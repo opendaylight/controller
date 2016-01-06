@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1aa4ed85_9776623d",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/ElectionTermImpl.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-01-06T13:10:44Z",
+      "side": 1,
+      "message": "I think we should still call update prior to persist - it will be safest for the caller to observe the update after calling this method. My concern is heisenbugs occurring, possibly now but in the future as well. Subsequent messages are stashed until the persist completes so only the processing of the current message may see the in-memory state updated prior to persist complete. This shouldn\u0027t matter either way. The key is whether or not to delay certain processing until persist completes which we\u0027re now leaving up to the caller by passing in a callback procedure.",
+      "revId": "b6da15e2eebb0760af2d02940be5a493f114a3df",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_97f182cf",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/ElectionTermImplTest.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-01-06T13:10:44Z",
+      "side": 1,
+      "message": "We don\u0027t need to capture and call the Procedure - it is called via the Answer above.",
+      "revId": "b6da15e2eebb0760af2d02940be5a493f114a3df",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_f7c9d679",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/MockRaftActorContext.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-01-06T13:10:44Z",
+      "side": 1,
+      "message": "We really should use the real ElectionTermImpl class...",
+      "revId": "b6da15e2eebb0760af2d02940be5a493f114a3df",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_77a5e6b3",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/RaftActorTest.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 1039,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-01-06T13:10:44Z",
+      "side": 1,
+      "message": "Can you call Assert.fail here?",
+      "revId": "b6da15e2eebb0760af2d02940be5a493f114a3df",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
