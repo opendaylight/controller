@@ -125,13 +125,13 @@ class RaftActorSnapshotMessageSupport {
 
             ActorRef snapshotReplyActor = context.actorOf(GetSnapshotReplyActor.props(captureSnapshot,
                     ImmutableElectionTerm.copyOf(context.getTermInformation()), sender,
-                    snapshotReplyActorTimeout, context.getId(), context.getPeerServerInfo()));
+                    snapshotReplyActorTimeout, context.getId(), context.getPeerServerInfo(true)));
 
             cohort.createSnapshot(snapshotReplyActor);
         } else {
             Snapshot snapshot = Snapshot.create(new byte[0], Collections.<ReplicatedLogEntry>emptyList(), -1, -1, -1, -1,
                     context.getTermInformation().getCurrentTerm(), context.getTermInformation().getVotedFor(),
-                    context.getPeerServerInfo());
+                    context.getPeerServerInfo(true));
 
             sender.tell(new GetSnapshotReply(context.getId(), SerializationUtils.serialize(snapshot)),
                     context.getActor());

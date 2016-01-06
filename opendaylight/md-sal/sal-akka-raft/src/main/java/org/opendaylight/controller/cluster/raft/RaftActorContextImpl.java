@@ -224,7 +224,8 @@ public class RaftActorContextImpl implements RaftActorContext {
         peerInfoMap.put(id, new PeerInfo(id, address, votingState));
     }
 
-    @Override public void removePeer(String name) {
+    @Override
+    public void removePeer(String name) {
         peerInfoMap.remove(name);
     }
 
@@ -290,7 +291,7 @@ public class RaftActorContextImpl implements RaftActorContext {
     }
 
     @Override
-    public ServerConfigurationPayload getPeerServerInfo() {
+    public ServerConfigurationPayload getPeerServerInfo(boolean includeSelf) {
         if (!isDynamicServerConfigurationInUse()) {
             return null;
         }
@@ -300,7 +301,10 @@ public class RaftActorContextImpl implements RaftActorContext {
             newConfig.add(new ServerInfo(peer.getId(), peer.isVoting()));
         }
 
-        newConfig.add(new ServerInfo(getId(), true));
+        if(includeSelf) {
+            newConfig.add(new ServerInfo(getId(), votingMember));
+        }
+
         return (new ServerConfigurationPayload(newConfig));
     }
 
