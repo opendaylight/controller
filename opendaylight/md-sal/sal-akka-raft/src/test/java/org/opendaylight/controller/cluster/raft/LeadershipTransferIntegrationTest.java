@@ -40,9 +40,13 @@ import scala.concurrent.duration.FiniteDuration;
  */
 public class LeadershipTransferIntegrationTest extends AbstractRaftActorIntegrationTest {
 
+    private final String follower3Id = factory.generateActorId("follower");
     private TestActorRef<MessageCollectorActor> leaderNotifierActor;
     private TestActorRef<MessageCollectorActor> follower1NotifierActor;
     private TestActorRef<MessageCollectorActor> follower2NotifierActor;
+    private TestActorRef<MessageCollectorActor> follower3NotifierActor;
+    private TestActorRef<TestRaftActor> follower3Actor;
+    private ActorRef follower3CollectorActor;
 
     @Test
     public void testLeaderTransferOnShutDown() throws Throwable {
@@ -77,6 +81,7 @@ public class LeadershipTransferIntegrationTest extends AbstractRaftActorIntegrat
         clearMessages(leaderNotifierActor);
         clearMessages(follower1NotifierActor);
         clearMessages(follower2NotifierActor);
+        clearMessages(follower3NotifierActor);
 
         FiniteDuration duration = FiniteDuration.create(5, TimeUnit.SECONDS);
         Future<Boolean> stopFuture = Patterns.gracefulStop(leaderActor, duration, new Shutdown());
@@ -84,6 +89,7 @@ public class LeadershipTransferIntegrationTest extends AbstractRaftActorIntegrat
         assertNullLeaderIdChange(leaderNotifierActor);
         assertNullLeaderIdChange(follower1NotifierActor);
         assertNullLeaderIdChange(follower2NotifierActor);
+        assertNullLeaderIdChange(follower3NotifierActor);
 
         verifyRaftState(follower1Actor, RaftState.Leader);
 
@@ -106,6 +112,7 @@ public class LeadershipTransferIntegrationTest extends AbstractRaftActorIntegrat
 
         expectFirstMatching(leaderCollectorActor, ApplyState.class);
         expectFirstMatching(follower1CollectorActor, ApplyState.class);
+        expectFirstMatching(follower3CollectorActor, ApplyState.class);
 
         testLog.info("sendPayloadWithFollower2Lagging ending");
     }
@@ -116,18 +123,28 @@ public class LeadershipTransferIntegrationTest extends AbstractRaftActorIntegrat
         follower1NotifierActor = factory.createTestActor(Props.create(MessageCollectorActor.class),
                 factory.generateActorId(follower1Id + "-notifier"));
         follower1Actor = newTestRaftActor(follower1Id, TestRaftActor.newBuilder().peerAddresses(
-                ImmutableMap.of(leaderId, testActorPath(leaderId), follower2Id, testActorPath(follower2Id))).
-                    config(newFollowerConfigParams()).roleChangeNotifier(follower1NotifierActor));
+                ImmutableMap.of(leaderId, testActorPath(leaderId), follower2Id, testActorPath(follower2Id),
+                        follower3Id, testActorPath(follower3Id))).
+                config(newFollowerConfigParams()).roleChangeNotifier(follower1NotifierActor));
 
         follower2NotifierActor = factory.createTestActor(Props.create(MessageCollectorActor.class),
                 factory.generateActorId(follower2Id + "-notifier"));
         follower2Actor = newTestRaftActor(follower2Id,TestRaftActor.newBuilder().peerAddresses(
-                ImmutableMap.of(leaderId, testActorPath(leaderId), follower1Id, follower1Actor.path().toString())).
-                    config(newFollowerConfigParams()).roleChangeNotifier(follower2NotifierActor));
+                ImmutableMap.of(leaderId, testActorPath(leaderId), follower1Id, follower1Actor.path().toString(),
+                        follower3Id, testActorPath(follower3Id))).
+                config(newFollowerConfigParams()).roleChangeNotifier(follower2NotifierActor));
+
+        follower3NotifierActor = factory.createTestActor(Props.create(MessageCollectorActor.class),
+                factory.generateActorId(follower3Id + "-notifier"));
+        follower3Actor = newTestRaftActor(follower3Id,TestRaftActor.newBuilder().peerAddresses(
+                ImmutableMap.of(leaderId, testActorPath(leaderId), follower1Id, follower1Actor.path().toString(),
+                        follower2Id, follower2Actor.path().toString())).
+                config(newFollowerConfigParams()).roleChangeNotifier(follower3NotifierActor));
 
         peerAddresses = ImmutableMap.<String, String>builder().
                 put(follower1Id, follower1Actor.path().toString()).
-                put(follower2Id, follower2Actor.path().toString()).build();
+                put(follower2Id, follower2Actor.path().toString()).
+                put(follower3Id, follower3Actor.path().toString()).build();
 
         leaderConfigParams = newLeaderConfigParams();
         leaderConfigParams.setElectionTimeoutFactor(3);
@@ -138,9 +155,11 @@ public class LeadershipTransferIntegrationTest extends AbstractRaftActorIntegrat
 
         follower1CollectorActor = follower1Actor.underlyingActor().collectorActor();
         follower2CollectorActor = follower2Actor.underlyingActor().collectorActor();
+        follower3CollectorActor = follower3Actor.underlyingActor().collectorActor();
         leaderCollectorActor = leaderActor.underlyingActor().collectorActor();
 
         leaderContext = leaderActor.underlyingActor().getRaftActorContext();
+        leaderContext.getPeerInfo(follower3Id).setVotingState(VotingState.NON_VOTING);
 
         waitUntilLeader(leaderActor);
 
@@ -181,6 +200,10 @@ public class LeadershipTransferIntegrationTest extends AbstractRaftActorIntegrat
         follower2Actor.underlyingActor().startDropMessages(AppendEntries.class);
 
         sendShutDown(leaderActor);
+
+        verifyRaftState(follower1Actor, RaftState.Follower);
+        verifyRaftState(follower2Actor, RaftState.Follower);
+        verifyRaftState(follower3Actor, RaftState.Follower);
 
         testLog.info("testLeaderTransferOnShutDown ending");
     }
