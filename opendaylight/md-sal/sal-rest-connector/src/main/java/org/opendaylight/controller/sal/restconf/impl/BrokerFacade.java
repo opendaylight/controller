@@ -169,6 +169,7 @@ public class BrokerFacade {
         if (rpcService == null) {
             throw new RestconfDocumentedException(Status.SERVICE_UNAVAILABLE);
         }
+        LOG.trace("Invoke RPC " + type + " with input: {}", input);
         return rpcService.invokeRpc(type, input);
     }
 
