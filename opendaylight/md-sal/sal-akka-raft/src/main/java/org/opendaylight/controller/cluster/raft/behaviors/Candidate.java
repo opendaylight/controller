@@ -135,7 +135,8 @@ public class Candidate extends AbstractRaftActorBehavior {
             // set currentTerm = T, convert to follower (§5.1)
             // This applies to all RPC messages and responses
             if (rpc.getTerm() > context.getTermInformation().getCurrentTerm()) {
-                context.getTermInformation().updateAndPersist(rpc.getTerm(), null, NoopProcedure.<Void>instance());
+                // FIXME: atomic update with behavior switch: pass to Follower
+                context.updatePersistentTermInformation(rpc.getTerm(), null, NoopProcedure.<Void>instance());
                 return internalSwitchBehavior(RaftState.Follower);
             }
         }
@@ -168,7 +169,9 @@ public class Candidate extends AbstractRaftActorBehavior {
         // Increment the election term and vote for self. Once persistence completes, initiate a new election
         long currentTerm = context.getTermInformation().getCurrentTerm();
         final long newTerm = currentTerm + 1;
-        context.getTermInformation().updateAndPersist(newTerm, context.getId(), new Procedure<Void>() {
+        
+        // FIMXE: Atomic update with continuation
+        context.updatePersistentTermInformation(newTerm, context.getId(), new Procedure<Void>() {
             @Override
             public void apply(final Void param) throws Exception {
                 // Request for a vote

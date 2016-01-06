@@ -13,7 +13,9 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
+import akka.japi.Procedure;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Supplier;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -22,8 +24,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.annotation.Nonnull;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.ServerConfigurationPayload.ServerInfo;
+import org.opendaylight.controller.cluster.raft.base.messages.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
 import org.slf4j.Logger;
 
@@ -35,7 +39,7 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     private final String id;
 
-    private final ElectionTerm termInformation;
+    private ElectionTermImpl termInformation;
 
     private long commitIndex;
 
@@ -65,12 +69,12 @@ public class RaftActorContextImpl implements RaftActorContext {
     private boolean votingMember = true;
 
     public RaftActorContextImpl(ActorRef actor, ActorContext context, String id,
-            ElectionTerm termInformation, long commitIndex, long lastApplied, Map<String, String> peerAddresses,
+            ElectionTermImpl termInformation, long commitIndex, long lastApplied, Map<String, String> peerAddresses,
             ConfigParams configParams, DataPersistenceProvider persistenceProvider, Logger logger) {
         this.actor = actor;
         this.context = context;
         this.id = id;
-        this.termInformation = termInformation;
+        this.termInformation = Preconditions.checkNotNull(termInformation);
         this.commitIndex = commitIndex;
         this.lastApplied = lastApplied;
         this.configParams = configParams;
@@ -307,5 +311,27 @@ public class RaftActorContextImpl implements RaftActorContext {
     @Override
     public boolean isVotingMember() {
         return votingMember;
+    }
+
+    @Override
+    public void updateTermInformation(final long term, final String votedFor) {
+        // FIXME: guard against invocation when a persistent update is running
+        termInformation = termInformation.nextTerm(term, votedFor);
+    }
+    
+    private void doUpdateTermInformation(ElectionTermImpl newTermInformation) {
+        // FIXME: check and clear that a persistent update is running
+        termInformation = newTermInformation;
+    }
+
+    @Override
+    public void updatePersistentTermInformation(final long term, final String votedFor, final Procedure<Void> callback) {
+        // FIXME: note that a persistent update is running
+        termInformation.nextPersistentTerm(term, votedFor, new Procedure<ElectionTermImpl>() {
+            @Override
+            public void apply(ElectionTermImpl param) {
+                doUpdateTermInformation(param);
+            }
+        });        
     }
 }

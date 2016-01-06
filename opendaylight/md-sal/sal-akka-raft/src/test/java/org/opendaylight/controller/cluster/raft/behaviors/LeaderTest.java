@@ -109,7 +109,7 @@ public class LeaderTest extends AbstractLeaderTest {
         actorContext.setPayloadVersion(payloadVersion);
 
         long term = 1;
-        actorContext.getTermInformation().update(term, "");
+        actorContext.updateTermInformation(term, "");
 
         leader = new Leader(actorContext);
 
@@ -160,7 +160,7 @@ public class LeaderTest extends AbstractLeaderTest {
         MockRaftActorContext actorContext = createActorContextWithFollower();
 
         long term = 1;
-        actorContext.getTermInformation().update(term, "");
+        actorContext.updateTermInformation(term, "");
 
         leader = new Leader(actorContext);
 
@@ -198,7 +198,7 @@ public class LeaderTest extends AbstractLeaderTest {
         actorContext.setRaftPolicy(createRaftPolicy(true, true));
 
         long term = 1;
-        actorContext.getTermInformation().update(term, "");
+        actorContext.updateTermInformation(term, "");
 
         leader = new Leader(actorContext);
 
@@ -241,7 +241,7 @@ public class LeaderTest extends AbstractLeaderTest {
         });
 
         long term = 1;
-        actorContext.getTermInformation().update(term, "");
+        actorContext.updateTermInformation(term, "");
 
         leader = new Leader(actorContext);
 
@@ -281,7 +281,7 @@ public class LeaderTest extends AbstractLeaderTest {
         });
 
         long term = 1;
-        actorContext.getTermInformation().update(term, "");
+        actorContext.updateTermInformation(term, "");
 
         leader = new Leader(actorContext);
 
@@ -331,7 +331,7 @@ public class LeaderTest extends AbstractLeaderTest {
         });
 
         long term = 1;
-        actorContext.getTermInformation().update(term, "");
+        actorContext.updateTermInformation(term, "");
 
         leader = new Leader(actorContext);
 
@@ -376,7 +376,7 @@ public class LeaderTest extends AbstractLeaderTest {
         });
 
         long term = 1;
-        actorContext.getTermInformation().update(term, "");
+        actorContext.updateTermInformation(term, "");
 
         leader = new Leader(actorContext);
 
@@ -413,7 +413,7 @@ public class LeaderTest extends AbstractLeaderTest {
         });
 
         long term = 1;
-        actorContext.getTermInformation().update(term, "");
+        actorContext.updateTermInformation(term, "");
 
         leader = new Leader(actorContext);
 
@@ -743,7 +743,7 @@ public class LeaderTest extends AbstractLeaderTest {
         // set the snapshot variables in replicatedlog
         actorContext.getReplicatedLog().setSnapshotIndex(snapshotIndex);
         actorContext.getReplicatedLog().setSnapshotTerm(snapshotTerm);
-        actorContext.getTermInformation().update(currentTerm, leaderActor.path().toString());
+        actorContext.updateTermInformation(currentTerm, leaderActor.path().toString());
         actorContext.setCommitIndex(lastAppliedIndex);
         actorContext.setLastApplied(lastAppliedIndex);
 
@@ -793,7 +793,7 @@ public class LeaderTest extends AbstractLeaderTest {
         // set the snapshot variables in replicatedlog
         actorContext.getReplicatedLog().setSnapshotIndex(snapshotIndex);
         actorContext.getReplicatedLog().setSnapshotTerm(snapshotTerm);
-        actorContext.getTermInformation().update(currentTerm, leaderActor.path().toString());
+        actorContext.updateTermInformation(currentTerm, leaderActor.path().toString());
         actorContext.setCommitIndex(lastAppliedIndex);
         actorContext.setLastApplied(lastAppliedIndex);
 
@@ -854,7 +854,7 @@ public class LeaderTest extends AbstractLeaderTest {
 
         actorContext.getReplicatedLog().setSnapshotIndex(snapshotIndex);
         actorContext.getReplicatedLog().setSnapshotTerm(snapshotTerm);
-        actorContext.getTermInformation().update(currentTerm, leaderActor.path().toString());
+        actorContext.updateTermInformation(currentTerm, leaderActor.path().toString());
 
         ByteString bs = toByteString(leadersSnapshot);
         leader.setSnapshot(Snapshot.create(bs.toByteArray(), Collections.<ReplicatedLogEntry>emptyList(),
@@ -918,7 +918,7 @@ public class LeaderTest extends AbstractLeaderTest {
         // set the snapshot variables in replicatedlog
         actorContext.getReplicatedLog().setSnapshotIndex(snapshotIndex);
         actorContext.getReplicatedLog().setSnapshotTerm(snapshotTerm);
-        actorContext.getTermInformation().update(currentTerm, leaderActor.path().toString());
+        actorContext.updateTermInformation(currentTerm, leaderActor.path().toString());
 
         ByteString bs = toByteString(leadersSnapshot);
         Snapshot snapshot = Snapshot.create(bs.toByteArray(), Collections.<ReplicatedLogEntry>emptyList(),
@@ -991,7 +991,7 @@ public class LeaderTest extends AbstractLeaderTest {
         // set the snapshot variables in replicatedlog
         actorContext.getReplicatedLog().setSnapshotIndex(snapshotIndex);
         actorContext.getReplicatedLog().setSnapshotTerm(snapshotTerm);
-        actorContext.getTermInformation().update(currentTerm, leaderActor.path().toString());
+        actorContext.updateTermInformation(currentTerm, leaderActor.path().toString());
 
         ByteString bs = toByteString(leadersSnapshot);
         Snapshot snapshot = Snapshot.create(bs.toByteArray(), Collections.<ReplicatedLogEntry>emptyList(),
@@ -1055,7 +1055,7 @@ public class LeaderTest extends AbstractLeaderTest {
         // set the snapshot variables in replicatedlog
         actorContext.getReplicatedLog().setSnapshotIndex(snapshotIndex);
         actorContext.getReplicatedLog().setSnapshotTerm(snapshotTerm);
-        actorContext.getTermInformation().update(currentTerm, leaderActor.path().toString());
+        actorContext.updateTermInformation(currentTerm, leaderActor.path().toString());
 
         ByteString bs = toByteString(leadersSnapshot);
         Snapshot snapshot = Snapshot.create(bs.toByteArray(), Collections.<ReplicatedLogEntry>emptyList(),
@@ -1599,7 +1599,7 @@ public class LeaderTest extends AbstractLeaderTest {
 
         leaderActorContext.setCommitIndex(1);
         leaderActorContext.setLastApplied(1);
-        leaderActorContext.getTermInformation().update(1, "leader");
+        leaderActorContext.updateTermInformation(1, "leader");
 
         leader = new Leader(leaderActorContext);
 
@@ -1858,7 +1858,7 @@ public class LeaderTest extends AbstractLeaderTest {
                     follower2Actor.path().toString());
 
             leaderActorContext.setPeerAddresses(peerAddresses);
-            leaderActorContext.getTermInformation().update(1, leaderActorId);
+            leaderActorContext.updateTermInformation(1, leaderActorId);
 
             RaftActorBehavior leader = createBehavior(leaderActorContext);
 

@@ -59,10 +59,12 @@ class RaftActorRecoverySupport {
             // Handle this message for backwards compatibility with pre-Lithium versions.
             org.opendaylight.controller.cluster.raft.RaftActor.UpdateElectionTerm update =
                     (org.opendaylight.controller.cluster.raft.RaftActor.UpdateElectionTerm)message;
-            context.getTermInformation().update(update.getCurrentTerm(), update.getVotedFor());
+            context.updateTermInformation(update.getCurrentTerm(), update.getVotedFor());
         } else if (message instanceof UpdateElectionTerm) {
-            context.getTermInformation().update(((UpdateElectionTerm) message).getCurrentTerm(),
-                    ((UpdateElectionTerm) message).getVotedFor());
+            final UpdateElectionTerm update = (UpdateElectionTerm) message;
+            
+            // FIXME: this should probably be persisted
+            context.updateTermInformation(update.getCurrentTerm(), update.getVotedFor());
         } else if(persistence.isRecoveryApplicable()) {
             if (message instanceof SnapshotOffer) {
                 onRecoveredSnapshot((SnapshotOffer) message);
@@ -101,7 +103,9 @@ class RaftActorRecoverySupport {
                 // for updating the term before restoring from snapshot should be fine, as we will not be doing
                 // anything with term information until the next message arrives (at which point persistence is
                 // guaranteed to have run).
-                context.getTermInformation().updateAndPersist(context.getTermInformation().getCurrentTerm(),
+
+                // FIXME: do we have a recovery behavior which can turn update into an updateAndPersist?
+                context.updatePersistentTermInformation(context.getTermInformation().getCurrentTerm(),
                         context.getTermInformation().getVotedFor(), NoopProcedure.<Void>instance());
             }
 
@@ -173,7 +177,7 @@ class RaftActorRecoverySupport {
         context.setReplicatedLog(ReplicatedLogImpl.newInstance(snapshot, context, currentBehavior));
         context.setLastApplied(snapshot.getLastAppliedIndex());
         context.setCommitIndex(snapshot.getLastAppliedIndex());
-        context.getTermInformation().update(snapshot.getElectionTerm(), snapshot.getElectionVotedFor());
+        context.updateTermInformation(snapshot.getElectionTerm(), snapshot.getElectionVotedFor());
 
         Stopwatch timer = Stopwatch.createStarted();
 

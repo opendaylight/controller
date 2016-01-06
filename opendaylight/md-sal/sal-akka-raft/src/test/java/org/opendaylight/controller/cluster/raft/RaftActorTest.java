@@ -639,7 +639,7 @@ public class RaftActorTest extends AbstractActorTest {
 
                 leaderActor.getRaftActorContext().setCommitIndex(4);
                 leaderActor.getRaftActorContext().setLastApplied(4);
-                leaderActor.getRaftActorContext().getTermInformation().update(1, persistenceId);
+                leaderActor.getRaftActorContext().updateTermInformation(1, persistenceId);
 
                 leaderActor.waitForInitializeBehaviorComplete();
 
@@ -735,7 +735,7 @@ public class RaftActorTest extends AbstractActorTest {
                 MockRaftActor followerActor = mockActorRef.underlyingActor();
                 followerActor.getRaftActorContext().setCommitIndex(4);
                 followerActor.getRaftActorContext().setLastApplied(4);
-                followerActor.getRaftActorContext().getTermInformation().update(1, persistenceId);
+                followerActor.getRaftActorContext().updateTermInformation(1, persistenceId);
 
                 followerActor.waitForInitializeBehaviorComplete();
 
@@ -843,7 +843,7 @@ public class RaftActorTest extends AbstractActorTest {
                 MockRaftActor leaderActor = mockActorRef.underlyingActor();
                 leaderActor.getRaftActorContext().setCommitIndex(9);
                 leaderActor.getRaftActorContext().setLastApplied(9);
-                leaderActor.getRaftActorContext().getTermInformation().update(1, persistenceId);
+                leaderActor.getRaftActorContext().updateTermInformation(1, persistenceId);
 
                 leaderActor.waitForInitializeBehaviorComplete();
 
@@ -920,7 +920,7 @@ public class RaftActorTest extends AbstractActorTest {
             MockRaftActor leaderActor = mockActorRef.underlyingActor();
             leaderActor.getRaftActorContext().setCommitIndex(3);
             leaderActor.getRaftActorContext().setLastApplied(3);
-            leaderActor.getRaftActorContext().getTermInformation().update(1, persistenceId);
+            leaderActor.getRaftActorContext().updateTermInformation(1, persistenceId);
 
             leaderActor.waitForInitializeBehaviorComplete();
             for(int i=0;i< 4;i++) {
@@ -967,7 +967,7 @@ public class RaftActorTest extends AbstractActorTest {
             MockRaftActor leaderActor = mockActorRef.underlyingActor();
             leaderActor.getRaftActorContext().setCommitIndex(3);
             leaderActor.getRaftActorContext().setLastApplied(3);
-            leaderActor.getRaftActorContext().getTermInformation().update(1, persistenceId);
+            leaderActor.getRaftActorContext().updateTermInformation(1, persistenceId);
             leaderActor.getReplicatedLog().setSnapshotIndex(3);
 
             leaderActor.waitForInitializeBehaviorComplete();

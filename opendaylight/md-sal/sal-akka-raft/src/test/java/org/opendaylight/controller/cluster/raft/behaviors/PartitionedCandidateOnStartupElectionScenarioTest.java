@@ -168,7 +168,7 @@ public class PartitionedCandidateOnStartupElectionScenarioTest extends AbstractL
         candidateReplicatedLog.append(new MockReplicatedLogEntry(2, 1, new MockPayload("")));
 
         member3Context.setReplicatedLog(candidateReplicatedLog);
-        member3Context.getTermInformation().update(2, member1Context.getId());
+        member3Context.updateTermInformation(2, member1Context.getId());
 
         // The member 3 Candidate will start a new term and send RequestVotes. However it will be
         // partitioned from the cluster by having member 1 and 2 drop its RequestVote messages.
@@ -243,10 +243,10 @@ public class PartitionedCandidateOnStartupElectionScenarioTest extends AbstractL
         replicatedLog.append(new MockReplicatedLogEntry(3, 1, new MockPayload("")));
 
         member1Context.setReplicatedLog(replicatedLog);
-        member1Context.getTermInformation().update(3, "");
+        member1Context.updateTermInformation(3, "");
 
         member2Context.setReplicatedLog(replicatedLog);
-        member2Context.getTermInformation().update(3, member1Context.getId());
+        member2Context.updateTermInformation(3, member1Context.getId());
 
         testLog.info("setupInitialMember1AndMember2Behaviors ending");
 

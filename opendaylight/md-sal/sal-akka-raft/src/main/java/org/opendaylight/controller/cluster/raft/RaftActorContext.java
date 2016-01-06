@@ -12,6 +12,7 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
+import akka.japi.Procedure;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Supplier;
 import java.util.Collection;
@@ -59,6 +60,30 @@ public interface RaftActorContext {
      * @return the ElectionTerm information
      */
     ElectionTerm getTermInformation();
+
+    // FIXME: does this need to be in this interface?
+    void updateTermInformation(long term, String votedFor);
+
+    /**
+     * To be called when we need to update the current term either because we
+     * received a message from someone with a more up-to-date term or because we
+     * just voted for someone
+     * <p>
+     * This information needs to be persisted so that on recovery the replica
+     * can start itself in the right term and know if it has already voted in
+     * that term or not.
+     *
+     * Note that the update will be asynchronous and observed only once persistence
+     * has had a chance to run. For that to happen, the caller is required to
+     * return from actor processing. If further actions need to be taken once
+     * the update has completed, provide a callback containing the required code.
+     *
+     * @param term
+     * @param votedFor
+     * @param callback callback to be invoked once update has completed
+     */
+    // FIXME: does this need to be in this interface?
+    void updatePersistentTermInformation(long term, String votedFor, Procedure<Void> callback);
 
     /**
      * @return index of highest log entry known to be committed (initialized to 0, increases monotonically)

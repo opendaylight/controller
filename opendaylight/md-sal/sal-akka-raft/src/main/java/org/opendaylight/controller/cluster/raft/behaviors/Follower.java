@@ -371,7 +371,7 @@ public class Follower extends AbstractRaftActorBehavior {
 
                 // Here is the tricky part. We must process this message only after we have persisted the term
                 // information change, which is an asynchronous call.
-                context.getTermInformation().updateAndPersist(rpc.getTerm(), null, new Procedure<Void>() {
+                context.updatePersistentTermInformation(rpc.getTerm(), null, new Procedure<Void>() {
                     @Override
                     public void apply(Void param) {
                         processMessage(sender, message);
