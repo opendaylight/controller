@@ -918,7 +918,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
             context.setCommitIndex(fromContext.getCommitIndex());
             context.setLastApplied(fromContext.getLastApplied());
-            context.getTermInformation().update(fromContext.getTermInformation().getCurrentTerm(),
+            context.updateTermInformation(fromContext.getTermInformation().getCurrentTerm(),
                     fromContext.getTermInformation().getVotedFor());
         }
 

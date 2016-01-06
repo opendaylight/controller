@@ -136,6 +136,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         delegatingPersistenceProvider = new RaftActorDelegatingPersistentDataProvider(null, persistentProvider);
 
         context = new RaftActorContextImpl(this.getSelf(),
+            // FIXME: different persistence!
             this.getContext(), id, new ElectionTermImpl(persistentProvider, id, LOG),
             -1, -1, peerAddresses,
             (configParams.isPresent() ? configParams.get(): new DefaultConfigParamsImpl()),
@@ -347,7 +348,9 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             case Follower:
             case Leader:
                 switchBehavior(reusableSwitchBehaviorSupplier.handleMessage(getSender(), message));
-                getRaftActorContext().getTermInformation().updateAndPersist(message.getNewTerm(), "",
+                
+                // FIXME: this should be target behavior initialization sequence
+                getRaftActorContext().updatePersistentTermInformation(message.getNewTerm(), "",
                     NoopProcedure.<Void>instance());
                 break;
             default:
@@ -581,7 +584,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         return replicatedLog().last();
     }
 
-    protected Long getCurrentTerm(){
+    protected final long getCurrentTerm(){
         return context.getTermInformation().getCurrentTerm();
     }
 

@@ -129,7 +129,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest {
     @Test
     public void testBecomeLeaderOnReceivingMajorityVotesInFiveNodeCluster(){
         MockRaftActorContext raftActorContext = createActorContext();
-        raftActorContext.getTermInformation().update(2L, "other");
+        raftActorContext.updateTermInformation(2L, "other");
         raftActorContext.setReplicatedLog(new MockRaftActorContext.MockReplicatedLogBuilder().
                 createEntries(0, 5, 1).build());
         raftActorContext.setPeerAddresses(setupPeers(4));
@@ -252,7 +252,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest {
     @Test
     public void testHandleRequestVoteWhenSenderTermEqualToCurrentTermAndVotedForMatches() {
         MockRaftActorContext context = createActorContext();
-        context.getTermInformation().update(1000, null);
+        context.updateTermInformation(1000, null);
 
         // Once a candidate is created it will immediately increment the current term so after
         // construction the currentTerm should be 1001
@@ -270,7 +270,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest {
     @Test
     public void testHandleRequestVoteWhenSenderTermEqualToCurrentTermAndVotedForDoesNotMatch() {
         MockRaftActorContext context = createActorContext();
-        context.getTermInformation().update(1000, null);
+        context.updateTermInformation(1000, null);
 
         // Once a candidate is created it will immediately increment the current term so after
         // construction the currentTerm should be 1001
@@ -308,7 +308,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest {
     public void testHandleAppendEntriesAddSameEntryToLog() throws Exception {
         MockRaftActorContext context = createActorContext();
 
-        context.getTermInformation().update(2, "test");
+        context.updateTermInformation(2, "test");
 
         // Prepare the receivers log
         MockRaftActorContext.MockPayload payload = new MockRaftActorContext.MockPayload("zero");
@@ -326,7 +326,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest {
         // the test will fail because the Candidate will assume that
         // the message was sent to it from a lower term peer and will
         // thus respond with a failure
-        context.getTermInformation().update(2, "test");
+        context.updateTermInformation(2, "test");
 
         // Send an unknown message so that the state of the RaftActor remains unchanged
         RaftActorBehavior expected = behavior.handleMessage(candidateActor, "unknown");

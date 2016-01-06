@@ -190,7 +190,7 @@ public class AbstractLeaderElectionScenarioTest {
             Map<String, String> peerAddresses) {
         MockRaftActorContext context = new MockRaftActorContext(id, system, actor);
         context.setPeerAddresses(peerAddresses);
-        context.getTermInformation().updateAndPersist(1, "", NoopProcedure.<Void>instance());
+        context.updatePersistentTermInformation(1, "", NoopProcedure.<Void>instance());
         return context;
     }
 

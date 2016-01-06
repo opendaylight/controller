@@ -7,18 +7,18 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
-import akka.japi.Procedure;
+import org.opendaylight.yangtools.concepts.Immutable;
 
 /**
  * Immutable implementation of ElectionTerm.
  *
  * @author Thomas Pantelis
  */
-public class ImmutableElectionTerm implements ElectionTerm {
+public final class ImmutableElectionTerm implements ElectionTerm, Immutable {
     private final long currentTerm;
     private final String votedFor;
 
-    private ImmutableElectionTerm(long currentTerm, String votedFor) {
+    private ImmutableElectionTerm(final long currentTerm, final String votedFor) {
         this.currentTerm = currentTerm;
         this.votedFor = votedFor;
     }
@@ -31,16 +31,6 @@ public class ImmutableElectionTerm implements ElectionTerm {
     @Override
     public String getVotedFor() {
         return votedFor;
-    }
-
-    @Override
-    public void update(long currentTerm, String votedFor) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void updateAndPersist(long currentTerm, String votedFor, Procedure<Void> callback) {
-        throw new UnsupportedOperationException();
     }
 
     @Override

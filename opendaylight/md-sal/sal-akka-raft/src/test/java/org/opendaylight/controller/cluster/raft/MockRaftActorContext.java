@@ -32,8 +32,8 @@ public class MockRaftActorContext extends RaftActorContextImpl {
     private ActorSystem system;
     private RaftPolicy raftPolicy;
 
-    private static ElectionTerm newElectionTerm() {
-        return new ElectionTerm() {
+    private static ElectionTermImpl newElectionTerm() {
+        return new ElectionTermImpl(persistenceProvider, id, null) {
             private long currentTerm = 1;
             private String votedFor = "";
 

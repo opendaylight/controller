@@ -54,21 +54,21 @@ public class ElectionTermImplTest {
 
     @Test
     public void testUpdateAndPersist() throws Exception {
-        final ElectionTermImpl impl = new ElectionTermImpl(mockPersistence, "test", LOG);
+        final ElectionTermImpl first = new ElectionTermImpl(mockPersistence, "test", LOG);
 
-        final SettableFuture<Void> p = SettableFuture.create();
-        impl.updateAndPersist(10, "member-1", new Procedure<Void>() {
+        final SettableFuture<ElectionTermImpl> p = SettableFuture.create();
+        first.nextPersistentTerm(10, "member-1", new Procedure<ElectionTermImpl>() {
             @Override
-            public void apply(final Void param) throws Exception {
-                p.set(null);
+            public void apply(final ElectionTermImpl param) throws Exception {
+                p.set(param);
             }
         });
 
         // Wait up to 10 seconds for callback to execute
-        p.get(10, TimeUnit.SECONDS);
+        final ElectionTermImpl second = p.get(10, TimeUnit.SECONDS);
 
-        assertEquals("getCurrentTerm", 10, impl.getCurrentTerm());
-        assertEquals("getVotedFor", "member-1", impl.getVotedFor());
+        assertEquals("getCurrentTerm", 10, second.getCurrentTerm());
+        assertEquals("getVotedFor", "member-1", second.getVotedFor());
 
         ArgumentCaptor<Object> message = ArgumentCaptor.forClass(Object.class);
         @SuppressWarnings({ "unchecked", "rawtypes" })

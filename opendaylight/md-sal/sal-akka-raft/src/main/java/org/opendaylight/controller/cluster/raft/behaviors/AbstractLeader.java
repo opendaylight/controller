@@ -364,7 +364,8 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                 LOG.debug("{}: Term {} in \"{}\" message is greater than leader's term {} - switching to Follower",
                         logName(), rpc.getTerm(), rpc, context.getTermInformation().getCurrentTerm());
 
-                context.getTermInformation().updateAndPersist(rpc.getTerm(), null, NoopProcedure.<Void>instance());
+                // FIXME: atomic update with behavior switch: pass the new term information to Follower
+                context.updatePersistentTermInformation(rpc.getTerm(), null, NoopProcedure.<Void>instance());
 
                 return internalSwitchBehavior(RaftState.Follower);
             }

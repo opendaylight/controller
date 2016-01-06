@@ -173,7 +173,8 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
             // We are granting the vote, but we have to record it first, which is asynchronous.
             LOG.debug("{}: requestVote will return: {}", logName(), reply);
 
-            context.getTermInformation().updateAndPersist(requestVote.getTerm(), requestVote.getCandidateId(),
+            // FIXME: atomic update with continuation in this behavior (e.g. onTermInformationUpdated)
+            context.updatePersistentTermInformation(requestVote.getTerm(), requestVote.getCandidateId(),
                 new Procedure<Void>() {
                 @Override
                 public void apply(final Void param) {
@@ -281,14 +282,14 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
     /**
      * @return the current term
      */
-    protected long currentTerm() {
+    protected final long currentTerm() {
         return context.getTermInformation().getCurrentTerm();
     }
 
     /**
      * @return the candidate for whom we voted in the current term
      */
-    protected String votedFor() {
+    protected final String votedFor() {
         return context.getTermInformation().getVotedFor();
     }
 

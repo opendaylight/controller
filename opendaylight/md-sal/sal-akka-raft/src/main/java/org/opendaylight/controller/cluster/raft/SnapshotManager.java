@@ -392,7 +392,9 @@ public class SnapshotManager implements SnapshotState {
                     context.setReplicatedLog(ReplicatedLogImpl.newInstance(snapshot, context, currentBehavior));
                     context.setLastApplied(snapshot.getLastAppliedIndex());
                     context.setCommitIndex(snapshot.getLastAppliedIndex());
-                    context.getTermInformation().update(snapshot.getElectionTerm(), snapshot.getElectionVotedFor());
+                    
+                    // FIXME: should this be persisted?
+                    context.updateTermInformation(snapshot.getElectionTerm(), snapshot.getElectionVotedFor());
 
                     if(snapshot.getState().length > 0 ) {
                         applySnapshotProcedure.apply(snapshot.getState());
