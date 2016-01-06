@@ -129,11 +129,12 @@ public class Leader extends AbstractLeader {
         }
 
         long lastIndex = context.getReplicatedLog().lastIndex();
+        boolean isVoting = context.getPeerInfo(followerId).isVoting();
 
-        LOG.debug("{}: tryToCompleteLeadershipTransfer: followerId: {}, matchIndex: {}, lastIndex: {}",
-                logName(), followerId, followerInfo.getMatchIndex(), lastIndex);
+        LOG.debug("{}: tryToCompleteLeadershipTransfer: followerId: {}, matchIndex: {}, lastIndex: {}, isVoting: {}",
+                logName(), followerId, followerInfo.getMatchIndex(), lastIndex, isVoting);
 
-        if(followerInfo.getMatchIndex() == lastIndex) {
+        if(isVoting && followerInfo.getMatchIndex() == lastIndex) {
             LOG.debug("{}: Follower's log matches - sending ElectionTimeout", logName());
 
             // We can't be sure if the follower has applied all its log entries to its state so send an
