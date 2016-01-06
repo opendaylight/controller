@@ -25,7 +25,6 @@ import akka.actor.Props;
 import akka.actor.Status;
 import akka.actor.Status.Failure;
 import akka.actor.Status.Success;
-import akka.actor.Terminated;
 import akka.cluster.Cluster;
 import akka.cluster.ClusterEvent;
 import akka.dispatch.Dispatchers;
@@ -1855,8 +1854,6 @@ public class ShardManagerTest extends AbstractActorTest {
             TestActorRef<TestShardManager> shardManager = actorFactory.createTestActor(
                     newTestShardMgrBuilder(mockConfig).addShardActor("default", shard).props());
 
-            watch(shard);
-
             shardManager.underlyingActor().waitForRecoveryComplete();
 
             shardManager.tell(new UpdateSchemaContext(TestModel.createTestContext()), getRef());
@@ -1870,7 +1867,7 @@ public class ShardManagerTest extends AbstractActorTest {
 
             shardManager.underlyingActor().verifySnapshotPersisted(Sets.newHashSet("people"));
 
-            expectMsgClass(duration("5 seconds"), Terminated.class);
+            MessageCollectorActor.expectFirstMatching(shard, Shutdown.class);
         }};
 
         LOG.info("testServerRemovedShardActorRunning ending");

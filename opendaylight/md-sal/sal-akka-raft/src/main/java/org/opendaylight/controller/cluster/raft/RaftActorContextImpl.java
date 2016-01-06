@@ -226,7 +226,11 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     @Override
     public void removePeer(String name) {
-        peerInfoMap.remove(name);
+        if(getId().equals(name)) {
+            votingMember = false;
+        } else {
+            peerInfoMap.remove(name);
+        }
     }
 
     @Override public ActorSelection getPeerActorSelection(String peerId) {

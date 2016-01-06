@@ -303,13 +303,29 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
     private void onWrappedShardResponse(WrappedShardResponse message) {
         if (message.getResponse() instanceof RemoveServerReply) {
-            onRemoveServerReply(getSender(), message.getShardName(), (RemoveServerReply) message.getResponse());
+            onRemoveServerReply(getSender(), message.getShardId(), (RemoveServerReply) message.getResponse(),
+                    message.getLeaderPath());
         }
     }
 
-    private void onRemoveServerReply(ActorRef originalSender, String shardName, RemoveServerReply response) {
-        shardReplicaOperationsInProgress.remove(shardName);
-        originalSender.tell(new Status.Success(null), self());
+    private void onRemoveServerReply(ActorRef originalSender, ShardIdentifier shardId, RemoveServerReply replyMsg,
+            String leaderPath) {
+        shardReplicaOperationsInProgress.remove(shardId);
+
+        LOG.debug ("{}: Received {} for shard {}", persistenceId(), replyMsg, shardId.getShardName());
+
+        if (replyMsg.getStatus() == ServerChangeStatus.OK) {
+            LOG.debug ("{}: Leader shard successfully removed the replica shard {}", persistenceId(),
+                    shardId.getShardName());
+            originalSender.tell(new akka.actor.Status.Success(null), getSelf());
+        } else {
+            LOG.warn ("{}: Leader failed to remove shard replica {} with status {}",
+                    persistenceId(), shardId, replyMsg.getStatus());
+
+            Exception failure = getServerChangeException(RemoveServer.class, replyMsg.getStatus(),
+                    leaderPath, shardId);
+            originalSender.tell(new akka.actor.Status.Failure(failure), getSelf());
+        }
     }
 
     private void onPrimaryShardFoundContext(PrimaryShardFoundForContext primaryShardFoundContext) {
@@ -356,7 +372,7 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
                     sender.tell(new Status.Failure(new RuntimeException(msg, failure)), self());
                 } else {
                     // SUCCESS
-                    self().tell(new WrappedShardResponse(shardName, response), sender);
+                    self().tell(new WrappedShardResponse(shardId, response, primaryPath), sender);
                 }
             }
         }, new Dispatchers(context().system().dispatchers()).getDispatcher(Dispatchers.DispatcherType.Client));
@@ -369,8 +385,8 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             LOG.debug("{} : Shard replica {} is not present in list", persistenceId(), shardId.toString());
             return;
         } else if(shardInformation.getActor() != null) {
-            LOG.debug("{} : Sending PoisonPill to Shard actor {}", persistenceId(), shardInformation.getActor());
-            shardInformation.getActor().tell(PoisonPill.getInstance(), self());
+            LOG.debug("{} : Sending Shutdown to Shard actor {}", persistenceId(), shardInformation.getActor());
+            shardInformation.getActor().tell(new Shutdown(), self());
         }
         LOG.debug("{} : Local Shard replica for shard {} has been removed", persistenceId(), shardId.getShardName());
         persistShardList();
@@ -1834,20 +1850,26 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
      * The WrappedShardResponse class wraps a response from a Shard.
      */
     private static class WrappedShardResponse {
-        private final String shardName;
+        private final ShardIdentifier shardId;
         private final Object response;
+        private final String leaderPath;
 
-        private WrappedShardResponse(String shardName, Object response) {
-            this.shardName = shardName;
+        private WrappedShardResponse(ShardIdentifier shardId, Object response, String leaderPath) {
+            this.shardId = shardId;
             this.response = response;
+            this.leaderPath = leaderPath;
         }
 
-        String getShardName() {
-            return shardName;
+        ShardIdentifier getShardId() {
+            return shardId;
         }
 
         Object getResponse() {
             return response;
+        }
+
+        String getLeaderPath() {
+            return leaderPath;
         }
     }
 }

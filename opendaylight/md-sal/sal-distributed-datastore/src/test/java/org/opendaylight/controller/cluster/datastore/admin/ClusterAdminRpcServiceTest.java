@@ -7,9 +7,12 @@
  */
 package org.opendaylight.controller.cluster.datastore.admin;
 
+import static org.hamcrest.CoreMatchers.anyOf;
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import static org.opendaylight.controller.cluster.datastore.MemberNode.verifyNoShardPresent;
 import static org.opendaylight.controller.cluster.datastore.MemberNode.verifyRaftPeersPresent;
@@ -353,6 +356,53 @@ public class ClusterAdminRpcServiceTest {
 
         verifyRaftPeersPresent(leaderNode1.configDataStore(), "cars");
         verifyNoShardPresent(replicaNode2.configDataStore(), "cars");
+    }
+
+    @Test
+    public void testRemoveShardLeaderReplica() throws Exception {
+        String name = "testRemoveShardLeaderReplica";
+        String moduleShardsConfig = "module-shards-member1-and-2-and-3.conf";
+        MemberNode leaderNode1 = MemberNode.builder(memberNodes).akkaConfig("Member1").testName(name ).
+                moduleShardsConfig(moduleShardsConfig).
+                datastoreContextBuilder(DatastoreContext.newBuilder().
+                        shardHeartbeatIntervalInMillis(300).shardElectionTimeoutFactor(1)).build();
+
+        MemberNode replicaNode2 = MemberNode.builder(memberNodes).akkaConfig("Member2").testName(name).
+                moduleShardsConfig(moduleShardsConfig).build();
+
+        MemberNode replicaNode3 = MemberNode.builder(memberNodes).akkaConfig("Member3").testName(name).
+                moduleShardsConfig(moduleShardsConfig).build();
+
+        leaderNode1.configDataStore().waitTillReady();
+        verifyRaftPeersPresent(leaderNode1.configDataStore(), "cars", "member-2", "member-3");
+        verifyRaftPeersPresent(replicaNode2.configDataStore(), "cars", "member-1", "member-3");
+        verifyRaftPeersPresent(replicaNode3.configDataStore(), "cars", "member-1", "member-2");
+
+        replicaNode2.waitForMembersUp("member-1", "member-3");
+        replicaNode2.waitForMembersUp("member-1", "member-2");
+
+        // Invoke RPC service on leader member-1 to remove it's local shard
+
+        ClusterAdminRpcService service1 = new ClusterAdminRpcService(leaderNode1.configDataStore(),
+                leaderNode1.operDataStore());
+
+        RpcResult<Void> rpcResult = service1.removeShardReplica(new RemoveShardReplicaInputBuilder().
+                setShardName("cars").setMemberName("member-1").setDataStoreType(DataStoreType.Config).build()).
+                        get(10, TimeUnit.SECONDS);
+        verifySuccessfulRpcResult(rpcResult);
+        service1.close();
+
+        verifyRaftState(replicaNode2.configDataStore(), "cars", new RaftStateVerifier() {
+            @Override
+            public void verify(OnDemandRaftState raftState) {
+                assertThat("Leader Id", raftState.getLeader(), anyOf(containsString("member-2"),
+                        containsString("member-3")));
+            }
+        });
+
+        verifyRaftPeersPresent(replicaNode2.configDataStore(), "cars", "member-3");
+        verifyRaftPeersPresent(replicaNode3.configDataStore(), "cars", "member-2");
+        verifyNoShardPresent(leaderNode1.configDataStore(), "cars");
     }
 
     @Test
