@@ -79,11 +79,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
         <groupId>junit</groupId>
         <artifactId>junit</artifactId>
     </dependency>
-    <dependency>
-        <groupId>org.apache.karaf.tooling</groupId>
-        <artifactId>karaf-maven-plugin</artifactId>
-        <version>${karaf.version}</version>
-    </dependency>
 
     <!-- Testing Dependencies -->
     <dependency>
