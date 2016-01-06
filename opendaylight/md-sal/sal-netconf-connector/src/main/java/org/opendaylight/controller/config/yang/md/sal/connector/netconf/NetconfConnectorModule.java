@@ -12,6 +12,7 @@ import static org.opendaylight.controller.config.api.JmxAttributeValidationExcep
 
 import com.google.common.base.Optional;
 import io.netty.util.concurrent.EventExecutor;
+import java.io.File;
 import java.math.BigDecimal;
 import java.net.InetSocketAddress;
 import java.util.List;
@@ -41,7 +42,12 @@ import org.opendaylight.protocol.framework.TimedReconnectStrategy;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Host;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
 import org.opendaylight.yangtools.yang.model.repo.api.SchemaContextFactory;
+import org.opendaylight.yangtools.yang.model.repo.api.SchemaSourceFilter;
+import org.opendaylight.yangtools.yang.model.repo.api.YangTextSchemaSource;
 import org.opendaylight.yangtools.yang.model.repo.spi.SchemaSourceRegistry;
+import org.opendaylight.yangtools.yang.model.repo.util.FilesystemSchemaSourceCache;
+import org.opendaylight.yangtools.yang.parser.repo.SharedSchemaRepository;
+import org.opendaylight.yangtools.yang.parser.util.TextToASTTransformer;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,6 +63,7 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
     private Optional<NetconfSessionPreferences> userCapabilities;
     private SchemaSourceRegistry schemaRegistry;
     private SchemaContextFactory schemaContextFactory;
+    private String instanceName;
 
     public NetconfConnectorModule(final org.opendaylight.controller.config.api.ModuleIdentifier identifier, final org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
         super(identifier, dependencyResolver);
@@ -141,8 +148,19 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
             salFacade = new KeepaliveSalFacade(id, salFacade, executor, keepaliveDelay);
         }
 
+
+        final SharedSchemaRepository repository = new SharedSchemaRepository(instanceName);
+        final SchemaContextFactory schemaContextFactory
+                = repository.createSchemaContextFactory(SchemaSourceFilter.ALWAYS_ACCEPT);
+        setSchemaRegistry(repository);
+        setSchemaContextFactory(schemaContextFactory);
+        final FilesystemSchemaSourceCache<YangTextSchemaSource> deviceCache =
+                createDeviceFilesystemCache(super.getSchemaCacheDirectory());
+        repository.registerSchemaSourceListener(deviceCache);
+        repository.registerSchemaSourceListener(TextToASTTransformer.create(repository, repository));
+
         final NetconfDevice.SchemaResourcesDTO schemaResourcesDTO =
-                new NetconfDevice.SchemaResourcesDTO(schemaRegistry, schemaContextFactory, new NetconfStateSchemas.NetconfStateSchemasResolverImpl());
+                new NetconfDevice.SchemaResourcesDTO(this.schemaRegistry, this.schemaContextFactory, new NetconfStateSchemas.NetconfStateSchemasResolverImpl());
 
         final NetconfDevice device =
                 new NetconfDevice(schemaResourcesDTO, id, salFacade, globalProcessingExecutor, getReconnectOnChangedSchema());
@@ -160,6 +178,18 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
         listener.initializeRemoteConnection(dispatcher, clientConfig);
 
         return new SalConnectorCloseable(listener, salFacade);
+    }
+
+    private static final String CACHE_DIRECTORY = "cache";
+    /**
+     * Creates a <code>FilesystemSchemaSourceCache</code> for the custom schema cache directory.
+     *
+     * @param schemaCacheDirectory The custom cache directory relative to "cache"
+     * @return A <code>FilesystemSchemaSourceCache</code> for the custom schema cache directory
+     */
+    private FilesystemSchemaSourceCache<YangTextSchemaSource> createDeviceFilesystemCache(final String schemaCacheDirectory) {
+        final String relativeSchemaCacheDirectory = CACHE_DIRECTORY + File.separator + schemaCacheDirectory;
+        return new FilesystemSchemaSourceCache<>(schemaRegistry, YangTextSchemaSource.class, new File(relativeSchemaCacheDirectory));
     }
 
     private boolean shouldSendKeepalive() {
@@ -273,5 +303,13 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
 
     public void setSchemaContextFactory(final SchemaContextFactory schemaContextFactory) {
         this.schemaContextFactory = schemaContextFactory;
+    }
+
+    public void setInstanceName(final String instanceName) {
+        this.instanceName = instanceName;
+    }
+
+    public String getInstanceName() {
+        return this.instanceName;
     }
 }
