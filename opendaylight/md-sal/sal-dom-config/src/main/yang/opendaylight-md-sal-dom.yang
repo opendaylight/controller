@@ -30,8 +30,6 @@ module opendaylight-md-sal-dom {
 
     identity schema-source-provider {
         base "config:service-type";
-        // TODO create a YangText specific source provider to avoid generic interface in config subsystem
-        // Config subsystem cannot handle generic service
-        config:java-class "org.opendaylight.yangtools.yang.model.repo.spi.SchemaSourceProvider";
+        config:java-class "org.opendaylight.controller.sal.core.api.model.YangSourceProvider";
     }
 }
