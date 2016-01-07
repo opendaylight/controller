@@ -139,6 +139,8 @@ class EntityOwnershipShard extends Shard {
     }
 
     private void onSelectOwner(SelectOwner selectOwner) {
+        LOG.debug("{}: onSelectOwner: {}", persistenceId(), selectOwner);
+
         String currentOwner = getCurrentOwner(selectOwner.getEntityPath());
         if(Strings.isNullOrEmpty(currentOwner)) {
             String entityType = EntityOwnersModel.entityTypeFromEntityPath(selectOwner.getEntityPath());
@@ -325,6 +327,8 @@ class EntityOwnershipShard extends Shard {
 
         String currentOwner = getCurrentOwner(message.getEntityPath());
         EntityOwnerSelectionStrategy strategy = getEntityOwnerElectionStrategy(message.getEntityPath());
+
+        LOG.debug("{}: Using strategy {} to select owner", persistenceId(), strategy);
         if(Strings.isNullOrEmpty(currentOwner)){
             if(strategy.getSelectionDelayInMillis() == 0L) {
                 String entityType = EntityOwnersModel.entityTypeFromEntityPath(message.getEntityPath());
@@ -443,6 +447,9 @@ class EntityOwnershipShard extends Shard {
         if(lastScheduledTask != null && !lastScheduledTask.isCancelled()){
             lastScheduledTask.cancel();
         }
+
+        LOG.debug("{}: Scheduling owner selection after {} ms", persistenceId(), strategy.getSelectionDelayInMillis());
+
         lastScheduledTask = context().system().scheduler().scheduleOnce(
                 FiniteDuration.apply(strategy.getSelectionDelayInMillis(), TimeUnit.MILLISECONDS)
                 , self(), new SelectOwner(entityPath, allCandidates, strategy)
