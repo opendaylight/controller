@@ -21,9 +21,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class EntityOwnerSelectionStrategyConfigReader {
-    public static final String CONFIG_ID = "org.opendaylight.controller.cluster.entity-owner-selection-strategies";
+    public static final String CONFIG_ID = "org.opendaylight.controller.cluster.entity.owner.selection.strategies";
 
     private static final Logger LOG = LoggerFactory.getLogger(EntityOwnerSelectionStrategyConfigReader.class);
+    private static final String ENTITY_TYPE_PREFIX = "entity.type.";
+
     private final BundleContext bundleContext;
     private final EntityOwnerSelectionStrategyConfig config;
 
@@ -51,7 +53,7 @@ public class EntityOwnerSelectionStrategyConfigReader {
                     String key = keys.nextElement();
                     String strategyProps = (String) properties.get(key);
                     String[] strategyClassAndDelay = strategyProps.split(",");
-                    if(strategyClassAndDelay.length >= 1) {
+                    if(key.startsWith(ENTITY_TYPE_PREFIX)) {
                         @SuppressWarnings("unchecked")
                         Class<? extends EntityOwnerSelectionStrategy> aClass
                         = (Class<? extends EntityOwnerSelectionStrategy>) getClass().getClassLoader().loadClass(strategyClassAndDelay[0]);
@@ -59,9 +61,14 @@ public class EntityOwnerSelectionStrategyConfigReader {
                         if(strategyClassAndDelay.length > 1){
                             delay = Long.parseLong(strategyClassAndDelay[1]);
                         }
-                        builder.addStrategy(key, aClass, delay);
+                        String entityType = key.substring(key.lastIndexOf(".") + 1);
+                        builder.addStrategy(entityType, aClass, delay);
+                    } else {
+                        LOG.debug("Ignoring non-conforming property key : {}, value : {}", key, strategyProps);
                     }
                 }
+            } else {
+                LOG.error("Could not read strategy configuration file, will use default configuration");
             }
         } catch(Exception e){
             LOG.warn("Failed to read selection strategy configuration file. All configuration will be ignored.", e);
