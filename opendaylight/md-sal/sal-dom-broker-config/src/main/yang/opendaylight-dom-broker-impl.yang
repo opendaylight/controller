@@ -37,6 +37,7 @@ module opendaylight-sal-dom-broker-impl {
     identity schema-service-singleton {
         base config:module-type;
         config:provided-service sal:schema-service;
+        config:provided-service sal:schema-source-provider;
         config:java-name-prefix SchemaServiceImplSingleton;
     }
 
