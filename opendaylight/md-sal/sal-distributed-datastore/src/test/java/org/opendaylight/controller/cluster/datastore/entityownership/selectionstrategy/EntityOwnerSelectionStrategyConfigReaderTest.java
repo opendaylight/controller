@@ -49,7 +49,7 @@ public class EntityOwnerSelectionStrategyConfigReaderTest {
     @Test
     public void testReadStrategies(){
         Hashtable<String, Object> props = new Hashtable<>();
-        props.put("test", "org.opendaylight.controller.cluster.datastore.entityownership.selectionstrategy.LastCandidateSelectionStrategy,100");
+        props.put("entity.type.test", "org.opendaylight.controller.cluster.datastore.entityownership.selectionstrategy.LastCandidateSelectionStrategy,100");
 
         doReturn(props).when(mockConfig).getProperties();
 
@@ -92,7 +92,7 @@ public class EntityOwnerSelectionStrategyConfigReaderTest {
     @Test
     public void testReadStrategiesInvalidDelay(){
         Hashtable<String, Object> props = new Hashtable<>();
-        props.put("test", "org.opendaylight.controller.cluster.datastore.entityownership.selectionstrategy.LastCandidateSelectionStrategy,foo");
+        props.put("entity.type.test", "org.opendaylight.controller.cluster.datastore.entityownership.selectionstrategy.LastCandidateSelectionStrategy,foo");
 
         doReturn(props).when(mockConfig).getProperties();
 
@@ -104,7 +104,7 @@ public class EntityOwnerSelectionStrategyConfigReaderTest {
     @Test
     public void testReadStrategiesInvalidClassType(){
         Hashtable<String, Object> props = new Hashtable<>();
-        props.put("test", "String,100");
+        props.put("entity.type.test", "String,100");
 
         doReturn(props).when(mockConfig).getProperties();
 
@@ -116,8 +116,8 @@ public class EntityOwnerSelectionStrategyConfigReaderTest {
     @Test
     public void testReadStrategiesMissingDelay(){
         Hashtable<String, Object> props = new Hashtable<>();
-        props.put("test", "org.opendaylight.controller.cluster.datastore.entityownership.selectionstrategy.LastCandidateSelectionStrategy,100");
-        props.put("test1", "org.opendaylight.controller.cluster.datastore.entityownership.selectionstrategy.LastCandidateSelectionStrategy");
+        props.put("entity.type.test", "org.opendaylight.controller.cluster.datastore.entityownership.selectionstrategy.LastCandidateSelectionStrategy,100");
+        props.put("entity.type.test1", "org.opendaylight.controller.cluster.datastore.entityownership.selectionstrategy.LastCandidateSelectionStrategy");
 
         doReturn(props).when(mockConfig).getProperties();
 
