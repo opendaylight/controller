@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da33351e_6417a452",
+        "filename": "opendaylight/md-sal/sal-dom-broker-config/src/main/yang/opendaylight-dom-broker-impl.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2016-01-08T09:22:58Z",
+      "side": 1,
+      "message": "yang-text-source-provider",
+      "range": {
+        "startLine": 40,
+        "startChar": 36,
+        "endLine": 40,
+        "endChar": 58
+      },
+      "revId": "038f25753629501d61a4957e79b1732e2ee27b06",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da33351e_8412a860",
+        "filename": "opendaylight/md-sal/sal-dom-config/src/main/yang/opendaylight-md-sal-dom.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2016-01-08T09:22:58Z",
+      "side": 1,
+      "message": "yang-text-source-provider",
+      "range": {
+        "startLine": 31,
+        "startChar": 13,
+        "endLine": 31,
+        "endChar": 35
+      },
+      "revId": "038f25753629501d61a4957e79b1732e2ee27b06",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
