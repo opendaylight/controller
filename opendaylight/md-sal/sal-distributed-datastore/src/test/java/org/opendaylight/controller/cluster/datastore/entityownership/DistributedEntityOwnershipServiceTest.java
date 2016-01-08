@@ -17,7 +17,9 @@ import static org.mockito.Mockito.mock;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.ENTITY_ID_QNAME;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.ENTITY_OWNERS_PATH;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.ENTITY_QNAME;
+import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.candidatePath;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.entityEntryWithOwner;
+import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.entityOwnersWithCandidate;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.entityOwnersWithEntityTypeEntry;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.entityPath;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.entityTypeEntryWithEntityEntry;
@@ -268,10 +270,12 @@ public class DistributedEntityOwnershipServiceTest extends AbstractEntityOwnersh
         shardBuilder.setDataTree(shardDataTree.getDataTree());
 
         Entity entity1 = new Entity(ENTITY_TYPE, "one");
+        writeNode(ENTITY_OWNERS_PATH, entityOwnersWithCandidate(ENTITY_TYPE, entity1.getId(), "member-1"), shardDataTree);
         writeNode(ENTITY_OWNERS_PATH, entityOwnersWithEntityTypeEntry(entityTypeEntryWithEntityEntry(entity1.getType(),
                 entityEntryWithOwner(entity1.getId(), "member-1"))), shardDataTree);
         verifyGetOwnershipState(service, entity1, true, true);
 
+        writeNode(ENTITY_OWNERS_PATH, entityOwnersWithCandidate(ENTITY_TYPE, entity1.getId(), "member-2"), shardDataTree);
         writeNode(entityPath(entity1.getType(), entity1.getId()), entityEntryWithOwner(entity1.getId(), "member-2"),
                 shardDataTree);
         verifyGetOwnershipState(service, entity1, false, true);
@@ -284,10 +288,14 @@ public class DistributedEntityOwnershipServiceTest extends AbstractEntityOwnersh
         Optional<EntityOwnershipState> state = service.getOwnershipState(entity2);
         assertEquals("getOwnershipState present", false, state.isPresent());
 
+        writeNode(ENTITY_OWNERS_PATH, entityOwnersWithCandidate(ENTITY_TYPE, entity2.getId(), "member-1"), shardDataTree);
         writeNode(entityPath(entity2.getType(), entity2.getId()), ImmutableNodes.mapEntry(ENTITY_QNAME,
                 ENTITY_ID_QNAME, entity2.getId()), shardDataTree);
         verifyGetOwnershipState(service, entity2, false, false);
 
+        deleteNode(candidatePath(entityPath(entity2.getType(), entity2.getId()), "member-1"), shardDataTree);
+        Optional<EntityOwnershipState> state2 = service.getOwnershipState(entity2);
+        assertEquals("getOwnershipState present", false, state2.isPresent());
         service.close();
     }
 

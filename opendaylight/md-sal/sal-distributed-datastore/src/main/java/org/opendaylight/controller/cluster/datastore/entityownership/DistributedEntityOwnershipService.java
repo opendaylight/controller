@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.datastore.entityownership;
 
+import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.CANDIDATE_NODE_ID;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.ENTITY_OWNER_NODE_ID;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.entityPath;
 import akka.actor.ActorRef;
@@ -44,6 +45,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
+import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
 import org.slf4j.Logger;
@@ -173,19 +175,26 @@ public class DistributedEntityOwnershipService implements EntityOwnershipService
         Preconditions.checkNotNull(forEntity, "forEntity cannot be null");
 
         DataTree dataTree = getLocalEntityOwnershipShardDataTree();
-        if(dataTree == null) {
+        if (dataTree == null) {
             return Optional.absent();
         }
 
         Optional<NormalizedNode<?, ?>> entityNode = dataTree.takeSnapshot().readNode(
                 entityPath(forEntity.getType(), forEntity.getId()));
-        if(!entityNode.isPresent()) {
+        if (!entityNode.isPresent()) {
+            return Optional.absent();
+        }
+
+        // Check if there are any candidates, if there are none we do not really have ownership state
+        final MapEntryNode entity = (MapEntryNode) entityNode.get();
+        final Optional<DataContainerChild<? extends PathArgument, ?>> optionalCandidates = entity.getChild(CANDIDATE_NODE_ID);
+        final boolean hasCandidates = optionalCandidates.isPresent() && ((MapNode) optionalCandidates.get()).getValue().size() > 0;
+        if(!hasCandidates){
             return Optional.absent();
         }
 
         String localMemberName = datastore.getActorContext().getCurrentMemberName();
-        Optional<DataContainerChild<? extends PathArgument, ?>> ownerLeaf = ((MapEntryNode)entityNode.get()).
-                getChild(ENTITY_OWNER_NODE_ID);
+        Optional<DataContainerChild<? extends PathArgument, ?>> ownerLeaf = entity.getChild(ENTITY_OWNER_NODE_ID);
         String owner = ownerLeaf.isPresent() ? ownerLeaf.get().getValue().toString() : null;
         boolean hasOwner = !Strings.isNullOrEmpty(owner);
         boolean isOwner = hasOwner && localMemberName.equals(owner);
