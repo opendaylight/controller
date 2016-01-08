@@ -257,15 +257,10 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
         Map<ModuleIdentifier, RootRuntimeBeanRegistratorImpl> runtimeRegistrators = new HashMap<>();
         for (ModuleInternalTransactionalInfo entry : commitInfo.getCommitted()
                 .values()) {
-            RootRuntimeBeanRegistratorImpl runtimeBeanRegistrator;
-            if (entry.hasOldModule() == false) {
-                runtimeBeanRegistrator = baseJMXRegistrator
-                        .createRuntimeBeanRegistrator(entry.getIdentifier());
-            } else {
-                // reuse old JMX registrator
-                runtimeBeanRegistrator = entry.getOldInternalInfo()
-                        .getRuntimeBeanRegistrator();
-            }
+            // FIXME creating new Runtime bean registrator for each new instance might cause leaks if client
+            // code doesn't close registration (and thus underlying registrator) in createInstance
+            RootRuntimeBeanRegistratorImpl runtimeBeanRegistrator = baseJMXRegistrator
+                    .createRuntimeBeanRegistrator(entry.getIdentifier());
             // set runtime jmx registrator if required
             Module module = entry.getProxiedModule();
             if (module instanceof RuntimeBeanRegistratorAwareModule) {
