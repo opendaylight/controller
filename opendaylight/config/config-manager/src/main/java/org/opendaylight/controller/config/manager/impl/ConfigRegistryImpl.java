@@ -252,28 +252,35 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
         }
 
         // set RuntimeBeanRegistrators on beans implementing
-        // RuntimeBeanRegistratorAwareModule, each module
-        // should have exactly one runtime jmx registrator.
+        // RuntimeBeanRegistratorAwareModule
         Map<ModuleIdentifier, RootRuntimeBeanRegistratorImpl> runtimeRegistrators = new HashMap<>();
         for (ModuleInternalTransactionalInfo entry : commitInfo.getCommitted()
                 .values()) {
-            RootRuntimeBeanRegistratorImpl runtimeBeanRegistrator;
-            if (entry.hasOldModule() == false) {
-                runtimeBeanRegistrator = baseJMXRegistrator
-                        .createRuntimeBeanRegistrator(entry.getIdentifier());
-            } else {
-                // reuse old JMX registrator
-                runtimeBeanRegistrator = entry.getOldInternalInfo()
-                        .getRuntimeBeanRegistrator();
-            }
             // set runtime jmx registrator if required
             Module module = entry.getProxiedModule();
+            RootRuntimeBeanRegistratorImpl runtimeBeanRegistrator = null;
+
             if (module instanceof RuntimeBeanRegistratorAwareModule) {
-                ((RuntimeBeanRegistratorAwareModule) module)
-                        .setRuntimeBeanRegistrator(runtimeBeanRegistrator);
+
+                if(entry.hasOldModule()) {
+
+                    if(module.canReuse(entry.getOldInternalInfo().getReadableModule().getModule())) {
+                        runtimeBeanRegistrator = entry.getOldInternalInfo().getRuntimeBeanRegistrator();
+                        ((RuntimeBeanRegistratorAwareModule) module).setRuntimeBeanRegistrator(runtimeBeanRegistrator);
+                    } else {
+                        runtimeBeanRegistrator = baseJMXRegistrator.createRuntimeBeanRegistrator(entry.getIdentifier());
+                        entry.getOldInternalInfo().getRuntimeBeanRegistrator().close();
+                        ((RuntimeBeanRegistratorAwareModule) module).setRuntimeBeanRegistrator(runtimeBeanRegistrator);
+                    }
+                } else {
+                    runtimeBeanRegistrator = baseJMXRegistrator.createRuntimeBeanRegistrator(entry.getIdentifier());
+                    ((RuntimeBeanRegistratorAwareModule) module).setRuntimeBeanRegistrator(runtimeBeanRegistrator);
+                }
             }
             // save it to info so it is accessible afterwards
-            runtimeRegistrators.put(entry.getIdentifier(), runtimeBeanRegistrator);
+            if(runtimeBeanRegistrator != null) {
+                runtimeRegistrators.put(entry.getIdentifier(), runtimeBeanRegistrator);
+            }
         }
 
         // can register runtime beans
