@@ -44,17 +44,13 @@ public class ModuleInternalInfo implements Comparable<ModuleInternalInfo>,
     public ModuleInternalInfo(ModuleIdentifier name,
             @Nullable DynamicReadableWrapper readableModule,
             OsgiRegistration osgiRegistration,
-            RootRuntimeBeanRegistratorImpl runtimeBeanRegistrator,
+            @Nullable RootRuntimeBeanRegistratorImpl runtimeBeanRegistrator,
             ModuleJMXRegistrator moduleJMXRegistrator, int orderingIdx,
             boolean isDefaultBean, ModuleFactory moduleFactory, BundleContext bundleContext) {
 
         if (osgiRegistration == null) {
             throw new IllegalArgumentException(
                     "Parameter 'osgiRegistration' is missing");
-        }
-        if (runtimeBeanRegistrator == null) {
-            throw new IllegalArgumentException(
-                    "Parameter 'runtimeBeanRegistrator' is missing");
         }
         this.readableModule = readableModule;
         this.osgiRegistration = osgiRegistration;
@@ -114,7 +110,7 @@ public class ModuleInternalInfo implements Comparable<ModuleInternalInfo>,
     public DestroyedModule toDestroyedModule() {
         return new DestroyedModule(getIdentifier(),
                 getReadableModule().getInstance(), getModuleJMXRegistrator(),
-                getOsgiRegistration(), getOrderingIdx());
+                getOsgiRegistration(), getOrderingIdx(), runtimeBeanRegistrator);
     }
 
     @Override
