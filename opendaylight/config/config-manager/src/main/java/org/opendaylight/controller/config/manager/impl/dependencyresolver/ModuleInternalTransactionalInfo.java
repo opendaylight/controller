@@ -58,7 +58,7 @@ public class ModuleInternalTransactionalInfo implements Identifiable<ModuleIdent
         return new DestroyedModule(name, oldModule.getInstance(),
                 maybeOldInternalInfo.getModuleJMXRegistrator(),
                 maybeOldInternalInfo.getOsgiRegistration(),
-                maybeOldInternalInfo.getOrderingIdx());
+                maybeOldInternalInfo.getOrderingIdx(), maybeOldInternalInfo.getRuntimeBeanRegistrator());
     }
 
 
