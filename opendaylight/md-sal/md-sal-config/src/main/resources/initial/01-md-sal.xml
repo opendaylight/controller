@@ -84,6 +84,10 @@
                             <type xmlns:binding="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding">binding:binding-async-data-broker</type>
                             <name>binding-data-broker</name>
                         </root-data-broker>
+                        <notification-publish-service>
+                            <type xmlns:binding-impl="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">binding-impl:binding-new-notification-publish-service</type>
+                            <name>binding-notification-publish-adapter</name>
+                        </notification-publish-service>
                     </binding-broker-impl>
                 </module>
 
