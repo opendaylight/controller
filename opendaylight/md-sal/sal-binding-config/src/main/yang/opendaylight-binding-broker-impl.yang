@@ -148,6 +148,15 @@ module opendaylight-sal-binding-broker-impl {
                         }
                     }
                 }
+
+                container notification-publish-service {
+                    presence "Whether the broker should provide a notification-publish service";
+                    uses config:service-ref {
+                        refine type {
+                            config:required-identity binding-new-notification-publish-service;
+                        }
+                    }
+                }
             }
         }
     }
