@@ -18,12 +18,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 import org.opendaylight.controller.md.sal.binding.api.BindingTransactionChain;
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.AsyncTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionChain;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListener;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.sal.connect.netconf.listener.NetconfDeviceCapabilities;
 import org.opendaylight.controller.sal.connect.util.RemoteDeviceId;
@@ -80,20 +76,9 @@ final class NetconfDeviceTopologyAdapter implements AutoCloseable {
     private final KeyedInstanceIdentifier<Topology, TopologyKey> topologyListPath;
     private static final String UNKNOWN_REASON = "Unknown reason";
 
-    NetconfDeviceTopologyAdapter(final RemoteDeviceId id, final DataBroker dataService) {
+    NetconfDeviceTopologyAdapter(final RemoteDeviceId id, final BindingTransactionChain txChain) {
         this.id = id;
-        this.txChain = Preconditions.checkNotNull(dataService).createTransactionChain(new TransactionChainListener() {
-            @Override
-            public void onTransactionChainFailed(TransactionChain<?, ?> chain, AsyncTransaction<?, ?> transaction, Throwable cause) {
-                logger.error("{}: TransactionChain({}) {} FAILED!", id, chain, transaction.getIdentifier(), cause);
-                throw new IllegalStateException(id + "  TransactionChain(" + chain + ") not committed correctly", cause);
-            }
-
-            @Override
-            public void onTransactionChainSuccessful(TransactionChain<?, ?> chain) {
-                logger.trace("{}: TransactionChain({}) {} SUCCESSFUL", id, chain);
-            }
-        });
+        this.txChain = Preconditions.checkNotNull(txChain);
 
         this.networkTopologyPath = InstanceIdentifier.builder(NetworkTopology.class).build();
         this.topologyListPath = networkTopologyPath.child(Topology.class, new TopologyKey(new TopologyId(TopologyNetconf.QNAME.getLocalName())));
@@ -231,6 +216,5 @@ final class NetconfDeviceTopologyAdapter implements AutoCloseable {
     @Override
     public void close() throws Exception {
         removeDeviceConfiguration();
-        txChain.close();
     }
 }

@@ -60,7 +60,7 @@ public class NetconfDeviceTopologyAdapterTest {
     public void testFailedDevice() throws Exception {
         doReturn(Futures.immediateCheckedFuture(null)).when(writeTx).submit();
 
-        NetconfDeviceTopologyAdapter adapter = new NetconfDeviceTopologyAdapter(id, broker);
+        NetconfDeviceTopologyAdapter adapter = new NetconfDeviceTopologyAdapter(id, txChain);
         adapter.setDeviceAsFailed(null);
 
         verify(txChain, times(2)).newWriteOnlyTransaction();
@@ -71,7 +71,7 @@ public class NetconfDeviceTopologyAdapterTest {
     public void testDeviceUpdate() throws Exception {
         doReturn(Futures.immediateCheckedFuture(null)).when(writeTx).submit();
 
-        NetconfDeviceTopologyAdapter adapter = new NetconfDeviceTopologyAdapter(id, broker);
+        NetconfDeviceTopologyAdapter adapter = new NetconfDeviceTopologyAdapter(id, txChain);
         adapter.updateDeviceData(true, new NetconfDeviceCapabilities());
 
         verify(txChain, times(2)).newWriteOnlyTransaction();
