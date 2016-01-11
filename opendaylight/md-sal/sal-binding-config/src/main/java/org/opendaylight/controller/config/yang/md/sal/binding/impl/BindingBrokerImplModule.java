@@ -67,8 +67,12 @@ public final class BindingBrokerImplModule extends
         final RpcProviderRegistry heliumRpcBroker = new HeliumRpcProviderRegistry(rpcConsumer, rpcProvider);
         final MountProviderService legacyMount = createLegacyMountPointService(mount);
 
+
         broker.setLegacyDataBroker(getDataBrokerDependency());
         broker.setNotificationBroker(getNotificationServiceDependency());
+        if (getNotificationPublishServiceDependency() != null) {
+            broker.setNotificationPublishService(getNotificationPublishServiceDependency());
+        }
         broker.setRpcBroker(heliumRpcBroker);
         broker.setDataBroker(getRootDataBrokerDependency());
         broker.setMountService(mount);
