@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da33351e_a0b06fde",
+        "filename": "opendaylight/md-sal/sal-binding-config/src/main/yang/opendaylight-binding-broker-impl.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2016-01-11T19:01:58Z",
+      "side": 1,
+      "message": "Make it non-mandatory, tests failed because configuration model change was not backwards compatible.",
+      "range": {
+        "startLine": 152,
+        "startChar": 16,
+        "endLine": 159,
+        "endChar": 17
+      },
+      "revId": "954eb9e94769deeb526ff93cd8966aeb66d5e3a8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
