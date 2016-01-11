@@ -58,9 +58,11 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.AddShardReplicaInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.BackupDatastoreInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.DataStoreType;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.RemoveAllShardReplicasInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.RemoveAllShardReplicasOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.RemoveShardReplicaInputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.add.replicas._for.all.shards.output.ShardResult;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.add.replicas._for.all.shards.output.ShardResultBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.shard.result.output.ShardResult;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.shard.result.output.ShardResultBuilder;
 import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -457,8 +459,65 @@ public class ClusterAdminRpcServiceTest {
     }
 
     @Test
-    public void testRemoveAllShardReplicas() {
-        // TODO implement
+    public void testRemoveAllShardReplicas() throws Exception {
+        String name = "testRemoveAllShardReplicas";
+        String moduleShardsConfig = "module-shards-member1-and-2-and-3.conf";
+        MemberNode leaderNode1 = MemberNode.builder(memberNodes).akkaConfig("Member1").testName(name ).
+                moduleShardsConfig(moduleShardsConfig).datastoreContextBuilder(DatastoreContext.newBuilder().
+                        shardHeartbeatIntervalInMillis(300).shardElectionTimeoutFactor(1)).build();
+
+        MemberNode replicaNode2 = MemberNode.builder(memberNodes).akkaConfig("Member2").testName(name).
+                moduleShardsConfig(moduleShardsConfig).build();
+
+        MemberNode replicaNode3 = MemberNode.builder(memberNodes).akkaConfig("Member3").testName(name).
+                moduleShardsConfig(moduleShardsConfig).build();
+
+        leaderNode1.configDataStore().waitTillReady();
+        verifyRaftPeersPresent(leaderNode1.configDataStore(), "cars", "member-2", "member-3");
+        verifyRaftPeersPresent(replicaNode2.configDataStore(), "cars", "member-1", "member-3");
+        verifyRaftPeersPresent(replicaNode3.configDataStore(), "cars", "member-1", "member-2");
+
+        ModuleShardConfiguration petsModuleConfig = new ModuleShardConfiguration(URI.create("pets-ns"), "pets-module",
+                "pets", null, Arrays.asList("member-1", "member-2", "member-3"));
+        leaderNode1.configDataStore().getActorContext().getShardManager().tell(
+                new CreateShard(petsModuleConfig, Shard.builder(), null), leaderNode1.kit().getRef());
+        leaderNode1.kit().expectMsgClass(Success.class);
+
+        replicaNode2.configDataStore().getActorContext().getShardManager().tell(
+                new CreateShard(petsModuleConfig, Shard.builder(), null), replicaNode2.kit().getRef());
+        replicaNode2.kit().expectMsgClass(Success.class);
+
+        replicaNode3.configDataStore().getActorContext().getShardManager().tell(
+                new CreateShard(petsModuleConfig, Shard.builder(), null), replicaNode3.kit().getRef());
+        replicaNode3.kit().expectMsgClass(Success.class);
+
+        verifyRaftPeersPresent(leaderNode1.configDataStore(), "pets", "member-2", "member-3");
+        verifyRaftPeersPresent(replicaNode2.configDataStore(), "pets", "member-1", "member-3");
+        verifyRaftPeersPresent(replicaNode3.configDataStore(), "pets", "member-1", "member-2");
+
+        ClusterAdminRpcService service3 = new ClusterAdminRpcService(replicaNode3.configDataStore(),
+                replicaNode3.operDataStore());
+
+        RpcResult<RemoveAllShardReplicasOutput> rpcResult = service3.removeAllShardReplicas(
+                new RemoveAllShardReplicasInputBuilder().setMemberName("member-3").build()).get(10, TimeUnit.SECONDS);
+        RemoveAllShardReplicasOutput result = verifySuccessfulRpcResult(rpcResult);
+        verifyShardResults(result.getShardResult(), successShardResult("cars", DataStoreType.Config),
+                successShardResult("people", DataStoreType.Config),
+                successShardResult("pets", DataStoreType.Config),
+                successShardResult("cars", DataStoreType.Operational),
+                successShardResult("people", DataStoreType.Operational));
+
+        verifyRaftPeersPresent(leaderNode1.configDataStore(), "cars", "member-2");
+        verifyRaftPeersPresent(leaderNode1.configDataStore(), "people", "member-2");
+        verifyRaftPeersPresent(leaderNode1.configDataStore(), "pets", "member-2");
+        verifyRaftPeersPresent(replicaNode2.configDataStore(), "cars", "member-1");
+        verifyRaftPeersPresent(replicaNode2.configDataStore(), "people", "member-1");
+        verifyRaftPeersPresent(replicaNode2.configDataStore(), "pets", "member-1");
+        verifyNoShardPresent(replicaNode3.configDataStore(), "cars");
+        verifyNoShardPresent(replicaNode3.configDataStore(), "people");
+        verifyNoShardPresent(replicaNode3.configDataStore(), "pets");
+
+        service3.close();
     }
 
     @Test
