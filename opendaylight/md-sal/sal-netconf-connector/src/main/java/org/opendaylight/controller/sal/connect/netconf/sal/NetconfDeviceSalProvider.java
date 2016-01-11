@@ -8,9 +8,15 @@
 package org.opendaylight.controller.sal.connect.netconf.sal;
 
 import com.google.common.base.Preconditions;
+
 import java.util.Collection;
 import java.util.Collections;
+
+import org.opendaylight.controller.md.sal.binding.api.BindingTransactionChain;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.common.api.data.AsyncTransaction;
+import org.opendaylight.controller.md.sal.common.api.data.TransactionChain;
+import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListener;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPoint;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPointService;
@@ -36,6 +42,24 @@ final class NetconfDeviceSalProvider implements AutoCloseable, Provider, Binding
     private MountInstance mountInstance;
 
     private volatile NetconfDeviceTopologyAdapter topologyDatastoreAdapter;
+
+    private DataBroker dataBroker;
+    private BindingTransactionChain txChain;
+
+    private final TransactionChainListener transactionChainListener =  new TransactionChainListener() {
+        @Override
+        public void onTransactionChainFailed(TransactionChain<?, ?> chain, AsyncTransaction<?, ?> transaction, Throwable cause) {
+            logger.error("{}: TransactionChain({}) {} FAILED!", id, chain, transaction.getIdentifier(), cause);
+            chain.close();
+            resetTransactionChainForAdapaters();
+            throw new IllegalStateException(id + "  TransactionChain(" + chain + ") not committed correctly", cause);
+        }
+
+        @Override
+        public void onTransactionChainSuccessful(TransactionChain<?, ?> chain) {
+            logger.trace("{}: TransactionChain({}) {} SUCCESSFUL", id, chain);
+        }
+    };
 
     public NetconfDeviceSalProvider(final RemoteDeviceId deviceId) {
         this.id = deviceId;
@@ -78,10 +102,21 @@ final class NetconfDeviceSalProvider implements AutoCloseable, Provider, Binding
     public void onSessionInitiated(final BindingAwareBroker.ProviderContext session) {
         logger.debug("{}: Session with sal established {}", id, session);
 
-        final DataBroker dataBroker = session.getSALService(DataBroker.class);
-        datastoreAdapter = new NetconfDeviceDatastoreAdapter(id, dataBroker);
+        this.dataBroker = session.getSALService(DataBroker.class);
+        txChain = Preconditions.checkNotNull(dataBroker).createTransactionChain(transactionChainListener);
 
-        topologyDatastoreAdapter = new NetconfDeviceTopologyAdapter(id, dataBroker);
+        datastoreAdapter = new NetconfDeviceDatastoreAdapter(id, txChain);
+        topologyDatastoreAdapter = new NetconfDeviceTopologyAdapter(id, txChain);
+    }
+
+    private void resetTransactionChainForAdapaters() {
+        txChain = Preconditions.checkNotNull(dataBroker).createTransactionChain(transactionChainListener);
+
+        datastoreAdapter.setTxChain(txChain);
+        topologyDatastoreAdapter.setTxChain(txChain);
+
+        logger.trace("{}: Resetting TransactionChain {}", id, txChain);
+
     }
 
     public void close() throws Exception {
@@ -90,6 +125,7 @@ final class NetconfDeviceSalProvider implements AutoCloseable, Provider, Binding
         datastoreAdapter = null;
         topologyDatastoreAdapter.close();
         topologyDatastoreAdapter = null;
+        txChain.close();
     }
 
     static final class MountInstance implements AutoCloseable {
