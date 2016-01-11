@@ -148,6 +148,18 @@ module opendaylight-sal-binding-broker-impl {
                         }
                     }
                 }
+
+                container notification-publish-service {
+                    uses config:service-ref {
+                        refine type {
+                            mandatory false;
+                            config:required-identity binding-new-notification-publish-service;
+                        }
+                        refine name {
+                            mandatory false;
+                        }
+                    }
+                }
             }
         }
     }
