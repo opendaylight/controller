@@ -12,16 +12,23 @@ import akka.actor.ActorSelection;
 import akka.actor.Cancellable;
 import com.google.common.base.Preconditions;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.Queue;
 import java.util.UUID;
 import javax.annotation.Nullable;
+import org.opendaylight.controller.cluster.raft.RaftActorLeadershipTransferCohort.OnComplete;
+import org.opendaylight.controller.cluster.raft.ServerConfigurationPayload.ServerInfo;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.SnapshotComplete;
 import org.opendaylight.controller.cluster.raft.behaviors.AbstractLeader;
 import org.opendaylight.controller.cluster.raft.messages.AddServer;
 import org.opendaylight.controller.cluster.raft.messages.AddServerReply;
+import org.opendaylight.controller.cluster.raft.messages.ChangeServersVotingStatus;
 import org.opendaylight.controller.cluster.raft.messages.RemoveServer;
 import org.opendaylight.controller.cluster.raft.messages.RemoveServerReply;
+import org.opendaylight.controller.cluster.raft.messages.ServerChangeReply;
 import org.opendaylight.controller.cluster.raft.messages.ServerChangeStatus;
 import org.opendaylight.controller.cluster.raft.messages.ServerRemoved;
 import org.opendaylight.controller.cluster.raft.messages.UnInitializedFollowerSnapshotReply;
@@ -59,6 +66,9 @@ class RaftActorServerConfigurationSupport {
         } else if(message instanceof RemoveServer) {
             onRemoveServer((RemoveServer) message, sender);
             return true;
+        } else if(message instanceof ChangeServersVotingStatus) {
+            onChangeServersVotingStatus((ChangeServersVotingStatus) message, sender);
+            return true;
         } else if (message instanceof ServerOperationTimeout) {
             currentOperationState.onServerOperationTimeout((ServerOperationTimeout) message);
             return true;
@@ -73,6 +83,13 @@ class RaftActorServerConfigurationSupport {
         } else {
             return false;
         }
+    }
+
+    private void onChangeServersVotingStatus(ChangeServersVotingStatus message, ActorRef sender) {
+        LOG.debug("{}: onChangeServersVotingStatus: {}, state: {}", raftContext.getId(), message,
+                currentOperationState);
+
+        onNewOperation(new ChangeServersVotingStatusContext(message, sender));
     }
 
     private void onRemoveServer(RemoveServer removeServer, ActorRef sender) {
@@ -202,13 +219,14 @@ class RaftActorServerConfigurationSupport {
         protected void persistNewServerConfiguration(ServerOperationContext<?> operationContext){
             raftContext.setDynamicServerConfigurationInUse();
 
-            boolean includeSelf = !operationContext.getServerId().equals(raftActor.getId());
-            ServerConfigurationPayload payload = raftContext.getPeerServerInfo(includeSelf);
+            ServerConfigurationPayload payload = raftContext.getPeerServerInfo(
+                    operationContext.includeSelfInNewConfiguration(raftActor));
             LOG.debug("{}: New server configuration : {}", raftContext.getId(), payload.getServerConfig());
 
             raftActor.persistData(operationContext.getClientRequestor(), operationContext.getContextId(), payload);
 
-            currentOperationState = new Persisting(operationContext, newTimer(new ServerOperationTimeout(operationContext.getServerId())));
+            currentOperationState = new Persisting(operationContext, newTimer(new ServerOperationTimeout(
+                    operationContext.getLoggingContext())));
 
             sendReply(operationContext, ServerChangeStatus.OK);
         }
@@ -218,7 +236,7 @@ class RaftActorServerConfigurationSupport {
                 sendReply(operationContext, replyStatus);
             }
 
-            operationContext.operationComplete(raftActor, replyStatus);
+            operationContext.operationComplete(raftActor, replyStatus == null || replyStatus == ServerChangeStatus.OK);
 
             currentOperationState = IDLE;
 
@@ -291,7 +309,7 @@ class RaftActorServerConfigurationSupport {
         @Override
         public void onServerOperationTimeout(ServerOperationTimeout timeout) {
             LOG.warn("{}: Timeout occured while replicating the new server configuration for {}", raftContext.getId(),
-                    timeout.getServerId());
+                    timeout.getLoggingContext());
 
             timedOut = true;
 
@@ -332,7 +350,7 @@ class RaftActorServerConfigurationSupport {
         }
 
         void handleInstallSnapshotTimeout(ServerOperationTimeout timeout) {
-            String serverId = timeout.getServerId();
+            String serverId = timeout.getLoggingContext();
 
             LOG.debug("{}: handleInstallSnapshotTimeout for new server {}", raftContext.getId(), serverId);
 
@@ -417,7 +435,7 @@ class RaftActorServerConfigurationSupport {
             handleInstallSnapshotTimeout(timeout);
 
             LOG.warn("{}: Timeout occured for new server {} while installing snapshot", raftContext.getId(),
-                    timeout.getServerId());
+                    timeout.getLoggingContext());
         }
 
         @Override
@@ -482,7 +500,7 @@ class RaftActorServerConfigurationSupport {
             handleInstallSnapshotTimeout(timeout);
 
             LOG.warn("{}: Timeout occured for new server {} while waiting for prior snapshot to complete",
-                    raftContext.getId(), timeout.getServerId());
+                    raftContext.getId(), timeout.getLoggingContext());
         }
     }
 
@@ -514,13 +532,18 @@ class RaftActorServerConfigurationSupport {
             return clientRequestor;
         }
 
+        void operationComplete(RaftActor raftActor, boolean succeeded) {
+        }
+
+        boolean includeSelfInNewConfiguration(RaftActor raftActor) {
+            return true;
+        }
+
         abstract Object newReply(ServerChangeStatus status, String leaderId);
 
         abstract InitialOperationState newInitialOperationState(RaftActorServerConfigurationSupport support);
 
-        abstract void operationComplete(RaftActor raftActor, ServerChangeStatus serverChangeStatus);
-
-        abstract String getServerId();
+        abstract String getLoggingContext();
     }
 
     /**
@@ -542,12 +565,7 @@ class RaftActorServerConfigurationSupport {
         }
 
         @Override
-        void operationComplete(RaftActor raftActor, ServerChangeStatus serverChangeStatus) {
-
-        }
-
-        @Override
-        String getServerId() {
+        String getLoggingContext() {
             return getOperation().getNewServerId();
         }
     }
@@ -601,27 +619,113 @@ class RaftActorServerConfigurationSupport {
         }
 
         @Override
-        void operationComplete(RaftActor raftActor, ServerChangeStatus serverChangeStatus) {
+        void operationComplete(RaftActor raftActor, boolean succeeded) {
             if(peerAddress != null) {
                 raftActor.context().actorSelection(peerAddress).tell(new ServerRemoved(getOperation().getServerId()), raftActor.getSelf());
             }
         }
 
         @Override
-        String getServerId() {
+        boolean includeSelfInNewConfiguration(RaftActor raftActor) {
+            return !getOperation().getServerId().equals(raftActor.getId());
+        }
+
+        @Override
+        String getLoggingContext() {
             return getOperation().getServerId();
         }
     }
 
-    static class ServerOperationTimeout {
-        private final String serverId;
-
-        ServerOperationTimeout(String serverId){
-           this.serverId = Preconditions.checkNotNull(serverId, "serverId should not be null");
+    private static class ChangeServersVotingStatusContext extends ServerOperationContext<ChangeServersVotingStatus> {
+        ChangeServersVotingStatusContext(ChangeServersVotingStatus convertMessage, ActorRef clientRequestor) {
+            super(convertMessage, clientRequestor);
         }
 
-        String getServerId() {
-            return serverId;
+        @Override
+        InitialOperationState newInitialOperationState(RaftActorServerConfigurationSupport support) {
+            return support.new ChangeServersVotingStatusState(this);
+        }
+
+        @Override
+        Object newReply(ServerChangeStatus status, String leaderId) {
+            return new ServerChangeReply(status, leaderId);
+        }
+
+        @Override
+        void operationComplete(final RaftActor raftActor, boolean succeeded) {
+            // If this leader changed to non-voting we need to step down as leader so we'll try to transfer
+            // leadership.
+            boolean localServerChangedToNonVoting = Boolean.FALSE.equals(getOperation().
+                    getServerVotingStatusMap().get(raftActor.getRaftActorContext().getId()));
+            if(succeeded && localServerChangedToNonVoting && raftActor.isLeader()) {
+                raftActor.initiateLeadershipTransfer(new OnComplete() {
+                    @Override
+                    public void onSuccess(ActorRef raftActorRef, ActorRef replyTo) {
+                        LOG.debug("{}: leader transfer succeeded after change to non-voting", raftActor.persistenceId());
+                        ensureFollowerState(raftActor);
+                    }
+
+                    @Override
+                    public void onFailure(ActorRef raftActorRef, ActorRef replyTo) {
+                        LOG.debug("{}: leader transfer failed after change to non-voting", raftActor.persistenceId());
+                        ensureFollowerState(raftActor);
+                    }
+
+                    private void ensureFollowerState(RaftActor raftActor) {
+                        // Whether or not leadership transfer succeeded, we have to step down as leader and
+                        // switch to Follower so ensure that.
+                        if(raftActor.getRaftState() != RaftState.Follower) {
+                            raftActor.initializeBehavior();
+                        }
+                    }
+                });
+            }
+        }
+
+        @Override
+        String getLoggingContext() {
+            return getOperation().getServerVotingStatusMap().toString();
+        }
+    }
+
+    private class ChangeServersVotingStatusState extends AbstractOperationState implements InitialOperationState {
+        private final ChangeServersVotingStatusContext changeVotingStatusContext;
+
+        ChangeServersVotingStatusState(ChangeServersVotingStatusContext changeVotingStatusContext) {
+            this.changeVotingStatusContext = changeVotingStatusContext;
+        }
+
+        @Override
+        public void initiate() {
+            LOG.debug("Initiating ChangeServersVotingStatusState");
+
+            Map<String, Boolean> serverVotingStatusMap = changeVotingStatusContext.getOperation().getServerVotingStatusMap();
+            List<ServerInfo> newServerInfoList = new ArrayList<>();
+            for(String peerId: raftContext.getPeerIds()) {
+                newServerInfoList.add(new ServerInfo(peerId, serverVotingStatusMap.containsKey(peerId) ?
+                        serverVotingStatusMap.get(peerId) : raftContext.getPeerInfo(peerId).isVoting()));
+            }
+
+            newServerInfoList.add(new ServerInfo(raftContext.getId(), serverVotingStatusMap.containsKey(
+                    raftContext.getId()) ? serverVotingStatusMap.get(raftContext.getId()) : raftContext.isVotingMember()));
+
+            raftContext.updatePeerIds(new ServerConfigurationPayload(newServerInfoList));
+            AbstractLeader leader = (AbstractLeader) raftActor.getCurrentBehavior();
+            leader.updateMinReplicaCount();
+
+            persistNewServerConfiguration(changeVotingStatusContext);
+        }
+    }
+
+    static class ServerOperationTimeout {
+        private final String loggingContext;
+
+        ServerOperationTimeout(String loggingContext){
+           this.loggingContext = Preconditions.checkNotNull(loggingContext, "loggingContext should not be null");
+        }
+
+        String getLoggingContext() {
+            return loggingContext;
         }
     }
 }
