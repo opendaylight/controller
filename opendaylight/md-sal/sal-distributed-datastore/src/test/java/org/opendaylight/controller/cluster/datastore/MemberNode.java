@@ -139,7 +139,7 @@ public class MemberNode {
         final Set<String> peerIds = Sets.newHashSet();
         for(String p: peerMemberNames) {
             peerIds.add(ShardIdentifier.builder().memberName(p).shardName(shardName).
-                type(datastore.getActorContext().getDataStoreType()).build().toString());
+                type(datastore.getActorContext().getDataStoreName()).build().toString());
         }
 
         verifyRaftState(datastore, shardName, new RaftStateVerifier() {

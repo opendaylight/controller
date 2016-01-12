@@ -302,7 +302,7 @@ public class ClusterAdminRpcService implements ClusterAdminService, AutoCloseabl
                 configDataStore.getActorContext() : operDataStore.getActorContext();
         Set<String> allShardNames = actorContext.getConfiguration().getAllShardNames();
 
-        LOG.debug("Sending message to all shards {} for data store {}", allShardNames, actorContext.getDataStoreType());
+        LOG.debug("Sending message to all shards {} for data store {}", allShardNames, actorContext.getDataStoreName());
 
         for(String shardName: allShardNames) {
             ListenableFuture<T> future = this.<T>ask(actorContext.getShardManager(), messageSupplier.apply(shardName),
