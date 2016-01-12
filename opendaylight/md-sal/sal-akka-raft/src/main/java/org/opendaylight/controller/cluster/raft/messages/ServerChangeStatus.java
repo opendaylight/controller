@@ -45,7 +45,7 @@ public enum ServerChangeStatus {
     PRIOR_REQUEST_CONSENSUS_TIMEOUT,
 
     /**
-     * An unsupported request, for example removing the current leader may not be supported (at least initially)
+     * An unsupported request, for example removing the leader in a single node cluster.
      */
     NOT_SUPPORTED,
 }
