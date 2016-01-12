@@ -78,7 +78,10 @@ class RaftActorServerConfigurationSupport {
     private void onRemoveServer(RemoveServer removeServer, ActorRef sender) {
         LOG.debug("{}: onRemoveServer: {}, state: {}", raftContext.getId(), removeServer, currentOperationState);
         boolean isSelf = removeServer.getServerId().equals(raftActor.getId());
-        if(!isSelf && !raftContext.getPeerIds().contains(removeServer.getServerId())) {
+        if(isSelf && !raftContext.hasFollowers()) {
+            sender.tell(new RemoveServerReply(ServerChangeStatus.NOT_SUPPORTED, raftActor.getLeaderId()),
+                    raftActor.getSelf());
+        } else if(!isSelf && !raftContext.getPeerIds().contains(removeServer.getServerId())) {
             sender.tell(new RemoveServerReply(ServerChangeStatus.DOES_NOT_EXIST, raftActor.getLeaderId()),
                     raftActor.getSelf());
         } else {
