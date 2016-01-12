@@ -11,7 +11,6 @@ import com.google.common.base.Preconditions;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Set;
-import org.opendaylight.controller.cluster.datastore.modification.ModificationPayload;
 import org.opendaylight.controller.cluster.datastore.modification.MutableCompositeModification;
 import org.opendaylight.controller.cluster.datastore.node.utils.transformer.NormalizedNodePruner;
 import org.opendaylight.controller.cluster.datastore.utils.PruningDataTreeModification;
@@ -70,10 +69,6 @@ class ShardRecoveryCoordinator implements RaftActorRecoveryCohort {
             if (payload instanceof DataTreeCandidatePayload) {
                 DataTreeCandidates.applyToModification(transaction, ((DataTreeCandidatePayload)payload).getCandidate());
                 size++;
-            } else if (payload instanceof ModificationPayload) {
-                MutableCompositeModification.fromSerializable(
-                    ((ModificationPayload) payload).getModification()).apply(transaction);
-                size++;
             } else if (payload instanceof CompositeModificationPayload) {
                 MutableCompositeModification.fromSerializable(
                     ((CompositeModificationPayload) payload).getModification()).apply(transaction);
@@ -85,7 +80,7 @@ class ShardRecoveryCoordinator implements RaftActorRecoveryCohort {
             } else {
                 log.error("{}: Unknown payload {} received during recovery", shardName, payload);
             }
-        } catch (IOException | ClassNotFoundException e) {
+        } catch (IOException e) {
             log.error("{}: Error extracting ModificationPayload", shardName, e);
         }
     }
