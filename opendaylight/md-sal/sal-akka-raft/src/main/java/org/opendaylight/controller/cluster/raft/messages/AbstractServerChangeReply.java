@@ -25,10 +25,6 @@ public class AbstractServerChangeReply implements Serializable {
         this.leaderHint = leaderHint;
     }
 
-    public static long getSerialversionuid() {
-        return serialVersionUID;
-    }
-
     public String getLeaderHint() {
         return leaderHint;
     }
