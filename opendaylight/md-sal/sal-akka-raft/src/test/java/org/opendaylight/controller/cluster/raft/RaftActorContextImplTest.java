@@ -8,6 +8,8 @@
 package org.opendaylight.controller.cluster.raft;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -18,11 +20,13 @@ import akka.actor.Props;
 import akka.testkit.TestActorRef;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.After;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.NonPersistentDataProvider;
+import org.opendaylight.controller.cluster.raft.ServerConfigurationPayload.ServerInfo;
 import org.opendaylight.controller.cluster.raft.utils.DoNothingActor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,5 +89,43 @@ public class RaftActorContextImplTest extends AbstractActorTest {
 
         context.setPeerAddress("peer2", "peerAddress2");
         assertEquals("getPeerAddress", null, context.getPeerAddress("peer2"));
+    }
+
+    @Test
+    public void testUpdatePeerIds() {
+        RaftActorContextImpl context = new RaftActorContextImpl(actor, actor.underlyingActor().getContext(),
+                "self", new ElectionTermImpl(new NonPersistentDataProvider(), "test", log), -1, -1,
+                Maps.newHashMap(ImmutableMap.<String, String>of("peer1", "peerAddress1")),
+                new DefaultConfigParamsImpl(), new NonPersistentDataProvider(), log);
+
+        context.updatePeerIds(new ServerConfigurationPayload(Arrays.asList(new ServerInfo("self", false),
+                new ServerInfo("peer2", true), new ServerInfo("peer3", false))));
+        verifyPeerInfo(context, "peer1", null);
+        verifyPeerInfo(context, "peer2", true);
+        verifyPeerInfo(context, "peer3", false);
+        assertEquals("isVotingMember", false, context.isVotingMember());
+
+        context.updatePeerIds(new ServerConfigurationPayload(Arrays.asList(new ServerInfo("self", true),
+                new ServerInfo("peer2", true), new ServerInfo("peer3", true))));
+        verifyPeerInfo(context, "peer2", true);
+        verifyPeerInfo(context, "peer3", true);
+        assertEquals("isVotingMember", true, context.isVotingMember());
+
+        context.updatePeerIds(new ServerConfigurationPayload(Arrays.asList(new ServerInfo("peer2", true),
+                new ServerInfo("peer3", true))));
+        verifyPeerInfo(context, "peer2", true);
+        verifyPeerInfo(context, "peer3", true);
+        assertEquals("isVotingMember", false, context.isVotingMember());
+    }
+
+    private void verifyPeerInfo(RaftActorContextImpl context, String peerId, Boolean voting) {
+        PeerInfo peerInfo = context.getPeerInfo(peerId);
+        if(voting != null) {
+            assertNotNull("Expected peer " + peerId, peerInfo);
+            assertEquals("getVotingState for " + peerId, voting.booleanValue() ? VotingState.VOTING : VotingState.NON_VOTING,
+                    peerInfo.getVotingState());
+        } else {
+            assertNull("Unexpected peer " + peerId, peerInfo);
+        }
     }
 }
