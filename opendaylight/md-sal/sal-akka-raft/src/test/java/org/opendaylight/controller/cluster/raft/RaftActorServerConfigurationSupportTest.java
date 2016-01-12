@@ -821,6 +821,18 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         MessageCollectorActor.expectFirstMatching(leaderCollector, ServerRemoved.class);
     }
 
+    @Test
+    public void testRemoveServerLeaderWithNoFollowers() {
+        TestActorRef<MockLeaderRaftActor> leaderActor = actorFactory.createTestActor(
+                MockLeaderRaftActor.props(Collections.<String, String>emptyMap(),
+                        new MockRaftActorContext()).withDispatcher(Dispatchers.DefaultDispatcherId()),
+                actorFactory.generateActorId(LEADER_ID));
+
+        leaderActor.tell(new RemoveServer(LEADER_ID), testKit.getRef());
+        RemoveServerReply removeServerReply = testKit.expectMsgClass(JavaTestKit.duration("5 seconds"), RemoveServerReply.class);
+        assertEquals("getStatus", ServerChangeStatus.NOT_SUPPORTED, removeServerReply.getStatus());
+    }
+
     private ServerInfo votingServer(String id) {
         return new ServerInfo(id, true);
     }
