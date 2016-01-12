@@ -185,7 +185,7 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener,
 
     @Override
     public void onDatastoreContextUpdated(DatastoreContextFactory contextFactory) {
-        LOG.info("DatastoreContext updated for data store {}", actorContext.getDataStoreType());
+        LOG.info("DatastoreContext updated for data store {}", actorContext.getDataStoreName());
 
         actorContext.setDatastoreContext(contextFactory);
         datastoreConfigMXBean.setContext(contextFactory.getBaseDatastoreContext());

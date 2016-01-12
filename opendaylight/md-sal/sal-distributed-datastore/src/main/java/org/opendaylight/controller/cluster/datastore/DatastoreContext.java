@@ -53,7 +53,7 @@ public class DatastoreContext {
     public static final long DEFAULT_SHARD_COMMIT_QUEUE_EXPIRY_TIMEOUT_IN_MS = TimeUnit.MILLISECONDS.convert(2, TimeUnit.MINUTES);
     public static final int DEFAULT_SHARD_SNAPSHOT_CHUNK_SIZE = 2048000;
 
-    private static final Set<String> globalDatastoreTypes = Sets.newConcurrentHashSet();
+    private static final Set<String> globalDatastoreNames = Sets.newConcurrentHashSet();
 
     private InMemoryDOMDataStoreConfigProperties dataStoreProperties;
     private Duration shardTransactionIdleTimeout = DatastoreContext.DEFAULT_SHARD_TRANSACTION_IDLE_TIMEOUT;
@@ -75,8 +75,8 @@ public class DatastoreContext {
     private boolean transactionDebugContextEnabled = false;
     private String shardManagerPersistenceId;
 
-    public static Set<String> getGlobalDatastoreTypes() {
-        return globalDatastoreTypes;
+    public static Set<String> getGlobalDatastoreNames() {
+        return globalDatastoreNames;
     }
 
     private DatastoreContext() {
@@ -385,14 +385,6 @@ public class DatastoreContext {
             return this;
         }
 
-        /**
-         * @deprecated Use {@link #logicalStoreType(LogicalDatastoreType)} or {@link #dataStoreName(String)}.
-         */
-        @Deprecated
-        public Builder dataStoreType(String dataStoreType){
-            return dataStoreName(dataStoreType);
-        }
-
         public Builder logicalStoreType(LogicalDatastoreType logicalStoreType){
             datastoreContext.logicalStoreType = Preconditions.checkNotNull(logicalStoreType);
 
@@ -478,7 +470,7 @@ public class DatastoreContext {
                     maxShardDataChangeListenerQueueSize, maxShardDataStoreExecutorQueueSize);
 
             if(datastoreContext.dataStoreName != null) {
-                globalDatastoreTypes.add(datastoreContext.dataStoreName);
+                globalDatastoreNames.add(datastoreContext.dataStoreName);
             }
 
             return datastoreContext;

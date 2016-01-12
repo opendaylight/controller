@@ -109,8 +109,8 @@ public class ClusterAdminRpcServiceTest {
 
             ImmutableMap<String, DatastoreSnapshot> map = ImmutableMap.of(snapshots.get(0).getType(), snapshots.get(0),
                     snapshots.get(1).getType(), snapshots.get(1));
-            verifyDatastoreSnapshot(node.configDataStore().getActorContext().getDataStoreType(),
-                    map.get(node.configDataStore().getActorContext().getDataStoreType()), "cars", "people");
+            verifyDatastoreSnapshot(node.configDataStore().getActorContext().getDataStoreName(),
+                    map.get(node.configDataStore().getActorContext().getDataStoreName()), "cars", "people");
         } finally {
             new File(fileName).delete();
         }

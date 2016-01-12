@@ -503,17 +503,6 @@ public class ActorContext {
     }
 
     /**
-     * Get the type of the data store to which this ActorContext belongs
-     *
-     * @return
-     * @deprecated Use {@link #getDataStoreName()} instead.
-     */
-    @Deprecated
-    public String getDataStoreType() {
-        return datastoreContext.getDataStoreName();
-    }
-
-    /**
      * Get the current transaction creation rate limit
      * @return
      */
