@@ -192,9 +192,11 @@ public class RaftActorContextImpl implements RaftActorContext {
     @Override
     public void updatePeerIds(ServerConfigurationPayload serverConfig){
         votingMember = true;
+        boolean foundSelf = false;
         Set<String> currentPeers = new HashSet<>(this.getPeerIds());
         for(ServerInfo server: serverConfig.getServerConfig()) {
             if(getId().equals(server.getId())) {
+                foundSelf = true;
                 if(!server.isVoting()) {
                     votingMember = false;
                 }
@@ -212,6 +214,11 @@ public class RaftActorContextImpl implements RaftActorContext {
         for(String peerIdToRemove: currentPeers) {
             this.removePeer(peerIdToRemove);
         }
+
+        if(!foundSelf) {
+            votingMember = false;
+        }
+
         setDynamicServerConfigurationInUse();
     }
 
