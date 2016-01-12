@@ -11,6 +11,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static java.lang.String.format;
 import static org.opendaylight.controller.config.yangjmxgenerator.ConfigConstants.createConfigQName;
+
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
@@ -57,6 +58,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 final class ModuleMXBeanEntryBuilder {
+
+    private static final String TYPE = "type";
 
     private Module currentModule;
     private Map<QName, ServiceInterfaceEntry> qNamesToSIEs;
@@ -463,26 +466,31 @@ final class ModuleMXBeanEntryBuilder {
         if (isDependencyContainer(dataNodeContainer)) {
             // reference
             UsesNode usesNode = dataNodeContainer.getUses().iterator().next();
-            checkState(usesNode.getRefines().size() == 1, "Unexpected 'refine' child node size of " + dataNodeContainer);
-            LeafSchemaNode refine = (LeafSchemaNode) usesNode.getRefines().values().iterator().next();
-            checkState(refine.getUnknownSchemaNodes().size() == 1, "Unexpected unknown schema node size of " + refine);
-            UnknownSchemaNode requiredIdentity = refine.getUnknownSchemaNodes().iterator().next();
-            checkState(ConfigConstants.REQUIRED_IDENTITY_EXTENSION_QNAME.equals(requiredIdentity.getNodeType()),
-                    "Unexpected language extension " + requiredIdentity);
-            String prefixAndIdentityLocalName = requiredIdentity.getNodeParameter();
-            // import should point to a module
-            ServiceInterfaceEntry serviceInterfaceEntry = findSIE(prefixAndIdentityLocalName, currentModule,
-                    qNamesToSIEs, schemaContext);
-            boolean mandatory = refine.getConstraints().isMandatory();
-            AbstractDependencyAttribute reference;
-            if (dataNodeContainer instanceof ContainerSchemaNode) {
-                reference = new DependencyAttribute(attrNode, serviceInterfaceEntry, mandatory,
-                        attrNode.getDescription());
-            } else {
-                reference = new ListDependenciesAttribute(attrNode, serviceInterfaceEntry, mandatory,
-                        attrNode.getDescription());
+            for (SchemaNode refineNode : usesNode.getRefines().values()) {
+                // this will ignore name nodes, since they are not needed here
+                if (TYPE.equals(refineNode.getQName().getLocalName())){
+                    checkState(refineNode.getUnknownSchemaNodes().size() == 1, "Unexpected unknown schema node size of " + refineNode);
+                    UnknownSchemaNode requiredIdentity = refineNode.getUnknownSchemaNodes().iterator().next();
+                    checkState(ConfigConstants.REQUIRED_IDENTITY_EXTENSION_QNAME.equals(requiredIdentity.getNodeType()),
+                            "Unexpected language extension " + requiredIdentity);
+                    String prefixAndIdentityLocalName = requiredIdentity.getNodeParameter();
+                    // import should point to a module
+                    ServiceInterfaceEntry serviceInterfaceEntry = findSIE(prefixAndIdentityLocalName, currentModule,
+                            qNamesToSIEs, schemaContext);
+                    LeafSchemaNode refine = (LeafSchemaNode) usesNode.getRefines().values().iterator().next();
+
+                    boolean mandatory = refine.getConstraints().isMandatory();
+                    AbstractDependencyAttribute reference;
+                    if (dataNodeContainer instanceof ContainerSchemaNode) {
+                        reference = new DependencyAttribute(attrNode, serviceInterfaceEntry, mandatory,
+                                attrNode.getDescription());
+                    } else {
+                        reference = new ListDependenciesAttribute(attrNode, serviceInterfaceEntry, mandatory,
+                                attrNode.getDescription());
+                    }
+                    return Optional.of(reference);
+                }
             }
-            return Optional.of(reference);
         }
         return Optional.absent();
     }
