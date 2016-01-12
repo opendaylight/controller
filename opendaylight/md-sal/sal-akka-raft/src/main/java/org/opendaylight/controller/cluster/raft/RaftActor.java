@@ -270,7 +270,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         }
     }
 
-    private void initiateLeadershipTransfer(final RaftActorLeadershipTransferCohort.OnComplete onComplete) {
+    void initiateLeadershipTransfer(final RaftActorLeadershipTransferCohort.OnComplete onComplete) {
         LOG.debug("{}: Initiating leader transfer", persistenceId());
 
         if(leadershipTransferInProgress == null) {

@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.raft;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor.assertNoneMatching;
 import static org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor.clearMessages;
 import static org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor.expectFirstMatching;
@@ -20,6 +21,7 @@ import akka.dispatch.Dispatchers;
 import akka.testkit.JavaTestKit;
 import akka.testkit.TestActorRef;
 import com.google.common.base.Optional;
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -44,9 +46,11 @@ import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.messages.AddServer;
 import org.opendaylight.controller.cluster.raft.messages.AddServerReply;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
+import org.opendaylight.controller.cluster.raft.messages.ChangeServersVotingStatus;
 import org.opendaylight.controller.cluster.raft.messages.InstallSnapshot;
 import org.opendaylight.controller.cluster.raft.messages.RemoveServer;
 import org.opendaylight.controller.cluster.raft.messages.RemoveServerReply;
+import org.opendaylight.controller.cluster.raft.messages.ServerChangeReply;
 import org.opendaylight.controller.cluster.raft.messages.ServerChangeStatus;
 import org.opendaylight.controller.cluster.raft.messages.ServerRemoved;
 import org.opendaylight.controller.cluster.raft.messages.UnInitializedFollowerSnapshotReply;
@@ -67,6 +71,7 @@ import scala.concurrent.duration.FiniteDuration;
 public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
     static final String LEADER_ID = "leader";
     static final String FOLLOWER_ID = "follower";
+    static final String FOLLOWER_ID2 = "follower2";
     static final String NEW_SERVER_ID = "new-server";
     static final String NEW_SERVER_ID2 = "new-server2";
     private static final Logger LOG = LoggerFactory.getLogger(RaftActorServerConfigurationSupportTest.class);
@@ -836,6 +841,155 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         leaderActor.tell(new RemoveServer(LEADER_ID), testKit.getRef());
         RemoveServerReply removeServerReply = testKit.expectMsgClass(JavaTestKit.duration("5 seconds"), RemoveServerReply.class);
         assertEquals("getStatus", ServerChangeStatus.NOT_SUPPORTED, removeServerReply.getStatus());
+    }
+
+    @Test
+    public void testChangeServersVotingStatus() {
+        DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
+        configParams.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
+        configParams.setCustomRaftPolicyImplementationClass(DisableElectionsRaftPolicy.class.getName());
+
+        final String follower1ActorId = actorFactory.generateActorId(FOLLOWER_ID);
+        final String follower1ActorPath = actorFactory.createTestActorPath(follower1ActorId);
+        final String follower2ActorId = actorFactory.generateActorId(FOLLOWER_ID2);
+        final String follower2ActorPath = actorFactory.createTestActorPath(follower2ActorId);
+
+        TestActorRef<MockLeaderRaftActor> leaderActor = actorFactory.createTestActor(
+                MockLeaderRaftActor.props(ImmutableMap.of(FOLLOWER_ID, follower1ActorPath,
+                        FOLLOWER_ID2, follower2ActorPath), new MockRaftActorContext()).
+                        withDispatcher(Dispatchers.DefaultDispatcherId()), actorFactory.generateActorId(LEADER_ID));
+        TestActorRef<MessageCollectorActor> leaderCollector = newLeaderCollectorActor(leaderActor.underlyingActor());
+
+        TestActorRef<CollectingMockRaftActor> follower1RaftActor = actorFactory.createTestActor(
+                CollectingMockRaftActor.props(FOLLOWER_ID, ImmutableMap.of(LEADER_ID, leaderActor.path().toString(),
+                        FOLLOWER_ID2, follower2ActorPath), configParams, NO_PERSISTENCE).
+                        withDispatcher(Dispatchers.DefaultDispatcherId()), follower1ActorId);
+        TestActorRef<MessageCollectorActor> follower1Collector = actorFactory.createTestActor(
+                MessageCollectorActor.props().withDispatcher(Dispatchers.DefaultDispatcherId()),
+                actorFactory.generateActorId("collector"));
+        follower1RaftActor.underlyingActor().setCollectorActor(follower1Collector);
+
+        TestActorRef<CollectingMockRaftActor> follower2RaftActor = actorFactory.createTestActor(
+                CollectingMockRaftActor.props(FOLLOWER_ID2, ImmutableMap.of(LEADER_ID, leaderActor.path().toString(),
+                        FOLLOWER_ID, follower1ActorPath), configParams, NO_PERSISTENCE).
+                        withDispatcher(Dispatchers.DefaultDispatcherId()), follower2ActorId);
+        TestActorRef<MessageCollectorActor> follower2Collector = actorFactory.createTestActor(
+                MessageCollectorActor.props().withDispatcher(Dispatchers.DefaultDispatcherId()),
+                actorFactory.generateActorId("collector"));
+        follower2RaftActor.underlyingActor().setCollectorActor(follower2Collector);
+
+        // Send first ChangeServersVotingStatus message
+
+        leaderActor.tell(new ChangeServersVotingStatus(ImmutableMap.of(FOLLOWER_ID, false, FOLLOWER_ID2, false)),
+                testKit.getRef());
+        ServerChangeReply reply = testKit.expectMsgClass(JavaTestKit.duration("5 seconds"), ServerChangeReply.class);
+        assertEquals("getStatus", ServerChangeStatus.OK, reply.getStatus());
+
+        final ApplyState applyState = MessageCollectorActor.expectFirstMatching(leaderCollector, ApplyState.class);
+        assertEquals(0L, applyState.getReplicatedLogEntry().getIndex());
+        verifyServerConfigurationPayloadEntry(leaderActor.underlyingActor().getRaftActorContext().getReplicatedLog(),
+                votingServer(LEADER_ID), nonVotingServer(FOLLOWER_ID), nonVotingServer(FOLLOWER_ID2));
+
+        MessageCollectorActor.expectFirstMatching(follower1Collector, ApplyState.class);
+        verifyServerConfigurationPayloadEntry(follower1RaftActor.underlyingActor().getRaftActorContext().getReplicatedLog(),
+                votingServer(LEADER_ID), nonVotingServer(FOLLOWER_ID), nonVotingServer(FOLLOWER_ID2));
+
+        MessageCollectorActor.expectFirstMatching(follower2Collector, ApplyState.class);
+        verifyServerConfigurationPayloadEntry(follower2RaftActor.underlyingActor().getRaftActorContext().getReplicatedLog(),
+                votingServer(LEADER_ID), nonVotingServer(FOLLOWER_ID), nonVotingServer(FOLLOWER_ID2));
+
+        MessageCollectorActor.clearMessages(leaderCollector);
+        MessageCollectorActor.clearMessages(follower1Collector);
+        MessageCollectorActor.clearMessages(follower2Collector);
+
+        // Send second ChangeServersVotingStatus message
+
+        leaderActor.tell(new ChangeServersVotingStatus(ImmutableMap.of(FOLLOWER_ID, true)), testKit.getRef());
+        reply = testKit.expectMsgClass(JavaTestKit.duration("5 seconds"), ServerChangeReply.class);
+        assertEquals("getStatus", ServerChangeStatus.OK, reply.getStatus());
+
+        MessageCollectorActor.expectFirstMatching(leaderCollector, ApplyState.class);
+        verifyServerConfigurationPayloadEntry(leaderActor.underlyingActor().getRaftActorContext().getReplicatedLog(),
+                votingServer(LEADER_ID), votingServer(FOLLOWER_ID), nonVotingServer(FOLLOWER_ID2));
+
+        MessageCollectorActor.expectFirstMatching(follower1Collector, ApplyState.class);
+        verifyServerConfigurationPayloadEntry(follower1RaftActor.underlyingActor().getRaftActorContext().getReplicatedLog(),
+                votingServer(LEADER_ID), votingServer(FOLLOWER_ID), nonVotingServer(FOLLOWER_ID2));
+
+        MessageCollectorActor.expectFirstMatching(follower2Collector, ApplyState.class);
+        verifyServerConfigurationPayloadEntry(follower2RaftActor.underlyingActor().getRaftActorContext().getReplicatedLog(),
+                votingServer(LEADER_ID), votingServer(FOLLOWER_ID), nonVotingServer(FOLLOWER_ID2));
+    }
+
+    @Test
+    public void testChangeLeaderToNonVoting() {
+        DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
+        configParams.setHeartBeatInterval(new FiniteDuration(500, TimeUnit.MILLISECONDS));
+
+        final String follower1ActorId = actorFactory.generateActorId(FOLLOWER_ID);
+        final String follower1ActorPath = actorFactory.createTestActorPath(follower1ActorId);
+        final String follower2ActorId = actorFactory.generateActorId(FOLLOWER_ID2);
+        final String follower2ActorPath = actorFactory.createTestActorPath(follower2ActorId);
+
+        TestActorRef<MockLeaderRaftActor> leaderActor = actorFactory.createTestActor(
+                MockLeaderRaftActor.props(ImmutableMap.of(FOLLOWER_ID, follower1ActorPath,
+                        FOLLOWER_ID2, follower2ActorPath), new MockRaftActorContext()).
+                        withDispatcher(Dispatchers.DefaultDispatcherId()), actorFactory.generateActorId(LEADER_ID));
+        TestActorRef<MessageCollectorActor> leaderCollector = newLeaderCollectorActor(leaderActor.underlyingActor());
+
+        TestActorRef<CollectingMockRaftActor> follower1RaftActor = actorFactory.createTestActor(
+                CollectingMockRaftActor.props(FOLLOWER_ID, ImmutableMap.of(LEADER_ID, leaderActor.path().toString(),
+                        FOLLOWER_ID2, follower2ActorPath), configParams, NO_PERSISTENCE).
+                        withDispatcher(Dispatchers.DefaultDispatcherId()), follower1ActorId);
+        TestActorRef<MessageCollectorActor> follower1Collector = actorFactory.createTestActor(
+                MessageCollectorActor.props().withDispatcher(Dispatchers.DefaultDispatcherId()),
+                actorFactory.generateActorId("collector"));
+        follower1RaftActor.underlyingActor().setCollectorActor(follower1Collector);
+
+        TestActorRef<CollectingMockRaftActor> follower2RaftActor = actorFactory.createTestActor(
+                CollectingMockRaftActor.props(FOLLOWER_ID2, ImmutableMap.of(LEADER_ID, leaderActor.path().toString(),
+                        FOLLOWER_ID, follower1ActorPath), configParams, NO_PERSISTENCE).
+                        withDispatcher(Dispatchers.DefaultDispatcherId()), follower2ActorId);
+        TestActorRef<MessageCollectorActor> follower2Collector = actorFactory.createTestActor(
+                MessageCollectorActor.props().withDispatcher(Dispatchers.DefaultDispatcherId()),
+                actorFactory.generateActorId("collector"));
+        follower2RaftActor.underlyingActor().setCollectorActor(follower2Collector);
+
+        // Send ChangeServersVotingStatus message
+
+        leaderActor.tell(new ChangeServersVotingStatus(ImmutableMap.of(LEADER_ID, false)), testKit.getRef());
+        ServerChangeReply reply = testKit.expectMsgClass(JavaTestKit.duration("5 seconds"), ServerChangeReply.class);
+        assertEquals("getStatus", ServerChangeStatus.OK, reply.getStatus());
+
+        MessageCollectorActor.expectFirstMatching(leaderCollector, ApplyState.class);
+        verifyServerConfigurationPayloadEntry(leaderActor.underlyingActor().getRaftActorContext().getReplicatedLog(),
+                nonVotingServer(LEADER_ID), votingServer(FOLLOWER_ID), votingServer(FOLLOWER_ID2));
+
+        MessageCollectorActor.expectFirstMatching(follower1Collector, ApplyState.class);
+        verifyServerConfigurationPayloadEntry(follower1RaftActor.underlyingActor().getRaftActorContext().getReplicatedLog(),
+                nonVotingServer(LEADER_ID), votingServer(FOLLOWER_ID), votingServer(FOLLOWER_ID2));
+
+        MessageCollectorActor.expectFirstMatching(follower2Collector, ApplyState.class);
+        verifyServerConfigurationPayloadEntry(follower2RaftActor.underlyingActor().getRaftActorContext().getReplicatedLog(),
+                nonVotingServer(LEADER_ID), votingServer(FOLLOWER_ID), votingServer(FOLLOWER_ID2));
+
+        verifyRaftState(RaftState.Leader, follower1RaftActor.underlyingActor(), follower2RaftActor.underlyingActor());
+        verifyRaftState(RaftState.Follower, leaderActor.underlyingActor());
+
+        MessageCollectorActor.expectMatching(leaderCollector, AppendEntries.class, 2);
+    }
+
+    private void verifyRaftState(RaftState expState, RaftActor... raftActors) {
+        Stopwatch sw = Stopwatch.createStarted();
+        while(sw.elapsed(TimeUnit.SECONDS) <= 5) {
+            for(RaftActor raftActor: raftActors) {
+                if(raftActor.getRaftState() == expState) {
+                    return;
+                }
+            }
+        }
+
+        fail("None of the RaftActors have state " + expState);
     }
 
     private ServerInfo votingServer(String id) {
