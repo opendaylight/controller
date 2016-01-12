@@ -463,26 +463,31 @@ final class ModuleMXBeanEntryBuilder {
         if (isDependencyContainer(dataNodeContainer)) {
             // reference
             UsesNode usesNode = dataNodeContainer.getUses().iterator().next();
-            checkState(usesNode.getRefines().size() == 1, "Unexpected 'refine' child node size of " + dataNodeContainer);
-            LeafSchemaNode refine = (LeafSchemaNode) usesNode.getRefines().values().iterator().next();
-            checkState(refine.getUnknownSchemaNodes().size() == 1, "Unexpected unknown schema node size of " + refine);
-            UnknownSchemaNode requiredIdentity = refine.getUnknownSchemaNodes().iterator().next();
-            checkState(ConfigConstants.REQUIRED_IDENTITY_EXTENSION_QNAME.equals(requiredIdentity.getNodeType()),
-                    "Unexpected language extension " + requiredIdentity);
-            String prefixAndIdentityLocalName = requiredIdentity.getNodeParameter();
-            // import should point to a module
-            ServiceInterfaceEntry serviceInterfaceEntry = findSIE(prefixAndIdentityLocalName, currentModule,
-                    qNamesToSIEs, schemaContext);
-            boolean mandatory = refine.getConstraints().isMandatory();
-            AbstractDependencyAttribute reference;
-            if (dataNodeContainer instanceof ContainerSchemaNode) {
-                reference = new DependencyAttribute(attrNode, serviceInterfaceEntry, mandatory,
-                        attrNode.getDescription());
-            } else {
-                reference = new ListDependenciesAttribute(attrNode, serviceInterfaceEntry, mandatory,
-                        attrNode.getDescription());
+            for (SchemaNode refineNode : usesNode.getRefines().values()) {
+                // this will ignore name nodes, since they are not needed here
+                if (!refineNode.getUnknownSchemaNodes().isEmpty()) {
+                    checkState(refineNode.getUnknownSchemaNodes().size() == 1, "Unexpected unknown schema node size of " + refineNode);
+                    UnknownSchemaNode requiredIdentity = refineNode.getUnknownSchemaNodes().iterator().next();
+                    checkState(ConfigConstants.REQUIRED_IDENTITY_EXTENSION_QNAME.equals(requiredIdentity.getNodeType()),
+                            "Unexpected language extension " + requiredIdentity);
+                    String prefixAndIdentityLocalName = requiredIdentity.getNodeParameter();
+                    // import should point to a module
+                    ServiceInterfaceEntry serviceInterfaceEntry = findSIE(prefixAndIdentityLocalName, currentModule,
+                            qNamesToSIEs, schemaContext);
+                    LeafSchemaNode refine = (LeafSchemaNode) usesNode.getRefines().values().iterator().next();
+
+                    boolean mandatory = refine.getConstraints().isMandatory();
+                    AbstractDependencyAttribute reference;
+                    if (dataNodeContainer instanceof ContainerSchemaNode) {
+                        reference = new DependencyAttribute(attrNode, serviceInterfaceEntry, mandatory,
+                                attrNode.getDescription());
+                    } else {
+                        reference = new ListDependenciesAttribute(attrNode, serviceInterfaceEntry, mandatory,
+                                attrNode.getDescription());
+                    }
+                    return Optional.of(reference);
+                }
             }
-            return Optional.of(reference);
         }
         return Optional.absent();
     }

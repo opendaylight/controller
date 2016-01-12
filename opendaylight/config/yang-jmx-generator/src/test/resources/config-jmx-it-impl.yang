@@ -185,6 +185,9 @@ module config-jmx-it-impl {
                         mandatory false;
                         config:required-identity th:threadfactory;
                     }
+                    refine name {
+                        mandatory false;
+                    }
                 }
             }
         }
