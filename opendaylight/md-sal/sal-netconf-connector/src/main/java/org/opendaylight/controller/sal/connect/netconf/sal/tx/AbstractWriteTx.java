@@ -3,10 +3,13 @@ package org.opendaylight.controller.sal.connect.netconf.sal.tx;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
@@ -20,6 +23,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
 import org.opendaylight.yangtools.yang.data.api.schema.MixinNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.model.repo.api.SchemaSourceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,7 +31,7 @@ public abstract class AbstractWriteTx implements DOMDataWriteTransaction {
 
     private static final Logger LOG  = LoggerFactory.getLogger(AbstractWriteTx.class);
 
-    private final long defaultRequestTimeoutMillis;
+    protected final long defaultRequestTimeoutMillis;
     protected final RemoteDeviceId id;
     protected final NetconfBaseOps netOps;
     protected final boolean rollbackSupport;
@@ -56,7 +60,7 @@ public abstract class AbstractWriteTx implements DOMDataWriteTransaction {
 
     protected void invokeBlocking(final String msg, final Function<NetconfBaseOps, ListenableFuture<DOMRpcResult>> op) throws NetconfDocumentedException {
         try {
-            final DOMRpcResult compositeNodeRpcResult = op.apply(netOps).get(defaultRequestTimeoutMillis, TimeUnit.MILLISECONDS);
+            final DOMRpcResult compositeNodeRpcResult = op.apply(netOps).get();
             if(isSuccess(compositeNodeRpcResult) == false) {
                 throw new NetconfDocumentedException(id + ": " + msg + " failed: " + compositeNodeRpcResult.getErrors(), NetconfDocumentedException.ErrorType.application,
                         NetconfDocumentedException.ErrorTag.operation_failed, NetconfDocumentedException.ErrorSeverity.warning);
@@ -64,7 +68,7 @@ public abstract class AbstractWriteTx implements DOMDataWriteTransaction {
         } catch (final InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new RuntimeException(e);
-        } catch (final ExecutionException | TimeoutException e) {
+        } catch (final ExecutionException e) {
             throw new NetconfDocumentedException(id + ": " + msg + " failed: " + e.getMessage(), e, NetconfDocumentedException.ErrorType.application,
                     NetconfDocumentedException.ErrorTag.operation_failed, NetconfDocumentedException.ErrorSeverity.warning);
         }
@@ -166,4 +170,17 @@ public abstract class AbstractWriteTx implements DOMDataWriteTransaction {
     }
 
     protected abstract void editConfig(DataContainerChild<?, ?> editStructure, Optional<ModifyAction> defaultOperation) throws NetconfDocumentedException;
+
+    protected ListenableFuture<DOMRpcResult> perfomRequestWithTimeout(String operation, ListenableFuture<DOMRpcResult> future) {
+        try {
+            future.get(defaultRequestTimeoutMillis, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException | ExecutionException e) {
+            LOG.error("{}: {} failed with error", operation, id, e);
+            throw new RuntimeException(id + ": " + operation + " failed");
+        } catch (TimeoutException e) {
+            LOG.warn("{}: Unable to {} after {} milliseconds", id, operation, defaultRequestTimeoutMillis, e);
+            return Futures.immediateFailedCheckedFuture(new SchemaSourceException(e.getMessage()));
+        }
+        return future;
+    }
 }
