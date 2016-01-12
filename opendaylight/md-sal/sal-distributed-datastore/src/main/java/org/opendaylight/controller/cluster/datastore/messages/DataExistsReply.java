@@ -27,15 +27,6 @@ public class DataExistsReply implements SerializableMessage {
         this.exists = exists;
     }
 
-    /**
-     * @deprecated Use {@link #create(boolean)} instead.
-     * @param exists
-     */
-    @Deprecated
-    public DataExistsReply(final boolean exists) {
-        this(exists, null);
-    }
-
     public static DataExistsReply create(final boolean exists) {
         return exists ? TRUE : FALSE;
     }
