@@ -54,7 +54,7 @@ final class NetconfDeviceDataBroker implements DOMDataBroker {
 
     @Override
     public DOMDataReadOnlyTransaction newReadOnlyTransaction() {
-        return new ReadOnlyTx(netconfOps, id);
+        return new ReadOnlyTx(netconfOps, id, requestTimeoutMillis);
     }
 
     @Override
