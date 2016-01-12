@@ -23,7 +23,7 @@ public class TransactionRateLimiter {
 
     private final ActorContext actorContext;
     private final long commitTimeoutInSeconds;
-    private final String dataStoreType;
+    private final String dataStoreName;
     private final RateLimiter txRateLimiter;
     private final AtomicLong acquireCount = new AtomicLong();
 
@@ -32,7 +32,7 @@ public class TransactionRateLimiter {
     public TransactionRateLimiter(ActorContext actorContext){
         this.actorContext = actorContext;
         this.commitTimeoutInSeconds = actorContext.getDatastoreContext().getShardTransactionCommitTimeoutInSeconds();
-        this.dataStoreType = actorContext.getDataStoreType();
+        this.dataStoreName = actorContext.getDataStoreName();
         this.txRateLimiter = RateLimiter.create(actorContext.getDatastoreContext().getTransactionCreationInitialRateLimit());
     }
 
@@ -65,16 +65,16 @@ public class TransactionRateLimiter {
     private double getRateLimitFromOtherDataStores(){
         // Since we have no rate data for unused Tx's data store, adjust to the rate from another
         // data store that does have rate data.
-        for(String datastoreType: DatastoreContext.getGlobalDatastoreTypes()) {
-            if(datastoreType.equals(this.dataStoreType)) {
+        for(String name: DatastoreContext.getGlobalDatastoreNames()) {
+            if(name.equals(this.dataStoreName)) {
                 continue;
             }
 
-            double newRateLimit = calculateNewRateLimit(actorContext.getOperationTimer(datastoreType, ActorContext.COMMIT),
+            double newRateLimit = calculateNewRateLimit(actorContext.getOperationTimer(name, ActorContext.COMMIT),
                     this.commitTimeoutInSeconds);
             if(newRateLimit > 0.0) {
                 LOG.debug("On unused Tx - data Store {} commit rateLimit adjusted to {}",
-                        this.dataStoreType, newRateLimit);
+                        this.dataStoreName, newRateLimit);
 
                 return newRateLimit;
             }

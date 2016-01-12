@@ -181,8 +181,8 @@ public class TransactionRateLimiterTest {
         }
 
 
-        DatastoreContext.getGlobalDatastoreTypes().add("config");
-        DatastoreContext.getGlobalDatastoreTypes().add("operational");
+        DatastoreContext.getGlobalDatastoreNames().add("config");
+        DatastoreContext.getGlobalDatastoreNames().add("operational");
 
         TransactionRateLimiter rateLimiter = new TransactionRateLimiter(actorContext);
 
