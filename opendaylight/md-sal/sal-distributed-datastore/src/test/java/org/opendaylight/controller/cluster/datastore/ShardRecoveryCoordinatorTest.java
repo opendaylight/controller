@@ -14,7 +14,6 @@ import com.google.common.base.Optional;
 import java.io.IOException;
 import org.junit.Before;
 import org.junit.Test;
-import org.opendaylight.controller.cluster.datastore.modification.ModificationPayload;
 import org.opendaylight.controller.cluster.datastore.modification.MutableCompositeModification;
 import org.opendaylight.controller.cluster.datastore.modification.WriteModification;
 import org.opendaylight.controller.cluster.datastore.utils.SerializationUtils;
@@ -61,20 +60,6 @@ public class ShardRecoveryCoordinatorTest {
         }
 
         coordinator.applyCurrentLogRecoveryBatch();
-    }
-
-    @Test
-    public void testAppendRecoveredLogEntryModificationPayload() throws IOException {
-        final ShardRecoveryCoordinator coordinator = new ShardRecoveryCoordinator(peopleDataTree,
-                peopleSchemaContext, null, "foobar", LoggerFactory.getLogger("foo"));
-        coordinator.startLogRecoveryBatch(10);
-        try {
-            final MutableCompositeModification modification  = new MutableCompositeModification((short) 1);
-            modification.addModification(new WriteModification(CarsModel.BASE_PATH, CarsModel.create()));
-            coordinator.appendRecoveredLogEntry(new ModificationPayload(modification));
-        } catch(final SchemaValidationFailedException e){
-            fail("SchemaValidationFailedException should not happen if pruning is done");
-        }
     }
 
     @Test

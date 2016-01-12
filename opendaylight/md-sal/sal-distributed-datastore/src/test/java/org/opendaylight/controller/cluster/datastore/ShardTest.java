@@ -37,7 +37,6 @@ import com.google.common.base.Optional;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.Uninterruptibles;
-import java.io.IOException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -75,7 +74,6 @@ import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContex
 import org.opendaylight.controller.cluster.datastore.modification.DeleteModification;
 import org.opendaylight.controller.cluster.datastore.modification.MergeModification;
 import org.opendaylight.controller.cluster.datastore.modification.Modification;
-import org.opendaylight.controller.cluster.datastore.modification.ModificationPayload;
 import org.opendaylight.controller.cluster.datastore.modification.MutableCompositeModification;
 import org.opendaylight.controller.cluster.datastore.modification.WriteModification;
 import org.opendaylight.controller.cluster.datastore.utils.MockDataChangeListener;
@@ -499,17 +497,14 @@ public class ShardTest extends AbstractShardTest {
 
     @Test
     public void testApplyState() throws Exception {
-
-        ShardTestKit testkit = new ShardTestKit(getSystem());
-
         final TestActorRef<Shard> shard = TestActorRef.create(getSystem(), newShardProps(), "testApplyState");
 
-        testkit.waitUntilLeader(shard);
+        ShardTestKit.waitUntilLeader(shard);
 
         final NormalizedNode<?, ?> node = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
         final ApplyState applyState = new ApplyState(null, "test", new ReplicatedLogImplEntry(1, 2,
-                newModificationPayload(new WriteModification(TestModel.TEST_PATH, node))));
+                newDataTreeCandidatePayload(new WriteModification(TestModel.TEST_PATH, node))));
 
         shard.underlyingActor().onReceiveCommand(applyState);
 
@@ -609,9 +604,13 @@ public class ShardTest extends AbstractShardTest {
 
         InMemoryJournal.addEntry(shardID.toString(), 0, DUMMY_DATA);
 
-        InMemoryJournal.addEntry(shardID.toString(), 1, new ReplicatedLogImplEntry(0, 1, newModificationPayload(
-            new WriteModification(TestModel.OUTER_LIST_PATH,
-                ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME).build()))));
+        ShardDataTree shardDataTree = new ShardDataTree(SCHEMA_CONTEXT, TreeType.CONFIGURATION);
+
+        InMemoryJournal.addEntry(shardID.toString(), 1, new ReplicatedLogImplEntry(0, 1, newDataTreeCandidatePayload(
+                shardDataTree,
+                new WriteModification(TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME)),
+                new WriteModification(TestModel.OUTER_LIST_PATH,
+                        ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME).build()))));
 
         final int nListEntries = 16;
         final Set<Integer> listEntryKeys = new HashSet<>();
@@ -624,7 +623,7 @@ public class ShardTest extends AbstractShardTest {
             final Modification mod = new MergeModification(path,
                     ImmutableNodes.mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, i));
             InMemoryJournal.addEntry(shardID.toString(), i + 1, new ReplicatedLogImplEntry(i, 1,
-                    newModificationPayload(mod)));
+                    newDataTreeCandidatePayload(shardDataTree, mod)));
         }
 
         InMemoryJournal.addEntry(shardID.toString(), nListEntries + 2,
@@ -633,13 +632,18 @@ public class ShardTest extends AbstractShardTest {
         testRecovery(listEntryKeys);
     }
 
-    private static ModificationPayload newModificationPayload(final Modification... mods) throws IOException {
-        final MutableCompositeModification compMod = new MutableCompositeModification();
+    private static DataTreeCandidatePayload newDataTreeCandidatePayload(final Modification... mods) throws Exception {
+        return newDataTreeCandidatePayload(new ShardDataTree(SCHEMA_CONTEXT, TreeType.CONFIGURATION), mods);
+    }
+
+    private static DataTreeCandidatePayload newDataTreeCandidatePayload(ShardDataTree shardDataTree,
+            final Modification... mods) throws Exception {
+        DataTreeModification dataTreeModification = shardDataTree.newModification();
         for(final Modification mod: mods) {
-            compMod.addModification(mod);
+            mod.apply(dataTreeModification);
         }
 
-        return new ModificationPayload(compMod);
+        return DataTreeCandidatePayload.create(shardDataTree.commit(dataTreeModification));
     }
 
     @Test

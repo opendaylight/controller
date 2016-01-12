@@ -11,9 +11,7 @@ package org.opendaylight.controller.cluster.datastore.modification;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import com.google.common.base.Optional;
-import com.google.common.base.Stopwatch;
 import org.apache.commons.lang.SerializationUtils;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
@@ -79,36 +77,5 @@ public class MutableCompositeModificationTest extends AbstractModificationTest {
         DeleteModification delete = (DeleteModification)clone.getModifications().get(2);
         assertEquals("getVersion", DataStoreVersions.CURRENT_VERSION, delete.getVersion());
         assertEquals("getPath", deletePath, delete.getPath());
-    }
-
-    @Test
-    @Ignore
-    public void testSerializationScale() throws Exception {
-        YangInstanceIdentifier writePath = TestModel.TEST_PATH;
-        NormalizedNode<?, ?> writeData = ImmutableContainerNodeBuilder.create().withNodeIdentifier(
-                new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME)).
-                withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo")).build();
-
-        MutableCompositeModification compositeModification = new MutableCompositeModification();
-        for(int i = 0; i < 1000; i++) {
-            compositeModification.addModification(new WriteModification(writePath, writeData));
-        }
-
-        Stopwatch sw = Stopwatch.createStarted();
-        for(int i = 0; i < 1000; i++) {
-            new ModificationPayload(compositeModification);
-        }
-
-        sw.stop();
-        System.out.println("Elapsed: "+sw);
-
-        ModificationPayload p = new ModificationPayload(compositeModification);
-        sw.start();
-        for(int i = 0; i < 1000; i++) {
-            p.getModification();
-        }
-
-        sw.stop();
-        System.out.println("Elapsed: "+sw);
     }
 }
