@@ -19,6 +19,7 @@ import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.RpcRegistration;
 import org.opendaylight.controller.sal.binding.api.BindingAwareProvider;
+import org.opendaylight.dsbenchmark.listener.DsbenchmarkListenerProvider;
 import org.opendaylight.dsbenchmark.simpletx.SimpletxBaDelete;
 import org.opendaylight.dsbenchmark.simpletx.SimpletxBaRead;
 import org.opendaylight.dsbenchmark.simpletx.SimpletxBaWrite;
@@ -52,14 +53,16 @@ import com.google.common.util.concurrent.Futures;
 public class DsbenchmarkProvider implements BindingAwareProvider, DsbenchmarkService, AutoCloseable {
 
     private static final Logger LOG = LoggerFactory.getLogger(DsbenchmarkProvider.class);
-    private final AtomicReference<ExecStatus> execStatus = new AtomicReference<ExecStatus>( ExecStatus.Idle );
-
     private static final InstanceIdentifier<TestExec> TEST_EXEC_IID = InstanceIdentifier.builder(TestExec.class).build();
     private static final InstanceIdentifier<TestStatus> TEST_STATUS_IID = InstanceIdentifier.builder(TestStatus.class).build();
-    private final DOMDataBroker domDataBroker;
-    private final DataBroker bindingDataBroker;
+
+    private final AtomicReference<ExecStatus> execStatus = new AtomicReference<ExecStatus>( ExecStatus.Idle );
+    private final DsbenchmarkListenerProvider listenerProvider = new DsbenchmarkListenerProvider();
+    private final DOMDataBroker domDataBroker;  // Async DOM Broker for use with all DOM operations
+    private final DataBroker bindingDataBroker; // Async Binding-Aware Broker for use in tx chains; initialized to ping-pong
+                                                // broker in default config (see default-config.xml and dsbenchmark-impl.yang)
+    private DataBroker dataBroker;              // "Legacy" OSGI Data Broker for use in simple transactions
     private RpcRegistration<DsbenchmarkService> dstReg;
-    private DataBroker dataBroker;
 
     private long testsCompleted = 0;
 
@@ -74,6 +77,7 @@ public class DsbenchmarkProvider implements BindingAwareProvider, DsbenchmarkSer
     public void onSessionInitiated(ProviderContext session) {
         this.dataBroker = session.getSALService(DataBroker.class);
         this.dstReg = session.addRpcImplementation( DsbenchmarkService.class, this );
+        listenerProvider.setDataBroker(dataBroker);
         setTestOperData(this.execStatus.get(), testsCompleted);
 
         LOG.info("DsbenchmarkProvider Session Initiated");
@@ -110,6 +114,9 @@ public class DsbenchmarkProvider implements BindingAwareProvider, DsbenchmarkSer
         // Get the appropriate writer based on operation type and data format
         DatastoreAbstractWriter dsWriter = getDatastoreWriter(input);
 
+        // Create listeners on OPERATIONAL and CONFIG test data subtrees
+        listenerProvider.createAndRegisterListeners(input.getListeners().intValue());
+
         long startTime, endTime, listCreateTime, execTime;
 
         startTime = System.nanoTime();
@@ -138,11 +145,15 @@ public class DsbenchmarkProvider implements BindingAwareProvider, DsbenchmarkSer
         setTestOperData( ExecStatus.Idle, testsCompleted);
         execStatus.set(ExecStatus.Idle);
 
+        // Get the number of data change events and cleanup the data change listeners
+        long numEvents = listenerProvider.getEventCountAndDestroyListeners();
+
         StartTestOutput output = new StartTestOutputBuilder()
                 .setStatus(StartTestOutput.Status.OK)
                 .setListBuildTime(listCreateTime)
                 .setExecTime(execTime)
                 .setTxOk((long)dsWriter.getTxOk())
+                .setNtfOk(numEvents)
                 .setTxError((long)dsWriter.getTxError())
                 .build();
 

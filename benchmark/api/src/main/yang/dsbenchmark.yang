@@ -144,19 +144,27 @@ module dsbenchmark {
                 default 100000;
                 description
                   "Number of elements in the OuterList";
-              }
+            }
             leaf innerElements {
                 type uint32;
                 default 1;
                 description
                   "Number of elements in the InnerList";
-              }
+            }
             leaf putsPerTx {
                 type uint32;
                 default 1;
                 description
-                  "Number of write operations (PUT, MERGE, or DELETE) per transaction submit";
-              }
+                  "Number of write operations (PUT, MERGE, or DELETE)
+                   per transaction submit";
+            }
+            leaf listeners {
+                type uint32;
+                default 0;
+                description
+                    "Number of data tree change listeners listening for
+                    changes on the test exec tree.";
+            }
         }
         output {
             leaf status {
@@ -174,32 +182,32 @@ module dsbenchmark {
                 }
                 description
                     "Indicates whether the test finished successfuly";
-               }
+            }
             leaf listBuildTime {
                 type uint32;
-                default 1;
                 description
                   "The time it took to build the list of lists";
-              }
+            }
             leaf execTime {
                 type uint32;
-                default 1;
                 description
                   "The time it took to execute all transactions";
-              }
+            }
             leaf txOk {
                 type uint32;
-                default 1;
                 description
                   "The number of successful transactions";
-              }
+            }
             leaf txError {
                 type uint32;
-                default 1;
                 description
                   "The number of failed transactions";
-              }
-
+            }
+            leaf ntfOk {
+                type uint32;
+                description
+                  "The number of successfully received data tree change notifications";
+            }
         }
     }
 
