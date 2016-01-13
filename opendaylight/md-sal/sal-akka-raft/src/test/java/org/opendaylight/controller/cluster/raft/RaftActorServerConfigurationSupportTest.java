@@ -24,6 +24,7 @@ import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -31,13 +32,16 @@ import java.util.concurrent.TimeUnit;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.NonPersistentDataProvider;
 import org.opendaylight.controller.cluster.raft.ServerConfigurationPayload.ServerInfo;
+import org.opendaylight.controller.cluster.raft.base.messages.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
+import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
 import org.opendaylight.controller.cluster.raft.base.messages.InitiateCaptureSnapshot;
+import org.opendaylight.controller.cluster.raft.base.messages.SnapshotComplete;
+import org.opendaylight.controller.cluster.raft.base.messages.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.behaviors.AbstractLeader;
 import org.opendaylight.controller.cluster.raft.behaviors.Follower;
 import org.opendaylight.controller.cluster.raft.behaviors.Leader;
@@ -48,6 +52,7 @@ import org.opendaylight.controller.cluster.raft.messages.ChangeServersVotingStat
 import org.opendaylight.controller.cluster.raft.messages.InstallSnapshot;
 import org.opendaylight.controller.cluster.raft.messages.RemoveServer;
 import org.opendaylight.controller.cluster.raft.messages.RemoveServerReply;
+import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.ServerChangeReply;
 import org.opendaylight.controller.cluster.raft.messages.ServerChangeStatus;
 import org.opendaylight.controller.cluster.raft.messages.ServerRemoved;
@@ -73,7 +78,8 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
     static final String NEW_SERVER_ID = "new-server";
     static final String NEW_SERVER_ID2 = "new-server2";
     private static final Logger LOG = LoggerFactory.getLogger(RaftActorServerConfigurationSupportTest.class);
-    private static final DataPersistenceProvider NO_PERSISTENCE = new NonPersistentDataProvider();
+    private static final boolean NO_PERSISTENCE = false;
+    private static final boolean PERSISTENT = true;
 
     private final TestActorFactory actorFactory = new TestActorFactory(getSystem());
 
@@ -91,7 +97,9 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
     public void setup() {
         InMemoryJournal.clear();
         InMemorySnapshotStore.clear();
+    }
 
+    private void setupNewFollower() {
         DefaultConfigParamsImpl configParams = newFollowerConfigParams();
 
         newFollowerCollectorActor = actorFactory.createTestActor(
@@ -123,6 +131,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
     @Test
     public void testAddServerWithExistingFollower() throws Exception {
+        setupNewFollower();
         RaftActorContext followerActorContext = newFollowerContext(FOLLOWER_ID, followerActor);
         followerActorContext.setReplicatedLog(new MockRaftActorContext.MockReplicatedLogBuilder().createEntries(
                 0, 3, 1).build());
@@ -211,6 +220,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
     @Test
     public void testAddServerWithNoExistingFollower() throws Exception {
+        setupNewFollower();
         RaftActorContext initialActorContext = new MockRaftActorContext();
         initialActorContext.setCommitIndex(1);
         initialActorContext.setLastApplied(1);
@@ -263,6 +273,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
     @Test
     public void testAddServersAsNonVoting() throws Exception {
+        setupNewFollower();
         RaftActorContext initialActorContext = new MockRaftActorContext();
 
         TestActorRef<MockLeaderRaftActor> leaderActor = actorFactory.createTestActor(
@@ -328,6 +339,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
     @Test
     public void testAddServerWithOperationInProgress() throws Exception {
+        setupNewFollower();
         RaftActorContext initialActorContext = new MockRaftActorContext();
 
         TestActorRef<MockLeaderRaftActor> leaderActor = actorFactory.createTestActor(
@@ -386,6 +398,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
     @Test
     public void testAddServerWithPriorSnapshotInProgress() throws Exception {
+        setupNewFollower();
         RaftActorContext initialActorContext = new MockRaftActorContext();
 
         TestActorRef<MockLeaderRaftActor> leaderActor = actorFactory.createTestActor(
@@ -428,6 +441,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
     @Test
     public void testAddServerWithPriorSnapshotCompleteTimeout() throws Exception {
+        setupNewFollower();
         RaftActorContext initialActorContext = new MockRaftActorContext();
 
         TestActorRef<MockLeaderRaftActor> leaderActor = actorFactory.createTestActor(
@@ -455,6 +469,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
     @Test
     public void testAddServerWithLeaderChangeBeforePriorSnapshotComplete() throws Exception {
+        setupNewFollower();
         RaftActorContext initialActorContext = new MockRaftActorContext();
 
         TestActorRef<MockLeaderRaftActor> leaderActor = actorFactory.createTestActor(
@@ -499,6 +514,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
     @Test
     public void testAddServerWithLeaderChangeDuringInstallSnapshot() throws Exception {
+        setupNewFollower();
         RaftActorContext initialActorContext = new MockRaftActorContext();
 
         TestActorRef<MockLeaderRaftActor> leaderActor = actorFactory.createTestActor(
@@ -539,6 +555,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
     @Test
     public void testAddServerWithInstallSnapshotTimeout() throws Exception {
+        setupNewFollower();
         RaftActorContext initialActorContext = new MockRaftActorContext();
 
         TestActorRef<MockLeaderRaftActor> leaderActor = actorFactory.createTestActor(
@@ -567,12 +584,14 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
     @Test
     public void testAddServerWithNoLeader() {
+        setupNewFollower();
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
         configParams.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
 
         TestActorRef<MockRaftActor> noLeaderActor = actorFactory.createTestActor(
-                MockRaftActor.props(LEADER_ID, ImmutableMap.of(FOLLOWER_ID, followerActor.path().toString()),
-                        configParams, NO_PERSISTENCE).withDispatcher(Dispatchers.DefaultDispatcherId()),
+                MockRaftActor.builder().id(LEADER_ID).peerAddresses(ImmutableMap.of(FOLLOWER_ID,
+                        followerActor.path().toString())).config(configParams).persistent(Optional.of(false)).
+                        props().withDispatcher(Dispatchers.DefaultDispatcherId()),
                 actorFactory.generateActorId(LEADER_ID));
         noLeaderActor.underlyingActor().waitForInitializeBehaviorComplete();
 
@@ -583,6 +602,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
     @Test
     public void testAddServerWithNoConsensusReached() {
+        setupNewFollower();
         RaftActorContext initialActorContext = new MockRaftActorContext();
 
         TestActorRef<MockLeaderRaftActor> leaderActor = actorFactory.createTestActor(
@@ -655,6 +675,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
     @Test
     public void testAddServerForwardedToLeader() {
+        setupNewFollower();
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
         configParams.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
 
@@ -663,8 +684,9 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
                 actorFactory.generateActorId(LEADER_ID));
 
         TestActorRef<MockRaftActor> followerRaftActor = actorFactory.createTestActor(
-                MockRaftActor.props(FOLLOWER_ID, ImmutableMap.of(LEADER_ID, leaderActor.path().toString()),
-                        configParams, NO_PERSISTENCE).withDispatcher(Dispatchers.DefaultDispatcherId()),
+                MockRaftActor.builder().id(FOLLOWER_ID).peerAddresses(ImmutableMap.of(LEADER_ID,
+                        leaderActor.path().toString())).config(configParams).persistent(Optional.of(false)).
+                        props().withDispatcher(Dispatchers.DefaultDispatcherId()),
                 actorFactory.generateActorId(FOLLOWER_ID));
         followerRaftActor.underlyingActor().waitForInitializeBehaviorComplete();
 
@@ -680,8 +702,9 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
         configParams.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
         TestActorRef<MockRaftActor> noLeaderActor = actorFactory.createTestActor(
-                MockRaftActor.props(LEADER_ID, ImmutableMap.of(FOLLOWER_ID, followerActor.path().toString()),
-                        configParams, NO_PERSISTENCE).withDispatcher(Dispatchers.DefaultDispatcherId()),
+                MockRaftActor.builder().id(LEADER_ID).peerAddresses(ImmutableMap.of(FOLLOWER_ID,
+                        followerActor.path().toString())).config(configParams).persistent(Optional.of(false)).
+                        props().withDispatcher(Dispatchers.DefaultDispatcherId()),
                 actorFactory.generateActorId(LEADER_ID));
 
         RaftActorServerConfigurationSupport support = new RaftActorServerConfigurationSupport(noLeaderActor.underlyingActor());
@@ -703,8 +726,9 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         configParams.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
 
         TestActorRef<MockRaftActor> leaderActor = actorFactory.createTestActor(
-                MockRaftActor.props(LEADER_ID, ImmutableMap.of(FOLLOWER_ID, followerActor.path().toString()),
-                        configParams, NO_PERSISTENCE).withDispatcher(Dispatchers.DefaultDispatcherId()),
+                MockRaftActor.builder().id(LEADER_ID).peerAddresses(ImmutableMap.of(FOLLOWER_ID,
+                        followerActor.path().toString())).config(configParams).persistent(Optional.of(false)).
+                        props().withDispatcher(Dispatchers.DefaultDispatcherId()),
                 actorFactory.generateActorId(LEADER_ID));
         leaderActor.underlyingActor().waitForInitializeBehaviorComplete();
 
@@ -737,8 +761,9 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
                 actorFactory.generateActorId(LEADER_ID));
 
         TestActorRef<MockRaftActor> followerRaftActor = actorFactory.createTestActor(
-                MockRaftActor.props(FOLLOWER_ID, ImmutableMap.of(LEADER_ID, leaderActor.path().toString()),
-                        configParams, NO_PERSISTENCE).withDispatcher(Dispatchers.DefaultDispatcherId()),
+                MockRaftActor.builder().id(FOLLOWER_ID).peerAddresses(ImmutableMap.of(LEADER_ID,
+                        leaderActor.path().toString())).config(configParams).persistent(Optional.of(false)).
+                        props().withDispatcher(Dispatchers.DefaultDispatcherId()),
                 actorFactory.generateActorId(FOLLOWER_ID));
         followerRaftActor.underlyingActor().waitForInitializeBehaviorComplete();
 
@@ -974,6 +999,237 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         MessageCollectorActor.expectMatching(leaderCollector, AppendEntries.class, 2);
     }
 
+    @Test
+    public void testChangeToVotingWithNoLeader() {
+        DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
+        configParams.setHeartBeatInterval(new FiniteDuration(100, TimeUnit.MILLISECONDS));
+
+        final String node1ID = "node1";
+        final String node2ID = "node2";
+
+        // Set up a persisted ServerConfigurationPayload. Initially node1 and node2 will come up as non-voting.
+        // via the server config. The server config will also contain 2 voting peers that are down (ie no
+        // actors created).
+
+        ServerConfigurationPayload persistedServerConfig = new ServerConfigurationPayload(Arrays.asList(
+                new ServerInfo(node1ID, false), new ServerInfo(node2ID, false),
+                new ServerInfo("downNode1", true), new ServerInfo("downNode2", true)));
+        ReplicatedLogImplEntry persistedServerConfigEntry = new ReplicatedLogImplEntry(0, 1, persistedServerConfig);
+
+        InMemoryJournal.addEntry(node1ID, 1, new UpdateElectionTerm(1, "downNode1"));
+        InMemoryJournal.addEntry(node1ID, 2, persistedServerConfigEntry);
+        InMemoryJournal.addEntry(node2ID, 1, new UpdateElectionTerm(1, "downNode2"));
+        InMemoryJournal.addEntry(node2ID, 2, persistedServerConfigEntry);
+
+        TestActorRef<CollectingMockRaftActor> node1RaftActorRef = actorFactory.createTestActor(
+                CollectingMockRaftActor.props(node1ID, ImmutableMap.<String, String>of(), configParams,
+                        PERSISTENT).withDispatcher(Dispatchers.DefaultDispatcherId()), node1ID);
+        TestActorRef<MessageCollectorActor> node1Collector = actorFactory.createTestActor(
+                MessageCollectorActor.props().withDispatcher(Dispatchers.DefaultDispatcherId()),
+                actorFactory.generateActorId("collector"));
+        CollectingMockRaftActor node1RaftActor = node1RaftActorRef.underlyingActor();
+        node1RaftActor.setCollectorActor(node1Collector);
+
+        TestActorRef<CollectingMockRaftActor> node2RaftActorRef = actorFactory.createTestActor(
+                CollectingMockRaftActor.props(node2ID, ImmutableMap.<String, String>of(), configParams,
+                        PERSISTENT).withDispatcher(Dispatchers.DefaultDispatcherId()), node2ID);
+        TestActorRef<MessageCollectorActor> node2Collector = actorFactory.createTestActor(
+                MessageCollectorActor.props().withDispatcher(Dispatchers.DefaultDispatcherId()),
+                actorFactory.generateActorId("collector"));
+        CollectingMockRaftActor node2RaftActor = node2RaftActorRef.underlyingActor();
+        node2RaftActor.setCollectorActor(node2Collector);
+
+        // Wait for snapshot after recovery
+        MessageCollectorActor.expectFirstMatching(node1Collector, SnapshotComplete.class);
+
+        // Verify the intended server config was loaded and applied.
+        verifyServerConfigurationPayloadEntry(node1RaftActor.getRaftActorContext().getReplicatedLog(),
+                nonVotingServer(node1ID), nonVotingServer(node2ID), votingServer("downNode1"),
+                votingServer("downNode2"));
+        assertEquals("isVotingMember", false, node1RaftActor.getRaftActorContext().isVotingMember());
+        assertEquals("getRaftState", RaftState.Follower, node1RaftActor.getRaftState());
+        assertEquals("getLeaderId", null, node1RaftActor.getLeaderId());
+
+        assertEquals("isVotingMember", false, node2RaftActor.getRaftActorContext().isVotingMember());
+
+        // For the test, we send a ChangeServersVotingStatus message to node1 to flip the voting states for
+        // each server, ie node1 and node2 to voting and the 2 down nodes to non-voting. This should cause
+        // node1 to try to elect itself as leader in order to apply the new server config. Since the 2
+        // down nodes are switched to non-voting, node1 should only need a vote from node2.
+
+        // First send the message such that node1 has no peer address for node2 - should fail.
+
+        ChangeServersVotingStatus changeServers = new ChangeServersVotingStatus(ImmutableMap.of(node1ID, true,
+                node2ID, true, "downNode1", false, "downNode2", false));
+        node1RaftActorRef.tell(changeServers, testKit.getRef());
+        ServerChangeReply reply = testKit.expectMsgClass(JavaTestKit.duration("5 seconds"), ServerChangeReply.class);
+        assertEquals("getStatus", ServerChangeStatus.NO_LEADER, reply.getStatus());
+
+        // Update node2's peer address and send the message again
+
+        node1RaftActor.setPeerAddress(node2ID, node2RaftActorRef.path().toString());
+
+        node1RaftActorRef.tell(changeServers, testKit.getRef());
+        reply = testKit.expectMsgClass(JavaTestKit.duration("5 seconds"), ServerChangeReply.class);
+        assertEquals("getStatus", ServerChangeStatus.OK, reply.getStatus());
+
+        ApplyJournalEntries apply = MessageCollectorActor.expectFirstMatching(node1Collector, ApplyJournalEntries.class);
+        assertEquals("getToIndex", 1, apply.getToIndex());
+        verifyServerConfigurationPayloadEntry(node1RaftActor.getRaftActorContext().getReplicatedLog(),
+                votingServer(node1ID), votingServer(node2ID), nonVotingServer("downNode1"),
+                nonVotingServer("downNode2"));
+        assertEquals("isVotingMember", true, node1RaftActor.getRaftActorContext().isVotingMember());
+        assertEquals("getRaftState", RaftState.Leader, node1RaftActor.getRaftState());
+
+        apply = MessageCollectorActor.expectFirstMatching(node2Collector, ApplyJournalEntries.class);
+        assertEquals("getToIndex", 1, apply.getToIndex());
+        verifyServerConfigurationPayloadEntry(node2RaftActor.getRaftActorContext().getReplicatedLog(),
+                votingServer(node1ID), votingServer(node2ID), nonVotingServer("downNode1"),
+                nonVotingServer("downNode2"));
+        assertEquals("isVotingMember", true, node2RaftActor.getRaftActorContext().isVotingMember());
+        assertEquals("getRaftState", RaftState.Follower, node2RaftActor.getRaftState());
+    }
+
+    @Test
+    public void testChangeToVotingWithNoLeaderAndElectionTimeout() {
+        final String node1ID = "node1";
+        final String node2ID = "node2";
+
+        PeerAddressResolver peerAddressResolver = new PeerAddressResolver() {
+            @Override
+            public String resolve(String peerId) {
+                return peerId.equals(node1ID) ? actorFactory.createTestActorPath(node1ID) :
+                    peerId.equals(node2ID) ? actorFactory.createTestActorPath(node2ID) : null;
+            }
+        };
+
+        ServerConfigurationPayload persistedServerConfig = new ServerConfigurationPayload(Arrays.asList(
+                new ServerInfo(node1ID, false), new ServerInfo(node2ID, true)));
+        ReplicatedLogImplEntry persistedServerConfigEntry = new ReplicatedLogImplEntry(0, 1, persistedServerConfig);
+
+        InMemoryJournal.addEntry(node1ID, 1, new UpdateElectionTerm(1, "node1"));
+        InMemoryJournal.addEntry(node1ID, 2, persistedServerConfigEntry);
+        InMemoryJournal.addEntry(node2ID, 1, new UpdateElectionTerm(1, "node1"));
+        InMemoryJournal.addEntry(node2ID, 2, persistedServerConfigEntry);
+
+        DefaultConfigParamsImpl configParams1 = new DefaultConfigParamsImpl();
+        configParams1.setHeartBeatInterval(new FiniteDuration(100, TimeUnit.MILLISECONDS));
+        configParams1.setElectionTimeoutFactor(1);
+        configParams1.setPeerAddressResolver(peerAddressResolver);
+        TestActorRef<CollectingMockRaftActor> node1RaftActorRef = actorFactory.createTestActor(
+                CollectingMockRaftActor.props(node1ID, ImmutableMap.<String, String>of(), configParams1,
+                        PERSISTENT).withDispatcher(Dispatchers.DefaultDispatcherId()), node1ID);
+        TestActorRef<MessageCollectorActor> node1Collector = actorFactory.createTestActor(
+                MessageCollectorActor.props().withDispatcher(Dispatchers.DefaultDispatcherId()),
+                actorFactory.generateActorId("collector"));
+        CollectingMockRaftActor node1RaftActor = node1RaftActorRef.underlyingActor();
+        node1RaftActor.setCollectorActor(node1Collector);
+
+        DefaultConfigParamsImpl configParams2 = new DefaultConfigParamsImpl();
+        configParams2.setElectionTimeoutFactor(1000000);
+        configParams1.setPeerAddressResolver(peerAddressResolver);
+        TestActorRef<CollectingMockRaftActor> node2RaftActorRef = actorFactory.createTestActor(
+                CollectingMockRaftActor.props(node2ID, ImmutableMap.<String, String>of(), configParams2,
+                        PERSISTENT).withDispatcher(Dispatchers.DefaultDispatcherId()), node2ID);
+        TestActorRef<MessageCollectorActor> node2Collector = actorFactory.createTestActor(
+                MessageCollectorActor.props().withDispatcher(Dispatchers.DefaultDispatcherId()),
+                actorFactory.generateActorId("collector"));
+        CollectingMockRaftActor node2RaftActor = node2RaftActorRef.underlyingActor();
+        node2RaftActor.setCollectorActor(node2Collector);
+
+        // Wait for snapshot after recovery
+        MessageCollectorActor.expectFirstMatching(node1Collector, SnapshotComplete.class);
+
+        // Send a ChangeServersVotingStatus message to node1 to change mode1 to voting. This should cause
+        // node1 to try to elect itself as leader in order to apply the new server config. But we'll drop
+        // RequestVote messages which should cause it to time out and revert back to the previous server
+        // config.
+
+        node2RaftActor.setDropMessageOfType(RequestVote.class);
+
+        ChangeServersVotingStatus changeServers = new ChangeServersVotingStatus(ImmutableMap.of(node1ID, true));
+        node1RaftActorRef.tell(changeServers, testKit.getRef());
+        ServerChangeReply reply = testKit.expectMsgClass(JavaTestKit.duration("5 seconds"), ServerChangeReply.class);
+        assertEquals("getStatus", ServerChangeStatus.NO_LEADER, reply.getStatus());
+
+        assertEquals("Server config", Sets.newHashSet(nonVotingServer(node1ID), votingServer(node2ID)),
+                Sets.newHashSet(node1RaftActor.getRaftActorContext().getPeerServerInfo(true).getServerConfig()));
+        assertEquals("getRaftState", RaftState.Follower, node1RaftActor.getRaftState());
+    }
+
+    @Test
+    public void testChangeToVotingWithNoLeaderAndOtherLeaderElected() {
+        DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
+        configParams.setHeartBeatInterval(new FiniteDuration(100, TimeUnit.MILLISECONDS));
+        configParams.setElectionTimeoutFactor(100000);
+
+        final String node1ID = "node1";
+        final String node2ID = "node2";
+
+        configParams.setPeerAddressResolver(new PeerAddressResolver() {
+            @Override
+            public String resolve(String peerId) {
+                return peerId.equals(node1ID) ? actorFactory.createTestActorPath(node1ID) :
+                    peerId.equals(node2ID) ? actorFactory.createTestActorPath(node2ID) : null;
+            }
+        });
+
+        ServerConfigurationPayload persistedServerConfig = new ServerConfigurationPayload(Arrays.asList(
+                new ServerInfo(node1ID, false), new ServerInfo(node2ID, true)));
+        ReplicatedLogImplEntry persistedServerConfigEntry = new ReplicatedLogImplEntry(0, 1, persistedServerConfig);
+
+        InMemoryJournal.addEntry(node1ID, 1, new UpdateElectionTerm(1, "downNode1"));
+        InMemoryJournal.addEntry(node1ID, 2, persistedServerConfigEntry);
+        InMemoryJournal.addEntry(node2ID, 1, new UpdateElectionTerm(1, "downNode2"));
+        InMemoryJournal.addEntry(node2ID, 2, persistedServerConfigEntry);
+
+        TestActorRef<CollectingMockRaftActor> node1RaftActorRef = actorFactory.createTestActor(
+                CollectingMockRaftActor.props(node1ID, ImmutableMap.<String, String>of(), configParams,
+                        PERSISTENT).withDispatcher(Dispatchers.DefaultDispatcherId()), node1ID);
+        TestActorRef<MessageCollectorActor> node1Collector = actorFactory.createTestActor(
+                MessageCollectorActor.props().withDispatcher(Dispatchers.DefaultDispatcherId()),
+                actorFactory.generateActorId("collector"));
+        CollectingMockRaftActor node1RaftActor = node1RaftActorRef.underlyingActor();
+        node1RaftActor.setCollectorActor(node1Collector);
+
+        TestActorRef<CollectingMockRaftActor> node2RaftActorRef = actorFactory.createTestActor(
+                CollectingMockRaftActor.props(node2ID, ImmutableMap.<String, String>of(), configParams,
+                        PERSISTENT).withDispatcher(Dispatchers.DefaultDispatcherId()), node2ID);
+        TestActorRef<MessageCollectorActor> node2Collector = actorFactory.createTestActor(
+                MessageCollectorActor.props().withDispatcher(Dispatchers.DefaultDispatcherId()),
+                actorFactory.generateActorId("collector"));
+        CollectingMockRaftActor node2RaftActor = node2RaftActorRef.underlyingActor();
+        node2RaftActor.setCollectorActor(node2Collector);
+
+        // Wait for snapshot after recovery
+        MessageCollectorActor.expectFirstMatching(node1Collector, SnapshotComplete.class);
+
+        // Send a ChangeServersVotingStatus message to node1 to change node1 to voting. This should cause
+        // node1 to try to elect itself as leader in order to apply the new server config. But we'll drop
+        // RequestVote messages in node2 and make it the leader so node1 should forward the server change
+        // request.
+
+        node2RaftActor.setDropMessageOfType(RequestVote.class);
+
+        ChangeServersVotingStatus changeServers = new ChangeServersVotingStatus(ImmutableMap.of(node1ID, true,
+                node2ID, true));
+        node1RaftActorRef.tell(changeServers, testKit.getRef());
+
+        MessageCollectorActor.expectFirstMatching(node2Collector, RequestVote.class);
+
+        node2RaftActorRef.tell(new ElectionTimeout(), ActorRef.noSender());
+
+        ServerChangeReply reply = testKit.expectMsgClass(JavaTestKit.duration("5 seconds"), ServerChangeReply.class);
+        assertEquals("getStatus", ServerChangeStatus.OK, reply.getStatus());
+
+        MessageCollectorActor.expectFirstMatching(node1Collector, ApplyJournalEntries.class);
+        verifyServerConfigurationPayloadEntry(node1RaftActor.getRaftActorContext().getReplicatedLog(),
+                votingServer(node1ID), votingServer(node2ID));
+        assertEquals("isVotingMember", true, node1RaftActor.getRaftActorContext().isVotingMember());
+        assertEquals("getRaftState", RaftState.Follower, node1RaftActor.getRaftState());
+        assertEquals("getRaftState", RaftState.Leader, node2RaftActor.getRaftState());
+    }
+
     private void verifyRaftState(RaftState expState, RaftActor... raftActors) {
         Stopwatch sw = Stopwatch.createStarted();
         while(sw.elapsed(TimeUnit.SECONDS) <= 5) {
@@ -1011,17 +1267,18 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         ReplicatedLogEntry logEntry = log.get(log.lastIndex());
         assertEquals("Last log entry payload class", ServerConfigurationPayload.class, logEntry.getData().getClass());
         ServerConfigurationPayload payload = (ServerConfigurationPayload)logEntry.getData();
-        assertEquals("getNewServerConfig", Sets.newHashSet(expected), Sets.newHashSet(payload.getServerConfig()));
+        assertEquals("Server config", Sets.newHashSet(expected), Sets.newHashSet(payload.getServerConfig()));
     }
 
     private static RaftActorContext newFollowerContext(String id, TestActorRef<? extends UntypedActor> actor) {
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
         configParams.setHeartBeatInterval(new FiniteDuration(100, TimeUnit.MILLISECONDS));
         configParams.setElectionTimeoutFactor(100000);
-        ElectionTermImpl termInfo = new ElectionTermImpl(NO_PERSISTENCE, id, LOG);
+        NonPersistentDataProvider noPersistence = new NonPersistentDataProvider();
+        ElectionTermImpl termInfo = new ElectionTermImpl(noPersistence, id, LOG);
         termInfo.update(1, LEADER_ID);
         return new RaftActorContextImpl(actor, actor.underlyingActor().getContext(),
-                id, termInfo, -1, -1, ImmutableMap.of(LEADER_ID, ""), configParams, NO_PERSISTENCE, LOG);
+                id, termInfo, -1, -1, ImmutableMap.of(LEADER_ID, ""), configParams, noPersistence, LOG);
     }
 
     static abstract class AbstractMockRaftActor extends MockRaftActor {
@@ -1029,9 +1286,9 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         private volatile Class<?> dropMessageOfType;
 
         AbstractMockRaftActor(String id, Map<String, String> peerAddresses, Optional<ConfigParams> config,
-                DataPersistenceProvider dataPersistenceProvider, TestActorRef<MessageCollectorActor> collectorActor) {
+                boolean persistent, TestActorRef<MessageCollectorActor> collectorActor) {
             super(builder().id(id).peerAddresses(peerAddresses).config(config.get()).
-                    dataPersistenceProvider(dataPersistenceProvider));
+                    persistent(Optional.of(persistent)));
             this.collectorActor = collectorActor;
         }
 
@@ -1057,14 +1314,25 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
     public static class CollectingMockRaftActor extends AbstractMockRaftActor {
 
-        CollectingMockRaftActor(String id, Map<String, String> peerAddresses, Optional<ConfigParams> config, DataPersistenceProvider dataPersistenceProvider, TestActorRef<MessageCollectorActor> collectorActor) {
-            super(id, peerAddresses, config, dataPersistenceProvider, collectorActor);
+        CollectingMockRaftActor(String id, Map<String, String> peerAddresses, Optional<ConfigParams> config,
+                boolean persistent, TestActorRef<MessageCollectorActor> collectorActor) {
+            super(id, peerAddresses, config, persistent, collectorActor);
+            snapshotCohortDelegate = new RaftActorSnapshotCohort() {
+                @Override
+                public void createSnapshot(ActorRef actorRef) {
+                    actorRef.tell(new CaptureSnapshotReply(new byte[0]), actorRef);
+                }
+
+                @Override
+                public void applySnapshot(byte[] snapshotBytes) {
+                }
+            };
         }
 
         public static Props props(final String id, final Map<String, String> peerAddresses,
-                                  ConfigParams config, DataPersistenceProvider dataPersistenceProvider){
+                                  ConfigParams config, boolean persistent){
 
-            return Props.create(CollectingMockRaftActor.class, id, peerAddresses, Optional.of(config), dataPersistenceProvider, null);
+            return Props.create(CollectingMockRaftActor.class, id, peerAddresses, Optional.of(config), persistent, null);
         }
 
     }
@@ -1113,7 +1381,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
     public static class MockNewFollowerRaftActor extends AbstractMockRaftActor {
         public MockNewFollowerRaftActor(ConfigParams config, TestActorRef<MessageCollectorActor> collectorActor) {
-            super(NEW_SERVER_ID, Maps.<String, String>newHashMap(), Optional.of(config), null, collectorActor);
+            super(NEW_SERVER_ID, Maps.<String, String>newHashMap(), Optional.of(config), NO_PERSISTENCE, collectorActor);
             setPersistence(false);
         }
 
