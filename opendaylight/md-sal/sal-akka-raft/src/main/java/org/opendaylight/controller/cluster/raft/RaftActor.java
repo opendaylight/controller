@@ -201,6 +201,14 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     }
 
     protected void changeCurrentBehavior(RaftActorBehavior newBehavior){
+        if(getCurrentBehavior() != null) {
+            try {
+                getCurrentBehavior().close();
+            } catch(Exception e) {
+                LOG.warn("{}: Error closing behavior {}", persistence(), getCurrentBehavior(), e);
+            }
+        }
+
         reusableBehaviorStateHolder.init(getCurrentBehavior());
         setCurrentBehavior(newBehavior);
         handleBehaviorChange(reusableBehaviorStateHolder, getCurrentBehavior());
@@ -243,7 +251,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         } else if (message instanceof ApplyJournalEntries){
             ApplyJournalEntries applyEntries = (ApplyJournalEntries) message;
             if(LOG.isDebugEnabled()) {
-                LOG.debug("{}: Persisting ApplyLogEntries with index={}", persistenceId(), applyEntries.getToIndex());
+                LOG.debug("{}: Persisting ApplyJournalEntries with index={}", persistenceId(), applyEntries.getToIndex());
             }
 
             persistence().persist(applyEntries, NoopProcedure.instance());
@@ -441,6 +449,8 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             if(leadershipTransferInProgress != null) {
                 leadershipTransferInProgress.onNewLeader(currentBehavior.getLeaderId());
             }
+
+            serverConfigurationSupport.onNewLeader(currentBehavior.getLeaderId());
         }
 
         if (roleChangeNotifier.isPresent() &&
