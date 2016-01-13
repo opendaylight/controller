@@ -263,8 +263,6 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                 ReplicatedLogEntry replicatedLogEntry = context.getReplicatedLog().get(N);
                 if (replicatedLogEntry != null && replicatedLogEntry.getTerm() == currentTerm()) {
                     context.setCommitIndex(N);
-                } else {
-                    break;
                 }
             } else {
                 break;
