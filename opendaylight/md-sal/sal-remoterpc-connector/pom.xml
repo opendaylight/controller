@@ -39,15 +39,15 @@
       <artifactId>akka-osgi_${scala.version}</artifactId>
     </dependency>
 
-  <dependency>
-     <groupId>com.typesafe.akka</groupId>
-     <artifactId>akka-slf4j_${scala.version}</artifactId>
-  </dependency>
+    <dependency>
+      <groupId>com.typesafe.akka</groupId>
+      <artifactId>akka-slf4j_${scala.version}</artifactId>
+    </dependency>
 
-      <dependency>
-          <groupId>com.typesafe.akka</groupId>
-          <artifactId>akka-persistence-experimental_${scala.version}</artifactId>
-      </dependency>
+    <dependency>
+      <groupId>com.typesafe.akka</groupId>
+      <artifactId>akka-persistence_${scala.version}</artifactId>
+    </dependency>
     <!-- SAL Dependencies -->
 
     <dependency>
