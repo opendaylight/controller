@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da33351e_d2b464f4",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/BrokerFacade.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 3635
+      },
+      "writtenOn": "2016-01-13T01:09:39Z",
+      "side": 1,
+      "message": "Please remove these lines.  This often happens with eclipse;  use https://wiki.opendaylight.org/view/GettingStarted:_Eclipse#Import_ordering",
+      "revId": "3e60c000eca9d5d86e44709d14efa130a8a12874",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
