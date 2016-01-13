@@ -25,7 +25,7 @@
       <feature.test.version>0.9.0-SNAPSHOT</feature.test.version>
       <karaf.empty.version>1.7.0-SNAPSHOT</karaf.empty.version>
       <surefire.version>2.16</surefire.version>
-      <akka.version>2.3.14</akka.version>
+      <akka.version>2.4.1</akka.version>
       <scala.version>2.11</scala.version>
    </properties>
     <dependencyManagement>
