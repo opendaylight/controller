@@ -497,6 +497,8 @@ public class DistributedDataStoreIntegrationTest {
             CountDownLatch blockRecoveryLatch = new CountDownLatch(1);
             InMemoryJournal.addBlockReadMessagesLatch(persistentID, blockRecoveryLatch);
 
+            InMemoryJournal.addEntry(persistentID, 1, "Dummy data so akka will read from persistence");
+
             DistributedDataStore dataStore = setupDistributedDataStore(testName, false, shardName);
 
             // Create the write Tx
@@ -566,6 +568,8 @@ public class DistributedDataStoreIntegrationTest {
             String persistentID = String.format("member-1-shard-%s-%s", shardName, testName);
             CountDownLatch blockRecoveryLatch = new CountDownLatch(1);
             InMemoryJournal.addBlockReadMessagesLatch(persistentID, blockRecoveryLatch);
+
+            InMemoryJournal.addEntry(persistentID, 1, "Dummy data so akka will read from persistence");
 
             DistributedDataStore dataStore = setupDistributedDataStore(testName, false, shardName);
 

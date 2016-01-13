@@ -21,7 +21,7 @@
     <controller.mdsal.version>1.4.0-SNAPSHOT</controller.mdsal.version>
     <config.version>0.5.0-SNAPSHOT</config.version>
     <commons.opendaylight.version>1.7.0-SNAPSHOT</commons.opendaylight.version>
-    <akka.version>2.3.14</akka.version>
+    <akka.version>2.4.1</akka.version>
     <features.file>features.xml</features.file>
     <config.configfile.directory>etc/opendaylight/karaf</config.configfile.directory>
     <config.clustering.configfile>05-clustering.xml</config.clustering.configfile>
@@ -254,6 +254,10 @@
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal-distributed-datastore</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>sal-dom-broker-config</artifactId>
     </dependency>
 
     <!-- message-bus -->
