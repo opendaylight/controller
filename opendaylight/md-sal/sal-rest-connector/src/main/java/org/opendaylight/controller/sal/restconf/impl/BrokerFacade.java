@@ -9,15 +9,19 @@ package org.opendaylight.controller.sal.restconf.impl;
 
 import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.CONFIGURATION;
 import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.OPERATIONAL;
+
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.ListenableFuture;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+
 import javax.ws.rs.core.Response.Status;
+
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
@@ -111,14 +115,14 @@ public class BrokerFacade {
     public CheckedFuture<Void, TransactionCommitFailedException> commitConfigurationDataPut(
             final SchemaContext globalSchema, final YangInstanceIdentifier path, final NormalizedNode<?, ?> payload) {
         checkPreconditions();
-        return putDataViaTransaction(domDataBroker.newReadWriteTransaction(), CONFIGURATION, path, payload, globalSchema);
+        return putDataViaTransaction(domDataBroker, CONFIGURATION, path, payload, globalSchema);
     }
 
     public CheckedFuture<Void, TransactionCommitFailedException> commitConfigurationDataPut(
             final DOMMountPoint mountPoint, final YangInstanceIdentifier path, final NormalizedNode<?, ?> payload) {
         final Optional<DOMDataBroker> domDataBrokerService = mountPoint.getService(DOMDataBroker.class);
         if (domDataBrokerService.isPresent()) {
-            return putDataViaTransaction(domDataBrokerService.get().newReadWriteTransaction(), CONFIGURATION, path,
+            return putDataViaTransaction(domDataBrokerService.get(), CONFIGURATION, path,
                     payload, mountPoint.getSchemaContext());
         }
         final String errMsg = "DOM data broker service isn't available for mount point " + path;
@@ -130,14 +134,14 @@ public class BrokerFacade {
     public CheckedFuture<Void, TransactionCommitFailedException> commitConfigurationDataPost(
             final SchemaContext globalSchema, final YangInstanceIdentifier path, final NormalizedNode<?, ?> payload) {
         checkPreconditions();
-        return postDataViaTransaction(domDataBroker.newReadWriteTransaction(), CONFIGURATION, path, payload, globalSchema);
+        return postDataViaTransaction(domDataBroker, CONFIGURATION, path, payload, globalSchema);
     }
 
     public CheckedFuture<Void, TransactionCommitFailedException> commitConfigurationDataPost(
             final DOMMountPoint mountPoint, final YangInstanceIdentifier path, final NormalizedNode<?, ?> payload) {
         final Optional<DOMDataBroker> domDataBrokerService = mountPoint.getService(DOMDataBroker.class);
         if (domDataBrokerService.isPresent()) {
-            return postDataViaTransaction(domDataBrokerService.get().newReadWriteTransaction(), CONFIGURATION, path,
+            return postDataViaTransaction(domDataBrokerService.get(), CONFIGURATION, path,
                     payload, mountPoint.getSchemaContext());
         }
         final String errMsg = "DOM data broker service isn't available for mount point " + path;
@@ -211,26 +215,39 @@ public class BrokerFacade {
     }
 
     private CheckedFuture<Void, TransactionCommitFailedException> postDataViaTransaction(
-            final DOMDataReadWriteTransaction rWTransaction, final LogicalDatastoreType datastore,
+            final DOMDataBroker domDataBroker, final LogicalDatastoreType datastore,
             final YangInstanceIdentifier path, final NormalizedNode<?, ?> payload, final SchemaContext schemaContext) {
         // FIXME: This is doing correct post for container and list children
         //        not sure if this will work for choice case
+        DOMDataReadWriteTransaction transaction = domDataBroker.newReadWriteTransaction();
         if(payload instanceof MapNode) {
             LOG.trace("POST " + datastore.name() + " via Restconf: {} with payload {}", path, payload);
             final NormalizedNode<?, ?> emptySubtree = ImmutableNodes.fromInstanceId(schemaContext, path);
-            rWTransaction.merge(datastore, YangInstanceIdentifier.create(emptySubtree.getIdentifier()), emptySubtree);
-            ensureParentsByMerge(datastore, path, rWTransaction, schemaContext);
+            try {
+                transaction.merge(datastore, YangInstanceIdentifier.create(emptySubtree.getIdentifier()), emptySubtree);
+            } catch (RuntimeException e) {
+                transaction.cancel();
+                transaction = domDataBroker.newReadWriteTransaction();
+                LOG.debug("Empty subtree merge failed", e);
+            }
+            if (!ensureParentsByMerge(datastore, path, transaction, schemaContext)) {
+                transaction.cancel();
+                transaction = domDataBroker.newReadWriteTransaction();
+            }
             for(final MapEntryNode child : ((MapNode) payload).getValue()) {
                 final YangInstanceIdentifier childPath = path.node(child.getIdentifier());
-                checkItemDoesNotExists(rWTransaction, datastore, childPath);
-                rWTransaction.put(datastore, childPath, child);
+                checkItemDoesNotExists(transaction, datastore, childPath);
+                transaction.put(datastore, childPath, child);
             }
         } else {
-            checkItemDoesNotExists(rWTransaction,datastore, path);
-            ensureParentsByMerge(datastore, path, rWTransaction, schemaContext);
-            rWTransaction.put(datastore, path, payload);
+            checkItemDoesNotExists(transaction,datastore, path);
+            if(!ensureParentsByMerge(datastore, path, transaction, schemaContext)) {
+                transaction.cancel();
+                transaction = domDataBroker.newReadWriteTransaction();
+            }
+            transaction.put(datastore, path, payload);
         }
-        return rWTransaction.submit();
+        return transaction.submit();
     }
 
     private void checkItemDoesNotExists(final DOMDataReadWriteTransaction rWTransaction,final LogicalDatastoreType store, final YangInstanceIdentifier path) {
@@ -250,12 +267,17 @@ public class BrokerFacade {
     }
 
     private CheckedFuture<Void, TransactionCommitFailedException> putDataViaTransaction(
-            final DOMDataReadWriteTransaction writeTransaction, final LogicalDatastoreType datastore,
-            final YangInstanceIdentifier path, final NormalizedNode<?, ?> payload, final SchemaContext schemaContext) {
+            final DOMDataBroker domDataBroker, final LogicalDatastoreType datastore,
+            final YangInstanceIdentifier path, final NormalizedNode<?, ?> payload, final SchemaContext schemaContext)
+    {
+        DOMDataReadWriteTransaction transaction = domDataBroker.newReadWriteTransaction();
         LOG.trace("Put " + datastore.name() + " via Restconf: {} with payload {}", path, payload);
-        ensureParentsByMerge(datastore, path, writeTransaction, schemaContext);
-        writeTransaction.put(datastore, path, payload);
-        return writeTransaction.submit();
+        if (!ensureParentsByMerge(datastore, path, transaction, schemaContext)) {
+            transaction.cancel();
+            transaction = domDataBroker.newReadWriteTransaction();
+        }
+        transaction.put(datastore, path, payload);
+        return transaction.submit();
     }
 
     private CheckedFuture<Void, TransactionCommitFailedException> deleteDataViaTransaction(
@@ -270,8 +292,10 @@ public class BrokerFacade {
         this.domDataBroker = domDataBroker;
     }
 
-    private void ensureParentsByMerge(final LogicalDatastoreType store,
+    private boolean ensureParentsByMerge(final LogicalDatastoreType store,
                                       final YangInstanceIdentifier normalizedPath, final DOMDataReadWriteTransaction rwTx, final SchemaContext schemaContext) {
+
+        boolean mergeResult = true;
         final List<PathArgument> normalizedPathWithoutChildArgs = new ArrayList<>();
         YangInstanceIdentifier rootNormalizedPath = null;
 
@@ -291,13 +315,33 @@ public class BrokerFacade {
 
         // No parent structure involved, no need to ensure parents
         if(normalizedPathWithoutChildArgs.isEmpty()) {
-            return;
+            return mergeResult;
         }
 
         Preconditions.checkArgument(rootNormalizedPath != null, "Empty path received");
 
         final NormalizedNode<?, ?> parentStructure =
                 ImmutableNodes.fromInstanceId(schemaContext, YangInstanceIdentifier.create(normalizedPathWithoutChildArgs));
-        rwTx.merge(store, rootNormalizedPath, parentStructure);
+        try {
+            rwTx.merge(store, rootNormalizedPath, parentStructure);
+        } catch (RuntimeException e) {
+            /*
+             * Catching the exception here, logging it and proceeding further
+             * for the following reasons.
+             *
+             * 1. For MD-SAL store if it fails we'll go with the next call
+             * anyway and let the failure happen there. 2. For NETCONF devices
+             * that can not handle these calls such as creation of empty lists
+             * etc, instead of failing we'll go with the actual call. Devices
+             * should be able to handle the actual calls made without the need
+             * to create parents. So instead of failing we will give a device a
+             * chance to configure the management entity in question. 3. If this
+             * merge call is handled properly by MD-SAL data store or a Netconf
+             * device this is a no-op.
+             */
+            mergeResult = false;
+            LOG.debug("Exception while creating the parent in ensureParentsByMerge. Proceeding with the actual request", e);
+        }
+        return mergeResult;
     }
 }
