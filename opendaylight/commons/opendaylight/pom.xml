@@ -16,7 +16,7 @@
   <properties>
     <mdsal.version>2.1.0-SNAPSHOT</mdsal.version>
     <mdsal.model.version>0.9.0-SNAPSHOT</mdsal.model.version>
-    <akka.version>2.3.14</akka.version>
+    <akka.version>2.4.1</akka.version>
     <appauth.version>0.7.0-SNAPSHOT</appauth.version>
     <archetype-app-northbound>0.3.0-SNAPSHOT</archetype-app-northbound>
     <arphandler.version>0.8.0-SNAPSHOT</arphandler.version>
@@ -245,7 +245,7 @@
 
       <dependency>
         <groupId>com.typesafe.akka</groupId>
-        <artifactId>akka-persistence-experimental_${scala.version}</artifactId>
+        <artifactId>akka-persistence_${scala.version}</artifactId>
         <version>${akka.version}</version>
       </dependency>
 
