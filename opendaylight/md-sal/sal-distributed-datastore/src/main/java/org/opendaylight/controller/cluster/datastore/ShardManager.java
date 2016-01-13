@@ -1277,7 +1277,8 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     private void onSaveSnapshotSuccess (SaveSnapshotSuccess successMessage) {
         LOG.debug ("{} saved ShardManager snapshot successfully. Deleting the prev snapshot if available",
             persistenceId());
-        deleteSnapshots(new SnapshotSelectionCriteria(scala.Long.MaxValue(), (successMessage.metadata().timestamp() - 1)));
+        deleteSnapshots(new SnapshotSelectionCriteria(scala.Long.MaxValue(), successMessage.metadata().timestamp() - 1,
+            0, 0));
     }
 
     private static class ForwardedAddServerReply {
