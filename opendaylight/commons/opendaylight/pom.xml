@@ -16,7 +16,7 @@
   <properties>
     <mdsal.version>2.0.0-SNAPSHOT</mdsal.version>
     <mdsal.model.version>0.8.0-SNAPSHOT</mdsal.model.version>
-    <akka.version>2.3.14</akka.version>
+    <akka.version>2.4.1</akka.version>
     <appauth.version>0.6.0-SNAPSHOT</appauth.version>
     <archetype-app-northbound>0.2.0-SNAPSHOT</archetype-app-northbound>
     <arphandler.version>0.7.0-SNAPSHOT</arphandler.version>
@@ -119,8 +119,8 @@
     <samples.loadbalancer.northbound.version>0.6.0-SNAPSHOT</samples.loadbalancer.northbound.version>
     <samples.simpleforwarding.version>0.6.0-SNAPSHOT</samples.simpleforwarding.version>
     <sanitytest.version>0.6.0-SNAPSHOT</sanitytest.version>
-    <scala.version>2.10</scala.version>
-    <scala.micro.version>4</scala.micro.version>
+    <scala.version>2.11</scala.version>
+    <scala.micro.version>7</scala.micro.version>
     <security.version>0.6.0-SNAPSHOT</security.version>
     <karaf.security.version>0.6.0-SNAPSHOT</karaf.security.version>
     <sitedeploy>dav:http://nexus.opendaylight.org/content/sites/site</sitedeploy>
@@ -251,7 +251,7 @@
 
       <dependency>
         <groupId>com.typesafe.akka</groupId>
-        <artifactId>akka-persistence-experimental_${scala.version}</artifactId>
+        <artifactId>akka-persistence_${scala.version}</artifactId>
         <version>${akka.version}</version>
       </dependency>
 
