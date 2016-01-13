@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da33351e_38000faa",
+        "filename": "opendaylight/config/yang-jmx-generator/src/main/java/org/opendaylight/controller/config/yangjmxgenerator/ModuleMXBeanEntryBuilder.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 468,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2016-01-13T10:23:20Z",
+      "side": 1,
+      "message": "this condition for matching refine type {..} should do a hard check if the refine argument is \"type\" (should be a constnat somewhere around) because a simple extension added to refine name {...} might break this.",
+      "range": {
+        "startLine": 468,
+        "startChar": 20,
+        "endLine": 468,
+        "endChar": 65
+      },
+      "revId": "94f9817cd0a0b6e450134037bde7bda6bad812c3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
