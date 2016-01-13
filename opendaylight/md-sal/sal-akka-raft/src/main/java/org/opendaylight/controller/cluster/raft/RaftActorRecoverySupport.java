@@ -95,7 +95,7 @@ class RaftActorRecoverySupport {
 
                 // Delete all the akka snapshots as they will not be needed
                 persistentProvider.deleteSnapshots(new SnapshotSelectionCriteria(scala.Long.MaxValue(),
-                        scala.Long.MaxValue()));
+                        scala.Long.MaxValue(), 0L, 0L));
 
                 // Since we cleaned out the journal, we need to re-write the current election info.
                 context.getTermInformation().updateAndPersist(context.getTermInformation().getCurrentTerm(),
