@@ -8,9 +8,7 @@
 package org.opendaylight.controller.cluster.raft.utils;
 
 import akka.dispatch.Futures;
-import akka.japi.Procedure;
-import akka.persistence.PersistentConfirmation;
-import akka.persistence.PersistentId;
+import akka.persistence.AtomicWrite;
 import akka.persistence.PersistentImpl;
 import akka.persistence.PersistentRepr;
 import akka.persistence.journal.japi.AsyncWriteJournal;
@@ -22,10 +20,12 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import org.apache.commons.lang.SerializationUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -148,7 +148,9 @@ public class InMemoryJournal extends AsyncWriteJournal {
 
     @Override
     public Future<Void> doAsyncReplayMessages(final String persistenceId, final long fromSequenceNr,
-            final long toSequenceNr, final long max, final Procedure<PersistentRepr> replayCallback) {
+            final long toSequenceNr, final long max, final Consumer<PersistentRepr> replayCallback) {
+        LOG.trace("doAsyncReplayMessages for {}: fromSequenceNr: {}, toSequenceNr: {}", persistenceId,
+                fromSequenceNr,toSequenceNr);
         return Futures.future(new Callable<Void>() {
             @Override
             public Void call() throws Exception {
@@ -168,8 +170,8 @@ public class InMemoryJournal extends AsyncWriteJournal {
                         if (++count <= max && entry.getKey() >= fromSequenceNr && entry.getKey() <= toSequenceNr) {
                             PersistentRepr persistentMessage =
                                     new PersistentImpl(deserialize(entry.getValue()), entry.getKey(), persistenceId,
-                                            false, null, null);
-                            replayCallback.apply(persistentMessage);
+                                            null, false, null, null);
+                            replayCallback.accept(persistentMessage);
                         }
                     }
                 }
@@ -181,6 +183,8 @@ public class InMemoryJournal extends AsyncWriteJournal {
 
     @Override
     public Future<Long> doAsyncReadHighestSequenceNr(String persistenceId, long fromSequenceNr) {
+        LOG.trace("doAsyncReadHighestSequenceNr for {}: fromSequenceNr: {}", persistenceId, fromSequenceNr);
+
         // Akka calls this during recovery.
         Map<Long, Object> journal = journals.get(persistenceId);
         if(journal == null) {
@@ -200,41 +204,36 @@ public class InMemoryJournal extends AsyncWriteJournal {
     }
 
     @Override
-    public Future<Void> doAsyncWriteMessages(final Iterable<PersistentRepr> messages) {
-        return Futures.future(new Callable<Void>() {
+    public Future<Iterable<Optional<Exception>>> doAsyncWriteMessages(final Iterable<AtomicWrite> messages) {
+        return Futures.future(new Callable<Iterable<Optional<Exception>>>() {
             @Override
-            public Void call() throws Exception {
-                for (PersistentRepr repr : messages) {
-                    LOG.trace("doAsyncWriteMessages: id: {}: seqNr: {}, payload: {}", repr.persistenceId(),
+            public Iterable<Optional<Exception>> call() throws Exception {
+                for (AtomicWrite write : messages) {
+                    // Copy to array - workaround for eclipse "ambiguous method" errors for toIterator, toIterable etc
+                    PersistentRepr[] array = new PersistentRepr[write.payload().size()];
+                    write.payload().copyToArray(array);
+                    for(PersistentRepr repr: array) {
+                        LOG.trace("doAsyncWriteMessages: id: {}: seqNr: {}, payload: {}", repr.persistenceId(),
                             repr.sequenceNr(), repr.payload());
 
-                    addEntry(repr.persistenceId(), repr.sequenceNr(), repr.payload());
+                        addEntry(repr.persistenceId(), repr.sequenceNr(), repr.payload());
 
-                    WriteMessagesComplete complete = writeMessagesComplete.get(repr.persistenceId());
-                    if(complete != null) {
-                        if(complete.ofType == null || complete.ofType.equals(repr.payload().getClass())) {
-                            complete.latch.countDown();
+                        WriteMessagesComplete complete = writeMessagesComplete.get(repr.persistenceId());
+                        if(complete != null) {
+                            if(complete.ofType == null || complete.ofType.equals(repr.payload().getClass())) {
+                                complete.latch.countDown();
+                            }
                         }
                     }
                 }
 
-                return null;
+                return Collections.emptyList();
             }
         }, context().dispatcher());
     }
 
     @Override
-    public Future<Void> doAsyncWriteConfirmations(Iterable<PersistentConfirmation> confirmations) {
-        return Futures.successful(null);
-    }
-
-    @Override
-    public Future<Void> doAsyncDeleteMessages(Iterable<PersistentId> messageIds, boolean permanent) {
-        return Futures.successful(null);
-    }
-
-    @Override
-    public Future<Void> doAsyncDeleteMessagesTo(String persistenceId, long toSequenceNr, boolean permanent) {
+    public Future<Void> doAsyncDeleteMessagesTo(String persistenceId, long toSequenceNr) {
         LOG.trace("doAsyncDeleteMessagesTo: {}", toSequenceNr);
         Map<Long, Object> journal = journals.get(persistenceId);
         if(journal != null) {

@@ -27,6 +27,7 @@ import org.opendaylight.controller.cluster.raft.DefaultConfigParamsImpl;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
+import org.opendaylight.controller.cluster.raft.TestActorFactory;
 import org.opendaylight.controller.cluster.raft.base.messages.SendHeartBeat;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
@@ -140,6 +141,7 @@ public class AbstractLeaderElectionScenarioTest {
 
     protected final Logger testLog = LoggerFactory.getLogger(MockRaftActorContext.class);
     protected final ActorSystem system = ActorSystem.create("test");
+    protected final TestActorFactory actorFactory = new TestActorFactory(system);
     protected TestActorRef<MemberActor> member1ActorRef;
     protected TestActorRef<MemberActor> member2ActorRef;
     protected TestActorRef<MemberActor> member3ActorRef;
@@ -214,7 +216,7 @@ public class AbstractLeaderElectionScenarioTest {
     }
 
     TestActorRef<MemberActor> newMemberActor(String name) throws Exception {
-        TestActorRef<MemberActor> actor = TestActorRef.create(system, MemberActor.props(), name);
+        TestActorRef<MemberActor> actor = actorFactory.createTestActor(MemberActor.props(), name);
         MessageCollectorActor.waitUntilReady(actor);
         return actor;
     }

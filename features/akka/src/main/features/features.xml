@@ -32,6 +32,7 @@
         <feature version="${akka.version}">odl-akka-system</feature>
         <bundle>wrap:mvn:org.uncommons.maths/uncommons-maths/{{VERSION}}</bundle>
         <bundle>mvn:com.google.protobuf/protobuf-java/{{VERSION}}</bundle>
+        <bundle>mvn:com.typesafe.akka/akka-protobuf_${scala.version}/${akka.version}</bundle>
         <bundle>mvn:io.netty/netty/{{VERSION}}</bundle>
         <bundle>mvn:com.typesafe.akka/akka-remote_${scala.version}/${akka.version}</bundle>
         <bundle>mvn:com.typesafe.akka/akka-cluster_${scala.version}/${akka.version}</bundle>
@@ -43,7 +44,8 @@
     <feature name='odl-akka-persistence' description='Akka Persistence' version="${akka.version}">
         <feature version='0.7'>odl-akka-leveldb</feature>
         <feature version="${akka.version}">odl-akka-system</feature>
-        <bundle>mvn:com.typesafe.akka/akka-persistence-experimental_${scala.version}/${akka.version}</bundle>
+        <bundle>mvn:com.typesafe.akka/akka-protobuf_${scala.version}/${akka.version}</bundle>
+        <bundle>mvn:com.typesafe.akka/akka-persistence_${scala.version}/${akka.version}</bundle>
         <bundle>wrap:mvn:com.google.protobuf/protobuf-java/{{VERSION}}$overwrite=merge&amp;DynamicImport-Package=org.opendaylight.controller.protobuff.messages.*;org.opendaylight.controller.cluster.raft.protobuff.client.messages.*</bundle>
     </feature>
 </features>
