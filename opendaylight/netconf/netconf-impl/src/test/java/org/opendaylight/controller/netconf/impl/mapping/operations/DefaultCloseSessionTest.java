@@ -18,6 +18,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
+import io.netty.channel.EventLoop;
 import io.netty.util.concurrent.GenericFutureListener;
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
@@ -34,6 +35,21 @@ import org.w3c.dom.Document;
 
 public class DefaultCloseSessionTest {
 
+    private void mockEventLoop(final Channel channel) {
+        final EventLoop eventLoop = mock(EventLoop.class);
+        doReturn(eventLoop).when(channel).eventLoop();
+        doAnswer(new Answer<Void>() {
+            @Override
+            public Void answer(InvocationOnMock invocation) throws Throwable {
+                final Object[] args = invocation.getArguments();
+                final Runnable runnable = (Runnable) args[0];
+                runnable.run();
+                return null;
+            }
+        }).when(eventLoop).execute(any(Runnable.class));
+        doReturn(true).when(eventLoop).inEventLoop();
+    }
+
     @Test
     public void testDefaultCloseSession() throws Exception {
         AutoCloseable res = mock(AutoCloseable.class);
@@ -43,7 +59,10 @@ public class DefaultCloseSessionTest {
         XmlElement elem = XmlElement.fromDomElement(XmlUtil.readXmlToElement("<elem/>"));
         final Channel channel = mock(Channel.class);
         doReturn("channel").when(channel).toString();
-        doReturn(mock(ChannelFuture.class)).when(channel).close();
+        mockEventLoop(channel);
+        final ChannelFuture channelFuture = mock(ChannelFuture.class);
+        doReturn(channelFuture).when(channel).close();
+        doReturn(channelFuture).when(channelFuture).addListener(any(GenericFutureListener.class));
 
         final ChannelFuture sendFuture = mock(ChannelFuture.class);
         doAnswer(new Answer<Object>() {
@@ -54,6 +73,7 @@ public class DefaultCloseSessionTest {
             }
         }).when(sendFuture).addListener(any(GenericFutureListener.class));
         doReturn(sendFuture).when(channel).writeAndFlush(anyObject());
+        doReturn(true).when(sendFuture).isSuccess();
         final NetconfServerSessionListener listener = mock(NetconfServerSessionListener.class);
         doNothing().when(listener).onSessionTerminated(any(NetconfServerSession.class), any(NetconfTerminationReason.class));
         final NetconfServerSession session =
