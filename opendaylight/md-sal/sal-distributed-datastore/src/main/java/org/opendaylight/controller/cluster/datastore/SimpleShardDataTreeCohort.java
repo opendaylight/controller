@@ -7,16 +7,24 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import org.opendaylight.controller.cluster.datastore.utils.PruningDataTreeModification;
 import org.opendaylight.controller.md.sal.common.api.data.OptimisticLockFailedException;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
+import org.opendaylight.mdsal.common.api.PostCanCommitStep;
+import org.opendaylight.mdsal.common.api.PostPreCommitStep;
+import org.opendaylight.mdsal.common.api.ThreePhaseCommitStep;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.ConflictingModificationAppliedException;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidateTip;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataValidationFailedException;
+import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,6 +36,9 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
     private final ShardDataTree dataTree;
     private final String transactionId;
     private DataTreeCandidateTip candidate;
+    private SchemaContext schema;
+    private Collection<? extends ThreePhaseCommitStep> activeCohorts;
+    private ResultCollection<PostPreCommitStep> userPreCommitFinished;
 
     SimpleShardDataTreeCohort(final ShardDataTree dataTree, final DataTreeModification transaction,
             final String transactionId) {
@@ -69,7 +80,19 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
     @Override
     public ListenableFuture<Void> preCommit() {
         try {
+            // FIXME: Should candidate creation be moved to canCommit?
             candidate = dataTree.getDataTree().prepare(dataTreeModification());
+            ResultCollection<PostCanCommitStep> postCustomCanCommit = customCohortsCanCommit().get();
+            activeCohorts = postCustomCanCommit.getValues();
+            if (!postCustomCanCommit.getThrowables().isEmpty()) {
+                return Futures.immediateFailedFuture(cohortsCanCommitFailure(postCustomCanCommit.getThrowables()));
+            }
+            userPreCommitFinished = customCohortsPreCommit(postCustomCanCommit.getValues()).get();
+            activeCohorts = userPreCommitFinished.getValues();
+
+            if (!userPreCommitFinished.getThrowables().isEmpty()) {
+                return Futures.immediateFailedFuture(cohortsPreCommitFailure(userPreCommitFinished.getThrowables()));
+            }
             /*
              * FIXME: this is the place where we should be interacting with persistence, specifically by invoking
              *        persist on the candidate (which gives us a Future).
@@ -82,6 +105,46 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
         }
     }
 
+    private ListenableFuture<ResultCollection<PostCanCommitStep>> customCohortsCanCommit() {
+        return dataTree.userCohorsCanCommit(transactionId, candidate, schema);
+    }
+
+    private ListenableFuture<ResultCollection<PostPreCommitStep>> customCohortsPreCommit(
+            Collection<PostCanCommitStep> steps) {
+        Collection<ListenableFuture<? extends PostPreCommitStep>> preCommitFutures = new ArrayList<>(steps.size());
+        for (PostCanCommitStep commitStep : steps) {
+            preCommitFutures.add(commitStep.preCommit());
+        }
+        return ResultCollection.fromFutures(preCommitFutures);
+    }
+
+    private ListenableFuture<ResultCollection<Object>> cohortsCommit() {
+        Collection<PostPreCommitStep> postPreCommits = userPreCommitFinished.getValues();
+        List<ListenableFuture<?>> commitFutures = new ArrayList<>(postPreCommits.size());
+        for (PostPreCommitStep postPreCommit : postPreCommits) {
+            commitFutures.add(postPreCommit.commit());
+        }
+        return ResultCollection.fromFutures(commitFutures);
+    }
+
+    private Throwable cohortsCanCommitFailure(Collection<Throwable> throwables) {
+        TransactionCommitFailedException frontend =
+                new TransactionCommitFailedException("Custom cohorts canCommit failed.");
+        for (Throwable backend : throwables) {
+            frontend.addSuppressed(backend);
+        }
+        return frontend;
+    }
+
+    private Throwable cohortsPreCommitFailure(Collection<Throwable> throwables) {
+        TransactionCommitFailedException frontend =
+                new TransactionCommitFailedException("Custom cohorts preCommit failed.");
+        for (Throwable backend : throwables) {
+            frontend.addSuppressed(backend);
+        }
+        return frontend;
+    }
+
     private DataTreeModification dataTreeModification() {
         DataTreeModification dataTreeModification = transaction;
         if(transaction instanceof PruningDataTreeModification){
@@ -92,8 +155,21 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
 
     @Override
     public ListenableFuture<Void> abort() {
-        // No-op, really
-        return VOID_FUTURE;
+        if (activeCohorts == null) {
+            return VOID_FUTURE;
+        }
+        Collection<ListenableFuture<?>> userAbortFutures = new ArrayList<>(activeCohorts.size());
+        for (ThreePhaseCommitStep value : activeCohorts) {
+            userAbortFutures.add(value.abort());
+        }
+        return Futures.transform(ResultCollection.fromFutures(userAbortFutures),
+                new Function<ResultCollection<?>, Void>() {
+
+                    @Override
+                    public Void apply(ResultCollection<?> input) {
+                        return null;
+                    }
+                });
     }
 
     @Override
@@ -105,8 +181,11 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
             return Futures.immediateFailedFuture(e);
         }
 
+
+        cohortsCommit();
         LOG.trace("Transaction {} committed, proceeding to notify", transaction);
         dataTree.notifyListeners(candidate);
         return VOID_FUTURE;
     }
+
 }

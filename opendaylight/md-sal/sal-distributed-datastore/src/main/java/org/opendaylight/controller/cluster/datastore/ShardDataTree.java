@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.datastore;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import com.google.common.util.concurrent.ListenableFuture;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.HashMap;
 import java.util.Map;
@@ -21,6 +22,7 @@ import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeListener;
 import org.opendaylight.controller.md.sal.dom.store.impl.DataChangeListenerRegistration;
 import org.opendaylight.controller.md.sal.dom.store.impl.ResolveDataChangeEventsTask;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.ListenerTree;
+import org.opendaylight.mdsal.common.api.PostCanCommitStep;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -51,6 +53,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     private static final ShardDataTreeNotificationManager MANAGER = new ShardDataTreeNotificationManager();
     private final Map<String, ShardDataTreeTransactionChain> transactionChains = new HashMap<>();
     private final ShardDataTreeChangePublisher treeChangePublisher = new ShardDataTreeChangePublisher();
+    private final ShardDataTreeCohortRegistry cohortRegistry = new ShardDataTreeCohortRegistry();
     private final ListenerTree listenerTree = ListenerTree.create();
     private final TipProducingDataTree dataTree;
     private SchemaContext schemaContext;
@@ -225,5 +228,10 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         DataTreeCandidateTip candidate = dataTree.prepare(modification);
         dataTree.commit(candidate);
         return candidate;
+    }
+
+    ListenableFuture<ResultCollection<PostCanCommitStep>> userCohorsCanCommit(String txId,
+            DataTreeCandidateTip candidate, SchemaContext schema) {
+        return cohortRegistry.canCommit(txId, candidate, schema);
     }
 }
