@@ -9,7 +9,6 @@
 package org.opendaylight.controller.cluster.raft.utils;
 
 import akka.dispatch.Futures;
-import akka.japi.Option;
 import akka.persistence.SelectedSnapshot;
 import akka.persistence.SnapshotMetadata;
 import akka.persistence.SnapshotSelectionCriteria;
@@ -21,6 +20,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -102,27 +102,27 @@ public class InMemorySnapshotStore extends SnapshotStore {
     }
 
     @Override
-    public Future<Option<SelectedSnapshot>> doLoadAsync(String persistenceId,
+    public Future<Optional<SelectedSnapshot>> doLoadAsync(String persistenceId,
             SnapshotSelectionCriteria snapshotSelectionCriteria) {
         List<StoredSnapshot> snapshotList = snapshots.get(persistenceId);
         if(snapshotList == null){
-            return Futures.successful(Option.<SelectedSnapshot>none());
+            return Futures.successful(Optional.<SelectedSnapshot>empty());
         }
 
         synchronized(snapshotList) {
             for(int i = snapshotList.size() - 1; i >= 0; i--) {
                 StoredSnapshot snapshot = snapshotList.get(i);
                 if(matches(snapshot, snapshotSelectionCriteria)) {
-                    return Futures.successful(Option.some(new SelectedSnapshot(snapshot.metadata,
+                    return Futures.successful(Optional.of(new SelectedSnapshot(snapshot.metadata,
                             snapshot.data)));
                 }
             }
         }
 
-        return Futures.successful(Option.<SelectedSnapshot>none());
+        return Futures.successful(Optional.<SelectedSnapshot>empty());
     }
 
-    private boolean matches(StoredSnapshot snapshot, SnapshotSelectionCriteria criteria) {
+    private static boolean matches(StoredSnapshot snapshot, SnapshotSelectionCriteria criteria) {
         return snapshot.metadata.sequenceNr() <= criteria.maxSequenceNr() &&
                 snapshot.metadata.timestamp() <= criteria.maxTimestamp();
     }
@@ -151,41 +151,36 @@ public class InMemorySnapshotStore extends SnapshotStore {
     }
 
     @Override
-    public void onSaved(SnapshotMetadata snapshotMetadata) throws Exception {
-    }
+    public Future<Void> doDeleteAsync(SnapshotMetadata metadata) {
+        List<StoredSnapshot> snapshotList = snapshots.get(metadata.persistenceId());
 
-    @Override
-    public void doDelete(SnapshotMetadata snapshotMetadata) throws Exception {
-        List<StoredSnapshot> snapshotList = snapshots.get(snapshotMetadata.persistenceId());
-
-        if(snapshotList == null){
-            return;
-        }
-
-        synchronized (snapshotList) {
-            for(int i=0;i<snapshotList.size(); i++){
-                StoredSnapshot snapshot = snapshotList.get(i);
-                if(snapshotMetadata.equals(snapshot.metadata)){
-                    snapshotList.remove(i);
-                    break;
+        if (snapshotList != null) {
+            synchronized (snapshotList) {
+                for(int i=0;i<snapshotList.size(); i++){
+                    StoredSnapshot snapshot = snapshotList.get(i);
+                    if(metadata.equals(snapshot.metadata)){
+                        snapshotList.remove(i);
+                        break;
+                    }
                 }
             }
         }
+
+        return Futures.successful(null);
     }
 
     @Override
-    public void doDelete(String persistentId, SnapshotSelectionCriteria snapshotSelectionCriteria)
-            throws Exception {
-        LOG.trace("doDelete: persistentId {}: maxSequenceNr: {}: maxTimestamp {}", persistentId,
-                snapshotSelectionCriteria.maxSequenceNr(), snapshotSelectionCriteria.maxTimestamp());
+    public Future<Void> doDeleteAsync(String persistenceId, SnapshotSelectionCriteria criteria) {
+        LOG.trace("doDelete: persistentId {}: maxSequenceNr: {}: maxTimestamp {}", persistenceId,
+            criteria.maxSequenceNr(), criteria.maxTimestamp());
 
-        List<StoredSnapshot> snapshotList = snapshots.get(persistentId);
+        List<StoredSnapshot> snapshotList = snapshots.get(persistenceId);
         if(snapshotList != null){
             synchronized (snapshotList) {
                 Iterator<StoredSnapshot> iter = snapshotList.iterator();
                 while(iter.hasNext()) {
                     StoredSnapshot s = iter.next();
-                    if(matches(s, snapshotSelectionCriteria)) {
+                    if(matches(s, criteria)) {
                         LOG.trace("Deleting snapshot for sequenceNr: {}, timestamp: {}: {}",
                                 s.metadata.sequenceNr(), s.metadata.timestamp(), s.data);
 
@@ -195,10 +190,12 @@ public class InMemorySnapshotStore extends SnapshotStore {
             }
         }
 
-        CountDownLatch latch = snapshotDeletedLatches.get(persistentId);
+        CountDownLatch latch = snapshotDeletedLatches.get(persistenceId);
         if(latch != null) {
             latch.countDown();
         }
+
+        return Futures.successful(null);
     }
 
     private static class StoredSnapshot {

@@ -12,7 +12,6 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.Cancellable;
 import akka.actor.Props;
-import akka.persistence.RecoveryFailure;
 import akka.serialization.Serialization;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
@@ -195,23 +194,12 @@ public class Shard extends RaftActor {
 
     @Override
     public void onReceiveRecover(final Object message) throws Exception {
-        if(LOG.isDebugEnabled()) {
-            LOG.debug("{}: onReceiveRecover: Received message {} from {}", persistenceId(),
-                message.getClass().toString(), getSender());
-        }
+        LOG.debug("{}: onReceiveRecover: Received message {} from {}", persistenceId(), message.getClass(),
+            getSender());
 
-        if (message instanceof RecoveryFailure){
-            LOG.error("{}: Recovery failed because of this cause",
-                    persistenceId(), ((RecoveryFailure) message).cause());
-
-            // Even though recovery failed, we still need to finish our recovery, eg send the
-            // ActorInitialized message and start the txCommitTimeoutCheckSchedule.
-            onRecoveryComplete();
-        } else {
-            super.onReceiveRecover(message);
-            if(LOG.isTraceEnabled()) {
-                appendEntriesReplyTracker.begin();
-            }
+        super.onReceiveRecover(message);
+        if (LOG.isTraceEnabled()) {
+            appendEntriesReplyTracker.begin();
         }
     }
 
