@@ -35,6 +35,8 @@ import org.opendaylight.controller.cluster.notifications.LeaderStateChanged;
 import org.opendaylight.controller.cluster.notifications.RoleChanged;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
+import org.opendaylight.controller.cluster.raft.base.messages.GetLastAppliedIndex;
+import org.opendaylight.controller.cluster.raft.base.messages.GetLastAppliedIndexReply;
 import org.opendaylight.controller.cluster.raft.base.messages.InitiateCaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.LeaderTransitioning;
 import org.opendaylight.controller.cluster.raft.base.messages.Replicate;
@@ -253,6 +255,8 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             );
         } else if(message instanceof GetOnDemandRaftState) {
             onGetOnDemandRaftStats();
+        } else if(message instanceof GetLastAppliedIndex) {
+            getSender().tell(new GetLastAppliedIndexReply(context.getId(), context.getLastApplied()), self());
         } else if(message instanceof InitiateCaptureSnapshot) {
             captureSnapshot();
         } else if(message instanceof SwitchBehavior){
@@ -439,6 +443,8 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             if(leadershipTransferInProgress != null) {
                 leadershipTransferInProgress.onNewLeader(currentBehavior.getLeaderId());
             }
+
+            serverConfigurationSupport.onNewLeader(currentBehavior.getLeaderId());
         }
 
         if (roleChangeNotifier.isPresent() &&

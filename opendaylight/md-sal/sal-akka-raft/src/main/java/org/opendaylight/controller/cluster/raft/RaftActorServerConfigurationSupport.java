@@ -10,6 +10,10 @@ package org.opendaylight.controller.cluster.raft;
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.Cancellable;
+import akka.dispatch.Futures;
+import akka.dispatch.OnComplete;
+import akka.pattern.Patterns;
+import akka.util.Timeout;
 import com.google.common.base.Preconditions;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -17,10 +21,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import javax.annotation.Nullable;
-import org.opendaylight.controller.cluster.raft.RaftActorLeadershipTransferCohort.OnComplete;
 import org.opendaylight.controller.cluster.raft.ServerConfigurationPayload.ServerInfo;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
+import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
+import org.opendaylight.controller.cluster.raft.base.messages.GetLastAppliedIndex;
+import org.opendaylight.controller.cluster.raft.base.messages.GetLastAppliedIndexReply;
 import org.opendaylight.controller.cluster.raft.base.messages.SnapshotComplete;
 import org.opendaylight.controller.cluster.raft.behaviors.AbstractLeader;
 import org.opendaylight.controller.cluster.raft.messages.AddServer;
@@ -35,6 +42,7 @@ import org.opendaylight.controller.cluster.raft.messages.UnInitializedFollowerSn
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import scala.concurrent.Future;
 
 /**
  * Handles server configuration related messages for a RaftActor.
@@ -85,11 +93,22 @@ class RaftActorServerConfigurationSupport {
         }
     }
 
+    public void onNewLeader(String leaderId) {
+        currentOperationState.onNewLeader(leaderId);
+    }
+
     private void onChangeServersVotingStatus(ChangeServersVotingStatus message, ActorRef sender) {
         LOG.debug("{}: onChangeServersVotingStatus: {}, state: {}", raftContext.getId(), message,
                 currentOperationState);
 
-        onNewOperation(new ChangeServersVotingStatusContext(message, sender));
+        boolean localServerChangingToVoting = Boolean.TRUE.equals(message.
+                getServerVotingStatusMap().get(raftActor.getRaftActorContext().getId()));
+        boolean hasNoLeader = raftActor.getLeaderId() == null;
+        if(localServerChangingToVoting && !raftContext.isVotingMember() && hasNoLeader) {
+            currentOperationState.onNewOperation(new ChangeServersVotingStatusContext(message, sender, true));
+        } else {
+            onNewOperation(new ChangeServersVotingStatusContext(message, sender, false));
+        }
     }
 
     private void onRemoveServer(RemoveServer removeServer, ActorRef sender) {
@@ -152,7 +171,7 @@ class RaftActorServerConfigurationSupport {
             ActorSelection leader = raftActor.getLeader();
             if (leader != null) {
                 LOG.debug("{}: Not leader - forwarding to leader {}", raftContext.getId(), leader);
-                leader.forward(operationContext.getOperation(), raftActor.getContext());
+                leader.tell(operationContext.getOperation(), operationContext.getClientRequestor());
             } else {
                 LOG.debug("{}: No leader - returning NO_LEADER reply", raftContext.getId());
                 operationContext.getClientRequestor().tell(operationContext.newReply(
@@ -174,6 +193,8 @@ class RaftActorServerConfigurationSupport {
         void onApplyState(ApplyState applyState);
 
         void onSnapshotComplete();
+
+        void onNewLeader(String newLeader);
     }
 
     /**
@@ -214,6 +235,10 @@ class RaftActorServerConfigurationSupport {
 
         @Override
         public void onSnapshotComplete() {
+        }
+
+        @Override
+        public void onNewLeader(String newLeader) {
         }
 
         protected void persistNewServerConfiguration(ServerOperationContext<?> operationContext){
@@ -634,13 +659,17 @@ class RaftActorServerConfigurationSupport {
     }
 
     private static class ChangeServersVotingStatusContext extends ServerOperationContext<ChangeServersVotingStatus> {
-        ChangeServersVotingStatusContext(ChangeServersVotingStatus convertMessage, ActorRef clientRequestor) {
+        private final boolean tryToElectLeader;
+
+        ChangeServersVotingStatusContext(ChangeServersVotingStatus convertMessage, ActorRef clientRequestor,
+                boolean tryToElectLeader) {
             super(convertMessage, clientRequestor);
+            this.tryToElectLeader = tryToElectLeader;
         }
 
         @Override
         InitialOperationState newInitialOperationState(RaftActorServerConfigurationSupport support) {
-            return support.new ChangeServersVotingStatusState(this);
+            return support.new ChangeServersVotingStatusState(this, tryToElectLeader);
         }
 
         @Override
@@ -655,7 +684,7 @@ class RaftActorServerConfigurationSupport {
             boolean localServerChangedToNonVoting = Boolean.FALSE.equals(getOperation().
                     getServerVotingStatusMap().get(raftActor.getRaftActorContext().getId()));
             if(succeeded && localServerChangedToNonVoting && raftActor.isLeader()) {
-                raftActor.initiateLeadershipTransfer(new OnComplete() {
+                raftActor.initiateLeadershipTransfer(new RaftActorLeadershipTransferCohort.OnComplete() {
                     @Override
                     public void onSuccess(ActorRef raftActorRef, ActorRef replyTo) {
                         LOG.debug("{}: leader transfer succeeded after change to non-voting", raftActor.persistenceId());
@@ -681,21 +710,147 @@ class RaftActorServerConfigurationSupport {
 
         @Override
         String getLoggingContext() {
-            return getOperation().getServerVotingStatusMap().toString();
+            return getOperation().toString();
         }
     }
 
     private class ChangeServersVotingStatusState extends AbstractOperationState implements InitialOperationState {
         private final ChangeServersVotingStatusContext changeVotingStatusContext;
+        private final boolean tryToElectLeader;
 
-        ChangeServersVotingStatusState(ChangeServersVotingStatusContext changeVotingStatusContext) {
+        ChangeServersVotingStatusState(ChangeServersVotingStatusContext changeVotingStatusContext,
+                boolean tryToElectLeader) {
             this.changeVotingStatusContext = changeVotingStatusContext;
+            this.tryToElectLeader = tryToElectLeader;
         }
 
         @Override
         public void initiate() {
             LOG.debug("Initiating ChangeServersVotingStatusState");
 
+            if(tryToElectLeader) {
+                initiateLeaderElection();
+            } else {
+                updateLocalPeerInfo();
+
+                persistNewServerConfiguration(changeVotingStatusContext);
+            }
+        }
+
+        private void initiateLeaderElection() {
+            LOG.debug("{}: Initiating leader election", raftContext.getId());
+
+            // We need to try to elect a leader in order to apply the new server config. We want to pick the
+            // voting server from the new server config that has the most up to date log. Therefore we'll ask
+            // each voting server for it's last applied log index and find the one with the largest index,
+            // including us. We require a successful response from each server for safety, otherwise we fail
+            // the operation.
+
+            List<ActorSelection> newVotingPeerActors = getNewVotingPeerActors();
+            if(newVotingPeerActors == null) {
+                operationComplete(changeVotingStatusContext, ServerChangeStatus.NO_LEADER);
+                return;
+            }
+
+            if(newVotingPeerActors.isEmpty()) {
+                initiateLocalLeaderElection();
+                return;
+            }
+
+            LOG.debug("{}: Sending GetLastAppliedIndex to voting peers {}", raftContext.getId(), newVotingPeerActors);
+
+            GetLastAppliedIndex getLastAppliedIndex = new GetLastAppliedIndex();
+            Timeout timeout = new Timeout(5, TimeUnit.SECONDS);
+            List<Future<Object>> futures = new ArrayList<>();
+            for(ActorSelection actor: newVotingPeerActors) {
+                futures.add(Patterns.ask(actor, getLastAppliedIndex, timeout));
+            }
+
+            OnComplete<Iterable<Object>> onComplete = new OnComplete<Iterable<Object>>() {
+                @Override
+                public void onComplete(final Throwable failure, final Iterable<Object> replies) {
+                    raftContext.getActor().tell(new Runnable() {
+                        @Override
+                        public void run() {
+                            onGetLastAppliedIndexReplies(failure, replies);
+                        }
+                    }, raftContext.getActor());
+                }
+            };
+
+            Futures.sequence(futures, raftActor.context().dispatcher()).onComplete(onComplete,
+                    raftActor.context().dispatcher());
+        }
+
+        private void onGetLastAppliedIndexReplies(final Throwable failure, final Iterable<Object> replies) {
+            if(failure != null) {
+                LOG.debug("{}: GetLastAppliedIndex request failed", raftContext.getId(), failure);
+                operationComplete(changeVotingStatusContext, ServerChangeStatus.NO_LEADER);
+                return;
+            }
+
+            long largestLastAppliedIndex = raftContext.getLastApplied();
+            String leaderCandidate = raftContext.getId();
+            for(Object reply: replies) {
+                long replyIndex = ((GetLastAppliedIndexReply)reply).getIndex();
+                if(replyIndex > largestLastAppliedIndex) {
+                    largestLastAppliedIndex = replyIndex;
+                    leaderCandidate = ((GetLastAppliedIndexReply)reply).getServerId();
+                }
+            }
+
+            LOG.debug("{}: Largest lastAppliedIndex {} found on server {}", raftContext.getId(),
+                    largestLastAppliedIndex, leaderCandidate);
+
+            if(leaderCandidate.equals(raftContext.getId())) {
+                initiateLocalLeaderElection();
+            } else {
+                // Another server's log is more up to date - forward the operation.
+                raftContext.getPeerActorSelection(leaderCandidate).tell(changeVotingStatusContext.getOperation(),
+                        changeVotingStatusContext.getClientRequestor());
+                currentOperationState = IDLE;
+            }
+        }
+
+        private void initiateLocalLeaderElection() {
+            LOG.debug("{}: Sending ElectionTimeout to start leader election", raftContext.getId());
+
+            ServerConfigurationPayload previousServerConfig = raftContext.getPeerServerInfo(true);
+            updateLocalPeerInfo();
+
+            raftContext.getActor().tell(new ElectionTimeout(), raftContext.getActor());
+
+            currentOperationState = new WaitingForLeaderElected(changeVotingStatusContext, previousServerConfig);
+        }
+
+        @Nullable
+        private List<ActorSelection> getNewVotingPeerActors() {
+            List<ActorSelection> peerActors = new ArrayList<>();
+            for(ServerInfo info: newServerInfoList(false)) {
+                if(info.isVoting()) {
+                    ActorSelection actor = raftContext.getPeerActorSelection(info.getId());
+                    if(actor == null) {
+                        return null;
+                    }
+
+                    peerActors.add(actor);
+                }
+            }
+
+            return peerActors;
+        }
+
+        private void updateLocalPeerInfo() {
+            List<ServerInfo> newServerInfoList = newServerInfoList(true);
+
+            raftContext.updatePeerIds(new ServerConfigurationPayload(newServerInfoList));
+            if(raftActor.getCurrentBehavior() instanceof AbstractLeader) {
+                AbstractLeader leader = (AbstractLeader) raftActor.getCurrentBehavior();
+                leader.updateMinReplicaCount();
+            }
+        }
+
+        private List<ServerInfo> newServerInfoList(boolean includeSelf) {
             Map<String, Boolean> serverVotingStatusMap = changeVotingStatusContext.getOperation().getServerVotingStatusMap();
             List<ServerInfo> newServerInfoList = new ArrayList<>();
             for(String peerId: raftContext.getPeerIds()) {
@@ -703,14 +858,52 @@ class RaftActorServerConfigurationSupport {
                         serverVotingStatusMap.get(peerId) : raftContext.getPeerInfo(peerId).isVoting()));
             }
 
-            newServerInfoList.add(new ServerInfo(raftContext.getId(), serverVotingStatusMap.containsKey(
-                    raftContext.getId()) ? serverVotingStatusMap.get(raftContext.getId()) : raftContext.isVotingMember()));
+            if(includeSelf) {
+                newServerInfoList.add(new ServerInfo(raftContext.getId(), serverVotingStatusMap.containsKey(
+                        raftContext.getId()) ? serverVotingStatusMap.get(raftContext.getId()) : raftContext.isVotingMember()));
+            }
 
-            raftContext.updatePeerIds(new ServerConfigurationPayload(newServerInfoList));
-            AbstractLeader leader = (AbstractLeader) raftActor.getCurrentBehavior();
-            leader.updateMinReplicaCount();
+            return newServerInfoList;
+        }
+    }
 
-            persistNewServerConfiguration(changeVotingStatusContext);
+    private class WaitingForLeaderElected extends AbstractOperationState {
+        private final ServerConfigurationPayload previousServerConfig;
+        private final ServerOperationContext<?> operationContext;
+        private final Cancellable timer;
+
+        WaitingForLeaderElected(ServerOperationContext<?> operationContext,
+                ServerConfigurationPayload previousServerConfig) {
+            this.operationContext = operationContext;
+            this.previousServerConfig = previousServerConfig;
+
+            timer = newTimer(new ServerOperationTimeout(operationContext.getLoggingContext()));
+        }
+
+        @Override
+        public void onNewLeader(String newLeader) {
+            LOG.debug("{}: New leader {} elected", raftContext.getId(), newLeader);
+
+            timer.cancel();
+
+            if(raftActor.isLeader()) {
+                persistNewServerConfiguration(operationContext);
+            } else {
+                // Edge case - some other node became leader so forward the operation.
+                currentOperationState = IDLE;
+                RaftActorServerConfigurationSupport.this.onNewOperation(operationContext);
+            }
+        }
+
+        @Override
+        public void onServerOperationTimeout(ServerOperationTimeout timeout) {
+            LOG.warn("{}: Leader election timed out - cannot apply operation {}",
+                    raftContext.getId(), timeout.getLoggingContext());
+
+            // Revert the local server config change.
+            raftContext.updatePeerIds(previousServerConfig);
+
+            operationComplete(operationContext, ServerChangeStatus.NO_LEADER);
         }
     }
 
