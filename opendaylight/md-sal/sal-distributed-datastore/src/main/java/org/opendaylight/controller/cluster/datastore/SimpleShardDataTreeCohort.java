@@ -47,6 +47,7 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
         try {
             dataTree.getDataTree().validate(modification);
             LOG.trace("Transaction {} validated", transaction);
+
             return TRUE_FUTURE;
         }
         catch (ConflictingModificationAppliedException e) {
