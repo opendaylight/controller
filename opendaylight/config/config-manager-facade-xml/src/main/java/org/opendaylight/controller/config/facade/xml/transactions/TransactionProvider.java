@@ -11,6 +11,7 @@ package org.opendaylight.controller.config.facade.xml.transactions;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import javax.management.InstanceNotFoundException;
@@ -18,10 +19,8 @@ import javax.management.ObjectName;
 import org.opendaylight.controller.config.api.ConflictingVersionException;
 import org.opendaylight.controller.config.api.ValidationException;
 import org.opendaylight.controller.config.api.jmx.CommitStatus;
-import org.opendaylight.controller.config.facade.xml.exception.NoTransactionFoundException;
 import org.opendaylight.controller.config.util.ConfigRegistryClient;
 import org.opendaylight.controller.config.util.ConfigTransactionClient;
-import org.opendaylight.controller.config.util.xml.DocumentedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -123,8 +122,7 @@ public class TransactionProvider implements AutoCloseable {
     /**
      * Commit and notification send must be atomic
      */
-    public CommitStatus commitTransaction() throws ValidationException, ConflictingVersionException,
-        NoTransactionFoundException {
+    public CommitStatus commitTransaction() throws ValidationException, ConflictingVersionException {
         return commitTransaction(configRegistryClient);
     }
 
@@ -132,12 +130,11 @@ public class TransactionProvider implements AutoCloseable {
      * Commit and notification send must be atomic
      * @param configRegistryClient
      */
-    public synchronized CommitStatus commitTransaction(final ConfigRegistryClient configRegistryClient) throws ValidationException, ConflictingVersionException, NoTransactionFoundException {
+    public synchronized CommitStatus commitTransaction(final ConfigRegistryClient configRegistryClient) throws ValidationException, ConflictingVersionException {
         if (!getTransaction().isPresent()){
-            throw new NoTransactionFoundException("No transaction found for session " + sessionIdForReporting,
-                    DocumentedException.ErrorType.application,
-                    DocumentedException.ErrorTag.operation_failed,
-                    DocumentedException.ErrorSeverity.error);
+            //making empty commit without prior opened transaction, just return commit status with empty lists
+            LOG.debug("Making commit without open candidate transaction for session {}", sessionIdForReporting);
+            return new CommitStatus(Collections.EMPTY_LIST, Collections.EMPTY_LIST, Collections.EMPTY_LIST);
         }
         final Optional<ObjectName> maybeTaON = getTransaction();
         ObjectName taON = maybeTaON.get();
