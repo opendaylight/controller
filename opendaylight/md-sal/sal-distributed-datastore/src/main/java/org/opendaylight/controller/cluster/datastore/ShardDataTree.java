@@ -219,6 +219,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         return dataTree.takeSnapshot().newModification();
     }
 
+    // FIXME: This should be removed, it violates encapsulation
     public DataTreeCandidate commit(DataTreeModification modification) throws DataValidationFailedException {
         modification.ready();
         dataTree.validate(modification);
