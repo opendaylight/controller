@@ -122,6 +122,8 @@ public class Shard extends RaftActor {
 
     private final ShardTransactionMessageRetrySupport messageRetrySupport;
 
+    private final DataTreeCohortActorRegistry cohortRegistry;
+
     protected Shard(AbstractBuilder<?, ?> builder) {
         super(builder.getId().toString(), builder.getPeerAddresses(),
                 Optional.of(builder.getDatastoreContext().getShardRaftConfig()), DataStoreVersions.CURRENT_VERSION);
@@ -135,7 +137,7 @@ public class Shard extends RaftActor {
         LOG.info("Shard created : {}, persistent : {}", name, datastoreContext.isPersistent());
 
         store = new ShardDataTree(builder.getSchemaContext(), builder.getTreeType());
-
+        cohortRegistry = new DataTreeCohortActorRegistry();
         shardMBean = ShardMBeanFactory.getShardStatsMBean(name.toString(),
                 datastoreContext.getDataStoreMXBeanType());
         shardMBean.setShard(this);
@@ -144,7 +146,7 @@ public class Shard extends RaftActor {
             getContext().become(new MeteringBehavior(this));
         }
 
-        commitCoordinator = new ShardCommitCoordinator(store,
+        commitCoordinator = new ShardCommitCoordinator(store, cohortRegistry,
                 datastoreContext.getShardCommitQueueExpiryTimeoutInMillis(),
                 datastoreContext.getShardTransactionCommitQueueCapacity(), LOG, this.name);
 
