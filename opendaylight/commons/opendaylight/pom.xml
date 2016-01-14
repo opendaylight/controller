@@ -784,12 +784,12 @@
       <dependency>
         <groupId>org.scala-lang</groupId>
         <artifactId>scala-library</artifactId>
-        <version>${scala.version}.1</version>
+        <version>${scala.version}.${scala.micro.version}</version>
       </dependency>
       <dependency>
         <groupId>org.scala-lang</groupId>
         <artifactId>scala-reflect</artifactId>
-        <version>${scala.version}.1</version>
+        <version>${scala.version}.${scala.micro.version}</version>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
