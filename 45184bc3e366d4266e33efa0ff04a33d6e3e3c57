@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a3d3df0_88b0fbde",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/RaftActorTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 373,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-01-14T14:13:04Z",
+      "side": 1,
+      "message": "Just curious - what\u0027s the purpose for this change?",
+      "revId": "45184bc3e366d4266e33efa0ff04a33d6e3e3c57",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
