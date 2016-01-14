@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -11,6 +11,7 @@ package org.opendaylight.controller.netconf.confignetconfconnector.transactions;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import javax.management.InstanceNotFoundException;
@@ -20,8 +21,6 @@ import org.opendaylight.controller.config.api.ValidationException;
 import org.opendaylight.controller.config.api.jmx.CommitStatus;
 import org.opendaylight.controller.config.util.ConfigRegistryClient;
 import org.opendaylight.controller.config.util.ConfigTransactionClient;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
-import org.opendaylight.controller.netconf.confignetconfconnector.exception.NoTransactionFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -125,12 +124,19 @@ public class TransactionProvider implements AutoCloseable {
     /**
      * Commit and notification send must be atomic
      */
-    public synchronized CommitStatus commitTransaction() throws ValidationException, ConflictingVersionException, NoTransactionFoundException {
+    public CommitStatus commitTransaction() throws ValidationException, ConflictingVersionException {
+        return commitTransaction(configRegistryClient);
+    }
+
+    /**
+     * Commit and notification send must be atomic
+     * @param configRegistryClient
+     */
+    public synchronized CommitStatus commitTransaction(final ConfigRegistryClient configRegistryClient) throws ValidationException, ConflictingVersionException {
         if (!getTransaction().isPresent()){
-            throw new NoTransactionFoundException("No transaction found for session " + netconfSessionIdForReporting,
-                    NetconfDocumentedException.ErrorType.application,
-                    NetconfDocumentedException.ErrorTag.operation_failed,
-                    NetconfDocumentedException.ErrorSeverity.error);
+            //making empty commit without prior opened transaction, just return commit status with empty lists
+            LOG.debug("Making commit without open candidate transaction for session {}", netconfSessionIdForReporting);
+            return new CommitStatus(Collections.EMPTY_LIST, Collections.EMPTY_LIST, Collections.EMPTY_LIST);
         }
         final Optional<ObjectName> maybeTaON = getTransaction();
         ObjectName taON = maybeTaON.get();
