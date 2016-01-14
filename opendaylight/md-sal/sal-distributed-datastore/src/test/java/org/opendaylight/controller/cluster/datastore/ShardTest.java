@@ -19,6 +19,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.opendaylight.controller.cluster.datastore.DataStoreVersions.CURRENT_VERSION;
+
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.Props;
@@ -1552,6 +1553,7 @@ public class ShardTest extends AbstractShardTest {
             final DataTreeCandidateNode candidateRoot = mock(DataTreeCandidateNode.class);
             doReturn(ModificationType.UNMODIFIED).when(candidateRoot).getModificationType();
             doReturn(candidateRoot).when(candidate).getRootNode();
+            doReturn(YangInstanceIdentifier.EMPTY).when(candidate).getRootPath();
             doReturn(candidate).when(cohort).getCandidate();
 
             shard.tell(prepareReadyTransactionMessage(readWrite, shard.underlyingActor(), cohort, transactionID2, modification, true), getRef());
@@ -1597,6 +1599,7 @@ public class ShardTest extends AbstractShardTest {
             final DataTreeCandidateNode candidateRoot = mock(DataTreeCandidateNode.class);
             doReturn(ModificationType.UNMODIFIED).when(candidateRoot).getModificationType();
             doReturn(candidateRoot).when(candidate).getRootNode();
+            doReturn(YangInstanceIdentifier.EMPTY).when(candidate).getRootPath();
             doReturn(candidate).when(cohort).getCandidate();
 
             shard.tell(prepareReadyTransactionMessage(readWrite, shard.underlyingActor(), cohort, transactionID2, modification, true), getRef());

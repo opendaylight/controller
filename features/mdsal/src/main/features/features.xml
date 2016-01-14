@@ -32,7 +32,7 @@
 
     <feature name='odl-mdsal-broker-local' version='${project.version}' description="OpenDaylight :: MDSAL :: Broker">
         <feature version='${yangtools.version}'>odl-yangtools-common</feature>
-        <feature version='${mdsal.version}'>odl-mdsal-binding-runtime</feature>
+        <feature version='${mdsal.version}'>odl-mdsal-binding-dom-adapter</feature>
         <feature version='${mdsal.model.version}'>odl-mdsal-models</feature>
         <feature version='${project.version}'>odl-mdsal-common</feature>
         <feature version='${config.version}'>odl-config-startup</feature>

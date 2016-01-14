@@ -32,6 +32,10 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransactio
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionChain;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreTreeChangePublisher;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
+import org.opendaylight.mdsal.dom.api.DOMDataTreeCommitCohort;
+import org.opendaylight.mdsal.dom.api.DOMDataTreeCommitCohortRegistration;
+import org.opendaylight.mdsal.dom.api.DOMDataTreeCommitCohortRegistry;
+import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -44,7 +48,7 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class DistributedDataStore implements DistributedDataStoreInterface, SchemaContextListener,
-        DatastoreContextConfigAdminOverlay.Listener, DOMStoreTreeChangePublisher, AutoCloseable {
+        DatastoreContextConfigAdminOverlay.Listener, DOMStoreTreeChangePublisher, DOMDataTreeCommitCohortRegistry, AutoCloseable {
 
     private static final Logger LOG = LoggerFactory.getLogger(DistributedDataStore.class);
     private static final String UNKNOWN_TYPE = "unknown";
@@ -154,6 +158,23 @@ public class DistributedDataStore implements DistributedDataStoreInterface, Sche
         listenerRegistrationProxy.init(shardName, treeId);
 
         return listenerRegistrationProxy;
+    }
+
+
+    @Override
+    public <C extends DOMDataTreeCommitCohort> DOMDataTreeCommitCohortRegistration<C> registerCommitCohort(
+            DOMDataTreeIdentifier subtree, C cohort) {
+        YangInstanceIdentifier treeId =
+                Preconditions.checkNotNull(subtree, "subtree should not be null").getRootIdentifier();
+        Preconditions.checkNotNull(cohort, "listener should not be null");
+
+
+        final String shardName = actorContext.getShardStrategyFactory().getStrategy(treeId).findShard(treeId);
+        LOG.debug("Registering cohort: {} for tree: {} shard: {}", cohort, treeId, shardName);
+
+        DataTreeCohortRegistrationProxy<C> cohortProxy = new DataTreeCohortRegistrationProxy<C>(actorContext, subtree, cohort);
+        cohortProxy.init(shardName);
+        return cohortProxy;
     }
 
     @Override

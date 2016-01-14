@@ -29,6 +29,10 @@ import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
 import org.opendaylight.controller.md.sal.dom.broker.impl.TransactionCommitFailedExceptionMapper;
 import org.opendaylight.controller.sal.core.spi.data.DOMStore;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
+import org.opendaylight.mdsal.dom.api.DOMDataTreeCommitCohort;
+import org.opendaylight.mdsal.dom.api.DOMDataTreeCommitCohortRegistration;
+import org.opendaylight.mdsal.dom.api.DOMDataTreeCommitCohortRegistry;
+import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
 import org.opendaylight.yangtools.util.DurationStatisticsTracker;
 import org.opendaylight.yangtools.util.concurrent.MappingCheckedFuture;
 import org.slf4j.Logger;
@@ -42,7 +46,7 @@ import org.slf4j.LoggerFactory;
  * @author Thomas Pantelis
  */
 @Beta
-public class ConcurrentDOMDataBroker extends AbstractDOMBroker {
+public class ConcurrentDOMDataBroker extends AbstractDOMBroker implements DOMDataTreeCommitCohortRegistry {
     private static final Logger LOG = LoggerFactory.getLogger(ConcurrentDOMDataBroker.class);
     private static final String CAN_COMMIT = "CAN_COMMIT";
     private static final String PRE_COMMIT = "PRE_COMMIT";
@@ -323,6 +327,27 @@ public class ConcurrentDOMDataBroker extends AbstractDOMBroker {
                     delegate.run();
                 }
             }
+        }
+    }
+
+    @Override
+    public <T extends DOMDataTreeCommitCohort> DOMDataTreeCommitCohortRegistration<T> registerCommitCohort(
+            DOMDataTreeIdentifier path, T cohort) {
+        DOMStore store = getTxFactories().get(toLegacy(path.getDatastoreType()));
+        if (store instanceof DOMDataTreeCommitCohortRegistry) {
+            return ((DOMDataTreeCommitCohortRegistry) store).registerCommitCohort(path, cohort);
+        }
+        throw new UnsupportedOperationException("Commit cohort is not supported for " + path);
+    }
+
+    private LogicalDatastoreType toLegacy(org.opendaylight.mdsal.common.api.LogicalDatastoreType datastoreType) {
+        switch (datastoreType) {
+            case CONFIGURATION:
+                return LogicalDatastoreType.CONFIGURATION;
+            case OPERATIONAL:
+                return LogicalDatastoreType.OPERATIONAL;
+            default:
+                throw new IllegalArgumentException("Unsupported data store type: " + datastoreType);
         }
     }
 }
