@@ -16,8 +16,11 @@ public abstract class ShardDataTreeCohort {
         // Prevent foreign instantiation
     }
 
+    // FIXME: This leaks internal state generated in preCommit,
+    // should be result of canCommit
     abstract DataTreeCandidateTip getCandidate();
 
+    // FIXME: Should return rebased DataTreeCandidateTip
     @VisibleForTesting
     public abstract ListenableFuture<Boolean> canCommit();
     @VisibleForTesting
