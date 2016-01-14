@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.raft.behaviors;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertSame;
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.testkit.TestActorRef;
@@ -32,6 +33,8 @@ import org.opendaylight.controller.cluster.raft.SerializationUtils;
 import org.opendaylight.controller.cluster.raft.TestActorFactory;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
+import org.opendaylight.controller.cluster.raft.messages.PreVote;
+import org.opendaylight.controller.cluster.raft.messages.PreVoteReply;
 import org.opendaylight.controller.cluster.raft.messages.RaftRPC;
 import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
@@ -44,7 +47,7 @@ public abstract class AbstractRaftActorBehaviorTest extends AbstractActorTest {
 
     protected final TestActorFactory actorFactory = new TestActorFactory(getSystem());
 
-    private final TestActorRef<MessageCollectorActor> behaviorActor = actorFactory.createTestActor(
+    protected final TestActorRef<MessageCollectorActor> behaviorActor = actorFactory.createTestActor(
             Props.create(MessageCollectorActor.class), actorFactory.generateActorId("behavior"));
 
     RaftActorBehavior behavior;
@@ -223,6 +226,56 @@ public abstract class AbstractRaftActorBehaviorTest extends AbstractActorTest {
         RequestVoteReply reply = MessageCollectorActor.expectFirstMatching(behaviorActor,
                 RequestVoteReply.class);
         assertEquals("isVoteGranted", false, reply.isVoteGranted());
+    }
+
+    @Test
+    public void testHandlePreVote() {
+        MockRaftActorContext context = createActorContext();
+        context.setReplicatedLog(new MockRaftActorContext.MockReplicatedLogBuilder().
+                createEntries(0, 2, 1).build());
+        context.getTermInformation().update(1, "test");
+
+        behavior = createBehavior(context);
+
+        // candidate same current term, same log term, same log index -> true
+        RaftActorBehavior ret = behavior.handleMessage(behaviorActor,
+                new PreVote(context.getTermInformation().getCurrentTerm(), 1, 1));
+        assertSame(behavior, ret);
+        PreVoteReply reply = MessageCollectorActor.expectFirstMatching(behaviorActor, PreVoteReply.class);
+        assertEquals("isVoteGranted", true, reply.isVoteGranted());
+        MessageCollectorActor.clearMessages(behaviorActor);
+
+        // candidate higher current term, higher log term, same log index -> true
+        behavior.handleMessage(behaviorActor, new PreVote(context.getTermInformation().getCurrentTerm() + 1, 0,
+                context.getTermInformation().getCurrentTerm() + 1));
+        reply = MessageCollectorActor.expectFirstMatching(behaviorActor, PreVoteReply.class);
+        assertEquals("isVoteGranted", true, reply.isVoteGranted());
+        MessageCollectorActor.clearMessages(behaviorActor);
+
+        // candidate same current term, same log term, higher log index -> true
+        behavior.handleMessage(behaviorActor, new PreVote(context.getTermInformation().getCurrentTerm(), 2, 1));
+        reply = MessageCollectorActor.expectFirstMatching(behaviorActor, PreVoteReply.class);
+        assertEquals("isVoteGranted", true, reply.isVoteGranted());
+        MessageCollectorActor.clearMessages(behaviorActor);
+
+        // candidate same current term, same log term, lower log index -> false
+        behavior.handleMessage(behaviorActor, new PreVote(context.getTermInformation().getCurrentTerm(), 0, 1));
+        reply = MessageCollectorActor.expectFirstMatching(behaviorActor, PreVoteReply.class);
+        assertEquals("isVoteGranted", false, reply.isVoteGranted());
+        MessageCollectorActor.clearMessages(behaviorActor);
+
+        // candidate same current term, lower log term, same log index -> false
+        behavior.handleMessage(behaviorActor, new PreVote(context.getTermInformation().getCurrentTerm(), 1, 0));
+        reply = MessageCollectorActor.expectFirstMatching(behaviorActor, PreVoteReply.class);
+        assertEquals("isVoteGranted", false, reply.isVoteGranted());
+        MessageCollectorActor.clearMessages(behaviorActor);
+
+        // candidate lower current term, lower log term, same log index -> false
+        behavior.handleMessage(behaviorActor, new PreVote(context.getTermInformation().getCurrentTerm() - 1, 1,
+                context.getTermInformation().getCurrentTerm() - 1));
+        reply = MessageCollectorActor.expectFirstMatching(behaviorActor, PreVoteReply.class);
+        assertEquals("isVoteGranted", false, reply.isVoteGranted());
+        MessageCollectorActor.clearMessages(behaviorActor);
     }
 
     @Test

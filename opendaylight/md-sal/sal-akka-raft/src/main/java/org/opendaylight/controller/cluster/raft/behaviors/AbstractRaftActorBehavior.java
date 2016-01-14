@@ -22,6 +22,8 @@ import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
+import org.opendaylight.controller.cluster.raft.messages.PreVote;
+import org.opendaylight.controller.cluster.raft.messages.PreVoteReply;
 import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import org.slf4j.Logger;
@@ -188,34 +190,59 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
 
         //  Reply false if term < currentTerm (§5.1)
         if (requestVote.getTerm() < currentTerm()) {
+            LOG.debug("{}: vote not granted - our current term {} is higher", logName(), currentTerm());
             grantVote = false;
 
-            // If votedFor is null or candidateId, and candidate’s log is at
-            // least as up-to-date as receiver’s log, grant vote (§5.2, §5.4)
-        } else if (votedFor() == null || votedFor()
-                .equals(requestVote.getCandidateId())) {
-
-            boolean candidateLatest = false;
-
-            // From §5.4.1
-            // Raft determines which of two logs is more up-to-date
-            // by comparing the index and term of the last entries in the
-            // logs. If the logs have last entries with different terms, then
-            // the log with the later term is more up-to-date. If the logs
-            // end with the same term, then whichever log is longer is
-            // more up-to-date.
-            if (requestVote.getLastLogTerm() > lastTerm()) {
-                candidateLatest = true;
-            } else if ((requestVote.getLastLogTerm() == lastTerm())
-                    && requestVote.getLastLogIndex() >= lastIndex()) {
-                candidateLatest = true;
-            }
-
-            if (candidateLatest) {
-                grantVote = true;
-            }
+        // If votedFor is null or candidateId, and candidate’s log is at
+        // least as up-to-date as receiver’s log, grant vote (§5.2, §5.4)
+        } else if (votedFor() == null || votedFor().equals(requestVote.getCandidateId())) {
+            grantVote = canGrantVote(requestVote.getLastLogTerm(), requestVote.getLastLogIndex());
+        } else {
+            LOG.debug("{}: vote not granted - our votedFor {} does not match candidate {}", logName(),
+                    votedFor(), requestVote.getCandidateId());
         }
+
         return grantVote;
+    }
+
+    private boolean canGrantVote(long lastLogTerm, long lastLogIndex) {
+        boolean candidateLatest = false;
+
+        // From §5.4.1
+        // Raft determines which of two logs is more up-to-date
+        // by comparing the index and term of the last entries in the
+        // logs. If the logs have last entries with different terms, then
+        // the log with the later term is more up-to-date. If the logs
+        // end with the same term, then whichever log is longer is
+        // more up-to-date.
+        long lastTerm = lastTerm();
+        if(lastLogTerm > lastTerm) {
+            candidateLatest = true;
+        } else if(lastLogTerm == lastTerm && lastLogIndex >= lastIndex()) {
+            candidateLatest = true;
+        }
+
+        if(!candidateLatest) {
+            LOG.debug("{}: vote not granted - our lastTerm {} or lastIndex {} is higher", logName(),
+                    lastTerm, lastIndex());
+        }
+
+        return candidateLatest;
+    }
+
+    protected RaftActorBehavior preVote(ActorRef sender, PreVote preVote) {
+        LOG.debug("{}: In preVote:  {}", logName(), preVote);
+
+        boolean grantVote = preVote.getTerm() >= currentTerm() &&
+                canGrantVote(preVote.getLastLogTerm(), preVote.getLastLogIndex());
+
+        PreVoteReply reply = new PreVoteReply(grantVote);
+
+        LOG.debug("{}: preVote returning: {}", logName(), reply);
+
+        sender.tell(reply, actor());
+
+        return this;
     }
 
     /**
@@ -411,6 +438,8 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
             return requestVote(sender, (RequestVote) message);
         } else if (message instanceof RequestVoteReply) {
             return handleRequestVoteReply(sender, (RequestVoteReply) message);
+        } else if (message instanceof PreVote) {
+            return preVote(sender, (PreVote) message);
         }
         return this;
     }
