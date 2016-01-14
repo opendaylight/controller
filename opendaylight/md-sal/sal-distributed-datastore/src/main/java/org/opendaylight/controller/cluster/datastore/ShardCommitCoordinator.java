@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import org.opendaylight.controller.cluster.datastore.compat.BackwardsCompatibleThreePhaseCommitCohort;
 import org.opendaylight.controller.cluster.datastore.messages.AbortTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.BatchedModifications;
@@ -34,6 +35,8 @@ import org.opendaylight.controller.cluster.datastore.modification.Modification;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 import org.slf4j.Logger;
+import scala.concurrent.duration.Duration;
+import scala.concurrent.duration.FiniteDuration;
 
 /**
  * Coordinates commits for a shard ensuring only one concurrent 3-phase commit.
@@ -52,6 +55,8 @@ class ShardCommitCoordinator {
     private CohortEntry currentCohortEntry;
 
     private final ShardDataTree dataTree;
+
+    private final DataTreeCohortActorRegistry cohortRegistry;
 
     // We use a LinkedList here to avoid synchronization overhead with concurrent queue impls
     // since this should only be accessed on the shard's dispatcher.
@@ -72,12 +77,16 @@ class ShardCommitCoordinator {
 
     private Runnable runOnPendingTransactionsComplete;
 
-    ShardCommitCoordinator(ShardDataTree dataTree,
+
+    private static final FiniteDuration MAXIMUM_COMMIT_STEP_DURATION = Duration.create(5, TimeUnit.SECONDS);
+
+    ShardCommitCoordinator(ShardDataTree dataTree, DataTreeCohortActorRegistry cohortRegistry,
             long cacheExpiryTimeoutInMillis, int queueCapacity, Logger log, String name) {
 
         this.queueCapacity = queueCapacity;
         this.log = log;
         this.name = name;
+        this.cohortRegistry = cohortRegistry;
         this.dataTree = Preconditions.checkNotNull(dataTree);
         this.cacheExpiryTimeoutInMillis = cacheExpiryTimeoutInMillis;
     }
@@ -136,7 +145,7 @@ class ShardCommitCoordinator {
                 ready.getTransactionID(), ready.getTxnClientVersion());
 
         ShardDataTreeCohort cohort = ready.getTransaction().ready();
-        CohortEntry cohortEntry = new CohortEntry(ready.getTransactionID(), cohort);
+        CohortEntry cohortEntry = new CohortEntry(ready.getTransactionID(), cohort, cohortRegistry);
         cohortCache.put(ready.getTransactionID(), cohortEntry);
 
         if(!queueCohortEntry(cohortEntry, sender, shard)) {
@@ -189,7 +198,8 @@ class ShardCommitCoordinator {
         if(cohortEntry == null) {
             cohortEntry = new CohortEntry(batched.getTransactionID(),
                     dataTree.newReadWriteTransaction(batched.getTransactionID(),
-                        batched.getTransactionChainID()));
+ batched.getTransactionChainID()),
+                    cohortRegistry);
             cohortCache.put(batched.getTransactionID(), cohortEntry);
         }
 
@@ -247,7 +257,7 @@ class ShardCommitCoordinator {
     void handleReadyLocalTransaction(ReadyLocalTransaction message, ActorRef sender, Shard shard) {
         final ShardDataTreeCohort cohort = new SimpleShardDataTreeCohort(dataTree, message.getModification(),
                 message.getTransactionID());
-        final CohortEntry cohortEntry = new CohortEntry(message.getTransactionID(), cohort);
+        final CohortEntry cohortEntry = new CohortEntry(message.getTransactionID(), cohort, cohortRegistry);
         cohortCache.put(message.getTransactionID(), cohortEntry);
         cohortEntry.setDoImmediateCommit(message.isDoCommitOnReady());
 
@@ -605,16 +615,22 @@ class ShardCommitCoordinator {
         private boolean doImmediateCommit;
         private final Stopwatch lastAccessTimer = Stopwatch.createStarted();
         private int totalBatchedModificationsReceived;
+        private CompositeDataTreeCohort userCohorts;
         private boolean aborted;
 
-        CohortEntry(String transactionID, ReadWriteShardDataTreeTransaction transaction) {
+        CohortEntry(String transactionID, ReadWriteShardDataTreeTransaction transaction,
+                DataTreeCohortActorRegistry cohortRegistry) {
             this.transaction = Preconditions.checkNotNull(transaction);
             this.transactionID = transactionID;
+            this.userCohorts =
+                    new CompositeDataTreeCohort(cohortRegistry, transactionID, null, MAXIMUM_COMMIT_STEP_DURATION);
         }
 
-        CohortEntry(String transactionID, ShardDataTreeCohort cohort) {
+        CohortEntry(String transactionID, ShardDataTreeCohort cohort, DataTreeCohortActorRegistry cohortRegistry) {
             this.transactionID = transactionID;
             this.cohort = cohort;
+            this.userCohorts =
+                    new CompositeDataTreeCohort(cohortRegistry, transactionID, null, MAXIMUM_COMMIT_STEP_DURATION);
             this.transaction = null;
         }
 
@@ -653,26 +669,38 @@ class ShardCommitCoordinator {
             }
         }
 
-        boolean canCommit() throws InterruptedException, ExecutionException {
+        boolean canCommit() throws InterruptedException, ExecutionException, TimeoutException {
             // We block on the future here (and also preCommit(), commit(), abort()) so we don't have to worry
             // about possibly accessing our state on a different thread outside of our dispatcher.
             // TODO: the ShardDataTreeCohort returns immediate Futures anyway which begs the question - why
             // bother even returning Futures from ShardDataTreeCohort if we have to treat them synchronously
             // anyway?. The Futures are really a remnant from when we were using the InMemoryDataBroker.
-            return cohort.canCommit().get();
+
+            Boolean successful = cohort.canCommit().get();
+
+            if (successful) {
+                // Moved preCommit here, since we need it to have rebase candidate available.
+                cohort.preCommit().get();
+                return userCohorts.canCommit(cohort.getCandidate());
+            }
+            return false;
         }
 
-        void preCommit() throws InterruptedException, ExecutionException {
-            cohort.preCommit().get();
+
+
+        void preCommit() throws InterruptedException, ExecutionException, TimeoutException {
+            userCohorts.preCommit();
         }
 
-        void commit() throws InterruptedException, ExecutionException {
+        void commit() throws InterruptedException, ExecutionException, TimeoutException {
             cohort.commit().get();
+            userCohorts.commit();
         }
 
-        void abort() throws InterruptedException, ExecutionException {
+        void abort() throws InterruptedException, ExecutionException, TimeoutException {
             aborted = true;
             cohort.abort().get();
+            userCohorts.abort();
         }
 
         void ready(CohortDecorator cohortDecorator, boolean doImmediateCommit) {
