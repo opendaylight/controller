@@ -135,7 +135,6 @@ public class Shard extends RaftActor {
         LOG.info("Shard created : {}, persistent : {}", name, datastoreContext.isPersistent());
 
         store = new ShardDataTree(builder.getSchemaContext(), builder.getTreeType());
-
         shardMBean = ShardMBeanFactory.getShardStatsMBean(name.toString(),
                 datastoreContext.getDataStoreMXBeanType());
         shardMBean.setShard(this);
@@ -143,9 +142,8 @@ public class Shard extends RaftActor {
         if (isMetricsCaptureEnabled()) {
             getContext().become(new MeteringBehavior(this));
         }
-
-        commitCoordinator = new ShardCommitCoordinator(store,
-                datastoreContext.getShardCommitQueueExpiryTimeoutInMillis(),
+        commitCoordinator =
+                new ShardCommitCoordinator(store, datastoreContext.getShardCommitQueueExpiryTimeoutInMillis(),
                 datastoreContext.getShardTransactionCommitQueueCapacity(), LOG, this.name);
 
         setTransactionCommitTimeout();
@@ -269,6 +267,9 @@ public class Shard extends RaftActor {
                 context().parent().forward(message, context());
             } else if(ShardTransactionMessageRetrySupport.TIMER_MESSAGE_CLASS.isInstance(message)) {
                 messageRetrySupport.onTimerMessage(message);
+            } else if (message instanceof DataTreeCohortActorRegistry.CohortRegistryCommand) {
+                commitCoordinator
+                        .processCohortRegistryCommand((DataTreeCohortActorRegistry.CohortRegistryCommand) message);
             } else {
                 super.onReceiveCommand(message);
             }
