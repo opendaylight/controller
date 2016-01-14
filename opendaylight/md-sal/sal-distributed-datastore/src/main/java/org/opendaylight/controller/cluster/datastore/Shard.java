@@ -134,7 +134,6 @@ public class Shard extends RaftActor {
         LOG.info("Shard created : {}, persistent : {}", name, datastoreContext.isPersistent());
 
         store = new ShardDataTree(builder.getSchemaContext(), builder.getTreeType());
-
         shardMBean = ShardMBeanFactory.getShardStatsMBean(name.toString(),
                 datastoreContext.getDataStoreMXBeanType());
         shardMBean.setShard(this);
@@ -142,9 +141,8 @@ public class Shard extends RaftActor {
         if (isMetricsCaptureEnabled()) {
             getContext().become(new MeteringBehavior(this));
         }
-
-        commitCoordinator = new ShardCommitCoordinator(store,
-                datastoreContext.getShardCommitQueueExpiryTimeoutInMillis(),
+        commitCoordinator =
+                new ShardCommitCoordinator(store, datastoreContext.getShardCommitQueueExpiryTimeoutInMillis(),
                 datastoreContext.getShardTransactionCommitQueueCapacity(), LOG, this.name);
 
         setTransactionCommitTimeout();
@@ -257,6 +255,9 @@ public class Shard extends RaftActor {
                 context().parent().forward(message, context());
             } else if(ShardTransactionMessageRetrySupport.TIMER_MESSAGE_CLASS.isInstance(message)) {
                 messageRetrySupport.onTimerMessage(message);
+            } else if (message instanceof DataTreeCohortActorRegistry.CohortRegistryCommand) {
+                commitCoordinator.processCohortRegistryCommand(getSender(),
+                        (DataTreeCohortActorRegistry.CohortRegistryCommand) message);
             } else {
                 super.onReceiveCommand(message);
             }
@@ -395,7 +396,7 @@ public class Shard extends RaftActor {
 
     protected void handleBatchedModificationsLocal(BatchedModifications batched, ActorRef sender) {
         try {
-            commitCoordinator.handleBatchedModifications(batched, sender, this);
+            commitCoordinator.handleBatchedModifications(batched, sender, this, store.getSchemaContext());
         } catch (Exception e) {
             LOG.error("{}: Error handling BatchedModifications for Tx {}", persistenceId(),
                     batched.getTransactionID(), e);
@@ -456,7 +457,7 @@ public class Shard extends RaftActor {
         boolean isLeaderActive = isLeaderActive();
         if (isLeader() && isLeaderActive) {
             try {
-                commitCoordinator.handleReadyLocalTransaction(message, getSender(), this);
+                commitCoordinator.handleReadyLocalTransaction(message, getSender(), this, store.getSchemaContext());
             } catch (Exception e) {
                 LOG.error("{}: Error handling ReadyLocalTransaction for Tx {}", persistenceId(),
                         message.getTransactionID(), e);
@@ -480,7 +481,8 @@ public class Shard extends RaftActor {
 
         boolean isLeaderActive = isLeaderActive();
         if (isLeader() && isLeaderActive) {
-            commitCoordinator.handleForwardedReadyTransaction(forwardedReady, getSender(), this);
+            commitCoordinator.handleForwardedReadyTransaction(forwardedReady, getSender(), this,
+                    store.getSchemaContext());
         } else {
             ActorSelection leader = getLeader();
             if (!isLeaderActive || leader == null) {
