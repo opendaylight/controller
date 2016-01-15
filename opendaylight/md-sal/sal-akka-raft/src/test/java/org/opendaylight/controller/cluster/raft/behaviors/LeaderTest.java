@@ -1944,7 +1944,7 @@ public class LeaderTest extends AbstractLeaderTest {
         MessageCollectorActor.assertNoneMatching(leaderActor, ApplyState.class, 500);
 
         // Send reply from the voting follower and verify consensus.
-        leader.handleMessage(leaderActor, new AppendEntriesReply(FOLLOWER_ID, 1, true, 0, 1, (short)0));
+        leader.handleMessage(leaderActor, new AppendEntriesReply(FOLLOWER_ID, 1, true, 1, 1, (short)0));
 
         MessageCollectorActor.expectFirstMatching(leaderActor, ApplyState.class);
     }

@@ -254,7 +254,8 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
             int replicatedCount = 1;
 
             for (FollowerLogInformation info : followerToLog.values()) {
-                if ((info.getMatchIndex() >= N) && (context.getPeerInfo(followerId).isVoting())) {
+                final PeerInfo peerInfo = context.getPeerInfo(info.getId());
+                if(info.getMatchIndex() >= N && (peerInfo != null && peerInfo.isVoting())) {
                     replicatedCount++;
                 }
             }
