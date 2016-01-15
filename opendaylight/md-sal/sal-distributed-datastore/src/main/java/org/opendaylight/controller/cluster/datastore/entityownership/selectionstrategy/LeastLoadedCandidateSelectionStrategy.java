@@ -8,14 +8,22 @@
 
 package org.opendaylight.controller.cluster.datastore.entityownership.selectionstrategy;
 
+import com.google.common.base.MoreObjects;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The LeastLoadedCandidateSelectionStrategy assigns ownership for an entity to the candidate which owns the least
  * number of entities.
  */
 public class LeastLoadedCandidateSelectionStrategy extends AbstractEntityOwnerSelectionStrategy {
+    private static final Logger LOG = LoggerFactory.getLogger(LeastLoadedCandidateSelectionStrategy.class);
+
+    private Map<String, Long> localStatistics = new HashMap<>();
+
     protected LeastLoadedCandidateSelectionStrategy(long selectionDelayInMillis) {
         super(selectionDelayInMillis);
     }
@@ -26,16 +34,28 @@ public class LeastLoadedCandidateSelectionStrategy extends AbstractEntityOwnerSe
         long leastLoadedCount = Long.MAX_VALUE;
 
         for(String candidateName : viableCandidates){
-            Long val = statistics.get(candidateName);
-            if(val != null && val < leastLoadedCount){
+            long val = MoreObjects.firstNonNull(statistics.get(candidateName), 0L);
+            long localVal = MoreObjects.firstNonNull(localStatistics.get(candidateName), 0L);
+            if(val < localVal){
+                LOG.debug("Local statistic higher - Candidate : {}, local statistic : {}, provided statistic : {}",
+                        candidateName, localVal, val);
+                val = localVal;
+            } else {
+                LOG.debug("Provided statistic higher - Candidate : {}, local statistic : {}, provided statistic : {}",
+                        candidateName, localVal, val);
+                localStatistics.put(candidateName, val);
+            }
+            if(val < leastLoadedCount){
                 leastLoadedCount = val;
                 leastLoadedCandidate = candidateName;
             }
         }
 
         if(leastLoadedCandidate == null){
-            return viableCandidates.iterator().next();
+            leastLoadedCandidate = viableCandidates.iterator().next();
         }
+
+        localStatistics.put(leastLoadedCandidate, leastLoadedCount + 1);
         return leastLoadedCandidate;
     }
 }
