@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a3d3df0_9ce2f401",
+        "filename": "opendaylight/md-sal/sal-netconf-connector/src/test/java/org/opendaylight/controller/sal/connect/netconf/sal/tx/ReadOnlyTxTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2016-01-15T10:11:46Z",
+      "side": 1,
+      "message": "A test that hits the timeout would be helpfull",
+      "revId": "8c0f2b9414c7a76d418ab54557564f850f0eb107",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
