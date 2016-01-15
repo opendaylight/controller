@@ -12,7 +12,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -78,20 +77,13 @@ public class RaftActorRecoverySupportTest {
     public void setup() {
         MockitoAnnotations.initMocks(this);
 
-        doNothing().when(mockCohort).startLogRecoveryBatch(any(int.class));
-        doNothing().when(mockCohort).applyCurrentLogRecoveryBatch();
-        doNothing().when(mockCohort).applyRecoverySnapshot(any(byte[].class));
-        doNothing().when(mockCohort).appendRecoveredLogEntry(any(Payload.class));
-        doReturn(null).when(mockCohort).getRestoreFromSnapshot();
-        doReturn(true).when(mockPersistence).isRecoveryApplicable();
-        doNothing().when(mockPersistence).deleteMessages(any(long.class));
-        doNothing().when(mockPersistentProvider).deleteMessages(any(long.class));
-        doNothing().when(mockPersistentProvider).deleteSnapshots(any(SnapshotSelectionCriteria.class));
-        doNothing().when(mockPersistentProvider).persist(any(Object.class), any(Procedure.class));
-
         context = new RaftActorContextImpl(null, null, localId, new ElectionTermImpl(mockPersistentProvider, "test", LOG),
                 -1, -1, Collections.<String,String>emptyMap(), configParams, mockPersistence, LOG);
+
         support = new RaftActorRecoverySupport(context, mockBehavior , mockCohort);
+
+        doReturn(true).when(mockPersistence).isRecoveryApplicable();
+
         context.setReplicatedLog(ReplicatedLogImpl.newInstance(context, mockBehavior));
     }
 
