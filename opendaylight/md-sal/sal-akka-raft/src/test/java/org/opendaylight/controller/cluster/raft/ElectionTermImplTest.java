@@ -8,8 +8,6 @@
 package org.opendaylight.controller.cluster.raft;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.verify;
 import akka.japi.Procedure;
 import org.junit.Before;
@@ -17,8 +15,6 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.base.messages.UpdateElectionTerm;
 import org.slf4j.Logger;
@@ -35,19 +31,9 @@ public class ElectionTermImplTest {
     @Mock
     private DataPersistenceProvider mockPersistence;
 
-    @SuppressWarnings("unchecked")
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-
-        doAnswer(new Answer<Void>() {
-            @Override
-            public Void answer(InvocationOnMock invocation) throws Exception {
-                final Object[] args = invocation.getArguments();
-                ((Procedure<Object>)args[1]).apply(args[0]);
-                return null;
-            }
-        }).when(mockPersistence).persist(any(Object.class), any(Procedure.class));
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })

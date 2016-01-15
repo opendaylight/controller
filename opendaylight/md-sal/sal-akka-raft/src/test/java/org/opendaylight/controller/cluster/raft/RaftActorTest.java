@@ -19,7 +19,6 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.same;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -37,7 +36,6 @@ import akka.persistence.SaveSnapshotFailure;
 import akka.persistence.SaveSnapshotSuccess;
 import akka.persistence.SnapshotMetadata;
 import akka.persistence.SnapshotOffer;
-import akka.persistence.SnapshotSelectionCriteria;
 import akka.testkit.JavaTestKit;
 import akka.testkit.TestActorRef;
 import com.google.common.base.Optional;
@@ -102,19 +100,6 @@ public class RaftActorTest extends AbstractActorTest {
     @Before
     public void setUp(){
         factory = new TestActorFactory(getSystem());
-    }
-
-    @SuppressWarnings("unchecked")
-    private static DataPersistenceProvider mockPersistenceProvider() {
-        final DataPersistenceProvider dataPersistenceProvider = mock(DataPersistenceProvider.class);
-        doReturn(false).when(dataPersistenceProvider).isRecoveryApplicable();
-        doReturn(0L).when(dataPersistenceProvider).getLastSequenceNumber();
-        doNothing().when(dataPersistenceProvider).saveSnapshot(any(Object.class));
-        doNothing().when(dataPersistenceProvider).persist(any(Object.class), any(Procedure.class));
-        doNothing().when(dataPersistenceProvider).deleteSnapshots(any(SnapshotSelectionCriteria.class));
-        doNothing().when(dataPersistenceProvider).deleteMessages(0L);
-
-        return dataPersistenceProvider;
     }
 
     @After
@@ -310,8 +295,7 @@ public class RaftActorTest extends AbstractActorTest {
         mockRaftActor.waitForRecoveryComplete();
 
         RaftActorRecoverySupport mockSupport = mock(RaftActorRecoverySupport.class);
-        doReturn(false).when(mockSupport).handleRecoveryMessage(any(Object.class), any(PersistentDataProvider.class));
-        mockRaftActor.setRaftActorRecoverySupport(mockSupport);
+        mockRaftActor.setRaftActorRecoverySupport(mockSupport );
 
         Snapshot snapshot = Snapshot.create(new byte[]{1}, Collections.<ReplicatedLogEntry>emptyList(), 3, 1, 3, 1);
         SnapshotOffer snapshotOffer = new SnapshotOffer(new SnapshotMetadata("test", 6, 12345), snapshot);
@@ -416,7 +400,7 @@ public class RaftActorTest extends AbstractActorTest {
 
                 config.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
 
-                DataPersistenceProvider dataPersistenceProvider = mockPersistenceProvider();
+                DataPersistenceProvider dataPersistenceProvider = mock(DataPersistenceProvider.class);
 
                 TestActorRef<MockRaftActor> mockActorRef = factory.createTestActor(MockRaftActor.props(persistenceId,
                         Collections.<String, String>emptyMap(), config, dataPersistenceProvider), persistenceId);
@@ -447,7 +431,7 @@ public class RaftActorTest extends AbstractActorTest {
 
                 config.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
 
-                DataPersistenceProvider dataPersistenceProvider = mockPersistenceProvider();
+                DataPersistenceProvider dataPersistenceProvider = mock(DataPersistenceProvider.class);
 
                 TestActorRef<MockRaftActor> mockActorRef = factory.createTestActor(MockRaftActor.props(persistenceId,
                         Collections.<String, String>emptyMap(), config, dataPersistenceProvider), persistenceId);
@@ -615,7 +599,7 @@ public class RaftActorTest extends AbstractActorTest {
                 config.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
                 config.setIsolatedLeaderCheckInterval(new FiniteDuration(1, TimeUnit.DAYS));
 
-                DataPersistenceProvider dataPersistenceProvider = mockPersistenceProvider();
+                DataPersistenceProvider dataPersistenceProvider = mock(DataPersistenceProvider.class);
 
                 Map<String, String> peerAddresses = new HashMap<>();
                 peerAddresses.put(follower1Id, followerActor1.path().toString());
@@ -712,7 +696,7 @@ public class RaftActorTest extends AbstractActorTest {
                 config.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
                 config.setIsolatedLeaderCheckInterval(new FiniteDuration(1, TimeUnit.DAYS));
 
-                DataPersistenceProvider dataPersistenceProvider = mockPersistenceProvider();
+                DataPersistenceProvider dataPersistenceProvider = mock(DataPersistenceProvider.class);
 
                 Map<String, String> peerAddresses = new HashMap<>();
                 peerAddresses.put(leaderId, leaderActor1.path().toString());
@@ -819,7 +803,7 @@ public class RaftActorTest extends AbstractActorTest {
                 config.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
                 config.setIsolatedLeaderCheckInterval(new FiniteDuration(1, TimeUnit.DAYS));
 
-                DataPersistenceProvider dataPersistenceProvider = mockPersistenceProvider();
+                DataPersistenceProvider dataPersistenceProvider = mock(DataPersistenceProvider.class);
 
                 Map<String, String> peerAddresses = new HashMap<>();
                 peerAddresses.put(follower1Id, followerActor1.path().toString());
@@ -1079,7 +1063,7 @@ public class RaftActorTest extends AbstractActorTest {
         String persistenceId = factory.generateActorId("follower-");
         ImmutableMap<String, String> peerAddresses =
             ImmutableMap.<String, String>builder().put("member1", "address").build();
-        DataPersistenceProvider dataPersistenceProvider = mockPersistenceProvider();
+        DataPersistenceProvider dataPersistenceProvider = mock(DataPersistenceProvider.class);
 
         TestActorRef<MockRaftActor> actorRef = factory.createTestActor(
                 MockRaftActor.props(persistenceId, peerAddresses, emptyConfig, dataPersistenceProvider), persistenceId);
@@ -1153,7 +1137,6 @@ public class RaftActorTest extends AbstractActorTest {
         verify(mockRaftActor.snapshotCohortDelegate, timeout(5000)).createSnapshot(any(ActorRef.class));
 
         mockRaftActor.snapshotCohortDelegate = mock(RaftActorSnapshotCohort.class);
-        doNothing().when(mockRaftActor.snapshotCohortDelegate).createSnapshot(any(ActorRef.class));
 
         raftActorRef.tell(GetSnapshot.INSTANCE, kit.getRef());
 
@@ -1181,7 +1164,6 @@ public class RaftActorTest extends AbstractActorTest {
 
         mockRaftActor.getSnapshotMessageSupport().setSnapshotReplyActorTimeout(Duration.create(200, TimeUnit.MILLISECONDS));
         reset(mockRaftActor.snapshotCohortDelegate);
-        doNothing().when(mockRaftActor.snapshotCohortDelegate).createSnapshot(any(ActorRef.class));
 
         raftActorRef.tell(GetSnapshot.INSTANCE, kit.getRef());
         Failure failure = kit.expectMsgClass(akka.actor.Status.Failure.class);
@@ -1193,7 +1175,6 @@ public class RaftActorTest extends AbstractActorTest {
 
         mockRaftActor.setPersistence(false);
         reset(mockRaftActor.snapshotCohortDelegate);
-        doNothing().when(mockRaftActor.snapshotCohortDelegate).createSnapshot(any(ActorRef.class));
 
         raftActorRef.tell(GetSnapshot.INSTANCE, kit.getRef());
         reply = kit.expectMsgClass(GetSnapshotReply.class);

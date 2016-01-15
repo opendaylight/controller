@@ -8,9 +8,7 @@
 package org.opendaylight.controller.cluster.raft;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.same;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
@@ -58,8 +56,6 @@ public class ReplicatedLogImplTest {
     public void setup() {
         MockitoAnnotations.initMocks(this);
 
-        doNothing().when(mockPersistence).persist(any(Object.class), any(Procedure.class));
-
         context = new RaftActorContextImpl(null, null, "test",
                 new ElectionTermImpl(mockPersistence, "test", LOG),
                 -1, -1, Collections.<String,String>emptyMap(), configParams, mockPersistence, LOG);
@@ -92,10 +88,7 @@ public class ReplicatedLogImplTest {
 
         reset(mockPersistence);
 
-        doNothing().when(mockPersistence).persist(any(MockReplicatedLogEntry.class), any(Procedure.class));
-
         Procedure<ReplicatedLogEntry> mockCallback = Mockito.mock(Procedure.class);
-        doNothing().when(mockCallback).apply(logEntry);
         log.appendAndPersist(logEntry, mockCallback);
 
         verifyPersist(logEntry);
@@ -120,8 +113,6 @@ public class ReplicatedLogImplTest {
         verifyPersist(logEntry1);
 
         reset(mockPersistence);
-
-        doNothing().when(mockPersistence).persist(any(MockReplicatedLogEntry.class), any(Procedure.class));
 
         log.appendAndPersist(logEntry2);
         verifyPersist(logEntry2);
@@ -150,8 +141,6 @@ public class ReplicatedLogImplTest {
         verifyPersist(logEntry);
 
         reset(mockPersistence);
-
-        doNothing().when(mockPersistence).persist(any(MockReplicatedLogEntry.class), any(Procedure.class));
 
         logEntry = new MockReplicatedLogEntry(1, 3, new MockPayload("3", 5));
 
