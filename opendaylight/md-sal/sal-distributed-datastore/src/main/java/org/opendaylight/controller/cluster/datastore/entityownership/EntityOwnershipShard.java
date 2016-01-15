@@ -326,13 +326,23 @@ class EntityOwnershipShard extends Shard {
         // remove it from the downPeerMemberNames.
         downPeerMemberNames.remove(message.getNewCandidate());
 
-        String currentOwner = getCurrentOwner(message.getEntityPath());
-        EntityOwnerSelectionStrategy strategy = getEntityOwnerElectionStrategy(message.getEntityPath());
+        final String currentOwner = getCurrentOwner(message.getEntityPath());
+        final EntityOwnerSelectionStrategy strategy = getEntityOwnerElectionStrategy(message.getEntityPath());
+        final String entityType = EntityOwnersModel.entityTypeFromEntityPath(message.getEntityPath());
+
+        // Available members is all the known peers - the number of peers that are down + self
+        // So if there are 2 peers and 1 is down then availableMembers will be 2
+        final int availableMembers = (peerIdToMemberNames.size() - downPeerMemberNames.size()) + 1;
 
         LOG.debug("{}: Using strategy {} to select owner", persistenceId(), strategy);
         if(Strings.isNullOrEmpty(currentOwner)){
             if(strategy.getSelectionDelayInMillis() == 0L) {
-                String entityType = EntityOwnersModel.entityTypeFromEntityPath(message.getEntityPath());
+                writeNewOwner(message.getEntityPath(), newOwner(message.getAllCandidates(),
+                        entityOwnershipStatistics.byEntityType(entityType), strategy));
+            } else if(message.getAllCandidates().size() == availableMembers) {
+                LOG.debug("{}: Received the maximum candidates requests : {} writing new owner",
+                        persistenceId(), availableMembers);
+                cancelOwnerSelectionTask(message.getEntityPath());
                 writeNewOwner(message.getEntityPath(), newOwner(message.getAllCandidates(),
                         entityOwnershipStatistics.byEntityType(entityType), strategy));
             } else {
@@ -480,19 +490,23 @@ class EntityOwnershipShard extends Shard {
      */
     public void scheduleOwnerSelection(YangInstanceIdentifier entityPath, Collection<String> allCandidates,
                                        EntityOwnerSelectionStrategy strategy){
-        Cancellable lastScheduledTask = entityToScheduledOwnershipTask.get(entityPath);
-        if(lastScheduledTask != null && !lastScheduledTask.isCancelled()){
-            lastScheduledTask.cancel();
-        }
+        cancelOwnerSelectionTask(entityPath);
 
         LOG.debug("{}: Scheduling owner selection after {} ms", persistenceId(), strategy.getSelectionDelayInMillis());
 
-        lastScheduledTask = context().system().scheduler().scheduleOnce(
+        final Cancellable lastScheduledTask = context().system().scheduler().scheduleOnce(
                 FiniteDuration.apply(strategy.getSelectionDelayInMillis(), TimeUnit.MILLISECONDS)
                 , self(), new SelectOwner(entityPath, allCandidates, strategy)
                 , context().system().dispatcher(), self());
 
         entityToScheduledOwnershipTask.put(entityPath, lastScheduledTask);
+    }
+
+    private void cancelOwnerSelectionTask(YangInstanceIdentifier entityPath){
+        final Cancellable lastScheduledTask = entityToScheduledOwnershipTask.get(entityPath);
+        if(lastScheduledTask != null && !lastScheduledTask.isCancelled()){
+            lastScheduledTask.cancel();
+        }
     }
 
     private String newOwner(Collection<String> candidates, Map<String, Long> statistics, EntityOwnerSelectionStrategy ownerSelectionStrategy) {
