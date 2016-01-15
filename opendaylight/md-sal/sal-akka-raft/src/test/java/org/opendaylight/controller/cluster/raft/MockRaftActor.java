@@ -9,8 +9,6 @@
 package org.opendaylight.controller.cluster.raft;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import akka.actor.ActorRef;
 import akka.actor.Props;
@@ -51,16 +49,8 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
         super(builder.id, builder.peerAddresses, Optional.fromNullable(builder.config), PAYLOAD_VERSION);
         state = new ArrayList<>();
         this.actorDelegate = mock(RaftActor.class);
-        doNothing().when(this.actorDelegate).onRecoveryComplete();
-        doNothing().when(this.actorDelegate).onStateChanged();
-        doNothing().when(this.actorDelegate).applyState(any(ActorRef.class), any(String.class), any(Object.class));
-
         this.recoveryCohortDelegate = mock(RaftActorRecoveryCohort.class);
-        doNothing().when(this.recoveryCohortDelegate).applyRecoverySnapshot(any(byte[].class));
-
         this.snapshotCohortDelegate = mock(RaftActorSnapshotCohort.class);
-        doNothing().when(this.snapshotCohortDelegate).applySnapshot(any(byte[].class));
-        doNothing().when(this.snapshotCohortDelegate).createSnapshot(any(ActorRef.class));
 
         if(builder.dataPersistenceProvider == null){
             setPersistence(builder.persistent.isPresent() ? builder.persistent.get() : true);
