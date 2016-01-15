@@ -4,13 +4,13 @@
   <parent>
     <groupId>org.opendaylight.controller.samples</groupId>
     <artifactId>sal-samples</artifactId>
-    <version>1.3.0-SNAPSHOT</version>
+    <version>1.4.0-SNAPSHOT</version>
   </parent>
   <artifactId>sample-toaster-provider</artifactId>
   <packaging>bundle</packaging>
 
   <properties>
-    <sal-binding-api.version>1.3.0-SNAPSHOT</sal-binding-api.version>
+    <sal-binding-api.version>1.4.0-SNAPSHOT</sal-binding-api.version>
   </properties>
 
   <dependencies>

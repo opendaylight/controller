@@ -19,8 +19,8 @@
   <properties>
     <!-- Optional TODO: Move these properties to your parent pom and possibly
             DependencyManagement section of your parent pom -->
-    <branding.version>1.2.0-SNAPSHOT</branding.version>
-    <karaf.resources.version>1.6.0-SNAPSHOT</karaf.resources.version>
+    <branding.version>1.3.0-SNAPSHOT</branding.version>
+    <karaf.resources.version>1.7.0-SNAPSHOT</karaf.resources.version>
     <karaf.version>3.0.3</karaf.version>
   </properties>
 
@@ -81,7 +81,7 @@
       <dependency>
         <groupId>org.opendaylight.openflowplugin</groupId>
         <artifactId>features-openflowplugin</artifactId>
-        <version>0.2.0-SNAPSHOT</version>
+        <version>0.3.0-SNAPSHOT</version>
         <classifier>features</classifier>
         <type>xml</type>
         <scope>runtime</scope>
