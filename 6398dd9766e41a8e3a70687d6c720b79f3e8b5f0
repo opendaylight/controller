@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a3d3df0_2893aafb",
+        "filename": "karaf/opendaylight-karaf-resources/src/main/resources/etc/custom.properties",
+        "patchSetId": 5
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 5404
+      },
+      "writtenOn": "2016-01-15T00:47:47Z",
+      "side": 1,
+      "message": "if this is default, can we add # at the line head?",
+      "range": {
+        "startLine": 89,
+        "startChar": 0,
+        "endLine": 89,
+        "endChar": 5
+      },
+      "revId": "6398dd9766e41a8e3a70687d6c720b79f3e8b5f0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
