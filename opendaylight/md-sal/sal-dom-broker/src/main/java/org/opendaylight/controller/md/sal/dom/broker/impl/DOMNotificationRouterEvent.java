@@ -47,20 +47,26 @@ final class DOMNotificationRouterEvent {
     }
 
     void deliverNotification() {
+        LOG.trace("Start delivery of notification {}", notification);
         for (ListenerRegistration<? extends DOMNotificationListener> r : subscribers) {
             final DOMNotificationListener listener = r.getInstance();
             if (listener != null) {
                 try {
+                    LOG.trace("Notifying listener {}", listener);
                     listener.onNotification(notification);
+                    LOG.trace("Listener notification completed");
                 } catch (Exception e) {
                     LOG.error("Delivery of notification {} caused an error in listener {}", notification, listener, e);
                 }
             }
         }
+        LOG.trace("Delivery completed");
     }
 
     void setFuture() {
         future.set(null);
+        notification = null;
+        subscribers = null;
+        future = null;
     }
-
 }
