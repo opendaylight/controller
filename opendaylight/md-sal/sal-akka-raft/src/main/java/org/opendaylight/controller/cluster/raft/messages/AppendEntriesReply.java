@@ -50,12 +50,6 @@ public class AppendEntriesReply extends AbstractRaftRPC {
         this.forceInstallSnapshot = forceInstallSnapshot;
     }
 
-
-    @Override
-    public long getTerm() {
-        return term;
-    }
-
     public boolean isSuccess() {
         return success;
     }
@@ -76,17 +70,14 @@ public class AppendEntriesReply extends AbstractRaftRPC {
         return payloadVersion;
     }
 
-    @Override
-    public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("AppendEntriesReply [success=").append(success).append(", logLastIndex=").append(logLastIndex)
-                .append(", logLastTerm=").append(logLastTerm).append(", followerId=").append(followerId)
-                .append(", payloadVersion=").append(", forceInstallSnapshot=").append(forceInstallSnapshot)
-                .append(payloadVersion).append("]");
-        return builder.toString();
-    }
-
     public boolean isForceInstallSnapshot() {
         return forceInstallSnapshot;
+    }
+
+    @Override
+    public String toString() {
+        return "AppendEntriesReply [term=" + getTerm() + ", success=" + success + ", followerId=" + followerId
+                + ", logLastIndex=" + logLastIndex + ", logLastTerm=" + logLastTerm + ", forceInstallSnapshot="
+                + forceInstallSnapshot + ", payloadVersion=" + payloadVersion + "]";
     }
 }

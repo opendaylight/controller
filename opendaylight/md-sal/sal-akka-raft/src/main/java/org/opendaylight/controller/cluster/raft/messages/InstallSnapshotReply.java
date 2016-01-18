@@ -40,7 +40,7 @@ public class InstallSnapshotReply extends AbstractRaftRPC {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("InstallSnapshotReply [term=").append(term).append(", followerId=").append(followerId)
+        builder.append("InstallSnapshotReply [term=").append(getTerm()).append(", followerId=").append(followerId)
                 .append(", chunkIndex=").append(chunkIndex).append(", success=").append(success).append("]");
         return builder.toString();
     }
