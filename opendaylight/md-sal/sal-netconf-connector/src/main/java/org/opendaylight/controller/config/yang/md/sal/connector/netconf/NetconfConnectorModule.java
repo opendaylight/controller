@@ -96,8 +96,8 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
         checkNotNull(getConnectionTimeoutMillis(), connectionTimeoutMillisJmxAttribute);
         checkCondition(getConnectionTimeoutMillis() > 0, "must be > 0", connectionTimeoutMillisJmxAttribute);
 
-        checkNotNull(getConnectionTimeoutMillis(), defaultRequestTimeoutMillisJmxAttribute);
-        checkCondition(getConnectionTimeoutMillis() > 0, "must be > 0", defaultRequestTimeoutMillisJmxAttribute);
+        checkNotNull(getDefaultRequestTimeoutMillis(), defaultRequestTimeoutMillisJmxAttribute);
+        checkCondition(getDefaultRequestTimeoutMillis() > 0, "must be > 0", defaultRequestTimeoutMillisJmxAttribute);
 
         checkNotNull(getBetweenAttemptsTimeoutMillis(), betweenAttemptsTimeoutMillisJmxAttribute);
         checkCondition(getBetweenAttemptsTimeoutMillis() > 0, "must be > 0", betweenAttemptsTimeoutMillisJmxAttribute);

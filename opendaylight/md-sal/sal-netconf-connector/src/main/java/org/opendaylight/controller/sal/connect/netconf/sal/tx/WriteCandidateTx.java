@@ -14,6 +14,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcResult;
@@ -93,11 +94,12 @@ public class WriteCandidateTx extends AbstractWriteTx {
     }
 
     private void lock() throws NetconfDocumentedException {
+        final String operation = "Lock candidate";
         try {
-            invokeBlocking("Lock candidate", new Function<NetconfBaseOps, ListenableFuture<DOMRpcResult>>() {
+            invokeBlocking(operation, new Function<NetconfBaseOps, ListenableFuture<DOMRpcResult>>() {
                 @Override
                 public ListenableFuture<DOMRpcResult> apply(final NetconfBaseOps input) {
-                    return input.lockCandidate(new NetconfRpcFutureCallback("Lock candidate", id));
+                    return perfomRequestWithTimeout(operation, input.lockCandidate(new NetconfRpcFutureCallback(operation, id)));
                 }
             });
         } catch (final NetconfDocumentedException e) {
@@ -183,14 +185,16 @@ public class WriteCandidateTx extends AbstractWriteTx {
 
     @Override
     protected void editConfig(final DataContainerChild<?, ?> editStructure, final Optional<ModifyAction> defaultOperation) throws NetconfDocumentedException {
-        invokeBlocking("Edit candidate", new Function<NetconfBaseOps, ListenableFuture<DOMRpcResult>>() {
+        final String operation = "Edit candidate";
+        invokeBlocking(operation, new Function<NetconfBaseOps, ListenableFuture<DOMRpcResult>>() {
             @Override
             public ListenableFuture<DOMRpcResult> apply(final NetconfBaseOps input) {
-                        return defaultOperation.isPresent()
-                                ? input.editConfigCandidate(new NetconfRpcFutureCallback("Edit candidate", id), editStructure, defaultOperation.get(),
+
+                        return perfomRequestWithTimeout(operation, defaultOperation.isPresent()
+                                ? input.editConfigCandidate(new NetconfRpcFutureCallback(operation, id), editStructure, defaultOperation.get(),
                                 rollbackSupport)
-                                : input.editConfigCandidate(new NetconfRpcFutureCallback("Edit candidate", id), editStructure,
-                                rollbackSupport);
+                                : input.editConfigCandidate(new NetconfRpcFutureCallback(operation, id), editStructure,
+                                rollbackSupport));
             }
         });
     }
