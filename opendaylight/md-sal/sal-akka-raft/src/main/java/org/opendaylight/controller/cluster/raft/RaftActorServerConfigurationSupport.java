@@ -574,7 +574,10 @@ class RaftActorServerConfigurationSupport {
 
         @Override
         public void initiate() {
-            raftContext.removePeer(getRemoveServerContext().getOperation().getServerId());
+            String serverId = getRemoveServerContext().getOperation().getServerId();
+            raftContext.removePeer(serverId);
+            ((AbstractLeader)raftActor.getCurrentBehavior()).removeFollower(serverId);
+
             persistNewServerConfiguration(getRemoveServerContext());
         }
     }
