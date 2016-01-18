@@ -19,11 +19,6 @@ public class RequestVoteReply extends AbstractRaftRPC {
         this.voteGranted = voteGranted;
     }
 
-    @Override
-    public long getTerm() {
-        return term;
-    }
-
     public boolean isVoteGranted() {
         return voteGranted;
     }
@@ -31,7 +26,7 @@ public class RequestVoteReply extends AbstractRaftRPC {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("RequestVoteReply [term=").append(term).append(", voteGranted=").append(voteGranted).append("]");
+        builder.append("RequestVoteReply [term=").append(getTerm()).append(", voteGranted=").append(voteGranted).append("]");
         return builder.toString();
     }
 }

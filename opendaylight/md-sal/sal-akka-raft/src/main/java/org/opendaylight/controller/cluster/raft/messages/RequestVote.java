@@ -15,16 +15,15 @@ public class RequestVote extends AbstractRaftRPC {
     private static final long serialVersionUID = -6967509186297108657L;
 
     // candidate requesting vote
-    private String candidateId;
+    private final String candidateId;
 
     // index of candidate’s last log entry (§5.4)
-    private long lastLogIndex;
+    private final long lastLogIndex;
 
     // term of candidate’s last log entry (§5.4)
-    private long lastLogTerm;
+    private final long lastLogTerm;
 
-    public RequestVote(long term, String candidateId, long lastLogIndex,
-        long lastLogTerm) {
+    public RequestVote(long term, String candidateId, long lastLogIndex, long lastLogTerm) {
         super(term);
         this.candidateId = candidateId;
         this.lastLogIndex = lastLogIndex;
@@ -32,13 +31,8 @@ public class RequestVote extends AbstractRaftRPC {
     }
 
     // added for testing while serialize-messages=on
-    public RequestVote() {
-    }
-
-    @Override
-    public long getTerm() {
-        return term;
-    }
+//    public RequestVote() {
+//    }
 
     public String getCandidateId() {
         return candidateId;
@@ -52,22 +46,10 @@ public class RequestVote extends AbstractRaftRPC {
         return lastLogTerm;
     }
 
-    public void setCandidateId(String candidateId) {
-        this.candidateId = candidateId;
-    }
-
-    public void setLastLogIndex(long lastLogIndex) {
-        this.lastLogIndex = lastLogIndex;
-    }
-
-    public void setLastLogTerm(long lastLogTerm) {
-        this.lastLogTerm = lastLogTerm;
-    }
-
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("RequestVote [term=").append(term).append(", candidateId=").append(candidateId)
+        builder.append("RequestVote [term=").append(getTerm()).append(", candidateId=").append(candidateId)
                 .append(", lastLogIndex=").append(lastLogIndex).append(", lastLogTerm=").append(lastLogTerm)
                 .append("]");
         return builder.toString();
