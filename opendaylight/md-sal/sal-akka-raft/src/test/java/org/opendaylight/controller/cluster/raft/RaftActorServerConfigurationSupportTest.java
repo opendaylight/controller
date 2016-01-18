@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.raft;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor.assertNoneMatching;
 import static org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor.clearMessages;
 import static org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor.expectFirstMatching;
@@ -39,6 +40,7 @@ import org.opendaylight.controller.cluster.raft.base.messages.InitiateCaptureSna
 import org.opendaylight.controller.cluster.raft.behaviors.AbstractLeader;
 import org.opendaylight.controller.cluster.raft.behaviors.Follower;
 import org.opendaylight.controller.cluster.raft.behaviors.Leader;
+import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.messages.AddServer;
 import org.opendaylight.controller.cluster.raft.messages.AddServerReply;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
@@ -773,12 +775,15 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
         leaderActor.tell(new RemoveServer(FOLLOWER_ID), testKit.getRef());
         RemoveServerReply removeServerReply = testKit.expectMsgClass(JavaTestKit.duration("5 seconds"), RemoveServerReply.class);
-
         assertEquals("getStatus", ServerChangeStatus.OK, removeServerReply.getStatus());
 
         final ApplyState applyState = MessageCollectorActor.expectFirstMatching(leaderCollector, ApplyState.class);
         assertEquals(0L, applyState.getReplicatedLogEntry().getIndex());
         verifyServerConfigurationPayloadEntry(leaderActor.underlyingActor().getRaftActorContext().getReplicatedLog(), votingServer(LEADER_ID));
+
+        RaftActorBehavior currentBehavior = leaderActor.underlyingActor().getCurrentBehavior();
+        assertTrue("Expected Leader", currentBehavior instanceof Leader);
+        assertEquals("Follower ids size", 0, ((Leader)currentBehavior).getFollowerIds().size());
 
         MessageCollectorActor.expectFirstMatching(collector, ServerRemoved.class);
     }

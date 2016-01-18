@@ -140,6 +140,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
 
     public void removeFollower(String followerId) {
         followerToLog.remove(followerId);
+        mapFollowerToSnapshot.remove(followerId);
     }
 
     public void updateMinReplicaCount() {
