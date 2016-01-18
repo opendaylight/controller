@@ -9,6 +9,7 @@
 package org.opendaylight.controller.cluster.datastore.utils;
 
 import static akka.pattern.Patterns.ask;
+
 import akka.actor.ActorPath;
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
@@ -99,7 +100,6 @@ public class ActorContext {
     private final Dispatchers dispatchers;
 
     private volatile SchemaContext schemaContext;
-    private volatile boolean updated;
     private final MetricRegistry metricRegistry = MetricsReporter.getInstance(DatastoreContext.METRICS_DOMAIN).getMetricsRegistry();
 
     private final PrimaryShardInfoFutureCache primaryShardInfoCache;
@@ -184,8 +184,6 @@ public class ActorContext {
         // consistency here as immediately visible updates to these members aren't critical. These
         // members could've been made volatile but wanted to avoid volatile reads as these are
         // accessed often and updates will be infrequent.
-
-        updated = true;
 
         if(shardManager != null) {
             shardManager.tell(contextFactory, ActorRef.noSender());
