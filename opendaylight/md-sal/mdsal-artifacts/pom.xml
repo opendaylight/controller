@@ -163,6 +163,11 @@
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
+                <artifactId>cds-frontend-mdsal</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
                 <artifactId>sal-remoterpc-connector</artifactId>
                 <version>${project.version}</version>
             </dependency>
