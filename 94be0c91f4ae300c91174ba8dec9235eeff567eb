@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_3dd118fc",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/CompositeDataTreeCohort.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2016-01-19T15:04:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a3d3df0_86a1faab",
+      "revId": "94be0c91f4ae300c91174ba8dec9235eeff567eb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_dd5c6c28",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DistributedDataStore.java",
         "patchSetId": 6
@@ -47,6 +65,24 @@
       "writtenOn": "2016-01-19T12:45:25Z",
       "side": 1,
       "message": "@Override or package-private?",
+      "revId": "94be0c91f4ae300c91174ba8dec9235eeff567eb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_9d094498",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DistributedDataStore.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 163,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2016-01-19T15:04:02Z",
+      "side": 1,
+      "message": "Override",
+      "parentUuid": "9a3d3df0_dd5c6c28",
       "revId": "94be0c91f4ae300c91174ba8dec9235eeff567eb",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -70,6 +106,24 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_fdfe906a",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 140,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2016-01-19T15:04:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a3d3df0_e6ca866d",
+      "revId": "94be0c91f4ae300c91174ba8dec9235eeff567eb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_46c89274",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardCommitCoordinator.java",
         "patchSetId": 6
@@ -81,6 +135,24 @@
       "writtenOn": "2016-01-19T02:20:44Z",
       "side": 1,
       "message": "indentation",
+      "revId": "94be0c91f4ae300c91174ba8dec9235eeff567eb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_dd03cc71",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardCommitCoordinator.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 201,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2016-01-19T15:04:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a3d3df0_46c89274",
       "revId": "94be0c91f4ae300c91174ba8dec9235eeff567eb",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
