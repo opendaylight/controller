@@ -12,13 +12,9 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
-import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages;
 
 public class ReadyTransactionReply extends VersionedExternalizableMessage {
     private static final long serialVersionUID = 1L;
-
-    public static final Class<ShardTransactionMessages.ReadyTransactionReply> SERIALIZABLE_CLASS =
-            ShardTransactionMessages.ReadyTransactionReply.class;
 
     private String cohortPath;
 
@@ -52,25 +48,14 @@ public class ReadyTransactionReply extends VersionedExternalizableMessage {
 
     @Override
     public Object toSerializable() {
-        if(getVersion() >= DataStoreVersions.LITHIUM_VERSION) {
-            return this;
-        } else {
-            return ShardTransactionMessages.ReadyTransactionReply.newBuilder().setActorPath(cohortPath).build();
-        }
+        return this;
     }
 
     public static ReadyTransactionReply fromSerializable(Object serializable) {
-        if(serializable instanceof ReadyTransactionReply) {
-            return (ReadyTransactionReply)serializable;
-        } else {
-            ShardTransactionMessages.ReadyTransactionReply o =
-                    (ShardTransactionMessages.ReadyTransactionReply) serializable;
-            return new ReadyTransactionReply(o.getActorPath(), DataStoreVersions.HELIUM_2_VERSION);
-        }
+        return (ReadyTransactionReply)serializable;
     }
 
     public static boolean isSerializedType(Object message) {
-        return message instanceof ReadyTransactionReply ||
-               message instanceof ShardTransactionMessages.ReadyTransactionReply;
+        return message instanceof ReadyTransactionReply;
     }
 }

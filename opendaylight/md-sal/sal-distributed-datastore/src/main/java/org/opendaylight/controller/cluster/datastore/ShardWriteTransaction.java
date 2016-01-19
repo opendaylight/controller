@@ -15,15 +15,8 @@ import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStats
 import org.opendaylight.controller.cluster.datastore.messages.BatchedModifications;
 import org.opendaylight.controller.cluster.datastore.messages.BatchedModificationsReply;
 import org.opendaylight.controller.cluster.datastore.messages.DataExists;
-import org.opendaylight.controller.cluster.datastore.messages.DeleteData;
-import org.opendaylight.controller.cluster.datastore.messages.DeleteDataReply;
 import org.opendaylight.controller.cluster.datastore.messages.ForwardedReadyTransaction;
-import org.opendaylight.controller.cluster.datastore.messages.MergeData;
-import org.opendaylight.controller.cluster.datastore.messages.MergeDataReply;
 import org.opendaylight.controller.cluster.datastore.messages.ReadData;
-import org.opendaylight.controller.cluster.datastore.messages.ReadyTransaction;
-import org.opendaylight.controller.cluster.datastore.messages.WriteData;
-import org.opendaylight.controller.cluster.datastore.messages.WriteDataReply;
 import org.opendaylight.controller.cluster.datastore.modification.Modification;
 
 /**
@@ -52,18 +45,6 @@ public class ShardWriteTransaction extends ShardTransaction {
 
         if (message instanceof BatchedModifications) {
             batchedModifications((BatchedModifications)message);
-        } else if (message instanceof ReadyTransaction) {
-            readyTransaction(!SERIALIZED_REPLY, false);
-        } else if(ReadyTransaction.SERIALIZABLE_CLASS.equals(message.getClass())) {
-            readyTransaction(SERIALIZED_REPLY, false);
-        } else if(WriteData.isSerializedType(message)) {
-            writeData(WriteData.fromSerializable(message), SERIALIZED_REPLY);
-
-        } else if(MergeData.isSerializedType(message)) {
-            mergeData(MergeData.fromSerializable(message), SERIALIZED_REPLY);
-
-        } else if(DeleteData.isSerializedType(message)) {
-            deleteData(DeleteData.fromSerializable(message), SERIALIZED_REPLY);
         } else {
             super.handleReceive(message);
         }
@@ -122,54 +103,6 @@ public class ShardWriteTransaction extends ShardTransaction {
             return true;
         } else {
             return false;
-        }
-    }
-
-    private void writeData(WriteData message, boolean returnSerialized) {
-        LOG.debug("writeData at path : {}", message.getPath());
-        if (checkClosed()) {
-            return;
-        }
-
-        try {
-            transaction.getSnapshot().write(message.getPath(), message.getData());
-            WriteDataReply writeDataReply = WriteDataReply.INSTANCE;
-            getSender().tell(returnSerialized ? writeDataReply.toSerializable(message.getVersion()) :
-                writeDataReply, getSelf());
-        }catch(Exception e){
-            getSender().tell(new akka.actor.Status.Failure(e), getSelf());
-        }
-    }
-
-    private void mergeData(MergeData message, boolean returnSerialized) {
-        LOG.debug("mergeData at path : {}", message.getPath());
-        if (checkClosed()) {
-            return;
-        }
-
-        try {
-            transaction.getSnapshot().merge(message.getPath(), message.getData());
-            MergeDataReply mergeDataReply = MergeDataReply.INSTANCE;
-            getSender().tell(returnSerialized ? mergeDataReply.toSerializable(message.getVersion()) :
-                mergeDataReply, getSelf());
-        }catch(Exception e){
-            getSender().tell(new akka.actor.Status.Failure(e), getSelf());
-        }
-    }
-
-    private void deleteData(DeleteData message, boolean returnSerialized) {
-        LOG.debug("deleteData at path : {}", message.getPath());
-        if (checkClosed()) {
-            return;
-        }
-
-        try {
-            transaction.getSnapshot().delete(message.getPath());
-            DeleteDataReply deleteDataReply = DeleteDataReply.INSTANCE;
-            getSender().tell(returnSerialized ? deleteDataReply.toSerializable(message.getVersion()) :
-                deleteDataReply, getSelf());
-        } catch(Exception e) {
-            getSender().tell(new akka.actor.Status.Failure(e), getSelf());
         }
     }
 
