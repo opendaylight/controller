@@ -22,7 +22,6 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import org.opendaylight.controller.cluster.datastore.compat.BackwardsCompatibleThreePhaseCommitCohort;
 import org.opendaylight.controller.cluster.datastore.messages.AbortTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.BatchedModifications;
 import org.opendaylight.controller.cluster.datastore.messages.BatchedModificationsReply;
@@ -143,34 +142,15 @@ class ShardCommitCoordinator {
             return;
         }
 
-        if(ready.getTxnClientVersion() < DataStoreVersions.LITHIUM_VERSION) {
-            // Return our actor path as we'll handle the three phase commit except if the Tx client
-            // version < Helium-1 version which means the Tx was initiated by a base Helium version node.
-            // In that case, the subsequent 3-phase commit messages won't contain the transactionId so to
-            // maintain backwards compatibility, we create a separate cohort actor to provide the compatible behavior.
-            ActorRef replyActorPath = shard.self();
-            if(ready.getTxnClientVersion() < DataStoreVersions.HELIUM_1_VERSION) {
-                log.debug("{}: Creating BackwardsCompatibleThreePhaseCommitCohort", name);
-                replyActorPath = shard.getContext().actorOf(BackwardsCompatibleThreePhaseCommitCohort.props(
-                        ready.getTransactionID()));
-            }
-
-            ReadyTransactionReply readyTransactionReply =
-                    new ReadyTransactionReply(Serialization.serializedActorPath(replyActorPath),
-                            ready.getTxnClientVersion());
-            sender.tell(ready.isReturnSerialized() ? readyTransactionReply.toSerializable() :
-                readyTransactionReply, shard.self());
+        if(ready.isDoImmediateCommit()) {
+            cohortEntry.setDoImmediateCommit(true);
+            cohortEntry.setReplySender(sender);
+            cohortEntry.setShard(shard);
+            handleCanCommit(cohortEntry);
         } else {
-            if(ready.isDoImmediateCommit()) {
-                cohortEntry.setDoImmediateCommit(true);
-                cohortEntry.setReplySender(sender);
-                cohortEntry.setShard(shard);
-                handleCanCommit(cohortEntry);
-            } else {
-                // The caller does not want immediate commit - the 3-phase commit will be coordinated by the
-                // front-end so send back a ReadyTransactionReply with our actor path.
-                sender.tell(readyTransactionReply(shard), shard.self());
-            }
+            // The caller does not want immediate commit - the 3-phase commit will be coordinated by the
+            // front-end so send back a ReadyTransactionReply with our actor path.
+            sender.tell(readyTransactionReply(shard), shard.self());
         }
     }
 

@@ -381,7 +381,7 @@ public abstract class AbstractTransactionProxyTest {
             TransactionType type, short transactionVersion, String prefix, ActorRef shardActorRef) {
 
         ActorRef txActorRef;
-        if(type == TransactionType.WRITE_ONLY && transactionVersion >= DataStoreVersions.LITHIUM_VERSION &&
+        if(type == TransactionType.WRITE_ONLY &&
                 dataStoreContextBuilder.build().isWriteOnlyTransactionOptimizationsEnabled()) {
             txActorRef = shardActorRef;
         } else {
