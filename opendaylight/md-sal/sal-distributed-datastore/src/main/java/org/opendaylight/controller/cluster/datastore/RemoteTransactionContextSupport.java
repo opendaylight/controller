@@ -14,7 +14,6 @@ import akka.pattern.AskTimeoutException;
 import akka.util.Timeout;
 import com.google.common.base.Preconditions;
 import java.util.concurrent.TimeUnit;
-import org.opendaylight.controller.cluster.datastore.compat.PreLithiumTransactionContextImpl;
 import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
 import org.opendaylight.controller.cluster.datastore.exceptions.ShardLeaderNotRespondingException;
 import org.opendaylight.controller.cluster.datastore.identifiers.TransactionIdentifier;
@@ -101,7 +100,7 @@ final class RemoteTransactionContextSupport {
     void setPrimaryShard(ActorSelection primaryShard, short primaryVersion) {
         this.primaryShard = primaryShard;
 
-        if (getTransactionType() == TransactionType.WRITE_ONLY && primaryVersion >= DataStoreVersions.LITHIUM_VERSION &&
+        if (getTransactionType() == TransactionType.WRITE_ONLY  &&
                 getActorContext().getDatastoreContext().isWriteOnlyTransactionOptimizationsEnabled()) {
             LOG.debug("Tx {} Primary shard {} found - creating WRITE_ONLY transaction context",
                 getIdentifier(), primaryShard);
@@ -249,15 +248,9 @@ final class RemoteTransactionContextSupport {
         // TxActor is always created where the leader of the shard is.
         // Check if TxActor is created in the same node
         boolean isTxActorLocal = getActorContext().isPathLocal(transactionPath);
-        final TransactionContext ret;
-
-        if (remoteTransactionVersion < DataStoreVersions.LITHIUM_VERSION) {
-            ret = new PreLithiumTransactionContextImpl(transactionContextWrapper.getIdentifier(), transactionPath, transactionActor,
-                getActorContext(), isTxActorLocal, remoteTransactionVersion, transactionContextWrapper.getLimiter());
-        } else {
-            ret = new RemoteTransactionContext(transactionContextWrapper.getIdentifier(), transactionActor, getActorContext(),
-                isTxActorLocal, remoteTransactionVersion, transactionContextWrapper.getLimiter());
-        }
+        final TransactionContext ret = new RemoteTransactionContext(transactionContextWrapper.getIdentifier(),
+                transactionActor, getActorContext(), isTxActorLocal, remoteTransactionVersion,
+                transactionContextWrapper.getLimiter());
 
         if(parent.getType() == TransactionType.READ_ONLY) {
             TransactionContextCleanup.track(this, ret);

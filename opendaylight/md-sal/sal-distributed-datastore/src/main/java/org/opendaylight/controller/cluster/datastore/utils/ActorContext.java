@@ -453,30 +453,6 @@ public class ActorContext {
     }
 
     /**
-     * @deprecated This method is present only to support backward compatibility with Helium and should not be
-     * used any further
-     *
-     *
-     * @param primaryPath
-     * @param localPathOfRemoteActor
-     * @return
-    */
-    @Deprecated
-    public String resolvePath(final String primaryPath,
-                                            final String localPathOfRemoteActor) {
-        StringBuilder builder = new StringBuilder();
-        String[] primaryPathElements = primaryPath.split("/");
-        builder.append(primaryPathElements[0]).append("//")
-            .append(primaryPathElements[1]).append(primaryPathElements[2]);
-        String[] remotePathElements = localPathOfRemoteActor.split("/");
-        for (int i = 3; i < remotePathElements.length; i++) {
-                builder.append("/").append(remotePathElements[i]);
-            }
-
-        return builder.toString();
-    }
-
-    /**
      * This is a utility method that lets us get a Timer object for any operation. This is a little open-ended to allow
      * us to create a timer for pretty much anything.
      *

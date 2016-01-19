@@ -293,53 +293,6 @@ public class ActorContextTest extends AbstractActorTest{
     }
 
     @Test
-    public void testResolvePathForRemoteActor() {
-        ActorContext actorContext =
-                new ActorContext(getSystem(), mock(ActorRef.class), mock(
-                        ClusterWrapper.class),
-                        mock(Configuration.class));
-
-        String actual = actorContext.resolvePath(
-                "akka.tcp://system@127.0.0.1:2550/user/shardmanager/shard",
-                "akka://system/user/shardmanager/shard/transaction");
-
-        String expected = "akka.tcp://system@127.0.0.1:2550/user/shardmanager/shard/transaction";
-
-        assertEquals(expected, actual);
-    }
-
-    @Test
-    public void testResolvePathForLocalActor() {
-        ActorContext actorContext =
-                new ActorContext(getSystem(), mock(ActorRef.class), mock(ClusterWrapper.class),
-                        mock(Configuration.class));
-
-        String actual = actorContext.resolvePath(
-                "akka://system/user/shardmanager/shard",
-                "akka://system/user/shardmanager/shard/transaction");
-
-        String expected = "akka://system/user/shardmanager/shard/transaction";
-
-        assertEquals(expected, actual);
-    }
-
-    @Test
-    public void testResolvePathForRemoteActorWithProperRemoteAddress() {
-        ActorContext actorContext =
-                new ActorContext(getSystem(), mock(ActorRef.class), mock(ClusterWrapper.class),
-                        mock(Configuration.class));
-
-        String actual = actorContext.resolvePath(
-                "akka.tcp://system@7.0.0.1:2550/user/shardmanager/shard",
-                "akka.tcp://system@7.0.0.1:2550/user/shardmanager/shard/transaction");
-
-        String expected = "akka.tcp://system@7.0.0.1:2550/user/shardmanager/shard/transaction";
-
-        assertEquals(expected, actual);
-    }
-
-
-    @Test
     public void testClientDispatcherIsGlobalDispatcher(){
         ActorContext actorContext =
                 new ActorContext(getSystem(), mock(ActorRef.class), mock(ClusterWrapper.class),

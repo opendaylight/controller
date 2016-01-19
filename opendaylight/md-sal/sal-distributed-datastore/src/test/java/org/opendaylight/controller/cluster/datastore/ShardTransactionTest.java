@@ -40,7 +40,6 @@ import org.opendaylight.controller.cluster.datastore.messages.MergeData;
 import org.opendaylight.controller.cluster.datastore.messages.MergeDataReply;
 import org.opendaylight.controller.cluster.datastore.messages.ReadData;
 import org.opendaylight.controller.cluster.datastore.messages.ReadDataReply;
-import org.opendaylight.controller.cluster.datastore.messages.ReadyTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.ReadyTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.WriteData;
 import org.opendaylight.controller.cluster.datastore.messages.WriteDataReply;
@@ -501,36 +500,6 @@ public class ShardTransactionTest extends AbstractActorTest {
             if(failure != null) {
                 throw failure.cause();
             }
-        }};
-    }
-
-    @Test
-    public void testOnReceivePreLithiumReadyTransaction() throws Exception {
-        new JavaTestKit(getSystem()) {{
-            final ActorRef transaction = newTransactionActor(RW, readWriteTransaction(),
-                    "testReadyTransaction", DataStoreVersions.HELIUM_2_VERSION);
-
-            JavaTestKit watcher = new JavaTestKit(getSystem());
-            watcher.watch(transaction);
-
-            transaction.tell(new ReadyTransaction().toSerializable(), getRef());
-
-            expectMsgClass(duration("5 seconds"), ReadyTransactionReply.SERIALIZABLE_CLASS);
-            watcher.expectMsgClass(duration("5 seconds"), Terminated.class);
-        }};
-
-        // test
-        new JavaTestKit(getSystem()) {{
-            final ActorRef transaction = newTransactionActor(RW, readWriteTransaction(),
-                    "testReadyTransaction2", DataStoreVersions.HELIUM_2_VERSION);
-
-            JavaTestKit watcher = new JavaTestKit(getSystem());
-            watcher.watch(transaction);
-
-            transaction.tell(new ReadyTransaction(), getRef());
-
-            expectMsgClass(duration("5 seconds"), ReadyTransactionReply.class);
-            watcher.expectMsgClass(duration("5 seconds"), Terminated.class);
         }};
     }
 
