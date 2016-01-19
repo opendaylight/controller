@@ -18,7 +18,6 @@ import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.opendaylight.controller.cluster.datastore.TransactionType.READ_ONLY;
 import static org.opendaylight.controller.cluster.datastore.TransactionType.READ_WRITE;
@@ -53,7 +52,6 @@ import org.opendaylight.controller.cluster.datastore.messages.BatchedModificatio
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CommitTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.PrimaryShardInfo;
-import org.opendaylight.controller.cluster.datastore.messages.ReadyTransaction;
 import org.opendaylight.controller.cluster.datastore.modification.DeleteModification;
 import org.opendaylight.controller.cluster.datastore.modification.MergeModification;
 import org.opendaylight.controller.cluster.datastore.modification.WriteModification;
@@ -570,9 +568,6 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
 
         verifyBatchedModifications(batchedModifications.get(0), true, true,
                 new WriteModification(TestModel.TEST_PATH, nodeToWrite));
-
-        verify(mockActorContext, never()).executeOperationAsync(eq(actorSelection(actorRef)),
-                isA(ReadyTransaction.SERIALIZABLE_CLASS));
     }
 
     @Test
@@ -601,9 +596,6 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
                 new WriteModification(TestModel.TEST_PATH, nodeToWrite));
 
         verifyBatchedModifications(batchedModifications.get(1), true, true);
-
-        verify(mockActorContext, never()).executeOperationAsync(eq(actorSelection(actorRef)),
-                isA(ReadyTransaction.SERIALIZABLE_CLASS));
     }
 
     @Test
@@ -1384,9 +1376,6 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
                 NormalizedNode<?, ?> carsNode = ImmutableNodes.containerNode(CarsModel.BASE_QNAME);
 
                 expectBatchedModifications(2);
-
-                doReturn(incompleteFuture()).when(mockActorContext).executeOperationAsync(
-                        any(ActorSelection.class), any(ReadyTransaction.class));
 
                 transactionProxy.write(TestModel.TEST_PATH, nodeToWrite);
 

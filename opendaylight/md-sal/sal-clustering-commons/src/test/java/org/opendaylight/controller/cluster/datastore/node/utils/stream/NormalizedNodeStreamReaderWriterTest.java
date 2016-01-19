@@ -15,9 +15,7 @@ import org.apache.commons.lang.SerializationUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.node.NormalizedNodeToNodeCodec;
-import org.opendaylight.controller.cluster.datastore.util.InstanceIdentifierUtils;
 import org.opendaylight.controller.cluster.datastore.util.TestModel;
-import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
@@ -157,11 +155,7 @@ public class NormalizedNodeStreamReaderWriterTest {
 
     @Test(expected=InvalidNormalizedNodeStreamException.class, timeout=10000)
     public void testInvalidYangInstanceIdentifierStream() throws IOException {
-        YangInstanceIdentifier path = YangInstanceIdentifier.builder(TestModel.TEST_PATH).build();
-
-        byte[] protobufBytes = ShardTransactionMessages.DeleteData.newBuilder().setInstanceIdentifierPathArguments(
-                InstanceIdentifierUtils.toSerializable(path)).build().toByteArray();
-
+        byte[] protobufBytes = {1,2,3};
         NormalizedNodeInputStreamReader reader = new NormalizedNodeInputStreamReader(
             ByteStreams.newDataInput(protobufBytes));
 

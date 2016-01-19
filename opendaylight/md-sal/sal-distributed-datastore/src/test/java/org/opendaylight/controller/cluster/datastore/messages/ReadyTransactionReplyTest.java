@@ -12,7 +12,6 @@ import java.io.Serializable;
 import org.apache.commons.lang.SerializationUtils;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
-import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages;
 
 /**
  * Unit tests for ReadyTransactionReply.
@@ -32,20 +31,6 @@ public class ReadyTransactionReplyTest {
         ReadyTransactionReply actual = ReadyTransactionReply.fromSerializable(SerializationUtils.clone(
                 (Serializable) serialized));
         assertEquals("getVersion", DataStoreVersions.CURRENT_VERSION, actual.getVersion());
-        assertEquals("getCohortPath", cohortPath, actual.getCohortPath());
-    }
-
-    @Test
-    public void testSerializationWithPreLithiumVersion() throws Exception {
-        String cohortPath = "cohort path";
-        ReadyTransactionReply expected = new ReadyTransactionReply(cohortPath, DataStoreVersions.HELIUM_2_VERSION);
-
-        Object serialized = expected.toSerializable();
-        assertEquals("Serialized type", ShardTransactionMessages.ReadyTransactionReply.class, serialized.getClass());
-
-        ReadyTransactionReply actual = ReadyTransactionReply.fromSerializable(SerializationUtils.clone(
-                (Serializable) serialized));
-        assertEquals("getVersion", DataStoreVersions.HELIUM_2_VERSION, actual.getVersion());
         assertEquals("getCohortPath", cohortPath, actual.getCohortPath());
     }
 }

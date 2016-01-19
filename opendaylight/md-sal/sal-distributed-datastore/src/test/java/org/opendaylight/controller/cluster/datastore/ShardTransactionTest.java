@@ -34,20 +34,12 @@ import org.opendaylight.controller.cluster.datastore.messages.CommitTransactionR
 import org.opendaylight.controller.cluster.datastore.messages.CreateSnapshot;
 import org.opendaylight.controller.cluster.datastore.messages.DataExists;
 import org.opendaylight.controller.cluster.datastore.messages.DataExistsReply;
-import org.opendaylight.controller.cluster.datastore.messages.DeleteData;
-import org.opendaylight.controller.cluster.datastore.messages.DeleteDataReply;
-import org.opendaylight.controller.cluster.datastore.messages.MergeData;
-import org.opendaylight.controller.cluster.datastore.messages.MergeDataReply;
 import org.opendaylight.controller.cluster.datastore.messages.ReadData;
 import org.opendaylight.controller.cluster.datastore.messages.ReadDataReply;
 import org.opendaylight.controller.cluster.datastore.messages.ReadyTransactionReply;
-import org.opendaylight.controller.cluster.datastore.messages.WriteData;
-import org.opendaylight.controller.cluster.datastore.messages.WriteDataReply;
 import org.opendaylight.controller.cluster.datastore.modification.DeleteModification;
 import org.opendaylight.controller.cluster.datastore.modification.MergeModification;
 import org.opendaylight.controller.cluster.datastore.modification.WriteModification;
-import org.opendaylight.controller.cluster.datastore.node.NormalizedNodeToNodeCodec;
-import org.opendaylight.controller.cluster.datastore.node.NormalizedNodeToNodeCodec.Encoded;
 import org.opendaylight.controller.cluster.datastore.utils.SerializationUtils;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
@@ -174,22 +166,6 @@ public class ShardTransactionTest extends AbstractActorTest {
     }
 
     @Test
-    public void testOnReceiveReadDataHeliumR1() throws Exception {
-        new JavaTestKit(getSystem()) {{
-            ActorRef transaction = newTransactionActor(RO, readOnlyTransaction(),
-                    "testOnReceiveReadDataHeliumR1", DataStoreVersions.HELIUM_1_VERSION);
-
-            transaction.tell(new ReadData(YangInstanceIdentifier.builder().build()).toSerializable(),
-                    getRef());
-
-            ShardTransactionMessages.ReadDataReply replySerialized =
-                    expectMsgClass(duration("5 seconds"), ShardTransactionMessages.ReadDataReply.class);
-
-            assertNotNull(ReadDataReply.fromSerializable(replySerialized).getNormalizedNode());
-        }};
-    }
-
-    @Test
     public void testOnReceiveDataExistsPositive() throws Exception {
         new JavaTestKit(getSystem()) {{
             final ActorRef shard = createShard();
@@ -245,102 +221,6 @@ public class ShardTransactionTest extends AbstractActorTest {
             DataExistsReply reply = expectMsgClass(duration("5 seconds"), DataExistsReply.class);
 
             assertFalse(reply.exists());
-        }};
-    }
-
-    @Test
-    public void testOnReceiveWriteData() {
-        new JavaTestKit(getSystem()) {{
-            final ActorRef transaction = newTransactionActor(WO, readWriteTransaction(),
-                    "testOnReceiveWriteData");
-
-            transaction.tell(new WriteData(TestModel.TEST_PATH,
-                    ImmutableNodes.containerNode(TestModel.TEST_QNAME), DataStoreVersions.HELIUM_2_VERSION).
-                        toSerializable(), getRef());
-
-            expectMsgClass(duration("5 seconds"), ShardTransactionMessages.WriteDataReply.class);
-
-            // unserialized write
-            transaction.tell(new WriteData(TestModel.TEST_PATH,
-                ImmutableNodes.containerNode(TestModel.TEST_QNAME), DataStoreVersions.CURRENT_VERSION),
-                getRef());
-
-            expectMsgClass(duration("5 seconds"), WriteDataReply.class);
-        }};
-    }
-
-    @Test
-    public void testOnReceiveHeliumR1WriteData() {
-        new JavaTestKit(getSystem()) {{
-            final ActorRef transaction = newTransactionActor(WO, readWriteTransaction(),
-                    "testOnReceiveHeliumR1WriteData", DataStoreVersions.HELIUM_1_VERSION);
-
-            Encoded encoded = new NormalizedNodeToNodeCodec(null).encode(TestModel.TEST_PATH,
-                    ImmutableNodes.containerNode(TestModel.TEST_QNAME));
-            ShardTransactionMessages.WriteData serialized = ShardTransactionMessages.WriteData.newBuilder()
-                    .setInstanceIdentifierPathArguments(encoded.getEncodedPath())
-                    .setNormalizedNode(encoded.getEncodedNode().getNormalizedNode()).build();
-
-            transaction.tell(serialized, getRef());
-
-            expectMsgClass(duration("5 seconds"), ShardTransactionMessages.WriteDataReply.class);
-        }};
-    }
-
-    @Test
-    public void testOnReceiveMergeData() {
-        new JavaTestKit(getSystem()) {{
-            final ActorRef transaction = newTransactionActor(RW, readWriteTransaction(),
-                    "testMergeData");
-
-            transaction.tell(new MergeData(TestModel.TEST_PATH,
-                    ImmutableNodes.containerNode(TestModel.TEST_QNAME), DataStoreVersions.HELIUM_2_VERSION).
-                        toSerializable(), getRef());
-
-            expectMsgClass(duration("5 seconds"), ShardTransactionMessages.MergeDataReply.class);
-
-            //unserialized merge
-            transaction.tell(new MergeData(TestModel.TEST_PATH,
-                ImmutableNodes.containerNode(TestModel.TEST_QNAME), DataStoreVersions.CURRENT_VERSION),
-                getRef());
-
-            expectMsgClass(duration("5 seconds"), MergeDataReply.class);
-        }};
-    }
-
-    @Test
-    public void testOnReceiveHeliumR1MergeData() throws Exception {
-        new JavaTestKit(getSystem()) {{
-            final ActorRef transaction = newTransactionActor(WO, readWriteTransaction(),
-                    "testOnReceiveHeliumR1MergeData", DataStoreVersions.HELIUM_1_VERSION);
-
-            Encoded encoded = new NormalizedNodeToNodeCodec(null).encode(TestModel.TEST_PATH,
-                    ImmutableNodes.containerNode(TestModel.TEST_QNAME));
-            ShardTransactionMessages.MergeData serialized = ShardTransactionMessages.MergeData.newBuilder()
-                    .setInstanceIdentifierPathArguments(encoded.getEncodedPath())
-                    .setNormalizedNode(encoded.getEncodedNode().getNormalizedNode()).build();
-
-            transaction.tell(serialized, getRef());
-
-            expectMsgClass(duration("5 seconds"), ShardTransactionMessages.MergeDataReply.class);
-        }};
-    }
-
-    @Test
-    public void testOnReceiveDeleteData() throws Exception {
-        new JavaTestKit(getSystem()) {{
-            final ActorRef transaction = newTransactionActor(WO, readWriteTransaction(),
-                    "testDeleteData");
-
-            transaction.tell(new DeleteData(TestModel.TEST_PATH, DataStoreVersions.HELIUM_2_VERSION).
-                    toSerializable(), getRef());
-
-            expectMsgClass(duration("5 seconds"), ShardTransactionMessages.DeleteDataReply.class);
-
-            //unserialized
-            transaction.tell(new DeleteData(TestModel.TEST_PATH, DataStoreVersions.CURRENT_VERSION), getRef());
-
-            expectMsgClass(duration("5 seconds"), DeleteDataReply.class);
         }};
     }
 
@@ -583,8 +463,8 @@ public class ShardTransactionTest extends AbstractActorTest {
                 datastoreContext, shardStats, "txn", DataStoreVersions.CURRENT_VERSION);
         final TestActorRef<ShardTransaction> transaction = TestActorRef.apply(props,getSystem());
 
-        transaction.receive(new DeleteData(TestModel.TEST_PATH, DataStoreVersions.CURRENT_VERSION).
-                toSerializable(), ActorRef.noSender());
+        transaction.receive(new BatchedModifications("tx1", DataStoreVersions.CURRENT_VERSION, null),
+                ActorRef.noSender());
     }
 
     @Test

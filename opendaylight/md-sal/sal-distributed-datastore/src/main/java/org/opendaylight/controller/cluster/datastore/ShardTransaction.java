@@ -37,10 +37,6 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
  * Handles Messages <br/>
  * ---------------- <br/>
  * <li> {@link org.opendaylight.controller.cluster.datastore.messages.ReadData}
- * <li> {@link org.opendaylight.controller.cluster.datastore.messages.WriteData}
- * <li> {@link org.opendaylight.controller.cluster.datastore.messages.MergeData}
- * <li> {@link org.opendaylight.controller.cluster.datastore.messages.DeleteData}
- * <li> {@link org.opendaylight.controller.cluster.datastore.messages.ReadyTransaction}
  * <li> {@link org.opendaylight.controller.cluster.datastore.messages.CloseTransaction}
  * </p>
  */

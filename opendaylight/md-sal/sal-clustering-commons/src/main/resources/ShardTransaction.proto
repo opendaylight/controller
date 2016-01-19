@@ -25,47 +25,12 @@ message CreateTransactionReply{
   optional int32 messageVersion = 3;
 }
 
-message ReadyTransaction{
-
-}
-
-message ReadyTransactionReply{
-  required string actorPath = 1;
-}
-
-message DeleteData {
-required InstanceIdentifier instanceIdentifierPathArguments = 1;
-}
-
-message DeleteDataReply{
-
-}
 message ReadData {
 required InstanceIdentifier instanceIdentifierPathArguments=1;
 }
 
 message ReadDataReply{
   optional Node normalizedNode=1;
-}
-
-message WriteData {
-  // base Helium version
-  required InstanceIdentifier instanceIdentifierPathArguments = 1;
-  required Node normalizedNode = 2;
-}
-
-message WriteDataReply{
-
-}
-
-message MergeData {
-  // base Helium version
-  required InstanceIdentifier instanceIdentifierPathArguments = 1;
-  required Node normalizedNode = 2;
-}
-
-message MergeDataReply{
-
 }
 
 message DataExists {
