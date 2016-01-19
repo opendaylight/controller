@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "9a3d3df0_7d3440de",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/CompositeDataTreeCohort.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-01-19T12:45:25Z",
+      "side": 1,
+      "message": "javadocs for these are needed",
+      "revId": "94be0c91f4ae300c91174ba8dec9235eeff567eb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_86a1faab",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/CompositeDataTreeCohort.java",
         "patchSetId": 6
@@ -13,6 +30,23 @@
       "writtenOn": "2016-01-19T02:20:44Z",
       "side": 1,
       "message": "Can we pass in a shared Timeout to avoid creating a new instance for every transaction?",
+      "revId": "94be0c91f4ae300c91174ba8dec9235eeff567eb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_dd5c6c28",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DistributedDataStore.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 163,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-01-19T12:45:25Z",
+      "side": 1,
+      "message": "@Override or package-private?",
       "revId": "94be0c91f4ae300c91174ba8dec9235eeff567eb",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
