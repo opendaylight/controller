@@ -63,6 +63,8 @@
 
     <!-- sal-distributed-datastore -->
     <module>sal-distributed-datastore</module>
+    <module>cds-frontend-mdsal</module>
+    <module>cds-it</module>
     <module>sal-dummy-distributed-datastore</module>
 
     <!-- XSQL -->

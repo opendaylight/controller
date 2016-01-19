@@ -40,6 +40,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import org.opendaylight.controller.cds.frontend.mdsal.ConcurrentDOMDataBroker;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext.Builder;
 import org.opendaylight.controller.cluster.datastore.IntegrationTestKit.ShardStatsVerifier;
 import org.opendaylight.controller.cluster.datastore.MemberNode.RaftStateVerifier;
