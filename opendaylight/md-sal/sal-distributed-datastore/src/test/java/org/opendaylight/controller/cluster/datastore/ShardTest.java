@@ -58,6 +58,7 @@ import org.opendaylight.controller.cluster.datastore.messages.CanCommitTransacti
 import org.opendaylight.controller.cluster.datastore.messages.CommitTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CommitTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransaction;
+import org.opendaylight.controller.cluster.datastore.messages.CreateTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.PeerAddressResolved;
 import org.opendaylight.controller.cluster.datastore.messages.ReadData;
 import org.opendaylight.controller.cluster.datastore.messages.ReadDataReply;
@@ -98,8 +99,6 @@ import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.protobuff.messages.cohort3pc.ThreePhaseCommitCohortMessages;
-import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.CreateTransactionReply;
-import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
@@ -119,8 +118,6 @@ import scala.concurrent.Future;
 import scala.concurrent.duration.FiniteDuration;
 
 public class ShardTest extends AbstractShardTest {
-    private static final QName CARS_QNAME = QName.create("urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test:cars", "2014-03-13", "cars");
-
     private static final String DUMMY_DATA = "Dummy data as snapshot sequence number is set to 0 in InMemorySnapshotStore and journal recovery seq number will start from 1";
 
     @Test
@@ -356,13 +353,13 @@ public class ShardTest extends AbstractShardTest {
 
             shard.tell(new UpdateSchemaContext(TestModel.createTestContext()), getRef());
 
-            shard.tell(new CreateTransaction("txn-1",
-                    TransactionType.READ_ONLY.ordinal() ).toSerializable(), getRef());
+            shard.tell(new CreateTransaction("txn-1", TransactionType.READ_ONLY.ordinal(), null,
+                    DataStoreVersions.CURRENT_VERSION).toSerializable(), getRef());
 
             final CreateTransactionReply reply = expectMsgClass(duration("3 seconds"),
                     CreateTransactionReply.class);
 
-            final String path = reply.getTransactionActorPath().toString();
+            final String path = reply.getTransactionPath().toString();
             assertTrue("Unexpected transaction path " + path,
                     path.contains("akka://test/user/testCreateTransaction/shard-txn-1"));
         }};
@@ -375,14 +372,13 @@ public class ShardTest extends AbstractShardTest {
 
             waitUntilLeader(shard);
 
-            shard.tell(new CreateTransaction("txn-1",
-                    TransactionType.READ_ONLY.ordinal() , "foobar").toSerializable(),
-                    getRef());
+            shard.tell(new CreateTransaction("txn-1",TransactionType.READ_ONLY.ordinal(), "foobar",
+                    DataStoreVersions.CURRENT_VERSION).toSerializable(), getRef());
 
             final CreateTransactionReply reply = expectMsgClass(duration("3 seconds"),
                     CreateTransactionReply.class);
 
-            final String path = reply.getTransactionActorPath().toString();
+            final String path = reply.getTransactionPath().toString();
             assertTrue("Unexpected transaction path " + path,
                     path.contains("akka://test/user/testCreateTransactionOnChain/shard-txn-1"));
         }};
@@ -891,12 +887,12 @@ public class ShardTest extends AbstractShardTest {
 
             // Create a read Tx on the same chain.
 
-            shard.tell(new CreateTransaction(transactionID2, TransactionType.READ_ONLY.ordinal() ,
-                    transactionChainID).toSerializable(), getRef());
+            shard.tell(new CreateTransaction(transactionID2, TransactionType.READ_ONLY.ordinal(),
+                    transactionChainID, DataStoreVersions.CURRENT_VERSION).toSerializable(), getRef());
 
             final CreateTransactionReply createReply = expectMsgClass(duration("3 seconds"), CreateTransactionReply.class);
 
-            getSystem().actorSelection(createReply.getTransactionActorPath()).tell(new ReadData(path), getRef());
+            getSystem().actorSelection(createReply.getTransactionPath()).tell(new ReadData(path), getRef());
             final ReadDataReply readReply = expectMsgClass(duration("3 seconds"), ReadDataReply.class);
             assertEquals("Read node", containerNode, readReply.getNormalizedNode());
 

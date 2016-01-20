@@ -187,7 +187,7 @@ public abstract class AbstractTransactionProxyTest {
         ArgumentMatcher<CreateTransaction> matcher = new ArgumentMatcher<CreateTransaction>() {
             @Override
             public boolean matches(Object argument) {
-                if(CreateTransaction.SERIALIZABLE_CLASS.equals(argument.getClass())) {
+                if(CreateTransaction.class.equals(argument.getClass())) {
                     CreateTransaction obj = CreateTransaction.fromSerializable(argument);
                     return obj.getTransactionId().startsWith(memberName) &&
                             obj.getTransactionType() == type.ordinal();
