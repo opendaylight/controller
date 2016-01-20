@@ -70,7 +70,7 @@ public class QuarantinedMonitorActor extends UntypedActor {
                     LOG.debug("received AssociationErrorEvent, cause: InvalidAssociation", cause2);
                 }
             } else {
-                LOG.warn("received AssociationErrorEvent", cause);
+                LOG.debug("received AssociationErrorEvent", cause);
             }
         }
     }
