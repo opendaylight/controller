@@ -226,7 +226,7 @@ public class Shard extends RaftActor {
         }
 
         try {
-            if (CreateTransaction.SERIALIZABLE_CLASS.isInstance(message)) {
+            if (CreateTransaction.isSerializedType(message)) {
                 handleCreateTransaction(message);
             } else if (BatchedModifications.class.isInstance(message)) {
                 handleBatchedModifications((BatchedModifications)message);
@@ -551,7 +551,7 @@ public class Shard extends RaftActor {
                 createTransaction.getVersion());
 
             getSender().tell(new CreateTransactionReply(Serialization.serializedActorPath(transactionActor),
-                    createTransaction.getTransactionId()).toSerializable(), getSelf());
+                    createTransaction.getTransactionId(), createTransaction.getVersion()).toSerializable(), getSelf());
         } catch (Exception e) {
             getSender().tell(new akka.actor.Status.Failure(e), getSelf());
         }
