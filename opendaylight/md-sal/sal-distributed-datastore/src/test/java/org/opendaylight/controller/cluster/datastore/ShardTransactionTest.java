@@ -121,8 +121,7 @@ public class ShardTransactionTest extends AbstractActorTest {
             transaction.tell(new ReadData(YangInstanceIdentifier.builder().build()).toSerializable(),
                 getRef());
 
-            Object replySerialized =
-                    expectMsgClass(duration("5 seconds"), ReadDataReply.SERIALIZABLE_CLASS);
+            Object replySerialized = expectMsgClass(duration("5 seconds"), ReadDataReply.class);
 
             assertNotNull(ReadDataReply.fromSerializable(replySerialized).getNormalizedNode());
 
@@ -151,8 +150,7 @@ public class ShardTransactionTest extends AbstractActorTest {
             // serialized read
             transaction.tell(new ReadData(TestModel.TEST_PATH).toSerializable(), getRef());
 
-            Object replySerialized =
-                    expectMsgClass(duration("5 seconds"), ReadDataReply.SERIALIZABLE_CLASS);
+            Object replySerialized = expectMsgClass(duration("5 seconds"), ReadDataReply.class);
 
             assertTrue(ReadDataReply.fromSerializable(replySerialized).getNormalizedNode() == null);
 
@@ -181,9 +179,7 @@ public class ShardTransactionTest extends AbstractActorTest {
             transaction.tell(new DataExists(YangInstanceIdentifier.builder().build()).toSerializable(),
                 getRef());
 
-            ShardTransactionMessages.DataExistsReply replySerialized =
-                expectMsgClass(duration("5 seconds"), ShardTransactionMessages.DataExistsReply.class);
-
+            Object replySerialized = expectMsgClass(duration("5 seconds"), ShardTransactionMessages.DataExistsReply.class);
             assertTrue(DataExistsReply.fromSerializable(replySerialized).exists());
 
             // unserialized read
@@ -210,9 +206,7 @@ public class ShardTransactionTest extends AbstractActorTest {
         private void testOnReceiveDataExistsNegative(final ActorRef transaction) {
             transaction.tell(new DataExists(TestModel.TEST_PATH).toSerializable(), getRef());
 
-            ShardTransactionMessages.DataExistsReply replySerialized =
-                expectMsgClass(duration("5 seconds"), ShardTransactionMessages.DataExistsReply.class);
-
+            Object replySerialized = expectMsgClass(duration("5 seconds"), ShardTransactionMessages.DataExistsReply.class);
             assertFalse(DataExistsReply.fromSerializable(replySerialized).exists());
 
             // unserialized read

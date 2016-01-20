@@ -8,20 +8,14 @@
 
 package org.opendaylight.controller.cluster.datastore.messages;
 
-import com.google.protobuf.ByteString;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
-import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
-import org.opendaylight.controller.cluster.datastore.node.NormalizedNodeToNodeCodec;
 import org.opendaylight.controller.cluster.datastore.utils.SerializationUtils;
-import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 public class ReadDataReply extends VersionedExternalizableMessage {
     private static final long serialVersionUID = 1L;
-
-    public static final Class<ReadDataReply> SERIALIZABLE_CLASS = ReadDataReply.class;
 
     private NormalizedNode<?, ?> normalizedNode;
 
@@ -51,49 +45,14 @@ public class ReadDataReply extends VersionedExternalizableMessage {
 
     @Override
     public Object toSerializable() {
-        if(getVersion() >= DataStoreVersions.LITHIUM_VERSION) {
-            return this;
-        } else {
-            return toSerializableReadDataReply(normalizedNode);
-        }
-    }
-
-    private static ShardTransactionMessages.ReadDataReply toSerializableReadDataReply(
-            NormalizedNode<?, ?> normalizedNode) {
-        if(normalizedNode != null) {
-            return ShardTransactionMessages.ReadDataReply.newBuilder()
-                    .setNormalizedNode(new NormalizedNodeToNodeCodec(null)
-                    .encode(normalizedNode).getNormalizedNode()).build();
-        } else {
-            return ShardTransactionMessages.ReadDataReply.newBuilder().build();
-
-        }
+        return this;
     }
 
     public static ReadDataReply fromSerializable(Object serializable) {
-        if(serializable instanceof ReadDataReply) {
-            return (ReadDataReply) serializable;
-        } else {
-            ShardTransactionMessages.ReadDataReply o =
-                    (ShardTransactionMessages.ReadDataReply) serializable;
-            return new ReadDataReply(new NormalizedNodeToNodeCodec(null).decode(o.getNormalizedNode()),
-                    DataStoreVersions.HELIUM_2_VERSION);
-        }
-    }
-
-    public static ByteString fromSerializableAsByteString(Object serializable) {
-        if(serializable instanceof ReadDataReply) {
-            ReadDataReply r = (ReadDataReply)serializable;
-            return toSerializableReadDataReply(r.getNormalizedNode()).toByteString();
-        } else {
-            ShardTransactionMessages.ReadDataReply o =
-                    (ShardTransactionMessages.ReadDataReply) serializable;
-            return o.getNormalizedNode().toByteString();
-        }
+        return (ReadDataReply) serializable;
     }
 
     public static boolean isSerializedType(Object message) {
-        return SERIALIZABLE_CLASS.isAssignableFrom(message.getClass()) ||
-               message instanceof ShardTransactionMessages.ReadDataReply;
+        return message instanceof ReadDataReply;
     }
 }
