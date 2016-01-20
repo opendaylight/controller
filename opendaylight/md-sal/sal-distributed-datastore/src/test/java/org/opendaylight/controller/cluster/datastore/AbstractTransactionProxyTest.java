@@ -53,6 +53,7 @@ import org.opendaylight.controller.cluster.datastore.messages.BatchedModificatio
 import org.opendaylight.controller.cluster.datastore.messages.BatchedModificationsReply;
 import org.opendaylight.controller.cluster.datastore.messages.CommitTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransaction;
+import org.opendaylight.controller.cluster.datastore.messages.CreateTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.DataExists;
 import org.opendaylight.controller.cluster.datastore.messages.DataExistsReply;
 import org.opendaylight.controller.cluster.datastore.messages.PrimaryShardInfo;
@@ -72,7 +73,6 @@ import org.opendaylight.controller.cluster.raft.utils.DoNothingActor;
 import org.opendaylight.controller.md.cluster.datastore.model.CarsModel;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
-import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.CreateTransactionReply;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
@@ -187,7 +187,7 @@ public abstract class AbstractTransactionProxyTest {
         ArgumentMatcher<CreateTransaction> matcher = new ArgumentMatcher<CreateTransaction>() {
             @Override
             public boolean matches(Object argument) {
-                if(CreateTransaction.SERIALIZABLE_CLASS.equals(argument.getClass())) {
+                if(CreateTransaction.class.equals(argument.getClass())) {
                     CreateTransaction obj = CreateTransaction.fromSerializable(argument);
                     return obj.getTransactionId().startsWith(memberName) &&
                             obj.getTransactionType() == type.ordinal();
@@ -317,12 +317,8 @@ public abstract class AbstractTransactionProxyTest {
                     eq(actorSelection(actorRef)), isA(ReadyLocalTransaction.class), any(Timeout.class));
     }
 
-    protected CreateTransactionReply createTransactionReply(ActorRef actorRef, int transactionVersion){
-        return CreateTransactionReply.newBuilder()
-            .setTransactionActorPath(actorRef.path().toString())
-            .setTransactionId("txn-1")
-            .setMessageVersion(transactionVersion)
-            .build();
+    protected CreateTransactionReply createTransactionReply(ActorRef actorRef, short transactionVersion){
+        return new CreateTransactionReply(actorRef.path().toString(), "txn-1", transactionVersion);
     }
 
     protected ActorRef setupActorContextWithoutInitialCreateTransaction(ActorSystem actorSystem) {
