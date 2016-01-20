@@ -241,11 +241,14 @@ public abstract class AbstractTransactionProxyTest {
     }
 
     protected ReadData eqReadData() {
+        return eqReadData(TestModel.TEST_PATH);
+    }
+
+    protected ReadData eqReadData(final YangInstanceIdentifier path) {
         ArgumentMatcher<ReadData> matcher = new ArgumentMatcher<ReadData>() {
             @Override
             public boolean matches(Object argument) {
-                return (argument instanceof ReadData) &&
-                    ((ReadData)argument).getPath().equals(TestModel.TEST_PATH);
+                return (argument instanceof ReadData) && ((ReadData)argument).getPath().equals(path);
             }
         };
 
@@ -256,21 +259,9 @@ public abstract class AbstractTransactionProxyTest {
         return Futures.successful((Object)new ReadyTransactionReply(path));
     }
 
-    protected Future<Object> readSerializedDataReply(NormalizedNode<?, ?> data,
-            short transactionVersion) {
-        return Futures.successful(new ReadDataReply(data, transactionVersion).toSerializable());
-    }
-
-    protected Future<Object> readSerializedDataReply(NormalizedNode<?, ?> data) {
-        return readSerializedDataReply(data, DataStoreVersions.CURRENT_VERSION);
-    }
 
     protected Future<ReadDataReply> readDataReply(NormalizedNode<?, ?> data) {
         return Futures.successful(new ReadDataReply(data, DataStoreVersions.CURRENT_VERSION));
-    }
-
-    protected Future<Object> dataExistsSerializedReply(boolean exists) {
-        return Futures.successful(DataExistsReply.create(exists).toSerializable());
     }
 
     protected Future<DataExistsReply> dataExistsReply(boolean exists) {

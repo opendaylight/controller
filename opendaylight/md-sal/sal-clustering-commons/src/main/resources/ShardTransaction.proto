@@ -29,10 +29,6 @@ message ReadData {
 required InstanceIdentifier instanceIdentifierPathArguments=1;
 }
 
-message ReadDataReply{
-  optional Node normalizedNode=1;
-}
-
 message DataExists {
   required InstanceIdentifier instanceIdentifierPathArguments = 1;
 }
