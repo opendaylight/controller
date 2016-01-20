@@ -27,7 +27,7 @@ public abstract class VersionedExternalizableMessage implements Externalizable, 
     }
 
     public VersionedExternalizableMessage(short version) {
-        this.version = version;
+        this.version = version <= DataStoreVersions.CURRENT_VERSION ? version: DataStoreVersions.CURRENT_VERSION;
     }
 
     public short getVersion() {

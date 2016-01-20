@@ -8,27 +8,26 @@
 
 package org.opendaylight.controller.cluster.datastore.messages;
 
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages;
 
-public class CreateTransactionReply implements SerializableMessage {
+public class CreateTransactionReply extends VersionedExternalizableMessage {
+    private static final long serialVersionUID = 1L;
 
-    public static final Class<?> SERIALIZABLE_CLASS = ShardTransactionMessages.CreateTransactionReply.class;
-    private final String transactionPath;
-    private final String transactionId;
-    private final short version;
+    private String transactionPath;
+    private String transactionId;
 
-    public CreateTransactionReply(String transactionPath, String transactionId) {
-        this(transactionPath, transactionId, DataStoreVersions.CURRENT_VERSION);
+    public CreateTransactionReply() {
     }
 
-    public CreateTransactionReply(final String transactionPath,
-                                  final String transactionId, final short version) {
+    public CreateTransactionReply(final String transactionPath, final String transactionId, final short version) {
+        super(version);
         this.transactionPath = transactionPath;
         this.transactionId = transactionId;
-        this.version = version;
     }
-
 
     public String getTransactionPath() {
         return transactionPath;
@@ -38,30 +37,51 @@ public class CreateTransactionReply implements SerializableMessage {
         return transactionId;
     }
 
-    public short getVersion() {
-        return version;
+    @Override
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        super.readExternal(in);
+        transactionId = in.readUTF();
+        transactionPath = in.readUTF();
     }
 
     @Override
-    public Object toSerializable(){
-        return ShardTransactionMessages.CreateTransactionReply.newBuilder()
-            .setTransactionActorPath(transactionPath)
-            .setTransactionId(transactionId)
-            .setMessageVersion(version)
-            .build();
+    public void writeExternal(ObjectOutput out) throws IOException {
+        super.writeExternal(out);
+        out.writeUTF(transactionId);
+        out.writeUTF(transactionPath);
     }
 
-    public static CreateTransactionReply fromSerializable(Object serializable){
-        ShardTransactionMessages.CreateTransactionReply o = (ShardTransactionMessages.CreateTransactionReply) serializable;
-        return new CreateTransactionReply(o.getTransactionActorPath(), o.getTransactionId(),
-                (short)o.getMessageVersion());
+    @Override
+    public Object toSerializable() {
+        if(getVersion() >= DataStoreVersions.BORON_VERSION) {
+            return this;
+        } else {
+            return ShardTransactionMessages.CreateTransactionReply.newBuilder().setTransactionActorPath(transactionPath)
+                    .setTransactionId(transactionId).setMessageVersion(getVersion()).build();
+        }
     }
 
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("CreateTransactionReply [transactionPath=").append(transactionPath).append(", transactionId=")
-                .append(transactionId).append(", version=").append(version).append("]");
+                .append(transactionId).append(", version=").append(getVersion()).append("]");
         return builder.toString();
+    }
+
+    public static CreateTransactionReply fromSerializable(Object serializable) {
+        if(serializable instanceof CreateTransactionReply) {
+            return (CreateTransactionReply)serializable;
+        } else {
+            ShardTransactionMessages.CreateTransactionReply o =
+                    (ShardTransactionMessages.CreateTransactionReply) serializable;
+            return new CreateTransactionReply(o.getTransactionActorPath(), o.getTransactionId(),
+                    (short)o.getMessageVersion());
+        }
+    }
+
+    public static boolean isSerializedType(Object message) {
+        return message instanceof CreateTransactionReply ||
+                message instanceof ShardTransactionMessages.CreateTransactionReply;
     }
 }
