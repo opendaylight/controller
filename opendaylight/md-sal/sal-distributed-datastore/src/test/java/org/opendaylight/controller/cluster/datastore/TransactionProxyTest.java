@@ -770,7 +770,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
         transactionProxy.close();
 
         verify(mockActorContext).sendOperationAsync(
-                eq(actorSelection(actorRef)), isA(CloseTransaction.SERIALIZABLE_CLASS));
+                eq(actorSelection(actorRef)), isA(CloseTransaction.class));
     }
 
 
