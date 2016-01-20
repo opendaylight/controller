@@ -89,12 +89,12 @@ public class ShardWriteTransaction extends ShardTransaction {
         }
     }
 
-    protected final void dataExists(DataExists message, final boolean returnSerialized) {
-        super.dataExists(transaction, message, returnSerialized);
+    protected final void dataExists(DataExists message) {
+        super.dataExists(transaction, message);
     }
 
-    protected final void readData(ReadData message, final boolean returnSerialized) {
-        super.readData(transaction, message, returnSerialized);
+    protected final void readData(ReadData message) {
+        super.readData(transaction, message);
     }
 
     private boolean checkClosed() {

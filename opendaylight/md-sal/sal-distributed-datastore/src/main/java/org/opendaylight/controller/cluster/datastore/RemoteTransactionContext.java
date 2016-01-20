@@ -36,7 +36,6 @@ public class RemoteTransactionContext extends AbstractTransactionContext {
 
     private final ActorContext actorContext;
     private final ActorSelection actor;
-    private final boolean isTxActorLocal;
     private final short remoteTransactionVersion;
     private final OperationLimiter limiter;
 
@@ -44,13 +43,11 @@ public class RemoteTransactionContext extends AbstractTransactionContext {
     private int totalBatchedModificationsSent;
 
     protected RemoteTransactionContext(TransactionIdentifier identifier, ActorSelection actor,
-            ActorContext actorContext, boolean isTxActorLocal,
-            short remoteTransactionVersion, OperationLimiter limiter) {
+            ActorContext actorContext, short remoteTransactionVersion, OperationLimiter limiter) {
         super(identifier);
         this.limiter = Preconditions.checkNotNull(limiter);
         this.actor = actor;
         this.actorContext = actorContext;
-        this.isTxActorLocal = isTxActorLocal;
         this.remoteTransactionVersion = remoteTransactionVersion;
     }
 
@@ -72,7 +69,7 @@ public class RemoteTransactionContext extends AbstractTransactionContext {
     }
 
     protected Future<Object> executeOperationAsync(SerializableMessage msg) {
-        return completeOperation(actorContext.executeOperationAsync(getActor(), isTxActorLocal ? msg : msg.toSerializable()));
+        return completeOperation(actorContext.executeOperationAsync(getActor(), msg.toSerializable()));
     }
 
     @Override
@@ -209,7 +206,7 @@ public class RemoteTransactionContext extends AbstractTransactionContext {
             }
         };
 
-        Future<Object> future = executeOperationAsync(readCmd);
+        Future<Object> future = executeOperationAsync(readCmd.asVersion(remoteTransactionVersion));
 
         future.onComplete(onComplete, actorContext.getClientDispatcher());
     }

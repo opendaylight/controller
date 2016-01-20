@@ -249,12 +249,8 @@ final class RemoteTransactionContextSupport {
 
     private TransactionContext createValidTransactionContext(ActorSelection transactionActor, String transactionPath,
             short remoteTransactionVersion) {
-        // TxActor is always created where the leader of the shard is.
-        // Check if TxActor is created in the same node
-        boolean isTxActorLocal = getActorContext().isPathLocal(transactionPath);
         final TransactionContext ret = new RemoteTransactionContext(transactionContextWrapper.getIdentifier(),
-                transactionActor, getActorContext(), isTxActorLocal, remoteTransactionVersion,
-                transactionContextWrapper.getLimiter());
+                transactionActor, getActorContext(), remoteTransactionVersion, transactionContextWrapper.getLimiter());
 
         if(parent.getType() == TransactionType.READ_ONLY) {
             TransactionContextCleanup.track(this, ret);

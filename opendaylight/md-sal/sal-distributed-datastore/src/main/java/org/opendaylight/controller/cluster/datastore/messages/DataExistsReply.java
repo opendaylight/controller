@@ -8,27 +8,28 @@
 
 package org.opendaylight.controller.cluster.datastore.messages;
 
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages;
 
-public class DataExistsReply implements SerializableMessage {
-    public static final Class<ShardTransactionMessages.DataExistsReply> SERIALIZABLE_CLASS =
-            ShardTransactionMessages.DataExistsReply.class;
+public class DataExistsReply extends VersionedExternalizableMessage {
+    private static final long serialVersionUID = 1L;
 
-    private static final DataExistsReply TRUE = new DataExistsReply(true, null);
-    private static final DataExistsReply FALSE = new DataExistsReply(false, null);
     private static final ShardTransactionMessages.DataExistsReply SERIALIZABLE_TRUE =
             ShardTransactionMessages.DataExistsReply.newBuilder().setExists(true).build();
     private static final ShardTransactionMessages.DataExistsReply SERIALIZABLE_FALSE =
             ShardTransactionMessages.DataExistsReply.newBuilder().setExists(false).build();
 
-    private final boolean exists;
+    private boolean exists;
 
-    private DataExistsReply(final boolean exists, final Void dummy) {
-        this.exists = exists;
+    public DataExistsReply() {
     }
 
-    public static DataExistsReply create(final boolean exists) {
-        return exists ? TRUE : FALSE;
+    public DataExistsReply(final boolean exists, final short version) {
+        super(version);
+        this.exists = exists;
     }
 
     public boolean exists() {
@@ -36,12 +37,36 @@ public class DataExistsReply implements SerializableMessage {
     }
 
     @Override
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        super.readExternal(in);
+        exists = in.readBoolean();
+    }
+
+    @Override
+    public void writeExternal(ObjectOutput out) throws IOException {
+        super.writeExternal(out);
+        out.writeBoolean(exists);
+    }
+
+    @Override
     public Object toSerializable() {
-        return exists ? SERIALIZABLE_TRUE : SERIALIZABLE_FALSE;
+        if(getVersion() >= DataStoreVersions.BORON_VERSION) {
+            return this;
+        } else {
+            return exists ? SERIALIZABLE_TRUE : SERIALIZABLE_FALSE;
+        }
     }
 
     public static DataExistsReply fromSerializable(final Object serializable) {
-        ShardTransactionMessages.DataExistsReply o = (ShardTransactionMessages.DataExistsReply) serializable;
-        return create(o.getExists());
+        if(serializable instanceof DataExistsReply) {
+            return (DataExistsReply)serializable;
+        } else {
+            ShardTransactionMessages.DataExistsReply o = (ShardTransactionMessages.DataExistsReply) serializable;
+            return new DataExistsReply(o.getExists(), DataStoreVersions.LITHIUM_VERSION);
+        }
+    }
+
+    public static boolean isSerializedType(Object message) {
+        return message instanceof DataExistsReply || message instanceof ShardTransactionMessages.DataExistsReply;
     }
 }

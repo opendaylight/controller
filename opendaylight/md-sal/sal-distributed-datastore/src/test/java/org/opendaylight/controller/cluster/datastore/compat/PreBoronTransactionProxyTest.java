@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.datastore.compat;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Matchers.eq;
@@ -19,6 +20,8 @@ import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.dispatch.Futures;
 import akka.util.Timeout;
+import com.google.common.base.Optional;
+import java.util.concurrent.TimeUnit;
 import org.junit.Test;
 import org.mockito.ArgumentMatcher;
 import org.opendaylight.controller.cluster.datastore.AbstractTransactionProxyTest;
@@ -26,17 +29,22 @@ import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 import org.opendaylight.controller.cluster.datastore.TransactionProxy;
 import org.opendaylight.controller.cluster.datastore.TransactionType;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransaction;
+import org.opendaylight.controller.cluster.datastore.messages.DataExists;
+import org.opendaylight.controller.cluster.datastore.messages.ReadData;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.DefaultShardStrategy;
 import org.opendaylight.controller.cluster.raft.utils.DoNothingActor;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages;
-import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.CreateTransactionReply;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 
 /**
  * TransactionProxy unit tests for backwards compatibility with pre-Boron versions.
  *
  * @author Thomas Pantelis
  */
+@SuppressWarnings("resource")
 public class PreBoronTransactionProxyTest extends AbstractTransactionProxyTest {
 
     private CreateTransaction eqLegacyCreateTransaction(final TransactionType type) {
@@ -56,12 +64,37 @@ public class PreBoronTransactionProxyTest extends AbstractTransactionProxyTest {
         return argThat(matcher);
     }
 
-    private CreateTransactionReply legacyCreateTransactionReply(ActorRef actorRef, int transactionVersion){
-        return CreateTransactionReply.newBuilder()
+    private ShardTransactionMessages.CreateTransactionReply legacyCreateTransactionReply(ActorRef actorRef,
+            int transactionVersion){
+        return ShardTransactionMessages.CreateTransactionReply.newBuilder()
             .setTransactionActorPath(actorRef.path().toString())
             .setTransactionId("txn-1")
             .setMessageVersion(transactionVersion)
             .build();
+    }
+
+    private ReadData eqLegacySerializedReadData(final YangInstanceIdentifier path) {
+        ArgumentMatcher<ReadData> matcher = new ArgumentMatcher<ReadData>() {
+            @Override
+            public boolean matches(Object argument) {
+                return ShardTransactionMessages.ReadData.class.equals(argument.getClass()) &&
+                       ReadData.fromSerializable(argument).getPath().equals(path);
+            }
+        };
+
+        return argThat(matcher);
+    }
+
+    private DataExists eqLegacySerializedDataExists() {
+        ArgumentMatcher<DataExists> matcher = new ArgumentMatcher<DataExists>() {
+            @Override
+            public boolean matches(Object argument) {
+                return ShardTransactionMessages.DataExists.class.equals(argument.getClass()) &&
+                       DataExists.fromSerializable(argument).getPath().equals(TestModel.TEST_PATH);
+            }
+        };
+
+        return argThat(matcher);
     }
 
     private ActorRef setupPreBoronActorContextWithInitialCreateTransaction(ActorSystem actorSystem,
@@ -83,23 +116,51 @@ public class PreBoronTransactionProxyTest extends AbstractTransactionProxyTest {
         }
 
         return txActorRef;
-
     }
 
     @Test
     public void testClose() throws Exception{
         ActorRef actorRef = setupPreBoronActorContextWithInitialCreateTransaction(getSystem(), READ_WRITE);
 
-        doReturn(readDataReply(null)).when(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), eqSerializedReadData());
+        expectBatchedModifications(actorRef, 1);
 
         TransactionProxy transactionProxy = new TransactionProxy(mockComponentFactory, READ_WRITE);
 
-        transactionProxy.read(TestModel.TEST_PATH);
+        transactionProxy.write(TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
 
         transactionProxy.close();
 
         verify(mockActorContext).sendOperationAsync(
                 eq(actorSelection(actorRef)), isA(ShardTransactionMessages.CloseTransaction.class));
+    }
+
+    @Test
+    public void testRead() throws Exception{
+        ActorRef actorRef = setupPreBoronActorContextWithInitialCreateTransaction(getSystem(), READ_WRITE);
+
+        NormalizedNode<?, ?> expectedNode = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+        doReturn(readDataReply(expectedNode)).when(mockActorContext).executeOperationAsync(
+                eq(actorSelection(actorRef)), eqLegacySerializedReadData(TestModel.TEST_PATH));
+
+        TransactionProxy transactionProxy = new TransactionProxy(mockComponentFactory, READ_WRITE);
+
+        Optional<NormalizedNode<?, ?>> readOptional = transactionProxy.read(
+                TestModel.TEST_PATH).get(5, TimeUnit.SECONDS);
+
+        assertEquals("NormalizedNode isPresent", true, readOptional.isPresent());
+        assertEquals("Response NormalizedNode", expectedNode, readOptional.get());
+    }
+
+    @Test
+    public void testExists() throws Exception{
+        ActorRef actorRef = setupPreBoronActorContextWithInitialCreateTransaction(getSystem(), READ_WRITE);
+
+        doReturn(dataExistsReply(true)).when(mockActorContext).executeOperationAsync(
+                eq(actorSelection(actorRef)), eqLegacySerializedDataExists());
+
+        TransactionProxy transactionProxy = new TransactionProxy(mockComponentFactory, READ_WRITE);
+
+        Boolean exists = transactionProxy.exists(TestModel.TEST_PATH).checkedGet(5, TimeUnit.SECONDS);
+        assertEquals("Exists response", true, exists);
     }
 }

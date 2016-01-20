@@ -41,9 +41,6 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
  * </p>
  */
 public abstract class ShardTransaction extends AbstractUntypedActorWithMetering {
-
-    protected static final boolean SERIALIZED_REPLY = true;
-
     private final ActorRef shardActor;
     private final ShardStats shardStats;
     private final String transactionID;
@@ -115,31 +112,25 @@ public abstract class ShardTransaction extends AbstractUntypedActorWithMetering 
         return ret;
     }
 
-    protected void readData(AbstractShardDataTreeTransaction<?> transaction, ReadData message,
-            final boolean returnSerialized) {
-
+    protected void readData(AbstractShardDataTreeTransaction<?> transaction, ReadData message) {
         if (checkClosed(transaction)) {
             return;
         }
 
         final YangInstanceIdentifier path = message.getPath();
         Optional<NormalizedNode<?, ?>> optional = transaction.getSnapshot().readNode(path);
-        ReadDataReply readDataReply = new ReadDataReply(optional.orNull(), clientTxVersion);
-        sender().tell((returnSerialized ? readDataReply.toSerializable(): readDataReply), self());
+        ReadDataReply readDataReply = new ReadDataReply(optional.orNull(), message.getVersion());
+        sender().tell(readDataReply.toSerializable(), self());
     }
 
-    protected void dataExists(AbstractShardDataTreeTransaction<?> transaction, DataExists message,
-        final boolean returnSerialized) {
-
+    protected void dataExists(AbstractShardDataTreeTransaction<?> transaction, DataExists message) {
         if (checkClosed(transaction)) {
             return;
         }
 
         final YangInstanceIdentifier path = message.getPath();
         boolean exists = transaction.getSnapshot().readNode(path).isPresent();
-        DataExistsReply dataExistsReply = DataExistsReply.create(exists);
-        getSender().tell(returnSerialized ? dataExistsReply.toSerializable() :
-            dataExistsReply, getSelf());
+        getSender().tell(new DataExistsReply(exists, message.getVersion()).toSerializable(), getSelf());
     }
 
     private static class ShardTransactionCreator implements Creator<ShardTransaction> {
