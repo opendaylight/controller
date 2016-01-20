@@ -27,10 +27,10 @@ public class OperationLimiterTest {
         limiter.acquire(permits);
         int availablePermits = 0;
 
-        limiter.onComplete(null, DataExistsReply.create(true));
+        limiter.onComplete(null, new DataExistsReply(true, DataStoreVersions.CURRENT_VERSION));
         assertEquals("availablePermits", ++availablePermits, limiter.availablePermits());
 
-        limiter.onComplete(null, DataExistsReply.create(true));
+        limiter.onComplete(null, new DataExistsReply(true, DataStoreVersions.CURRENT_VERSION));
         assertEquals("availablePermits", ++availablePermits, limiter.availablePermits());
 
         limiter.onComplete(null, new IllegalArgumentException());

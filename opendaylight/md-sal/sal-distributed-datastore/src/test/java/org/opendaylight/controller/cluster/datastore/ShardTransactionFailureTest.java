@@ -66,12 +66,13 @@ public class ShardTransactionFailureTest extends AbstractActorTest {
                 "testNegativeReadWithReadOnlyTransactionClosed");
 
         Future<Object> future = akka.pattern.Patterns.ask(subject,
-                new ReadData(YangInstanceIdentifier.EMPTY), 3000);
+                new ReadData(YangInstanceIdentifier.EMPTY, DataStoreVersions.CURRENT_VERSION), 3000);
         Await.result(future, Duration.create(3, TimeUnit.SECONDS));
 
         subject.underlyingActor().getDOMStoreTransaction().abort();
 
-        future = akka.pattern.Patterns.ask(subject, new ReadData(YangInstanceIdentifier.EMPTY), 3000);
+        future = akka.pattern.Patterns.ask(subject, new ReadData(YangInstanceIdentifier.EMPTY,
+                DataStoreVersions.CURRENT_VERSION), 3000);
         Await.result(future, Duration.create(3, TimeUnit.SECONDS));
     }
 
@@ -87,12 +88,13 @@ public class ShardTransactionFailureTest extends AbstractActorTest {
                 "testNegativeReadWithReadWriteTransactionClosed");
 
         Future<Object> future = akka.pattern.Patterns.ask(subject,
-                new ReadData(YangInstanceIdentifier.EMPTY), 3000);
+                new ReadData(YangInstanceIdentifier.EMPTY, DataStoreVersions.CURRENT_VERSION), 3000);
         Await.result(future, Duration.create(3, TimeUnit.SECONDS));
 
         subject.underlyingActor().getDOMStoreTransaction().abort();
 
-        future = akka.pattern.Patterns.ask(subject, new ReadData(YangInstanceIdentifier.EMPTY), 3000);
+        future = akka.pattern.Patterns.ask(subject, new ReadData(YangInstanceIdentifier.EMPTY,
+                DataStoreVersions.CURRENT_VERSION), 3000);
         Await.result(future, Duration.create(3, TimeUnit.SECONDS));
     }
 
@@ -107,12 +109,13 @@ public class ShardTransactionFailureTest extends AbstractActorTest {
                 "testNegativeExistsWithReadWriteTransactionClosed");
 
         Future<Object> future = akka.pattern.Patterns.ask(subject,
-                new DataExists(YangInstanceIdentifier.EMPTY), 3000);
+                new DataExists(YangInstanceIdentifier.EMPTY, DataStoreVersions.CURRENT_VERSION), 3000);
         Await.result(future, Duration.create(3, TimeUnit.SECONDS));
 
         subject.underlyingActor().getDOMStoreTransaction().abort();
 
-        future = akka.pattern.Patterns.ask(subject, new DataExists(YangInstanceIdentifier.EMPTY), 3000);
+        future = akka.pattern.Patterns.ask(subject,
+                new DataExists(YangInstanceIdentifier.EMPTY, DataStoreVersions.CURRENT_VERSION), 3000);
         Await.result(future, Duration.create(3, TimeUnit.SECONDS));
     }
 }

@@ -200,40 +200,12 @@ public abstract class AbstractTransactionProxyTest {
         return argThat(matcher);
     }
 
-    protected DataExists eqSerializedDataExists() {
-        ArgumentMatcher<DataExists> matcher = new ArgumentMatcher<DataExists>() {
-            @Override
-            public boolean matches(Object argument) {
-                return DataExists.SERIALIZABLE_CLASS.equals(argument.getClass()) &&
-                       DataExists.fromSerializable(argument).getPath().equals(TestModel.TEST_PATH);
-            }
-        };
-
-        return argThat(matcher);
-    }
-
     protected DataExists eqDataExists() {
         ArgumentMatcher<DataExists> matcher = new ArgumentMatcher<DataExists>() {
             @Override
             public boolean matches(Object argument) {
                 return (argument instanceof DataExists) &&
                     ((DataExists)argument).getPath().equals(TestModel.TEST_PATH);
-            }
-        };
-
-        return argThat(matcher);
-    }
-
-    protected ReadData eqSerializedReadData() {
-        return eqSerializedReadData(TestModel.TEST_PATH);
-    }
-
-    protected ReadData eqSerializedReadData(final YangInstanceIdentifier path) {
-        ArgumentMatcher<ReadData> matcher = new ArgumentMatcher<ReadData>() {
-            @Override
-            public boolean matches(Object argument) {
-                return ReadData.SERIALIZABLE_CLASS.equals(argument.getClass()) &&
-                       ReadData.fromSerializable(argument).getPath().equals(path);
             }
         };
 
@@ -265,7 +237,7 @@ public abstract class AbstractTransactionProxyTest {
     }
 
     protected Future<DataExistsReply> dataExistsReply(boolean exists) {
-        return Futures.successful(DataExistsReply.create(exists));
+        return Futures.successful(new DataExistsReply(exists, DataStoreVersions.CURRENT_VERSION));
     }
 
     protected Future<BatchedModificationsReply> batchedModificationsReply(int count) {
@@ -349,8 +321,6 @@ public abstract class AbstractTransactionProxyTest {
 
         doReturn(primaryShardInfoReply(actorSystem, actorRef, transactionVersion)).
                 when(mockActorContext).findPrimaryShardAsync(eq(shardName));
-
-        doReturn(false).when(mockActorContext).isPathLocal(actorRef.path().toString());
 
         return actorRef;
     }
