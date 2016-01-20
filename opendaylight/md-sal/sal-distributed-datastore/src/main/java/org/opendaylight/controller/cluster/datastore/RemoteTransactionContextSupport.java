@@ -48,7 +48,7 @@ final class RemoteTransactionContextSupport {
     /**
      * The target primary shard.
      */
-    private volatile ActorSelection primaryShard;
+    private volatile PrimaryShardInfo primaryShardInfo;
 
     /**
      * The total timeout for creating a tx on the primary shard.
@@ -97,18 +97,20 @@ final class RemoteTransactionContextSupport {
     /**
      * Sets the target primary shard and initiates a CreateTransaction try.
      */
-    void setPrimaryShard(ActorSelection primaryShard, short primaryVersion) {
-        this.primaryShard = primaryShard;
+    void setPrimaryShard(PrimaryShardInfo primaryShardInfo) {
+        this.primaryShardInfo = primaryShardInfo;
 
         if (getTransactionType() == TransactionType.WRITE_ONLY  &&
                 getActorContext().getDatastoreContext().isWriteOnlyTransactionOptimizationsEnabled()) {
+            ActorSelection primaryShard = primaryShardInfo.getPrimaryShardActor();
+
             LOG.debug("Tx {} Primary shard {} found - creating WRITE_ONLY transaction context",
                 getIdentifier(), primaryShard);
 
             // For write-only Tx's we prepare the transaction modifications directly on the shard actor
             // to avoid the overhead of creating a separate transaction actor.
-            transactionContextWrapper.executePriorTransactionOperations(createValidTransactionContext(this.primaryShard,
-                    this.primaryShard.path().toString(), primaryVersion));
+            transactionContextWrapper.executePriorTransactionOperations(createValidTransactionContext(
+                    primaryShard, primaryShard.path().toString(), primaryShardInfo.getPrimaryShardVersion()));
         } else {
             tryCreateTransaction();
         }
@@ -119,14 +121,16 @@ final class RemoteTransactionContextSupport {
      */
     private void tryCreateTransaction() {
         if(LOG.isDebugEnabled()) {
-            LOG.debug("Tx {} Primary shard {} found - trying create transaction", getIdentifier(), primaryShard);
+            LOG.debug("Tx {} Primary shard {} found - trying create transaction", getIdentifier(),
+                    primaryShardInfo.getPrimaryShardActor());
         }
 
         Object serializedCreateMessage = new CreateTransaction(getIdentifier().toString(),
-            getTransactionType().ordinal(), getIdentifier().getChainId()).toSerializable();
+                getTransactionType().ordinal(), getIdentifier().getChainId(),
+                    primaryShardInfo.getPrimaryShardVersion()).toSerializable();
 
-        Future<Object> createTxFuture = getActorContext().executeOperationAsync(primaryShard,
-                serializedCreateMessage, createTxMessageTimeout);
+        Future<Object> createTxFuture = getActorContext().executeOperationAsync(
+                primaryShardInfo.getPrimaryShardActor(), serializedCreateMessage, createTxMessageTimeout);
 
         createTxFuture.onComplete(new OnComplete<Object>() {
             @Override
@@ -139,7 +143,7 @@ final class RemoteTransactionContextSupport {
     private void tryFindPrimaryShard() {
         LOG.debug("Tx {} Retrying findPrimaryShardAsync for shard {}", getIdentifier(), shardName);
 
-        this.primaryShard = null;
+        this.primaryShardInfo = null;
         Future<PrimaryShardInfo> findPrimaryFuture = getActorContext().findPrimaryShardAsync(shardName);
         findPrimaryFuture.onComplete(new OnComplete<PrimaryShardInfo>() {
             @Override
@@ -151,7 +155,7 @@ final class RemoteTransactionContextSupport {
 
     private void onFindPrimaryShardComplete(final Throwable failure, final PrimaryShardInfo primaryShardInfo) {
         if (failure == null) {
-            this.primaryShard = primaryShardInfo.getPrimaryShardActor();
+            this.primaryShardInfo = primaryShardInfo;
             tryCreateTransaction();
         } else {
             LOG.debug("Tx {}: Find primary for shard {} failed", getIdentifier(), shardName, failure);
@@ -163,7 +167,7 @@ final class RemoteTransactionContextSupport {
     private void onCreateTransactionComplete(Throwable failure, Object response) {
         // An AskTimeoutException will occur if the local shard forwards to an unavailable remote leader or
         // the cached remote leader actor is no longer available.
-        boolean retryCreateTransaction = this.primaryShard != null &&
+        boolean retryCreateTransaction = primaryShardInfo != null &&
                 (failure instanceof NoShardLeaderException || failure instanceof AskTimeoutException);
         if(retryCreateTransaction) {
             // Schedule a retry unless we're out of retries. Note: totalCreateTxTimeout is volatile as it may
@@ -223,7 +227,7 @@ final class RemoteTransactionContextSupport {
             }
 
             localTransactionContext = new NoOpTransactionContext(resultingEx, getIdentifier());
-        } else if (CreateTransactionReply.SERIALIZABLE_CLASS.equals(response.getClass())) {
+        } else if (CreateTransactionReply.isSerializedType(response)) {
             localTransactionContext = createValidTransactionContext(
                     CreateTransactionReply.fromSerializable(response));
         } else {
@@ -240,7 +244,7 @@ final class RemoteTransactionContextSupport {
         LOG.debug("Tx {} Received {}", getIdentifier(), reply);
 
         return createValidTransactionContext(getActorContext().actorSelection(reply.getTransactionPath()),
-                reply.getTransactionPath(), reply.getVersion());
+                reply.getTransactionPath(), primaryShardInfo.getPrimaryShardVersion());
     }
 
     private TransactionContext createValidTransactionContext(ActorSelection transactionActor, String transactionPath,

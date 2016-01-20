@@ -82,7 +82,7 @@ abstract class AbstractTransactionContextFactory<F extends LocalTransactionFacto
             } else {
                 RemoteTransactionContextSupport remote = new RemoteTransactionContextSupport(transactionContextWrapper,
                         parent, shardName);
-                remote.setPrimaryShard(primaryShardInfo.getPrimaryShardActor(), primaryShardInfo.getPrimaryShardVersion());
+                remote.setPrimaryShard(primaryShardInfo);
             }
         } finally {
             onTransactionContextCreated(parent.getIdentifier());
