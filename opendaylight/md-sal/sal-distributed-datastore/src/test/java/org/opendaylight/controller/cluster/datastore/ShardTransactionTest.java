@@ -117,16 +117,8 @@ public class ShardTransactionTest extends AbstractActorTest {
         }
 
         private void testOnReceiveReadData(final ActorRef transaction) {
-            //serialized read
-            transaction.tell(new ReadData(YangInstanceIdentifier.builder().build()).toSerializable(),
-                getRef());
-
-            Object replySerialized = expectMsgClass(duration("5 seconds"), ReadDataReply.class);
-
-            assertNotNull(ReadDataReply.fromSerializable(replySerialized).getNormalizedNode());
-
-            // unserialized read
-            transaction.tell(new ReadData(YangInstanceIdentifier.builder().build()),getRef());
+            transaction.tell(new ReadData(YangInstanceIdentifier.builder().build(),
+                    DataStoreVersions.CURRENT_VERSION),getRef());
 
             ReadDataReply reply = expectMsgClass(duration("5 seconds"), ReadDataReply.class);
 
@@ -147,15 +139,7 @@ public class ShardTransactionTest extends AbstractActorTest {
         }
 
         private void testOnReceiveReadDataWhenDataNotFound(final ActorRef transaction) {
-            // serialized read
-            transaction.tell(new ReadData(TestModel.TEST_PATH).toSerializable(), getRef());
-
-            Object replySerialized = expectMsgClass(duration("5 seconds"), ReadDataReply.class);
-
-            assertTrue(ReadDataReply.fromSerializable(replySerialized).getNormalizedNode() == null);
-
-            // unserialized read
-            transaction.tell(new ReadData(TestModel.TEST_PATH),getRef());
+            transaction.tell(new ReadData(TestModel.TEST_PATH, DataStoreVersions.CURRENT_VERSION),getRef());
 
             ReadDataReply reply = expectMsgClass(duration("5 seconds"), ReadDataReply.class);
 
@@ -176,14 +160,8 @@ public class ShardTransactionTest extends AbstractActorTest {
         }
 
         private void testOnReceiveDataExistsPositive(final ActorRef transaction) {
-            transaction.tell(new DataExists(YangInstanceIdentifier.builder().build()).toSerializable(),
-                getRef());
-
-            Object replySerialized = expectMsgClass(duration("5 seconds"), ShardTransactionMessages.DataExistsReply.class);
-            assertTrue(DataExistsReply.fromSerializable(replySerialized).exists());
-
-            // unserialized read
-            transaction.tell(new DataExists(YangInstanceIdentifier.builder().build()),getRef());
+            transaction.tell(new DataExists(YangInstanceIdentifier.builder().build(),
+                    DataStoreVersions.CURRENT_VERSION),getRef());
 
             DataExistsReply reply = expectMsgClass(duration("5 seconds"), DataExistsReply.class);
 
@@ -204,13 +182,7 @@ public class ShardTransactionTest extends AbstractActorTest {
         }
 
         private void testOnReceiveDataExistsNegative(final ActorRef transaction) {
-            transaction.tell(new DataExists(TestModel.TEST_PATH).toSerializable(), getRef());
-
-            Object replySerialized = expectMsgClass(duration("5 seconds"), ShardTransactionMessages.DataExistsReply.class);
-            assertFalse(DataExistsReply.fromSerializable(replySerialized).exists());
-
-            // unserialized read
-            transaction.tell(new DataExists(TestModel.TEST_PATH),getRef());
+            transaction.tell(new DataExists(TestModel.TEST_PATH, DataStoreVersions.CURRENT_VERSION),getRef());
 
             DataExistsReply reply = expectMsgClass(duration("5 seconds"), DataExistsReply.class);
 
@@ -474,6 +446,35 @@ public class ShardTransactionTest extends AbstractActorTest {
             watch(transaction);
 
             expectMsgClass(duration("3 seconds"), Terminated.class);
+        }};
+    }
+
+    @Test
+    public void testOnReceivePreBoronReadData() throws Exception {
+        new JavaTestKit(getSystem()) {{
+            ActorRef transaction = newTransactionActor(RO, readOnlyTransaction(), createShard(),
+                    "testOnReceivePreBoronReadData");
+
+            transaction.tell(new ReadData(YangInstanceIdentifier.EMPTY, DataStoreVersions.LITHIUM_VERSION).
+                    toSerializable(), getRef());
+
+            Object replySerialized = expectMsgClass(duration("5 seconds"), ReadDataReply.class);
+            assertNotNull(ReadDataReply.fromSerializable(replySerialized).getNormalizedNode());
+        }};
+    }
+
+    @Test
+    public void testOnReceivePreBoronDataExists() throws Exception {
+        new JavaTestKit(getSystem()) {{
+            ActorRef transaction = newTransactionActor(RO, readOnlyTransaction(), createShard(),
+                    "testOnReceivePreBoronDataExists");
+
+            transaction.tell(new DataExists(YangInstanceIdentifier.EMPTY, DataStoreVersions.LITHIUM_VERSION).
+                    toSerializable(), getRef());
+
+            Object replySerialized = expectMsgClass(duration("5 seconds"),
+                    ShardTransactionMessages.DataExistsReply.class);
+            assertTrue(DataExistsReply.fromSerializable(replySerialized).exists());
         }};
     }
 

@@ -11,6 +11,7 @@ package org.opendaylight.controller.cluster.datastore.messages;
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.SettableFuture;
+import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 import org.opendaylight.controller.cluster.datastore.util.InstanceIdentifierUtils;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages;
@@ -19,21 +20,23 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 public class ReadData extends AbstractRead<Optional<NormalizedNode<?, ?>>> {
-    public static final Class<ShardTransactionMessages.ReadData> SERIALIZABLE_CLASS = ShardTransactionMessages.ReadData.class;
+    private static final long serialVersionUID = 1L;
 
-    public ReadData(final YangInstanceIdentifier path) {
-        super(path);
+    public ReadData() {
+    }
+
+    public ReadData(final YangInstanceIdentifier path, short version) {
+        super(path, version);
     }
 
     @Override
     public Object toSerializable() {
-        return ShardTransactionMessages.ReadData.newBuilder()
-                .setInstanceIdentifierPathArguments(InstanceIdentifierUtils.toSerializable(getPath())).build();
-    }
-
-    public static ReadData fromSerializable(final Object serializable) {
-        ShardTransactionMessages.ReadData o = (ShardTransactionMessages.ReadData)serializable;
-        return new ReadData(InstanceIdentifierUtils.fromSerializable(o.getInstanceIdentifierPathArguments()));
+        if(getVersion() >= DataStoreVersions.BORON_VERSION) {
+            return this;
+        } else {
+            return ShardTransactionMessages.ReadData.newBuilder().setInstanceIdentifierPathArguments(
+                    InstanceIdentifierUtils.toSerializable(getPath())).build();
+        }
     }
 
     @Override
@@ -49,5 +52,24 @@ public class ReadData extends AbstractRead<Optional<NormalizedNode<?, ?>>> {
         } else {
             returnFuture.setException(new ReadFailedException("Invalid response reading data for path " + getPath()));
         }
+    }
+
+    @Override
+    protected AbstractRead<Optional<NormalizedNode<?, ?>>> newInstance(short withVersion) {
+        return new ReadData(getPath(), withVersion);
+    }
+
+    public static ReadData fromSerializable(final Object serializable) {
+        if(serializable instanceof ReadData) {
+            return (ReadData)serializable;
+        } else {
+            ShardTransactionMessages.ReadData o = (ShardTransactionMessages.ReadData)serializable;
+            return new ReadData(InstanceIdentifierUtils.fromSerializable(o.getInstanceIdentifierPathArguments()),
+                    DataStoreVersions.LITHIUM_VERSION);
+        }
+    }
+
+    public static boolean isSerializedType(Object message) {
+        return message instanceof ReadData || message instanceof ShardTransactionMessages.ReadData;
     }
 }
