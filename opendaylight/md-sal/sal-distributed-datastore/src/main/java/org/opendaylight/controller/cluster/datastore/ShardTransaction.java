@@ -80,7 +80,7 @@ public abstract class ShardTransaction extends AbstractUntypedActorWithMetering 
 
     @Override
     public void handleReceive(Object message) throws Exception {
-        if (message.getClass().equals(CloseTransaction.SERIALIZABLE_CLASS)) {
+        if (CloseTransaction.isSerializedType(message)) {
             closeTransaction(true);
         } else if (message instanceof ReceiveTimeout) {
             if(LOG.isDebugEnabled()) {
@@ -100,7 +100,7 @@ public abstract class ShardTransaction extends AbstractUntypedActorWithMetering 
         getDOMStoreTransaction().abort();
 
         if(sendReply && returnCloseTransactionReply()) {
-            getSender().tell(CloseTransactionReply.INSTANCE.toSerializable(), getSelf());
+            getSender().tell(new CloseTransactionReply(), getSelf());
         }
 
         getSelf().tell(PoisonPill.getInstance(), getSelf());

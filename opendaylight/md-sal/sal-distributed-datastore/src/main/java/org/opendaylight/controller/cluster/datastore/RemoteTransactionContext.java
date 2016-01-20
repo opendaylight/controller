@@ -80,7 +80,7 @@ public class RemoteTransactionContext extends AbstractTransactionContext {
         LOG.debug("Tx {} closeTransaction called", getIdentifier());
         TransactionContextCleanup.untrack(this);
 
-        actorContext.sendOperationAsync(getActor(), CloseTransaction.INSTANCE.toSerializable());
+        actorContext.sendOperationAsync(getActor(), new CloseTransaction(remoteTransactionVersion).toSerializable());
     }
 
     @Override

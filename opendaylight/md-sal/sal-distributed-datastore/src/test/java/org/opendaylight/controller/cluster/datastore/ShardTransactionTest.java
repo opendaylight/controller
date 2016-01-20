@@ -416,7 +416,7 @@ public class ShardTransactionTest extends AbstractActorTest {
 
             transaction.tell(new CloseTransaction().toSerializable(), getRef());
 
-            expectMsgClass(duration("3 seconds"), CloseTransactionReply.SERIALIZABLE_CLASS);
+            expectMsgClass(duration("3 seconds"), CloseTransactionReply.class);
             expectTerminated(duration("3 seconds"), transaction);
         }};
     }
@@ -431,7 +431,7 @@ public class ShardTransactionTest extends AbstractActorTest {
 
             transaction.tell(new CloseTransaction().toSerializable(), getRef());
 
-            expectMsgClass(duration("3 seconds"), CloseTransactionReply.SERIALIZABLE_CLASS);
+            expectMsgClass(duration("3 seconds"), CloseTransactionReply.class);
             expectTerminated(duration("3 seconds"), transaction);
         }};
     }
