@@ -83,7 +83,7 @@ public class NormalizedNodePruner implements NormalizedNodeStreamWriter {
     }
 
     @Override
-    public void leafSetEntryNode(Object o) throws IOException, IllegalArgumentException {
+    public void leafSetEntryNode(QName name, Object value) throws IOException, IllegalArgumentException {
 
         checkNotSealed();
 
@@ -95,8 +95,8 @@ public class NormalizedNodePruner implements NormalizedNodeStreamWriter {
 
         parent.builder()
                 .addChild(Builders.leafSetEntryBuilder()
-                        .withValue(o)
-                        .withNodeIdentifier(new YangInstanceIdentifier.NodeWithValue(parent.nodeType(), o))
+                        .withValue(value)
+                        .withNodeIdentifier(new YangInstanceIdentifier.NodeWithValue<>(parent.nodeType(), value))
                         .build());
     }
 

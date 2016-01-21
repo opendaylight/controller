@@ -171,7 +171,7 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
     }
 
     @Override
-    public void leafSetEntryNode(final Object value) throws IOException, IllegalArgumentException {
+    public void leafSetEntryNode(final QName name, final Object value) throws IOException, IllegalArgumentException {
         LOG.debug("Writing a new leaf set entry node");
 
         output.writeByte(NodeTypes.LEAF_SET_ENTRY_NODE);
@@ -348,8 +348,8 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
 
             case PathArgumentTypes.NODE_IDENTIFIER_WITH_VALUE :
 
-                YangInstanceIdentifier.NodeWithValue nodeWithValue =
-                    (YangInstanceIdentifier.NodeWithValue) pathArgument;
+                YangInstanceIdentifier.NodeWithValue<?> nodeWithValue =
+                    (YangInstanceIdentifier.NodeWithValue<?>) pathArgument;
 
                 writeQName(nodeWithValue.getNodeType());
                 writeObject(nodeWithValue.getValue());

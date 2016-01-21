@@ -200,7 +200,7 @@ public class NormalizedNodePrunerTest {
 
     @Test(expected = IllegalStateException.class)
     public void testLeafSetEntryNodeHasNoParent() throws IOException {
-        prunerFullSchema.leafSetEntryNode(mock(Object.class));
+        prunerFullSchema.leafSetEntryNode(mock(QName.class), mock(Object.class));
     }
 
     @Test
@@ -208,8 +208,8 @@ public class NormalizedNodePrunerTest {
         prunerFullSchema.stack().push(normalizedNodeBuilderWrapper);
         Object o = mock(Object.class);
         YangInstanceIdentifier.PathArgument nodeIdentifier
-                = new YangInstanceIdentifier.NodeWithValue(normalizedNodeBuilderWrapper.identifier().getNodeType(), o);
-        prunerFullSchema.leafSetEntryNode(o);
+                = new YangInstanceIdentifier.NodeWithValue<>(normalizedNodeBuilderWrapper.identifier().getNodeType(), o);
+        prunerFullSchema.leafSetEntryNode(nodeIdentifier.getNodeType(), o);
 
         ArgumentCaptor<NormalizedNode> captor = ArgumentCaptor.forClass(NormalizedNode.class);
 
@@ -227,7 +227,7 @@ public class NormalizedNodePrunerTest {
         doReturn(new YangInstanceIdentifier.NodeIdentifier(TestModel.AUG_CONT_QNAME)).when(normalizedNodeBuilderWrapper).identifier();
 
         prunerNoAugSchema.stack().push(normalizedNodeBuilderWrapper);
-        prunerNoAugSchema.leafSetEntryNode(new YangInstanceIdentifier.NodeIdentifier(TestModel.AUG_CONT_QNAME));
+        prunerNoAugSchema.leafSetEntryNode(TestModel.AUG_CONT_QNAME, new YangInstanceIdentifier.NodeIdentifier(TestModel.AUG_CONT_QNAME));
 
         verify(normalizedNodeContainerBuilder, never()).addChild(any(NormalizedNode.class));
     }
