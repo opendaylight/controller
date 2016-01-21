@@ -134,8 +134,13 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput,
                         withNodeIdentifier(augIdentifier)).build();
 
             case NodeTypes.LEAF_SET_ENTRY_NODE :
+                QName name = lastLeafSetQName;
+                if(name == null) {
+                    name = readQName();
+                }
+
                 Object value = readObject();
-                NodeWithValue leafIdentifier = new NodeWithValue(lastLeafSetQName, value);
+                NodeWithValue<?> leafIdentifier = new NodeWithValue<>(name, value);
 
                 LOG.debug("Reading leaf set entry node {}, value {}", leafIdentifier, value);
 
@@ -222,7 +227,7 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput,
                         Builders.leafSetBuilder().withNodeIdentifier(identifier)).build();
 
             case NodeTypes.ORDERED_LEAF_SET:
-                LOG.debug("Read leaf set node");
+                LOG.debug("Read ordered leaf set node {}", identifier);
                 ListNodeBuilder<Object, LeafSetEntryNode<Object>> orderedLeafSetBuilder =
                         Builders.orderedLeafSetBuilder().withNodeIdentifier(identifier);
                 orderedLeafSetBuilder = addLeafSetChildren(identifier.getNodeType(), orderedLeafSetBuilder);

@@ -10,18 +10,17 @@ package org.opendaylight.controller.cluster.datastore.node.utils.transformer;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
-
 import java.io.IOException;
 import java.net.URI;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-
 import javax.xml.transform.dom.DOMSource;
-
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.schema.AnyXmlNode;
+import org.opendaylight.yangtools.yang.data.api.schema.LeafNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeStreamWriter;
 import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
@@ -49,6 +48,7 @@ public class NormalizedNodePruner implements NormalizedNodeStreamWriter {
         this.validNamespaces = validNamespaces;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public void leafNode(YangInstanceIdentifier.NodeIdentifier nodeIdentifier, Object o) throws IOException, IllegalArgumentException {
 
@@ -57,13 +57,16 @@ public class NormalizedNodePruner implements NormalizedNodeStreamWriter {
         if(!isValidNamespace(nodeIdentifier)){
             return;
         }
+
         NormalizedNodeBuilderWrapper parent = stack.peek();
-        Preconditions.checkState(parent != null, "leafNode has no parent");
-        parent.builder()
-                .addChild(Builders.leafBuilder()
-                        .withNodeIdentifier(nodeIdentifier)
-                        .withValue(o)
-                        .build());
+        LeafNode<Object> leafNode = Builders.leafBuilder().withNodeIdentifier(nodeIdentifier).withValue(o).build();
+        if(parent != null) {
+            parent.builder().addChild(leafNode);
+        } else {
+            // If there's no parent node then this is a stand alone LeafNode.
+            this.normalizedNode = leafNode;
+            sealed = true;
+        }
     }
 
     @Override
@@ -82,22 +85,25 @@ public class NormalizedNodePruner implements NormalizedNodeStreamWriter {
         addBuilder(Builders.orderedLeafSetBuilder().withNodeIdentifier(nodeIdentifier), nodeIdentifier);
     }
 
+    @SuppressWarnings({ "unchecked" })
     @Override
-    public void leafSetEntryNode(Object o) throws IOException, IllegalArgumentException {
-
+    public void leafSetEntryNode(QName name, Object o) throws IOException, IllegalArgumentException {
         checkNotSealed();
 
-        NormalizedNodeBuilderWrapper parent = stack.peek();
-        Preconditions.checkState(parent != null, "leafSetEntryNode has no parent");
-        if(!isValidNamespace(parent.identifier())){
+        if(!isValidNamespace(name)){
             return;
         }
 
-        parent.builder()
-                .addChild(Builders.leafSetEntryBuilder()
-                        .withValue(o)
-                        .withNodeIdentifier(new YangInstanceIdentifier.NodeWithValue(parent.nodeType(), o))
-                        .build());
+        NormalizedNodeBuilderWrapper parent = stack.peek();
+        if(parent != null) {
+            parent.builder().addChild(Builders.leafSetEntryBuilder().withValue(o).withNodeIdentifier(
+                    new YangInstanceIdentifier.NodeWithValue<>(parent.nodeType(), o)).build());
+        } else {
+            // If there's no parent LeafSetNode then this is a stand alone LeafSetEntryNode.
+            this.normalizedNode = Builders.leafSetEntryBuilder().withValue(o).withNodeIdentifier(
+                    new YangInstanceIdentifier.NodeWithValue<>(name, o)).build();
+            sealed = true;
+        }
     }
 
     @Override
@@ -169,17 +175,25 @@ public class NormalizedNodePruner implements NormalizedNodeStreamWriter {
         addBuilder(Builders.augmentationBuilder().withNodeIdentifier(augmentationIdentifier), augmentationIdentifier);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public void anyxmlNode(YangInstanceIdentifier.NodeIdentifier nodeIdentifier, Object o) throws IOException, IllegalArgumentException {
-
         checkNotSealed();
 
         if(!isValidNamespace(nodeIdentifier)){
             return;
         }
+
         NormalizedNodeBuilderWrapper parent = stack.peek();
-        Preconditions.checkState(parent != null, "anyxmlNode has no parent");
-        parent.builder().addChild(Builders.anyXmlBuilder().withNodeIdentifier(nodeIdentifier).withValue((DOMSource) o).build());
+        AnyXmlNode anyXmlNode = Builders.anyXmlBuilder().withNodeIdentifier(nodeIdentifier).
+                withValue((DOMSource) o).build();
+        if(parent != null) {
+            parent.builder().addChild(anyXmlNode);
+        } else {
+            // If there's no parent node then this is a stand alone AnyXmlNode.
+            this.normalizedNode = anyXmlNode;
+            sealed = true;
+        }
     }
 
     @Override

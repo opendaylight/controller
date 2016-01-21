@@ -30,6 +30,7 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
 
     private NormalizedNodeWriter normalizedNodeWriter;
     private boolean headerWritten;
+    private QName lastLeafSetQName;
 
     AbstractNormalizedNodeDataOutput(final DataOutput output) {
         this.output = Preconditions.checkNotNull(output);
@@ -159,6 +160,7 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
         Preconditions.checkNotNull(name, "Node identifier should not be null");
         LOG.debug("Starting a new leaf set");
 
+        lastLeafSetQName = name.getNodeType();
         startNode(name.getNodeType(), NodeTypes.LEAF_SET);
     }
 
@@ -167,14 +169,22 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
         Preconditions.checkNotNull(name, "Node identifier should not be null");
         LOG.debug("Starting a new ordered leaf set");
 
+        lastLeafSetQName = name.getNodeType();
         startNode(name.getNodeType(), NodeTypes.ORDERED_LEAF_SET);
     }
 
     @Override
-    public void leafSetEntryNode(final Object value) throws IOException, IllegalArgumentException {
+    public void leafSetEntryNode(final QName name, final Object value) throws IOException, IllegalArgumentException {
         LOG.debug("Writing a new leaf set entry node");
 
         output.writeByte(NodeTypes.LEAF_SET_ENTRY_NODE);
+
+        // lastLeafSetQName is set if the parent LeafSetNode was previously written. Otherwise this is a
+        // stand alone LeafSetEntryNode so write out it's name here.
+        if(lastLeafSetQName == null) {
+            writeQName(name);
+        }
+
         writeObject(value);
     }
 

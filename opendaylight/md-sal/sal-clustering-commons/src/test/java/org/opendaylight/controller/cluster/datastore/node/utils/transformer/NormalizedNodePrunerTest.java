@@ -25,7 +25,6 @@ import javax.xml.transform.dom.DOMSource;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.opendaylight.controller.cluster.datastore.node.utils.NormalizedNodeNavigator;
@@ -33,6 +32,8 @@ import org.opendaylight.controller.cluster.datastore.node.utils.NormalizedNodeVi
 import org.opendaylight.controller.cluster.datastore.util.TestModel;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.schema.AnyXmlNode;
+import org.opendaylight.yangtools.yang.data.api.schema.LeafNode;
 import org.opendaylight.yangtools.yang.data.api.schema.LeafSetEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeWriter;
@@ -169,26 +170,26 @@ public class NormalizedNodePrunerTest {
         return count.get();
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void testLeafNodeHasNoParent() throws IOException {
-        prunerFullSchema.leafNode(new YangInstanceIdentifier.NodeIdentifier(TestModel.BOOLEAN_LEAF_QNAME), mock(Object.class));
+        NormalizedNode<?, ?> input = Builders.leafBuilder().withNodeIdentifier(
+                new YangInstanceIdentifier.NodeIdentifier(TestModel.DESC_QNAME)).withValue("test").build();
+        NormalizedNodeWriter.forStreamWriter(prunerFullSchema).write(input);
+
+        NormalizedNode<?, ?> actual = prunerFullSchema.normalizedNode();
+        assertEquals("normalizedNode", input, actual);
     }
 
     @Test
     public void testLeafNodeHasParent() throws IOException {
-        prunerFullSchema.stack().push(normalizedNodeBuilderWrapper);
-        Object o = mock(Object.class);
-        prunerFullSchema.leafNode(new YangInstanceIdentifier.NodeIdentifier(TestModel.BOOLEAN_LEAF_QNAME), o);
+        LeafNode<Object> child = Builders.leafBuilder().withNodeIdentifier(
+                new YangInstanceIdentifier.NodeIdentifier(TestModel.DESC_QNAME)).withValue("test").build();
+        NormalizedNode<?, ?> input = Builders.containerBuilder().withNodeIdentifier(
+                new YangInstanceIdentifier.NodeIdentifier(TestModel.AUG_CONT_QNAME)).withChild(child).build();
+        NormalizedNodeWriter.forStreamWriter(prunerFullSchema).write(input);
 
-        ArgumentCaptor<NormalizedNode> captor = ArgumentCaptor.forClass(NormalizedNode.class);
-
-        verify(normalizedNodeContainerBuilder).addChild(captor.capture());
-
-        NormalizedNode<?, ?> value = captor.getValue();
-        assertEquals(normalizedNodeBuilderWrapper.identifier().getNodeType(), value.getNodeType());
-        assertEquals(normalizedNodeBuilderWrapper.identifier(), value.getIdentifier());
-        assertEquals(o, value.getValue());
-
+        NormalizedNode<?, ?> actual = prunerFullSchema.normalizedNode();
+        assertEquals("normalizedNode", input, actual);
     }
 
     @Test
@@ -198,28 +199,26 @@ public class NormalizedNodePrunerTest {
         verify(normalizedNodeContainerBuilder, never()).addChild(any(NormalizedNode.class));
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void testLeafSetEntryNodeHasNoParent() throws IOException {
-        prunerFullSchema.leafSetEntryNode(mock(Object.class));
+        NormalizedNode<?, ?> input = Builders.leafSetEntryBuilder().withValue("test").withNodeIdentifier(
+                new YangInstanceIdentifier.NodeWithValue<>(TestModel.FAMILY_QNAME, "test")).build();
+        NormalizedNodeWriter.forStreamWriter(prunerFullSchema).write(input);
+
+        NormalizedNode<?, ?> actual = prunerFullSchema.normalizedNode();
+        assertEquals("normalizedNode", input, actual);
     }
 
     @Test
     public void testLeafSetEntryNodeHasParent() throws IOException {
-        prunerFullSchema.stack().push(normalizedNodeBuilderWrapper);
-        Object o = mock(Object.class);
-        YangInstanceIdentifier.PathArgument nodeIdentifier
-                = new YangInstanceIdentifier.NodeWithValue(normalizedNodeBuilderWrapper.identifier().getNodeType(), o);
-        prunerFullSchema.leafSetEntryNode(o);
+        LeafSetEntryNode<Object> child = Builders.leafSetEntryBuilder().withValue("test").withNodeIdentifier(
+                new YangInstanceIdentifier.NodeWithValue<>(TestModel.FAMILY_QNAME, "test")).build();
+        NormalizedNode<?, ?> input = Builders.leafSetBuilder().withNodeIdentifier(
+                new YangInstanceIdentifier.NodeIdentifier(TestModel.FAMILY_QNAME)).withChild(child).build();
+        NormalizedNodeWriter.forStreamWriter(prunerFullSchema).write(input);
 
-        ArgumentCaptor<NormalizedNode> captor = ArgumentCaptor.forClass(NormalizedNode.class);
-
-        verify(normalizedNodeContainerBuilder).addChild(captor.capture());
-
-        NormalizedNode<?, ?> value = captor.getValue();
-        assertEquals(nodeIdentifier.getNodeType(), value.getNodeType());
-        assertEquals(nodeIdentifier, value.getIdentifier());
-        assertEquals(o, value.getValue());
-
+        NormalizedNode<?, ?> actual = prunerFullSchema.normalizedNode();
+        assertEquals("normalizedNode", input, actual);
     }
 
     @Test
@@ -227,31 +226,33 @@ public class NormalizedNodePrunerTest {
         doReturn(new YangInstanceIdentifier.NodeIdentifier(TestModel.AUG_CONT_QNAME)).when(normalizedNodeBuilderWrapper).identifier();
 
         prunerNoAugSchema.stack().push(normalizedNodeBuilderWrapper);
-        prunerNoAugSchema.leafSetEntryNode(new YangInstanceIdentifier.NodeIdentifier(TestModel.AUG_CONT_QNAME));
+        prunerNoAugSchema.leafSetEntryNode(TestModel.AUG_CONT_QNAME, "");
 
         verify(normalizedNodeContainerBuilder, never()).addChild(any(NormalizedNode.class));
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void testAnyXMLNodeHasNoParent() throws IOException {
-        prunerFullSchema.anyxmlNode(new YangInstanceIdentifier.NodeIdentifier(TestModel.BOOLEAN_LEAF_QNAME), mock(Object.class));
+        NormalizedNode<?, ?> input = Builders.anyXmlBuilder().withNodeIdentifier(
+                new YangInstanceIdentifier.NodeIdentifier(TestModel.CHILD_NAME_QNAME)).
+                    withValue(mock(DOMSource.class)).build();
+        NormalizedNodeWriter.forStreamWriter(prunerFullSchema).write(input);
+
+        NormalizedNode<?, ?> actual = prunerFullSchema.normalizedNode();
+        assertEquals("normalizedNode", input, actual);
     }
 
     @Test
     public void testAnyXMLNodeHasParent() throws IOException {
-        prunerFullSchema.stack().push(normalizedNodeBuilderWrapper);
-        YangInstanceIdentifier.NodeIdentifier nodeIdentifier = new YangInstanceIdentifier.NodeIdentifier(TestModel.BOOLEAN_LEAF_QNAME);
-        DOMSource o = mock(DOMSource.class);
-        prunerFullSchema.anyxmlNode(nodeIdentifier, o);
+        AnyXmlNode child = Builders.anyXmlBuilder().withNodeIdentifier(
+                new YangInstanceIdentifier.NodeIdentifier(TestModel.CHILD_NAME_QNAME)).
+                    withValue(mock(DOMSource.class)).build();
+        NormalizedNode<?, ?> input = Builders.containerBuilder().withNodeIdentifier(
+                new YangInstanceIdentifier.NodeIdentifier(TestModel.AUG_CONT_QNAME)).withChild(child).build();
+        NormalizedNodeWriter.forStreamWriter(prunerFullSchema).write(input);
 
-        ArgumentCaptor<NormalizedNode> captor = ArgumentCaptor.forClass(NormalizedNode.class);
-
-        verify(normalizedNodeContainerBuilder).addChild(captor.capture());
-
-        NormalizedNode<?, ?> value = captor.getValue();
-        assertEquals(nodeIdentifier.getNodeType(), value.getNodeType());
-        assertEquals(nodeIdentifier, value.getIdentifier());
-        assertEquals(o, value.getValue());
+        NormalizedNode<?, ?> actual = prunerFullSchema.normalizedNode();
+        assertEquals("normalizedNode", input, actual);
     }
 
     @Test
