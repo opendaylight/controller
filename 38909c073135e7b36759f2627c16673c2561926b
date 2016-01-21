@@ -16,6 +16,24 @@
       "revId": "38909c073135e7b36759f2627c16673c2561926b",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_8f69018e",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardCommitCoordinator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 146,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-01-21T14:06:45Z",
+      "side": 0,
+      "message": "We would never reach here if the client was Helium since the ForwardedReadyTransaction comes from the tx actor however that wouldn\u0027t be sent since the ReadyTransaction message was removed (in the next patch).  So I think a Helium client would still be able to create a tx actor but the write/merge/ready messages would be dropped and time out on the client side.",
+      "parentUuid": "9a3d3df0_2113ae67",
+      "revId": "38909c073135e7b36759f2627c16673c2561926b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
