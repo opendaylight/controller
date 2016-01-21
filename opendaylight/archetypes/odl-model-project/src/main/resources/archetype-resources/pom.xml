@@ -11,8 +11,8 @@
     <nexusproxy>http://nexus.opendaylight.org/content</nexusproxy>
     <nexus.repository.release>opendaylight.release</nexus.repository.release>
     <nexus.repository.snapshot>opendaylight.release</nexus.repository.snapshot>
-    <yang.version>0.9.0-SNAPSHOT</yang.version>
-    <yang.codegen.version>0.9.0-SNAPSHOT</yang.codegen.version>
+    <yang.version>1.0.0-SNAPSHOT</yang.version>
+    <mdsal.model.version>0.9.0-SNAPSHOT</mdsal.model.version>
     <bundle.plugin.version>2.3.7</bundle.plugin.version>
   </properties>
   <scm>
@@ -85,9 +85,9 @@
 
         <dependencies>
           <dependency>
-            <groupId>org.opendaylight.yangtools</groupId>
+            <groupId>org.opendaylight.mdsal</groupId>
             <artifactId>maven-sal-api-gen-plugin</artifactId>
-            <version>${yang.codegen.version}</version>
+            <version>${mdsal.model.version}</version>
             <type>jar</type>
           </dependency>
         </dependencies>
@@ -164,7 +164,7 @@
     <dependency>
       <groupId>org.opendaylight.yangtools</groupId>
       <artifactId>yang-binding</artifactId>
-      <version>${yang.codegen.version}</version>
+      <version>${yangtools.version}</version>
     </dependency>
   </dependencies>
 </project>

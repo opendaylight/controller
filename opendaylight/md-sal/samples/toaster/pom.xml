@@ -29,7 +29,7 @@
           <dependency>
             <groupId>org.opendaylight.mdsal</groupId>
             <artifactId>maven-sal-api-gen-plugin</artifactId>
-            <version>0.9.0-SNAPSHOT</version>
+            <version>${mdsal.model.version}</version>
             <type>jar</type>
           </dependency>
         </dependencies>

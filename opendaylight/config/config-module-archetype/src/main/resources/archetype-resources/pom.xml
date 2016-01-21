@@ -10,6 +10,7 @@
     <properties>
         <config.version>${config-api-version}</config.version>
         <yangtools.version>${yang-maven-plugin-version}</yangtools.version>
+        <mdsal.model.version>${mdsal-model-version}</mdsal.model.version>
         <maven.bundle.version>${maven-bundle-plugin-version}</maven.bundle.version>
         <java.version.source>1.7</java.version.source>
         <java.version.target>1.7</java.version.target>
@@ -69,9 +70,9 @@
                         <version>${config.version}</version>
                     </dependency>
                     <dependency>
-                        <groupId>org.opendaylight.yangtools</groupId>
+                        <groupId>org.opendaylight.mdsal</groupId>
                         <artifactId>maven-sal-api-gen-plugin</artifactId>
-                        <version>${yangtools.version}</version>
+                        <version>${mdsal.model.version}</version>
                     </dependency>
                 </dependencies>
             </plugin>
