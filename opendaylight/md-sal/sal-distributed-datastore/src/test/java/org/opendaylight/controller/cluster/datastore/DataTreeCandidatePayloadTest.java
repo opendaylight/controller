@@ -16,17 +16,23 @@ import java.util.Collection;
 import org.apache.commons.lang3.SerializationUtils;
 import org.junit.Before;
 import org.junit.Test;
+import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
+import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
+import org.opendaylight.yangtools.yang.data.api.schema.LeafNode;
+import org.opendaylight.yangtools.yang.data.api.schema.LeafSetEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidateNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidates;
+import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
-import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 
 public class DataTreeCandidatePayloadTest {
+    static final QName LEAF_SET = QName.create(TestModel.TEST_QNAME, "leaf-set");
+
     private DataTreeCandidate candidate;
 
     private static DataTreeCandidateNode findNode(final Collection<DataTreeCandidateNode> nodes, final PathArgument arg) {
@@ -119,5 +125,63 @@ public class DataTreeCandidatePayloadTest {
     public void testPayloadSerDes() throws IOException {
         final DataTreeCandidatePayload payload = DataTreeCandidatePayload.create(candidate);
         assertCandidateEquals(candidate, SerializationUtils.clone(payload).getCandidate());
+    }
+
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @Test
+    public void testLeafSetEntryNodeCandidate() throws Exception {
+        YangInstanceIdentifier.NodeWithValue entryPathArg = new YangInstanceIdentifier.NodeWithValue(LEAF_SET, "one");
+        YangInstanceIdentifier leafSetEntryPath = YangInstanceIdentifier.builder(TestModel.TEST_PATH).node(LEAF_SET)
+                .node(entryPathArg).build();
+
+        NormalizedNode<?, ?> leafSetEntryNode = Builders.leafSetEntryBuilder().
+                withNodeIdentifier(entryPathArg).withValue("one").build();
+
+        DataTreeCandidate candidate = DataTreeCandidates.fromNormalizedNode(leafSetEntryPath, leafSetEntryNode);
+        DataTreeCandidatePayload payload = DataTreeCandidatePayload.create(candidate);
+        assertCandidateEquals(candidate, payload.getCandidate());
+    }
+
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @Test
+    public void testLeafSetNodeCandidate() throws Exception {
+        YangInstanceIdentifier.NodeWithValue entryPathArg = new YangInstanceIdentifier.NodeWithValue(LEAF_SET, "one");
+        YangInstanceIdentifier leafSetPath = YangInstanceIdentifier.builder(TestModel.TEST_PATH).node(LEAF_SET).build();
+
+        LeafSetEntryNode leafSetEntryNode = Builders.leafSetEntryBuilder().
+                withNodeIdentifier(entryPathArg).withValue("one").build();
+        NormalizedNode<?, ?> leafSetNode = Builders.leafSetBuilder().withNodeIdentifier(
+                new YangInstanceIdentifier.NodeIdentifier(LEAF_SET)).withChild(leafSetEntryNode).build();
+
+        DataTreeCandidate candidate = DataTreeCandidates.fromNormalizedNode(leafSetPath, leafSetNode);
+        DataTreeCandidatePayload payload = DataTreeCandidatePayload.create(candidate);
+        assertCandidateEquals(candidate, payload.getCandidate());
+    }
+
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @Test
+    public void testOrderedLeafSetNodeCandidate() throws Exception {
+        YangInstanceIdentifier.NodeWithValue entryPathArg = new YangInstanceIdentifier.NodeWithValue(LEAF_SET, "one");
+        YangInstanceIdentifier leafSetPath = YangInstanceIdentifier.builder(TestModel.TEST_PATH).node(LEAF_SET).build();
+
+        LeafSetEntryNode leafSetEntryNode = Builders.leafSetEntryBuilder().
+                withNodeIdentifier(entryPathArg).withValue("one").build();
+        NormalizedNode<?, ?> leafSetNode = Builders.orderedLeafSetBuilder().withNodeIdentifier(
+                new YangInstanceIdentifier.NodeIdentifier(LEAF_SET)).withChild(leafSetEntryNode).build();
+
+        DataTreeCandidate candidate = DataTreeCandidates.fromNormalizedNode(leafSetPath, leafSetNode);
+        DataTreeCandidatePayload payload = DataTreeCandidatePayload.create(candidate);
+        assertCandidateEquals(candidate, payload.getCandidate());
+    }
+
+    @Test
+    public void testLeafNodeCandidate() throws Exception {
+        YangInstanceIdentifier leafPath = YangInstanceIdentifier.builder(TestModel.TEST_PATH).node(TestModel.DESC_QNAME).build();
+        LeafNode<Object> leafNode = Builders.leafBuilder().withNodeIdentifier(
+                new YangInstanceIdentifier.NodeIdentifier(TestModel.DESC_QNAME)).withValue("test").build();
+
+        DataTreeCandidate candidate = DataTreeCandidates.fromNormalizedNode(leafPath, leafNode);
+        DataTreeCandidatePayload payload = DataTreeCandidatePayload.create(candidate);
+        assertCandidateEquals(candidate, payload.getCandidate());
     }
 }
