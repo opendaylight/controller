@@ -237,7 +237,7 @@ public class DistributedDataStoreRemotingIntegrationTest {
         ActorSystem newSystem = ActorSystem.create("reinstated-member2", ConfigFactory.load().getConfig("Member2"));
 
         DistributedDataStore member2Datastore = new IntegrationTestKit(newSystem, leaderDatastoreContextBuilder).
-                setupDistributedDataStore(testName, "module-shards-member2", true, CARS_AND_PEOPLE);
+                setupDistributedDataStore(testName, "module-shards-member2.conf", true, CARS_AND_PEOPLE);
 
         verifyCars(member2Datastore.newReadOnlyTransaction(), car2);
 

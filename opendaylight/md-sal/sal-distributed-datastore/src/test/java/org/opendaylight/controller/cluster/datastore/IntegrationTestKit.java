@@ -15,12 +15,18 @@ import akka.actor.ActorSystem;
 import akka.actor.PoisonPill;
 import com.google.common.base.Optional;
 import com.google.common.base.Stopwatch;
+import com.google.common.io.Resources;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.Uninterruptibles;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import org.mockito.Mockito;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext.Builder;
+import org.opendaylight.controller.cluster.datastore.config.AbstractModuleShardConfigProvider;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.config.ConfigurationImpl;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStats;
@@ -68,10 +74,32 @@ public class IntegrationTestKit extends ShardTestKit {
                 SchemaContextHelper.full(), shardNames);
     }
 
-    public DistributedDataStore setupDistributedDataStore(String typeName, String moduleShardsConfig,
+    public DistributedDataStore setupDistributedDataStore(String typeName, final String moduleShardsConfig,
             boolean waitUntilLeader, SchemaContext schemaContext, String... shardNames) {
         ClusterWrapper cluster = new ClusterWrapperImpl(getSystem());
-        Configuration config = new ConfigurationImpl(moduleShardsConfig, "modules.conf");
+        Configuration config = new ConfigurationImpl(new AbstractModuleShardConfigProvider() {
+            @Override
+            protected Config loadModulesConfig() {
+                try {
+                    return ConfigFactory.parseReader(
+                        Resources.asCharSource(Resources.getResource(IntegrationTestKit.class, "/modules.conf"),
+                        StandardCharsets.UTF_8).openStream());
+                } catch (IOException e) {
+                    throw new IllegalStateException("Failed to open modules.conf", e);
+                }
+            }
+
+            @Override
+            protected Config loadModuleShardsConfig() {
+                try {
+                    return ConfigFactory.parseReader(
+                        Resources.asCharSource(Resources.getResource(IntegrationTestKit.class, "/" + moduleShardsConfig),
+                        StandardCharsets.UTF_8).openStream());
+                } catch (IOException e) {
+                    throw new IllegalStateException("Failed to open " + moduleShardsConfig, e);
+                }
+            }
+        });
 
         datastoreContextBuilder.dataStoreName(typeName);
 
