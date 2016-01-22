@@ -719,7 +719,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
         modifications.addModification(new MergeModification(ENTITY_OWNERS_PATH, node));
 
         shard.tell(modifications, sender.getRef());
-        sender.expectMsgClass(CommitTransactionReply.SERIALIZABLE_CLASS);
+        sender.expectMsgClass(CommitTransactionReply.class);
     }
 
     private static BatchedModifications newBatchedModifications() {
@@ -932,7 +932,8 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
                         }
                     }
 
-                    getSender().tell(CommitTransactionReply.INSTANCE.toSerializable(), getSelf());
+                    getSender().tell(CommitTransactionReply.instance(DataStoreVersions.CURRENT_VERSION).
+                            toSerializable(), getSelf());
                 } else {
                     sendReply = true;
                 }

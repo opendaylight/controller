@@ -116,7 +116,7 @@ public class ThreePhaseCommitCohortProxy extends AbstractThreePhaseCommitCohort<
 
         commitOperationCallback.run();
 
-        final Object message = new CanCommitTransaction(transactionId).toSerializable();
+        final Object message = new CanCommitTransaction(transactionId, DataStoreVersions.CURRENT_VERSION).toSerializable();
 
         final Iterator<ActorSelection> iterator = cohorts.iterator();
 
@@ -137,7 +137,7 @@ public class ThreePhaseCommitCohortProxy extends AbstractThreePhaseCommitCohort<
                 commitOperationCallback.pause();
 
                 boolean result = true;
-                if (response.getClass().equals(CanCommitTransactionReply.SERIALIZABLE_CLASS)) {
+                if (CanCommitTransactionReply.isSerializedType(response)) {
                     CanCommitTransactionReply reply =
                             CanCommitTransactionReply.fromSerializable(response);
                     if (!reply.getCanCommit()) {
@@ -196,8 +196,8 @@ public class ThreePhaseCommitCohortProxy extends AbstractThreePhaseCommitCohort<
         // exception then that exception will supersede and suppress the original exception. But
         // it's the original exception that is the root cause and of more interest to the client.
 
-        return voidOperation("abort", new AbortTransaction(transactionId).toSerializable(),
-                AbortTransactionReply.SERIALIZABLE_CLASS, false);
+        return voidOperation("abort", new AbortTransaction(transactionId, DataStoreVersions.CURRENT_VERSION).toSerializable(),
+                AbortTransactionReply.class, false);
     }
 
     @Override
@@ -205,8 +205,8 @@ public class ThreePhaseCommitCohortProxy extends AbstractThreePhaseCommitCohort<
         OperationCallback operationCallback = commitOperationCallback != null ? commitOperationCallback :
             OperationCallback.NO_OP_CALLBACK;
 
-        return voidOperation("commit", new CommitTransaction(transactionId).toSerializable(),
-                CommitTransactionReply.SERIALIZABLE_CLASS, true, operationCallback);
+        return voidOperation("commit", new CommitTransaction(transactionId, DataStoreVersions.CURRENT_VERSION).toSerializable(),
+                CommitTransactionReply.class, true, operationCallback);
     }
 
     private ListenableFuture<Void> voidOperation(final String operationName, final Object message,

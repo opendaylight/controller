@@ -281,7 +281,7 @@ public class ShardTransactionTest extends AbstractActorTest {
             batched.setTotalMessagesSent(1);
 
             transaction.tell(batched, getRef());
-            expectMsgClass(duration("5 seconds"), CommitTransactionReply.SERIALIZABLE_CLASS);
+            expectMsgClass(duration("5 seconds"), CommitTransactionReply.class);
             watcher.expectMsgClass(duration("5 seconds"), Terminated.class);
         }};
     }
