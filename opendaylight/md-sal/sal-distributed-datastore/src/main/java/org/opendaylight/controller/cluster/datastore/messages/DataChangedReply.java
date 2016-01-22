@@ -8,19 +8,6 @@
 
 package org.opendaylight.controller.cluster.datastore.messages;
 
-import org.opendaylight.controller.protobuff.messages.datachange.notification.DataChangeListenerMessages;
-
-public class DataChangedReply implements SerializableMessage {
-    public static final Class<DataChangeListenerMessages.DataChangedReply> SERIALIZABLE_CLASS =
-            DataChangeListenerMessages.DataChangedReply.class;
-
-    private static final Object SERIALIZED_INSTANCE =
-            DataChangeListenerMessages.DataChangedReply.newBuilder().build();
-
+public class DataChangedReply {
     public static final DataChangedReply INSTANCE = new DataChangedReply();
-
-    @Override
-    public Object toSerializable() {
-        return SERIALIZED_INSTANCE;
-    }
 }
