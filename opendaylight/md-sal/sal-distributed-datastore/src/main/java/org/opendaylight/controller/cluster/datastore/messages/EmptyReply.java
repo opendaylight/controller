@@ -14,16 +14,23 @@ import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
  *
  * @author Thomas Pantelis
  */
-public abstract class EmptyReply extends EmptyExternalizable {
-
-    private final Object legacySerializedInstance;
-
-    protected EmptyReply(Object legacySerializedInstance) {
-        super();
-        this.legacySerializedInstance = legacySerializedInstance;
+public abstract class EmptyReply extends VersionedExternalizableMessage {
+    protected EmptyReply() {
     }
 
-    public Object toSerializable(short toVersion) {
-        return toVersion >= DataStoreVersions.LITHIUM_VERSION ? this : legacySerializedInstance;
+    protected EmptyReply(short version) {
+        super(version);
+    }
+
+    protected abstract Object newLegacySerializedInstance();
+
+    @Override
+    public Object toSerializable() {
+        return getVersion() >= DataStoreVersions.BORON_VERSION ? this : newLegacySerializedInstance();
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + " [version=" + getVersion() + "]";
     }
 }

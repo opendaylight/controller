@@ -568,7 +568,7 @@ public class DistributedDataStoreRemotingIntegrationTest {
             throw new AssertionError("Unexpected failure response", ((akka.actor.Status.Failure)resp).cause());
         }
 
-        assertEquals("Response type", CommitTransactionReply.SERIALIZABLE_CLASS, resp.getClass());
+        assertEquals("Response type", CommitTransactionReply.class, resp.getClass());
 
         verifyCars(leaderDistributedDataStore.newReadOnlyTransaction(), car1);
 
@@ -631,7 +631,7 @@ public class DistributedDataStoreRemotingIntegrationTest {
             throw new AssertionError("Unexpected failure response", ((akka.actor.Status.Failure)resp).cause());
         }
 
-        assertEquals("Response type", CommitTransactionReply.SERIALIZABLE_CLASS, resp.getClass());
+        assertEquals("Response type", CommitTransactionReply.class, resp.getClass());
 
         verifyCars(leaderDistributedDataStore.newReadOnlyTransaction(), car1);
 
