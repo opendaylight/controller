@@ -21,8 +21,7 @@ import scala.concurrent.Future;
 /**
  * A cohort proxy implementation for a single-shard transaction commit. If the transaction was a direct commit
  * to the shard, this implementation elides the CanCommitTransaction and CommitTransaction messages to the
- * shard as an optimization. Otherwise the 3-phase commit to the shard is delegated to a
- * ThreePhaseCommitCohortProxy instance (this is for backwards compatibility with pre-Lithium versions).
+ * shard as an optimization.
  *
  * @author Thomas Pantelis
  */

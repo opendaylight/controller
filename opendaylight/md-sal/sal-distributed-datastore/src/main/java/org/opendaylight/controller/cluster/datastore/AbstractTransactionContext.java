@@ -17,9 +17,16 @@ abstract class AbstractTransactionContext implements TransactionContext {
     private final TransactionIdentifier transactionIdentifier;
     private long modificationCount = 0;
     private boolean handOffComplete;
+    private final short transactionVersion;
 
     protected AbstractTransactionContext(TransactionIdentifier transactionIdentifier) {
+        this(transactionIdentifier, DataStoreVersions.CURRENT_VERSION);
+    }
+
+    protected AbstractTransactionContext(TransactionIdentifier transactionIdentifier,
+            short transactionVersion) {
         this.transactionIdentifier = transactionIdentifier;
+        this.transactionVersion = transactionVersion;
     }
 
     /**
@@ -51,5 +58,10 @@ abstract class AbstractTransactionContext implements TransactionContext {
     @Override
     public boolean usesOperationLimiting() {
         return false;
+    }
+
+    @Override
+    public short getTransactionVersion() {
+        return transactionVersion;
     }
 }

@@ -347,7 +347,7 @@ public class Shard extends RaftActor {
         try {
             cohortEntry.commit();
 
-            sender.tell(CommitTransactionReply.instance(DataStoreVersions.CURRENT_VERSION).toSerializable(), getSelf());
+            sender.tell(CommitTransactionReply.instance(cohortEntry.getClientVersion()).toSerializable(), getSelf());
 
             shardMBean.incrementCommittedTransactionCount();
             shardMBean.setLastCommittedTransactionTime(System.currentTimeMillis());
@@ -384,7 +384,8 @@ public class Shard extends RaftActor {
                     LOG.error("{}: Failed to re-apply transaction {}", persistenceId(), transactionID, e);
                 }
 
-                sender.tell(CommitTransactionReply.instance(DataStoreVersions.CURRENT_VERSION).toSerializable(), getSelf());
+                sender.tell(CommitTransactionReply.instance(cohortEntry.getClientVersion()).toSerializable(),
+                        getSelf());
             } else {
                 // This really shouldn't happen - it likely means that persistence or replication
                 // took so long to complete such that the cohort entry was expired from the cache.

@@ -45,4 +45,6 @@ interface TransactionContext {
      * @return
      */
     boolean usesOperationLimiting();
+
+    short getTransactionVersion();
 }

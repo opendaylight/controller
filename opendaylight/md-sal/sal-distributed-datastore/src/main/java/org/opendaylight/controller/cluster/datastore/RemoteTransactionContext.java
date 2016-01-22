@@ -36,7 +36,6 @@ public class RemoteTransactionContext extends AbstractTransactionContext {
 
     private final ActorContext actorContext;
     private final ActorSelection actor;
-    private final short remoteTransactionVersion;
     private final OperationLimiter limiter;
 
     private BatchedModifications batchedModifications;
@@ -44,11 +43,10 @@ public class RemoteTransactionContext extends AbstractTransactionContext {
 
     protected RemoteTransactionContext(TransactionIdentifier identifier, ActorSelection actor,
             ActorContext actorContext, short remoteTransactionVersion, OperationLimiter limiter) {
-        super(identifier);
+        super(identifier, remoteTransactionVersion);
         this.limiter = Preconditions.checkNotNull(limiter);
         this.actor = actor;
         this.actorContext = actorContext;
-        this.remoteTransactionVersion = remoteTransactionVersion;
     }
 
     private Future<Object> completeOperation(Future<Object> operationFuture){
@@ -64,10 +62,6 @@ public class RemoteTransactionContext extends AbstractTransactionContext {
         return actorContext;
     }
 
-    protected short getRemoteTransactionVersion() {
-        return remoteTransactionVersion;
-    }
-
     protected Future<Object> executeOperationAsync(SerializableMessage msg) {
         return completeOperation(actorContext.executeOperationAsync(getActor(), msg.toSerializable()));
     }
@@ -77,7 +71,7 @@ public class RemoteTransactionContext extends AbstractTransactionContext {
         LOG.debug("Tx {} closeTransaction called", getIdentifier());
         TransactionContextCleanup.untrack(this);
 
-        actorContext.sendOperationAsync(getActor(), new CloseTransaction(remoteTransactionVersion).toSerializable());
+        actorContext.sendOperationAsync(getActor(), new CloseTransaction(getTransactionVersion()).toSerializable());
     }
 
     @Override
@@ -115,7 +109,8 @@ public class RemoteTransactionContext extends AbstractTransactionContext {
     }
 
     private BatchedModifications newBatchedModifications() {
-        return new BatchedModifications(getIdentifier().toString(), remoteTransactionVersion, getIdentifier().getChainId());
+        return new BatchedModifications(getIdentifier().toString(), getTransactionVersion(),
+                getIdentifier().getChainId());
     }
 
     private void batchModification(Modification modification) {
@@ -206,7 +201,7 @@ public class RemoteTransactionContext extends AbstractTransactionContext {
             }
         };
 
-        Future<Object> future = executeOperationAsync(readCmd.asVersion(remoteTransactionVersion));
+        Future<Object> future = executeOperationAsync(readCmd.asVersion(getTransactionVersion()));
 
         future.onComplete(onComplete, actorContext.getClientDispatcher());
     }
