@@ -8,29 +8,36 @@
 
 package org.opendaylight.controller.cluster.datastore.messages;
 
+import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 import org.opendaylight.controller.protobuff.messages.cohort3pc.ThreePhaseCommitCohortMessages;
 
-public class CanCommitTransaction implements SerializableMessage {
-    public static final Class<?> SERIALIZABLE_CLASS = ThreePhaseCommitCohortMessages.CanCommitTransaction.class;
+public class CanCommitTransaction extends AbstractThreePhaseCommitMessage {
+    private static final long serialVersionUID = 1L;
 
-    private final String transactionID;
-
-    public CanCommitTransaction(String transactionID) {
-        this.transactionID = transactionID;
+    public CanCommitTransaction() {
     }
 
-    public String getTransactionID() {
-        return transactionID;
+    public CanCommitTransaction(String transactionID, final short version) {
+        super(transactionID, version);
     }
 
     @Override
-    public Object toSerializable() {
+    protected Object newLegacySerializedInstance() {
         return ThreePhaseCommitCohortMessages.CanCommitTransaction.newBuilder().
-                setTransactionId(transactionID).build();
+                setTransactionId(getTransactionID()).build();
     }
 
-    public static CanCommitTransaction fromSerializable(Object message) {
-        return new CanCommitTransaction(((ThreePhaseCommitCohortMessages.CanCommitTransaction)message).
-                getTransactionId());
+    public static CanCommitTransaction fromSerializable(Object serializable) {
+        if(serializable instanceof CanCommitTransaction) {
+            return (CanCommitTransaction)serializable;
+        } else {
+            return new CanCommitTransaction(((ThreePhaseCommitCohortMessages.CanCommitTransaction)serializable).
+                    getTransactionId(), DataStoreVersions.LITHIUM_VERSION);
+        }
+    }
+
+    public static boolean isSerializedType(Object message) {
+        return message instanceof CanCommitTransaction ||
+                message instanceof ThreePhaseCommitCohortMessages.CanCommitTransaction;
     }
 }
