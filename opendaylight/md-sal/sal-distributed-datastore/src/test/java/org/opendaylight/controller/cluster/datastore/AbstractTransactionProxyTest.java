@@ -456,8 +456,8 @@ public abstract class AbstractTransactionProxyTest {
                 Iterator<?> iter = futureResults.iterator();
                 while(iter.hasNext()) {
                     Object actual = iter.next();
-                    if(CommitTransactionReply.SERIALIZABLE_CLASS.isInstance(expReply) &&
-                       CommitTransactionReply.SERIALIZABLE_CLASS.isInstance(actual)) {
+                    if(CommitTransactionReply.isSerializedType(expReply) &&
+                       CommitTransactionReply.isSerializedType(actual)) {
                         found = true;
                     } else if(expReply instanceof ActorSelection && Objects.equal(expReply, actual)) {
                         found = true;

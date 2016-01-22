@@ -95,7 +95,7 @@ class LocalThreePhaseCommitCohort implements DOMStoreThreePhaseCommitCohort {
                 if (failure != null) {
                     LOG.error("Failed to prepare transaction {} on backend", transaction.getIdentifier(), failure);
                     transactionAborted(transaction);
-                } else if (CommitTransactionReply.SERIALIZABLE_CLASS.isInstance(message)) {
+                } else if (CommitTransactionReply.isSerializedType(message)) {
                     LOG.debug("Transaction {} committed successfully", transaction.getIdentifier());
                     transactionCommitted(transaction);
                 } else {

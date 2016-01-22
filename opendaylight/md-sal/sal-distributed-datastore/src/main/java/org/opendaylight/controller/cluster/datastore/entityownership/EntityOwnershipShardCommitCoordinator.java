@@ -44,7 +44,7 @@ class EntityOwnershipShardCommitCoordinator {
 
     boolean handleMessage(Object message, EntityOwnershipShard shard) {
         boolean handled = true;
-        if(CommitTransactionReply.SERIALIZABLE_CLASS.isInstance(message)) {
+        if(CommitTransactionReply.isSerializedType(message)) {
             // Successful reply from a local commit.
             inflightCommitSucceeded(shard);
         } else if(message instanceof akka.actor.Status.Failure) {

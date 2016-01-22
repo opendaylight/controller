@@ -234,11 +234,11 @@ public class Shard extends RaftActor {
                 handleForwardedReadyTransaction((ForwardedReadyTransaction) message);
             } else if (message instanceof ReadyLocalTransaction) {
                 handleReadyLocalTransaction((ReadyLocalTransaction)message);
-            } else if (CanCommitTransaction.SERIALIZABLE_CLASS.isInstance(message)) {
+            } else if (CanCommitTransaction.isSerializedType(message)) {
                 handleCanCommitTransaction(CanCommitTransaction.fromSerializable(message));
-            } else if (CommitTransaction.SERIALIZABLE_CLASS.isInstance(message)) {
+            } else if (CommitTransaction.isSerializedType(message)) {
                 handleCommitTransaction(CommitTransaction.fromSerializable(message));
-            } else if (AbortTransaction.SERIALIZABLE_CLASS.isInstance(message)) {
+            } else if (AbortTransaction.isSerializedType(message)) {
                 handleAbortTransaction(AbortTransaction.fromSerializable(message));
             } else if (CloseTransactionChain.SERIALIZABLE_CLASS.isInstance(message)) {
                 closeTransactionChain(CloseTransactionChain.fromSerializable(message));
@@ -347,7 +347,7 @@ public class Shard extends RaftActor {
         try {
             cohortEntry.commit();
 
-            sender.tell(CommitTransactionReply.INSTANCE.toSerializable(), getSelf());
+            sender.tell(CommitTransactionReply.instance(DataStoreVersions.CURRENT_VERSION).toSerializable(), getSelf());
 
             shardMBean.incrementCommittedTransactionCount();
             shardMBean.setLastCommittedTransactionTime(System.currentTimeMillis());
@@ -384,7 +384,7 @@ public class Shard extends RaftActor {
                     LOG.error("{}: Failed to re-apply transaction {}", persistenceId(), transactionID, e);
                 }
 
-                sender.tell(CommitTransactionReply.INSTANCE.toSerializable(), getSelf());
+                sender.tell(CommitTransactionReply.instance(DataStoreVersions.CURRENT_VERSION).toSerializable(), getSelf());
             } else {
                 // This really shouldn't happen - it likely means that persistence or replication
                 // took so long to complete such that the cohort entry was expired from the cache.

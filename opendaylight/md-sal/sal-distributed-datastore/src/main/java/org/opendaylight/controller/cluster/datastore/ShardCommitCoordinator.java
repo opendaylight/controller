@@ -319,9 +319,10 @@ class ShardCommitCoordinator {
                                 "Can Commit failed, no detailed cause available.")), cohortEntry.getShard().self());
                 }
             } else {
+                // FIXME - use caller's version
                 cohortEntry.getReplySender().tell(
-                        canCommit ? CanCommitTransactionReply.YES.toSerializable() :
-                            CanCommitTransactionReply.NO.toSerializable(), cohortEntry.getShard().self());
+                        canCommit ? CanCommitTransactionReply.yes(DataStoreVersions.CURRENT_VERSION).toSerializable() :
+                            CanCommitTransactionReply.no(DataStoreVersions.CURRENT_VERSION).toSerializable(), cohortEntry.getShard().self());
             }
         } catch (Exception e) {
             log.debug("{}: An exception occurred during canCommit", name, e);
