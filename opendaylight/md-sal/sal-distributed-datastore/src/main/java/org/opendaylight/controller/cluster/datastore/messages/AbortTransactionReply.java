@@ -8,19 +8,33 @@
 
 package org.opendaylight.controller.cluster.datastore.messages;
 
+import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 import org.opendaylight.controller.protobuff.messages.cohort3pc.ThreePhaseCommitCohortMessages;
 
-public class AbortTransactionReply implements SerializableMessage {
-    public static final Class<ThreePhaseCommitCohortMessages.AbortTransactionReply> SERIALIZABLE_CLASS =
-            ThreePhaseCommitCohortMessages.AbortTransactionReply.class;
-
+public class AbortTransactionReply extends EmptyReply {
     private static final Object SERIALIZED_INSTANCE =
             ThreePhaseCommitCohortMessages.AbortTransactionReply.newBuilder().build();
 
-    public static final AbortTransactionReply INSTANCE = new AbortTransactionReply();
+    private static final AbortTransactionReply INSTANCE = new AbortTransactionReply();
+
+    public AbortTransactionReply() {
+    }
+
+    private AbortTransactionReply(short version) {
+        super(version);
+    }
 
     @Override
-    public Object toSerializable() {
+    protected Object newLegacySerializedInstance() {
         return SERIALIZED_INSTANCE;
+    }
+
+    public static AbortTransactionReply instance(short version) {
+        return version == DataStoreVersions.CURRENT_VERSION ? INSTANCE : new AbortTransactionReply(version);
+    }
+
+    public static boolean isSerializedType(Object message) {
+        return message instanceof AbortTransactionReply ||
+                message instanceof ThreePhaseCommitCohortMessages.AbortTransactionReply;
     }
 }
