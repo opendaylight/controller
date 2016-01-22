@@ -25,6 +25,7 @@ import akka.japi.Creator;
 import akka.testkit.TestActorRef;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
+import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.Collections;
@@ -274,6 +275,15 @@ public abstract class AbstractShardTest extends AbstractActorTest{
         }
     }
 
+    protected ShardDataTreeCohort mockShardDataTreeCohort() {
+        ShardDataTreeCohort cohort = mock(ShardDataTreeCohort.class);
+        doReturn(Futures.immediateFuture(Boolean.TRUE)).when(cohort).canCommit();
+        doReturn(Futures.immediateFuture(null)).when(cohort).preCommit();
+        doReturn(Futures.immediateFuture(null)).when(cohort).commit();
+        doReturn(mockCandidate("candidate")).when(cohort).getCandidate();
+        return cohort;
+    }
+
     static ShardDataTreeTransactionParent newShardDataTreeTransactionParent(ShardDataTreeCohort cohort) {
         ShardDataTreeTransactionParent mockParent = mock(ShardDataTreeTransactionParent.class);
         doReturn(cohort).when(mockParent).finishTransaction(any(ReadWriteShardDataTreeTransaction.class));
@@ -420,7 +430,7 @@ public abstract class AbstractShardTest extends AbstractActorTest{
         assertEquals(TestModel.ID_QNAME.getLocalName() + " value", expIDValue, idLeaf.get().getValue());
     }
 
-    static DataTreeCandidateTip mockCandidate(final String name) {
+    public static DataTreeCandidateTip mockCandidate(final String name) {
         final DataTreeCandidateTip mockCandidate = mock(DataTreeCandidateTip.class, name);
         final DataTreeCandidateNode mockCandidateNode = mock(DataTreeCandidateNode.class, name + "-node");
         doReturn(ModificationType.WRITE).when(mockCandidateNode).getModificationType();
