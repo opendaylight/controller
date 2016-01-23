@@ -21,7 +21,6 @@ import org.opendaylight.controller.cluster.NonPersistentDataProvider;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages;
-import org.opendaylight.controller.protobuff.messages.cluster.raft.test.MockPayloadMessages;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -184,16 +183,12 @@ public class MockRaftActorContext extends RaftActorContextImpl {
         }
 
         @Override public Map<GeneratedMessage.GeneratedExtension<?, ?>, String> encode() {
-            Map<GeneratedMessage.GeneratedExtension<?, ?>, String> map = new HashMap<>();
-            map.put(MockPayloadMessages.value, value);
-            return map;
+            return null;
         }
 
         @Override public Payload decode(
             AppendEntriesMessages.AppendEntries.ReplicatedLogEntry.Payload payloadProtoBuff) {
-            String value = payloadProtoBuff.getExtension(MockPayloadMessages.value);
-            this.value = value;
-            return this;
+            return null;
         }
 
         @Override
