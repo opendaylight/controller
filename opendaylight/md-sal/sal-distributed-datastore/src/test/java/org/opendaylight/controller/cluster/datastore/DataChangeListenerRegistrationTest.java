@@ -44,13 +44,13 @@ public class DataChangeListenerRegistrationTest extends AbstractActorTest {
         @Override
         protected void run() {
 
-          subject.tell(new CloseDataChangeListenerRegistration().toSerializable(), getRef());
+          subject.tell(CloseDataChangeListenerRegistration.INSTANCE, getRef());
 
           final String out = new ExpectMsg<String>(duration("1 seconds"), "match hint") {
             // do not put code outside this method, will run afterwards
             @Override
             protected String match(final Object in) {
-              if (in.getClass().equals(CloseDataChangeListenerRegistrationReply.SERIALIZABLE_CLASS)) {
+              if (in.getClass().equals(CloseDataChangeListenerRegistrationReply.class)) {
                 return "match";
               } else {
                 throw noMatch();
