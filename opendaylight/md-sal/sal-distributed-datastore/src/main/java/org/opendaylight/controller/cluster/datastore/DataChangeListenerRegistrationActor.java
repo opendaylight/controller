@@ -12,7 +12,6 @@ import akka.actor.PoisonPill;
 import akka.actor.Props;
 import akka.japi.Creator;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActor;
-
 import org.opendaylight.controller.cluster.datastore.messages.CloseDataChangeListenerRegistration;
 import org.opendaylight.controller.cluster.datastore.messages.CloseDataChangeListenerRegistrationReply;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
@@ -32,9 +31,8 @@ public class DataChangeListenerRegistrationActor extends AbstractUntypedActor {
 
     @Override
     public void handleReceive(Object message) throws Exception {
-        if (message.getClass().equals(CloseDataChangeListenerRegistration.SERIALIZABLE_CLASS)) {
-            closeListenerRegistration(
-                new CloseDataChangeListenerRegistration());
+        if (message instanceof CloseDataChangeListenerRegistration) {
+            closeListenerRegistration();
         }
     }
 
@@ -43,11 +41,9 @@ public class DataChangeListenerRegistrationActor extends AbstractUntypedActor {
         return Props.create(new DataChangeListenerRegistrationCreator(registration));
     }
 
-    private void closeListenerRegistration(
-        CloseDataChangeListenerRegistration message) {
+    private void closeListenerRegistration() {
         registration.close();
-        getSender()
-            .tell(new CloseDataChangeListenerRegistrationReply().toSerializable(), getSelf());
+        getSender().tell(CloseDataChangeListenerRegistrationReply.INSTANCE, getSelf());
         getSelf().tell(PoisonPill.getInstance(), getSelf());
     }
 

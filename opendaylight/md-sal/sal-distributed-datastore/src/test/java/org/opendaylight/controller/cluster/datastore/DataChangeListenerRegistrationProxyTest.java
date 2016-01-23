@@ -113,7 +113,7 @@ public class DataChangeListenerRegistrationProxyTest extends AbstractActorTest {
             proxy.close();
 
             // The listener registration actor should get a Close message
-            expectMsgClass(timeout, CloseDataChangeListenerRegistration.SERIALIZABLE_CLASS);
+            expectMsgClass(timeout, CloseDataChangeListenerRegistration.class);
 
             // The DataChangeListener actor should be terminated
             expectMsgClass(timeout, Terminated.class);
@@ -171,7 +171,7 @@ public class DataChangeListenerRegistrationProxyTest extends AbstractActorTest {
             proxy.close();
 
             // The listener registration actor should get a Close message
-            expectMsgClass(timeout, CloseDataChangeListenerRegistration.SERIALIZABLE_CLASS);
+            expectMsgClass(timeout, CloseDataChangeListenerRegistration.class);
 
             // The DataChangeListener actor should be terminated
             expectMsgClass(timeout, Terminated.class);
@@ -313,7 +313,7 @@ public class DataChangeListenerRegistrationProxyTest extends AbstractActorTest {
             proxy.init(YangInstanceIdentifier.of(TestModel.TEST_QNAME),
                     AsyncDataBroker.DataChangeScope.ONE);
 
-            expectMsgClass(duration("5 seconds"), CloseDataChangeListenerRegistration.SERIALIZABLE_CLASS);
+            expectMsgClass(duration("5 seconds"), CloseDataChangeListenerRegistration.class);
 
             Assert.assertEquals("getListenerRegistrationActor", null,
                     proxy.getListenerRegistrationActor());
