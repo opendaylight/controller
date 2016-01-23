@@ -19,6 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
+import java.util.function.Function;
 import javax.annotation.Nonnull;
 import org.opendaylight.controller.cluster.datastore.identifiers.TransactionChainIdentifier;
 import org.opendaylight.controller.cluster.datastore.identifiers.TransactionIdentifier;
@@ -184,7 +185,13 @@ final class TransactionChainProxy extends AbstractTransactionContextFactory<Loca
         currentState = CLOSED_STATE;
 
         // Send a close transaction chain request to each and every shard
-        getActorContext().broadcast(new CloseTransactionChain(transactionChainId.toString()).toSerializable());
+
+        getActorContext().broadcast(new Function<Short, Object>() {
+            @Override
+            public Object apply(Short version) {
+                return new CloseTransactionChain(transactionChainId.toString(), version).toSerializable();
+            }
+        });
     }
 
     private TransactionProxy allocateWriteTransaction(final TransactionType type) {
