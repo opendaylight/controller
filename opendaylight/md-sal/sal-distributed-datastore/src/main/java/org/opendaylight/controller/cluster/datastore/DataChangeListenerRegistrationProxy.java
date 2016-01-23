@@ -86,8 +86,7 @@ public class DataChangeListenerRegistrationProxy implements ListenerRegistration
         }
 
         if(sendCloseMessage) {
-            listenerRegistrationActor.tell(new
-                CloseDataChangeListenerRegistration().toSerializable(), null);
+            listenerRegistrationActor.tell(CloseDataChangeListenerRegistration.INSTANCE, null);
         }
     }
 
@@ -146,8 +145,7 @@ public class DataChangeListenerRegistrationProxy implements ListenerRegistration
         }
 
         if(sendCloseMessage) {
-            listenerRegistrationActor.tell(new CloseDataChangeListenerRegistration().toSerializable(),
-                    ActorRef.noSender());
+            listenerRegistrationActor.tell(CloseDataChangeListenerRegistration.INSTANCE, ActorRef.noSender());
             listenerRegistrationActor = null;
         }
 
