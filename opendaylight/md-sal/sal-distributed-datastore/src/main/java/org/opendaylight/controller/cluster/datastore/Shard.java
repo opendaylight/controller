@@ -240,7 +240,7 @@ public class Shard extends RaftActor {
                 handleCommitTransaction(CommitTransaction.fromSerializable(message));
             } else if (AbortTransaction.isSerializedType(message)) {
                 handleAbortTransaction(AbortTransaction.fromSerializable(message));
-            } else if (CloseTransactionChain.SERIALIZABLE_CLASS.isInstance(message)) {
+            } else if (CloseTransactionChain.isSerializedType(message)) {
                 closeTransactionChain(CloseTransactionChain.fromSerializable(message));
             } else if (message instanceof RegisterChangeListener) {
                 changeSupport.onMessage((RegisterChangeListener) message, isLeader(), hasLeader());
