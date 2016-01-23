@@ -35,6 +35,7 @@ import com.typesafe.config.ConfigFactory;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -497,7 +498,12 @@ public class ActorContextTest extends AbstractActorTest{
                     mock(ClusterWrapper.class), mockConfig,
                     DatastoreContext.newBuilder().shardInitializationTimeout(200, TimeUnit.MILLISECONDS).build(), new PrimaryShardInfoFutureCache());
 
-            actorContext.broadcast(new TestMessage());
+            actorContext.broadcast(new Function<Short, Object>() {
+                @Override
+                public Object apply(Short v) {
+                    return new TestMessage();
+                }
+            });
 
             MessageCollectorActor.expectFirstMatching(shardActorRef1, TestMessage.class);
             MessageCollectorActor.expectFirstMatching(shardActorRef2, TestMessage.class);
