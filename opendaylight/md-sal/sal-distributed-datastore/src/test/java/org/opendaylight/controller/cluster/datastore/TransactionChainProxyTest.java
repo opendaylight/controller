@@ -11,7 +11,6 @@ package org.opendaylight.controller.cluster.datastore;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.doReturn;
@@ -21,12 +20,12 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.opendaylight.controller.cluster.datastore.TransactionType.READ_WRITE;
 import static org.opendaylight.controller.cluster.datastore.TransactionType.WRITE_ONLY;
-
 import akka.actor.ActorRef;
 import akka.util.Timeout;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.messages.BatchedModifications;
@@ -72,7 +71,7 @@ public class TransactionChainProxyTest extends AbstractTransactionProxyTest {
     public void testClose() throws Exception {
         new TransactionChainProxy(mockComponentFactory).close();
 
-        verify(mockActorContext, times(1)).broadcast(anyObject());
+        verify(mockActorContext, times(1)).broadcast(any(Function.class));
     }
 
     @Test
