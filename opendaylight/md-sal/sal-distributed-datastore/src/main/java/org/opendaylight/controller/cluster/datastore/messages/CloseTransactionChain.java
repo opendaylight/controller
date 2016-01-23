@@ -8,31 +8,64 @@
 
 package org.opendaylight.controller.cluster.datastore.messages;
 
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionChainMessages;
 
-public class CloseTransactionChain implements SerializableMessage {
-    public static final Class<ShardTransactionChainMessages.CloseTransactionChain> SERIALIZABLE_CLASS =
-        ShardTransactionChainMessages.CloseTransactionChain.class;
-    private final String transactionChainId;
+public class CloseTransactionChain extends VersionedExternalizableMessage {
+    private static final long serialVersionUID = 1L;
 
-    public CloseTransactionChain(final String transactionChainId){
+    private String transactionChainId;
+
+    public CloseTransactionChain() {
+    }
+
+    public CloseTransactionChain(final String transactionChainId, final short version) {
+        super(version);
         this.transactionChainId = transactionChainId;
-    }
-
-    @Override
-    public Object toSerializable() {
-        return ShardTransactionChainMessages.CloseTransactionChain.newBuilder()
-            .setTransactionChainId(transactionChainId).build();
-    }
-
-    public static CloseTransactionChain fromSerializable(final Object message){
-        ShardTransactionChainMessages.CloseTransactionChain closeTransactionChain
-            = (ShardTransactionChainMessages.CloseTransactionChain) message;
-
-        return new CloseTransactionChain(closeTransactionChain.getTransactionChainId());
     }
 
     public String getTransactionChainId() {
         return transactionChainId;
+    }
+
+    @Override
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        super.readExternal(in);
+        transactionChainId = in.readUTF();
+    }
+
+    @Override
+    public void writeExternal(ObjectOutput out) throws IOException {
+        super.writeExternal(out);
+        out.writeUTF(transactionChainId);
+    }
+
+    @Override
+    public Object toSerializable() {
+        if(getVersion() >= DataStoreVersions.BORON_VERSION) {
+            return this;
+        } else {
+            return ShardTransactionChainMessages.CloseTransactionChain.newBuilder()
+                .setTransactionChainId(transactionChainId).build();
+        }
+    }
+
+    public static CloseTransactionChain fromSerializable(final Object serializable){
+        if(serializable instanceof CloseTransactionChain) {
+            return (CloseTransactionChain)serializable;
+        } else {
+            ShardTransactionChainMessages.CloseTransactionChain closeTransactionChain =
+                    (ShardTransactionChainMessages.CloseTransactionChain) serializable;
+            return new CloseTransactionChain(closeTransactionChain.getTransactionChainId(),
+                    DataStoreVersions.LITHIUM_VERSION);
+        }
+    }
+
+    public static boolean isSerializedType(Object message) {
+        return message instanceof CloseTransactionChain ||
+                message instanceof ShardTransactionChainMessages.CloseTransactionChain;
     }
 }

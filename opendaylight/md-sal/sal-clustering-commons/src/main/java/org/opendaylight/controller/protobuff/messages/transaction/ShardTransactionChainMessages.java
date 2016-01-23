@@ -3,6 +3,7 @@
 
 package org.opendaylight.controller.protobuff.messages.transaction;
 
+@Deprecated
 public final class ShardTransactionChainMessages {
   private ShardTransactionChainMessages() {}
   public static void registerAllExtensions(
@@ -44,6 +45,7 @@ public final class ShardTransactionChainMessages {
       return defaultInstance;
     }
 
+    @Override
     public CloseTransactionChain getDefaultInstanceForType() {
       return defaultInstance;
     }
@@ -99,6 +101,7 @@ public final class ShardTransactionChainMessages {
       return org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionChainMessages.internal_static_org_opendaylight_controller_mdsal_CloseTransactionChain_descriptor;
     }
 
+    @Override
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
       return org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionChainMessages.internal_static_org_opendaylight_controller_mdsal_CloseTransactionChain_fieldAccessorTable
@@ -108,7 +111,8 @@ public final class ShardTransactionChainMessages {
 
     public static com.google.protobuf.Parser<CloseTransactionChain> PARSER =
         new com.google.protobuf.AbstractParser<CloseTransactionChain>() {
-      public CloseTransactionChain parsePartialFrom(
+      @Override
+    public CloseTransactionChain parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
@@ -128,12 +132,14 @@ public final class ShardTransactionChainMessages {
     /**
      * <code>optional string transactionChainId = 1;</code>
      */
+    @Override
     public boolean hasTransactionChainId() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
     /**
      * <code>optional string transactionChainId = 1;</code>
      */
+    @Override
     public java.lang.String getTransactionChainId() {
       java.lang.Object ref = transactionChainId_;
       if (ref instanceof java.lang.String) {
@@ -151,6 +157,7 @@ public final class ShardTransactionChainMessages {
     /**
      * <code>optional string transactionChainId = 1;</code>
      */
+    @Override
     public com.google.protobuf.ByteString
         getTransactionChainIdBytes() {
       java.lang.Object ref = transactionChainId_;
@@ -169,14 +176,18 @@ public final class ShardTransactionChainMessages {
       transactionChainId_ = "";
     }
     private byte memoizedIsInitialized = -1;
+    @Override
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
-      if (isInitialized != -1) return isInitialized == 1;
+      if (isInitialized != -1) {
+        return isInitialized == 1;
+    }
 
       memoizedIsInitialized = 1;
       return true;
     }
 
+    @Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
@@ -187,9 +198,12 @@ public final class ShardTransactionChainMessages {
     }
 
     private int memoizedSerializedSize = -1;
+    @Override
     public int getSerializedSize() {
       int size = memoizedSerializedSize;
-      if (size != -1) return size;
+      if (size != -1) {
+        return size;
+    }
 
       size = 0;
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
@@ -262,10 +276,12 @@ public final class ShardTransactionChainMessages {
     }
 
     public static Builder newBuilder() { return Builder.create(); }
+    @Override
     public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder(org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionChainMessages.CloseTransactionChain prototype) {
       return newBuilder().mergeFrom(prototype);
     }
+    @Override
     public Builder toBuilder() { return newBuilder(this); }
 
     @java.lang.Override
@@ -285,7 +301,8 @@ public final class ShardTransactionChainMessages {
         return org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionChainMessages.internal_static_org_opendaylight_controller_mdsal_CloseTransactionChain_descriptor;
       }
 
-      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      @Override
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
         return org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionChainMessages.internal_static_org_opendaylight_controller_mdsal_CloseTransactionChain_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
@@ -310,27 +327,32 @@ public final class ShardTransactionChainMessages {
         return new Builder();
       }
 
-      public Builder clear() {
+      @Override
+    public Builder clear() {
         super.clear();
         transactionChainId_ = "";
         bitField0_ = (bitField0_ & ~0x00000001);
         return this;
       }
 
-      public Builder clone() {
+      @Override
+    public Builder clone() {
         return create().mergeFrom(buildPartial());
       }
 
-      public com.google.protobuf.Descriptors.Descriptor
+      @Override
+    public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
         return org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionChainMessages.internal_static_org_opendaylight_controller_mdsal_CloseTransactionChain_descriptor;
       }
 
-      public org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionChainMessages.CloseTransactionChain getDefaultInstanceForType() {
+      @Override
+    public org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionChainMessages.CloseTransactionChain getDefaultInstanceForType() {
         return org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionChainMessages.CloseTransactionChain.getDefaultInstance();
       }
 
-      public org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionChainMessages.CloseTransactionChain build() {
+      @Override
+    public org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionChainMessages.CloseTransactionChain build() {
         org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionChainMessages.CloseTransactionChain result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
@@ -338,7 +360,8 @@ public final class ShardTransactionChainMessages {
         return result;
       }
 
-      public org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionChainMessages.CloseTransactionChain buildPartial() {
+      @Override
+    public org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionChainMessages.CloseTransactionChain buildPartial() {
         org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionChainMessages.CloseTransactionChain result = new org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionChainMessages.CloseTransactionChain(this);
         int from_bitField0_ = bitField0_;
         int to_bitField0_ = 0;
@@ -351,7 +374,8 @@ public final class ShardTransactionChainMessages {
         return result;
       }
 
-      public Builder mergeFrom(com.google.protobuf.Message other) {
+      @Override
+    public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionChainMessages.CloseTransactionChain) {
           return mergeFrom((org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionChainMessages.CloseTransactionChain)other);
         } else {
@@ -361,7 +385,9 @@ public final class ShardTransactionChainMessages {
       }
 
       public Builder mergeFrom(org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionChainMessages.CloseTransactionChain other) {
-        if (other == org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionChainMessages.CloseTransactionChain.getDefaultInstance()) return this;
+        if (other == org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionChainMessages.CloseTransactionChain.getDefaultInstance()) {
+            return this;
+        }
         if (other.hasTransactionChainId()) {
           bitField0_ |= 0x00000001;
           transactionChainId_ = other.transactionChainId_;
@@ -371,11 +397,13 @@ public final class ShardTransactionChainMessages {
         return this;
       }
 
-      public final boolean isInitialized() {
+      @Override
+    public final boolean isInitialized() {
         return true;
       }
 
-      public Builder mergeFrom(
+      @Override
+    public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
@@ -399,13 +427,15 @@ public final class ShardTransactionChainMessages {
       /**
        * <code>optional string transactionChainId = 1;</code>
        */
-      public boolean hasTransactionChainId() {
+      @Override
+    public boolean hasTransactionChainId() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
       /**
        * <code>optional string transactionChainId = 1;</code>
        */
-      public java.lang.String getTransactionChainId() {
+      @Override
+    public java.lang.String getTransactionChainId() {
         java.lang.Object ref = transactionChainId_;
         if (!(ref instanceof java.lang.String)) {
           java.lang.String s = ((com.google.protobuf.ByteString) ref)
@@ -419,7 +449,8 @@ public final class ShardTransactionChainMessages {
       /**
        * <code>optional string transactionChainId = 1;</code>
        */
-      public com.google.protobuf.ByteString
+      @Override
+    public com.google.protobuf.ByteString
           getTransactionChainIdBytes() {
         java.lang.Object ref = transactionChainId_;
         if (ref instanceof String) {
@@ -500,6 +531,7 @@ public final class ShardTransactionChainMessages {
       return defaultInstance;
     }
 
+    @Override
     public CloseTransactionChainReply getDefaultInstanceForType() {
       return defaultInstance;
     }
@@ -549,6 +581,7 @@ public final class ShardTransactionChainMessages {
       return org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionChainMessages.internal_static_org_opendaylight_controller_mdsal_CloseTransactionChainReply_descriptor;
     }
 
+    @Override
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
       return org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionChainMessages.internal_static_org_opendaylight_controller_mdsal_CloseTransactionChainReply_fieldAccessorTable
@@ -558,7 +591,8 @@ public final class ShardTransactionChainMessages {
 
     public static com.google.protobuf.Parser<CloseTransactionChainReply> PARSER =
         new com.google.protobuf.AbstractParser<CloseTransactionChainReply>() {
-      public CloseTransactionChainReply parsePartialFrom(
+      @Override
+    public CloseTransactionChainReply parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
@@ -574,14 +608,18 @@ public final class ShardTransactionChainMessages {
     private void initFields() {
     }
     private byte memoizedIsInitialized = -1;
+    @Override
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
-      if (isInitialized != -1) return isInitialized == 1;
+      if (isInitialized != -1) {
+        return isInitialized == 1;
+    }
 
       memoizedIsInitialized = 1;
       return true;
     }
 
+    @Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
@@ -589,9 +627,12 @@ public final class ShardTransactionChainMessages {
     }
 
     private int memoizedSerializedSize = -1;
+    @Override
     public int getSerializedSize() {
       int size = memoizedSerializedSize;
-      if (size != -1) return size;
+      if (size != -1) {
+        return size;
+    }
 
       size = 0;
       size += getUnknownFields().getSerializedSize();
@@ -660,10 +701,12 @@ public final class ShardTransactionChainMessages {
     }
 
     public static Builder newBuilder() { return Builder.create(); }
+    @Override
     public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder(org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionChainMessages.CloseTransactionChainReply prototype) {
       return newBuilder().mergeFrom(prototype);
     }
+    @Override
     public Builder toBuilder() { return newBuilder(this); }
 
     @java.lang.Override
@@ -683,7 +726,8 @@ public final class ShardTransactionChainMessages {
         return org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionChainMessages.internal_static_org_opendaylight_controller_mdsal_CloseTransactionChainReply_descriptor;
       }
 
-      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      @Override
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
         return org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionChainMessages.internal_static_org_opendaylight_controller_mdsal_CloseTransactionChainReply_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
@@ -708,25 +752,30 @@ public final class ShardTransactionChainMessages {
         return new Builder();
       }
 
-      public Builder clear() {
+      @Override
+    public Builder clear() {
         super.clear();
         return this;
       }
 
-      public Builder clone() {
+      @Override
+    public Builder clone() {
         return create().mergeFrom(buildPartial());
       }
 
-      public com.google.protobuf.Descriptors.Descriptor
+      @Override
+    public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
         return org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionChainMessages.internal_static_org_opendaylight_controller_mdsal_CloseTransactionChainReply_descriptor;
       }
 
-      public org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionChainMessages.CloseTransactionChainReply getDefaultInstanceForType() {
+      @Override
+    public org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionChainMessages.CloseTransactionChainReply getDefaultInstanceForType() {
         return org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionChainMessages.CloseTransactionChainReply.getDefaultInstance();
       }
 
-      public org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionChainMessages.CloseTransactionChainReply build() {
+      @Override
+    public org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionChainMessages.CloseTransactionChainReply build() {
         org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionChainMessages.CloseTransactionChainReply result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
@@ -734,13 +783,15 @@ public final class ShardTransactionChainMessages {
         return result;
       }
 
-      public org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionChainMessages.CloseTransactionChainReply buildPartial() {
+      @Override
+    public org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionChainMessages.CloseTransactionChainReply buildPartial() {
         org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionChainMessages.CloseTransactionChainReply result = new org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionChainMessages.CloseTransactionChainReply(this);
         onBuilt();
         return result;
       }
 
-      public Builder mergeFrom(com.google.protobuf.Message other) {
+      @Override
+    public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionChainMessages.CloseTransactionChainReply) {
           return mergeFrom((org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionChainMessages.CloseTransactionChainReply)other);
         } else {
@@ -750,16 +801,20 @@ public final class ShardTransactionChainMessages {
       }
 
       public Builder mergeFrom(org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionChainMessages.CloseTransactionChainReply other) {
-        if (other == org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionChainMessages.CloseTransactionChainReply.getDefaultInstance()) return this;
+        if (other == org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionChainMessages.CloseTransactionChainReply.getDefaultInstance()) {
+            return this;
+        }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
 
-      public final boolean isInitialized() {
+      @Override
+    public final boolean isInitialized() {
         return true;
       }
 
-      public Builder mergeFrom(
+      @Override
+    public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
@@ -816,6 +871,7 @@ public final class ShardTransactionChainMessages {
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
+        @Override
         public com.google.protobuf.ExtensionRegistry assignDescriptors(
             com.google.protobuf.Descriptors.FileDescriptor root) {
           descriptor = root;
