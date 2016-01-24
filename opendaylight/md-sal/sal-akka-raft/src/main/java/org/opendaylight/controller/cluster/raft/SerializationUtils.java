@@ -8,19 +8,14 @@
 
 package org.opendaylight.controller.cluster.raft;
 
-import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.InstallSnapshot;
 
 public class SerializationUtils {
 
     public static Object fromSerializable(Object serializable){
-        if(AppendEntries.isSerializedType(serializable)){
-            return AppendEntries.fromSerializable(serializable);
-
-        } else if (serializable.getClass().equals(InstallSnapshot.SERIALIZABLE_CLASS)) {
+        if (serializable.getClass().equals(InstallSnapshot.SERIALIZABLE_CLASS)) {
             return InstallSnapshot.fromSerializable(serializable);
         }
         return serializable;
     }
-
 }
