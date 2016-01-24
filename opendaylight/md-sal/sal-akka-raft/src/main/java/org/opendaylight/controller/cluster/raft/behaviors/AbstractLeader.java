@@ -624,7 +624,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                     appendEntries);
         }
 
-        followerActor.tell(appendEntries.toSerializable(), actor());
+        followerActor.tell(appendEntries, actor());
     }
 
     /**

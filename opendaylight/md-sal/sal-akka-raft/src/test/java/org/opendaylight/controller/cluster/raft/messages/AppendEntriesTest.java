@@ -8,18 +8,13 @@
 package org.opendaylight.controller.cluster.raft.messages;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Iterator;
 import org.apache.commons.lang.SerializationUtils;
-import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;
-import org.opendaylight.controller.cluster.raft.RaftVersions;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogImplEntry;
-import org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages;
 
 /**
  * Unit tests for AppendEntries.
@@ -41,30 +36,6 @@ public class AppendEntriesTest {
         AppendEntries cloned = (AppendEntries) SerializationUtils.clone(expected);
 
         verifyAppendEntries(expected, cloned);
-    }
-
-    @Test
-    public void testToAndFromSerializable() {
-        AppendEntries entries = new AppendEntries(5L, "node1", 7L, 8L,
-                Collections.<ReplicatedLogEntry>emptyList(), 10L, -1, (short)0);
-
-        assertSame("toSerializable", entries, entries.toSerializable());
-        assertSame("fromSerializable", entries,
-                org.opendaylight.controller.cluster.raft.SerializationUtils.fromSerializable(entries));
-    }
-
-    @Test
-    public void testToAndFromLegacySerializable() {
-        ReplicatedLogEntry entry = new ReplicatedLogImplEntry(3, 4, new MockPayload("payload"));
-        AppendEntries entries = new AppendEntries(5L, "node1", 7L, 8L, Arrays.asList(entry), 10L, -1, (short)0);
-
-        Object serializable = entries.toSerializable(RaftVersions.HELIUM_VERSION);
-        Assert.assertTrue(serializable instanceof AppendEntriesMessages.AppendEntries);
-
-        AppendEntries entries2 = (AppendEntries)
-                org.opendaylight.controller.cluster.raft.SerializationUtils.fromSerializable(serializable);
-
-        verifyAppendEntries(entries, entries2);
     }
 
     private static void verifyAppendEntries(AppendEntries expected, AppendEntries actual) {
