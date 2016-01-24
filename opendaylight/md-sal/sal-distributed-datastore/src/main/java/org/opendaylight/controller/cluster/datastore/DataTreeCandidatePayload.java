@@ -11,7 +11,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
-import com.google.protobuf.GeneratedMessage.GeneratedExtension;
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
@@ -19,13 +18,11 @@ import java.io.ObjectOutput;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Map;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeDataInput;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeDataOutput;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeInputStreamReader;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeOutputStreamWriter;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
-import org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages.AppendEntries;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
@@ -212,19 +209,6 @@ final class DataTreeCandidatePayload extends Payload implements Externalizable {
 
     DataTreeCandidate getCandidate() throws IOException {
         return parseCandidate(ByteStreams.newDataInput(serialized));
-    }
-
-    @Override
-    @Deprecated
-    @SuppressWarnings("rawtypes")
-    public <T> Map<GeneratedExtension, T> encode() {
-        return null;
-    }
-
-    @Override
-    @Deprecated
-    public Payload decode(final AppendEntries.ReplicatedLogEntry.Payload payload) {
-        return null;
     }
 
     @Override
