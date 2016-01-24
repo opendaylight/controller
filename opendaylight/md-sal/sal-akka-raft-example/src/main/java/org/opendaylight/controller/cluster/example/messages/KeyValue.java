@@ -8,11 +8,8 @@
 
 package org.opendaylight.controller.cluster.example.messages;
 
-import com.google.protobuf.GeneratedMessage;
 import java.io.Serializable;
-import java.util.Map;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
-import org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages;
 
 public class KeyValue extends Payload implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -48,16 +45,6 @@ public class KeyValue extends Payload implements Serializable {
             "key='" + key + '\'' +
             ", value='" + value + '\'' +
             '}';
-    }
-
-    // override this method to return  the protobuff related extension fields and their values
-    @Override public Map<GeneratedMessage.GeneratedExtension<?, ?>, String> encode() {
-        return null;
-    }
-
-    // override this method to assign the values from protobuff
-    @Override public Payload decode(AppendEntriesMessages.AppendEntries.ReplicatedLogEntry.Payload payloadProtoBuff) {
-        return null;
     }
 
     @Override
