@@ -13,14 +13,12 @@ import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.japi.Procedure;
-import com.google.protobuf.GeneratedMessage;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import org.opendaylight.controller.cluster.NonPersistentDataProvider;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
-import org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -182,22 +180,9 @@ public class MockRaftActorContext extends RaftActorContextImpl {
             this.size = size;
         }
 
-        @Override public Map<GeneratedMessage.GeneratedExtension<?, ?>, String> encode() {
-            return null;
-        }
-
-        @Override public Payload decode(
-            AppendEntriesMessages.AppendEntries.ReplicatedLogEntry.Payload payloadProtoBuff) {
-            return null;
-        }
-
         @Override
         public int size() {
             return size;
-        }
-
-        @Override public String getClientPayloadClassName() {
-            return MockPayload.class.getName();
         }
 
         @Override

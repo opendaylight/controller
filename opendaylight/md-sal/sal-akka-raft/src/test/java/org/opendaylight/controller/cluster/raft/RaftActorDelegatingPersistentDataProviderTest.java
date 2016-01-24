@@ -10,8 +10,6 @@ package org.opendaylight.controller.cluster.raft;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import akka.japi.Procedure;
-import com.google.protobuf.GeneratedMessage.GeneratedExtension;
-import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -90,18 +88,6 @@ public class RaftActorDelegatingPersistentDataProviderTest {
     }
 
     static class TestNonPersistentPayload extends Payload {
-        @SuppressWarnings("rawtypes")
-        @Override
-        public <T> Map<GeneratedExtension, T> encode() {
-            return null;
-        }
-
-        @Override
-        public Payload decode(
-                org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages.AppendEntries.ReplicatedLogEntry.Payload payload) {
-            return null;
-        }
-
         @Override
         public int size() {
             return 0;
