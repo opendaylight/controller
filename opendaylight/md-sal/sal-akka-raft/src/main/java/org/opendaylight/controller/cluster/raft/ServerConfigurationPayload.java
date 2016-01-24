@@ -8,17 +8,14 @@
 package org.opendaylight.controller.cluster.raft;
 
 import com.google.common.base.Preconditions;
-import com.google.protobuf.GeneratedMessage.GeneratedExtension;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.List;
-import java.util.Map;
 import javax.annotation.Nonnull;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.PersistentPayload;
-import org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,19 +58,6 @@ public class ServerConfigurationPayload extends Payload implements PersistentPay
         }
 
         return serializedSize;
-    }
-
-    @Override
-    @Deprecated
-    @SuppressWarnings("rawtypes")
-    public <T> Map<GeneratedExtension, T> encode() {
-        return null;
-    }
-
-    @Override
-    @Deprecated
-    public Payload decode(AppendEntriesMessages.AppendEntries.ReplicatedLogEntry.Payload payload) {
-        return null;
     }
 
     @Override
