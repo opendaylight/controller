@@ -60,14 +60,6 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         updateSchemaContext(schemaContext);
     }
 
-    /**
-     * @deprecated Use {@link #ShardDataTree(SchemaContext, TreeType)} instead.
-     */
-    @Deprecated
-    public ShardDataTree(final SchemaContext schemaContext) {
-        this(schemaContext, TreeType.OPERATIONAL);
-    }
-
     public TipProducingDataTree getDataTree() {
         return dataTree;
     }
