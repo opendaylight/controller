@@ -108,4 +108,14 @@ public interface FollowerLogInformation {
      * Sets the payload data version of the follower.
      */
     void setPayloadVersion(short payloadVersion);
+
+    /**
+     * @return the raft version of the follower.
+     */
+    short getRaftVersion();
+
+    /**
+     * Sets the raft version of the follower.
+     */
+    void setRaftVersion(short payloadVersion);
 }
