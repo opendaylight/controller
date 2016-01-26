@@ -8,6 +8,8 @@
 
 package org.opendaylight.controller.cluster.raft.messages;
 
+import org.opendaylight.controller.cluster.raft.RaftVersions;
+
 /**
  * Reply for the AppendEntriesRpc message
  */
@@ -30,6 +32,8 @@ public class AppendEntriesReply extends AbstractRaftRPC {
     private final String followerId;
 
     private final short payloadVersion;
+
+    private final short raftVersion = RaftVersions.CURRENT_VERSION;
 
     private final boolean forceInstallSnapshot;
 
@@ -70,6 +74,10 @@ public class AppendEntriesReply extends AbstractRaftRPC {
         return payloadVersion;
     }
 
+    public short getRaftVersion() {
+        return raftVersion;
+    }
+
     public boolean isForceInstallSnapshot() {
         return forceInstallSnapshot;
     }
@@ -78,6 +86,6 @@ public class AppendEntriesReply extends AbstractRaftRPC {
     public String toString() {
         return "AppendEntriesReply [term=" + getTerm() + ", success=" + success + ", followerId=" + followerId
                 + ", logLastIndex=" + logLastIndex + ", logLastTerm=" + logLastTerm + ", forceInstallSnapshot="
-                + forceInstallSnapshot + ", payloadVersion=" + payloadVersion + "]";
+                + forceInstallSnapshot + ", payloadVersion=" + payloadVersion + ", raftVersion=" + raftVersion + "]";
     }
 }
