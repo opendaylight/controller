@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a3d3df0_6fff4635",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardTransactionFailureTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 3172
+      },
+      "writtenOn": "2016-01-26T21:46:36Z",
+      "side": 1,
+      "message": "Since we pass this value so often, I wonder if we should have a constructor that defaults this argument to DataStoreVersions.CURRENT_VERSION.",
+      "range": {
+        "startLine": 69,
+        "startChar": 57,
+        "endLine": 69,
+        "endChar": 92
+      },
+      "revId": "3b19a221bf00841839606db87dd5a7a9d19e4597",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
