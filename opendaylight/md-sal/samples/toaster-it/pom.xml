@@ -48,11 +48,6 @@
       <artifactId>pax-exam-junit4</artifactId>
     </dependency>
     <dependency>
-      <groupId>equinoxSDK381</groupId>
-      <artifactId>org.eclipse.osgi</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
       <groupId>org.ops4j.pax.exam</groupId>
       <artifactId>pax-exam-container-native</artifactId>
       <scope>test</scope>

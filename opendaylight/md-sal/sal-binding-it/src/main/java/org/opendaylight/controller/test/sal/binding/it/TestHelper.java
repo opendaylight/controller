@@ -172,7 +172,9 @@ public class TestHelper {
         return new DefaultCompositeOption(
         // Repository required to load harmcrest (OSGi-fied version).
         // Mockito
-                mavenBundle("org.mockito", "mockito-all", "1.9.5"), junitBundles(),
+                mavenBundle("org.mockito", "mockito-core", "1.10.19"),
+                mavenBundle("org.objenesis", "objenesis", "2.2"),
+                junitBundles(),
 
                 /*
                  * Felix has implicit boot delegation enabled by default. It
