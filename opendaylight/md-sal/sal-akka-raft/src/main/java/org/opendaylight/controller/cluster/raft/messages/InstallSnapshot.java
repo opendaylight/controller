@@ -10,23 +10,33 @@ package org.opendaylight.controller.cluster.raft.messages;
 
 import com.google.common.base.Optional;
 import com.google.protobuf.ByteString;
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+import org.opendaylight.controller.cluster.raft.RaftVersions;
 import org.opendaylight.controller.protobuff.messages.cluster.raft.InstallSnapshotMessages;
 
-public class InstallSnapshot extends AbstractRaftRPC {
-
-    public static final Class<InstallSnapshotMessages.InstallSnapshot> SERIALIZABLE_CLASS = InstallSnapshotMessages.InstallSnapshot.class;
+public class InstallSnapshot extends AbstractRaftRPC implements Externalizable {
     private static final long serialVersionUID = 1L;
+    public static final Class<InstallSnapshotMessages.InstallSnapshot> SERIALIZABLE_CLASS = InstallSnapshotMessages.InstallSnapshot.class;
 
-    private final String leaderId;
-    private final long lastIncludedIndex;
-    private final long lastIncludedTerm;
-    private final ByteString data;
-    private final int chunkIndex;
-    private final int totalChunks;
-    private final Optional<Integer> lastChunkHashCode;
+    private String leaderId;
+    private long lastIncludedIndex;
+    private long lastIncludedTerm;
+    private byte[] data;
+    private int chunkIndex;
+    private int totalChunks;
+    private Optional<Integer> lastChunkHashCode;
+
+    /**
+     * Empty constructor to satisfy Externalizable.
+     */
+    public InstallSnapshot() {
+    }
 
     public InstallSnapshot(long term, String leaderId, long lastIncludedIndex,
-        long lastIncludedTerm, ByteString data, int chunkIndex, int totalChunks, Optional<Integer> lastChunkHashCode) {
+        long lastIncludedTerm, byte[] data, int chunkIndex, int totalChunks, Optional<Integer> lastChunkHashCode) {
         super(term);
         this.leaderId = leaderId;
         this.lastIncludedIndex = lastIncludedIndex;
@@ -38,10 +48,9 @@ public class InstallSnapshot extends AbstractRaftRPC {
     }
 
     public InstallSnapshot(long term, String leaderId, long lastIncludedIndex,
-                           long lastIncludedTerm, ByteString data, int chunkIndex, int totalChunks) {
+                           long lastIncludedTerm, byte[] data, int chunkIndex, int totalChunks) {
         this(term, leaderId, lastIncludedIndex, lastIncludedTerm, data, chunkIndex, totalChunks, Optional.<Integer>absent());
     }
-
 
     public String getLeaderId() {
         return leaderId;
@@ -55,7 +64,7 @@ public class InstallSnapshot extends AbstractRaftRPC {
         return lastIncludedTerm;
     }
 
-    public ByteString getData() {
+    public byte[] getData() {
         return data;
     }
 
@@ -71,47 +80,92 @@ public class InstallSnapshot extends AbstractRaftRPC {
         return lastChunkHashCode;
     }
 
-    public <T extends Object> Object toSerializable(){
-        InstallSnapshotMessages.InstallSnapshot.Builder builder = InstallSnapshotMessages.InstallSnapshot.newBuilder()
-                .setTerm(this.getTerm())
-                .setLeaderId(this.getLeaderId())
-                .setChunkIndex(this.getChunkIndex())
-                .setData(this.getData())
-                .setLastIncludedIndex(this.getLastIncludedIndex())
-                .setLastIncludedTerm(this.getLastIncludedTerm())
-                .setTotalChunks(this.getTotalChunks());
+    @Override
+    public void writeExternal(ObjectOutput out) throws IOException {
+        out.writeShort(RaftVersions.CURRENT_VERSION);
+        out.writeLong(getTerm());
+        out.writeUTF(leaderId);
+        out.writeLong(lastIncludedIndex);
+        out.writeLong(lastIncludedTerm);
+        out.writeInt(chunkIndex);
+        out.writeInt(totalChunks);
 
-        if(lastChunkHashCode.isPresent()){
-            builder.setLastChunkHashCode(lastChunkHashCode.get());
+        out.writeByte(lastChunkHashCode.isPresent() ? 1 : 0);
+        if(lastChunkHashCode.isPresent()) {
+            out.writeInt(lastChunkHashCode.get().intValue());
         }
-        return builder.build();
+
+        out.writeObject(data);
     }
 
-    public static InstallSnapshot fromSerializable (Object o) {
-        InstallSnapshotMessages.InstallSnapshot from =
-            (InstallSnapshotMessages.InstallSnapshot) o;
+    @Override
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        in.readShort(); // raft version - not currently used
+        setTerm(in.readLong());
+        leaderId = in.readUTF();
+        lastIncludedIndex = in.readLong();
+        lastIncludedTerm = in.readLong();
+        chunkIndex = in.readInt();
+        totalChunks = in.readInt();
 
-        Optional<Integer> lastChunkHashCode = Optional.absent();
-        if(from.hasLastChunkHashCode()){
-            lastChunkHashCode = Optional.of(from.getLastChunkHashCode());
+        lastChunkHashCode = Optional.absent();
+        boolean chunkHashCodePresent = in.readByte() == 1;
+        if(chunkHashCodePresent) {
+            lastChunkHashCode = Optional.of(in.readInt());
         }
 
-        InstallSnapshot installSnapshot = new InstallSnapshot(from.getTerm(),
-            from.getLeaderId(), from.getLastIncludedIndex(),
-            from.getLastIncludedTerm(), from.getData(),
-            from.getChunkIndex(), from.getTotalChunks(), lastChunkHashCode);
+        data = (byte[])in.readObject();
+    }
 
-        return installSnapshot;
+    public <T extends Object> Object toSerializable(short version) {
+        if(version >= RaftVersions.CURRENT_VERSION) {
+            return this;
+        } else {
+            InstallSnapshotMessages.InstallSnapshot.Builder builder = InstallSnapshotMessages.InstallSnapshot.newBuilder()
+                    .setTerm(this.getTerm())
+                    .setLeaderId(this.getLeaderId())
+                    .setChunkIndex(this.getChunkIndex())
+                    .setData(ByteString.copyFrom(getData()))
+                    .setLastIncludedIndex(this.getLastIncludedIndex())
+                    .setLastIncludedTerm(this.getLastIncludedTerm())
+                    .setTotalChunks(this.getTotalChunks());
+
+            if(lastChunkHashCode.isPresent()){
+                builder.setLastChunkHashCode(lastChunkHashCode.get());
+            }
+            return builder.build();
+        }
     }
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("InstallSnapshot [term=").append(term).append(", leaderId=").append(leaderId)
-                .append(", lastIncludedIndex=").append(lastIncludedIndex).append(", lastIncludedTerm=")
-                .append(lastIncludedTerm).append(", data=").append(data).append(", chunkIndex=").append(chunkIndex)
-                .append(", totalChunks=").append(totalChunks).append(", lastChunkHashCode=").append(lastChunkHashCode)
-                .append("]");
-        return builder.toString();
+        return "InstallSnapshot [term=" + getTerm() + ", leaderId=" + leaderId + ", lastIncludedIndex="
+                + lastIncludedIndex + ", lastIncludedTerm=" + lastIncludedTerm + ", datasize=" + data.length
+                + ", Chunk=" + chunkIndex + "/" + totalChunks + ", lastChunkHashCode=" + lastChunkHashCode + "]";
+    }
+
+    public static InstallSnapshot fromSerializable (Object o) {
+        if(o instanceof InstallSnapshot) {
+            return (InstallSnapshot)o;
+        } else {
+            InstallSnapshotMessages.InstallSnapshot from =
+                    (InstallSnapshotMessages.InstallSnapshot) o;
+
+            Optional<Integer> lastChunkHashCode = Optional.absent();
+            if(from.hasLastChunkHashCode()){
+                lastChunkHashCode = Optional.of(from.getLastChunkHashCode());
+            }
+
+            InstallSnapshot installSnapshot = new InstallSnapshot(from.getTerm(),
+                    from.getLeaderId(), from.getLastIncludedIndex(),
+                    from.getLastIncludedTerm(), from.getData().toByteArray(),
+                    from.getChunkIndex(), from.getTotalChunks(), lastChunkHashCode);
+
+            return installSnapshot;
+        }
+    }
+
+    public static boolean isSerializedType(Object message) {
+        return message instanceof InstallSnapshot || message instanceof InstallSnapshotMessages.InstallSnapshot;
     }
 }

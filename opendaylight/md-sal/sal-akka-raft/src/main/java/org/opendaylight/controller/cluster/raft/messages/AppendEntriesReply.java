@@ -8,6 +8,8 @@
 
 package org.opendaylight.controller.cluster.raft.messages;
 
+import org.opendaylight.controller.cluster.raft.RaftVersions;
+
 /**
  * Reply for the AppendEntriesRpc message
  */
@@ -31,6 +33,8 @@ public class AppendEntriesReply extends AbstractRaftRPC {
 
     private final short payloadVersion;
 
+    private final short raftVersion = RaftVersions.CURRENT_VERSION;
+
     private final boolean forceInstallSnapshot;
 
     public AppendEntriesReply(String followerId, long term, boolean success, long logLastIndex, long logLastTerm,
@@ -48,12 +52,6 @@ public class AppendEntriesReply extends AbstractRaftRPC {
         this.logLastTerm = logLastTerm;
         this.payloadVersion = payloadVersion;
         this.forceInstallSnapshot = forceInstallSnapshot;
-    }
-
-
-    @Override
-    public long getTerm() {
-        return term;
     }
 
     public boolean isSuccess() {
@@ -76,17 +74,18 @@ public class AppendEntriesReply extends AbstractRaftRPC {
         return payloadVersion;
     }
 
-    @Override
-    public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("AppendEntriesReply [success=").append(success).append(", logLastIndex=").append(logLastIndex)
-                .append(", logLastTerm=").append(logLastTerm).append(", followerId=").append(followerId)
-                .append(", payloadVersion=").append(", forceInstallSnapshot=").append(forceInstallSnapshot)
-                .append(payloadVersion).append("]");
-        return builder.toString();
+    public short getRaftVersion() {
+        return raftVersion;
     }
 
     public boolean isForceInstallSnapshot() {
         return forceInstallSnapshot;
+    }
+
+    @Override
+    public String toString() {
+        return "AppendEntriesReply [term=" + getTerm() + ", success=" + success + ", followerId=" + followerId
+                + ", logLastIndex=" + logLastIndex + ", logLastTerm=" + logLastTerm + ", forceInstallSnapshot="
+                + forceInstallSnapshot + ", payloadVersion=" + payloadVersion + ", raftVersion=" + raftVersion + "]";
     }
 }

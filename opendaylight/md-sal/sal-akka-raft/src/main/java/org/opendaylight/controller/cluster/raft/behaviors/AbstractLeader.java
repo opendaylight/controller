@@ -16,6 +16,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.protobuf.ByteString;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -211,6 +212,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
 
         followerLogInformation.markFollowerActive();
         followerLogInformation.setPayloadVersion(appendEntriesReply.getPayloadVersion());
+        followerLogInformation.setRaftVersion(appendEntriesReply.getRaftVersion());
 
         boolean updated = false;
         if (appendEntriesReply.isSuccess()) {
@@ -709,7 +711,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
     private void sendSnapshotChunk(ActorSelection followerActor, String followerId) {
         try {
             if (snapshot.isPresent()) {
-                ByteString nextSnapshotChunk = getNextSnapshotChunk(followerId, snapshot.get().getSnapshotBytes());
+                byte[] nextSnapshotChunk = getNextSnapshotChunk(followerId, snapshot.get().getSnapshotBytes());
 
                 // Note: the previous call to getNextSnapshotChunk has the side-effect of adding
                 // followerId to the followerToSnapshot map.
@@ -723,7 +725,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                         followerToSnapshot.incrementChunkIndex(),
                         followerToSnapshot.getTotalChunks(),
                         Optional.of(followerToSnapshot.getLastChunkHashCode())
-                    ).toSerializable(),
+                    ).toSerializable(followerToLog.get(followerId).getRaftVersion()),
                     actor()
                 );
 
@@ -742,15 +744,15 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
      * Acccepts snaphot as ByteString, enters into map for future chunks
      * creates and return a ByteString chunk
      */
-    private ByteString getNextSnapshotChunk(String followerId, ByteString snapshotBytes) throws IOException {
+    private byte[] getNextSnapshotChunk(String followerId, ByteString snapshotBytes) throws IOException {
         FollowerToSnapshot followerToSnapshot = mapFollowerToSnapshot.get(followerId);
         if (followerToSnapshot == null) {
             followerToSnapshot = new FollowerToSnapshot(snapshotBytes);
             mapFollowerToSnapshot.put(followerId, followerToSnapshot);
         }
-        ByteString nextChunk = followerToSnapshot.getNextChunk();
+        byte[] nextChunk = followerToSnapshot.getNextChunk();
 
-        LOG.debug("{}: next snapshot chunk size for follower {}: {}", logName(), followerId, nextChunk.size());
+        LOG.debug("{}: next snapshot chunk size for follower {}: {}", logName(), followerId, nextChunk.length);
 
         return nextChunk;
     }
@@ -890,25 +892,23 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
             }
         }
 
-        public ByteString getNextChunk() {
+        public byte[] getNextChunk() {
             int snapshotLength = getSnapshotBytes().size();
             int start = incrementOffset();
             int size = context.getConfigParams().getSnapshotChunkSize();
             if (context.getConfigParams().getSnapshotChunkSize() > snapshotLength) {
                 size = snapshotLength;
-            } else {
-                if ((start + context.getConfigParams().getSnapshotChunkSize()) > snapshotLength) {
-                    size = snapshotLength - start;
-                }
+            } else if ((start + context.getConfigParams().getSnapshotChunkSize()) > snapshotLength) {
+                size = snapshotLength - start;
             }
 
+            byte[] nextChunk = new byte[size];
+            getSnapshotBytes().copyTo(nextChunk, start, 0, size);
+            nextChunkHashCode = Arrays.hashCode(nextChunk);
 
-            LOG.debug("{}: Next chunk: length={}, offset={},size={}", logName(),
-                    snapshotLength, start, size);
-
-            ByteString substring = getSnapshotBytes().substring(start, start + size);
-            nextChunkHashCode = substring.hashCode();
-            return substring;
+            LOG.debug("{}: Next chunk: total length={}, offset={}, size={}, hashCode={}", logName(),
+                    snapshotLength, start, size, nextChunkHashCode);
+            return nextChunk;
         }
 
         /**
