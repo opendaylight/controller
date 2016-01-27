@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.datastore.entityownership.selections
 import static org.junit.Assert.assertEquals;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.Test;
@@ -18,22 +19,47 @@ public class LeastLoadedCandidateSelectionStrategyTest {
 
     @Test
     public void testLeastLoadedStrategy(){
-        LeastLoadedCandidateSelectionStrategy strategy = new LeastLoadedCandidateSelectionStrategy(0L);
+        LeastLoadedCandidateSelectionStrategy strategy = new LeastLoadedCandidateSelectionStrategy(0L, Collections.<String, Long>emptyMap());
 
-        String owner = strategy.newOwner(prepareViableCandidates(3), new HashMap<String, Long>());
+        String owner = strategy.newOwner(null, prepareViableCandidates(3));
         assertEquals("member-1", owner);
+
+        Map<String, Long> localStatistics = strategy.getLocalStatistics();
+        assertEquals(1L, (long) localStatistics.get("member-1"));
 
         // member-2 has least load
-        owner = strategy.newOwner(prepareViableCandidates(3), prepareStatistics(5,2,4));
+        strategy = new LeastLoadedCandidateSelectionStrategy(0L, prepareStatistics(5,2,4));
+        owner = strategy.newOwner(null, prepareViableCandidates(3));
         assertEquals("member-2", owner);
 
+        assertStatistics(strategy.getLocalStatistics(), 5,3,4);
+
         // member-3 has least load
-        owner = strategy.newOwner(prepareViableCandidates(3), prepareStatistics(5,7,4));
+        strategy = new LeastLoadedCandidateSelectionStrategy(0L, prepareStatistics(5,7,4));
+        owner = strategy.newOwner(null, prepareViableCandidates(3));
         assertEquals("member-3", owner);
 
+        assertStatistics(strategy.getLocalStatistics(), 5,7,5);
+
         // member-1 has least load
-        owner = strategy.newOwner(prepareViableCandidates(3), prepareStatistics(1,7,4));
+        strategy = new LeastLoadedCandidateSelectionStrategy(0L, prepareStatistics(1,7,4));
+        owner = strategy.newOwner(null, prepareViableCandidates(3));
         assertEquals("member-1", owner);
+
+        assertStatistics(strategy.getLocalStatistics(), 2,7,4);
+
+        // Let member-3 become the owner
+        strategy = new LeastLoadedCandidateSelectionStrategy(0L, prepareStatistics(3,3,0));
+        owner = strategy.newOwner(null, prepareViableCandidates(3));
+        assertEquals("member-3", owner);
+
+        assertStatistics(strategy.getLocalStatistics(), 3,3,1);
+
+        // member-3 is no longer viable so choose a new owner
+        owner = strategy.newOwner("member-3", prepareViableCandidates(2));
+        assertEquals("member-1", owner);
+
+        assertStatistics(strategy.getLocalStatistics(), 4,3,0);
 
     }
 
@@ -51,5 +77,11 @@ public class LeastLoadedCandidateSelectionStrategyTest {
             viableCandidates.add("member-" + (i+1));
         }
         return viableCandidates;
+    }
+
+    private void assertStatistics(Map<String, Long> statistics, long... count){
+        for(int i=0;i<count.length;i++){
+            assertEquals(count[i], (long) statistics.get("member-" + (i+1)));
+        }
     }
 }

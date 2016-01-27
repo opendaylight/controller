@@ -9,10 +9,12 @@ package org.opendaylight.controller.cluster.datastore.entityownership.selections
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Hashtable;
 import org.junit.Before;
 import org.junit.Test;
@@ -57,9 +59,17 @@ public class EntityOwnerSelectionStrategyConfigReaderTest {
 
         assertTrue(config.isStrategyConfigured("test"));
 
-        EntityOwnerSelectionStrategy strategy = config.createStrategy("test");
-        assertTrue(strategy instanceof LastCandidateSelectionStrategy);
+        EntityOwnerSelectionStrategy strategy = config.createStrategy("test", Collections.<String, Long>emptyMap());
+        assertTrue(strategy.toString(), strategy instanceof LastCandidateSelectionStrategy);
         assertEquals(100L, strategy.getSelectionDelayInMillis());
+
+        final EntityOwnerSelectionStrategy strategy1 = config.createStrategy("test", Collections.<String, Long>emptyMap());
+        assertEquals(strategy, strategy1);
+
+        config.clearStrategies();
+
+        final EntityOwnerSelectionStrategy strategy2 = config.createStrategy("test", Collections.<String, Long>emptyMap());
+        assertNotEquals(strategy1, strategy2);
     }
 
     @Test
@@ -123,8 +133,8 @@ public class EntityOwnerSelectionStrategyConfigReaderTest {
 
         EntityOwnerSelectionStrategyConfig config = new EntityOwnerSelectionStrategyConfigReader(mockBundleContext).getConfig();
 
-        assertEquals(100, config.createStrategy("test").getSelectionDelayInMillis());
-        assertEquals(0, config.createStrategy("test2").getSelectionDelayInMillis());
+        assertEquals(100, config.createStrategy("test", Collections.<String, Long>emptyMap()).getSelectionDelayInMillis());
+        assertEquals(0, config.createStrategy("test2", Collections.<String, Long>emptyMap()).getSelectionDelayInMillis());
     }
 
 }

@@ -143,7 +143,7 @@ class EntityOwnershipShard extends Shard {
         String currentOwner = getCurrentOwner(selectOwner.getEntityPath());
         if(Strings.isNullOrEmpty(currentOwner)) {
             String entityType = EntityOwnersModel.entityTypeFromEntityPath(selectOwner.getEntityPath());
-            writeNewOwner(selectOwner.getEntityPath(), newOwner(selectOwner.getAllCandidates(),
+            writeNewOwner(selectOwner.getEntityPath(), newOwner(currentOwner, selectOwner.getAllCandidates(),
                     entityOwnershipStatistics.byEntityType(entityType),
                     selectOwner.getOwnerSelectionStrategy()));
 
@@ -274,6 +274,11 @@ class EntityOwnershipShard extends Shard {
                 newLeader, isLeader);
 
         if(isLeader) {
+
+            // Clear all existing strategies so that they get re-created when we call createStrategy again
+            // This allows the strategies to be re-initialized with existing statistics maintained by
+            // EntityOwnershipStatistics
+            strategyConfig.clearStrategies();
             // We were just elected leader. If the old leader is down, select new owners for the entities
             // owned by the down leader.
 
@@ -300,7 +305,7 @@ class EntityOwnershipShard extends Shard {
             if(message.getRemovedCandidate().equals(currentOwner) || message.getRemainingCandidates().size() == 0){
                 String entityType = EntityOwnersModel.entityTypeFromEntityPath(message.getEntityPath());
                 writeNewOwner(message.getEntityPath(),
-                        newOwner(message.getRemainingCandidates(), entityOwnershipStatistics.byEntityType(entityType),
+                        newOwner(currentOwner, message.getRemainingCandidates(), entityOwnershipStatistics.byEntityType(entityType),
                                 getEntityOwnerElectionStrategy(message.getEntityPath())));
             }
         } else {
@@ -323,7 +328,7 @@ class EntityOwnershipShard extends Shard {
 
     private EntityOwnerSelectionStrategy getEntityOwnerElectionStrategy(YangInstanceIdentifier entityPath) {
         final String entityType = EntityOwnersModel.entityTypeFromEntityPath(entityPath);
-        return strategyConfig.createStrategy(entityType);
+        return strategyConfig.createStrategy(entityType, entityOwnershipStatistics.byEntityType(entityType));
     }
 
     private void onCandidateAdded(CandidateAdded message) {
@@ -348,13 +353,13 @@ class EntityOwnershipShard extends Shard {
         LOG.debug("{}: Using strategy {} to select owner", persistenceId(), strategy);
         if(Strings.isNullOrEmpty(currentOwner)){
             if(strategy.getSelectionDelayInMillis() == 0L) {
-                writeNewOwner(message.getEntityPath(), newOwner(message.getAllCandidates(),
+                writeNewOwner(message.getEntityPath(), newOwner(currentOwner, message.getAllCandidates(),
                         entityOwnershipStatistics.byEntityType(entityType), strategy));
             } else if(message.getAllCandidates().size() == availableMembers) {
                 LOG.debug("{}: Received the maximum candidates requests : {} writing new owner",
                         persistenceId(), availableMembers);
                 cancelOwnerSelectionTask(message.getEntityPath());
-                writeNewOwner(message.getEntityPath(), newOwner(message.getAllCandidates(),
+                writeNewOwner(message.getEntityPath(), newOwner(currentOwner, message.getAllCandidates(),
                         entityOwnershipStatistics.byEntityType(entityType), strategy));
             } else {
                 scheduleOwnerSelection(message.getEntityPath(), message.getAllCandidates(), strategy);
@@ -464,12 +469,12 @@ class EntityOwnershipShard extends Shard {
         }
     }
 
-    private String newOwner(Collection<String> candidates, Map<String, Long> statistics, EntityOwnerSelectionStrategy ownerSelectionStrategy) {
+    private String newOwner(String currentOwner, Collection<String> candidates, Map<String, Long> statistics, EntityOwnerSelectionStrategy ownerSelectionStrategy) {
         Collection<String> viableCandidates = getViableCandidates(candidates);
         if(viableCandidates.size() == 0){
             return "";
         }
-        return ownerSelectionStrategy.newOwner(viableCandidates, statistics);
+        return ownerSelectionStrategy.newOwner(currentOwner, viableCandidates);
     }
 
     private Collection<String> getViableCandidates(Collection<String> candidates) {
