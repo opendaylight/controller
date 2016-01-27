@@ -22,6 +22,30 @@
       "revId": "3b19a221bf00841839606db87dd5a7a9d19e4597",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_ea94e438",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardTransactionFailureTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-01-27T01:59:52Z",
+      "side": 1,
+      "message": "I thought about that but that would only be of value to unit tests. Production code should always pass a version so I wanted to force it via the signature to prevent a mistake.",
+      "parentUuid": "9a3d3df0_6fff4635",
+      "range": {
+        "startLine": 69,
+        "startChar": 57,
+        "endLine": 69,
+        "endChar": 92
+      },
+      "revId": "3b19a221bf00841839606db87dd5a7a9d19e4597",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
