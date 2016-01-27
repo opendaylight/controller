@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.datastore.entityownership.selections
 
 import com.google.common.base.Preconditions;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 
 /**
@@ -17,14 +18,14 @@ import java.util.Map;
  */
 public class FirstCandidateSelectionStrategy extends AbstractEntityOwnerSelectionStrategy {
 
-    public static final FirstCandidateSelectionStrategy INSTANCE = new FirstCandidateSelectionStrategy(0L);
+    public static final FirstCandidateSelectionStrategy INSTANCE = new FirstCandidateSelectionStrategy(0L, Collections.emptyMap());
 
-    public FirstCandidateSelectionStrategy(long selectionDelayInMillis) {
-        super(selectionDelayInMillis);
+    public FirstCandidateSelectionStrategy(long selectionDelayInMillis, Map<String, Long> initialStatistics) {
+        super(selectionDelayInMillis, initialStatistics);
     }
 
     @Override
-    public String newOwner(Collection<String> viableCandidates, Map<String, Long> statistics) {
+    public String newOwner(String currentOwner, Collection<String> viableCandidates) {
         Preconditions.checkArgument(viableCandidates.size() > 0, "No viable candidates provided");
         return viableCandidates.iterator().next();
     }

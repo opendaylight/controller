@@ -13,12 +13,12 @@ import java.util.Collection;
 import java.util.Map;
 
 public class LastCandidateSelectionStrategy extends AbstractEntityOwnerSelectionStrategy {
-    public LastCandidateSelectionStrategy(final long selectionDelayInMillis) {
-        super(selectionDelayInMillis);
+    public LastCandidateSelectionStrategy(long selectionDelayInMillis, Map<String, Long> initialStatistics) {
+        super(selectionDelayInMillis, initialStatistics);
     }
 
     @Override
-    public String newOwner(final Collection<String> viableCandidates, final Map<String, Long> statistics) {
+    public String newOwner(String currentOwner, Collection<String> viableCandidates) {
         return Iterables.getLast(viableCandidates);
     }
 }
