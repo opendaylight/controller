@@ -46,7 +46,7 @@ public class DummyShard extends UntypedActor{
         } else if(AppendEntries.LEGACY_SERIALIZABLE_CLASS.equals(o.getClass()) || o instanceof AppendEntries) {
             AppendEntries req = AppendEntries.fromSerializable(o);
             handleAppendEntries(req);
-        } else if(InstallSnapshot.SERIALIZABLE_CLASS.equals(o.getClass())) {
+        } else if(InstallSnapshot.isSerializedType(o)) {
             InstallSnapshot req = InstallSnapshot.fromSerializable(o);
             handleInstallSnapshot(req);
         } else if(o instanceof InstallSnapshot){

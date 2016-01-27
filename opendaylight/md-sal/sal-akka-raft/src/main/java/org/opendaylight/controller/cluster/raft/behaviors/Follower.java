@@ -358,9 +358,7 @@ public class Follower extends AbstractRaftActorBehavior {
 
     private void handleInstallSnapshot(final ActorRef sender, InstallSnapshot installSnapshot) {
 
-        LOG.debug("{}: InstallSnapshot received from leader {}, datasize: {} , Chunk: {}/{}",
-                    logName(), installSnapshot.getLeaderId(), installSnapshot.getData().size(),
-                    installSnapshot.getChunkIndex(), installSnapshot.getTotalChunks());
+        LOG.debug("{}: handleInstallSnapshot: {}", logName(), installSnapshot);
 
         leaderId = installSnapshot.getLeaderId();
 

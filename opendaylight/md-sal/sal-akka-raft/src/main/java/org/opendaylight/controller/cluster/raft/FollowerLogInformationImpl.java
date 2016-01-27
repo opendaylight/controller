@@ -27,6 +27,12 @@ public class FollowerLogInformationImpl implements FollowerLogInformation {
 
     private short payloadVersion = -1;
 
+    // Assume the HELIUM_VERSION version initially for backwards compatibility until we obtain the follower's
+    // actual version via AppendEntriesReply. Although we no longer support the Helium version, a pre-Boron
+    // follower will not have the version field in AppendEntriesReply so it will be set to 0 which is
+    // HELIUM_VERSION.
+    private short raftVersion = RaftVersions.HELIUM_VERSION;
+
     private final PeerInfo peerInfo;
 
     public FollowerLogInformationImpl(PeerInfo peerInfo, long matchIndex, RaftActorContext context) {
@@ -151,6 +157,16 @@ public class FollowerLogInformationImpl implements FollowerLogInformation {
     @Override
     public void setPayloadVersion(short payloadVersion) {
         this.payloadVersion = payloadVersion;
+    }
+
+    @Override
+    public short getRaftVersion() {
+        return raftVersion;
+    }
+
+    @Override
+    public void setRaftVersion(short raftVersion) {
+        this.raftVersion = raftVersion;
     }
 
     @Override
