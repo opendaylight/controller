@@ -17,7 +17,7 @@ public class SerializationUtils {
         if(AppendEntries.isSerializedType(serializable)){
             return AppendEntries.fromSerializable(serializable);
 
-        } else if (serializable.getClass().equals(InstallSnapshot.SERIALIZABLE_CLASS)) {
+        } else if (InstallSnapshot.isSerializedType(serializable)) {
             return InstallSnapshot.fromSerializable(serializable);
         }
         return serializable;

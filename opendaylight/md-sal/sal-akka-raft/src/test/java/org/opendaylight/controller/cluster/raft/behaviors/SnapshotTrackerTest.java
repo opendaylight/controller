@@ -14,6 +14,7 @@ import com.google.protobuf.ByteString;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.Assert;
@@ -28,9 +29,9 @@ public class SnapshotTrackerTest {
 
     Map<String, String> data;
     ByteString byteString;
-    ByteString chunk1;
-    ByteString chunk2;
-    ByteString chunk3;
+    byte[] chunk1;
+    byte[] chunk2;
+    byte[] chunk3;
 
     @Before
     public void setup(){
@@ -128,9 +129,9 @@ public class SnapshotTrackerTest {
 
         SnapshotTracker tracker2 = new SnapshotTracker(logger, 3);
 
-        tracker2.addChunk(1, chunk1, Optional.<Integer>absent());
-        tracker2.addChunk(2, chunk2, Optional.<Integer>absent());
-        tracker2.addChunk(3, chunk3, Optional.<Integer>absent());
+        tracker2.addChunk(1, chunk1, Optional.of(AbstractLeader.INITIAL_LAST_CHUNK_HASH_CODE));
+        tracker2.addChunk(2, chunk2, Optional.of(Arrays.hashCode(chunk1)));
+        tracker2.addChunk(3, chunk3, Optional.of(Arrays.hashCode(chunk2)));
 
         byte[] snapshot = tracker2.getSnapshot();
 
@@ -141,15 +142,15 @@ public class SnapshotTrackerTest {
     public void testGetCollectedChunks() throws SnapshotTracker.InvalidChunkException {
         SnapshotTracker tracker1 = new SnapshotTracker(logger, 5);
 
-        ByteString chunks = chunk1.concat(chunk2);
+        ByteString chunks = ByteString.copyFrom(chunk1).concat(ByteString.copyFrom(chunk2));
 
-        tracker1.addChunk(1, chunk1, Optional.<Integer>absent());
-        tracker1.addChunk(2, chunk2, Optional.<Integer>absent());
+        tracker1.addChunk(1, chunk1, Optional.of(AbstractLeader.INITIAL_LAST_CHUNK_HASH_CODE));
+        tracker1.addChunk(2, chunk2, Optional.of(Arrays.hashCode(chunk1)));
 
         assertEquals(chunks, tracker1.getCollectedChunks());
     }
 
-    public ByteString getNextChunk (ByteString bs, int offset, int size){
+    public byte[] getNextChunk (ByteString bs, int offset, int size){
         int snapshotLength = bs.size();
         int start = offset;
         if (size > snapshotLength) {
@@ -159,7 +160,10 @@ public class SnapshotTrackerTest {
                 size = snapshotLength - start;
             }
         }
-        return bs.substring(start, start + size);
+
+        byte[] nextChunk = new byte[size];
+        bs.copyTo(nextChunk, start, 0, size);
+        return nextChunk;
     }
 
     private static ByteString toByteString(Map<String, String> state) {

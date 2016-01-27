@@ -158,6 +158,8 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
         }
     }
 
+    protected static final int SNAPSHOT_CHUNK_SIZE = 100;
+
     protected final Logger testLog = LoggerFactory.getLogger(getClass());
 
     protected final TestActorFactory factory = new TestActorFactory(getSystem());
@@ -204,6 +206,7 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
         configParams.setSnapshotBatchCount(snapshotBatchCount);
         configParams.setSnapshotDataThresholdPercentage(70);
         configParams.setIsolatedLeaderCheckInterval(new FiniteDuration(1, TimeUnit.DAYS));
+        configParams.setSnapshotChunkSize(SNAPSHOT_CHUNK_SIZE);
         return configParams;
     }
 
