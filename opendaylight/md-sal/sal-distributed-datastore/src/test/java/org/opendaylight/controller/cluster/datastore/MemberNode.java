@@ -100,6 +100,28 @@ public class MemberNode {
         fail("Member(s) " + otherMembersSet + " are not Up");
     }
 
+    public void waitForMemberDown(String member) {
+        Stopwatch sw = Stopwatch.createStarted();
+        while(sw.elapsed(TimeUnit.SECONDS) <= 10) {
+            CurrentClusterState state = Cluster.get(kit.getSystem()).state();
+            for(Member m: state.getUnreachable()) {
+                if(member.equals(m.getRoles().iterator().next())) {
+                    return;
+                }
+            }
+
+            for(Member m: state.getMembers()) {
+                if(m.status() != MemberStatus.up() && member.equals(m.getRoles().iterator().next())) {
+                    return;
+                }
+            }
+
+            Uninterruptibles.sleepUninterruptibly(100, TimeUnit.MILLISECONDS);
+        }
+
+        fail("Member " + member + " is now down");
+    }
+
     public void cleanup() {
         if(!cleanedUp) {
             cleanedUp = true;
