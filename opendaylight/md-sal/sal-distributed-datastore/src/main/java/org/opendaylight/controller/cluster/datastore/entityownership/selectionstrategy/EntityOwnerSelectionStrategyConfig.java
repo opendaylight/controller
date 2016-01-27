@@ -27,7 +27,7 @@ public class EntityOwnerSelectionStrategyConfig {
         return entityTypeToStrategyInfo.get(entityType) != null;
     }
 
-    public EntityOwnerSelectionStrategy createStrategy(String entityType){
+    public EntityOwnerSelectionStrategy createStrategy(String entityType, Map<String, Long> initialStatistics){
         final EntityOwnerSelectionStrategy strategy;
         final EntityOwnerSelectionStrategy existingStrategy = entityTypeToOwnerSelectionStrategy.get(entityType);
         if(existingStrategy != null){
@@ -37,12 +37,16 @@ public class EntityOwnerSelectionStrategyConfig {
             if(strategyInfo == null){
                 strategy = FirstCandidateSelectionStrategy.INSTANCE;
             } else {
-                strategy = strategyInfo.createStrategy();
+                strategy = strategyInfo.createStrategy(initialStatistics);
             }
             entityTypeToOwnerSelectionStrategy.put(entityType, strategy);
         }
         return strategy;
 
+    }
+
+    public void clearStrategies() {
+        entityTypeToOwnerSelectionStrategy.clear();
     }
 
     private static final class StrategyInfo {
@@ -54,9 +58,9 @@ public class EntityOwnerSelectionStrategyConfig {
             this.delay = delay;
         }
 
-        public EntityOwnerSelectionStrategy createStrategy(){
+        public EntityOwnerSelectionStrategy createStrategy(Map<String, Long> initialStatistics){
             try {
-                return strategyClass.getDeclaredConstructor(long.class).newInstance(delay);
+                return strategyClass.getDeclaredConstructor(long.class, Map.class).newInstance(delay, initialStatistics);
             } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
                 LOG.warn("could not create custom strategy", e);
             }

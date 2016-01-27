@@ -9,7 +9,7 @@
 package org.opendaylight.controller.cluster.datastore.entityownership.selectionstrategy;
 
 import java.util.Collection;
-import java.util.Map;
+import javax.annotation.Nullable;
 
 /**
  * An EntityOwnerSelectionStrategy is to be used by the EntityOwnershipShard to select a new owner from a collection
@@ -24,11 +24,9 @@ public interface EntityOwnerSelectionStrategy {
 
 
     /**
-     *
+     * @param currentOwner the current owner of the entity if any, null otherwise
      * @param viableCandidates the available candidates from which to choose the new owner
-     * @param statistics contains a snapshot of a mapping between candidate names and the number of entities
-     *                   owned by that candidate
      * @return the new owner
      */
-    String newOwner(Collection<String> viableCandidates, Map<String, Long> statistics);
+    String newOwner(@Nullable String currentOwner, Collection<String> viableCandidates);
 }

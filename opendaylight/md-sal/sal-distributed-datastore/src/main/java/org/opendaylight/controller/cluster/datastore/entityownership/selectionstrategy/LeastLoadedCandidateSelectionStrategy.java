@@ -8,7 +8,9 @@
 
 package org.opendaylight.controller.cluster.datastore.entityownership.selectionstrategy;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
+import com.google.common.base.Preconditions;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -24,27 +26,25 @@ public class LeastLoadedCandidateSelectionStrategy extends AbstractEntityOwnerSe
 
     private Map<String, Long> localStatistics = new HashMap<>();
 
-    protected LeastLoadedCandidateSelectionStrategy(long selectionDelayInMillis) {
-        super(selectionDelayInMillis);
+    protected LeastLoadedCandidateSelectionStrategy(long selectionDelayInMillis, Map<String, Long> initialStatistics) {
+        super(selectionDelayInMillis, initialStatistics);
+
+        localStatistics.putAll(initialStatistics);
     }
 
     @Override
-    public String newOwner(Collection<String> viableCandidates, Map<String, Long> statistics) {
+    public String newOwner(String currentOwner, Collection<String> viableCandidates) {
+        Preconditions.checkArgument(viableCandidates.size() > 0);
         String leastLoadedCandidate = null;
         long leastLoadedCount = Long.MAX_VALUE;
 
+        if(currentOwner != null){
+            long localVal = MoreObjects.firstNonNull(localStatistics.get(currentOwner), 0L);
+            localStatistics.put(currentOwner, localVal - 1);
+        }
+
         for(String candidateName : viableCandidates){
-            long val = MoreObjects.firstNonNull(statistics.get(candidateName), 0L);
-            long localVal = MoreObjects.firstNonNull(localStatistics.get(candidateName), 0L);
-            if(val < localVal){
-                LOG.debug("Local statistic higher - Candidate : {}, local statistic : {}, provided statistic : {}",
-                        candidateName, localVal, val);
-                val = localVal;
-            } else {
-                LOG.debug("Provided statistic higher - Candidate : {}, local statistic : {}, provided statistic : {}",
-                        candidateName, localVal, val);
-                localStatistics.put(candidateName, val);
-            }
+            long val = MoreObjects.firstNonNull(localStatistics.get(candidateName), 0L);
             if(val < leastLoadedCount){
                 leastLoadedCount = val;
                 leastLoadedCandidate = candidateName;
@@ -57,5 +57,10 @@ public class LeastLoadedCandidateSelectionStrategy extends AbstractEntityOwnerSe
 
         localStatistics.put(leastLoadedCandidate, leastLoadedCount + 1);
         return leastLoadedCandidate;
+    }
+
+    @VisibleForTesting
+    Map<String, Long> getLocalStatistics(){
+        return localStatistics;
     }
 }
