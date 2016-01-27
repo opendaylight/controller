@@ -3,6 +3,7 @@
 
 package org.opendaylight.controller.protobuff.messages.cluster.raft;
 
+@Deprecated
 public final class InstallSnapshotMessages {
   private InstallSnapshotMessages() {}
   public static void registerAllExtensions(
@@ -114,6 +115,7 @@ public final class InstallSnapshotMessages {
       return defaultInstance;
     }
 
+    @Override
     public InstallSnapshot getDefaultInstanceForType() {
       return defaultInstance;
     }
@@ -204,6 +206,7 @@ public final class InstallSnapshotMessages {
       return org.opendaylight.controller.protobuff.messages.cluster.raft.InstallSnapshotMessages.internal_static_org_opendaylight_controller_cluster_raft_InstallSnapshot_descriptor;
     }
 
+    @Override
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
       return org.opendaylight.controller.protobuff.messages.cluster.raft.InstallSnapshotMessages.internal_static_org_opendaylight_controller_cluster_raft_InstallSnapshot_fieldAccessorTable
@@ -213,7 +216,8 @@ public final class InstallSnapshotMessages {
 
     public static com.google.protobuf.Parser<InstallSnapshot> PARSER =
         new com.google.protobuf.AbstractParser<InstallSnapshot>() {
-      public InstallSnapshot parsePartialFrom(
+      @Override
+    public InstallSnapshot parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
@@ -233,12 +237,14 @@ public final class InstallSnapshotMessages {
     /**
      * <code>optional int64 term = 1;</code>
      */
+    @Override
     public boolean hasTerm() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
     /**
      * <code>optional int64 term = 1;</code>
      */
+    @Override
     public long getTerm() {
       return term_;
     }
@@ -249,12 +255,14 @@ public final class InstallSnapshotMessages {
     /**
      * <code>optional string leaderId = 2;</code>
      */
+    @Override
     public boolean hasLeaderId() {
       return ((bitField0_ & 0x00000002) == 0x00000002);
     }
     /**
      * <code>optional string leaderId = 2;</code>
      */
+    @Override
     public java.lang.String getLeaderId() {
       java.lang.Object ref = leaderId_;
       if (ref instanceof java.lang.String) {
@@ -272,6 +280,7 @@ public final class InstallSnapshotMessages {
     /**
      * <code>optional string leaderId = 2;</code>
      */
+    @Override
     public com.google.protobuf.ByteString
         getLeaderIdBytes() {
       java.lang.Object ref = leaderId_;
@@ -292,12 +301,14 @@ public final class InstallSnapshotMessages {
     /**
      * <code>optional int64 lastIncludedIndex = 3;</code>
      */
+    @Override
     public boolean hasLastIncludedIndex() {
       return ((bitField0_ & 0x00000004) == 0x00000004);
     }
     /**
      * <code>optional int64 lastIncludedIndex = 3;</code>
      */
+    @Override
     public long getLastIncludedIndex() {
       return lastIncludedIndex_;
     }
@@ -308,12 +319,14 @@ public final class InstallSnapshotMessages {
     /**
      * <code>optional int64 lastIncludedTerm = 4;</code>
      */
+    @Override
     public boolean hasLastIncludedTerm() {
       return ((bitField0_ & 0x00000008) == 0x00000008);
     }
     /**
      * <code>optional int64 lastIncludedTerm = 4;</code>
      */
+    @Override
     public long getLastIncludedTerm() {
       return lastIncludedTerm_;
     }
@@ -324,12 +337,14 @@ public final class InstallSnapshotMessages {
     /**
      * <code>optional bytes data = 5;</code>
      */
+    @Override
     public boolean hasData() {
       return ((bitField0_ & 0x00000010) == 0x00000010);
     }
     /**
      * <code>optional bytes data = 5;</code>
      */
+    @Override
     public com.google.protobuf.ByteString getData() {
       return data_;
     }
@@ -340,12 +355,14 @@ public final class InstallSnapshotMessages {
     /**
      * <code>optional int32 chunkIndex = 6;</code>
      */
+    @Override
     public boolean hasChunkIndex() {
       return ((bitField0_ & 0x00000020) == 0x00000020);
     }
     /**
      * <code>optional int32 chunkIndex = 6;</code>
      */
+    @Override
     public int getChunkIndex() {
       return chunkIndex_;
     }
@@ -356,12 +373,14 @@ public final class InstallSnapshotMessages {
     /**
      * <code>optional int32 totalChunks = 7;</code>
      */
+    @Override
     public boolean hasTotalChunks() {
       return ((bitField0_ & 0x00000040) == 0x00000040);
     }
     /**
      * <code>optional int32 totalChunks = 7;</code>
      */
+    @Override
     public int getTotalChunks() {
       return totalChunks_;
     }
@@ -372,12 +391,14 @@ public final class InstallSnapshotMessages {
     /**
      * <code>optional int32 lastChunkHashCode = 8;</code>
      */
+    @Override
     public boolean hasLastChunkHashCode() {
       return ((bitField0_ & 0x00000080) == 0x00000080);
     }
     /**
      * <code>optional int32 lastChunkHashCode = 8;</code>
      */
+    @Override
     public int getLastChunkHashCode() {
       return lastChunkHashCode_;
     }
@@ -393,14 +414,18 @@ public final class InstallSnapshotMessages {
       lastChunkHashCode_ = 0;
     }
     private byte memoizedIsInitialized = -1;
+    @Override
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
-      if (isInitialized != -1) return isInitialized == 1;
+      if (isInitialized != -1) {
+        return isInitialized == 1;
+    }
 
       memoizedIsInitialized = 1;
       return true;
     }
 
+    @Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
@@ -432,9 +457,12 @@ public final class InstallSnapshotMessages {
     }
 
     private int memoizedSerializedSize = -1;
+    @Override
     public int getSerializedSize() {
       int size = memoizedSerializedSize;
-      if (size != -1) return size;
+      if (size != -1) {
+        return size;
+    }
 
       size = 0;
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
@@ -535,10 +563,12 @@ public final class InstallSnapshotMessages {
     }
 
     public static Builder newBuilder() { return Builder.create(); }
+    @Override
     public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder(org.opendaylight.controller.protobuff.messages.cluster.raft.InstallSnapshotMessages.InstallSnapshot prototype) {
       return newBuilder().mergeFrom(prototype);
     }
+    @Override
     public Builder toBuilder() { return newBuilder(this); }
 
     @java.lang.Override
@@ -558,7 +588,8 @@ public final class InstallSnapshotMessages {
         return org.opendaylight.controller.protobuff.messages.cluster.raft.InstallSnapshotMessages.internal_static_org_opendaylight_controller_cluster_raft_InstallSnapshot_descriptor;
       }
 
-      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      @Override
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
         return org.opendaylight.controller.protobuff.messages.cluster.raft.InstallSnapshotMessages.internal_static_org_opendaylight_controller_cluster_raft_InstallSnapshot_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
@@ -583,7 +614,8 @@ public final class InstallSnapshotMessages {
         return new Builder();
       }
 
-      public Builder clear() {
+      @Override
+    public Builder clear() {
         super.clear();
         term_ = 0L;
         bitField0_ = (bitField0_ & ~0x00000001);
@@ -604,20 +636,24 @@ public final class InstallSnapshotMessages {
         return this;
       }
 
-      public Builder clone() {
+      @Override
+    public Builder clone() {
         return create().mergeFrom(buildPartial());
       }
 
-      public com.google.protobuf.Descriptors.Descriptor
+      @Override
+    public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
         return org.opendaylight.controller.protobuff.messages.cluster.raft.InstallSnapshotMessages.internal_static_org_opendaylight_controller_cluster_raft_InstallSnapshot_descriptor;
       }
 
-      public org.opendaylight.controller.protobuff.messages.cluster.raft.InstallSnapshotMessages.InstallSnapshot getDefaultInstanceForType() {
+      @Override
+    public org.opendaylight.controller.protobuff.messages.cluster.raft.InstallSnapshotMessages.InstallSnapshot getDefaultInstanceForType() {
         return org.opendaylight.controller.protobuff.messages.cluster.raft.InstallSnapshotMessages.InstallSnapshot.getDefaultInstance();
       }
 
-      public org.opendaylight.controller.protobuff.messages.cluster.raft.InstallSnapshotMessages.InstallSnapshot build() {
+      @Override
+    public org.opendaylight.controller.protobuff.messages.cluster.raft.InstallSnapshotMessages.InstallSnapshot build() {
         org.opendaylight.controller.protobuff.messages.cluster.raft.InstallSnapshotMessages.InstallSnapshot result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
@@ -625,7 +661,8 @@ public final class InstallSnapshotMessages {
         return result;
       }
 
-      public org.opendaylight.controller.protobuff.messages.cluster.raft.InstallSnapshotMessages.InstallSnapshot buildPartial() {
+      @Override
+    public org.opendaylight.controller.protobuff.messages.cluster.raft.InstallSnapshotMessages.InstallSnapshot buildPartial() {
         org.opendaylight.controller.protobuff.messages.cluster.raft.InstallSnapshotMessages.InstallSnapshot result = new org.opendaylight.controller.protobuff.messages.cluster.raft.InstallSnapshotMessages.InstallSnapshot(this);
         int from_bitField0_ = bitField0_;
         int to_bitField0_ = 0;
@@ -666,7 +703,8 @@ public final class InstallSnapshotMessages {
         return result;
       }
 
-      public Builder mergeFrom(com.google.protobuf.Message other) {
+      @Override
+    public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof org.opendaylight.controller.protobuff.messages.cluster.raft.InstallSnapshotMessages.InstallSnapshot) {
           return mergeFrom((org.opendaylight.controller.protobuff.messages.cluster.raft.InstallSnapshotMessages.InstallSnapshot)other);
         } else {
@@ -676,7 +714,9 @@ public final class InstallSnapshotMessages {
       }
 
       public Builder mergeFrom(org.opendaylight.controller.protobuff.messages.cluster.raft.InstallSnapshotMessages.InstallSnapshot other) {
-        if (other == org.opendaylight.controller.protobuff.messages.cluster.raft.InstallSnapshotMessages.InstallSnapshot.getDefaultInstance()) return this;
+        if (other == org.opendaylight.controller.protobuff.messages.cluster.raft.InstallSnapshotMessages.InstallSnapshot.getDefaultInstance()) {
+            return this;
+        }
         if (other.hasTerm()) {
           setTerm(other.getTerm());
         }
@@ -707,11 +747,13 @@ public final class InstallSnapshotMessages {
         return this;
       }
 
-      public final boolean isInitialized() {
+      @Override
+    public final boolean isInitialized() {
         return true;
       }
 
-      public Builder mergeFrom(
+      @Override
+    public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
@@ -735,13 +777,15 @@ public final class InstallSnapshotMessages {
       /**
        * <code>optional int64 term = 1;</code>
        */
-      public boolean hasTerm() {
+      @Override
+    public boolean hasTerm() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
       /**
        * <code>optional int64 term = 1;</code>
        */
-      public long getTerm() {
+      @Override
+    public long getTerm() {
         return term_;
       }
       /**
@@ -768,13 +812,15 @@ public final class InstallSnapshotMessages {
       /**
        * <code>optional string leaderId = 2;</code>
        */
-      public boolean hasLeaderId() {
+      @Override
+    public boolean hasLeaderId() {
         return ((bitField0_ & 0x00000002) == 0x00000002);
       }
       /**
        * <code>optional string leaderId = 2;</code>
        */
-      public java.lang.String getLeaderId() {
+      @Override
+    public java.lang.String getLeaderId() {
         java.lang.Object ref = leaderId_;
         if (!(ref instanceof java.lang.String)) {
           java.lang.String s = ((com.google.protobuf.ByteString) ref)
@@ -788,7 +834,8 @@ public final class InstallSnapshotMessages {
       /**
        * <code>optional string leaderId = 2;</code>
        */
-      public com.google.protobuf.ByteString
+      @Override
+    public com.google.protobuf.ByteString
           getLeaderIdBytes() {
         java.lang.Object ref = leaderId_;
         if (ref instanceof String) {
@@ -842,13 +889,15 @@ public final class InstallSnapshotMessages {
       /**
        * <code>optional int64 lastIncludedIndex = 3;</code>
        */
-      public boolean hasLastIncludedIndex() {
+      @Override
+    public boolean hasLastIncludedIndex() {
         return ((bitField0_ & 0x00000004) == 0x00000004);
       }
       /**
        * <code>optional int64 lastIncludedIndex = 3;</code>
        */
-      public long getLastIncludedIndex() {
+      @Override
+    public long getLastIncludedIndex() {
         return lastIncludedIndex_;
       }
       /**
@@ -875,13 +924,15 @@ public final class InstallSnapshotMessages {
       /**
        * <code>optional int64 lastIncludedTerm = 4;</code>
        */
-      public boolean hasLastIncludedTerm() {
+      @Override
+    public boolean hasLastIncludedTerm() {
         return ((bitField0_ & 0x00000008) == 0x00000008);
       }
       /**
        * <code>optional int64 lastIncludedTerm = 4;</code>
        */
-      public long getLastIncludedTerm() {
+      @Override
+    public long getLastIncludedTerm() {
         return lastIncludedTerm_;
       }
       /**
@@ -908,13 +959,15 @@ public final class InstallSnapshotMessages {
       /**
        * <code>optional bytes data = 5;</code>
        */
-      public boolean hasData() {
+      @Override
+    public boolean hasData() {
         return ((bitField0_ & 0x00000010) == 0x00000010);
       }
       /**
        * <code>optional bytes data = 5;</code>
        */
-      public com.google.protobuf.ByteString getData() {
+      @Override
+    public com.google.protobuf.ByteString getData() {
         return data_;
       }
       /**
@@ -944,13 +997,15 @@ public final class InstallSnapshotMessages {
       /**
        * <code>optional int32 chunkIndex = 6;</code>
        */
-      public boolean hasChunkIndex() {
+      @Override
+    public boolean hasChunkIndex() {
         return ((bitField0_ & 0x00000020) == 0x00000020);
       }
       /**
        * <code>optional int32 chunkIndex = 6;</code>
        */
-      public int getChunkIndex() {
+      @Override
+    public int getChunkIndex() {
         return chunkIndex_;
       }
       /**
@@ -977,13 +1032,15 @@ public final class InstallSnapshotMessages {
       /**
        * <code>optional int32 totalChunks = 7;</code>
        */
-      public boolean hasTotalChunks() {
+      @Override
+    public boolean hasTotalChunks() {
         return ((bitField0_ & 0x00000040) == 0x00000040);
       }
       /**
        * <code>optional int32 totalChunks = 7;</code>
        */
-      public int getTotalChunks() {
+      @Override
+    public int getTotalChunks() {
         return totalChunks_;
       }
       /**
@@ -1010,13 +1067,15 @@ public final class InstallSnapshotMessages {
       /**
        * <code>optional int32 lastChunkHashCode = 8;</code>
        */
-      public boolean hasLastChunkHashCode() {
+      @Override
+    public boolean hasLastChunkHashCode() {
         return ((bitField0_ & 0x00000080) == 0x00000080);
       }
       /**
        * <code>optional int32 lastChunkHashCode = 8;</code>
        */
-      public int getLastChunkHashCode() {
+      @Override
+    public int getLastChunkHashCode() {
         return lastChunkHashCode_;
       }
       /**
@@ -1075,6 +1134,7 @@ public final class InstallSnapshotMessages {
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
+        @Override
         public com.google.protobuf.ExtensionRegistry assignDescriptors(
             com.google.protobuf.Descriptors.FileDescriptor root) {
           descriptor = root;

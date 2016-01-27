@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.raft.behaviors;
 
 import com.google.common.base.Optional;
 import com.google.protobuf.ByteString;
+import java.util.Arrays;
 import org.slf4j.Logger;
 
 /**
@@ -36,7 +37,10 @@ public class SnapshotTracker {
      * @return true when the lastChunk is received
      * @throws InvalidChunkException
      */
-    boolean addChunk(int chunkIndex, ByteString chunk, Optional<Integer> lastChunkHashCode) throws InvalidChunkException{
+    boolean addChunk(int chunkIndex, byte[] chunk, Optional<Integer> lastChunkHashCode) throws InvalidChunkException{
+        LOG.debug("addChunk: chunkIndex={}, lastChunkIndex={}, collectedChunks.size={}, lastChunkHashCode={}",
+                chunkIndex, lastChunkIndex, collectedChunks.size(), this.lastChunkHashCode);
+
         if(sealed){
             throw new InvalidChunkException("Invalid chunk received with chunkIndex " + chunkIndex + " all chunks already received");
         }
@@ -48,19 +52,14 @@ public class SnapshotTracker {
         if(lastChunkHashCode.isPresent()){
             if(lastChunkHashCode.get() != this.lastChunkHashCode){
                 throw new InvalidChunkException("The hash code of the recorded last chunk does not match " +
-                        "the senders hash code expected " + lastChunkHashCode + " was " + lastChunkHashCode.get());
+                        "the senders hash code, expected " + this.lastChunkHashCode + " was " + lastChunkHashCode.get());
             }
-        }
-
-        if(LOG.isDebugEnabled()) {
-            LOG.debug("Chunk={},collectedChunks.size:{}",
-                    chunkIndex, collectedChunks.size());
         }
 
         sealed = (chunkIndex == totalChunks);
         lastChunkIndex = chunkIndex;
-        collectedChunks = collectedChunks.concat(chunk);
-        this.lastChunkHashCode = chunk.hashCode();
+        collectedChunks = collectedChunks.concat(ByteString.copyFrom(chunk));
+        this.lastChunkHashCode = Arrays.hashCode(chunk);
         return sealed;
     }
 

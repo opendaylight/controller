@@ -763,7 +763,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
         InstallSnapshot lastInstallSnapshot = null;
 
         for(int i = 0; i < totalChunks; i++) {
-            ByteString chunkData = getNextChunk(bsSnapshot, offset, chunkSize);
+            byte[] chunkData = getNextChunk(bsSnapshot, offset, chunkSize);
             lastInstallSnapshot = new InstallSnapshot(1, "leader", lastIncludedIndex, 1,
                     chunkData, chunkIndex, totalChunks);
             follower.handleMessage(leaderActor, lastInstallSnapshot);
@@ -830,7 +830,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
         assertTrue(totalChunks > 1);
 
         // Send an install snapshot with the first chunk to start the process of installing a snapshot
-        ByteString chunkData = getNextChunk(bsSnapshot, 0, chunkSize);
+        byte[] chunkData = getNextChunk(bsSnapshot, 0, chunkSize);
         follower.handleMessage(leaderActor, new InstallSnapshot(1, "leader", lastIncludedIndex, 1,
                 chunkData, 1, totalChunks));
 
@@ -871,7 +871,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
         InstallSnapshot lastInstallSnapshot = null;
 
         for(int i = 0; i < totalChunks; i++) {
-            ByteString chunkData = getNextChunk(bsSnapshot, offset, chunkSize);
+            byte[] chunkData = getNextChunk(bsSnapshot, offset, chunkSize);
             lastInstallSnapshot = new InstallSnapshot(1, "leader", lastIncludedIndex, 1,
                     chunkData, chunkIndex, totalChunks);
             follower.handleMessage(leaderActor, lastInstallSnapshot);
@@ -983,7 +983,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
         assertEquals("schedule election", 0, getElectionTimeoutCount(follower));
     }
 
-    public ByteString getNextChunk (ByteString bs, int offset, int chunkSize){
+    public byte[] getNextChunk (ByteString bs, int offset, int chunkSize){
         int snapshotLength = bs.size();
         int start = offset;
         int size = chunkSize;
@@ -994,7 +994,10 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
                 size = snapshotLength - start;
             }
         }
-        return bs.substring(start, start + size);
+
+        byte[] nextChunk = new byte[size];
+        bs.copyTo(nextChunk, start, 0, size);
+        return nextChunk;
     }
 
     private void expectAndVerifyAppendEntriesReply(int expTerm, boolean expSuccess,
