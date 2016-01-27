@@ -63,6 +63,12 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <classifier>features</classifier>
       <scope>runtime</scope>
     </dependency>
+    <!-- karaf region dependency -->
+    <dependency>
+      <groupId>org.apache.karaf.region</groupId>
+      <artifactId>org.apache.karaf.region.persist</artifactId>
+      <version>${karaf.version}</version>
+    </dependency>
     <!-- ODL Branding -->
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
