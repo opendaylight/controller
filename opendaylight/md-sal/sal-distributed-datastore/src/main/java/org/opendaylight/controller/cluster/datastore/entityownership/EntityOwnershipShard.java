@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.cluster.datastore.entityownership;
 
-import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.CANDIDATE_NAME_NODE_ID;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.CANDIDATE_NODE_ID;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.ENTITY_ID_NODE_ID;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.ENTITY_ID_QNAME;
@@ -23,10 +22,6 @@ import static org.opendaylight.controller.cluster.datastore.entityownership.Enti
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.candidatePath;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.createEntity;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.entityOwnersWithCandidate;
-import akka.actor.ActorRef;
-import akka.actor.ActorSelection;
-import akka.actor.Cancellable;
-import akka.pattern.Patterns;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
@@ -64,6 +59,10 @@ import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
+import akka.actor.ActorRef;
+import akka.actor.ActorSelection;
+import akka.actor.Cancellable;
+import akka.pattern.Patterns;
 import scala.concurrent.Future;
 import scala.concurrent.duration.FiniteDuration;
 
@@ -269,7 +268,7 @@ class EntityOwnershipShard extends Shard {
             LOG.debug("{}: oldLeaderMemberName: {}", persistenceId(), oldLeaderMemberName);
 
             if(downPeerMemberNames.contains(oldLeaderMemberName)) {
-                selectNewOwnerForEntitiesOwnedBy(oldLeaderMemberName);
+                removeCandidateFromEntities(oldLeaderMemberName);
             }
         } else {
             // The leader changed - notify the coordinator to check if pending modifications need to be sent.
@@ -359,32 +358,6 @@ class EntityOwnershipShard extends Shard {
         commitCoordinator.onStateChanged(this, isLeader());
     }
 
-    private void selectNewOwnerForEntitiesOwnedBy(String owner) {
-        final BatchedModifications modifications = commitCoordinator.newBatchedModifications();
-        searchForEntitiesOwnedBy(owner, new EntityWalker() {
-            @Override
-            public void onEntity(MapEntryNode entityTypeNode, MapEntryNode entityNode) {
-
-                YangInstanceIdentifier entityPath = YangInstanceIdentifier.builder(ENTITY_TYPES_PATH).
-                        node(entityTypeNode.getIdentifier()).node(ENTITY_NODE_ID).node(entityNode.getIdentifier()).
-                        node(ENTITY_OWNER_NODE_ID).build();
-
-                String entityType = EntityOwnersModel.entityTypeFromEntityPath(entityPath);
-
-                Object newOwner = newOwner(getCandidateNames(entityNode),
-                        entityOwnershipStatistics.byEntityType(entityType),
-                        getEntityOwnerElectionStrategy(entityPath));
-
-                LOG.debug("{}: Found entity {}, writing new owner {}", persistenceId(), entityPath, newOwner);
-
-                modifications.addModification(new WriteModification(entityPath,
-                        ImmutableNodes.leafNode(ENTITY_OWNER_NODE_ID, newOwner)));
-            }
-        });
-
-        commitCoordinator.commitModifications(modifications, this);
-    }
-
     private void removeCandidateFromEntities(final String owner) {
         final BatchedModifications modifications = commitCoordinator.newBatchedModifications();
         searchForEntities(new EntityWalker() {
@@ -449,16 +422,6 @@ class EntityOwnershipShard extends Shard {
                 walker.onEntity(entityType, entity);
             }
         }
-    }
-
-    private static Collection<String> getCandidateNames(MapEntryNode entity) {
-        Collection<MapEntryNode> candidates = ((MapNode) entity.getChild(CANDIDATE_NODE_ID).get()).getValue();
-        Collection<String> candidateNames = new ArrayList<>(candidates.size());
-        for(MapEntryNode candidate: candidates) {
-            candidateNames.add(candidate.getChild(CANDIDATE_NAME_NODE_ID).get().getValue().toString());
-        }
-
-        return candidateNames;
     }
 
     private void writeNewOwner(YangInstanceIdentifier entityPath, String newOwner) {
