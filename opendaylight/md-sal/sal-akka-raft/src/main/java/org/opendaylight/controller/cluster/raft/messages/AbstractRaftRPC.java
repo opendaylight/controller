@@ -27,7 +27,7 @@ public class AbstractRaftRPC implements RaftRPC {
         return term;
     }
 
-    public void setTerm(long term) {
+    protected void setTerm(long term) {
         this.term = term;
     }
 }
