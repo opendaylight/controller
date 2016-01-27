@@ -10,7 +10,7 @@ package org.opendaylight.controller.cluster.datastore.entityownership.selections
 
 import com.google.common.base.Preconditions;
 import java.util.Collection;
-import java.util.Map;
+import java.util.Collections;
 
 /**
  * The FirstCandidateSelectionStrategy always selects the first viable candidate from the list of candidates
@@ -20,11 +20,11 @@ public class FirstCandidateSelectionStrategy extends AbstractEntityOwnerSelectio
     public static final FirstCandidateSelectionStrategy INSTANCE = new FirstCandidateSelectionStrategy(0L);
 
     public FirstCandidateSelectionStrategy(long selectionDelayInMillis) {
-        super(selectionDelayInMillis);
+        super(selectionDelayInMillis, Collections.<String, Long>emptyMap());
     }
 
     @Override
-    public String newOwner(Collection<String> viableCandidates, Map<String, Long> statistics) {
+    public String newOwner(String currentOwner, Collection<String> viableCandidates) {
         Preconditions.checkArgument(viableCandidates.size() > 0, "No viable candidates provided");
         return viableCandidates.iterator().next();
     }

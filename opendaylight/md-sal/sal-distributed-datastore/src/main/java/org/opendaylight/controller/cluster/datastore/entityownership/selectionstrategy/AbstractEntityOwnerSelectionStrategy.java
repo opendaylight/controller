@@ -8,11 +8,13 @@
 
 package org.opendaylight.controller.cluster.datastore.entityownership.selectionstrategy;
 
+import java.util.Map;
+
 public abstract class AbstractEntityOwnerSelectionStrategy implements EntityOwnerSelectionStrategy {
 
     private final long selectionDelayInMillis;
 
-    protected AbstractEntityOwnerSelectionStrategy(long selectionDelayInMillis) {
+    protected AbstractEntityOwnerSelectionStrategy(long selectionDelayInMillis, Map<String, Long> initialStatistics) {
         this.selectionDelayInMillis = selectionDelayInMillis;
     }
 
