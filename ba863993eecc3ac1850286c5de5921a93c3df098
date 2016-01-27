@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a3d3df0_202c2d47",
+        "filename": "karaf/karaf-parent/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-01-27T12:52:22Z",
+      "side": 1,
+      "message": "Wouldn\u0027t a runtime-scoped dependency be sufficient?",
+      "revId": "ba863993eecc3ac1850286c5de5921a93c3df098",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
