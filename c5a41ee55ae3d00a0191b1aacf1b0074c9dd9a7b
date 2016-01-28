@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a3d3df0_a03f98d5",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/EntityOwnershipShard.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 334,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-01-28T18:57:53Z",
+      "side": 1,
+      "message": "We can\u0027t assume that the local node has a candidate.",
+      "revId": "c5a41ee55ae3d00a0191b1aacf1b0074c9dd9a7b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_000da43e",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/selectionstrategy/LeastLoadedCandidateSelectionStrategy.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-01-28T18:57:53Z",
+      "side": 1,
+      "message": "What is the purpose of these changes? Can you add comments?",
+      "revId": "c5a41ee55ae3d00a0191b1aacf1b0074c9dd9a7b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
