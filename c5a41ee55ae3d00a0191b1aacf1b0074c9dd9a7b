@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_ecbfd7fa",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/EntityOwnershipShard.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 334,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2016-01-29T16:51:14Z",
+      "side": 1,
+      "message": "Ok - maybe a little explanation. To do a fair distribution of ownership we need to delay a little bit before candidate registrations come in. Now if I set the delay to 5 seconds I\u0027d be waiting 5 seconds before I can hand out ownership. To speeden it up I\u0027m making an assumption here that if I have received that max possible candidate registrations then I can hand out the ownership immediately. Now if only 2 nodes out of the 3 nodes were registering candidates we would fall back to the assign ownership after delay logic.",
+      "parentUuid": "9a3d3df0_a03f98d5",
+      "revId": "c5a41ee55ae3d00a0191b1aacf1b0074c9dd9a7b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_000da43e",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/selectionstrategy/LeastLoadedCandidateSelectionStrategy.java",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2016-01-28T18:57:53Z",
       "side": 1,
       "message": "What is the purpose of these changes? Can you add comments?",
+      "revId": "c5a41ee55ae3d00a0191b1aacf1b0074c9dd9a7b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_4cbfe3fb",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/selectionstrategy/LeastLoadedCandidateSelectionStrategy.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2016-01-29T16:51:14Z",
+      "side": 1,
+      "message": "So the problem was that even when we use LLCS most of the time we saw that the first registered candidate was getting ownership which was due to our previous logic where we assign ownership based on statistics collected using a DCL. This was because we were seeing a burst of registrations - for example all openflow switches connected to the controller at about the same time. \n\nEssentially we were assigning ownership based on stale statistics and we therefore got it wrong. In this patch I introduced local statistics for the strategy which the strategy updates when a newOwner request is made. \n\nAdditionally I added logic to look up the passed in statistics and go with the higher value of the local and passed in statistics. \n\nIn a subsequent patch I have simplified all this to simply rely on localStatistics only with global statistics being passed in to the strategy when it is constructed.",
+      "parentUuid": "9a3d3df0_000da43e",
       "revId": "c5a41ee55ae3d00a0191b1aacf1b0074c9dd9a7b",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
