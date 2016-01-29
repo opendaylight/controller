@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_a6a3304e",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohortProxy.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 256,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-01-29T11:34:41Z",
+      "side": 1,
+      "message": "yeah - that would look better",
+      "parentUuid": "9a3d3df0_8bea750d",
+      "range": {
+        "startLine": 256,
+        "startChar": 27,
+        "endLine": 256,
+        "endChar": 28
+      },
+      "revId": "821de257a21dbecec8bc94a0627409701413bc32",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_42885e1f",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohortProxy.java",
         "patchSetId": 2
@@ -53,6 +77,24 @@
       "writtenOn": "2016-01-28T22:05:34Z",
       "side": 1,
       "message": "Seems like we should be able to retrieve the resolved actor directly from actorFuture, instead of manually storing it ourselves separately in resolvedActor.  But maybe this way is a performance optimization?",
+      "revId": "821de257a21dbecec8bc94a0627409701413bc32",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_86bd4c6b",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ThreePhaseCommitCohortProxy.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 380,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-01-29T11:34:41Z",
+      "side": 1,
+      "message": "It\u0027s actually obtained via OnComplete. I think it makes sense to explicitly set it since akka has already resolved it, otherwise I\u0027d have to catch unnecessary Exception if get is called.",
+      "parentUuid": "9a3d3df0_8bd1d559",
       "revId": "821de257a21dbecec8bc94a0627409701413bc32",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
