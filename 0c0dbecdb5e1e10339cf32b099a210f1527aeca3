@@ -22,6 +22,30 @@
       "revId": "0c0dbecdb5e1e10339cf32b099a210f1527aeca3",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_633595d9",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/CanCommitTransactionReply.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-01-30T06:43:32Z",
+      "side": 1,
+      "message": "Yeah I know - good observation - hard to sneak anything past you :) It actually doesn\u0027t matter what version is set after de-serialization at this point - the version  is only important to serialize.",
+      "parentUuid": "9a3d3df0_802feff5",
+      "range": {
+        "startLine": 83,
+        "startChar": 47,
+        "endLine": 83,
+        "endChar": 55
+      },
+      "revId": "0c0dbecdb5e1e10339cf32b099a210f1527aeca3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
