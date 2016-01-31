@@ -4,6 +4,7 @@
    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
    xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.2.0 http://karaf.apache.org/xmlns/features/v1.2.0">
 
+    <repository>mvn:org.opendaylight.odlparent/features-odlparent/{{VERSION}}/xml/features</repository>
     <repository>mvn:org.opendaylight.yangtools/features-yangtools/{{VERSION}}/xml/features</repository>
 
     <repository>mvn:org.opendaylight.mdsal/features-mdsal/{{VERSION}}/xml/features</repository>
@@ -35,9 +36,9 @@
         <feature version='${project.version}'>odl-mdsal-common</feature>
         <feature version='${config.version}'>odl-config-startup</feature>
         <feature version='${config.version}'>odl-config-netty</feature>
+        <feature version='[3.3.0,4.0.0)'>odl-lmax</feature>
         <!-- FIXME: Bug 4202: Add MD-SAL provided odl-mdsal-binding-adapter -->
         <!-- FIXME: Bug 4202: Add MD-SAL provided odl-mdsal-dom-broker -->
-        <bundle>mvn:com.lmax/disruptor/{{VERSION}}</bundle>
         <bundle>mvn:org.opendaylight.controller/sal-core-api/{{VERSION}}</bundle>
         <bundle>mvn:org.opendaylight.controller/sal-core-spi/{{VERSION}}</bundle>
         <bundle>mvn:org.opendaylight.controller/sal-broker-impl/{{VERSION}}</bundle>
