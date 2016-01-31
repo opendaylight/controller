@@ -223,12 +223,6 @@
         <version>${codahale.metrics.version}</version>
       </dependency>
 
-      <dependency>
-        <groupId>com.lmax</groupId>
-        <artifactId>disruptor</artifactId>
-        <version>3.3.0</version>
-      </dependency>
-
       <!-- 3rd party dependencies needed by config-->
       <dependency>
         <groupId>org.apache.maven</groupId>
