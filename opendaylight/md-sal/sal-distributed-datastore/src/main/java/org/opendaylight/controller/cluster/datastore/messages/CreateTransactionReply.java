@@ -11,7 +11,6 @@ package org.opendaylight.controller.cluster.datastore.messages;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
-import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages;
 
 public class CreateTransactionReply extends VersionedExternalizableMessage {
@@ -52,13 +51,9 @@ public class CreateTransactionReply extends VersionedExternalizableMessage {
     }
 
     @Override
-    public Object toSerializable() {
-        if(getVersion() >= DataStoreVersions.BORON_VERSION) {
-            return this;
-        } else {
+    protected Object newLegacySerializedInstance() {
             return ShardTransactionMessages.CreateTransactionReply.newBuilder().setTransactionActorPath(transactionPath)
                     .setTransactionId(transactionId).setMessageVersion(getVersion()).build();
-        }
     }
 
     @Override

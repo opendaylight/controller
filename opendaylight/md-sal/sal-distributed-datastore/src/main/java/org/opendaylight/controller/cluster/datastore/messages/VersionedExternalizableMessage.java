@@ -43,4 +43,16 @@ public abstract class VersionedExternalizableMessage implements Externalizable, 
     public void writeExternal(ObjectOutput out) throws IOException {
         out.writeShort(version);
     }
+
+    protected abstract Object newLegacySerializedInstance();
+
+    @Override
+    public final Object toSerializable() {
+        return getVersion() >= DataStoreVersions.BORON_VERSION ? this : newLegacySerializedInstance();
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + " [version=" + getVersion() + "]";
+    }
 }

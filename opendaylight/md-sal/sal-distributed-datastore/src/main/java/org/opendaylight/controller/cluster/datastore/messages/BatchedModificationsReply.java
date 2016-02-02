@@ -45,7 +45,8 @@ public class BatchedModificationsReply extends VersionedExternalizableMessage {
     }
 
     @Override
-    public Object toSerializable() {
+    protected Object newLegacySerializedInstance() {
+        // no legacy serialized type for this class; return self
         return this;
     }
 

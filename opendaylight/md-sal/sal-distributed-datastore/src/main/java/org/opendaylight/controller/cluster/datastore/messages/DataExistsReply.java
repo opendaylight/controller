@@ -49,12 +49,8 @@ public class DataExistsReply extends VersionedExternalizableMessage {
     }
 
     @Override
-    public Object toSerializable() {
-        if(getVersion() >= DataStoreVersions.BORON_VERSION) {
-            return this;
-        } else {
+    protected Object newLegacySerializedInstance() {
             return exists ? SERIALIZABLE_TRUE : SERIALIZABLE_FALSE;
-        }
     }
 
     public static DataExistsReply fromSerializable(final Object serializable) {

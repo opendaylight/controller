@@ -11,7 +11,7 @@ package org.opendaylight.controller.cluster.datastore.messages;
 import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 import org.opendaylight.controller.protobuff.messages.cohort3pc.ThreePhaseCommitCohortMessages;
 
-public class AbortTransactionReply extends EmptyReply {
+public class AbortTransactionReply extends VersionedExternalizableMessage {
     private static final Object SERIALIZED_INSTANCE =
             ThreePhaseCommitCohortMessages.AbortTransactionReply.newBuilder().build();
 
