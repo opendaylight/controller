@@ -11,7 +11,6 @@ import com.google.common.base.Preconditions;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
-import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 
 /**
  * Base class for a 3PC message.
@@ -31,8 +30,6 @@ public abstract class AbstractThreePhaseCommitMessage extends VersionedExternali
         this.transactionID = Preconditions.checkNotNull(transactionID);
     }
 
-    protected abstract Object newLegacySerializedInstance();
-
     public String getTransactionID() {
         return transactionID;
     }
@@ -47,11 +44,6 @@ public abstract class AbstractThreePhaseCommitMessage extends VersionedExternali
     public void writeExternal(ObjectOutput out) throws IOException {
         super.writeExternal(out);
         out.writeUTF(transactionID);
-    }
-
-    @Override
-    public Object toSerializable() {
-        return getVersion() >= DataStoreVersions.BORON_VERSION ? this : newLegacySerializedInstance();
     }
 
     @Override

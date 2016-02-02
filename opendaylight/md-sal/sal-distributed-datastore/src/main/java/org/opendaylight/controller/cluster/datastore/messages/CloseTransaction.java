@@ -8,7 +8,6 @@
 
 package org.opendaylight.controller.cluster.datastore.messages;
 
-import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages;
 
 public class CloseTransaction extends VersionedExternalizableMessage {
@@ -25,8 +24,8 @@ public class CloseTransaction extends VersionedExternalizableMessage {
     }
 
     @Override
-    public Object toSerializable() {
-        return getVersion() >= DataStoreVersions.BORON_VERSION ? this : SERIALIZED_INSTANCE;
+    protected Object newLegacySerializedInstance() {
+        return SERIALIZED_INSTANCE;
     }
 
     public static boolean isSerializedType(Object message) {

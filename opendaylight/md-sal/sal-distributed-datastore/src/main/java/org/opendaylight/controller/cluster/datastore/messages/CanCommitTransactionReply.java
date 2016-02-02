@@ -53,12 +53,8 @@ public class CanCommitTransactionReply extends VersionedExternalizableMessage {
     }
 
     @Override
-    public Object toSerializable() {
-        if(getVersion() >= DataStoreVersions.BORON_VERSION) {
-            return this;
-        } else {
-            return canCommit ? YES_SERIALIZED : NO_SERIALIZED;
-        }
+    protected Object newLegacySerializedInstance() {
+        return canCommit ? YES_SERIALIZED : NO_SERIALIZED;
     }
 
     @Override

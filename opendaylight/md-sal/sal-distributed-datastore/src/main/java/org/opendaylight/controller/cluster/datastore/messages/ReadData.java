@@ -30,13 +30,9 @@ public class ReadData extends AbstractRead<Optional<NormalizedNode<?, ?>>> {
     }
 
     @Override
-    public Object toSerializable() {
-        if(getVersion() >= DataStoreVersions.BORON_VERSION) {
-            return this;
-        } else {
-            return ShardTransactionMessages.ReadData.newBuilder().setInstanceIdentifierPathArguments(
-                    InstanceIdentifierUtils.toSerializable(getPath())).build();
-        }
+    protected Object newLegacySerializedInstance() {
+        return ShardTransactionMessages.ReadData.newBuilder()
+                .setInstanceIdentifierPathArguments(InstanceIdentifierUtils.toSerializable(getPath())).build();
     }
 
     @Override

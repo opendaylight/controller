@@ -28,13 +28,9 @@ public class DataExists extends AbstractRead<Boolean> {
     }
 
     @Override
-    public Object toSerializable() {
-        if(getVersion() >= DataStoreVersions.BORON_VERSION) {
-            return this;
-        } else {
-            return ShardTransactionMessages.DataExists.newBuilder().setInstanceIdentifierPathArguments(
-                        InstanceIdentifierUtils.toSerializable(getPath())).build();
-        }
+    protected Object newLegacySerializedInstance() {
+        return ShardTransactionMessages.DataExists.newBuilder()
+                .setInstanceIdentifierPathArguments(InstanceIdentifierUtils.toSerializable(getPath())).build();
     }
 
     @Override

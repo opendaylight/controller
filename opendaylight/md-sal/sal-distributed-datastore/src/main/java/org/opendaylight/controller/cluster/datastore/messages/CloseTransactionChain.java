@@ -44,13 +44,9 @@ public class CloseTransactionChain extends VersionedExternalizableMessage {
     }
 
     @Override
-    public Object toSerializable() {
-        if(getVersion() >= DataStoreVersions.BORON_VERSION) {
-            return this;
-        } else {
-            return ShardTransactionChainMessages.CloseTransactionChain.newBuilder()
-                .setTransactionChainId(transactionChainId).build();
-        }
+    protected Object newLegacySerializedInstance() {
+        return ShardTransactionChainMessages.CloseTransactionChain.newBuilder().setTransactionChainId(transactionChainId)
+                .build();
     }
 
     public static CloseTransactionChain fromSerializable(final Object serializable){
