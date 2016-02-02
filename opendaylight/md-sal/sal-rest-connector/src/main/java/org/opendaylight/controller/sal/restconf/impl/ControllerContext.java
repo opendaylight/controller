@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -595,7 +596,7 @@ public class ControllerContext implements SchemaContextListener {
             targetNode = findInstanceDataChildByNameAndNamespace(parentNode, nodeName, module.getNamespace());
 
             if (targetNode == null && parentNode instanceof Module) {
-                final RpcDefinition rpc = ControllerContext.getInstance().getRpcDefinition(head);
+                final RpcDefinition rpc = ControllerContext.getInstance().getRpcDefinition(head, module.getRevision());
                 if (rpc != null) {
                     return new InstanceIdentifierContext<RpcDefinition>(builder.build(), rpc, mountPoint,
                             mountPoint != null ? mountPoint.getSchemaContext() : globalSchema);
@@ -770,7 +771,7 @@ public class ControllerContext implements SchemaContextListener {
         String additionalInfo = "";
         if (decoded == null) {
             if ((baseType instanceof IdentityrefTypeDefinition)) {
-                decoded = toQName(urlDecoded);
+                decoded = toQName(urlDecoded, null);
                 additionalInfo = "For key which is of type identityref it should be in format module_name:identity_name.";
             }
         }
@@ -811,11 +812,11 @@ public class ControllerContext implements SchemaContextListener {
         return str.substring(idx + 1);
     }
 
-    private QName toQName(final String name) {
+    private QName toQName(final String name, final Date revisionDate) {
         checkPreconditions();
         final String module = toModuleName(name);
         final String node = toNodeName(name);
-        final Module m = globalSchema.findModuleByName(module, null);
+        final Module m = globalSchema.findModuleByName(module, revisionDate);
         return m == null ? null : QName.create(m.getQNameModule(), node);
     }
 
@@ -823,8 +824,8 @@ public class ControllerContext implements SchemaContextListener {
         return node instanceof ListSchemaNode || node instanceof ContainerSchemaNode;
     }
 
-    public RpcDefinition getRpcDefinition(final String name) {
-        final QName validName = toQName(name);
+    public RpcDefinition getRpcDefinition(final String name, final Date revisionDate) {
+        final QName validName = toQName(name, revisionDate);
         return validName == null ? null : qnameToRpc.get().get(validName);
     }
 
