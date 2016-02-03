@@ -357,6 +357,57 @@
       "revId": "8b2e91a1772526099bc8a97ee038c1e31a3e7b41",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_1899871f",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/DataTreeCohortIntegrationTest.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-02-03T18:12:57Z",
+      "side": 1,
+      "message": "Can you capture and verify the DOMDataTreeCandidate that is passed to the cohort?",
+      "revId": "8b2e91a1772526099bc8a97ee038c1e31a3e7b41",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_387a8bf1",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/DataTreeCohortIntegrationTest.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-02-03T18:12:57Z",
+      "side": 1,
+      "message": "Should reset the mock and verify it isn\u0027t called.",
+      "revId": "8b2e91a1772526099bc8a97ee038c1e31a3e7b41",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_18cb471f",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/DataTreeCohortIntegrationTest.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-02-03T18:12:57Z",
+      "side": 1,
+      "message": "We need more unit tests here, e.g.:\n\n- Return failure from canCommit and verify transaction fails and exception is propagated.\n\n- Test preCommit step, both success and failure.\n\n- Test commit step, both success and failure.",
+      "revId": "8b2e91a1772526099bc8a97ee038c1e31a3e7b41",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
