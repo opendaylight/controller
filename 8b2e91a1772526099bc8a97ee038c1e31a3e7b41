@@ -240,6 +240,23 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_78589332",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeCohortAdapter.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-02-03T15:51:58Z",
+      "side": 1,
+      "message": "Also can we rename this to DataTreeCohortRegistrationAdapter or DataTreeCohortRegistrationProxy to be consistent with the similar existing listener registration classes?",
+      "revId": "8b2e91a1772526099bc8a97ee038c1e31a3e7b41",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_3d4b9d88",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeCohortAdapter.java",
         "patchSetId": 13
