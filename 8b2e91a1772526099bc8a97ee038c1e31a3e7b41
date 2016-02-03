@@ -1,0 +1,327 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a3d3df0_7db7e586",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/CompositeDataTreeCohort.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-02-03T15:46:31Z",
+      "side": 1,
+      "message": "Can you add class javadocs?",
+      "revId": "8b2e91a1772526099bc8a97ee038c1e31a3e7b41",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_1de179d0",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeCohortActor.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-02-03T15:46:31Z",
+      "side": 1,
+      "message": "R is not referenced in this class - is it necessary?",
+      "revId": "8b2e91a1772526099bc8a97ee038c1e31a3e7b41",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_9d9e2953",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeCohortActor.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-02-03T15:46:31Z",
+      "side": 1,
+      "message": "Minor thing but this doesn\u0027t need to be public. Same in the other classes below.\n\nAlso can you move this getter after the constructor?",
+      "revId": "8b2e91a1772526099bc8a97ee038c1e31a3e7b41",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_3d90bd42",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeCohortActor.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 165,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-02-03T15:46:31Z",
+      "side": 1,
+      "message": "What does this FIXME mean? You\u0027re passing the SchemaContext via the message - is this FIXME valid?",
+      "revId": "8b2e91a1772526099bc8a97ee038c1e31a3e7b41",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_fdaad517",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeCohortActorRegistry.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-02-03T15:46:31Z",
+      "side": 1,
+      "message": "Can you add class javadocs?",
+      "revId": "8b2e91a1772526099bc8a97ee038c1e31a3e7b41",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_dd4431b9",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeCohortActorRegistry.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-02-03T15:46:31Z",
+      "side": 1,
+      "message": "I see that removeRegistration internally locks/unlocks and advises not to explicitly lock/unlock. However we\u0027re accessing cohortToNode in an unprotected manner. Should cohortToNode be a ConcurrentMap?",
+      "revId": "8b2e91a1772526099bc8a97ee038c1e31a3e7b41",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_bd020d3c",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeCohortActorRegistry.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 149,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-02-03T15:46:31Z",
+      "side": 1,
+      "message": "should this be an else?",
+      "revId": "8b2e91a1772526099bc8a97ee038c1e31a3e7b41",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_bd896dcc",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeCohortActorRegistry.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-02-03T15:46:31Z",
+      "side": 1,
+      "message": "I\u0027m not clear on the algorithm, specifically wrt exact/inexact children and why there\u0027s 2 recursive lookupAndCreateCanCommits methods. Can you add comments explaining this?",
+      "revId": "8b2e91a1772526099bc8a97ee038c1e31a3e7b41",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_5d1021a8",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeCohortActorRegistry.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 157,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-02-03T15:46:31Z",
+      "side": 1,
+      "message": "create should be capitalised.",
+      "revId": "8b2e91a1772526099bc8a97ee038c1e31a3e7b41",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_7d0d2590",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeCohortActorRegistry.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 158,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-02-03T15:46:31Z",
+      "side": 1,
+      "message": "indentation",
+      "revId": "8b2e91a1772526099bc8a97ee038c1e31a3e7b41",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_9d2109ff",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeCohortActorRegistry.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 198,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-02-03T15:46:31Z",
+      "side": 1,
+      "message": "Does this need to be public?",
+      "revId": "8b2e91a1772526099bc8a97ee038c1e31a3e7b41",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_dde0b198",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeCohortActorRegistry.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 199,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-02-03T15:46:31Z",
+      "side": 1,
+      "message": "Do we need the overhead of copying the path arg list since we know we don\u0027t modify it?",
+      "revId": "8b2e91a1772526099bc8a97ee038c1e31a3e7b41",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_fde5b5a8",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeCohortActorRegistry.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 201,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-02-03T15:46:31Z",
+      "side": 1,
+      "message": "This class is used to build \u0027messages\u0027 and releases it so is it necessary to return an immutable copy, i.e. do we care if the caller modified it? Again, it would save overhead not to copy.",
+      "revId": "8b2e91a1772526099bc8a97ee038c1e31a3e7b41",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_dda55148",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeCohortAdapter.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-02-03T15:46:31Z",
+      "side": 1,
+      "message": "Can you add class javadocs?",
+      "revId": "8b2e91a1772526099bc8a97ee038c1e31a3e7b41",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_3d4b9d88",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeCohortAdapter.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-02-03T15:46:31Z",
+      "side": 1,
+      "message": "It seems this is the Shard actor - should we name it so?",
+      "revId": "8b2e91a1772526099bc8a97ee038c1e31a3e7b41",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_1d1cd976",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeCohortAdapter.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-02-03T15:46:31Z",
+      "side": 1,
+      "message": "This will block the caller - shouldn\u0027t we use findLocalShardAsync here, as we do with listener regs? I assume you\u0027re using sync call to propagate failures to the caller but the public API doesn\u0027t declare exceptions can be thrown on registration  so we shouldn\u0027t propagate unexpected exceptions to the caller.",
+      "revId": "8b2e91a1772526099bc8a97ee038c1e31a3e7b41",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_fd581558",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeCohortAdapter.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-02-03T15:46:31Z",
+      "side": 1,
+      "message": "indentation",
+      "revId": "8b2e91a1772526099bc8a97ee038c1e31a3e7b41",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_1803470e",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeCohortAdapter.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-02-03T15:46:31Z",
+      "side": 1,
+      "message": "As with registration, I don\u0027t think we should propagate unexpected exceptions to the caller. We can use async call here and log error.",
+      "revId": "8b2e91a1772526099bc8a97ee038c1e31a3e7b41",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_38272bb8",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardCommitCoordinator.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 616,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-02-03T15:46:31Z",
+      "side": 1,
+      "message": "Since most transactions likely won\u0027t have associated user cohorts, it would be nice to elide the processing as much as possible. Can we pre-determine if there are any registered cohorts and/or lazily create the CompositeDataTreeCohort if needed with as little overhead as possible?",
+      "revId": "8b2e91a1772526099bc8a97ee038c1e31a3e7b41",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
