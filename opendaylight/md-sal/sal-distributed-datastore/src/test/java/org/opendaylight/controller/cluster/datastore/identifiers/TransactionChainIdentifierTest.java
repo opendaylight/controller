@@ -8,7 +8,9 @@
 
 package org.opendaylight.controller.cluster.datastore.identifiers;
 
+import static org.hamcrest.CoreMatchers.startsWith;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 import org.junit.Test;
 
 public class TransactionChainIdentifierTest {
@@ -27,11 +29,11 @@ public class TransactionChainIdentifierTest {
 
         TransactionIdentifier txId1 = transactionChainIdentifier.newTransactionIdentifier();
 
-        assertEquals("member-1-chn-99-txn-1", txId1.toString());
+        assertThat(txId1.toString(), startsWith("member-1-chn-99-txn-1-"));
 
         TransactionIdentifier txId2 = transactionChainIdentifier.newTransactionIdentifier();
 
-        assertEquals("member-1-chn-99-txn-2", txId2.toString());
+        assertThat(txId2.toString(), startsWith("member-1-chn-99-txn-2-"));
     }
 
 }

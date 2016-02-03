@@ -8,7 +8,8 @@
 
 package org.opendaylight.controller.cluster.datastore.identifiers;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.CoreMatchers.startsWith;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
@@ -25,7 +26,7 @@ public class ChainedTransactionIdentifierTest {
         assertTrue(txnId.contains("100"));
         assertTrue(txnId.contains("99"));
 
-        assertEquals("member-1-chn-99-txn-100", txnId);
+        assertThat(txnId, startsWith("member-1-chn-99-txn-100-"));
     }
 
 }
