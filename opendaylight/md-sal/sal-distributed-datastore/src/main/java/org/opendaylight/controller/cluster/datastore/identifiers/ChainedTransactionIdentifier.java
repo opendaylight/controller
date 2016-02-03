@@ -25,8 +25,9 @@ public class ChainedTransactionIdentifier extends TransactionIdentifier {
         stringRepresentation = Suppliers.memoize(new Supplier<String>() {
             @Override
             public String get() {
-                return new StringBuilder(chainId.toString().length() + TX_SEPARATOR.length() + 10).
-                        append(chainId).append(TX_SEPARATOR).append(getCounter()).toString();
+                return new StringBuilder(chainId.toString().length() + TX_SEPARATOR.length() + 21).
+                        append(chainId).append(TX_SEPARATOR).append(getCounter()).append('-').
+                        append(getTimestamp()).toString();
             }
         });
     }
