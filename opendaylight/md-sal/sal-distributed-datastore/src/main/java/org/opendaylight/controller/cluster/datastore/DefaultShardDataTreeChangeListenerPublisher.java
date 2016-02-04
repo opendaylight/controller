@@ -14,17 +14,30 @@ import org.opendaylight.controller.md.sal.dom.spi.AbstractDOMDataTreeChangeListe
 import org.opendaylight.controller.sal.core.spi.data.AbstractDOMStoreTreeChangePublisher;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidates;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidateNode;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidates;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Default implementation of ShardDataTreeChangeListenerPublisher that directly generates and publishes
+ * notifications for DataTreeChangeListeners.
+ *
+ * @author Thomas Pantelis
+ */
 @NotThreadSafe
-final class ShardDataTreeChangePublisher extends AbstractDOMStoreTreeChangePublisher {
-    private static final Logger LOG = LoggerFactory.getLogger(ShardDataTreeChangePublisher.class);
+final class DefaultShardDataTreeChangeListenerPublisher extends AbstractDOMStoreTreeChangePublisher
+        implements ShardDataTreeChangeListenerPublisher {
+    private static final Logger LOG = LoggerFactory.getLogger(DefaultShardDataTreeChangeListenerPublisher.class);
 
-    void publishChanges(final DataTreeCandidate candidate) {
+    @Override
+    public void publishChanges(final DataTreeCandidate candidate) {
         processCandidateTree(candidate);
+    }
+
+    @Override
+    public ShardDataTreeChangeListenerPublisher newInstance() {
+        return new DefaultShardDataTreeChangeListenerPublisher();
     }
 
     @Override
