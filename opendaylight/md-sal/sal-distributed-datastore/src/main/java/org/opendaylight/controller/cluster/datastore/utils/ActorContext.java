@@ -83,7 +83,7 @@ public class ActorContext {
             return actualFailure;
         }
     };
-    public static final String MAILBOX = "bounded-mailbox";
+    public static final String BOUNDED_MAILBOX = "bounded-mailbox";
     public static final String COMMIT = "commit";
 
     private final ActorSystem actorSystem;

@@ -19,8 +19,6 @@ import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataCh
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeListener;
 import org.opendaylight.controller.md.sal.dom.store.impl.DataChangeListenerRegistration;
-import org.opendaylight.controller.md.sal.dom.store.impl.ResolveDataChangeEventsTask;
-import org.opendaylight.controller.md.sal.dom.store.impl.tree.ListenerTree;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -48,16 +46,27 @@ import org.slf4j.LoggerFactory;
 public class ShardDataTree extends ShardDataTreeTransactionParent {
     private static final Logger LOG = LoggerFactory.getLogger(ShardDataTree.class);
     private static final YangInstanceIdentifier ROOT_PATH = YangInstanceIdentifier.builder().build();
-    private static final ShardDataTreeNotificationManager MANAGER = new ShardDataTreeNotificationManager();
+
     private final Map<String, ShardDataTreeTransactionChain> transactionChains = new HashMap<>();
-    private final ShardDataTreeChangePublisher treeChangePublisher = new ShardDataTreeChangePublisher();
-    private final ListenerTree listenerTree = ListenerTree.create();
+    private final ShardDataTreeChangeListenerPublisher treeChangeListenerPublisher;
+    private final ShardDataChangeListenerPublisher dataChangeListenerPublisher;
     private final TipProducingDataTree dataTree;
+    private final String logContext;
     private SchemaContext schemaContext;
 
-    public ShardDataTree(final SchemaContext schemaContext, final TreeType treeType) {
+    public ShardDataTree(final SchemaContext schemaContext, final TreeType treeType,
+            final ShardDataTreeChangeListenerPublisher treeChangeListenerPublisher,
+            final ShardDataChangeListenerPublisher dataChangeListenerPublisher, final String logContext) {
         dataTree = InMemoryDataTreeFactory.getInstance().create(treeType);
         updateSchemaContext(schemaContext);
+        this.treeChangeListenerPublisher = treeChangeListenerPublisher;
+        this.dataChangeListenerPublisher = dataChangeListenerPublisher;
+        this.logContext = logContext;
+    }
+
+    public ShardDataTree(final SchemaContext schemaContext, final TreeType treeType) {
+        this(schemaContext, treeType, new DefaultShardDataTreeChangeListenerPublisher(),
+                new DefaultShardDataChangeListenerPublisher(), "");
     }
 
     public TipProducingDataTree getDataTree() {
@@ -102,33 +111,27 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     }
 
     public void notifyListeners(final DataTreeCandidate candidate) {
-        LOG.debug("Notifying listeners on candidate {}", candidate);
-
-        // DataTreeChanges first, as they are more light-weight
-        treeChangePublisher.publishChanges(candidate);
-
-        // DataChanges second, as they are heavier
-        ResolveDataChangeEventsTask.create(candidate, listenerTree).resolve(MANAGER);
+        treeChangeListenerPublisher.publishChanges(candidate, logContext);
+        dataChangeListenerPublisher.publishChanges(candidate, logContext);
     }
 
     void notifyOfInitialData(DataChangeListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier,
             NormalizedNode<?, ?>>> listenerReg, Optional<DataTreeCandidate> currentState) {
 
         if(currentState.isPresent()) {
-            ListenerTree localListenerTree = ListenerTree.create();
-            localListenerTree.registerDataChangeListener(listenerReg.getPath(), listenerReg.getInstance(),
+            ShardDataChangeListenerPublisher localPublisher = dataChangeListenerPublisher.newInstance();
+            localPublisher.registerDataChangeListener(listenerReg.getPath(), listenerReg.getInstance(),
                     listenerReg.getScope());
-
-            ResolveDataChangeEventsTask.create(currentState.get(), localListenerTree).resolve(MANAGER);
+            localPublisher.publishChanges(currentState.get(), logContext);
         }
     }
 
     void notifyOfInitialData(final YangInstanceIdentifier path, final DOMDataTreeChangeListener listener,
             final Optional<DataTreeCandidate> currentState) {
         if(currentState.isPresent()) {
-            ShardDataTreeChangePublisher localTreeChangePublisher = new ShardDataTreeChangePublisher();
-            localTreeChangePublisher.registerTreeChangeListener(path, listener);
-            localTreeChangePublisher.publishChanges(currentState.get());
+            ShardDataTreeChangeListenerPublisher localPublisher = treeChangeListenerPublisher.newInstance();
+            localPublisher.registerTreeChangeListener(path, listener);
+            localPublisher.publishChanges(currentState.get(), logContext);
         }
     }
 
@@ -145,7 +148,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         if (chain != null) {
             chain.close();
         } else {
-            LOG.debug("Closing non-existent transaction chain {}", transactionChainId);
+            LOG.debug("{}: Closing non-existent transaction chain {}", logContext, transactionChainId);
         }
     }
 
@@ -154,7 +157,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
                     final AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>> listener,
                     final DataChangeScope scope) {
         final DataChangeListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>> reg =
-                listenerTree.registerDataChangeListener(path, listener, scope);
+                dataChangeListenerPublisher.registerDataChangeListener(path, listener, scope);
 
         return new SimpleEntry<>(reg, readCurrentData());
     }
@@ -167,20 +170,20 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
 
     public Entry<ListenerRegistration<DOMDataTreeChangeListener>, Optional<DataTreeCandidate>> registerTreeChangeListener(
             final YangInstanceIdentifier path, final DOMDataTreeChangeListener listener) {
-        final ListenerRegistration<DOMDataTreeChangeListener> reg = treeChangePublisher.registerTreeChangeListener(
+        final ListenerRegistration<DOMDataTreeChangeListener> reg = treeChangeListenerPublisher.registerTreeChangeListener(
                 path, listener);
 
         return new SimpleEntry<>(reg, readCurrentData());
     }
 
     void applyForeignCandidate(final String identifier, final DataTreeCandidate foreign) throws DataValidationFailedException {
-        LOG.debug("Applying foreign transaction {}", identifier);
+        LOG.debug("{}: Applying foreign transaction {}", logContext, identifier);
 
         final DataTreeModification mod = dataTree.takeSnapshot().newModification();
         DataTreeCandidates.applyToModification(mod, foreign);
         mod.ready();
 
-        LOG.trace("Applying foreign modification {}", mod);
+        LOG.trace("{}: Applying foreign modification {}", logContext, mod);
         dataTree.validate(mod);
         final DataTreeCandidate candidate = dataTree.prepare(mod);
         dataTree.commit(candidate);
