@@ -16,6 +16,24 @@
       "revId": "02f2d6103c0da220e96279ba5fca7c942c97d8d5",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_95727dab",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/identifiers/TransactionIdentifier.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-02-04T11:50:18Z",
+      "side": 1,
+      "message": "Resyncing client/server counters seems to indicate maintaining cross-process counters. I think that would be way overkill. All we need is a globally unique txn ID since the IDs may be passed to other nodes in the cluster. Using only a UUID would do the trick but memberName and counter are useful for debugging so I\u0027d like to keep those.  \n\nSo we either add an additional UUID field or a timestamp to disambiguate reused counter values across restarts of the same node. Since we already have memberName and counter to provide some uniqueness, I\u0027d rather use a timestamp as stringified UUIDs are very long. I don\u0027t think it really matters if the time drifted backwards but I can use System.nanoTime to alleviate that.",
+      "parentUuid": "9a3d3df0_32abc71e",
+      "revId": "02f2d6103c0da220e96279ba5fca7c942c97d8d5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
