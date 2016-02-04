@@ -14,7 +14,6 @@ import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -28,7 +27,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 public class MockDataTreeChangeListener implements DOMDataTreeChangeListener {
 
     private final List<Collection<DataTreeCandidate>> changeList =
-            Collections.synchronizedList(Lists.<Collection<DataTreeCandidate>>newArrayList());
+            Lists.<Collection<DataTreeCandidate>>newArrayList();
 
     private volatile CountDownLatch changeLatch;
     private int expChangeEventCount;
@@ -40,12 +39,16 @@ public class MockDataTreeChangeListener implements DOMDataTreeChangeListener {
     public void reset(int expChangeEventCount) {
         changeLatch = new CountDownLatch(expChangeEventCount);
         this.expChangeEventCount = expChangeEventCount;
-        changeList.clear();
+        synchronized(changeList) {
+            changeList.clear();
+        }
     }
 
     @Override
     public void onDataTreeChanged(@Nonnull final Collection<DataTreeCandidate> changes) {
-        changeList.add(changes);
+        synchronized(changeList) {
+            changeList.add(changes);
+        }
         changeLatch.countDown();
     }
 
@@ -59,9 +62,11 @@ public class MockDataTreeChangeListener implements DOMDataTreeChangeListener {
 
     public void verifyNotifiedData(YangInstanceIdentifier... paths) {
         Set<YangInstanceIdentifier> pathSet = new HashSet<>(Arrays.asList(paths));
-        for(Collection<DataTreeCandidate> list: changeList) {
-            for(DataTreeCandidate c: list) {
-                pathSet.remove(c.getRootPath());
+        synchronized(changeList) {
+            for(Collection<DataTreeCandidate> list: changeList) {
+                for(DataTreeCandidate c: list) {
+                    pathSet.remove(c.getRootPath());
+                }
             }
         }
 
@@ -72,15 +77,19 @@ public class MockDataTreeChangeListener implements DOMDataTreeChangeListener {
 
     public void expectNoMoreChanges(String assertMsg) {
         Uninterruptibles.sleepUninterruptibly(500, TimeUnit.MILLISECONDS);
-        assertEquals(assertMsg, expChangeEventCount, changeList.size());
+        synchronized(changeList) {
+            assertEquals(assertMsg, expChangeEventCount, changeList.size());
+        }
     }
 
     public void verifyNoNotifiedData(YangInstanceIdentifier... paths) {
         Set<YangInstanceIdentifier> pathSet = new HashSet<>(Arrays.asList(paths));
-        for(Collection<DataTreeCandidate> list: changeList) {
-            for(DataTreeCandidate c: list) {
-                assertFalse("Unexpected " + c.getRootPath() + " present in DataTreeCandidate",
-                        pathSet.contains(c.getRootPath()));
+        synchronized(changeList) {
+            for(Collection<DataTreeCandidate> list: changeList) {
+                for(DataTreeCandidate c: list) {
+                    assertFalse("Unexpected " + c.getRootPath() + " present in DataTreeCandidate",
+                            pathSet.contains(c.getRootPath()));
+                }
             }
         }
     }

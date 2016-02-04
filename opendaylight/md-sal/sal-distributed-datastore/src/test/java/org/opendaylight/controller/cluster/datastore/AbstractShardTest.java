@@ -22,7 +22,9 @@ import akka.actor.PoisonPill;
 import akka.actor.Props;
 import akka.dispatch.Dispatchers;
 import akka.japi.Creator;
+import akka.pattern.Patterns;
 import akka.testkit.TestActorRef;
+import akka.util.Timeout;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.Futures;
@@ -33,6 +35,7 @@ import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.After;
 import org.junit.Assert;
@@ -69,6 +72,9 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.TreeType;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.impl.schema.tree.InMemoryDataTreeFactory;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import scala.concurrent.Await;
+import scala.concurrent.Future;
+import scala.concurrent.duration.Duration;
 
 /**
  * Abstract base for shard unit tests.
@@ -341,7 +347,13 @@ public abstract class AbstractShardTest extends AbstractActorTest{
 
     public static void writeToStore(final TestActorRef<Shard> shard, final YangInstanceIdentifier id,
             final NormalizedNode<?,?> node) throws InterruptedException, ExecutionException {
-        writeToStore(shard.underlyingActor().getDataStore(), id, node);
+        Future<Object> future = Patterns.ask(shard, newBatchedModifications("tx", id, node, true, true, 1),
+                new Timeout(5, TimeUnit.SECONDS));
+        try {
+            Await.ready(future, Duration.create(5, TimeUnit.SECONDS));
+        } catch(TimeoutException e) {
+            throw new ExecutionException(e);
+        }
     }
 
     public static void writeToStore(final ShardDataTree store, final YangInstanceIdentifier id,
