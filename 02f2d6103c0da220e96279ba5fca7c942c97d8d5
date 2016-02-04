@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a3d3df0_32abc71e",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/identifiers/TransactionIdentifier.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-02-04T10:35:21Z",
+      "side": 1,
+      "message": "This is calendar time, so subject to moving backwards. I don\u0027t think we should rely on time here, but rather have a way of resyncing client/server counters.",
+      "revId": "02f2d6103c0da220e96279ba5fca7c942c97d8d5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
