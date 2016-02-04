@@ -239,7 +239,7 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener,
         for(int i=0;i<100;i++) {
             try {
                 return actorSystem.actorOf(builder.props().withDispatcher(shardDispatcher).withMailbox(
-                        ActorContext.MAILBOX), shardManagerId);
+                        ActorContext.BOUNDED_MAILBOX), shardManagerId);
             } catch (Exception e){
                 lastException = e;
                 Uninterruptibles.sleepUninterruptibly(100, TimeUnit.MILLISECONDS);

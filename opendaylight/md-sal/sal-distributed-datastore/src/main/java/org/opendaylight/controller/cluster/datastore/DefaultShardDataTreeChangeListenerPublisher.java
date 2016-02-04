@@ -7,24 +7,56 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import com.google.common.base.Stopwatch;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.concurrent.TimeUnit;
 import javax.annotation.concurrent.NotThreadSafe;
 import org.opendaylight.controller.md.sal.dom.spi.AbstractDOMDataTreeChangeListenerRegistration;
 import org.opendaylight.controller.sal.core.spi.data.AbstractDOMStoreTreeChangePublisher;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidates;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidateNode;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidates;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Default implementation of ShardDataTreeChangeListenerPublisher that directly generates and publishes
+ * notifications for DataTreeChangeListeners.
+ *
+ * @author Thomas Pantelis
+ */
 @NotThreadSafe
-final class ShardDataTreeChangePublisher extends AbstractDOMStoreTreeChangePublisher {
-    private static final Logger LOG = LoggerFactory.getLogger(ShardDataTreeChangePublisher.class);
+final class DefaultShardDataTreeChangeListenerPublisher extends AbstractDOMStoreTreeChangePublisher
+        implements ShardDataTreeChangeListenerPublisher {
+    private static final Logger LOG = LoggerFactory.getLogger(DefaultShardDataTreeChangeListenerPublisher.class);
 
-    void publishChanges(final DataTreeCandidate candidate) {
-        processCandidateTree(candidate);
+    private final Stopwatch timer = Stopwatch.createUnstarted();
+
+    @Override
+    public void publishChanges(final DataTreeCandidate candidate, String logContext) {
+        timer.start();
+
+        try {
+            processCandidateTree(candidate);
+        } finally {
+            timer.stop();
+            long elapsedTime = timer.elapsed(TimeUnit.MILLISECONDS);
+            if(elapsedTime >= PUBLISH_DELAY_THRESHOLD_IN_MS) {
+                LOG.warn("{}: Generation of DataTreeCandidateNode events took longer than expected. Elapsed time: {}",
+                        logContext, timer);
+            } else {
+                LOG.debug("{}: Elapsed time for generation of DataTreeCandidateNode events: {}", logContext, timer);
+            }
+
+            timer.reset();
+        }
+    }
+
+    @Override
+    public ShardDataTreeChangeListenerPublisher newInstance() {
+        return new DefaultShardDataTreeChangeListenerPublisher();
     }
 
     @Override
