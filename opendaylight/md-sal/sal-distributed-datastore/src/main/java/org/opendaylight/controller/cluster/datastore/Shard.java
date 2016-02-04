@@ -134,7 +134,9 @@ public class Shard extends RaftActor {
 
         LOG.info("Shard created : {}, persistent : {}", name, datastoreContext.isPersistent());
 
-        store = new ShardDataTree(builder.getSchemaContext(), builder.getTreeType());
+        store = new ShardDataTree(builder.getSchemaContext(), builder.getTreeType(),
+                new ShardDataTreeChangeListenerPublisherActorProxy(getContext(), name + "-DTCL-publisher"),
+                new ShardDataChangeListenerPublisherActorProxy(getContext(), name + "-DCL-publisher"));
 
         shardMBean = ShardMBeanFactory.getShardStatsMBean(name.toString(),
                 datastoreContext.getDataStoreMXBeanType());
