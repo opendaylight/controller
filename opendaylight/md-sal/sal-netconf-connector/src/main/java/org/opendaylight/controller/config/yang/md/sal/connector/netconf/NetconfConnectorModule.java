@@ -10,10 +10,8 @@ package org.opendaylight.controller.config.yang.md.sal.connector.netconf;
 import static org.opendaylight.controller.config.api.JmxAttributeValidationException.checkCondition;
 import static org.opendaylight.controller.config.api.JmxAttributeValidationException.checkNotNull;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Strings;
-import io.netty.util.concurrent.EventExecutor;
 import java.io.File;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.InetSocketAddress;
 import java.util.List;
@@ -21,6 +19,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
+
 import org.opendaylight.controller.config.api.JmxAttributeValidationException;
 import org.opendaylight.controller.netconf.client.NetconfClientDispatcher;
 import org.opendaylight.controller.netconf.client.conf.NetconfClientConfiguration;
@@ -42,9 +41,11 @@ import org.opendaylight.protocol.framework.ReconnectStrategyFactory;
 import org.opendaylight.protocol.framework.TimedReconnectStrategy;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Host;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
+import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.model.repo.api.SchemaContextFactory;
 import org.opendaylight.yangtools.yang.model.repo.api.SchemaRepository;
 import org.opendaylight.yangtools.yang.model.repo.api.SchemaSourceFilter;
+import org.opendaylight.yangtools.yang.model.repo.api.SourceIdentifier;
 import org.opendaylight.yangtools.yang.model.repo.api.YangTextSchemaSource;
 import org.opendaylight.yangtools.yang.model.repo.spi.SchemaSourceRegistry;
 import org.opendaylight.yangtools.yang.model.repo.util.FilesystemSchemaSourceCache;
@@ -53,6 +54,12 @@ import org.opendaylight.yangtools.yang.parser.util.TextToASTTransformer;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Optional;
+import com.google.common.base.Strings;
+import com.google.common.io.Files;
+
+import io.netty.util.concurrent.EventExecutor;
 
 /**
  *
@@ -212,9 +219,24 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
      */
     private FilesystemSchemaSourceCache<YangTextSchemaSource> createDeviceFilesystemCache(final String schemaCacheDirectory) {
         final String relativeSchemaCacheDirectory = CACHE_DIRECTORY + File.separator + schemaCacheDirectory;
+
+        // Copy all sideloaded schemas in the directory
+        if (userCapabilities.isPresent()) {
+            new File(relativeSchemaCacheDirectory).mkdir();
+            final File defaultCacheDirectory =  new File(CACHE_DIRECTORY + File.separator + DEFAULT_CACHE_DIRECTORY);
+            for (QName qname : userCapabilities.get().getModuleBasedCaps()) {
+                final SourceIdentifier sourceIdentifier = new SourceIdentifier(qname.getLocalName(), qname.getFormattedRevision());
+                final File fileSource = FilesystemSchemaSourceCache.sourceIdToFile(sourceIdentifier, defaultCacheDirectory);
+                final File fileDest = new File(relativeSchemaCacheDirectory + File.separator + fileSource.getName());
+                try {
+                    Files.copy(fileSource, fileDest);
+                } catch (IOException e) {
+                    logger.error("Failed to copy {} in {}", fileSource, relativeSchemaCacheDirectory, e);
+                }
+            }
+        }
         return new FilesystemSchemaSourceCache<>(schemaRegistry, YangTextSchemaSource.class, new File(relativeSchemaCacheDirectory));
     }
-
     private boolean shouldSendKeepalive() {
         return getKeepaliveDelay() > 0;
     }
