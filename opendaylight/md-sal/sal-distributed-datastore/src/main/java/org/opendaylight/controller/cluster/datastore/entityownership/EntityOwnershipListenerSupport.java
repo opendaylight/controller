@@ -62,17 +62,17 @@ class EntityOwnershipListenerSupport {
     void addEntityOwnershipListener(String entityType, EntityOwnershipListener listener) {
         LOG.debug("{}: Adding EntityOwnershipListener {} for entity type {}", logId, listener, entityType);
 
-        addListener(listener, entityType, entityTypeListenerMap);
+        addListener(listener, entityType);
     }
 
     void removeEntityOwnershipListener(String entityType, EntityOwnershipListener listener) {
         LOG.debug("{}: Removing EntityOwnershipListener {} for entity type {}", logId, listener, entityType);
 
-        removeListener(listener, entityType, entityTypeListenerMap);
+        removeListener(listener, entityType);
     }
 
     void notifyEntityOwnershipListeners(Entity entity, boolean wasOwner, boolean isOwner, boolean hasOwner) {
-        notifyListeners(entity, entity.getType(), wasOwner, isOwner, hasOwner, entityTypeListenerMap);
+        notifyListeners(entity, entity.getType(), wasOwner, isOwner, hasOwner);
     }
 
     void notifyEntityOwnershipListener(Entity entity, boolean wasOwner, boolean isOwner, boolean hasOwner,
@@ -80,9 +80,8 @@ class EntityOwnershipListenerSupport {
         notifyListeners(entity, wasOwner, isOwner, hasOwner, Arrays.asList(listener));
     }
 
-    private <T> void notifyListeners(Entity entity, T mapKey, boolean wasOwner, boolean isOwner, boolean hasOwner,
-            Multimap<T, EntityOwnershipListener> listenerMap) {
-        Collection<EntityOwnershipListener> listeners = listenerMap.get(mapKey);
+    private void notifyListeners(Entity entity, String mapKey, boolean wasOwner, boolean isOwner, boolean hasOwner) {
+        Collection<EntityOwnershipListener> listeners = entityTypeListenerMap.get(mapKey);
         if(!listeners.isEmpty()) {
             notifyListeners(entity, wasOwner, isOwner, hasOwner, listeners);
         }
@@ -100,9 +99,8 @@ class EntityOwnershipListenerSupport {
         }
     }
 
-    private <T> void addListener(EntityOwnershipListener listener, T mapKey,
-            Multimap<T, EntityOwnershipListener> toListenerMap) {
-        if(toListenerMap.put(mapKey, listener)) {
+    private void addListener(EntityOwnershipListener listener, String mapKey) {
+        if (entityTypeListenerMap.put(mapKey, listener)) {
             ListenerActorRefEntry listenerEntry = listenerActorMap.get(listener);
             if(listenerEntry == null) {
                 listenerActorMap.put(listener, new ListenerActorRefEntry());
@@ -112,9 +110,8 @@ class EntityOwnershipListenerSupport {
         }
     }
 
-    private <T> void removeListener(EntityOwnershipListener listener, T mapKey,
-            Multimap<T, EntityOwnershipListener> fromListenerMap) {
-        if(fromListenerMap.remove(mapKey, listener)) {
+    private void removeListener(EntityOwnershipListener listener, String mapKey) {
+        if (entityTypeListenerMap.remove(mapKey, listener)) {
             ListenerActorRefEntry listenerEntry = listenerActorMap.get(listener);
 
             LOG.debug("{}: Found {}", logId, listenerEntry);
