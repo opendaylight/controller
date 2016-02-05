@@ -12,8 +12,8 @@ import akka.actor.ActorRef;
 import akka.actor.PoisonPill;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Map;
@@ -77,7 +77,7 @@ class EntityOwnershipListenerSupport {
 
     void notifyEntityOwnershipListener(Entity entity, boolean wasOwner, boolean isOwner, boolean hasOwner,
             EntityOwnershipListener listener) {
-        notifyListeners(entity, wasOwner, isOwner, hasOwner, Arrays.asList(listener));
+        notifyListeners(entity, wasOwner, isOwner, hasOwner, Collections.singleton(listener));
     }
 
     private void notifyListeners(Entity entity, String mapKey, boolean wasOwner, boolean isOwner, boolean hasOwner) {
