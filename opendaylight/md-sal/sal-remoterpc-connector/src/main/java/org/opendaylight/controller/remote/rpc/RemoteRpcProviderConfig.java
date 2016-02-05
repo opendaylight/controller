@@ -103,6 +103,12 @@ public class RemoteRpcProviderConfig extends CommonConfig {
 
         }
 
+        public Builder gossipTickInterval(String interval) {
+            configHolder.put(TAG_GOSSIP_TICK_INTERVAL, interval);
+            return this;
+        }
+
+        @Override
         public RemoteRpcProviderConfig build(){
             return new RemoteRpcProviderConfig(merge());
         }
