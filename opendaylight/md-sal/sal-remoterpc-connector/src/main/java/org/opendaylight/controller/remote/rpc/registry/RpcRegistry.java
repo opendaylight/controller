@@ -8,13 +8,18 @@
 package org.opendaylight.controller.remote.rpc.registry;
 
 import akka.actor.ActorRef;
+import akka.actor.Cancellable;
 import akka.actor.Props;
 import akka.japi.Creator;
 import akka.japi.Option;
 import akka.japi.Pair;
 import com.google.common.base.Preconditions;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 import org.opendaylight.controller.remote.rpc.RemoteRpcProviderConfig;
 import org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.AddOrUpdateRoutes;
 import org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.FindRouters;
@@ -26,6 +31,7 @@ import org.opendaylight.controller.remote.rpc.registry.mbeans.RemoteRpcRegistryM
 import org.opendaylight.controller.remote.rpc.registry.mbeans.RemoteRpcRegistryMXBeanImpl;
 import org.opendaylight.controller.sal.connector.api.RpcRouter;
 import org.opendaylight.controller.sal.connector.api.RpcRouter.RouteIdentifier;
+import scala.concurrent.duration.FiniteDuration;
 
 /**
  * Registry to look up cluster nodes that have registered for a given rpc.
@@ -34,6 +40,7 @@ import org.opendaylight.controller.sal.connector.api.RpcRouter.RouteIdentifier;
  * cluster wide information.
  */
 public class RpcRegistry extends BucketStore<RoutingTable> {
+    private final Set<Runnable> routesUpdatedCallbacks = new HashSet<>();
 
     public RpcRegistry(RemoteRpcProviderConfig config) {
         super(config);
@@ -56,6 +63,8 @@ public class RpcRegistry extends BucketStore<RoutingTable> {
             receiveRemoveRoutes((RemoveRoutes) message);
         } else if (message instanceof Messages.FindRouters) {
             receiveGetRouter((FindRouters) message);
+        } else if (message instanceof Runnable) {
+            ((Runnable)message).run();
         } else {
             super.handleReceive(message);
         }
@@ -83,6 +92,8 @@ public class RpcRegistry extends BucketStore<RoutingTable> {
         }
 
         updateLocalBucket(table);
+
+        onBucketsUpdated();
     }
 
     /**
@@ -101,19 +112,65 @@ public class RpcRegistry extends BucketStore<RoutingTable> {
     /**
      * Finds routers for the given rpc.
      *
-     * @param msg
+     * @param findRouters
      */
-    private void receiveGetRouter(FindRouters msg) {
+    private void receiveGetRouter(final FindRouters findRouters) {
+        log.debug("receiveGetRouter for {}", findRouters.getRouteIdentifier());
+
+        final ActorRef sender = getSender();
+        if(!findRouters(findRouters, sender)) {
+            FiniteDuration timeout = getConfig().getGossipTickInterval().$times(10);
+
+            log.debug("No routers found for {} - scheduling {} ms timer", findRouters.getRouteIdentifier(),
+                    timeout.toMillis());
+
+            final AtomicReference<Cancellable> timer = new AtomicReference<>();
+            final Runnable routesUpdatedRunnable = new Runnable() {
+                @Override
+                public void run() {
+                    if(findRouters(findRouters, sender)) {
+                        routesUpdatedCallbacks.remove(this);
+                        timer.get().cancel();
+                    }
+                }
+            };
+
+            routesUpdatedCallbacks.add(routesUpdatedRunnable);
+
+            Runnable timerRunnable = new Runnable() {
+                @Override
+                public void run() {
+                    log.debug("Timed out finding routers for {}", findRouters.getRouteIdentifier());
+
+                    routesUpdatedCallbacks.remove(routesUpdatedRunnable);
+                    sender.tell(new Messages.FindRoutersReply(
+                            Collections.<Pair<ActorRef, Long>>emptyList()), getSelf());
+                }
+            };
+
+            timer.set(getContext().system().scheduler().scheduleOnce(timeout, timerRunnable,
+                    getContext().dispatcher()));
+        }
+    }
+
+    private boolean findRouters(FindRouters findRouters, ActorRef sender) {
         List<Pair<ActorRef, Long>> routers = new ArrayList<>();
 
-        RouteIdentifier<?, ?, ?> routeId = msg.getRouteIdentifier();
+        RouteIdentifier<?, ?, ?> routeId = findRouters.getRouteIdentifier();
         findRoutes(getLocalBucket().getData(), routeId, routers);
 
         for(Bucket<RoutingTable> bucket : getRemoteBuckets().values()) {
             findRoutes(bucket.getData(), routeId, routers);
         }
 
-        getSender().tell(new Messages.FindRoutersReply(routers), getSelf());
+        log.debug("Found {} routers for {}", routers.size(), findRouters.getRouteIdentifier());
+
+        boolean foundRouters = !routers.isEmpty();
+        if(foundRouters) {
+            sender.tell(new Messages.FindRoutersReply(routers), getSelf());
+        }
+
+        return foundRouters;
     }
 
     private void findRoutes(RoutingTable table, RpcRouter.RouteIdentifier<?, ?, ?> routeId,
@@ -125,6 +182,13 @@ public class RpcRegistry extends BucketStore<RoutingTable> {
         Option<Pair<ActorRef, Long>> routerWithUpdateTime = table.getRouterFor(routeId);
         if(!routerWithUpdateTime.isEmpty()) {
             routers.add(routerWithUpdateTime.get());
+        }
+    }
+
+    @Override
+    protected void onBucketsUpdated() {
+        for(Runnable callBack: routesUpdatedCallbacks) {
+            callBack.run();
         }
     }
 
