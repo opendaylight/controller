@@ -8,12 +8,20 @@
 
 package org.opendaylight.controller.remote.rpc.registry;
 
+import static org.junit.Assert.fail;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Address;
 import akka.actor.Props;
+import akka.cluster.Cluster;
+import akka.cluster.ClusterEvent.CurrentClusterState;
+import akka.cluster.Member;
+import akka.cluster.MemberStatus;
+import akka.cluster.UniqueAddress;
 import akka.japi.Pair;
 import akka.testkit.JavaTestKit;
+import com.google.common.base.Stopwatch;
+import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.Uninterruptibles;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
@@ -24,6 +32,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -71,12 +80,36 @@ public class RpcRegistryTest {
             }
         };
 
-        RemoteRpcProviderConfig config1 = new RemoteRpcProviderConfig.Builder("memberA").withConfigReader(reader).build();
-        RemoteRpcProviderConfig config2 = new RemoteRpcProviderConfig.Builder("memberB").withConfigReader(reader).build();
-        RemoteRpcProviderConfig config3 = new RemoteRpcProviderConfig.Builder("memberC").withConfigReader(reader).build();
+        RemoteRpcProviderConfig config1 = new RemoteRpcProviderConfig.Builder("memberA").gossipTickInterval("200ms").
+                withConfigReader(reader).build();
+        RemoteRpcProviderConfig config2 = new RemoteRpcProviderConfig.Builder("memberB").gossipTickInterval("200ms")
+                .withConfigReader(reader).build();
+        RemoteRpcProviderConfig config3 = new RemoteRpcProviderConfig.Builder("memberC").gossipTickInterval("200ms")
+                .withConfigReader(reader).build();
         node1 = ActorSystem.create("opendaylight-rpc", config1.get());
         node2 = ActorSystem.create("opendaylight-rpc", config2.get());
         node3 = ActorSystem.create("opendaylight-rpc", config3.get());
+
+        waitForMembersUp(node1, Cluster.get(node2).selfUniqueAddress(), Cluster.get(node3).selfUniqueAddress());
+        waitForMembersUp(node2, Cluster.get(node1).selfUniqueAddress(), Cluster.get(node3).selfUniqueAddress());
+    }
+
+    static void waitForMembersUp(ActorSystem node, UniqueAddress... addresses) {
+        Set<UniqueAddress> otherMembersSet = Sets.newHashSet(addresses);
+        Stopwatch sw = Stopwatch.createStarted();
+        while(sw.elapsed(TimeUnit.SECONDS) <= 10) {
+            CurrentClusterState state = Cluster.get(node).state();
+            for(Member m: state.getMembers()) {
+                if(m.status() == MemberStatus.up() && otherMembersSet.remove(m.uniqueAddress()) &&
+                        otherMembersSet.isEmpty()) {
+                    return;
+                }
+            }
+
+            Uninterruptibles.sleepUninterruptibly(100, TimeUnit.MILLISECONDS);
+        }
+
+        fail("Member(s) " + otherMembersSet + " are not Up");
     }
 
     @AfterClass
@@ -366,4 +399,41 @@ public class RpcRegistryTest {
         return routeIds;
     }
 
+    @Test
+    public void testFindRoutersNotPresentInitially() throws Exception {
+
+        final JavaTestKit mockBroker1 = new JavaTestKit(node1);
+        final JavaTestKit mockBroker2 = new JavaTestKit(node2);
+
+        registry1.tell(new SetLocalRouter(mockBroker1.getRef()), mockBroker1.getRef());
+        registry2.tell(new SetLocalRouter(mockBroker2.getRef()), mockBroker2.getRef());
+
+        List<RpcRouter.RouteIdentifier<?, ?, ?>> routeIds = createRouteIds();
+
+        registry1.tell(new FindRouters(routeIds.get(0)), mockBroker1.getRef());
+
+        registry2.tell(new AddOrUpdateRoutes(routeIds), mockBroker2.getRef());
+
+        FindRoutersReply reply = mockBroker1.expectMsgClass(Duration.create(7, TimeUnit.SECONDS),
+                FindRoutersReply.class);
+        List<Pair<ActorRef, Long>> respList = reply.getRouterWithUpdateTime();
+        Assert.assertEquals("getRouterWithUpdateTime size", 1, respList.size());
+    }
+
+    @Test
+    public void testFindRoutersNonExistent() throws Exception {
+
+        final JavaTestKit mockBroker1 = new JavaTestKit(node1);
+
+        registry1.tell(new SetLocalRouter(mockBroker1.getRef()), mockBroker1.getRef());
+
+        List<RpcRouter.RouteIdentifier<?, ?, ?>> routeIds = createRouteIds();
+
+        registry1.tell(new FindRouters(routeIds.get(0)), mockBroker1.getRef());
+
+        FindRoutersReply reply = mockBroker1.expectMsgClass(Duration.create(7, TimeUnit.SECONDS),
+                FindRoutersReply.class);
+        List<Pair<ActorRef, Long>> respList = reply.getRouterWithUpdateTime();
+        Assert.assertEquals("getRouterWithUpdateTime size", 0, respList.size());
+    }
 }

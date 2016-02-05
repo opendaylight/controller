@@ -111,6 +111,10 @@ public class BucketStore<T extends Copier<T>> extends AbstractUntypedActorWithMe
         }
     }
 
+    protected RemoteRpcProviderConfig getConfig() {
+        return config;
+    }
+
     /**
      * Returns all the buckets the this node knows about, self owned + remote
      */
@@ -224,6 +228,11 @@ public class BucketStore<T extends Copier<T>> extends AbstractUntypedActorWithMe
         if(log.isDebugEnabled()) {
             log.debug("State after update - Local Bucket [{}], Remote Buckets [{}]", localBucket, remoteBuckets);
         }
+
+        onBucketsUpdated();
+    }
+
+    protected void onBucketsUpdated() {
     }
 
     public BucketImpl<T> getLocalBucket() {
