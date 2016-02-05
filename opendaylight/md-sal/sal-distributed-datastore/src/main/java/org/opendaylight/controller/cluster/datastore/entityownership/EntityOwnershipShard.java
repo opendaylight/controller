@@ -57,7 +57,6 @@ import org.opendaylight.controller.cluster.datastore.modification.MergeModificat
 import org.opendaylight.controller.cluster.datastore.modification.WriteModification;
 import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
@@ -189,16 +188,29 @@ class EntityOwnershipShard extends Shard {
 
         getSender().tell(SuccessReply.INSTANCE, getSelf());
 
-        searchForEntitiesOwnedBy(localMemberName, new EntityWalker() {
+        searchForEntities(new EntityWalker() {
             @Override
             public void onEntity(MapEntryNode entityTypeNode, MapEntryNode entityNode) {
-                Optional<DataContainerChild<? extends PathArgument, ?>> possibleType =
-                        entityTypeNode.getChild(ENTITY_TYPE_NODE_ID);
+                Optional<DataContainerChild<?, ?>> possibleType = entityTypeNode.getChild(ENTITY_TYPE_NODE_ID);
                 String entityType = possibleType.isPresent() ? possibleType.get().getValue().toString() : null;
                 if (registerListener.getEntityType().equals(entityType)) {
+                    final boolean hasOwner;
+                    final boolean isOwner;
+
+                    Optional<DataContainerChild<?, ?>> possibleOwner = entityNode.getChild(ENTITY_OWNER_NODE_ID);
+                    if (possibleOwner.isPresent()) {
+                        isOwner = localMemberName.equals(possibleOwner.get().getValue().toString());
+                        hasOwner = true;
+                    } else {
+                        isOwner = false;
+                        hasOwner = false;
+                    }
+
                     Entity entity = new Entity(entityType,
-                            (YangInstanceIdentifier) entityNode.getChild(ENTITY_ID_NODE_ID).get().getValue());
-                    listenerSupport.notifyEntityOwnershipListener(entity, false, true, true, registerListener.getListener());
+                        (YangInstanceIdentifier) entityNode.getChild(ENTITY_ID_NODE_ID).get().getValue());
+
+                    listenerSupport.notifyEntityOwnershipListener(entity, false, isOwner, hasOwner,
+                        registerListener.getListener());
                 }
             }
         });
@@ -399,26 +411,6 @@ class EntityOwnershipShard extends Shard {
         return ((MapNode)entity.getChild(CANDIDATE_NODE_ID).get()).getChild(candidateNodeKey(candidateName)).isPresent();
     }
 
-    private void searchForEntitiesOwnedBy(final String owner, final EntityWalker walker) {
-        Optional<NormalizedNode<?, ?>> possibleEntityTypes = getDataStore().readNode(ENTITY_TYPES_PATH);
-        if(!possibleEntityTypes.isPresent()) {
-            return;
-        }
-
-        LOG.debug("{}: Searching for entities owned by {}", persistenceId(), owner);
-
-        searchForEntities(new EntityWalker() {
-            @Override
-            public void onEntity(MapEntryNode entityTypeNode, MapEntryNode entityNode) {
-                Optional<DataContainerChild<? extends PathArgument, ?>> possibleOwner =
-                        entityNode.getChild(ENTITY_OWNER_NODE_ID);
-                if (possibleOwner.isPresent() && owner.equals(possibleOwner.get().getValue().toString())) {
-                    walker.onEntity(entityTypeNode, entityNode);
-                }
-            }
-        });
-    }
-
     private void searchForEntities(EntityWalker walker) {
         Optional<NormalizedNode<?, ?>> possibleEntityTypes = getDataStore().readNode(ENTITY_TYPES_PATH);
         if(!possibleEntityTypes.isPresent()) {
@@ -426,10 +418,10 @@ class EntityOwnershipShard extends Shard {
         }
 
         for(MapEntryNode entityType:  ((MapNode) possibleEntityTypes.get()).getValue()) {
-            Optional<DataContainerChild<? extends PathArgument, ?>> possibleEntities =
-                    entityType.getChild(ENTITY_NODE_ID);
+            Optional<DataContainerChild<?, ?>> possibleEntities = entityType.getChild(ENTITY_NODE_ID);
             if(!possibleEntities.isPresent()) {
-                continue; // shouldn't happen but handle anyway
+                // shouldn't happen but handle anyway
+                continue;
             }
 
             for(MapEntryNode entity:  ((MapNode) possibleEntities.get()).getValue()) {
