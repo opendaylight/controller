@@ -12,7 +12,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.AdditionalMatchers.or;
-import static org.mockito.Mockito.atMost;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.timeout;
@@ -196,6 +195,8 @@ public class DistributedEntityOwnershipIntegrationTest {
         // Register follower2 candidate for entity2 and verify it gets added but doesn't become owner
 
         follower2EntityOwnershipService.registerListener(ENTITY_TYPE1, follower2MockListener);
+        verify(follower2MockListener, times(1)).ownershipChanged(ownershipChange(ENTITY2, false, false, true));
+
         follower2EntityOwnershipService.registerCandidate(ENTITY2);
         verifyCandidates(leaderDistributedDataStore, ENTITY2, "member-2", "member-3");
         verifyOwner(leaderDistributedDataStore, ENTITY2, "member-2");
@@ -212,7 +213,6 @@ public class DistributedEntityOwnershipIntegrationTest {
         // if the original ownership change with "member-2 is replicated to follower2 after the listener is
         // registered.
         Uninterruptibles.sleepUninterruptibly(500, TimeUnit.MILLISECONDS);
-        verify(follower2MockListener, atMost(1)).ownershipChanged(ownershipChange(ENTITY2, false, false, true));
         verify(follower2MockListener, timeout(5000)).ownershipChanged(ownershipChange(ENTITY2, false, true, true));
 
         // Register follower1 candidate for entity3 and verify it becomes owner
