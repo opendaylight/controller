@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a3d3df0_5384880b",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/CanCommitTransactionReply.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-02-05T19:14:47Z",
+      "side": 1,
+      "message": "indentation",
+      "revId": "b9bf6454e37ef74eddfe4fdde31b9585bce91b44",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_f38cbc37",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/CreateTransaction.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-02-05T19:14:47Z",
+      "side": 1,
+      "message": "indentation",
+      "revId": "b9bf6454e37ef74eddfe4fdde31b9585bce91b44",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_33874411",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/CreateTransactionReply.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-02-05T19:14:47Z",
+      "side": 1,
+      "message": "indentation",
+      "revId": "b9bf6454e37ef74eddfe4fdde31b9585bce91b44",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_7378ac2b",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/DataExists.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-02-05T19:14:47Z",
+      "side": 1,
+      "message": "indentation",
+      "revId": "b9bf6454e37ef74eddfe4fdde31b9585bce91b44",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_d377f838",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/DataExistsReply.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-02-05T19:14:47Z",
+      "side": 1,
+      "message": "indentation",
+      "revId": "b9bf6454e37ef74eddfe4fdde31b9585bce91b44",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_b3723447",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/ReadData.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-02-05T19:14:47Z",
+      "side": 1,
+      "message": "indentation",
+      "revId": "b9bf6454e37ef74eddfe4fdde31b9585bce91b44",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
