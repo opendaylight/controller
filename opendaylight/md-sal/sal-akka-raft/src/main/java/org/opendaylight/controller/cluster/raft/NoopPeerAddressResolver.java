@@ -13,7 +13,7 @@ package org.opendaylight.controller.cluster.raft;
  * @author Thomas Pantelis
  */
 public final class NoopPeerAddressResolver implements PeerAddressResolver {
-    public static NoopPeerAddressResolver INSTANCE = new NoopPeerAddressResolver();
+    public static final NoopPeerAddressResolver INSTANCE = new NoopPeerAddressResolver();
 
     private NoopPeerAddressResolver() {
     }
