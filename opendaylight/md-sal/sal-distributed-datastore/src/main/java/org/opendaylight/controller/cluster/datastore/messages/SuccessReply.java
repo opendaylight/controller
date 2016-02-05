@@ -17,5 +17,5 @@ import java.io.Serializable;
 public class SuccessReply implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    public static SuccessReply INSTANCE = new SuccessReply();
+    public static final SuccessReply INSTANCE = new SuccessReply();
 }
