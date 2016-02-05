@@ -12,6 +12,7 @@ import static org.mockito.AdditionalMatchers.or;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
@@ -710,7 +711,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
                 ownershipChange(entity3, false, true, true)));
         Uninterruptibles.sleepUninterruptibly(300, TimeUnit.MILLISECONDS);
         verify(listener, never()).ownershipChanged(ownershipChange(entity4));
-        verify(listener, never()).ownershipChanged(ownershipChange(entity1));
+        verify(listener, times(1)).ownershipChanged(ownershipChange(entity1));
     }
 
     private static void commitModification(TestActorRef<EntityOwnershipShard> shard, NormalizedNode<?, ?> node,
