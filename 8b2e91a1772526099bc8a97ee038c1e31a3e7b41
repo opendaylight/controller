@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_d9a0b7a1",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/CompositeDataTreeCohort.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2016-02-07T18:45:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a3d3df0_7db7e586",
+      "revId": "8b2e91a1772526099bc8a97ee038c1e31a3e7b41",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_1de179d0",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeCohortActor.java",
         "patchSetId": 13
@@ -30,6 +48,24 @@
       "writtenOn": "2016-02-03T15:46:31Z",
       "side": 1,
       "message": "R is not referenced in this class - is it necessary?",
+      "revId": "8b2e91a1772526099bc8a97ee038c1e31a3e7b41",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_b99b3371",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeCohortActor.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2016-02-07T18:45:44Z",
+      "side": 1,
+      "message": "In current iteration\nis just marker to match Request messages\nto Response messages in order to make this more\nreadable.",
+      "parentUuid": "9a3d3df0_1de179d0",
       "revId": "8b2e91a1772526099bc8a97ee038c1e31a3e7b41",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_198a1f1b",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeCohortActor.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2016-02-07T18:45:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a3d3df0_9d9e2953",
+      "revId": "8b2e91a1772526099bc8a97ee038c1e31a3e7b41",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_3d90bd42",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeCohortActor.java",
         "patchSetId": 13
@@ -70,6 +124,24 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_f98c9b37",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeCohortActor.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 165,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2016-02-07T18:45:44Z",
+      "side": 1,
+      "message": "Leftover from previous patches, already fixed.",
+      "parentUuid": "9a3d3df0_3d90bd42",
+      "revId": "8b2e91a1772526099bc8a97ee038c1e31a3e7b41",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_fdaad517",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeCohortActorRegistry.java",
         "patchSetId": 13
@@ -81,6 +153,24 @@
       "writtenOn": "2016-02-03T15:46:31Z",
       "side": 1,
       "message": "Can you add class javadocs?",
+      "revId": "8b2e91a1772526099bc8a97ee038c1e31a3e7b41",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_5984a70b",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeCohortActorRegistry.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2016-02-07T18:45:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a3d3df0_fdaad517",
       "revId": "8b2e91a1772526099bc8a97ee038c1e31a3e7b41",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -122,6 +212,24 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_39872311",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeCohortActorRegistry.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2016-02-07T18:45:44Z",
+      "side": 1,
+      "message": "Also class is marked as not thread-safe and is externaly synchronized via actor.",
+      "parentUuid": "9a3d3df0_b8685bbb",
+      "revId": "8b2e91a1772526099bc8a97ee038c1e31a3e7b41",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_bd020d3c",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeCohortActorRegistry.java",
         "patchSetId": 13
@@ -133,6 +241,24 @@
       "writtenOn": "2016-02-03T15:46:31Z",
       "side": 1,
       "message": "should this be an else?",
+      "revId": "8b2e91a1772526099bc8a97ee038c1e31a3e7b41",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_385f2be7",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeCohortActorRegistry.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 149,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2016-02-07T18:45:44Z",
+      "side": 1,
+      "message": "No it should not... you may have exact cohorts (non wildcarded) and inexact cohorts (using wildcarded instance identifier) and we need to process both.",
+      "parentUuid": "9a3d3df0_bd020d3c",
       "revId": "8b2e91a1772526099bc8a97ee038c1e31a3e7b41",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -156,6 +282,24 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_997d8f1f",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeCohortActorRegistry.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2016-02-07T18:45:44Z",
+      "side": 1,
+      "message": "To be honest this is modified algorithm from DataTreeChangeListeners and DataChangeListener registry.\n\nThe first method lookups affected listener from root to actual change (they are also affected) then algorithm switches to second one which lookups listeners after root of change.\n\nThis is necessary when we move to shards rooted somewhere else than root.",
+      "parentUuid": "9a3d3df0_bd896dcc",
+      "revId": "8b2e91a1772526099bc8a97ee038c1e31a3e7b41",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_5d1021a8",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeCohortActorRegistry.java",
         "patchSetId": 13
@@ -167,6 +311,24 @@
       "writtenOn": "2016-02-03T15:46:31Z",
       "side": 1,
       "message": "create should be capitalised.",
+      "revId": "8b2e91a1772526099bc8a97ee038c1e31a3e7b41",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_79788b2b",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeCohortActorRegistry.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 157,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2016-02-07T18:45:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a3d3df0_5d1021a8",
       "revId": "8b2e91a1772526099bc8a97ee038c1e31a3e7b41",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -190,6 +352,24 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_d9771739",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeCohortActorRegistry.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 158,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2016-02-07T18:45:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a3d3df0_7d0d2590",
+      "revId": "8b2e91a1772526099bc8a97ee038c1e31a3e7b41",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_9d2109ff",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeCohortActorRegistry.java",
         "patchSetId": 13
@@ -201,6 +381,24 @@
       "writtenOn": "2016-02-03T15:46:31Z",
       "side": 1,
       "message": "Does this need to be public?",
+      "revId": "8b2e91a1772526099bc8a97ee038c1e31a3e7b41",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_b9721347",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeCohortActorRegistry.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 198,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2016-02-07T18:45:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a3d3df0_9d2109ff",
       "revId": "8b2e91a1772526099bc8a97ee038c1e31a3e7b41",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -224,6 +422,24 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_19917f47",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeCohortActorRegistry.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 199,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2016-02-07T18:45:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a3d3df0_dde0b198",
+      "revId": "8b2e91a1772526099bc8a97ee038c1e31a3e7b41",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_fde5b5a8",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeCohortActorRegistry.java",
         "patchSetId": 13
@@ -235,6 +451,24 @@
       "writtenOn": "2016-02-03T15:46:31Z",
       "side": 1,
       "message": "This class is used to build \u0027messages\u0027 and releases it so is it necessary to return an immutable copy, i.e. do we care if the caller modified it? Again, it would save overhead not to copy.",
+      "revId": "8b2e91a1772526099bc8a97ee038c1e31a3e7b41",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_f993fb4c",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeCohortActorRegistry.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 201,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2016-02-07T18:45:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a3d3df0_fde5b5a8",
       "revId": "8b2e91a1772526099bc8a97ee038c1e31a3e7b41",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -275,6 +509,24 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_599b0767",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeCohortAdapter.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2016-02-07T18:45:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a3d3df0_78589332",
+      "revId": "8b2e91a1772526099bc8a97ee038c1e31a3e7b41",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_3d4b9d88",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeCohortAdapter.java",
         "patchSetId": 13
@@ -286,6 +538,24 @@
       "writtenOn": "2016-02-03T15:46:31Z",
       "side": 1,
       "message": "It seems this is the Shard actor - should we name it so?",
+      "revId": "8b2e91a1772526099bc8a97ee038c1e31a3e7b41",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_399e0357",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeCohortAdapter.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2016-02-07T18:45:44Z",
+      "side": 1,
+      "message": "Currently implementation- wise it is shard actor, but in this context it is actually CohortRegistry, which more clearly communicates which messages are expected to be send / received and in which context we are communicating with shard.\n\nNotion that Shard handles these messages is currently implementation detail and I can envision it may change in future.\n\n(e.g. One registry for multiple shards).",
+      "parentUuid": "9a3d3df0_3d4b9d88",
       "revId": "8b2e91a1772526099bc8a97ee038c1e31a3e7b41",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -309,6 +579,24 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_99d2affe",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeCohortAdapter.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2016-02-07T18:45:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a3d3df0_1d1cd976",
+      "revId": "8b2e91a1772526099bc8a97ee038c1e31a3e7b41",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_fd581558",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeCohortAdapter.java",
         "patchSetId": 13
@@ -320,6 +608,24 @@
       "writtenOn": "2016-02-03T15:46:31Z",
       "side": 1,
       "message": "indentation",
+      "revId": "8b2e91a1772526099bc8a97ee038c1e31a3e7b41",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_99a46fa7",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeCohortAdapter.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2016-02-07T18:45:44Z",
+      "side": 1,
+      "message": "Indentiation is correct according to modified Guava style which we are using in OpenDaylight.",
+      "parentUuid": "9a3d3df0_fd581558",
       "revId": "8b2e91a1772526099bc8a97ee038c1e31a3e7b41",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -360,6 +666,24 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_180987dd",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardCommitCoordinator.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 616,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2016-02-07T18:45:44Z",
+      "side": 1,
+      "message": "No, in order to determine if cohort needs to be invoked, we need DataTreeCandidate which is available at later point of commit sequence - preCommit.",
+      "parentUuid": "9a3d3df0_38272bb8",
+      "revId": "8b2e91a1772526099bc8a97ee038c1e31a3e7b41",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_1899871f",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/DataTreeCohortIntegrationTest.java",
         "patchSetId": 13
@@ -371,6 +695,24 @@
       "writtenOn": "2016-02-03T18:12:57Z",
       "side": 1,
       "message": "Can you capture and verify the DOMDataTreeCandidate that is passed to the cohort?",
+      "revId": "8b2e91a1772526099bc8a97ee038c1e31a3e7b41",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_f9e13bd1",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/DataTreeCohortIntegrationTest.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2016-02-07T18:45:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a3d3df0_1899871f",
       "revId": "8b2e91a1772526099bc8a97ee038c1e31a3e7b41",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -394,6 +736,24 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_59e947b7",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/DataTreeCohortIntegrationTest.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2016-02-07T18:45:44Z",
+      "side": 1,
+      "message": "Mockito.verifyNoMoreInteractions",
+      "parentUuid": "9a3d3df0_387a8bf1",
+      "revId": "8b2e91a1772526099bc8a97ee038c1e31a3e7b41",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_18cb471f",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/DataTreeCohortIntegrationTest.java",
         "patchSetId": 13
@@ -405,6 +765,24 @@
       "writtenOn": "2016-02-03T18:12:57Z",
       "side": 1,
       "message": "We need more unit tests here, e.g.:\n\n- Return failure from canCommit and verify transaction fails and exception is propagated.\n\n- Test preCommit step, both success and failure.\n\n- Test commit step, both success and failure.",
+      "revId": "8b2e91a1772526099bc8a97ee038c1e31a3e7b41",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_39ec43c7",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/DataTreeCohortIntegrationTest.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2016-02-07T18:45:44Z",
+      "side": 1,
+      "message": "preCommit and commit success steps are verified in previous test.",
+      "parentUuid": "9a3d3df0_18cb471f",
       "revId": "8b2e91a1772526099bc8a97ee038c1e31a3e7b41",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
