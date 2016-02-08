@@ -69,7 +69,7 @@ public class PreLithiumTransactionContextImpl extends RemoteTransactionContext {
         }
 
         if(msg != null) {
-            executeOperationAsync(msg);
+            executeOperationAsync(msg, getActorContext().getOperationTimeout());
         }
     }
 
@@ -79,7 +79,7 @@ public class PreLithiumTransactionContextImpl extends RemoteTransactionContext {
 
         // Send the ReadyTransaction message to the Tx actor.
 
-        Future<Object> lastReplyFuture = executeOperationAsync(ReadyTransaction.INSTANCE);
+        Future<Object> lastReplyFuture = executeOperationAsync(ReadyTransaction.INSTANCE, getActorContext().getOperationTimeout());
 
         return transformReadyReply(lastReplyFuture);
     }
