@@ -140,7 +140,7 @@ public class PreBoronTransactionProxyTest extends AbstractTransactionProxyTest {
 
         NormalizedNode<?, ?> expectedNode = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
         doReturn(readDataReply(expectedNode)).when(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), eqLegacySerializedReadData(TestModel.TEST_PATH));
+                eq(actorSelection(actorRef)), eqLegacySerializedReadData(TestModel.TEST_PATH), any(Timeout.class));
 
         TransactionProxy transactionProxy = new TransactionProxy(mockComponentFactory, READ_WRITE);
 
@@ -156,7 +156,7 @@ public class PreBoronTransactionProxyTest extends AbstractTransactionProxyTest {
         ActorRef actorRef = setupPreBoronActorContextWithInitialCreateTransaction(getSystem(), READ_WRITE);
 
         doReturn(dataExistsReply(true)).when(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), eqLegacySerializedDataExists());
+                eq(actorSelection(actorRef)), eqLegacySerializedDataExists(), any(Timeout.class));
 
         TransactionProxy transactionProxy = new TransactionProxy(mockComponentFactory, READ_WRITE);
 

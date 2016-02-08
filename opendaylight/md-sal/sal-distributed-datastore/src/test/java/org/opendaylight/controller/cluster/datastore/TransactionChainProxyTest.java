@@ -21,7 +21,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.opendaylight.controller.cluster.datastore.TransactionType.READ_WRITE;
 import static org.opendaylight.controller.cluster.datastore.TransactionType.WRITE_ONLY;
-
 import akka.actor.ActorRef;
 import akka.util.Timeout;
 import java.util.concurrent.CountDownLatch;
@@ -129,7 +128,7 @@ public class TransactionChainProxyTest extends AbstractTransactionProxyTest {
 
             Promise<Object> batchedReplyPromise1 = akka.dispatch.Futures.promise();
             doReturn(batchedReplyPromise1.future()).when(mockActorContext).executeOperationAsync(
-                    eq(actorSelection(txActorRef1)), isA(BatchedModifications.class));
+                    eq(actorSelection(txActorRef1)), isA(BatchedModifications.class), any(Timeout.class));
 
             DOMStoreWriteTransaction writeTx1 = txChainProxy.newWriteOnlyTransaction();
 
@@ -199,7 +198,7 @@ public class TransactionChainProxyTest extends AbstractTransactionProxyTest {
 
             Promise<Object> readyReplyPromise1 = akka.dispatch.Futures.promise();
             doReturn(readyReplyPromise1.future()).when(mockActorContext).executeOperationAsync(
-                    eq(actorSelection(txActorRef1)), isA(BatchedModifications.class));
+                    eq(actorSelection(txActorRef1)), isA(BatchedModifications.class), any(Timeout.class));
 
             DOMStoreWriteTransaction writeTx1 = txChainProxy.newReadWriteTransaction();
 
