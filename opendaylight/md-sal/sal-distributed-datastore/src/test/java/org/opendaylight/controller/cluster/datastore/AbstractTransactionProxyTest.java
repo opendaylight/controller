@@ -255,7 +255,7 @@ public abstract class AbstractTransactionProxyTest {
 
     protected void expectBatchedModifications(ActorRef actorRef, int count) {
         doReturn(batchedModificationsReply(count)).when(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), isA(BatchedModifications.class));
+                eq(actorSelection(actorRef)), isA(BatchedModifications.class), any(Timeout.class));
     }
 
     protected void expectBatchedModificationsReady(ActorRef actorRef) {
@@ -265,22 +265,22 @@ public abstract class AbstractTransactionProxyTest {
     protected void expectBatchedModificationsReady(ActorRef actorRef, boolean doCommitOnReady) {
         doReturn(doCommitOnReady ? Futures.successful(new CommitTransactionReply().toSerializable()) :
             readyTxReply(actorRef.path().toString())).when(mockActorContext).executeOperationAsync(
-                    eq(actorSelection(actorRef)), isA(BatchedModifications.class));
+                    eq(actorSelection(actorRef)), isA(BatchedModifications.class), any(Timeout.class));
     }
 
     protected void expectBatchedModifications(int count) {
         doReturn(batchedModificationsReply(count)).when(mockActorContext).executeOperationAsync(
-                any(ActorSelection.class), isA(BatchedModifications.class));
+                any(ActorSelection.class), isA(BatchedModifications.class), any(Timeout.class));
     }
 
     protected void expectIncompleteBatchedModifications() {
         doReturn(incompleteFuture()).when(mockActorContext).executeOperationAsync(
-                any(ActorSelection.class), isA(BatchedModifications.class));
+                any(ActorSelection.class), isA(BatchedModifications.class), any(Timeout.class));
     }
 
     protected void expectFailedBatchedModifications(ActorRef actorRef) {
         doReturn(Futures.failed(new TestException())).when(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), isA(BatchedModifications.class));
+                eq(actorSelection(actorRef)), isA(BatchedModifications.class), any(Timeout.class));
     }
 
     protected void expectReadyLocalTransaction(ActorRef actorRef, boolean doCommitOnReady) {
@@ -387,7 +387,7 @@ public abstract class AbstractTransactionProxyTest {
         ArgumentCaptor<BatchedModifications> batchedModificationsCaptor =
                 ArgumentCaptor.forClass(BatchedModifications.class);
         verify(mockActorContext, Mockito.atLeastOnce()).executeOperationAsync(
-                eq(actorSelection(actorRef)), batchedModificationsCaptor.capture());
+                eq(actorSelection(actorRef)), batchedModificationsCaptor.capture(), any(Timeout.class));
 
         List<BatchedModifications> batchedModifications = filterCaptured(
                 batchedModificationsCaptor, BatchedModifications.class);
