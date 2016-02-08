@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorSelection;
 import akka.dispatch.OnComplete;
+import akka.util.Timeout;
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.SettableFuture;
 import org.opendaylight.controller.cluster.datastore.identifiers.TransactionIdentifier;
@@ -62,8 +63,8 @@ public class RemoteTransactionContext extends AbstractTransactionContext {
         return actorContext;
     }
 
-    protected Future<Object> executeOperationAsync(SerializableMessage msg) {
-        return completeOperation(actorContext.executeOperationAsync(getActor(), msg.toSerializable()));
+    protected Future<Object> executeOperationAsync(SerializableMessage msg, Timeout timeout) {
+        return completeOperation(actorContext.executeOperationAsync(getActor(), msg.toSerializable(), timeout));
     }
 
     @Override
@@ -146,7 +147,7 @@ public class RemoteTransactionContext extends AbstractTransactionContext {
             batchedModifications.setReady(ready);
             batchedModifications.setDoCommitOnReady(doCommitOnReady);
             batchedModifications.setTotalMessagesSent(++totalBatchedModificationsSent);
-            sent = executeOperationAsync(batchedModifications);
+            sent = executeOperationAsync(batchedModifications, actorContext.getTransactionCommitOperationTimeout());
 
             if(ready) {
                 batchedModifications = null;
@@ -201,7 +202,8 @@ public class RemoteTransactionContext extends AbstractTransactionContext {
             }
         };
 
-        Future<Object> future = executeOperationAsync(readCmd.asVersion(getTransactionVersion()));
+        Future<Object> future = executeOperationAsync(readCmd.asVersion(getTransactionVersion()),
+                actorContext.getOperationTimeout());
 
         future.onComplete(onComplete, actorContext.getClientDispatcher());
     }
