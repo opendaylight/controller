@@ -138,19 +138,19 @@ public class PreLithiumTransactionProxyTest extends AbstractTransactionProxyTest
         NormalizedNode<?, ?> testNode = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
         doReturn(readSerializedDataReply(testNode, version)).when(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), eqSerializedReadData(TestModel.TEST_PATH));
+                eq(actorSelection(actorRef)), eqSerializedReadData(TestModel.TEST_PATH), any(Timeout.class));
 
         doReturn(Futures.successful(new WriteDataReply().toSerializable(version))).when(mockActorContext).
-                executeOperationAsync(eq(actorSelection(actorRef)), eqLegacyWriteData(testNode));
+                executeOperationAsync(eq(actorSelection(actorRef)), eqLegacyWriteData(testNode), any(Timeout.class));
 
         doReturn(Futures.successful(new MergeDataReply().toSerializable(version))).when(mockActorContext).
-                executeOperationAsync(eq(actorSelection(actorRef)), eqLegacyMergeData(testNode));
+                executeOperationAsync(eq(actorSelection(actorRef)), eqLegacyMergeData(testNode), any(Timeout.class));
 
         doReturn(Futures.successful(new DeleteDataReply().toSerializable(version))).when(mockActorContext).
-                executeOperationAsync(eq(actorSelection(actorRef)), eqLegacyDeleteData(TestModel.TEST_PATH));
+                executeOperationAsync(eq(actorSelection(actorRef)), eqLegacyDeleteData(TestModel.TEST_PATH), any(Timeout.class));
 
         doReturn(readySerializedTxReply(actorRef.path().toString(), version)).when(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), isA(ReadyTransaction.SERIALIZABLE_CLASS));
+                eq(actorSelection(actorRef)), isA(ReadyTransaction.SERIALIZABLE_CLASS), any(Timeout.class));
 
         doReturn(actorRef.path().toString()).when(mockActorContext).resolvePath(eq(actorRef.path().toString()),
                 eq(actorRef.path().toString()));
@@ -227,10 +227,10 @@ public class PreLithiumTransactionProxyTest extends AbstractTransactionProxyTest
         NormalizedNode<?, ?> testNode = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
         doReturn(Futures.successful(new WriteDataReply().toSerializable(version))).when(mockActorContext).
-                executeOperationAsync(eq(actorSelection(actorRef)), eqLegacyWriteData(testNode));
+                executeOperationAsync(eq(actorSelection(actorRef)), eqLegacyWriteData(testNode), any(Timeout.class));
 
         doReturn(readySerializedTxReply(actorRef.path().toString(), version)).when(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), isA(ReadyTransaction.SERIALIZABLE_CLASS));
+                eq(actorSelection(actorRef)), isA(ReadyTransaction.SERIALIZABLE_CLASS), any(Timeout.class));
 
         TransactionProxy transactionProxy = new TransactionProxy(mockComponentFactory, WRITE_ONLY);
 

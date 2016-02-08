@@ -94,7 +94,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
         TransactionProxy transactionProxy = new TransactionProxy(mockComponentFactory, READ_ONLY);
 
         doReturn(readSerializedDataReply(null)).when(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), eqSerializedReadData());
+                eq(actorSelection(actorRef)), eqSerializedReadData(), any(Timeout.class));
 
         Optional<NormalizedNode<?, ?>> readOptional = transactionProxy.read(
                 TestModel.TEST_PATH).get(5, TimeUnit.SECONDS);
@@ -104,7 +104,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
         NormalizedNode<?, ?> expectedNode = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
         doReturn(readSerializedDataReply(expectedNode)).when(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), eqSerializedReadData());
+                eq(actorSelection(actorRef)), eqSerializedReadData(), any(Timeout.class));
 
         readOptional = transactionProxy.read(TestModel.TEST_PATH).get(5, TimeUnit.SECONDS);
 
@@ -118,7 +118,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
         ActorRef actorRef = setupActorContextWithInitialCreateTransaction(getSystem(), READ_ONLY);
 
         doReturn(Futures.successful(new Object())).when(mockActorContext).
-                executeOperationAsync(eq(actorSelection(actorRef)), eqSerializedReadData());
+                executeOperationAsync(eq(actorSelection(actorRef)), eqSerializedReadData(), any(Timeout.class));
 
         TransactionProxy transactionProxy = new TransactionProxy(mockComponentFactory, READ_ONLY);
 
@@ -130,7 +130,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
         ActorRef actorRef = setupActorContextWithInitialCreateTransaction(getSystem(), READ_ONLY);
 
         doReturn(Futures.failed(new TestException())).when(mockActorContext).
-                executeOperationAsync(eq(actorSelection(actorRef)), eqSerializedReadData());
+                executeOperationAsync(eq(actorSelection(actorRef)), eqSerializedReadData(), any(Timeout.class));
 
         TransactionProxy transactionProxy = new TransactionProxy(mockComponentFactory, READ_ONLY);
 
@@ -190,7 +190,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
         expectBatchedModifications(actorRef, 1);
 
         doReturn(readSerializedDataReply(expectedNode)).when(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), eqSerializedReadData());
+                eq(actorSelection(actorRef)), eqSerializedReadData(), any(Timeout.class));
 
         TransactionProxy transactionProxy = new TransactionProxy(mockComponentFactory, READ_WRITE);
 
@@ -204,10 +204,10 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
 
         InOrder inOrder = Mockito.inOrder(mockActorContext);
         inOrder.verify(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), isA(BatchedModifications.class));
+                eq(actorSelection(actorRef)), isA(BatchedModifications.class), any(Timeout.class));
 
         inOrder.verify(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), eqSerializedReadData());
+                eq(actorSelection(actorRef)), eqSerializedReadData(), any(Timeout.class));
     }
 
     @Test(expected=IllegalStateException.class)
@@ -242,14 +242,14 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
         TransactionProxy transactionProxy = new TransactionProxy(mockComponentFactory, READ_ONLY);
 
         doReturn(dataExistsSerializedReply(false)).when(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), eqSerializedDataExists());
+                eq(actorSelection(actorRef)), eqSerializedDataExists(), any(Timeout.class));
 
         Boolean exists = transactionProxy.exists(TestModel.TEST_PATH).checkedGet();
 
         assertEquals("Exists response", false, exists);
 
         doReturn(dataExistsSerializedReply(true)).when(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), eqSerializedDataExists());
+                eq(actorSelection(actorRef)), eqSerializedDataExists(), any(Timeout.class));
 
         exists = transactionProxy.exists(TestModel.TEST_PATH).checkedGet();
 
@@ -271,7 +271,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
         ActorRef actorRef = setupActorContextWithInitialCreateTransaction(getSystem(), READ_ONLY);
 
         doReturn(Futures.successful(new Object())).when(mockActorContext).
-                executeOperationAsync(eq(actorSelection(actorRef)), eqSerializedDataExists());
+                executeOperationAsync(eq(actorSelection(actorRef)), eqSerializedDataExists(), any(Timeout.class));
 
         TransactionProxy transactionProxy = new TransactionProxy(mockComponentFactory, READ_ONLY);
 
@@ -283,7 +283,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
         ActorRef actorRef = setupActorContextWithInitialCreateTransaction(getSystem(), READ_ONLY);
 
         doReturn(Futures.failed(new TestException())).when(mockActorContext).
-                executeOperationAsync(eq(actorSelection(actorRef)), eqSerializedDataExists());
+                executeOperationAsync(eq(actorSelection(actorRef)), eqSerializedDataExists(), any(Timeout.class));
 
         TransactionProxy transactionProxy = new TransactionProxy(mockComponentFactory, READ_ONLY);
 
@@ -299,7 +299,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
         expectBatchedModifications(actorRef, 1);
 
         doReturn(dataExistsSerializedReply(true)).when(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), eqSerializedDataExists());
+                eq(actorSelection(actorRef)), eqSerializedDataExists(), any(Timeout.class));
 
         TransactionProxy transactionProxy = new TransactionProxy(mockComponentFactory, READ_WRITE);
 
@@ -311,10 +311,10 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
 
         InOrder inOrder = Mockito.inOrder(mockActorContext);
         inOrder.verify(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), isA(BatchedModifications.class));
+                eq(actorSelection(actorRef)), isA(BatchedModifications.class), any(Timeout.class));
 
         inOrder.verify(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), eqSerializedDataExists());
+                eq(actorSelection(actorRef)), eqSerializedDataExists(), any(Timeout.class));
     }
 
     @Test(expected=IllegalStateException.class)
@@ -349,7 +349,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
                 eqCreateTransaction(memberName, READ_WRITE), any(Timeout.class));
 
         doReturn(readSerializedDataReply(null)).when(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), eqSerializedReadData());
+                eq(actorSelection(actorRef)), eqSerializedReadData(), any(Timeout.class));
 
         expectBatchedModificationsReady(actorRef);
 
@@ -445,7 +445,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
         NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
         doReturn(readSerializedDataReply(null)).when(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), eqSerializedReadData());
+                eq(actorSelection(actorRef)), eqSerializedReadData(), any(Timeout.class));
 
         expectBatchedModifications(actorRef, 1);
 
@@ -473,7 +473,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
         NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
         doReturn(readSerializedDataReply(null)).when(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), eqSerializedReadData());
+                eq(actorSelection(actorRef)), eqSerializedReadData(), any(Timeout.class));
 
         expectBatchedModificationsReady(actorRef, true);
 
@@ -503,7 +503,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
         ActorRef actorRef = setupActorContextWithInitialCreateTransaction(getSystem(), READ_WRITE);
 
         doReturn(readSerializedDataReply(null)).when(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), eqSerializedReadData());
+                eq(actorSelection(actorRef)), eqSerializedReadData(), any(Timeout.class));
 
         expectBatchedModificationsReady(actorRef, true);
 
@@ -737,7 +737,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
         ActorRef actorRef2 = setupActorContextWithInitialCreateTransaction(getSystem(), WRITE_ONLY, "junk");
 
         doReturn(Futures.successful(new Object())).when(mockActorContext).
-                executeOperationAsync(eq(actorSelection(actorRef1)), isA(BatchedModifications.class));
+                executeOperationAsync(eq(actorSelection(actorRef1)), isA(BatchedModifications.class), any(Timeout.class));
 
         expectBatchedModificationsReady(actorRef2);
 
@@ -769,7 +769,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
         ActorRef actorRef = setupActorContextWithInitialCreateTransaction(getSystem(), READ_WRITE);
 
         doReturn(readSerializedDataReply(null)).when(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), eqSerializedReadData());
+                eq(actorSelection(actorRef)), eqSerializedReadData(), any(Timeout.class));
 
         TransactionProxy transactionProxy = new TransactionProxy(mockComponentFactory, READ_WRITE);
 
@@ -803,7 +803,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
 
         // negative test case with null as the reply
         doReturn(readDataReply(null)).when(mockActorContext).executeOperationAsync(
-            any(ActorSelection.class), eqReadData());
+            any(ActorSelection.class), eqReadData(), any(Timeout.class));
 
         Optional<NormalizedNode<?, ?>> readOptional = transactionProxy.read(
             TestModel.TEST_PATH).get(5, TimeUnit.SECONDS);
@@ -814,7 +814,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
         NormalizedNode<?, ?> expectedNode = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
         doReturn(readDataReply(expectedNode)).when(mockActorContext).executeOperationAsync(
-            any(ActorSelection.class), eqReadData());
+            any(ActorSelection.class), eqReadData(), any(Timeout.class));
 
         readOptional = transactionProxy.read(TestModel.TEST_PATH).get(5, TimeUnit.SECONDS);
 
@@ -824,7 +824,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
 
         // test for local data exists
         doReturn(dataExistsReply(true)).when(mockActorContext).executeOperationAsync(
-            any(ActorSelection.class), eqDataExists());
+            any(ActorSelection.class), eqDataExists(), any(Timeout.class));
 
         boolean exists = transactionProxy.exists(TestModel.TEST_PATH).checkedGet();
 
@@ -1246,7 +1246,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
                 NormalizedNode<?, ?> nodeToRead = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
                 doReturn(readDataReply(nodeToRead)).when(mockActorContext).executeOperationAsync(
-                        any(ActorSelection.class), eqReadData());
+                        any(ActorSelection.class), eqReadData(), any(Timeout.class));
 
                 transactionProxy.read(TestModel.TEST_PATH);
 
@@ -1322,7 +1322,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
             @Override
             public void run(TransactionProxy transactionProxy) {
                 doReturn(dataExistsReply(true)).when(mockActorContext).executeOperationAsync(
-                        any(ActorSelection.class), eqDataExists());
+                        any(ActorSelection.class), eqDataExists(), any(Timeout.class));
 
                 transactionProxy.exists(TestModel.TEST_PATH);
 
@@ -1498,13 +1498,13 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
         YangInstanceIdentifier deletePath = TestModel.OUTER_LIST_PATH;
 
         doReturn(readSerializedDataReply(writeNode2)).when(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), eqSerializedReadData(writePath2));
+                eq(actorSelection(actorRef)), eqSerializedReadData(writePath2), any(Timeout.class));
 
         doReturn(readSerializedDataReply(mergeNode2)).when(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), eqSerializedReadData(mergePath2));
+                eq(actorSelection(actorRef)), eqSerializedReadData(mergePath2), any(Timeout.class));
 
         doReturn(dataExistsSerializedReply(true)).when(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), eqSerializedDataExists());
+                eq(actorSelection(actorRef)), eqSerializedDataExists(), any(Timeout.class));
 
         TransactionProxy transactionProxy = new TransactionProxy(mockComponentFactory, READ_WRITE);
 
@@ -1543,22 +1543,22 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
 
         InOrder inOrder = Mockito.inOrder(mockActorContext);
         inOrder.verify(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), isA(BatchedModifications.class));
+                eq(actorSelection(actorRef)), isA(BatchedModifications.class), any(Timeout.class));
 
         inOrder.verify(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), eqSerializedReadData(writePath2));
+                eq(actorSelection(actorRef)), eqSerializedReadData(writePath2), any(Timeout.class));
 
         inOrder.verify(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), isA(BatchedModifications.class));
+                eq(actorSelection(actorRef)), isA(BatchedModifications.class), any(Timeout.class));
 
         inOrder.verify(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), eqSerializedReadData(mergePath2));
+                eq(actorSelection(actorRef)), eqSerializedReadData(mergePath2), any(Timeout.class));
 
         inOrder.verify(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), isA(BatchedModifications.class));
+                eq(actorSelection(actorRef)), isA(BatchedModifications.class), any(Timeout.class));
 
         inOrder.verify(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), eqSerializedDataExists());
+                eq(actorSelection(actorRef)), eqSerializedDataExists(), any(Timeout.class));
     }
 
     @Test
@@ -1631,6 +1631,6 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
                         eqCreateTransaction(memberName, TransactionType.READ_ONLY), any(Timeout.class));
 
         doReturn(readSerializedDataReply(expectedNode)).when(mockActorContext).executeOperationAsync(
-                eq(actorSelection(txActorRef)), eqSerializedReadData(YangInstanceIdentifier.builder().build()));
+                eq(actorSelection(txActorRef)), eqSerializedReadData(YangInstanceIdentifier.builder().build()), any(Timeout.class));
     }
 }
