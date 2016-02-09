@@ -8,14 +8,14 @@
 
 package org.opendaylight.controller.cluster.raft;
 
-import akka.japi.Procedure;
-import akka.persistence.SnapshotSelectionCriteria;
 import com.google.common.annotations.VisibleForTesting;
 import java.util.List;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.SendInstallSnapshot;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.slf4j.Logger;
+import akka.japi.Procedure;
+import akka.persistence.SnapshotSelectionCriteria;
 
 public class SnapshotManager implements SnapshotState {
 
@@ -211,8 +211,18 @@ public class SnapshotManager implements SnapshotState {
 
             List<ReplicatedLogEntry> unAppliedEntries = context.getReplicatedLog().getFrom(lastAppliedIndex + 1);
 
-            captureSnapshot = new CaptureSnapshot(lastLogEntry.getIndex(),
-                    lastLogEntry.getTerm(), lastAppliedIndex, lastAppliedTerm,
+            long lastLogEntryIndex = lastAppliedIndex;
+            long lastLogEntryTerm = lastAppliedTerm;
+            if(lastLogEntry != null) {
+                lastLogEntryIndex = lastLogEntry.getIndex();
+                lastLogEntryTerm = lastLogEntry.getTerm();
+            } else {
+                LOG.debug("{}: Capturing Snapshot : lastLogEntry is null. Using lastAppliedIndex {} and lastAppliedTerm {} instead.",
+                        persistenceId(), lastAppliedIndex, lastAppliedTerm);
+            }
+
+            captureSnapshot = new CaptureSnapshot(lastLogEntryIndex,
+                    lastLogEntryTerm, lastAppliedIndex, lastAppliedTerm,
                     newReplicatedToAllIndex, newReplicatedToAllTerm, unAppliedEntries, targetFollower != null);
 
             if(captureSnapshot.isInstallSnapshotInitiated()) {
