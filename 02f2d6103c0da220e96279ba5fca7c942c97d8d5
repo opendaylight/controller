@@ -34,6 +34,24 @@
       "revId": "02f2d6103c0da220e96279ba5fca7c942c97d8d5",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_d264094b",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/identifiers/TransactionIdentifier.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-02-09T17:18:14Z",
+      "side": 1,
+      "message": "Well, both systems have a node id, so that identifies entities. We need a mechanism by which both parties can signal that they have restarted in a way that lost state, so that the other party can adjust their local state accordingly.\n\nOtherwise this is not resistant to restart+clock going backwards. Nanotime does not help either, as that is even less defined.",
+      "parentUuid": "9a3d3df0_95727dab",
+      "revId": "02f2d6103c0da220e96279ba5fca7c942c97d8d5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
