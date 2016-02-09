@@ -52,6 +52,24 @@
       "revId": "02f2d6103c0da220e96279ba5fca7c942c97d8d5",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_75e887e2",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/identifiers/TransactionIdentifier.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-02-09T18:33:28Z",
+      "side": 1,
+      "message": "I don\u0027t think we need any more mechanisms to communicate state that will make things even more complicated. We just need unique txn IDs to fix this issue so I\u0027ll use a UUID even though it\u0027s rather long.",
+      "parentUuid": "9a3d3df0_d264094b",
+      "revId": "02f2d6103c0da220e96279ba5fca7c942c97d8d5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
