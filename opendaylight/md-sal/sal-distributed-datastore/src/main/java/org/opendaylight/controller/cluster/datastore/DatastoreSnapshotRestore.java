@@ -90,7 +90,7 @@ public class DatastoreSnapshotRestore {
         }
     }
 
-    private DatastoreSnapshotList deserialize(InputStream inputStream) throws IOException, ClassNotFoundException {
+    private static DatastoreSnapshotList deserialize(InputStream inputStream) throws IOException, ClassNotFoundException {
         try(ObjectInputStream ois = new ObjectInputStream(inputStream)) {
             return (DatastoreSnapshotList) ois.readObject();
         }

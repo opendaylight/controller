@@ -242,7 +242,7 @@ public class ShardManagerTest extends AbstractActorTest {
         return shardManager;
     }
 
-    private void waitForShardInitialized(ActorRef shardManager, String shardName, JavaTestKit kit) {
+    private static void waitForShardInitialized(ActorRef shardManager, String shardName, JavaTestKit kit) {
         AssertionError last = null;
         Stopwatch sw = Stopwatch.createStarted();
         while(sw.elapsed(TimeUnit.SECONDS) <= 5) {
@@ -260,7 +260,7 @@ public class ShardManagerTest extends AbstractActorTest {
         throw last;
     }
 
-    private <T> T expectMsgClassOrFailure(Class<T> msgClass, JavaTestKit kit, String msg) {
+    private static <T> T expectMsgClassOrFailure(Class<T> msgClass, JavaTestKit kit, String msg) {
         Object reply = kit.expectMsgAnyClassOf(JavaTestKit.duration("5 sec"), msgClass, Failure.class);
         if(reply instanceof Failure) {
             throw new AssertionError(msg + " failed", ((Failure)reply).cause());
@@ -2156,7 +2156,7 @@ public class ShardManagerTest extends AbstractActorTest {
         boolean canIntercept(Object message);
     }
 
-    private MessageInterceptor newFindPrimaryInterceptor(final ActorRef primaryActor) {
+    private static MessageInterceptor newFindPrimaryInterceptor(final ActorRef primaryActor) {
         return new MessageInterceptor(){
             @Override
             public Object apply(Object message) {
