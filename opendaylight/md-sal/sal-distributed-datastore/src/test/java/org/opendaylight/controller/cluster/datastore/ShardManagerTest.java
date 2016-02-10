@@ -1777,7 +1777,7 @@ public class ShardManagerTest extends AbstractActorTest {
 
 
     public void testServerChangeWhenAlreadyInProgress(final String shardName, final Object firstServerChange,
-                                                      final Class firstForwardedServerChangeClass,
+                                                      final Class<?> firstForwardedServerChangeClass,
                                                       final Object secondServerChange) throws Exception {
         new JavaTestKit(getSystem()) {{
             JavaTestKit mockShardLeaderKit = new JavaTestKit(getSystem());
