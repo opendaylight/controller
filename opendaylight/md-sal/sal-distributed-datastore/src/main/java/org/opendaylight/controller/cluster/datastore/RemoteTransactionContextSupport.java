@@ -110,7 +110,7 @@ final class RemoteTransactionContextSupport {
             // For write-only Tx's we prepare the transaction modifications directly on the shard actor
             // to avoid the overhead of creating a separate transaction actor.
             transactionContextWrapper.executePriorTransactionOperations(createValidTransactionContext(
-                    primaryShard, primaryShard.path().toString(), primaryShardInfo.getPrimaryShardVersion()));
+                    primaryShard, String.valueOf(primaryShard.path()), primaryShardInfo.getPrimaryShardVersion()));
         } else {
             tryCreateTransaction();
         }

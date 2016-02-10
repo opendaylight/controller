@@ -2001,22 +2001,22 @@ public class ShardManagerTest extends AbstractActorTest {
                 if(message instanceof FindPrimary) {
                     findPrimaryMessageReceived.countDown();
                 } else if(message instanceof ClusterEvent.MemberUp) {
-                    String role = ((ClusterEvent.MemberUp)message).member().roles().head();
+                    String role = ((ClusterEvent.MemberUp)message).member().roles().iterator().next();
                     if(!getCluster().getCurrentMemberName().equals(role)) {
                         memberUpReceived.countDown();
                     }
                 } else if(message instanceof ClusterEvent.MemberRemoved) {
-                    String role = ((ClusterEvent.MemberRemoved)message).member().roles().head();
+                    String role = ((ClusterEvent.MemberRemoved)message).member().roles().iterator().next();
                     if(!getCluster().getCurrentMemberName().equals(role)) {
                         memberRemovedReceived.countDown();
                     }
                 } else if(message instanceof ClusterEvent.UnreachableMember) {
-                    String role = ((ClusterEvent.UnreachableMember)message).member().roles().head();
+                    String role = ((ClusterEvent.UnreachableMember)message).member().roles().iterator().next();
                     if(!getCluster().getCurrentMemberName().equals(role)) {
                         memberUnreachableReceived.countDown();
                     }
                 } else if(message instanceof ClusterEvent.ReachableMember) {
-                    String role = ((ClusterEvent.ReachableMember)message).member().roles().head();
+                    String role = ((ClusterEvent.ReachableMember)message).member().roles().iterator().next();
                     if(!getCluster().getCurrentMemberName().equals(role)) {
                         memberReachableReceived.countDown();
                     }

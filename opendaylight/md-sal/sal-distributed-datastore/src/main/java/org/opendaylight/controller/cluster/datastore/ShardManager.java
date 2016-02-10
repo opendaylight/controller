@@ -750,7 +750,7 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     }
 
     private void memberRemoved(ClusterEvent.MemberRemoved message) {
-        String memberName = message.member().roles().head();
+        String memberName = message.member().roles().iterator().next();
 
         LOG.debug("{}: Received MemberRemoved: memberName: {}, address: {}", persistenceId(), memberName,
                 message.member().address());
@@ -763,7 +763,7 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     }
 
     private void memberExited(ClusterEvent.MemberExited message) {
-        String memberName = message.member().roles().head();
+        String memberName = message.member().roles().iterator().next();
 
         LOG.debug("{}: Received MemberExited: memberName: {}, address: {}", persistenceId(), memberName,
                 message.member().address());
@@ -776,7 +776,7 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     }
 
     private void memberUp(ClusterEvent.MemberUp message) {
-        String memberName = message.member().roles().head();
+        String memberName = message.member().roles().iterator().next();
 
         LOG.debug("{}: Received MemberUp: memberName: {}, address: {}", persistenceId(), memberName,
                 message.member().address());
@@ -799,7 +799,7 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     }
 
     private void memberReachable(ClusterEvent.ReachableMember message) {
-        String memberName = message.member().roles().head();
+        String memberName = message.member().roles().iterator().next();
         LOG.debug("Received ReachableMember: memberName {}, address: {}", memberName, message.member().address());
 
         addPeerAddress(memberName, message.member().address());
@@ -808,7 +808,7 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     }
 
     private void memberUnreachable(ClusterEvent.UnreachableMember message) {
-        String memberName = message.member().roles().head();
+        String memberName = message.member().roles().iterator().next();
         LOG.debug("Received UnreachableMember: memberName {}, address: {}", memberName, message.member().address());
 
         markMemberUnavailable(memberName);
