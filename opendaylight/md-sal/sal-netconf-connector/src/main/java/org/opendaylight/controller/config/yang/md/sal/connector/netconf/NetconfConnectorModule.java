@@ -150,14 +150,14 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
         final BindingAwareBroker bindingBroker = getBindingRegistryDependency();
 
         RemoteDeviceHandler<NetconfSessionPreferences> salFacade
-                = new NetconfDeviceSalFacade(id, domBroker, bindingBroker, bundleContext, getDefaultRequestTimeoutMillis());
+                = new NetconfDeviceSalFacade(id, domBroker, bindingBroker, bundleContext);
 
         final Long keepaliveDelay = getKeepaliveDelay();
         if(shouldSendKeepalive()) {
             // Keepalive executor is optional for now and a default instance is supported
             final ScheduledExecutorService executor = getKeepaliveExecutor() == null ?
                     DEFAULT_KEEPALIVE_EXECUTOR : getKeepaliveExecutorDependency().getExecutor();
-            salFacade = new KeepaliveSalFacade(id, salFacade, executor, keepaliveDelay);
+            salFacade = new KeepaliveSalFacade(id, salFacade, executor, keepaliveDelay, getDefaultRequestTimeoutMillis());
         }
 
         final String moduleSchemaCacheDirectory = getSchemaCacheDirectory();
