@@ -35,16 +35,14 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 final class NetconfDeviceDataBroker implements DOMDataBroker {
     private final RemoteDeviceId id;
     private final NetconfBaseOps netconfOps;
-    private final long requestTimeoutMillis;
 
     private final boolean rollbackSupport;
     private boolean candidateSupported;
     private boolean runningWritable;
 
-    public NetconfDeviceDataBroker(final RemoteDeviceId id, final SchemaContext schemaContext, final DOMRpcService rpc, final NetconfSessionPreferences netconfSessionPreferences, long requestTimeoutMillis) {
+    public NetconfDeviceDataBroker(final RemoteDeviceId id, final SchemaContext schemaContext, final DOMRpcService rpc, final NetconfSessionPreferences netconfSessionPreferences) {
         this.id = id;
         this.netconfOps = new NetconfBaseOps(rpc, schemaContext);
-        this.requestTimeoutMillis = requestTimeoutMillis;
         // get specific attributes from netconf preferences and get rid of it
         // no need to keep the entire preferences object, its quite big with all the capability QNames
         candidateSupported = netconfSessionPreferences.isCandidateSupported();
@@ -54,7 +52,7 @@ final class NetconfDeviceDataBroker implements DOMDataBroker {
 
     @Override
     public DOMDataReadOnlyTransaction newReadOnlyTransaction() {
-        return new ReadOnlyTx(netconfOps, id, requestTimeoutMillis);
+        return new ReadOnlyTx(netconfOps, id);
     }
 
     @Override
@@ -66,12 +64,12 @@ final class NetconfDeviceDataBroker implements DOMDataBroker {
     public DOMDataWriteTransaction newWriteOnlyTransaction() {
         if(candidateSupported) {
             if(runningWritable) {
-                return new WriteCandidateRunningTx(id, netconfOps, rollbackSupport, requestTimeoutMillis);
+                return new WriteCandidateRunningTx(id, netconfOps, rollbackSupport);
             } else {
-                return new WriteCandidateTx(id, netconfOps, rollbackSupport, requestTimeoutMillis);
+                return new WriteCandidateTx(id, netconfOps, rollbackSupport);
             }
         } else {
-            return new WriteRunningTx(id, netconfOps, rollbackSupport, requestTimeoutMillis);
+            return new WriteRunningTx(id, netconfOps, rollbackSupport);
         }
     }
 
