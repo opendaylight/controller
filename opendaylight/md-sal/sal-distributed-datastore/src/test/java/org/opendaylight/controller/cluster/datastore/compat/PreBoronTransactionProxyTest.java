@@ -64,7 +64,7 @@ public class PreBoronTransactionProxyTest extends AbstractTransactionProxyTest {
         return argThat(matcher);
     }
 
-    private ShardTransactionMessages.CreateTransactionReply legacyCreateTransactionReply(ActorRef actorRef,
+    private static ShardTransactionMessages.CreateTransactionReply legacyCreateTransactionReply(ActorRef actorRef,
             int transactionVersion){
         return ShardTransactionMessages.CreateTransactionReply.newBuilder()
             .setTransactionActorPath(actorRef.path().toString())
@@ -73,7 +73,7 @@ public class PreBoronTransactionProxyTest extends AbstractTransactionProxyTest {
             .build();
     }
 
-    private ReadData eqLegacySerializedReadData(final YangInstanceIdentifier path) {
+    private static ReadData eqLegacySerializedReadData(final YangInstanceIdentifier path) {
         ArgumentMatcher<ReadData> matcher = new ArgumentMatcher<ReadData>() {
             @Override
             public boolean matches(Object argument) {
@@ -85,7 +85,7 @@ public class PreBoronTransactionProxyTest extends AbstractTransactionProxyTest {
         return argThat(matcher);
     }
 
-    private DataExists eqLegacySerializedDataExists() {
+    private static DataExists eqLegacySerializedDataExists() {
         ArgumentMatcher<DataExists> matcher = new ArgumentMatcher<DataExists>() {
             @Override
             public boolean matches(Object argument) {

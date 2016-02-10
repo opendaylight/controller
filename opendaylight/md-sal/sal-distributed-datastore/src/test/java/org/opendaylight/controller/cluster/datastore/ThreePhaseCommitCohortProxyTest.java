@@ -298,7 +298,7 @@ public class ThreePhaseCommitCohortProxyTest extends AbstractActorTest {
         });
     }
 
-    private CohortInfo newCohortInfoWithFailedFuture(Exception failure) {
+    private static CohortInfo newCohortInfoWithFailedFuture(Exception failure) {
         return new CohortInfo(Futures.<ActorSelection>failed(failure), new Supplier<Short>() {
             @Override
             public Short get() {

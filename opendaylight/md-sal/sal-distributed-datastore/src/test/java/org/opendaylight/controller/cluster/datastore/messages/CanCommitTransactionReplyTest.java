@@ -29,7 +29,7 @@ public class CanCommitTransactionReplyTest {
                 CanCommitTransactionReply.class);
     }
 
-    private void testSerialization(CanCommitTransactionReply expected, Class<?> expSerialized) {
+    private static void testSerialization(CanCommitTransactionReply expected, Class<?> expSerialized) {
         Object serialized = expected.toSerializable();
         assertEquals("Serialized type", expSerialized, serialized.getClass());
 

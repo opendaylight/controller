@@ -1191,7 +1191,7 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         }
     }
 
-    private Exception getServerChangeException(Class<?> serverChange, ServerChangeStatus serverChangeStatus,
+    private static Exception getServerChangeException(Class<?> serverChange, ServerChangeStatus serverChangeStatus,
                                                String leaderPath, ShardIdentifier shardId) {
         Exception failure;
         switch (serverChangeStatus) {

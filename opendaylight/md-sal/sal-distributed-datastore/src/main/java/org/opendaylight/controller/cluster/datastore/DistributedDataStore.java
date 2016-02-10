@@ -232,8 +232,8 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener,
         }
     }
 
-    private ActorRef createShardManager(ActorSystem actorSystem, ShardManager.Builder builder, String shardDispatcher,
-                                        String shardManagerId){
+    private static ActorRef createShardManager(ActorSystem actorSystem, ShardManager.Builder builder,
+            String shardDispatcher, String shardManagerId) {
         Exception lastException = null;
 
         for(int i=0;i<100;i++) {

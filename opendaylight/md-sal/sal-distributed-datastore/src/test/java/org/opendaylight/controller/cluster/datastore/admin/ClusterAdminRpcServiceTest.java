@@ -133,7 +133,7 @@ public class ClusterAdminRpcServiceTest {
         service.close();
     }
 
-    private void verifyDatastoreSnapshot(String type, DatastoreSnapshot datastoreSnapshot, String... expShardNames) {
+    private static void verifyDatastoreSnapshot(String type, DatastoreSnapshot datastoreSnapshot, String... expShardNames) {
         assertNotNull("Missing DatastoreSnapshot for type " + type, datastoreSnapshot);
         Set<String> shardNames = new HashSet<>();
         for(DatastoreSnapshot.ShardSnapshot s: datastoreSnapshot.getShardSnapshots()) {
@@ -231,7 +231,7 @@ public class ClusterAdminRpcServiceTest {
         service.close();
     }
 
-    private NormalizedNode<?, ?> writeCarsNodeAndVerify(DistributedDataStore writeToStore,
+    private static NormalizedNode<?, ?> writeCarsNodeAndVerify(DistributedDataStore writeToStore,
             DistributedDataStore readFromStore) throws Exception {
         DOMStoreWriteTransaction writeTx = writeToStore.newWriteOnlyTransaction();
         NormalizedNode<?, ?> carsNode = CarsModel.create();
@@ -247,7 +247,7 @@ public class ClusterAdminRpcServiceTest {
         return carsNode;
     }
 
-    private void readCarsNodeAndVerify(DistributedDataStore readFromStore,
+    private static void readCarsNodeAndVerify(DistributedDataStore readFromStore,
             NormalizedNode<?, ?> expCarsNode) throws Exception {
         Optional<NormalizedNode<?, ?>> optional = readFromStore.newReadOnlyTransaction().
                 read(CarsModel.BASE_PATH).get(15, TimeUnit.SECONDS);
@@ -255,7 +255,7 @@ public class ClusterAdminRpcServiceTest {
         assertEquals("Data node", expCarsNode, optional.get());
     }
 
-    private void doAddShardReplica(MemberNode memberNode, String shardName, String... peerMemberNames)
+    private static void doAddShardReplica(MemberNode memberNode, String shardName, String... peerMemberNames)
             throws Exception {
         memberNode.waitForMembersUp(peerMemberNames);
 
@@ -280,7 +280,7 @@ public class ClusterAdminRpcServiceTest {
         service.close();
     }
 
-    private <T> T verifySuccessfulRpcResult(RpcResult<T> rpcResult) {
+    private static <T> T verifySuccessfulRpcResult(RpcResult<T> rpcResult) {
         if(!rpcResult.isSuccessful()) {
             if(rpcResult.getErrors().size() > 0) {
                 RpcError error = Iterables.getFirst(rpcResult.getErrors(), null);
@@ -293,7 +293,7 @@ public class ClusterAdminRpcServiceTest {
         return rpcResult.getResult();
     }
 
-    private void verifyFailedRpcResult(RpcResult<Void> rpcResult) {
+    private static void verifyFailedRpcResult(RpcResult<Void> rpcResult) {
         assertEquals("RpcResult", false, rpcResult.isSuccessful());
         assertEquals("RpcResult errors size", 1, rpcResult.getErrors().size());
         RpcError error = Iterables.getFirst(rpcResult.getErrors(), null);
@@ -530,7 +530,7 @@ public class ClusterAdminRpcServiceTest {
         // TODO implement
     }
 
-    private void verifyShardResults(List<ShardResult> shardResults, ShardResult... expShardResults) {
+    private static void verifyShardResults(List<ShardResult> shardResults, ShardResult... expShardResults) {
         Map<String, ShardResult> expResultsMap = new HashMap<>();
         for(ShardResult r: expShardResults) {
             expResultsMap.put(r.getShardName() + "-" + r.getDataStoreType(), r);
@@ -553,11 +553,11 @@ public class ClusterAdminRpcServiceTest {
         }
     }
 
-    private ShardResult successShardResult(String shardName, DataStoreType type) {
+    private static ShardResult successShardResult(String shardName, DataStoreType type) {
         return new ShardResultBuilder().setDataStoreType(type).setShardName(shardName).setSucceeded(true).build();
     }
 
-    private ShardResult failedShardResult(String shardName, DataStoreType type) {
+    private static ShardResult failedShardResult(String shardName, DataStoreType type) {
         return new ShardResultBuilder().setDataStoreType(type).setShardName(shardName).setSucceeded(false).build();
     }
 }
