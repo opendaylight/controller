@@ -14,11 +14,7 @@ import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
-
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadOnlyTransaction;
@@ -44,12 +40,9 @@ public final class ReadOnlyTx implements DOMDataReadOnlyTransaction {
     private final RemoteDeviceId id;
     private final FutureCallback<DOMRpcResult> loggingCallback;
 
-    private final long requestTimeoutMillis;
-
-    public ReadOnlyTx(final NetconfBaseOps netconfOps, final RemoteDeviceId id, final long requestTimeoutMillis) {
+    public ReadOnlyTx(final NetconfBaseOps netconfOps, final RemoteDeviceId id) {
         this.netconfOps = netconfOps;
         this.id = id;
-        this.requestTimeoutMillis = requestTimeoutMillis;
 
         // Simple logging callback to log result of read operation
         loggingCallback = new FutureCallback<DOMRpcResult>() {
@@ -60,6 +53,7 @@ public final class ReadOnlyTx implements DOMDataReadOnlyTransaction {
                 } else {
                     LOG.warn("{}: Reading data unsuccessful: {}", id, result.getErrors());
                 }
+
             }
 
             @Override
@@ -82,11 +76,6 @@ public final class ReadOnlyTx implements DOMDataReadOnlyTransaction {
                 return NormalizedNodes.findNode(dataNode, path.getPathArguments());
             }
         });
-
-
-        if(!readWithTimeout("readConfigurationData", configRunning)) {
-            return null;
-        }
 
         return MappingCheckedFuture.create(transformedFuture, ReadFailedException.MAPPER);
     }
@@ -118,10 +107,6 @@ public final class ReadOnlyTx implements DOMDataReadOnlyTransaction {
                 return NormalizedNodes.findNode(dataNode, path.getPathArguments());
             }
         });
-
-        if(!readWithTimeout("readOperationalData", configCandidate)) {
-            return null;
-        }
 
         return MappingCheckedFuture.create(transformedFuture, ReadFailedException.MAPPER);
     }
@@ -160,19 +145,5 @@ public final class ReadOnlyTx implements DOMDataReadOnlyTransaction {
     @Override
     public Object getIdentifier() {
         return this;
-    }
-
-    private boolean readWithTimeout(String operation, ListenableFuture<DOMRpcResult> future) {
-        try {
-            future.get(requestTimeoutMillis, TimeUnit.MILLISECONDS);
-        } catch (InterruptedException | ExecutionException e) {
-            LOG.error("{}: {} failed with error", id, operation, e);
-            throw new RuntimeException(id + ": readOperationalData failed");
-        } catch (TimeoutException e) {
-            LOG.warn("{}: Unable to {} after {} milliseconds", id, operation, requestTimeoutMillis, e);
-            future.cancel(true);
-            return false;
-        }
-        return true;
     }
 }

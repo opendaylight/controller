@@ -16,9 +16,13 @@ import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
+
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.opendaylight.controller.md.sal.dom.api.DOMNotification;
@@ -51,28 +55,33 @@ public final class KeepaliveSalFacade implements RemoteDeviceHandler<NetconfSess
     // 2 minutes keepalive delay by default
     private static final long DEFAULT_DELAY = TimeUnit.MINUTES.toSeconds(2);
 
+    // 1 minute transaction timeout by default
+    private static final long DEFAULT_TRANSACTION_TIMEOUT_MILLI = TimeUnit.MILLISECONDS.toMillis(60000);
+
     private final RemoteDeviceId id;
     private final RemoteDeviceHandler<NetconfSessionPreferences> salFacade;
     private final ScheduledExecutorService executor;
     private final long keepaliveDelaySeconds;
     private final ResetKeepalive resetKeepaliveTask;
+    private final long defaultRequestTimeoutMillis;
 
     private volatile NetconfDeviceCommunicator listener;
     private volatile ScheduledFuture<?> currentKeepalive;
     private volatile DOMRpcService currentDeviceRpc;
 
     public KeepaliveSalFacade(final RemoteDeviceId id, final RemoteDeviceHandler<NetconfSessionPreferences> salFacade,
-                              final ScheduledExecutorService executor, final long keepaliveDelaySeconds) {
+                              final ScheduledExecutorService executor, final long keepaliveDelaySeconds, final long defaultRequestTimeoutMillis) {
         this.id = id;
         this.salFacade = salFacade;
         this.executor = executor;
         this.keepaliveDelaySeconds = keepaliveDelaySeconds;
+        this.defaultRequestTimeoutMillis = defaultRequestTimeoutMillis;
         this.resetKeepaliveTask = new ResetKeepalive();
     }
 
     public KeepaliveSalFacade(final RemoteDeviceId id, final RemoteDeviceHandler<NetconfSessionPreferences> salFacade,
                               final ScheduledExecutorService executor) {
-        this(id, salFacade, executor, DEFAULT_DELAY);
+        this(id, salFacade, executor, DEFAULT_DELAY, DEFAULT_TRANSACTION_TIMEOUT_MILLI);
     }
 
     /**
@@ -118,7 +127,7 @@ public final class KeepaliveSalFacade implements RemoteDeviceHandler<NetconfSess
     @Override
     public void onDeviceConnected(final SchemaContext remoteSchemaContext, final NetconfSessionPreferences netconfSessionPreferences, final DOMRpcService deviceRpc) {
         this.currentDeviceRpc = deviceRpc;
-        final DOMRpcService deviceRpc1 = new KeepaliveDOMRpcService(deviceRpc, resetKeepaliveTask);
+        final DOMRpcService deviceRpc1 = new KeepaliveDOMRpcService(deviceRpc, resetKeepaliveTask, id, defaultRequestTimeoutMillis);
         salFacade.onDeviceConnected(remoteSchemaContext, netconfSessionPreferences, deviceRpc1);
 
         LOG.debug("{}: Netconf session initiated, starting keepalives", id);
@@ -237,10 +246,14 @@ public final class KeepaliveSalFacade implements RemoteDeviceHandler<NetconfSess
 
         private final DOMRpcService deviceRpc;
         private ResetKeepalive resetKeepaliveTask;
+        private final long defaultRequestTimeoutMillis;
+        private final RemoteDeviceId id;
 
-        public KeepaliveDOMRpcService(final DOMRpcService deviceRpc, final ResetKeepalive resetKeepaliveTask) {
+        public KeepaliveDOMRpcService(final DOMRpcService deviceRpc, final ResetKeepalive resetKeepaliveTask, final RemoteDeviceId id, final long defaultRequestTimeoutMillis) {
             this.deviceRpc = deviceRpc;
             this.resetKeepaliveTask = resetKeepaliveTask;
+            this.id = id;
+            this.defaultRequestTimeoutMillis = defaultRequestTimeoutMillis;
         }
 
         @Nonnull
@@ -248,6 +261,18 @@ public final class KeepaliveSalFacade implements RemoteDeviceHandler<NetconfSess
         public CheckedFuture<DOMRpcResult, DOMRpcException> invokeRpc(@Nonnull final SchemaPath type, final NormalizedNode<?, ?> input) {
             final CheckedFuture<DOMRpcResult, DOMRpcException> domRpcResultDOMRpcExceptionCheckedFuture = deviceRpc.invokeRpc(type, input);
             Futures.addCallback(domRpcResultDOMRpcExceptionCheckedFuture, resetKeepaliveTask);
+
+            try {
+                domRpcResultDOMRpcExceptionCheckedFuture.get(defaultRequestTimeoutMillis, TimeUnit.MILLISECONDS);
+            } catch (final InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new RuntimeException(e);
+            }
+            catch (final ExecutionException | TimeoutException e) {
+                return Futures.immediateFailedCheckedFuture((DOMRpcException) new DOMRpcException(id + " : invokeRpc failed. " + e.getMessage()) {
+                });
+            }
+
             return domRpcResultDOMRpcExceptionCheckedFuture;
         }
 

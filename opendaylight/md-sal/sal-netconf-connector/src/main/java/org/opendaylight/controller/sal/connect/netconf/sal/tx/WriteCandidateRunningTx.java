@@ -8,10 +8,8 @@
 
 package org.opendaylight.controller.sal.connect.netconf.sal.tx;
 
-
 import com.google.common.base.Function;
 import com.google.common.util.concurrent.ListenableFuture;
-
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcResult;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.sal.connect.netconf.util.NetconfBaseOps;
@@ -31,7 +29,7 @@ public class WriteCandidateRunningTx extends WriteCandidateTx {
 
     private static final Logger LOG  = LoggerFactory.getLogger(WriteCandidateRunningTx.class);
 
-    public WriteCandidateRunningTx(final RemoteDeviceId id, final NetconfBaseOps netOps, final boolean rollbackSupport, final long requestTimeoutMillis) {
+    public WriteCandidateRunningTx(final RemoteDeviceId id, final NetconfBaseOps netOps, final boolean rollbackSupport, long requestTimeoutMillis) {
         super(id, netOps, rollbackSupport, requestTimeoutMillis);
     }
 
@@ -48,13 +46,11 @@ public class WriteCandidateRunningTx extends WriteCandidateTx {
     }
 
     private void lockRunning() {
-        final String operation = "Lock Running";
         try {
-            invokeBlocking(operation, new Function<NetconfBaseOps, ListenableFuture<DOMRpcResult>>() {
+            invokeBlocking("Lock running", new Function<NetconfBaseOps, ListenableFuture<DOMRpcResult>>() {
                 @Override
                 public ListenableFuture<DOMRpcResult> apply(final NetconfBaseOps input) {
-                    return perfomRequestWithTimeout(operation, input.lockRunning(new NetconfRpcFutureCallback(operation, id)));
-
+                    return input.lockRunning(new NetconfRpcFutureCallback("Lock running", id));
                 }
             });
         } catch (final NetconfDocumentedException e) {

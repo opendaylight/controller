@@ -96,8 +96,8 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
         checkNotNull(getConnectionTimeoutMillis(), connectionTimeoutMillisJmxAttribute);
         checkCondition(getConnectionTimeoutMillis() > 0, "must be > 0", connectionTimeoutMillisJmxAttribute);
 
-        checkNotNull(getDefaultRequestTimeoutMillis(), defaultRequestTimeoutMillisJmxAttribute);
-        checkCondition(getDefaultRequestTimeoutMillis() > 0, "must be > 0", defaultRequestTimeoutMillisJmxAttribute);
+        checkNotNull(getConnectionTimeoutMillis(), defaultRequestTimeoutMillisJmxAttribute);
+        checkCondition(getConnectionTimeoutMillis() > 0, "must be > 0", defaultRequestTimeoutMillisJmxAttribute);
 
         checkNotNull(getBetweenAttemptsTimeoutMillis(), betweenAttemptsTimeoutMillisJmxAttribute);
         checkCondition(getBetweenAttemptsTimeoutMillis() > 0, "must be > 0", betweenAttemptsTimeoutMillisJmxAttribute);
@@ -157,7 +157,7 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
             // Keepalive executor is optional for now and a default instance is supported
             final ScheduledExecutorService executor = getKeepaliveExecutor() == null ?
                     DEFAULT_KEEPALIVE_EXECUTOR : getKeepaliveExecutorDependency().getExecutor();
-            salFacade = new KeepaliveSalFacade(id, salFacade, executor, keepaliveDelay);
+            salFacade = new KeepaliveSalFacade(id, salFacade, executor, keepaliveDelay, getDefaultRequestTimeoutMillis());
         }
 
         final String moduleSchemaCacheDirectory = getSchemaCacheDirectory();
