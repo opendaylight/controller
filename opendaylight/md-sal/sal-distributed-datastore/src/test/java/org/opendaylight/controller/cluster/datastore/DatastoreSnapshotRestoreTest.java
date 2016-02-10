@@ -80,7 +80,7 @@ public class DatastoreSnapshotRestoreTest {
         assertNull("Expected null DatastoreSnapshot", DatastoreSnapshotRestore.instance().getAndRemove("oper"));
     }
 
-    private void verifySnapshot(DatastoreSnapshot expected, DatastoreSnapshot actual) {
+    private static void verifySnapshot(DatastoreSnapshot expected, DatastoreSnapshot actual) {
         assertNotNull("DatastoreSnapshot is null", actual);
         assertEquals("getType", expected.getType(), actual.getType());
         assertTrue("ShardManager snapshots don't match", Objects.deepEquals(expected.getShardManagerSnapshot(),

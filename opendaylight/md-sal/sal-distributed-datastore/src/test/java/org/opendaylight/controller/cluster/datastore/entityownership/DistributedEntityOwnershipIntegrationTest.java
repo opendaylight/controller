@@ -123,7 +123,7 @@ public class DistributedEntityOwnershipIntegrationTest {
         }
     }
 
-    private DistributedEntityOwnershipService newOwnershipService(DistributedDataStore datastore) {
+    private static DistributedEntityOwnershipService newOwnershipService(DistributedDataStore datastore) {
         DistributedEntityOwnershipService service = new DistributedEntityOwnershipService(datastore,
                 EntityOwnerSelectionStrategyConfig.newBuilder().build());
         service.start();

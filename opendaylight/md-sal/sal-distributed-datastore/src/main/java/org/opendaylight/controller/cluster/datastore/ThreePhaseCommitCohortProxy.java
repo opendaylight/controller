@@ -253,7 +253,7 @@ public class ThreePhaseCommitCohortProxy extends AbstractThreePhaseCommitCohort<
                 CommitTransactionReply.class, true, operationCallback);
     }
 
-    private boolean successfulFuture(ListenableFuture<Void> future) {
+    private static boolean successfulFuture(ListenableFuture<Void> future) {
         if(!future.isDone()) {
             return false;
         }
