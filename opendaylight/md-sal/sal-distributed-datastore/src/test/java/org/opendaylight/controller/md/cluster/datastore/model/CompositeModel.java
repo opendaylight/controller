@@ -262,13 +262,13 @@ public class CompositeModel {
         ImmutableLeafSetEntryNodeBuilder
             .create()
             .withNodeIdentifier(
-                new YangInstanceIdentifier.NodeWithValue(QName.create(TEST_QNAME,
+                new YangInstanceIdentifier.NodeWithValue<>(QName.create(TEST_QNAME,
                     "shoe"), "nike")).withValue("nike").build();
     final LeafSetEntryNode<Object> puma =
         ImmutableLeafSetEntryNodeBuilder
             .create()
             .withNodeIdentifier(
-                new YangInstanceIdentifier.NodeWithValue(QName.create(TEST_QNAME,
+                new YangInstanceIdentifier.NodeWithValue<>(QName.create(TEST_QNAME,
                     "shoe"), "puma")).withValue("puma").build();
     final LeafSetNode<Object> shoes =
         ImmutableLeafSetNodeBuilder
@@ -282,13 +282,13 @@ public class CompositeModel {
         ImmutableLeafSetEntryNodeBuilder
             .create()
             .withNodeIdentifier(
-                (new YangInstanceIdentifier.NodeWithValue(QName.create(TEST_QNAME,
+                (new YangInstanceIdentifier.NodeWithValue<>(QName.create(TEST_QNAME,
                     "number"), 5))).withValue(5).build();
     final LeafSetEntryNode<Object> fifteen =
         ImmutableLeafSetEntryNodeBuilder
             .create()
             .withNodeIdentifier(
-                (new YangInstanceIdentifier.NodeWithValue(QName.create(TEST_QNAME,
+                (new YangInstanceIdentifier.NodeWithValue<>(QName.create(TEST_QNAME,
                     "number"), 15))).withValue(15).build();
     final LeafSetNode<Object> numbers =
         ImmutableLeafSetNodeBuilder
