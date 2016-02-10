@@ -35,11 +35,6 @@ final class NoOpTransactionContext extends AbstractTransactionContext {
     }
 
     @Override
-    public boolean supportsDirectCommit() {
-        return true;
-    }
-
-    @Override
     public Future<Object> directCommit() {
         LOG.debug("Tx {} directCommit called, failure: {}", getIdentifier(), failure);
         return akka.dispatch.Futures.failed(failure);

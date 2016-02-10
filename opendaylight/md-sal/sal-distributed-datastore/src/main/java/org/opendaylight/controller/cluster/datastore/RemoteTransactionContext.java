@@ -75,11 +75,6 @@ public class RemoteTransactionContext extends AbstractTransactionContext {
     }
 
     @Override
-    public boolean supportsDirectCommit() {
-        return true;
-    }
-
-    @Override
     public Future<Object> directCommit() {
         LOG.debug("Tx {} directCommit called", getIdentifier());
 

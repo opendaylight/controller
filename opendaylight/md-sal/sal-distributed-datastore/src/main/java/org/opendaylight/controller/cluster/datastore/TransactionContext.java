@@ -26,8 +26,6 @@ interface TransactionContext {
 
     <T> void executeRead(AbstractRead<T> readCmd, SettableFuture<T> promise);
 
-    boolean supportsDirectCommit();
-
     Future<Object> directCommit();
 
     /**
