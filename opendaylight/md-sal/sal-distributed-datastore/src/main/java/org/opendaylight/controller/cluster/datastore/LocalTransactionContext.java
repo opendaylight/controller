@@ -87,11 +87,6 @@ abstract class LocalTransactionContext extends AbstractTransactionContext {
     }
 
     @Override
-    public boolean supportsDirectCommit() {
-        return true;
-    }
-
-    @Override
     public void closeTransaction() {
         txDelegate.close();
     }

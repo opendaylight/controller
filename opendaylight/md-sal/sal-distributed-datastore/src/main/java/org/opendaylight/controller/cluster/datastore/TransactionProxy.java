@@ -254,30 +254,26 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
             contextWrapper.maybeExecuteTransactionOperation(new TransactionOperation() {
                 @Override
                 public void invoke(TransactionContext transactionContext) {
-                    promise.completeWith(getReadyOrDirectCommitFuture(transactionContext, operationCallbackRef));
+                    promise.completeWith(getDirectCommitFuture(transactionContext, operationCallbackRef));
                 }
             });
             future = promise.future();
         } else {
             // avoid the creation of a promise and a TransactionOperation
-            future = getReadyOrDirectCommitFuture(transactionContext, operationCallbackRef);
+            future = getDirectCommitFuture(transactionContext, operationCallbackRef);
         }
 
         return new SingleCommitCohortProxy(txContextFactory.getActorContext(), future, getIdentifier().toString(),
                 operationCallbackRef);
     }
 
-    private Future<?> getReadyOrDirectCommitFuture(TransactionContext transactionContext,
+    private Future<?> getDirectCommitFuture(TransactionContext transactionContext,
             OperationCallback.Reference operationCallbackRef) {
-        if (transactionContext.supportsDirectCommit()) {
-            TransactionRateLimitingCallback rateLimitingCallback = new TransactionRateLimitingCallback(
-                    txContextFactory.getActorContext());
-            operationCallbackRef.set(rateLimitingCallback);
-            rateLimitingCallback.run();
-            return transactionContext.directCommit();
-        } else {
-            return transactionContext.readyTransaction();
-        }
+        TransactionRateLimitingCallback rateLimitingCallback = new TransactionRateLimitingCallback(
+                txContextFactory.getActorContext());
+        operationCallbackRef.set(rateLimitingCallback);
+        rateLimitingCallback.run();
+        return transactionContext.directCommit();
     }
 
     private AbstractThreePhaseCommitCohort<ActorSelection> createMultiCommitCohort(
