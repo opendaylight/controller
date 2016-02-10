@@ -65,7 +65,7 @@ public class NetconfDeviceWriteOnlyTxTest {
     @Test
     public void testIgnoreNonVisibleData() {
         final WriteCandidateTx tx = new WriteCandidateTx(id, new NetconfBaseOps(rpc, mock(SchemaContext.class)),
-                false, 60000L);
+                false);
         final MapNode emptyList = ImmutableNodes.mapNodeBuilder(NETCONF_FILTER_QNAME).build();
         tx.merge(LogicalDatastoreType.CONFIGURATION, YangInstanceIdentifier.create(new YangInstanceIdentifier.NodeIdentifier(NETCONF_FILTER_QNAME)), emptyList);
         tx.put(LogicalDatastoreType.CONFIGURATION, YangInstanceIdentifier.create(new YangInstanceIdentifier.NodeIdentifier(NETCONF_FILTER_QNAME)), emptyList);
@@ -76,7 +76,7 @@ public class NetconfDeviceWriteOnlyTxTest {
     @Test
     public void testDiscardChanges() {
         final WriteCandidateTx tx = new WriteCandidateTx(id, new NetconfBaseOps(rpc, mock(SchemaContext.class)),
-                false, 60000L);
+                false);
         final CheckedFuture<Void, TransactionCommitFailedException> submitFuture = tx.submit();
         try {
             submitFuture.checkedGet();
@@ -102,7 +102,7 @@ public class NetconfDeviceWriteOnlyTxTest {
         .doReturn(rpcErrorFuture).when(rpc).invokeRpc(any(SchemaPath.class), any(NormalizedNode.class));
 
         final WriteCandidateTx tx = new WriteCandidateTx(id, new NetconfBaseOps(rpc, mock(SchemaContext.class)),
-                false, 60000L);
+                false);
 
         final CheckedFuture<Void, TransactionCommitFailedException> submitFuture = tx.submit();
         try {
@@ -121,7 +121,7 @@ public class NetconfDeviceWriteOnlyTxTest {
                 .when(rpc).invokeRpc(any(SchemaPath.class), any(NormalizedNode.class));
 
         final WriteRunningTx tx = new WriteRunningTx(id, new NetconfBaseOps(rpc, NetconfDevice.INIT_SCHEMA_CTX),
-                false, 60000L);
+                false);
         try {
             tx.delete(LogicalDatastoreType.CONFIGURATION, yangIId);
         } catch (final Exception e) {
