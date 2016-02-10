@@ -23,6 +23,7 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCoh
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionFactory;
 
 public abstract class AbstractDOMTransactionFactory<T extends DOMStoreTransactionFactory> implements AutoCloseable {
+    @SuppressWarnings("rawtypes")
     private static final AtomicIntegerFieldUpdater<AbstractDOMTransactionFactory> UPDATER =
             AtomicIntegerFieldUpdater.newUpdater(AbstractDOMTransactionFactory.class, "closed");
     private final Map<LogicalDatastoreType, T> storeTxFactories;

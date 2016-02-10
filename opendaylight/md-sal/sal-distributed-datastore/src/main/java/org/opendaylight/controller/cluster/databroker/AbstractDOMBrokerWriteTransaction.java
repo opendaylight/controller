@@ -35,8 +35,10 @@ import org.slf4j.LoggerFactory;
 public abstract class AbstractDOMBrokerWriteTransaction<T extends DOMStoreWriteTransaction>
         extends AbstractDOMBrokerTransaction<T> implements DOMDataWriteTransaction {
 
+    @SuppressWarnings("rawtypes")
     private static final AtomicReferenceFieldUpdater<AbstractDOMBrokerWriteTransaction, AbstractDOMTransactionFactory> IMPL_UPDATER =
             AtomicReferenceFieldUpdater.newUpdater(AbstractDOMBrokerWriteTransaction.class, AbstractDOMTransactionFactory.class, "commitImpl");
+    @SuppressWarnings("rawtypes")
     private static final AtomicReferenceFieldUpdater<AbstractDOMBrokerWriteTransaction, Future> FUTURE_UPDATER =
             AtomicReferenceFieldUpdater.newUpdater(AbstractDOMBrokerWriteTransaction.class, Future.class, "commitFuture");
     private static final Logger LOG = LoggerFactory.getLogger(AbstractDOMBrokerWriteTransaction.class);
