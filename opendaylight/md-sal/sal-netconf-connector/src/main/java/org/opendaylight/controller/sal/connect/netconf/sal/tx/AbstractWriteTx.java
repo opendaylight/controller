@@ -3,13 +3,8 @@ package org.opendaylight.controller.sal.connect.netconf.sal.tx;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
-
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
@@ -23,7 +18,6 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
 import org.opendaylight.yangtools.yang.data.api.schema.MixinNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.model.repo.api.SchemaSourceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,15 +25,13 @@ public abstract class AbstractWriteTx implements DOMDataWriteTransaction {
 
     private static final Logger LOG  = LoggerFactory.getLogger(AbstractWriteTx.class);
 
-    protected final long defaultRequestTimeoutMillis;
     protected final RemoteDeviceId id;
     protected final NetconfBaseOps netOps;
     protected final boolean rollbackSupport;
     // Allow commit to be called only once
     protected boolean finished = false;
 
-    public AbstractWriteTx(final long requestTimeoutMillis, final NetconfBaseOps netOps, final RemoteDeviceId id, final boolean rollbackSupport) {
-        this.defaultRequestTimeoutMillis = requestTimeoutMillis;
+    public AbstractWriteTx(final NetconfBaseOps netOps, final RemoteDeviceId id, final boolean rollbackSupport) {
         this.netOps = netOps;
         this.id = id;
         this.rollbackSupport = rollbackSupport;
@@ -170,17 +162,4 @@ public abstract class AbstractWriteTx implements DOMDataWriteTransaction {
     }
 
     protected abstract void editConfig(DataContainerChild<?, ?> editStructure, Optional<ModifyAction> defaultOperation) throws NetconfDocumentedException;
-
-    protected ListenableFuture<DOMRpcResult> perfomRequestWithTimeout(String operation, ListenableFuture<DOMRpcResult> future) {
-        try {
-            future.get(defaultRequestTimeoutMillis, TimeUnit.MILLISECONDS);
-        } catch (InterruptedException | ExecutionException e) {
-            LOG.error("{}: {} failed with error", operation, id, e);
-            return Futures.immediateFailedCheckedFuture(new RuntimeException(id + ": " + operation + " failed"));
-        } catch (TimeoutException e) {
-            LOG.warn("{}: Unable to {} after {} milliseconds", id, operation, defaultRequestTimeoutMillis, e);
-            return Futures.immediateFailedCheckedFuture(new SchemaSourceException(e.getMessage()));
-        }
-        return future;
-    }
 }
