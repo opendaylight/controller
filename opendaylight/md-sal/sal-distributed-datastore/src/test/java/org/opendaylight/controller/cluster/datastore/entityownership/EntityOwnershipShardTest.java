@@ -110,7 +110,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
 
         TestActorRef<EntityOwnershipShard> shard = actorFactory.createTestActor(newShardProps());
 
-        kit.waitUntilLeader(shard);
+        ShardTestKit.waitUntilLeader(shard);
 
         YangInstanceIdentifier entityId = ENTITY_ID1;
         Entity entity = new Entity(ENTITY_TYPE, entityId);
@@ -169,7 +169,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
                 ImmutableMap.<String, String>builder().put(peerId, peer.path().toString()).build()).
                 withDispatcher(Dispatchers.DefaultDispatcherId()));
 
-        kit.waitUntilLeader(shard);
+        ShardTestKit.waitUntilLeader(shard);
 
         YangInstanceIdentifier entityId = ENTITY_ID1;
         Entity entity = new Entity(ENTITY_TYPE, entityId);
@@ -205,7 +205,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
                 ImmutableMap.<String, String>builder().put(peerId, peer.path().toString()).build()).
                 withDispatcher(Dispatchers.DefaultDispatcherId()));
 
-        kit.waitUntilLeader(shard);
+        ShardTestKit.waitUntilLeader(shard);
 
         // Drop AppendEntries and wait enough time for the shard to switch to IsolatedLeader.
         follower.dropAppendEntries = true;
@@ -297,7 +297,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
     public void testOnUnregisterCandidateLocal() throws Exception {
         ShardTestKit kit = new ShardTestKit(getSystem());
         TestActorRef<EntityOwnershipShard> shard = actorFactory.createTestActor(newShardProps());
-        kit.waitUntilLeader(shard);
+        ShardTestKit.waitUntilLeader(shard);
 
         Entity entity = new Entity(ENTITY_TYPE, ENTITY_ID1);
 
@@ -329,7 +329,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
     public void testOwnershipChanges() throws Exception {
         ShardTestKit kit = new ShardTestKit(getSystem());
         TestActorRef<EntityOwnershipShard> shard = actorFactory.createTestActor(newShardProps());
-        kit.waitUntilLeader(shard);
+        ShardTestKit.waitUntilLeader(shard);
 
         Entity entity = new Entity(ENTITY_TYPE, ENTITY_ID1);
         ShardDataTree shardDataTree = shard.underlyingActor().getDataStore();
@@ -418,7 +418,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
                 withDispatcher(Dispatchers.DefaultDispatcherId()), leaderId.toString());
         leader.tell(new ElectionTimeout(), leader);
 
-        kit.waitUntilLeader(leader);
+        ShardTestKit.waitUntilLeader(leader);
 
         // Send PeerDown and PeerUp with no entities
 
@@ -566,7 +566,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
         peer2.tell(new PeerDown(LOCAL_MEMBER_NAME, leaderId.toString()), ActorRef.noSender());
         peer2.tell(new ElectionTimeout(), peer2);
 
-        kit.waitUntilLeader(peer2);
+        ShardTestKit.waitUntilLeader(peer2);
 
         verifyOwner(peer2, ENTITY_TYPE, ENTITY_ID4, "");
         verifyOwner(peer2, ENTITY_TYPE, ENTITY_ID3, peerMemberName2);
@@ -592,7 +592,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
                     LOCAL_MEMBER_NAME, EntityOwnerSelectionStrategyConfig.newBuilder().build()).withDispatcher(Dispatchers.DefaultDispatcherId()), leaderId.toString());
         leader.tell(new ElectionTimeout(), leader);
 
-        kit.waitUntilLeader(leader);
+        ShardTestKit.waitUntilLeader(leader);
 
         shard.tell(new PeerAddressResolved(leaderId.toString(), leader.path().toString()), ActorRef.noSender());
 
@@ -636,7 +636,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
     public void testListenerRegistration() throws Exception {
         ShardTestKit kit = new ShardTestKit(getSystem());
         TestActorRef<EntityOwnershipShard> shard = actorFactory.createTestActor(newShardProps());
-        kit.waitUntilLeader(shard);
+        ShardTestKit.waitUntilLeader(shard);
         ShardDataTree shardDataTree = shard.underlyingActor().getDataStore();
 
         String otherEntityType = "otherEntityType";
@@ -900,7 +900,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
 
         TestActorRef<EntityOwnershipShard> shard = actorFactory.createTestActor(newShardProps(builder.build(),
                 ImmutableMap.of(peerId.toString(), peer.path().toString())));
-        kit.waitUntilLeader(shard);
+        ShardTestKit.waitUntilLeader(shard);
 
         Entity entity = new Entity(ENTITY_TYPE, ENTITY_ID1);
         ShardDataTree shardDataTree = shard.underlyingActor().getDataStore();
@@ -943,7 +943,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
 
         TestActorRef<EntityOwnershipShard> shard = actorFactory.createTestActor(newShardProps(builder.build(),
                 ImmutableMap.of(follower1Id.toString(), follower2.path().toString(), follower2Id.toString(), follower2.path().toString())));
-        kit.waitUntilLeader(shard);
+        ShardTestKit.waitUntilLeader(shard);
 
         Entity entity = new Entity(ENTITY_TYPE, ENTITY_ID1);
         ShardDataTree shardDataTree = shard.underlyingActor().getDataStore();
