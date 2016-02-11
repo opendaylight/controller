@@ -402,7 +402,9 @@ public class DistributedEntityOwnershipIntegrationTest {
             Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
             if(!leaderEntityOwnershipService.getOwnershipState(ENTITY1).isPresent() ||
                     !leaderEntityOwnershipService.getOwnershipState(ENTITY1).get().hasOwner() &&
+                    follower1EntityOwnershipService.getOwnershipState(ENTITY1).isPresent() &&
                     !follower1EntityOwnershipService.getOwnershipState(ENTITY1).get().hasOwner() &&
+                    follower2EntityOwnershipService.getOwnershipState(ENTITY1).isPresent() &&
                     !follower2EntityOwnershipService.getOwnershipState(ENTITY1).get().hasOwner() &&
                     leaderChangeCaptor.getAllValues().size() > 0 && !leaderChangeCaptor.getValue().hasOwner() &&
                     leaderChangeCaptor.getAllValues().size() > 0 && !follower1ChangeCaptor.getValue().hasOwner() &&
