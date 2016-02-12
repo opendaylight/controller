@@ -23,13 +23,13 @@ import java.util.List;
 
 public class InstanceIdentifierUtilsTest {
 
-    private static QName TEST_QNAME = QName
+    private static final QName TEST_QNAME = QName
             .create("(urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test?revision=2014-03-13)test");
-    private static QName NODE_WITH_VALUE_QNAME = QName
+    private static final QName NODE_WITH_VALUE_QNAME = QName
             .create("(urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test?revision=2014-03-13)value");
-    private static QName NODE_WITH_PREDICATES_QNAME = QName
+    private static final QName NODE_WITH_PREDICATES_QNAME = QName
             .create("(urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test?revision=2014-03-13)pred");
-    private static QName NAME_QNAME = QName
+    private static final QName NAME_QNAME = QName
             .create("(urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test?revision=2014-03-13)name");
 
     @Test
@@ -64,7 +64,7 @@ public class InstanceIdentifierUtilsTest {
         YangInstanceIdentifier.PathArgument p1 = new YangInstanceIdentifier.NodeIdentifier(TEST_QNAME);
 
         YangInstanceIdentifier.PathArgument p2 =
-                new YangInstanceIdentifier.NodeWithValue(NODE_WITH_VALUE_QNAME, value);
+                new YangInstanceIdentifier.NodeWithValue<>(NODE_WITH_VALUE_QNAME, value);
 
         List<YangInstanceIdentifier.PathArgument> arguments = new ArrayList<>();
 
@@ -137,7 +137,7 @@ public class InstanceIdentifierUtilsTest {
         List<YangInstanceIdentifier.PathArgument> arguments =
                                                 Arrays.<YangInstanceIdentifier.PathArgument>asList(
                 new YangInstanceIdentifier.NodeIdentifier(TEST_QNAME),
-                new YangInstanceIdentifier.NodeWithValue(NODE_WITH_VALUE_QNAME, 1),
+                new YangInstanceIdentifier.NodeWithValue<>(NODE_WITH_VALUE_QNAME, 1),
                 new YangInstanceIdentifier.NodeIdentifierWithPredicates(
                         NODE_WITH_PREDICATES_QNAME, NAME_QNAME, 2));
 
