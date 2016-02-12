@@ -24,63 +24,63 @@ import org.opendaylight.yangtools.yang.model.api.TypeDefinition;
  */
 public class XmlUtils {
 
-  public static final XmlCodecProvider DEFAULT_XML_CODEC_PROVIDER = new XmlCodecProvider() {
-    @Override
-    public TypeDefinitionAwareCodec<Object, ? extends TypeDefinition<?>> codecFor(final TypeDefinition<?> baseType) {
-      return TypeDefinitionAwareCodec.from(baseType);
-    }
-  };
-
-  private XmlUtils() {
-  }
-
-  public static TypeDefinition<?> resolveBaseTypeFrom(final @Nonnull TypeDefinition<?> type) {
-    TypeDefinition<?> superType = type;
-    while (superType.getBaseType() != null) {
-      superType = superType.getBaseType();
-    }
-    return superType;
-  }
-
-  /**
-   * This code is picked from yangtools and modified to add type of instance identifier
-   * output of instance identifier something like below for a flow ref composite node of type instance identifier,
-   * which has path arguments with predicates, whose value is of type java.lang.short
-   * <flow-ref xmlns:bgkj="urn:opendaylight:flow:inventory" xmlns:jdlk="urn:opendaylight:inventory">
-   *   /jdlk:nodes/jdlk:node[jdlk:id='openflow:205558455098190@java.lang.String']
-   *   /bgkj:table[bgkj:id='3@java.lang.Short']
-   *   /bgkj:flow[bgkj:id='156@java.lang.String']
-   * </flow-ref>
-   *
-   */
-
-  public static String encodeIdentifier(final RandomPrefix prefixes, final YangInstanceIdentifier id) {
-    final StringBuilder textContent = new StringBuilder();
-    for (final PathArgument pathArgument : id.getPathArguments()) {
-      textContent.append('/');
-      textContent.append(prefixes.encodeQName(pathArgument.getNodeType()));
-      if (pathArgument instanceof NodeIdentifierWithPredicates) {
-        final Map<QName, Object> predicates = ((NodeIdentifierWithPredicates) pathArgument).getKeyValues();
-
-        for (final QName keyValue : predicates.keySet()) {
-          final Object value = predicates.get(keyValue);
-          final String type = value.getClass().getName();
-          final String predicateValue = String.valueOf(value);
-          textContent.append('[');
-          textContent.append(prefixes.encodeQName(keyValue));
-          textContent.append("='");
-          textContent.append(predicateValue);
-          textContent.append("@");
-          textContent.append(type);
-          textContent.append("']");
+    public static final XmlCodecProvider DEFAULT_XML_CODEC_PROVIDER = new XmlCodecProvider() {
+        @Override
+        public TypeDefinitionAwareCodec<Object, ? extends TypeDefinition<?>> codecFor(final TypeDefinition<?> baseType) {
+            return TypeDefinitionAwareCodec.from(baseType);
         }
-      } else if (pathArgument instanceof NodeWithValue) {
-        textContent.append("[.='");
-        textContent.append(((NodeWithValue) pathArgument).getValue());
-        textContent.append("']");
-      }
+    };
+
+    private XmlUtils() {
     }
 
-    return textContent.toString();
-  }
+    public static TypeDefinition<?> resolveBaseTypeFrom(final @Nonnull TypeDefinition<?> type) {
+        TypeDefinition<?> superType = type;
+        while (superType.getBaseType() != null) {
+            superType = superType.getBaseType();
+        }
+        return superType;
+    }
+
+    /**
+     * This code is picked from yangtools and modified to add type of instance identifier
+     * output of instance identifier something like below for a flow ref composite node of type instance identifier,
+     * which has path arguments with predicates, whose value is of type java.lang.short
+     * <flow-ref xmlns:bgkj="urn:opendaylight:flow:inventory" xmlns:jdlk="urn:opendaylight:inventory">
+     *   /jdlk:nodes/jdlk:node[jdlk:id='openflow:205558455098190@java.lang.String']
+     *   /bgkj:table[bgkj:id='3@java.lang.Short']
+     *   /bgkj:flow[bgkj:id='156@java.lang.String']
+     * </flow-ref>
+     *
+     */
+
+    public static String encodeIdentifier(final RandomPrefix prefixes, final YangInstanceIdentifier id) {
+        final StringBuilder textContent = new StringBuilder();
+        for (final PathArgument pathArgument : id.getPathArguments()) {
+            textContent.append('/');
+            textContent.append(prefixes.encodeQName(pathArgument.getNodeType()));
+            if (pathArgument instanceof NodeIdentifierWithPredicates) {
+                final Map<QName, Object> predicates = ((NodeIdentifierWithPredicates) pathArgument).getKeyValues();
+
+                for (final QName keyValue : predicates.keySet()) {
+                    final Object value = predicates.get(keyValue);
+                    final String type = value.getClass().getName();
+                    final String predicateValue = String.valueOf(value);
+                    textContent.append('[');
+                    textContent.append(prefixes.encodeQName(keyValue));
+                    textContent.append("='");
+                    textContent.append(predicateValue);
+                    textContent.append("@");
+                    textContent.append(type);
+                    textContent.append("']");
+                }
+            } else if (pathArgument instanceof NodeWithValue) {
+                textContent.append("[.='");
+                textContent.append(((NodeWithValue<?>) pathArgument).getValue());
+                textContent.append("']");
+            }
+        }
+
+        return textContent.toString();
+    }
 }

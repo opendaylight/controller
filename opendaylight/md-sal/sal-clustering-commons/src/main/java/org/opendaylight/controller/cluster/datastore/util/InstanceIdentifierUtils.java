@@ -19,6 +19,10 @@ import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessa
 import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.Builder;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.AugmentationIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeWithValue;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
@@ -67,12 +71,11 @@ public class InstanceIdentifierUtils {
             NormalizedNodeMessages.InstanceIdentifier.newBuilder();
 
         try {
-            for (org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.
-                                            PathArgument pathArgument : path.getPathArguments()) {
+            for (PathArgument pathArgument : path.getPathArguments()) {
                 NormalizedNodeMessages.PathArgument serializablePathArgument;
                 if(context == null) {
                     String nodeType = "";
-                    if(!(pathArgument instanceof YangInstanceIdentifier.AugmentationIdentifier)){
+                    if (!(pathArgument instanceof AugmentationIdentifier)) {
                         nodeType = pathArgument.getNodeType().toString();
                     }
 
@@ -109,7 +112,7 @@ public class InstanceIdentifierUtils {
     public static YangInstanceIdentifier fromSerializable(NormalizedNodeMessages.InstanceIdentifier path,
             QNameDeSerializationContext context) {
 
-        List<YangInstanceIdentifier.PathArgument> pathArguments = new ArrayList<>();
+        List<PathArgument> pathArguments = new ArrayList<>();
 
         for(NormalizedNodeMessages.PathArgument pathArgument : path.getArgumentsList()) {
             if(context == null || pathArgument.hasType()) {
@@ -155,14 +158,11 @@ public class InstanceIdentifierUtils {
      * @return
      */
     private static Iterable<? extends NormalizedNodeMessages.Attribute> getPathArgumentAttributes(
-        YangInstanceIdentifier.PathArgument pathArgument) {
+        PathArgument pathArgument) {
         List<NormalizedNodeMessages.Attribute> attributes = new ArrayList<>();
 
-
-
-        if (pathArgument instanceof YangInstanceIdentifier.NodeWithValue) {
-            YangInstanceIdentifier.NodeWithValue identifier
-                = (YangInstanceIdentifier.NodeWithValue) pathArgument;
+        if (pathArgument instanceof NodeWithValue) {
+            NodeWithValue<?> identifier = (NodeWithValue<?>) pathArgument;
 
             NormalizedNodeMessages.Attribute attribute =
                 NormalizedNodeMessages.Attribute.newBuilder()
@@ -172,9 +172,8 @@ public class InstanceIdentifierUtils {
                     .build();
 
             attributes.add(attribute);
-        } else if (pathArgument instanceof YangInstanceIdentifier.NodeIdentifierWithPredicates) {
-            YangInstanceIdentifier.NodeIdentifierWithPredicates identifier
-                = (YangInstanceIdentifier.NodeIdentifierWithPredicates) pathArgument;
+        } else if (pathArgument instanceof NodeIdentifierWithPredicates) {
+            NodeIdentifierWithPredicates identifier = (NodeIdentifierWithPredicates) pathArgument;
 
             for (QName key : identifier.getKeyValues().keySet()) {
                 Object value = identifier.getKeyValues().get(key);
@@ -189,9 +188,8 @@ public class InstanceIdentifierUtils {
 
             }
 
-        } else if(pathArgument instanceof YangInstanceIdentifier.AugmentationIdentifier) {
-            YangInstanceIdentifier.AugmentationIdentifier identifier
-                = (YangInstanceIdentifier.AugmentationIdentifier) pathArgument;
+        } else if(pathArgument instanceof AugmentationIdentifier) {
+            AugmentationIdentifier identifier = (AugmentationIdentifier) pathArgument;
 
             for (QName key : identifier.getPossibleChildNames()) {
                 Object value = key;
@@ -217,27 +215,25 @@ public class InstanceIdentifierUtils {
      * @param pathArgument protocol buffer PathArgument
      * @return MD-SAL PathArgument
      */
-    private static YangInstanceIdentifier.PathArgument parsePathArgument(
+    private static PathArgument parsePathArgument(
             NormalizedNodeMessages.PathArgument pathArgument) {
-        if (YangInstanceIdentifier.NodeWithValue.class.getSimpleName().equals(pathArgument.getType())) {
+        if (NodeWithValue.class.getSimpleName().equals(pathArgument.getType())) {
 
-            YangInstanceIdentifier.NodeWithValue nodeWithValue =
-                new YangInstanceIdentifier.NodeWithValue(
+            NodeWithValue<?> nodeWithValue = new NodeWithValue<>(
                     QNameFactory.create(pathArgument.getNodeType().getValue()),
                     parseAttribute(pathArgument.getAttributes(0)));
 
             return nodeWithValue;
 
-        } else if(YangInstanceIdentifier.NodeIdentifierWithPredicates.class.getSimpleName().equals(pathArgument.getType())){
+        } else if(NodeIdentifierWithPredicates.class.getSimpleName().equals(pathArgument.getType())){
 
-            YangInstanceIdentifier.NodeIdentifierWithPredicates
-                nodeIdentifierWithPredicates =
-                new YangInstanceIdentifier.NodeIdentifierWithPredicates(
+            NodeIdentifierWithPredicates nodeIdentifierWithPredicates =
+                new NodeIdentifierWithPredicates(
                     QNameFactory.create(pathArgument.getNodeType().getValue()), toAttributesMap(pathArgument.getAttributesList()));
 
             return nodeIdentifierWithPredicates;
 
-        } else if(YangInstanceIdentifier.AugmentationIdentifier.class.getSimpleName().equals(pathArgument.getType())){
+        } else if(AugmentationIdentifier.class.getSimpleName().equals(pathArgument.getType())){
 
             Set<QName> qNameSet = new HashSet<>();
 
@@ -245,7 +241,7 @@ public class InstanceIdentifierUtils {
                 qNameSet.add(QNameFactory.create(attribute.getValue()));
             }
 
-            return new YangInstanceIdentifier.AugmentationIdentifier(qNameSet);
+            return new AugmentationIdentifier(qNameSet);
         }
 
         return NodeIdentifierFactory.getArgument(pathArgument.getValue());

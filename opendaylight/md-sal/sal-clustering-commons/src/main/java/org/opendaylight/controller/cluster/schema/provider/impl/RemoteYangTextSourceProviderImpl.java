@@ -48,7 +48,7 @@ public class RemoteYangTextSourceProviderImpl implements RemoteYangTextSourcePro
         LOG.trace("Sending yang schema source for {}", identifier);
 
         final Promise<YangTextSchemaSourceSerializationProxy> promise = akka.dispatch.Futures.promise();
-        CheckedFuture future = repository.getSchemaSource(identifier, YangTextSchemaSource.class);
+        CheckedFuture<YangTextSchemaSource, ?> future = repository.getSchemaSource(identifier, YangTextSchemaSource.class);
 
         Futures.addCallback(future, new FutureCallback<YangTextSchemaSource>() {
             @Override

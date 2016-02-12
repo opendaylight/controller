@@ -173,7 +173,7 @@ public class DefaultConfigParamsImpl implements ConfigParams {
             try {
                 String className = DefaultConfigParamsImpl.this.customRaftPolicyImplementationClass;
                 LOG.info("Trying to use custom RaftPolicy {}", className);
-                Class c = Class.forName(className);
+                Class<?> c = Class.forName(className);
                 RaftPolicy obj = (RaftPolicy)c.newInstance();
                 return obj;
             } catch (Exception e) {

@@ -16,8 +16,11 @@ import org.junit.rules.ExpectedException;
 import org.opendaylight.controller.cluster.datastore.util.TestModel;
 import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.AugmentationIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeWithValue;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import java.net.URI;
 import java.util.Date;
 import java.util.HashMap;
@@ -39,8 +42,7 @@ public class PathArgumentSerializerTest{
         expectedException.expect(NullPointerException.class);
         expectedException.expectMessage("context should not be null");
 
-        PathArgumentSerializer.serialize(null, mock(
-            YangInstanceIdentifier.PathArgument.class));
+        PathArgumentSerializer.serialize(null, mock(PathArgument.class));
     }
 
     @Test
@@ -80,7 +82,7 @@ public class PathArgumentSerializerTest{
 
         NormalizedNodeMessages.PathArgument actual = PathArgumentSerializer
             .serialize(serializationContext,
-                new YangInstanceIdentifier.NodeIdentifier(
+                new NodeIdentifier(
                     TestModel.TEST_QNAME));
 
         assertEquals(PathArgumentType.NODE_IDENTIFIER.ordinal(), actual.getIntType());
@@ -101,7 +103,7 @@ public class PathArgumentSerializerTest{
 
         NormalizedNodeMessages.PathArgument actual = PathArgumentSerializer
             .serialize(serializationContext,
-                new YangInstanceIdentifier.NodeWithValue(
+                new NodeWithValue<>(
                     TestModel.TEST_QNAME, "foo"));
 
         assertEquals(PathArgumentType.NODE_IDENTIFIER_WITH_VALUE.ordinal(), actual.getIntType());
@@ -134,8 +136,7 @@ public class PathArgumentSerializerTest{
 
         NormalizedNodeMessages.PathArgument actual = PathArgumentSerializer
             .serialize(serializationContext,
-                new YangInstanceIdentifier.NodeIdentifierWithPredicates(
-                    TestModel.TEST_QNAME, predicates));
+                new NodeIdentifierWithPredicates(TestModel.TEST_QNAME, predicates));
 
         assertEquals(PathArgumentType.NODE_IDENTIFIER_WITH_PREDICATES.ordinal(), actual.getIntType());
         assertEquals(5, actual.getNodeType().getLocalName());
@@ -161,8 +162,7 @@ public class PathArgumentSerializerTest{
 
         NormalizedNodeMessages.PathArgument actual = PathArgumentSerializer
             .serialize(serializationContext,
-                new YangInstanceIdentifier.AugmentationIdentifier(
-                    ImmutableSet.of(TestModel.TEST_QNAME)));
+                new AugmentationIdentifier(ImmutableSet.of(TestModel.TEST_QNAME)));
 
         assertEquals(PathArgumentType.AUGMENTATION_IDENTIFIER.ordinal(), actual.getIntType());
 
@@ -190,11 +190,9 @@ public class PathArgumentSerializerTest{
         nodeBuilder.addCode(TestModel.TEST_QNAME.getFormattedRevision());
         nodeBuilder.addCode(TestModel.TEST_QNAME.getLocalName());
 
-        YangInstanceIdentifier.PathArgument pathArgument =
-            NormalizedNodeSerializer
-                .deSerialize(nodeBuilder.build(), pathBuilder.build());
+        PathArgument pathArgument = NormalizedNodeSerializer.deSerialize(nodeBuilder.build(), pathBuilder.build());
 
-        assertEquals(new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME), pathArgument);
+        assertEquals(new NodeIdentifier(TestModel.TEST_QNAME), pathArgument);
 
     }
 
@@ -218,11 +216,9 @@ public class PathArgumentSerializerTest{
         nodeBuilder.addCode(TestModel.TEST_QNAME.getFormattedRevision());
         nodeBuilder.addCode(TestModel.TEST_QNAME.getLocalName());
 
-        YangInstanceIdentifier.PathArgument pathArgument =
-            NormalizedNodeSerializer
-                .deSerialize(nodeBuilder.build(), pathBuilder.build());
+        PathArgument pathArgument = NormalizedNodeSerializer.deSerialize(nodeBuilder.build(), pathBuilder.build());
 
-        assertEquals(new YangInstanceIdentifier.NodeWithValue(TestModel.TEST_QNAME, "foo"), pathArgument);
+        assertEquals(new NodeWithValue<>(TestModel.TEST_QNAME, "foo"), pathArgument);
 
     }
     @Test
@@ -244,11 +240,9 @@ public class PathArgumentSerializerTest{
         nodeBuilder.addCode(TestModel.TEST_QNAME.getFormattedRevision());
         nodeBuilder.addCode(TestModel.TEST_QNAME.getLocalName());
 
-        YangInstanceIdentifier.PathArgument pathArgument =
-            NormalizedNodeSerializer
-                .deSerialize(nodeBuilder.build(), pathBuilder.build());
+        PathArgument pathArgument = NormalizedNodeSerializer.deSerialize(nodeBuilder.build(), pathBuilder.build());
 
-        assertEquals(new YangInstanceIdentifier.NodeIdentifierWithPredicates(TestModel.TEST_QNAME,
+        assertEquals(new NodeIdentifierWithPredicates(TestModel.TEST_QNAME,
             ImmutableMap.<QName, Object>of(TestModel.TEST_QNAME, "foo")), pathArgument);
 
     }
@@ -269,14 +263,8 @@ public class PathArgumentSerializerTest{
         nodeBuilder.addCode(TestModel.TEST_QNAME.getFormattedRevision());
         nodeBuilder.addCode(TestModel.TEST_QNAME.getLocalName());
 
-        YangInstanceIdentifier.PathArgument pathArgument =
-            NormalizedNodeSerializer
-                .deSerialize(nodeBuilder.build(), pathBuilder.build());
+        PathArgument pathArgument = NormalizedNodeSerializer.deSerialize(nodeBuilder.build(), pathBuilder.build());
 
-        assertEquals(new YangInstanceIdentifier.AugmentationIdentifier(ImmutableSet.of(TestModel.TEST_QNAME)), pathArgument);
-
+        assertEquals(new AugmentationIdentifier(ImmutableSet.of(TestModel.TEST_QNAME)), pathArgument);
     }
-
-
-
 }
