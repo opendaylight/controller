@@ -14,12 +14,19 @@ import com.typesafe.config.ConfigFactory;
 import java.io.File;
 
 public class FileAkkaConfigurationReader implements AkkaConfigurationReader {
-    private static final String DEFAULT_AKKA_CONF_PATH = "./configuration/initial/akka.conf";
+    private static final String CUSTOM_AKKA_CONF_PATH = "./configuration/initial/akka.conf";
+    private static final String FACTORY_AKKA_CONF_PATH = "./configuration/factory/akka.conf";
 
-    @Override public Config read() {
-        File configFile = new File(DEFAULT_AKKA_CONF_PATH);
-        Preconditions.checkState(configFile.exists(), "%s is missing", configFile);
-        return ConfigFactory.parseFile(configFile);
+    @Override
+    public Config read() {
+        File customConfigFile = new File(CUSTOM_AKKA_CONF_PATH);
+        Preconditions.checkState(customConfigFile.exists(), "%s is missing", customConfigFile);
 
+        File factoryConfigFile = new File(FACTORY_AKKA_CONF_PATH);
+        if(factoryConfigFile.exists()) {
+            return ConfigFactory.parseFile(customConfigFile).withFallback(ConfigFactory.parseFile(factoryConfigFile));
+        }
+
+        return ConfigFactory.parseFile(customConfigFile);
     }
 }
