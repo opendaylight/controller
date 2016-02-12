@@ -47,6 +47,11 @@
                   <classifier>akkaconf</classifier>
                 </artifact>
                 <artifact>
+                  <file>${project.build.directory}/classes/initial/factory-akka.conf</file>
+                  <type>xml</type>
+                  <classifier>factoryakkaconf</classifier>
+                </artifact>
+                <artifact>
                   <file>${project.build.directory}/classes/initial/module-shards.conf</file>
                   <type>xml</type>
                   <classifier>moduleshardconf</classifier>
