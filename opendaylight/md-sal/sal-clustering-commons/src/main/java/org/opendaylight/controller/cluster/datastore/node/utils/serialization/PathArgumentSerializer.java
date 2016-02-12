@@ -73,8 +73,8 @@ public class PathArgumentSerializer {
             public Iterable<? extends NormalizedNodeMessages.PathArgumentAttribute> get(
                     QNameSerializationContext context, YangInstanceIdentifier.PathArgument pathArgument) {
 
-                YangInstanceIdentifier.NodeWithValue identifier
-                    = (YangInstanceIdentifier.NodeWithValue) pathArgument;
+                YangInstanceIdentifier.NodeWithValue<?> identifier
+                    = (YangInstanceIdentifier.NodeWithValue<?>) pathArgument;
 
                 NormalizedNodeMessages.PathArgumentAttribute attribute =
                     buildAttribute(context, null, identifier.getValue());
@@ -211,8 +211,8 @@ public class PathArgumentSerializer {
         switch(PathArgumentType.values()[pathArgument.getIntType()]){
             case NODE_IDENTIFIER_WITH_VALUE : {
 
-                YangInstanceIdentifier.NodeWithValue nodeWithValue =
-                    new YangInstanceIdentifier.NodeWithValue(
+                YangInstanceIdentifier.NodeWithValue<?> nodeWithValue =
+                    new YangInstanceIdentifier.NodeWithValue<>(
                         QNameFactory.create(qNameToString(context, pathArgument.getNodeType())),
                         parseAttribute(context, pathArgument.getAttribute(0)));
 
