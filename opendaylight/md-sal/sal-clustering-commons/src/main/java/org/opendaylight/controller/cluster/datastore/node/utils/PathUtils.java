@@ -15,6 +15,11 @@ import java.util.List;
 import java.util.Set;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.AugmentationIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeWithValue;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 
 public class PathUtils {
     private static final Splitter SLASH_SPLITTER = Splitter.on('/').omitEmptyStrings();
@@ -27,8 +32,7 @@ public class PathUtils {
      * @return
      */
     public static String toString(YangInstanceIdentifier path) {
-        final Iterator<YangInstanceIdentifier.PathArgument> it =
-            path.getPathArguments().iterator();
+        final Iterator<PathArgument> it = path.getPathArguments().iterator();
         if (!it.hasNext()) {
             return "";
         }
@@ -52,15 +56,15 @@ public class PathUtils {
      * @param pathArgument
      * @return
      */
-    public static String toString(YangInstanceIdentifier.PathArgument pathArgument){
-        if(pathArgument instanceof YangInstanceIdentifier.NodeIdentifier){
-            return toString((YangInstanceIdentifier.NodeIdentifier) pathArgument);
-        } else if(pathArgument instanceof YangInstanceIdentifier.AugmentationIdentifier){
-            return toString((YangInstanceIdentifier.AugmentationIdentifier) pathArgument);
-        } else if(pathArgument instanceof YangInstanceIdentifier.NodeWithValue){
-            return toString((YangInstanceIdentifier.NodeWithValue) pathArgument);
-        } else if(pathArgument instanceof YangInstanceIdentifier.NodeIdentifierWithPredicates){
-            return toString((YangInstanceIdentifier.NodeIdentifierWithPredicates) pathArgument);
+    public static String toString(PathArgument pathArgument){
+        if(pathArgument instanceof NodeIdentifier){
+            return toString((NodeIdentifier) pathArgument);
+        } else if(pathArgument instanceof AugmentationIdentifier){
+            return toString((AugmentationIdentifier) pathArgument);
+        } else if(pathArgument instanceof NodeWithValue){
+            return toString((NodeWithValue<?>) pathArgument);
+        } else if(pathArgument instanceof NodeIdentifierWithPredicates){
+            return toString((NodeIdentifierWithPredicates) pathArgument);
         }
 
         return pathArgument.toString();
@@ -74,18 +78,18 @@ public class PathUtils {
      * @return
      */
     public static YangInstanceIdentifier toYangInstanceIdentifier(String path){
-        List<YangInstanceIdentifier.PathArgument> pathArguments = new ArrayList<>();
+        List<PathArgument> pathArguments = new ArrayList<>();
         for (String segment : SLASH_SPLITTER.split(path)) {
             pathArguments.add(NodeIdentifierFactory.getArgument(segment));
         }
         return YangInstanceIdentifier.create(pathArguments);
     }
 
-    private static String toString(YangInstanceIdentifier.NodeIdentifier pathArgument){
+    private static String toString(NodeIdentifier pathArgument){
         return pathArgument.getNodeType().toString();
     }
 
-    private static String toString(YangInstanceIdentifier.AugmentationIdentifier pathArgument){
+    private static String toString(AugmentationIdentifier pathArgument){
         Set<QName> childNames = pathArgument.getPossibleChildNames();
         final StringBuilder sb = new StringBuilder("AugmentationIdentifier{");
         sb.append("childNames=").append(childNames).append('}');
@@ -93,11 +97,11 @@ public class PathUtils {
 
     }
 
-    private static String toString(YangInstanceIdentifier.NodeWithValue pathArgument){
+    private static String toString(NodeWithValue<?> pathArgument) {
         return pathArgument.getNodeType().toString() + "[" + pathArgument.getValue() + "]";
     }
 
-    private static String toString(YangInstanceIdentifier.NodeIdentifierWithPredicates pathArgument){
+    private static String toString(NodeIdentifierWithPredicates pathArgument){
         return pathArgument.getNodeType().toString() + '[' + pathArgument.getKeyValues() + ']';
     }
 

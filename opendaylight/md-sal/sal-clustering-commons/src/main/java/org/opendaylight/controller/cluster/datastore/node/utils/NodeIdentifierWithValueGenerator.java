@@ -38,7 +38,7 @@ public class NodeIdentifierWithValueGenerator{
             final String name = matcher.group(1);
             final String value = matcher.group(2);
 
-            return new YangInstanceIdentifier.NodeWithValue(
+            return new YangInstanceIdentifier.NodeWithValue<>(
                 QNameFactory.create(name), getValue(value));
         }
 

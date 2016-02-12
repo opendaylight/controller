@@ -63,7 +63,7 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput,
     private NormalizedNodeAttrBuilder<YangInstanceIdentifier.NodeIdentifier,
                                       Object, LeafNode<Object>> leafBuilder;
 
-    private NormalizedNodeAttrBuilder<NodeWithValue, Object,
+    private NormalizedNodeAttrBuilder<NodeWithValue<Object>, Object,
                                       LeafSetEntryNode<Object>> leafSetEntryBuilder;
 
     private final StringBuilder reusableStringBuilder = new StringBuilder(50);
@@ -140,7 +140,7 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput,
                 }
 
                 Object value = readObject();
-                NodeWithValue<?> leafIdentifier = new NodeWithValue<>(name, value);
+                NodeWithValue<Object> leafIdentifier = new NodeWithValue<>(name, value);
 
                 LOG.debug("Reading leaf set entry node {}, value {}", leafIdentifier, value);
 
@@ -169,7 +169,7 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput,
         return leafBuilder;
     }
 
-    private NormalizedNodeAttrBuilder<NodeWithValue, Object,
+    private NormalizedNodeAttrBuilder<NodeWithValue<Object>, Object,
                                       LeafSetEntryNode<Object>> leafSetEntryBuilder() {
         if(leafSetEntryBuilder == null) {
             leafSetEntryBuilder = Builders.leafSetEntryBuilder();
@@ -390,7 +390,7 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput,
                 return new NodeIdentifierWithPredicates(readQName(), readKeyValueMap());
 
             case PathArgumentTypes.NODE_IDENTIFIER_WITH_VALUE :
-                return new NodeWithValue(readQName(), readObject());
+                return new NodeWithValue<>(readQName(), readObject());
 
             default :
                 return null;
