@@ -77,7 +77,11 @@ public class DeadlockMonitor implements AutoCloseable {
         public void run() {
             ModuleIdentifierWithNanos old = new ModuleIdentifierWithNanos(); // null moduleId
             while (this.isInterrupted() == false) {
-                ModuleIdentifierWithNanos copy = new ModuleIdentifierWithNanos(DeadlockMonitor.this.top);
+                ModuleIdentifierWithNanos copy;
+                synchronized(this) {
+                    copy = new ModuleIdentifierWithNanos(DeadlockMonitor.this.top);
+                }
+
                 if (old.moduleIdentifier == null || old.equals(copy) == false) {
                     // started
                     old = copy;
@@ -89,7 +93,7 @@ public class DeadlockMonitor implements AutoCloseable {
                     }
                 }
                 try {
-                    sleep(1000);
+                    sleep(WARN_AFTER_MILLIS);
                 } catch (InterruptedException e) {
                     interrupt();
                 }
