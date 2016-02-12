@@ -838,11 +838,11 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         assertEquals("getStatus", ServerChangeStatus.NOT_SUPPORTED, removeServerReply.getStatus());
     }
 
-    private ServerInfo votingServer(String id) {
+    private static ServerInfo votingServer(String id) {
         return new ServerInfo(id, true);
     }
 
-    private ServerInfo nonVotingServer(String id) {
+    private static ServerInfo nonVotingServer(String id) {
         return new ServerInfo(id, false);
     }
 

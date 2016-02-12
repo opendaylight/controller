@@ -118,7 +118,7 @@ public class RaftActorContextImplTest extends AbstractActorTest {
         assertEquals("isVotingMember", false, context.isVotingMember());
     }
 
-    private void verifyPeerInfo(RaftActorContextImpl context, String peerId, Boolean voting) {
+    private static void verifyPeerInfo(RaftActorContextImpl context, String peerId, Boolean voting) {
         PeerInfo peerInfo = context.getPeerInfo(peerId);
         if(voting != null) {
             assertNotNull("Expected peer " + peerId, peerInfo);
