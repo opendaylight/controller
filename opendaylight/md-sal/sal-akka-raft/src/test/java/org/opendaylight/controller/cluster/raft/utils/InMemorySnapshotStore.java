@@ -122,7 +122,7 @@ public class InMemorySnapshotStore extends SnapshotStore {
         return Futures.successful(Option.<SelectedSnapshot>none());
     }
 
-    private boolean matches(StoredSnapshot snapshot, SnapshotSelectionCriteria criteria) {
+    private static boolean matches(StoredSnapshot snapshot, SnapshotSelectionCriteria criteria) {
         return snapshot.metadata.sequenceNr() <= criteria.maxSequenceNr() &&
                 snapshot.metadata.timestamp() <= criteria.maxTimestamp();
     }

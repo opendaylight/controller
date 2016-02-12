@@ -267,7 +267,7 @@ class RaftActorRecoverySupport {
                  replicatedLog().getSnapshotTerm(), replicatedLog().size());
     }
 
-    private boolean isServerConfigurationPayload(ReplicatedLogEntry repLogEntry){
+    private static boolean isServerConfigurationPayload(ReplicatedLogEntry repLogEntry){
         return (repLogEntry.getData() instanceof ServerConfigurationPayload);
     }
 }
