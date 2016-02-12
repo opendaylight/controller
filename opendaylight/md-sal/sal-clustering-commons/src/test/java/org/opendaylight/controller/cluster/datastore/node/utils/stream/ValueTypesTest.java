@@ -19,7 +19,7 @@ public class ValueTypesTest {
         assertEquals(ValueTypes.STRING_BYTES_TYPE, ValueTypes.getSerializableType(largeString));
     }
 
-    private String largeString(int minSize){
+    private static String largeString(int minSize){
         final int pow = (int) (Math.log(minSize * 2) / Math.log(2));
         String s = "X";
         for(int i=0;i<pow;i++){
