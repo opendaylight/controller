@@ -13,6 +13,11 @@ import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.util.TestModel;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.AugmentationIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeWithValue;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -22,7 +27,7 @@ public class PathUtilsTest {
 
     @Test
     public void toStringNodeIdentifier(){
-        YangInstanceIdentifier.PathArgument pathArgument = nodeIdentifier();
+        PathArgument pathArgument = nodeIdentifier();
 
         String expected = "(urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test?revision=2014-03-13)test";
 
@@ -33,7 +38,7 @@ public class PathUtilsTest {
     public void toStringAugmentationIdentifier(){
         String expected = "AugmentationIdentifier{childNames=[(urn:opendaylight:flow:table:statistics?revision=2013-12-15)flow-table-statistics]}";
 
-        YangInstanceIdentifier.PathArgument pathArgument = augmentationIdentifier();
+        PathArgument pathArgument = augmentationIdentifier();
 
         assertEquals(expected, PathUtils.toString(pathArgument));
     }
@@ -41,7 +46,7 @@ public class PathUtilsTest {
     @Test
     public void toStringNodeWithValue(){
 
-        YangInstanceIdentifier.PathArgument pathArgument = nodeWithValue();
+        PathArgument pathArgument = nodeWithValue();
 
         String expected = "(urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test?revision=2014-03-13)test[100]";
 
@@ -52,7 +57,7 @@ public class PathUtilsTest {
     @Test
     public void toStringNodeIdentifierWithPredicates(){
 
-        YangInstanceIdentifier.PathArgument pathArgument = nodeIdentifierWithPredicates();
+        PathArgument pathArgument = nodeIdentifierWithPredicates();
 
         String expected = "(urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test?revision=2014-03-13)test[{(urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test?revision=2014-03-13)id=100}]";
 
@@ -93,25 +98,25 @@ public class PathUtilsTest {
 
     }
 
-    private static YangInstanceIdentifier.NodeIdentifier nodeIdentifier(){
-        return new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME);
+    private static NodeIdentifier nodeIdentifier(){
+        return new NodeIdentifier(TestModel.TEST_QNAME);
     }
 
-    private static YangInstanceIdentifier.AugmentationIdentifier augmentationIdentifier(){
+    private static AugmentationIdentifier augmentationIdentifier(){
         Set<QName> childNames = ImmutableSet.of(QNameFactory.create("(urn:opendaylight:flow:table:statistics?revision=2013-12-15)flow-table-statistics"));
 
-        return new YangInstanceIdentifier.AugmentationIdentifier(childNames);
+        return new AugmentationIdentifier(childNames);
     }
 
-    private static YangInstanceIdentifier.NodeWithValue nodeWithValue(){
-        return new YangInstanceIdentifier.NodeWithValue(TestModel.TEST_QNAME, Integer.valueOf(100));
+    private static NodeWithValue<?> nodeWithValue(){
+        return new NodeWithValue<>(TestModel.TEST_QNAME, Integer.valueOf(100));
     }
 
-    private static YangInstanceIdentifier.NodeIdentifierWithPredicates nodeIdentifierWithPredicates(){
+    private static NodeIdentifierWithPredicates nodeIdentifierWithPredicates(){
         Map<QName, Object> keys = new HashMap<>();
 
         keys.put(TestModel.ID_QNAME, Integer.valueOf(100));
 
-        return new YangInstanceIdentifier.NodeIdentifierWithPredicates(TestModel.TEST_QNAME, keys);
+        return new NodeIdentifierWithPredicates(TestModel.TEST_QNAME, keys);
     }
 }
