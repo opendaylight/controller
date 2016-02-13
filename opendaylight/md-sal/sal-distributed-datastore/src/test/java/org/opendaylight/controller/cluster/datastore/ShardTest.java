@@ -2338,7 +2338,7 @@ public class ShardTest extends AbstractShardTest {
                             "akka://test/user/" + followerShardID.toString())).schemaContext(SCHEMA_CONTEXT).props().
                     withDispatcher(Dispatchers.DefaultDispatcherId()), leaderShardID.toString());
 
-            leaderShard.tell(new ElectionTimeout(), ActorRef.noSender());
+            leaderShard.tell(ElectionTimeout.INSTANCE, ActorRef.noSender());
             String leaderPath = waitUntilLeader(followerShard);
             assertEquals("Shard leader path", leaderShard.path().toString(), leaderPath);
 
@@ -2414,7 +2414,7 @@ public class ShardTest extends AbstractShardTest {
                             "akka://test/user/" + followerShardID.toString())).schemaContext(SCHEMA_CONTEXT).props().
                     withDispatcher(Dispatchers.DefaultDispatcherId()), leaderShardID.toString());
 
-            leaderShard.tell(new ElectionTimeout(), ActorRef.noSender());
+            leaderShard.tell(ElectionTimeout.INSTANCE, ActorRef.noSender());
             String leaderPath = waitUntilLeader(followerShard);
             assertEquals("Shard leader path", leaderShard.path().toString(), leaderPath);
 
