@@ -230,7 +230,7 @@ public class ShardTest extends AbstractShardTest {
             assertNotNull("getListenerRegistrationPath", reply.getListenerRegistrationPath());
 
             // Sanity check - verify the shard is not the leader yet.
-            shard.tell(new FindLeader(), getRef());
+            shard.tell(FindLeader.INSTANCE, getRef());
             final FindLeaderReply findLeadeReply =
                     expectMsgClass(duration("5 seconds"), FindLeaderReply.class);
             assertNull("Expected the shard not to be the leader", findLeadeReply.getLeaderActor());
@@ -329,7 +329,7 @@ public class ShardTest extends AbstractShardTest {
                 RegisterDataTreeChangeListenerReply.class);
             assertNotNull("getListenerRegistratioznPath", reply.getListenerRegistrationPath());
 
-            shard.tell(new FindLeader(), getRef());
+            shard.tell(FindLeader.INSTANCE, getRef());
             final FindLeaderReply findLeadeReply =
                     expectMsgClass(duration("5 seconds"), FindLeaderReply.class);
             assertNull("Expected the shard not to be the leader", findLeadeReply.getLeaderActor());
