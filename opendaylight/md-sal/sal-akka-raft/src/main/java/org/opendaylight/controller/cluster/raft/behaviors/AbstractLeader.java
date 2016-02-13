@@ -764,7 +764,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         // need to be sent if there are other messages being sent to the remote
         // actor.
         heartbeatSchedule = context.getActorSystem().scheduler().scheduleOnce(
-            interval, context.getActor(), new SendHeartBeat(),
+            interval, context.getActor(), SendHeartBeat.INSTANCE,
             context.getActorSystem().dispatcher(), context.getActor());
     }
 

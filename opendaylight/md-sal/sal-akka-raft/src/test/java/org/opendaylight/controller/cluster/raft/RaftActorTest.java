@@ -844,7 +844,7 @@ public class RaftActorTest extends AbstractActorTest {
                 assertEquals(RaftState.Leader, leaderActor.getCurrentBehavior().state());
 
                 // simulate a real snapshot
-                leaderActor.onReceiveCommand(new SendHeartBeat());
+                leaderActor.onReceiveCommand(SendHeartBeat.INSTANCE);
                 assertEquals(5, leaderActor.getReplicatedLog().size());
                 assertEquals(String.format("expected to be Leader but was %s. Current Leader = %s ",
                         leaderActor.getCurrentBehavior().state(), leaderActor.getLeaderId())
