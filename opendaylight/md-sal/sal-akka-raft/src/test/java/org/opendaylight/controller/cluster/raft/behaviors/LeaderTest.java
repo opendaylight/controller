@@ -132,7 +132,7 @@ public class LeaderTest extends AbstractLeaderTest {
         Uninterruptibles.sleepUninterruptibly(actorContext.getConfigParams().
                 getHeartBeatInterval().toMillis(), TimeUnit.MILLISECONDS);
 
-        leader.handleMessage(leaderActor, new SendHeartBeat());
+        leader.handleMessage(leaderActor, SendHeartBeat.INSTANCE);
 
         appendEntries = MessageCollectorActor.expectFirstMatching(followerActor, AppendEntries.class);
         assertEquals("getPrevLogIndex", lastIndex - 1, appendEntries.getPrevLogIndex());
@@ -406,7 +406,7 @@ public class LeaderTest extends AbstractLeaderTest {
         // Wait slightly longer than heartbeat duration
         Uninterruptibles.sleepUninterruptibly(750, TimeUnit.MILLISECONDS);
 
-        leader.handleMessage(leaderActor, new SendHeartBeat());
+        leader.handleMessage(leaderActor, SendHeartBeat.INSTANCE);
 
         List<AppendEntries> allMessages = MessageCollectorActor.getAllMatching(followerActor, AppendEntries.class);
         assertEquals("The number of append entries collected should be 2", 2, allMessages.size());
@@ -448,7 +448,7 @@ public class LeaderTest extends AbstractLeaderTest {
 
         for(int i=0;i<3;i++) {
             Uninterruptibles.sleepUninterruptibly(150, TimeUnit.MILLISECONDS);
-            leader.handleMessage(leaderActor, new SendHeartBeat());
+            leader.handleMessage(leaderActor, SendHeartBeat.INSTANCE);
         }
 
         List<AppendEntries> allMessages = MessageCollectorActor.getAllMatching(followerActor, AppendEntries.class);
@@ -484,7 +484,7 @@ public class LeaderTest extends AbstractLeaderTest {
         followerActor.underlyingActor().clear();
 
         Uninterruptibles.sleepUninterruptibly(150, TimeUnit.MILLISECONDS);
-        leader.handleMessage(leaderActor, new SendHeartBeat());
+        leader.handleMessage(leaderActor, SendHeartBeat.INSTANCE);
         sendReplicate(actorContext, lastIndex+1);
 
         List<AppendEntries> allMessages = MessageCollectorActor.getAllMatching(followerActor, AppendEntries.class);
@@ -590,7 +590,7 @@ public class LeaderTest extends AbstractLeaderTest {
         Uninterruptibles.sleepUninterruptibly(actorContext.getConfigParams().getHeartBeatInterval().toMillis(),
                 TimeUnit.MILLISECONDS);
 
-        leader.handleMessage(leaderActor, new SendHeartBeat());
+        leader.handleMessage(leaderActor, SendHeartBeat.INSTANCE);
 
         AppendEntries aeproto = MessageCollectorActor.expectFirstMatching(followerActor, AppendEntries.class);
 
@@ -601,7 +601,7 @@ public class LeaderTest extends AbstractLeaderTest {
         //InstallSnapshotReply received
         fts.markSendStatus(true);
 
-        leader.handleMessage(leaderActor, new SendHeartBeat());
+        leader.handleMessage(leaderActor, SendHeartBeat.INSTANCE);
 
         InstallSnapshot is = MessageCollectorActor.expectFirstMatching(followerActor, InstallSnapshot.class);
 
@@ -1069,7 +1069,7 @@ public class LeaderTest extends AbstractLeaderTest {
         Uninterruptibles.sleepUninterruptibly(actorContext.getConfigParams().getHeartBeatInterval().toMillis(),
                 TimeUnit.MILLISECONDS);
 
-        leader.handleMessage(leaderActor, new SendHeartBeat());
+        leader.handleMessage(leaderActor, SendHeartBeat.INSTANCE);
 
         installSnapshot = MessageCollectorActor.expectFirstMatching(followerActor, InstallSnapshot.class);
 
@@ -1339,7 +1339,7 @@ public class LeaderTest extends AbstractLeaderTest {
         Uninterruptibles.sleepUninterruptibly(leaderActorContext.getConfigParams().getHeartBeatInterval().toMillis(),
                 TimeUnit.MILLISECONDS);
 
-        leader.handleMessage(leaderActor, new SendHeartBeat());
+        leader.handleMessage(leaderActor, SendHeartBeat.INSTANCE);
 
         appendEntries = MessageCollectorActor.expectFirstMatching(followerActor, AppendEntries.class);
 
@@ -2106,7 +2106,7 @@ public class LeaderTest extends AbstractLeaderTest {
 
         Uninterruptibles.sleepUninterruptibly(leaderActorContext.getConfigParams().
                 getHeartBeatInterval().toMillis() + 1, TimeUnit.MILLISECONDS);
-        leader.handleMessage(leaderActor, new SendHeartBeat());
+        leader.handleMessage(leaderActor, SendHeartBeat.INSTANCE);
         MessageCollectorActor.expectFirstMatching(followerActor, AppendEntries.class);
         leader.handleMessage(leaderActor, new AppendEntriesReply(FOLLOWER_ID, 1, true, 1, 1, (short)0));
 
@@ -2147,7 +2147,7 @@ public class LeaderTest extends AbstractLeaderTest {
         for(int i = 0; i < leaderActorContext.getConfigParams().getElectionTimeoutFactor(); i++) {
             Uninterruptibles.sleepUninterruptibly(leaderActorContext.getConfigParams().
                     getHeartBeatInterval().toMillis() + 1, TimeUnit.MILLISECONDS);
-            leader.handleMessage(leaderActor, new SendHeartBeat());
+            leader.handleMessage(leaderActor, SendHeartBeat.INSTANCE);
         }
 
         verify(mockTransferCohort).abortTransfer();

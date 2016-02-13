@@ -16,6 +16,16 @@ import java.io.Serializable;
  *
  * Typically the Leader to itself on a schedule
  */
-public class SendHeartBeat implements Serializable {
+public final class SendHeartBeat implements Serializable {
     private static final long serialVersionUID = 1L;
+    public static final SendHeartBeat INSTANCE = new SendHeartBeat();
+
+    private SendHeartBeat() {
+        // Hidden on purpose
+    }
+
+    @SuppressWarnings({ "static-method", "unused" })
+    private SendHeartBeat readResolve() {
+        return INSTANCE;
+    }
 }
