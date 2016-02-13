@@ -9,11 +9,11 @@ package org.opendaylight.controller.cluster.raft.client.messages;
 
 /**
  * Internal client message to get a snapshot of the current state based on whether or not persistence is
- * enabled. Returns a GetSnapshotReply instance.
+ * enabled. Returns a {@link GetSnapshotReply} instance.
  *
  * @author Thomas Pantelis
  */
-public class GetSnapshot {
+public final class GetSnapshot {
     public static final GetSnapshot INSTANCE = new GetSnapshot();
 
     private GetSnapshot() {
