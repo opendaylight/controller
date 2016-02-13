@@ -47,7 +47,6 @@ import org.opendaylight.controller.cluster.raft.base.messages.ApplyJournalEntrie
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
-import org.opendaylight.controller.cluster.raft.base.messages.IsolatedLeaderCheck;
 import org.opendaylight.controller.cluster.raft.base.messages.Replicate;
 import org.opendaylight.controller.cluster.raft.base.messages.SendHeartBeat;
 import org.opendaylight.controller.cluster.raft.base.messages.SendInstallSnapshot;
@@ -1818,7 +1817,7 @@ public class LeaderTest extends AbstractLeaderTest {
         MockRaftActorContext leaderActorContext = createActorContext();
 
         leader = new Leader(leaderActorContext);
-        RaftActorBehavior behavior = leader.handleMessage(leaderActor, new IsolatedLeaderCheck());
+        RaftActorBehavior behavior = leader.handleMessage(leaderActor, Leader.ISOLATED_LEADER_CHECK);
         Assert.assertTrue(behavior instanceof Leader);
     }
 
@@ -1839,7 +1838,7 @@ public class LeaderTest extends AbstractLeaderTest {
 
         leader.markFollowerActive("follower-1");
         leader.markFollowerActive("follower-2");
-        RaftActorBehavior behavior = leader.handleMessage(leaderActor, new IsolatedLeaderCheck());
+        RaftActorBehavior behavior = leader.handleMessage(leaderActor, Leader.ISOLATED_LEADER_CHECK);
         Assert.assertTrue("Behavior not instance of Leader when all followers are active",
                 behavior instanceof Leader);
 
@@ -1852,7 +1851,7 @@ public class LeaderTest extends AbstractLeaderTest {
 
         leader.markFollowerInActive("follower-1");
         leader.markFollowerActive("follower-2");
-        behavior = leader.handleMessage(leaderActor, new IsolatedLeaderCheck());
+        behavior = leader.handleMessage(leaderActor, Leader.ISOLATED_LEADER_CHECK);
         Assert.assertTrue("Behavior not instance of Leader when majority of followers are active",
                 behavior instanceof Leader);
 
@@ -1864,7 +1863,7 @@ public class LeaderTest extends AbstractLeaderTest {
         assertEquals(termMsg2.getActor(), followerActor2);
 
         leader.markFollowerInActive("follower-2");
-        return leader.handleMessage(leaderActor, new IsolatedLeaderCheck());
+        return leader.handleMessage(leaderActor, Leader.ISOLATED_LEADER_CHECK);
     }
 
     @Test
