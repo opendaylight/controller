@@ -14,6 +14,16 @@ import java.io.Serializable;
  *
  * @author Thomas Pantelis
  */
-public class LeaderTransitioning implements Serializable {
+public final class LeaderTransitioning implements Serializable {
     private static final long serialVersionUID = 1L;
+    public static final LeaderTransitioning INSTANCE = new LeaderTransitioning();
+
+    private LeaderTransitioning() {
+        // Hidden on purpose
+    }
+
+    @SuppressWarnings({ "static-method", "unused" })
+    private LeaderTransitioning readResolve() {
+        return INSTANCE;
+    }
 }
