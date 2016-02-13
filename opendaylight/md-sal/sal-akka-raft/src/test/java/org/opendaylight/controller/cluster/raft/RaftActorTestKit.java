@@ -61,7 +61,7 @@ public class RaftActorTestKit extends JavaTestKit {
     public static void waitUntilLeader(ActorRef actorRef) {
         FiniteDuration duration = Duration.create(100, TimeUnit.MILLISECONDS);
         for(int i = 0; i < 20 * 5; i++) {
-            Future<Object> future = Patterns.ask(actorRef, new FindLeader(), new Timeout(duration));
+            Future<Object> future = Patterns.ask(actorRef, FindLeader.INSTANCE, new Timeout(duration));
             try {
                 FindLeaderReply resp = (FindLeaderReply) Await.result(future, duration);
                 if(resp.getLeaderActor() != null) {

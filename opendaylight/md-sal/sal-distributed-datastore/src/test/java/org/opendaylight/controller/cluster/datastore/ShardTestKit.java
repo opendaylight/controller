@@ -49,7 +49,7 @@ public class ShardTestKit extends JavaTestKit {
     public static String waitUntilLeader(ActorRef shard) {
         FiniteDuration duration = Duration.create(100, TimeUnit.MILLISECONDS);
         for(int i = 0; i < 20 * 5; i++) {
-            Future<Object> future = Patterns.ask(shard, new FindLeader(), new Timeout(duration));
+            Future<Object> future = Patterns.ask(shard, FindLeader.INSTANCE, new Timeout(duration));
             try {
                 FindLeaderReply resp = (FindLeaderReply)Await.result(future, duration);
                 if(resp.getLeaderActor() != null) {
@@ -73,7 +73,7 @@ public class ShardTestKit extends JavaTestKit {
         FiniteDuration duration = Duration.create(100, TimeUnit.MILLISECONDS);
         Object lastResponse = null;
         for(int i = 0; i < 20 * 5; i++) {
-            Future<Object> future = Patterns.ask(shard, new FindLeader(), new Timeout(duration));
+            Future<Object> future = Patterns.ask(shard, FindLeader.INSTANCE, new Timeout(duration));
             try {
                 FindLeaderReply resp = (FindLeaderReply)Await.result(future, duration);
                 if(resp.getLeaderActor() == null) {
