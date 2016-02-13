@@ -1937,7 +1937,7 @@ public class ShardManagerTest extends AbstractActorTest {
             shardManager.tell(new ActorInitialized(), shard2);
 
             FiniteDuration duration = FiniteDuration.create(5, TimeUnit.SECONDS);
-            Future<Boolean> stopFuture = Patterns.gracefulStop(shardManager, duration, new Shutdown());
+            Future<Boolean> stopFuture = Patterns.gracefulStop(shardManager, duration, Shutdown.INSTANCE);
 
             MessageCollectorActor.expectFirstMatching(shard1, Shutdown.class);
             MessageCollectorActor.expectFirstMatching(shard2, Shutdown.class);

@@ -15,6 +15,16 @@ import java.io.Serializable;
  *
  * @author Thomas Pantelis
  */
-public class Shutdown implements Serializable {
+public final class Shutdown implements Serializable {
     private static final long serialVersionUID = 1L;
+    public static final Shutdown INSTANCE = new Shutdown();
+
+    private Shutdown() {
+        // Hidden on purpose
+    }
+
+    @SuppressWarnings({ "static-method", "unused" })
+    private Shutdown readResolve() {
+        return INSTANCE;
+    }
 }
