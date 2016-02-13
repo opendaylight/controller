@@ -76,11 +76,10 @@ public class RaftActorLeadershipTransferCohort {
                     currentBehavior.getLeaderPayloadVersion()), raftActor.self());
         }
 
-        LeaderTransitioning leaderTransitioning = new LeaderTransitioning();
         for(String peerId: context.getPeerIds()) {
             ActorSelection followerActor = context.getPeerActorSelection(peerId);
             if(followerActor != null) {
-                followerActor.tell(leaderTransitioning, context.getActor());
+                followerActor.tell(LeaderTransitioning.INSTANCE, context.getActor());
             }
         }
 

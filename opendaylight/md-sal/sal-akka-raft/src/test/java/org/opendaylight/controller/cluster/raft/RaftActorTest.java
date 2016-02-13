@@ -1360,7 +1360,7 @@ public class RaftActorTest extends AbstractActorTest {
 
         MessageCollectorActor.clearMessages(notifierActor);
 
-        raftActorRef.tell(new LeaderTransitioning(), ActorRef.noSender());
+        raftActorRef.tell(LeaderTransitioning.INSTANCE, ActorRef.noSender());
 
         leaderStateChange = MessageCollectorActor.expectFirstMatching(notifierActor, LeaderStateChanged.class);
         assertEquals("getMemberId", persistenceId, leaderStateChange.getMemberId());
