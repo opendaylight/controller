@@ -2338,7 +2338,7 @@ public class ShardTest extends AbstractShardTest {
                             "akka://test/user/" + followerShardID.toString())).schemaContext(SCHEMA_CONTEXT).props().
                     withDispatcher(Dispatchers.DefaultDispatcherId()), leaderShardID.toString());
 
-            leaderShard.tell(new ElectionTimeout(), ActorRef.noSender());
+            leaderShard.tell(ElectionTimeout.INSTANCE, ActorRef.noSender());
             String leaderPath = waitUntilLeader(followerShard);
             assertEquals("Shard leader path", leaderShard.path().toString(), leaderPath);
 
@@ -2384,8 +2384,14 @@ public class ShardTest extends AbstractShardTest {
                     RegisterDataTreeChangeListenerReply.class);
             assertNotNull("getListenerRegistrationPath", reply.getListenerRegistrationPath());
 
+<<<<<<< 0b4c86f4f33ba051a14c921f615d2cde4d0d6787
             shard.tell(DatastoreContext.newBuilderFrom(dataStoreContextBuilder.build()).
                     customRaftPolicyImplementation(null).build(), ActorRef.noSender());
+=======
+            writeToStore(shard, path, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
+
+            shard.tell(ElectionTimeout.INSTANCE, ActorRef.noSender());
+>>>>>>> Turn ElectionTimeout into a proper singleton
 
             listener.waitForChangeEvents();
         }};
@@ -2414,7 +2420,7 @@ public class ShardTest extends AbstractShardTest {
                             "akka://test/user/" + followerShardID.toString())).schemaContext(SCHEMA_CONTEXT).props().
                     withDispatcher(Dispatchers.DefaultDispatcherId()), leaderShardID.toString());
 
-            leaderShard.tell(new ElectionTimeout(), ActorRef.noSender());
+            leaderShard.tell(ElectionTimeout.INSTANCE, ActorRef.noSender());
             String leaderPath = waitUntilLeader(followerShard);
             assertEquals("Shard leader path", leaderShard.path().toString(), leaderPath);
 

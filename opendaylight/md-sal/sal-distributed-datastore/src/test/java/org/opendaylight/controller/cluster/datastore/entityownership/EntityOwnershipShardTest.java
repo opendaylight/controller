@@ -416,7 +416,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
                 ImmutableMap.<String, String>builder().put(peerId1.toString(), peer1.path().toString()).
                         put(peerId2.toString(), peer2.path().toString()).build(), LOCAL_MEMBER_NAME, EntityOwnerSelectionStrategyConfig.newBuilder().build()).
                 withDispatcher(Dispatchers.DefaultDispatcherId()), leaderId.toString());
-        leader.tell(new ElectionTimeout(), leader);
+        leader.tell(ElectionTimeout.INSTANCE, leader);
 
         ShardTestKit.waitUntilLeader(leader);
 
@@ -564,7 +564,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
 
         leader.tell(PoisonPill.getInstance(), ActorRef.noSender());
         peer2.tell(new PeerDown(LOCAL_MEMBER_NAME, leaderId.toString()), ActorRef.noSender());
-        peer2.tell(new ElectionTimeout(), peer2);
+        peer2.tell(ElectionTimeout.INSTANCE, peer2);
 
         ShardTestKit.waitUntilLeader(peer2);
 
@@ -590,7 +590,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
         TestActorRef<EntityOwnershipShard> leader = actorFactory.createTestActor(newShardProps(leaderId,
                 ImmutableMap.<String, String>builder().put(localId.toString(), shard.path().toString()).build(),
                     LOCAL_MEMBER_NAME, EntityOwnerSelectionStrategyConfig.newBuilder().build()).withDispatcher(Dispatchers.DefaultDispatcherId()), leaderId.toString());
-        leader.tell(new ElectionTimeout(), leader);
+        leader.tell(ElectionTimeout.INSTANCE, leader);
 
         ShardTestKit.waitUntilLeader(leader);
 
