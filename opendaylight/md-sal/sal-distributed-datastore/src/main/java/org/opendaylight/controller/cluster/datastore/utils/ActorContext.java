@@ -381,7 +381,7 @@ public class ActorContext {
     public void shutdown() {
         FiniteDuration duration = datastoreContext.getShardRaftConfig().getElectionTimeOutInterval().$times(3);
         try {
-            Await.ready(Patterns.gracefulStop(shardManager, duration, new Shutdown()), duration);
+            Await.ready(Patterns.gracefulStop(shardManager, duration, Shutdown.INSTANCE), duration);
         } catch(Exception e) {
             LOG.warn("ShardManager for {} data store did not shutdown gracefully", getDataStoreName(), e);
         }
