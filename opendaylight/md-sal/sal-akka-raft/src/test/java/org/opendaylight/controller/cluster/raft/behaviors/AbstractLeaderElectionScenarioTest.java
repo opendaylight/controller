@@ -221,6 +221,6 @@ public class AbstractLeaderElectionScenarioTest {
 
     void sendHeartbeat(TestActorRef<MemberActor> leaderActor) {
         Uninterruptibles.sleepUninterruptibly(HEARTBEAT_INTERVAL, TimeUnit.MILLISECONDS);
-        leaderActor.underlyingActor().behavior.handleMessage(leaderActor, new SendHeartBeat());
+        leaderActor.underlyingActor().behavior.handleMessage(leaderActor, SendHeartBeat.INSTANCE);
     }
 }
