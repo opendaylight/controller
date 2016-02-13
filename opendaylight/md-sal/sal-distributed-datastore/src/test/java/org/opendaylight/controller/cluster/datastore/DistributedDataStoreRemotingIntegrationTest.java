@@ -778,7 +778,7 @@ public class DistributedDataStoreRemotingIntegrationTest {
         Future<ActorRef> future = leaderDistributedDataStore.getActorContext().findLocalShardAsync("cars");
         ActorRef leaderActor = Await.result(future, duration);
 
-        Future<Boolean> stopFuture = Patterns.gracefulStop(leaderActor, duration, new Shutdown());
+        Future<Boolean> stopFuture = Patterns.gracefulStop(leaderActor, duration, Shutdown.INSTANCE);
 
         // Commit the 2 transactions. They should finish and succeed.
 

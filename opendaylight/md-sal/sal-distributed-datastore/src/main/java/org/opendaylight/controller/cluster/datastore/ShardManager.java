@@ -259,14 +259,13 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     }
 
     private void onShutDown() {
-        Shutdown shutdown = new Shutdown();
         List<Future<Boolean>> stopFutures = new ArrayList<>(localShards.size());
         for (ShardInformation info : localShards.values()) {
             if (info.getActor() != null) {
                 LOG.debug("{}: Issuing gracefulStop to shard {}", persistenceId(), info.getShardId());
 
                 FiniteDuration duration = info.getDatastoreContext().getShardRaftConfig().getElectionTimeOutInterval().$times(2);
-                stopFutures.add(Patterns.gracefulStop(info.getActor(), duration, shutdown));
+                stopFutures.add(Patterns.gracefulStop(info.getActor(), duration, Shutdown.INSTANCE));
             }
         }
 
@@ -385,7 +384,7 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             return;
         } else if(shardInformation.getActor() != null) {
             LOG.debug("{} : Sending Shutdown to Shard actor {}", persistenceId(), shardInformation.getActor());
-            shardInformation.getActor().tell(new Shutdown(), self());
+            shardInformation.getActor().tell(Shutdown.INSTANCE, self());
         }
         LOG.debug("{} : Local Shard replica for shard {} has been removed", persistenceId(), shardId.getShardName());
         persistShardList();
