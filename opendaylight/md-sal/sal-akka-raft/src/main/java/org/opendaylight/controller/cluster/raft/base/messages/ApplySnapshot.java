@@ -44,7 +44,7 @@ public class ApplySnapshot {
         void onFailure();
     }
 
-    public static Callback NOOP_CALLBACK = new Callback() {
+    private static final Callback NOOP_CALLBACK = new Callback() {
         @Override
         public void onSuccess() {
         }
