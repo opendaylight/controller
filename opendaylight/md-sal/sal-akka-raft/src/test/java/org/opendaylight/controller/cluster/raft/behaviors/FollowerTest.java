@@ -109,7 +109,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
 
         follower = new Follower(createActorContext());
 
-        RaftActorBehavior raftBehavior = follower.handleMessage(followerActor, new ElectionTimeout());
+        RaftActorBehavior raftBehavior = follower.handleMessage(followerActor, ElectionTimeout.INSTANCE);
 
         assertTrue(raftBehavior instanceof Candidate);
     }
@@ -967,6 +967,8 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
         MockRaftActorContext context = createActorContext();
         follower = createBehavior(context);
         follower.handleMessage(leaderActor, new RaftRPC() {
+            private static final long serialVersionUID = 1L;
+
             @Override
             public long getTerm() {
                 return 100;
