@@ -13,17 +13,21 @@ import akka.pattern.Patterns;
 import akka.testkit.JavaTestKit;
 import akka.util.Timeout;
 import com.google.common.util.concurrent.Uninterruptibles;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import org.junit.Assert;
 import org.opendaylight.controller.cluster.raft.client.messages.FindLeader;
 import org.opendaylight.controller.cluster.raft.client.messages.FindLeaderReply;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
 import scala.concurrent.duration.FiniteDuration;
 
 public class RaftActorTestKit extends JavaTestKit {
+    private static final Logger LOG = LoggerFactory.getLogger(RaftActorTestKit.class);
     private final ActorRef raftActor;
 
     public RaftActorTestKit(ActorSystem actorSystem, String actorName) {
@@ -63,16 +67,14 @@ public class RaftActorTestKit extends JavaTestKit {
         for(int i = 0; i < 20 * 5; i++) {
             Future<Object> future = Patterns.ask(actorRef, FindLeader.INSTANCE, new Timeout(duration));
             try {
-                FindLeaderReply resp = (FindLeaderReply) Await.result(future, duration);
-                if(resp.getLeaderActor() != null) {
+                final Optional<String> maybeLeader = ((FindLeaderReply)Await.result(future, duration)).getLeaderActor();
+                if (maybeLeader.isPresent()) {
                     return;
                 }
             } catch(TimeoutException e) {
             } catch(Exception e) {
-                System.err.println("FindLeader threw ex");
-                e.printStackTrace();
+                LOG.error("FindLeader failed", e);
             }
-
 
             Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
         }
