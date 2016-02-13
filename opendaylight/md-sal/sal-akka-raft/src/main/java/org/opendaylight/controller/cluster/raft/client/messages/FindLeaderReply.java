@@ -8,17 +8,28 @@
 
 package org.opendaylight.controller.cluster.raft.client.messages;
 
+import com.google.common.annotations.VisibleForTesting;
 import java.io.Serializable;
+import java.util.Optional;
+import javax.annotation.Nullable;
 
-public class FindLeaderReply implements Serializable {
+/**
+ * Reply to {@link FindLeader} message, containing the address of the leader actor, as known to the raft actor which
+ * sent the message. If the responding actor does not have knowledge of the leader, {@link #getLeaderActor()} will
+ * return {@link Optional#empty()}.
+ *
+ * This message is intended for testing purposes only.
+ */
+@VisibleForTesting
+public final class FindLeaderReply implements Serializable {
     private static final long serialVersionUID = 1L;
     private final String leaderActor;
 
-    public FindLeaderReply(String leaderActor) {
+    public FindLeaderReply(@Nullable final String leaderActor) {
         this.leaderActor = leaderActor;
     }
 
-    public String getLeaderActor() {
-        return leaderActor;
+    public Optional<String> getLeaderActor() {
+        return Optional.ofNullable(leaderActor);
     }
 }

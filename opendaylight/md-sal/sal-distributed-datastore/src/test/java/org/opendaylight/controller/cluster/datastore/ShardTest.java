@@ -11,7 +11,6 @@ package org.opendaylight.controller.cluster.datastore;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doReturn;
@@ -233,7 +232,7 @@ public class ShardTest extends AbstractShardTest {
             shard.tell(FindLeader.INSTANCE, getRef());
             final FindLeaderReply findLeadeReply =
                     expectMsgClass(duration("5 seconds"), FindLeaderReply.class);
-            assertNull("Expected the shard not to be the leader", findLeadeReply.getLeaderActor());
+            assertFalse("Expected the shard not to be the leader", findLeadeReply.getLeaderActor().isPresent());
 
             // Signal the onChangeListenerRegistered latch to tell the thread above to proceed
             // with the election process.
@@ -332,7 +331,7 @@ public class ShardTest extends AbstractShardTest {
             shard.tell(FindLeader.INSTANCE, getRef());
             final FindLeaderReply findLeadeReply =
                     expectMsgClass(duration("5 seconds"), FindLeaderReply.class);
-            assertNull("Expected the shard not to be the leader", findLeadeReply.getLeaderActor());
+            assertFalse("Expected the shard not to be the leader", findLeadeReply.getLeaderActor().isPresent());
 
             writeToStore(shard, path, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
 
