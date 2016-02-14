@@ -7,38 +7,42 @@
  */
 package org.opendaylight.controller.cluster.raft.messages;
 
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.MoreObjects;
+import com.google.common.base.Preconditions;
 import java.io.Serializable;
+import java.util.Optional;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /**
  * Abstract base class for a server configuration change reply.
  *
  * @author Thomas Pantelis
  */
-public class AbstractServerChangeReply implements Serializable {
+public abstract class AbstractServerChangeReply implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private final String leaderHint;
     private final ServerChangeStatus status;
 
-    public AbstractServerChangeReply(ServerChangeStatus status, String leaderHint) {
-        this.status = status;
+    AbstractServerChangeReply(final @Nonnull ServerChangeStatus status, final @Nullable String leaderHint) {
+        this.status = Preconditions.checkNotNull(status);
         this.leaderHint = leaderHint;
     }
 
-    public static long getSerialversionuid() {
-        return serialVersionUID;
+    @VisibleForTesting
+    @Nonnull public final Optional<String> getLeaderHint() {
+        return Optional.ofNullable(leaderHint);
     }
 
-    public String getLeaderHint() {
-        return leaderHint;
-    }
-
-    public ServerChangeStatus getStatus() {
+    @Nonnull public final ServerChangeStatus getStatus() {
         return status;
     }
 
     @Override
-    public String toString() {
-        return getClass().getSimpleName() + " [status=" + status + ", leaderHint=" + leaderHint + "]";
+    public final String toString() {
+        return MoreObjects.toStringHelper(getClass()).omitNullValues()
+            .add("status", status).add("leaderHint", leaderHint).toString();
     }
 }
