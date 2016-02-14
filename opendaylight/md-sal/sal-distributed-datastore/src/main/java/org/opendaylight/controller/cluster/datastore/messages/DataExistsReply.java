@@ -17,8 +17,10 @@ import org.opendaylight.controller.protobuff.messages.transaction.ShardTransacti
 public class DataExistsReply extends VersionedExternalizableMessage {
     private static final long serialVersionUID = 1L;
 
+    @Deprecated
     private static final ShardTransactionMessages.DataExistsReply SERIALIZABLE_TRUE =
             ShardTransactionMessages.DataExistsReply.newBuilder().setExists(true).build();
+    @Deprecated
     private static final ShardTransactionMessages.DataExistsReply SERIALIZABLE_FALSE =
             ShardTransactionMessages.DataExistsReply.newBuilder().setExists(false).build();
 
@@ -48,6 +50,7 @@ public class DataExistsReply extends VersionedExternalizableMessage {
         out.writeBoolean(exists);
     }
 
+    @Deprecated
     @Override
     protected Object newLegacySerializedInstance() {
         return exists ? SERIALIZABLE_TRUE : SERIALIZABLE_FALSE;
