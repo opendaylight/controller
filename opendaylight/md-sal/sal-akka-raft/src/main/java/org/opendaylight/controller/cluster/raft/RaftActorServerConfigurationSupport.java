@@ -145,21 +145,6 @@ class RaftActorServerConfigurationSupport {
     }
 
     /**
-     * Interface for a server operation FSM state.
-     */
-    private interface OperationState {
-        void onNewOperation(ServerOperationContext<?> operationContext);
-
-        void onServerOperationTimeout(ServerOperationTimeout timeout);
-
-        void onUnInitializedFollowerSnapshotReply(UnInitializedFollowerSnapshotReply reply);
-
-        void onApplyState(ApplyState applyState);
-
-        void onSnapshotComplete();
-    }
-
-    /**
      * Interface for the initial state for a server operation.
      */
     private interface InitialOperationState {
@@ -169,9 +154,8 @@ class RaftActorServerConfigurationSupport {
     /**
      * Abstract base class for a server operation FSM state. Handles common behavior for all states.
      */
-    private abstract class AbstractOperationState implements OperationState {
-        @Override
-        public void onNewOperation(ServerOperationContext<?> operationContext) {
+    private abstract class OperationState {
+        void onNewOperation(ServerOperationContext<?> operationContext) {
             // We're currently processing another operation so queue it to be processed later.
 
             LOG.debug("{}: Server operation already in progress - queueing {}", raftContext.getId(),
@@ -180,23 +164,20 @@ class RaftActorServerConfigurationSupport {
             pendingOperationsQueue.add(operationContext);
         }
 
-        @Override
-        public void onServerOperationTimeout(ServerOperationTimeout timeout) {
+        void onServerOperationTimeout(ServerOperationTimeout timeout) {
             LOG.debug("onServerOperationTimeout should not be called in state {}", this);
         }
 
-        @Override
-        public void onUnInitializedFollowerSnapshotReply(UnInitializedFollowerSnapshotReply reply) {
+        void onUnInitializedFollowerSnapshotReply(UnInitializedFollowerSnapshotReply reply) {
             LOG.debug("onUnInitializedFollowerSnapshotReply was called in state {}", this);
         }
 
-        @Override
-        public void onApplyState(ApplyState applyState) {
+        void onApplyState(ApplyState applyState) {
             LOG.debug("onApplyState was called in state {}", this);
         }
 
-        @Override
-        public void onSnapshotComplete() {
+        void onSnapshotComplete() {
+
         }
 
         protected void persistNewServerConfiguration(ServerOperationContext<?> operationContext){
@@ -250,7 +231,7 @@ class RaftActorServerConfigurationSupport {
     /**
      * The state when no server operation is in progress. It immediately initiates new server operations.
      */
-    private class Idle extends AbstractOperationState {
+    private final class Idle extends OperationState {
         @Override
         public void onNewOperation(ServerOperationContext<?> operationContext) {
             operationContext.newInitialOperationState(RaftActorServerConfigurationSupport.this).initiate();
@@ -265,7 +246,7 @@ class RaftActorServerConfigurationSupport {
     /**
      * The state when a new server configuration is being persisted and replicated.
      */
-    private class Persisting extends AbstractOperationState {
+    private final class Persisting extends OperationState {
         private final ServerOperationContext<?> operationContext;
         private final Cancellable timer;
         private boolean timedOut = false;
@@ -316,7 +297,7 @@ class RaftActorServerConfigurationSupport {
     /**
      * Abstract base class for an AddServer operation state.
      */
-    private abstract class AddServerState extends AbstractOperationState {
+    private abstract class AddServerState extends OperationState {
         private final AddServerContext addServerContext;
 
         AddServerState(AddServerContext addServerContext) {
@@ -354,7 +335,7 @@ class RaftActorServerConfigurationSupport {
      * The initial state for the AddServer operation. It adds the new follower as a peer and initiates
      * snapshot capture, if necessary.
      */
-    private class InitialAddServerState extends AddServerState implements InitialOperationState {
+    private final class InitialAddServerState extends AddServerState implements InitialOperationState {
         InitialAddServerState(AddServerContext addServerContext) {
             super(addServerContext);
         }
@@ -404,7 +385,7 @@ class RaftActorServerConfigurationSupport {
      * The AddServer operation state for when the catch-up snapshot is being installed. It handles successful
      * reply or timeout.
      */
-    private class InstallingSnapshot extends AddServerState {
+    private final class InstallingSnapshot extends AddServerState {
         private final Cancellable installSnapshotTimer;
 
         InstallingSnapshot(AddServerContext addServerContext, Cancellable installSnapshotTimer) {
@@ -448,7 +429,7 @@ class RaftActorServerConfigurationSupport {
      * The AddServer operation state for when there is a snapshot already in progress. When the current
      * snapshot completes, it initiates an install snapshot.
      */
-    private class WaitingForPriorSnapshotComplete extends AddServerState {
+    private final class WaitingForPriorSnapshotComplete extends AddServerState {
         private final Cancellable snapshotTimer;
 
         WaitingForPriorSnapshotComplete(AddServerContext addServerContext, Cancellable snapshotTimer) {
@@ -552,9 +533,8 @@ class RaftActorServerConfigurationSupport {
         }
     }
 
-    private abstract class RemoveServerState extends AbstractOperationState {
+    private abstract class RemoveServerState extends OperationState {
         private final RemoveServerContext removeServerContext;
-
 
         protected RemoveServerState(RemoveServerContext removeServerContext) {
             this.removeServerContext = Preconditions.checkNotNull(removeServerContext);
@@ -566,7 +546,7 @@ class RaftActorServerConfigurationSupport {
         }
     }
 
-    private class InitialRemoveServerState extends RemoveServerState implements InitialOperationState{
+    private final class InitialRemoveServerState extends RemoveServerState implements InitialOperationState{
 
         protected InitialRemoveServerState(RemoveServerContext removeServerContext) {
             super(removeServerContext);
