@@ -50,6 +50,7 @@ public class CreateTransactionReply extends VersionedExternalizableMessage {
         out.writeUTF(transactionPath);
     }
 
+    @Deprecated
     @Override
     protected Object newLegacySerializedInstance() {
         return ShardTransactionMessages.CreateTransactionReply.newBuilder().setTransactionActorPath(transactionPath)

@@ -60,6 +60,7 @@ public class CreateTransaction extends VersionedExternalizableMessage {
         out.writeUTF(transactionChainId);
     }
 
+    @Deprecated
     @Override
     protected Object newLegacySerializedInstance() {
         return ShardTransactionMessages.CreateTransaction.newBuilder().setTransactionId(transactionId)
