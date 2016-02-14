@@ -204,6 +204,8 @@ public class ShardTest extends AbstractShardTest {
                 }
             };
 
+            setupInMemorySnapshotStore();
+
             final MockDataChangeListener listener = new MockDataChangeListener(1);
             final ActorRef dclActor = actorFactory.createActor(DataChangeListener.props(listener),
                     "testRegisterChangeListenerWhenNotLeaderInitially-DataChangeListener");
@@ -212,9 +214,7 @@ public class ShardTest extends AbstractShardTest {
                     Props.create(new DelegatingShardCreator(creator)).withDispatcher(Dispatchers.DefaultDispatcherId()),
                     "testRegisterChangeListenerWhenNotLeaderInitially");
 
-            // Write initial data into the in-memory store.
             final YangInstanceIdentifier path = TestModel.TEST_PATH;
-            writeToStore(shard, path, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
 
             // Wait until the shard receives the first ElectionTimeout message.
             assertEquals("Got first ElectionTimeout", true,
@@ -284,8 +284,7 @@ public class ShardTest extends AbstractShardTest {
 
                 @Override
                 public Shard create() throws Exception {
-                    return new Shard(Shard.builder().id(shardID).datastoreContext(
-                            dataStoreContextBuilder.persistent(false).build()).schemaContext(SCHEMA_CONTEXT)) {
+                    return new Shard(newShardBuilder()) {
                         @Override
                         public void onReceiveCommand(final Object message) throws Exception {
                             if(message instanceof ElectionTimeout && firstElectionTimeout) {
@@ -309,6 +308,8 @@ public class ShardTest extends AbstractShardTest {
                 }
             };
 
+            setupInMemorySnapshotStore();
+
             final MockDataTreeChangeListener listener = new MockDataTreeChangeListener(1);
             final ActorRef dclActor = actorFactory.createActor(DataTreeChangeListenerActor.props(listener),
                     "testDataTreeChangeListenerNotifiedWhenNotTheLeaderOnRegistration-DataChangeListener");
@@ -318,7 +319,6 @@ public class ShardTest extends AbstractShardTest {
                     "testDataTreeChangeListenerNotifiedWhenNotTheLeaderOnRegistration");
 
             final YangInstanceIdentifier path = TestModel.TEST_PATH;
-            writeToStore(shard, path, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
 
             assertEquals("Got first ElectionTimeout", true,
                 onFirstElectionTimeout.await(5, TimeUnit.SECONDS));
@@ -333,7 +333,6 @@ public class ShardTest extends AbstractShardTest {
                     expectMsgClass(duration("5 seconds"), FindLeaderReply.class);
             assertFalse("Expected the shard not to be the leader", findLeadeReply.getLeaderActor().isPresent());
 
-            writeToStore(shard, path, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
 
             onChangeListenerRegistered.countDown();
 
@@ -2287,11 +2286,14 @@ public class ShardTest extends AbstractShardTest {
     public void testClusteredDataChangeListenerDelayedRegistration() throws Exception {
         new ShardTestKit(getSystem()) {{
             String testName = "testClusteredDataChangeListenerDelayedRegistration";
-            dataStoreContextBuilder.shardElectionTimeoutFactor(1000);
+            dataStoreContextBuilder.shardElectionTimeoutFactor(1000).
+                    customRaftPolicyImplementation(DisableElectionsRaftPolicy.class.getName());
 
             final MockDataChangeListener listener = new MockDataChangeListener(1);
             final ActorRef dclActor = actorFactory.createActor(DataChangeListener.props(listener),
                     actorFactory.generateActorId(testName + "-DataChangeListener"));
+
+            setupInMemorySnapshotStore();
 
             final TestActorRef<Shard> shard = actorFactory.createTestActor(
                     newShardBuilder().props().withDispatcher(Dispatchers.DefaultDispatcherId()),
@@ -2306,9 +2308,8 @@ public class ShardTest extends AbstractShardTest {
                 RegisterChangeListenerReply.class);
             assertNotNull("getListenerRegistrationPath", reply.getListenerRegistrationPath());
 
-            writeToStore(shard, path, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
-
-            shard.tell(new ElectionTimeout(), ActorRef.noSender());
+            shard.tell(DatastoreContext.newBuilderFrom(dataStoreContextBuilder.build()).
+                    customRaftPolicyImplementation(null).build(), ActorRef.noSender());
 
             listener.waitForChangeEvents();
         }};
@@ -2361,11 +2362,14 @@ public class ShardTest extends AbstractShardTest {
     public void testClusteredDataTreeChangeListenerDelayedRegistration() throws Exception {
         new ShardTestKit(getSystem()) {{
             String testName = "testClusteredDataTreeChangeListenerDelayedRegistration";
-            dataStoreContextBuilder.shardElectionTimeoutFactor(1000);
+            dataStoreContextBuilder.shardElectionTimeoutFactor(1000).
+                    customRaftPolicyImplementation(DisableElectionsRaftPolicy.class.getName());
 
             final MockDataTreeChangeListener listener = new MockDataTreeChangeListener(1);
             final ActorRef dclActor = actorFactory.createActor(DataTreeChangeListenerActor.props(listener),
                     actorFactory.generateActorId(testName + "-DataTreeChangeListener"));
+
+            setupInMemorySnapshotStore();
 
             final TestActorRef<Shard> shard = actorFactory.createTestActor(
                     newShardBuilder().props().withDispatcher(Dispatchers.DefaultDispatcherId()),
@@ -2380,9 +2384,8 @@ public class ShardTest extends AbstractShardTest {
                     RegisterDataTreeChangeListenerReply.class);
             assertNotNull("getListenerRegistrationPath", reply.getListenerRegistrationPath());
 
-            writeToStore(shard, path, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
-
-            shard.tell(new ElectionTimeout(), ActorRef.noSender());
+            shard.tell(DatastoreContext.newBuilderFrom(dataStoreContextBuilder.build()).
+                    customRaftPolicyImplementation(null).build(), ActorRef.noSender());
 
             listener.waitForChangeEvents();
         }};
