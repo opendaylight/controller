@@ -132,7 +132,7 @@ public class BaseYangSwaggerGenerator {
 
             cal.setTime(rev);
 
-            if(cal.get(Calendar.YEAR) < 1970) {
+            if(cal.get(Calendar.YEAR) <= 1970) {
                 rev = null;
             }
         }
