@@ -12,31 +12,66 @@ import com.google.common.base.Optional;
 import com.google.protobuf.ByteString;
 import java.io.Externalizable;
 import java.io.IOException;
+import java.io.InvalidObjectException;
 import java.io.ObjectInput;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
 import org.opendaylight.controller.cluster.raft.RaftVersions;
 import org.opendaylight.controller.protobuff.messages.cluster.raft.InstallSnapshotMessages;
+import org.opendaylight.yangtools.concepts.Builder;
 
-public class InstallSnapshot extends AbstractRaftRPC implements Externalizable {
+public final class InstallSnapshot extends AbstractRaftRPC implements Externalizable {
+    private static final class InstallSnapshotBuilder implements Builder<InstallSnapshot> {
+        private long term;
+        private String leaderId;
+        private long lastIncludedIndex;
+        private long lastIncludedTerm;
+        private int chunkIndex;
+        private int totalChunks;
+        private Optional<Integer> lastChunkHashCode;
+        private byte[] data;
+
+        @Override
+        public InstallSnapshot build() {
+            return new InstallSnapshot(term, leaderId, lastIncludedIndex, lastIncludedTerm, data, chunkIndex,
+                totalChunks, lastChunkHashCode);
+        }
+    }
+
     private static final long serialVersionUID = 1L;
     public static final Class<InstallSnapshotMessages.InstallSnapshot> SERIALIZABLE_CLASS = InstallSnapshotMessages.InstallSnapshot.class;
 
-    private String leaderId;
-    private long lastIncludedIndex;
-    private long lastIncludedTerm;
-    private byte[] data;
-    private int chunkIndex;
-    private int totalChunks;
-    private Optional<Integer> lastChunkHashCode;
+    private final String leaderId;
+    private final long lastIncludedIndex;
+    private final long lastIncludedTerm;
+    private final byte[] data;
+    private final int chunkIndex;
+    private final int totalChunks;
+    private final Optional<Integer> lastChunkHashCode;
+
+    // Used strictly during deserialization
+    private final InstallSnapshotBuilder builder;
 
     /**
      * Empty constructor to satisfy Externalizable.
+     *
+     * @deprecated Do no use.
      */
+    @Deprecated
     public InstallSnapshot() {
+        super(0L);
+        this.leaderId = null;
+        this.lastIncludedIndex = 0;
+        this.lastIncludedTerm = 0;
+        this.data = null;
+        this.chunkIndex = 0;
+        this.totalChunks = 0;
+        this.lastChunkHashCode = null;
+        this.builder = new InstallSnapshotBuilder();
     }
 
-    public InstallSnapshot(long term, String leaderId, long lastIncludedIndex,
-        long lastIncludedTerm, byte[] data, int chunkIndex, int totalChunks, Optional<Integer> lastChunkHashCode) {
+    public InstallSnapshot(final long term, final String leaderId, final long lastIncludedIndex,
+        final long lastIncludedTerm, final byte[] data, final int chunkIndex, final int totalChunks, final Optional<Integer> lastChunkHashCode) {
         super(term);
         this.leaderId = leaderId;
         this.lastIncludedIndex = lastIncludedIndex;
@@ -45,10 +80,11 @@ public class InstallSnapshot extends AbstractRaftRPC implements Externalizable {
         this.chunkIndex = chunkIndex;
         this.totalChunks = totalChunks;
         this.lastChunkHashCode = lastChunkHashCode;
+        this.builder = null;
     }
 
-    public InstallSnapshot(long term, String leaderId, long lastIncludedIndex,
-                           long lastIncludedTerm, byte[] data, int chunkIndex, int totalChunks) {
+    public InstallSnapshot(final long term, final String leaderId, final long lastIncludedIndex,
+                           final long lastIncludedTerm, final byte[] data, final int chunkIndex, final int totalChunks) {
         this(term, leaderId, lastIncludedIndex, lastIncludedTerm, data, chunkIndex, totalChunks, Optional.<Integer>absent());
     }
 
@@ -80,61 +116,29 @@ public class InstallSnapshot extends AbstractRaftRPC implements Externalizable {
         return lastChunkHashCode;
     }
 
-    @Override
-    public void writeExternal(ObjectOutput out) throws IOException {
-        out.writeShort(RaftVersions.CURRENT_VERSION);
-        out.writeLong(getTerm());
-        out.writeUTF(leaderId);
-        out.writeLong(lastIncludedIndex);
-        out.writeLong(lastIncludedTerm);
-        out.writeInt(chunkIndex);
-        out.writeInt(totalChunks);
-
-        out.writeByte(lastChunkHashCode.isPresent() ? 1 : 0);
-        if(lastChunkHashCode.isPresent()) {
-            out.writeInt(lastChunkHashCode.get().intValue());
-        }
-
-        out.writeObject(data);
+    @SuppressWarnings({ "unused", "static-method" })
+    private Object readObject(final ObjectInputStream stream) throws InvalidObjectException {
+        throw new InvalidObjectException("ExternalizableProxy should have been used");
     }
 
-    @Override
-    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-        in.readShort(); // raft version - not currently used
-        setTerm(in.readLong());
-        leaderId = in.readUTF();
-        lastIncludedIndex = in.readLong();
-        lastIncludedTerm = in.readLong();
-        chunkIndex = in.readInt();
-        totalChunks = in.readInt();
-
-        lastChunkHashCode = Optional.absent();
-        boolean chunkHashCodePresent = in.readByte() == 1;
-        if(chunkHashCodePresent) {
-            lastChunkHashCode = Optional.of(in.readInt());
-        }
-
-        data = (byte[])in.readObject();
-    }
-
-    public <T extends Object> Object toSerializable(short version) {
-        if(version >= RaftVersions.BORON_VERSION) {
+    public <T extends Object> Object toSerializable(final short version) {
+        if (version >= RaftVersions.BORON_VERSION) {
             return this;
-        } else {
-            InstallSnapshotMessages.InstallSnapshot.Builder builder = InstallSnapshotMessages.InstallSnapshot.newBuilder()
-                    .setTerm(this.getTerm())
-                    .setLeaderId(this.getLeaderId())
-                    .setChunkIndex(this.getChunkIndex())
-                    .setData(ByteString.copyFrom(getData()))
-                    .setLastIncludedIndex(this.getLastIncludedIndex())
-                    .setLastIncludedTerm(this.getLastIncludedTerm())
-                    .setTotalChunks(this.getTotalChunks());
-
-            if(lastChunkHashCode.isPresent()){
-                builder.setLastChunkHashCode(lastChunkHashCode.get());
-            }
-            return builder.build();
         }
+
+        InstallSnapshotMessages.InstallSnapshot.Builder builder = InstallSnapshotMessages.InstallSnapshot.newBuilder()
+                .setTerm(this.getTerm())
+                .setLeaderId(this.getLeaderId())
+                .setChunkIndex(this.getChunkIndex())
+                .setData(ByteString.copyFrom(getData()))
+                .setLastIncludedIndex(this.getLastIncludedIndex())
+                .setLastIncludedTerm(this.getLastIncludedTerm())
+                .setTotalChunks(this.getTotalChunks());
+
+        if (lastChunkHashCode.isPresent()){
+            builder.setLastChunkHashCode(lastChunkHashCode.get());
+        }
+        return builder.build();
     }
 
     @Override
@@ -144,7 +148,50 @@ public class InstallSnapshot extends AbstractRaftRPC implements Externalizable {
                 + ", Chunk=" + chunkIndex + "/" + totalChunks + ", lastChunkHashCode=" + lastChunkHashCode + "]";
     }
 
-    public static InstallSnapshot fromSerializable (Object o) {
+    @Override
+    public void writeExternal(final ObjectOutput out) throws IOException {
+        out.writeShort(RaftVersions.CURRENT_VERSION);
+        out.writeLong(getTerm());
+        out.writeUTF(leaderId);
+        out.writeLong(lastIncludedIndex);
+        out.writeLong(lastIncludedTerm);
+        out.writeInt(chunkIndex);
+        out.writeInt(totalChunks);
+
+        if (lastChunkHashCode.isPresent()) {
+            out.writeByte(1);
+            out.writeInt(lastChunkHashCode.get());
+        } else {
+            out.writeByte(0);
+        }
+
+        out.writeObject(data);
+    }
+
+    @Override
+    public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
+        in.readShort(); // raft version - not currently used
+        builder.term = in.readLong();
+        builder.leaderId = in.readUTF();
+        builder.lastIncludedIndex = in.readLong();
+        builder.lastIncludedTerm = in.readLong();
+        builder.chunkIndex = in.readInt();
+        builder.totalChunks = in.readInt();
+
+        if (in.readByte() == 1) {
+            builder.lastChunkHashCode = Optional.of(in.readInt());
+        } else {
+            builder.lastChunkHashCode = Optional.absent();
+        }
+
+        builder.data = (byte[])in.readObject();
+    }
+
+    private Object readResolve() {
+        return builder.build();
+    }
+
+    public static InstallSnapshot fromSerializable(final Object o) {
         if(o instanceof InstallSnapshot) {
             return (InstallSnapshot)o;
         } else {
@@ -165,7 +212,7 @@ public class InstallSnapshot extends AbstractRaftRPC implements Externalizable {
         }
     }
 
-    public static boolean isSerializedType(Object message) {
+    public static boolean isSerializedType(final Object message) {
         return message instanceof InstallSnapshot || message instanceof InstallSnapshotMessages.InstallSnapshot;
     }
 }
