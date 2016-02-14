@@ -804,15 +804,9 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
         return newShardProps(Collections.<String,String>emptyMap());
     }
 
-    private Props newShardProps(EntityOwnerSelectionStrategyConfig strategyConfig) {
-        return newShardProps(newShardId(LOCAL_MEMBER_NAME), Collections.<String,String>emptyMap(),
-                LOCAL_MEMBER_NAME, strategyConfig);
-    }
-
     private Props newShardProps(EntityOwnerSelectionStrategyConfig strategyConfig, Map<String, String> peers) {
         return newShardProps(newShardId(LOCAL_MEMBER_NAME), peers, LOCAL_MEMBER_NAME, strategyConfig);
     }
-
 
     private Props newShardProps(Map<String,String> peers) {
         return newShardProps(newShardId(LOCAL_MEMBER_NAME), peers, LOCAL_MEMBER_NAME, EntityOwnerSelectionStrategyConfig.newBuilder().build());
@@ -844,8 +838,6 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
                 super.onReceiveCommand(message);
             }
         }
-
-
     }
 
     public static class MockFollower extends UntypedActor {
