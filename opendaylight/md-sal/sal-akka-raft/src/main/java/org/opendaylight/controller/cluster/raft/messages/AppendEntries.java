@@ -8,11 +8,14 @@
 
 package org.opendaylight.controller.cluster.raft.messages;
 
+import com.google.common.base.Preconditions;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import javax.annotation.Nonnull;
 import org.opendaylight.controller.cluster.raft.RaftVersions;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 
@@ -20,10 +23,8 @@ import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
  * Invoked by leader to replicate log entries (§5.3); also used as
  * heartbeat (§5.2).
  */
-public class AppendEntries extends AbstractRaftRPC {
+public final class AppendEntries extends AbstractRaftRPC {
     private static final long serialVersionUID = 1L;
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AppendEntries.class);
 
     // So that follower can redirect clients
     private final String leaderId;
@@ -47,12 +48,13 @@ public class AppendEntries extends AbstractRaftRPC {
     private final short payloadVersion;
 
     public AppendEntries(long term, String leaderId, long prevLogIndex, long prevLogTerm,
-            List<ReplicatedLogEntry> entries, long leaderCommit, long replicatedToAllIndex, short payloadVersion) {
+            @Nonnull List<ReplicatedLogEntry> entries, long leaderCommit, long replicatedToAllIndex,
+            short payloadVersion) {
         super(term);
         this.leaderId = leaderId;
         this.prevLogIndex = prevLogIndex;
         this.prevLogTerm = prevLogTerm;
-        this.entries = entries;
+        this.entries = Preconditions.checkNotNull(entries);
         this.leaderCommit = leaderCommit;
         this.replicatedToAllIndex = replicatedToAllIndex;
         this.payloadVersion = payloadVersion;
@@ -92,8 +94,8 @@ public class AppendEntries extends AbstractRaftRPC {
         return prevLogTerm;
     }
 
-    public List<ReplicatedLogEntry> getEntries() {
-        return entries;
+    public @Nonnull List<ReplicatedLogEntry> getEntries() {
+        return Collections.unmodifiableList(entries);
     }
 
     public long getLeaderCommit() {
