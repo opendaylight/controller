@@ -27,6 +27,7 @@ public class DataExists extends AbstractRead<Boolean> {
         super(path, version);
     }
 
+    @Deprecated
     @Override
     protected Object newLegacySerializedInstance() {
         return ShardTransactionMessages.DataExists.newBuilder()
