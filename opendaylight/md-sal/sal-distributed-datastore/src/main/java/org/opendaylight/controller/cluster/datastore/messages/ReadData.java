@@ -29,6 +29,7 @@ public class ReadData extends AbstractRead<Optional<NormalizedNode<?, ?>>> {
         super(path, version);
     }
 
+    @Deprecated
     @Override
     protected Object newLegacySerializedInstance() {
         return ShardTransactionMessages.ReadData.newBuilder()
