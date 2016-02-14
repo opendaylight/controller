@@ -21,6 +21,7 @@ public class CanCommitTransaction extends AbstractThreePhaseCommitMessage {
         super(transactionID, version);
     }
 
+    @Deprecated
     @Override
     protected Object newLegacySerializedInstance() {
         return ThreePhaseCommitCohortMessages.CanCommitTransaction.newBuilder().

@@ -13,6 +13,7 @@ import org.opendaylight.controller.protobuff.messages.transaction.ShardTransacti
 public class CloseTransaction extends VersionedExternalizableMessage {
     private static final long serialVersionUID = 1L;
 
+    @Deprecated
     private static final Object SERIALIZED_INSTANCE =
             ShardTransactionMessages.CloseTransaction.newBuilder().build();
 
@@ -23,6 +24,7 @@ public class CloseTransaction extends VersionedExternalizableMessage {
         super(version);
     }
 
+    @Deprecated
     @Override
     protected Object newLegacySerializedInstance() {
         return SERIALIZED_INSTANCE;
