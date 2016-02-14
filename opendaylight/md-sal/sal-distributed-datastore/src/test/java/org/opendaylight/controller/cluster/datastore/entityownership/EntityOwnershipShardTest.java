@@ -872,10 +872,8 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
                 if(!dropAppendEntries) {
                     AppendEntries req = (AppendEntries) message;
                     long lastIndex = req.getLeaderCommit();
-                    if (req.getEntries().size() > 0) {
-                        for(ReplicatedLogEntry entry : req.getEntries()) {
-                            lastIndex = entry.getIndex();
-                        }
+                    for (ReplicatedLogEntry entry : req.getEntries()) {
+                        lastIndex = entry.getIndex();
                     }
 
                     getSender().tell(new AppendEntriesReply(myId, req.getTerm(), true, lastIndex, req.getTerm(),
