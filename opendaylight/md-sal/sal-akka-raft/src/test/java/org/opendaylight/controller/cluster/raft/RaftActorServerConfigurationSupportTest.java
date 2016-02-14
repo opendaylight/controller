@@ -152,7 +152,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
         AddServerReply addServerReply = testKit.expectMsgClass(JavaTestKit.duration("5 seconds"), AddServerReply.class);
         assertEquals("getStatus", ServerChangeStatus.OK, addServerReply.getStatus());
-        assertEquals("getLeaderHint", LEADER_ID, addServerReply.getLeaderHint());
+        assertEquals("getLeaderHint", LEADER_ID, addServerReply.getLeaderHint().get());
 
         // Verify ServerConfigurationPayload entry in leader's log
 
@@ -235,7 +235,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
         AddServerReply addServerReply = testKit.expectMsgClass(JavaTestKit.duration("5 seconds"), AddServerReply.class);
         assertEquals("getStatus", ServerChangeStatus.OK, addServerReply.getStatus());
-        assertEquals("getLeaderHint", LEADER_ID, addServerReply.getLeaderHint());
+        assertEquals("getLeaderHint", LEADER_ID, addServerReply.getLeaderHint().get());
 
         // Verify ServerConfigurationPayload entry in leader's log
 
@@ -276,7 +276,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
         AddServerReply addServerReply = testKit.expectMsgClass(JavaTestKit.duration("5 seconds"), AddServerReply.class);
         assertEquals("getStatus", ServerChangeStatus.OK, addServerReply.getStatus());
-        assertEquals("getLeaderHint", LEADER_ID, addServerReply.getLeaderHint());
+        assertEquals("getLeaderHint", LEADER_ID, addServerReply.getLeaderHint().get());
 
         // Verify ServerConfigurationPayload entry in leader's log
 
@@ -409,7 +409,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
         AddServerReply addServerReply = testKit.expectMsgClass(JavaTestKit.duration("5 seconds"), AddServerReply.class);
         assertEquals("getStatus", ServerChangeStatus.OK, addServerReply.getStatus());
-        assertEquals("getLeaderHint", LEADER_ID, addServerReply.getLeaderHint());
+        assertEquals("getLeaderHint", LEADER_ID, addServerReply.getLeaderHint().get());
 
         expectFirstMatching(newFollowerCollectorActor, ApplySnapshot.class);
 
@@ -619,7 +619,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         // The first AddServer should succeed with OK even though consensus wasn't reached
         AddServerReply addServerReply = testKit.expectMsgClass(JavaTestKit.duration("5 seconds"), AddServerReply.class);
         assertEquals("getStatus", ServerChangeStatus.OK, addServerReply.getStatus());
-        assertEquals("getLeaderHint", LEADER_ID, addServerReply.getLeaderHint());
+        assertEquals("getLeaderHint", LEADER_ID, addServerReply.getLeaderHint().get());
 
         // Verify ServerConfigurationPayload entry in leader's log
         verifyServerConfigurationPayloadEntry(leaderActorContext.getReplicatedLog(), votingServer(LEADER_ID),
