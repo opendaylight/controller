@@ -26,6 +26,7 @@ import com.google.common.base.Stopwatch;
 import com.google.protobuf.ByteString;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -469,7 +470,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
 
         // AppendEntries is now sent with a bigger term
         // this will set the receivers term to be the same as the sender's term
-        AppendEntries appendEntries = new AppendEntries(100, "leader", 0, 0, null, 101, -1, (short)0);
+        AppendEntries appendEntries = new AppendEntries(100, "leader", 0, 0, Collections.emptyList(), 101, -1, (short)0);
 
         follower = createBehavior(context);
 

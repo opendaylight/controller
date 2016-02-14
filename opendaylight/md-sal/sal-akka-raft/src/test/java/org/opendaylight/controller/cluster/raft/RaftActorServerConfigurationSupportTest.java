@@ -836,7 +836,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
                 actorFactory.generateActorId(FOLLOWER_ID));
         followerRaftActor.underlyingActor().waitForInitializeBehaviorComplete();
 
-        followerRaftActor.tell(new AppendEntries(1, LEADER_ID, 0, 1, Collections.<ReplicatedLogEntry>emptyList(),
+        followerRaftActor.tell(new AppendEntries(1, LEADER_ID, 0, 1, Collections.emptyList(),
                 -1, -1, (short)0), leaderActor);
 
         followerRaftActor.tell(new RemoveServer(FOLLOWER_ID), testKit.getRef());

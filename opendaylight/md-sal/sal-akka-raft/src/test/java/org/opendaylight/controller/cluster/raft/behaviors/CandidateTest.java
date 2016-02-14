@@ -185,7 +185,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
 
         setupPeers(1);
         RaftActorBehavior newBehavior = candidate.handleMessage(peerActors[0], new AppendEntries(1, "test", 0, 0,
-                Collections.<ReplicatedLogEntry>emptyList(), 0, -1, (short) 0));
+                Collections.emptyList(), 0, -1, (short) 0));
 
         AppendEntriesReply reply = MessageCollectorActor.expectFirstMatching(
                 peerActors[0], AppendEntriesReply.class);
@@ -200,7 +200,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
 
         setupPeers(1);
         RaftActorBehavior newBehavior = candidate.handleMessage(peerActors[0], new AppendEntries(5, "test", 0, 0,
-                Collections.<ReplicatedLogEntry>emptyList(), 0, -1, (short) 0));
+                Collections.emptyList(), 0, -1, (short) 0));
 
         assertTrue("New Behavior : " + newBehavior, newBehavior instanceof Follower);
     }
@@ -213,7 +213,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
 
         setupPeers(1);
         RaftActorBehavior newBehavior = candidate.handleMessage(peerActors[0], new AppendEntries(2, "test", 0, 0,
-                Collections.<ReplicatedLogEntry>emptyList(), 0, -1, (short) 0));
+                Collections.emptyList(), 0, -1, (short) 0));
 
         assertTrue("New Behavior : " + newBehavior + " term = " + actorContext.getTermInformation().getCurrentTerm(),
                 newBehavior instanceof Follower);

@@ -1353,7 +1353,7 @@ public class RaftActorTest extends AbstractActorTest {
 
         mockRaftActor.waitForInitializeBehaviorComplete();
 
-        raftActorRef.tell(new AppendEntries(1L, "leader", 0L, 1L, Collections.<ReplicatedLogEntry>emptyList(),
+        raftActorRef.tell(new AppendEntries(1L, "leader", 0L, 1L, Collections.emptyList(),
                 0L, -1L, (short)1), ActorRef.noSender());
         LeaderStateChanged leaderStateChange = MessageCollectorActor.expectFirstMatching(
                 notifierActor, LeaderStateChanged.class);

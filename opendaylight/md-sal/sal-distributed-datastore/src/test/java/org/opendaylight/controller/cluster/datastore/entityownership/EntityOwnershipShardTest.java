@@ -240,7 +240,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
                         ImmutableMap.<String, String>builder().put(peerId, peer.path().toString()).build(),
                         dataStoreContextBuilder.build()).withDispatcher(Dispatchers.DefaultDispatcherId()));
 
-        shard.tell(new AppendEntries(1L, peerId, -1L, -1L, Collections.<ReplicatedLogEntry>emptyList(), -1L, -1L,
+        shard.tell(new AppendEntries(1L, peerId, -1L, -1L, Collections.emptyList(), -1L, -1L,
                 DataStoreVersions.CURRENT_VERSION), peer);
 
         shard.tell(new RegisterCandidateLocal(new Entity(ENTITY_TYPE, ENTITY_ID1)), kit.getRef());
@@ -865,10 +865,8 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
                 if(!dropAppendEntries) {
                     AppendEntries req = (AppendEntries) message;
                     long lastIndex = req.getLeaderCommit();
-                    if (req.getEntries().size() > 0) {
-                        for(ReplicatedLogEntry entry : req.getEntries()) {
-                            lastIndex = entry.getIndex();
-                        }
+                    for (ReplicatedLogEntry entry : req.getEntries()) {
+                        lastIndex = entry.getIndex();
                     }
 
                     getSender().tell(new AppendEntriesReply(myId, req.getTerm(), true, lastIndex, req.getTerm(),
