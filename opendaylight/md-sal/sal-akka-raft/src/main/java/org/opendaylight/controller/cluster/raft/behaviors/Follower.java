@@ -11,6 +11,8 @@ package org.opendaylight.controller.cluster.raft.behaviors;
 import akka.actor.ActorRef;
 import com.google.common.annotations.VisibleForTesting;
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.ListIterator;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
@@ -98,7 +100,7 @@ public class Follower extends AbstractRaftActorBehavior {
     @Override protected RaftActorBehavior handleAppendEntries(ActorRef sender,
                                                               AppendEntries appendEntries) {
 
-        int numLogEntries = appendEntries.getEntries() != null ? appendEntries.getEntries().size() : 0;
+        int numLogEntries = appendEntries.getEntries().size();
         if(LOG.isTraceEnabled()) {
             LOG.trace("{}: handleAppendEntries: {}", logName(), appendEntries);
         } else if(LOG.isDebugEnabled() && numLogEntries > 0) {
@@ -143,7 +145,7 @@ public class Follower extends AbstractRaftActorBehavior {
             return this;
         }
 
-        if (appendEntries.getEntries() != null && appendEntries.getEntries().size() > 0) {
+        if (appendEntries.getEntries().size() > 0) {
 
             LOG.debug("{}: Number of entries to be appended = {}", logName(),
                         appendEntries.getEntries().size());
@@ -155,8 +157,8 @@ public class Follower extends AbstractRaftActorBehavior {
             if (context.getReplicatedLog().size() > 0) {
 
                 // Find the entry up until the one that is not in the follower's log
-                for (int i = 0;i < appendEntries.getEntries().size(); i++, addEntriesFrom++) {
-                    ReplicatedLogEntry matchEntry = appendEntries.getEntries().get(i);
+                for (ReplicatedLogEntry matchEntry : appendEntries.getEntries()) {
+                    addEntriesFrom++;
                     ReplicatedLogEntry newEntry = context.getReplicatedLog().get(matchEntry.getIndex());
 
                     if (newEntry == null) {
@@ -189,9 +191,9 @@ public class Follower extends AbstractRaftActorBehavior {
                         (addEntriesFrom + lastIndex));
 
             // 4. Append any new entries not already in the log
-            for (int i = addEntriesFrom; i < appendEntries.getEntries().size(); i++) {
-                ReplicatedLogEntry entry = appendEntries.getEntries().get(i);
-
+            final Iterator<ReplicatedLogEntry> it = appendEntries.getEntries().listIterator(addEntriesFrom);
+            while (it.hasNext()) {
+                ReplicatedLogEntry entry = it.next();
                 LOG.debug("{}: Append entry to log {}", logName(), entry.getData());
 
                 context.getReplicatedLog().appendAndPersist(entry);
@@ -249,12 +251,11 @@ public class Follower extends AbstractRaftActorBehavior {
         return this;
     }
 
-    private boolean isOutOfSync(AppendEntries appendEntries) {
+    private boolean isOutOfSync(final AppendEntries appendEntries) {
 
         long prevLogTerm = getLogEntryTerm(appendEntries.getPrevLogIndex());
         boolean prevEntryPresent = isLogEntryPresent(appendEntries.getPrevLogIndex());
         long lastIndex = lastIndex();
-        int numLogEntries = appendEntries.getEntries() != null ? appendEntries.getEntries().size() : 0;
         boolean outOfSync = true;
 
         if (lastIndex == -1 && appendEntries.getPrevLogIndex() != -1) {
@@ -292,7 +293,7 @@ public class Follower extends AbstractRaftActorBehavior {
                     "{}: Cannot append entries because the replicatedToAllIndex {} does not appear to be in the in-memory journal",
                     logName(), appendEntries.getReplicatedToAllIndex());
         } else if(appendEntries.getPrevLogIndex() == -1 && appendEntries.getPrevLogTerm() == -1
-                && appendEntries.getReplicatedToAllIndex() != -1 && numLogEntries > 0
+                && appendEntries.getReplicatedToAllIndex() != -1 && appendEntries.getEntries().size() > 0
                 && !isLogEntryPresent(appendEntries.getEntries().get(0).getIndex() - 1)
                 && !context.getReplicatedLog().isInSnapshot(appendEntries.getEntries().get(0).getIndex() - 1)) {
             LOG.debug(
