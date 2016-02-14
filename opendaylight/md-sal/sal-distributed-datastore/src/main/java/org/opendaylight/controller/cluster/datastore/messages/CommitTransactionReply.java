@@ -12,6 +12,7 @@ import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 import org.opendaylight.controller.protobuff.messages.cohort3pc.ThreePhaseCommitCohortMessages;
 
 public class CommitTransactionReply extends VersionedExternalizableMessage {
+    @Deprecated
     private static final Object SERIALIZED_INSTANCE =
             ThreePhaseCommitCohortMessages.CommitTransactionReply.newBuilder().build();
 
@@ -24,6 +25,7 @@ public class CommitTransactionReply extends VersionedExternalizableMessage {
         super(version);
     }
 
+    @Deprecated
     @Override
     protected Object newLegacySerializedInstance() {
         return SERIALIZED_INSTANCE;
