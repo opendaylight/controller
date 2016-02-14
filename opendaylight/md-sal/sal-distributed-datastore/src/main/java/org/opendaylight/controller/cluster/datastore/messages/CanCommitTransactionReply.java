@@ -52,6 +52,7 @@ public class CanCommitTransactionReply extends VersionedExternalizableMessage {
         out.writeBoolean(canCommit);
     }
 
+    @Deprecated
     @Override
     protected Object newLegacySerializedInstance() {
         return canCommit ? YES_SERIALIZED : NO_SERIALIZED;
