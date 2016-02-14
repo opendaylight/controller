@@ -44,6 +44,10 @@ public abstract class VersionedExternalizableMessage implements Externalizable, 
         out.writeShort(version);
     }
 
+    /**
+     * @deprecated Pre-Boron compatibility.
+     */
+    @Deprecated
     protected abstract Object newLegacySerializedInstance();
 
     @Override

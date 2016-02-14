@@ -43,6 +43,7 @@ public class CloseTransactionChain extends VersionedExternalizableMessage {
         out.writeUTF(transactionChainId);
     }
 
+    @Deprecated
     @Override
     protected Object newLegacySerializedInstance() {
         return ShardTransactionChainMessages.CloseTransactionChain.newBuilder().setTransactionChainId(transactionChainId)
