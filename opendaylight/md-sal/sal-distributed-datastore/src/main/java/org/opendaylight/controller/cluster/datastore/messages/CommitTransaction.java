@@ -21,6 +21,7 @@ public class CommitTransaction extends AbstractThreePhaseCommitMessage {
         super(transactionID, version);
     }
 
+    @Deprecated
     @Override
     protected Object newLegacySerializedInstance() {
         return ThreePhaseCommitCohortMessages.CommitTransaction.newBuilder().setTransactionId(

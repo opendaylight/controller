@@ -21,6 +21,7 @@ public class AbortTransaction extends AbstractThreePhaseCommitMessage {
         super(transactionID, version);
     }
 
+    @Deprecated
     @Override
     protected Object newLegacySerializedInstance() {
         return ThreePhaseCommitCohortMessages.AbortTransaction.newBuilder().

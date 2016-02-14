@@ -20,9 +20,11 @@ public class CanCommitTransactionReply extends VersionedExternalizableMessage {
     private static final CanCommitTransactionReply NO =
             new CanCommitTransactionReply(false, DataStoreVersions.CURRENT_VERSION);
 
+    @Deprecated
     private static final ThreePhaseCommitCohortMessages.CanCommitTransactionReply YES_SERIALIZED =
             ThreePhaseCommitCohortMessages.CanCommitTransactionReply.newBuilder().setCanCommit(true).build();
 
+    @Deprecated
     private static final ThreePhaseCommitCohortMessages.CanCommitTransactionReply NO_SERIALIZED =
             ThreePhaseCommitCohortMessages.CanCommitTransactionReply.newBuilder().setCanCommit(false).build();
 
@@ -52,6 +54,7 @@ public class CanCommitTransactionReply extends VersionedExternalizableMessage {
         out.writeBoolean(canCommit);
     }
 
+    @Deprecated
     @Override
     protected Object newLegacySerializedInstance() {
         return canCommit ? YES_SERIALIZED : NO_SERIALIZED;
