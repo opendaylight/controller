@@ -8,26 +8,18 @@
 
 package org.opendaylight.controller.cluster.raft.messages;
 
-public class AbstractRaftRPC implements RaftRPC {
+abstract class AbstractRaftRPC implements RaftRPC {
     private static final long serialVersionUID = -6061342433962854822L;
 
     // term
-    private long term;
+    private final long term;
 
-    protected AbstractRaftRPC(long term){
+    protected AbstractRaftRPC(final long term) {
         this.term = term;
-    }
-
-    // added for testing while serialize-messages=on
-    public AbstractRaftRPC() {
     }
 
     @Override
-    public long getTerm() {
+    public final long getTerm() {
         return term;
-    }
-
-    protected void setTerm(long term) {
-        this.term = term;
     }
 }
