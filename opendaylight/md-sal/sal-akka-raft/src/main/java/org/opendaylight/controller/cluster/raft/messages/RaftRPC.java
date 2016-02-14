@@ -10,6 +10,14 @@ package org.opendaylight.controller.cluster.raft.messages;
 
 import java.io.Serializable;
 
+/**
+ * Interface implemented by all requests exchanged in the Raft protocol.
+ */
 public interface RaftRPC extends Serializable {
+    /**
+     * Return the term in which this call is being made.
+     *
+     * @return The term ID
+     */
     public long getTerm();
 }
