@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a3d3df0_d5ea1cab",
+        "filename": "opendaylight/md-sal/sal-netconf-connector/src/main/java/org/opendaylight/controller/sal/connect/netconf/sal/KeepaliveSalFacade.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 266,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2016-02-15T15:51:42Z",
+      "side": 1,
+      "message": "I think we should be able to eliminate blocking altogether here. We should be able to schedule a timeout task into the executor that would check whether the future from deviceRpc.invokeRpc() is finished or fail the future we return here if the timeout is reached.\nWe should also get rid of all the invokeBlocking() calls in netconf transactions and replace them with non blocking.",
+      "range": {
+        "startLine": 266,
+        "startChar": 16,
+        "endLine": 266,
+        "endChar": 113
+      },
+      "revId": "2de63e6ee47f6717e80b52bb21e3fbd7f7cc2f21",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
