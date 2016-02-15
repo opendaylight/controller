@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a3d3df0_18a2f998",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/messages/AbstractServerChangeReply.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-02-15T18:41:28Z",
+      "side": 1,
+      "message": "The other option is to annotate with @Nullable. I think the use of  Optional in place of a nullable value is a bit overkill and incurs overhead although in this case it\u0027s negligible. Can the Optional instance be null, i.e. should we annotate with @Nonnull to convey that?",
+      "revId": "0b06c0e1889464fd0fed7e78f8944319315c90f5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
