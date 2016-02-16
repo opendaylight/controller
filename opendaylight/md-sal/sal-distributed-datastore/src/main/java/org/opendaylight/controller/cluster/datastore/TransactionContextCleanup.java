@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
  * to the old generation space and thus should be cleaned up in a timely manner as the GC
  * runs on the young generation (eden, swap1...) space much more frequently.
  */
-final class TransactionContextCleanup extends FinalizablePhantomReference<RemoteTransactionContextSupport> {
+final class TransactionContextCleanup extends FinalizablePhantomReference<TransactionProxy> {
     private static final Logger LOG = LoggerFactory.getLogger(TransactionContextCleanup.class);
     /**
      * Used to enqueue the PhantomReferences for read-only TransactionProxy instances. The
@@ -42,12 +42,12 @@ final class TransactionContextCleanup extends FinalizablePhantomReference<Remote
 
     private final TransactionContext cleanup;
 
-    private TransactionContextCleanup(RemoteTransactionContextSupport referent, TransactionContext cleanup) {
+    private TransactionContextCleanup(TransactionProxy referent, TransactionContext cleanup) {
         super(referent, QUEUE);
         this.cleanup = cleanup;
     }
 
-    static void track(final RemoteTransactionContextSupport referent, final TransactionContext cleanup) {
+    static void track(final TransactionProxy referent, final TransactionContext cleanup) {
         final TransactionContextCleanup ret = new TransactionContextCleanup(referent, cleanup);
         CACHE.put(cleanup, ret);
     }
@@ -61,7 +61,7 @@ final class TransactionContextCleanup extends FinalizablePhantomReference<Remote
         }
     }
 
-    static void untrack(final RemoteTransactionContext cleanup) {
+    static void untrack(final TransactionContext cleanup) {
         CACHE.remove(cleanup);
     }
 }

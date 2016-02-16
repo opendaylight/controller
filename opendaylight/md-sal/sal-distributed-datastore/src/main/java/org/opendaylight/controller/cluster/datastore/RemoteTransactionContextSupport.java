@@ -260,7 +260,7 @@ final class RemoteTransactionContextSupport {
         }
 
         if(parent.getType() == TransactionType.READ_ONLY) {
-            TransactionContextCleanup.track(this, ret);
+            TransactionContextCleanup.track(parent, ret);
         }
 
         return ret;
