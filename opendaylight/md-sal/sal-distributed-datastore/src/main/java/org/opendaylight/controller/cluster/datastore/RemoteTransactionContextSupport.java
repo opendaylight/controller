@@ -253,7 +253,7 @@ final class RemoteTransactionContextSupport {
                 transactionActor, getActorContext(), remoteTransactionVersion, transactionContextWrapper.getLimiter());
 
         if(parent.getType() == TransactionType.READ_ONLY) {
-            TransactionContextCleanup.track(this, ret);
+            TransactionContextCleanup.track(parent, ret);
         }
 
         return ret;
