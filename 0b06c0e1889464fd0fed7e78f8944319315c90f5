@@ -16,6 +16,24 @@
       "revId": "0b06c0e1889464fd0fed7e78f8944319315c90f5",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_49979548",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/messages/AbstractServerChangeReply.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-02-16T14:54:24Z",
+      "side": 1,
+      "message": "I can add @Nonnull. I do not believe Optional should be a problem, as it should be readily inlineable and escape analysis should identify the object as a stack-local thing...",
+      "parentUuid": "9a3d3df0_18a2f998",
+      "revId": "0b06c0e1889464fd0fed7e78f8944319315c90f5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
