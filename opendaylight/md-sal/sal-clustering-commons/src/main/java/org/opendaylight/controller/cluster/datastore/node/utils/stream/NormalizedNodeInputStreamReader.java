@@ -11,9 +11,7 @@ package org.opendaylight.controller.cluster.datastore.node.utils.stream;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import java.io.DataInput;
-import java.io.DataInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
@@ -68,14 +66,6 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput 
     private final StringBuilder reusableStringBuilder = new StringBuilder(50);
 
     private boolean readSignatureMarker = true;
-
-    /**
-     * @deprecated Use {@link #NormalizedNodeInputStreamReader(DataInput)} instead.
-     */
-    @Deprecated
-    public NormalizedNodeInputStreamReader(final InputStream stream) throws IOException {
-        this((DataInput) new DataInputStream(Preconditions.checkNotNull(stream)));
-    }
 
     /**
      * @deprecated Use {@link NormalizedNodeInputOutput#newDataInput(DataInput)} instead.
