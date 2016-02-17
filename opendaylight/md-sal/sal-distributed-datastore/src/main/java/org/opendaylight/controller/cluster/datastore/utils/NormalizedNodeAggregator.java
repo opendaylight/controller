@@ -15,6 +15,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataValidationFailedException;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.TreeType;
 import org.opendaylight.yangtools.yang.data.impl.schema.tree.InMemoryDataTreeFactory;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
@@ -27,8 +28,8 @@ public class NormalizedNodeAggregator {
                              final SchemaContext schemaContext) {
         this.rootIdentifier = rootIdentifier;
         this.nodes = nodes;
-        // FIXME: BUG-1014: pass down proper DataTree
-        this.dataTree = InMemoryDataTreeFactory.getInstance().create();
+        // FIXME: pass down proper DataTree based on configuration
+        this.dataTree = InMemoryDataTreeFactory.getInstance().create(TreeType.OPERATIONAL);
         this.dataTree.setSchemaContext(schemaContext);
     }
 
