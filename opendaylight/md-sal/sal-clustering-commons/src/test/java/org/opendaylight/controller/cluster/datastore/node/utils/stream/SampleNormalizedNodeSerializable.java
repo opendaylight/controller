@@ -8,16 +8,12 @@
 
 package org.opendaylight.controller.cluster.datastore.node.utils.stream;
 
-import java.io.DataInput;
-import java.io.DataOutput;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.net.URISyntaxException;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeStreamWriter;
-import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeWriter;
 
 public class SampleNormalizedNodeSerializable implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -33,15 +29,12 @@ public class SampleNormalizedNodeSerializable implements Serializable {
     }
 
     private void readObject(final ObjectInputStream stream) throws IOException, ClassNotFoundException, URISyntaxException {
-        NormalizedNodeDataInput reader = new NormalizedNodeInputStreamReader((DataInput)stream);
+        NormalizedNodeDataInput reader = NormalizedNodeInputOutput.newDataInput(stream);
         this.input = reader.readNormalizedNode();
     }
 
     private void writeObject(final ObjectOutputStream stream) throws IOException {
-        NormalizedNodeStreamWriter writer = new NormalizedNodeOutputStreamWriter((DataOutput)stream);
-        NormalizedNodeWriter normalizedNodeWriter = NormalizedNodeWriter.forStreamWriter(writer);
-
-        normalizedNodeWriter.write(this.input);
+        NormalizedNodeDataOutput writer =  NormalizedNodeInputOutput.newDataOutput(stream);
+        writer.writeNormalizedNode(input);
     }
-
 }
