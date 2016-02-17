@@ -33,7 +33,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
  */
 public final class SerializationUtils {
     public static final ThreadLocal<NormalizedNodeDataOutput> REUSABLE_WRITER_TL = new ThreadLocal<>();
-    public static final ThreadLocal<NormalizedNodeInputStreamReader> REUSABLE_READER_TL = new ThreadLocal<>();
+    public static final ThreadLocal<NormalizedNodeDataInput> REUSABLE_READER_TL = new ThreadLocal<>();
 
     public static interface Applier<T> {
         void apply(T instance, YangInstanceIdentifier path, NormalizedNode<?, ?> node);
@@ -49,12 +49,12 @@ public final class SerializationUtils {
     }
 
     private static NormalizedNodeDataInput streamReader(DataInput in) throws IOException {
-        NormalizedNodeInputStreamReader streamWriter = REUSABLE_READER_TL.get();
-        if(streamWriter == null) {
-            streamWriter = new NormalizedNodeInputStreamReader(in);
+        NormalizedNodeDataInput streamReader = REUSABLE_READER_TL.get();
+        if(streamReader == null) {
+            streamReader = new NormalizedNodeInputStreamReader(in);
         }
 
-        return streamWriter;
+        return streamReader;
     }
 
     public static void serializePathAndNode(YangInstanceIdentifier path, NormalizedNode<?, ?> node,

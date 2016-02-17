@@ -15,6 +15,7 @@ import java.io.ObjectOutput;
 import java.util.Map;
 import java.util.Set;
 import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
+import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeDataInput;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeDataOutput;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeInputOutput;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeInputStreamReader;
@@ -45,7 +46,7 @@ public class DataChanged implements Externalizable {
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         in.readShort(); // Read the version
 
-        NormalizedNodeInputStreamReader streamReader = new NormalizedNodeInputStreamReader(in);
+        NormalizedNodeDataInput streamReader = new NormalizedNodeInputStreamReader(in);
 
         // Note: the scope passed to builder is not actually used.
         Builder builder = DOMImmutableDataChangeEvent.builder(DataChangeScope.SUBTREE);
