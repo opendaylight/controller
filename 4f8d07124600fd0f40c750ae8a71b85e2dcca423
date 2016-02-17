@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_49fb15c1",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/CompositeDataTreeCohort.java",
+        "patchSetId": 15
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2016-02-17T12:08:24Z",
+      "side": 1,
+      "message": "I would rather go for optimizations later then early.",
+      "parentUuid": "9a3d3df0_ed821593",
+      "revId": "4f8d07124600fd0f40c750ae8a71b85e2dcca423",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_ad5f6d40",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/CompositeDataTreeCohort.java",
         "patchSetId": 15
@@ -30,6 +48,24 @@
       "writtenOn": "2016-02-09T07:19:26Z",
       "side": 1,
       "message": "I\u0027m wary of this blocking the shard actor as we don\u0027t know how long it might take a cohort to complete its processing - in akka land this is not best practice and should be avoided. How about returning a Future from canCommit etc and using OnComplete in ShardCommitCoordinator?",
+      "revId": "4f8d07124600fd0f40c750ae8a71b85e2dcca423",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_090e2de5",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/CompositeDataTreeCohort.java",
+        "patchSetId": 15
+      },
+      "lineNbr": 156,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2016-02-17T12:08:24Z",
+      "side": 1,
+      "message": "That would mean restructing / rewriting ShardCommitCoordinator, which also assumes blocking behaviour.",
+      "parentUuid": "9a3d3df0_ad5f6d40",
       "revId": "4f8d07124600fd0f40c750ae8a71b85e2dcca423",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_4ee956e5",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/CompositeDataTreeCohort.java",
+        "patchSetId": 15
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2016-02-17T12:08:24Z",
+      "side": 1,
+      "message": "As we discussed on call we should probably fail transaction.",
+      "parentUuid": "9a3d3df0_ad0dad40",
+      "revId": "4f8d07124600fd0f40c750ae8a71b85e2dcca423",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_ed59755b",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeCohortActor.java",
         "patchSetId": 15
@@ -64,6 +118,24 @@
       "writtenOn": "2016-02-09T07:19:26Z",
       "side": 1,
       "message": "This should be called DataTreeCohortActor. However you really don\u0027t need this class - you could call Props.create(DataTreeCohortActor.class, cohort).",
+      "revId": "4f8d07124600fd0f40c750ae8a71b85e2dcca423",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_4e979648",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeCohortActor.java",
+        "patchSetId": 15
+      },
+      "lineNbr": 276,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2016-02-17T12:08:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a3d3df0_ed59755b",
       "revId": "4f8d07124600fd0f40c750ae8a71b85e2dcca423",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_ce7ba6f3",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeCohortRegistrationProxy.java",
+        "patchSetId": 15
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2016-02-17T12:08:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a3d3df0_cd73d113",
+      "revId": "4f8d07124600fd0f40c750ae8a71b85e2dcca423",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_2d623d3e",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeCohortRegistrationProxy.java",
         "patchSetId": 15
@@ -98,6 +188,24 @@
       "writtenOn": "2016-02-09T07:19:26Z",
       "side": 1,
       "message": "Same as above wrt synchronized methods.",
+      "revId": "4f8d07124600fd0f40c750ae8a71b85e2dcca423",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_ae80e2c0",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeCohortRegistrationProxy.java",
+        "patchSetId": 15
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2016-02-17T12:08:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a3d3df0_2d623d3e",
       "revId": "4f8d07124600fd0f40c750ae8a71b85e2dcca423",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_0e82aec7",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeCohortRegistrationProxy.java",
+        "patchSetId": 15
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2016-02-17T12:08:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a3d3df0_2d14fd9e",
+      "revId": "4f8d07124600fd0f40c750ae8a71b85e2dcca423",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_8d2269ff",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeCohortRegistrationProxy.java",
         "patchSetId": 15
@@ -132,6 +258,24 @@
       "writtenOn": "2016-02-09T07:19:26Z",
       "side": 1,
       "message": "Not a big deal but it doesn\u0027t seem we need to block the caller here since we don\u0027t report back a result. We can just call tell.",
+      "revId": "4f8d07124600fd0f40c750ae8a71b85e2dcca423",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_ee866ada",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeCohortRegistrationProxy.java",
+        "patchSetId": 15
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2016-02-17T12:08:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a3d3df0_8d2269ff",
       "revId": "4f8d07124600fd0f40c750ae8a71b85e2dcca423",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -166,6 +310,24 @@
       "writtenOn": "2016-02-09T07:19:26Z",
       "side": 1,
       "message": "Can you remove this unnecessary change?",
+      "revId": "4f8d07124600fd0f40c750ae8a71b85e2dcca423",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_bf214efd",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/SimpleShardDataTreeCohort.java",
+        "patchSetId": 15
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2016-02-17T12:08:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a3d3df0_680b9325",
       "revId": "4f8d07124600fd0f40c750ae8a71b85e2dcca423",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
