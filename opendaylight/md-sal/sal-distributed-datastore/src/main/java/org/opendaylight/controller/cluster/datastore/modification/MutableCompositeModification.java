@@ -14,8 +14,7 @@ import java.io.ObjectOutput;
 import java.util.ArrayList;
 import java.util.List;
 import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
-import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeInputStreamReader;
-import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeOutputStreamWriter;
+import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeInputOutput;
 import org.opendaylight.controller.cluster.datastore.utils.SerializationUtils;
 import org.opendaylight.controller.protobuff.messages.persistent.PersistentMessages;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
@@ -88,7 +87,7 @@ public class MutableCompositeModification implements CompositeModification {
         int size = in.readInt();
 
         if(size > 1) {
-            SerializationUtils.REUSABLE_READER_TL.set(new NormalizedNodeInputStreamReader(in));
+            SerializationUtils.REUSABLE_READER_TL.set(NormalizedNodeInputOutput.newDataInput(in));
         }
 
         try {
@@ -120,7 +119,7 @@ public class MutableCompositeModification implements CompositeModification {
         out.writeInt(modifications.size());
 
         if(modifications.size() > 1) {
-            SerializationUtils.REUSABLE_WRITER_TL.set(new NormalizedNodeOutputStreamWriter(out));
+            SerializationUtils.REUSABLE_WRITER_TL.set(NormalizedNodeInputOutput.newDataOutput(out));
         }
 
         try {
