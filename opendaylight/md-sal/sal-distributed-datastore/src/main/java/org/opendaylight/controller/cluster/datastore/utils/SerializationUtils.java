@@ -20,8 +20,8 @@ import org.opendaylight.controller.cluster.datastore.node.NormalizedNodeToNodeCo
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.InvalidNormalizedNodeStreamException;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeDataInput;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeDataOutput;
+import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeInputOutput;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeInputStreamReader;
-import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeOutputStreamWriter;
 import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -32,7 +32,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
  * @author Thomas Pantelis
  */
 public final class SerializationUtils {
-    public static final ThreadLocal<NormalizedNodeOutputStreamWriter> REUSABLE_WRITER_TL = new ThreadLocal<>();
+    public static final ThreadLocal<NormalizedNodeDataOutput> REUSABLE_WRITER_TL = new ThreadLocal<>();
     public static final ThreadLocal<NormalizedNodeInputStreamReader> REUSABLE_READER_TL = new ThreadLocal<>();
 
     public static interface Applier<T> {
@@ -40,9 +40,9 @@ public final class SerializationUtils {
     }
 
     private static NormalizedNodeDataOutput streamWriter(DataOutput out) throws IOException {
-        NormalizedNodeOutputStreamWriter streamWriter = REUSABLE_WRITER_TL.get();
+        NormalizedNodeDataOutput streamWriter = REUSABLE_WRITER_TL.get();
         if(streamWriter == null) {
-            streamWriter = new NormalizedNodeOutputStreamWriter(out);
+            streamWriter = NormalizedNodeInputOutput.newDataOutput(out);
         }
 
         return streamWriter;
