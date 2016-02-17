@@ -56,7 +56,7 @@ public class NormalizedNodeStreamReaderWriterTest {
         writer.writeNormalizedNode(toasterContainer);
 
         NormalizedNodeInputStreamReader reader = new NormalizedNodeInputStreamReader(
-            ByteStreams.newDataInput(byteArrayOutputStream.toByteArray()));
+            ByteStreams.newDataInput(byteArrayOutputStream.toByteArray()), false);
 
         NormalizedNode<?,?> node = reader.readNormalizedNode();
         Assert.assertEquals(testContainer, node);
@@ -104,7 +104,7 @@ public class NormalizedNodeStreamReaderWriterTest {
         writer.writeYangInstanceIdentifier(path);
 
         NormalizedNodeInputStreamReader reader = new NormalizedNodeInputStreamReader(
-            ByteStreams.newDataInput(byteArrayOutputStream.toByteArray()));
+            ByteStreams.newDataInput(byteArrayOutputStream.toByteArray()), false);
 
         YangInstanceIdentifier newPath = reader.readYangInstanceIdentifier();
         Assert.assertEquals(path, newPath);
@@ -129,7 +129,7 @@ public class NormalizedNodeStreamReaderWriterTest {
         writer.writeYangInstanceIdentifier(path);
 
         NormalizedNodeInputStreamReader reader = new NormalizedNodeInputStreamReader(
-            ByteStreams.newDataInput(byteArrayOutputStream.toByteArray()));
+            ByteStreams.newDataInput(byteArrayOutputStream.toByteArray()), false);
 
         NormalizedNode<?,?> node = reader.readNormalizedNode();
         Assert.assertEquals(testContainer, node);
@@ -146,7 +146,7 @@ public class NormalizedNodeStreamReaderWriterTest {
                 TestModel.createBaseTestContainerBuilder().build()).getNormalizedNode().toByteArray();
 
         NormalizedNodeInputStreamReader reader = new NormalizedNodeInputStreamReader(
-            ByteStreams.newDataInput(protobufBytes));
+            ByteStreams.newDataInput(protobufBytes), false);
 
         reader.readNormalizedNode();
     }
@@ -155,7 +155,7 @@ public class NormalizedNodeStreamReaderWriterTest {
     public void testInvalidYangInstanceIdentifierStream() throws IOException {
         byte[] protobufBytes = {1,2,3};
         NormalizedNodeInputStreamReader reader = new NormalizedNodeInputStreamReader(
-            ByteStreams.newDataInput(protobufBytes));
+            ByteStreams.newDataInput(protobufBytes), false);
 
         reader.readYangInstanceIdentifier();
     }

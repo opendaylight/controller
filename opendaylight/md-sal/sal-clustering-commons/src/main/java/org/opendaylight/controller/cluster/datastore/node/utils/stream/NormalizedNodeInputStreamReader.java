@@ -45,8 +45,7 @@ import org.slf4j.LoggerFactory;
  * If a node can have children, then that node's end is calculated based on appearance of END_NODE.
  *
  */
-
-public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput {
+class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput {
 
     private static final Logger LOG = LoggerFactory.getLogger(NormalizedNodeInputStreamReader.class);
 
@@ -66,14 +65,6 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput 
     private final StringBuilder reusableStringBuilder = new StringBuilder(50);
 
     private boolean readSignatureMarker = true;
-
-    /**
-     * @deprecated Use {@link NormalizedNodeInputOutput#newDataInput(DataInput)} instead.
-     */
-    @Deprecated
-    public NormalizedNodeInputStreamReader(final DataInput input) {
-        this(input, false);
-    }
 
     NormalizedNodeInputStreamReader(final DataInput input, final boolean versionChecked) {
         this.input = Preconditions.checkNotNull(input);
