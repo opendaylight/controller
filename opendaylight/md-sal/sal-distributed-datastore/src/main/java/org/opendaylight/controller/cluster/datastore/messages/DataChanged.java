@@ -15,8 +15,9 @@ import java.io.ObjectOutput;
 import java.util.Map;
 import java.util.Set;
 import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
+import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeDataOutput;
+import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeInputOutput;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeInputStreamReader;
-import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeOutputStreamWriter;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.dom.store.impl.DOMImmutableDataChangeEvent;
@@ -99,8 +100,7 @@ public class DataChanged implements Externalizable {
     public void writeExternal(ObjectOutput out) throws IOException {
         out.writeShort(DataStoreVersions.CURRENT_VERSION);
 
-        NormalizedNodeOutputStreamWriter streamWriter = new NormalizedNodeOutputStreamWriter(out);
-        NormalizedNodeWriter nodeWriter = NormalizedNodeWriter.forStreamWriter(streamWriter);
+        NormalizedNodeDataOutput streamWriter = NormalizedNodeInputOutput.newDataOutput(out);
 
         // Write created data
 
@@ -108,7 +108,7 @@ public class DataChanged implements Externalizable {
         out.writeInt(createdData.size());
         for(Map.Entry<YangInstanceIdentifier, NormalizedNode<?, ?>> e: createdData.entrySet()) {
             streamWriter.writeYangInstanceIdentifier(e.getKey());
-            nodeWriter.write(e.getValue());
+            streamWriter.writeNormalizedNode(e.getValue());
         }
 
         // Write updated data
@@ -118,8 +118,8 @@ public class DataChanged implements Externalizable {
         out.writeInt(updatedData.size());
         for(Map.Entry<YangInstanceIdentifier, NormalizedNode<?, ?>> e: updatedData.entrySet()) {
             streamWriter.writeYangInstanceIdentifier(e.getKey());
-            nodeWriter.write(originalData.get(e.getKey()));
-            nodeWriter.write(e.getValue());
+            streamWriter.writeNormalizedNode(originalData.get(e.getKey()));
+            streamWriter.writeNormalizedNode(e.getValue());
         }
 
         // Write removed data
@@ -128,7 +128,7 @@ public class DataChanged implements Externalizable {
         out.writeInt(removed.size());
         for(YangInstanceIdentifier path: removed) {
             streamWriter.writeYangInstanceIdentifier(path);
-            nodeWriter.write(originalData.get(path));
+            streamWriter.writeNormalizedNode(originalData.get(path));
         }
 
         // Write original subtree
@@ -136,7 +136,7 @@ public class DataChanged implements Externalizable {
         NormalizedNode<?, ?> originalSubtree = change.getOriginalSubtree();
         out.writeBoolean(originalSubtree != null);
         if(originalSubtree != null) {
-            nodeWriter.write(originalSubtree);
+            streamWriter.writeNormalizedNode(originalSubtree);
         }
 
         // Write original subtree
@@ -144,7 +144,7 @@ public class DataChanged implements Externalizable {
         NormalizedNode<?, ?> updatedSubtree = change.getUpdatedSubtree();
         out.writeBoolean(updatedSubtree != null);
         if(updatedSubtree != null) {
-            nodeWriter.write(updatedSubtree);
+            streamWriter.writeNormalizedNode(updatedSubtree);
         }
     }
 }
