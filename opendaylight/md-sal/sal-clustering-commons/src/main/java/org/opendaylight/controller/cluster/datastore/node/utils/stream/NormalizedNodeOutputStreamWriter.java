@@ -16,7 +16,6 @@ import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeStreamWriter;
 
 /**
  * NormalizedNodeOutputStreamWriter will be used by distributed datastore to send normalized node in
@@ -32,7 +31,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeStre
  * Based on the each node, the node type is also written to the stream, that helps in reconstructing the object,
  * while reading.
  */
-public class NormalizedNodeOutputStreamWriter extends AbstractNormalizedNodeDataOutput implements NormalizedNodeStreamWriter {
+public class NormalizedNodeOutputStreamWriter extends AbstractNormalizedNodeDataOutput {
     private final Map<String, Integer> stringCodeMap = new HashMap<>();
 
     /**
