@@ -21,6 +21,7 @@ import java.util.Collections;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeDataInput;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeDataOutput;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeInputStreamReader;
+import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeInputOutput;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeOutputStreamWriter;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -97,7 +98,7 @@ final class DataTreeCandidatePayload extends Payload implements Externalizable {
 
     static DataTreeCandidatePayload create(final DataTreeCandidate candidate) {
         final ByteArrayDataOutput out = ByteStreams.newDataOutput();
-        try (final NormalizedNodeOutputStreamWriter writer = new NormalizedNodeOutputStreamWriter(out)) {
+        try (final NormalizedNodeDataOutput writer = NormalizedNodeInputOutput.newDataOutput(out)) {
             writer.writeYangInstanceIdentifier(candidate.getRootPath());
 
             final DataTreeCandidateNode node = candidate.getRootNode();
