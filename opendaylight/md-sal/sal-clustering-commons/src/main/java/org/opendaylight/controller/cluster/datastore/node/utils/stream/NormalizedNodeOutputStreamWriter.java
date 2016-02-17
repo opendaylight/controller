@@ -8,11 +8,8 @@
 
 package org.opendaylight.controller.cluster.datastore.node.utils.stream;
 
-import com.google.common.base.Preconditions;
 import java.io.DataOutput;
-import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
 import org.opendaylight.yangtools.yang.common.QName;
@@ -33,14 +30,6 @@ import org.opendaylight.yangtools.yang.common.QName;
  */
 public class NormalizedNodeOutputStreamWriter extends AbstractNormalizedNodeDataOutput {
     private final Map<String, Integer> stringCodeMap = new HashMap<>();
-
-    /**
-     * @deprecated Use {@link #NormalizedNodeOutputStreamWriter(DataOutput)} instead.
-     */
-    @Deprecated
-    public NormalizedNodeOutputStreamWriter(final OutputStream stream) throws IOException {
-        this((DataOutput) new DataOutputStream(Preconditions.checkNotNull(stream)));
-    }
 
     /**
      * @deprecated Use {@link NormalizedNodeInputOutput#newDataOutput(DataOutput)} instead.
