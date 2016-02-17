@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a3d3df0_273a35e7",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/messages/AppendEntries.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-02-17T22:08:15Z",
+      "side": 1,
+      "message": "understand the safety aspect of returning an unmodifiable list but I don\u0027t think we need the overhead of being that defensive here. This is not a public API and no callers modify the list and it wouldn\u0027t make sense for them to do so. I\u0027d rather add a javadoc stating not to modify the list rather than incurring the unnecessary overhead of an intermediate object on every call. \n\nThere are other internal classes where we pass/return lists which technically should be immutable but being defensive everywhere gets to be overkill and reduces efficiency.",
+      "revId": "2a6a88268354f979c4bc8f20c3d657ce7be2044b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
