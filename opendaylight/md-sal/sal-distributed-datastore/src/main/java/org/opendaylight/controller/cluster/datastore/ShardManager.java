@@ -934,8 +934,8 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
                 continue;
             }
 
-            LOG.debug("{}: findPrimary for {} forwarding to remote ShardManager {}", persistenceId(),
-                    shardName, address);
+            LOG.debug("{}: findPrimary for {} forwarding to remote ShardManager {}, visitedAddresses: {}",
+                    persistenceId(), shardName, address, visitedAddresses);
 
             getContext().actorSelection(address).forward(new RemoteFindPrimary(shardName,
                     message.isWaitUntilReady(), visitedAddresses), getContext());
