@@ -48,7 +48,7 @@ import org.slf4j.LoggerFactory;
  *
  */
 
-public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput, NormalizedNodeStreamReader {
+public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput {
 
     private static final Logger LOG = LoggerFactory.getLogger(NormalizedNodeInputStreamReader.class);
 
