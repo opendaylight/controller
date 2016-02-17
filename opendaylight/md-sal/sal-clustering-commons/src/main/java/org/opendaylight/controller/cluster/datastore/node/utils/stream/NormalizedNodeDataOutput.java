@@ -18,8 +18,11 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;;
  * Interface for emitting {@link NormalizedNode}s, {@link YangInstanceIdentifier}s and {@link PathArgument}s.
  */
 @Beta
-public interface NormalizedNodeDataOutput extends DataOutput {
+public interface NormalizedNodeDataOutput extends AutoCloseable, DataOutput {
     void writeNormalizedNode(NormalizedNode<?, ?> normalizedNode) throws IOException;
     void writePathArgument(PathArgument pathArgument) throws IOException;
     void writeYangInstanceIdentifier(YangInstanceIdentifier identifier) throws IOException;
+
+    @Override
+    void close() throws IOException;
 }
