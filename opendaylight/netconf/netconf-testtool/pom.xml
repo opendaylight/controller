@@ -128,6 +128,14 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>netty-config-api</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>sal-inmemory-datastore</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>mdsal-netconf-connector</artifactId>
+        </dependency>
 
     </dependencies>
 

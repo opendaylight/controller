@@ -56,7 +56,6 @@ import org.apache.sshd.server.PasswordAuthenticator;
 import org.apache.sshd.server.keyprovider.PEMGeneratorHostKeyProvider;
 import org.apache.sshd.server.session.ServerSession;
 import org.opendaylight.controller.netconf.api.Capability;
-import org.opendaylight.controller.netconf.api.monitoring.CapabilityListener;
 import org.opendaylight.controller.netconf.api.monitoring.NetconfMonitoringService;
 import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.impl.DefaultCommitNotificationProducer;
@@ -64,24 +63,16 @@ import org.opendaylight.controller.netconf.impl.NetconfServerDispatcherImpl;
 import org.opendaylight.controller.netconf.impl.NetconfServerSessionNegotiatorFactory;
 import org.opendaylight.controller.netconf.impl.SessionIdProvider;
 import org.opendaylight.controller.netconf.impl.osgi.AggregatedNetconfOperationServiceFactory;
-import org.opendaylight.controller.netconf.mapping.api.NetconfOperation;
-import org.opendaylight.controller.netconf.mapping.api.NetconfOperationService;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationServiceFactory;
 import org.opendaylight.controller.netconf.monitoring.osgi.NetconfMonitoringActivator;
 import org.opendaylight.controller.netconf.monitoring.osgi.NetconfMonitoringOperationService;
 import org.opendaylight.controller.netconf.ssh.SshProxyServer;
 import org.opendaylight.controller.netconf.ssh.SshProxyServerConfiguration;
 import org.opendaylight.controller.netconf.ssh.SshProxyServerConfigurationBuilder;
-import org.opendaylight.controller.netconf.test.tool.rpc.DataList;
-import org.opendaylight.controller.netconf.test.tool.rpc.SimulatedCommit;
-import org.opendaylight.controller.netconf.test.tool.rpc.SimulatedCreateSubscription;
-import org.opendaylight.controller.netconf.test.tool.rpc.SimulatedEditConfig;
-import org.opendaylight.controller.netconf.test.tool.rpc.SimulatedGet;
-import org.opendaylight.controller.netconf.test.tool.rpc.SimulatedGetConfig;
-import org.opendaylight.controller.netconf.test.tool.rpc.SimulatedLock;
-import org.opendaylight.controller.netconf.test.tool.rpc.SimulatedUnLock;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.model.repo.api.SchemaResolutionException;
 import org.opendaylight.yangtools.yang.model.repo.api.SchemaSourceException;
+import org.opendaylight.yangtools.yang.model.repo.api.SchemaSourceFilter;
 import org.opendaylight.yangtools.yang.model.repo.api.SchemaSourceRepresentation;
 import org.opendaylight.yangtools.yang.model.repo.api.SourceIdentifier;
 import org.opendaylight.yangtools.yang.model.repo.api.YangTextSchemaSource;
@@ -108,6 +99,7 @@ public class NetconfDeviceSimulator implements Closeable {
     private final List<SshProxyServer> sshWrappers = Lists.newArrayList();
     private final ScheduledExecutorService minaTimerExecutor;
     private final ExecutorService nioExecutor;
+    private SchemaContext schemaContext;
 
     private boolean sendFakeSchema = false;
 
@@ -125,7 +117,7 @@ public class NetconfDeviceSimulator implements Closeable {
         this.nioExecutor = nioExecutor;
     }
 
-    private NetconfServerDispatcherImpl createDispatcher(final Map<ModuleBuilder, String> moduleBuilders, final boolean exi, final int generateConfigsTimeout, final Optional<File> notificationsFile) {
+    private NetconfServerDispatcherImpl createDispatcher(final Map<ModuleBuilder, String> moduleBuilders, final boolean exi, final int generateConfigsTimeout, final Optional<File> notificationsFile, final boolean mdSal) {
 
         final Set<Capability> capabilities = Sets.newHashSet(Collections2.transform(moduleBuilders.keySet(), new Function<ModuleBuilder, Capability>() {
             @Override
@@ -142,14 +134,15 @@ public class NetconfDeviceSimulator implements Closeable {
         final SessionIdProvider idProvider = new SessionIdProvider();
 
         final AggregatedNetconfOperationServiceFactory aggregatedNetconfOperationServiceFactory = new AggregatedNetconfOperationServiceFactory();
-        final SimulatedOperationProvider simulatedOperationProvider = new SimulatedOperationProvider(idProvider, capabilities, notificationsFile);
+        final NetconfOperationServiceFactory operationProvider = mdSal ? new MdsalOperationProvider(idProvider, capabilities, schemaContext) :
+                new SimulatedOperationProvider(idProvider, capabilities, notificationsFile);
 
         final NetconfMonitoringService monitoringService1 = new DummyMonitoringService(capabilities);
 
         final NetconfMonitoringActivator.NetconfMonitoringOperationServiceFactory monitoringService =
                 new NetconfMonitoringActivator.NetconfMonitoringOperationServiceFactory(
                         new NetconfMonitoringOperationService(monitoringService1));
-        aggregatedNetconfOperationServiceFactory.onAddNetconfOperationServiceFactory(simulatedOperationProvider);
+        aggregatedNetconfOperationServiceFactory.onAddNetconfOperationServiceFactory(operationProvider);
         aggregatedNetconfOperationServiceFactory.onAddNetconfOperationServiceFactory(monitoringService);
 
         final DefaultCommitNotificationProducer commitNotifier = new DefaultCommitNotificationProducer(ManagementFactory.getPlatformMBeanServer());
@@ -199,7 +192,7 @@ public class NetconfDeviceSimulator implements Closeable {
 
         final Map<ModuleBuilder, String> moduleBuilders = parseSchemasToModuleBuilders(params);
 
-        final NetconfServerDispatcherImpl dispatcher = createDispatcher(moduleBuilders, params.exi, params.generateConfigsTimeout, Optional.fromNullable(params.notificationFile));
+        final NetconfServerDispatcherImpl dispatcher = createDispatcher(moduleBuilders, params.exi, params.generateConfigsTimeout, Optional.fromNullable(params.notificationFile), params.mdSal);
 
         int currentPort = params.startingPort;
 
@@ -336,6 +329,16 @@ public class NetconfDeviceSimulator implements Closeable {
         addDefaultSchemas(consumer);
 
         final Map<SourceIdentifier, Map.Entry<ASTSchemaSource, YangTextSchemaSource>> asts = Maps.newHashMap();
+
+        try {
+            //necessary for creating mdsal datastores and operations
+            schemaContext = consumer.createSchemaContextFactory(
+                SchemaSourceFilter.ALWAYS_ACCEPT)
+                .createSchemaContext(loadedSources).checkedGet();
+        } catch (final SchemaResolutionException e) {
+            throw new RuntimeException("Cannot parse schema context", e);
+        }
+
         for (final SourceIdentifier loadedSource : loadedSources) {
             try {
                 final CheckedFuture<ASTSchemaSource, SchemaSourceException> ast = consumer.getSchemaSource(loadedSource, ASTSchemaSource.class);
@@ -404,64 +407,6 @@ public class NetconfDeviceSimulator implements Closeable {
         minaTimerExecutor.shutdownNow();
         nioExecutor.shutdownNow();
         // close Everything
-    }
-
-    private static class SimulatedOperationProvider implements NetconfOperationServiceFactory {
-        private final Set<Capability> caps;
-        private final SimulatedOperationService simulatedOperationService;
-
-
-        public SimulatedOperationProvider(final SessionIdProvider idProvider, final Set<Capability> caps, final Optional<File> notificationsFile) {
-            this.caps = caps;
-            simulatedOperationService = new SimulatedOperationService(idProvider.getCurrentSessionId(), notificationsFile);
-        }
-
-        @Override
-        public Set<Capability> getCapabilities() {
-            return caps;
-        }
-
-        @Override
-        public AutoCloseable registerCapabilityListener(final CapabilityListener listener) {
-            listener.onCapabilitiesAdded(caps);
-            return new AutoCloseable() {
-                @Override
-                public void close() throws Exception {}
-            };
-        }
-
-        @Override
-        public NetconfOperationService createService(final String netconfSessionIdForReporting) {
-            return simulatedOperationService;
-        }
-
-        static class SimulatedOperationService implements NetconfOperationService {
-            private final long currentSessionId;
-            private final Optional<File> notificationsFile;
-
-            public SimulatedOperationService(final long currentSessionId, final Optional<File> notificationsFile) {
-                this.currentSessionId = currentSessionId;
-                this.notificationsFile = notificationsFile;
-            }
-
-            @Override
-            public Set<NetconfOperation> getNetconfOperations() {
-                final DataList storage = new DataList();
-                final SimulatedGet sGet = new SimulatedGet(String.valueOf(currentSessionId), storage);
-                final SimulatedEditConfig sEditConfig = new SimulatedEditConfig(String.valueOf(currentSessionId), storage);
-                final SimulatedGetConfig sGetConfig = new SimulatedGetConfig(String.valueOf(currentSessionId), storage);
-                final SimulatedCommit sCommit = new SimulatedCommit(String.valueOf(currentSessionId));
-                final SimulatedLock sLock = new SimulatedLock(String.valueOf(currentSessionId));
-                final SimulatedUnLock sUnlock = new SimulatedUnLock(String.valueOf(currentSessionId));
-                final SimulatedCreateSubscription sCreateSubs = new SimulatedCreateSubscription(String.valueOf(currentSessionId), notificationsFile);
-                return Sets.<NetconfOperation>newHashSet(sGet,  sGetConfig, sEditConfig, sCommit, sLock, sUnlock, sCreateSubs);
-            }
-
-            @Override
-            public void close() {
-            }
-
-        }
     }
 
 }
