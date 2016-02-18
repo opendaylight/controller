@@ -163,6 +163,12 @@ public class NetconfMDSalMappingTest {
     }
 
     @Test
+    public void testCommitWithoutOpenTransaction() throws Exception {
+        verifyResponse(commit(), RPC_REPLY_OK);
+        assertEmptyDatastore(getConfigCandidate());
+    }
+
+    @Test
     public void testCandidateTransaction() throws Exception {
 
         verifyResponse(edit("messages/mapping/editConfigs/editConfig_merge_n1.xml"), RPC_REPLY_OK);

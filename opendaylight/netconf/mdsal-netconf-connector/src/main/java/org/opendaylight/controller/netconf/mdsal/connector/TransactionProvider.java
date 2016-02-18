@@ -73,8 +73,9 @@ public class TransactionProvider implements AutoCloseable{
 
     public synchronized boolean commitTransaction() throws NetconfDocumentedException {
         if (!getCandidateTransaction().isPresent()) {
-            throw new NetconfDocumentedException(NO_TRANSACTION_FOUND_FOR_SESSION + netconfSessionIdForReporting,
-                    ErrorType.application, ErrorTag.operation_failed, ErrorSeverity.error);
+            //making empty commit without prior opened transaction, just return true
+            LOG.debug("Making commit without open candidate transaction for session {}", netconfSessionIdForReporting);
+            return true;
         }
 
         CheckedFuture<Void, TransactionCommitFailedException> future = candidateTransaction.submit();
