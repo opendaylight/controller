@@ -151,7 +151,7 @@ public class NetconfDeviceSimulator implements Closeable {
                 ? NetconfServerSessionNegotiatorFactory.DEFAULT_BASE_CAPABILITIES
                 : Sets.newHashSet(XmlNetconfConstants.URN_IETF_PARAMS_NETCONF_BASE_1_0, XmlNetconfConstants.URN_IETF_PARAMS_NETCONF_BASE_1_1);
 
-        final NetconfServerSessionNegotiatorFactory serverNegotiatorFactory = new NetconfServerSessionNegotiatorFactory(
+        final NetconfServerSessionNegotiatorFactory serverNegotiatorFactory = new TesttoolNegotiationFactory(
                 hashedWheelTimer, aggregatedNetconfOperationServiceFactory, idProvider, generateConfigsTimeout, commitNotifier, monitoringService1, serverCapabilities);
 
         final NetconfServerDispatcherImpl.ServerChannelInitializer serverChannelInitializer = new NetconfServerDispatcherImpl.ServerChannelInitializer(
