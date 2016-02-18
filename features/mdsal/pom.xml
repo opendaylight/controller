@@ -4,23 +4,23 @@
   <parent>
     <groupId>org.opendaylight.odlparent</groupId>
     <artifactId>features-parent</artifactId>
-    <version>1.6.0-Beryllium</version>
+    <version>1.6.1-SNAPSHOT</version>
     <relativePath/>
   </parent>
 
   <groupId>org.opendaylight.controller</groupId>
   <artifactId>features-mdsal</artifactId>
-  <version>1.3.0-Beryllium</version>
+  <version>1.3.1-SNAPSHOT</version>
 
   <packaging>jar</packaging>
 
   <properties>
-    <yangtools.version>0.8.0-Beryllium</yangtools.version>
-    <mdsal.version>2.0.0-Beryllium</mdsal.version>
-    <mdsal.model.version>0.8.0-Beryllium</mdsal.model.version>
-    <controller.mdsal.version>1.3.0-Beryllium</controller.mdsal.version>
-    <config.version>0.4.0-Beryllium</config.version>
-    <commons.opendaylight.version>1.6.0-Beryllium</commons.opendaylight.version>
+    <yangtools.version>0.8.1-SNAPSHOT</yangtools.version>
+    <mdsal.version>2.0.1-SNAPSHOT</mdsal.version>
+    <mdsal.model.version>0.8.1-SNAPSHOT</mdsal.model.version>
+    <controller.mdsal.version>1.3.1-SNAPSHOT</controller.mdsal.version>
+    <config.version>0.4.1-SNAPSHOT</config.version>
+    <commons.opendaylight.version>1.6.1-SNAPSHOT</commons.opendaylight.version>
     <akka.version>2.3.14</akka.version>
     <features.file>features.xml</features.file>
     <config.configfile.directory>etc/opendaylight/karaf</config.configfile.directory>
@@ -37,7 +37,7 @@
       <dependency>
         <groupId>org.opendaylight.odlparent</groupId>
         <artifactId>odlparent-artifacts</artifactId>
-        <version>1.6.0-Beryllium</version>
+        <version>1.6.1-SNAPSHOT</version>
         <scope>import</scope>
         <type>pom</type>
       </dependency>
