@@ -611,14 +611,8 @@ public class NetconfMappingTest extends AbstractConfigTest {
         assertEquals(3 + 3, afterReplace);
     }
 
-    @Test(expected = NetconfDocumentedException.class)
-    public void testEx() throws Exception {
-
-        commit();
-    }
-
     @Test
-    public void testEx2() throws Exception {
+    public void testEx() throws Exception {
         assertContainsElement(discard(), readXmlToElement("<ok xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\"/>"));
     }
 
