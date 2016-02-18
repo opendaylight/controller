@@ -65,14 +65,13 @@ class MdsalOperationProvider implements NetconfOperationServiceFactory {
             .getLogger(MdsalOperationProvider.class);
 
     private final Set<Capability> caps;
-    private final MdsalOperationService mdsalOperationService;
+    private final SchemaContext schemaContext;
 
     public MdsalOperationProvider(final SessionIdProvider idProvider,
                                   final Set<Capability> caps,
                                   final SchemaContext schemaContext) {
         this.caps = caps;
-        mdsalOperationService = new MdsalOperationService(
-                idProvider.getCurrentSessionId(), schemaContext, caps);
+        this.schemaContext = schemaContext;
     }
 
     @Override
@@ -93,13 +92,15 @@ class MdsalOperationProvider implements NetconfOperationServiceFactory {
 
     @Override
     public NetconfOperationService createService(String netconfSessionIdForReporting) {
-        return mdsalOperationService;
+        return new MdsalOperationService(Long.parseLong(netconfSessionIdForReporting), schemaContext, caps);
     }
 
     static class MdsalOperationService implements NetconfOperationService {
         private final long currentSessionId;
         private final SchemaContext schemaContext;
         private final Set<Capability> caps;
+        private final SchemaService schemaService;
+        private final DOMDataBroker dataBroker;
 
         public MdsalOperationService(final long currentSessionId,
                                      final SchemaContext schemaContext,
@@ -107,14 +108,15 @@ class MdsalOperationProvider implements NetconfOperationServiceFactory {
             this.currentSessionId = currentSessionId;
             this.schemaContext = schemaContext;
             this.caps = caps;
+            this.schemaService = createSchemaService();
+
+            this.dataBroker = createDataStore(schemaService);
+
         }
 
         @Override
         public Set<NetconfOperation> getNetconfOperations() {
-            final SchemaService schemaService = createSchemaService();
-
-            final DOMDataBroker db = createDataStore(schemaService);
-            TransactionProvider transactionProvider = new TransactionProvider(db, String.valueOf(currentSessionId));
+            TransactionProvider transactionProvider = new TransactionProvider(dataBroker, String.valueOf(currentSessionId));
             CurrentSchemaContext currentSchemaContext = new CurrentSchemaContext(schemaService);
 
             ContainerNode netconf = createNetconfState();
@@ -122,7 +124,7 @@ class MdsalOperationProvider implements NetconfOperationServiceFactory {
             YangInstanceIdentifier yangInstanceIdentifier = YangInstanceIdentifier.builder().node(NetconfState.QNAME)
                     .build();
 
-            final DOMDataWriteTransaction tx = db.newWriteOnlyTransaction();
+            final DOMDataWriteTransaction tx = dataBroker.newWriteOnlyTransaction();
             tx.put(LogicalDatastoreType.OPERATIONAL, yangInstanceIdentifier, netconf);
 
             try {

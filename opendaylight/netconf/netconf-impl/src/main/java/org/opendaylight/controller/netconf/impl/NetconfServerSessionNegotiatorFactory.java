@@ -14,6 +14,7 @@ import com.google.common.collect.Sets;
 import io.netty.channel.Channel;
 import io.netty.util.Timer;
 import io.netty.util.concurrent.Promise;
+import java.net.SocketAddress;
 import java.util.Set;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfServerSessionPreferences;
@@ -108,16 +109,23 @@ public class NetconfServerSessionNegotiatorFactory implements SessionNegotiatorF
         }
 
         return new NetconfServerSessionNegotiator(proposal, promise, channel, timer,
-                getListener(Long.toString(sessionId)), connectionTimeoutMillis);
+                getListener(Long.toString(sessionId), channel.localAddress()), connectionTimeoutMillis);
     }
 
-    private NetconfServerSessionListener getListener(final String netconfSessionIdForReporting) {
-        final NetconfOperationService service =
-                this.aggregatedOpService.createService(netconfSessionIdForReporting);
+    private NetconfServerSessionListener getListener(final String netconfSessionIdForReporting, final SocketAddress socketAddress) {
+        final NetconfOperationService service = getOperationServiceForAddress(netconfSessionIdForReporting, socketAddress);
         final NetconfOperationRouter operationRouter =
                 new NetconfOperationRouterImpl(service, commitNotificationProducer, monitoringService, netconfSessionIdForReporting);
         return new NetconfServerSessionListener(operationRouter, monitoringService, service);
 
+    }
+
+    protected NetconfOperationService getOperationServiceForAddress(final String netconfSessionIdForReporting, final SocketAddress socketAddress) {
+        return this.aggregatedOpService.createService(netconfSessionIdForReporting);
+    }
+
+    protected final NetconfOperationServiceFactory getOperationServiceFactory() {
+        return aggregatedOpService;
     }
 
     private NetconfHelloMessage createHelloMessage(final long sessionId, final NetconfMonitoringService capabilityProvider) throws NetconfDocumentedException {
