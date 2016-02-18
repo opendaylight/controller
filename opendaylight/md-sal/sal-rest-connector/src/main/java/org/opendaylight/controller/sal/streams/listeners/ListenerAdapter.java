@@ -16,6 +16,7 @@ import io.netty.channel.Channel;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.util.internal.ConcurrentSet;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
@@ -23,6 +24,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.Executors;
@@ -30,10 +32,14 @@ import java.util.regex.Pattern;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.stream.XMLOutputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
@@ -45,7 +51,16 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeWithValue;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
+import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.api.schema.UnkeyedListEntryNode;
+import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeStreamWriter;
+import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeWriter;
+import org.opendaylight.yangtools.yang.data.impl.codec.xml.XMLStreamNormalizedNodeStreamWriter;
+import org.opendaylight.yangtools.yang.data.impl.codec.xml.XmlDocumentUtils;
+import org.opendaylight.yangtools.yang.data.util.DataSchemaContextTree;
+import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -91,8 +106,6 @@ public class ListenerAdapter implements DOMDataChangeListener {
 
     @Override
     public void onDataChanged(final AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change) {
-        // TODO Auto-generated method stub
-
         if (!change.getCreatedData().isEmpty() || !change.getUpdatedData().isEmpty()
                 || !change.getRemovedPaths().isEmpty()) {
             final String xml = prepareXmlFrom(change);
@@ -212,6 +225,8 @@ public class ListenerAdapter implements DOMDataChangeListener {
      * @return Data in printable form.
      */
     private String prepareXmlFrom(final AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change) {
+        final SchemaContext schemaContext = ControllerContext.getInstance().getGlobalSchema();
+        final DataSchemaContextTree dataContextTree =  DataSchemaContextTree.from(schemaContext);
         final Document doc = createDocument();
         final Element notificationElement = doc.createElementNS("urn:ietf:params:xml:ns:netconf:notification:1.0",
                 "notification");
@@ -223,7 +238,8 @@ public class ListenerAdapter implements DOMDataChangeListener {
 
         final Element dataChangedNotificationEventElement = doc.createElementNS(
                 "urn:opendaylight:params:xml:ns:yang:controller:md:sal:remote", "data-changed-notification");
-        addValuesToDataChangedNotificationEventElement(doc, dataChangedNotificationEventElement, change);
+        addValuesToDataChangedNotificationEventElement(doc, dataChangedNotificationEventElement, change,
+                schemaContext, dataContextTree);
         notificationElement.appendChild(dataChangedNotificationEventElement);
 
         try {
@@ -281,13 +297,17 @@ public class ListenerAdapter implements DOMDataChangeListener {
      */
     private void addValuesToDataChangedNotificationEventElement(final Document doc,
             final Element dataChangedNotificationEventElement,
-            final AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change) {
-        addValuesFromDataToElement(doc, change.getCreatedData().keySet(), dataChangedNotificationEventElement,
-                Operation.CREATED);
-        if (change.getCreatedData().isEmpty()) {
-            addValuesFromDataToElement(doc, change.getUpdatedData().keySet(), dataChangedNotificationEventElement,
-                    Operation.UPDATED);
-        }
+            final AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change,
+            final SchemaContext  schemaContext, final DataSchemaContextTree dataSchemaContextTree) {
+
+        addCreatedChangedValuesFromDataToElement(doc, change.getCreatedData().entrySet(),
+                dataChangedNotificationEventElement,
+                Operation.CREATED, schemaContext, dataSchemaContextTree);
+
+        addCreatedChangedValuesFromDataToElement(doc, change.getUpdatedData().entrySet(),
+                    dataChangedNotificationEventElement,
+                    Operation.UPDATED, schemaContext, dataSchemaContextTree);
+
         addValuesFromDataToElement(doc, change.getRemovedPaths(), dataChangedNotificationEventElement,
                 Operation.DELETED);
     }
@@ -317,6 +337,20 @@ public class ListenerAdapter implements DOMDataChangeListener {
         }
     }
 
+    private void addCreatedChangedValuesFromDataToElement(final Document doc, final Set<Entry<YangInstanceIdentifier,
+                NormalizedNode<?,?>>> data, final Element element, final Operation operation, final SchemaContext
+            schemaContext, final DataSchemaContextTree dataSchemaContextTree) {
+        if (data == null || data.isEmpty()) {
+            return;
+        }
+        for (Entry<YangInstanceIdentifier, NormalizedNode<?, ?>> entry : data) {
+            if (!ControllerContext.getInstance().isNodeMixin(entry.getKey())) {
+                final Node node = createCreatedChangedDataChangeEventElement(doc, entry, operation, schemaContext,
+                        dataSchemaContextTree);
+                element.appendChild(node);
+            }
+        }
+    }
 
     /**
      * Creates changed event element from data.
@@ -342,6 +376,74 @@ public class ListenerAdapter implements DOMDataChangeListener {
         return dataChangeEventElement;
     }
 
+    private Node createCreatedChangedDataChangeEventElement(final Document doc, final Entry<YangInstanceIdentifier,
+            NormalizedNode<?, ?>> entry, final Operation operation, final SchemaContext
+            schemaContext, final DataSchemaContextTree dataSchemaContextTree) {
+        final Element dataChangeEventElement = doc.createElement("data-change-event");
+        final Element pathElement = doc.createElement("path");
+        final YangInstanceIdentifier path = entry.getKey();
+        addPathAsValueToElement(path, pathElement);
+        dataChangeEventElement.appendChild(pathElement);
+
+        final Element operationElement = doc.createElement("operation");
+        operationElement.setTextContent(operation.value);
+        dataChangeEventElement.appendChild(operationElement);
+
+        try {
+            final DOMResult domResult = writeNormalizedNode(entry.getValue(), path,
+                    schemaContext, dataSchemaContextTree);
+            final Node result = doc.importNode(domResult.getNode().getFirstChild(), true);
+            final Element dataElement = doc.createElement("data");
+            dataElement.appendChild(result);
+            dataChangeEventElement.appendChild(dataElement);
+        } catch (IOException e) {
+            LOG.error("Error in writer ", e);
+        } catch (XMLStreamException e) {
+            LOG.error("Error processing stream", e);
+        }
+
+        return dataChangeEventElement;
+    }
+
+    private static DOMResult writeNormalizedNode(final NormalizedNode<?,?> normalized, final
+        YangInstanceIdentifier path, final SchemaContext context, final DataSchemaContextTree dataSchemaContextTree) throws
+            IOException, XMLStreamException {
+        final XMLOutputFactory XML_FACTORY = XMLOutputFactory.newFactory();
+        final Document doc = XmlDocumentUtils.getDocument();
+        final DOMResult result = new DOMResult(doc);
+        NormalizedNodeWriter normalizedNodeWriter = null;
+        NormalizedNodeStreamWriter normalizedNodeStreamWriter = null;
+        XMLStreamWriter writer = null;
+        final SchemaPath nodePath;
+
+        if (normalized instanceof MapEntryNode || normalized instanceof UnkeyedListEntryNode) {
+            nodePath = dataSchemaContextTree.getChild(path).getDataSchemaNode().getPath();
+        } else {
+            nodePath = dataSchemaContextTree.getChild(path).getDataSchemaNode().getPath().getParent();
+        }
+
+        try {
+            writer = XML_FACTORY.createXMLStreamWriter(result);
+            normalizedNodeStreamWriter = XMLStreamNormalizedNodeStreamWriter.create(writer, context, nodePath);
+            normalizedNodeWriter = NormalizedNodeWriter.forStreamWriter(normalizedNodeStreamWriter);
+
+            normalizedNodeWriter.write(normalized);
+
+            normalizedNodeWriter.flush();
+        } finally {
+            if (normalizedNodeWriter != null) {
+                normalizedNodeWriter.close();
+            }
+            if (normalizedNodeStreamWriter != null) {
+                normalizedNodeStreamWriter.close();
+            }
+            if (writer != null) {
+                writer.close();
+            }
+        }
+
+        return result;
+    }
 
     /**
      * Adds path as value to element.
@@ -446,8 +548,7 @@ public class ListenerAdapter implements DOMDataChangeListener {
     /**
      * Sets {@link ListenerRegistration} registration.
      *
-     * @param registration
-     *            ListenerRegistration<DataChangeListener>
+     * @param registration DOMDataChangeListener registration
      */
     public void setRegistration(final ListenerRegistration<DOMDataChangeListener> registration) {
         this.registration = registration;
