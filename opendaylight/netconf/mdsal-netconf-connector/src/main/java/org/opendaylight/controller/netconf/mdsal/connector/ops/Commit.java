@@ -37,7 +37,7 @@ public class Commit extends AbstractSingletonNetconfOperation {
     protected Element handleWithNoSubsequentOperations(final Document document, final XmlElement operationElement) throws NetconfDocumentedException {
 
         boolean commitStatus = transactionProvider.commitTransaction();
-        LOG.trace("Transaction commited succesfuly {}", commitStatus);
+        LOG.trace("Commit completed successfully {}", commitStatus);
 
         return XmlUtil.createElement(document, XmlNetconfConstants.OK, Optional.<String>absent());
     }
