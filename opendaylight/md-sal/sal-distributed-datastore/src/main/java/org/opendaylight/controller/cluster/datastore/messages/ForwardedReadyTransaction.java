@@ -18,16 +18,13 @@ import org.opendaylight.controller.cluster.datastore.ReadWriteShardDataTreeTrans
 public class ForwardedReadyTransaction {
     private final String transactionID;
     private final ReadWriteShardDataTreeTransaction transaction;
-    private final boolean returnSerialized;
     private final boolean doImmediateCommit;
     private final short txnClientVersion;
 
     public ForwardedReadyTransaction(String transactionID, short txnClientVersion,
-            ReadWriteShardDataTreeTransaction transaction, boolean returnSerialized,
-            boolean doImmediateCommit) {
+            ReadWriteShardDataTreeTransaction transaction, boolean doImmediateCommit) {
         this.transactionID = Preconditions.checkNotNull(transactionID);
         this.transaction = Preconditions.checkNotNull(transaction);
-        this.returnSerialized = returnSerialized;
         this.txnClientVersion = txnClientVersion;
         this.doImmediateCommit = doImmediateCommit;
     }
@@ -38,10 +35,6 @@ public class ForwardedReadyTransaction {
 
     public ReadWriteShardDataTreeTransaction getTransaction() {
         return transaction;
-    }
-
-    public boolean isReturnSerialized() {
-        return returnSerialized;
     }
 
     public short getTxnClientVersion() {

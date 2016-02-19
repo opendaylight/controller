@@ -112,7 +112,7 @@ public class ShardWriteTransaction extends ShardTransaction {
         LOG.debug("readyTransaction : {}", transactionID);
 
         getShardActor().forward(new ForwardedReadyTransaction(transactionID, clientTxVersion,
-                transaction, returnSerialized, doImmediateCommit), getContext());
+                transaction, doImmediateCommit), getContext());
 
         // The shard will handle the commit from here so we're no longer needed - self-destruct.
         getSelf().tell(PoisonPill.getInstance(), getSelf());

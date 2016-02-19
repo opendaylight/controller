@@ -629,7 +629,7 @@ public class DistributedDataStoreRemotingIntegrationTest {
 
         ForwardedReadyTransaction forwardedReady = new ForwardedReadyTransaction("tx-1",
                 DataStoreVersions.CURRENT_VERSION, new ReadWriteShardDataTreeTransaction(
-                        Mockito.mock(ShardDataTreeTransactionParent.class), "tx-1", modification), true, true);
+                        Mockito.mock(ShardDataTreeTransactionParent.class), "tx-1", modification), true);
 
         carsFollowerShard.get().tell(forwardedReady, followerTestKit.getRef());
         Object resp = followerTestKit.expectMsgClass(Object.class);
@@ -649,7 +649,7 @@ public class DistributedDataStoreRemotingIntegrationTest {
 
         forwardedReady = new ForwardedReadyTransaction("tx-2",
                 DataStoreVersions.CURRENT_VERSION, new ReadWriteShardDataTreeTransaction(
-                        Mockito.mock(ShardDataTreeTransactionParent.class), "tx-2", modification), true, false);
+                        Mockito.mock(ShardDataTreeTransactionParent.class), "tx-2", modification), false);
 
         carsFollowerShard.get().tell(forwardedReady, followerTestKit.getRef());
         resp = followerTestKit.expectMsgClass(Object.class);
