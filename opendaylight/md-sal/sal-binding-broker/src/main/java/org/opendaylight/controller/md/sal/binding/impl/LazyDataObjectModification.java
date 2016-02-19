@@ -140,11 +140,12 @@ final class LazyDataObjectModification<T extends DataObject> implements DataObje
         switch(domData.getModificationType()) {
             case WRITE:
                 return DataObjectModification.ModificationType.WRITE;
+            case APPEARED:
             case SUBTREE_MODIFIED:
                 return DataObjectModification.ModificationType.SUBTREE_MODIFIED;
+            case DISAPPEARED:
             case DELETE:
                 return DataObjectModification.ModificationType.DELETE;
-
             default:
                 // TODO: Should we lie about modification type instead of exception?
                 throw new IllegalStateException("Unsupported DOM Modification type " + domData.getModificationType());
