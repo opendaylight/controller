@@ -75,11 +75,11 @@ public class BatchedModificationsTest {
 
         // Test with different params.
 
-        batched = new BatchedModifications("tx2", (short)10, null);
+        batched = new BatchedModifications("tx2", (short)10000, null);
 
         clone = (BatchedModifications) SerializationUtils.clone((Serializable) batched.toSerializable());
 
-        assertEquals("getVersion", 10, clone.getVersion());
+        assertEquals("getVersion", DataStoreVersions.CURRENT_VERSION, clone.getVersion());
         assertEquals("getTransactionID", "tx2", clone.getTransactionID());
         assertEquals("getTransactionChainID", "", clone.getTransactionChainID());
         assertEquals("isReady", false, clone.isReady());
