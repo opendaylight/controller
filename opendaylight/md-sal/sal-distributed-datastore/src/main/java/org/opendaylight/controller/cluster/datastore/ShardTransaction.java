@@ -44,21 +44,18 @@ public abstract class ShardTransaction extends AbstractUntypedActorWithMetering 
     private final ActorRef shardActor;
     private final ShardStats shardStats;
     private final String transactionID;
-    private final short clientTxVersion;
 
-    protected ShardTransaction(ActorRef shardActor, ShardStats shardStats, String transactionID,
-            short clientTxVersion) {
+    protected ShardTransaction(ActorRef shardActor, ShardStats shardStats, String transactionID) {
         super("shard-tx"); //actor name override used for metering. This does not change the "real" actor name
         this.shardActor = shardActor;
         this.shardStats = shardStats;
         this.transactionID = Preconditions.checkNotNull(transactionID);
-        this.clientTxVersion = clientTxVersion;
     }
 
     public static Props props(TransactionType type, AbstractShardDataTreeTransaction<?> transaction, ActorRef shardActor,
-            DatastoreContext datastoreContext, ShardStats shardStats, String transactionID, short txnClientVersion) {
+            DatastoreContext datastoreContext, ShardStats shardStats, String transactionID) {
         return Props.create(new ShardTransactionCreator(type, transaction, shardActor,
-           datastoreContext, shardStats, transactionID, txnClientVersion));
+           datastoreContext, shardStats, transactionID));
     }
 
     protected abstract AbstractShardDataTreeTransaction<?> getDOMStoreTransaction();
@@ -69,10 +66,6 @@ public abstract class ShardTransaction extends AbstractUntypedActorWithMetering 
 
     protected String getTransactionID() {
         return transactionID;
-    }
-
-    protected short getClientTxVersion() {
-        return clientTxVersion;
     }
 
     @Override
@@ -142,17 +135,15 @@ public abstract class ShardTransaction extends AbstractUntypedActorWithMetering 
         final DatastoreContext datastoreContext;
         final ShardStats shardStats;
         final String transactionID;
-        final short txnClientVersion;
         final TransactionType type;
 
         ShardTransactionCreator(TransactionType type, AbstractShardDataTreeTransaction<?> transaction, ActorRef shardActor,
-                DatastoreContext datastoreContext, ShardStats shardStats, String transactionID, short txnClientVersion) {
+                DatastoreContext datastoreContext, ShardStats shardStats, String transactionID) {
             this.transaction = Preconditions.checkNotNull(transaction);
             this.shardActor = shardActor;
             this.shardStats = shardStats;
             this.datastoreContext = datastoreContext;
             this.transactionID = Preconditions.checkNotNull(transactionID);
-            this.txnClientVersion = txnClientVersion;
             this.type = type;
         }
 
@@ -162,15 +153,15 @@ public abstract class ShardTransaction extends AbstractUntypedActorWithMetering 
             switch (type) {
             case READ_ONLY:
                 tx = new ShardReadTransaction(transaction, shardActor,
-                    shardStats, transactionID, txnClientVersion);
+                    shardStats, transactionID);
                 break;
             case READ_WRITE:
                 tx = new ShardReadWriteTransaction((ReadWriteShardDataTreeTransaction)transaction,
-                    shardActor, shardStats, transactionID, txnClientVersion);
+                    shardActor, shardStats, transactionID);
                 break;
             case WRITE_ONLY:
                 tx = new ShardWriteTransaction((ReadWriteShardDataTreeTransaction)transaction,
-                    shardActor, shardStats, transactionID, txnClientVersion);
+                    shardActor, shardStats, transactionID);
                 break;
             default:
                 throw new IllegalArgumentException("Unhandled transaction type " + type);
