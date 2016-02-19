@@ -25,7 +25,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <config.version>0.5.0-SNAPSHOT</config.version>
     <mdsal.version>1.4.0-SNAPSHOT</mdsal.version>
     <yangtools.version>1.0.0-SNAPSHOT</yangtools.version>
-    <jmxGeneratorPath>src/main/yang-gen-config</jmxGeneratorPath>
+    <jmxGeneratorPath>target/generated-sources/config-binding</jmxGeneratorPath>
     <config.file>src/main/config/default-config.xml</config.file>
   </properties>
 
