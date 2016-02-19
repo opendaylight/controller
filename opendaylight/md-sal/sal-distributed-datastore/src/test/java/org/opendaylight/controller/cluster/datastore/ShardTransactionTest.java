@@ -80,21 +80,12 @@ public class ShardTransactionTest extends AbstractActorTest {
     }
 
     private ActorRef newTransactionActor(TransactionType type, AbstractShardDataTreeTransaction<?> transaction, String name) {
-        return newTransactionActor(type, transaction, name, DataStoreVersions.CURRENT_VERSION);
-    }
-
-    private ActorRef newTransactionActor(TransactionType type, AbstractShardDataTreeTransaction<?> transaction, String name, short version) {
-        return newTransactionActor(type, transaction, null, name, version);
+        return newTransactionActor(type, transaction, null, name);
     }
 
     private ActorRef newTransactionActor(TransactionType type, AbstractShardDataTreeTransaction<?> transaction, ActorRef shard, String name) {
-        return newTransactionActor(type, transaction, null, name, DataStoreVersions.CURRENT_VERSION);
-    }
-
-    private ActorRef newTransactionActor(TransactionType type, AbstractShardDataTreeTransaction<?> transaction, ActorRef shard, String name,
-            short version) {
         Props props = ShardTransaction.props(type, transaction, shard != null ? shard : createShard(),
-                datastoreContext, shardStats, "txn", version);
+                datastoreContext, shardStats, "txn");
         return getSystem().actorOf(props, name);
     }
 
@@ -426,7 +417,7 @@ public class ShardTransactionTest extends AbstractActorTest {
     public void testNegativePerformingWriteOperationOnReadTransaction() throws Exception {
         final ActorRef shard = createShard();
         final Props props = ShardTransaction.props(TransactionType.READ_ONLY, readOnlyTransaction(), shard,
-                datastoreContext, shardStats, "txn", DataStoreVersions.CURRENT_VERSION);
+                datastoreContext, shardStats, "txn");
         final TestActorRef<ShardTransaction> transaction = TestActorRef.apply(props,getSystem());
 
         transaction.receive(new BatchedModifications("tx1", DataStoreVersions.CURRENT_VERSION, null),

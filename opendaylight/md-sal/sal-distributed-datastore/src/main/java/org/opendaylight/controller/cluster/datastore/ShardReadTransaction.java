@@ -30,8 +30,8 @@ public class ShardReadTransaction extends ShardTransaction {
     private final AbstractShardDataTreeTransaction<?> transaction;
 
     public ShardReadTransaction(AbstractShardDataTreeTransaction<?> transaction, ActorRef shardActor,
-            ShardStats shardStats, String transactionID, short clientTxVersion) {
-        super(shardActor, shardStats, transactionID, clientTxVersion);
+            ShardStats shardStats, String transactionID) {
+        super(shardActor, shardStats, transactionID);
         this.transaction = transaction;
     }
 

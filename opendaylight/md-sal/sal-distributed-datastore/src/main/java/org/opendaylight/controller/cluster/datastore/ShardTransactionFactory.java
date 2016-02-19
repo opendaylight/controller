@@ -38,7 +38,7 @@ class ShardTransactionActorFactory {
     }
 
     ActorRef newShardTransaction(TransactionType type, ShardTransactionIdentifier transactionID,
-            String transactionChainID, short clientVersion) {
+            String transactionChainID) {
         final AbstractShardDataTreeTransaction<?> transaction;
         switch (type) {
         case READ_ONLY:
@@ -58,7 +58,7 @@ class ShardTransactionActorFactory {
         }
 
         return actorContext.actorOf(ShardTransaction.props(type, transaction, shardActor, datastoreContext, shardMBean,
-                transactionID.getRemoteTransactionId(), clientVersion).withDispatcher(txnDispatcherPath),
+                transactionID.getRemoteTransactionId()).withDispatcher(txnDispatcherPath),
                 transactionID.toString());
     }
 }
