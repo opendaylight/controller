@@ -16,6 +16,7 @@ import java.util.HashSet;
 import java.util.Set;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.AbstractShardTest;
+import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 import org.opendaylight.controller.cluster.datastore.Shard;
 import org.opendaylight.controller.cluster.datastore.ShardTestKit;
 import org.opendaylight.controller.cluster.datastore.modification.MergeModification;
@@ -49,7 +50,7 @@ import org.opendaylight.yangtools.yang.data.impl.schema.tree.InMemoryDataTreeFac
 public class PreLithiumShardTest extends AbstractShardTest {
 
     private static CompositeModificationPayload newLegacyPayload(final Modification... mods) {
-        MutableCompositeModification compMod = new MutableCompositeModification();
+        MutableCompositeModification compMod = new MutableCompositeModification(DataStoreVersions.HELIUM_2_VERSION);
         for(Modification mod: mods) {
             compMod.addModification(mod);
         }
@@ -58,7 +59,7 @@ public class PreLithiumShardTest extends AbstractShardTest {
     }
 
     private static CompositeModificationByteStringPayload newLegacyByteStringPayload(final Modification... mods) {
-        MutableCompositeModification compMod = new MutableCompositeModification();
+        MutableCompositeModification compMod = new MutableCompositeModification(DataStoreVersions.HELIUM_2_VERSION);
         for(Modification mod: mods) {
             compMod.addModification(mod);
         }
