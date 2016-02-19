@@ -18,7 +18,7 @@ import org.opendaylight.controller.cluster.datastore.modification.MutableComposi
  *
  * @author Thomas Pantelis
  */
-public class BatchedModifications extends MutableCompositeModification implements SerializableMessage {
+public class BatchedModifications extends MutableCompositeModification {
     private static final long serialVersionUID = 1L;
 
     private boolean ready;
@@ -86,11 +86,6 @@ public class BatchedModifications extends MutableCompositeModification implement
         out.writeBoolean(ready);
         out.writeInt(totalMessagesSent);
         out.writeBoolean(doCommitOnReady);
-    }
-
-    @Override
-    public Object toSerializable() {
-        return this;
     }
 
     @Override
