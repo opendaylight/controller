@@ -301,7 +301,7 @@ public abstract class AbstractShardTest extends AbstractActorTest{
             String transactionID, short version, boolean doCommitOnReady) {
         return new ForwardedReadyTransaction(transactionID, version,
                 new ReadWriteShardDataTreeTransaction(newShardDataTreeTransactionParent(cohort), transactionID,
-                        mock(DataTreeModification.class)), true, doCommitOnReady);
+                        mock(DataTreeModification.class)), doCommitOnReady);
     }
 
     protected Object prepareReadyTransactionMessage(boolean remoteReadWriteTransaction, Shard shard, ShardDataTreeCohort cohort,
