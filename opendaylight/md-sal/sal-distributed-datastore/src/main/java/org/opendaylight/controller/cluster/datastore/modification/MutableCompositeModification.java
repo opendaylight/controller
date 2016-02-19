@@ -14,6 +14,7 @@ import java.io.ObjectOutput;
 import java.util.ArrayList;
 import java.util.List;
 import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
+import org.opendaylight.controller.cluster.datastore.messages.VersionedExternalizableMessage;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeInputOutput;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeInputStreamReader;
 import org.opendaylight.controller.cluster.datastore.utils.SerializationUtils;
@@ -25,18 +26,17 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification
  * MutableCompositeModification is just a mutable version of a
  * CompositeModification {@link org.opendaylight.controller.cluster.datastore.modification.MutableCompositeModification#addModification(Modification)}
  */
-public class MutableCompositeModification implements CompositeModification {
+public class MutableCompositeModification extends VersionedExternalizableMessage implements CompositeModification {
     private static final long serialVersionUID = 1L;
 
     private final List<Modification> modifications = new ArrayList<>();
-    private short version;
 
     public MutableCompositeModification() {
         this(DataStoreVersions.CURRENT_VERSION);
     }
 
     public MutableCompositeModification(short version) {
-        this.version = version;
+        super(version);
     }
 
     @Override
@@ -58,14 +58,6 @@ public class MutableCompositeModification implements CompositeModification {
         return COMPOSITE;
     }
 
-    public short getVersion() {
-        return version;
-    }
-
-    public void setVersion(short version) {
-        this.version = version;
-    }
-
     /**
      * Add a new Modification to the list of Modifications represented by this
      * composite
@@ -83,7 +75,7 @@ public class MutableCompositeModification implements CompositeModification {
 
     @Override
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-        version = in.readShort();
+        super.readExternal(in);
 
         int size = in.readInt();
 
@@ -96,15 +88,15 @@ public class MutableCompositeModification implements CompositeModification {
                 byte type = in.readByte();
                 switch(type) {
                 case Modification.WRITE:
-                    modifications.add(WriteModification.fromStream(in, version));
+                    modifications.add(WriteModification.fromStream(in, getVersion()));
                     break;
 
                 case Modification.MERGE:
-                    modifications.add(MergeModification.fromStream(in, version));
+                    modifications.add(MergeModification.fromStream(in, getVersion()));
                     break;
 
                 case Modification.DELETE:
-                    modifications.add(DeleteModification.fromStream(in, version));
+                    modifications.add(DeleteModification.fromStream(in, getVersion()));
                     break;
                 }
             }
@@ -115,7 +107,7 @@ public class MutableCompositeModification implements CompositeModification {
 
     @Override
     public void writeExternal(ObjectOutput out) throws IOException {
-        out.writeShort(version);
+        super.writeExternal(out);
 
         out.writeInt(modifications.size());
 
@@ -134,18 +126,21 @@ public class MutableCompositeModification implements CompositeModification {
     }
 
     @Override
-    @Deprecated
-    public Object toSerializable() {
-        PersistentMessages.CompositeModification.Builder builder =
-                PersistentMessages.CompositeModification.newBuilder();
+    protected Object newLegacySerializedInstance() {
+        if(getVersion() >= DataStoreVersions.LITHIUM_VERSION) {
+            return this;
+        } else {
+            PersistentMessages.CompositeModification.Builder builder =
+                    PersistentMessages.CompositeModification.newBuilder();
 
-        builder.setTimeStamp(System.nanoTime());
+            builder.setTimeStamp(System.nanoTime());
 
-        for (Modification m : modifications) {
-            builder.addModification((PersistentMessages.Modification) m.toSerializable());
+            for (Modification m : modifications) {
+                builder.addModification((PersistentMessages.Modification) m.toSerializable());
+            }
+
+            return builder.build();
         }
-
-        return builder.build();
     }
 
     public static MutableCompositeModification fromSerializable(Object serializable) {
