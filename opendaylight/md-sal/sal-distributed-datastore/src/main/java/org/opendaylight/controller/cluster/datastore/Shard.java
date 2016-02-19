@@ -18,6 +18,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -440,8 +441,15 @@ public class Shard extends RaftActor {
                 // TODO: what if this is not the first batch and leadership changed in between batched messages?
                 // We could check if the commitCoordinator already has a cached entry and forward all the previous
                 // batched modifications.
-                LOG.debug("{}: Forwarding BatchedModifications to leader {}", persistenceId(), leader);
-                leader.forward(batched, getContext());
+                Collection<BatchedModifications> newModifications = commitCoordinator.createForwardedBatchedModifications(
+                        batched, datastoreContext.getShardBatchedModificationCount());
+
+                LOG.debug("{}: Forwarding {} BatchedModifications to leader {}", persistenceId(),
+                        newModifications.size(), leader);
+
+                for(BatchedModifications bm: newModifications) {
+                    leader.forward(bm, getContext());
+                }
             }
         }
     }
