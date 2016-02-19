@@ -533,11 +533,10 @@ public class Shard extends RaftActor {
     }
 
     private ActorRef createTypedTransactionActor(int transactionType,
-            ShardTransactionIdentifier transactionId, String transactionChainId,
-            short clientVersion ) {
+            ShardTransactionIdentifier transactionId, String transactionChainId) {
 
         return transactionActorFactory.newShardTransaction(TransactionType.fromInt(transactionType),
-                transactionId, transactionChainId, clientVersion);
+                transactionId, transactionChainId);
     }
 
     private void createTransaction(CreateTransaction createTransaction) {
@@ -548,8 +547,7 @@ public class Shard extends RaftActor {
             }
 
             ActorRef transactionActor = createTransaction(createTransaction.getTransactionType(),
-                createTransaction.getTransactionId(), createTransaction.getTransactionChainId(),
-                createTransaction.getVersion());
+                createTransaction.getTransactionId(), createTransaction.getTransactionChainId());
 
             getSender().tell(new CreateTransactionReply(Serialization.serializedActorPath(transactionActor),
                     createTransaction.getTransactionId(), createTransaction.getVersion()).toSerializable(), getSelf());
@@ -559,7 +557,7 @@ public class Shard extends RaftActor {
     }
 
     private ActorRef createTransaction(int transactionType, String remoteTransactionId,
-            String transactionChainId, short clientVersion) {
+            String transactionChainId) {
 
 
         ShardTransactionIdentifier transactionId = new ShardTransactionIdentifier(remoteTransactionId);
@@ -569,7 +567,7 @@ public class Shard extends RaftActor {
         }
 
         ActorRef transactionActor = createTypedTransactionActor(transactionType, transactionId,
-                transactionChainId, clientVersion);
+                transactionChainId);
 
         return transactionActor;
     }
