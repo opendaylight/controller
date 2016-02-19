@@ -30,8 +30,8 @@ public class ShardWriteTransaction extends ShardTransaction {
     private final ReadWriteShardDataTreeTransaction transaction;
 
     public ShardWriteTransaction(ReadWriteShardDataTreeTransaction transaction, ActorRef shardActor,
-            ShardStats shardStats, String transactionID, short clientTxVersion) {
-        super(shardActor, shardStats, transactionID, clientTxVersion);
+            ShardStats shardStats, String transactionID) {
+        super(shardActor, shardStats, transactionID);
         this.transaction = transaction;
     }
 
@@ -75,7 +75,7 @@ public class ShardWriteTransaction extends ShardTransaction {
                             totalBatchedModificationsReceived, batched.getTotalMessagesSent()));
                 }
 
-                readyTransaction(false, batched.isDoCommitOnReady());
+                readyTransaction(false, batched.isDoCommitOnReady(), batched.getVersion());
             } else {
                 getSender().tell(new BatchedModificationsReply(batched.getModifications().size()), getSelf());
             }
@@ -106,12 +106,12 @@ public class ShardWriteTransaction extends ShardTransaction {
         }
     }
 
-    private void readyTransaction(boolean returnSerialized, boolean doImmediateCommit) {
+    private void readyTransaction(boolean returnSerialized, boolean doImmediateCommit, short clientTxVersion) {
         String transactionID = getTransactionID();
 
         LOG.debug("readyTransaction : {}", transactionID);
 
-        getShardActor().forward(new ForwardedReadyTransaction(transactionID, getClientTxVersion(),
+        getShardActor().forward(new ForwardedReadyTransaction(transactionID, clientTxVersion,
                 transaction, returnSerialized, doImmediateCommit), getContext());
 
         // The shard will handle the commit from here so we're no longer needed - self-destruct.
