@@ -7,8 +7,8 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
-import com.google.common.base.Preconditions;
 import akka.actor.ActorRef;
+import com.google.common.base.Preconditions;
 import java.util.concurrent.ExecutionException;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardTransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.CreateSnapshot;
@@ -51,7 +51,7 @@ class ShardSnapshotCohort implements RaftActorSnapshotCohort {
                 "createSnapshot" + ++createSnapshotTransactionCounter);
 
         ActorRef createSnapshotTransaction = transactionActorFactory.newShardTransaction(
-                TransactionType.READ_ONLY, transactionID, "", DataStoreVersions.CURRENT_VERSION);
+                TransactionType.READ_ONLY, transactionID, "");
 
         createSnapshotTransaction.tell(CreateSnapshot.INSTANCE, actorRef);
     }
