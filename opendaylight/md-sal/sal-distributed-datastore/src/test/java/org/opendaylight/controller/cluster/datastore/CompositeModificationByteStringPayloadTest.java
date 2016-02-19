@@ -27,7 +27,7 @@ public class CompositeModificationByteStringPayloadTest {
                         .containerNode(TestModel.TEST_QNAME));
 
         MutableCompositeModification compositeModification =
-                new MutableCompositeModification();
+                new MutableCompositeModification(DataStoreVersions.HELIUM_2_VERSION);
 
         compositeModification.addModification(writeModification);
 
