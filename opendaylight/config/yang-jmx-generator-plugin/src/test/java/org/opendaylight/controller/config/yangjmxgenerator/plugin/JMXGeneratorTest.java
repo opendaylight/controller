@@ -8,8 +8,6 @@
 package org.opendaylight.controller.config.yangjmxgenerator.plugin;
 
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -18,53 +16,35 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-
+import static org.opendaylight.controller.config.yangjmxgenerator.PackageTranslatorTest.EXPECTED_PACKAGE_PREFIX;
+import com.github.javaparser.JavaParser;
+import com.github.javaparser.ParseException;
+import com.github.javaparser.ast.CompilationUnit;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.io.Files;
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import org.apache.maven.project.MavenProject;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.compiler.IProblem;
-import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.ASTParser;
-import org.eclipse.jdt.core.dom.ASTVisitor;
-import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.FieldDeclaration;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.NormalAnnotation;
-import org.eclipse.jdt.core.dom.PackageDeclaration;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.config.api.DependencyResolver;
 import org.opendaylight.controller.config.api.DependencyResolverFactory;
 import org.opendaylight.controller.config.api.DynamicMBeanWithInstance;
-import org.opendaylight.controller.config.api.annotations.Description;
-import org.opendaylight.controller.config.api.annotations.RequireInterface;
-import org.opendaylight.controller.config.api.annotations.ServiceInterfaceAnnotation;
 import org.opendaylight.controller.config.spi.AbstractModule;
 import org.opendaylight.controller.config.spi.Module;
 import org.opendaylight.controller.config.spi.ModuleFactory;
 import org.opendaylight.controller.config.yangjmxgenerator.ConfigConstants;
-import org.opendaylight.controller.config.yangjmxgenerator.PackageTranslatorTest;
 import org.opendaylight.controller.config.yangjmxgenerator.ServiceInterfaceEntryTest;
 import org.osgi.framework.BundleContext;
 import org.xml.sax.ErrorHandler;
@@ -77,7 +57,7 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
 
     JMXGenerator jmxGenerator;
 
-    protected final HashMap<String, String> map = Maps.newHashMap();
+    protected final HashMap<String, String> map = new HashMap<>();
     protected File outputBaseDir;
     File generatedResourcesDir;
 
@@ -112,9 +92,7 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
     @Before
     public void setUp() {
         map.put(JMXGenerator.NAMESPACE_TO_PACKAGE_PREFIX + "1",
-                ConfigConstants.CONFIG_NAMESPACE
-                        + JMXGenerator.NAMESPACE_TO_PACKAGE_DIVIDER
-                        + PackageTranslatorTest.EXPECTED_PACKAGE_PREFIX);
+                ConfigConstants.CONFIG_NAMESPACE + JMXGenerator.NAMESPACE_TO_PACKAGE_DIVIDER + EXPECTED_PACKAGE_PREFIX);
         map.put(JMXGenerator.MODULE_FACTORY_FILE_BOOLEAN, "false");
         jmxGenerator = new JMXGenerator(new CodeWriter());
         jmxGenerator.setAdditionalConfig(map);
@@ -124,8 +102,7 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
         MavenProject project = mock(MavenProject.class);
         doReturn(generatorOutputPath).when(project).getBasedir();
         jmxGenerator.setMavenProject(project);
-        outputBaseDir = JMXGenerator.concatFolders(targetDir,
-                "generated-sources", "config");
+        outputBaseDir = JMXGenerator.concatFolders(targetDir, "generated-sources", "config");
     }
 
     @Test
@@ -160,7 +137,7 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
         }
     }
 
-    public static List<String> toFileNames(final Collection<File> files) {
+    private static List<String> toFileNames(final Collection<File> files) {
         List<String> result = new ArrayList<>();
         for (File f : files) {
             result.add(f.getName());
@@ -170,72 +147,53 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
     }
 
     @Test
-    public void generateSIEsTest() throws IOException {
+    public void generateSIEsTest() throws IOException, ParseException {
         Collection<File> files = jmxGenerator.generateSources(context,
-                outputBaseDir, Sets.newHashSet(threadsModule));
-        assertEquals(ServiceInterfaceEntryTest.expectedSIEFileNames,
-                toFileNames(files));
-
-        Map<String, ASTVisitor> verifiers = Maps.newHashMap();
-
-        for (File file : files) {
-            verifiers.put(file.getName(), new SieASTVisitor());
-        }
-
-        processGeneratedCode(files, verifiers);
+                outputBaseDir, Collections.singleton(threadsModule));
+        assertEquals(ServiceInterfaceEntryTest.expectedSIEFileNames, toFileNames(files));
 
         for (File file : files) {
             String fileName = file.getName();
-            SieASTVisitor verifier = (SieASTVisitor) verifiers.get(fileName);
+            SieASTVisitor verifier = new SieASTVisitor(EXPECTED_PACKAGE_PREFIX + ".threads", fileName);
+            verifyFile(file, verifier);
 
-            assertEquals(fileName.substring(0, fileName.length() - 5),
-                    verifier.type);
-            assertThat(
-                    verifier.extnds,
+            assertThat(verifier.extnds,
                     containsString("org.opendaylight.controller.config.api.annotations.AbstractServiceInterface"));
-            assertEquals(PackageTranslatorTest.EXPECTED_PACKAGE_PREFIX
-                    + ".threads", verifier.packageName);
             assertNotNull(verifier.javadoc);
 
-            if ("ThreadPoolServiceInterface.java".equals(fileName)) {
-                assertContains(verifier.descriptionAnotValue,
-                        "A simple pool of threads able to execute work.");
+            switch (fileName) {
+            case "ThreadPoolServiceInterface.java":
+                assertContains(verifier.descriptionAnotValue, "A simple pool of threads able to execute work.");
                 assertContains(verifier.sieAnnotValue, "threadpool");
-                assertContains(verifier.sieAnnotOsgiRegistrationType,
-                        PackageTranslatorTest.EXPECTED_PACKAGE_PREFIX
-                                + ".threadpool.ThreadPool.class");
-            } else if ("ScheduledThreadPoolServiceInterface.java"
-                    .equals(fileName)) {
+                assertContains(verifier.sieAnnotOsgiRegistrationType, EXPECTED_PACKAGE_PREFIX + ".threadpool.ThreadPool.class");
+                break;
+            case "ScheduledThreadPoolServiceInterface.java":
                 assertContains(verifier.extnds,
-                        PackageTranslatorTest.EXPECTED_PACKAGE_PREFIX
-                                + ".threads.ThreadPoolServiceInterface");
-                assertContains(
-                        verifier.descriptionAnotValue,
+                        EXPECTED_PACKAGE_PREFIX  + ".threads.ThreadPoolServiceInterface");
+                assertContains(verifier.descriptionAnotValue,
                         "An extension of the simple pool of threads able to schedule work to be executed at some point in time.");
                 assertContains(verifier.sieAnnotValue, "scheduled-threadpool");
                 assertContains(verifier.sieAnnotOsgiRegistrationType,
-                        PackageTranslatorTest.EXPECTED_PACKAGE_PREFIX
-                                + ".threadpool.ScheduledThreadPool.class");
-            } else if ("EventBusServiceInterface.java".equals(fileName)) {
-                assertContains(
-                        verifier.descriptionAnotValue,
+                        EXPECTED_PACKAGE_PREFIX + ".threadpool.ScheduledThreadPool.class");
+                break;
+            case "EventBusServiceInterface.java":
+                assertContains(verifier.descriptionAnotValue,
                         "Service representing an event bus. The service acts as message router between event producers and event consumers");
                 assertContains(verifier.sieAnnotValue, "eventbus");
-                assertContains(verifier.sieAnnotOsgiRegistrationType,
-                        "com.google.common.eventbus.EventBus.class");
-            } else if ("ThreadFactoryServiceInterface.java".equals(fileName)) {
-                assertContains(
-                        verifier.descriptionAnotValue,
+                assertContains(verifier.sieAnnotOsgiRegistrationType, "com.google.common.eventbus.EventBus.class");
+                break;
+            case "ThreadFactoryServiceInterface.java":
+                assertContains( verifier.descriptionAnotValue,
                         "Service representing a ThreadFactory instance. It is directly useful in Java world, where various library pieces need to create threads and you may want to inject a customized thread implementation.");
                 assertContains(verifier.sieAnnotValue, "threadfactory");
                 assertContains(verifier.sieAnnotOsgiRegistrationType,
                         "java.util.concurrent.ThreadFactory.class");
-
-            } else if ("ScheduledExecutorServiceServiceInterface.java"
-                    .equals(fileName)) {
+                break;
+            case "ScheduledExecutorServiceServiceInterface.java":
                 assertContains(verifier.sieAnnotOsgiRegistrationType,
                         "java.util.concurrent.ScheduledExecutorService.class");
-            } else {
+                break;
+            default:
                 fail("Unknown generated sie " + fileName);
             }
         }
@@ -247,8 +205,8 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
         map.put(JMXGenerator.MODULE_FACTORY_FILE_BOOLEAN, "randomValue");
         jmxGenerator.setAdditionalConfig(map);
 
-        Collection<File> files = jmxGenerator.generateSources(context,
-                outputBaseDir, Sets.newHashSet(bgpListenerJavaModule));
+        Collection<File> files = jmxGenerator.generateSources(context, outputBaseDir,
+            Collections.singleton(bgpListenerJavaModule));
 
         assertEquals(expectedGenerateMBEsListNames, toFileNames(files));
     }
@@ -259,196 +217,121 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
         map.put(JMXGenerator.MODULE_FACTORY_FILE_BOOLEAN, "randomValue");
         jmxGenerator.setAdditionalConfig(map);
 
-        Collection<File> files = jmxGenerator.generateSources(context,
-                outputBaseDir, Sets.newHashSet(threadsJavaModule));
+        Collection<File> files = jmxGenerator.generateSources(context, outputBaseDir,
+            Collections.singleton(threadsJavaModule));
 
         assertEquals(expectedModuleFileNames, toFileNames(files));
 
-        Map<String, ASTVisitor> verifiers = Maps.newHashMap();
-
-        Collection<File> xmlFiles = Collections2.filter(files,
-                new Predicate<File>() {
-
-                    @Override
-                    public boolean apply(final File input) {
-                        return input.getName().endsWith("xml");
-                    }
-                });
-
-        Collection<File> javaFiles = Collections2.filter(files,
-                new Predicate<File>() {
-
-                    @Override
-                    public boolean apply(final File input) {
-                        return input.getName().endsWith("java");
-                    }
-                });
-
-        MbeASTVisitor abstractDynamicThreadPoolModuleVisitor = null;
-        MbeASTVisitor asyncEventBusModuleMXBeanVisitor = null;
-        MbeASTVisitor abstractNamingThreadFactoryModuleFactoryVisitor = null;
-        MbeASTVisitor asyncEventBusModuleVisitor = null;
-        MbeASTVisitor eventBusModuleFactoryVisitor = null;
-
-        for (File file : javaFiles) {
-            String name = file.getName();
-            MbeASTVisitor visitor = new MbeASTVisitor();
-            verifiers.put(name, visitor);
-            if (name.equals("AbstractDynamicThreadPoolModule.java")) {
-                abstractDynamicThreadPoolModuleVisitor = visitor;
+        for (File file : files) {
+            final String name = file.getName();
+            if (!name.endsWith("java")) {
+                continue;
             }
-            if (name.equals("AsyncEventBusModuleMXBean.java")) {
-                asyncEventBusModuleMXBeanVisitor = visitor;
-            }
-            if (name.equals("AbstractNamingThreadFactoryModuleFactory.java")) {
-                abstractNamingThreadFactoryModuleFactoryVisitor = visitor;
-            }
-            if (name.equals("AsyncEventBusModule.java")) {
-                asyncEventBusModuleVisitor = visitor;
-            }
-            if (name.equals("EventBusModuleFactory.java")) {
-                eventBusModuleFactoryVisitor = visitor;
+
+            MbeASTVisitor visitor = new MbeASTVisitor(EXPECTED_PACKAGE_PREFIX + ".threads.java", name);
+
+            verifyFile(file, visitor);
+
+            switch (name) {
+            case "AbstractDynamicThreadPoolModule.java":
+                assertAbstractDynamicThreadPoolModule(visitor);
+                break;
+            case "AsyncEventBusModuleMXBean.java":
+                assertEquals("Incorrenct number of generated methods", 4, visitor.methods.size());
+                break;
+            case "AbstractNamingThreadFactoryModuleFactory.java":
+                assertAbstractNamingThreadFactoryModuleFactory(visitor);
+                break;
+            case "AsyncEventBusModule.java":
+                assertContains(visitor.extnds, EXPECTED_PACKAGE_PREFIX + ".threads.java.AbstractAsyncEventBusModule");
+                visitor.assertFields(0);
+                assertEquals("Incorrenct number of generated methods", 2, visitor.methods.size());
+                visitor.assertConstructors(2);
+                visitor.assertMethodDescriptions(0);
+                visitor.assertMethodJavadocs(0);
+                break;
+            case "EventBusModuleFactory.java":
+                assertContains(visitor.extnds,
+                    EXPECTED_PACKAGE_PREFIX + ".threads.java.AbstractEventBusModuleFactory");
+                visitor.assertFields(0);
+                assertEquals("Incorrenct number of generated methods", 0, visitor.methods.size());
+                visitor.assertConstructors(0);
+                visitor.assertMethodDescriptions(0);
+                visitor.assertMethodJavadocs(0);
+                break;
             }
         }
 
-        processGeneratedCode(javaFiles, verifiers);
+        verifyXmlFiles(Collections2.filter(files, new Predicate<File>() {
+            @Override
+            public boolean apply(final File input) {
+                return input.getName().endsWith("xml");
+            }
+        }));
 
-        assertAbstractDynamicThreadPoolModule(abstractDynamicThreadPoolModuleVisitor);
-        assertAsyncEventBusModuleMXBean(asyncEventBusModuleMXBeanVisitor);
-        assertAbstractNamingThreadFactoryModuleFactory(abstractNamingThreadFactoryModuleFactoryVisitor);
-        assertAsyncEventBusModule(asyncEventBusModuleVisitor);
-        assertEventBusModuleFactory(eventBusModuleFactoryVisitor);
-
-        verifyXmlFiles(xmlFiles);
         // verify ModuleFactory file
-        File moduleFactoryFile = JMXGenerator.concatFolders(
-                generatedResourcesDir, "META-INF", "services",
+        File moduleFactoryFile = JMXGenerator.concatFolders(generatedResourcesDir, "META-INF", "services",
                 ModuleFactory.class.getName());
-        assertThat(moduleFactoryFile.exists(), is(true));
-        Set<String> lines = Sets.newHashSet(Files
-                .readLines(moduleFactoryFile, StandardCharsets.UTF_8));
-        Set<String> expectedLines = Sets.newHashSet(//
-                PackageTranslatorTest.EXPECTED_PACKAGE_PREFIX
-                        + ".threads.java.EventBusModuleFactory",//
-                PackageTranslatorTest.EXPECTED_PACKAGE_PREFIX
-                        + ".threads.java.AsyncEventBusModuleFactory", //
-                PackageTranslatorTest.EXPECTED_PACKAGE_PREFIX
-                        + ".threads.java.DynamicThreadPoolModuleFactory",//
-                PackageTranslatorTest.EXPECTED_PACKAGE_PREFIX
-                        + ".threads.java.NamingThreadFactoryModuleFactory", //
-                PackageTranslatorTest.EXPECTED_PACKAGE_PREFIX
-                        + ".threads.java.ThreadPoolRegistryImplModuleFactory");
+        assertTrue(moduleFactoryFile.exists());
+        Set<String> lines = ImmutableSet.copyOf(Files.readLines(moduleFactoryFile, StandardCharsets.UTF_8));
+        Set<String> expectedLines = ImmutableSet.of(
+                EXPECTED_PACKAGE_PREFIX + ".threads.java.EventBusModuleFactory",
+                EXPECTED_PACKAGE_PREFIX + ".threads.java.AsyncEventBusModuleFactory",
+                EXPECTED_PACKAGE_PREFIX + ".threads.java.DynamicThreadPoolModuleFactory",
+                EXPECTED_PACKAGE_PREFIX + ".threads.java.NamingThreadFactoryModuleFactory",
+                EXPECTED_PACKAGE_PREFIX + ".threads.java.ThreadPoolRegistryImplModuleFactory");
 
-
-        assertThat(lines, equalTo(expectedLines));
-
+        assertEquals(expectedLines, lines);
     }
 
-    private void verifyXmlFiles(final Collection<File> xmlFiles) throws Exception {
+    private static void verifyXmlFiles(final Collection<File> xmlFiles) throws Exception {
         ErrorHandler errorHandler = new ErrorHandler() {
 
             @Override
             public void warning(final SAXParseException exception)
                     throws SAXException {
-                fail("Generated blueprint xml is not well formed "
-                        + exception.getMessage());
+                fail("Generated blueprint xml is not well formed " + exception.getMessage());
             }
 
             @Override
             public void fatalError(final SAXParseException exception)
                     throws SAXException {
-                fail("Generated blueprint xml is not well formed "
-                        + exception.getMessage());
+                fail("Generated blueprint xml is not well formed " + exception.getMessage());
             }
 
             @Override
             public void error(final SAXParseException exception) throws SAXException {
-                fail("Generated blueprint xml is not well formed "
-                        + exception.getMessage());
+                fail("Generated blueprint xml is not well formed "  + exception.getMessage());
             }
         };
 
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        factory.setValidating(false);
+        factory.setNamespaceAware(true);
+
         for (File file : xmlFiles) {
-            DocumentBuilderFactory factory = DocumentBuilderFactory
-                    .newInstance();
-            factory.setValidating(false);
-            factory.setNamespaceAware(true);
-
             DocumentBuilder builder = factory.newDocumentBuilder();
-
             builder.setErrorHandler(errorHandler);
             builder.parse(new InputSource(file.getPath()));
         }
-
     }
 
-    private void assertEventBusModuleFactory(final MbeASTVisitor visitor) {
-        assertEquals(PackageTranslatorTest.EXPECTED_PACKAGE_PREFIX
-                + ".threads.java", visitor.packageName);
-        assertEquals("EventBusModuleFactory", visitor.type);
-        assertContains(visitor.extnds,
-                PackageTranslatorTest.EXPECTED_PACKAGE_PREFIX
-                        + ".threads.java.AbstractEventBusModuleFactory");
+    private static void assertAbstractNamingThreadFactoryModuleFactory( final MbeASTVisitor visitor) {
+        assertContains(visitor.implmts, "org.opendaylight.controller.config.spi.ModuleFactory");
 
-        assertEquals(0, visitor.fieldDeclarations.size());
-
-        assertEquals("Incorrenct number of generated methods", 0,
-                visitor.methods.size());
-        assertEquals("Incorrenct number of generated constructors", 0,
-                visitor.constructors.size());
-        assertEquals("Incorrenct number of generated method descriptions", 0,
-                visitor.methodDescriptions.size());
-        assertEquals("Incorrenct number of generated method javadoc", 0,
-                visitor.methodJavadoc.size());
-    }
-
-    private void assertAsyncEventBusModule(final MbeASTVisitor visitor) {
-        assertEquals(PackageTranslatorTest.EXPECTED_PACKAGE_PREFIX
-                + ".threads.java", visitor.packageName);
-        assertEquals("AsyncEventBusModule", visitor.type);
-        assertContains(visitor.extnds,
-                PackageTranslatorTest.EXPECTED_PACKAGE_PREFIX
-                        + ".threads.java.AbstractAsyncEventBusModule");
-
-        assertEquals(0, visitor.fieldDeclarations.size());
-
-        assertEquals("Incorrenct number of generated methods", 2,
-                visitor.methods.size());
-        assertEquals("Incorrenct number of generated constructors", 2,
-                visitor.constructors.size());
-        assertEquals("Incorrenct number of generated method descriptions", 0,
-                visitor.methodDescriptions.size());
-        assertEquals("Incorrenct number of generated method javadoc", 0,
-                visitor.methodJavadoc.size());
-    }
-
-    private void assertAbstractNamingThreadFactoryModuleFactory(
-            final MbeASTVisitor visitor) {
-        assertEquals(PackageTranslatorTest.EXPECTED_PACKAGE_PREFIX
-                + ".threads.java", visitor.packageName);
-        assertEquals("AbstractNamingThreadFactoryModuleFactory", visitor.type);
-        assertContains(visitor.implmts,
-                "org.opendaylight.controller.config.spi.ModuleFactory");
-        Set<String> fieldDeclarations = visitor.fieldDeclarations;
-        assertDeclaredField(fieldDeclarations,
-                "public static final java.lang.String NAME=\"threadfactory-naming\"");
-        assertDeclaredField(
-                fieldDeclarations,
+        visitor.assertFields(2);
+        visitor.assertField("public static final java.lang.String NAME = \"threadfactory-naming\"");
+        visitor.assertField(
                 "private static final java.util.Set<Class<? extends org.opendaylight.controller.config.api.annotations.AbstractServiceInterface>> serviceIfcs");
 
-        assertEquals(2, fieldDeclarations.size());
-
         assertFactoryMethods(visitor.methods, 9);
-        assertEquals("Incorrenct number of generated method descriptions", 0,
-                visitor.methodDescriptions.size());
-        assertEquals("Incorrenct number of generated method javadoc", 0,
-                visitor.methodJavadoc.size());
-
+        visitor.assertMethodDescriptions(0);
+        visitor.assertMethodJavadocs(0);
     }
 
-    private void assertFactoryMethods(final Set<String> methods, final int expectedSize) {
+    private static void assertFactoryMethods(final Set<String> methods, final int expectedSize) {
 
-        List<ArgumentAssertion> args = Lists.newArrayList();
+        List<ArgumentAssertion> args = new ArrayList<>();
         ArgumentAssertion oldInstanceArg = new ArgumentAssertion(DynamicMBeanWithInstance.class.getCanonicalName(), "old");
         ArgumentAssertion instanceNameArg = new ArgumentAssertion(String.class.getSimpleName(), "instanceName");
         ArgumentAssertion dependencyResolverArg = new ArgumentAssertion(DependencyResolver.class.getCanonicalName(), "dependencyResolver");
@@ -489,257 +372,55 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
         assertMethodPresent(methods, new MethodAssertion("boolean", "isModuleImplementingServiceInterface", args));
 
         assertEquals(methods.size(), expectedSize);
-
     }
 
-    private void assertMethodPresent(final Set<String> methods, final MethodAssertion methodAssertion) {
+    private static void assertMethodPresent(final Set<String> methods, final MethodAssertion methodAssertion) {
         assertTrue(String.format("Generated methods did not contain %s, generated methods: %s",
                 methodAssertion.toString(), methods), methods.contains(methodAssertion.toString()));
     }
 
-    private void assertAsyncEventBusModuleMXBean(final MbeASTVisitor visitor) {
-        assertEquals(PackageTranslatorTest.EXPECTED_PACKAGE_PREFIX
-                + ".threads.java", visitor.packageName);
-        assertEquals("AsyncEventBusModuleMXBean", visitor.type);
-
-        assertEquals("Incorrenct number of generated methods", 4,
-                visitor.methods.size());
-
-    }
-
-    private void assertAbstractDynamicThreadPoolModule(final MbeASTVisitor visitor) {
-        assertEquals(PackageTranslatorTest.EXPECTED_PACKAGE_PREFIX
-                + ".threads.java", visitor.packageName);
+    private static void assertAbstractDynamicThreadPoolModule(final MbeASTVisitor visitor) {
         assertNotNull(visitor.javadoc);
-        assertContains(visitor.descriptionAnotValue,
-                "threadpool-dynamic description");
-        assertEquals("AbstractDynamicThreadPoolModule", visitor.type);
+        assertContains(visitor.descriptionAnotValue, "threadpool-dynamic description");
         assertContains(visitor.implmts,
-                PackageTranslatorTest.EXPECTED_PACKAGE_PREFIX
-                        + ".threads.java.DynamicThreadPoolModuleMXBean",
-                PackageTranslatorTest.EXPECTED_PACKAGE_PREFIX
-                        + ".threads.ScheduledThreadPoolServiceInterface",
-                PackageTranslatorTest.EXPECTED_PACKAGE_PREFIX
-                        + ".threads.ThreadPoolServiceInterface");
+                EXPECTED_PACKAGE_PREFIX + ".threads.java.DynamicThreadPoolModuleMXBean",
+                EXPECTED_PACKAGE_PREFIX + ".threads.ScheduledThreadPoolServiceInterface",
+                EXPECTED_PACKAGE_PREFIX + ".threads.ThreadPoolServiceInterface");
         assertContains(visitor.extnds, AbstractModule.class.getCanonicalName());
-        assertEquals(2, visitor.constructors.size());
-        Set<String> fieldDeclarations = visitor.fieldDeclarations;
-        assertDeclaredField(fieldDeclarations,
-                "private java.lang.Long maximumSize");
-        assertDeclaredField(fieldDeclarations,
-                "private javax.management.ObjectName threadfactory");
-        assertDeclaredField(fieldDeclarations,
-                "private java.util.concurrent.ThreadFactory threadfactoryDependency");
-        assertDeclaredField(fieldDeclarations,
-                "private java.lang.Long keepAlive=new java.lang.Long(\"10\")");
-        assertDeclaredField(fieldDeclarations,
-                "private java.lang.Long coreSize");
-        assertDeclaredField(fieldDeclarations, "private byte[] binary");
-        assertEquals(17, fieldDeclarations.size());
+        visitor.assertConstructors(2);
+        visitor.assertFields(17);
+        visitor.assertField("private java.lang.Long maximumSize");
+        visitor.assertField("private javax.management.ObjectName threadfactory");
+        visitor.assertField("private java.util.concurrent.ThreadFactory threadfactoryDependency");
+        visitor.assertField("private java.lang.Long keepAlive = new java.lang.Long(\"10\")");
+        visitor.assertField("private java.lang.Long coreSize");
+        visitor.assertField("private byte[] binary");
 
         assertEquals(1, visitor.requireIfc.size());
         String reqIfc = visitor.requireIfc.get("setThreadfactory");
         assertNotNull("Missing generated setter for threadfactory", reqIfc);
-        assertContains(reqIfc, PackageTranslatorTest.EXPECTED_PACKAGE_PREFIX
-                + ".threads.ThreadFactoryServiceInterface");
+        assertContains(reqIfc, EXPECTED_PACKAGE_PREFIX + ".threads.ThreadFactoryServiceInterface");
 
-        assertEquals("Incorrenct number of generated methods", 26,
-                visitor.methods.size());
-        assertEquals("Incorrenct number of generated method descriptions", 3,
-                visitor.methodDescriptions.size());
-        assertEquals("Incorrenct number of generated method javadoc", 3,
-                visitor.methodJavadoc.size());
-        assertNotNull("Missing javadoc for setMaximumSize method " + visitor.methodJavadoc,
-                visitor.methodJavadoc.get("void setMaximumSize(java.lang.Long maximumSize)"));
-    }
-
-    private void assertDeclaredField(final Set<String> fieldDeclarations,
-            final String declaration) {
-        assertTrue("Missing field " + declaration + ", got: "
-                + fieldDeclarations,
-                fieldDeclarations.contains(declaration + ";\n"));
-    }
-
-    private static class SieASTVisitor extends ASTVisitor {
-        protected String packageName, descriptionAnotValue, sieAnnotValue,
-                sieAnnotOsgiRegistrationType, type, extnds, javadoc;
-        protected Map<String, String> methodDescriptions = Maps.newHashMap();
-
-        @Override
-        public boolean visit(final PackageDeclaration node) {
-            packageName = node.getName().toString();
-            return super.visit(node);
-        }
-
-        @Override
-        public boolean visit(final NormalAnnotation node) {
-            if (node.getTypeName().toString()
-                    .equals(Description.class.getCanonicalName())) {
-                if (node.getParent() instanceof TypeDeclaration) {
-                    descriptionAnotValue = node.values().get(0).toString();
-                } else if (node.getParent() instanceof MethodDeclaration) {
-                    String descr = node.values().get(0).toString();
-                    methodDescriptions.put(((MethodDeclaration) node
-                            .getParent()).getName().toString(), descr);
-                }
-            } else if (node
-                    .getTypeName()
-                    .toString()
-                    .equals(ServiceInterfaceAnnotation.class.getCanonicalName())) {
-                String text1 = node.values().get(0).toString();
-                String text2 = node.values().get(1).toString();
-                if (text1.contains("value")) {
-                    sieAnnotValue = text1;
-                    sieAnnotOsgiRegistrationType = text2;
-                } else {
-                    sieAnnotValue = text2;
-                    sieAnnotOsgiRegistrationType = text1;
-                }
-            }
-            return super.visit(node);
-        }
-
-        @Override
-        public boolean visit(final TypeDeclaration node) {
-            javadoc = node.getJavadoc() == null ? null : node.getJavadoc()
-                    .toString();
-            type = node.getName().toString();
-            List<?> superIfcs = node.superInterfaceTypes();
-            extnds = superIfcs != null && !superIfcs.isEmpty() ? superIfcs
-                    .toString() : null;
-            return super.visit(node);
-        }
-    }
-
-    private static class MbeASTVisitor extends SieASTVisitor {
-        private String implmts;
-        private final Set<String> fieldDeclarations = Sets.newHashSet();
-        private final Set<String> constructors = Sets.newHashSet();
-        private final Set<String> methods = new HashSet<String>();
-        private final Map<String, String> requireIfc = Maps.newHashMap();
-        private final Map<String, String> methodJavadoc = Maps.newHashMap();
-
-        @Override
-        public boolean visit(final NormalAnnotation node) {
-            boolean result = super.visit(node);
-            if (node.getTypeName().toString()
-                    .equals(RequireInterface.class.getCanonicalName())
-                    && node.getParent() instanceof MethodDeclaration) {
-                // remember only top level description annotation
-                String reqVal = node.values().get(0).toString();
-                requireIfc.put(((MethodDeclaration) node.getParent()).getName()
-                        .toString(), reqVal);
-            }
-            return result;
-        }
-
-        @Override
-        public boolean visit(final FieldDeclaration node) {
-            fieldDeclarations.add(node.toString());
-            return super.visit(node);
-        }
-
-        @Override
-        public boolean visit(final MethodDeclaration node) {
-            if (node.isConstructor()) {
-                constructors.add(node.toString());
-            } else {
-                String methodSignature = node.getReturnType2() + " " + node.getName() + "(";
-                boolean first = true;
-                for (Object o : node.parameters()) {
-                    if (first){
-                        first = false;
-                    } else {
-                        methodSignature += ",";
-                    }
-                    methodSignature += o.toString();
-                }
-                methodSignature += ")";
-                methods.add(methodSignature);
-                if (node.getJavadoc() != null) {
-                    methodJavadoc.put(methodSignature, node.getJavadoc().toString());
-                }
-            }
-            return super.visit(node);
-        }
-
-        @Override
-        public boolean visit(final TypeDeclaration node) {
-            boolean visit = super.visit(node);
-            List<?> superIfcs = node.superInterfaceTypes();
-            implmts = superIfcs != null && !superIfcs.isEmpty() ? superIfcs
-                    .toString() : null;
-            extnds = node.getSuperclassType() == null ? null : node
-                    .getSuperclassType().toString();
-            return visit;
-        }
+        assertEquals("Incorrenct number of generated methods", 26, visitor.methods.size());
+        visitor.assertMethodDescriptions(3);
+        visitor.assertMethodJavadocs(3);
+        visitor.assertMethodJavadoc("setMaximumSize", "void setMaximumSize(java.lang.Long maximumSize)");
 
     }
 
-    private void assertContains(final String source, final String... contained) {
+    private static void assertContains(final String source, final String... contained) {
         for (String string : contained) {
             assertThat(source, containsString(string));
         }
     }
 
-    private void processGeneratedCode(final Collection<File> files,
-            final Map<String, ASTVisitor> verifiers) throws IOException {
-        ASTParser parser = ASTParser.newParser(AST.JLS3);
-        Map<?, ?> options = JavaCore.getOptions();
-        JavaCore.setComplianceOptions(JavaCore.VERSION_1_7, options);
-        parser.setCompilerOptions(options);
-
-        parser.setKind(ASTParser.K_COMPILATION_UNIT);
-
-        for (File file : files) {
-            char[] source = readFileAsChars(file);
-            parser.setSource(source);
-            parser.setResolveBindings(true);
-
-            CompilationUnit cu = (CompilationUnit) parser.createAST(null);
-            // Check for compilation problems in generated file
-            for (IProblem c : cu.getProblems()) {
-                // 1610613332 = Syntax error, annotations are only available if
-                // source level is 5.0
-                if (c.getID() == 1610613332) {
-                    continue;
-                }
-                // 1610613332 = Syntax error, parameterized types are only
-                // available if source level is 5.0
-                if (c.getID() == 1610613329) {
-                    continue;
-                }
-                if (c.getID() == 1610613328) {
-                    continue;
-                }
-                fail("Error in generated source code " + file + ":"
-                        + c.getSourceLineNumber() + " id: " + c.getID() + " message:"  + c.toString());
-            }
-
-            ASTVisitor visitor = verifiers.get(file.getName());
-            if (visitor == null) {
-                fail("Unknown generated file " + file.getName());
-            }
-            cu.accept(visitor);
-
-        }
+    private static void verifyFile(final File file, final AbstractVerifier verifier) throws ParseException, IOException {
+        final CompilationUnit cu = JavaParser.parse(file);
+        cu.accept(verifier, null);
+        verifier.verify();
     }
 
-    public static char[] readFileAsChars(final File file) throws IOException {
-        List<String> readLines = Files
-                .readLines(file, Charset.forName("utf-8"));
-        char[] retVal = new char[0];
-        for (String string : readLines) {
-            char[] line = string.toCharArray();
-            int beforeLength = retVal.length;
-            retVal = Arrays.copyOf(retVal, retVal.length + line.length + 1);
-            System.arraycopy(line, 0, retVal, beforeLength, line.length);
-            retVal[retVal.length - 1] = '\n';
-        }
-        return retVal;
-    }
-
-    private static class MethodAssertion extends ArgumentAssertion{
+    private static class MethodAssertion extends ArgumentAssertion {
 
         private final List<ArgumentAssertion> arguments;
 
@@ -764,7 +445,7 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
                 sb.append(argument.type).append(' ');
                 sb.append(argument.name);
                 if(++i != arguments.size()) {
-                    sb.append(',');
+                    sb.append(", ");
                 }
             }
             sb.append(')');

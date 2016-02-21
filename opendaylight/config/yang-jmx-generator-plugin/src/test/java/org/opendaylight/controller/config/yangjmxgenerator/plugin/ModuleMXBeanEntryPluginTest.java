@@ -12,7 +12,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
-
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -147,8 +146,7 @@ public class ModuleMXBeanEntryPluginTest extends ModuleMXBeanEntryTest {
         }
     }
 
-    private Method findFirstMethodByName(List<? extends Method> methods,
-            String name) {
+    private static Method findFirstMethodByName(final List<? extends Method> methods, final String name) {
         for (Method ms : methods) {
             if (name.equals(ms.getName())) {
                 return ms;

@@ -449,7 +449,7 @@ public class TemplateFactory {
                         Collections.singletonList(new Annotation("Override", Collections.<Parameter>emptyList())), equalsBodyBuilder.toString());
             }
 
-            private MethodDefinition getHash(final Map<String, AttributeIfc> attrs) {
+            private static MethodDefinition getHash(final Map<String, AttributeIfc> attrs) {
                 final StringBuilder hashBodyBuilder = new StringBuilder(
                         "        return java.util.Objects.hash(");
                 for (AttributeIfc s : attrs.values()) {

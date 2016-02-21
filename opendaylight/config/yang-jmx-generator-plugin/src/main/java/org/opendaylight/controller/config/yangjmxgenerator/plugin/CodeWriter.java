@@ -43,7 +43,7 @@ final class CodeWriter {
     private static final Logger LOG = LoggerFactory.getLogger(CodeWriter.class);
     private static final Optional<String> COPYRIGHT = StringUtil.loadCopyright();
 
-    public File writeSie(ServiceInterfaceEntry sie, File outputBaseDir) {
+    public File writeSie(final ServiceInterfaceEntry sie, final File outputBaseDir) {
         try {
             GeneralInterfaceTemplate generalInterfaceTemplate = TemplateFactory.serviceInterfaceFromSie(sie);
             GeneratedObject go = new GenericGeneratedObjectFactory().toGeneratedObject(generalInterfaceTemplate, COPYRIGHT);
@@ -56,8 +56,8 @@ final class CodeWriter {
         }
     }
 
-    public List<File> writeMbe(ModuleMXBeanEntry mbe, File targetBaseDir,
-                               File mainBaseDir) {
+    public List<File> writeMbe(final ModuleMXBeanEntry mbe, final File targetBaseDir,
+                               final File mainBaseDir) {
         try {
             List<File> generatedFiles = Lists.newArrayList();
 
@@ -117,7 +117,8 @@ final class CodeWriter {
         }
     }
 
-    private List<File> persistGeneratedObjects(File targetBaseDir, File mainBaseDir, Map<GeneratedObject, Boolean> gos) throws IOException {
+    private static List<File> persistGeneratedObjects(final File targetBaseDir, final File mainBaseDir,
+            final Map<GeneratedObject, Boolean> gos) throws IOException {
         List<File> generatedFiles = new ArrayList<>();
         for (Entry<GeneratedObject, Boolean> entry : gos.entrySet()) {
             boolean overwrite = entry.getValue();
@@ -136,7 +137,7 @@ final class CodeWriter {
         return generatedFiles;
     }
 
-    private List<FtlTemplate> getRuntimeBeanFtlTemplates(Collection<RuntimeBeanEntry> runtimeBeans) {
+    private static List<FtlTemplate> getRuntimeBeanFtlTemplates(final Collection<RuntimeBeanEntry> runtimeBeans) {
         if (runtimeBeans.isEmpty()) {
             return Collections.emptyList();
         }

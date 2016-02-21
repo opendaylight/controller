@@ -12,13 +12,11 @@ import org.junit.Before;
 import org.opendaylight.controller.config.yangjmxgenerator.AbstractYangTest;
 
 public abstract class AbstractGeneratorTest extends AbstractYangTest {
-    private static final File GENERATOR_OUTPUT_PATH_ROOT = new File(
-            "target/testgen");
+    private static final File GENERATOR_OUTPUT_PATH_ROOT = new File("target/testgen");
     protected final File generatorOutputPath;
 
     public AbstractGeneratorTest() {
-        generatorOutputPath = new File(GENERATOR_OUTPUT_PATH_ROOT, getClass()
-                .getSimpleName());
+        generatorOutputPath = new File(GENERATOR_OUTPUT_PATH_ROOT, getClass().getSimpleName());
     }
 
     @Before
@@ -26,10 +24,10 @@ public abstract class AbstractGeneratorTest extends AbstractYangTest {
         deleteFolder(generatorOutputPath);
     }
 
-    public void deleteFolder(File folder) {
+    public void deleteFolder(final File folder) {
         File[] files = folder.listFiles();
         if (files != null) {
-            for (File f: files) {
+            for (File f : files) {
                 if (f.isDirectory()) {
                     deleteFolder(f);
                 } else {
@@ -39,5 +37,4 @@ public abstract class AbstractGeneratorTest extends AbstractYangTest {
         }
         folder.delete();
     }
-
 }
