@@ -161,10 +161,11 @@ public class TestHelper {
 
     public static Option baseModelBundles() {
         return new DefaultCompositeOption( //
-                mavenBundle(MDSAL+".model", "yang-ext").versionAsInProject(), // //
-                mavenBundle(MDSAL_MODELS, "ietf-inet-types").versionAsInProject(), // //
-                mavenBundle(MDSAL_MODELS, "ietf-yang-types").versionAsInProject(), // //
-                mavenBundle(MDSAL_MODELS, "opendaylight-l2-types").versionAsInProject() // //
+                mavenBundle(MDSAL+".model", "yang-ext").versionAsInProject(),
+                mavenBundle(MDSAL_MODELS, "ietf-type-util").versionAsInProject(),
+                mavenBundle(MDSAL_MODELS, "ietf-inet-types").versionAsInProject(),
+                mavenBundle(MDSAL_MODELS, "ietf-yang-types").versionAsInProject(),
+                mavenBundle(MDSAL_MODELS, "opendaylight-l2-types").versionAsInProject()
                 );
     }
 
