@@ -18,7 +18,21 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-
+import com.github.javaparser.JavaParser;
+import com.github.javaparser.ParseException;
+import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.Node;
+import com.github.javaparser.ast.PackageDeclaration;
+import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.ConstructorDeclaration;
+import com.github.javaparser.ast.body.FieldDeclaration;
+import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.comments.Comment;
+import com.github.javaparser.ast.comments.JavadocComment;
+import com.github.javaparser.ast.expr.NormalAnnotationExpr;
+import com.github.javaparser.ast.type.ClassOrInterfaceType;
+import com.github.javaparser.ast.visitor.VoidVisitor;
+import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
@@ -41,17 +55,6 @@ import java.util.Set;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import org.apache.maven.project.MavenProject;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.compiler.IProblem;
-import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.ASTParser;
-import org.eclipse.jdt.core.dom.ASTVisitor;
-import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.FieldDeclaration;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.NormalAnnotation;
-import org.eclipse.jdt.core.dom.PackageDeclaration;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.config.api.DependencyResolver;
@@ -160,7 +163,7 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
         }
     }
 
-    public static List<String> toFileNames(final Collection<File> files) {
+    private static List<String> toFileNames(final Collection<File> files) {
         List<String> result = new ArrayList<>();
         for (File f : files) {
             result.add(f.getName());
@@ -170,13 +173,13 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
     }
 
     @Test
-    public void generateSIEsTest() throws IOException {
+    public void generateSIEsTest() throws IOException, ParseException {
         Collection<File> files = jmxGenerator.generateSources(context,
                 outputBaseDir, Sets.newHashSet(threadsModule));
         assertEquals(ServiceInterfaceEntryTest.expectedSIEFileNames,
                 toFileNames(files));
 
-        Map<String, ASTVisitor> verifiers = Maps.newHashMap();
+        Map<String, SieASTVisitor> verifiers = new HashMap<>();
 
         for (File file : files) {
             verifiers.put(file.getName(), new SieASTVisitor());
@@ -186,46 +189,36 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
 
         for (File file : files) {
             String fileName = file.getName();
-            SieASTVisitor verifier = (SieASTVisitor) verifiers.get(fileName);
+            SieASTVisitor verifier = verifiers.get(fileName);
 
-            assertEquals(fileName.substring(0, fileName.length() - 5),
-                    verifier.type);
-            assertThat(
-                    verifier.extnds,
+            assertEquals(fileName.substring(0, fileName.length() - 5), verifier.type);
+            assertThat(verifier.extnds,
                     containsString("org.opendaylight.controller.config.api.annotations.AbstractServiceInterface"));
-            assertEquals(PackageTranslatorTest.EXPECTED_PACKAGE_PREFIX
-                    + ".threads", verifier.packageName);
+            assertEquals(PackageTranslatorTest.EXPECTED_PACKAGE_PREFIX + ".threads", verifier.packageName);
             assertNotNull(verifier.javadoc);
 
             if ("ThreadPoolServiceInterface.java".equals(fileName)) {
-                assertContains(verifier.descriptionAnotValue,
-                        "A simple pool of threads able to execute work.");
+                assertContains(verifier.descriptionAnotValue, "A simple pool of threads able to execute work.");
                 assertContains(verifier.sieAnnotValue, "threadpool");
                 assertContains(verifier.sieAnnotOsgiRegistrationType,
-                        PackageTranslatorTest.EXPECTED_PACKAGE_PREFIX
-                                + ".threadpool.ThreadPool.class");
+                        PackageTranslatorTest.EXPECTED_PACKAGE_PREFIX + ".threadpool.ThreadPool.class");
             } else if ("ScheduledThreadPoolServiceInterface.java"
                     .equals(fileName)) {
                 assertContains(verifier.extnds,
-                        PackageTranslatorTest.EXPECTED_PACKAGE_PREFIX
-                                + ".threads.ThreadPoolServiceInterface");
-                assertContains(
-                        verifier.descriptionAnotValue,
+                        PackageTranslatorTest.EXPECTED_PACKAGE_PREFIX  + ".threads.ThreadPoolServiceInterface");
+                assertContains(verifier.descriptionAnotValue,
                         "An extension of the simple pool of threads able to schedule work to be executed at some point in time.");
                 assertContains(verifier.sieAnnotValue, "scheduled-threadpool");
                 assertContains(verifier.sieAnnotOsgiRegistrationType,
                         PackageTranslatorTest.EXPECTED_PACKAGE_PREFIX
                                 + ".threadpool.ScheduledThreadPool.class");
             } else if ("EventBusServiceInterface.java".equals(fileName)) {
-                assertContains(
-                        verifier.descriptionAnotValue,
+                assertContains(verifier.descriptionAnotValue,
                         "Service representing an event bus. The service acts as message router between event producers and event consumers");
                 assertContains(verifier.sieAnnotValue, "eventbus");
-                assertContains(verifier.sieAnnotOsgiRegistrationType,
-                        "com.google.common.eventbus.EventBus.class");
+                assertContains(verifier.sieAnnotOsgiRegistrationType, "com.google.common.eventbus.EventBus.class");
             } else if ("ThreadFactoryServiceInterface.java".equals(fileName)) {
-                assertContains(
-                        verifier.descriptionAnotValue,
+                assertContains( verifier.descriptionAnotValue,
                         "Service representing a ThreadFactory instance. It is directly useful in Java world, where various library pieces need to create threads and you may want to inject a customized thread implementation.");
                 assertContains(verifier.sieAnnotValue, "threadfactory");
                 assertContains(verifier.sieAnnotOsgiRegistrationType,
@@ -264,7 +257,6 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
 
         assertEquals(expectedModuleFileNames, toFileNames(files));
 
-        Map<String, ASTVisitor> verifiers = Maps.newHashMap();
 
         Collection<File> xmlFiles = Collections2.filter(files,
                 new Predicate<File>() {
@@ -284,6 +276,7 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
                     }
                 });
 
+        Map<String, SieASTVisitor> verifiers = new HashMap<>();
         MbeASTVisitor abstractDynamicThreadPoolModuleVisitor = null;
         MbeASTVisitor asyncEventBusModuleMXBeanVisitor = null;
         MbeASTVisitor abstractNamingThreadFactoryModuleFactoryVisitor = null;
@@ -344,7 +337,7 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
 
     }
 
-    private void verifyXmlFiles(final Collection<File> xmlFiles) throws Exception {
+    private static void verifyXmlFiles(final Collection<File> xmlFiles) throws Exception {
         ErrorHandler errorHandler = new ErrorHandler() {
 
             @Override
@@ -382,7 +375,7 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
 
     }
 
-    private void assertEventBusModuleFactory(final MbeASTVisitor visitor) {
+    private static void assertEventBusModuleFactory(final MbeASTVisitor visitor) {
         assertEquals(PackageTranslatorTest.EXPECTED_PACKAGE_PREFIX
                 + ".threads.java", visitor.packageName);
         assertEquals("EventBusModuleFactory", visitor.type);
@@ -402,7 +395,7 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
                 visitor.methodJavadoc.size());
     }
 
-    private void assertAsyncEventBusModule(final MbeASTVisitor visitor) {
+    private static void assertAsyncEventBusModule(final MbeASTVisitor visitor) {
         assertEquals(PackageTranslatorTest.EXPECTED_PACKAGE_PREFIX
                 + ".threads.java", visitor.packageName);
         assertEquals("AsyncEventBusModule", visitor.type);
@@ -422,8 +415,7 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
                 visitor.methodJavadoc.size());
     }
 
-    private void assertAbstractNamingThreadFactoryModuleFactory(
-            final MbeASTVisitor visitor) {
+    private static void assertAbstractNamingThreadFactoryModuleFactory( final MbeASTVisitor visitor) {
         assertEquals(PackageTranslatorTest.EXPECTED_PACKAGE_PREFIX
                 + ".threads.java", visitor.packageName);
         assertEquals("AbstractNamingThreadFactoryModuleFactory", visitor.type);
@@ -431,9 +423,8 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
                 "org.opendaylight.controller.config.spi.ModuleFactory");
         Set<String> fieldDeclarations = visitor.fieldDeclarations;
         assertDeclaredField(fieldDeclarations,
-                "public static final java.lang.String NAME=\"threadfactory-naming\"");
-        assertDeclaredField(
-                fieldDeclarations,
+                "public static final java.lang.String NAME = \"threadfactory-naming\"");
+        assertDeclaredField(fieldDeclarations,
                 "private static final java.util.Set<Class<? extends org.opendaylight.controller.config.api.annotations.AbstractServiceInterface>> serviceIfcs");
 
         assertEquals(2, fieldDeclarations.size());
@@ -446,7 +437,7 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
 
     }
 
-    private void assertFactoryMethods(final Set<String> methods, final int expectedSize) {
+    private static void assertFactoryMethods(final Set<String> methods, final int expectedSize) {
 
         List<ArgumentAssertion> args = Lists.newArrayList();
         ArgumentAssertion oldInstanceArg = new ArgumentAssertion(DynamicMBeanWithInstance.class.getCanonicalName(), "old");
@@ -492,22 +483,20 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
 
     }
 
-    private void assertMethodPresent(final Set<String> methods, final MethodAssertion methodAssertion) {
+    private static void assertMethodPresent(final Set<String> methods, final MethodAssertion methodAssertion) {
         assertTrue(String.format("Generated methods did not contain %s, generated methods: %s",
                 methodAssertion.toString(), methods), methods.contains(methodAssertion.toString()));
     }
 
-    private void assertAsyncEventBusModuleMXBean(final MbeASTVisitor visitor) {
+    private static void assertAsyncEventBusModuleMXBean(final MbeASTVisitor visitor) {
         assertEquals(PackageTranslatorTest.EXPECTED_PACKAGE_PREFIX
                 + ".threads.java", visitor.packageName);
         assertEquals("AsyncEventBusModuleMXBean", visitor.type);
 
-        assertEquals("Incorrenct number of generated methods", 4,
-                visitor.methods.size());
-
+        assertEquals("Incorrenct number of generated methods", 4, visitor.methods.size());
     }
 
-    private void assertAbstractDynamicThreadPoolModule(final MbeASTVisitor visitor) {
+    private static void assertAbstractDynamicThreadPoolModule(final MbeASTVisitor visitor) {
         assertEquals(PackageTranslatorTest.EXPECTED_PACKAGE_PREFIX
                 + ".threads.java", visitor.packageName);
         assertNotNull(visitor.javadoc);
@@ -531,7 +520,7 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
         assertDeclaredField(fieldDeclarations,
                 "private java.util.concurrent.ThreadFactory threadfactoryDependency");
         assertDeclaredField(fieldDeclarations,
-                "private java.lang.Long keepAlive=new java.lang.Long(\"10\")");
+                "private java.lang.Long keepAlive = new java.lang.Long(\"10\")");
         assertDeclaredField(fieldDeclarations,
                 "private java.lang.Long coreSize");
         assertDeclaredField(fieldDeclarations, "private byte[] binary");
@@ -553,41 +542,49 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
                 visitor.methodJavadoc.get("void setMaximumSize(java.lang.Long maximumSize)"));
     }
 
-    private void assertDeclaredField(final Set<String> fieldDeclarations,
-            final String declaration) {
-        assertTrue("Missing field " + declaration + ", got: "
-                + fieldDeclarations,
-                fieldDeclarations.contains(declaration + ";\n"));
+    private static void assertDeclaredField(final Set<String> fieldDeclarations, final String declaration) {
+        assertTrue("Missing field " + declaration + ", got: " + fieldDeclarations,
+                fieldDeclarations.contains(declaration + ";"));
     }
 
-    private static class SieASTVisitor extends ASTVisitor {
+    private static class SieASTVisitor extends VoidVisitorAdapter<Void> {
         protected String packageName, descriptionAnotValue, sieAnnotValue,
                 sieAnnotOsgiRegistrationType, type, extnds, javadoc;
-        protected Map<String, String> methodDescriptions = Maps.newHashMap();
+        protected final Map<String, String> methodDescriptions = new HashMap<>();
 
         @Override
-        public boolean visit(final PackageDeclaration node) {
-            packageName = node.getName().toString();
-            return super.visit(node);
+        public void visit(final PackageDeclaration n, final Void arg) {
+            packageName = n.getName().toString();
+            super.visit(n, arg);
         }
 
         @Override
-        public boolean visit(final NormalAnnotation node) {
-            if (node.getTypeName().toString()
-                    .equals(Description.class.getCanonicalName())) {
-                if (node.getParent() instanceof TypeDeclaration) {
-                    descriptionAnotValue = node.values().get(0).toString();
-                } else if (node.getParent() instanceof MethodDeclaration) {
-                    String descr = node.values().get(0).toString();
-                    methodDescriptions.put(((MethodDeclaration) node
-                            .getParent()).getName().toString(), descr);
+        public void visit(final ClassOrInterfaceDeclaration n, final Void arg) {
+            type = n.getName();
+            extnds = n.getExtends().toString();
+
+            final Comment c = n.getComment();
+            if (c instanceof JavadocComment) {
+                javadoc = c.toString();
+            }
+
+            super.visit(n, arg);
+        }
+
+        @Override
+        public void visit(final NormalAnnotationExpr expr, final Void arg) {
+            final String fqcn = expr.getName().toString();
+            if (fqcn.equals(Description.class.getCanonicalName())) {
+                final Node parent = expr.getParentNode();
+                final String value = expr.getPairs().get(0).toString();
+                if (parent instanceof ClassOrInterfaceDeclaration) {
+                    descriptionAnotValue = value;
+                } else if (parent instanceof MethodDeclaration) {
+                    methodDescriptions.put(((MethodDeclaration) parent).getName(), value);
                 }
-            } else if (node
-                    .getTypeName()
-                    .toString()
-                    .equals(ServiceInterfaceAnnotation.class.getCanonicalName())) {
-                String text1 = node.values().get(0).toString();
-                String text2 = node.values().get(1).toString();
+            } else if (fqcn.equals(ServiceInterfaceAnnotation.class.getCanonicalName())) {
+                String text1 = expr.getPairs().get(0).toString();
+                String text2 = expr.getPairs().get(1).toString();
                 if (text1.contains("value")) {
                     sieAnnotValue = text1;
                     sieAnnotOsgiRegistrationType = text2;
@@ -596,18 +593,8 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
                     sieAnnotOsgiRegistrationType = text1;
                 }
             }
-            return super.visit(node);
-        }
 
-        @Override
-        public boolean visit(final TypeDeclaration node) {
-            javadoc = node.getJavadoc() == null ? null : node.getJavadoc()
-                    .toString();
-            type = node.getName().toString();
-            List<?> superIfcs = node.superInterfaceTypes();
-            extnds = superIfcs != null && !superIfcs.isEmpty() ? superIfcs
-                    .toString() : null;
-            return super.visit(node);
+            super.visit(expr, arg);
         }
     }
 
@@ -620,108 +607,75 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
         private final Map<String, String> methodJavadoc = Maps.newHashMap();
 
         @Override
-        public boolean visit(final NormalAnnotation node) {
-            boolean result = super.visit(node);
-            if (node.getTypeName().toString()
-                    .equals(RequireInterface.class.getCanonicalName())
-                    && node.getParent() instanceof MethodDeclaration) {
-                // remember only top level description annotation
-                String reqVal = node.values().get(0).toString();
-                requireIfc.put(((MethodDeclaration) node.getParent()).getName()
-                        .toString(), reqVal);
-            }
-            return result;
-        }
+        public void visit(final NormalAnnotationExpr expr, final Void arg) {
+            super.visit(expr, arg);
 
-        @Override
-        public boolean visit(final FieldDeclaration node) {
-            fieldDeclarations.add(node.toString());
-            return super.visit(node);
-        }
-
-        @Override
-        public boolean visit(final MethodDeclaration node) {
-            if (node.isConstructor()) {
-                constructors.add(node.toString());
-            } else {
-                String methodSignature = node.getReturnType2() + " " + node.getName() + "(";
-                boolean first = true;
-                for (Object o : node.parameters()) {
-                    if (first){
-                        first = false;
-                    } else {
-                        methodSignature += ",";
-                    }
-                    methodSignature += o.toString();
-                }
-                methodSignature += ")";
-                methods.add(methodSignature);
-                if (node.getJavadoc() != null) {
-                    methodJavadoc.put(methodSignature, node.getJavadoc().toString());
+            final String fqcn = expr.getName().toString();
+            if (fqcn.equals(RequireInterface.class.getCanonicalName()) && expr.getParentNode() instanceof MethodDeclaration) {
+                final Node parent = expr.getParentNode();
+                if (parent instanceof MethodDeclaration) {
+                    // remember only top level description annotation
+                    String reqVal = expr.getPairs().get(0).toString();
+                    requireIfc.put(((MethodDeclaration) parent).getName().toString(), reqVal);
                 }
             }
-            return super.visit(node);
         }
 
         @Override
-        public boolean visit(final TypeDeclaration node) {
-            boolean visit = super.visit(node);
-            List<?> superIfcs = node.superInterfaceTypes();
-            implmts = superIfcs != null && !superIfcs.isEmpty() ? superIfcs
-                    .toString() : null;
-            extnds = node.getSuperclassType() == null ? null : node
-                    .getSuperclassType().toString();
-            return visit;
+        public void visit(final ConstructorDeclaration n, final Void arg) {
+            constructors.add(n.toString());
+            super.visit(n, arg);
         }
 
+        @Override
+        public void visit(final MethodDeclaration n, final Void arg) {
+            final String signature = n.getDeclarationAsString(false, false);
+
+            methods.add(signature);
+
+            final Comment c = n.getComment();
+            if (c instanceof JavadocComment) {
+                methodJavadoc.put(signature, c.toString());
+            }
+            super.visit(n, arg);
+        }
+
+        @Override
+        public void visit(final FieldDeclaration n, final Void arg) {
+            fieldDeclarations.add(n.toStringWithoutComments());
+            super.visit(n, arg);
+        }
+
+        @Override
+        public void visit(final ClassOrInterfaceDeclaration n, final Void arg) {
+            super.visit(n, arg);
+
+            List<?> superIfcs = n.getImplements();
+            implmts = superIfcs != null && !superIfcs.isEmpty() ? superIfcs.toString() : null;
+
+            if (!n.isInterface()) {
+                final List<ClassOrInterfaceType> e = n.getExtends();
+                if (!e.isEmpty()) {
+                    extnds = e.get(0).toString();
+                }
+            }
+        }
     }
 
-    private void assertContains(final String source, final String... contained) {
+
+    private static void assertContains(final String source, final String... contained) {
         for (String string : contained) {
             assertThat(source, containsString(string));
         }
     }
 
-    private void processGeneratedCode(final Collection<File> files,
-            final Map<String, ASTVisitor> verifiers) throws IOException {
-        ASTParser parser = ASTParser.newParser(AST.JLS3);
-        Map<?, ?> options = JavaCore.getOptions();
-        JavaCore.setComplianceOptions(JavaCore.VERSION_1_7, options);
-        parser.setCompilerOptions(options);
-
-        parser.setKind(ASTParser.K_COMPILATION_UNIT);
-
+    private static void processGeneratedCode(final Collection<File> files,
+            final Map<String, SieASTVisitor> verifiers) throws ParseException, IOException {
         for (File file : files) {
-            char[] source = readFileAsChars(file);
-            parser.setSource(source);
-            parser.setResolveBindings(true);
-
-            CompilationUnit cu = (CompilationUnit) parser.createAST(null);
-            // Check for compilation problems in generated file
-            for (IProblem c : cu.getProblems()) {
-                // 1610613332 = Syntax error, annotations are only available if
-                // source level is 5.0
-                if (c.getID() == 1610613332) {
-                    continue;
-                }
-                // 1610613332 = Syntax error, parameterized types are only
-                // available if source level is 5.0
-                if (c.getID() == 1610613329) {
-                    continue;
-                }
-                if (c.getID() == 1610613328) {
-                    continue;
-                }
-                fail("Error in generated source code " + file + ":"
-                        + c.getSourceLineNumber() + " id: " + c.getID() + " message:"  + c.toString());
-            }
-
-            ASTVisitor visitor = verifiers.get(file.getName());
-            if (visitor == null) {
-                fail("Unknown generated file " + file.getName());
-            }
-            cu.accept(visitor);
-
+            final CompilationUnit cu = JavaParser.parse(file);
+            VoidVisitor<?> visitor = verifiers.get(file.getName());
+            assertNotNull("Unknown generated file " + file.getName(), visitor);
+            cu.accept(visitor, null);
         }
     }
 
@@ -764,7 +718,7 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
                 sb.append(argument.type).append(' ');
                 sb.append(argument.name);
                 if(++i != arguments.size()) {
-                    sb.append(',');
+                    sb.append(", ");
                 }
             }
             sb.append(')');

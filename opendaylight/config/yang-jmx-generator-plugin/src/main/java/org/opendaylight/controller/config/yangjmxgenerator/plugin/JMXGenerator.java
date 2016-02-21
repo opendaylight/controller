@@ -197,8 +197,7 @@ public class JMXGenerator implements BasicCodeGenerator, MavenProjectAware {
         this.generateModuleFactoryFile = extractModuleFactoryBoolean(additionalCfg);
     }
 
-    private boolean extractModuleFactoryBoolean(
-            final Map<String, String> additionalCfg) {
+    private static boolean extractModuleFactoryBoolean(final Map<String, String> additionalCfg) {
         String bool = additionalCfg.get(MODULE_FACTORY_FILE_BOOLEAN);
         return !"false".equals(bool);
     }
