@@ -7,6 +7,14 @@
  */
 package org.opendaylight.controller.sample.toaster.provider;
 
+import com.google.common.base.Function;
+import com.google.common.base.Optional;
+import com.google.common.util.concurrent.AsyncFunction;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.SettableFuture;
+import java.util.Collection;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -14,13 +22,13 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
-
 import org.opendaylight.controller.config.yang.config.toaster_provider.impl.ToasterProviderRuntimeMXBean;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.DataChangeListener;
+import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
+import org.opendaylight.controller.md.sal.binding.api.DataTreeChangeListener;
+import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.OptimisticLockFailedException;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
@@ -35,25 +43,16 @@ import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.ToasterRestocked;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.ToasterRestockedBuilder;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.ToasterService;
-import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcError;
-import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.common.RpcError.ErrorType;
 import org.opendaylight.yangtools.yang.common.RpcResult;
+import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Function;
-import com.google.common.base.Optional;
-import com.google.common.util.concurrent.AsyncFunction;
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.SettableFuture;
-
 public class OpendaylightToaster implements ToasterService, ToasterProviderRuntimeMXBean,
-                                            DataChangeListener, AutoCloseable {
+                                            DataTreeChangeListener<Toaster>, AutoCloseable {
 
     private static final Logger LOG = LoggerFactory.getLogger(OpendaylightToaster.class);
 
@@ -128,21 +127,26 @@ public class OpendaylightToaster implements ToasterService, ToasterProviderRunti
     }
 
     /**
-     * Implemented from the DataChangeListener interface.
+     * Implemented from the DataTreeChangeListener interface.
      */
     @Override
-    public void onDataChanged( final AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> change ) {
-        DataObject dataObject = change.getUpdatedSubtree();
-        if( dataObject instanceof Toaster )
-        {
-            Toaster toaster = (Toaster) dataObject;
-            Long darkness = toaster.getDarknessFactor();
-            if( darkness != null )
-            {
-                darknessFactor.set( darkness );
-            }
+    public void onDataTreeChanged(Collection<DataTreeModification<Toaster>> changes) {
+        for(DataTreeModification<Toaster> change: changes) {
+            DataObjectModification<Toaster> rootNode = change.getRootNode();
+            if(rootNode.getModificationType() == DataObjectModification.ModificationType.WRITE) {
+                Toaster oldToaster = rootNode.getDataBefore();
+                Toaster newToaster = rootNode.getDataAfter();
+                LOG.info("onDataTreeChanged - Toaster config with path {} was added or replaced: old Toaster: {}, new Toaster: {}",
+                        change.getRootPath().getRootIdentifier(), oldToaster, newToaster);
 
-            LOG.info("onDataChanged - new Toaster config: {}", toaster);
+                Long darkness = newToaster.getDarknessFactor();
+                if(darkness != null) {
+                    darknessFactor.set(darkness);
+                }
+            } else if(rootNode.getModificationType() == DataObjectModification.ModificationType.DELETE) {
+                LOG.info("onDataTreeChanged - Toaster config with path {} was deleted: old Toaster: {}",
+                        change.getRootPath().getRootIdentifier(), rootNode.getDataBefore());
+            }
         }
     }
 
