@@ -1295,7 +1295,8 @@ public class RaftActorTest extends AbstractActorTest {
 
         mockRaftActor.waitForRecoveryComplete();
 
-        verify(mockRaftActor.snapshotCohortDelegate, timeout(500).never()).applySnapshot(any(byte[].class));
+        Uninterruptibles.sleepUninterruptibly(500, TimeUnit.MILLISECONDS);
+        verify(mockRaftActor.snapshotCohortDelegate, never()).applySnapshot(any(byte[].class));
 
         RaftActorContext context = mockRaftActor.getRaftActorContext();
         assertEquals("Journal log size", 1, context.getReplicatedLog().size());
