@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.datastore;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.util.concurrent.ListenableFuture;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidateTip;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 
 public abstract class ShardDataTreeCohort {
     ShardDataTreeCohort() {
@@ -17,6 +18,7 @@ public abstract class ShardDataTreeCohort {
     }
 
     abstract DataTreeCandidateTip getCandidate();
+    abstract DataTreeModification getDataTreeModification();
 
     @VisibleForTesting
     public abstract ListenableFuture<Boolean> canCommit();

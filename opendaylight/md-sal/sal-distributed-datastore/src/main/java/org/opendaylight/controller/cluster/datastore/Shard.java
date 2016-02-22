@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nonnull;
 import org.opendaylight.controller.cluster.common.actor.CommonConfig;
@@ -327,8 +328,19 @@ public class Shard extends RaftActor {
     }
 
     private void handleCommitTransaction(final CommitTransaction commit) {
-        if(!commitCoordinator.handleCommit(commit.getTransactionID(), getSender(), this)) {
-            shardMBean.incrementFailedTransactionsCount();
+        if (isLeader()) {
+            if(!commitCoordinator.handleCommit(commit.getTransactionID(), getSender(), this)) {
+                shardMBean.incrementFailedTransactionsCount();
+            }
+        } else {
+            ActorSelection leader = getLeader();
+            if (leader == null) {
+                messageRetrySupport.addMessageToRetry(commit, getSender(),
+                        "Could not commit transaction " + commit.getTransactionID());
+            } else {
+                LOG.debug("{}: Forwarding CommitTransaction to leader {}", persistenceId(), leader);
+                leader.forward(commit, getContext());
+            }
         }
     }
 
@@ -336,7 +348,27 @@ public class Shard extends RaftActor {
         LOG.debug("{}: Finishing commit for transaction {}", persistenceId(), cohortEntry.getTransactionID());
 
         try {
-            cohortEntry.commit();
+            try {
+                cohortEntry.commit();
+            } catch(ExecutionException e) {
+                // We may get a "store tree and candidate base differ" IllegalStateException from commit under
+                // certain edge case scenarios so we'll try to re-apply the candidate from scratch as a last
+                // resort. Eg, we're a follower and a tx payload is replicated but the leader goes down before
+                // applying it to the state. We then become the leader and a second tx is pre-committed and
+                // replicated. When consensus occurs, this will cause the first tx to be applied as a foreign
+                // candidate via applyState prior to the second tx. Since the second tx has already been
+                // pre-committed, when it gets here to commit it will get an IllegalStateException.
+
+                // FIXME - this is not an ideal way to handle this scenario. This is temporary - a cleaner
+                // solution will be forthcoming.
+                if(e.getCause() instanceof IllegalStateException) {
+                    LOG.debug("{}: commit failed for transaction {} - retrying as foreign candidate", persistenceId(),
+                            transactionID, e);
+                    store.applyForeignCandidate(transactionID, cohortEntry.getCandidate());
+                } else {
+                    throw e;
+                }
+            }
 
             sender.tell(CommitTransactionReply.instance(cohortEntry.getClientVersion()).toSerializable(), getSelf());
 
@@ -393,7 +425,19 @@ public class Shard extends RaftActor {
 
     private void handleCanCommitTransaction(final CanCommitTransaction canCommit) {
         LOG.debug("{}: Can committing transaction {}", persistenceId(), canCommit.getTransactionID());
-        commitCoordinator.handleCanCommit(canCommit.getTransactionID(), getSender(), this);
+
+        if (isLeader()) {
+            commitCoordinator.handleCanCommit(canCommit.getTransactionID(), getSender(), this);
+        } else {
+            ActorSelection leader = getLeader();
+            if (leader == null) {
+                messageRetrySupport.addMessageToRetry(canCommit, getSender(),
+                        "Could not canCommit transaction " + canCommit.getTransactionID());
+            } else {
+                LOG.debug("{}: Forwarding CanCommitTransaction to leader {}", persistenceId(), leader);
+                leader.forward(canCommit, getContext());
+            }
+        }
     }
 
     protected void handleBatchedModificationsLocal(BatchedModifications batched, ActorRef sender) {
@@ -689,9 +733,6 @@ public class Shard extends RaftActor {
             }
 
             store.closeAllTransactionChains();
-
-            commitCoordinator.abortPendingTransactions(
-                    "The transacton was aborted due to inflight leadership change.", this);
         }
 
         if(hasLeader && !isIsolatedLeader()) {
@@ -703,7 +744,31 @@ public class Shard extends RaftActor {
     protected void onLeaderChanged(String oldLeader, String newLeader) {
         shardMBean.incrementLeadershipChangeCount();
 
-        if(hasLeader() && !isIsolatedLeader()) {
+        boolean hasLeader = hasLeader();
+        if(hasLeader && !isLeader()) {
+            // Another leader was elected. If we were the previous leader and had pending transactions, convert
+            // them to transaction messages and send to the new leader.
+            ActorSelection leader = getLeader();
+            if(leader != null) {
+                Collection<Object> messagesToForward = commitCoordinator.convertPendingTransactionsToMessages(
+                        datastoreContext.getShardBatchedModificationCount());
+
+                if(!messagesToForward.isEmpty()) {
+                    LOG.debug("{}: Forwarding {} pending transaction messages to leader {}", persistenceId(),
+                            messagesToForward.size(), leader);
+
+                    for(Object message: messagesToForward) {
+                        leader.tell(message, self());
+                    }
+                }
+            } else {
+                commitCoordinator.abortPendingTransactions(
+                        "The transacton was aborted due to inflight leadership change and the leader address isn't available.",
+                        this);
+            }
+        }
+
+        if(hasLeader && !isIsolatedLeader()) {
             messageRetrySupport.retryMessages();
         }
     }
