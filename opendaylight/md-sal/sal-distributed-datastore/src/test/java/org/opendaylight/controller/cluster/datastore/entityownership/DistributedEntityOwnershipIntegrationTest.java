@@ -13,6 +13,7 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.AdditionalMatchers.or;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
@@ -174,7 +175,8 @@ public class DistributedEntityOwnershipIntegrationTest {
 
         leaderEntityOwnershipService.registerCandidate(ENTITY1_2);
         verify(leaderMockListener2, timeout(5000)).ownershipChanged(ownershipChange(ENTITY1_2, false, true, true));
-        verify(leaderMockListener, timeout(300).never()).ownershipChanged(ownershipChange(ENTITY1_2));
+        Uninterruptibles.sleepUninterruptibly(300, TimeUnit.MILLISECONDS);
+        verify(leaderMockListener, never()).ownershipChanged(ownershipChange(ENTITY1_2));
         reset(leaderMockListener2);
 
         // Register follower1 candidate for entity1 and verify it gets added but doesn't become owner
@@ -182,8 +184,9 @@ public class DistributedEntityOwnershipIntegrationTest {
         follower1EntityOwnershipService.registerCandidate(ENTITY1);
         verifyCandidates(leaderDistributedDataStore, ENTITY1, "member-1", "member-2");
         verifyOwner(leaderDistributedDataStore, ENTITY1, "member-1");
-        verify(leaderMockListener, timeout(300).never()).ownershipChanged(ownershipChange(ENTITY1));
-        verify(follower1MockListener, timeout(300).never()).ownershipChanged(ownershipChange(ENTITY1));
+        Uninterruptibles.sleepUninterruptibly(300, TimeUnit.MILLISECONDS);
+        verify(leaderMockListener, never()).ownershipChanged(ownershipChange(ENTITY1));
+        verify(follower1MockListener, never()).ownershipChanged(ownershipChange(ENTITY1));
 
         // Register follower1 candidate for entity2 and verify it becomes owner
 
@@ -452,7 +455,8 @@ public class DistributedEntityOwnershipIntegrationTest {
 
         // Register a candidate for follower1 - should get queued since follower1 has no leader
         EntityOwnershipCandidateRegistration candidateReg = follower1EntityOwnershipService.registerCandidate(ENTITY1);
-        verify(leaderMockListener, timeout(300).never()).ownershipChanged(ownershipChange(ENTITY1));
+        Uninterruptibles.sleepUninterruptibly(300, TimeUnit.MILLISECONDS);
+        verify(leaderMockListener, never()).ownershipChanged(ownershipChange(ENTITY1));
 
         // Add replica in follower1
         AddShardReplica addReplica = new AddShardReplica(ENTITY_OWNERSHIP_SHARD_NAME);

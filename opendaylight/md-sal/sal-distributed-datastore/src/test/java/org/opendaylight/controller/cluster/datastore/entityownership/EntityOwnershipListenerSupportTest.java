@@ -19,8 +19,10 @@ import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.testkit.JavaTestKit;
 import akka.testkit.TestActorRef;
+import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -82,7 +84,8 @@ public class EntityOwnershipListenerSupportTest extends AbstractEntityOwnershipT
 
         verify(mockListener1, timeout(5000)).ownershipChanged(ownershipChange(entity1, false, true, true));
         verify(mockListener1_2, timeout(5000)).ownershipChanged(ownershipChange(entity1, false, true, true));
-        verify(mockListener2, timeout(300).never()).ownershipChanged(any(EntityOwnershipChange.class));
+        Uninterruptibles.sleepUninterruptibly(300, TimeUnit.MILLISECONDS);
+        verify(mockListener2, never()).ownershipChanged(any(EntityOwnershipChange.class));
         assertEquals("# of listener actors", 2, actorContext.children().size());
         reset(mockListener1, mockListener2, mockListener1_2);
 
@@ -91,7 +94,8 @@ public class EntityOwnershipListenerSupportTest extends AbstractEntityOwnershipT
         support.notifyEntityOwnershipListeners(entity2, false, true, true);
 
         verify(mockListener2, timeout(5000)).ownershipChanged(ownershipChange(entity2, false, true, true));
-        verify(mockListener1, timeout(300).never()).ownershipChanged(any(EntityOwnershipChange.class));
+        Uninterruptibles.sleepUninterruptibly(300, TimeUnit.MILLISECONDS);
+        verify(mockListener1, never()).ownershipChanged(any(EntityOwnershipChange.class));
         verify(mockListener1_2, never()).ownershipChanged(any(EntityOwnershipChange.class));
         assertEquals("# of listener actors", 3, actorContext.children().size());
         reset(mockListener1, mockListener2, mockListener1_2);
@@ -100,7 +104,8 @@ public class EntityOwnershipListenerSupportTest extends AbstractEntityOwnershipT
 
         support.notifyEntityOwnershipListeners(entity3, true, false, true);
 
-        verify(mockListener1, timeout(300).never()).ownershipChanged(any(EntityOwnershipChange.class));
+        Uninterruptibles.sleepUninterruptibly(300, TimeUnit.MILLISECONDS);
+        verify(mockListener1, never()).ownershipChanged(any(EntityOwnershipChange.class));
         verify(mockListener2, never()).ownershipChanged(any(EntityOwnershipChange.class));
         verify(mockListener1_2, never()).ownershipChanged(any(EntityOwnershipChange.class));
         reset(mockListener1, mockListener2, mockListener1_2);
@@ -114,7 +119,8 @@ public class EntityOwnershipListenerSupportTest extends AbstractEntityOwnershipT
         support.notifyEntityOwnershipListeners(entity1, true, false, true);
 
         verify(mockListener1_2, timeout(5000)).ownershipChanged(ownershipChange(entity1, true, false, true));
-        verify(mockListener1, timeout(300).never()).ownershipChanged(any(EntityOwnershipChange.class));
+        Uninterruptibles.sleepUninterruptibly(300, TimeUnit.MILLISECONDS);
+        verify(mockListener1, never()).ownershipChanged(any(EntityOwnershipChange.class));
         reset(mockListener1, mockListener2, mockListener1_2);
 
         // Unregister all listeners and verify their listener actors are destroyed.
