@@ -1293,7 +1293,7 @@ public class ShardTest extends AbstractShardTest {
             final ShardDataTreeCohort cohort1 = mock(ShardDataTreeCohort.class, "cohort1");
             doReturn(Futures.immediateFuture(Boolean.TRUE)).when(cohort1).canCommit();
             doReturn(Futures.immediateFuture(null)).when(cohort1).preCommit();
-            doReturn(Futures.immediateFailedFuture(new IllegalStateException("mock"))).when(cohort1).commit();
+            doReturn(Futures.immediateFailedFuture(new RuntimeException("mock"))).when(cohort1).commit();
             doReturn(mockCandidate("cohort1-candidate")).when(cohort1).getCandidate();
 
             final String transactionID2 = "tx2";

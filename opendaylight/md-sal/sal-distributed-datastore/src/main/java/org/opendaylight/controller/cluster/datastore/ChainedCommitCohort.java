@@ -12,6 +12,7 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidateTip;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,5 +66,10 @@ final class ChainedCommitCohort extends ShardDataTreeCohort {
     @Override
     DataTreeCandidateTip getCandidate() {
         return delegate.getCandidate();
+    }
+
+    @Override
+    DataTreeModification getDataTreeModification() {
+        return delegate.getDataTreeModification();
     }
 }

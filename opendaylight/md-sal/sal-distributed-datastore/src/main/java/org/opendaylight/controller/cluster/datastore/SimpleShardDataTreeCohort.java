@@ -43,7 +43,7 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
 
     @Override
     public ListenableFuture<Boolean> canCommit() {
-        DataTreeModification modification = dataTreeModification();
+        DataTreeModification modification = getDataTreeModification();
         try {
             dataTree.getDataTree().validate(modification);
             LOG.trace("Transaction {} validated", transaction);
@@ -69,7 +69,7 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
     @Override
     public ListenableFuture<Void> preCommit() {
         try {
-            candidate = dataTree.getDataTree().prepare(dataTreeModification());
+            candidate = dataTree.getDataTree().prepare(getDataTreeModification());
             /*
              * FIXME: this is the place where we should be interacting with persistence, specifically by invoking
              *        persist on the candidate (which gives us a Future).
@@ -86,7 +86,8 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
         }
     }
 
-    private DataTreeModification dataTreeModification() {
+    @Override
+    DataTreeModification getDataTreeModification() {
         DataTreeModification dataTreeModification = transaction;
         if(transaction instanceof PruningDataTreeModification){
             dataTreeModification = ((PruningDataTreeModification) transaction).getResultingModification();
