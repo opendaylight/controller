@@ -45,12 +45,13 @@ public class Follower extends AbstractRaftActorBehavior {
     private static final int SYNC_THRESHOLD = 10;
 
     public Follower(RaftActorContext context) {
-        this(context, null);
+        this(context, null, (short)-1);
     }
 
-    public Follower(RaftActorContext context, String initialLeaderId) {
+    public Follower(RaftActorContext context, String initialLeaderId, short initialLeaderPayloadVersion) {
         super(context, RaftState.Follower);
         leaderId = initialLeaderId;
+        setLeaderPayloadVersion(initialLeaderPayloadVersion);
 
         initialSyncStatusTracker = new SyncStatusTracker(context.getActor(), getId(), SYNC_THRESHOLD);
 
