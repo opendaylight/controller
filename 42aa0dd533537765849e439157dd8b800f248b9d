@@ -22,6 +22,23 @@
       "revId": "42aa0dd533537765849e439157dd8b800f248b9d",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_cda70ca6",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/registry/RpcRegistry.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-02-23T22:33:46Z",
+      "side": 1,
+      "message": "I think this should be info(), something is not quite right with the system at this time, right?",
+      "revId": "42aa0dd533537765849e439157dd8b800f248b9d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
