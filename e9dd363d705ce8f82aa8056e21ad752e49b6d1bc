@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a3d3df0_377b67f6",
+        "filename": "opendaylight/md-sal/sal-clustering-config/src/main/resources/initial/akka.conf",
+        "patchSetId": 3
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-02-23T16:12:11Z",
+      "side": 1,
+      "message": "whitespace :)",
+      "revId": "e9dd363d705ce8f82aa8056e21ad752e49b6d1bc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_d71afbc4",
+        "filename": "opendaylight/md-sal/sal-clustering-config/src/main/resources/initial/factory-akka.conf",
+        "patchSetId": 3
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-02-23T16:12:11Z",
+      "side": 1,
+      "message": "whitespace :)",
+      "revId": "e9dd363d705ce8f82aa8056e21ad752e49b6d1bc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
