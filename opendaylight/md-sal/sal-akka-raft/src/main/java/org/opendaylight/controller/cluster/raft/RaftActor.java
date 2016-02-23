@@ -612,10 +612,11 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             RaftActorBehavior behavior = currentBehavior.getDelegate();
             if(behavior instanceof Follower) {
                 String previousLeaderId = ((Follower)behavior).getLeaderId();
+                short previousLeaderPayloadVersion = behavior.getLeaderPayloadVersion();
 
                 LOG.debug("{}: Re-initializing to Follower with previous leaderId {}", persistenceId(), previousLeaderId);
 
-                changeCurrentBehavior(new Follower(context, previousLeaderId));
+                changeCurrentBehavior(new Follower(context, previousLeaderId, previousLeaderPayloadVersion));
             } else {
                 initializeBehavior();
             }
