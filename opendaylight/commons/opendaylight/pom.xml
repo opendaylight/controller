@@ -280,16 +280,6 @@
         <version>1.5</version>
       </dependency>
       <dependency>
-        <groupId>org.eclipse</groupId>
-        <artifactId>jdt</artifactId>
-        <version>3.3.0-v20070607-1300</version>
-      </dependency>
-      <dependency>
-        <groupId>org.eclipse.equinox</groupId>
-        <artifactId>app</artifactId>
-        <version>1.0.0-v20070606</version>
-      </dependency>
-      <dependency>
         <groupId>org.uncommons.maths</groupId>
         <artifactId>uncommons-maths</artifactId>
         <version>${uncommons.maths.version}</version>
@@ -308,13 +298,6 @@
         <groupId>org.fusesource.leveldbjni</groupId>
         <artifactId>leveldbjni-all</artifactId>
         <version>${leveldbjni.version}</version>
-      </dependency>
-
-      <!-- equinox http service bridge -->
-      <dependency>
-        <groupId>org.eclipse.jdt</groupId>
-        <artifactId>core</artifactId>
-        <version>3.3.0-v_771</version>
       </dependency>
 
       <!-- md-sal -->
