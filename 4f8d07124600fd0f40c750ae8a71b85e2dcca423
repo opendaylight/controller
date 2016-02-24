@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_6d9d200a",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/CompositeDataTreeCohort.java",
+        "patchSetId": 15
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-02-24T03:01:39Z",
+      "side": 1,
+      "message": "Do you mean you\u0027d rather optimize it in follow-up patches? If so can you add a TODO/FIXME comment?",
+      "parentUuid": "9a3d3df0_49fb15c1",
+      "revId": "4f8d07124600fd0f40c750ae8a71b85e2dcca423",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_ad5f6d40",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/CompositeDataTreeCohort.java",
         "patchSetId": 15
