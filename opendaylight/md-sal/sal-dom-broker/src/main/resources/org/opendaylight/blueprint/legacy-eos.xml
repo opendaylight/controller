@@ -2,13 +2,13 @@
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
            xmlns:odl="http://opendaylight.org/xmlns/blueprint/v1.0.0">
 
-<!--   <reference id="domEntityOwnershipService" interface="org.opendaylight.mdsal.dom.api.clustering.DOMEntityOwnershipService" /> -->
+  <reference id="domEntityOwnershipService" interface="org.opendaylight.mdsal.dom.api.clustering.DOMEntityOwnershipService" />
 
-<!--   <bean id="legacyEntityOwnershipService" class="org.opendaylight.controller.md.sal.common.impl.clustering.LegacyEntityOwnershipServiceAdapter" -->
-<!--           destroy-method="close"> -->
-<!--     <argument ref="domEntityOwnershipService"/> -->
-<!--   </bean> -->
+  <bean id="legacyEntityOwnershipService" class="org.opendaylight.controller.md.sal.dom.clustering.impl.LegacyEntityOwnershipServiceAdapter"
+          destroy-method="close">
+    <argument ref="domEntityOwnershipService"/>
+  </bean>
 
-<!--   <service ref="legacyEntityOwnershipService" interface="org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipService" -->
-<!--         odl:type="default"/> -->
+  <service ref="legacyEntityOwnershipService" interface="org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipService"
+        odl:type="default"/>
 </blueprint>
