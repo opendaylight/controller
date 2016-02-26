@@ -29,8 +29,9 @@ import org.mockito.ArgumentMatcher;
 import org.mockito.Matchers;
 import org.opendaylight.controller.cluster.datastore.AbstractActorTest;
 import org.opendaylight.controller.cluster.datastore.ShardDataTree;
-import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
-import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipChange;
+import org.opendaylight.mdsal.eos.common.api.EntityOwnershipChangeState;
+import org.opendaylight.mdsal.eos.dom.api.DOMEntity;
+import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipChange;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.entity.owners.rev150804.EntityOwners;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.entity.owners.rev150804.entity.owners.EntityType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.entity.owners.rev150804.entity.owners.entity.type.entity.Candidate;
@@ -172,34 +173,36 @@ public class AbstractEntityOwnershipTest extends AbstractActorTest {
         shardDataTree.notifyListeners(shardDataTree.commit(modification));
     }
 
-    static EntityOwnershipChange ownershipChange(final Entity expEntity, final boolean expWasOwner,
+    static DOMEntityOwnershipChange ownershipChange(final DOMEntity expEntity, final boolean expWasOwner,
             final boolean expIsOwner, final boolean expHasOwner) {
-        return Matchers.argThat(new ArgumentMatcher<EntityOwnershipChange>() {
+        return Matchers.argThat(new ArgumentMatcher<DOMEntityOwnershipChange>() {
             @Override
             public boolean matches(Object argument) {
-                EntityOwnershipChange change = (EntityOwnershipChange) argument;
-                return expEntity.equals(change.getEntity()) && expWasOwner == change.wasOwner() &&
-                        expIsOwner == change.isOwner() && expHasOwner == change.hasOwner();
+                DOMEntityOwnershipChange change = (DOMEntityOwnershipChange) argument;
+                return expEntity.equals(change.getEntity()) && expWasOwner == change.getState().wasOwner() &&
+                        expIsOwner == change.getState().isOwner() && expHasOwner == change.getState().hasOwner();
             }
 
             @Override
             public void describeTo(Description description) {
-                description.appendValue(new EntityOwnershipChange(expEntity, expWasOwner, expIsOwner, expHasOwner));
+                description.appendValue(new DOMEntityOwnershipChange(expEntity, EntityOwnershipChangeState.from(
+                        expWasOwner, expIsOwner, expHasOwner)));
             }
         });
     }
 
-    static EntityOwnershipChange ownershipChange(final Entity expEntity) {
-        return Matchers.argThat(new ArgumentMatcher<EntityOwnershipChange>() {
+    static DOMEntityOwnershipChange ownershipChange(final DOMEntity expEntity) {
+        return Matchers.argThat(new ArgumentMatcher<DOMEntityOwnershipChange>() {
             @Override
             public boolean matches(Object argument) {
-                EntityOwnershipChange change = (EntityOwnershipChange) argument;
+                DOMEntityOwnershipChange change = (DOMEntityOwnershipChange) argument;
                 return expEntity.equals(change.getEntity());
             }
 
             @Override
             public void describeTo(Description description) {
-                description.appendValue(new EntityOwnershipChange(expEntity, false, false, false));
+                description.appendValue(new DOMEntityOwnershipChange(expEntity, EntityOwnershipChangeState.from(
+                        false, false, false)));
             }
         });
     }

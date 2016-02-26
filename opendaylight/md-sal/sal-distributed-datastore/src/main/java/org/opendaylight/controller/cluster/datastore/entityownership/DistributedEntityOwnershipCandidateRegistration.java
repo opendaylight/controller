@@ -7,18 +7,20 @@
  */
 package org.opendaylight.controller.cluster.datastore.entityownership;
 
-import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
-import org.opendaylight.controller.md.sal.common.impl.clustering.AbstractEntityOwnershipCandidateRegistration;
+import org.opendaylight.mdsal.eos.dom.api.DOMEntity;
+import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipCandidateRegistration;
+import org.opendaylight.yangtools.concepts.AbstractObjectRegistration;
 
 /**
  * Implementation of EntityOwnershipCandidateRegistration.
  *
  * @author Thomas Pantelis
  */
-class DistributedEntityOwnershipCandidateRegistration extends AbstractEntityOwnershipCandidateRegistration {
+class DistributedEntityOwnershipCandidateRegistration extends AbstractObjectRegistration<DOMEntity>
+        implements DOMEntityOwnershipCandidateRegistration {
     private final DistributedEntityOwnershipService service;
 
-    DistributedEntityOwnershipCandidateRegistration(Entity entity, DistributedEntityOwnershipService service) {
+    DistributedEntityOwnershipCandidateRegistration(DOMEntity entity, DistributedEntityOwnershipService service) {
         super(entity);
         this.service = service;
     }
