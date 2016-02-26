@@ -20,7 +20,7 @@
         <feature version='${project.version}'>odl-mdsal-xsql</feature>
         <feature version='${project.version}'>odl-toaster</feature>
     </feature>
-    <feature name='odl-mdsal-common' version='${project.version}' description="OpenDaylight :: Config :: All">
+    <feature name='odl-mdsal-controller-common' version='${project.version}' description="OpenDaylight :: Config :: All">
       <feature version='${yangtools.version}'>odl-yangtools-yang-data</feature>
       <feature version='${config.version}'>odl-config-api</feature>
       <feature version='${mdsal.version}'>odl-mdsal-binding-runtime</feature>
@@ -34,12 +34,13 @@
         <feature version='${yangtools.version}'>odl-yangtools-common</feature>
         <feature version='${mdsal.version}'>odl-mdsal-binding-dom-adapter</feature>
         <feature version='${mdsal.model.version}'>odl-mdsal-models</feature>
-        <feature version='${project.version}'>odl-mdsal-common</feature>
+        <feature version='${project.version}'>odl-mdsal-controller-common</feature>
         <feature version='${config.version}'>odl-config-startup</feature>
         <feature version='${config.version}'>odl-config-netty</feature>
         <feature version='[3.3.0,4.0.0)'>odl-lmax</feature>
         <!-- FIXME: Bug 4202: Add MD-SAL provided odl-mdsal-binding-adapter -->
         <!-- FIXME: Bug 4202: Add MD-SAL provided odl-mdsal-dom-broker -->
+        <feature version='${mdsal.version}'>odl-mdsal-dom-api</feature>
         <bundle>mvn:org.opendaylight.controller/sal-core-api/{{VERSION}}</bundle>
         <bundle>mvn:org.opendaylight.controller/sal-core-spi/{{VERSION}}</bundle>
         <bundle start-level="70">mvn:org.opendaylight.controller/sal-broker-impl/{{VERSION}}</bundle>
