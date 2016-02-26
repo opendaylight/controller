@@ -15,6 +15,10 @@
       <artifactId>guava</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.opendaylight.mdsal</groupId>
+      <artifactId>mdsal-dom-api</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal-common-api</artifactId>
     </dependency>
