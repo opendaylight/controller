@@ -5,7 +5,7 @@ module distributed-entity-ownership-service {
 
     import config { prefix config; revision-date 2013-04-05; }
     import opendaylight-operational-dom-datastore {prefix operational-dom-store-spi;}
-    import opendaylight-entity-ownership-service { prefix entity-ownership-service-spi; }
+    import opendaylight-dom-entity-ownership-service { prefix dom-eos; }
 
     description
         "This module contains the base YANG definitions for the DistributedEntityOwnershipService implementation";
@@ -17,7 +17,7 @@ module distributed-entity-ownership-service {
     // This is the definition of the service implementation as a module identity.
     identity distributed-entity-ownership-service-provider {
         base config:module-type;
-        config:provided-service entity-ownership-service-spi:entity-ownership-service;
+        config:provided-service dom-eos:dom-entity-ownership-service;
         config:java-name-prefix DistributedEntityOwnershipServiceProvider;
     }
 
