@@ -11,8 +11,8 @@ import akka.actor.Props;
 import akka.japi.Creator;
 import com.google.common.base.Preconditions;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActor;
-import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipChange;
-import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipListener;
+import org.opendaylight.mdsal.dom.api.clustering.DOMEntityOwnershipChange;
+import org.opendaylight.mdsal.dom.api.clustering.DOMEntityOwnershipListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,22 +24,22 @@ import org.slf4j.LoggerFactory;
 class EntityOwnershipListenerActor extends AbstractUntypedActor {
     private static final Logger LOG = LoggerFactory.getLogger(EntityOwnershipListenerActor.class);
 
-    private final EntityOwnershipListener listener;
+    private final DOMEntityOwnershipListener listener;
 
-    private EntityOwnershipListenerActor(EntityOwnershipListener listener) {
+    private EntityOwnershipListenerActor(DOMEntityOwnershipListener listener) {
         this.listener = listener;
     }
 
     @Override
     protected void handleReceive(Object message) {
-        if (message instanceof EntityOwnershipChange) {
-            onEntityOwnershipChanged((EntityOwnershipChange)message);
+        if (message instanceof DOMEntityOwnershipChange) {
+            onEntityOwnershipChanged((DOMEntityOwnershipChange)message);
         } else {
             unknownMessage(message);
         }
     }
 
-    private void onEntityOwnershipChanged(EntityOwnershipChange change) {
+    private void onEntityOwnershipChanged(DOMEntityOwnershipChange change) {
         LOG.debug("Notifying EntityOwnershipListener {}: {}", listener, change);
 
         try {
@@ -49,16 +49,16 @@ class EntityOwnershipListenerActor extends AbstractUntypedActor {
         }
     }
 
-    static Props props(EntityOwnershipListener listener) {
+    static Props props(DOMEntityOwnershipListener listener) {
         return Props.create(new EntityOwnershipListenerCreator(listener));
     }
 
     private static final class EntityOwnershipListenerCreator implements Creator<EntityOwnershipListenerActor> {
         private static final long serialVersionUID = 1L;
 
-        private final EntityOwnershipListener listener;
+        private final DOMEntityOwnershipListener listener;
 
-        EntityOwnershipListenerCreator(EntityOwnershipListener listener) {
+        EntityOwnershipListenerCreator(DOMEntityOwnershipListener listener) {
             this.listener = Preconditions.checkNotNull(listener);
         }
 

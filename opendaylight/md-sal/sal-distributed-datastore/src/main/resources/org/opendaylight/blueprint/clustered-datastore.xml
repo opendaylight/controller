@@ -124,6 +124,6 @@
     <argument ref="selectionStrategyConfig"/>
   </bean>
 
-  <service ref="distributedEntityOwnershipService" interface="org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipService"
+  <service ref="distributedEntityOwnershipService" interface="org.opendaylight.mdsal.dom.api.clustering.DOMEntityOwnershipService"
         odl:type="default"/>
 </blueprint>
