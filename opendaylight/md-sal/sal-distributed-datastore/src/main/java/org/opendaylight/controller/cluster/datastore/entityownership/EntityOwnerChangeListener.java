@@ -13,7 +13,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import java.util.Collection;
-import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
+import org.opendaylight.mdsal.dom.api.clustering.DOMEntity;
 import org.opendaylight.yangtools.yang.data.api.schema.LeafNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
@@ -60,7 +60,7 @@ class EntityOwnerChangeListener extends AbstractEntityOwnerChangeListener {
                 boolean wasOwner = Objects.equal(localMemberName, origOwner);
                 boolean hasOwner = !Strings.isNullOrEmpty(newOwner);
 
-                Entity entity = createEntity(change.getRootPath());
+                DOMEntity entity = createEntity(change.getRootPath());
 
                 LOG.debug("{}: Calling notifyEntityOwnershipListeners: entity: {}, wasOwner: {}, isOwner: {}, hasOwner: {}",
                         logId(), entity, wasOwner, isOwner, hasOwner);
