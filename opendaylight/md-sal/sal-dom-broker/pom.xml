@@ -19,6 +19,10 @@
       <artifactId>disruptor</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.opendaylight.mdsal</groupId>
+      <artifactId>mdsal-dom-api</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal-common-impl</artifactId>
     </dependency>
@@ -94,6 +98,7 @@
                             <!-- TODO Remove sal.broker.impl from export when SchemaAwareRpcRegistry is not used in connector anymore -->
                             org.opendaylight.controller.md.sal.dom.broker.impl,
                             org.opendaylight.controller.md.sal.dom.broker.impl.*,
+                            org.opendaylight.controller.md.sal.dom.clustering.impl,
             </Export-Package>
             <Import-Package>*</Import-Package>
           </instructions>

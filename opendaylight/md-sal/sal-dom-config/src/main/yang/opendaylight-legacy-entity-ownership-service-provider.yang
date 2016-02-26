@@ -1,0 +1,26 @@
+module opendaylight-legacy-entity-ownership-service-provider {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:config:legacy-entity-ownership-service-provider";
+    prefix "legacy-entity-ownership-service";
+
+    import config { prefix config; revision-date 2013-04-05; }
+    import opendaylight-entity-ownership-service { prefix legacy-eos-spi; }
+
+    description "Legacy EntityOwnershipService implementation";
+
+    revision "2016-02-26" {
+        description "Initial revision";
+    }
+
+    identity legacy-entity-ownership-service-provider {
+        base config:module-type;
+        config:provided-service legacy-eos-spi:entity-ownership-service;
+        config:java-name-prefix LegacyEntityOwnershipServiceProvider;
+    }
+
+    augment "/config:modules/config:module/config:configuration" {
+        case legacy-entity-ownership-service-provider {
+            when "/config:modules/config:module/config:type = 'legacy-entity-ownership-service-provider'";
+        }
+    }
+}
