@@ -53,12 +53,12 @@ import org.opendaylight.controller.cluster.datastore.entityownership.selectionst
 import org.opendaylight.controller.cluster.datastore.messages.GetShardDataTree;
 import org.opendaylight.controller.cluster.datastore.utils.MockClusterWrapper;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
-import org.opendaylight.controller.md.sal.common.api.clustering.CandidateAlreadyRegisteredException;
-import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
-import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipCandidateRegistration;
-import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipListener;
-import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipListenerRegistration;
-import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipState;
+import org.opendaylight.mdsal.common.api.clustering.CandidateAlreadyRegisteredException;
+import org.opendaylight.mdsal.common.api.clustering.EntityOwnershipState;
+import org.opendaylight.mdsal.dom.api.clustering.DOMEntity;
+import org.opendaylight.mdsal.dom.api.clustering.DOMEntityOwnershipCandidateRegistration;
+import org.opendaylight.mdsal.dom.api.clustering.DOMEntityOwnershipListener;
+import org.opendaylight.mdsal.dom.api.clustering.DOMEntityOwnershipListenerRegistration;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -139,9 +139,9 @@ public class DistributedEntityOwnershipServiceTest extends AbstractEntityOwnersh
         shardBuilder.expectShardMessage(RegisterCandidateLocal.class);
 
         YangInstanceIdentifier entityId = YangInstanceIdentifier.of(QNAME);
-        Entity entity = new Entity(ENTITY_TYPE, entityId);
+        DOMEntity entity = new DOMEntity(ENTITY_TYPE, entityId);
 
-        EntityOwnershipCandidateRegistration reg = service.registerCandidate(entity);
+        DOMEntityOwnershipCandidateRegistration reg = service.registerCandidate(entity);
 
         verifyEntityOwnershipCandidateRegistration(entity, reg);
         verifyRegisterCandidateLocal(shardBuilder, entity);
@@ -160,10 +160,10 @@ public class DistributedEntityOwnershipServiceTest extends AbstractEntityOwnersh
 
         // Register a different entity - should succeed
 
-        Entity entity2 = new Entity(ENTITY_TYPE2, entityId);
+        DOMEntity entity2 = new DOMEntity(ENTITY_TYPE2, entityId);
         shardBuilder.expectShardMessage(RegisterCandidateLocal.class);
 
-        EntityOwnershipCandidateRegistration reg2 = service.registerCandidate(entity2);
+        DOMEntityOwnershipCandidateRegistration reg2 = service.registerCandidate(entity2);
 
         verifyEntityOwnershipCandidateRegistration(entity2, reg2);
         verifyRegisterCandidateLocal(shardBuilder, entity2);
@@ -188,9 +188,9 @@ public class DistributedEntityOwnershipServiceTest extends AbstractEntityOwnersh
 
         shardBuilder.expectShardMessage(RegisterCandidateLocal.class);
 
-        Entity entity = new Entity(ENTITY_TYPE, YangInstanceIdentifier.of(QNAME));
+        DOMEntity entity = new DOMEntity(ENTITY_TYPE, YangInstanceIdentifier.of(QNAME));
 
-        EntityOwnershipCandidateRegistration reg = service.registerCandidate(entity);
+        DOMEntityOwnershipCandidateRegistration reg = service.registerCandidate(entity);
 
         verifyEntityOwnershipCandidateRegistration(entity, reg);
         verifyRegisterCandidateLocal(shardBuilder, entity);
@@ -229,10 +229,10 @@ public class DistributedEntityOwnershipServiceTest extends AbstractEntityOwnersh
         shardBuilder.expectShardMessage(RegisterListenerLocal.class);
 
         YangInstanceIdentifier entityId = YangInstanceIdentifier.of(QNAME);
-        Entity entity = new Entity(ENTITY_TYPE, entityId);
-        EntityOwnershipListener listener = mock(EntityOwnershipListener.class);
+        DOMEntity entity = new DOMEntity(ENTITY_TYPE, entityId);
+        DOMEntityOwnershipListener listener = mock(DOMEntityOwnershipListener.class);
 
-        EntityOwnershipListenerRegistration reg = service.registerListener(entity.getType(), listener);
+        DOMEntityOwnershipListenerRegistration reg = service.registerListener(entity.getType(), listener);
 
         assertNotNull("EntityOwnershipListenerRegistration null", reg);
         assertEquals("getEntityType", entity.getType(), reg.getEntityType());
@@ -269,31 +269,33 @@ public class DistributedEntityOwnershipServiceTest extends AbstractEntityOwnersh
         ShardDataTree shardDataTree = new ShardDataTree(SchemaContextHelper.entityOwners(), TreeType.OPERATIONAL);
         shardBuilder.setDataTree(shardDataTree.getDataTree());
 
-        Entity entity1 = new Entity(ENTITY_TYPE, "one");
-        writeNode(ENTITY_OWNERS_PATH, entityOwnersWithCandidate(ENTITY_TYPE, entity1.getId(), "member-1"), shardDataTree);
+        DOMEntity entity1 = new DOMEntity(ENTITY_TYPE, "one");
+        writeNode(ENTITY_OWNERS_PATH, entityOwnersWithCandidate(ENTITY_TYPE, entity1.getIdentifier(), "member-1"), shardDataTree);
         writeNode(ENTITY_OWNERS_PATH, entityOwnersWithEntityTypeEntry(entityTypeEntryWithEntityEntry(entity1.getType(),
-                entityEntryWithOwner(entity1.getId(), "member-1"))), shardDataTree);
-        verifyGetOwnershipState(service, entity1, true, true);
+                entityEntryWithOwner(entity1.getIdentifier(), "member-1"))), shardDataTree);
+        verifyGetOwnershipState(service, entity1, EntityOwnershipState.IS_OWNER);
 
-        writeNode(ENTITY_OWNERS_PATH, entityOwnersWithCandidate(ENTITY_TYPE, entity1.getId(), "member-2"), shardDataTree);
-        writeNode(entityPath(entity1.getType(), entity1.getId()), entityEntryWithOwner(entity1.getId(), "member-2"),
+        writeNode(ENTITY_OWNERS_PATH, entityOwnersWithCandidate(ENTITY_TYPE,
+                entity1.getIdentifier(), "member-2"), shardDataTree);
+        writeNode(entityPath(entity1.getType(), entity1.getIdentifier()),
+                entityEntryWithOwner(entity1.getIdentifier(), "member-2"), shardDataTree);
+        verifyGetOwnershipState(service, entity1, EntityOwnershipState.OWNED_BY_OTHER);
+
+        writeNode(entityPath(entity1.getType(), entity1.getIdentifier()), entityEntryWithOwner(entity1.getIdentifier(), ""),
                 shardDataTree);
-        verifyGetOwnershipState(service, entity1, false, true);
+        verifyGetOwnershipState(service, entity1, EntityOwnershipState.NO_OWNER);
 
-        writeNode(entityPath(entity1.getType(), entity1.getId()), entityEntryWithOwner(entity1.getId(), ""),
-                shardDataTree);
-        verifyGetOwnershipState(service, entity1, false, false);
-
-        Entity entity2 = new Entity(ENTITY_TYPE, "two");
+        DOMEntity entity2 = new DOMEntity(ENTITY_TYPE, "two");
         Optional<EntityOwnershipState> state = service.getOwnershipState(entity2);
         assertEquals("getOwnershipState present", false, state.isPresent());
 
-        writeNode(ENTITY_OWNERS_PATH, entityOwnersWithCandidate(ENTITY_TYPE, entity2.getId(), "member-1"), shardDataTree);
-        writeNode(entityPath(entity2.getType(), entity2.getId()), ImmutableNodes.mapEntry(ENTITY_QNAME,
-                ENTITY_ID_QNAME, entity2.getId()), shardDataTree);
-        verifyGetOwnershipState(service, entity2, false, false);
+        writeNode(ENTITY_OWNERS_PATH, entityOwnersWithCandidate(ENTITY_TYPE, entity2.getIdentifier(), "member-1"),
+                shardDataTree);
+        writeNode(entityPath(entity2.getType(), entity2.getIdentifier()), ImmutableNodes.mapEntry(ENTITY_QNAME,
+                ENTITY_ID_QNAME, entity2.getIdentifier()), shardDataTree);
+        verifyGetOwnershipState(service, entity2, EntityOwnershipState.NO_OWNER);
 
-        deleteNode(candidatePath(entityPath(entity2.getType(), entity2.getId()), "member-1"), shardDataTree);
+        deleteNode(candidatePath(entityPath(entity2.getType(), entity2.getIdentifier()), "member-1"), shardDataTree);
         Optional<EntityOwnershipState> state2 = service.getOwnershipState(entity2);
         assertEquals("getOwnershipState present", false, state2.isPresent());
         service.close();
@@ -312,7 +314,7 @@ public class DistributedEntityOwnershipServiceTest extends AbstractEntityOwnersh
 
         service.start();
 
-        final Entity test = new Entity("test-type", "test");
+        final DOMEntity test = new DOMEntity("test-type", "test");
 
         assertFalse(service.isCandidateRegistered(test));
 
@@ -323,12 +325,11 @@ public class DistributedEntityOwnershipServiceTest extends AbstractEntityOwnersh
         service.close();
     }
 
-    private static void verifyGetOwnershipState(DistributedEntityOwnershipService service, Entity entity,
-            boolean isOwner, boolean hasOwner) {
+    private static void verifyGetOwnershipState(DistributedEntityOwnershipService service, DOMEntity entity,
+            EntityOwnershipState expState) {
         Optional<EntityOwnershipState> state = service.getOwnershipState(entity);
         assertEquals("getOwnershipState present", true, state.isPresent());
-        assertEquals("isOwner", isOwner, state.get().isOwner());
-        assertEquals("hasOwner", hasOwner, state.get().hasOwner());
+        assertEquals("EntityOwnershipState", expState, state.get());
     }
 
     private void verifyEntityCandidate(ActorRef entityOwnershipShard, String entityType,
@@ -346,12 +347,13 @@ public class DistributedEntityOwnershipServiceTest extends AbstractEntityOwnersh
                 });
     }
 
-    private static void verifyRegisterCandidateLocal(final TestShardBuilder shardBuilder, Entity entity) {
+    private static void verifyRegisterCandidateLocal(final TestShardBuilder shardBuilder, DOMEntity entity) {
         RegisterCandidateLocal regCandidate = shardBuilder.waitForShardMessage();
         assertEquals("getEntity", entity, regCandidate.getEntity());
     }
 
-    private static void verifyEntityOwnershipCandidateRegistration(Entity entity, EntityOwnershipCandidateRegistration reg) {
+    private static void verifyEntityOwnershipCandidateRegistration(DOMEntity entity,
+            DOMEntityOwnershipCandidateRegistration reg) {
         assertNotNull("EntityOwnershipCandidateRegistration null", reg);
         assertEquals("getInstance", entity, reg.getInstance());
     }
