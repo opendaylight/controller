@@ -18,9 +18,10 @@ import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Set;
-import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
-import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipChange;
-import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipListener;
+import org.opendaylight.mdsal.eos.common.api.EntityOwnershipChangeState;
+import org.opendaylight.mdsal.eos.dom.api.DOMEntity;
+import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipChange;
+import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,9 +35,9 @@ class EntityOwnershipListenerSupport {
 
     private final String logId;
     private final ActorContext actorContext;
-    private final Map<EntityOwnershipListener, ListenerActorRefEntry> listenerActorMap = new IdentityHashMap<>();
-    private final Set<Entity> entitiesWithCandidateSet = new HashSet<>();
-    private final Multimap<String, EntityOwnershipListener> entityTypeListenerMap = HashMultimap.create();
+    private final Map<DOMEntityOwnershipListener, ListenerActorRefEntry> listenerActorMap = new IdentityHashMap<>();
+    private final Set<DOMEntity> entitiesWithCandidateSet = new HashSet<>();
+    private final Multimap<String, DOMEntityOwnershipListener> entityTypeListenerMap = HashMultimap.create();
     private volatile boolean inJeopardy = false;
 
     EntityOwnershipListenerSupport(ActorContext actorContext, String logId) {
@@ -60,50 +61,51 @@ class EntityOwnershipListenerSupport {
         return wasInJeopardy;
     }
 
-    boolean hasCandidateForEntity(Entity entity) {
+    boolean hasCandidateForEntity(DOMEntity entity) {
         return entitiesWithCandidateSet.contains(entity);
     }
 
-    void setHasCandidateForEntity(Entity entity) {
+    void setHasCandidateForEntity(DOMEntity entity) {
         entitiesWithCandidateSet.add(entity);
     }
 
-    void unsetHasCandidateForEntity(Entity entity) {
+    void unsetHasCandidateForEntity(DOMEntity entity) {
         entitiesWithCandidateSet.remove(entity);
     }
 
-    void addEntityOwnershipListener(String entityType, EntityOwnershipListener listener) {
+    void addEntityOwnershipListener(String entityType, DOMEntityOwnershipListener listener) {
         LOG.debug("{}: Adding EntityOwnershipListener {} for entity type {}", logId, listener, entityType);
 
         addListener(listener, entityType);
     }
 
-    void removeEntityOwnershipListener(String entityType, EntityOwnershipListener listener) {
+    void removeEntityOwnershipListener(String entityType, DOMEntityOwnershipListener listener) {
         LOG.debug("{}: Removing EntityOwnershipListener {} for entity type {}", logId, listener, entityType);
 
         removeListener(listener, entityType);
     }
 
-    void notifyEntityOwnershipListeners(Entity entity, boolean wasOwner, boolean isOwner, boolean hasOwner) {
+    void notifyEntityOwnershipListeners(DOMEntity entity, boolean wasOwner, boolean isOwner, boolean hasOwner) {
         notifyListeners(entity, entity.getType(), wasOwner, isOwner, hasOwner);
     }
 
-    void notifyEntityOwnershipListener(Entity entity, boolean wasOwner, boolean isOwner, boolean hasOwner,
-            EntityOwnershipListener listener) {
+    void notifyEntityOwnershipListener(DOMEntity entity, boolean wasOwner, boolean isOwner, boolean hasOwner,
+            DOMEntityOwnershipListener listener) {
         notifyListeners(entity, wasOwner, isOwner, hasOwner, Collections.singleton(listener));
     }
 
-    private void notifyListeners(Entity entity, String mapKey, boolean wasOwner, boolean isOwner, boolean hasOwner) {
-        Collection<EntityOwnershipListener> listeners = entityTypeListenerMap.get(mapKey);
+    private void notifyListeners(DOMEntity entity, String mapKey, boolean wasOwner, boolean isOwner, boolean hasOwner) {
+        Collection<DOMEntityOwnershipListener> listeners = entityTypeListenerMap.get(mapKey);
         if(!listeners.isEmpty()) {
             notifyListeners(entity, wasOwner, isOwner, hasOwner, listeners);
         }
     }
 
-    private void notifyListeners(Entity entity, boolean wasOwner, boolean isOwner, boolean hasOwner,
-            Collection<EntityOwnershipListener> listeners) {
-        EntityOwnershipChange changed = new EntityOwnershipChange(entity, wasOwner, isOwner, hasOwner, inJeopardy);
-        for(EntityOwnershipListener listener: listeners) {
+    private void notifyListeners(DOMEntity entity, boolean wasOwner, boolean isOwner, boolean hasOwner,
+            Collection<DOMEntityOwnershipListener> listeners) {
+        DOMEntityOwnershipChange changed = new DOMEntityOwnershipChange(entity,
+                EntityOwnershipChangeState.from(wasOwner, isOwner, hasOwner), inJeopardy);
+        for(DOMEntityOwnershipListener listener: listeners) {
             ActorRef listenerActor = listenerActorFor(listener);
 
             LOG.debug("{}: Notifying EntityOwnershipListenerActor {} with {}", logId, listenerActor, changed);
@@ -112,7 +114,7 @@ class EntityOwnershipListenerSupport {
         }
     }
 
-    private void addListener(EntityOwnershipListener listener, String mapKey) {
+    private void addListener(DOMEntityOwnershipListener listener, String mapKey) {
         if (entityTypeListenerMap.put(mapKey, listener)) {
             ListenerActorRefEntry listenerEntry = listenerActorMap.get(listener);
             if(listenerEntry == null) {
@@ -123,7 +125,7 @@ class EntityOwnershipListenerSupport {
         }
     }
 
-    private void removeListener(EntityOwnershipListener listener, String mapKey) {
+    private void removeListener(DOMEntityOwnershipListener listener, String mapKey) {
         if (entityTypeListenerMap.remove(mapKey, listener)) {
             ListenerActorRefEntry listenerEntry = listenerActorMap.get(listener);
 
@@ -141,7 +143,7 @@ class EntityOwnershipListenerSupport {
         }
     }
 
-    private ActorRef listenerActorFor(EntityOwnershipListener listener) {
+    private ActorRef listenerActorFor(DOMEntityOwnershipListener listener) {
         return listenerActorMap.get(listener).actorFor(listener);
     }
 
@@ -149,7 +151,7 @@ class EntityOwnershipListenerSupport {
         ActorRef actorRef;
         int referenceCount = 1;
 
-        ActorRef actorFor(EntityOwnershipListener listener) {
+        ActorRef actorFor(DOMEntityOwnershipListener listener) {
             if(actorRef == null) {
                 actorRef = actorContext.actorOf(EntityOwnershipListenerActor.props(listener));
 

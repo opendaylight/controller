@@ -55,13 +55,13 @@ import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolic
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
-import org.opendaylight.controller.md.sal.common.api.clustering.CandidateAlreadyRegisteredException;
-import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
-import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipCandidateRegistration;
-import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipChange;
-import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipListener;
-import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipService;
-import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipState;
+import org.opendaylight.mdsal.eos.common.api.CandidateAlreadyRegisteredException;
+import org.opendaylight.mdsal.eos.common.api.EntityOwnershipState;
+import org.opendaylight.mdsal.eos.dom.api.DOMEntity;
+import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipCandidateRegistration;
+import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipChange;
+import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipListener;
+import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.entity.owners.rev150804.entity.owners.entity.type.entity.Candidate;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
@@ -79,11 +79,11 @@ public class DistributedEntityOwnershipIntegrationTest {
     private static final String MODULE_SHARDS_MEMBER_1_CONFIG = "module-shards-default-member-1.conf";
     private static final String ENTITY_TYPE1 = "entityType1";
     private static final String ENTITY_TYPE2 = "entityType2";
-    private static final Entity ENTITY1 = new Entity(ENTITY_TYPE1, "entity1");
-    private static final Entity ENTITY1_2 = new Entity(ENTITY_TYPE2, "entity1");
-    private static final Entity ENTITY2 = new Entity(ENTITY_TYPE1, "entity2");
-    private static final Entity ENTITY3 = new Entity(ENTITY_TYPE1, "entity3");
-    private static final Entity ENTITY4 = new Entity(ENTITY_TYPE1, "entity4");
+    private static final DOMEntity ENTITY1 = new DOMEntity(ENTITY_TYPE1, "entity1");
+    private static final DOMEntity ENTITY1_2 = new DOMEntity(ENTITY_TYPE2, "entity1");
+    private static final DOMEntity ENTITY2 = new DOMEntity(ENTITY_TYPE1, "entity2");
+    private static final DOMEntity ENTITY3 = new DOMEntity(ENTITY_TYPE1, "entity3");
+    private static final DOMEntity ENTITY4 = new DOMEntity(ENTITY_TYPE1, "entity4");
     private static final SchemaContext SCHEMA_CONTEXT = SchemaContextHelper.entityOwners();
 
     private final DatastoreContext.Builder leaderDatastoreContextBuilder =
@@ -96,16 +96,16 @@ public class DistributedEntityOwnershipIntegrationTest {
     private final List<MemberNode> memberNodes = new ArrayList<>();
 
     @Mock
-    private EntityOwnershipListener leaderMockListener;
+    private DOMEntityOwnershipListener leaderMockListener;
 
     @Mock
-    private EntityOwnershipListener leaderMockListener2;
+    private DOMEntityOwnershipListener leaderMockListener2;
 
     @Mock
-    private EntityOwnershipListener follower1MockListener;
+    private DOMEntityOwnershipListener follower1MockListener;
 
     @Mock
-    private EntityOwnershipListener follower2MockListener;
+    private DOMEntityOwnershipListener follower2MockListener;
 
     @Before
     public void setUp() {
@@ -148,9 +148,9 @@ public class DistributedEntityOwnershipIntegrationTest {
         follower1Node.configDataStore().waitTillReady();
         follower2Node.configDataStore().waitTillReady();
 
-        EntityOwnershipService leaderEntityOwnershipService = newOwnershipService(leaderDistributedDataStore);
-        EntityOwnershipService follower1EntityOwnershipService = newOwnershipService(follower1Node.configDataStore());
-        EntityOwnershipService follower2EntityOwnershipService = newOwnershipService(follower2Node.configDataStore());
+        DOMEntityOwnershipService leaderEntityOwnershipService = newOwnershipService(leaderDistributedDataStore);
+        DOMEntityOwnershipService follower1EntityOwnershipService = newOwnershipService(follower1Node.configDataStore());
+        DOMEntityOwnershipService follower2EntityOwnershipService = newOwnershipService(follower2Node.configDataStore());
 
         leaderNode.kit().waitUntilLeader(leaderNode.configDataStore().getActorContext(), ENTITY_OWNERSHIP_SHARD_NAME);
 
@@ -165,8 +165,8 @@ public class DistributedEntityOwnershipIntegrationTest {
         verify(follower1MockListener, timeout(5000)).ownershipChanged(ownershipChange(ENTITY1, false, false, true));
         reset(leaderMockListener, follower1MockListener);
 
-        verifyGetOwnershipState(leaderEntityOwnershipService, ENTITY1, true, true);
-        verifyGetOwnershipState(follower1EntityOwnershipService, ENTITY1, false, true);
+        verifyGetOwnershipState(leaderEntityOwnershipService, ENTITY1, EntityOwnershipState.IS_OWNER);
+        verifyGetOwnershipState(follower1EntityOwnershipService, ENTITY1, EntityOwnershipState.OWNED_BY_OTHER);
 
         // Register leader candidate for entity1_2 (same id, different type) and verify it becomes owner
 
@@ -187,7 +187,7 @@ public class DistributedEntityOwnershipIntegrationTest {
 
         // Register follower1 candidate for entity2 and verify it becomes owner
 
-        EntityOwnershipCandidateRegistration follower1Entity2Reg = follower1EntityOwnershipService.registerCandidate(ENTITY2);
+        DOMEntityOwnershipCandidateRegistration follower1Entity2Reg = follower1EntityOwnershipService.registerCandidate(ENTITY2);
         verify(follower1MockListener, timeout(5000)).ownershipChanged(ownershipChange(ENTITY2, false, true, true));
         verify(leaderMockListener, timeout(5000)).ownershipChanged(ownershipChange(ENTITY2, false, false, true));
         reset(leaderMockListener, follower1MockListener);
@@ -252,7 +252,7 @@ public class DistributedEntityOwnershipIntegrationTest {
 
         // Register leader candidate for entity2 and verify it becomes owner
 
-        EntityOwnershipCandidateRegistration leaderEntity2Reg = leaderEntityOwnershipService.registerCandidate(ENTITY2);
+        DOMEntityOwnershipCandidateRegistration leaderEntity2Reg = leaderEntityOwnershipService.registerCandidate(ENTITY2);
         verify(leaderMockListener, timeout(5000)).ownershipChanged(ownershipChange(ENTITY2, false, true, true));
         verifyOwner(leaderDistributedDataStore, ENTITY2, "member-1");
 
@@ -288,9 +288,9 @@ public class DistributedEntityOwnershipIntegrationTest {
         follower1Node.configDataStore().waitTillReady();
         follower2Node.configDataStore().waitTillReady();
 
-        EntityOwnershipService leaderEntityOwnershipService = newOwnershipService(leaderDistributedDataStore);
-        EntityOwnershipService follower1EntityOwnershipService = newOwnershipService(follower1Node.configDataStore());
-        EntityOwnershipService follower2EntityOwnershipService = newOwnershipService(follower2Node.configDataStore());
+        DOMEntityOwnershipService leaderEntityOwnershipService = newOwnershipService(leaderDistributedDataStore);
+        DOMEntityOwnershipService follower1EntityOwnershipService = newOwnershipService(follower1Node.configDataStore());
+        DOMEntityOwnershipService follower2EntityOwnershipService = newOwnershipService(follower2Node.configDataStore());
 
         leaderNode.kit().waitUntilLeader(leaderNode.configDataStore().getActorContext(), ENTITY_OWNERSHIP_SHARD_NAME);
 
@@ -371,11 +371,11 @@ public class DistributedEntityOwnershipIntegrationTest {
         follower1Node.configDataStore().waitTillReady();
         follower2Node.configDataStore().waitTillReady();
 
-        EntityOwnershipService leaderEntityOwnershipService = newOwnershipService(leaderDistributedDataStore);
-        EntityOwnershipService follower1EntityOwnershipService = newOwnershipService(follower1Node.configDataStore());
-        EntityOwnershipService follower2EntityOwnershipService = newOwnershipService(follower2Node.configDataStore());
-        EntityOwnershipService follower3EntityOwnershipService = newOwnershipService(follower3Node.configDataStore());
-        EntityOwnershipService follower4EntityOwnershipService = newOwnershipService(follower4Node.configDataStore());
+        DOMEntityOwnershipService leaderEntityOwnershipService = newOwnershipService(leaderDistributedDataStore);
+        DOMEntityOwnershipService follower1EntityOwnershipService = newOwnershipService(follower1Node.configDataStore());
+        DOMEntityOwnershipService follower2EntityOwnershipService = newOwnershipService(follower2Node.configDataStore());
+        DOMEntityOwnershipService follower3EntityOwnershipService = newOwnershipService(follower3Node.configDataStore());
+        DOMEntityOwnershipService follower4EntityOwnershipService = newOwnershipService(follower4Node.configDataStore());
 
         leaderNode.kit().waitUntilLeader(leaderNode.configDataStore().getActorContext(), ENTITY_OWNERSHIP_SHARD_NAME);
 
@@ -460,9 +460,9 @@ public class DistributedEntityOwnershipIntegrationTest {
         follower1Node.configDataStore().waitTillReady();
         follower2Node.configDataStore().waitTillReady();
 
-        EntityOwnershipService leaderEntityOwnershipService = newOwnershipService(leaderDistributedDataStore);
-        EntityOwnershipService follower1EntityOwnershipService = newOwnershipService(follower1Node.configDataStore());
-        EntityOwnershipService follower2EntityOwnershipService = newOwnershipService(follower2Node.configDataStore());
+        DOMEntityOwnershipService leaderEntityOwnershipService = newOwnershipService(leaderDistributedDataStore);
+        DOMEntityOwnershipService follower1EntityOwnershipService = newOwnershipService(follower1Node.configDataStore());
+        DOMEntityOwnershipService follower2EntityOwnershipService = newOwnershipService(follower2Node.configDataStore());
 
         leaderNode.kit().waitUntilLeader(leaderNode.configDataStore().getActorContext(), ENTITY_OWNERSHIP_SHARD_NAME);
 
@@ -470,17 +470,17 @@ public class DistributedEntityOwnershipIntegrationTest {
         follower1EntityOwnershipService.registerListener(ENTITY_TYPE1, follower1MockListener);
         follower2EntityOwnershipService.registerListener(ENTITY_TYPE1, follower2MockListener);
 
-        final EntityOwnershipCandidateRegistration candidate1 = leaderEntityOwnershipService.registerCandidate(ENTITY1);
+        final DOMEntityOwnershipCandidateRegistration candidate1 = leaderEntityOwnershipService.registerCandidate(ENTITY1);
         verify(leaderMockListener, timeout(5000)).ownershipChanged(ownershipChange(ENTITY1, false, true, true));
 
-        final EntityOwnershipCandidateRegistration candidate2 = follower1EntityOwnershipService.registerCandidate(ENTITY1);
-        final EntityOwnershipCandidateRegistration candidate3 = follower2EntityOwnershipService.registerCandidate(ENTITY1);
+        final DOMEntityOwnershipCandidateRegistration candidate2 = follower1EntityOwnershipService.registerCandidate(ENTITY1);
+        final DOMEntityOwnershipCandidateRegistration candidate3 = follower2EntityOwnershipService.registerCandidate(ENTITY1);
 
         Mockito.reset(leaderMockListener);
 
-        ArgumentCaptor<EntityOwnershipChange> leaderChangeCaptor = ArgumentCaptor.forClass(EntityOwnershipChange.class);
-        ArgumentCaptor<EntityOwnershipChange> follower1ChangeCaptor = ArgumentCaptor.forClass(EntityOwnershipChange.class);
-        ArgumentCaptor<EntityOwnershipChange> follower2ChangeCaptor = ArgumentCaptor.forClass(EntityOwnershipChange.class);
+        ArgumentCaptor<DOMEntityOwnershipChange> leaderChangeCaptor = ArgumentCaptor.forClass(DOMEntityOwnershipChange.class);
+        ArgumentCaptor<DOMEntityOwnershipChange> follower1ChangeCaptor = ArgumentCaptor.forClass(DOMEntityOwnershipChange.class);
+        ArgumentCaptor<DOMEntityOwnershipChange> follower2ChangeCaptor = ArgumentCaptor.forClass(DOMEntityOwnershipChange.class);
         doNothing().when(leaderMockListener).ownershipChanged(leaderChangeCaptor.capture());
         doNothing().when(follower1MockListener).ownershipChanged(follower1ChangeCaptor.capture());
         doNothing().when(follower2MockListener).ownershipChanged(follower2ChangeCaptor.capture());
@@ -493,14 +493,14 @@ public class DistributedEntityOwnershipIntegrationTest {
         for(int i=0;i<100;i++) {
             Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
             if(!leaderEntityOwnershipService.getOwnershipState(ENTITY1).isPresent() ||
-                    !leaderEntityOwnershipService.getOwnershipState(ENTITY1).get().hasOwner() &&
+                    leaderEntityOwnershipService.getOwnershipState(ENTITY1).get() == EntityOwnershipState.NO_OWNER &&
                     follower1EntityOwnershipService.getOwnershipState(ENTITY1).isPresent() &&
-                    !follower1EntityOwnershipService.getOwnershipState(ENTITY1).get().hasOwner() &&
+                    follower1EntityOwnershipService.getOwnershipState(ENTITY1).get() == EntityOwnershipState.NO_OWNER &&
                     follower2EntityOwnershipService.getOwnershipState(ENTITY1).isPresent() &&
-                    !follower2EntityOwnershipService.getOwnershipState(ENTITY1).get().hasOwner() &&
-                    leaderChangeCaptor.getAllValues().size() > 0 && !leaderChangeCaptor.getValue().hasOwner() &&
-                    leaderChangeCaptor.getAllValues().size() > 0 && !follower1ChangeCaptor.getValue().hasOwner() &&
-                    leaderChangeCaptor.getAllValues().size() > 0 && !follower2ChangeCaptor.getValue().hasOwner()) {
+                    follower2EntityOwnershipService.getOwnershipState(ENTITY1).get() == EntityOwnershipState.NO_OWNER &&
+                    leaderChangeCaptor.getAllValues().size() > 0 && !leaderChangeCaptor.getValue().getState().hasOwner() &&
+                    leaderChangeCaptor.getAllValues().size() > 0 && !follower1ChangeCaptor.getValue().getState().hasOwner() &&
+                    leaderChangeCaptor.getAllValues().size() > 0 && !follower2ChangeCaptor.getValue().getState().hasOwner()) {
                 passed = true;
                 break;
             }
@@ -523,7 +523,7 @@ public class DistributedEntityOwnershipIntegrationTest {
                 datastoreContextBuilder(leaderDatastoreContextBuilder).build();
 
         DistributedDataStore leaderDistributedDataStore = leaderNode.configDataStore();
-        EntityOwnershipService leaderEntityOwnershipService = newOwnershipService(leaderDistributedDataStore);
+        DOMEntityOwnershipService leaderEntityOwnershipService = newOwnershipService(leaderDistributedDataStore);
 
         leaderNode.kit().waitUntilLeader(leaderNode.configDataStore().getActorContext(), ENTITY_OWNERSHIP_SHARD_NAME);
 
@@ -537,12 +537,12 @@ public class DistributedEntityOwnershipIntegrationTest {
         leaderNode.waitForMembersUp("member-2");
         follower1Node.waitForMembersUp("member-1");
 
-        EntityOwnershipService follower1EntityOwnershipService = newOwnershipService(follower1DistributedDataStore);
+        DOMEntityOwnershipService follower1EntityOwnershipService = newOwnershipService(follower1DistributedDataStore);
 
         leaderEntityOwnershipService.registerListener(ENTITY_TYPE1, leaderMockListener);
 
         // Register a candidate for follower1 - should get queued since follower1 has no leader
-        EntityOwnershipCandidateRegistration candidateReg = follower1EntityOwnershipService.registerCandidate(ENTITY1);
+        DOMEntityOwnershipCandidateRegistration candidateReg = follower1EntityOwnershipService.registerCandidate(ENTITY1);
         Uninterruptibles.sleepUninterruptibly(300, TimeUnit.MILLISECONDS);
         verify(leaderMockListener, never()).ownershipChanged(ownershipChange(ENTITY1));
 
@@ -603,15 +603,15 @@ public class DistributedEntityOwnershipIntegrationTest {
         follower1Node.configDataStore().waitTillReady();
         follower2Node.configDataStore().waitTillReady();
 
-        EntityOwnershipService leaderEntityOwnershipService = newOwnershipService(leaderDistributedDataStore);
-        EntityOwnershipService follower1EntityOwnershipService = newOwnershipService(follower1Node.configDataStore());
-        EntityOwnershipService follower2EntityOwnershipService = newOwnershipService(follower2Node.configDataStore());
+        DOMEntityOwnershipService leaderEntityOwnershipService = newOwnershipService(leaderDistributedDataStore);
+        DOMEntityOwnershipService follower1EntityOwnershipService = newOwnershipService(follower1Node.configDataStore());
+        DOMEntityOwnershipService follower2EntityOwnershipService = newOwnershipService(follower2Node.configDataStore());
 
         leaderNode.kit().waitUntilLeader(leaderNode.configDataStore().getActorContext(), ENTITY_OWNERSHIP_SHARD_NAME);
 
         // Register leader candidate for entity1 and verify it becomes owner
 
-        EntityOwnershipCandidateRegistration leaderEntity1Reg = leaderEntityOwnershipService.registerCandidate(ENTITY1);
+        DOMEntityOwnershipCandidateRegistration leaderEntity1Reg = leaderEntityOwnershipService.registerCandidate(ENTITY1);
 
         verifyCandidates(leaderDistributedDataStore, ENTITY1, "member-1");
         verifyOwner(leaderDistributedDataStore, ENTITY1, "member-1");
@@ -644,15 +644,15 @@ public class DistributedEntityOwnershipIntegrationTest {
         follower1Node.configDataStore().waitTillReady();
         follower2Node.configDataStore().waitTillReady();
 
-        EntityOwnershipService leaderEntityOwnershipService = newOwnershipService(leaderDistributedDataStore);
-        EntityOwnershipService follower1EntityOwnershipService = newOwnershipService(follower1Node.configDataStore());
-        EntityOwnershipService follower2EntityOwnershipService = newOwnershipService(follower2Node.configDataStore());
+        DOMEntityOwnershipService leaderEntityOwnershipService = newOwnershipService(leaderDistributedDataStore);
+        DOMEntityOwnershipService follower1EntityOwnershipService = newOwnershipService(follower1Node.configDataStore());
+        DOMEntityOwnershipService follower2EntityOwnershipService = newOwnershipService(follower2Node.configDataStore());
 
         leaderNode.kit().waitUntilLeader(leaderNode.configDataStore().getActorContext(), ENTITY_OWNERSHIP_SHARD_NAME);
 
         // Register leader candidate for entity1 and verify it becomes owner
 
-        EntityOwnershipCandidateRegistration leaderEntity1Reg = leaderEntityOwnershipService.registerCandidate(ENTITY1);
+        DOMEntityOwnershipCandidateRegistration leaderEntity1Reg = leaderEntityOwnershipService.registerCandidate(ENTITY1);
 
         verifyCandidates(leaderDistributedDataStore, ENTITY1, "member-1");
         verifyOwner(leaderDistributedDataStore, ENTITY1, "member-1");
@@ -664,20 +664,19 @@ public class DistributedEntityOwnershipIntegrationTest {
         verifyOwner(leaderDistributedDataStore, ENTITY1, "member-2");
     }
 
-    private static void verifyGetOwnershipState(EntityOwnershipService service, Entity entity,
-            boolean isOwner, boolean hasOwner) {
+    private static void verifyGetOwnershipState(final DOMEntityOwnershipService service, final DOMEntity entity,
+            final EntityOwnershipState expState) {
         Optional<EntityOwnershipState> state = service.getOwnershipState(entity);
         assertEquals("getOwnershipState present", true, state.isPresent());
-        assertEquals("isOwner", isOwner, state.get().isOwner());
-        assertEquals("hasOwner", hasOwner, state.get().hasOwner());
+        assertEquals("EntityOwnershipState", expState, state.get());
     }
 
-    private static void verifyCandidates(final DistributedDataStore dataStore, final Entity entity, final String... expCandidates) throws Exception {
+    private static void verifyCandidates(final DistributedDataStore dataStore, final DOMEntity entity, final String... expCandidates) throws Exception {
         AssertionError lastError = null;
         Stopwatch sw = Stopwatch.createStarted();
         while(sw.elapsed(TimeUnit.MILLISECONDS) <= 10000) {
             Optional<NormalizedNode<?, ?>> possible = dataStore.newReadOnlyTransaction().read(
-                    entityPath(entity.getType(), entity.getId()).node(Candidate.QNAME)).get(5, TimeUnit.SECONDS);
+                    entityPath(entity.getType(), entity.getIdentifier()).node(Candidate.QNAME)).get(5, TimeUnit.SECONDS);
             try {
                 assertEquals("Candidates not found for " + entity, true, possible.isPresent());
                 Collection<String> actual = new ArrayList<>();
@@ -696,8 +695,8 @@ public class DistributedEntityOwnershipIntegrationTest {
         throw lastError;
     }
 
-    private static void verifyOwner(final DistributedDataStore dataStore, final Entity entity, final String expOwner) {
-        AbstractEntityOwnershipTest.verifyOwner(expOwner, entity.getType(), entity.getId(),
+    private static void verifyOwner(final DistributedDataStore dataStore, final DOMEntity entity, final String expOwner) {
+        AbstractEntityOwnershipTest.verifyOwner(expOwner, entity.getType(), entity.getIdentifier(),
                 path -> {
                     try {
                         return dataStore.newReadOnlyTransaction().read(path).get(5, TimeUnit.SECONDS).get();

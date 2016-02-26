@@ -35,13 +35,13 @@ import org.opendaylight.controller.cluster.datastore.messages.CreateShard;
 import org.opendaylight.controller.cluster.datastore.messages.GetShardDataTree;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ModuleShardStrategy;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
-import org.opendaylight.controller.md.sal.common.api.clustering.CandidateAlreadyRegisteredException;
-import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
-import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipCandidateRegistration;
-import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipListener;
-import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipListenerRegistration;
-import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipService;
-import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipState;
+import org.opendaylight.mdsal.eos.common.api.CandidateAlreadyRegisteredException;
+import org.opendaylight.mdsal.eos.common.api.EntityOwnershipState;
+import org.opendaylight.mdsal.eos.dom.api.DOMEntity;
+import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipCandidateRegistration;
+import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipListener;
+import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipListenerRegistration;
+import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.entity.owners.rev150804.EntityOwners;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
@@ -60,14 +60,14 @@ import scala.concurrent.duration.Duration;
  *
  * @author Thomas Pantelis
  */
-public class DistributedEntityOwnershipService implements EntityOwnershipService, AutoCloseable {
+public class DistributedEntityOwnershipService implements DOMEntityOwnershipService, AutoCloseable {
     @VisibleForTesting
     static final String ENTITY_OWNERSHIP_SHARD_NAME = "entity-ownership";
 
     private static final Logger LOG = LoggerFactory.getLogger(DistributedEntityOwnershipService.class);
     private static final Timeout MESSAGE_TIMEOUT = new Timeout(1, TimeUnit.MINUTES);
 
-    private final ConcurrentMap<Entity, Entity> registeredEntities = new ConcurrentHashMap<>();
+    private final ConcurrentMap<DOMEntity, DOMEntity> registeredEntities = new ConcurrentHashMap<>();
     private final ActorContext context;
 
     private volatile ActorRef localEntityOwnershipShard;
@@ -140,7 +140,7 @@ public class DistributedEntityOwnershipService implements EntityOwnershipService
     }
 
     @Override
-    public EntityOwnershipCandidateRegistration registerCandidate(final Entity entity)
+    public DOMEntityOwnershipCandidateRegistration registerCandidate(final DOMEntity entity)
             throws CandidateAlreadyRegisteredException {
         Preconditions.checkNotNull(entity, "entity cannot be null");
 
@@ -156,7 +156,7 @@ public class DistributedEntityOwnershipService implements EntityOwnershipService
         return new DistributedEntityOwnershipCandidateRegistration(entity, this);
     }
 
-    void unregisterCandidate(final Entity entity) {
+    void unregisterCandidate(final DOMEntity entity) {
         LOG.debug("Unregistering candidate for {}", entity);
 
         executeLocalEntityOwnershipShardOperation(new UnregisterCandidateLocal(entity));
@@ -164,7 +164,8 @@ public class DistributedEntityOwnershipService implements EntityOwnershipService
     }
 
     @Override
-    public EntityOwnershipListenerRegistration registerListener(final String entityType, final EntityOwnershipListener listener) {
+    public DOMEntityOwnershipListenerRegistration registerListener(final String entityType,
+            final DOMEntityOwnershipListener listener) {
         Preconditions.checkNotNull(entityType, "entityType cannot be null");
         Preconditions.checkNotNull(listener, "listener cannot be null");
 
@@ -177,7 +178,7 @@ public class DistributedEntityOwnershipService implements EntityOwnershipService
     }
 
     @Override
-    public Optional<EntityOwnershipState> getOwnershipState(final Entity forEntity) {
+    public Optional<EntityOwnershipState> getOwnershipState(final DOMEntity forEntity) {
         Preconditions.checkNotNull(forEntity, "forEntity cannot be null");
 
         DataTree dataTree = getLocalEntityOwnershipShardDataTree();
@@ -186,7 +187,7 @@ public class DistributedEntityOwnershipService implements EntityOwnershipService
         }
 
         Optional<NormalizedNode<?, ?>> entityNode = dataTree.takeSnapshot().readNode(
-                entityPath(forEntity.getType(), forEntity.getId()));
+                entityPath(forEntity.getType(), forEntity.getIdentifier()));
         if (!entityNode.isPresent()) {
             return Optional.absent();
         }
@@ -205,11 +206,11 @@ public class DistributedEntityOwnershipService implements EntityOwnershipService
         boolean hasOwner = !Strings.isNullOrEmpty(owner);
         boolean isOwner = hasOwner && localMemberName.getName().equals(owner);
 
-        return Optional.of(new EntityOwnershipState(isOwner, hasOwner));
+        return Optional.of(EntityOwnershipState.from(isOwner, hasOwner));
     }
 
     @Override
-    public boolean isCandidateRegistered(@Nonnull final Entity entity) {
+    public boolean isCandidateRegistered(@Nonnull final DOMEntity entity) {
         return registeredEntities.get(entity) != null;
     }
 
@@ -232,7 +233,7 @@ public class DistributedEntityOwnershipService implements EntityOwnershipService
         return localEntityOwnershipShardDataTree;
     }
 
-    void unregisterListener(final String entityType, final EntityOwnershipListener listener) {
+    void unregisterListener(final String entityType, final DOMEntityOwnershipListener listener) {
         LOG.debug("Unregistering listener {} for entity type {}", listener, entityType);
 
         executeLocalEntityOwnershipShardOperation(new UnregisterListenerLocal(listener, entityType));
