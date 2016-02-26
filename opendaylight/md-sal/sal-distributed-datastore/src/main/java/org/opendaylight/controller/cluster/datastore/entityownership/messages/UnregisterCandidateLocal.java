@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.datastore.entityownership.messages;
 
-import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
+import org.opendaylight.mdsal.eos.dom.api.DOMEntity;
 
 /**
  * Message sent to the local EntityOwnershipShard to unregister a candidate.
@@ -15,13 +15,13 @@ import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
  * @author Thomas Pantelis
  */
 public class UnregisterCandidateLocal {
-    private final Entity entity;
+    private final DOMEntity entity;
 
-    public UnregisterCandidateLocal(Entity entity) {
+    public UnregisterCandidateLocal(DOMEntity entity) {
         this.entity = entity;
     }
 
-    public Entity getEntity() {
+    public DOMEntity getEntity() {
         return entity;
     }
 

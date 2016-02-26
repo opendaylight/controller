@@ -57,7 +57,7 @@ import org.opendaylight.controller.cluster.datastore.modification.DeleteModifica
 import org.opendaylight.controller.cluster.datastore.modification.MergeModification;
 import org.opendaylight.controller.cluster.datastore.modification.WriteModification;
 import org.opendaylight.controller.cluster.raft.RaftState;
-import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
+import org.opendaylight.mdsal.eos.dom.api.DOMEntity;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
@@ -165,7 +165,7 @@ class EntityOwnershipShard extends Shard {
         listenerSupport.setHasCandidateForEntity(registerCandidate.getEntity());
 
         NormalizedNode<?, ?> entityOwners = entityOwnersWithCandidate(registerCandidate.getEntity().getType(),
-                registerCandidate.getEntity().getId(), localMemberName.getName());
+                registerCandidate.getEntity().getIdentifier(), localMemberName.getName());
         commitCoordinator.commitModification(new MergeModification(ENTITY_OWNERS_PATH, entityOwners), this);
 
         getSender().tell(SuccessReply.INSTANCE, getSelf());
@@ -174,10 +174,10 @@ class EntityOwnershipShard extends Shard {
     private void onUnregisterCandidateLocal(UnregisterCandidateLocal unregisterCandidate) {
         LOG.debug("{}: onUnregisterCandidateLocal: {}", persistenceId(), unregisterCandidate);
 
-        Entity entity = unregisterCandidate.getEntity();
+        DOMEntity entity = unregisterCandidate.getEntity();
         listenerSupport.unsetHasCandidateForEntity(entity);
 
-        YangInstanceIdentifier candidatePath = candidatePath(entity.getType(), entity.getId(), localMemberName.getName());
+        YangInstanceIdentifier candidatePath = candidatePath(entity.getType(), entity.getIdentifier(), localMemberName.getName());
         commitCoordinator.commitModification(new DeleteModification(candidatePath), this);
 
         getSender().tell(SuccessReply.INSTANCE, getSelf());
@@ -206,7 +206,7 @@ class EntityOwnershipShard extends Shard {
                     hasOwner = false;
                 }
 
-                Entity entity = new Entity(entityType,
+                DOMEntity entity = new DOMEntity(entityType,
                     (YangInstanceIdentifier) entityNode.getChild(ENTITY_ID_NODE_ID).get().getValue());
 
                 listenerSupport.notifyEntityOwnershipListener(entity, false, isOwner, hasOwner,
@@ -283,7 +283,7 @@ class EntityOwnershipShard extends Shard {
                     hasOwner = false;
                 }
 
-                Entity entity = new Entity(possibleType.get().getValue().toString(),
+                DOMEntity entity = new DOMEntity(possibleType.get().getValue().toString(),
                     (YangInstanceIdentifier) entityNode.getChild(ENTITY_ID_NODE_ID).get().getValue());
 
                 listenerSupport.notifyEntityOwnershipListeners(entity, isOwner, isOwner, hasOwner);

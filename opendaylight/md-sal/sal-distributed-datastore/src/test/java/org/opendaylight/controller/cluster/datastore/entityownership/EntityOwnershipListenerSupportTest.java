@@ -28,9 +28,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.TestActorFactory;
 import org.opendaylight.controller.cluster.raft.utils.DoNothingActor;
-import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
-import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipChange;
-import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipListener;
+import org.opendaylight.mdsal.eos.dom.api.DOMEntity;
+import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipChange;
+import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipListener;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import scala.collection.Iterator;
@@ -62,14 +62,14 @@ public class EntityOwnershipListenerSupportTest extends AbstractEntityOwnershipT
     public void testNotifyEntityOwnershipListeners() {
         EntityOwnershipListenerSupport support = new EntityOwnershipListenerSupport(actorContext, "test");
 
-        EntityOwnershipListener mockListener1 = mock(EntityOwnershipListener.class, "EntityOwnershipListener1");
-        EntityOwnershipListener mockListener2 = mock(EntityOwnershipListener.class, "EntityOwnershipListener2");
-        EntityOwnershipListener mockListener1_2 = mock(EntityOwnershipListener.class, "EntityOwnershipListener1_2");
+        DOMEntityOwnershipListener mockListener1 = mock(DOMEntityOwnershipListener.class, "EntityOwnershipListener1");
+        DOMEntityOwnershipListener mockListener2 = mock(DOMEntityOwnershipListener.class, "EntityOwnershipListener2");
+        DOMEntityOwnershipListener mockListener1_2 = mock(DOMEntityOwnershipListener.class, "EntityOwnershipListener1_2");
         String entityType1 = "type1";
         String entityType2 = "type2";
-        Entity entity1 = new Entity(entityType1, YangInstanceIdentifier.of(QName.create("test", "id1")));
-        Entity entity2 = new Entity(entityType2, YangInstanceIdentifier.of(QName.create("test", "id2")));
-        Entity entity3 = new Entity("noListener", YangInstanceIdentifier.of(QName.create("test", "id5")));
+        DOMEntity entity1 = new DOMEntity(entityType1, YangInstanceIdentifier.of(QName.create("test", "id1")));
+        DOMEntity entity2 = new DOMEntity(entityType2, YangInstanceIdentifier.of(QName.create("test", "id2")));
+        DOMEntity entity3 = new DOMEntity("noListener", YangInstanceIdentifier.of(QName.create("test", "id5")));
 
         // Add EntityOwnershipListener registrations.
 
@@ -85,7 +85,7 @@ public class EntityOwnershipListenerSupportTest extends AbstractEntityOwnershipT
         verify(mockListener1, timeout(5000)).ownershipChanged(ownershipChange(entity1, false, true, true));
         verify(mockListener1_2, timeout(5000)).ownershipChanged(ownershipChange(entity1, false, true, true));
         Uninterruptibles.sleepUninterruptibly(300, TimeUnit.MILLISECONDS);
-        verify(mockListener2, never()).ownershipChanged(any(EntityOwnershipChange.class));
+        verify(mockListener2, never()).ownershipChanged(any(DOMEntityOwnershipChange.class));
         assertEquals("# of listener actors", 2, actorContext.children().size());
         reset(mockListener1, mockListener2, mockListener1_2);
 
@@ -95,8 +95,8 @@ public class EntityOwnershipListenerSupportTest extends AbstractEntityOwnershipT
 
         verify(mockListener2, timeout(5000)).ownershipChanged(ownershipChange(entity2, false, true, true));
         Uninterruptibles.sleepUninterruptibly(300, TimeUnit.MILLISECONDS);
-        verify(mockListener1, never()).ownershipChanged(any(EntityOwnershipChange.class));
-        verify(mockListener1_2, never()).ownershipChanged(any(EntityOwnershipChange.class));
+        verify(mockListener1, never()).ownershipChanged(any(DOMEntityOwnershipChange.class));
+        verify(mockListener1_2, never()).ownershipChanged(any(DOMEntityOwnershipChange.class));
         assertEquals("# of listener actors", 3, actorContext.children().size());
         reset(mockListener1, mockListener2, mockListener1_2);
 
@@ -105,9 +105,9 @@ public class EntityOwnershipListenerSupportTest extends AbstractEntityOwnershipT
         support.notifyEntityOwnershipListeners(entity3, true, false, true);
 
         Uninterruptibles.sleepUninterruptibly(300, TimeUnit.MILLISECONDS);
-        verify(mockListener1, never()).ownershipChanged(any(EntityOwnershipChange.class));
-        verify(mockListener2, never()).ownershipChanged(any(EntityOwnershipChange.class));
-        verify(mockListener1_2, never()).ownershipChanged(any(EntityOwnershipChange.class));
+        verify(mockListener1, never()).ownershipChanged(any(DOMEntityOwnershipChange.class));
+        verify(mockListener2, never()).ownershipChanged(any(DOMEntityOwnershipChange.class));
+        verify(mockListener1_2, never()).ownershipChanged(any(DOMEntityOwnershipChange.class));
         reset(mockListener1, mockListener2, mockListener1_2);
 
         Iterable<ActorRef> listenerActors = actorContext.children();
@@ -120,7 +120,7 @@ public class EntityOwnershipListenerSupportTest extends AbstractEntityOwnershipT
 
         verify(mockListener1_2, timeout(5000)).ownershipChanged(ownershipChange(entity1, true, false, true));
         Uninterruptibles.sleepUninterruptibly(300, TimeUnit.MILLISECONDS);
-        verify(mockListener1, never()).ownershipChanged(any(EntityOwnershipChange.class));
+        verify(mockListener1, never()).ownershipChanged(any(DOMEntityOwnershipChange.class));
         reset(mockListener1, mockListener2, mockListener1_2);
 
         // Unregister all listeners and verify their listener actors are destroyed.
@@ -151,8 +151,8 @@ public class EntityOwnershipListenerSupportTest extends AbstractEntityOwnershipT
         support.notifyEntityOwnershipListeners(entity1, false, false, true);
 
         verify(mockListener1, timeout(5000)).ownershipChanged(ownershipChange(entity1, false, false, true));
-        verify(mockListener1_2, never()).ownershipChanged(any(EntityOwnershipChange.class));
-        verify(mockListener2, never()).ownershipChanged(any(EntityOwnershipChange.class));
+        verify(mockListener1_2, never()).ownershipChanged(any(DOMEntityOwnershipChange.class));
+        verify(mockListener2, never()).ownershipChanged(any(DOMEntityOwnershipChange.class));
 
         // Quickly register and unregister mockListener2 - expecting no exceptions.
 
@@ -163,7 +163,7 @@ public class EntityOwnershipListenerSupportTest extends AbstractEntityOwnershipT
     @Test
     public void testHasCandidateForEntity() {
         EntityOwnershipListenerSupport support = new EntityOwnershipListenerSupport(actorContext, "test");
-        Entity entity = new Entity("type", YangInstanceIdentifier.of(QName.create("test", "id")));
+        DOMEntity entity = new DOMEntity("type", YangInstanceIdentifier.of(QName.create("test", "id")));
 
         assertEquals("hasCandidateForEntity", false, support.hasCandidateForEntity(entity));
 
