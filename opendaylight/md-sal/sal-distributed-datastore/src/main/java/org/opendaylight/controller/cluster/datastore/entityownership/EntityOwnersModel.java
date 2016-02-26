@@ -8,7 +8,7 @@
 package org.opendaylight.controller.cluster.datastore.entityownership;
 
 import java.util.Map.Entry;
-import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
+import org.opendaylight.mdsal.eos.dom.api.DOMEntity;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.entity.owners.rev150804.EntityOwners;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.entity.owners.rev150804.entity.owners.EntityType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.entity.owners.rev150804.entity.owners.entity.type.entity.Candidate;
@@ -123,7 +123,7 @@ public final class EntityOwnersModel {
         return null;
     }
 
-    static Entity createEntity(YangInstanceIdentifier entityPath) {
+    static DOMEntity createEntity(YangInstanceIdentifier entityPath) {
         String entityType = null;
         YangInstanceIdentifier entityId = null;
         for(PathArgument pathArg: entityPath.getPathArguments()) {
@@ -138,6 +138,6 @@ public final class EntityOwnersModel {
             }
         }
 
-        return new Entity(entityType, entityId);
+        return new DOMEntity(entityType, entityId);
     }
 }

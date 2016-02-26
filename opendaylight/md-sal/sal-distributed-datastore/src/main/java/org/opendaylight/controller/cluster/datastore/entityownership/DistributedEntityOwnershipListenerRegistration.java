@@ -7,27 +7,36 @@
  */
 package org.opendaylight.controller.cluster.datastore.entityownership;
 
-import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipListener;
-import org.opendaylight.controller.md.sal.common.impl.clustering.AbstractEntityOwnershipListenerRegistration;
+import com.google.common.base.Preconditions;
+import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipListener;
+import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipListenerRegistration;
+import org.opendaylight.yangtools.concepts.AbstractObjectRegistration;
 
 /**
  * Implementation of EntityOwnershipListenerRegistration.
  *
  * @author Thomas Pantelis
  */
-class DistributedEntityOwnershipListenerRegistration extends AbstractEntityOwnershipListenerRegistration {
-
+class DistributedEntityOwnershipListenerRegistration extends AbstractObjectRegistration<DOMEntityOwnershipListener>
+        implements DOMEntityOwnershipListenerRegistration {
     private final DistributedEntityOwnershipService service;
+    private final String entityType;
 
-    DistributedEntityOwnershipListenerRegistration(EntityOwnershipListener listener, String entityType,
+    DistributedEntityOwnershipListenerRegistration(DOMEntityOwnershipListener listener, String entityType,
             DistributedEntityOwnershipService service) {
-        super(listener, entityType);
-        this.service = service;
+        super(listener);
+        this.entityType = Preconditions.checkNotNull(entityType, "entityType cannot be null");
+        this.service = Preconditions.checkNotNull(service, "DOMEntityOwnershipListener cannot be null");
     }
 
     @Override
     protected void removeRegistration() {
         service.unregisterListener(getEntityType(), getInstance());
+    }
+
+    @Override
+    public String getEntityType() {
+        return entityType;
     }
 
     @Override

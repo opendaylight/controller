@@ -22,7 +22,7 @@ import org.junit.Test;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.ShardDataTree;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
-import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
+import org.opendaylight.mdsal.eos.dom.api.DOMEntity;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -44,8 +44,8 @@ public class EntityOwnerChangeListenerTest {
             YangInstanceIdentifier.of(QName.create("test", "2015-08-14", "entity1"));
     private static final YangInstanceIdentifier ENTITY_ID2 =
             YangInstanceIdentifier.of(QName.create("test", "2015-08-14", "entity2"));
-    private static final Entity ENTITY1 = new Entity(ENTITY_TYPE, ENTITY_ID1);
-    private static final Entity ENTITY2 = new Entity(ENTITY_TYPE, ENTITY_ID2);
+    private static final DOMEntity ENTITY1 = new DOMEntity(ENTITY_TYPE, ENTITY_ID1);
+    private static final DOMEntity ENTITY2 = new DOMEntity(ENTITY_TYPE, ENTITY_ID2);
 
     private final ShardDataTree shardDataTree = new ShardDataTree(SchemaContextHelper.entityOwners(),
         TreeType.OPERATIONAL);
@@ -62,7 +62,7 @@ public class EntityOwnerChangeListenerTest {
     public void testOnDataTreeChanged() throws Exception {
         writeNode(ENTITY_OWNERS_PATH, entityOwnersWithCandidate(ENTITY_TYPE, ENTITY_ID1, LOCAL_MEMBER_NAME));
         writeNode(ENTITY_OWNERS_PATH, entityOwnersWithCandidate(ENTITY_TYPE, ENTITY_ID2, LOCAL_MEMBER_NAME));
-        verify(mockListenerSupport, never()).notifyEntityOwnershipListeners(any(Entity.class), anyBoolean(),
+        verify(mockListenerSupport, never()).notifyEntityOwnershipListeners(any(DOMEntity.class), anyBoolean(),
                 anyBoolean(), anyBoolean());
 
         // Write local member as owner for entity 1
@@ -74,7 +74,7 @@ public class EntityOwnerChangeListenerTest {
 
         reset(mockListenerSupport);
         writeNode(ENTITY_OWNERS_PATH, entityOwnersWithCandidate(ENTITY_TYPE, ENTITY_ID1, REMOTE_MEMBER_NAME1));
-        verify(mockListenerSupport, never()).notifyEntityOwnershipListeners(any(Entity.class), anyBoolean(),
+        verify(mockListenerSupport, never()).notifyEntityOwnershipListeners(any(DOMEntity.class), anyBoolean(),
                 anyBoolean(), anyBoolean());
 
         // Change owner to remote member 1 for entity 1
@@ -116,7 +116,7 @@ public class EntityOwnerChangeListenerTest {
 
         reset(mockListenerSupport);
         writeNode(entityPath(ENTITY_TYPE, ENTITY_ID2), entityEntryWithOwner(ENTITY_ID2, LOCAL_MEMBER_NAME));
-        verify(mockListenerSupport, never()).notifyEntityOwnershipListeners(any(Entity.class), anyBoolean(),
+        verify(mockListenerSupport, never()).notifyEntityOwnershipListeners(any(DOMEntity.class), anyBoolean(),
                 anyBoolean(), anyBoolean());
 
         // Clear the owner for entity 2
@@ -129,7 +129,7 @@ public class EntityOwnerChangeListenerTest {
 
         reset(mockListenerSupport);
         writeNode(entityPath(ENTITY_TYPE, ENTITY_ID2), entityEntryWithOwner(ENTITY_ID2, null));
-        verify(mockListenerSupport, never()).notifyEntityOwnershipListeners(any(Entity.class), anyBoolean(),
+        verify(mockListenerSupport, never()).notifyEntityOwnershipListeners(any(DOMEntity.class), anyBoolean(),
                 anyBoolean(), anyBoolean());
     }
 

@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.datastore.entityownership.messages;
 
-import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipListener;
+import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipListener;
 
 /**
  * Message sent to the local EntityOwnershipShard to register an EntityOwnershipListener.
@@ -15,15 +15,15 @@ import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipL
  * @author Thomas Pantelis
  */
 public class RegisterListenerLocal {
-    private final EntityOwnershipListener listener;
+    private final DOMEntityOwnershipListener listener;
     private final String entityType;
 
-    public RegisterListenerLocal(EntityOwnershipListener listener, String entityType) {
+    public RegisterListenerLocal(DOMEntityOwnershipListener listener, String entityType) {
         this.listener = listener;
         this.entityType = entityType;
     }
 
-    public EntityOwnershipListener getListener() {
+    public DOMEntityOwnershipListener getListener() {
         return listener;
     }
 
