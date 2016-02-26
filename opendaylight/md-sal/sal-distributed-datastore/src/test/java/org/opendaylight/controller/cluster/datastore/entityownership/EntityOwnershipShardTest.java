@@ -12,9 +12,9 @@ import static org.mockito.AdditionalMatchers.or;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.ENTITY_OWNERS_PATH;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.candidatePath;
@@ -68,9 +68,9 @@ import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
-import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
-import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipChange;
-import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipListener;
+import org.opendaylight.mdsal.dom.api.clustering.DOMEntity;
+import org.opendaylight.mdsal.dom.api.clustering.DOMEntityOwnershipChange;
+import org.opendaylight.mdsal.dom.api.clustering.DOMEntityOwnershipListener;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -114,7 +114,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
         ShardTestKit.waitUntilLeader(shard);
 
         YangInstanceIdentifier entityId = ENTITY_ID1;
-        Entity entity = new Entity(ENTITY_TYPE, entityId);
+        DOMEntity entity = new DOMEntity(ENTITY_TYPE, entityId);
 
         shard.tell(new RegisterCandidateLocal(entity), kit.getRef());
         kit.expectMsgClass(SuccessReply.class);
@@ -138,7 +138,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
                 withDispatcher(Dispatchers.DefaultDispatcherId()));
 
         YangInstanceIdentifier entityId = ENTITY_ID1;
-        Entity entity = new Entity(ENTITY_TYPE, entityId);
+        DOMEntity entity = new DOMEntity(ENTITY_TYPE, entityId);
 
         shard.tell(new RegisterCandidateLocal(entity), kit.getRef());
         kit.expectMsgClass(SuccessReply.class);
@@ -173,7 +173,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
         ShardTestKit.waitUntilLeader(shard);
 
         YangInstanceIdentifier entityId = ENTITY_ID1;
-        Entity entity = new Entity(ENTITY_TYPE, entityId);
+        DOMEntity entity = new DOMEntity(ENTITY_TYPE, entityId);
 
         shard.tell(new RegisterCandidateLocal(entity), kit.getRef());
         kit.expectMsgClass(SuccessReply.class);
@@ -213,7 +213,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
         Uninterruptibles.sleepUninterruptibly(500, TimeUnit.MILLISECONDS);
 
         YangInstanceIdentifier entityId = ENTITY_ID1;
-        Entity entity = new Entity(ENTITY_TYPE, entityId);
+        DOMEntity entity = new DOMEntity(ENTITY_TYPE, entityId);
 
         shard.tell(new RegisterCandidateLocal(entity), kit.getRef());
         kit.expectMsgClass(SuccessReply.class);
@@ -243,7 +243,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
         shard.tell(new AppendEntries(1L, peerId, -1L, -1L, Collections.<ReplicatedLogEntry>emptyList(), -1L, -1L,
                 DataStoreVersions.CURRENT_VERSION), peer);
 
-        shard.tell(new RegisterCandidateLocal(new Entity(ENTITY_TYPE, ENTITY_ID1)), kit.getRef());
+        shard.tell(new RegisterCandidateLocal(new DOMEntity(ENTITY_TYPE, ENTITY_ID1)), kit.getRef());
         kit.expectMsgClass(SuccessReply.class);
 
         MockLeader leader = peer.underlyingActor();
@@ -259,7 +259,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
 
         shard.tell(dataStoreContextBuilder.shardTransactionCommitTimeoutInSeconds(1).build(), ActorRef.noSender());
 
-        shard.tell(new RegisterCandidateLocal(new Entity(ENTITY_TYPE, ENTITY_ID2)), kit.getRef());
+        shard.tell(new RegisterCandidateLocal(new DOMEntity(ENTITY_TYPE, ENTITY_ID2)), kit.getRef());
         kit.expectMsgClass(SuccessReply.class);
 
         assertEquals("Leader received BatchedModifications", true, Uninterruptibles.awaitUninterruptibly(
@@ -276,7 +276,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
         for(int i = 1; i <= max; i++) {
             YangInstanceIdentifier id = YangInstanceIdentifier.of(QName.create("test", "2015-08-14", "test" + i));
             entityIds.add(id);
-            shard.tell(new RegisterCandidateLocal(new Entity(ENTITY_TYPE, id)), kit.getRef());
+            shard.tell(new RegisterCandidateLocal(new DOMEntity(ENTITY_TYPE, id)), kit.getRef());
         }
 
         assertEquals("Leader received BatchedModifications", true, Uninterruptibles.awaitUninterruptibly(
@@ -300,7 +300,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
         TestActorRef<EntityOwnershipShard> shard = actorFactory.createTestActor(newShardProps());
         ShardTestKit.waitUntilLeader(shard);
 
-        Entity entity = new Entity(ENTITY_TYPE, ENTITY_ID1);
+        DOMEntity entity = new DOMEntity(ENTITY_TYPE, ENTITY_ID1);
 
         // Register
 
@@ -332,7 +332,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
         TestActorRef<EntityOwnershipShard> shard = actorFactory.createTestActor(newShardProps());
         ShardTestKit.waitUntilLeader(shard);
 
-        Entity entity = new Entity(ENTITY_TYPE, ENTITY_ID1);
+        DOMEntity entity = new DOMEntity(ENTITY_TYPE, ENTITY_ID1);
         ShardDataTree shardDataTree = shard.underlyingActor().getDataStore();
 
         // Add a remote candidate
@@ -428,7 +428,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
 
         // Add candidates for entity1 with the local leader as the owner
 
-        leader.tell(new RegisterCandidateLocal(new Entity(ENTITY_TYPE, ENTITY_ID1)), kit.getRef());
+        leader.tell(new RegisterCandidateLocal(new DOMEntity(ENTITY_TYPE, ENTITY_ID1)), kit.getRef());
         kit.expectMsgClass(SuccessReply.class);
         verifyCommittedEntityCandidate(leader, ENTITY_TYPE, ENTITY_ID1, LOCAL_MEMBER_NAME);
 
@@ -453,7 +453,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
         commitModification(leader, entityOwnersWithCandidate(ENTITY_TYPE, ENTITY_ID3, peerMemberName2), kit);
         verifyCommittedEntityCandidate(leader, ENTITY_TYPE, ENTITY_ID3, peerMemberName2);
 
-        leader.tell(new RegisterCandidateLocal(new Entity(ENTITY_TYPE, ENTITY_ID3)), kit.getRef());
+        leader.tell(new RegisterCandidateLocal(new DOMEntity(ENTITY_TYPE, ENTITY_ID3)), kit.getRef());
         kit.expectMsgClass(SuccessReply.class);
         verifyCommittedEntityCandidate(leader, ENTITY_TYPE, ENTITY_ID3, LOCAL_MEMBER_NAME);
 
@@ -597,8 +597,8 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
 
         shard.tell(new PeerAddressResolved(leaderId.toString(), leader.path().toString()), ActorRef.noSender());
 
-        Entity entity = new Entity(ENTITY_TYPE, ENTITY_ID1);
-        EntityOwnershipListener listener = mock(EntityOwnershipListener.class);
+        DOMEntity entity = new DOMEntity(ENTITY_TYPE, ENTITY_ID1);
+        DOMEntityOwnershipListener listener = mock(DOMEntityOwnershipListener.class);
 
         shard.tell(new RegisterListenerLocal(listener, ENTITY_TYPE), kit.getRef());
         kit.expectMsgClass(SuccessReply.class);
@@ -607,7 +607,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
 
         shard.tell(new RegisterCandidateLocal(entity), kit.getRef());
         kit.expectMsgClass(SuccessReply.class);
-        verifyCommittedEntityCandidate(shard, entity.getType(), entity.getId(), LOCAL_MEMBER_NAME);
+        verifyCommittedEntityCandidate(shard, entity.getType(), entity.getIdentifier(), LOCAL_MEMBER_NAME);
         verify(listener, timeout(5000)).ownershipChanged(ownershipChange(entity, false, true, true));
         reset(listener);
 
@@ -620,7 +620,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
 
         // Since the the shard has a local candidate registered, it should re-add its candidate to the entity.
 
-        verifyCommittedEntityCandidate(shard, entity.getType(), entity.getId(), LOCAL_MEMBER_NAME);
+        verifyCommittedEntityCandidate(shard, entity.getType(), entity.getIdentifier(), LOCAL_MEMBER_NAME);
         verify(listener, timeout(5000)).ownershipChanged(ownershipChange(entity, false, true, true));
 
         // Unregister the local candidate and verify it's removed and no re-added.
@@ -628,9 +628,9 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
         shard.tell(new UnregisterCandidateLocal(entity), kit.getRef());
         kit.expectMsgClass(SuccessReply.class);
 
-        verifyNoEntityCandidate(shard, entity.getType(), entity.getId(), LOCAL_MEMBER_NAME);
+        verifyNoEntityCandidate(shard, entity.getType(), entity.getIdentifier(), LOCAL_MEMBER_NAME);
         Uninterruptibles.sleepUninterruptibly(500, TimeUnit.MILLISECONDS);
-        verifyNoEntityCandidate(shard, entity.getType(), entity.getId(), LOCAL_MEMBER_NAME);
+        verifyNoEntityCandidate(shard, entity.getType(), entity.getIdentifier(), LOCAL_MEMBER_NAME);
     }
 
     @Test
@@ -641,11 +641,11 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
         ShardDataTree shardDataTree = shard.underlyingActor().getDataStore();
 
         String otherEntityType = "otherEntityType";
-        Entity entity1 = new Entity(ENTITY_TYPE, ENTITY_ID1);
-        Entity entity2 = new Entity(ENTITY_TYPE, ENTITY_ID2);
-        Entity entity3 = new Entity(ENTITY_TYPE, ENTITY_ID3);
-        Entity entity4 = new Entity(otherEntityType, ENTITY_ID3);
-        EntityOwnershipListener listener = mock(EntityOwnershipListener.class);
+        DOMEntity entity1 = new DOMEntity(ENTITY_TYPE, ENTITY_ID1);
+        DOMEntity entity2 = new DOMEntity(ENTITY_TYPE, ENTITY_ID2);
+        DOMEntity entity3 = new DOMEntity(ENTITY_TYPE, ENTITY_ID3);
+        DOMEntity entity4 = new DOMEntity(otherEntityType, ENTITY_ID3);
+        DOMEntityOwnershipListener listener = mock(DOMEntityOwnershipListener.class);
 
         // Register listener
 
@@ -676,9 +676,9 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
         // Register remote candidate for entity1
 
         String remoteMemberName = "remoteMember";
-        writeNode(ENTITY_OWNERS_PATH, entityOwnersWithCandidate(ENTITY_TYPE, entity1.getId(), remoteMemberName),
+        writeNode(ENTITY_OWNERS_PATH, entityOwnersWithCandidate(ENTITY_TYPE, entity1.getIdentifier(), remoteMemberName),
                 shardDataTree);
-        verifyCommittedEntityCandidate(shard, ENTITY_TYPE, entity1.getId(), remoteMemberName);
+        verifyCommittedEntityCandidate(shard, ENTITY_TYPE, entity1.getIdentifier(), remoteMemberName);
 
         // Unregister the local candidate for entity1 and verify listener is notified
 
@@ -696,9 +696,9 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
         shard.tell(new RegisterCandidateLocal(entity3), kit.getRef());
         kit.expectMsgClass(SuccessReply.class);
 
-        verifyOwner(shard, ENTITY_TYPE, entity3.getId(), LOCAL_MEMBER_NAME);
+        verifyOwner(shard, ENTITY_TYPE, entity3.getIdentifier(), LOCAL_MEMBER_NAME);
         Uninterruptibles.sleepUninterruptibly(500, TimeUnit.MILLISECONDS);
-        verify(listener, never()).ownershipChanged(any(EntityOwnershipChange.class));
+        verify(listener, never()).ownershipChanged(any(DOMEntityOwnershipChange.class));
 
         // Re-register the listener and verify it gets notified of currently owned entities
 
@@ -895,7 +895,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
                 ImmutableMap.of(peerId.toString(), peer.path().toString())));
         ShardTestKit.waitUntilLeader(shard);
 
-        Entity entity = new Entity(ENTITY_TYPE, ENTITY_ID1);
+        DOMEntity entity = new DOMEntity(ENTITY_TYPE, ENTITY_ID1);
         ShardDataTree shardDataTree = shard.underlyingActor().getDataStore();
 
         // Add a remote candidate
@@ -938,7 +938,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
                 ImmutableMap.of(follower1Id.toString(), follower2.path().toString(), follower2Id.toString(), follower2.path().toString())));
         ShardTestKit.waitUntilLeader(shard);
 
-        Entity entity = new Entity(ENTITY_TYPE, ENTITY_ID1);
+        DOMEntity entity = new DOMEntity(ENTITY_TYPE, ENTITY_ID1);
         ShardDataTree shardDataTree = shard.underlyingActor().getDataStore();
 
         // Add a remote candidate
