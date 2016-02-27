@@ -15,7 +15,8 @@ import org.opendaylight.controller.cluster.datastore.Shard;
 import org.opendaylight.controller.cluster.datastore.config.ModuleShardConfiguration;
 
 /**
- * A message sent to the ShardManager to dynamically create a new shard.
+ * A message sent to the ShardManager to dynamically create a new shard. Shard Manager responds
+ * with a reference to the actor handling the shard.
  *
  * @author Thomas Pantelis
  */
@@ -31,8 +32,8 @@ public class CreateShard {
      * @param shardPropsCreator used to obtain the Props for creating the shard actor instance.
      * @param datastoreContext the DatastoreContext for the new shard. If null, the default is used.
      */
-    public CreateShard(@Nonnull ModuleShardConfiguration moduleShardConfig,
-            @Nonnull Shard.AbstractBuilder<?, ?> shardBuilder, @Nullable DatastoreContext datastoreContext) {
+    public CreateShard(@Nonnull final ModuleShardConfiguration moduleShardConfig,
+            @Nonnull final Shard.AbstractBuilder<?, ?> shardBuilder, @Nullable final DatastoreContext datastoreContext) {
         this.moduleShardConfig = Preconditions.checkNotNull(moduleShardConfig);
         this.shardBuilder = Preconditions.checkNotNull(shardBuilder);
         this.datastoreContext = datastoreContext;
