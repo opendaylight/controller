@@ -18,18 +18,19 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import java.util.Collection;
+import com.google.common.base.Verify;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nonnull;
-import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.config.ModuleShardConfiguration;
+import org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnershipShard.Builder;
 import org.opendaylight.controller.cluster.datastore.entityownership.messages.RegisterCandidateLocal;
 import org.opendaylight.controller.cluster.datastore.entityownership.messages.RegisterListenerLocal;
 import org.opendaylight.controller.cluster.datastore.entityownership.messages.UnregisterCandidateLocal;
 import org.opendaylight.controller.cluster.datastore.entityownership.messages.UnregisterListenerLocal;
 import org.opendaylight.controller.cluster.datastore.entityownership.selectionstrategy.EntityOwnerSelectionStrategyConfig;
+import org.opendaylight.controller.cluster.datastore.exceptions.TimeoutException;
 import org.opendaylight.controller.cluster.datastore.messages.CreateShard;
 import org.opendaylight.controller.cluster.datastore.messages.GetShardDataTree;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ModuleShardStrategy;
@@ -59,7 +60,7 @@ import scala.concurrent.duration.Duration;
  *
  * @author Thomas Pantelis
  */
-public class DistributedEntityOwnershipService implements EntityOwnershipService, AutoCloseable {
+public final class DistributedEntityOwnershipService implements EntityOwnershipService, AutoCloseable {
     static final String ENTITY_OWNERSHIP_SHARD_NAME = "entity-ownership";
 
     private static final Logger LOG = LoggerFactory.getLogger(DistributedEntityOwnershipService.class);
@@ -67,73 +68,58 @@ public class DistributedEntityOwnershipService implements EntityOwnershipService
 
     private final ConcurrentMap<Entity, Entity> registeredEntities = new ConcurrentHashMap<>();
     private final ActorContext context;
+    private final ActorRef shardActor;
 
-    private volatile ActorRef localEntityOwnershipShard;
     private volatile DataTree localEntityOwnershipShardDataTree;
 
-    private DistributedEntityOwnershipService(final ActorContext context) {
+    private DistributedEntityOwnershipService(final ActorContext context, final ActorRef shardActor) {
+        // ActorContext is needed only for getCurrentMemberName() and getClientDispatcher()
         this.context = Preconditions.checkNotNull(context);
+        this.shardActor = Preconditions.checkNotNull(shardActor);
     }
 
+    /**
+     * Create a started {@link DistributedEntityOwnershipService}. The service is fully functional and the backing
+     * shard is created by the time this method returns.
+     */
     public static DistributedEntityOwnershipService start(final ActorContext context,
             final EntityOwnerSelectionStrategyConfig strategyConfig) {
-        ActorRef shardManagerActor = context.getShardManager();
+        final ModuleShardConfiguration configuration = new ModuleShardConfiguration(
+            EntityOwners.QNAME.getNamespace(), "entity-owners", ENTITY_OWNERSHIP_SHARD_NAME,
+            ModuleShardStrategy.NAME, context.getConfiguration().getUniqueMemberNamesForAllShards()); 
+        final Builder builder = EntityOwnershipShard.newBuilder()
+                .localMemberName(context.getCurrentMemberName())
+                .ownerSelectionStrategyConfig(strategyConfig);
+        final CreateShard createShard = new CreateShard(configuration, builder, null);
 
-        Configuration configuration = context.getConfiguration();
-        Collection<String> entityOwnersMemberNames = configuration.getUniqueMemberNamesForAllShards();
-        CreateShard createShard = new CreateShard(new ModuleShardConfiguration(EntityOwners.QNAME.getNamespace(),
-                "entity-owners", ENTITY_OWNERSHIP_SHARD_NAME, ModuleShardStrategy.NAME, entityOwnersMemberNames),
-                        newShardBuilder(context, strategyConfig), null);
+        LOG.debug("Creating shard {}", ENTITY_OWNERSHIP_SHARD_NAME);
+        final Object response;
+        try {
+            response = context.executeOperation(context.getShardManager(), createShard);
+        } catch (TimeoutException e) {
+            throw new IllegalStateException("Timed out creating shard " + ENTITY_OWNERSHIP_SHARD_NAME, e);
+        }
 
-        Future<Object> createFuture = context.executeOperationAsync(shardManagerActor,
-                createShard, MESSAGE_TIMEOUT);
+        Verify.verify(response instanceof ActorRef, "Created shard %s, but response %s is not an ActorRef",
+            ENTITY_OWNERSHIP_SHARD_NAME, response);
 
-        createFuture.onComplete(new OnComplete<Object>() {
-            @Override
-            public void onComplete(final Throwable failure, final Object response) {
-                if (failure != null) {
-                    LOG.error("Failed to create {} shard", ENTITY_OWNERSHIP_SHARD_NAME, failure);
-                } else {
-                    LOG.info("Successfully created {} shard", ENTITY_OWNERSHIP_SHARD_NAME);
-                }
-            }
-        }, context.getClientDispatcher());
-
-        return new DistributedEntityOwnershipService(context);
-    }
-
-    private void executeEntityOwnershipShardOperation(final ActorRef shardActor, final Object message) {
-        Future<Object> future = context.executeOperationAsync(shardActor, message, MESSAGE_TIMEOUT);
-        future.onComplete(new OnComplete<Object>() {
-            @Override
-            public void onComplete(final Throwable failure, final Object response) {
-                if(failure != null) {
-                    LOG.debug("Error sending message {} to {}", message, shardActor, failure);
-                } else {
-                    LOG.debug("{} message to {} succeeded", message, shardActor, failure);
-                }
-            }
-        }, context.getClientDispatcher());
+        final ActorRef shardActor = (ActorRef) response;
+        LOG.info("Successfully created shard {} actor {}", ENTITY_OWNERSHIP_SHARD_NAME, shardActor);
+        return new DistributedEntityOwnershipService(context, shardActor);
     }
 
     private void executeLocalEntityOwnershipShardOperation(final Object message) {
-        if(localEntityOwnershipShard == null) {
-            Future<ActorRef> future = context.findLocalShardAsync(ENTITY_OWNERSHIP_SHARD_NAME);
-            future.onComplete(new OnComplete<ActorRef>() {
-                @Override
-                public void onComplete(final Throwable failure, final ActorRef shardActor) {
-                    if(failure != null) {
-                        LOG.error("Failed to find local {} shard", ENTITY_OWNERSHIP_SHARD_NAME, failure);
-                    } else {
-                        localEntityOwnershipShard = shardActor;
-                        executeEntityOwnershipShardOperation(localEntityOwnershipShard, message);
-                    }
+        final Future<Object> future = Patterns.ask(shardActor, message, MESSAGE_TIMEOUT);
+        future.onComplete(new OnComplete<Object>() {
+            @Override
+            public void onComplete(final Throwable failure, final Object response) {
+                if (failure != null) {
+                    LOG.debug("Error sending message {} to {}", message, shardActor, failure);
+                } else {
+                    LOG.debug("{} message to {} succeeded", message, shardActor);
                 }
-            }, context.getClientDispatcher());
-
-        } else {
-            executeEntityOwnershipShardOperation(localEntityOwnershipShard, message);
-        }
+            }
+        }, context.getClientDispatcher());
     }
 
     @Override
@@ -211,14 +197,9 @@ public class DistributedEntityOwnershipService implements EntityOwnershipService
     }
 
     private DataTree getLocalEntityOwnershipShardDataTree() {
-        if(localEntityOwnershipShardDataTree == null) {
+        if (localEntityOwnershipShardDataTree == null) {
             try {
-                if(localEntityOwnershipShard == null) {
-                    localEntityOwnershipShard = Await.result(context.findLocalShardAsync(
-                            ENTITY_OWNERSHIP_SHARD_NAME), Duration.Inf());
-                }
-
-                localEntityOwnershipShardDataTree = (DataTree) Await.result(Patterns.ask(localEntityOwnershipShard,
+                localEntityOwnershipShardDataTree = (DataTree) Await.result(Patterns.ask(shardActor,
                         GetShardDataTree.INSTANCE, MESSAGE_TIMEOUT), Duration.Inf());
             } catch (Exception e) {
                 LOG.error("Failed to find local {} shard", ENTITY_OWNERSHIP_SHARD_NAME, e);
@@ -236,16 +217,11 @@ public class DistributedEntityOwnershipService implements EntityOwnershipService
 
     @Override
     public void close() {
-    }
-
-    private static EntityOwnershipShard.Builder newShardBuilder(final ActorContext context,
-            final EntityOwnerSelectionStrategyConfig strategyConfig) {
-        return EntityOwnershipShard.newBuilder().localMemberName(context.getCurrentMemberName())
-                .ownerSelectionStrategyConfig(strategyConfig);
+        // FIXME: we need to unregister any entities and destroy the local shard
     }
 
     @VisibleForTesting
     ActorRef getLocalEntityOwnershipShard() {
-        return localEntityOwnershipShard;
+        return shardActor;
     }
 }

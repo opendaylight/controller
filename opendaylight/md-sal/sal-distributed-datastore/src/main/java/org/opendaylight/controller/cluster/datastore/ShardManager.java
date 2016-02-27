@@ -427,27 +427,24 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     private void onCreateShard(CreateShard createShard) {
         LOG.debug("{}: onCreateShard: {}", persistenceId(), createShard);
 
-        Object reply;
-        try {
-            String shardName = createShard.getModuleShardConfig().getShardName();
-            if(localShards.containsKey(shardName)) {
-                LOG.debug("{}: Shard {} already exists", persistenceId(), shardName);
-                reply = new akka.actor.Status.Success(String.format("Shard with name %s already exists", shardName));
-            } else {
-                doCreateShard(createShard);
-                reply = new akka.actor.Status.Success(null);
+        final String shardName = createShard.getModuleShardConfig().getShardName();
+        ShardInformation info = localShards.get(shardName);
+        if (info == null) {
+            try {
+                info = doCreateShard(createShard);
+            } catch (Exception e) {
+                LOG.error("{}: onCreateShard for {} failed", persistenceId(), shardName, e);
+                getSelf().tell(new Status.Failure(e), getSelf());
+                return;
             }
-        } catch (Exception e) {
-            LOG.error("{}: onCreateShard failed", persistenceId(), e);
-            reply = new akka.actor.Status.Failure(e);
+        } else {
+            LOG.debug("{}: Shard {} already exists", persistenceId(), shardName);
         }
 
-        if(getSender() != null && !getContext().system().deadLetters().equals(getSender())) {
-            getSender().tell(reply, getSelf());
-        }
+        getSender().tell(new Status.Success(info.actor), getSelf());
     }
 
-    private void doCreateShard(CreateShard createShard) {
+    private ShardInformation doCreateShard(CreateShard createShard) {
         ModuleShardConfiguration moduleShardConfig = createShard.getModuleShardConfig();
         String shardName = moduleShardConfig.getShardName();
 
@@ -497,6 +494,8 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         if(schemaContext != null) {
             info.setActor(newShardActor(schemaContext, info));
         }
+
+        return info;
     }
 
     private DatastoreContext.Builder newShardDatastoreContextBuilder(String shardName) {
