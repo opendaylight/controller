@@ -46,6 +46,10 @@ public class EntityOwnerSelectionStrategyConfigReaderTest {
         doReturn(mockConfig).when(mockConfigAdmin).getConfiguration(EntityOwnerSelectionStrategyConfigReader.CONFIG_ID);
     }
 
+    private EntityOwnerSelectionStrategyConfig loadStrategyConfig() {
+        return EntityOwnerSelectionStrategyConfigReader.loadStrategyWithConfig(mockBundleContext);
+    }
+
     @Test
     public void testReadStrategies(){
         Hashtable<String, Object> props = new Hashtable<>();
@@ -53,7 +57,7 @@ public class EntityOwnerSelectionStrategyConfigReaderTest {
 
         doReturn(props).when(mockConfig).getProperties();
 
-        EntityOwnerSelectionStrategyConfig config = new EntityOwnerSelectionStrategyConfigReader(mockBundleContext).getConfig();
+        EntityOwnerSelectionStrategyConfig config = loadStrategyConfig();
 
         assertTrue(config.isStrategyConfigured("test"));
 
@@ -66,7 +70,7 @@ public class EntityOwnerSelectionStrategyConfigReaderTest {
     public void testReadStrategiesWithIOException() throws IOException {
         doThrow(IOException.class).when(mockConfigAdmin).getConfiguration(EntityOwnerSelectionStrategyConfigReader.CONFIG_ID);
 
-        EntityOwnerSelectionStrategyConfig config = new EntityOwnerSelectionStrategyConfigReader(mockBundleContext).getConfig();
+        EntityOwnerSelectionStrategyConfig config = loadStrategyConfig();
 
         assertFalse(config.isStrategyConfigured("test"));
     }
@@ -75,7 +79,7 @@ public class EntityOwnerSelectionStrategyConfigReaderTest {
     public void testReadStrategiesWithNullConfiguration() throws IOException {
         doReturn(null).when(mockConfigAdmin).getConfiguration(EntityOwnerSelectionStrategyConfigReader.CONFIG_ID);
 
-        EntityOwnerSelectionStrategyConfig config = new EntityOwnerSelectionStrategyConfigReader(mockBundleContext).getConfig();
+        EntityOwnerSelectionStrategyConfig config = loadStrategyConfig();
 
         assertFalse(config.isStrategyConfigured("test"));
     }
@@ -84,33 +88,29 @@ public class EntityOwnerSelectionStrategyConfigReaderTest {
     public void testReadStrategiesWithNullConfigurationProperties() throws IOException {
         doReturn(null).when(mockConfig).getProperties();
 
-        EntityOwnerSelectionStrategyConfig config = new EntityOwnerSelectionStrategyConfigReader(mockBundleContext).getConfig();
+        EntityOwnerSelectionStrategyConfig config = loadStrategyConfig();
 
         assertFalse(config.isStrategyConfigured("test"));
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void testReadStrategiesInvalidDelay(){
         Hashtable<String, Object> props = new Hashtable<>();
         props.put("entity.type.test", "org.opendaylight.controller.cluster.datastore.entityownership.selectionstrategy.LastCandidateSelectionStrategy,foo");
 
         doReturn(props).when(mockConfig).getProperties();
 
-        EntityOwnerSelectionStrategyConfig config = new EntityOwnerSelectionStrategyConfigReader(mockBundleContext).getConfig();
-
-        assertFalse(config.isStrategyConfigured("test"));
+        loadStrategyConfig();
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void testReadStrategiesInvalidClassType(){
         Hashtable<String, Object> props = new Hashtable<>();
         props.put("entity.type.test", "String,100");
 
         doReturn(props).when(mockConfig).getProperties();
 
-        EntityOwnerSelectionStrategyConfig config = new EntityOwnerSelectionStrategyConfigReader(mockBundleContext).getConfig();
-
-        assertFalse(config.isStrategyConfigured("test"));
+        loadStrategyConfig();
     }
 
     @Test
@@ -121,7 +121,7 @@ public class EntityOwnerSelectionStrategyConfigReaderTest {
 
         doReturn(props).when(mockConfig).getProperties();
 
-        EntityOwnerSelectionStrategyConfig config = new EntityOwnerSelectionStrategyConfigReader(mockBundleContext).getConfig();
+        EntityOwnerSelectionStrategyConfig config = loadStrategyConfig();
 
         assertEquals(100, config.createStrategy("test").getSelectionDelayInMillis());
         assertEquals(0, config.createStrategy("test2").getSelectionDelayInMillis());
