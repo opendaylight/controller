@@ -12,7 +12,7 @@ import com.google.common.base.Preconditions;
 import java.io.IOException;
 import java.util.Dictionary;
 import java.util.Enumeration;
-import javax.annotation.Nullable;
+import org.opendaylight.controller.cluster.datastore.entityownership.selectionstrategy.EntityOwnerSelectionStrategyConfig.Builder;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.Configuration;
@@ -20,78 +20,115 @@ import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class EntityOwnerSelectionStrategyConfigReader {
+/**
+ * @deprecated FIXME: Service injection class. This class needs to be eliminated in favor of proper service injection,
+ *             which can be any of OSGi (which this class uses internally), java.util.ServiceLoader, or config
+ *             subsystem.
+ */
+@Deprecated
+public final class EntityOwnerSelectionStrategyConfigReader {
     public static final String CONFIG_ID = "org.opendaylight.controller.cluster.entity.owner.selection.strategies";
 
     private static final Logger LOG = LoggerFactory.getLogger(EntityOwnerSelectionStrategyConfigReader.class);
     private static final String ENTITY_TYPE_PREFIX = "entity.type.";
 
-    private final BundleContext bundleContext;
-    private final EntityOwnerSelectionStrategyConfig config;
-
-    public EntityOwnerSelectionStrategyConfigReader(BundleContext bundleContext) {
-        this.bundleContext = Preconditions.checkNotNull(bundleContext);
-        ServiceReference<ConfigurationAdmin> configAdminServiceReference =
-                bundleContext.getServiceReference(ConfigurationAdmin.class);
-        if(configAdminServiceReference == null) {
-            LOG.warn("No ConfigurationAdmin service found");
-            this.config = EntityOwnerSelectionStrategyConfig.newBuilder().build();
-        } else {
-            this.config = readConfiguration(configAdminServiceReference);
-        }
+    private EntityOwnerSelectionStrategyConfigReader() {
+        // Hidden on purpose
     }
 
-    private EntityOwnerSelectionStrategyConfig readConfiguration(ServiceReference<ConfigurationAdmin> configAdminServiceReference) {
-        EntityOwnerSelectionStrategyConfig.Builder builder = EntityOwnerSelectionStrategyConfig.newBuilder();
-        ConfigurationAdmin configAdmin = null;
+    public static EntityOwnerSelectionStrategyConfig loadStrategyWithConfig(final BundleContext bundleContext) {
+        final EntityOwnerSelectionStrategyConfig.Builder builder = EntityOwnerSelectionStrategyConfig.newBuilder();
+
+        final ServiceReference<ConfigurationAdmin> configAdminServiceReference =
+                bundleContext.getServiceReference(ConfigurationAdmin.class);
+        if (configAdminServiceReference == null) {
+            LOG.warn("No ConfigurationAdmin service found");
+            return builder.build();
+        }
+
+        final ConfigurationAdmin configAdmin = bundleContext.getService(configAdminServiceReference);
+        if (configAdmin == null) {
+            LOG.warn("Failed to get ConfigurationAdmin service");
+            return builder.build();
+        }
+
+        final Configuration config;
         try {
-            configAdmin = bundleContext.getService(configAdminServiceReference);
-            Dictionary<String, Object> properties = getProperties(configAdmin);
-            if(properties != null) {
-                Enumeration<String> keys = properties.keys();
-                while (keys.hasMoreElements()) {
-                    String key = keys.nextElement();
-                    String strategyProps = (String) properties.get(key);
-                    String[] strategyClassAndDelay = strategyProps.split(",");
-                    if(key.startsWith(ENTITY_TYPE_PREFIX)) {
-                        @SuppressWarnings("unchecked")
-                        Class<? extends EntityOwnerSelectionStrategy> aClass
-                        = (Class<? extends EntityOwnerSelectionStrategy>) getClass().getClassLoader().loadClass(strategyClassAndDelay[0]);
-                        long delay = 0;
-                        if(strategyClassAndDelay.length > 1){
-                            delay = Long.parseLong(strategyClassAndDelay[1]);
-                        }
-                        String entityType = key.substring(key.lastIndexOf(".") + 1);
-                        builder.addStrategy(entityType, aClass, delay);
-                    } else {
-                        LOG.debug("Ignoring non-conforming property key : {}, value : {}", key, strategyProps);
-                    }
-                }
-            } else {
-                LOG.error("Could not read strategy configuration file, will use default configuration");
+            config = configAdmin.getConfiguration(CONFIG_ID);
+            if (config != null) {
+                return parseConfiguration(builder, config);
             }
-        } catch(Exception e){
-            LOG.warn("Failed to read selection strategy configuration file. All configuration will be ignored.", e);
+
+            LOG.error("Could not read strategy configuration file, will use default configuration");
+        } catch (IOException e1) {
+            LOG.warn("Failed to get configuration for {}, starting up empty", CONFIG_ID);
+            return builder.build();
         } finally {
-            if(configAdmin != null) {
-                try {
-                    bundleContext.ungetService(configAdminServiceReference);
-                } catch (Exception e) {
-                    LOG.debug("Error from ungetService", e);
-                }
+            try {
+                bundleContext.ungetService(configAdminServiceReference);
+            } catch (Exception e) {
+                LOG.debug("Error from ungetService", e);
             }
         }
 
         return builder.build();
     }
 
-    @Nullable
-    private static Dictionary<String, Object> getProperties(ConfigurationAdmin configAdmin) throws IOException {
-        Configuration config = configAdmin.getConfiguration(CONFIG_ID);
-        return config != null ? config.getProperties() : null;
+    private static EntityOwnerSelectionStrategyConfig parseConfiguration(final Builder builder, final Configuration config) {
+        // Historic note: java.util.Dictionary since introduction of java.util.Map in Java 1.2
+        final Dictionary<String, Object> properties = config.getProperties();
+        if (properties == null) {
+            LOG.error("Empty strategy configuration {}, using defaults", config);
+            return builder.build();
+        }
+
+        // No java.util.Iterable: Wheeey, pre-Java 5 world!!!
+        final Enumeration<String> keys = properties.keys();
+        while (keys.hasMoreElements()) {
+            final String key = keys.nextElement();
+            if (!key.startsWith(ENTITY_TYPE_PREFIX)) {
+                LOG.debug("Ignoring non-conforming property key : {}");
+                continue;
+            }
+
+            final String[] strategyClassAndDelay = ((String) properties.get(key)).split(",");
+            final Class<? extends EntityOwnerSelectionStrategy> aClass;
+            try {
+                aClass = loadClass(strategyClassAndDelay[0]);
+            } catch (ClassNotFoundException e) {
+                LOG.error("Failed to load class {}, ignoring it", strategyClassAndDelay[0], e);
+                continue;
+            }
+
+            final long delay;
+            if (strategyClassAndDelay.length > 1) {
+                delay = Long.parseLong(strategyClassAndDelay[1]);
+            } else {
+                delay = 0;
+            }
+
+            String entityType = key.substring(key.lastIndexOf(".") + 1);
+            builder.addStrategy(entityType, aClass, delay);
+            LOG.debug("Entity Type '{}' using strategy {} delay {}", entityType, aClass, delay);
+        }
+
+        return builder.build();
     }
 
-    public EntityOwnerSelectionStrategyConfig getConfig() {
-        return config;
+    @Deprecated
+    @SuppressWarnings("unchecked")
+    private static Class<? extends EntityOwnerSelectionStrategy> loadClass(final String strategyClassAndDelay)
+            throws ClassNotFoundException {
+        final Class<?> clazz;
+        try {
+           clazz = EntityOwnerSelectionStrategyConfigReader.class.getClassLoader().loadClass(strategyClassAndDelay);
+        } catch (ClassNotFoundException e) {
+            throw new IllegalArgumentException("Failed to load strategy " + strategyClassAndDelay);
+        }
+
+        Preconditions.checkArgument(EntityOwnerSelectionStrategy.class.isAssignableFrom(clazz),
+            "Selected implementation %s must implement EntityOwnerSelectionStrategy, clazz");
+
+        return (Class<? extends EntityOwnerSelectionStrategy>) clazz;
     }
 }
