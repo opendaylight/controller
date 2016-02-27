@@ -14,20 +14,23 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class EntityOwnerSelectionStrategyConfig {
+/**
+ * FIXME: this is simple registry service, except it also loads classes.
+ */
+public final class EntityOwnerSelectionStrategyConfig {
     private static final Logger LOG = LoggerFactory.getLogger(EntityOwnerSelectionStrategyConfig.class);
     private final Map<String, StrategyInfo> entityTypeToStrategyInfo = new HashMap<>();
     private final Map<String, EntityOwnerSelectionStrategy> entityTypeToOwnerSelectionStrategy = new HashMap<>();
 
-    private EntityOwnerSelectionStrategyConfig(){
+    private EntityOwnerSelectionStrategyConfig() {
 
     }
 
-    public boolean isStrategyConfigured(String entityType){
+    public boolean isStrategyConfigured(final String entityType) {
         return entityTypeToStrategyInfo.get(entityType) != null;
     }
 
-    public EntityOwnerSelectionStrategy createStrategy(String entityType){
+    public EntityOwnerSelectionStrategy createStrategy(final String entityType) {
         final EntityOwnerSelectionStrategy strategy;
         final EntityOwnerSelectionStrategy existingStrategy = entityTypeToOwnerSelectionStrategy.get(entityType);
         if(existingStrategy != null){
@@ -42,19 +45,29 @@ public class EntityOwnerSelectionStrategyConfig {
             entityTypeToOwnerSelectionStrategy.put(entityType, strategy);
         }
         return strategy;
-
     }
 
+    /**
+     * @deprecated FIXME: THIS IS CONFIGURATION FOR A CUSTOM-LOADED CLASS CONSTRUCTOR
+     *
+     * This class should not exist. It contains a single long, which is passed to the constructor (via reflection).
+     * We are getting that information from a BundleContext. We are running in OSGi environment, hence this class
+     * needs to be deployed in its own bundle, with its own configuration.
+     *
+     * If this is used internally, it needs to be relocated into a separate package along with the implementation
+     * using it.
+     */
+    @Deprecated
     private static final class StrategyInfo {
         private final Class<? extends EntityOwnerSelectionStrategy> strategyClass;
         private final long delay;
 
-        private StrategyInfo(Class<? extends EntityOwnerSelectionStrategy> strategyClass, long delay) {
+        private StrategyInfo(final Class<? extends EntityOwnerSelectionStrategy> strategyClass, final long delay) {
             this.strategyClass = strategyClass;
             this.delay = delay;
         }
 
-        public EntityOwnerSelectionStrategy createStrategy(){
+        public EntityOwnerSelectionStrategy createStrategy() {
             try {
                 return strategyClass.getDeclaredConstructor(long.class).newInstance(delay);
             } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
@@ -64,18 +77,18 @@ public class EntityOwnerSelectionStrategyConfig {
         }
     }
 
-    public static Builder newBuilder(){
+    public static Builder newBuilder() {
         return new Builder(new EntityOwnerSelectionStrategyConfig());
     }
 
     public static class Builder {
         private final EntityOwnerSelectionStrategyConfig config;
 
-        private Builder(EntityOwnerSelectionStrategyConfig config){
+        private Builder(final EntityOwnerSelectionStrategyConfig config){
             this.config = config;
         }
 
-        public Builder addStrategy(String entityType, Class<? extends EntityOwnerSelectionStrategy> strategy, long delay){
+        public Builder addStrategy(final String entityType, final Class<? extends EntityOwnerSelectionStrategy> strategy, final long delay){
             config.entityTypeToStrategyInfo.put(entityType, new StrategyInfo(strategy, delay));
             return this;
         }
@@ -84,5 +97,4 @@ public class EntityOwnerSelectionStrategyConfig {
             return this.config;
         }
     }
-
 }
