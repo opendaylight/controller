@@ -27,7 +27,6 @@ import akka.actor.Status.Failure;
 import akka.actor.Status.Success;
 import akka.cluster.Cluster;
 import akka.testkit.JavaTestKit;
-import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Iterables;
@@ -48,11 +47,9 @@ import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.DistributedDataStore;
 import org.opendaylight.controller.cluster.datastore.IntegrationTestKit;
 import org.opendaylight.controller.cluster.datastore.MemberNode;
-import org.opendaylight.controller.cluster.datastore.MemberNode.RaftStateVerifier;
 import org.opendaylight.controller.cluster.datastore.entityownership.selectionstrategy.EntityOwnerSelectionStrategyConfig;
 import org.opendaylight.controller.cluster.datastore.messages.AddShardReplica;
 import org.opendaylight.controller.cluster.raft.RaftState;
-import org.opendaylight.controller.cluster.raft.client.messages.OnDemandRaftState;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
@@ -65,7 +62,6 @@ import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipL
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipService;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipState;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.entity.owners.rev150804.entity.owners.entity.type.entity.Candidate;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -123,11 +119,9 @@ public class DistributedEntityOwnershipIntegrationTest {
         }
     }
 
-    private static DistributedEntityOwnershipService newOwnershipService(DistributedDataStore datastore) {
-        DistributedEntityOwnershipService service = new DistributedEntityOwnershipService(datastore,
+    private static DistributedEntityOwnershipService newOwnershipService(final DistributedDataStore datastore) {
+        return DistributedEntityOwnershipService.start(datastore.getActorContext(),
                 EntityOwnerSelectionStrategyConfig.newBuilder().build());
-        service.start();
-        return service;
     }
 
     @Test
@@ -331,12 +325,7 @@ public class DistributedEntityOwnershipIntegrationTest {
         follower1Shard.tell(DatastoreContext.newBuilderFrom(followerDatastoreContextBuilder.build()).
                 customRaftPolicyImplementation(null).build(), ActorRef.noSender());
 
-        MemberNode.verifyRaftState(follower1Node.configDataStore(), ENTITY_OWNERSHIP_SHARD_NAME, new RaftStateVerifier() {
-            @Override
-            public void verify(OnDemandRaftState raftState) {
-                assertEquals("Raft state", RaftState.Leader.toString(), raftState.getRaftState());
-            }
-        });
+        MemberNode.verifyRaftState(follower1Node.configDataStore(), ENTITY_OWNERSHIP_SHARD_NAME, raftState -> assertEquals("Raft state", RaftState.Leader.toString(), raftState.getRaftState()));
 
         // Verify the prior leader's candidates are removed
 
@@ -486,26 +475,23 @@ public class DistributedEntityOwnershipIntegrationTest {
         follower1EntityOwnershipService.registerCandidate(ENTITY1);
         verify(leaderMockListener, timeout(20000)).ownershipChanged(ownershipChange(ENTITY1, false, false, true));
 
-        verifyRaftState(follower1Node.configDataStore(), ENTITY_OWNERSHIP_SHARD_NAME, new RaftStateVerifier() {
-            @Override
-            public void verify(OnDemandRaftState raftState) {
-                assertNull("Custom RaftPolicy class name", raftState.getCustomRaftPolicyClassName());
-                assertEquals("Peer count", 1, raftState.getPeerAddresses().keySet().size());
-                assertThat("Peer Id", Iterables.<String>getLast(raftState.getPeerAddresses().keySet()),
-                        org.hamcrest.CoreMatchers.containsString("member-1"));
-            }
+        verifyRaftState(follower1Node.configDataStore(), ENTITY_OWNERSHIP_SHARD_NAME, raftState -> {
+            assertNull("Custom RaftPolicy class name", raftState.getCustomRaftPolicyClassName());
+            assertEquals("Peer count", 1, raftState.getPeerAddresses().keySet().size());
+            assertThat("Peer Id", Iterables.<String>getLast(raftState.getPeerAddresses().keySet()),
+                    org.hamcrest.CoreMatchers.containsString("member-1"));
         });
     }
 
-    private static void verifyGetOwnershipState(EntityOwnershipService service, Entity entity,
-            boolean isOwner, boolean hasOwner) {
+    private static void verifyGetOwnershipState(final EntityOwnershipService service, final Entity entity,
+            final boolean isOwner, final boolean hasOwner) {
         Optional<EntityOwnershipState> state = service.getOwnershipState(entity);
         assertEquals("getOwnershipState present", true, state.isPresent());
         assertEquals("isOwner", isOwner, state.get().isOwner());
         assertEquals("hasOwner", hasOwner, state.get().hasOwner());
     }
 
-    private static void verifyCandidates(DistributedDataStore dataStore, Entity entity, String... expCandidates) throws Exception {
+    private static void verifyCandidates(final DistributedDataStore dataStore, final Entity entity, final String... expCandidates) throws Exception {
         AssertionError lastError = null;
         Stopwatch sw = Stopwatch.createStarted();
         while(sw.elapsed(TimeUnit.MILLISECONDS) <= 10000) {
@@ -529,16 +515,13 @@ public class DistributedEntityOwnershipIntegrationTest {
         throw lastError;
     }
 
-    private static void verifyOwner(final DistributedDataStore dataStore, Entity entity, String expOwner) {
+    private static void verifyOwner(final DistributedDataStore dataStore, final Entity entity, final String expOwner) {
         AbstractEntityOwnershipTest.verifyOwner(expOwner, entity.getType(), entity.getId(),
-                new Function<YangInstanceIdentifier, NormalizedNode<?,?>>() {
-                    @Override
-                    public NormalizedNode<?, ?> apply(YangInstanceIdentifier path) {
-                        try {
-                            return dataStore.newReadOnlyTransaction().read(path).get(5, TimeUnit.SECONDS).get();
-                        } catch (Exception e) {
-                            return null;
-                        }
+                path -> {
+                    try {
+                        return dataStore.newReadOnlyTransaction().read(path).get(5, TimeUnit.SECONDS).get();
+                    } catch (Exception e) {
+                        return null;
                     }
                 });
     }
