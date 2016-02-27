@@ -14,6 +14,10 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.ENTITY_ID_QNAME;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.ENTITY_OWNERS_PATH;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.ENTITY_QNAME;
@@ -25,11 +29,8 @@ import static org.opendaylight.controller.cluster.datastore.entityownership.Enti
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.entityTypeEntryWithEntityEntry;
 import akka.actor.ActorRef;
 import akka.actor.PoisonPill;
-import akka.actor.Props;
-import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
-import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.Collection;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -37,6 +38,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.DatastoreContextFactory;
@@ -61,7 +63,6 @@ import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipL
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipState;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.TreeType;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
@@ -75,10 +76,10 @@ import scala.concurrent.duration.Duration;
  * @author Thomas Pantelis
  */
 public class DistributedEntityOwnershipServiceTest extends AbstractEntityOwnershipTest {
-    static String ENTITY_TYPE = "test";
-    static String ENTITY_TYPE2 = "test2";
-    static int ID_COUNTER = 1;
+    static final String ENTITY_TYPE = "test";
+    static final String ENTITY_TYPE2 = "test2";
     static final QName QNAME = QName.create("test", "2015-08-11", "foo");
+    static int ID_COUNTER = 1;
 
     private final String dataStoreName = "config" + ID_COUNTER++;
     private DistributedDataStore dataStore;
@@ -95,7 +96,7 @@ public class DistributedEntityOwnershipServiceTest extends AbstractEntityOwnersh
             }
         };
 
-        DatastoreContextFactory mockContextFactory = Mockito.mock(DatastoreContextFactory.class);
+        DatastoreContextFactory mockContextFactory = mock(DatastoreContextFactory.class);
         Mockito.doReturn(datastoreContext).when(mockContextFactory).getBaseDatastoreContext();
         Mockito.doReturn(datastoreContext).when(mockContextFactory).getShardDatastoreContext(Mockito.anyString());
 
@@ -109,11 +110,16 @@ public class DistributedEntityOwnershipServiceTest extends AbstractEntityOwnersh
         dataStore.getActorContext().getShardManager().tell(PoisonPill.getInstance(), ActorRef.noSender());
     }
 
+    private static <T> T verifyMessage(final DistributedEntityOwnershipService mock, final Class<T> type) {
+        final ArgumentCaptor<T> message = ArgumentCaptor.forClass(type);
+        verify(mock).executeLocalEntityOwnershipShardOperation(message.capture());
+        return message.getValue();
+    }
+
     @Test
     public void testEntityOwnershipShardCreated() throws Exception {
-        DistributedEntityOwnershipService service = new DistributedEntityOwnershipService(dataStore,
+        DistributedEntityOwnershipService service = DistributedEntityOwnershipService.start(dataStore.getActorContext(),
                 EntityOwnerSelectionStrategyConfig.newBuilder().build());
-        service.start();
 
         Future<ActorRef> future = dataStore.getActorContext().findLocalShardAsync(
                 DistributedEntityOwnershipService.ENTITY_OWNERSHIP_SHARD_NAME);
@@ -125,26 +131,15 @@ public class DistributedEntityOwnershipServiceTest extends AbstractEntityOwnersh
 
     @Test
     public void testRegisterCandidate() throws Exception {
-        final TestShardBuilder shardBuilder = new TestShardBuilder();
-        DistributedEntityOwnershipService service = new DistributedEntityOwnershipService(dataStore,
-                EntityOwnerSelectionStrategyConfig.newBuilder().build()) {
-            @Override
-            protected EntityOwnershipShard.Builder newShardBuilder() {
-                return shardBuilder;
-            }
-        };
-
-        service.start();
-
-        shardBuilder.expectShardMessage(RegisterCandidateLocal.class);
+        DistributedEntityOwnershipService service = spy(DistributedEntityOwnershipService.start(
+            dataStore.getActorContext(), EntityOwnerSelectionStrategyConfig.newBuilder().build()));
 
         YangInstanceIdentifier entityId = YangInstanceIdentifier.of(QNAME);
         Entity entity = new Entity(ENTITY_TYPE, entityId);
 
         EntityOwnershipCandidateRegistration reg = service.registerCandidate(entity);
-
+        verifyRegisterCandidateLocal(service, entity);
         verifyEntityOwnershipCandidateRegistration(entity, reg);
-        verifyRegisterCandidateLocal(shardBuilder, entity);
         verifyEntityCandidate(service.getLocalEntityOwnershipShard(), ENTITY_TYPE, entityId,
                 dataStore.getActorContext().getCurrentMemberName());
 
@@ -159,14 +154,12 @@ public class DistributedEntityOwnershipServiceTest extends AbstractEntityOwnersh
         }
 
         // Register a different entity - should succeed
+        reset(service);
 
         Entity entity2 = new Entity(ENTITY_TYPE2, entityId);
-        shardBuilder.expectShardMessage(RegisterCandidateLocal.class);
-
         EntityOwnershipCandidateRegistration reg2 = service.registerCandidate(entity2);
-
+        verifyRegisterCandidateLocal(service, entity2);
         verifyEntityOwnershipCandidateRegistration(entity2, reg2);
-        verifyRegisterCandidateLocal(shardBuilder, entity2);
         verifyEntityCandidate(service.getLocalEntityOwnershipShard(), ENTITY_TYPE2, entityId,
                 dataStore.getActorContext().getCurrentMemberName());
 
@@ -175,58 +168,32 @@ public class DistributedEntityOwnershipServiceTest extends AbstractEntityOwnersh
 
     @Test
     public void testCloseCandidateRegistration() throws Exception {
-        final TestShardBuilder shardBuilder = new TestShardBuilder();
-        DistributedEntityOwnershipService service = new DistributedEntityOwnershipService(dataStore,
-                EntityOwnerSelectionStrategyConfig.newBuilder().build()) {
-            @Override
-            protected EntityOwnershipShard.Builder newShardBuilder() {
-                return shardBuilder;
-            }
-        };
-
-        service.start();
-
-        shardBuilder.expectShardMessage(RegisterCandidateLocal.class);
+        DistributedEntityOwnershipService service = spy(DistributedEntityOwnershipService.start(
+            dataStore.getActorContext(), EntityOwnerSelectionStrategyConfig.newBuilder().build()));
 
         Entity entity = new Entity(ENTITY_TYPE, YangInstanceIdentifier.of(QNAME));
-
         EntityOwnershipCandidateRegistration reg = service.registerCandidate(entity);
 
         verifyEntityOwnershipCandidateRegistration(entity, reg);
-        verifyRegisterCandidateLocal(shardBuilder, entity);
+        verifyRegisterCandidateLocal(service, entity);
 
-        shardBuilder.expectShardMessage(UnregisterCandidateLocal.class);
-
+        reset(service);
         reg.close();
-
-        UnregisterCandidateLocal unregCandidate = shardBuilder.waitForShardMessage();
+        UnregisterCandidateLocal unregCandidate = verifyMessage(service, UnregisterCandidateLocal.class);
         assertEquals("getEntity", entity, unregCandidate.getEntity());
 
         // Re-register - should succeed.
-
-        shardBuilder.expectShardMessage(RegisterCandidateLocal.class);
-
+        reset(service);
         service.registerCandidate(entity);
-
-        verifyRegisterCandidateLocal(shardBuilder, entity);
+        verifyRegisterCandidateLocal(service, entity);
 
         service.close();
     }
 
     @Test
     public void testListenerRegistration() {
-        final TestShardBuilder shardBuilder = new TestShardBuilder();
-        DistributedEntityOwnershipService service = new DistributedEntityOwnershipService(dataStore,
-                EntityOwnerSelectionStrategyConfig.newBuilder().build()) {
-            @Override
-            protected EntityOwnershipShard.Builder newShardBuilder() {
-                return shardBuilder;
-            }
-        };
-
-        service.start();
-
-        shardBuilder.expectShardMessage(RegisterListenerLocal.class);
+        DistributedEntityOwnershipService service = spy(DistributedEntityOwnershipService.start(
+            dataStore.getActorContext(), EntityOwnerSelectionStrategyConfig.newBuilder().build()));
 
         YangInstanceIdentifier entityId = YangInstanceIdentifier.of(QNAME);
         Entity entity = new Entity(ENTITY_TYPE, entityId);
@@ -238,15 +205,13 @@ public class DistributedEntityOwnershipServiceTest extends AbstractEntityOwnersh
         assertEquals("getEntityType", entity.getType(), reg.getEntityType());
         assertEquals("getInstance", listener, reg.getInstance());
 
-        RegisterListenerLocal regListener = shardBuilder.waitForShardMessage();
+        RegisterListenerLocal regListener = verifyMessage(service, RegisterListenerLocal.class);
         assertSame("getListener", listener, regListener.getListener());
         assertEquals("getEntityType", entity.getType(), regListener.getEntityType());
 
-        shardBuilder.expectShardMessage(UnregisterListenerLocal.class);
-
+        reset(service);
         reg.close();
-
-        UnregisterListenerLocal unregListener = shardBuilder.waitForShardMessage();
+        UnregisterListenerLocal unregListener = verifyMessage(service, UnregisterListenerLocal.class);
         assertEquals("getEntityType", entity.getType(), unregListener.getEntityType());
         assertSame("getListener", listener, unregListener.getListener());
 
@@ -255,19 +220,12 @@ public class DistributedEntityOwnershipServiceTest extends AbstractEntityOwnersh
 
     @Test
     public void testGetOwnershipState() throws Exception {
-        final TestShardBuilder shardBuilder = new TestShardBuilder();
-        DistributedEntityOwnershipService service = new DistributedEntityOwnershipService(dataStore,
-                EntityOwnerSelectionStrategyConfig.newBuilder().build()) {
-            @Override
-            protected EntityOwnershipShard.Builder newShardBuilder() {
-                return shardBuilder;
-            }
-        };
-
-        service.start();
+        DistributedEntityOwnershipService service = spy(DistributedEntityOwnershipService.start(
+            dataStore.getActorContext(), EntityOwnerSelectionStrategyConfig.newBuilder().build()));
 
         ShardDataTree shardDataTree = new ShardDataTree(SchemaContextHelper.entityOwners(), TreeType.OPERATIONAL);
-        shardBuilder.setDataTree(shardDataTree.getDataTree());
+
+        when(service.getLocalEntityOwnershipShardDataTree()).thenReturn(shardDataTree.getDataTree());
 
         Entity entity1 = new Entity(ENTITY_TYPE, "one");
         writeNode(ENTITY_OWNERS_PATH, entityOwnersWithCandidate(ENTITY_TYPE, entity1.getId(), "member-1"), shardDataTree);
@@ -301,16 +259,8 @@ public class DistributedEntityOwnershipServiceTest extends AbstractEntityOwnersh
 
     @Test
     public void testIsCandidateRegistered() throws CandidateAlreadyRegisteredException {
-        final TestShardBuilder shardBuilder = new TestShardBuilder();
-        DistributedEntityOwnershipService service = new DistributedEntityOwnershipService(dataStore,
-                EntityOwnerSelectionStrategyConfig.newBuilder().build()) {
-            @Override
-            protected EntityOwnershipShard.Builder newShardBuilder() {
-                return shardBuilder;
-            }
-        };
-
-        service.start();
+        DistributedEntityOwnershipService service = DistributedEntityOwnershipService.start(dataStore.getActorContext(),
+                EntityOwnerSelectionStrategyConfig.newBuilder().build());
 
         final Entity test = new Entity("test-type", "test");
 
@@ -323,74 +273,34 @@ public class DistributedEntityOwnershipServiceTest extends AbstractEntityOwnersh
         service.close();
     }
 
-    private static void verifyGetOwnershipState(DistributedEntityOwnershipService service, Entity entity,
-            boolean isOwner, boolean hasOwner) {
+    private static void verifyGetOwnershipState(final DistributedEntityOwnershipService service, final Entity entity,
+            final boolean isOwner, final boolean hasOwner) {
         Optional<EntityOwnershipState> state = service.getOwnershipState(entity);
         assertEquals("getOwnershipState present", true, state.isPresent());
         assertEquals("isOwner", isOwner, state.get().isOwner());
         assertEquals("hasOwner", hasOwner, state.get().hasOwner());
     }
 
-    private void verifyEntityCandidate(ActorRef entityOwnershipShard, String entityType,
-            YangInstanceIdentifier entityId, String candidateName) {
+    private void verifyEntityCandidate(final ActorRef entityOwnershipShard, final String entityType,
+            final YangInstanceIdentifier entityId, final String candidateName) {
         verifyEntityCandidate(entityType, entityId, candidateName,
-                new Function<YangInstanceIdentifier, NormalizedNode<?,?>>() {
-                    @Override
-                    public NormalizedNode<?, ?> apply(YangInstanceIdentifier path) {
-                        try {
-                            return dataStore.newReadOnlyTransaction().read(path).get(5, TimeUnit.SECONDS).get();
-                        } catch (Exception e) {
-                            return null;
-                        }
+                path -> {
+                    try {
+                        return dataStore.newReadOnlyTransaction().read(path).get(5, TimeUnit.SECONDS).get();
+                    } catch (Exception e) {
+                        return null;
                     }
                 });
     }
 
-    private static void verifyRegisterCandidateLocal(final TestShardBuilder shardBuilder, Entity entity) {
-        RegisterCandidateLocal regCandidate = shardBuilder.waitForShardMessage();
+    private static void verifyRegisterCandidateLocal(final DistributedEntityOwnershipService service, final Entity entity) {
+        RegisterCandidateLocal regCandidate = verifyMessage(service, RegisterCandidateLocal.class);
         assertEquals("getEntity", entity, regCandidate.getEntity());
     }
 
-    private static void verifyEntityOwnershipCandidateRegistration(Entity entity, EntityOwnershipCandidateRegistration reg) {
+    private static void verifyEntityOwnershipCandidateRegistration(final Entity entity, final EntityOwnershipCandidateRegistration reg) {
         assertNotNull("EntityOwnershipCandidateRegistration null", reg);
         assertEquals("getInstance", entity, reg.getInstance());
-    }
-
-    static class TestShardBuilder extends EntityOwnershipShard.Builder {
-        TestShardBuilder() {
-            localMemberName("member-1").ownerSelectionStrategyConfig(
-                    EntityOwnerSelectionStrategyConfig.newBuilder().build());
-        }
-
-        private final AtomicReference<CountDownLatch> messageReceived = new AtomicReference<>();
-        private final AtomicReference<Object> receivedMessage = new AtomicReference<>();
-        private final AtomicReference<Class<?>> messageClass = new AtomicReference<>();
-        private final AtomicReference<DataTree> dataTree = new AtomicReference<>();
-
-        @Override
-        public Props props() {
-            verify();
-            return Props.create(TestEntityOwnershipShard.class,this, messageClass, messageReceived,
-                    receivedMessage, dataTree);
-        }
-
-        @SuppressWarnings("unchecked")
-        <T> T waitForShardMessage() {
-            assertTrue("Message " + messageClass.get().getSimpleName() + " was not received",
-                    Uninterruptibles.awaitUninterruptibly(messageReceived.get(), 5, TimeUnit.SECONDS));
-            assertEquals("Message type", messageClass.get(), receivedMessage.get().getClass());
-            return (T) receivedMessage.get();
-        }
-
-        void expectShardMessage(Class<?> ofType) {
-            messageReceived.set(new CountDownLatch(1));
-            receivedMessage.set(null);
-            messageClass.set(ofType);
-        }
-
-        void setDataTree(DataTree tree) {
-            this.dataTree.set(tree);
-        }
     }
 
     static class TestEntityOwnershipShard extends EntityOwnershipShard {
@@ -399,9 +309,9 @@ public class DistributedEntityOwnershipServiceTest extends AbstractEntityOwnersh
         private final AtomicReference<Class<?>> messageClass;
         private final AtomicReference<DataTree> dataTree;
 
-        protected TestEntityOwnershipShard(EntityOwnershipShard.Builder builder,
-                AtomicReference<Class<?>> messageClass, AtomicReference<CountDownLatch> messageReceived,
-                AtomicReference<Object> receivedMessage, AtomicReference<DataTree> dataTree) {
+        protected TestEntityOwnershipShard(final EntityOwnershipShard.Builder builder,
+                final AtomicReference<Class<?>> messageClass, final AtomicReference<CountDownLatch> messageReceived,
+                final AtomicReference<Object> receivedMessage, final AtomicReference<DataTree> dataTree) {
             super(builder);
             this.messageClass = messageClass;
             this.messageReceived = messageReceived;
