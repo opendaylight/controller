@@ -1,0 +1,123 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a3d3df0_a9154e4a",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/selectionstrategy/EntityOwnerSelectionStrategyConfigReader.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-02-27T15:08:40Z",
+      "side": 1,
+      "message": "I\u0027m not sure what you mean here. Moiz added this to allow entity election strategy to be configurable via a .cfg file.  Could\u0027ve used config system but didn\u0027t want to introduce a pain point with preserving the config on upgrade.",
+      "revId": "c259cdadc2f9eef5807ced7abda6480ec56d981f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_492da2a7",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/selectionstrategy/EntityOwnerSelectionStrategyConfigReader.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-02-27T15:08:40Z",
+      "side": 1,
+      "message": "We should log to debug here as it\u0027s not an error if there\u0027s no cfg file. In reality though the ConfigAdmin doesn\u0027t return null but doesn\u0027t hurt to check.",
+      "revId": "c259cdadc2f9eef5807ced7abda6480ec56d981f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_292ade8f",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/selectionstrategy/EntityOwnerSelectionStrategyConfigReader.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-02-27T15:08:40Z",
+      "side": 1,
+      "message": "Again we should log to debug here. ConfigAdmin actually returns a valid Configuration instance and null properties when the cfg file doesn\u0027t exist. So this error is always emitted on startup by default which isn\u0027t good.",
+      "revId": "c259cdadc2f9eef5807ced7abda6480ec56d981f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_090efa3a",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/config/yang/config/distributed_entity_ownership_service/DistributedEntityOwnershipServiceProviderModule.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-02-27T15:08:40Z",
+      "side": 1,
+      "message": "A side note - the code generation really should be changed to not emit inline fully-qualified class names.",
+      "revId": "c259cdadc2f9eef5807ced7abda6480ec56d981f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_dc116e53",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/config/yang/config/distributed_entity_ownership_service/DistributedEntityOwnershipServiceProviderModule.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-02-27T15:08:40Z",
+      "side": 1,
+      "message": "You now pass just the ActorContext to the DistributedEntityOwnershipService - did you mean to keep this comment or do you mean the ActorContext should be passed to this Module (is it possible to even do that)?",
+      "revId": "c259cdadc2f9eef5807ced7abda6480ec56d981f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_e90ab624",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/config/yang/config/distributed_entity_ownership_service/DistributedEntityOwnershipServiceProviderModule.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-02-27T15:08:40Z",
+      "side": 1,
+      "message": "The EntityOwnerSelectionStrategyConfigReader needs it to get the ConfigAdmin service.",
+      "revId": "c259cdadc2f9eef5807ced7abda6480ec56d981f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_3c1b3a74",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/entityownership/DistributedEntityOwnershipIntegrationTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 328,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-02-27T15:08:40Z",
+      "side": 1,
+      "message": "This line is rather long - can you wrap it?",
+      "revId": "c259cdadc2f9eef5807ced7abda6480ec56d981f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
