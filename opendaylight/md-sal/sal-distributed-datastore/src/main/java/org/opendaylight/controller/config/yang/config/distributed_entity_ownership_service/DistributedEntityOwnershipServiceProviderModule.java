@@ -13,43 +13,50 @@ import org.opendaylight.controller.cluster.datastore.DistributedDataStore;
 import org.opendaylight.controller.cluster.datastore.entityownership.DistributedEntityOwnershipService;
 import org.opendaylight.controller.cluster.datastore.entityownership.selectionstrategy.EntityOwnerSelectionStrategyConfig;
 import org.opendaylight.controller.cluster.datastore.entityownership.selectionstrategy.EntityOwnerSelectionStrategyConfigReader;
+import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
+import org.opendaylight.controller.config.api.DependencyResolver;
+import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.sal.core.spi.data.DOMStore;
 import org.osgi.framework.BundleContext;
 
-
-public class DistributedEntityOwnershipServiceProviderModule extends org.opendaylight.controller.config.yang.config.distributed_entity_ownership_service.AbstractDistributedEntityOwnershipServiceProviderModule {
+public class DistributedEntityOwnershipServiceProviderModule extends AbstractDistributedEntityOwnershipServiceProviderModule {
+    private EntityOwnerSelectionStrategyConfig strategyConfig;
     private BundleContext bundleContext;
 
-    public DistributedEntityOwnershipServiceProviderModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier, org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
+    public DistributedEntityOwnershipServiceProviderModule(final ModuleIdentifier identifier,
+            final DependencyResolver dependencyResolver) {
         super(identifier, dependencyResolver);
     }
 
-    public DistributedEntityOwnershipServiceProviderModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier, org.opendaylight.controller.config.api.DependencyResolver dependencyResolver, org.opendaylight.controller.config.yang.config.distributed_entity_ownership_service.DistributedEntityOwnershipServiceProviderModule oldModule, java.lang.AutoCloseable oldInstance) {
+    public DistributedEntityOwnershipServiceProviderModule(final ModuleIdentifier identifier,
+            final DependencyResolver dependencyResolver,
+            final DistributedEntityOwnershipServiceProviderModule oldModule, final AutoCloseable oldInstance) {
         super(identifier, dependencyResolver, oldModule, oldInstance);
     }
 
     @Override
     public void customValidation() {
-        // add custom validation form module attributes here.
+        strategyConfig = EntityOwnerSelectionStrategyConfigReader.loadStrategyWithConfig(bundleContext);
     }
 
     @Override
-    public boolean canReuseInstance(AbstractDistributedEntityOwnershipServiceProviderModule oldModule) {
+    public boolean canReuseInstance(final AbstractDistributedEntityOwnershipServiceProviderModule oldModule) {
         return true;
     }
 
     @Override
-    public java.lang.AutoCloseable createInstance() {
+    public AutoCloseable createInstance() {
+        // FIXME: EntityOwnership needs only the ActorContext, not the entire datastore
         DOMStore dataStore = getDataStoreDependency();
         Preconditions.checkArgument(dataStore instanceof DistributedDataStore,
                 "Injected DOMStore must be an instance of DistributedDataStore");
-        EntityOwnerSelectionStrategyConfig strategyConfig = new EntityOwnerSelectionStrategyConfigReader(bundleContext).getConfig();
-        DistributedEntityOwnershipService service = new DistributedEntityOwnershipService((DistributedDataStore)dataStore, strategyConfig);
-        service.start();
-        return service;
+
+        final ActorContext context = ((DistributedDataStore)dataStore).getActorContext();
+        return DistributedEntityOwnershipService.start(context, strategyConfig);
     }
 
-    public void setBundleContext(BundleContext bundleContext) {
+    public void setBundleContext(final BundleContext bundleContext) {
+        // What do we need from the bundle context?
         this.bundleContext = bundleContext;
     }
 }
