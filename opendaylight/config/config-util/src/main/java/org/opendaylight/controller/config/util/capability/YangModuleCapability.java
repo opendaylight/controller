@@ -9,6 +9,7 @@
 package org.opendaylight.controller.config.util.capability;
 
 import com.google.common.base.Optional;
+import java.util.Objects;
 import org.opendaylight.yangtools.yang.common.SimpleDateFormatUtil;
 import org.opendaylight.yangtools.yang.model.api.Module;
 
@@ -53,5 +54,21 @@ public final class YangModuleCapability extends BasicCapability {
     @Override
     public Optional<String> getRevision() {
         return Optional.of(revision);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        YangModuleCapability that = (YangModuleCapability) o;
+        return Objects.equals(revision, that.revision) &&
+                Objects.equals(moduleName, that.moduleName) &&
+                Objects.equals(moduleNamespace, that.moduleNamespace);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), revision, moduleName, moduleNamespace);
     }
 }

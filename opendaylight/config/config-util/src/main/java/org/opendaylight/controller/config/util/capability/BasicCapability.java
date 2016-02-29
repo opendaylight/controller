@@ -11,6 +11,7 @@ package org.opendaylight.controller.config.util.capability;
 import com.google.common.base.Optional;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Objects;
 
 /**
  * Capability representing a basic, one-line, string based capability
@@ -56,5 +57,18 @@ public class BasicCapability implements Capability {
     @Override
     public String toString() {
         return capability;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        BasicCapability that = (BasicCapability) o;
+        return Objects.equals(capability, that.capability);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(capability);
     }
 }
