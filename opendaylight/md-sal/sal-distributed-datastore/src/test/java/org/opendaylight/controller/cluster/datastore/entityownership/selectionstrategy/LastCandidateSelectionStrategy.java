@@ -8,19 +8,17 @@
 
 package org.opendaylight.controller.cluster.datastore.entityownership.selectionstrategy;
 
-import java.util.ArrayList;
+import com.google.common.collect.Iterables;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 
 public class LastCandidateSelectionStrategy extends AbstractEntityOwnerSelectionStrategy {
-    public LastCandidateSelectionStrategy(long selectionDelayInMillis) {
+    public LastCandidateSelectionStrategy(final long selectionDelayInMillis) {
         super(selectionDelayInMillis);
     }
 
     @Override
-    public String newOwner(Collection<String> viableCandidates, Map<String, Long> statistics) {
-        List<String> candidates = new ArrayList<>(viableCandidates);
-        return candidates.get(candidates.size()-1);
+    public String newOwner(final Collection<String> viableCandidates, final Map<String, Long> statistics) {
+        return Iterables.getLast(viableCandidates);
     }
 }
