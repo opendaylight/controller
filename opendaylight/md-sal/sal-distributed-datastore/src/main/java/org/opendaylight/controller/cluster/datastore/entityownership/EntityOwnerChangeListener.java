@@ -10,6 +10,8 @@ package org.opendaylight.controller.cluster.datastore.entityownership;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.createEntity;
 import com.google.common.base.Objects;
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import java.util.Collection;
 import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
 import org.opendaylight.yangtools.yang.data.api.schema.LeafNode;
@@ -30,13 +32,13 @@ class EntityOwnerChangeListener extends AbstractEntityOwnerChangeListener {
     private final String localMemberName;
     private final EntityOwnershipListenerSupport listenerSupport;
 
-    EntityOwnerChangeListener(String localMemberName, EntityOwnershipListenerSupport listenerSupport) {
-        this.localMemberName = localMemberName;
-        this.listenerSupport = listenerSupport;
+    EntityOwnerChangeListener(final String localMemberName, final EntityOwnershipListenerSupport listenerSupport) {
+        this.localMemberName = Preconditions.checkNotNull(localMemberName);
+        this.listenerSupport = Preconditions.checkNotNull(listenerSupport);
     }
 
     @Override
-    public void onDataTreeChanged(Collection<DataTreeCandidate> changes) {
+    public void onDataTreeChanged(final Collection<DataTreeCandidate> changes) {
         for(DataTreeCandidate change: changes) {
             DataTreeCandidateNode changeRoot = change.getRootNode();
             LeafNode<?> ownerLeaf = (LeafNode<?>) changeRoot.getDataAfter().get();
@@ -56,7 +58,7 @@ class EntityOwnerChangeListener extends AbstractEntityOwnerChangeListener {
             if(!Objects.equal(origOwner, newOwner)) {
                 boolean isOwner = Objects.equal(localMemberName, newOwner);
                 boolean wasOwner = Objects.equal(localMemberName, origOwner);
-                boolean hasOwner = newOwner != null && !newOwner.toString().isEmpty();
+                boolean hasOwner = !Strings.isNullOrEmpty(newOwner);
 
                 Entity entity = createEntity(change.getRootPath());
 
