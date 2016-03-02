@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a3d3df0_cb66c2ec",
+        "filename": "opendaylight/netconf/netconf-testtool/src/main/java/org/opendaylight/controller/netconf/test/tool/DummyMonitoringService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 5705
+      },
+      "writtenOn": "2016-03-02T07:11:35Z",
+      "side": 1,
+      "message": "This line of code exceeds more then 120 characters ,Better if you break it in two lines.",
+      "range": {
+        "startLine": 81,
+        "startChar": 8,
+        "endLine": 81,
+        "endChar": 12
+      },
+      "revId": "3116e44ebcff9f00026a4fad8f60a35a29ec431c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
