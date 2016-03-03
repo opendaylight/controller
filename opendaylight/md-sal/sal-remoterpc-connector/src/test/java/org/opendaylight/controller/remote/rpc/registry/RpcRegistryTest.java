@@ -409,15 +409,22 @@ public class RpcRegistryTest {
         registry2.tell(new SetLocalRouter(mockBroker2.getRef()), mockBroker2.getRef());
 
         List<RpcRouter.RouteIdentifier<?, ?, ?>> routeIds = createRouteIds();
+        routeIds.addAll(createRouteIds());
 
-        registry1.tell(new FindRouters(routeIds.get(0)), mockBroker1.getRef());
+        JavaTestKit replyKit1 = new JavaTestKit(node1);
+        registry1.tell(new FindRouters(routeIds.get(0)), replyKit1.getRef());
+        JavaTestKit replyKit2 = new JavaTestKit(node1);
+        registry1.tell(new FindRouters(routeIds.get(1)), replyKit2.getRef());
 
         registry2.tell(new AddOrUpdateRoutes(routeIds), mockBroker2.getRef());
 
-        FindRoutersReply reply = mockBroker1.expectMsgClass(Duration.create(7, TimeUnit.SECONDS),
+        FindRoutersReply reply = replyKit1.expectMsgClass(Duration.create(7, TimeUnit.SECONDS),
                 FindRoutersReply.class);
-        List<Pair<ActorRef, Long>> respList = reply.getRouterWithUpdateTime();
-        Assert.assertEquals("getRouterWithUpdateTime size", 1, respList.size());
+        Assert.assertEquals("getRouterWithUpdateTime size", 1, reply.getRouterWithUpdateTime().size());
+
+        reply = replyKit2.expectMsgClass(Duration.create(7, TimeUnit.SECONDS),
+                FindRoutersReply.class);
+        Assert.assertEquals("getRouterWithUpdateTime size", 1, reply.getRouterWithUpdateTime().size());
     }
 
     @Test
