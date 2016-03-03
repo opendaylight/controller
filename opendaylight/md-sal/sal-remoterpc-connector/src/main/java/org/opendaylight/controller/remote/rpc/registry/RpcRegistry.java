@@ -187,7 +187,11 @@ public class RpcRegistry extends BucketStore<RoutingTable> {
 
     @Override
     protected void onBucketsUpdated() {
-        for(Runnable callBack: routesUpdatedCallbacks) {
+        if(routesUpdatedCallbacks.isEmpty()) {
+            return;
+        }
+
+        for(Runnable callBack: routesUpdatedCallbacks.toArray(new Runnable[routesUpdatedCallbacks.size()])) {
             callBack.run();
         }
     }
