@@ -12,7 +12,7 @@
     <parent>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>netconf-subsystem</artifactId>
-        <version>0.3.4-Lithium-SR4</version>
+        <version>0.3.5-SNAPSHOT</version>
         <relativePath>../</relativePath>
     </parent>
     <artifactId>netconf-usermanager</artifactId>
