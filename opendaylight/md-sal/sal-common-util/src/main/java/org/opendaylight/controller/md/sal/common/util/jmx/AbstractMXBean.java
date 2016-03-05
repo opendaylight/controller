@@ -70,6 +70,14 @@ public abstract class AbstractMXBean {
     }
 
     /**
+     * This method is a wrapper for registerMBean with void return type so it can be invoked by dependency
+     * injection frameworks such as Spring and Blueprint.
+     */
+    public void register() {
+        registerMBean();
+    }
+
+    /**
      * Registers this bean with the platform MBean server with the domain defined by
      * {@link #BASE_JMX_PREFIX}.
      *
@@ -105,6 +113,14 @@ public abstract class AbstractMXBean {
 
         }
         return registered;
+    }
+
+    /**
+     * This method is a wrapper for unregisterMBean with void return type so it can be invoked by dependency
+     * injection frameworks such as Spring and Blueprint.
+     */
+    public void unregister() {
+        unregisterMBean();
     }
 
     /**
