@@ -44,13 +44,24 @@ public class DistributedOperationalDataStoreProviderModule extends
 
     @Override
     public java.lang.AutoCloseable createInstance() {
+        DatastoreContext datastoreContext = newDatastoreContext(getOperationalProperties());
 
-        OperationalProperties props = getOperationalProperties();
+        return DistributedDataStoreFactory.createInstance(getOperationalSchemaServiceDependency(),
+                datastoreContext, DatastoreSnapshotRestore.instance(),
+                getOperationalActorSystemProviderDependency(), bundleContext);
+    }
+
+    public static DatastoreContext newDatastoreContext() {
+        return newDatastoreContext(null);
+    }
+
+    private static DatastoreContext newDatastoreContext(OperationalProperties inProps) {
+        OperationalProperties props = inProps;
         if(props == null) {
             props = new OperationalProperties();
         }
 
-        DatastoreContext datastoreContext = DatastoreContext.newBuilder()
+        return DatastoreContext.newBuilder()
                 .logicalStoreType(LogicalDatastoreType.OPERATIONAL)
                 .maxShardDataChangeExecutorPoolSize(props.getMaxShardDataChangeExecutorPoolSize().getValue().intValue())
                 .maxShardDataChangeExecutorQueueSize(props.getMaxShardDataChangeExecutorQueueSize().getValue().intValue())
@@ -81,10 +92,6 @@ public class DistributedOperationalDataStoreProviderModule extends
                 .customRaftPolicyImplementation(props.getCustomRaftPolicyImplementation())
                 .shardSnapshotChunkSize(props.getShardSnapshotChunkSize().getValue().intValue())
                 .build();
-
-        return DistributedDataStoreFactory.createInstance(getOperationalSchemaServiceDependency(),
-                datastoreContext, DatastoreSnapshotRestore.instance().getAndRemove(datastoreContext.getDataStoreName()),
-                getOperationalActorSystemProviderDependency().getActorSystem(), bundleContext);
     }
 
     public void setBundleContext(BundleContext bundleContext) {
