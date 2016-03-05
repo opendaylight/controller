@@ -23,6 +23,8 @@
 
     <module>opendaylight/model</module>
 
+    <module>opendaylight/blueprint</module>
+
     <!-- Parents -->
     <module>opendaylight/commons/protocol-framework</module>
     <module>opendaylight/commons/checkstyle</module>
