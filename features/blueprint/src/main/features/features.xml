@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<features name="odl-config-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.2.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.2.0 http://karaf.apache.org/xmlns/features/v1.2.0">
+
+  <feature name='odl-blueprint' version='${project.version}' description="OpenDaylight :: Blueprint">
+    <bundle start-level="40">mvn:org.opendaylight.controller/blueprint/{{VERSION}}</bundle>
+  </feature>
+</features>
