@@ -53,6 +53,11 @@ public class ConfigPersisterActivator implements BundleActivator {
         LOG.debug("ConfigPersister starting");
         this.context = context;
 
+        if(!"false".equals(System.getProperty("org.opendaylight.deactivate-configsystem", "false"))) {
+            LOG.info("Config system is deactivated");
+            return;
+        }
+
         PropertiesProviderBaseImpl propertiesProvider = new PropertiesProviderBaseImpl(context);
 
         final PersisterAggregator persisterAggregator = PersisterAggregator.createFromProperties(propertiesProvider);
