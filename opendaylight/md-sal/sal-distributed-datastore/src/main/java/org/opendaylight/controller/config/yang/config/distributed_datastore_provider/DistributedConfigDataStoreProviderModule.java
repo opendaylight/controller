@@ -44,12 +44,24 @@ public class DistributedConfigDataStoreProviderModule extends
 
     @Override
     public java.lang.AutoCloseable createInstance() {
-        ConfigProperties props = getConfigProperties();
+        DatastoreContext datastoreContext = newDatastoreContext(getConfigProperties());
+
+        return DistributedDataStoreFactory.createInstance(getConfigSchemaServiceDependency(),
+                datastoreContext, DatastoreSnapshotRestore.instance(),
+                getConfigActorSystemProviderDependency(), bundleContext);
+    }
+
+    public static DatastoreContext newDatastoreContext() {
+        return newDatastoreContext(null);
+    }
+
+    private static DatastoreContext newDatastoreContext(ConfigProperties inProps) {
+        ConfigProperties props = inProps;
         if(props == null) {
             props = new ConfigProperties();
         }
 
-        DatastoreContext datastoreContext = DatastoreContext.newBuilder()
+        return DatastoreContext.newBuilder()
                 .logicalStoreType(LogicalDatastoreType.CONFIGURATION)
                 .maxShardDataChangeExecutorPoolSize(props.getMaxShardDataChangeExecutorPoolSize().getValue().intValue())
                 .maxShardDataChangeExecutorQueueSize(props.getMaxShardDataChangeExecutorQueueSize().getValue().intValue())
@@ -80,10 +92,6 @@ public class DistributedConfigDataStoreProviderModule extends
                 .customRaftPolicyImplementation(props.getCustomRaftPolicyImplementation())
                 .shardSnapshotChunkSize(props.getShardSnapshotChunkSize().getValue().intValue())
                 .build();
-
-        return DistributedDataStoreFactory.createInstance(getConfigSchemaServiceDependency(),
-                datastoreContext, DatastoreSnapshotRestore.instance().getAndRemove(datastoreContext.getDataStoreName()),
-                getConfigActorSystemProviderDependency().getActorSystem(), bundleContext);
     }
 
     public void setBundleContext(BundleContext bundleContext) {
