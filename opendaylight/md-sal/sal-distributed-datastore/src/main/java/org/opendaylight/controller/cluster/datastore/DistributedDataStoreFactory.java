@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorSystem;
+import org.opendaylight.controller.cluster.ActorSystemProvider;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.config.ConfigurationImpl;
 import org.opendaylight.controller.cluster.datastore.messages.DatastoreSnapshot;
@@ -20,11 +21,14 @@ public class DistributedDataStoreFactory {
     private static final Logger LOG = LoggerFactory.getLogger(DistributedDataStoreFactory.class);
 
     public static DistributedDataStore createInstance(SchemaService schemaService,
-            DatastoreContext datastoreContext, DatastoreSnapshot restoreFromSnapshot, ActorSystem actorSystem,
-            BundleContext bundleContext) {
+            DatastoreContext datastoreContext, DatastoreSnapshotRestore datastoreSnapshotRestore,
+            ActorSystemProvider actorSystemProvider, BundleContext bundleContext) {
 
         LOG.info("Create data store instance of type : {}", datastoreContext.getDataStoreName());
 
+        ActorSystem actorSystem = actorSystemProvider.getActorSystem();
+        DatastoreSnapshot restoreFromSnapshot = datastoreSnapshotRestore.getAndRemove(
+                datastoreContext.getDataStoreName());
         DatastoreContextIntrospector introspector = new DatastoreContextIntrospector(datastoreContext);
         DatastoreContextConfigAdminOverlay overlay = new DatastoreContextConfigAdminOverlay(
                 introspector, bundleContext);
