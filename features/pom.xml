@@ -18,5 +18,6 @@
     <module>protocol-framework</module>
     <module>extras</module>
     <module>benchmark</module>
+    <module>blueprint</module>
   </modules>
 </project>
