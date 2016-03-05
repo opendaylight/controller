@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.opendaylight.odlparent</groupId>
+    <artifactId>features-parent</artifactId>
+    <version>1.7.0-SNAPSHOT</version>
+    <relativePath/>
+  </parent>
+
+  <groupId>org.opendaylight.controller</groupId>
+  <artifactId>features-blueprint</artifactId>
+  <version>0.5.0-SNAPSHOT</version>
+  <packaging>jar</packaging>
+
+  <properties>
+    <features.file>features.xml</features.file>
+  </properties>
+
+  <dependencyManagement>
+    <dependencies>
+       <dependency>
+        <groupId>org.opendaylight.odlparent</groupId>
+        <artifactId>odlparent-artifacts</artifactId>
+        <version>1.7.0-SNAPSHOT</version>
+        <scope>import</scope>
+        <type>pom</type>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <dependencies>
+
+    <!-- Required features repositories -->
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>blueprint</artifactId>
+      <version>0.5.0-SNAPSHOT</version>
+    </dependency>
+  </dependencies>
+
+</project>
