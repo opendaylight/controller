@@ -47,7 +47,7 @@ public class ConcurrentDOMDataBroker extends AbstractDOMBroker {
     private static final String PRE_COMMIT = "PRE_COMMIT";
     private static final String COMMIT = "COMMIT";
 
-    private final DurationStatisticsTracker commitStatsTracker = DurationStatisticsTracker.createConcurrent();
+    private final DurationStatisticsTracker commitStatsTracker;
 
     /**
      * This executor is used to execute Future listener callback Runnables async.
@@ -55,8 +55,14 @@ public class ConcurrentDOMDataBroker extends AbstractDOMBroker {
     private final Executor clientFutureCallbackExecutor;
 
     public ConcurrentDOMDataBroker(final Map<LogicalDatastoreType, DOMStore> datastores, Executor listenableFutureExecutor) {
+        this(datastores, listenableFutureExecutor, DurationStatisticsTracker.createConcurrent());
+    }
+
+    public ConcurrentDOMDataBroker(final Map<LogicalDatastoreType, DOMStore> datastores, Executor listenableFutureExecutor,
+            DurationStatisticsTracker commitStatsTracker) {
         super(datastores);
         this.clientFutureCallbackExecutor = Preconditions.checkNotNull(listenableFutureExecutor);
+        this.commitStatsTracker = Preconditions.checkNotNull(commitStatsTracker);
     }
 
     public DurationStatisticsTracker getCommitStatsTracker() {
