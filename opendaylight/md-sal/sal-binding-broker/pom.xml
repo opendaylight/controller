@@ -113,6 +113,7 @@
                             org.opendaylight.controller.md.sal.binding.spi,
                             org.opendaylight.controller.sal.binding.codegen.impl,
             </Export-Package>
+            <Import-Package>*,org.opendaylight.yangtools.binding.data.codec.gen.impl</Import-Package>
           </instructions>
         </configuration>
       </plugin>

@@ -44,6 +44,15 @@ public class SingletonHolder {
     private static ListeningExecutorService CHANGE_EVENT_EXECUTOR = null;
 
     /**
+     * This method is for access via blueprint xml which can access static fields.
+     *
+     * @return
+     */
+    public static JavassistUtils getJavassistUtils() {
+        return JavassistUtils.forClassPool(CLASS_POOL);
+    }
+
+    /**
      * @deprecated This method is only used from configuration modules and thus callers of it
      *             should use service injection to make the executor configurable.
      */
