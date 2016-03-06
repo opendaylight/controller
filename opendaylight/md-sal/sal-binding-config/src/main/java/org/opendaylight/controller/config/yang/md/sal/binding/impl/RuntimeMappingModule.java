@@ -13,7 +13,7 @@ import org.opendaylight.controller.md.sal.binding.impl.BindingToNormalizedNodeCo
 import org.opendaylight.controller.sal.binding.codegen.impl.SingletonHolder;
 import org.opendaylight.yangtools.binding.data.codec.gen.impl.StreamWriterGenerator;
 import org.opendaylight.yangtools.binding.data.codec.impl.BindingNormalizedNodeCodecRegistry;
-import org.opendaylight.yangtools.sal.binding.generator.impl.GeneratedClassLoadingStrategy;
+import org.opendaylight.yangtools.sal.binding.generator.api.ClassLoadingStrategy;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -50,15 +50,15 @@ public final class RuntimeMappingModule extends AbstractRuntimeMappingModule {
 
     @Override
     public java.lang.AutoCloseable createInstance() {
-        final GeneratedClassLoadingStrategy classLoading = getGlobalClassLoadingStrategy();
+        final ClassLoadingStrategy classLoading = getGlobalClassLoadingStrategy();
         final BindingNormalizedNodeCodecRegistry codecRegistry = new BindingNormalizedNodeCodecRegistry(StreamWriterGenerator.create(SingletonHolder.JAVASSIST));
         final BindingToNormalizedNodeCodec instance = new BindingToNormalizedNodeCodec(classLoading, codecRegistry,getWaitForSchema());
         bundleContext.registerService(SchemaContextListener.class, instance, new Hashtable<String,String>());
         return instance;
     }
 
-    private GeneratedClassLoadingStrategy getGlobalClassLoadingStrategy() {
-        final ServiceReference<GeneratedClassLoadingStrategy> ref = bundleContext.getServiceReference(GeneratedClassLoadingStrategy.class);
+    private ClassLoadingStrategy getGlobalClassLoadingStrategy() {
+        final ServiceReference<ClassLoadingStrategy> ref = bundleContext.getServiceReference(ClassLoadingStrategy.class);
         return bundleContext.getService(ref);
     }
 

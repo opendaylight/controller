@@ -35,7 +35,7 @@ import org.opendaylight.yangtools.binding.data.codec.api.BindingCodecTreeNode;
 import org.opendaylight.yangtools.binding.data.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.yangtools.binding.data.codec.impl.BindingNormalizedNodeCodecRegistry;
 import org.opendaylight.yangtools.binding.data.codec.impl.MissingSchemaException;
-import org.opendaylight.yangtools.sal.binding.generator.impl.GeneratedClassLoadingStrategy;
+import org.opendaylight.yangtools.sal.binding.generator.api.ClassLoadingStrategy;
 import org.opendaylight.yangtools.sal.binding.generator.util.BindingRuntimeContext;
 import org.opendaylight.yangtools.yang.binding.BindingMapping;
 import org.opendaylight.yangtools.yang.binding.DataContainer;
@@ -66,7 +66,7 @@ public final class BindingToNormalizedNodeCodec implements BindingCodecTreeFacto
 
     private final BindingNormalizedNodeCodecRegistry codecRegistry;
 
-    private final GeneratedClassLoadingStrategy classLoadingStrategy;
+    private final ClassLoadingStrategy classLoadingStrategy;
     private final FutureSchema futureSchema;
     private final LoadingCache<InstanceIdentifier<?>, YangInstanceIdentifier> iiCache = CacheBuilder.newBuilder()
             .softValues().build(new CacheLoader<InstanceIdentifier<?>, YangInstanceIdentifier>() {
@@ -80,13 +80,13 @@ public final class BindingToNormalizedNodeCodec implements BindingCodecTreeFacto
 
     private DataNormalizer legacyToNormalized;
 
-    public BindingToNormalizedNodeCodec(final GeneratedClassLoadingStrategy classLoadingStrategy,
+    public BindingToNormalizedNodeCodec(final ClassLoadingStrategy classLoadingStrategy,
             final BindingNormalizedNodeCodecRegistry codecRegistry) {
         this(classLoadingStrategy,codecRegistry,false);
 
     }
 
-    public BindingToNormalizedNodeCodec(final GeneratedClassLoadingStrategy classLoadingStrategy,
+    public BindingToNormalizedNodeCodec(final ClassLoadingStrategy classLoadingStrategy,
             final BindingNormalizedNodeCodecRegistry codecRegistry,final boolean waitForSchema) {
         this.classLoadingStrategy = Preconditions.checkNotNull(classLoadingStrategy,"classLoadingStrategy");
         this.codecRegistry = Preconditions.checkNotNull(codecRegistry,"codecRegistry");
