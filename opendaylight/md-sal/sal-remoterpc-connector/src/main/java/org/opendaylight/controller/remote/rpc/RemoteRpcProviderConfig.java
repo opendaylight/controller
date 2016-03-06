@@ -82,6 +82,15 @@ public class RemoteRpcProviderConfig extends CommonConfig {
         return cachedGossipTickInterval;
     }
 
+    /**
+     * This is called via blueprint xml as the builder pattern can't be used.
+     */
+    public static RemoteRpcProviderConfig newInstance(String actorSystemName, boolean metricCaptureEnabled,
+            int mailboxCapacity) {
+        return new Builder(actorSystemName).metricCaptureEnabled(metricCaptureEnabled).
+                mailboxCapacity(mailboxCapacity).build();
+    }
+
     public static class Builder extends CommonConfig.Builder<Builder>{
 
         public Builder(String actorSystemName){
