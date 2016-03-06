@@ -20,11 +20,11 @@ import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import javassist.ClassPool;
 import org.apache.commons.lang3.StringUtils;
 import org.opendaylight.yangtools.sal.binding.generator.util.JavassistUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import javassist.ClassPool;
 
 public class SingletonHolder {
     private static final Logger logger = LoggerFactory.getLogger(SingletonHolder.class);
@@ -42,6 +42,15 @@ public class SingletonHolder {
     private static ListeningExecutorService NOTIFICATION_EXECUTOR = null;
     private static ListeningExecutorService COMMIT_EXECUTOR = null;
     private static ListeningExecutorService CHANGE_EVENT_EXECUTOR = null;
+
+    /**
+     * This method is for access via blueprint xml which can access static fields.
+     *
+     * @return
+     */
+    public static JavassistUtils getJavassistUtils() {
+        return JavassistUtils.forClassPool(CLASS_POOL);
+    }
 
     /**
      * @deprecated This method is only used from configuration modules and thus callers of it
