@@ -25,7 +25,7 @@ import org.opendaylight.controller.config.manager.impl.osgi.mapping.RefreshingSC
 import org.opendaylight.controller.config.manager.impl.util.OsgiRegistrationUtil;
 import org.opendaylight.controller.config.spi.ModuleFactory;
 import org.opendaylight.yangtools.concepts.ObjectRegistration;
-import org.opendaylight.yangtools.sal.binding.generator.impl.GeneratedClassLoadingStrategy;
+import org.opendaylight.yangtools.sal.binding.generator.api.ClassLoadingStrategy;
 import org.opendaylight.yangtools.sal.binding.generator.impl.ModuleInfoBackedContext;
 import org.opendaylight.yangtools.yang.binding.YangModuleInfo;
 import org.osgi.framework.Bundle;
@@ -96,7 +96,7 @@ public class ConfigManagerActivator implements BundleActivator, SynchronousBundl
                     new JMXNotifierConfigRegistry(configRegistry, configMBeanServer);
 
             // register config registry to OSGi
-            AutoCloseable clsReg = registerService(context, moduleInfoBackedContext, GeneratedClassLoadingStrategy.class);
+            AutoCloseable clsReg = registerService(context, moduleInfoBackedContext, ClassLoadingStrategy.class);
             AutoCloseable configRegReg = registerService(context, notifyingConfigRegistry, ConfigRegistry.class);
 
             // register config registry to jmx
