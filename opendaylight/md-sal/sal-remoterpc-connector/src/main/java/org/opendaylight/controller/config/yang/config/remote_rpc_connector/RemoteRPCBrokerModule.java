@@ -9,6 +9,8 @@
 package org.opendaylight.controller.config.yang.config.remote_rpc_connector;
 
 import akka.actor.ActorSystem;
+import org.opendaylight.controller.md.sal.dom.api.DOMRpcProviderService;
+import org.opendaylight.controller.remote.rpc.RemoteRpcProvider;
 import org.opendaylight.controller.remote.rpc.RemoteRpcProviderConfig;
 import org.opendaylight.controller.remote.rpc.RemoteRpcProviderFactory;
 import org.opendaylight.controller.sal.core.api.Broker;
@@ -44,7 +46,10 @@ public class RemoteRPCBrokerModule extends org.opendaylight.controller.config.ya
                 .mailboxCapacity(getBoundedMailboxCapacity())
                 .build();
 
-        return RemoteRpcProviderFactory.createInstance(broker, bundleContext, actorSystem, config);
+        RemoteRpcProvider rpcProvider = RemoteRpcProviderFactory.createInstance((DOMRpcProviderService)broker,
+                actorSystem, config);
+        broker.registerProvider(rpcProvider);
+        return rpcProvider;
     }
 
     public void setBundleContext(BundleContext bundleContext) {
