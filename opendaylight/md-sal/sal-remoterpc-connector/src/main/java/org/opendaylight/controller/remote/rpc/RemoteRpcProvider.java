@@ -37,7 +37,8 @@ public class RemoteRpcProvider implements AutoCloseable, Provider, SchemaContext
 
   private ListenerRegistration<SchemaContextListener> schemaListenerRegistration;
   private final ActorSystem actorSystem;
-  private Broker.ProviderSession brokerSession;
+  private SchemaService schemaService;
+  private DOMRpcService rpcService;
   private SchemaContext schemaContext;
   private ActorRef rpcManager;
   private final RemoteRpcProviderConfig config;
@@ -51,6 +52,14 @@ public class RemoteRpcProvider implements AutoCloseable, Provider, SchemaContext
     this.config = Preconditions.checkNotNull(config);
   }
 
+  public void setRpcService(DOMRpcService rpcService) {
+      this.rpcService = rpcService;
+  }
+
+  public void setSchemaService(SchemaService schemaService) {
+      this.schemaService = schemaService;
+  }
+
   @Override
   public void close() throws Exception {
     if (schemaListenerRegistration != null) {
@@ -61,7 +70,8 @@ public class RemoteRpcProvider implements AutoCloseable, Provider, SchemaContext
 
   @Override
   public void onSessionInitiated(final Broker.ProviderSession session) {
-    brokerSession = session;
+    schemaService = session.getService(SchemaService.class);
+    rpcService = session.getService(DOMRpcService.class);
     start();
   }
 
@@ -70,11 +80,9 @@ public class RemoteRpcProvider implements AutoCloseable, Provider, SchemaContext
     return null;
   }
 
-  private void start() {
+  public void start() {
     LOG.info("Starting remote rpc service...");
 
-    final SchemaService schemaService = brokerSession.getService(SchemaService.class);
-    final DOMRpcService rpcService = brokerSession.getService(DOMRpcService.class);
     schemaContext = schemaService.getGlobalContext();
     rpcManager = actorSystem.actorOf(RpcManager.props(schemaContext,
             rpcProvisionRegistry, rpcService, config), config.getRpcManagerName());
