@@ -59,8 +59,7 @@ public final class DomBrokerImplModule extends org.opendaylight.controller.confi
 
         services.putInstance(DOMDataBroker.class, asyncBroker);
 
-        final DOMRpcRouter rpcRouter = new DOMRpcRouter();
-        schemaService.registerSchemaContextListener(rpcRouter);
+        final DOMRpcRouter rpcRouter = DOMRpcRouter.newInstance(schemaService);
         services.putInstance(DOMRpcService.class, rpcRouter);
         services.putInstance(DOMRpcProviderService.class, rpcRouter);
 
