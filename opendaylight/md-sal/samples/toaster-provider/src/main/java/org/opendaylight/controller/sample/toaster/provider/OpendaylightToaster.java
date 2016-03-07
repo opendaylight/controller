@@ -26,6 +26,7 @@ import org.opendaylight.controller.config.yang.config.toaster_provider.impl.Toas
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeChangeListener;
+import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
@@ -43,6 +44,7 @@ import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.ToasterRestocked;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.ToasterRestockedBuilder;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.ToasterService;
+import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcError.ErrorType;
@@ -63,6 +65,7 @@ public class OpendaylightToaster implements ToasterService, ToasterProviderRunti
 
     private NotificationProviderService notificationProvider;
     private DataBroker dataProvider;
+    private ListenerRegistration<OpendaylightToaster> dataTreeChangeListenerRegistration;
 
     private final ExecutorService executor;
 
@@ -87,6 +90,10 @@ public class OpendaylightToaster implements ToasterService, ToasterProviderRunti
 
     public void setDataProvider(final DataBroker salDataProvider) {
         this.dataProvider = salDataProvider;
+
+        dataProvider.registerDataTreeChangeListener(new DataTreeIdentifier<Toaster>(
+                LogicalDatastoreType.CONFIGURATION, OpendaylightToaster.TOASTER_IID), this);
+
         setToasterStatusUp( null );
     }
 
@@ -99,6 +106,8 @@ public class OpendaylightToaster implements ToasterService, ToasterProviderRunti
         executor.shutdown();
 
         if (dataProvider != null) {
+            dataTreeChangeListenerRegistration.close();
+
             WriteTransaction tx = dataProvider.newWriteOnlyTransaction();
             tx.delete(LogicalDatastoreType.OPERATIONAL,TOASTER_IID);
             Futures.addCallback( tx.submit(), new FutureCallback<Void>() {
