@@ -28,10 +28,10 @@
                     </data-broker>
 
                     <notification-service>
-                        <type xmlns:binding="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding">
-                            binding:binding-notification-service
+                        <type xmlns:binding="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">
+                            binding:binding-new-notification-publish-service
                         </type>
-                        <name>binding-notification-broker</name>
+                        <name>binding-notification-publish-adapter</name>
                     </notification-service>
                 </module>
 
@@ -47,10 +47,10 @@
                     </rpc-registry>
 
                     <notification-service>
-                        <type xmlns:binding="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding">
-                            binding:binding-notification-service
+                        <type xmlns:binding="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">
+                            binding:binding-new-notification-service
                         </type>
-                        <name>binding-notification-broker</name>
+                        <name>binding-notification-adapter</name>
                     </notification-service>
                 </module>
             </modules>

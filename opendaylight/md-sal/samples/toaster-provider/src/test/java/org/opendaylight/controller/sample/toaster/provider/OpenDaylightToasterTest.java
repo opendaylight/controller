@@ -13,16 +13,15 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
-
+import com.google.common.base.Optional;
 import java.util.concurrent.Future;
-
 import org.junit.Ignore;
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.binding.api.NotificationPublishService;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.binding.test.AbstractDataBrokerTest;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.DisplayString;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.MakeToastInput;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.MakeToastInputBuilder;
@@ -30,8 +29,6 @@ import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.WheatBread;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcResult;
-
-import com.google.common.base.Optional;
 
 public class OpenDaylightToasterTest extends AbstractDataBrokerTest{
 
@@ -48,7 +45,7 @@ public class OpenDaylightToasterTest extends AbstractDataBrokerTest{
          * Doesn't look like we have support for the NotificationProviderService yet, so mock it
          * for now.
          */
-        NotificationProviderService mockNotification = mock( NotificationProviderService.class );
+        NotificationPublishService mockNotification = mock( NotificationPublishService.class );
         toaster.setNotificationProvider( mockNotification );
     }
 
