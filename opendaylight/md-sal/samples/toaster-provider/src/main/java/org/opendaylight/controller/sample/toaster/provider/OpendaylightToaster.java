@@ -26,12 +26,14 @@ import org.opendaylight.controller.config.yang.config.toaster_provider.impl.Toas
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeChangeListener;
+import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.OptimisticLockFailedException;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
+import org.opendaylight.controller.md.sal.common.util.jmx.AbstractMXBean;
 import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.DisplayString;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.MakeToastInput;
@@ -43,6 +45,7 @@ import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.ToasterRestocked;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.ToasterRestockedBuilder;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.ToasterService;
+import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcError.ErrorType;
@@ -51,7 +54,7 @@ import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class OpendaylightToaster implements ToasterService, ToasterProviderRuntimeMXBean,
+public class OpendaylightToaster extends AbstractMXBean implements ToasterService, ToasterProviderRuntimeMXBean,
                                             DataTreeChangeListener<Toaster>, AutoCloseable {
 
     private static final Logger LOG = LoggerFactory.getLogger(OpendaylightToaster.class);
@@ -63,6 +66,7 @@ public class OpendaylightToaster implements ToasterService, ToasterProviderRunti
 
     private NotificationProviderService notificationProvider;
     private DataBroker dataProvider;
+    private ListenerRegistration<OpendaylightToaster> dataTreeChangeListenerRegistration;
 
     private final ExecutorService executor;
 
@@ -78,6 +82,7 @@ public class OpendaylightToaster implements ToasterService, ToasterProviderRunti
     private final AtomicLong darknessFactor = new AtomicLong( 1000 );
 
     public OpendaylightToaster() {
+        super("OpendaylightToaster", "toaster-provider", null);
         executor = Executors.newFixedThreadPool(1);
     }
 
@@ -87,6 +92,10 @@ public class OpendaylightToaster implements ToasterService, ToasterProviderRunti
 
     public void setDataProvider(final DataBroker salDataProvider) {
         this.dataProvider = salDataProvider;
+
+        dataProvider.registerDataTreeChangeListener(new DataTreeIdentifier<Toaster>(
+                LogicalDatastoreType.CONFIGURATION, OpendaylightToaster.TOASTER_IID), this);
+
         setToasterStatusUp( null );
     }
 
@@ -99,6 +108,8 @@ public class OpendaylightToaster implements ToasterService, ToasterProviderRunti
         executor.shutdown();
 
         if (dataProvider != null) {
+            dataTreeChangeListenerRegistration.close();
+
             WriteTransaction tx = dataProvider.newWriteOnlyTransaction();
             tx.delete(LogicalDatastoreType.OPERATIONAL,TOASTER_IID);
             Futures.addCallback( tx.submit(), new FutureCallback<Void>() {
