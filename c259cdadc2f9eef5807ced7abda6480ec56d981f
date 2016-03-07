@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_75702372",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/selectionstrategy/EntityOwnerSelectionStrategyConfigReader.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-03-07T16:28:18Z",
+      "side": 1,
+      "message": "Well, the problem really is that we are using .loadClass() and exposing class names -- essentially what you could feasibly do is introduce a strategy class on system classpath and load that.\n\nIf the intent is to configure only the implementations provided herein, we should just provide short names for them and do a switch() + explicit instantiations.",
+      "parentUuid": "9a3d3df0_a9154e4a",
+      "revId": "c259cdadc2f9eef5807ced7abda6480ec56d981f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_492da2a7",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/selectionstrategy/EntityOwnerSelectionStrategyConfigReader.java",
         "patchSetId": 2
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_751e630d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/selectionstrategy/EntityOwnerSelectionStrategyConfigReader.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-03-07T16:28:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a3d3df0_492da2a7",
+      "revId": "c259cdadc2f9eef5807ced7abda6480ec56d981f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_292ade8f",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/selectionstrategy/EntityOwnerSelectionStrategyConfigReader.java",
         "patchSetId": 2
@@ -47,6 +83,24 @@
       "writtenOn": "2016-02-27T15:08:40Z",
       "side": 1,
       "message": "Again we should log to debug here. ConfigAdmin actually returns a valid Configuration instance and null properties when the cfg file doesn\u0027t exist. So this error is always emitted on startup by default which isn\u0027t good.",
+      "revId": "c259cdadc2f9eef5807ced7abda6480ec56d981f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_d5192f23",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/selectionstrategy/EntityOwnerSelectionStrategyConfigReader.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-03-07T16:28:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a3d3df0_292ade8f",
       "revId": "c259cdadc2f9eef5807ced7abda6480ec56d981f",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -87,6 +141,24 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_55ca3fa1",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/config/yang/config/distributed_entity_ownership_service/DistributedEntityOwnershipServiceProviderModule.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-03-07T16:28:18Z",
+      "side": 1,
+      "message": "I just wanted to mark it for refactor -- if we had a service definition for ActorContext, we certainly could inject that all around.",
+      "parentUuid": "9a3d3df0_dc116e53",
+      "revId": "c259cdadc2f9eef5807ced7abda6480ec56d981f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_e90ab624",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/config/yang/config/distributed_entity_ownership_service/DistributedEntityOwnershipServiceProviderModule.java",
         "patchSetId": 2
@@ -104,6 +176,24 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_75c2e385",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/config/yang/config/distributed_entity_ownership_service/DistributedEntityOwnershipServiceProviderModule.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-03-07T16:28:18Z",
+      "side": 1,
+      "message": "Yeah, this was a mark for follow-up to analyze injection strategy, I will follow up a bit more.",
+      "parentUuid": "9a3d3df0_e90ab624",
+      "revId": "c259cdadc2f9eef5807ced7abda6480ec56d981f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_3c1b3a74",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/entityownership/DistributedEntityOwnershipIntegrationTest.java",
         "patchSetId": 2
@@ -115,6 +205,24 @@
       "writtenOn": "2016-02-27T15:08:40Z",
       "side": 1,
       "message": "This line is rather long - can you wrap it?",
+      "revId": "c259cdadc2f9eef5807ced7abda6480ec56d981f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_b5146be9",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/entityownership/DistributedEntityOwnershipIntegrationTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 328,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-03-07T16:28:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a3d3df0_3c1b3a74",
       "revId": "c259cdadc2f9eef5807ced7abda6480ec56d981f",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
