@@ -18,13 +18,9 @@
 package org.opendaylight.controller.config.yang.config.toaster_provider.impl;
 
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
 import org.opendaylight.controller.sample.toaster.provider.OpendaylightToaster;
-import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.Toaster;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.ToasterService;
-import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,10 +60,6 @@ public final class ToasterProviderModule extends
         DataBroker dataBrokerService = getDataBrokerDependency();
         opendaylightToaster.setDataProvider(dataBrokerService);
 
-        final ListenerRegistration<OpendaylightToaster> dataTreeChangeListenerRegistration = dataBrokerService
-                .registerDataTreeChangeListener(new DataTreeIdentifier<Toaster>(LogicalDatastoreType.CONFIGURATION,
-                        OpendaylightToaster.TOASTER_IID), opendaylightToaster);
-
         final BindingAwareBroker.RpcRegistration<ToasterService> rpcRegistration = getRpcRegistryDependency()
                 .addRpcImplementation(ToasterService.class, opendaylightToaster);
 
@@ -81,7 +73,6 @@ public final class ToasterProviderModule extends
 
             @Override
             public void close() throws Exception {
-                dataTreeChangeListenerRegistration.close();
                 rpcRegistration.close();
                 runtimeReg.close();
                 closeQuietly(opendaylightToaster);
