@@ -78,7 +78,6 @@ public final class BindingToNormalizedNodeCodec implements BindingCodecTreeFacto
 
             });
 
-    private BindingRuntimeContext runtimeContext;
     private DataNormalizer legacyToNormalized;
 
     public BindingToNormalizedNodeCodec(final GeneratedClassLoadingStrategy classLoadingStrategy,
@@ -91,7 +90,7 @@ public final class BindingToNormalizedNodeCodec implements BindingCodecTreeFacto
             final BindingNormalizedNodeCodecRegistry codecRegistry,final boolean waitForSchema) {
         this.classLoadingStrategy = Preconditions.checkNotNull(classLoadingStrategy,"classLoadingStrategy");
         this.codecRegistry = Preconditions.checkNotNull(codecRegistry,"codecRegistry");
-        this.futureSchema = waitForSchema ? new FutureSchema(WAIT_DURATION_SEC, TimeUnit.SECONDS) : null;
+        this.futureSchema = new FutureSchema(WAIT_DURATION_SEC, TimeUnit.SECONDS, waitForSchema);
     }
 
     YangInstanceIdentifier toYangInstanceIdentifierBlocking(final InstanceIdentifier<? extends DataObject> binding) {
@@ -227,13 +226,11 @@ public final class BindingToNormalizedNodeCodec implements BindingCodecTreeFacto
     }
 
     @Override
-    public void onGlobalContextUpdated(final SchemaContext arg0) {
-        legacyToNormalized = new DataNormalizer(arg0);
-        runtimeContext = BindingRuntimeContext.create(classLoadingStrategy, arg0);
+    public void onGlobalContextUpdated(final SchemaContext schemaContext) {
+        legacyToNormalized = new DataNormalizer(schemaContext);
+        BindingRuntimeContext runtimeContext = BindingRuntimeContext.create(classLoadingStrategy, schemaContext);
         codecRegistry.onBindingRuntimeContextUpdated(runtimeContext);
-        if(futureSchema != null) {
-            futureSchema.onRuntimeContextUpdated(runtimeContext);
-        }
+        futureSchema.onRuntimeContextUpdated(runtimeContext);
     }
 
     public <T extends DataObject> Function<Optional<NormalizedNode<?, ?>>, Optional<T>>  deserializeFunction(final InstanceIdentifier<T> path) {
@@ -306,31 +303,35 @@ public final class BindingToNormalizedNodeCodec implements BindingCodecTreeFacto
         final QNameModule moduleName = BindingReflections.getQNameModule(modeledClass);
         final URI namespace = moduleName.getNamespace();
         final Date revision = moduleName.getRevision();
-        Module module = runtimeContext.getSchemaContext().findModuleByNamespaceAndRevision(namespace, revision);
-        if(module == null && futureSchema != null && futureSchema.waitForSchema(namespace,revision)) {
-            module = runtimeContext.getSchemaContext().findModuleByNamespaceAndRevision(namespace, revision);
+        Module module = runtimeContext().getSchemaContext().findModuleByNamespaceAndRevision(namespace, revision);
+        if(module == null && futureSchema.waitForSchema(namespace,revision)) {
+            module = runtimeContext().getSchemaContext().findModuleByNamespaceAndRevision(namespace, revision);
         }
         Preconditions.checkState(module != null, "Schema for %s is not available.", modeledClass);
         return module;
     }
 
     private void waitForSchema(final Collection<Class<?>> binding, final MissingSchemaException e) {
-        if(futureSchema != null) {
-            LOG.warn("Blocking thread to wait for schema convergence updates for {} {}",futureSchema.getDuration(), futureSchema.getUnit());
-            if(!futureSchema.waitForSchema(binding)) {
-                return;
-            }
+        LOG.warn("Blocking thread to wait for schema convergence updates for {} {}", futureSchema.getDuration(),
+                futureSchema.getUnit());
+        if(futureSchema.waitForSchema(binding)) {
+            return;
         }
+
         throw e;
     }
 
     private Method findRpcMethod(final Class<? extends RpcService> key, final RpcDefinition rpcDef) throws NoSuchMethodException {
         final String methodName = BindingMapping.getMethodName(rpcDef.getQName());
         if(rpcDef.getInput() != null) {
-            final Class<?> inputClz = runtimeContext.getClassForSchema(rpcDef.getInput());
+            final Class<?> inputClz = runtimeContext().getClassForSchema(rpcDef.getInput());
             return key.getMethod(methodName, inputClz);
         }
         return key.getMethod(methodName);
+    }
+
+    private BindingRuntimeContext runtimeContext() {
+        return futureSchema.runtimeContext();
     }
 
     @Override
@@ -361,11 +362,11 @@ public final class BindingToNormalizedNodeCodec implements BindingCodecTreeFacto
     @SuppressWarnings("unchecked")
     public Set<Class<? extends Notification>> getNotificationClasses(final Set<SchemaPath> interested) {
         final Set<Class<? extends Notification>> result = new HashSet<>();
-        final Set<NotificationDefinition> knownNotifications = runtimeContext.getSchemaContext().getNotifications();
+        final Set<NotificationDefinition> knownNotifications = runtimeContext().getSchemaContext().getNotifications();
         for (final NotificationDefinition notification : knownNotifications) {
             if (interested.contains(notification.getPath())) {
                 try {
-                    result.add((Class<? extends Notification>) runtimeContext.getClassForSchema(notification));
+                    result.add((Class<? extends Notification>) runtimeContext().getClassForSchema(notification));
                 } catch (final IllegalStateException e) {
                     // Ignore
                     LOG.warn("Class for {} is currently not known.",notification.getPath(),e);

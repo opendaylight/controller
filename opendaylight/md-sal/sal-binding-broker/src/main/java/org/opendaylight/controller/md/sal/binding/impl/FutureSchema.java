@@ -13,29 +13,51 @@ import com.google.common.base.Throwables;
 import com.google.common.util.concurrent.SettableFuture;
 import java.net.URI;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import javax.annotation.concurrent.GuardedBy;
 import org.opendaylight.yangtools.sal.binding.generator.util.BindingRuntimeContext;
 import org.opendaylight.yangtools.yang.binding.Augmentation;
 
 class FutureSchema implements AutoCloseable {
 
-    private final List<FutureSchemaPredicate> postponedOperations = new CopyOnWriteArrayList<>();
+    @GuardedBy(value="postponedOperations")
+    private final Set<FutureSchemaPredicate> postponedOperations = new LinkedHashSet<>();
     private final long duration;
     private final TimeUnit unit;
+    private final boolean waitEnabled;
+    private volatile BindingRuntimeContext runtimeContext;
 
-    protected FutureSchema(final long time, final TimeUnit unit) {
+    protected FutureSchema(final long time, final TimeUnit unit, final boolean waitEnabled) {
         this.duration = time;
         this.unit = unit;
+        this.waitEnabled = waitEnabled;
+    }
+
+    BindingRuntimeContext runtimeContext() {
+        BindingRuntimeContext localRuntimeContext = runtimeContext;
+        if(localRuntimeContext != null) {
+            return localRuntimeContext;
+        }
+
+        if(waitForSchema(Collections.emptyList())) {
+            return runtimeContext;
+        }
+
+        throw new IllegalStateException("No SchemaContext is available");
     }
 
     void onRuntimeContextUpdated(final BindingRuntimeContext context) {
-        for (final FutureSchemaPredicate op : postponedOperations) {
-            op.unlockIfPossible(context);
+        synchronized(postponedOperations) {
+            runtimeContext = context;
+            for (final FutureSchemaPredicate op : postponedOperations) {
+                op.unlockIfPossible(context);
+            }
         }
     }
 
@@ -49,8 +71,10 @@ class FutureSchema implements AutoCloseable {
 
     @Override
     public void close() {
-        for (final FutureSchemaPredicate op : postponedOperations) {
-            op.cancel();
+        synchronized(postponedOperations) {
+            for (final FutureSchemaPredicate op : postponedOperations) {
+                op.cancel();
+            }
         }
     }
 
@@ -65,19 +89,16 @@ class FutureSchema implements AutoCloseable {
     }
 
     boolean waitForSchema(final URI namespace, final Date revision) {
-        final FutureSchemaPredicate postponedOp = new FutureSchemaPredicate() {
-
+        return addPostponedOpAndWait(new FutureSchemaPredicate() {
             @Override
             public boolean apply(final BindingRuntimeContext input) {
                 return input.getSchemaContext().findModuleByNamespaceAndRevision(namespace, revision) != null;
             }
-        };
-        return postponedOp.waitForSchema();
+        });
     }
 
     boolean waitForSchema(final Collection<Class<?>> bindingClasses) {
-        final FutureSchemaPredicate postponedOp = new FutureSchemaPredicate() {
-
+        return addPostponedOpAndWait(new FutureSchemaPredicate() {
             @Override
             public boolean apply(final BindingRuntimeContext context) {
                 for (final Class<?> clz : bindingClasses) {
@@ -87,7 +108,24 @@ class FutureSchema implements AutoCloseable {
                 }
                 return true;
             }
-        };
+        });
+    }
+
+    private boolean addPostponedOpAndWait(FutureSchemaPredicate postponedOp) {
+        if(!waitEnabled) {
+            return false;
+        }
+
+        BindingRuntimeContext localRuntimeContext = runtimeContext;
+        synchronized(postponedOperations) {
+            postponedOperations.add(postponedOp);
+
+            // If the runtimeContext changed, this op may now be satisfied so check it.
+            if(localRuntimeContext != runtimeContext) {
+                postponedOp.unlockIfPossible(runtimeContext);
+            }
+        }
+
         return postponedOp.waitForSchema();
     }
 
@@ -102,7 +140,9 @@ class FutureSchema implements AutoCloseable {
             } catch (final TimeoutException e) {
                 return false;
             } finally {
-                postponedOperations.remove(this);
+                synchronized(postponedOperations) {
+                    postponedOperations.remove(this);
+                }
             }
         }
 
