@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_35a85bda",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 444,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-03-07T15:59:03Z",
+      "side": 1,
+      "message": "I have not seen any real retries in the DEOS class, hence my assumption here -- I missed the condition below. I think we should be creating the actor even when we do not have a schema context and let it be uninitialized as long as it does not receive a schema context. Given that registrations are asynchronous, it can process requests before it gets a schema context, it just won\u0027t activate anyone, right?",
+      "parentUuid": "9a3d3df0_bc1e2a5d",
+      "revId": "ce8f0dd8bb0046780d6dab1a910cfe79a5aa1ae9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_9c2366a6",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/DistributedEntityOwnershipService.java",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2016-02-27T15:23:28Z",
       "side": 1,
       "message": "The local shard is owned and destroyed by the ShardManager.",
+      "revId": "ce8f0dd8bb0046780d6dab1a910cfe79a5aa1ae9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_d5b80f2c",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/DistributedEntityOwnershipService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 221,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-03-07T15:59:03Z",
+      "side": 1,
+      "message": "Right, but this is a service built on top of ShardManager, hence it could conceivably be shut down with SM remaining up. In that case we really do not want the candidates, listeners and the local shard to hang around, right?",
+      "parentUuid": "9a3d3df0_9c2366a6",
       "revId": "ce8f0dd8bb0046780d6dab1a910cfe79a5aa1ae9",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
