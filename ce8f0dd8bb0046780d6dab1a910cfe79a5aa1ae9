@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_d592cff4",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 444,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-03-07T19:39:19Z",
+      "side": 1,
+      "message": "The SchemaContext is needed for persistence recovery even though the EOS is operational and persistence is off. But this is generic. Also it transactions would fail w/o the SchemaContext. \n\nThat said, I think the SchemaContext is always available at this point but better to be safe, i.e. \"if it ain\u0027t broke, don\u0027t fix it\" :)",
+      "parentUuid": "9a3d3df0_35a85bda",
+      "revId": "ce8f0dd8bb0046780d6dab1a910cfe79a5aa1ae9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_9c2366a6",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/DistributedEntityOwnershipService.java",
         "patchSetId": 2
@@ -66,6 +84,24 @@
       "side": 1,
       "message": "Right, but this is a service built on top of ShardManager, hence it could conceivably be shut down with SM remaining up. In that case we really do not want the candidates, listeners and the local shard to hang around, right?",
       "parentUuid": "9a3d3df0_9c2366a6",
+      "revId": "ce8f0dd8bb0046780d6dab1a910cfe79a5aa1ae9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_b552ab32",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/DistributedEntityOwnershipService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 221,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-03-07T19:39:19Z",
+      "side": 1,
+      "message": "Yeah - it could and that might probably does happen on shutdown for a short period. It could shut down the shard but it would be safest to go thru the SM. That would require a little in SM as it currently assumes it owns the shard lifecycle.\n\nAt the very least, it would be good to unregister all local candidates on graceful shutdown to minimize the amount of time the leader has stale candidates (they\u0027re cleaned up when the leader gets the PeerDown event via akka after some seconds).\n\nAlso we should fail/drop further candidate requests after close. Unfortunately there\u0027s nothing currently in the DEOS API to communicate that case to the caller (we only have CadidateAlreadyRegistered). We could add a general base CandidateRegistrationFailed ex in the new API. We could also throw an IllegalStateEx but that wouldn\u0027t be friendly to the client.",
+      "parentUuid": "9a3d3df0_d5b80f2c",
       "revId": "ce8f0dd8bb0046780d6dab1a910cfe79a5aa1ae9",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
