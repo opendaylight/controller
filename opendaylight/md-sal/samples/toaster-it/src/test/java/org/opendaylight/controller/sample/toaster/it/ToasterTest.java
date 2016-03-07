@@ -55,7 +55,7 @@ public class ToasterTest extends AbstractMdsalTestBase {
     @Test
     public void testToaster() throws Exception {
         MBeanServer platformMBeanServer = ManagementFactory.getPlatformMBeanServer();
-        ObjectName providerOn = new ObjectName("org.opendaylight.controller:instanceName=toaster-provider-impl,type=RuntimeBean,moduleFactoryName=toaster-provider-impl");
+        ObjectName providerOn = new ObjectName("org.opendaylight.controller:name=OpendaylightToaster,type=toaster-provider");
 
         long toastsMade = (long) platformMBeanServer.getAttribute(providerOn, "ToastsMade");
         assertEquals(0, toastsMade);
