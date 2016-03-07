@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+           xmlns:odl="http://opendaylight.org/xmlns/blueprint/v1.0.0"
+           xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0">
+
+  <odl:processor/>
+
+  <cm:property-placeholder persistent-id="org.opendaylight.toaster" update-strategy="none">
+    <cm:default-properties>
+      <cm:property name="databroker-type" value="default"/>
+    </cm:default-properties>
+  </cm:property-placeholder>
+
+  <reference id="dataBroker" interface="org.opendaylight.controller.md.sal.binding.api.DataBroker" odl:type="${databroker-type}" />
+  <reference id="notificationService" interface="org.opendaylight.controller.md.sal.binding.api.NotificationPublishService"/>
+
+  <bean id="toaster" class="org.opendaylight.controller.sample.toaster.provider.OpendaylightToaster"
+          init-method="register" destroy-method="unregister">
+    <property name="dataProvider" ref="dataBroker"/>
+    <property name="notificationProvider" ref="notificationService"/>
+  </bean>
+
+  <odl:rpc-implementation ref="toaster"/>
+</blueprint>
