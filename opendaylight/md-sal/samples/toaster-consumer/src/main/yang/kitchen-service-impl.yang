@@ -9,6 +9,7 @@ module kitchen-service-impl {
     import rpc-context { prefix rpcx; revision-date 2013-06-17; }
 
     import opendaylight-md-sal-binding { prefix mdsal; revision-date 2013-10-28; }
+    import opendaylight-sal-binding-broker-impl { prefix binding-impl; revision-date 2013-10-28; }
 
     description
         "This module contains the base YANG definitions for
@@ -49,7 +50,7 @@ module kitchen-service-impl {
                 uses config:service-ref {
                     refine type {
                         mandatory true;
-                        config:required-identity mdsal:binding-notification-service;
+                        config:required-identity binding-impl:binding-new-notification-service;
                     }
                 }
             }
