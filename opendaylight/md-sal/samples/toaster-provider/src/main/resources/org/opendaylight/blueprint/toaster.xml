@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+           xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0">
+
+  <reference id="dataBroker" interface="org.opendaylight.controller.md.sal.binding.api.DataBroker"/>
+  <reference id="rpcRegistry" interface="org.opendaylight.controller.sal.binding.api.RpcProviderRegistry"/>
+  <reference id="notificationService" interface="org.opendaylight.controller.sal.binding.api.NotificationProviderService"/>
+
+  <bean id="toaster" class="org.opendaylight.controller.sample.toaster.provider.OpendaylightToaster">
+    <property name="dataProvider" ref="dataBroker"/>
+    <property name="notificationProvider" ref="notificationService"/>
+  </bean>
+
+  <bean id="rpcRegistryWrapper" class="org.opendaylight.controller.sal.binding.api.RpcProviderRegistryWrapper" >
+    <argument ref="rpcRegistry"/>
+    <argument ref="blueprintBundleContext"/>
+  </bean>
+
+  <bean class="org.opendaylight.controller.sal.binding.api.BindingAwareBroker.RoutedRpcRegistration" factory-ref="rpcRegistryWrapper" factory-method="addRpcImplementation" destroy-method="close">
+    <argument value="org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.ToasterService"/>
+    <argument ref="toaster"/>
+  </bean>
+
+</blueprint>
