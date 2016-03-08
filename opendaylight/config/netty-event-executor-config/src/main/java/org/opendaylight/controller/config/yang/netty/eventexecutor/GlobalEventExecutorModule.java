@@ -17,8 +17,6 @@
  */
 package org.opendaylight.controller.config.yang.netty.eventexecutor;
 
-import io.netty.util.concurrent.EventExecutor;
-import io.netty.util.concurrent.GlobalEventExecutor;
 import org.opendaylight.controller.config.yang.netty.eventexecutor.AutoCloseableEventExecutor.CloseableEventExecutorMixin;
 
 public final class GlobalEventExecutorModule extends
@@ -42,8 +40,7 @@ public final class GlobalEventExecutorModule extends
 
     @Override
     public java.lang.AutoCloseable createInstance() {
-        EventExecutor eventExecutor = GlobalEventExecutor.INSTANCE;
-        return CloseableEventExecutorMixin.createCloseableProxy(eventExecutor);
+        return CloseableEventExecutorMixin.globalEventExecutor();
     }
 
 
