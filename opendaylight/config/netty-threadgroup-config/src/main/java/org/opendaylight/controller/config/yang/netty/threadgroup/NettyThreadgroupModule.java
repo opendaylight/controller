@@ -17,8 +17,6 @@
 */
 package org.opendaylight.controller.config.yang.netty.threadgroup;
 
-import io.netty.channel.nio.NioEventLoopGroup;
-import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.config.api.JmxAttributeValidationException;
 
 /**
@@ -44,24 +42,6 @@ public final class NettyThreadgroupModule extends org.opendaylight.controller.co
 
     @Override
     public java.lang.AutoCloseable createInstance() {
-        return getThreadCount()==null ? new NioEventLoopGroupCloseable() : new NioEventLoopGroupCloseable(getThreadCount());
-    }
-
-
-    private class NioEventLoopGroupCloseable extends NioEventLoopGroup implements AutoCloseable {
-
-
-        public NioEventLoopGroupCloseable(int threadCount) {
-            super(threadCount);
-        }
-
-        public NioEventLoopGroupCloseable() {
-            super();
-        }
-
-        @Override
-        public void close() throws Exception {
-            shutdownGracefully(0, 1, TimeUnit.SECONDS);
-        }
+        return NioEventLoopGroupCloseable.newInstance(getThreadCount());
     }
 }
