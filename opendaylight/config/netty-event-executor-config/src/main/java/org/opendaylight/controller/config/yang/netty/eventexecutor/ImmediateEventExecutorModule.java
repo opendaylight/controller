@@ -7,8 +7,6 @@
  */
 package org.opendaylight.controller.config.yang.netty.eventexecutor;
 
-import io.netty.util.concurrent.EventExecutor;
-import io.netty.util.concurrent.ImmediateEventExecutor;
 import org.opendaylight.controller.config.yang.netty.eventexecutor.AutoCloseableEventExecutor.CloseableEventExecutorMixin;
 
 public final class ImmediateEventExecutorModule extends org.opendaylight.controller.config.yang.netty.eventexecutor.AbstractImmediateEventExecutorModule {
@@ -30,7 +28,6 @@ public final class ImmediateEventExecutorModule extends org.opendaylight.control
 
     @Override
     public java.lang.AutoCloseable createInstance() {
-        EventExecutor eventExecutor = ImmediateEventExecutor.INSTANCE;
-        return CloseableEventExecutorMixin.createCloseableProxy(eventExecutor);
+        return CloseableEventExecutorMixin.immediateEventExecutor();
     }
 }
