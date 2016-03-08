@@ -16,6 +16,8 @@ import io.netty.channel.ChannelPromise;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.Queue;
+
+import org.apache.sshd.common.future.CloseFuture;
 import org.apache.sshd.common.future.SshFutureListener;
 import org.apache.sshd.common.io.IoOutputStream;
 import org.apache.sshd.common.io.IoWriteFuture;
@@ -168,7 +170,16 @@ public final class AsyncSshHandlerWriter implements AutoCloseable {
 
     @Override
     public void close() {
-        asyncIn = null;
+        asyncIn.close(false).addListener(new SshFutureListener<CloseFuture>() {
+            @Override
+            public void operationComplete(final CloseFuture future) {
+                if (!future.isClosed()) {
+                    asyncIn.close(true);
+                }
+                LOG.info("asyncIn closed, and null");
+                asyncIn = null;
+            }
+        });
     }
 
     private static Buffer toBuffer(final ByteBuf msg) {
