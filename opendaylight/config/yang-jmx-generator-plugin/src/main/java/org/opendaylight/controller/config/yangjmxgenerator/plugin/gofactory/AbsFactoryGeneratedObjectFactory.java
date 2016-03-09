@@ -114,11 +114,10 @@ public class AbsFactoryGeneratedObjectFactory {
                 "throw new UnsupportedOperationException(\"Class reloading is not supported\");\n"+
             "}\n", moduleFQN, DynamicMBeanWithInstance.class.getCanonicalName()));
 
-        // TODO The generic specifier in HashSet<> isn't necessary, but the Eclipse AST parser used in the unit tests doesn't support this
         b.addToBody(format("\n"+
             "@Override\n"+
             "public java.util.Set<%s> getDefaultModules(org.opendaylight.controller.config.api.DependencyResolverFactory dependencyResolverFactory, %s bundleContext) {\n"+
-                "return new java.util.HashSet<%1$s>();\n"+
+                "return new java.util.HashSet<>();\n"+
             "}\n", moduleFQN, BUNDLE_CONTEXT));
 
         return new GeneratedObjectBuilder(b.build()).toGeneratedObject();
@@ -153,8 +152,7 @@ public class AbsFactoryGeneratedObjectFactory {
 
         String result = "static {\n";
         if (!providedServices.isEmpty()) {
-            // TODO The generic specifier in HashSet<> isn't necessary, but the Eclipse AST parser used in the unit tests doesn't support this
-            result += format("java.util.Set<%1$s> serviceIfcs2 = new java.util.HashSet<%1$s>();\n", generic);
+            result += format("java.util.Set<%1$s> serviceIfcs2 = new java.util.HashSet<>();\n", generic);
 
             for(FullyQualifiedName fqn: providedServices) {
                 result += format("serviceIfcs2.add(%s.class);\n", fqn);
