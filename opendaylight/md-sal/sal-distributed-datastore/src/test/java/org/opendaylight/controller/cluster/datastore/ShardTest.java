@@ -977,8 +977,12 @@ public class ShardTest extends AbstractShardTest {
     }
 
     @Test
-    public void testReadyWithImmediateCommit() throws Exception{
+    public void testReadyWithReadWriteImmediateCommit() throws Exception{
         testReadyWithImmediateCommit(true);
+    }
+
+    @Test
+    public void testReadyWithWriteOnlyImmediateCommit() throws Exception{
         testReadyWithImmediateCommit(false);
     }
 
@@ -1089,9 +1093,13 @@ public class ShardTest extends AbstractShardTest {
     }
 
     @Test
-    public void testCommitWithPersistenceDisabled() throws Throwable {
+    public void testReadWriteCommitWithPersistenceDisabled() throws Throwable {
         testCommitWithPersistenceDisabled(true);
-        testCommitWithPersistenceDisabled(false);
+    }
+
+    @Test
+    public void testWriteOnlyCommitWithPersistenceDisabled() throws Throwable {
+        testCommitWithPersistenceDisabled(true);
     }
 
     private void testCommitWithPersistenceDisabled(final boolean readWrite) throws Throwable {
@@ -1141,8 +1149,12 @@ public class ShardTest extends AbstractShardTest {
     }
 
     @Test
-    public void testCommitWhenTransactionHasNoModifications() {
+    public void testReadWriteCommitWhenTransactionHasNoModifications() {
         testCommitWhenTransactionHasNoModifications(true);
+    }
+
+    @Test
+    public void testWriteOnlyCommitWhenTransactionHasNoModifications() {
         testCommitWhenTransactionHasNoModifications(false);
     }
 
@@ -1199,8 +1211,12 @@ public class ShardTest extends AbstractShardTest {
     }
 
     @Test
-    public void testCommitWhenTransactionHasModifications() {
+    public void testReadWriteCommitWhenTransactionHasModifications() {
         testCommitWhenTransactionHasModifications(true);
+    }
+
+    @Test
+    public void testWriteOnlyCommitWhenTransactionHasModifications() {
         testCommitWhenTransactionHasModifications(false);
     }
 
