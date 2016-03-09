@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_33234e57",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/main/java/org/opendaylight/controller/md/sal/binding/impl/BindingToNormalizedNodeCodec.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-03-09T22:24:56Z",
+      "side": 1,
+      "message": "I agree but I needed to access it from the unit tests. Unfortunately they\u0027re in a separate package. I could move the unit test class to the same package, would that be OK?",
+      "parentUuid": "9a3d3df0_083899d1",
+      "revId": "14e1d0c5dbff3ddeefbea6231b16f7f98bebc166",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_a877ed9e",
         "filename": "opendaylight/md-sal/sal-binding-broker/src/main/java/org/opendaylight/controller/md/sal/binding/impl/FutureSchema.java",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2016-03-09T10:23:31Z",
       "side": 1,
       "message": "please keep the order of variables:\n- static final\n- final\n- non-final",
+      "revId": "14e1d0c5dbff3ddeefbea6231b16f7f98bebc166",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_531412e8",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/main/java/org/opendaylight/controller/md/sal/binding/impl/FutureSchema.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-03-09T22:24:56Z",
+      "side": 1,
+      "message": "Will do",
+      "parentUuid": "9a3d3df0_a877ed9e",
       "revId": "14e1d0c5dbff3ddeefbea6231b16f7f98bebc166",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
