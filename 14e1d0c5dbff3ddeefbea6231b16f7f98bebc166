@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a3d3df0_083899d1",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/main/java/org/opendaylight/controller/md/sal/binding/impl/BindingToNormalizedNodeCodec.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-03-09T10:23:31Z",
+      "side": 1,
+      "message": "We should not be publishing this method",
+      "revId": "14e1d0c5dbff3ddeefbea6231b16f7f98bebc166",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_a877ed9e",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/main/java/org/opendaylight/controller/md/sal/binding/impl/FutureSchema.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-03-09T10:23:31Z",
+      "side": 1,
+      "message": "please keep the order of variables:\n- static final\n- final\n- non-final",
+      "revId": "14e1d0c5dbff3ddeefbea6231b16f7f98bebc166",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
