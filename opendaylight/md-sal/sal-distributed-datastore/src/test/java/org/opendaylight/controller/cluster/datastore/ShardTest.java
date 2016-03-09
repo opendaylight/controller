@@ -19,17 +19,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.opendaylight.controller.cluster.datastore.DataStoreVersions.CURRENT_VERSION;
-import akka.actor.ActorRef;
-import akka.actor.ActorSelection;
-import akka.actor.Props;
-import akka.actor.Status.Failure;
-import akka.dispatch.Dispatchers;
-import akka.dispatch.OnComplete;
-import akka.japi.Creator;
-import akka.pattern.Patterns;
-import akka.persistence.SaveSnapshotSuccess;
-import akka.testkit.TestActorRef;
-import akka.util.Timeout;
 import com.google.common.base.Function;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -111,6 +100,17 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.TreeType;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.tree.InMemoryDataTreeFactory;
+import akka.actor.ActorRef;
+import akka.actor.ActorSelection;
+import akka.actor.Props;
+import akka.actor.Status.Failure;
+import akka.dispatch.Dispatchers;
+import akka.dispatch.OnComplete;
+import akka.japi.Creator;
+import akka.pattern.Patterns;
+import akka.persistence.SaveSnapshotSuccess;
+import akka.testkit.TestActorRef;
+import akka.util.Timeout;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.FiniteDuration;
@@ -977,8 +977,12 @@ public class ShardTest extends AbstractShardTest {
     }
 
     @Test
-    public void testReadyWithImmediateCommit() throws Exception{
+    public void testReadyWithReadWriteImmediateCommit() throws Exception{
         testReadyWithImmediateCommit(true);
+    }
+
+    @Test
+    public void testReadyWithWriteOnlyImmediateCommit() throws Exception{
         testReadyWithImmediateCommit(false);
     }
 
@@ -1089,9 +1093,13 @@ public class ShardTest extends AbstractShardTest {
     }
 
     @Test
-    public void testCommitWithPersistenceDisabled() throws Throwable {
+    public void testReadWriteCommitWithPersistenceDisabled() throws Throwable {
         testCommitWithPersistenceDisabled(true);
-        testCommitWithPersistenceDisabled(false);
+    }
+
+    @Test
+    public void testWriteOnlyCommitWithPersistenceDisabled() throws Throwable {
+        testCommitWithPersistenceDisabled(true);
     }
 
     private void testCommitWithPersistenceDisabled(final boolean readWrite) throws Throwable {
@@ -1141,8 +1149,12 @@ public class ShardTest extends AbstractShardTest {
     }
 
     @Test
-    public void testCommitWhenTransactionHasNoModifications() {
+    public void testReadWriteCommitWhenTransactionHasNoModifications() {
         testCommitWhenTransactionHasNoModifications(true);
+    }
+
+    @Test
+    public void testWriteOnlyCommitWhenTransactionHasNoModifications() {
         testCommitWhenTransactionHasNoModifications(false);
     }
 
@@ -1199,8 +1211,12 @@ public class ShardTest extends AbstractShardTest {
     }
 
     @Test
-    public void testCommitWhenTransactionHasModifications() {
+    public void testReadWriteCommitWhenTransactionHasModifications() {
         testCommitWhenTransactionHasModifications(true);
+    }
+
+    @Test
+    public void testWriteOnlyCommitWhenTransactionHasModifications() {
         testCommitWhenTransactionHasModifications(false);
     }
 
