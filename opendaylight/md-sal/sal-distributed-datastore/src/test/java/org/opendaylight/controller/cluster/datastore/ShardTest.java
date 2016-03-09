@@ -97,6 +97,7 @@ import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolic
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
+import org.opendaylight.controller.md.cluster.datastore.model.CarsModel;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker;
@@ -1112,8 +1113,12 @@ public class ShardTest extends AbstractShardTest {
     }
 
     @Test
-    public void testReadyWithImmediateCommit() throws Exception{
+    public void testReadyWithReadWriteImmediateCommit() throws Exception{
         testReadyWithImmediateCommit(true);
+    }
+
+    @Test
+    public void testReadyWithWriteOnlyImmediateCommit() throws Exception{
         testReadyWithImmediateCommit(false);
     }
 
@@ -1230,9 +1235,13 @@ public class ShardTest extends AbstractShardTest {
     }
 
     @Test
-    public void testCommitWithPersistenceDisabled() throws Throwable {
+    public void testReadWriteCommitWithPersistenceDisabled() throws Throwable {
         testCommitWithPersistenceDisabled(true);
-        testCommitWithPersistenceDisabled(false);
+    }
+
+    @Test
+    public void testWriteOnlyCommitWithPersistenceDisabled() throws Throwable {
+        testCommitWithPersistenceDisabled(true);
     }
 
     public void testCommitWithPersistenceDisabled(final boolean readWrite) throws Throwable {
@@ -1288,7 +1297,7 @@ public class ShardTest extends AbstractShardTest {
         final DataTreeCandidateNode mockCandidateNode = mock(DataTreeCandidateNode.class, name + "-node");
         doReturn(ModificationType.WRITE).when(mockCandidateNode).getModificationType();
         doReturn(Optional.of(ImmutableNodes.containerNode(CARS_QNAME))).when(mockCandidateNode).getDataAfter();
-        doReturn(YangInstanceIdentifier.builder().build()).when(mockCandidate).getRootPath();
+        doReturn(CarsModel.BASE_PATH).when(mockCandidate).getRootPath();
         doReturn(mockCandidateNode).when(mockCandidate).getRootNode();
         return mockCandidate;
     }
@@ -1303,8 +1312,12 @@ public class ShardTest extends AbstractShardTest {
     }
 
     @Test
-    public void testCommitWhenTransactionHasNoModifications() {
+    public void testReadWriteCommitWhenTransactionHasNoModifications() {
         testCommitWhenTransactionHasNoModifications(true);
+    }
+
+    @Test
+    public void testWriteOnlyCommitWhenTransactionHasNoModifications() {
         testCommitWhenTransactionHasNoModifications(false);
     }
 
@@ -1364,8 +1377,12 @@ public class ShardTest extends AbstractShardTest {
     }
 
     @Test
-    public void testCommitWhenTransactionHasModifications() {
+    public void testReadWriteCommitWhenTransactionHasModifications() {
         testCommitWhenTransactionHasModifications(true);
+    }
+
+    @Test
+    public void testWriteOnlyCommitWhenTransactionHasModifications() {
         testCommitWhenTransactionHasModifications(false);
     }
 
