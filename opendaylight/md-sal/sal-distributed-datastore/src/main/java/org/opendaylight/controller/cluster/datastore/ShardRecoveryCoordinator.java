@@ -9,10 +9,7 @@ package org.opendaylight.controller.cluster.datastore;
 
 import com.google.common.base.Preconditions;
 import java.io.IOException;
-import java.net.URI;
-import java.util.Set;
 import org.opendaylight.controller.cluster.datastore.modification.MutableCompositeModification;
-import org.opendaylight.controller.cluster.datastore.node.utils.transformer.NormalizedNodePruner;
 import org.opendaylight.controller.cluster.datastore.utils.PruningDataTreeModification;
 import org.opendaylight.controller.cluster.datastore.utils.SerializationUtils;
 import org.opendaylight.controller.cluster.raft.RaftActorRecoveryCohort;
@@ -36,11 +33,10 @@ import org.slf4j.Logger;
  * @author Thomas Pantelis
  */
 class ShardRecoveryCoordinator implements RaftActorRecoveryCohort {
-    private static final YangInstanceIdentifier ROOT = YangInstanceIdentifier.builder().build();
     private final ShardDataTree store;
     private final String shardName;
     private final Logger log;
-    private final Set<URI> validNamespaces;
+    private final SchemaContext schemaContext;
     private PruningDataTreeModification transaction;
     private int size;
     private final byte[] restoreFromSnapshot;
@@ -51,13 +47,13 @@ class ShardRecoveryCoordinator implements RaftActorRecoveryCohort {
         this.restoreFromSnapshot = restoreFromSnapshot;
         this.shardName = shardName;
         this.log = log;
-        this.validNamespaces = NormalizedNodePruner.namespaces(schemaContext);
+        this.schemaContext = schemaContext;
     }
 
     @Override
     public void startLogRecoveryBatch(int maxBatchSize) {
         log.debug("{}: starting log recovery batch with max size {}", shardName, maxBatchSize);
-        transaction = new PruningDataTreeModification(store.newModification(), validNamespaces);
+        transaction = new PruningDataTreeModification(store.newModification(), store.getDataTree(), schemaContext);
         size = 0;
     }
 
@@ -86,7 +82,7 @@ class ShardRecoveryCoordinator implements RaftActorRecoveryCohort {
     }
 
     private void commitTransaction(PruningDataTreeModification tx) throws DataValidationFailedException {
-        store.commit(tx.getDelegate());
+        store.commit(tx.getResultingModification());
     }
 
     /**
@@ -115,8 +111,9 @@ class ShardRecoveryCoordinator implements RaftActorRecoveryCohort {
         log.debug("{}: Applying recovered snapshot", shardName);
 
         final NormalizedNode<?, ?> node = SerializationUtils.deserializeNormalizedNode(snapshotBytes);
-        final PruningDataTreeModification tx = new PruningDataTreeModification(store.newModification(), validNamespaces);
-        tx.write(ROOT, node);
+        final PruningDataTreeModification tx = new PruningDataTreeModification(store.newModification(),
+                store.getDataTree(), schemaContext);
+        tx.write(YangInstanceIdentifier.EMPTY, node);
         try {
             commitTransaction(tx);
         } catch (DataValidationFailedException e) {
