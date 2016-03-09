@@ -53,6 +53,9 @@ public class Parameters {
     @Arg(dest = "auth")
     public ArrayList<String> auth;
 
+    @Arg(dest = "timeout")
+    public long timeout;
+
     static ArgumentParser getParser() {
         final ArgumentParser parser = ArgumentParsers.newArgumentParser("netconf stress client");
 
@@ -122,12 +125,19 @@ public class Parameters {
                 .help("Username and password for HTTP basic authentication in order username password.")
                 .dest("auth");
 
+        parser.addArgument("--timeout")
+                .type(Long.class)
+                .setDefault(5)
+                .help("Maximum time in minutes to wait for finishing all requests.")
+                .dest("timeout");
+
         return parser;
     }
 
     void validate() {
         Preconditions.checkArgument(port > 0, "Port =< 0");
         Preconditions.checkArgument(editCount > 0, "Edit count =< 0");
+        Preconditions.checkArgument(timeout > 0, "Timeout =< 0");
 
         Preconditions.checkArgument(editContent.exists(), "Edit content file missing");
         Preconditions.checkArgument(editContent.isDirectory() == false, "Edit content file is a dir");
