@@ -16,4 +16,10 @@ module odl-datastore-augmentation {
         }
     }
 
+    augment "/test:test" {
+        container aug-container {
+            container aug-inner-container {
+            }
+        }
+    }
 }
