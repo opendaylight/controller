@@ -20,7 +20,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
 import net.sourceforge.argparse4j.inf.ArgumentParserException;
 import org.opendaylight.controller.netconf.test.tool.TestToolUtils;
@@ -133,18 +132,23 @@ public class RestPerfClient {
         LOG.info("Starting performance test");
         final Stopwatch started = Stopwatch.createStarted();
         try {
-            final List<Future<Void>> futures = executorService.invokeAll(callables, 5, TimeUnit.MINUTES);
-            for (final Future<Void> future : futures) {
-                try {
-                    future.get(4L, TimeUnit.MINUTES);
-                } catch (ExecutionException | TimeoutException e) {
-                    throw new RuntimeException(e);
+            final List<Future<Void>> futures = executorService.invokeAll(callables, parameters.timeout, TimeUnit.MINUTES);
+            for (int i = 0; i < futures.size(); i++) {
+                Future<Void> future = futures.get(i);
+                if (future.isCancelled()) {
+                    LOG.info("{}. thread timed out.", i + 1);
+                } else {
+                    try {
+                        future.get();
+                    } catch (final ExecutionException e) {
+                        LOG.info("{}. thread failed.", i + 1, e);
+                    }
                 }
             }
-            executorService.shutdownNow();
         } catch (final InterruptedException e) {
-            throw new RuntimeException("Unable to execute requests", e);
+            LOG.warn("Unable to execute requests", e);
         }
+        executorService.shutdownNow();
         started.stop();
 
         LOG.info("FINISHED. Execution time: {}", started);
