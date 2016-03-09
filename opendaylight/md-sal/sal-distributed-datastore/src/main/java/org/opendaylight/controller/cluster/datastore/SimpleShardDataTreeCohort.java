@@ -85,7 +85,7 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
     private DataTreeModification dataTreeModification() {
         DataTreeModification dataTreeModification = transaction;
         if(transaction instanceof PruningDataTreeModification){
-            dataTreeModification = ((PruningDataTreeModification) transaction).getDelegate();
+            dataTreeModification = ((PruningDataTreeModification) transaction).getResultingModification();
         }
         return dataTreeModification;
     }

@@ -10,16 +10,21 @@ package org.opendaylight.controller.cluster.datastore.utils;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import java.io.IOException;
-import java.net.URI;
-import java.util.Set;
+import java.util.ArrayDeque;
+import java.util.Deque;
+import javax.annotation.Nonnull;
 import org.opendaylight.controller.cluster.datastore.node.utils.transformer.NormalizedNodePruner;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeWriter;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModificationCursor;
 import org.opendaylight.yangtools.yang.data.impl.schema.tree.SchemaValidationFailedException;
+import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,12 +35,14 @@ import org.slf4j.LoggerFactory;
 public class PruningDataTreeModification implements DataTreeModification {
 
     private static final Logger LOG = LoggerFactory.getLogger(PruningDataTreeModification.class);
-    private final DataTreeModification delegate;
-    private final Set<URI> validNamespaces;
+    private DataTreeModification delegate;
+    private final SchemaContext schemaContext;
+    private final DataTree dataTree;
 
-    public PruningDataTreeModification(DataTreeModification delegate, Set<URI> validNamespaces) {
+    public PruningDataTreeModification(DataTreeModification delegate, DataTree dataTree, SchemaContext schemaContext) {
         this.delegate = delegate;
-        this.validNamespaces = validNamespaces;
+        this.dataTree = dataTree;
+        this.schemaContext = schemaContext;
     }
 
     @Override
@@ -56,10 +63,8 @@ public class PruningDataTreeModification implements DataTreeModification {
                 delegate.merge(yangInstanceIdentifier, normalizedNode);
             }
         } catch (SchemaValidationFailedException e){
-            if(!isValidYangInstanceIdentifier(yangInstanceIdentifier)){
-                LOG.warn("Invalid node identifier {} ignoring merge", yangInstanceIdentifier);
-                return;
-            }
+            LOG.warn("Node at path {} was pruned during merge due to validation error: {}",
+                    yangInstanceIdentifier, e.getMessage());
 
             pruneAndMergeNode(yangInstanceIdentifier, normalizedNode);
         }
@@ -67,9 +72,7 @@ public class PruningDataTreeModification implements DataTreeModification {
     }
 
     private void pruneAndMergeNode(YangInstanceIdentifier yangInstanceIdentifier, NormalizedNode<?, ?> normalizedNode) {
-        LOG.warn("Node at path : {} was pruned during merge", yangInstanceIdentifier);
-
-        NormalizedNode<?,?> pruned = pruneNormalizedNode(normalizedNode);
+        NormalizedNode<?,?> pruned = pruneNormalizedNode(yangInstanceIdentifier, normalizedNode);
 
         if(pruned != null) {
             delegate.merge(yangInstanceIdentifier, pruned);
@@ -85,19 +88,15 @@ public class PruningDataTreeModification implements DataTreeModification {
                 delegate.write(yangInstanceIdentifier, normalizedNode);
             }
         } catch (SchemaValidationFailedException e){
-            if(!isValidYangInstanceIdentifier(yangInstanceIdentifier)){
-                LOG.warn("Invalid node identifier {} ignoring write", yangInstanceIdentifier);
-                return;
-            }
+            LOG.warn("Node at path : {} was pruned during write due to validation error: {}",
+                    yangInstanceIdentifier, e.getMessage());
 
             pruneAndWriteNode(yangInstanceIdentifier, normalizedNode);
         }
     }
 
     private void pruneAndWriteNode(YangInstanceIdentifier yangInstanceIdentifier, NormalizedNode<?, ?> normalizedNode) {
-        LOG.warn("Node at path : {} was pruned during write", yangInstanceIdentifier);
-
-        NormalizedNode<?,?> pruned = pruneNormalizedNode(normalizedNode);
+        NormalizedNode<?,?> pruned = pruneNormalizedNode(yangInstanceIdentifier, normalizedNode);
 
         if(pruned != null) {
             delegate.write(yangInstanceIdentifier, pruned);
@@ -106,7 +105,15 @@ public class PruningDataTreeModification implements DataTreeModification {
 
     @Override
     public void ready() {
-        delegate.ready();
+        try {
+            delegate.ready();
+        } catch (SchemaValidationFailedException e) {
+            DataTreeModification newModification = dataTree.takeSnapshot().newModification();
+            delegate.applyToCursor(new PruningDataTreeModificationCursor(newModification, this));
+
+            delegate = newModification;
+            delegate.ready();
+        }
     }
 
     @Override
@@ -121,12 +128,12 @@ public class PruningDataTreeModification implements DataTreeModification {
 
     @Override
     public DataTreeModification newModification() {
-        return new PruningDataTreeModification(delegate.newModification(), validNamespaces);
+        return new PruningDataTreeModification(delegate.newModification(), dataTree, schemaContext);
     }
 
     @VisibleForTesting
-    NormalizedNode<?, ?> pruneNormalizedNode(NormalizedNode<?,?> input){
-        NormalizedNodePruner pruner = new NormalizedNodePruner(validNamespaces);
+    NormalizedNode<?, ?> pruneNormalizedNode(YangInstanceIdentifier path, NormalizedNode<?,?> input) {
+        NormalizedNodePruner pruner = new NormalizedNodePruner(path, schemaContext);
         try {
             NormalizedNodeWriter.forStreamWriter(pruner).write(input);
         } catch (IOException ioe) {
@@ -136,18 +143,88 @@ public class PruningDataTreeModification implements DataTreeModification {
         return pruner.normalizedNode();
     }
 
-    public DataTreeModification getDelegate(){
+    public DataTreeModification getResultingModification(){
         return delegate;
     }
 
-    private boolean isValidYangInstanceIdentifier(YangInstanceIdentifier instanceIdentifier){
-        for(YangInstanceIdentifier.PathArgument pathArgument : instanceIdentifier.getPathArguments()){
-            if(!validNamespaces.contains(pathArgument.getNodeType().getNamespace())){
-                return false;
+    private static class PruningDataTreeModificationCursor implements DataTreeModificationCursor {
+        private final Deque<YangInstanceIdentifier> stack = new ArrayDeque<>();
+        private final DataTreeModification toModification;
+        private final PruningDataTreeModification pruningModification;
+
+        PruningDataTreeModificationCursor(DataTreeModification toModification,
+                PruningDataTreeModification pruningModification) {
+            this.toModification = toModification;
+            this.pruningModification = pruningModification;
+            stack.push(YangInstanceIdentifier.EMPTY);
+        }
+
+        @Override
+        public void write(PathArgument child, NormalizedNode<?, ?> data) {
+            YangInstanceIdentifier path = stack.peek().node(child);
+            NormalizedNode<?, ?> prunedNode = pruningModification.pruneNormalizedNode(path, data);
+            if(prunedNode != null) {
+                toModification.write(path, prunedNode);
             }
         }
 
-        return true;
-    }
+        @Override
+        public void merge(PathArgument child, NormalizedNode<?, ?> data) {
+            YangInstanceIdentifier path = stack.peek().node(child);
+            NormalizedNode<?, ?> prunedNode = pruningModification.pruneNormalizedNode(path, data);
+            if(prunedNode != null) {
+                toModification.merge(path, prunedNode);
+            }
+        }
 
+        @Override
+        public void delete(PathArgument child) {
+            try {
+                toModification.delete(stack.peek().node(child));
+            } catch(SchemaValidationFailedException e) {
+                // Ignoring since we would've already logged this in the call to the original modification.
+            }
+        }
+
+        @Override
+        public void enter(@Nonnull final PathArgument child) {
+            stack.push(stack.peek().node(child));
+        }
+
+        @Override
+        public void enter(@Nonnull final PathArgument... path) {
+            for (PathArgument arg : path) {
+                enter(arg);
+            }
+        }
+
+        @Override
+        public void enter(@Nonnull final Iterable<PathArgument> path) {
+            for (PathArgument arg : path) {
+                enter(arg);
+            }
+        }
+
+        @Override
+        public void exit() {
+            stack.pop();
+        }
+
+        @Override
+        public void exit(final int depth) {
+            Preconditions.checkArgument(depth < stack.size(), "Stack holds only %s elements, cannot exit %s levels", stack.size(), depth);
+            for (int i = 0; i < depth; ++i) {
+                stack.pop();
+            }
+        }
+
+        @Override
+        public Optional<NormalizedNode<?, ?>> readNode(@Nonnull final PathArgument child) {
+            throw new UnsupportedOperationException("Not implemented");
+        }
+
+        @Override
+        public void close() {
+        }
+    }
 }
