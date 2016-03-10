@@ -14,18 +14,14 @@ import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfi
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.features;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.karafDistributionConfiguration;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.keepRuntimeFolder;
-
 import com.google.common.base.Stopwatch;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.management.ManagementFactory;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
-
 import javax.management.ObjectName;
-
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.internal.AssumptionViolatedException;
@@ -131,7 +127,8 @@ public abstract class AbstractConfigTestBase {
                         .useDeployFolder(false),
                 when(Boolean.getBoolean(KEEP_UNPACK_DIRECTORY_PROP)).useOptions(keepRuntimeFolder()),
                 features(getFeatureRepo(), getFeatureName()),
-                getLoggingOption()};
+                getLoggingOption(),
+                editConfigurationFilePut("etc/org.ops4j.pax.logging.cfg", "log4j.rootLogger", "INFO, stdout, osgi:*")};
         return options;
     }
 
