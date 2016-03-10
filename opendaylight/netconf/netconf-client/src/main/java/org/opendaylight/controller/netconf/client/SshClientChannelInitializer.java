@@ -8,14 +8,20 @@
 package org.opendaylight.controller.netconf.client;
 
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.util.concurrent.GenericFutureListener;
 import io.netty.util.concurrent.Promise;
 import java.io.IOException;
 import org.opendaylight.controller.netconf.nettyutil.AbstractChannelInitializer;
 import org.opendaylight.controller.netconf.nettyutil.handler.ssh.authentication.AuthenticationHandler;
 import org.opendaylight.controller.netconf.nettyutil.handler.ssh.client.AsyncSshHandler;
 import org.opendaylight.protocol.framework.SessionListenerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 final class SshClientChannelInitializer extends AbstractChannelInitializer<NetconfClientSession> {
+
+    private static final Logger LOG = LoggerFactory.getLogger(SshClientChannelInitializer.class);
 
     private final AuthenticationHandler authenticationHandler;
     private final NetconfClientSessionNegotiatorFactory negotiatorFactory;
@@ -33,7 +39,18 @@ final class SshClientChannelInitializer extends AbstractChannelInitializer<Netco
     public void initialize(final Channel ch, final Promise<NetconfClientSession> promise) {
         try {
             // ssh handler has to be the first handler in pipeline
+            LOG.info("initialize channel {} - promise", ch, promise);
             ch.pipeline().addFirst(AsyncSshHandler.createForNetconfSubsystem(authenticationHandler));
+            ch.closeFuture().addListener(new GenericFutureListener<ChannelFuture>() {
+                @Override
+                public void operationComplete(final ChannelFuture future) throws Exception {
+                    if(future.isSuccess()) {
+                        LOG.debug("Channel {} closed: success", future.channel());
+                    } else {
+                        LOG.warn("Channel {} closed: fail", future.channel());
+                    }
+                }
+            });
             super.initialize(ch,promise);
         } catch (final IOException e) {
             throw new RuntimeException(e);
