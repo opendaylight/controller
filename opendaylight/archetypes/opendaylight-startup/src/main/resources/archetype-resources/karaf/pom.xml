@@ -9,23 +9,28 @@ terms of the Eclipse Public License v1.0 which accompanies this distribution,
 and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>karaf-parent</artifactId>
     <version>1.7.0-SNAPSHOT</version>
     <relativePath/>
   </parent>
-  <modelVersion>4.0.0</modelVersion>
+
   <groupId>${groupId}</groupId>
   <artifactId>${artifactId}-karaf</artifactId>
   <version>${version}</version>
   <name>${project.artifactId}</name>
+
   <prerequisites>
     <maven>3.1.1</maven>
   </prerequisites>
+
   <properties>
     <karaf.localFeature>odl-${artifactId}-ui</karaf.localFeature>
   </properties>
+
   <dependencyManagement>
     <dependencies>
       <dependency>
@@ -37,6 +42,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
       </dependency>
     </dependencies>
   </dependencyManagement>
+
   <dependencies>
     <dependency>
       <!-- scope is compile so all features (there is only one) are installed
@@ -54,6 +60,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
       <scope>runtime</scope>
     </dependency>
   </dependencies>
+
   <!-- DO NOT install or deploy the karaf artifact -->
   <build>
     <plugins>
