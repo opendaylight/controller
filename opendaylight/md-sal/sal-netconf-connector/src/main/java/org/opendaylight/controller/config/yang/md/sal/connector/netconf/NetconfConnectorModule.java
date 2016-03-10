@@ -42,10 +42,13 @@ import org.opendaylight.protocol.framework.ReconnectStrategyFactory;
 import org.opendaylight.protocol.framework.TimedReconnectStrategy;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Host;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.IpAddress;
+import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.model.repo.api.SchemaContextFactory;
 import org.opendaylight.yangtools.yang.model.repo.api.SchemaRepository;
 import org.opendaylight.yangtools.yang.model.repo.api.SchemaSourceFilter;
+import org.opendaylight.yangtools.yang.model.repo.api.SourceIdentifier;
 import org.opendaylight.yangtools.yang.model.repo.api.YangTextSchemaSource;
+import org.opendaylight.yangtools.yang.model.repo.spi.PotentialSchemaSource;
 import org.opendaylight.yangtools.yang.model.repo.spi.SchemaSourceRegistry;
 import org.opendaylight.yangtools.yang.model.repo.util.FilesystemSchemaSourceCache;
 import org.opendaylight.yangtools.yang.parser.repo.SharedSchemaRepository;
@@ -160,6 +163,12 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
             salFacade = new KeepaliveSalFacade(id, salFacade, executor, keepaliveDelay);
         }
 
+        schemaRegistry.registerSchemaSourceListener(
+                TextToASTTransformer.create((SchemaRepository) schemaRegistry, schemaRegistry));
+
+        final NetconfDevice.SchemaResourcesDTO schemaResourcesDTO =
+                new NetconfDevice.SchemaResourcesDTO(this.schemaRegistry, this.schemaContextFactory, new NetconfStateSchemas.NetconfStateSchemasResolverImpl());
+
         final String moduleSchemaCacheDirectory = getSchemaCacheDirectory();
         // If a custom schema cache directory is specified, then create the backing Repository,
         // SchemaContextFactory and FilesystemSchemaSourceCache.  If the default is specified,
@@ -178,13 +187,14 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
             repository.registerSchemaSourceListener(deviceCache);
             logger.info("Netconf connector for device {} will use schema cache directory {} instead of {}",
                     instanceName, moduleSchemaCacheDirectory, DEFAULT_CACHE_DIRECTORY);
+
+            if (userCapabilities.isPresent()) {
+                for (QName qname : userCapabilities.get().getModuleBasedCaps()) {
+                    final SourceIdentifier sourceIdentifier = new SourceIdentifier(qname.getLocalName(), qname.getFormattedRevision());
+                    schemaRegistry.registerSchemaSource(deviceCache, PotentialSchemaSource.create(sourceIdentifier, YangTextSchemaSource.class, PotentialSchemaSource.Costs.LOCAL_IO_FALLBACK.getValue()));
+                }
+            }
         }
-
-        schemaRegistry.registerSchemaSourceListener(
-                TextToASTTransformer.create((SchemaRepository) schemaRegistry, schemaRegistry));
-
-        final NetconfDevice.SchemaResourcesDTO schemaResourcesDTO =
-                new NetconfDevice.SchemaResourcesDTO(this.schemaRegistry, this.schemaContextFactory, new NetconfStateSchemas.NetconfStateSchemasResolverImpl());
 
         final NetconfDevice device =
                 new NetconfDevice(schemaResourcesDTO, id, salFacade, globalProcessingExecutor, getReconnectOnChangedSchema());
