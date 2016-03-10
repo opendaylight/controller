@@ -33,6 +33,8 @@
       <directory></directory>
       <includes>
         <include>pom.xml</include>
+        <include>deploy-site.xml</include>
+        <include>src/**</include>
       </includes>
     </fileSet>
 
