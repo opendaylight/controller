@@ -7,84 +7,53 @@
  */
 package org.opendaylight.controller.sample.toaster.it;
 
-import org.junit.Assert;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.ops4j.pax.exam.CoreOptions.maven;
+import java.lang.management.ManagementFactory;
+import javax.inject.Inject;
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.opendaylight.controller.mdsal.it.base.AbstractMdsalTestBase;
 import org.opendaylight.controller.sample.kitchen.api.EggsType;
 import org.opendaylight.controller.sample.kitchen.api.KitchenService;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.HashBrown;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.WhiteBread;
-import org.ops4j.pax.exam.Configuration;
-import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
-import org.ops4j.pax.exam.options.DefaultCompositeOption;
+import org.ops4j.pax.exam.options.MavenUrlReference;
 import org.ops4j.pax.exam.util.Filter;
-import org.ops4j.pax.exam.util.PathUtils;
-
-import javax.inject.Inject;
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
-
-import java.lang.management.ManagementFactory;
-
-import static org.junit.Assert.assertEquals;
-import static org.opendaylight.controller.test.sal.binding.it.TestHelper.baseModelBundles;
-import static org.opendaylight.controller.test.sal.binding.it.TestHelper.bindingAwareSalBundles;
-import static org.opendaylight.controller.test.sal.binding.it.TestHelper.configMinumumBundles;
-import static org.opendaylight.controller.test.sal.binding.it.TestHelper.junitAndMockitoBundles;
-import static org.opendaylight.controller.test.sal.binding.it.TestHelper.mdSalCoreBundles;
-import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
-import static org.ops4j.pax.exam.CoreOptions.options;
-import static org.ops4j.pax.exam.CoreOptions.systemPackages;
-import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 
 @RunWith(PaxExam.class)
-public class ToasterTest {
-
+public class ToasterTest extends AbstractMdsalTestBase {
     @Inject
     @Filter(timeout=60*1000)
     KitchenService kitchenService;
 
-    @Configuration
-    public Option[] config() {
-        return options(systemProperty("osgi.console").value("2401"), mavenBundle("org.slf4j", "slf4j-api")
-                .versionAsInProject(), //
-                          mavenBundle("org.slf4j", "log4j-over-slf4j").versionAsInProject(), //
-
-                                systemProperty("logback.configurationFile").value(
-                        "file:" + PathUtils.getBaseDir()
-                                + "/src/test/resources/logback.xml"),
-                mavenBundle("ch.qos.logback", "logback-core").versionAsInProject(), //
-                mavenBundle("ch.qos.logback", "logback-classic").versionAsInProject(), //
-                systemProperty("osgi.bundles.defaultStartLevel").value("4"),
-                systemPackages("sun.nio.ch"),
-
-                toasterBundles(),
-                mdSalCoreBundles(),
-
-                bindingAwareSalBundles(),
-                configMinumumBundles(),
-                // BASE Models
-                baseModelBundles(),
-
-                // Set fail if unresolved bundle present
-                systemProperty("pax.exam.osgi.unresolved.fail").value("true"),
-                junitAndMockitoBundles());
+    @Override
+    public String getModuleName() {
+        return "toaster-provider-impl";
     }
 
-    private Option toasterBundles() {
-        return new DefaultCompositeOption(
-                mavenBundle("org.opendaylight.controller.samples", "sample-toaster-provider").versionAsInProject(),
-                mavenBundle("org.opendaylight.controller.samples", "sample-toaster-consumer").versionAsInProject(),
-                mavenBundle("org.opendaylight.controller.samples", "sample-toaster").versionAsInProject(),
-                mavenBundle("openexi", "nagasena").versionAsInProject(),
-                mavenBundle("openexi", "nagasena-rta").versionAsInProject()
-        );
+    @Override
+    public String getInstanceName() {
+        return "toaster-provider-impl";
+    }
+
+    @Override
+    public MavenUrlReference getFeatureRepo() {
+        return maven().groupId("org.opendaylight.controller").artifactId("features-mdsal").classifier("features")
+                .type("xml").versionAsInProject();
+    }
+
+    @Override
+    public String getFeatureName() {
+        return "odl-toaster";
     }
 
     @Test
     public void testToaster() throws Exception {
-
         MBeanServer platformMBeanServer = ManagementFactory.getPlatformMBeanServer();
         ObjectName providerOn = new ObjectName("org.opendaylight.controller:instanceName=toaster-provider-impl,type=RuntimeBean,moduleFactoryName=toaster-provider-impl");
 
@@ -97,11 +66,10 @@ public class ToasterTest {
         success &= kitchenService.makeBreakfast( EggsType.SCRAMBLED, HashBrown.class, 4).get().isSuccessful();
         success &= kitchenService.makeBreakfast( EggsType.POACHED, WhiteBread.class, 8 ).get().isSuccessful();
 
-        Assert.assertTrue("Not all breakfasts succeeded", success);
+        assertTrue("Not all breakfasts succeeded", success);
 
         // Verify toasts made count on provider via JMX/config-subsystem
         toastsMade = (long) platformMBeanServer.getAttribute(providerOn, "ToastsMade");
         assertEquals(2, toastsMade);
     }
-
 }
