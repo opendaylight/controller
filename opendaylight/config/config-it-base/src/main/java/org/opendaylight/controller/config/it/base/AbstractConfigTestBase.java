@@ -14,18 +14,14 @@ import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfi
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.features;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.karafDistributionConfiguration;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.keepRuntimeFolder;
-
 import com.google.common.base.Stopwatch;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.management.ManagementFactory;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
-
 import javax.management.ObjectName;
-
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.internal.AssumptionViolatedException;
@@ -39,11 +35,15 @@ import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.karaf.options.KarafDistributionOption;
 import org.ops4j.pax.exam.karaf.options.LogLevelOption.LogLevel;
 import org.ops4j.pax.exam.options.MavenArtifactUrlReference;
-import org.ops4j.pax.exam.options.MavenUrlReference;
+import org.ops4j.pax.exam.options.UrlReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public abstract class AbstractConfigTestBase {
+    private static final String MAVEN_REPO_LOCAL = "maven.repo.local";
+    private static final String ORG_OPS4J_PAX_URL_MVN_LOCAL_REPOSITORY = "org.ops4j.pax.url.mvn.localRepository";
+    private static final String ETC_ORG_OPS4J_PAX_URL_MVN_CFG = "etc/org.ops4j.pax.url.mvn.cfg";
+    private static final String ETC_ORG_OPS4J_PAX_LOGGING_CFG = "etc/org.ops4j.pax.logging.cfg";
 
     private static final String PAX_EXAM_UNPACK_DIRECTORY = "target/exam";
     private static final String KARAF_DEBUG_PORT = "5005";
@@ -81,7 +81,7 @@ public abstract class AbstractConfigTestBase {
 
     public abstract String getInstanceName();
 
-    public abstract MavenUrlReference getFeatureRepo();
+    public abstract UrlReference getFeatureRepo();
 
     public abstract String getFeatureName();
 
@@ -121,6 +121,13 @@ public abstract class AbstractConfigTestBase {
         return karafUrl.getURL();
     }
 
+    protected Option mvnLocalRepoOption() {
+        String mvnRepoLocal = System.getProperty(MAVEN_REPO_LOCAL, "");
+        LOG.info("mvnLocalRepo \"{}\"", mvnRepoLocal);
+        return editConfigurationFilePut(ETC_ORG_OPS4J_PAX_URL_MVN_CFG, ORG_OPS4J_PAX_URL_MVN_LOCAL_REPOSITORY,
+                mvnRepoLocal);
+    }
+
     @Configuration
     public Option[] config() {
         Option[] options = new Option[] {
@@ -131,7 +138,9 @@ public abstract class AbstractConfigTestBase {
                         .useDeployFolder(false),
                 when(Boolean.getBoolean(KEEP_UNPACK_DIRECTORY_PROP)).useOptions(keepRuntimeFolder()),
                 features(getFeatureRepo(), getFeatureName()),
-                getLoggingOption()};
+                getLoggingOption(),
+                mvnLocalRepoOption(),
+                editConfigurationFilePut(ETC_ORG_OPS4J_PAX_LOGGING_CFG, "log4j.rootLogger", "INFO, stdout, osgi:*")};
         return options;
     }
 
