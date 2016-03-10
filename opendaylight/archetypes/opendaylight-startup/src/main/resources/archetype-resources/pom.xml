@@ -20,9 +20,18 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
   <name>${artifactId}</name>
   <packaging>pom</packaging>
   <modelVersion>4.0.0</modelVersion>
+
   <prerequisites>
     <maven>3.1.1</maven>
   </prerequisites>
+
+  <scm>
+    <connection>scm:git:ssh://git.opendaylight.org:29418/${artifactId}.git</connection>
+    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/${artifactId}.git</developerConnection>
+    <tag>HEAD</tag>
+    <url>https://wiki.opendaylight.org/view/${artifactId}:Main</url>
+  </scm>
+
   <modules>
     <module>api</module>
     <module>impl</module>
@@ -31,6 +40,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
     <module>artifacts</module>
     <module>it</module>
   </modules>
+
   <!-- DO NOT install or deploy the repo root pom as it's only needed to initiate a build -->
   <build>
     <plugins>
@@ -50,11 +60,4 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
       </plugin>
     </plugins>
   </build>
-
-  <scm>
-    <connection>scm:git:ssh://git.opendaylight.org:29418/${artifactId}.git</connection>
-    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/${artifactId}.git</developerConnection>
-    <tag>HEAD</tag>
-    <url>https://wiki.opendaylight.org/view/${artifactId}:Main</url>
-  </scm>
 </project>
