@@ -11,7 +11,7 @@
     <requiredProperty key="copyright" />
     <requiredProperty key="copyrightYear">
         <defaultValue>
-            2015
+            2016
         </defaultValue>
     </requiredProperty>
     <requiredProperty key="version">
