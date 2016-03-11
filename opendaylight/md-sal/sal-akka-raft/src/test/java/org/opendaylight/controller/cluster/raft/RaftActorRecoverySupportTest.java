@@ -241,22 +241,6 @@ public class RaftActorRecoverySupportTest {
     }
 
     @Test
-    public void testOnDeprecatedDeleteEntries() {
-        ReplicatedLog replicatedLog = context.getReplicatedLog();
-        replicatedLog.append(new MockRaftActorContext.MockReplicatedLogEntry(1,
-                0, new MockRaftActorContext.MockPayload("0")));
-        replicatedLog.append(new MockRaftActorContext.MockReplicatedLogEntry(1,
-                1, new MockRaftActorContext.MockPayload("1")));
-        replicatedLog.append(new MockRaftActorContext.MockReplicatedLogEntry(1,
-                2, new MockRaftActorContext.MockPayload("2")));
-
-        sendMessageToSupport(new org.opendaylight.controller.cluster.raft.RaftActor.DeleteEntries(1));
-
-        assertEquals("Journal log size", 1, context.getReplicatedLog().size());
-        assertEquals("Last index", 0, context.getReplicatedLog().lastIndex());
-    }
-
-    @Test
     public void testOnDeleteEntries() {
         ReplicatedLog replicatedLog = context.getReplicatedLog();
         replicatedLog.append(new MockRaftActorContext.MockReplicatedLogEntry(1,
@@ -276,15 +260,6 @@ public class RaftActorRecoverySupportTest {
     public void testUpdateElectionTerm() {
 
         sendMessageToSupport(new UpdateElectionTerm(5, "member2"));
-
-        assertEquals("Current term", 5, context.getTermInformation().getCurrentTerm());
-        assertEquals("Voted For", "member2", context.getTermInformation().getVotedFor());
-    }
-
-    @Test
-    public void testDeprecatedUpdateElectionTerm() {
-
-        sendMessageToSupport(new org.opendaylight.controller.cluster.raft.RaftActor.UpdateElectionTerm(5, "member2"));
 
         assertEquals("Current term", 5, context.getTermInformation().getCurrentTerm());
         assertEquals("Voted For", "member2", context.getTermInformation().getVotedFor());
@@ -312,7 +287,7 @@ public class RaftActorRecoverySupportTest {
 
         sendMessageToSupport(new DeleteEntries(5));
 
-        sendMessageToSupport(new org.opendaylight.controller.cluster.raft.RaftActor.DeleteEntries(5));
+        sendMessageToSupport(new DeleteEntries(5));
 
         assertEquals("Journal log size", 0, context.getReplicatedLog().size());
         assertEquals("Last index", -1, context.getReplicatedLog().lastIndex());

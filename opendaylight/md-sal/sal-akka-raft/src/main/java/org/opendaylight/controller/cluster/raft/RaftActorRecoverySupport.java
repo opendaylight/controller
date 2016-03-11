@@ -51,14 +51,9 @@ class RaftActorRecoverySupport {
 
         boolean recoveryComplete = false;
         DataPersistenceProvider persistence = context.getPersistenceProvider();
-        if (message instanceof org.opendaylight.controller.cluster.raft.RaftActor.UpdateElectionTerm) {
-            // Handle this message for backwards compatibility with pre-Lithium versions.
-            org.opendaylight.controller.cluster.raft.RaftActor.UpdateElectionTerm update =
-                    (org.opendaylight.controller.cluster.raft.RaftActor.UpdateElectionTerm)message;
+        if (message instanceof UpdateElectionTerm) {
+            final UpdateElectionTerm update = (UpdateElectionTerm) message;
             context.getTermInformation().update(update.getCurrentTerm(), update.getVotedFor());
-        } else if (message instanceof UpdateElectionTerm) {
-            context.getTermInformation().update(((UpdateElectionTerm) message).getCurrentTerm(),
-                    ((UpdateElectionTerm) message).getVotedFor());
         } else if(persistence.isRecoveryApplicable()) {
             if (message instanceof SnapshotOffer) {
                 onRecoveredSnapshot((SnapshotOffer) message);
@@ -68,9 +63,6 @@ class RaftActorRecoverySupport {
                 onRecoveredApplyLogEntries(((ApplyJournalEntries) message).getToIndex());
             } else if (message instanceof DeleteEntries) {
                 replicatedLog().removeFrom(((DeleteEntries) message).getFromIndex());
-            } else if (message instanceof org.opendaylight.controller.cluster.raft.RaftActor.DeleteEntries) {
-                // Handle this message for backwards compatibility with pre-Lithium versions.
-                replicatedLog().removeFrom(((org.opendaylight.controller.cluster.raft.RaftActor.DeleteEntries) message).getFromIndex());
             } else if (message instanceof RecoveryCompleted) {
                 onRecoveryCompletedMessage();
                 possiblyRestoreFromSnapshot();
