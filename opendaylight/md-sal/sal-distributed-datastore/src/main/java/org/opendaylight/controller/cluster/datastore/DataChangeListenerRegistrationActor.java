@@ -30,9 +30,11 @@ public class DataChangeListenerRegistrationActor extends AbstractUntypedActor {
     }
 
     @Override
-    public void handleReceive(Object message) throws Exception {
+    public void handleReceive(Object message) {
         if (message instanceof CloseDataChangeListenerRegistration) {
             closeListenerRegistration();
+        } else {
+            unknownMessage(message);
         }
     }
 

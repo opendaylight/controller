@@ -37,6 +37,8 @@ final class DataTreeChangeListenerActor extends AbstractUntypedActor {
             dataChanged((DataTreeChanged)message);
         } else if (message instanceof EnableNotification) {
             enableNotification((EnableNotification) message);
+        } else {
+            unknownMessage(message);
         }
     }
 
