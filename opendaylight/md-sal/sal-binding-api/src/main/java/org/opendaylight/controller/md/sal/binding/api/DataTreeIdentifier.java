@@ -76,4 +76,10 @@ public final class DataTreeIdentifier<T extends DataObject> implements Immutable
         }
         return rootIdentifier.equals(other.rootIdentifier);
     }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "{datastoreType = " + datastoreType + ", rootIdentifier = " +
+                rootIdentifier + "}";
+    }
 }

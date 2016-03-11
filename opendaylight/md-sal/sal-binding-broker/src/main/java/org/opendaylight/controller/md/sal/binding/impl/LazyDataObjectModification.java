@@ -201,4 +201,9 @@ final class LazyDataObjectModification<T extends DataObject> implements DataObje
         }
         return null;
     }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "{identifier = " + identifier + ", domData = " + domData + "}";
+    }
 }
