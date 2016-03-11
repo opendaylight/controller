@@ -41,8 +41,7 @@ public class ShardWriteTransaction extends ShardTransaction {
     }
 
     @Override
-    public void handleReceive(Object message) throws Exception {
-
+    public void handleReceive(Object message) {
         if (message instanceof BatchedModifications) {
             batchedModifications((BatchedModifications)message);
         } else {
