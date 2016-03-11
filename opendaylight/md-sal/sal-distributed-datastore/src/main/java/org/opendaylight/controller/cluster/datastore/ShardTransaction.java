@@ -69,16 +69,14 @@ public abstract class ShardTransaction extends AbstractUntypedActorWithMetering 
     }
 
     @Override
-    public void handleReceive(Object message) throws Exception {
+    public void handleReceive(Object message) {
         if (CloseTransaction.isSerializedType(message)) {
             closeTransaction(true);
         } else if (message instanceof ReceiveTimeout) {
-            if(LOG.isDebugEnabled()) {
-                LOG.debug("Got ReceiveTimeout for inactivity - closing Tx");
-            }
+            LOG.debug("Got ReceiveTimeout for inactivity - closing transaction {}", transactionID);
             closeTransaction(false);
         } else {
-            throw new UnknownMessageException(message);
+            unknownMessage(message);
         }
     }
 
