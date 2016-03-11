@@ -45,7 +45,7 @@ public class RoleChangeNotifier extends AbstractUntypedActor implements AutoClos
     }
 
     @Override
-    protected void handleReceive(Object message) throws Exception {
+    protected void handleReceive(Object message) {
         if (message instanceof RegisterRoleChangeListener) {
             // register listeners for this shard
 
@@ -92,6 +92,8 @@ public class RoleChangeNotifier extends AbstractUntypedActor implements AutoClos
             for (ActorRef listener: registeredListeners.values()) {
                 listener.tell(latestLeaderStateChanged, getSelf());
             }
+        } else {
+            unknownMessage(message);
         }
     }
 
