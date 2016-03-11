@@ -16,40 +16,27 @@ public abstract class AbstractUntypedPersistentActor extends UntypedPersistentAc
 
     protected final Logger LOG = LoggerFactory.getLogger(getClass());
 
-    public AbstractUntypedPersistentActor() {
-        if(LOG.isTraceEnabled()) {
-            LOG.trace("Actor created {}", getSelf());
-        }
-        getContext().
-            system().
-            actorSelection("user/termination-monitor").
-            tell(new Monitor(getSelf()), getSelf());
-
+    protected AbstractUntypedPersistentActor() {
+        LOG.trace("Actor created {}", getSelf());
+        getContext().system().actorSelection("user/termination-monitor").tell(new Monitor(getSelf()), getSelf());
     }
 
-
-    @Override public void onReceiveCommand(Object message) throws Exception {
+    @Override
+    public void onReceiveCommand(Object message) throws Exception {
         final String messageType = message.getClass().getSimpleName();
-        if(LOG.isTraceEnabled()) {
-            LOG.trace("Received message {}", messageType);
-        }
+        LOG.trace("Received message {}", messageType);
+
         handleCommand(message);
-        if(LOG.isTraceEnabled()) {
-            LOG.trace("Done handling message {}", messageType);
-        }
 
+        LOG.trace("Done handling message {}", messageType);
     }
 
-    @Override public void onReceiveRecover(Object message) throws Exception {
+    @Override
+    public void onReceiveRecover(Object message) throws Exception {
         final String messageType = message.getClass().getSimpleName();
-        if(LOG.isTraceEnabled()) {
-            LOG.trace("Received message {}", messageType);
-        }
+        LOG.trace("Received message {}", messageType);
         handleRecover(message);
-        if(LOG.isTraceEnabled()) {
-            LOG.trace("Done handling message {}", messageType);
-        }
-
+        LOG.trace("Done handling message {}", messageType);
     }
 
     protected abstract void handleRecover(Object message) throws Exception;
@@ -61,9 +48,7 @@ public abstract class AbstractUntypedPersistentActor extends UntypedPersistentAc
     }
 
     protected void unknownMessage(Object message) throws Exception {
-        if(LOG.isDebugEnabled()) {
-            LOG.debug("Received unhandled message {}", message);
-        }
+        LOG.debug("Received unhandled message {}", message);
         unhandled(message);
     }
 }
