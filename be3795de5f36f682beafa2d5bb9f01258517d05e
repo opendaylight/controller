@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a3d3df0_0c6ee4c8",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 819,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-03-11T14:46:12Z",
+      "side": 0,
+      "message": "I don\u0027t think it\u0027s safe quite yet to remove these. These come from the persisted journal and it\u0027s possible there could be a lingering one if the shard hasn\u0027t reached the snapshot point yet. This was the reason I didn\u0027t remove the deprecated He payload classes yet. I think one more release for these as well wouldn\u0027t hurt. So keep this patch around for later.",
+      "revId": "be3795de5f36f682beafa2d5bb9f01258517d05e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
