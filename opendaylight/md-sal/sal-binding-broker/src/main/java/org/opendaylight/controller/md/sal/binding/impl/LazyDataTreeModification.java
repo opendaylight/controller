@@ -65,4 +65,8 @@ class LazyDataTreeModification<T extends DataObject> implements DataTreeModifica
         return result;
     }
 
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "{path = " + path + ", rootNode = " + rootNode + "}";
+    }
 }
