@@ -12,9 +12,9 @@ import static org.mockito.AdditionalMatchers.or;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.ENTITY_OWNERS_PATH;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.candidatePath;
@@ -714,8 +714,8 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
         verify(listener, times(1)).ownershipChanged(ownershipChange(entity1));
     }
 
-    private static void commitModification(TestActorRef<EntityOwnershipShard> shard, NormalizedNode<?, ?> node,
-            JavaTestKit sender) {
+    private static void commitModification(final TestActorRef<EntityOwnershipShard> shard, final NormalizedNode<?, ?> node,
+            final JavaTestKit sender) {
         BatchedModifications modifications = newBatchedModifications();
         modifications.addModification(new MergeModification(ENTITY_OWNERS_PATH, node));
 
@@ -731,12 +731,12 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
         return modifications;
     }
 
-    private void verifyEntityCandidateRemoved(final TestActorRef<EntityOwnershipShard> shard, String entityType,
-            YangInstanceIdentifier entityId, String candidateName) {
+    private void verifyEntityCandidateRemoved(final TestActorRef<EntityOwnershipShard> shard, final String entityType,
+            final YangInstanceIdentifier entityId, final String candidateName) {
         verifyNodeRemoved(candidatePath(entityType, entityId, candidateName),
                 new Function<YangInstanceIdentifier, NormalizedNode<?,?>>() {
                     @Override
-                    public NormalizedNode<?, ?> apply(YangInstanceIdentifier path) {
+                    public NormalizedNode<?, ?> apply(final YangInstanceIdentifier path) {
                         try {
                             return AbstractShardTest.readStore(shard, path);
                         } catch(Exception e) {
@@ -746,11 +746,11 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
         });
     }
 
-    private void verifyCommittedEntityCandidate(final TestActorRef<EntityOwnershipShard> shard, String entityType,
-            YangInstanceIdentifier entityId, String candidateName) {
+    private void verifyCommittedEntityCandidate(final TestActorRef<EntityOwnershipShard> shard, final String entityType,
+            final YangInstanceIdentifier entityId, final String candidateName) {
         verifyEntityCandidate(entityType, entityId, candidateName, new Function<YangInstanceIdentifier, NormalizedNode<?,?>>() {
             @Override
-            public NormalizedNode<?, ?> apply(YangInstanceIdentifier path) {
+            public NormalizedNode<?, ?> apply(final YangInstanceIdentifier path) {
                 try {
                     return AbstractShardTest.readStore(shard, path);
                 } catch(Exception e) {
@@ -760,11 +760,11 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
         });
     }
 
-    private void verifyNoEntityCandidate(final TestActorRef<EntityOwnershipShard> shard, String entityType,
-            YangInstanceIdentifier entityId, String candidateName) {
+    private void verifyNoEntityCandidate(final TestActorRef<EntityOwnershipShard> shard, final String entityType,
+            final YangInstanceIdentifier entityId, final String candidateName) {
         verifyEntityCandidate(entityType, entityId, candidateName, new Function<YangInstanceIdentifier, NormalizedNode<?,?>>() {
             @Override
-            public NormalizedNode<?, ?> apply(YangInstanceIdentifier path) {
+            public NormalizedNode<?, ?> apply(final YangInstanceIdentifier path) {
                 try {
                     return AbstractShardTest.readStore(shard, path);
                 } catch(Exception e) {
@@ -774,24 +774,24 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
         }, false);
     }
 
-    private void verifyBatchedEntityCandidate(List<Modification> mods, String entityType,
-            YangInstanceIdentifier entityId, String candidateName) throws Exception {
+    private void verifyBatchedEntityCandidate(final List<Modification> mods, final String entityType,
+            final YangInstanceIdentifier entityId, final String candidateName) throws Exception {
         assertEquals("BatchedModifications size", 1, mods.size());
         verifyBatchedEntityCandidate(mods.get(0), entityType, entityId, candidateName);
     }
 
-    private void verifyBatchedEntityCandidate(Modification mod, String entityType,
-            YangInstanceIdentifier entityId, String candidateName) throws Exception {
+    private void verifyBatchedEntityCandidate(final Modification mod, final String entityType,
+            final YangInstanceIdentifier entityId, final String candidateName) throws Exception {
         assertEquals("Modification type", MergeModification.class, mod.getClass());
         verifyEntityCandidate(((MergeModification)mod).getData(), entityType,
                 entityId, candidateName, true);
     }
 
-    private static void verifyOwner(final TestActorRef<EntityOwnershipShard> shard, String entityType,
-            YangInstanceIdentifier entityId, String localMemberName) {
+    private static void verifyOwner(final TestActorRef<EntityOwnershipShard> shard, final String entityType,
+            final YangInstanceIdentifier entityId, final String localMemberName) {
         verifyOwner(localMemberName, entityType, entityId, new Function<YangInstanceIdentifier, NormalizedNode<?,?>>() {
             @Override
-            public NormalizedNode<?, ?> apply(YangInstanceIdentifier path) {
+            public NormalizedNode<?, ?> apply(final YangInstanceIdentifier path) {
                 try {
                     return AbstractShardTest.readStore(shard, path);
                 } catch(Exception e) {
@@ -805,38 +805,38 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
         return newShardProps(Collections.<String,String>emptyMap());
     }
 
-    private Props newShardProps(EntityOwnerSelectionStrategyConfig strategyConfig, Map<String, String> peers) {
+    private Props newShardProps(final EntityOwnerSelectionStrategyConfig strategyConfig, final Map<String, String> peers) {
         return newShardProps(newShardId(LOCAL_MEMBER_NAME), peers, LOCAL_MEMBER_NAME, strategyConfig);
     }
 
-    private Props newShardProps(Map<String,String> peers) {
+    private Props newShardProps(final Map<String,String> peers) {
         return newShardProps(newShardId(LOCAL_MEMBER_NAME), peers, LOCAL_MEMBER_NAME, EntityOwnerSelectionStrategyConfig.newBuilder().build());
     }
 
-    private Props newShardProps(ShardIdentifier shardId, Map<String,String> peers, String memberName,
-                                EntityOwnerSelectionStrategyConfig config) {
+    private Props newShardProps(final ShardIdentifier shardId, final Map<String,String> peers, final String memberName,
+                                final EntityOwnerSelectionStrategyConfig config) {
         return EntityOwnershipShard.newBuilder().id(shardId).peerAddresses(peers).
                 datastoreContext(dataStoreContextBuilder.build()).schemaContext(SCHEMA_CONTEXT).
                 localMemberName(memberName).ownerSelectionStrategyConfig(config).props().withDispatcher(Dispatchers.DefaultDispatcherId());
     }
 
-    private static ShardIdentifier newShardId(String memberName) {
+    private static ShardIdentifier newShardId(final String memberName) {
         return ShardIdentifier.builder().memberName(memberName).shardName("entity-ownership").
                 type("operational" + NEXT_SHARD_NUM.getAndIncrement()).build();
     }
 
     public static class TestEntityOwnershipShard extends EntityOwnershipShard {
 
-        TestEntityOwnershipShard(ShardIdentifier name, Map<String, String> peerAddresses,
-                DatastoreContext datastoreContext) {
+        TestEntityOwnershipShard(final ShardIdentifier name, final Map<String, String> peerAddresses,
+                final DatastoreContext datastoreContext) {
             super(newBuilder().id(name).peerAddresses(peerAddresses).datastoreContext(datastoreContext).
                     schemaContext(SCHEMA_CONTEXT).localMemberName(LOCAL_MEMBER_NAME));
         }
 
         @Override
-        public void onReceiveCommand(Object message) throws Exception {
+        protected void handleCommand(final Object message) {
             if(!(message instanceof ElectionTimeout)) {
-                super.onReceiveCommand(message);
+                super.handleCommand(message);
             }
         }
     }
@@ -846,17 +846,17 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
         volatile boolean dropAppendEntries;
         private final String myId;
 
-        public MockFollower(String myId) {
+        public MockFollower(final String myId) {
             this(myId, true);
         }
 
-        public MockFollower(String myId, boolean grantVote) {
+        public MockFollower(final String myId, final boolean grantVote) {
             this.myId = myId;
             this.grantVote = grantVote;
         }
 
         @Override
-        public void onReceive(Object message) {
+        public void onReceive(final Object message) {
             if(message instanceof RequestVote) {
                 if(grantVote) {
                     getSender().tell(new RequestVoteReply(((RequestVote)message).getTerm(), true), getSelf());
@@ -965,7 +965,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
         volatile long delay;
 
         @Override
-        public void onReceive(Object message) {
+        public void onReceive(final Object message) {
             if(message instanceof BatchedModifications) {
                 if(delay > 0) {
                     Uninterruptibles.sleepUninterruptibly(delay, TimeUnit.MILLISECONDS);
