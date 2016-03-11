@@ -320,12 +320,12 @@ public class DistributedEntityOwnershipServiceTest extends AbstractEntityOwnersh
         }
 
         @Override
-        public void onReceiveCommand(final Object message) throws Exception {
+        protected void handleCommand(final Object message) {
             try {
                 if(dataTree.get() != null && message instanceof GetShardDataTree) {
                     sender().tell(dataTree.get(), self());
                 } else {
-                    super.onReceiveCommand(message);
+                    super.handleCommand(message);
                 }
             } finally {
                 Class<?> expMsgClass = messageClass.get();

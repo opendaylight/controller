@@ -121,7 +121,7 @@ public class Shard extends RaftActor {
 
     private final ShardTransactionMessageRetrySupport messageRetrySupport;
 
-    protected Shard(AbstractBuilder<?, ?> builder) {
+    protected Shard(final AbstractBuilder<?, ?> builder) {
         super(builder.getId().toString(), builder.getPeerAddresses(),
                 Optional.of(builder.getDatastoreContext().getShardRaftConfig()), DataStoreVersions.CURRENT_VERSION);
 
@@ -169,7 +169,7 @@ public class Shard extends RaftActor {
                 datastoreContext.getShardTransactionCommitTimeoutInSeconds(), TimeUnit.SECONDS) / 2;
     }
 
-    private Optional<ActorRef> createRoleChangeNotifier(String shardId) {
+    private Optional<ActorRef> createRoleChangeNotifier(final String shardId) {
         ActorRef shardRoleChangeNotifier = this.getContext().actorOf(
             RoleChangeNotifier.getProps(shardId), shardId + "-notifier");
         return Optional.of(shardRoleChangeNotifier);
@@ -193,18 +193,18 @@ public class Shard extends RaftActor {
     }
 
     @Override
-    public void onReceiveRecover(final Object message) throws Exception {
+    protected void handleRecover(final Object message) {
         LOG.debug("{}: onReceiveRecover: Received message {} from {}", persistenceId(), message.getClass(),
             getSender());
 
-        super.onReceiveRecover(message);
+        super.handleRecover(message);
         if (LOG.isTraceEnabled()) {
             appendEntriesReplyTracker.begin();
         }
     }
 
     @Override
-    public void onReceiveCommand(final Object message) throws Exception {
+    protected void handleCommand(final Object message) {
 
         MessageTracker.Context context = appendEntriesReplyTracker.received(message);
 
@@ -258,7 +258,7 @@ public class Shard extends RaftActor {
             } else if(ShardTransactionMessageRetrySupport.TIMER_MESSAGE_CLASS.isInstance(message)) {
                 messageRetrySupport.onTimerMessage(message);
             } else {
-                super.onReceiveCommand(message);
+                super.handleCommand(message);
             }
         } finally {
             context.done();
@@ -283,13 +283,13 @@ public class Shard extends RaftActor {
     }
 
     @Override
-    protected LeaderStateChanged newLeaderStateChanged(String memberId, String leaderId, short leaderPayloadVersion) {
+    protected LeaderStateChanged newLeaderStateChanged(final String memberId, final String leaderId, final short leaderPayloadVersion) {
         return new ShardLeaderStateChanged(memberId, leaderId,
                 isLeader() ? Optional.<DataTree>of(store.getDataTree()) : Optional.<DataTree>absent(),
                 leaderPayloadVersion);
     }
 
-    protected void onDatastoreContext(DatastoreContext context) {
+    protected void onDatastoreContext(final DatastoreContext context) {
         datastoreContext = context;
 
         commitCoordinator.setQueueCapacity(datastoreContext.getShardTransactionCommitQueueCapacity());
@@ -393,7 +393,7 @@ public class Shard extends RaftActor {
         commitCoordinator.handleCanCommit(canCommit.getTransactionID(), getSender(), this);
     }
 
-    protected void handleBatchedModificationsLocal(BatchedModifications batched, ActorRef sender) {
+    protected void handleBatchedModificationsLocal(final BatchedModifications batched, final ActorRef sender) {
         try {
             commitCoordinator.handleBatchedModifications(batched, sender, this);
         } catch (Exception e) {
@@ -403,7 +403,7 @@ public class Shard extends RaftActor {
         }
     }
 
-    private void handleBatchedModifications(BatchedModifications batched) {
+    private void handleBatchedModifications(final BatchedModifications batched) {
         // This message is sent to prepare the modifications transaction directly on the Shard as an
         // optimization to avoid the extra overhead of a separate ShardTransaction actor. On the last
         // BatchedModifications message, the caller sets the ready flag in the message indicating
@@ -434,7 +434,7 @@ public class Shard extends RaftActor {
         }
     }
 
-    private boolean failIfIsolatedLeader(ActorRef sender) {
+    private boolean failIfIsolatedLeader(final ActorRef sender) {
         if(isIsolatedLeader()) {
             sender.tell(new akka.actor.Status.Failure(new NoShardLeaderException(String.format(
                     "Shard %s was the leader but has lost contact with all of its followers. Either all" +
@@ -475,7 +475,7 @@ public class Shard extends RaftActor {
         }
     }
 
-    private void handleForwardedReadyTransaction(ForwardedReadyTransaction forwardedReady) {
+    private void handleForwardedReadyTransaction(final ForwardedReadyTransaction forwardedReady) {
         LOG.debug("{}: handleForwardedReadyTransaction for {}", persistenceId(), forwardedReady.getTransactionID());
 
         boolean isLeaderActive = isLeaderActive();
@@ -520,14 +520,14 @@ public class Shard extends RaftActor {
         store.closeTransactionChain(closeTransactionChain.getTransactionChainId());
     }
 
-    private ActorRef createTypedTransactionActor(int transactionType,
-            ShardTransactionIdentifier transactionId, String transactionChainId) {
+    private ActorRef createTypedTransactionActor(final int transactionType,
+            final ShardTransactionIdentifier transactionId, final String transactionChainId) {
 
         return transactionActorFactory.newShardTransaction(TransactionType.fromInt(transactionType),
                 transactionId, transactionChainId);
     }
 
-    private void createTransaction(CreateTransaction createTransaction) {
+    private void createTransaction(final CreateTransaction createTransaction) {
         try {
             if(TransactionType.fromInt(createTransaction.getTransactionType()) != TransactionType.READ_ONLY &&
                     failIfIsolatedLeader(getSender())) {
@@ -544,8 +544,8 @@ public class Shard extends RaftActor {
         }
     }
 
-    private ActorRef createTransaction(int transactionType, String remoteTransactionId,
-            String transactionChainId) {
+    private ActorRef createTransaction(final int transactionType, final String remoteTransactionId,
+            final String transactionChainId) {
 
 
         ShardTransactionIdentifier transactionId = new ShardTransactionIdentifier(remoteTransactionId);
@@ -647,7 +647,7 @@ public class Shard extends RaftActor {
         }
     }
 
-    private void applyModificationToState(ActorRef clientActor, String identifier, Object modification) {
+    private void applyModificationToState(final ActorRef clientActor, final String identifier, final Object modification) {
         if(modification == null) {
             LOG.error(
                     "{}: modification is null - this is very unexpected, clientActor = {}, identifier = {}",
@@ -689,7 +689,7 @@ public class Shard extends RaftActor {
     }
 
     @Override
-    protected void onLeaderChanged(String oldLeader, String newLeader) {
+    protected void onLeaderChanged(final String oldLeader, final String newLeader) {
         shardMBean.incrementLeadershipChangeCount();
 
         if(hasLeader() && !isIsolatedLeader()) {
@@ -698,7 +698,7 @@ public class Shard extends RaftActor {
     }
 
     @Override
-    protected void pauseLeader(Runnable operation) {
+    protected void pauseLeader(final Runnable operation) {
         LOG.debug("{}: In pauseLeader, operation: {}", persistenceId(), operation);
         commitCoordinator.setRunOnPendingTransactionsComplete(operation);
     }
@@ -740,7 +740,7 @@ public class Shard extends RaftActor {
         private DatastoreSnapshot.ShardSnapshot restoreFromSnapshot;
         private volatile boolean sealed;
 
-        protected AbstractBuilder(Class<S> shardClass) {
+        protected AbstractBuilder(final Class<S> shardClass) {
             this.shardClass = shardClass;
         }
 
@@ -753,31 +753,31 @@ public class Shard extends RaftActor {
             return (T) this;
         }
 
-        public T id(ShardIdentifier id) {
+        public T id(final ShardIdentifier id) {
             checkSealed();
             this.id = id;
             return self();
         }
 
-        public T peerAddresses(Map<String, String> peerAddresses) {
+        public T peerAddresses(final Map<String, String> peerAddresses) {
             checkSealed();
             this.peerAddresses = peerAddresses;
             return self();
         }
 
-        public T datastoreContext(DatastoreContext datastoreContext) {
+        public T datastoreContext(final DatastoreContext datastoreContext) {
             checkSealed();
             this.datastoreContext = datastoreContext;
             return self();
         }
 
-        public T schemaContext(SchemaContext schemaContext) {
+        public T schemaContext(final SchemaContext schemaContext) {
             checkSealed();
             this.schemaContext = schemaContext;
             return self();
         }
 
-        public T restoreFromSnapshot(DatastoreSnapshot.ShardSnapshot restoreFromSnapshot) {
+        public T restoreFromSnapshot(final DatastoreSnapshot.ShardSnapshot restoreFromSnapshot) {
             checkSealed();
             this.restoreFromSnapshot = restoreFromSnapshot;
             return self();
