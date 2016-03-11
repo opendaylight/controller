@@ -80,11 +80,11 @@ class EntityOwnershipShard extends Shard {
     private final Map<YangInstanceIdentifier, Cancellable> entityToScheduledOwnershipTask = new HashMap<>();
     private final EntityOwnershipStatistics entityOwnershipStatistics;
 
-    private static DatastoreContext noPersistenceDatastoreContext(DatastoreContext datastoreContext) {
+    private static DatastoreContext noPersistenceDatastoreContext(final DatastoreContext datastoreContext) {
         return DatastoreContext.newBuilderFrom(datastoreContext).persistent(false).build();
     }
 
-    protected EntityOwnershipShard(Builder builder) {
+    protected EntityOwnershipShard(final Builder builder) {
         super(builder);
         this.localMemberName = builder.localMemberName;
         this.commitCoordinator = new EntityOwnershipShardCommitCoordinator(builder.localMemberName, LOG);
@@ -100,7 +100,7 @@ class EntityOwnershipShard extends Shard {
     }
 
     @Override
-    protected void onDatastoreContext(DatastoreContext context) {
+    protected void onDatastoreContext(final DatastoreContext context) {
         super.onDatastoreContext(noPersistenceDatastoreContext(context));
     }
 
@@ -113,7 +113,7 @@ class EntityOwnershipShard extends Shard {
     }
 
     @Override
-    public void onReceiveCommand(final Object message) throws Exception {
+    protected void handleCommand(final Object message) {
         if(message instanceof RegisterCandidateLocal) {
             onRegisterCandidateLocal((RegisterCandidateLocal) message);
         } else if(message instanceof UnregisterCandidateLocal) {
@@ -133,11 +133,11 @@ class EntityOwnershipShard extends Shard {
         } else if(message instanceof SelectOwner) {
             onSelectOwner((SelectOwner) message);
         } else if(!commitCoordinator.handleMessage(message, this)) {
-            super.onReceiveCommand(message);
+            super.handleCommand(message);
         }
     }
 
-    private void onSelectOwner(SelectOwner selectOwner) {
+    private void onSelectOwner(final SelectOwner selectOwner) {
         LOG.debug("{}: onSelectOwner: {}", persistenceId(), selectOwner);
 
         String currentOwner = getCurrentOwner(selectOwner.getEntityPath());
@@ -157,7 +157,7 @@ class EntityOwnershipShard extends Shard {
         }
     }
 
-    private void onRegisterCandidateLocal(RegisterCandidateLocal registerCandidate) {
+    private void onRegisterCandidateLocal(final RegisterCandidateLocal registerCandidate) {
         LOG.debug("{}: onRegisterCandidateLocal: {}", persistenceId(), registerCandidate);
 
         listenerSupport.setHasCandidateForEntity(registerCandidate.getEntity());
@@ -169,7 +169,7 @@ class EntityOwnershipShard extends Shard {
         getSender().tell(SuccessReply.INSTANCE, getSelf());
     }
 
-    private void onUnregisterCandidateLocal(UnregisterCandidateLocal unregisterCandidate) {
+    private void onUnregisterCandidateLocal(final UnregisterCandidateLocal unregisterCandidate) {
         LOG.debug("{}: onUnregisterCandidateLocal: {}", persistenceId(), unregisterCandidate);
 
         Entity entity = unregisterCandidate.getEntity();
@@ -190,7 +190,7 @@ class EntityOwnershipShard extends Shard {
 
         searchForEntities(new EntityWalker() {
             @Override
-            public void onEntity(MapEntryNode entityTypeNode, MapEntryNode entityNode) {
+            public void onEntity(final MapEntryNode entityTypeNode, final MapEntryNode entityNode) {
                 Optional<DataContainerChild<?, ?>> possibleType = entityTypeNode.getChild(ENTITY_TYPE_NODE_ID);
                 String entityType = possibleType.isPresent() ? possibleType.get().getValue().toString() : null;
                 if (registerListener.getEntityType().equals(entityType)) {
@@ -216,7 +216,7 @@ class EntityOwnershipShard extends Shard {
         });
     }
 
-    private void onUnregisterListenerLocal(UnregisterListenerLocal unregisterListener) {
+    private void onUnregisterListenerLocal(final UnregisterListenerLocal unregisterListener) {
         LOG.debug("{}: onUnregisterListenerLocal: {}", persistenceId(), unregisterListener);
 
         listenerSupport.removeEntityOwnershipListener(unregisterListener.getEntityType(), unregisterListener.getListener());
@@ -266,7 +266,7 @@ class EntityOwnershipShard extends Shard {
     }
 
     @Override
-    protected void onLeaderChanged(String oldLeader, String newLeader) {
+    protected void onLeaderChanged(final String oldLeader, final String newLeader) {
         super.onLeaderChanged(oldLeader, newLeader);
 
         boolean isLeader = isLeader();
@@ -297,7 +297,7 @@ class EntityOwnershipShard extends Shard {
         }
     }
 
-    private void onCandidateRemoved(CandidateRemoved message) {
+    private void onCandidateRemoved(final CandidateRemoved message) {
         LOG.debug("{}: onCandidateRemoved: {}", persistenceId(), message);
 
         if(isLeader()) {
@@ -326,12 +326,12 @@ class EntityOwnershipShard extends Shard {
         }
     }
 
-    private EntityOwnerSelectionStrategy getEntityOwnerElectionStrategy(YangInstanceIdentifier entityPath) {
+    private EntityOwnerSelectionStrategy getEntityOwnerElectionStrategy(final YangInstanceIdentifier entityPath) {
         final String entityType = EntityOwnersModel.entityTypeFromEntityPath(entityPath);
         return strategyConfig.createStrategy(entityType, entityOwnershipStatistics.byEntityType(entityType));
     }
 
-    private void onCandidateAdded(CandidateAdded message) {
+    private void onCandidateAdded(final CandidateAdded message) {
         if(!isLeader()){
             return;
         }
@@ -367,7 +367,7 @@ class EntityOwnershipShard extends Shard {
         }
     }
 
-    private void onPeerDown(PeerDown peerDown) {
+    private void onPeerDown(final PeerDown peerDown) {
         LOG.info("{}: onPeerDown: {}", persistenceId(), peerDown);
 
         String downMemberName = peerDown.getMemberName();
@@ -377,7 +377,7 @@ class EntityOwnershipShard extends Shard {
         }
     }
 
-    private void onPeerUp(PeerUp peerUp) {
+    private void onPeerUp(final PeerUp peerUp) {
         LOG.debug("{}: onPeerUp: {}", persistenceId(), peerUp);
 
         peerIdToMemberNames.put(peerUp.getPeerId(), peerUp.getMemberName());
@@ -393,7 +393,7 @@ class EntityOwnershipShard extends Shard {
         final BatchedModifications modifications = commitCoordinator.newBatchedModifications();
         searchForEntities(new EntityWalker() {
             @Override
-            public void onEntity(MapEntryNode entityTypeNode, MapEntryNode entityNode) {
+            public void onEntity(final MapEntryNode entityTypeNode, final MapEntryNode entityNode) {
                 if (hasCandidate(entityNode, owner)) {
                     YangInstanceIdentifier entityId =
                             (YangInstanceIdentifier) entityNode.getIdentifier().getKeyValues().get(ENTITY_ID_QNAME);
@@ -412,11 +412,11 @@ class EntityOwnershipShard extends Shard {
         commitCoordinator.commitModifications(modifications, this);
     }
 
-    private static boolean hasCandidate(MapEntryNode entity, String candidateName) {
+    private static boolean hasCandidate(final MapEntryNode entity, final String candidateName) {
         return ((MapNode)entity.getChild(CANDIDATE_NODE_ID).get()).getChild(candidateNodeKey(candidateName)).isPresent();
     }
 
-    private void searchForEntities(EntityWalker walker) {
+    private void searchForEntities(final EntityWalker walker) {
         Optional<NormalizedNode<?, ?>> possibleEntityTypes = getDataStore().readNode(ENTITY_TYPES_PATH);
         if(!possibleEntityTypes.isPresent()) {
             return;
@@ -435,7 +435,7 @@ class EntityOwnershipShard extends Shard {
         }
     }
 
-    private void writeNewOwner(YangInstanceIdentifier entityPath, String newOwner) {
+    private void writeNewOwner(final YangInstanceIdentifier entityPath, final String newOwner) {
         LOG.debug("{}: Writing new owner {} for entity {}", persistenceId(), newOwner, entityPath);
 
         commitCoordinator.commitModification(new WriteModification(entityPath.node(ENTITY_OWNER_QNAME),
@@ -448,8 +448,8 @@ class EntityOwnershipShard extends Shard {
      * @param entityPath
      * @param allCandidates
      */
-    public void scheduleOwnerSelection(YangInstanceIdentifier entityPath, Collection<String> allCandidates,
-                                       EntityOwnerSelectionStrategy strategy){
+    public void scheduleOwnerSelection(final YangInstanceIdentifier entityPath, final Collection<String> allCandidates,
+                                       final EntityOwnerSelectionStrategy strategy){
         cancelOwnerSelectionTask(entityPath);
 
         LOG.debug("{}: Scheduling owner selection after {} ms", persistenceId(), strategy.getSelectionDelayInMillis());
@@ -462,14 +462,14 @@ class EntityOwnershipShard extends Shard {
         entityToScheduledOwnershipTask.put(entityPath, lastScheduledTask);
     }
 
-    private void cancelOwnerSelectionTask(YangInstanceIdentifier entityPath){
+    private void cancelOwnerSelectionTask(final YangInstanceIdentifier entityPath){
         final Cancellable lastScheduledTask = entityToScheduledOwnershipTask.get(entityPath);
         if(lastScheduledTask != null && !lastScheduledTask.isCancelled()){
             lastScheduledTask.cancel();
         }
     }
 
-    private String newOwner(String currentOwner, Collection<String> candidates, Map<String, Long> statistics, EntityOwnerSelectionStrategy ownerSelectionStrategy) {
+    private String newOwner(final String currentOwner, final Collection<String> candidates, final Map<String, Long> statistics, final EntityOwnerSelectionStrategy ownerSelectionStrategy) {
         Collection<String> viableCandidates = getViableCandidates(candidates);
         if(viableCandidates.size() == 0){
             return "";
@@ -477,7 +477,7 @@ class EntityOwnershipShard extends Shard {
         return ownerSelectionStrategy.newOwner(currentOwner, viableCandidates);
     }
 
-    private Collection<String> getViableCandidates(Collection<String> candidates) {
+    private Collection<String> getViableCandidates(final Collection<String> candidates) {
         Collection<String> viableCandidates = new ArrayList<>();
 
         for (String candidate : candidates) {
@@ -488,7 +488,7 @@ class EntityOwnershipShard extends Shard {
         return viableCandidates;
     }
 
-    private String getCurrentOwner(YangInstanceIdentifier entityId) {
+    private String getCurrentOwner(final YangInstanceIdentifier entityId) {
         Optional<NormalizedNode<?, ?>> optionalEntityOwner = getDataStore().readNode(entityId.node(ENTITY_OWNER_QNAME));
         if(optionalEntityOwner.isPresent()){
             return optionalEntityOwner.get().getValue().toString();
@@ -512,13 +512,13 @@ class EntityOwnershipShard extends Shard {
             super(EntityOwnershipShard.class);
         }
 
-        Builder localMemberName(String localMemberName) {
+        Builder localMemberName(final String localMemberName) {
             checkSealed();
             this.localMemberName = localMemberName;
             return this;
         }
 
-        Builder ownerSelectionStrategyConfig(EntityOwnerSelectionStrategyConfig ownerSelectionStrategyConfig){
+        Builder ownerSelectionStrategyConfig(final EntityOwnerSelectionStrategyConfig ownerSelectionStrategyConfig){
             checkSealed();
             this.ownerSelectionStrategyConfig = ownerSelectionStrategyConfig;
             return this;
