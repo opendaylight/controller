@@ -311,15 +311,13 @@ public class RaftActorTest extends AbstractActorTest {
         DeleteEntries deleteEntries = new DeleteEntries(1);
         mockRaftActor.handleRecover(deleteEntries);
 
-        org.opendaylight.controller.cluster.raft.RaftActor.DeleteEntries deprecatedDeleteEntries =
-                new org.opendaylight.controller.cluster.raft.RaftActor.DeleteEntries(1);
+        DeleteEntries deprecatedDeleteEntries = new DeleteEntries(1);
         mockRaftActor.handleRecover(deprecatedDeleteEntries);
 
         UpdateElectionTerm updateElectionTerm = new UpdateElectionTerm(5, "member2");
         mockRaftActor.handleRecover(updateElectionTerm);
 
-        org.opendaylight.controller.cluster.raft.RaftActor.UpdateElectionTerm deprecatedUpdateElectionTerm =
-                new org.opendaylight.controller.cluster.raft.RaftActor.UpdateElectionTerm(6, "member3");
+        UpdateElectionTerm deprecatedUpdateElectionTerm = new UpdateElectionTerm(6, "member3");
         mockRaftActor.handleRecover(deprecatedUpdateElectionTerm);
 
         verify(mockSupport).handleRecoveryMessage(same(snapshotOffer), any(PersistentDataProvider.class));
