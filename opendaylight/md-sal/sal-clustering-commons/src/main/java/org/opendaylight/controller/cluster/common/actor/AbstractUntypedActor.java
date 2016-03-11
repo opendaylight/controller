@@ -15,38 +15,24 @@ import org.slf4j.LoggerFactory;
 public abstract class AbstractUntypedActor extends UntypedActor {
     protected final Logger LOG = LoggerFactory.getLogger(getClass());
 
-    public AbstractUntypedActor() {
-        if(LOG.isDebugEnabled()) {
-            LOG.debug("Actor created {}", getSelf());
-        }
-        getContext().
-            system().
-            actorSelection("user/termination-monitor").
-            tell(new Monitor(getSelf()), getSelf());
-
+    protected AbstractUntypedActor() {
+        LOG.debug("Actor created {}", getSelf());
+        getContext().system().actorSelection("user/termination-monitor").tell(new Monitor(getSelf()), getSelf());
     }
 
-    @Override public void onReceive(Object message) throws Exception {
-        final String messageType = message.getClass().getSimpleName();
-        if(LOG.isDebugEnabled()) {
-//            LOG.debug("Received message {}", messageType);
-        }
+    @Override
+    public void onReceive(Object message) throws Exception {
         handleReceive(message);
-        if(LOG.isDebugEnabled()) {
-//            LOG.debug("Done handling message {}", messageType);
-        }
     }
 
     protected abstract void handleReceive(Object message) throws Exception;
 
     protected void ignoreMessage(Object message) {
-        LOG.debug("Unhandled message {} ", message);
+        LOG.debug("Unhandled message {}", message);
     }
 
     protected void unknownMessage(Object message) throws Exception {
-        if(LOG.isDebugEnabled()) {
-            LOG.debug("Received unhandled message {}", message);
-        }
+        LOG.debug("Received unhandled message {}", message);
         unhandled(message);
     }
 }
