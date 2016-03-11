@@ -32,17 +32,18 @@ public class DataChangeListener extends AbstractUntypedActor {
     private final AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>> listener;
     private boolean notificationsEnabled = false;
 
-    public DataChangeListener(AsyncDataChangeListener<YangInstanceIdentifier,
-                                                      NormalizedNode<?, ?>> listener) {
+    public DataChangeListener(AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>> listener) {
         this.listener = Preconditions.checkNotNull(listener, "listener should not be null");
     }
 
     @Override
-    public void handleReceive(Object message) throws Exception {
-        if(message instanceof DataChanged){
+    public void handleReceive(Object message) {
+        if (message instanceof DataChanged){
             dataChanged(message);
-        } else if(message instanceof EnableNotification){
+        } else if (message instanceof EnableNotification){
             enableNotification((EnableNotification) message);
+        } else {
+            unknownMessage(message);
         }
     }
 
@@ -56,8 +57,7 @@ public class DataChangeListener extends AbstractUntypedActor {
 
         // Do nothing if notifications are not enabled
         if(!notificationsEnabled) {
-            LOG.debug("Notifications not enabled for listener {} - dropping change notification",
-                    listener);
+            LOG.debug("Notifications not enabled for listener {} - dropping change notification", listener);
             return;
         }
 

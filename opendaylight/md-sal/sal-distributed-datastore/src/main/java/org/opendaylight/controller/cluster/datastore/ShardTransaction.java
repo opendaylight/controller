@@ -16,7 +16,6 @@ import akka.japi.Creator;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActorWithMetering;
-import org.opendaylight.controller.cluster.datastore.exceptions.UnknownMessageException;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStats;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransactionReply;
@@ -69,16 +68,14 @@ public abstract class ShardTransaction extends AbstractUntypedActorWithMetering 
     }
 
     @Override
-    public void handleReceive(Object message) throws Exception {
+    public void handleReceive(Object message) {
         if (CloseTransaction.isSerializedType(message)) {
             closeTransaction(true);
         } else if (message instanceof ReceiveTimeout) {
-            if(LOG.isDebugEnabled()) {
-                LOG.debug("Got ReceiveTimeout for inactivity - closing Tx");
-            }
+            LOG.debug("Got ReceiveTimeout for inactivity - closing transaction {}", transactionID);
             closeTransaction(false);
         } else {
-            throw new UnknownMessageException(message);
+            unknownMessage(message);
         }
     }
 

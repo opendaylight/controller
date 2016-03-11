@@ -32,8 +32,10 @@ class EntityOwnershipListenerActor extends AbstractUntypedActor {
 
     @Override
     protected void handleReceive(Object message) {
-        if(message instanceof EntityOwnershipChange) {
+        if (message instanceof EntityOwnershipChange) {
             onEntityOwnershipChanged((EntityOwnershipChange)message);
+        } else {
+            unknownMessage(message);
         }
     }
 
