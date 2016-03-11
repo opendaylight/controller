@@ -22,7 +22,7 @@ public abstract class AbstractUntypedPersistentActor extends UntypedPersistentAc
     }
 
     @Override
-    public void onReceiveCommand(Object message) throws Exception {
+    public final void onReceiveCommand(final Object message) throws Exception {
         final String messageType = message.getClass().getSimpleName();
         LOG.trace("Received message {}", messageType);
 
@@ -32,7 +32,7 @@ public abstract class AbstractUntypedPersistentActor extends UntypedPersistentAc
     }
 
     @Override
-    public void onReceiveRecover(Object message) throws Exception {
+    public final void onReceiveRecover(final Object message) throws Exception {
         final String messageType = message.getClass().getSimpleName();
         LOG.trace("Received message {}", messageType);
         handleRecover(message);
@@ -43,11 +43,11 @@ public abstract class AbstractUntypedPersistentActor extends UntypedPersistentAc
 
     protected abstract void handleCommand(Object message) throws Exception;
 
-    protected void ignoreMessage(Object message) {
+    protected void ignoreMessage(final Object message) {
         LOG.debug("Unhandled message {} ", message);
     }
 
-    protected void unknownMessage(Object message) throws Exception {
+    protected void unknownMessage(final Object message) throws Exception {
         LOG.debug("Received unhandled message {}", message);
         unhandled(message);
     }

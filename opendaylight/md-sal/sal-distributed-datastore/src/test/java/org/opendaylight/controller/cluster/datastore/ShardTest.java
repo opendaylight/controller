@@ -174,7 +174,7 @@ public class ShardTest extends AbstractShardTest {
                     // it does do a persist)
                     return new Shard(newShardBuilder()) {
                         @Override
-                        public void onReceiveCommand(final Object message) throws Exception {
+                        public void handleCommand(final Object message) {
                             if(message instanceof ElectionTimeout && firstElectionTimeout) {
                                 // Got the first ElectionTimeout. We don't forward it to the
                                 // base Shard yet until we've sent the RegisterChangeListener
@@ -197,7 +197,7 @@ public class ShardTest extends AbstractShardTest {
 
                                 onFirstElectionTimeout.countDown();
                             } else {
-                                super.onReceiveCommand(message);
+                                super.handleCommand(message);
                             }
                         }
                     };
@@ -286,7 +286,7 @@ public class ShardTest extends AbstractShardTest {
                 public Shard create() throws Exception {
                     return new Shard(newShardBuilder()) {
                         @Override
-                        public void onReceiveCommand(final Object message) throws Exception {
+                        public void handleCommand(final Object message) {
                             if(message instanceof ElectionTimeout && firstElectionTimeout) {
                                 firstElectionTimeout = false;
                                 final ActorRef self = getSelf();
@@ -301,7 +301,7 @@ public class ShardTest extends AbstractShardTest {
 
                                 onFirstElectionTimeout.countDown();
                             } else {
-                                super.onReceiveCommand(message);
+                                super.handleCommand(message);
                             }
                         }
                     };
@@ -393,7 +393,7 @@ public class ShardTest extends AbstractShardTest {
                             schemaContext(SCHEMA_CONTEXT));
                 }
 
-                String getPeerAddress(String id) {
+                String getPeerAddress(final String id) {
                     return getRaftActorContext().getPeerAddress(id);
                 }
 
@@ -1995,8 +1995,8 @@ public class ShardTest extends AbstractShardTest {
                 public Shard create() throws Exception {
                     return new Shard(newShardBuilder()) {
                         @Override
-                        public void onReceiveCommand(final Object message) throws Exception {
-                            super.onReceiveCommand(message);
+                        public void handleCommand(final Object message) {
+                            super.handleCommand(message);
                             if(message.equals(TX_COMMIT_TIMEOUT_CHECK_MESSAGE)) {
                                 if(cleaupCheckLatch.get() != null) {
                                     cleaupCheckLatch.get().countDown();
@@ -2085,7 +2085,7 @@ public class ShardTest extends AbstractShardTest {
         new ShardTestKit(getSystem()) {{
             class TestShard extends Shard {
 
-                protected TestShard(AbstractBuilder<?, ?> builder) {
+                protected TestShard(final AbstractBuilder<?, ?> builder) {
                     super(builder);
                     setPersistence(new TestPersistentDataProvider(super.persistence()));
                 }
@@ -2129,7 +2129,7 @@ public class ShardTest extends AbstractShardTest {
             awaitAndValidateSnapshot(expectedRoot);
         }
 
-        private void awaitAndValidateSnapshot(NormalizedNode<?,?> expectedRoot) throws InterruptedException {
+        private void awaitAndValidateSnapshot(final NormalizedNode<?,?> expectedRoot) throws InterruptedException {
             assertEquals("Snapshot saved", true, latch.get().await(5, TimeUnit.SECONDS));
 
             assertTrue("Invalid saved snapshot " + savedSnapshot.get(),
