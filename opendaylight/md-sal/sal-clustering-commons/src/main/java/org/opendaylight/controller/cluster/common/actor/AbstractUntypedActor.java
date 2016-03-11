@@ -21,17 +21,24 @@ public abstract class AbstractUntypedActor extends UntypedActor {
     }
 
     @Override
-    public void onReceive(Object message) throws Exception {
+    public final void onReceive(Object message) throws Exception {
         handleReceive(message);
     }
 
+    /**
+     * Receive and handle an incoming message. If the implementation does not handle this particular message,
+     * it should call {@link #ignoreMessage(Object)} or {@link #unknownMessage(Object)}.
+     *
+     * @param message Incoming message
+     * @throws Exception
+     */
     protected abstract void handleReceive(Object message) throws Exception;
 
-    protected void ignoreMessage(Object message) {
-        LOG.debug("Unhandled message {}", message);
+    protected final void ignoreMessage(Object message) {
+        LOG.debug("Ignoring unhandled message {}", message);
     }
 
-    protected void unknownMessage(Object message) throws Exception {
+    protected final void unknownMessage(Object message) {
         LOG.debug("Received unhandled message {}", message);
         unhandled(message);
     }
