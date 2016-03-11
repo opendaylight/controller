@@ -86,7 +86,6 @@
     <ietf-restconf.version>2013.10.19.8.3-SNAPSHOT</ietf-restconf.version>
     <ietf-topology.version>2013.10.21.8.3-SNAPSHOT</ietf-topology.version>
     <ietf-yang-types.version>2010.09.24.8.3-SNAPSHOT</ietf-yang-types.version>
-    <jdepend.maven.plugin.version>2.0-beta-2</jdepend.maven.plugin.version>
     <jmxGeneratorPath>src/main/yang-gen-config</jmxGeneratorPath>
     <jolokia-bridge.version>0.2.3-SNAPSHOT</jolokia-bridge.version>
     <karaf.branding.version>1.2.3-SNAPSHOT</karaf.branding.version>
