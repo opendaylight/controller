@@ -188,6 +188,30 @@
       "revId": "29dc9694f12f7d48f6ff12a55120dbfdeac964f7",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_63185ed3",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/PruningDataTreeModification.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-03-12T23:05:25Z",
+      "side": 1,
+      "message": "Actually it is correct to change the delegate reference. When getDelegate() is called it must return the actual delegate that was readied.",
+      "parentUuid": "9a3d3df0_03b2324b",
+      "range": {
+        "startLine": 114,
+        "startChar": 12,
+        "endLine": 114,
+        "endChar": 39
+      },
+      "revId": "29dc9694f12f7d48f6ff12a55120dbfdeac964f7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
