@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a3d3df0_d62e4bfa",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/transformer/NormalizedNodePruner.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 259,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2016-03-12T02:32:15Z",
+      "side": 1,
+      "message": "Could we make this final?",
+      "range": {
+        "startLine": 259,
+        "startChar": 8,
+        "endLine": 259,
+        "endChar": 16
+      },
+      "revId": "29dc9694f12f7d48f6ff12a55120dbfdeac964f7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_270ae325",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/transformer/NormalizedNodePruner.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 274,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2016-03-12T02:32:15Z",
+      "side": 1,
+      "message": "Don\u0027t know why this method is called findRootSchemaNode. It seems like we\u0027re just going through the nodePath and finding the last PathArgument for which a schemaNode exists? Also is there any reason why we cannot just find this schema node in the constructor and store it in a field?",
+      "range": {
+        "startLine": 274,
+        "startChar": 37,
+        "endLine": 274,
+        "endChar": 55
+      },
+      "revId": "29dc9694f12f7d48f6ff12a55120dbfdeac964f7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_e33e2eb7",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/PruningDataTreeModification.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2016-03-12T02:32:15Z",
+      "side": 1,
+      "message": "Changing the delegate reference like this does not seem right to me from an API perspective considering that delegate is passed to the PruningModification.",
+      "range": {
+        "startLine": 114,
+        "startChar": 12,
+        "endLine": 114,
+        "endChar": 39
+      },
+      "revId": "29dc9694f12f7d48f6ff12a55120dbfdeac964f7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
