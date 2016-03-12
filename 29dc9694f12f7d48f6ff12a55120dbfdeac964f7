@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_63a17ef7",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/transformer/NormalizedNodePruner.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 259,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-03-12T03:00:50Z",
+      "side": 1,
+      "message": "sure",
+      "parentUuid": "9a3d3df0_d62e4bfa",
+      "range": {
+        "startLine": 259,
+        "startChar": 8,
+        "endLine": 259,
+        "endChar": 16
+      },
+      "revId": "29dc9694f12f7d48f6ff12a55120dbfdeac964f7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_270ae325",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/transformer/NormalizedNodePruner.java",
         "patchSetId": 2
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_a3a7060a",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/transformer/NormalizedNodePruner.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 274,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-03-12T03:00:50Z",
+      "side": 1,
+      "message": "I could do that. I struggled to find a good name for this. It finds the SchemaNode corresponding to the root NormalizedNode. I\u0027ll see if I can come up with a better name.",
+      "parentUuid": "9a3d3df0_270ae325",
+      "range": {
+        "startLine": 274,
+        "startChar": 37,
+        "endLine": 274,
+        "endChar": 55
+      },
+      "revId": "29dc9694f12f7d48f6ff12a55120dbfdeac964f7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_e33e2eb7",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/PruningDataTreeModification.java",
         "patchSetId": 2
@@ -59,6 +107,30 @@
       "writtenOn": "2016-03-12T02:32:15Z",
       "side": 1,
       "message": "Changing the delegate reference like this does not seem right to me from an API perspective considering that delegate is passed to the PruningModification.",
+      "range": {
+        "startLine": 114,
+        "startChar": 12,
+        "endLine": 114,
+        "endChar": 39
+      },
+      "revId": "29dc9694f12f7d48f6ff12a55120dbfdeac964f7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_03b2324b",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/PruningDataTreeModification.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-03-12T03:00:50Z",
+      "side": 1,
+      "message": "yeah I can see that. I\u0027ll keep delegate final.",
+      "parentUuid": "9a3d3df0_e33e2eb7",
       "range": {
         "startLine": 114,
         "startChar": 12,
