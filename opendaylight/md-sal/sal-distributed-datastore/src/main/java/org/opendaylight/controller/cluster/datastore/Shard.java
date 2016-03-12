@@ -333,7 +333,22 @@ public class Shard extends RaftActor {
         LOG.debug("{}: Finishing commit for transaction {}", persistenceId(), cohortEntry.getTransactionID());
 
         try {
-            cohortEntry.commit();
+            try {
+                cohortEntry.commit();
+            } catch(IllegalStateException e) {
+                // We may get a "store tree and candidate base differ" IllegalStateException from commit under
+                // certain edge case scenarios so we'll try to re-apply the candidate from scratch as a last
+                // resort. Eg, we're a follower and a tx payload is replicated but the leader goes down before
+                // applying it to the state. We then become the leader and a second tx is pre-committed and
+                // replicated. When consensus occurs, this will cause the first tx to be applied as a foreign
+                // candidate via applyState prior to the second tx. Since the second tx has already been
+                // pre-committed, when the it gets here to commit it will get an IllegalStateException.
+
+                LOG.debug("{}: commit failed for transaction {} - retrying as foreign candidate", persistenceId(),
+                        transactionID, e);
+
+                store.applyForeignCandidate(transactionID, cohortEntry.getCandidate());
+            }
 
             sender.tell(CommitTransactionReply.instance(cohortEntry.getClientVersion()).toSerializable(), getSelf());
 
