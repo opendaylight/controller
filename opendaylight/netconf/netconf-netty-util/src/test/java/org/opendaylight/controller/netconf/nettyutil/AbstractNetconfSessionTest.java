@@ -28,6 +28,7 @@ import io.netty.channel.ChannelPipeline;
 import io.netty.channel.EventLoop;
 import io.netty.handler.codec.ByteToMessageDecoder;
 import io.netty.handler.codec.MessageToByteEncoder;
+import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
 import java.util.Collections;
 import org.junit.Before;
@@ -78,6 +79,8 @@ public class AbstractNetconfSessionTest {
         doReturn(null).when(pipeline).replace(anyString(), anyString(), any(ChannelHandler.class));
 
         doReturn(eventLoop).when(channel).eventLoop();
+        doReturn(mock(Future.class)).when(eventLoop).shutdownGracefully();
+
         doAnswer(new Answer<Void>() {
             @Override
             public Void answer(InvocationOnMock invocation) throws Throwable {

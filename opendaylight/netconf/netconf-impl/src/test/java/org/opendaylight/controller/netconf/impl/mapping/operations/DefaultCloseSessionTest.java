@@ -19,6 +19,7 @@ import static org.mockito.Mockito.verify;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.EventLoop;
+import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
@@ -48,6 +49,7 @@ public class DefaultCloseSessionTest {
             }
         }).when(eventLoop).execute(any(Runnable.class));
         doReturn(true).when(eventLoop).inEventLoop();
+        doReturn(mock(Future.class)).when(eventLoop).shutdownGracefully();
     }
 
     @Test
@@ -86,6 +88,7 @@ public class DefaultCloseSessionTest {
                 "xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\">\n" +
                 "<ok/>\n" +
                 "</rpc-reply>")));
+        verify(channel.eventLoop()).shutdownGracefully();
         verify(channel).close();
         verify(listener).onSessionTerminated(any(NetconfServerSession.class), any(NetconfTerminationReason.class));
     }

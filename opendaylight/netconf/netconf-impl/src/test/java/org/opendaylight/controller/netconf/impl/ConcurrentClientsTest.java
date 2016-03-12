@@ -368,7 +368,9 @@ public class ConcurrentClientsTest {
                         "Received error response: " + XmlUtil.toString(result.getDocument()) + " to request: "
                                 + XmlUtil.toString(getMessage.getDocument()));
 
-                netconfClient.close();
+                // FIXME closing the netconfClient closes the underlying eventPool,
+                // thus no more netconfClient.sendRequest() can be performed.
+                //  netconfClient.close();
                 LOG.info("Client with session id {}: ended", sessionId);
             } catch (final Exception e) {
                 throw new IllegalStateException(Thread.currentThread().getName(), e);
