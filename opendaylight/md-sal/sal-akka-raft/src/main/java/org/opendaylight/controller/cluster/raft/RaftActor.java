@@ -16,6 +16,7 @@ import akka.japi.Procedure;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Objects;
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Supplier;
 import com.google.common.collect.Lists;
 import java.io.Serializable;
@@ -40,7 +41,6 @@ import org.opendaylight.controller.cluster.raft.base.messages.LeaderTransitionin
 import org.opendaylight.controller.cluster.raft.base.messages.Replicate;
 import org.opendaylight.controller.cluster.raft.base.messages.SwitchBehavior;
 import org.opendaylight.controller.cluster.raft.behaviors.AbstractLeader;
-import org.opendaylight.controller.cluster.raft.behaviors.DelegatingRaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.behaviors.Follower;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.client.messages.FindLeader;
@@ -97,13 +97,52 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
     private static final long APPLY_STATE_DELAY_THRESHOLD_IN_NANOS = TimeUnit.MILLISECONDS.toNanos(50L); // 50 millis
 
-    protected final Logger LOG = LoggerFactory.getLogger(getClass());
-
     /**
-     * The current state determines the current behavior of a RaftActor
-     * A Raft Actor always starts off in the Follower State
+     * Internal-noop behavior. Does not do anything on close, but fails any attempt to execute active operations.
      */
-    private final DelegatingRaftActorBehavior currentBehavior = new DelegatingRaftActorBehavior();
+    private static final RaftActorBehavior NOOP_BEHAVIOR = new RaftActorBehavior() {
+        @Override
+        public void close() {
+            // Intentional no-op
+        }
+
+        @Override
+        public RaftActorBehavior switchBehavior(final RaftActorBehavior behavior) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public RaftState state() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void setReplicatedToAllIndex(final long replicatedToAllIndex) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public RaftActorBehavior handleMessage(final ActorRef sender, final Object message) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public long getReplicatedToAllIndex() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public short getLeaderPayloadVersion() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public String getLeaderId() {
+            throw new UnsupportedOperationException();
+        }
+    };
+
+    protected final Logger LOG = LoggerFactory.getLogger(getClass());
 
     /**
      * This context should NOT be passed directly to any other actor it is
@@ -115,10 +154,6 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
     private final PersistentDataProvider persistentProvider;
 
-    private RaftActorRecoverySupport raftRecovery;
-
-    private RaftActorSnapshotMessageSupport snapshotSupport;
-
     private final BehaviorStateHolder reusableBehaviorStateHolder = new BehaviorStateHolder();
 
     private final SwitchBehaviorSupplier reusableSwitchBehaviorSupplier = new SwitchBehaviorSupplier();
@@ -126,6 +161,16 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     private RaftActorServerConfigurationSupport serverConfigurationSupport;
 
     private RaftActorLeadershipTransferCohort leadershipTransferInProgress;
+
+    /**
+     * The current state determines the current behavior of a RaftActor
+     * A Raft Actor always starts off in the Follower State
+     */
+    private RaftActorBehavior currentBehavior = NOOP_BEHAVIOR;
+
+    private RaftActorRecoverySupport raftRecovery;
+
+    private RaftActorSnapshotMessageSupport snapshotSupport;
 
     private boolean shuttingDown;
 
@@ -158,12 +203,10 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
     @Override
     public void postStop() {
-        if(currentBehavior.getDelegate() != null) {
-            try {
-                currentBehavior.close();
-            } catch (Exception e) {
-                LOG.debug("{}: Error closing behavior {}", persistenceId(), currentBehavior.state());
-            }
+        try {
+            currentBehavior.close();
+        } catch (Exception e) {
+            LOG.debug("{}: Error closing behavior {}", persistenceId(), currentBehavior.state());
         }
 
         super.postStop();
@@ -200,10 +243,10 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         changeCurrentBehavior(new Follower(context));
     }
 
-    protected void changeCurrentBehavior(RaftActorBehavior newBehavior){
-        reusableBehaviorStateHolder.init(getCurrentBehavior());
+    protected void changeCurrentBehavior(final RaftActorBehavior newBehavior) {
+        reusableBehaviorStateHolder.init(currentBehavior);
         setCurrentBehavior(newBehavior);
-        handleBehaviorChange(reusableBehaviorStateHolder, getCurrentBehavior());
+        handleBehaviorChange(reusableBehaviorStateHolder, currentBehavior);
     }
 
     @Override
@@ -353,12 +396,12 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         }
     }
 
-    private void switchBehavior(Supplier<RaftActorBehavior> supplier){
-        reusableBehaviorStateHolder.init(getCurrentBehavior());
+    private void switchBehavior(final Supplier<RaftActorBehavior> supplier) {
+        reusableBehaviorStateHolder.init(currentBehavior);
 
         setCurrentBehavior(supplier.get());
 
-        handleBehaviorChange(reusableBehaviorStateHolder, getCurrentBehavior());
+        handleBehaviorChange(reusableBehaviorStateHolder, currentBehavior);
     }
 
     protected RaftActorSnapshotMessageSupport newRaftActorSnapshotMessageSupport() {
@@ -398,8 +441,8 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             builder.lastLogTerm(lastLogEntry.getTerm());
         }
 
-        if(getCurrentBehavior() instanceof AbstractLeader) {
-            AbstractLeader leader = (AbstractLeader)getCurrentBehavior();
+        if (currentBehavior instanceof AbstractLeader) {
+            AbstractLeader leader = (AbstractLeader)currentBehavior;
             Collection<String> followerIds = leader.getFollowerIds();
             List<FollowerInfo> followerInfoList = Lists.newArrayListWithCapacity(followerIds.size());
             for(String id: followerIds) {
@@ -518,12 +561,12 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     }
 
     @VisibleForTesting
-    void setCurrentBehavior(RaftActorBehavior behavior) {
-        currentBehavior.setDelegate(behavior);
+    void setCurrentBehavior(final RaftActorBehavior behavior) {
+        currentBehavior = Preconditions.checkNotNull(behavior);
     }
 
-    protected RaftActorBehavior getCurrentBehavior() {
-        return currentBehavior.getDelegate();
+    protected final RaftActorBehavior getCurrentBehavior() {
+        return currentBehavior;
     }
 
     /**
@@ -609,7 +652,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             // The RaftPolicy was modified. If the current behavior is Follower then re-initialize to Follower
             // but transfer the previous leaderId so it doesn't immediately try to schedule an election. This
             // avoids potential disruption. Otherwise, switch to Follower normally.
-            RaftActorBehavior behavior = currentBehavior.getDelegate();
+            RaftActorBehavior behavior = currentBehavior;
             if(behavior instanceof Follower) {
                 String previousLeaderId = ((Follower)behavior).getLeaderId();
                 short previousLeaderPayloadVersion = behavior.getLeaderPayloadVersion();
