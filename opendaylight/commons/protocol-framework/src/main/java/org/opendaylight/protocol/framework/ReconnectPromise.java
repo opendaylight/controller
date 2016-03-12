@@ -62,8 +62,11 @@ final class ReconnectPromise<S extends ProtocolSession<?>, L extends SessionList
             @Override
             public void operationComplete(Future<Object> future) throws Exception {
                 if (!future.isSuccess()) {
+                    LOG.debug("Done but failed");
                     ReconnectPromise.this.setFailure(future.cause());
                 }
+                LOG.debug("Done");
+//                b.group().shutdownGracefully();
             }
         });
     }
@@ -79,9 +82,11 @@ final class ReconnectPromise<S extends ProtocolSession<?>, L extends SessionList
 
     @Override
     public synchronized boolean cancel(final boolean mayInterruptIfRunning) {
+        LOG.debug("cancel");
         if (super.cancel(mayInterruptIfRunning)) {
             Preconditions.checkNotNull(pending);
             this.pending.cancel(mayInterruptIfRunning);
+            LOG.debug("cancel yea!");
             return true;
         }
 

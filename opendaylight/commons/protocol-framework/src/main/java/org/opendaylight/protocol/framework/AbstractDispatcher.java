@@ -32,6 +32,7 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.concurrent.DefaultPromise;
 import io.netty.util.concurrent.EventExecutor;
 import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.GenericFutureListener;
 import io.netty.util.concurrent.GlobalEventExecutor;
 import io.netty.util.concurrent.Promise;
 
@@ -194,6 +195,17 @@ public abstract class AbstractDispatcher<S extends ProtocolSession<?>, L extends
                     @Override
                     protected void initChannel(final SocketChannel ch) {
                         initializer.initializeChannel(ch, p);
+                        ch.closeFuture().addListener(new GenericFutureListener<Future<? super Void>>() {
+
+                            @Override
+                            public void operationComplete(
+                                    Future<? super Void> arg0)
+                                    throws Exception {
+                                LOG.debug("createClient channel eneded {}", arg0);
+//                                bootstrap.group().shutdownGracefully();
+
+                            }
+                        });
                     }
                 });
 
@@ -253,6 +265,15 @@ public abstract class AbstractDispatcher<S extends ProtocolSession<?>, L extends
         setWorkerGroup(b);
         setChannelFactory(b);
 
+//        p.addListener(new GenericFutureListener<Future<? super Void>>() {
+//
+//            @Override
+//            public void operationComplete(Future<? super Void> arg0)
+//                    throws Exception {
+//                LOG.debug("Shutdown eventPool");
+//                b.group().shutdownGracefully();
+//            }
+//        });
         p.connect();
         return p;
     }

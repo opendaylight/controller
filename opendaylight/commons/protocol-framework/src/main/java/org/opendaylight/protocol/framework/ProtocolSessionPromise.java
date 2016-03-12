@@ -16,6 +16,7 @@ import io.netty.util.concurrent.DefaultPromise;
 import io.netty.util.concurrent.EventExecutor;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.FutureListener;
+import io.netty.util.concurrent.GenericFutureListener;
 import io.netty.util.concurrent.Promise;
 import java.net.InetSocketAddress;
 import javax.annotation.concurrent.GuardedBy;
@@ -57,6 +58,15 @@ final class ProtocolSessionPromise<S extends ProtocolSession<?>> extends Default
             final ChannelFuture connectFuture = this.b.connect(this.address);
             // Add listener that attempts reconnect by invoking this method again.
             connectFuture.addListener(new BootstrapConnectListener(lock));
+            connectFuture.addListener(new GenericFutureListener<Future<? super Void>>() {
+
+                @Override
+                public void operationComplete(Future<? super Void> arg0)
+                        throws Exception {
+                        LOG.debug("Received operation complet {}", arg0);
+
+                }
+            });
             this.pending = connectFuture;
         } catch (final Exception e) {
             LOG.info("Failed to connect to {}", address, e);
@@ -66,8 +76,10 @@ final class ProtocolSessionPromise<S extends ProtocolSession<?>> extends Default
 
     @Override
     public synchronized boolean cancel(final boolean mayInterruptIfRunning) {
+        LOG.debug("cancel");
         if (super.cancel(mayInterruptIfRunning)) {
             this.pending.cancel(mayInterruptIfRunning);
+            LOG.debug("cancel yes!");
             return true;
         }
 
