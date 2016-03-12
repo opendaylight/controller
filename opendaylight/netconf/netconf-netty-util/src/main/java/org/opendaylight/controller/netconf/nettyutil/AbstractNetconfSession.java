@@ -53,6 +53,7 @@ public abstract class AbstractNetconfSession<S extends NetconfSession, L extends
 
     @Override
     public void close() {
+        channel.eventLoop().shutdownGracefully();
         channel.close();
         up = false;
         sessionListener.onSessionTerminated(thisInstance(), new NetconfTerminationReason("Session closed"));

@@ -16,6 +16,8 @@ import io.netty.channel.ChannelPromise;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.Queue;
+
+import org.apache.sshd.common.future.CloseFuture;
 import org.apache.sshd.common.future.SshFutureListener;
 import org.apache.sshd.common.io.IoOutputStream;
 import org.apache.sshd.common.io.IoWriteFuture;
@@ -89,7 +91,7 @@ public final class AsyncSshHandlerWriter implements AutoCloseable {
                 @Override
                 public void operationComplete(final IoWriteFuture future) {
                     // synchronized block due to deadlock that happens on ssh window resize
-                    // writes and pending writes would lock the underlyinch channel session
+                    // writes and pending writes would lock the underlying channel session
                     // window resize write would try to write the message on an already locked channelSession,
                     // while the pending write was in progress from the write callback
                     synchronized (asyncIn) {
@@ -168,7 +170,19 @@ public final class AsyncSshHandlerWriter implements AutoCloseable {
 
     @Override
     public void close() {
-        asyncIn = null;
+        synchronized (asyncIn) {
+            asyncIn.close(false).addListener(new SshFutureListener<CloseFuture>() {
+
+                @Override
+                public void operationComplete(CloseFuture future) {
+                    if (!future.isClosed()) {
+                        asyncIn.close(true);
+                    }
+                    LOG.info("asyncIn closed {}", asyncIn);
+                    asyncIn = null;
+                }
+            });
+        }
     }
 
     private static Buffer toBuffer(final ByteBuf msg) {

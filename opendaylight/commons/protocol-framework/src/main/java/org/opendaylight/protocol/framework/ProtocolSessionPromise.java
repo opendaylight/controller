@@ -59,14 +59,16 @@ final class ProtocolSessionPromise<S extends ProtocolSession<?>> extends Default
             connectFuture.addListener(new BootstrapConnectListener(lock));
             this.pending = connectFuture;
         } catch (final Exception e) {
-            LOG.info("Failed to connect to {}", address, e);
+            LOG.error("Failed to connect to {}", address, e);
             setFailure(e);
+            executor().shutdown();
         }
     }
 
     @Override
     public synchronized boolean cancel(final boolean mayInterruptIfRunning) {
         if (super.cancel(mayInterruptIfRunning)) {
+            LOG.warn("protocolSessionPromise {} closed", pending);
             this.pending.cancel(mayInterruptIfRunning);
             return true;
         }
@@ -78,6 +80,7 @@ final class ProtocolSessionPromise<S extends ProtocolSession<?>> extends Default
     public synchronized Promise<S> setSuccess(final S result) {
         LOG.debug("Promise {} completed", this);
         this.strategy.reconnectSuccessful();
+        executor().shutdownGracefully();
         return super.setSuccess(result);
     }
 
@@ -110,6 +113,7 @@ final class ProtocolSessionPromise<S extends ProtocolSession<?>> extends Default
                     if (cf.isSuccess()) {
                         LOG.debug("Closing channel for cancelled promise {}", lock);
                         cf.channel().close();
+                        executor().shutdownGracefully();
                     }
                     return;
                 }
@@ -120,6 +124,8 @@ final class ProtocolSessionPromise<S extends ProtocolSession<?>> extends Default
                 }
 
                 LOG.debug("Attempt to connect to {} failed", ProtocolSessionPromise.this.address, cf.cause());
+
+                LOG.warn("Channel is open: {} is active: {}", cf.channel().isOpen(), cf.channel().isActive());
 
                 final Future<Void> rf = ProtocolSessionPromise.this.strategy.scheduleReconnect(cf.cause());
                 rf.addListener(new ReconnectingStrategyListener());
@@ -144,10 +150,13 @@ final class ProtocolSessionPromise<S extends ProtocolSession<?>> extends Default
                      */
                     if (!isCancelled()) {
                         if (sf.isSuccess()) {
+                            LOG.warn("ReconnectingStrategyListener connect");
                             connect();
                         } else {
                             setFailure(sf.cause());
                         }
+                    } else {
+                        LOG.warn("ReconnectingStrategyListener is cancelled {}", sf.cause());
                     }
                 }
             }

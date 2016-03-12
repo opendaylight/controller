@@ -170,7 +170,7 @@ public abstract class AbstractDispatcher<S extends ProtocolSession<?>, L extends
         setChannelFactory(b);
 
         p.connect();
-        LOG.debug("Client created.");
+        LOG.debug("Client created 173.");
         return p;
     }
 
@@ -198,7 +198,7 @@ public abstract class AbstractDispatcher<S extends ProtocolSession<?>, L extends
                 });
 
         p.connect();
-        LOG.debug("Client created.");
+        LOG.debug("Client created 201.");
         return p;
     }
 
@@ -243,6 +243,8 @@ public abstract class AbstractDispatcher<S extends ProtocolSession<?>, L extends
      */
     protected Future<Void> createReconnectingClient(final InetSocketAddress address, final ReconnectStrategyFactory connectStrategyFactory,
             final PipelineInitializer<S> initializer) {
+        LOG.debug("createReconnectingClient created.");
+
         final Bootstrap b = new Bootstrap();
 
         final ReconnectPromise<S, L> p = new ReconnectPromise<>(GlobalEventExecutor.INSTANCE, this, address, connectStrategyFactory, b, initializer);

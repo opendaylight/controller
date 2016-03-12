@@ -16,12 +16,16 @@ import io.netty.channel.ChannelPromise;
 import java.io.IOException;
 import java.net.SocketAddress;
 import java.util.HashMap;
+
+import javax.annotation.concurrent.GuardedBy;
+
 import org.apache.sshd.ClientChannel;
 import org.apache.sshd.ClientSession;
 import org.apache.sshd.SshClient;
 import org.apache.sshd.client.future.AuthFuture;
 import org.apache.sshd.client.future.ConnectFuture;
 import org.apache.sshd.client.future.OpenFuture;
+import org.apache.sshd.common.FactoryManager;
 import org.apache.sshd.common.future.CloseFuture;
 import org.apache.sshd.common.future.SshFutureListener;
 import org.opendaylight.controller.netconf.nettyutil.handler.ssh.authentication.AuthenticationHandler;
@@ -46,8 +50,8 @@ public class AsyncSshHandler extends ChannelOutboundHandlerAdapter {
     static {
         DEFAULT_CLIENT.setProperties(new HashMap<String, String>(){
             {
-                put(SshClient.AUTH_TIMEOUT, Long.toString(DEFAULT_TIMEOUT));
-                put(SshClient.IDLE_TIMEOUT, Long.toString(DEFAULT_TIMEOUT));
+                put(FactoryManager.AUTH_TIMEOUT, Long.toString(DEFAULT_TIMEOUT));
+                put(FactoryManager.IDLE_TIMEOUT, Long.toString(DEFAULT_TIMEOUT));
             }
         });
         // TODO make configurable, or somehow reuse netty threadpool
@@ -56,7 +60,9 @@ public class AsyncSshHandler extends ChannelOutboundHandlerAdapter {
     }
 
     private final AuthenticationHandler authenticationHandler;
-    private final SshClient sshClient;
+
+    @GuardedBy("this")
+    private SshClient sshClient;
 
     private AsyncSshHandlerReader sshReadAsyncListener;
     private AsyncSshHandlerWriter sshWriteAsyncHandler;
@@ -217,13 +223,17 @@ public class AsyncSshHandler extends ChannelOutboundHandlerAdapter {
             sshReadAsyncListener.close();
         }
 
-        if(session!= null && !session.isClosed() && !session.isClosing()) {
+        if(session!= null) {
             session.close(false).addListener(new SshFutureListener<CloseFuture>() {
                 @Override
                 public void operationComplete(final CloseFuture future) {
-                    if (future.isClosed() == false) {
+                    if (!future.isClosed()) {
+                        LOG.debug("force close session");
                         session.close(true);
                     }
+                    LOG.debug("session isclose {} channel isclose {}", session.isClosing(), channel);
+                    session.waitFor(ClientSession.CLOSED, 0);
+                    LOG.info("Session {} is closed", session);
                     session = null;
                 }
             });
@@ -239,8 +249,43 @@ public class AsyncSshHandler extends ChannelOutboundHandlerAdapter {
             LOG.warn("Unable to cleanup all resources for channel: {}. Ignoring.", ctx.channel(), e);
         }
 
-        channel = null;
+        if (channel != null) {
+            channel.close(false).addListener(new SshFutureListener<CloseFuture>() {
+                @Override
+                public void operationComplete(final CloseFuture future) {
+                    if (!future.isClosed()) {
+                        LOG.debug("force close channel");
+                        channel.close(true);
+                    }
+                    LOG.debug("channel isclose {} session {}", channel, session);
+                    channel.waitFor(ClientChannel.CLOSED, 0);
+                    LOG.info("Channel is closed");
+                    channel = null;
+                }
+            });;
+        }
+
+        try {
+            super.close(ctx, promise);
+        } catch (Exception e) {
+            LOG.error("Channel is closed", e);
+        }
+
+//            sshClient.close(false).addListener(new SshFutureListener<CloseFuture>() {
+//                @Override
+//                public void operationComplete(final CloseFuture future) {
+//                    if (!future.isClosed()) {
+//                        LOG.debug("force close sshClient");
+//                        sshClient.close(true);
+//                    }
+//                    LOG.debug("sshClient isclose {}", sshClient.isClosed());
+//                    LOG.info("sshClient is closed");
+//                    sshClient = null;
+//                }
+//            });;
+
         promise.setSuccess();
+
         LOG.debug("SSH session closed on channel: {}", ctx.channel());
     }
 

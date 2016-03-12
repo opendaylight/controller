@@ -42,7 +42,7 @@ public final class ReconnectImmediatelyStrategy implements ReconnectStrategy {
 
     @Override
     public void reconnectSuccessful() {
-        // Nothing to do
+        executor.shutdownGracefully();
     }
 
     @Override

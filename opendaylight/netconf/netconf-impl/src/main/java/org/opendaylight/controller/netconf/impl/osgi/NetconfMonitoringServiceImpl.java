@@ -231,6 +231,7 @@ public class NetconfMonitoringServiceImpl implements NetconfMonitoringService, A
 
     private void notifyListeners() {
         for (final MonitoringListener listener : listeners) {
+            LOG.info("NotifyListeners {}", listener);
             listener.onStateChanged(getCurrentNetconfState());
         }
     }

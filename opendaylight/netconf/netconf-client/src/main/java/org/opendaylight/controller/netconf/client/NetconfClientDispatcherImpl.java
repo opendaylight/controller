@@ -20,6 +20,7 @@ import org.opendaylight.protocol.framework.AbstractDispatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@SuppressWarnings("deprecation")
 public class NetconfClientDispatcherImpl extends AbstractDispatcher<NetconfClientSession, NetconfClientSessionListener>
         implements NetconfClientDispatcher, Closeable {
 
@@ -92,12 +93,10 @@ public class NetconfClientDispatcherImpl extends AbstractDispatcher<NetconfClien
 
     private Future<NetconfClientSession> createSshClient(final NetconfClientConfiguration currentConfiguration) {
         LOG.debug("Creating SSH client with configuration: {}", currentConfiguration);
-        return super.createClient(currentConfiguration.getAddress(), currentConfiguration.getReconnectStrategy(),
-                new PipelineInitializer<NetconfClientSession>() {
+        return super.createClient(currentConfiguration.getAddress(), currentConfiguration.getReconnectStrategy(), new PipelineInitializer<NetconfClientSession>() {
 
                     @Override
-                    public void initializeChannel(final SocketChannel ch,
-                                                  final Promise<NetconfClientSession> sessionPromise) {
+                    public void initializeChannel(final SocketChannel ch, final Promise<NetconfClientSession> sessionPromise) {
                         new SshClientChannelInitializer(currentConfiguration.getAuthHandler(),
                                 getNegotiatorFactory(currentConfiguration), currentConfiguration.getSessionListener())
                                 .initialize(ch, sessionPromise);

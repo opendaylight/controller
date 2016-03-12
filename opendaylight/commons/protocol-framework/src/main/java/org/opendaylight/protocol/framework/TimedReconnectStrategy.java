@@ -144,8 +144,10 @@ public final class TimedReconnectStrategy implements ReconnectStrategy {
 
     @Override
     public synchronized void reconnectSuccessful() {
+        LOG.warn("Reconnect successful");
         Preconditions.checkState(!this.scheduled);
         this.attempts = 0;
+        executor.shutdownGracefully();
     }
 
     @Override

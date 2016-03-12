@@ -66,7 +66,7 @@ public class SimpleNetconfClientSessionListener implements NetconfClientSessionL
         if (e != null) {
             e.promise.setFailure(cause);
         }
-
+        this.clientSession.close();
         this.clientSession = null;
     }
 

@@ -10,6 +10,8 @@ package org.opendaylight.controller.netconf.nettyutil.handler.ssh.client;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+
+import org.apache.sshd.common.future.CloseFuture;
 import org.apache.sshd.common.future.SshFutureListener;
 import org.apache.sshd.common.io.IoInputStream;
 import org.apache.sshd.common.io.IoReadFuture;
@@ -46,6 +48,12 @@ public final class AsyncSshHandlerReader implements SshFutureListener<IoReadFutu
 
     @Override
     public synchronized void operationComplete(final IoReadFuture future) {
+
+        //if asyncout is already set to null by close method, do nothing
+        if(asyncOut == null) {
+            return;
+        }
+
         if(future.getException() != null) {
             if(asyncOut.isClosed() || asyncOut.isClosing()) {
                 // Ssh dropped
@@ -88,7 +96,19 @@ public final class AsyncSshHandlerReader implements SshFutureListener<IoReadFutu
             currentReadFuture = null;
         }
 
-        asyncOut = null;
+        synchronized (asyncOut) {
+            asyncOut.close(false).addListener(new SshFutureListener<CloseFuture>() {
+
+                @Override
+                public void operationComplete(CloseFuture future) {
+                    if (!future.isClosed()) {
+                        asyncOut.close(true);
+                    }
+                    LOG.info("asyncOut closed {}", asyncOut);
+                    asyncOut = null;
+                }
+            });
+        }
     }
 
     public interface ReadMsgHandler {

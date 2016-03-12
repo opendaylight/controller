@@ -54,6 +54,7 @@ public class NetconfServerSessionListener implements NetconfSessionListener<Netc
     }
 
     public void onDown(final NetconfServerSession netconfNetconfServerSession) {
+        LOG.info("onDown {}", netconfNetconfServerSession);
         monitoringService.onSessionDown(netconfNetconfServerSession);
 
         try {

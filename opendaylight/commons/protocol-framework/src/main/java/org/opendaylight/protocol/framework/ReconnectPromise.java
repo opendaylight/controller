@@ -64,6 +64,7 @@ final class ReconnectPromise<S extends ProtocolSession<?>, L extends SessionList
                 if (!future.isSuccess()) {
                     ReconnectPromise.this.setFailure(future.cause());
                 }
+                LOG.info("OperationComplete, isDone: {}", ReconnectPromise.this.isDone());
             }
         });
     }
@@ -80,11 +81,12 @@ final class ReconnectPromise<S extends ProtocolSession<?>, L extends SessionList
     @Override
     public synchronized boolean cancel(final boolean mayInterruptIfRunning) {
         if (super.cancel(mayInterruptIfRunning)) {
+            LOG.info("Yea canceled");
             Preconditions.checkNotNull(pending);
             this.pending.cancel(mayInterruptIfRunning);
             return true;
         }
-
+        LOG.info("Not canceled");
         return false;
     }
 
@@ -109,6 +111,8 @@ final class ReconnectPromise<S extends ProtocolSession<?>, L extends SessionList
             if (promise.isInitialConnectFinished() == false) {
                 LOG.debug("Connection to {} was dropped during negotiation, reattempting", promise.address);
             }
+
+//            promise.dispatcher.close();
 
             LOG.debug("Reconnecting after connection to {} was dropped", promise.address);
             promise.connect();
