@@ -32,7 +32,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>mdsal-artifacts</artifactId>
-        <version>${mdsal.version}</version>
+        <version>${controller.mdsal.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -43,7 +43,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>mdsal-it-base</artifactId>
-      <version>${mdsal.version}</version>
+      <version>${controller.mdsal.version}</version>
     </dependency>
 
     <!-- Dependencies for pax exam karaf container -->
