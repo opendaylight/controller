@@ -22,7 +22,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <bundle>mvn:${groupId}/${artifactId}-api/{{VERSION}}</bundle>
   </feature>
   <feature name='odl-${artifactId}' version='${symbol_dollar}{project.version}' description='OpenDaylight :: ${artifactId}'>
-    <feature version='${symbol_dollar}{mdsal.version}'>odl-mdsal-broker</feature>
+    <feature version='${symbol_dollar}{controller.mdsal.version}'>odl-mdsal-broker</feature>
     <feature version='${symbol_dollar}{project.version}'>odl-${artifactId}-api</feature>
     <bundle>mvn:${groupId}/${artifactId}-impl/{{VERSION}}</bundle>
   </feature>

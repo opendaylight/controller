@@ -20,7 +20,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <version>1.7.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <properties>
-    <mdsal.version>1.7.0-SNAPSHOT</mdsal.version>
+    <controller.mdsal.version>1.7.0-SNAPSHOT</controller.mdsal.version>
     <karaf.distro.groupId>org.opendaylight.odlparent</karaf.distro.groupId>
     <karaf.distro.artifactId>opendaylight-karaf-empty</karaf.distro.artifactId>
     <karaf.distro.version>2.0.4</karaf.distro.version>
@@ -32,7 +32,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>mdsal-artifacts</artifactId>
-        <version>${mdsal.version}</version>
+        <version>${controller.mdsal.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -43,7 +43,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>mdsal-it-base</artifactId>
-      <version>${mdsal.version}</version>
+      <version>${controller.mdsal.version}</version>
     </dependency>
 
     <!-- Dependencies for pax exam karaf container -->

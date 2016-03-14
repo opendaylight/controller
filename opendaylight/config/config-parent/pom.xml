@@ -23,7 +23,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
 
   <properties>
     <config.version>0.8.0-SNAPSHOT</config.version>
-    <mdsal.version>1.7.0-SNAPSHOT</mdsal.version>
+    <controller.mdsal.version>1.7.0-SNAPSHOT</controller.mdsal.version>
     <yangtools.version>2.0.0-SNAPSHOT</yangtools.version>
     <jmxGeneratorPath>${project.build.directory}/generated-sources/config-binding</jmxGeneratorPath>
     <config.file>src/main/config/default-config.xml</config.file>
@@ -42,7 +42,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>mdsal-artifacts</artifactId>
-        <version>${mdsal.version}</version>
+        <version>${controller.mdsal.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
