@@ -82,12 +82,12 @@
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>sal-binding-config</artifactId>
-            <version>${mdsal.version}</version>
+            <version>${controller.mdsal.version}</version>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>sal-binding-api</artifactId>
-            <version>${mdsal.version}</version>
+            <version>${controller.mdsal.version}</version>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
@@ -96,7 +96,7 @@
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>sal-common-util</artifactId>
-            <version>${mdsal.version}</version>
+            <version>${controller.mdsal.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.tycho</groupId>
