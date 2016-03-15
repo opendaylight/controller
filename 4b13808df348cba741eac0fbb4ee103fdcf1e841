@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_92668628",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 344,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-03-15T13:41:49Z",
+      "side": 1,
+      "message": "It does get prepared again in the exception clause below. It seems that what you and Tony are saying is essentially what I\u0027ve coded here (unless I\u0027m missing something). If that\u0027s the case but you\u0027re objecting to relying on an ex path, I agree that\u0027s not ideal but it\u0027s an uncommon path and trying to do it as you and Tony suggest would likely be more complicated. Handling this case will be ugly no matter how it\u0027s done.",
+      "parentUuid": "9a3d3df0_32a7baa8",
+      "range": {
+        "startLine": 343,
+        "startChar": 31,
+        "endLine": 344,
+        "endChar": 67
+      },
+      "revId": "4b13808df348cba741eac0fbb4ee103fdcf1e841",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_d2aace83",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
         "patchSetId": 1
