@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "9a3d3df0_32a7baa8",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 344,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-03-15T12:29:38Z",
+      "side": 1,
+      "message": "This means that the second transaction must be prepared again, not replicated and applied to the state -- e.g. applyForeignCandidate() needs to invalidate the DataTreeCandidate and the codepath leading to finishCommit() in that case must realize this has happened and react accordingly.",
+      "range": {
+        "startLine": 343,
+        "startChar": 31,
+        "endLine": 344,
+        "endChar": 67
+      },
+      "revId": "4b13808df348cba741eac0fbb4ee103fdcf1e841",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_d2aace83",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
         "patchSetId": 1
