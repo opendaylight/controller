@@ -9,6 +9,7 @@
 package org.opendaylight.controller.cluster.raft.behaviors;
 
 import akka.actor.ActorRef;
+import akka.japi.Procedure;
 import com.google.common.annotations.VisibleForTesting;
 import java.util.ArrayList;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
@@ -37,12 +38,18 @@ import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
  * </ul>
  */
 public class Follower extends AbstractRaftActorBehavior {
-
-    private SnapshotTracker snapshotTracker = null;
+    private static final int SYNC_THRESHOLD = 10;
 
     private final SyncStatusTracker initialSyncStatusTracker;
 
-    private static final int SYNC_THRESHOLD = 10;
+    private final Procedure<ReplicatedLogEntry> appendAndPersistCallback = new Procedure<ReplicatedLogEntry>() {
+        @Override
+        public void apply(ReplicatedLogEntry logEntry) {
+            context.getReplicatedLog().captureSnapshotIfReady(logEntry);
+        }
+    };
+
+    private SnapshotTracker snapshotTracker = null;
 
     public Follower(RaftActorContext context) {
         this(context, null);
@@ -194,7 +201,7 @@ public class Follower extends AbstractRaftActorBehavior {
 
                 LOG.debug("{}: Append entry to log {}", logName(), entry.getData());
 
-                context.getReplicatedLog().appendAndPersist(entry);
+                context.getReplicatedLog().appendAndPersist(entry, appendAndPersistCallback);
 
                 if(entry.getData() instanceof ServerConfigurationPayload) {
                     context.updatePeerIds((ServerConfigurationPayload)entry.getData());
