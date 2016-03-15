@@ -9,7 +9,6 @@
 package org.opendaylight.controller.cluster.raft;
 
 import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
-import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 
 public interface SnapshotState {
     /**
@@ -52,14 +51,14 @@ public interface SnapshotState {
      * @param currentBehavior
      * @param totalMemory
      */
-    void persist(byte[] snapshotBytes, RaftActorBehavior currentBehavior, long totalMemory);
+    void persist(byte[] snapshotBytes, long totalMemory);
 
     /**
      * Commit the snapshot by trimming the log
      *
      * @param sequenceNumber
      */
-    void commit(long sequenceNumber, RaftActorBehavior currentBehavior);
+    void commit(long sequenceNumber);
 
     /**
      * Rollback the snapshot
@@ -72,5 +71,5 @@ public interface SnapshotState {
      * @param desiredTrimIndex
      * @return the actual trim index
      */
-    long trimLog(long desiredTrimIndex, RaftActorBehavior currentBehavior);
+    long trimLog(long desiredTrimIndex);
 }

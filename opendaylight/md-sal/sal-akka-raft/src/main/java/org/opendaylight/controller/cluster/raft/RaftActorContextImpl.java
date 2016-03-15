@@ -14,6 +14,7 @@ import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Supplier;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -24,6 +25,7 @@ import java.util.Map;
 import java.util.Set;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.ServerConfigurationPayload.ServerInfo;
+import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
 import org.slf4j.Logger;
 
@@ -63,6 +65,8 @@ public class RaftActorContextImpl implements RaftActorContext {
     private short payloadVersion;
 
     private boolean votingMember = true;
+
+    private RaftActorBehavior currentBehavior;
 
     public RaftActorContextImpl(ActorRef actor, ActorContext context, String id,
             ElectionTerm termInformation, long commitIndex, long lastApplied, Map<String, String> peerAddresses,
@@ -322,5 +326,24 @@ public class RaftActorContextImpl implements RaftActorContext {
     @Override
     public boolean isVotingMember() {
         return votingMember;
+    }
+
+    @Override
+    public RaftActorBehavior getCurrentBehavior() {
+        return currentBehavior;
+    }
+
+    void setCurrentBehavior(final RaftActorBehavior behavior) {
+        this.currentBehavior = Preconditions.checkNotNull(behavior);
+    }
+
+    void close() {
+        if (currentBehavior != null) {
+            try {
+                currentBehavior.close();
+            } catch (Exception e) {
+                LOG.debug("{}: Error closing behavior {}", getId(), currentBehavior.state());
+            }
+        }
     }
 }
