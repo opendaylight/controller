@@ -183,6 +183,7 @@ public class DelayedMessagesElectionScenarioTest extends AbstractLeaderElectionS
         member2Context.setConfigParams(member2ConfigParams);
 
         member2Actor.behavior = new Follower(member2Context);
+        member2Context.setCurrentBehavior(member2Actor.behavior);
 
         // Create member 3's behavior initially as Follower
 
@@ -195,6 +196,7 @@ public class DelayedMessagesElectionScenarioTest extends AbstractLeaderElectionS
         member3Context.setConfigParams(member3ConfigParams);
 
         member3Actor.behavior = new Follower(member3Context);
+        member3Context.setCurrentBehavior(member3Actor.behavior);
 
         // Create member 1's behavior initially as Leader
 

@@ -112,6 +112,7 @@ public class LeaderTest extends AbstractLeaderTest {
         actorContext.getTermInformation().update(term, "");
 
         leader = new Leader(actorContext);
+        actorContext.setCurrentBehavior(leader);
 
         // Leader should send an immediate heartbeat with no entries as follower is inactive.
         long lastIndex = actorContext.getReplicatedLog().lastIndex();
@@ -145,11 +146,11 @@ public class LeaderTest extends AbstractLeaderTest {
     }
 
 
-    private RaftActorBehavior sendReplicate(MockRaftActorContext actorContext, long index){
+    private RaftActorBehavior sendReplicate(final MockRaftActorContext actorContext, final long index){
         return sendReplicate(actorContext, 1, index);
     }
 
-    private RaftActorBehavior sendReplicate(MockRaftActorContext actorContext, long term, long index){
+    private RaftActorBehavior sendReplicate(final MockRaftActorContext actorContext, final long term, final long index){
         MockRaftActorContext.MockPayload payload = new MockRaftActorContext.MockPayload("foo");
         MockRaftActorContext.MockReplicatedLogEntry newEntry = new MockRaftActorContext.MockReplicatedLogEntry(
                 term, index, payload);
@@ -208,6 +209,7 @@ public class LeaderTest extends AbstractLeaderTest {
         actorContext.getTermInformation().update(newTerm, "");
 
         leader = new Leader(actorContext);
+        actorContext.setCurrentBehavior(leader);
 
         // Leader will send an immediate heartbeat - ignore it.
         MessageCollectorActor.expectFirstMatching(followerActor, AppendEntries.class);
@@ -894,6 +896,7 @@ public class LeaderTest extends AbstractLeaderTest {
         actorContext.setCommitIndex(commitIndex);
 
         leader = new Leader(actorContext);
+        actorContext.setCurrentBehavior(leader);
 
         leader.getFollower(FOLLOWER_ID).setMatchIndex(-1);
         leader.getFollower(FOLLOWER_ID).setNextIndex(0);
@@ -962,6 +965,7 @@ public class LeaderTest extends AbstractLeaderTest {
         actorContext.setCommitIndex(commitIndex);
 
         leader = new Leader(actorContext);
+        actorContext.setCurrentBehavior(leader);
 
         leader.getFollower(FOLLOWER_ID).setMatchIndex(-1);
         leader.getFollower(FOLLOWER_ID).setNextIndex(0);
@@ -1190,8 +1194,8 @@ public class LeaderTest extends AbstractLeaderTest {
         assertEquals("totalChunks not matching", chunkIndex, fts.getTotalChunks());
     }
 
-    @Override protected RaftActorBehavior createBehavior(
-        RaftActorContext actorContext) {
+    @Override
+    protected RaftActorBehavior createBehavior(final RaftActorContext actorContext) {
         return new Leader(actorContext);
     }
 
@@ -1201,7 +1205,7 @@ public class LeaderTest extends AbstractLeaderTest {
     }
 
     @Override
-    protected MockRaftActorContext createActorContext(ActorRef actorRef) {
+    protected MockRaftActorContext createActorContext(final ActorRef actorRef) {
         return createActorContext(LEADER_ID, actorRef);
     }
 
@@ -1212,7 +1216,7 @@ public class LeaderTest extends AbstractLeaderTest {
         return actorContext;
     }
 
-    private MockRaftActorContext createActorContext(String id, ActorRef actorRef) {
+    private MockRaftActorContext createActorContext(final String id, final ActorRef actorRef) {
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
         configParams.setHeartBeatInterval(new FiniteDuration(50, TimeUnit.MILLISECONDS));
         configParams.setElectionTimeoutFactor(100000);
@@ -1241,6 +1245,7 @@ public class LeaderTest extends AbstractLeaderTest {
 
         Follower follower = new Follower(followerActorContext);
         followerActor.underlyingActor().setBehavior(follower);
+        followerActorContext.setCurrentBehavior(follower);
 
         Map<String, String> peerAddresses = new HashMap<>();
         peerAddresses.put(FOLLOWER_ID, followerActor.path().toString());
@@ -1264,6 +1269,7 @@ public class LeaderTest extends AbstractLeaderTest {
         followerActorContext.setCommitIndex(1);
 
         leader = new Leader(leaderActorContext);
+        leaderActorContext.setCurrentBehavior(leader);
 
         AppendEntries appendEntries = MessageCollectorActor.expectFirstMatching(followerActor, AppendEntries.class);
 
@@ -1295,6 +1301,7 @@ public class LeaderTest extends AbstractLeaderTest {
 
         Follower follower = new Follower(followerActorContext);
         followerActor.underlyingActor().setBehavior(follower);
+        followerActorContext.setCurrentBehavior(follower);
 
         Map<String, String> leaderPeerAddresses = new HashMap<>();
         leaderPeerAddresses.put(FOLLOWER_ID, followerActor.path().toString());
@@ -1462,6 +1469,7 @@ public class LeaderTest extends AbstractLeaderTest {
 
         Follower follower = new Follower(followerActorContext);
         followerActor.underlyingActor().setBehavior(follower);
+        followerActorContext.setCurrentBehavior(follower);
 
         leader = new Leader(leaderActorContext);
 
@@ -1477,6 +1485,7 @@ public class LeaderTest extends AbstractLeaderTest {
         assertEquals("getPrevLogIndex", 0, appendEntries.getPrevLogIndex());
 
         leaderActor.underlyingActor().setBehavior(leader);
+        leaderActorContext.setCurrentBehavior(leader);
 
         leader.handleMessage(followerActor, appendEntriesReply);
 
@@ -1541,6 +1550,7 @@ public class LeaderTest extends AbstractLeaderTest {
 
         Follower follower = new Follower(followerActorContext);
         followerActor.underlyingActor().setBehavior(follower);
+        followerActorContext.setCurrentBehavior(follower);
 
         leader = new Leader(leaderActorContext);
 
@@ -1556,6 +1566,7 @@ public class LeaderTest extends AbstractLeaderTest {
         assertEquals("getPrevLogIndex", 0, appendEntries.getPrevLogIndex());
 
         leaderActor.underlyingActor().setBehavior(leader);
+        leaderActorContext.setCurrentBehavior(leader);
 
         leader.handleMessage(followerActor, appendEntriesReply);
 
@@ -1738,6 +1749,7 @@ public class LeaderTest extends AbstractLeaderTest {
 
         Follower follower = new Follower(followerActorContext);
         followerActor.underlyingActor().setBehavior(follower);
+        followerActorContext.setCurrentBehavior(follower);
 
         leader = new Leader(leaderActorContext);
 
@@ -1753,6 +1765,7 @@ public class LeaderTest extends AbstractLeaderTest {
         assertEquals("getPrevLogIndex", 2, appendEntries.getPrevLogIndex());
 
         leaderActor.underlyingActor().setBehavior(leader);
+        leaderActorContext.setCurrentBehavior(leader);
 
         leader.handleMessage(followerActor, appendEntriesReply);
 
@@ -1822,7 +1835,7 @@ public class LeaderTest extends AbstractLeaderTest {
         Assert.assertTrue(behavior instanceof Leader);
     }
 
-    private RaftActorBehavior setupIsolatedLeaderCheckTestWithTwoFollowers(RaftPolicy raftPolicy){
+    private RaftActorBehavior setupIsolatedLeaderCheckTestWithTwoFollowers(final RaftPolicy raftPolicy){
         ActorRef followerActor1 = getSystem().actorOf(MessageCollectorActor.props(), "follower-1");
         ActorRef followerActor2 = getSystem().actorOf(MessageCollectorActor.props(), "follower-2");
 
@@ -1964,6 +1977,7 @@ public class LeaderTest extends AbstractLeaderTest {
         leaderActorContext.addToPeers(nonVotingFollowerId, nonVotingFollowerActor.path().toString(), VotingState.NON_VOTING);
 
         leader = new Leader(leaderActorContext);
+        leaderActorContext.setCurrentBehavior(leader);
 
         // Ignore initial heartbeats
         MessageCollectorActor.expectFirstMatching(followerActor, AppendEntries.class);
@@ -2020,6 +2034,7 @@ public class LeaderTest extends AbstractLeaderTest {
         leaderActorContext.setReplicatedLog(new MockRaftActorContext.MockReplicatedLogBuilder().build());
 
         leader = new Leader(leaderActorContext);
+        leaderActorContext.setCurrentBehavior(leader);
 
         // Initial heartbeat
         MessageCollectorActor.expectFirstMatching(followerActor, AppendEntries.class);
@@ -2059,6 +2074,7 @@ public class LeaderTest extends AbstractLeaderTest {
         leaderActorContext.setReplicatedLog(new MockRaftActorContext.MockReplicatedLogBuilder().build());
 
         leader = new Leader(leaderActorContext);
+        leaderActorContext.setCurrentBehavior(leader);
 
         // Initial heartbeat
         MessageCollectorActor.expectFirstMatching(followerActor, AppendEntries.class);
@@ -2090,6 +2106,7 @@ public class LeaderTest extends AbstractLeaderTest {
                 new FiniteDuration(200, TimeUnit.MILLISECONDS));
 
         leader = new Leader(leaderActorContext);
+        leaderActorContext.setCurrentBehavior(leader);
 
         // Initial heartbeat
         MessageCollectorActor.expectFirstMatching(followerActor, AppendEntries.class);
@@ -2128,6 +2145,7 @@ public class LeaderTest extends AbstractLeaderTest {
         leaderActorContext.setReplicatedLog(new MockRaftActorContext.MockReplicatedLogBuilder().build());
 
         leader = new Leader(leaderActorContext);
+        leaderActorContext.setCurrentBehavior(leader);
 
         // Initial heartbeat
         MessageCollectorActor.expectFirstMatching(followerActor, AppendEntries.class);
@@ -2157,8 +2175,8 @@ public class LeaderTest extends AbstractLeaderTest {
     }
 
     @Override
-    protected void assertStateChangesToFollowerWhenRaftRPCHasNewerTerm(RaftActorContext actorContext,
-            ActorRef actorRef, RaftRPC rpc) throws Exception {
+    protected void assertStateChangesToFollowerWhenRaftRPCHasNewerTerm(final MockRaftActorContext actorContext,
+            final ActorRef actorRef, final RaftRPC rpc) throws Exception {
         super.assertStateChangesToFollowerWhenRaftRPCHasNewerTerm(actorContext, actorRef, rpc);
         assertEquals("New votedFor", null, actorContext.getTermInformation().getVotedFor());
     }
@@ -2168,7 +2186,7 @@ public class LeaderTest extends AbstractLeaderTest {
         private final long electionTimeOutIntervalMillis;
         private final int snapshotChunkSize;
 
-        public MockConfigParamsImpl(long electionTimeOutIntervalMillis, int snapshotChunkSize) {
+        public MockConfigParamsImpl(final long electionTimeOutIntervalMillis, final int snapshotChunkSize) {
             super();
             this.electionTimeOutIntervalMillis = electionTimeOutIntervalMillis;
             this.snapshotChunkSize = snapshotChunkSize;

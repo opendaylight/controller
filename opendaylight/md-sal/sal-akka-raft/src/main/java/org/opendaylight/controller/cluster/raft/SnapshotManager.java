@@ -42,7 +42,7 @@ public class SnapshotManager implements SnapshotState {
     private ApplySnapshot applySnapshot;
     private Procedure<byte[]> applySnapshotProcedure;
 
-    public SnapshotManager(RaftActorContext context, Logger logger) {
+    public SnapshotManager(final RaftActorContext context, final Logger logger) {
         this.context = context;
         this.LOG = logger;
     }
@@ -57,28 +57,28 @@ public class SnapshotManager implements SnapshotState {
     }
 
     @Override
-    public boolean captureToInstall(ReplicatedLogEntry lastLogEntry, long replicatedToAllIndex, String targetFollower) {
+    public boolean captureToInstall(final ReplicatedLogEntry lastLogEntry, final long replicatedToAllIndex, final String targetFollower) {
         return currentState.captureToInstall(lastLogEntry, replicatedToAllIndex, targetFollower);
     }
 
     @Override
-    public boolean capture(ReplicatedLogEntry lastLogEntry, long replicatedToAllIndex) {
+    public boolean capture(final ReplicatedLogEntry lastLogEntry, final long replicatedToAllIndex) {
         return currentState.capture(lastLogEntry, replicatedToAllIndex);
     }
 
     @Override
-    public void apply(ApplySnapshot snapshot) {
+    public void apply(final ApplySnapshot snapshot) {
         currentState.apply(snapshot);
     }
 
     @Override
-    public void persist(byte[] snapshotBytes, RaftActorBehavior currentBehavior, long totalMemory) {
-        currentState.persist(snapshotBytes, currentBehavior, totalMemory);
+    public void persist(final byte[] snapshotBytes, final long totalMemory) {
+        currentState.persist(snapshotBytes, totalMemory);
     }
 
     @Override
-    public void commit(long sequenceNumber, RaftActorBehavior currentBehavior) {
-        currentState.commit(sequenceNumber, currentBehavior);
+    public void commit(final long sequenceNumber) {
+        currentState.commit(sequenceNumber);
     }
 
     @Override
@@ -87,15 +87,15 @@ public class SnapshotManager implements SnapshotState {
     }
 
     @Override
-    public long trimLog(long desiredTrimIndex, RaftActorBehavior currentBehavior) {
-        return currentState.trimLog(desiredTrimIndex, currentBehavior);
+    public long trimLog(final long desiredTrimIndex) {
+        return currentState.trimLog(desiredTrimIndex);
     }
 
-    public void setCreateSnapshotCallable(Procedure<Void> createSnapshotProcedure) {
+    public void setCreateSnapshotCallable(final Procedure<Void> createSnapshotProcedure) {
         this.createSnapshotProcedure = createSnapshotProcedure;
     }
 
-    public void setApplySnapshotProcedure(Procedure<byte[]> applySnapshotProcedure) {
+    public void setApplySnapshotProcedure(final Procedure<byte[]> applySnapshotProcedure) {
         this.applySnapshotProcedure = applySnapshotProcedure;
     }
 
@@ -116,8 +116,8 @@ public class SnapshotManager implements SnapshotState {
         return context.getId();
     }
 
-    public CaptureSnapshot newCaptureSnapshot(ReplicatedLogEntry lastLogEntry, long replicatedToAllIndex,
-            boolean installSnapshotInitiated) {
+    public CaptureSnapshot newCaptureSnapshot(final ReplicatedLogEntry lastLogEntry, final long replicatedToAllIndex,
+            final boolean installSnapshotInitiated) {
         TermInformationReader lastAppliedTermInfoReader =
                 lastAppliedTermInformationReader.init(context.getReplicatedLog(), context.getLastApplied(),
                         lastLogEntry, hasFollowers());
@@ -155,29 +155,29 @@ public class SnapshotManager implements SnapshotState {
         }
 
         @Override
-        public boolean capture(ReplicatedLogEntry lastLogEntry, long replicatedToAllIndex) {
+        public boolean capture(final ReplicatedLogEntry lastLogEntry, final long replicatedToAllIndex) {
             LOG.debug("capture should not be called in state {}", this);
             return false;
         }
 
         @Override
-        public boolean captureToInstall(ReplicatedLogEntry lastLogEntry, long replicatedToAllIndex, String targetFollower) {
+        public boolean captureToInstall(final ReplicatedLogEntry lastLogEntry, final long replicatedToAllIndex, final String targetFollower) {
             LOG.debug("captureToInstall should not be called in state {}", this);
             return false;
         }
 
         @Override
-        public void apply(ApplySnapshot snapshot) {
+        public void apply(final ApplySnapshot snapshot) {
             LOG.debug("apply should not be called in state {}", this);
         }
 
         @Override
-        public void persist(byte[] snapshotBytes, RaftActorBehavior currentBehavior, long totalMemory) {
+        public void persist(final byte[] snapshotBytes, final long totalMemory) {
             LOG.debug("persist should not be called in state {}", this);
         }
 
         @Override
-        public void commit(long sequenceNumber, RaftActorBehavior currentBehavior) {
+        public void commit(final long sequenceNumber) {
             LOG.debug("commit should not be called in state {}", this);
         }
 
@@ -187,12 +187,12 @@ public class SnapshotManager implements SnapshotState {
         }
 
         @Override
-        public long trimLog(long desiredTrimIndex, RaftActorBehavior currentBehavior) {
+        public long trimLog(final long desiredTrimIndex) {
             LOG.debug("trimLog should not be called in state {}", this);
             return -1;
         }
 
-        protected long doTrimLog(long desiredTrimIndex, RaftActorBehavior currentBehavior){
+        protected long doTrimLog(final long desiredTrimIndex){
             //  we would want to keep the lastApplied as its used while capturing snapshots
             long lastApplied = context.getLastApplied();
             long tempMin = Math.min(desiredTrimIndex, (lastApplied > -1 ? lastApplied - 1 : -1));
@@ -211,7 +211,10 @@ public class SnapshotManager implements SnapshotState {
                 context.getReplicatedLog().snapshotPreCommit(tempMin, entry.getTerm());
                 context.getReplicatedLog().snapshotCommit();
                 return tempMin;
-            } else if(tempMin > currentBehavior.getReplicatedToAllIndex()) {
+            }
+
+            final RaftActorBehavior currentBehavior = context.getCurrentBehavior();
+            if(tempMin > currentBehavior.getReplicatedToAllIndex()) {
                 // It's possible a follower was lagging and an install snapshot advanced its match index past
                 // the current replicatedToAllIndex. Since the follower is now caught up we should advance the
                 // replicatedToAllIndex (to tempMin). The fact that tempMin wasn't found in the log is likely
@@ -230,7 +233,7 @@ public class SnapshotManager implements SnapshotState {
             return false;
         }
 
-        private boolean capture(ReplicatedLogEntry lastLogEntry, long replicatedToAllIndex, String targetFollower) {
+        private boolean capture(final ReplicatedLogEntry lastLogEntry, final long replicatedToAllIndex, final String targetFollower) {
             captureSnapshot = newCaptureSnapshot(lastLogEntry, replicatedToAllIndex, targetFollower != null);
 
             if(captureSnapshot.isInstallSnapshotInitiated()) {
@@ -258,17 +261,17 @@ public class SnapshotManager implements SnapshotState {
         }
 
         @Override
-        public boolean capture(ReplicatedLogEntry lastLogEntry, long replicatedToAllIndex) {
+        public boolean capture(final ReplicatedLogEntry lastLogEntry, final long replicatedToAllIndex) {
             return capture(lastLogEntry, replicatedToAllIndex, null);
         }
 
         @Override
-        public boolean captureToInstall(ReplicatedLogEntry lastLogEntry, long replicatedToAllIndex, String targetFollower) {
+        public boolean captureToInstall(final ReplicatedLogEntry lastLogEntry, final long replicatedToAllIndex, final String targetFollower) {
             return capture(lastLogEntry, replicatedToAllIndex, targetFollower);
         }
 
         @Override
-        public void apply(ApplySnapshot applySnapshot) {
+        public void apply(final ApplySnapshot applySnapshot) {
             SnapshotManager.this.applySnapshot = applySnapshot;
 
             lastSequenceNumber = context.getPersistenceProvider().getLastSequenceNumber();
@@ -286,15 +289,15 @@ public class SnapshotManager implements SnapshotState {
         }
 
         @Override
-        public long trimLog(long desiredTrimIndex, RaftActorBehavior currentBehavior) {
-            return doTrimLog(desiredTrimIndex, currentBehavior);
+        public long trimLog(final long desiredTrimIndex) {
+            return doTrimLog(desiredTrimIndex);
         }
     }
 
     private class Creating extends AbstractSnapshotState {
 
         @Override
-        public void persist(byte[] snapshotBytes, RaftActorBehavior currentBehavior, long totalMemory) {
+        public void persist(final byte[] snapshotBytes, final long totalMemory) {
             // create a snapshot object from the state provided and save it
             // when snapshot is saved async, SaveSnapshotSuccess is raised.
 
@@ -316,6 +319,7 @@ public class SnapshotManager implements SnapshotState {
             boolean logSizeExceededSnapshotBatchCount =
                     context.getReplicatedLog().size() >= context.getConfigParams().getSnapshotBatchCount();
 
+            final RaftActorBehavior currentBehavior = context.getCurrentBehavior();
             if (dataSizeThresholdExceeded || logSizeExceededSnapshotBatchCount) {
                 if(LOG.isDebugEnabled()) {
                     if(dataSizeThresholdExceeded) {
@@ -381,7 +385,7 @@ public class SnapshotManager implements SnapshotState {
     private class Persisting extends AbstractSnapshotState {
 
         @Override
-        public void commit(long sequenceNumber, RaftActorBehavior currentBehavior) {
+        public void commit(final long sequenceNumber) {
             LOG.debug("{}: Snapshot success -  sequence number: {}", persistenceId(), sequenceNumber);
 
             if(applySnapshot != null) {
@@ -389,7 +393,7 @@ public class SnapshotManager implements SnapshotState {
                     Snapshot snapshot = applySnapshot.getSnapshot();
 
                     //clears the followers log, sets the snapshot index to ensure adjusted-index works
-                    context.setReplicatedLog(ReplicatedLogImpl.newInstance(snapshot, context, currentBehavior));
+                    context.setReplicatedLog(ReplicatedLogImpl.newInstance(snapshot, context));
                     context.setLastApplied(snapshot.getLastAppliedIndex());
                     context.setCommitIndex(snapshot.getLastAppliedIndex());
                     context.getTermInformation().update(snapshot.getElectionTerm(), snapshot.getElectionVotedFor());
@@ -456,8 +460,8 @@ public class SnapshotManager implements SnapshotState {
         private long index;
         private long term;
 
-        public LastAppliedTermInformationReader init(ReplicatedLog log, long originalIndex,
-                                         ReplicatedLogEntry lastLogEntry, boolean hasFollowers){
+        public LastAppliedTermInformationReader init(final ReplicatedLog log, final long originalIndex,
+                                         final ReplicatedLogEntry lastLogEntry, final boolean hasFollowers){
             ReplicatedLogEntry entry = log.get(originalIndex);
             this.index = -1L;
             this.term = -1L;
@@ -493,7 +497,7 @@ public class SnapshotManager implements SnapshotState {
         private long index;
         private long term;
 
-        ReplicatedToAllTermInformationReader init(ReplicatedLog log, long originalIndex){
+        ReplicatedToAllTermInformationReader init(final ReplicatedLog log, final long originalIndex){
             ReplicatedLogEntry entry = log.get(originalIndex);
             this.index = -1L;
             this.term = -1L;

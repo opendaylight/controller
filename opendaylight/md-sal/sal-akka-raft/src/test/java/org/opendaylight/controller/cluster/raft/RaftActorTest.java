@@ -504,7 +504,7 @@ public class RaftActorTest extends AbstractActorTest {
             final short newLeaderVersion = 6;
             Follower follower = new Follower(raftActor.getRaftActorContext()) {
                 @Override
-                public RaftActorBehavior handleMessage(ActorRef sender, Object message) {
+                public RaftActorBehavior handleMessage(final ActorRef sender, final Object message) {
                     leaderId = newLeaderId;
                     setLeaderPayloadVersion(newLeaderVersion);
                     return this;
@@ -657,12 +657,12 @@ public class RaftActorTest extends AbstractActorTest {
                         new MockRaftActorContext.MockPayload("foo-4")));
 
                 leaderActor.getRaftActorContext().getSnapshotManager().persist(snapshotBytes.toByteArray(),
-                        leader, Runtime.getRuntime().totalMemory());
+                        Runtime.getRuntime().totalMemory());
 
                 assertTrue(leaderActor.getRaftActorContext().getSnapshotManager().isCapturing());
 
                 // The commit is needed to complete the snapshot creation process
-                leaderActor.getRaftActorContext().getSnapshotManager().commit(-1, leader);
+                leaderActor.getRaftActorContext().getSnapshotManager().commit(-1);
 
                 // capture snapshot reply should remove the snapshotted entries only
                 assertEquals(3, leaderActor.getReplicatedLog().size());
@@ -765,7 +765,7 @@ public class RaftActorTest extends AbstractActorTest {
                 assertTrue(followerActor.getRaftActorContext().getSnapshotManager().isCapturing());
 
                 // The commit is needed to complete the snapshot creation process
-                followerActor.getRaftActorContext().getSnapshotManager().commit(-1, follower);
+                followerActor.getRaftActorContext().getSnapshotManager().commit(-1);
 
                 // capture snapshot reply should remove the snapshotted entries only till replicatedToAllIndex
                 assertEquals(3, followerActor.getReplicatedLog().size()); //indexes 5,6,7 left in the log
@@ -1037,7 +1037,7 @@ public class RaftActorTest extends AbstractActorTest {
         assertEquals(RaftState.Leader, leaderActor.getCurrentBehavior().state());
     }
 
-    public static ByteString fromObject(Object snapshot) throws Exception {
+    public static ByteString fromObject(final Object snapshot) throws Exception {
         ByteArrayOutputStream b = null;
         ObjectOutputStream o = null;
         try {

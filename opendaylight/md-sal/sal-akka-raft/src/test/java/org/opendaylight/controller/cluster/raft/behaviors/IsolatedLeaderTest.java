@@ -43,7 +43,7 @@ public class IsolatedLeaderTest  extends AbstractLeaderTest {
     }
 
     @Override
-    protected RaftActorBehavior createBehavior(RaftActorContext actorContext) {
+    protected RaftActorBehavior createBehavior(final RaftActorContext actorContext) {
         return new IsolatedLeader(actorContext);
     }
 
@@ -53,7 +53,7 @@ public class IsolatedLeaderTest  extends AbstractLeaderTest {
     }
 
     @Override
-    protected MockRaftActorContext createActorContext(ActorRef actor) {
+    protected MockRaftActorContext createActorContext(final ActorRef actor) {
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
         configParams.setElectionTimeoutFactor(100000);
         MockRaftActorContext context = new MockRaftActorContext("isolated-leader", getSystem(), actor);
@@ -73,6 +73,7 @@ public class IsolatedLeaderTest  extends AbstractLeaderTest {
         leaderActorContext.setPeerAddresses(peerAddresses);
 
         isolatedLeader = new IsolatedLeader(leaderActorContext);
+        leaderActorContext.setCurrentBehavior(isolatedLeader);
         assertEquals("Raft state", RaftState.IsolatedLeader, isolatedLeader.state());
 
         // in a 3 node cluster, even if 1 follower is returns a reply, the isolatedLeader is not isolated
@@ -108,6 +109,7 @@ public class IsolatedLeaderTest  extends AbstractLeaderTest {
         leaderActorContext.setPeerAddresses(peerAddresses);
 
         isolatedLeader = new IsolatedLeader(leaderActorContext);
+        leaderActorContext.setCurrentBehavior(isolatedLeader);
         assertEquals("Raft state", RaftState.IsolatedLeader, isolatedLeader.state());
 
         // in a 5 member cluster, atleast 2 followers need to be active and return a reply

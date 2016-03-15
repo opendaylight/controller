@@ -25,7 +25,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.opendaylight.controller.cluster.raft.DefaultConfigParamsImpl;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
-import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.TestActorFactory;
 import org.opendaylight.controller.cluster.raft.base.messages.SendHeartBeat;
@@ -55,7 +54,7 @@ public class AbstractLeaderElectionScenarioTest {
         }
 
         @Override
-        public void onReceive(Object message) throws Exception {
+        public void onReceive(final Object message) throws Exception {
             // Ignore scheduled SendHeartBeat messages.
             if(message instanceof SendHeartBeat) {
                 return;
@@ -88,22 +87,22 @@ public class AbstractLeaderElectionScenarioTest {
                     Uninterruptibles.awaitUninterruptibly(behaviorStateChangeLatch, 5, TimeUnit.SECONDS));
         }
 
-        void expectMessageClass(Class<?> expClass, int expCount) {
+        void expectMessageClass(final Class<?> expClass, final int expCount) {
             messagesReceivedLatches.put(expClass, new CountDownLatch(expCount));
         }
 
-        void waitForExpectedMessages(Class<?> expClass) {
+        void waitForExpectedMessages(final Class<?> expClass) {
             CountDownLatch latch = messagesReceivedLatches.get(expClass);
             assertNotNull("No messages received for " + expClass, latch);
             assertTrue("Missing messages of type " + expClass,
                     Uninterruptibles.awaitUninterruptibly(latch, 5, TimeUnit.SECONDS));
         }
 
-        void dropMessagesToBehavior(Class<?> msgClass) {
+        void dropMessagesToBehavior(final Class<?> msgClass) {
             dropMessagesToBehavior(msgClass, 1);
         }
 
-        void dropMessagesToBehavior(Class<?> msgClass, int expCount) {
+        void dropMessagesToBehavior(final Class<?> msgClass, final int expCount) {
             expectMessageClass(msgClass, expCount);
             dropMessagesToBehavior.put(msgClass, Boolean.TRUE);
         }
@@ -120,19 +119,19 @@ public class AbstractLeaderElectionScenarioTest {
             super.clear();
         }
 
-        void forwardCapturedMessageToBehavior(Class<?> msgClass, ActorRef sender) throws Exception {
+        void forwardCapturedMessageToBehavior(final Class<?> msgClass, final ActorRef sender) throws Exception {
             Object message = getFirstMatching(getSelf(), msgClass);
             assertNotNull("Message of type " + msgClass + " not received", message);
             getSelf().tell(message, sender);
         }
 
-        void forwardCapturedMessagesToBehavior(Class<?> msgClass, ActorRef sender) throws Exception {
+        void forwardCapturedMessagesToBehavior(final Class<?> msgClass, final ActorRef sender) throws Exception {
             for(Object m: getAllMatching(getSelf(), msgClass)) {
                 getSelf().tell(m, sender);
             }
         }
 
-        <T> T getCapturedMessage(Class<T> msgClass) throws Exception {
+        <T> T getCapturedMessage(final Class<T> msgClass) throws Exception {
             T message = getFirstMatching(getSelf(), msgClass);
             assertNotNull("Message of type " + msgClass + " not received", message);
             return message;
@@ -187,25 +186,26 @@ public class AbstractLeaderElectionScenarioTest {
         return configParams;
     }
 
-    MockRaftActorContext newRaftActorContext(String id, ActorRef actor,
-            Map<String, String> peerAddresses) {
+    MockRaftActorContext newRaftActorContext(final String id, final ActorRef actor,
+            final Map<String, String> peerAddresses) {
         MockRaftActorContext context = new MockRaftActorContext(id, system, actor);
         context.setPeerAddresses(peerAddresses);
         context.getTermInformation().updateAndPersist(1, "");
         return context;
     }
 
-    void verifyBehaviorState(String name, MemberActor actor, RaftState expState) {
+    void verifyBehaviorState(final String name, final MemberActor actor, final RaftState expState) {
         assertEquals(name + " behavior state", expState, actor.behavior.state());
     }
 
-    void initializeLeaderBehavior(MemberActor actor, RaftActorContext context, int numActiveFollowers) throws Exception {
+    void initializeLeaderBehavior(final MemberActor actor, final MockRaftActorContext context, final int numActiveFollowers) throws Exception {
         // Leader sends immediate heartbeats - we don't care about it so ignore it.
 
         actor.expectMessageClass(AppendEntriesReply.class, numActiveFollowers);
 
-        @SuppressWarnings("resource")
         Leader leader = new Leader(context);
+        context.setCurrentBehavior(leader);
+
         actor.waitForExpectedMessages(AppendEntriesReply.class);
         // Delay assignment here so the AppendEntriesReply isn't forwarded to the behavior.
         actor.behavior = leader;
@@ -215,14 +215,14 @@ public class AbstractLeaderElectionScenarioTest {
 
     }
 
-    TestActorRef<MemberActor> newMemberActor(String name) throws Exception {
+    TestActorRef<MemberActor> newMemberActor(final String name) throws Exception {
         TestActorRef<MemberActor> actor = factory.createTestActor(MemberActor.props().
                 withDispatcher(Dispatchers.DefaultDispatcherId()), name);
         MessageCollectorActor.waitUntilReady(actor);
         return actor;
     }
 
-    void sendHeartbeat(TestActorRef<MemberActor> leaderActor) {
+    void sendHeartbeat(final TestActorRef<MemberActor> leaderActor) {
         Uninterruptibles.sleepUninterruptibly(HEARTBEAT_INTERVAL, TimeUnit.MILLISECONDS);
         leaderActor.underlyingActor().behavior.handleMessage(leaderActor, SendHeartBeat.INSTANCE);
     }

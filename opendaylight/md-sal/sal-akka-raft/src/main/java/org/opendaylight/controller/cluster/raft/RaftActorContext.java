@@ -17,6 +17,7 @@ import com.google.common.base.Supplier;
 import java.util.Collection;
 import javax.annotation.Nullable;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
+import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
 import org.slf4j.Logger;
 
@@ -241,4 +242,9 @@ public interface RaftActorContext {
      * @return true if this RaftActor is a voting member of the cluster, false otherwise.
      */
     boolean isVotingMember();
+
+    /**
+     * @return current behavior attached to the raft actor.
+     */
+    RaftActorBehavior getCurrentBehavior();
 }
