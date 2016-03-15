@@ -40,7 +40,7 @@ import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payloa
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 import org.slf4j.LoggerFactory;
 
-public abstract class AbstractRaftActorBehaviorTest extends AbstractActorTest {
+public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior> extends AbstractActorTest {
 
     protected final TestActorFactory actorFactory = new TestActorFactory(getSystem());
 
@@ -66,7 +66,7 @@ public abstract class AbstractRaftActorBehaviorTest extends AbstractActorTest {
      */
     @Test
     public void testHandleRaftRPCWithNewerTerm() throws Exception {
-        RaftActorContext actorContext = createActorContext();
+        MockRaftActorContext actorContext = createActorContext();
 
         assertStateChangesToFollowerWhenRaftRPCHasNewerTerm(actorContext, behaviorActor,
                 createAppendEntriesWithNewerTerm());
@@ -212,7 +212,7 @@ public abstract class AbstractRaftActorBehaviorTest extends AbstractActorTest {
      */
     @Test
     public void testHandleRequestVoteWhenSenderTermLessThanCurrentTerm() {
-        RaftActorContext context = createActorContext();
+        MockRaftActorContext context = createActorContext();
 
         context.getTermInformation().update(1000, null);
 
@@ -272,11 +272,11 @@ public abstract class AbstractRaftActorBehaviorTest extends AbstractActorTest {
     }
 
 
-    protected void assertStateChangesToFollowerWhenRaftRPCHasNewerTerm(RaftActorContext actorContext,
+    protected void assertStateChangesToFollowerWhenRaftRPCHasNewerTerm(MockRaftActorContext actorContext,
             ActorRef actorRef, RaftRPC rpc) throws Exception {
 
         Payload p = new MockRaftActorContext.MockPayload("");
-        setLastLogEntry((MockRaftActorContext) actorContext, 1, 0, p);
+        setLastLogEntry(actorContext, 1, 0, p);
         actorContext.getTermInformation().update(1, "test");
 
         RaftActorBehavior origBehavior = createBehavior(actorContext);
@@ -304,8 +304,13 @@ public abstract class AbstractRaftActorBehaviorTest extends AbstractActorTest {
         return log;
     }
 
-    protected abstract RaftActorBehavior createBehavior(
-        RaftActorContext actorContext);
+    protected abstract T createBehavior(RaftActorContext actorContext);
+
+    protected final T createBehavior(MockRaftActorContext actorContext) {
+        T ret = createBehavior((RaftActorContext)actorContext);
+        actorContext.setCurrentBehavior(ret);
+        return ret;
+    }
 
     protected RaftActorBehavior createBehavior() {
         return createBehavior(createActorContext());

@@ -25,7 +25,7 @@ import org.opendaylight.controller.cluster.raft.utils.ForwardMessageToBehaviorAc
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 import scala.concurrent.duration.FiniteDuration;
 
-public abstract class AbstractLeaderTest extends AbstractRaftActorBehaviorTest{
+public abstract class AbstractLeaderTest<T extends AbstractLeader> extends AbstractRaftActorBehaviorTest<T> {
 
     /**
      * When we removed scheduling of heartbeat in the AbstractLeader constructor we ended up with a situation where

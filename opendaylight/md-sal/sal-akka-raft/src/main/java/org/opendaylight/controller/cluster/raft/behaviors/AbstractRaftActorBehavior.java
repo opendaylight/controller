@@ -495,7 +495,7 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
      * @param snapshotCapturedIndex
      */
     protected void performSnapshotWithoutCapture(final long snapshotCapturedIndex) {
-        long actualIndex = context.getSnapshotManager().trimLog(snapshotCapturedIndex, this);
+        long actualIndex = context.getSnapshotManager().trimLog(snapshotCapturedIndex);
 
         if(actualIndex != -1){
             setReplicatedToAllIndex(actualIndex);

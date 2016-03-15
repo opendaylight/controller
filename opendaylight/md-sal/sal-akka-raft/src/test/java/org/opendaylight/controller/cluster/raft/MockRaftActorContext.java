@@ -17,6 +17,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import org.opendaylight.controller.cluster.NonPersistentDataProvider;
+import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.slf4j.Logger;
@@ -317,5 +318,10 @@ public class MockRaftActorContext extends RaftActorContextImpl {
         public ReplicatedLog build() {
             return this.mockLog;
         }
+    }
+
+    @Override
+    public void setCurrentBehavior(final RaftActorBehavior behavior) {
+        super.setCurrentBehavior(behavior);
     }
 }
