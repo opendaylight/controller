@@ -66,7 +66,7 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
 
     private final RaftState state;
 
-    protected AbstractRaftActorBehavior(RaftActorContext context, RaftState state) {
+    protected AbstractRaftActorBehavior(final RaftActorContext context, final RaftState state) {
         this.context = context;
         this.state = state;
         this.LOG = context.getLogger();
@@ -84,7 +84,7 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
     }
 
     @Override
-    public void setReplicatedToAllIndex(long replicatedToAllIndex) {
+    public void setReplicatedToAllIndex(final long replicatedToAllIndex) {
         this.replicatedToAllIndex = replicatedToAllIndex;
     }
 
@@ -117,8 +117,8 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
      * @param appendEntries
      * @return a new behavior if it was changed or the current behavior
      */
-    protected RaftActorBehavior appendEntries(ActorRef sender,
-        AppendEntries appendEntries) {
+    protected RaftActorBehavior appendEntries(final ActorRef sender,
+        final AppendEntries appendEntries) {
 
         // 1. Reply false if term < currentTerm (§5.1)
         if (appendEntries.getTerm() < currentTerm()) {
@@ -161,7 +161,7 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
      * @param requestVote
      * @return a new behavior if it was changed or the current behavior
      */
-    protected RaftActorBehavior requestVote(ActorRef sender, RequestVote requestVote) {
+    protected RaftActorBehavior requestVote(final ActorRef sender, final RequestVote requestVote) {
 
         LOG.debug("{}: In requestVote:  {}", logName(), requestVote);
 
@@ -180,7 +180,7 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
         return this;
     }
 
-    protected boolean canGrantVote(RequestVote requestVote){
+    protected boolean canGrantVote(final RequestVote requestVote){
         boolean grantVote = false;
 
         //  Reply false if term < currentTerm (§5.1)
@@ -258,7 +258,7 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
      *
      * @param interval the duration after which we should trigger a new election
      */
-    protected void scheduleElection(FiniteDuration interval) {
+    protected void scheduleElection(final FiniteDuration interval) {
         stopElection();
 
         if(canStartElection()) {
@@ -308,7 +308,7 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
      * @param logIndex
      * @return the client request tracker for the specified logIndex
      */
-    protected ClientRequestTracker findClientRequestTracker(long logIndex) {
+    protected ClientRequestTracker findClientRequestTracker(final long logIndex) {
         return null;
     }
 
@@ -316,7 +316,7 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
      * @param logIndex
      * @return the client request tracker for the specified logIndex
      */
-    protected ClientRequestTracker removeClientRequestTracker(long logIndex) {
+    protected ClientRequestTracker removeClientRequestTracker(final long logIndex) {
         return null;
     }
 
@@ -325,7 +325,7 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
      *
      * @return log index from the previous to last entry in the log
      */
-    protected long prevLogIndex(long index){
+    protected long prevLogIndex(final long index){
         ReplicatedLogEntry prevEntry =
             context.getReplicatedLog().get(index - 1);
         if (prevEntry != null) {
@@ -337,7 +337,7 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
     /**
      * @return log term from the previous to last entry in the log
      */
-    protected long prevLogTerm(long index){
+    protected long prevLogTerm(final long index){
         ReplicatedLogEntry prevEntry =
             context.getReplicatedLog().get(index - 1);
         if (prevEntry != null) {
@@ -394,12 +394,12 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
         actor().tell(new ApplyJournalEntries(context.getLastApplied()), actor());
     }
 
-    protected Object fromSerializableMessage(Object serializable){
+    protected Object fromSerializableMessage(final Object serializable){
         return SerializationUtils.fromSerializable(serializable);
     }
 
     @Override
-    public RaftActorBehavior handleMessage(ActorRef sender, Object message) {
+    public RaftActorBehavior handleMessage(final ActorRef sender, final Object message) {
         if (message instanceof AppendEntries) {
             return appendEntries(sender, (AppendEntries) message);
         } else if (message instanceof AppendEntriesReply) {
@@ -421,23 +421,23 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
         return leaderPayloadVersion;
     }
 
-    public void setLeaderPayloadVersion(short leaderPayloadVersion) {
+    public void setLeaderPayloadVersion(final short leaderPayloadVersion) {
         this.leaderPayloadVersion = leaderPayloadVersion;
     }
 
     @Override
-    public RaftActorBehavior switchBehavior(RaftActorBehavior behavior) {
+    public RaftActorBehavior switchBehavior(final RaftActorBehavior behavior) {
         return internalSwitchBehavior(behavior);
     }
 
-    protected RaftActorBehavior internalSwitchBehavior(RaftState newState) {
+    protected RaftActorBehavior internalSwitchBehavior(final RaftState newState) {
         if(context.getRaftPolicy().automaticElectionsEnabled()){
             return internalSwitchBehavior(newState.createBehavior(context));
         }
         return this;
     }
 
-    private RaftActorBehavior internalSwitchBehavior(RaftActorBehavior newBehavior) {
+    private RaftActorBehavior internalSwitchBehavior(final RaftActorBehavior newBehavior) {
         LOG.info("{} :- Switching from behavior {} to {}", logName(), this.state(), newBehavior.state());
         try {
             close();
@@ -448,7 +448,7 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
     }
 
 
-    protected int getMajorityVoteCount(int numPeers) {
+    protected int getMajorityVoteCount(final int numPeers) {
         // Votes are required from a majority of the peers including self.
         // The numMajority field therefore stores a calculated value
         // of the number of votes required for this candidate to win an
@@ -479,7 +479,7 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
      * @param snapshotCapturedIndex
      */
     protected void performSnapshotWithoutCapture(final long snapshotCapturedIndex) {
-        long actualIndex = context.getSnapshotManager().trimLog(snapshotCapturedIndex, this);
+        long actualIndex = context.getSnapshotManager().trimLog(snapshotCapturedIndex);
 
         if(actualIndex != -1){
             setReplicatedToAllIndex(actualIndex);

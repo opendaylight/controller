@@ -12,7 +12,6 @@ import com.google.common.base.Preconditions;
 import java.util.Collections;
 import java.util.List;
 import org.opendaylight.controller.cluster.raft.base.messages.DeleteEntries;
-import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 
 /**
  * Implementation of ReplicatedLog used by the RaftActor.
@@ -22,7 +21,6 @@ class ReplicatedLogImpl extends AbstractReplicatedLogImpl {
 
     private long dataSizeSinceLastSnapshot = 0L;
     private final RaftActorContext context;
-    private final RaftActorBehavior currentBehavior;
 
     private final Procedure<DeleteEntries> deleteProcedure = new Procedure<DeleteEntries>() {
         @Override
@@ -30,22 +28,19 @@ class ReplicatedLogImpl extends AbstractReplicatedLogImpl {
         }
     };
 
-    static ReplicatedLog newInstance(final Snapshot snapshot, final RaftActorContext context,
-            final RaftActorBehavior currentBehavior) {
+    static ReplicatedLog newInstance(final Snapshot snapshot, final RaftActorContext context) {
         return new ReplicatedLogImpl(snapshot.getLastAppliedIndex(), snapshot.getLastAppliedTerm(),
-                snapshot.getUnAppliedEntries(), context, currentBehavior);
+                snapshot.getUnAppliedEntries(), context);
     }
 
-    static ReplicatedLog newInstance(final RaftActorContext context, final RaftActorBehavior currentBehavior) {
-        return new ReplicatedLogImpl(-1L, -1L, Collections.<ReplicatedLogEntry>emptyList(), context,
-                currentBehavior);
+    static ReplicatedLog newInstance(final RaftActorContext context) {
+        return new ReplicatedLogImpl(-1L, -1L, Collections.<ReplicatedLogEntry>emptyList(), context);
     }
 
     private ReplicatedLogImpl(final long snapshotIndex, final long snapshotTerm, final List<ReplicatedLogEntry> unAppliedEntries,
-            final RaftActorContext context, final RaftActorBehavior currentBehavior) {
+            final RaftActorContext context) {
         super(snapshotIndex, snapshotTerm, unAppliedEntries);
         this.context = Preconditions.checkNotNull(context);
-        this.currentBehavior = Preconditions.checkNotNull(currentBehavior);
     }
 
     @Override
@@ -72,7 +67,7 @@ class ReplicatedLogImpl extends AbstractReplicatedLogImpl {
                 || getDataSizeForSnapshotCheck() > dataThreshold)) {
 
             boolean started = context.getSnapshotManager().capture(replicatedLogEntry,
-                    currentBehavior.getReplicatedToAllIndex());
+                    context.getCurrentBehavior().getReplicatedToAllIndex());
             if (started) {
                 if (!context.hasFollowers()) {
                     dataSizeSinceLastSnapshot = 0;
