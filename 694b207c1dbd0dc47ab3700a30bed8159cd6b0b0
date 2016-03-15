@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a3d3df0_727ae288",
+        "filename": "opendaylight/config/config-util/src/main/java/org/opendaylight/controller/config/util/capability/BasicCapability.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2016-03-15T10:30:10Z",
+      "side": 1,
+      "message": "Please adhere to the coding guidelines we use:\nhttps://google.github.io/styleguide/javaguide.html#s4.1.1-braces-always-used",
+      "range": {
+        "startLine": 64,
+        "startChar": 8,
+        "endLine": 65,
+        "endChar": 66
+      },
+      "revId": "694b207c1dbd0dc47ab3700a30bed8159cd6b0b0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_9277a69f",
+        "filename": "opendaylight/config/config-util/src/main/java/org/opendaylight/controller/config/util/capability/YangModuleCapability.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2016-03-15T10:30:10Z",
+      "side": 1,
+      "message": "Please adhere to the coding guidelines we use:\nhttps://google.github.io/styleguide/javaguide.html#s4.1.1-braces-always-used",
+      "range": {
+        "startLine": 61,
+        "startChar": 8,
+        "endLine": 63,
+        "endChar": 43
+      },
+      "revId": "694b207c1dbd0dc47ab3700a30bed8159cd6b0b0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
