@@ -40,7 +40,6 @@ import org.opendaylight.controller.cluster.raft.base.messages.ApplyJournalEntrie
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyLogEntries;
 import org.opendaylight.controller.cluster.raft.base.messages.DeleteEntries;
 import org.opendaylight.controller.cluster.raft.base.messages.UpdateElectionTerm;
-import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,8 +56,6 @@ public class RaftActorRecoverySupportTest {
     @Mock
     private DataPersistenceProvider mockPersistence;
 
-    @Mock
-    private RaftActorBehavior mockBehavior;
 
     @Mock
     private RaftActorRecoveryCohort mockCohort;
@@ -80,18 +77,18 @@ public class RaftActorRecoverySupportTest {
         context = new RaftActorContextImpl(null, null, localId, new ElectionTermImpl(mockPersistentProvider, "test", LOG),
                 -1, -1, Collections.<String,String>emptyMap(), configParams, mockPersistence, LOG);
 
-        support = new RaftActorRecoverySupport(context, mockBehavior , mockCohort);
+        support = new RaftActorRecoverySupport(context, mockCohort);
 
         doReturn(true).when(mockPersistence).isRecoveryApplicable();
 
-        context.setReplicatedLog(ReplicatedLogImpl.newInstance(context, mockBehavior));
+        context.setReplicatedLog(ReplicatedLogImpl.newInstance(context));
     }
 
-    private void sendMessageToSupport(Object message) {
+    private void sendMessageToSupport(final Object message) {
         sendMessageToSupport(message, false);
     }
 
-    private void sendMessageToSupport(Object message, boolean expComplete) {
+    private void sendMessageToSupport(final Object message, final boolean expComplete) {
         boolean complete = support.handleRecoveryMessage(message, mockPersistentProvider);
         assertEquals("complete", expComplete, complete);
     }
@@ -352,13 +349,13 @@ public class RaftActorRecoverySupportTest {
     static UpdateElectionTerm updateElectionTerm(final long term, final String votedFor) {
         return Matchers.argThat(new ArgumentMatcher<UpdateElectionTerm>() {
             @Override
-            public boolean matches(Object argument) {
+            public boolean matches(final Object argument) {
                 UpdateElectionTerm other = (UpdateElectionTerm) argument;
                 return term == other.getCurrentTerm() && votedFor.equals(other.getVotedFor());
             }
 
             @Override
-            public void describeTo(Description description) {
+            public void describeTo(final Description description) {
                 description.appendValue(new UpdateElectionTerm(term, votedFor));
             }
         });
