@@ -212,6 +212,30 @@
       "revId": "29dc9694f12f7d48f6ff12a55120dbfdeac964f7",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_584a5d55",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/PruningDataTreeModification.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2016-03-15T21:59:36Z",
+      "side": 1,
+      "message": "When I pass a DataTreeModification to PruningDataTreeModification is my expectation that getDelegate returns that DataTreeModification? I think originally that was the intent. \n\nI think it may be better to introduce leave getDelegate to return the originally passed delegate and add a separate getter to get the actually dataTreeModification on which the ready was done.",
+      "parentUuid": "9a3d3df0_63185ed3",
+      "range": {
+        "startLine": 114,
+        "startChar": 12,
+        "endLine": 114,
+        "endChar": 39
+      },
+      "revId": "29dc9694f12f7d48f6ff12a55120dbfdeac964f7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
