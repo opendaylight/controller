@@ -135,7 +135,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
     public void testAddServerWithExistingFollower() throws Exception {
         LOG.info("testAddServerWithExistingFollower starting");
         setupNewFollower();
-        RaftActorContext followerActorContext = newFollowerContext(FOLLOWER_ID, followerActor);
+        RaftActorContextImpl followerActorContext = newFollowerContext(FOLLOWER_ID, followerActor);
         followerActorContext.setReplicatedLog(new MockRaftActorContext.MockReplicatedLogBuilder().createEntries(
                 0, 3, 1).build());
         followerActorContext.setCommitIndex(2);
@@ -143,6 +143,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
         Follower follower = new Follower(followerActorContext);
         followerActor.underlyingActor().setBehavior(follower);
+        followerActorContext.setCurrentBehavior(follower);
 
         TestActorRef<MockLeaderRaftActor> leaderActor = actorFactory.createTestActor(
                 MockLeaderRaftActor.props(ImmutableMap.of(FOLLOWER_ID, followerActor.path().toString()),
@@ -1441,7 +1442,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         assertEquals("Server config", Sets.newHashSet(expected), Sets.newHashSet(payload.getServerConfig()));
     }
 
-    private static RaftActorContext newFollowerContext(String id, TestActorRef<? extends UntypedActor> actor) {
+    private static RaftActorContextImpl newFollowerContext(String id, TestActorRef<? extends UntypedActor> actor) {
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
         configParams.setHeartBeatInterval(new FiniteDuration(100, TimeUnit.MILLISECONDS));
         configParams.setElectionTimeoutFactor(100000);
