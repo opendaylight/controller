@@ -325,7 +325,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest {
     }
 
     @Override
-    protected RaftActorBehavior createBehavior(RaftActorContext actorContext) {
+    protected RaftActorBehavior createBehavior(final RaftActorContext actorContext) {
         return new Candidate(actorContext);
     }
 
@@ -333,7 +333,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest {
         return new MockRaftActorContext("candidate", getSystem(), candidateActor);
     }
 
-    private Map<String, String> setupPeers(int count) {
+    private Map<String, String> setupPeers(final int count) {
         Map<String, String> peerMap = new HashMap<>();
         peerActors = new TestActorRef[count];
         for(int i = 0; i < count; i++) {
@@ -346,8 +346,8 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest {
     }
 
     @Override
-    protected void assertStateChangesToFollowerWhenRaftRPCHasNewerTerm(RaftActorContext actorContext,
-            ActorRef actorRef, RaftRPC rpc) throws Exception {
+    protected void assertStateChangesToFollowerWhenRaftRPCHasNewerTerm(final MockRaftActorContext actorContext,
+            final ActorRef actorRef, final RaftRPC rpc) throws Exception {
         super.assertStateChangesToFollowerWhenRaftRPCHasNewerTerm(actorContext, actorRef, rpc);
         assertEquals("New votedFor", null, actorContext.getTermInformation().getVotedFor());
     }

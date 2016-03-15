@@ -125,7 +125,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
     @Test
     public void testAddServerWithExistingFollower() throws Exception {
-        RaftActorContext followerActorContext = newFollowerContext(FOLLOWER_ID, followerActor);
+        RaftActorContextImpl followerActorContext = newFollowerContext(FOLLOWER_ID, followerActor);
         followerActorContext.setReplicatedLog(new MockRaftActorContext.MockReplicatedLogBuilder().createEntries(
                 0, 3, 1).build());
         followerActorContext.setCommitIndex(2);
@@ -133,6 +133,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
         Follower follower = new Follower(followerActorContext);
         followerActor.underlyingActor().setBehavior(follower);
+        followerActorContext.setCurrentBehavior(follower);
 
         TestActorRef<MockLeaderRaftActor> leaderActor = actorFactory.createTestActor(
                 MockLeaderRaftActor.props(ImmutableMap.of(FOLLOWER_ID, followerActor.path().toString()),
@@ -1019,7 +1020,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         assertEquals("getNewServerConfig", Sets.newHashSet(expected), Sets.newHashSet(payload.getServerConfig()));
     }
 
-    private static RaftActorContext newFollowerContext(String id, TestActorRef<? extends UntypedActor> actor) {
+    private static RaftActorContextImpl newFollowerContext(String id, TestActorRef<? extends UntypedActor> actor) {
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
         configParams.setHeartBeatInterval(new FiniteDuration(100, TimeUnit.MILLISECONDS));
         configParams.setElectionTimeoutFactor(100000);
@@ -1066,7 +1067,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
             super(id, peerAddresses, config, dataPersistenceProvider, collectorActor);
         }
 
-        public static Props props(final String id, final Map<String, String> peerAddresses,
+        public static Props props(String id, Map<String, String> peerAddresses,
                                   ConfigParams config, DataPersistenceProvider dataPersistenceProvider){
 
             return Props.create(CollectingMockRaftActor.class, id, peerAddresses, Optional.of(config), dataPersistenceProvider, null);

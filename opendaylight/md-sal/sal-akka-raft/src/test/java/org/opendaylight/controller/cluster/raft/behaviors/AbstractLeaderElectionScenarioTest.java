@@ -25,7 +25,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.opendaylight.controller.cluster.raft.DefaultConfigParamsImpl;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
-import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.TestActorFactory;
 import org.opendaylight.controller.cluster.raft.base.messages.SendHeartBeat;
@@ -199,13 +198,14 @@ public class AbstractLeaderElectionScenarioTest {
         assertEquals(name + " behavior state", expState, actor.behavior.state());
     }
 
-    void initializeLeaderBehavior(MemberActor actor, RaftActorContext context, int numActiveFollowers) throws Exception {
+    void initializeLeaderBehavior(MemberActor actor, MockRaftActorContext context, int numActiveFollowers) throws Exception {
         // Leader sends immediate heartbeats - we don't care about it so ignore it.
 
         actor.expectMessageClass(AppendEntriesReply.class, numActiveFollowers);
 
-        @SuppressWarnings("resource")
         Leader leader = new Leader(context);
+        context.setCurrentBehavior(leader);
+
         actor.waitForExpectedMessages(AppendEntriesReply.class);
         // Delay assignment here so the AppendEntriesReply isn't forwarded to the behavior.
         actor.behavior = leader;
