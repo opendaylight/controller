@@ -77,7 +77,7 @@ class RaftActorServerConfigurationSupport {
 
     private void onRemoveServer(RemoveServer removeServer, ActorRef sender) {
         LOG.debug("{}: onRemoveServer: {}, state: {}", raftContext.getId(), removeServer, currentOperationState);
-        boolean isSelf = removeServer.getServerId().equals(raftActor.getId());
+        boolean isSelf = removeServer.getServerId().equals(raftContext.getId());
         if(isSelf && !raftContext.hasFollowers()) {
             sender.tell(new RemoveServerReply(ServerChangeStatus.NOT_SUPPORTED, raftActor.getLeaderId()),
                     raftActor.getSelf());
@@ -183,7 +183,7 @@ class RaftActorServerConfigurationSupport {
         protected void persistNewServerConfiguration(ServerOperationContext<?> operationContext){
             raftContext.setDynamicServerConfigurationInUse();
 
-            boolean includeSelf = !operationContext.getServerId().equals(raftActor.getId());
+            boolean includeSelf = !operationContext.getServerId().equals(raftContext.getId());
             ServerConfigurationPayload payload = raftContext.getPeerServerInfo(includeSelf);
             LOG.debug("{}: New server configuration : {}", raftContext.getId(), payload.getServerConfig());
 
@@ -261,7 +261,7 @@ class RaftActorServerConfigurationSupport {
             // Sanity check - we could get an ApplyState from a previous operation that timed out so make
             // sure it's meant for us.
             if(operationContext.getContextId().equals(applyState.getIdentifier())) {
-                LOG.info("{}: {} has been successfully replicated to a majority of followers", raftActor.getId(),
+                LOG.info("{}: {} has been successfully replicated to a majority of followers", raftContext.getId(),
                         applyState.getReplicatedLogEntry().getData());
 
                 timer.cancel();

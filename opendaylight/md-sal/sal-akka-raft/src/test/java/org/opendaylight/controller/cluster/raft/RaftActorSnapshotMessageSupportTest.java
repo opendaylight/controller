@@ -71,11 +71,11 @@ public class RaftActorSnapshotMessageSupportTest {
             }
         };
 
-        support = new RaftActorSnapshotMessageSupport(context, mockBehavior, mockCohort);
+        support = new RaftActorSnapshotMessageSupport(context, mockCohort);
 
         doReturn(true).when(mockPersistence).isRecoveryApplicable();
 
-        context.setReplicatedLog(ReplicatedLogImpl.newInstance(context, mockBehavior));
+        context.setReplicatedLog(ReplicatedLogImpl.newInstance(context));
     }
 
     private void sendMessageToSupport(Object message) {
@@ -109,7 +109,7 @@ public class RaftActorSnapshotMessageSupportTest {
         byte[] snapshot = {1,2,3,4,5};
         sendMessageToSupport(new CaptureSnapshotReply(snapshot));
 
-        verify(mockSnapshotManager).persist(same(snapshot), same(mockBehavior), anyLong());
+        verify(mockSnapshotManager).persist(same(snapshot), anyLong());
     }
 
     @Test
@@ -118,7 +118,7 @@ public class RaftActorSnapshotMessageSupportTest {
         long sequenceNumber = 100;
         sendMessageToSupport(new SaveSnapshotSuccess(new SnapshotMetadata("foo", sequenceNumber, 1234L)));
 
-        verify(mockSnapshotManager).commit(eq(sequenceNumber), same(mockBehavior));
+        verify(mockSnapshotManager).commit(eq(sequenceNumber));
     }
 
     @Test
@@ -135,7 +135,7 @@ public class RaftActorSnapshotMessageSupportTest {
 
         sendMessageToSupport(RaftActorSnapshotMessageSupport.COMMIT_SNAPSHOT);
 
-        verify(mockSnapshotManager).commit(eq(-1L), same(mockBehavior));
+        verify(mockSnapshotManager).commit(eq(-1L));
     }
 
     @Test
