@@ -45,6 +45,30 @@
       "revId": "4b13808df348cba741eac0fbb4ee103fdcf1e841",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_524d1ec3",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 345,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-03-15T12:53:23Z",
+      "side": 1,
+      "message": "It\u0027s complicated to explain. Apply state in a follower occurs after the leader has obtained consensus, incremented the commit index and applied locally. \n\nHowever it can happen that a follower receives a replicate and adds it to the log, say at index 1,  but the leader transfers or dies before applying it to the state. The follower  becomes leader and when the next tx is applied, log index 2, it has to first apply all prior log entries that hadn\u0027t been committed yet, in this case index 1. Since we got consensus for index 2 that means index 1 has also been replicated to a majority. Therefore ApplyState is sent for index 1 and then index 2. However index 1 is applied as a \"foreign\" candidate while index 2 is in the pre-commit state. \n\nSo, if index 1 was applied as a foreign candidate, why is it wrong to do so for index 2? It\u0027s kind of analogous to rebasing a patch. This could be done w/o relying on data tree commit to fail, although it\u0027s tricky and would complicate the Shard code further. So why not rely on the DataTree since it already does the checking? This is an uncommon code path.",
+      "parentUuid": "9a3d3df0_d2aace83",
+      "range": {
+        "startLine": 342,
+        "startChar": 45,
+        "endLine": 345,
+        "endChar": 103
+      },
+      "revId": "4b13808df348cba741eac0fbb4ee103fdcf1e841",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
