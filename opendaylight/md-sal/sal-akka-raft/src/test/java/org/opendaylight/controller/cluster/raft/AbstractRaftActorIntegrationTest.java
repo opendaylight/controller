@@ -214,6 +214,7 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
         configParams.setHeartBeatInterval(new FiniteDuration(500, TimeUnit.MILLISECONDS));
         configParams.setElectionTimeoutFactor(1000);
+        configParams.setSnapshotBatchCount(snapshotBatchCount);
         return configParams;
     }
 

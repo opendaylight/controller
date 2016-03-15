@@ -226,6 +226,18 @@ public class ReplicationAndSnapshotsIntegrationTest extends AbstractRaftActorInt
         assertEquals("Leader last applied", 3, leaderContext.getLastApplied());
         assertEquals("Leader replicatedToAllIndex", 2, leader.getReplicatedToAllIndex());
 
+        // The followers should also snapshot so verify.
+
+        MessageCollectorActor.expectFirstMatching(follower1CollectorActor, SaveSnapshotSuccess.class);
+        persistedSnapshots = InMemorySnapshotStore.getSnapshots(follower1Id, Snapshot.class);
+        assertEquals("Persisted snapshots size", 1, persistedSnapshots.size());
+        verifySnapshot("Persisted", persistedSnapshots.get(0), initialTerm, 2, currentTerm, 3);
+        unAppliedEntry = persistedSnapshots.get(0).getUnAppliedEntries();
+        assertEquals("Persisted Snapshot getUnAppliedEntries size", 1, unAppliedEntry.size());
+        verifyReplicatedLogEntry(unAppliedEntry.get(0), currentTerm, 3, payload3);
+
+        MessageCollectorActor.expectFirstMatching(follower2CollectorActor, SaveSnapshotSuccess.class);
+
         MessageCollectorActor.clearMessages(leaderCollectorActor);
         MessageCollectorActor.clearMessages(follower1CollectorActor);
         MessageCollectorActor.clearMessages(follower2CollectorActor);
