@@ -208,9 +208,14 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
     @Override
     protected void handleCommand(final Object message) {
-        if(serverConfigurationSupport.handleMessage(message, getSender())) {
+        if (serverConfigurationSupport.handleMessage(message, getSender())) {
             return;
-        } else if (message instanceof ApplyState){
+        }
+        if (snapshotSupport.handleSnapshotMessage(message, getSender())) {
+            return;
+        }
+
+        if (message instanceof ApplyState) {
             ApplyState applyState = (ApplyState) message;
 
             long elapsedTime = (System.nanoTime() - applyState.getStartTime());
@@ -238,7 +243,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
                 context.getSnapshotManager().trimLog(context.getLastApplied(), currentBehavior);
             }
 
-        } else if (message instanceof ApplyJournalEntries){
+        } else if (message instanceof ApplyJournalEntries) {
             ApplyJournalEntries applyEntries = (ApplyJournalEntries) message;
             if(LOG.isDebugEnabled()) {
                 LOG.debug("{}: Persisting ApplyLogEntries with index={}", persistenceId(), applyEntries.getToIndex());
@@ -255,7 +260,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             onGetOnDemandRaftStats();
         } else if(message instanceof InitiateCaptureSnapshot) {
             captureSnapshot();
-        } else if(message instanceof SwitchBehavior){
+        } else if(message instanceof SwitchBehavior) {
             switchBehavior(((SwitchBehavior) message));
         } else if(message instanceof LeaderTransitioning) {
             onLeaderTransitioning();
@@ -263,7 +268,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             onShutDown();
         } else if(message instanceof Runnable) {
             ((Runnable)message).run();
-        } else if(!snapshotSupport.handleSnapshotMessage(message, getSender())) {
+        } else {
             switchBehavior(reusableSwitchBehaviorSupplier.handleMessage(getSender(), message));
         }
     }
