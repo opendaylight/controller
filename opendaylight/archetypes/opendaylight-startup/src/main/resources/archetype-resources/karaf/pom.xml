@@ -61,7 +61,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
     </dependency>
   </dependencies>
 
-  <!-- DO NOT install or deploy the karaf artifact -->
+  <!-- DO NOT deploy the karaf artifact -->
   <build>
     <plugins>
       <plugin>
