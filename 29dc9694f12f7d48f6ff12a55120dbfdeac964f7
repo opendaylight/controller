@@ -236,6 +236,30 @@
       "revId": "29dc9694f12f7d48f6ff12a55120dbfdeac964f7",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_983a2597",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/PruningDataTreeModification.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-03-16T03:34:54Z",
+      "side": 1,
+      "message": "This is not a public class and has a specific usage. No caller actually wants the original DataTreeModification or is even aware of it. How about if I change getDelegate to getResultingModification?",
+      "parentUuid": "9a3d3df0_584a5d55",
+      "range": {
+        "startLine": 114,
+        "startChar": 12,
+        "endLine": 114,
+        "endChar": 39
+      },
+      "revId": "29dc9694f12f7d48f6ff12a55120dbfdeac964f7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
