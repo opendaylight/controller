@@ -65,27 +65,23 @@ class RaftActorSnapshotMessageSupport {
     }
 
     boolean handleSnapshotMessage(Object message, ActorRef sender) {
-        if(message instanceof ApplySnapshot ) {
+        if (message instanceof ApplySnapshot ) {
             onApplySnapshot((ApplySnapshot) message);
-            return true;
         } else if (message instanceof SaveSnapshotSuccess) {
             onSaveSnapshotSuccess((SaveSnapshotSuccess) message);
-            return true;
         } else if (message instanceof SaveSnapshotFailure) {
             onSaveSnapshotFailure((SaveSnapshotFailure) message);
-            return true;
         } else if (message instanceof CaptureSnapshotReply) {
             onCaptureSnapshotReply(((CaptureSnapshotReply) message).getSnapshot());
-            return true;
         } else if (message.equals(COMMIT_SNAPSHOT)) {
             context.getSnapshotManager().commit(-1, currentBehavior);
-            return true;
         } else if (message instanceof GetSnapshot) {
             onGetSnapshot(sender);
-            return true;
         } else {
             return false;
         }
+
+        return true;
     }
 
     private void onCaptureSnapshotReply(byte[] snapshotBytes) {
