@@ -260,6 +260,30 @@
       "revId": "29dc9694f12f7d48f6ff12a55120dbfdeac964f7",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_e26a9fb1",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/PruningDataTreeModification.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2016-03-16T17:41:59Z",
+      "side": 1,
+      "message": "Yes that would be good.",
+      "parentUuid": "9a3d3df0_983a2597",
+      "range": {
+        "startLine": 114,
+        "startChar": 12,
+        "endLine": 114,
+        "endChar": 39
+      },
+      "revId": "29dc9694f12f7d48f6ff12a55120dbfdeac964f7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
