@@ -61,9 +61,17 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
     </dependency>
   </dependencies>
 
-  <!-- DO NOT install or deploy the karaf artifact -->
   <build>
     <plugins>
+
+      <!-- DO NOT install or deploy the karaf artifact -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-install-plugin</artifactId>
+        <configuration>
+          <skip>true</skip>
+        </configuration>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-deploy-plugin</artifactId>
