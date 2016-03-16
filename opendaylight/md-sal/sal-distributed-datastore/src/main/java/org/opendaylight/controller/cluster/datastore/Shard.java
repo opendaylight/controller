@@ -218,7 +218,7 @@ public class Shard extends RaftActor {
         try {
             if (CreateTransaction.isSerializedType(message)) {
                 handleCreateTransaction(message);
-            } else if (BatchedModifications.class.isInstance(message)) {
+            } else if (message instanceof BatchedModifications) {
                 handleBatchedModifications((BatchedModifications)message);
             } else if (message instanceof ForwardedReadyTransaction) {
                 handleForwardedReadyTransaction((ForwardedReadyTransaction) message);
