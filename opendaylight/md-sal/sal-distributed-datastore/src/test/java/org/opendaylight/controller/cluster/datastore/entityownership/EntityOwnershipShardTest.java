@@ -12,9 +12,9 @@ import static org.mockito.AdditionalMatchers.or;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.ENTITY_OWNERS_PATH;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.candidatePath;
@@ -834,9 +834,9 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
         }
 
         @Override
-        public void onReceiveCommand(Object message) throws Exception {
+        public void handleCommand(Object message) {
             if(!(message instanceof ElectionTimeout)) {
-                super.onReceiveCommand(message);
+                super.handleCommand(message);
             }
         }
     }

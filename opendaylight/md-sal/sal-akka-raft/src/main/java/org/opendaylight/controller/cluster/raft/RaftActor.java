@@ -170,7 +170,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     }
 
     @Override
-    public void handleRecover(Object message) {
+    protected void handleRecover(Object message) {
         if(raftRecovery == null) {
             raftRecovery = newRaftActorRecoverySupport();
         }
@@ -207,7 +207,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     }
 
     @Override
-    public void handleCommand(final Object message) {
+    protected void handleCommand(final Object message) {
         if(serverConfigurationSupport.handleMessage(message, getSender())) {
             return;
         } else if (message instanceof ApplyState){

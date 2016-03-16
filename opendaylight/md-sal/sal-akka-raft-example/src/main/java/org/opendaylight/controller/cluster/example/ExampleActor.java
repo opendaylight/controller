@@ -57,7 +57,8 @@ public class ExampleActor extends RaftActor implements RaftActorRecoveryCohort, 
         return Props.create(ExampleActor.class, id, peerAddresses, configParams);
     }
 
-    @Override public void onReceiveCommand(Object message) throws Exception{
+    @Override
+    protected void handleCommand(Object message) {
         if(message instanceof KeyValue){
             if(isLeader()) {
                 String persistId = Long.toString(persistIdentifier++);
@@ -89,7 +90,7 @@ public class ExampleActor extends RaftActor implements RaftActorRecoveryCohort, 
             }
 
         } else {
-            super.onReceiveCommand(message);
+            super.handleCommand(message);
         }
     }
 
@@ -145,7 +146,7 @@ public class ExampleActor extends RaftActor implements RaftActorRecoveryCohort, 
         }
     }
 
-    private ByteString fromObject(Object snapshot) throws Exception {
+    private static ByteString fromObject(Object snapshot) throws Exception {
         ByteArrayOutputStream b = null;
         ObjectOutputStream o = null;
         try {
@@ -165,7 +166,7 @@ public class ExampleActor extends RaftActor implements RaftActorRecoveryCohort, 
         }
     }
 
-    private Object toObject(byte [] bs) throws ClassNotFoundException, IOException {
+    private static Object toObject(byte [] bs) throws ClassNotFoundException, IOException {
         Object obj = null;
         ByteArrayInputStream bis = null;
         ObjectInputStream ois = null;
@@ -186,10 +187,6 @@ public class ExampleActor extends RaftActor implements RaftActorRecoveryCohort, 
 
     @Override protected void onStateChanged() {
 
-    }
-
-    @Override public void onReceiveRecover(Object message)throws Exception {
-        super.onReceiveRecover(message);
     }
 
     @Override public String persistenceId() {

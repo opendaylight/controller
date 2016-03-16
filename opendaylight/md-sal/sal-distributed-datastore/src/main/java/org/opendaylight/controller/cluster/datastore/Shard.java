@@ -196,18 +196,18 @@ public class Shard extends RaftActor {
     }
 
     @Override
-    public void onReceiveRecover(final Object message) throws Exception {
+    protected void handleRecover(final Object message) {
         LOG.debug("{}: onReceiveRecover: Received message {} from {}", persistenceId(), message.getClass(),
             getSender());
 
-        super.onReceiveRecover(message);
+        super.handleRecover(message);
         if (LOG.isTraceEnabled()) {
             appendEntriesReplyTracker.begin();
         }
     }
 
     @Override
-    public void onReceiveCommand(final Object message) throws Exception {
+    protected void handleCommand(final Object message) {
 
         MessageTracker.Context context = appendEntriesReplyTracker.received(message);
 
@@ -261,7 +261,7 @@ public class Shard extends RaftActor {
             } else if(ShardTransactionMessageRetrySupport.TIMER_MESSAGE_CLASS.isInstance(message)) {
                 messageRetrySupport.onTimerMessage(message);
             } else {
-                super.onReceiveCommand(message);
+                super.handleCommand(message);
             }
         } finally {
             context.done();
