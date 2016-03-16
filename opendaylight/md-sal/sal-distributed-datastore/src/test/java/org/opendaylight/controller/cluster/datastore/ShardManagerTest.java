@@ -1992,7 +1992,7 @@ public class ShardManagerTest extends AbstractActorTest {
         }
 
         @Override
-        public void handleRecover(Object message) throws Exception {
+        protected void handleRecover(Object message) throws Exception {
             try {
                 super.handleRecover(message);
             } finally {
