@@ -22,6 +22,7 @@ import org.apache.sshd.SshClient;
 import org.apache.sshd.client.future.AuthFuture;
 import org.apache.sshd.client.future.ConnectFuture;
 import org.apache.sshd.client.future.OpenFuture;
+import org.apache.sshd.common.FactoryManager;
 import org.apache.sshd.common.future.CloseFuture;
 import org.apache.sshd.common.future.SshFutureListener;
 import org.opendaylight.controller.netconf.nettyutil.handler.ssh.authentication.AuthenticationHandler;
@@ -46,8 +47,8 @@ public class AsyncSshHandler extends ChannelOutboundHandlerAdapter {
     static {
         DEFAULT_CLIENT.setProperties(new HashMap<String, String>(){
             {
-                put(SshClient.AUTH_TIMEOUT, Long.toString(DEFAULT_TIMEOUT));
-                put(SshClient.IDLE_TIMEOUT, Long.toString(DEFAULT_TIMEOUT));
+                put(FactoryManager.AUTH_TIMEOUT, Long.toString(DEFAULT_TIMEOUT));
+                put(FactoryManager.IDLE_TIMEOUT, Long.toString(DEFAULT_TIMEOUT));
             }
         });
         // TODO make configurable, or somehow reuse netty threadpool
@@ -79,8 +80,6 @@ public class AsyncSshHandler extends ChannelOutboundHandlerAdapter {
     public AsyncSshHandler(final AuthenticationHandler authenticationHandler, final SshClient sshClient) throws IOException {
         this.authenticationHandler = Preconditions.checkNotNull(authenticationHandler);
         this.sshClient = Preconditions.checkNotNull(sshClient);
-        // Start just in case
-        sshClient.start();
     }
 
     private void startSsh(final ChannelHandlerContext ctx, final SocketAddress address) {
