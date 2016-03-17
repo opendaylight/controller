@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a42497e_9282ecfe",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardCommitCoordinator.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 276,
+      "author": {
+        "id": 3172
+      },
+      "writtenOn": "2016-03-17T21:30:33Z",
+      "side": 1,
+      "message": "If applyToCursor() above somehow finds no nodes to apply to, then newModifications will be empty and this will throw an exception here.  Is this possible?\n\nMaybe initialize newModifications with one element first?  We can also do away with the newModifications.isEmpty() check then.",
+      "range": {
+        "startLine": 276,
+        "startChar": 53,
+        "endLine": 276,
+        "endChar": 62
+      },
+      "revId": "633ebec2200dafd84ba9bd32063c4b879494cf9f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
