@@ -71,6 +71,8 @@ public class AsyncSshHandlerTest {
     @Mock
     private Channel channel;
     @Mock
+    private ChannelFuture channelFuture;
+    @Mock
     private SocketAddress remoteAddress;
     @Mock
     private SocketAddress localAddress;
@@ -91,6 +93,7 @@ public class AsyncSshHandlerTest {
         stubChannel();
         stubCtx();
         stubRemoteAddress();
+        stubChannelFuture();
 
         promise = getMockedPromise();
 
@@ -130,6 +133,7 @@ public class AsyncSshHandlerTest {
                 return null;
             }
         }).when(future).addListener(any(SshFutureListener.class));
+        doReturn(future).when(future).removeListener(Matchers.<SshFutureListener<T>>any());
 
         return listenerSettableFuture;
     }
@@ -149,6 +153,11 @@ public class AsyncSshHandlerTest {
 
     private void stubChannel() {
         doReturn("channel").when(channel).toString();
+        doReturn(channelFuture).when(channel).deregister();
+    }
+
+    private void stubChannelFuture() throws InterruptedException {
+        doReturn(channelFuture).when(channelFuture).sync();
     }
 
     private void stubSshClient() {
@@ -292,6 +301,7 @@ public class AsyncSshHandlerTest {
             public void onSuccess(final SshFutureListener<IoWriteFuture> result) {
                 doReturn(false).when(ioWriteFuture).isWritten();
                 doReturn(new IllegalStateException()).when(ioWriteFuture).getException();
+                doReturn(ioWriteFuture).when(ioWriteFuture).removeListener(Matchers.<SshFutureListener<IoWriteFuture>>any());
                 doReturn(true).when(asyncIn).isClosing();
                 doReturn(true).when(asyncIn).isClosed();
                 result.operationComplete(ioWriteFuture);

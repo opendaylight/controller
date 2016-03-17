@@ -87,7 +87,6 @@ public final class AsyncSshHandlerReader implements SshFutureListener<IoReadFutu
             currentReadFuture.removeListener(this);
             currentReadFuture = null;
         }
-
         asyncOut = null;
     }
 

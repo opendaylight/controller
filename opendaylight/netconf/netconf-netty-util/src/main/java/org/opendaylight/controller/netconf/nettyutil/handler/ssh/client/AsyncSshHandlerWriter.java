@@ -45,6 +45,9 @@ public final class AsyncSshHandlerWriter implements AutoCloseable {
     // Order has to be preserved for queued writes
     private final Deque<PendingWriteRequest> pending = new LinkedList<>();
 
+    private IoWriteFuture currentWriteFuture;
+    private SshFutureListener<IoWriteFuture> currentWriteListener;
+
     public AsyncSshHandlerWriter(final IoOutputStream asyncIn) {
         this.asyncIn = asyncIn;
     }
@@ -84,7 +87,8 @@ public final class AsyncSshHandlerWriter implements AutoCloseable {
             if (LOG.isTraceEnabled()) {
                 LOG.trace("Writing request on channel: {}, message: {}", ctx.channel(), byteBufToString(byteBufMsg));
             }
-            asyncIn.write(toBuffer(byteBufMsg)).addListener(new SshFutureListener<IoWriteFuture>() {
+            currentWriteFuture = asyncIn.write(toBuffer(byteBufMsg));
+            currentWriteListener = new SshFutureListener<IoWriteFuture>() {
 
                 @Override
                 public void operationComplete(final IoWriteFuture future) {
@@ -120,7 +124,9 @@ public final class AsyncSshHandlerWriter implements AutoCloseable {
                     // At this time we are guaranteed that we are not in pending state anymore so the next request should succeed
                     writePendingIfAny();
                 }
-            });
+            };
+
+            currentWriteFuture.addListener(currentWriteListener);
 
         } catch (final WritePendingException e) {
 
@@ -168,6 +174,11 @@ public final class AsyncSshHandlerWriter implements AutoCloseable {
 
     @Override
     public void close() {
+        // Remove self as listener on close to prevent write from closed output
+        if (currentWriteFuture != null) {
+            currentWriteFuture.removeListener(currentWriteListener);
+            currentWriteFuture = null;
+        }
         asyncIn = null;
     }
 
