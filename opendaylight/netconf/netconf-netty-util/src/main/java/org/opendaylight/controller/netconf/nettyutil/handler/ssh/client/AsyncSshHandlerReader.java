@@ -53,6 +53,8 @@ public final class AsyncSshHandlerReader implements SshFutureListener<IoReadFutu
             } else {
                 LOG.warn("Exception while reading from SSH remote on channel {}", channelId, future.getException());
             }
+            future.removeListener(this);
+            future.getBuffer().clear();
             invokeDisconnect();
             return;
         }
@@ -87,8 +89,10 @@ public final class AsyncSshHandlerReader implements SshFutureListener<IoReadFutu
             currentReadFuture.removeListener(this);
             currentReadFuture = null;
         }
-
-        asyncOut = null;
+        if (asyncOut != null) {
+            asyncOut.close(true);
+            asyncOut = null;
+        }
     }
 
     public interface ReadMsgHandler {

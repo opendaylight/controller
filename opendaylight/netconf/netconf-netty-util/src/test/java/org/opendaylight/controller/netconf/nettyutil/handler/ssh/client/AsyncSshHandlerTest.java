@@ -71,6 +71,8 @@ public class AsyncSshHandlerTest {
     @Mock
     private Channel channel;
     @Mock
+    private ChannelFuture channelFuture;
+    @Mock
     private SocketAddress remoteAddress;
     @Mock
     private SocketAddress localAddress;
@@ -91,10 +93,11 @@ public class AsyncSshHandlerTest {
         stubChannel();
         stubCtx();
         stubRemoteAddress();
+        stubChannelFuture();
 
         promise = getMockedPromise();
 
-        asyncSshHandler = new AsyncSshHandler(authHandler, sshClient);
+        asyncSshHandler = new AsyncSshHandler(authHandler);
     }
 
     @After
@@ -149,6 +152,11 @@ public class AsyncSshHandlerTest {
 
     private void stubChannel() {
         doReturn("channel").when(channel).toString();
+        doReturn(channelFuture).when(channel).deregister();
+    }
+
+    private void stubChannelFuture() throws InterruptedException {
+        doReturn(channelFuture).when(channelFuture).sync();
     }
 
     private void stubSshClient() {

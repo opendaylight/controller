@@ -55,6 +55,7 @@ final class SshProxyClientHandler extends ChannelInboundHandlerAdapter {
             @Override
             public void close() throws Exception {
                 // Close both sessions (delegate server and remote client)
+                LOG.info("WE USE THAT, SERIOUSLY?");
                 ctx.fireChannelInactive();
                 ctx.disconnect();
                 ctx.close();

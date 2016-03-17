@@ -13,12 +13,12 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelOutboundHandlerAdapter;
 import io.netty.channel.ChannelPromise;
+
 import java.io.IOException;
 import java.net.SocketAddress;
-import java.util.HashMap;
+
 import org.apache.sshd.ClientChannel;
 import org.apache.sshd.ClientSession;
-import org.apache.sshd.SshClient;
 import org.apache.sshd.client.future.AuthFuture;
 import org.apache.sshd.client.future.ConnectFuture;
 import org.apache.sshd.client.future.OpenFuture;
@@ -34,29 +34,8 @@ import org.slf4j.LoggerFactory;
 public class AsyncSshHandler extends ChannelOutboundHandlerAdapter {
 
     private static final Logger LOG = LoggerFactory.getLogger(AsyncSshHandler.class);
-    public static final String SUBSYSTEM = "netconf";
-
-    public static final SshClient DEFAULT_CLIENT = SshClient.setUpDefaultClient();
-
-    public static final int SSH_DEFAULT_NIO_WORKERS = 8;
-
-    // Disable default timeouts from mina sshd
-    private static final long DEFAULT_TIMEOUT = -1L;
-
-    static {
-        DEFAULT_CLIENT.setProperties(new HashMap<String, String>(){
-            {
-                put(SshClient.AUTH_TIMEOUT, Long.toString(DEFAULT_TIMEOUT));
-                put(SshClient.IDLE_TIMEOUT, Long.toString(DEFAULT_TIMEOUT));
-            }
-        });
-        // TODO make configurable, or somehow reuse netty threadpool
-        DEFAULT_CLIENT.setNioWorkers(SSH_DEFAULT_NIO_WORKERS);
-        DEFAULT_CLIENT.start();
-    }
 
     private final AuthenticationHandler authenticationHandler;
-    private final SshClient sshClient;
 
     private AsyncSshHandlerReader sshReadAsyncListener;
     private AsyncSshHandlerWriter sshWriteAsyncHandler;
@@ -65,28 +44,20 @@ public class AsyncSshHandler extends ChannelOutboundHandlerAdapter {
     private ClientSession session;
     private ChannelPromise connectPromise;
 
-
-    public static AsyncSshHandler createForNetconfSubsystem(final AuthenticationHandler authenticationHandler) throws IOException {
-        return new AsyncSshHandler(authenticationHandler, DEFAULT_CLIENT);
-    }
-
     /**
      *
      * @param authenticationHandler
      * @param sshClient started SshClient
      * @throws IOException
      */
-    public AsyncSshHandler(final AuthenticationHandler authenticationHandler, final SshClient sshClient) throws IOException {
+    public AsyncSshHandler(final AuthenticationHandler authenticationHandler) throws IOException {
         this.authenticationHandler = Preconditions.checkNotNull(authenticationHandler);
-        this.sshClient = Preconditions.checkNotNull(sshClient);
-        // Start just in case
-        sshClient.start();
     }
 
     private void startSsh(final ChannelHandlerContext ctx, final SocketAddress address) {
         LOG.debug("Starting SSH to {} on channel: {}", address, ctx.channel());
 
-        final ConnectFuture sshConnectionFuture = sshClient.connect(authenticationHandler.getUsername(), address);
+        final ConnectFuture sshConnectionFuture = AsyncSshUtils.DEFAULT_CLIENT.connect(authenticationHandler.getUsername(), address);
         sshConnectionFuture.addListener(new SshFutureListener<ConnectFuture>() {
             @Override
             public void operationComplete(final ConnectFuture future) {
@@ -128,7 +99,7 @@ public class AsyncSshHandler extends ChannelOutboundHandlerAdapter {
         try {
             LOG.debug("SSH session authenticated on channel: {}, server version: {}", ctx.channel(), session.getServerVersion());
 
-            channel = session.createSubsystemChannel(SUBSYSTEM);
+            channel = session.createSubsystemChannel(AsyncSshUtils.SUBSYSTEM);
             channel.setStreaming(ClientChannel.Streaming.Async);
             channel.open().addListener(new SshFutureListener<OpenFuture>() {
                 @Override
@@ -239,9 +210,15 @@ public class AsyncSshHandler extends ChannelOutboundHandlerAdapter {
             LOG.warn("Unable to cleanup all resources for channel: {}. Ignoring.", ctx.channel(), e);
         }
 
+        try {
+            ctx.channel().deregister().sync();
+        } catch (InterruptedException e1) {
+            LOG.error("Failed to deregister channel from eventLoop", e1);
+        }
+
         channel = null;
         promise.setSuccess();
+
         LOG.debug("SSH session closed on channel: {}", ctx.channel());
     }
-
 }
