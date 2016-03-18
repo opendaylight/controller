@@ -22,6 +22,30 @@
       "revId": "633ebec2200dafd84ba9bd32063c4b879494cf9f",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a42497e_d26c7439",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardCommitCoordinator.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 276,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-03-18T00:50:23Z",
+      "side": 1,
+      "message": "There\u0027s always at least 1, \u0027from\u0027 that\u0027s passed in that is applied on line 260.\n\napplyToCursor has the knowledge of how many mods there are and in what order they need to be applied so I can\u0027t (correctly) initialize it.",
+      "parentUuid": "7a42497e_9282ecfe",
+      "range": {
+        "startLine": 276,
+        "startChar": 53,
+        "endLine": 276,
+        "endChar": 62
+      },
+      "revId": "633ebec2200dafd84ba9bd32063c4b879494cf9f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
