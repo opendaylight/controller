@@ -1,0 +1,19 @@
+module opendaylight-test-bug-2562 {
+    yang-version 1;
+    namespace "opendaylight-test-bug-2562:namespace";
+    prefix "ty";
+    revision "2016-01-01" {
+        description
+            "bug 2562 Binding Data Codec: Incorrectly deserialized unkeyed list from NormalizedNode";
+    }
+
+    container root {
+        list fooroot {
+            list barroot {
+                key "type";
+                leaf type { type int32; }
+                leaf value { type int32; }
+            }
+        }
+    }
+}
