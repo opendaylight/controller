@@ -345,17 +345,17 @@ public class ThreePhaseCommitCohortProxyTest extends AbstractActorTest {
         @Override
         public void onReceive(Object message) {
             if(CanCommitTransaction.isSerializedType(message)) {
+                canCommitCount.incrementAndGet();
                 onMessage("CanCommitTransaction", message, CanCommitTransaction.fromSerializable(message),
                         builder.expCanCommitType, builder.canCommitReply);
-                canCommitCount.incrementAndGet();
             } else if(CommitTransaction.isSerializedType(message)) {
+                commitCount.incrementAndGet();
                 onMessage("CommitTransaction", message, CommitTransaction.fromSerializable(message),
                         builder.expCommitType, builder.commitReply);
-                commitCount.incrementAndGet();
             } else if(AbortTransaction.isSerializedType(message)) {
+                abortCount.incrementAndGet();
                 onMessage("AbortTransaction", message, AbortTransaction.fromSerializable(message),
                         builder.expAbortType, builder.abortReply);
-                abortCount.incrementAndGet();
             } else {
                 assertionError = new AssertionError("Unexpected message " + message);
             }
