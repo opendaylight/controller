@@ -765,6 +765,9 @@ public class DistributedDataStoreRemotingIntegrationTest {
 
         // Gracefully stop the leader via a Shutdown message.
 
+        sendDatastoreContextUpdate(leaderDistributedDataStore, leaderDatastoreContextBuilder.
+                shardElectionTimeoutFactor(100));
+
         FiniteDuration duration = FiniteDuration.create(5, TimeUnit.SECONDS);
         Future<ActorRef> future = leaderDistributedDataStore.getActorContext().findLocalShardAsync("cars");
         ActorRef leaderActor = Await.result(future, duration);
