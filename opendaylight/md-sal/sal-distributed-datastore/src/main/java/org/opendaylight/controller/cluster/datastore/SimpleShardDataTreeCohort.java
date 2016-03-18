@@ -77,7 +77,11 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
             LOG.trace("Transaction {} prepared candidate {}", transaction, candidate);
             return VOID_FUTURE;
         } catch (Exception e) {
-            LOG.debug("Transaction {} failed to prepare", transaction, e);
+            if(LOG.isTraceEnabled()) {
+                LOG.trace("Transaction {} failed to prepare", transaction, e);
+            } else {
+                LOG.error("Transaction failed to prepare", e);
+            }
             return Futures.immediateFailedFuture(e);
         }
     }
@@ -101,7 +105,11 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
         try {
             dataTree.getDataTree().commit(candidate);
         } catch (Exception e) {
-            LOG.error("Transaction {} failed to commit", transaction, e);
+            if(LOG.isTraceEnabled()) {
+                LOG.trace("Transaction {} failed to commit", transaction, e);
+            } else {
+                LOG.error("Transaction failed to commit", e);
+            }
             return Futures.immediateFailedFuture(e);
         }
 
