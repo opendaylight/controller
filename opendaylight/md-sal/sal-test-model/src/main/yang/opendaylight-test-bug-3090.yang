@@ -1,0 +1,28 @@
+module opendaylight-test-bug-3090 {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:opendaylight-test-bug-3090";
+    prefix "rpc";
+
+    description
+        "Test model for Bug 3090 - An AsyncDataChangeEvent instance's getCreatedData() method can't get data if list has multi-key";
+
+    revision "2016-01-01" {
+        description
+            "Bug 3090";
+    }
+
+    container root {
+        list list-in-root {
+            key "leaf-c leaf-a leaf-b";
+            leaf leaf-a {
+                type string;
+            }
+            leaf leaf-b {
+                type string;
+            }
+            leaf leaf-c {
+                type string;
+            }
+        }
+    }
+}
