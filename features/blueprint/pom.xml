@@ -31,7 +31,10 @@
 
   <dependencies>
 
-    <!-- Required features repositories -->
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+    </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>blueprint</artifactId>

@@ -5,6 +5,7 @@
           xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.2.0 http://karaf.apache.org/xmlns/features/v1.2.0">
 
   <feature name='odl-blueprint' version='${project.version}' description="OpenDaylight :: Blueprint">
+    <bundle>mvn:com.google.guava/guava/{{VERSION}}</bundle>
     <bundle start-level="40">mvn:org.opendaylight.controller/blueprint/{{VERSION}}</bundle>
   </feature>
 </features>
