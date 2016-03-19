@@ -14,7 +14,10 @@ import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.List;
+import org.apache.aries.blueprint.NamespaceHandler;
 import org.apache.aries.blueprint.services.BlueprintExtenderService;
+import org.apache.aries.util.AriesFrameworkUtil;
+import org.opendaylight.controller.blueprint.ext.OpendaylightNamespaceHandler;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -47,7 +50,9 @@ public class BlueprintBundleTracker implements BundleActivator, BundleTrackerCus
     private ServiceTracker<BlueprintExtenderService, BlueprintExtenderService> serviceTracker;
     private BundleTracker<Bundle> bundleTracker;
     private volatile BlueprintExtenderService blueprintExtenderService;
+    private volatile ServiceRegistration<?> blueprintContainerRestartReg;
     private ServiceRegistration<?> eventHandlerReg;
+    private ServiceRegistration<?> namespaceReg;
 
     /**
      * Implemented from BundleActivator.
@@ -56,11 +61,9 @@ public class BlueprintBundleTracker implements BundleActivator, BundleTrackerCus
     public void start(BundleContext context) {
         LOG.info("Starting {}", getClass().getSimpleName());
 
-        // Register EventHandler for blueprint events
+        registerBlueprintEventHandler(context);
 
-        Dictionary<String, Object> props = new Hashtable<>();
-        props.put(org.osgi.service.event.EventConstants.EVENT_TOPIC, EventConstants.TOPIC_CREATED);
-        eventHandlerReg = context.registerService(EventHandler.class.getName(), this, props);
+        registerNamespaceHandler(context);
 
         bundleTracker = new BundleTracker<>(context, Bundle.ACTIVE, this);
 
@@ -73,6 +76,10 @@ public class BlueprintBundleTracker implements BundleActivator, BundleTrackerCus
                         bundleTracker.open();
 
                         LOG.debug("Got BlueprintExtenderService");
+
+                        blueprintContainerRestartReg = context.registerService(
+                                BlueprintContainerRestartService.class.getName(),
+                                new BlueprintContainerRestartServiceImpl(blueprintExtenderService), new Hashtable<>());
 
                         return blueprintExtenderService;
                     }
@@ -90,6 +97,19 @@ public class BlueprintBundleTracker implements BundleActivator, BundleTrackerCus
         serviceTracker.open();
     }
 
+    private void registerNamespaceHandler(BundleContext context) {
+        Dictionary<String, Object> props = new Hashtable<>();
+        props.put("osgi.service.blueprint.namespace", OpendaylightNamespaceHandler.NAMESPACE_1_0_0);
+        namespaceReg = context.registerService(NamespaceHandler.class.getName(),
+                new OpendaylightNamespaceHandler(), props);
+    }
+
+    private void registerBlueprintEventHandler(BundleContext context) {
+        Dictionary<String, Object> props = new Hashtable<>();
+        props.put(org.osgi.service.event.EventConstants.EVENT_TOPIC, EventConstants.TOPIC_CREATED);
+        eventHandlerReg = context.registerService(EventHandler.class.getName(), this, props);
+    }
+
     /**
      * Implemented from BundleActivator.
      */
@@ -97,7 +117,10 @@ public class BlueprintBundleTracker implements BundleActivator, BundleTrackerCus
     public void stop(BundleContext context) {
         bundleTracker.close();
         serviceTracker.close();
-        eventHandlerReg.unregister();
+
+        AriesFrameworkUtil.safeUnregisterService(eventHandlerReg);
+        AriesFrameworkUtil.safeUnregisterService(namespaceReg);
+        AriesFrameworkUtil.safeUnregisterService(blueprintContainerRestartReg);
     }
 
     /**
@@ -146,7 +169,7 @@ public class BlueprintBundleTracker implements BundleActivator, BundleTrackerCus
         }
     }
 
-    private List<Object> findBlueprintPaths(Bundle bundle) {
+    static List<Object> findBlueprintPaths(Bundle bundle) {
         List<Object> paths = null;
         Enumeration<URL> e = bundle.findEntries(BLUEPRINT_FILE_PATH, BLUEPRINT_FLE_PATTERN, false);
         while(e != null && e.hasMoreElements()) {
