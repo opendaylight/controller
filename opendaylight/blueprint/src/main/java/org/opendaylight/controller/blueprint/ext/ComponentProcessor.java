@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.blueprint.ext;
 
+import com.google.common.base.Strings;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -15,6 +16,7 @@ import org.apache.aries.blueprint.ComponentDefinitionRegistry;
 import org.apache.aries.blueprint.ComponentDefinitionRegistryProcessor;
 import org.apache.aries.blueprint.ext.AbstractPropertyPlaceholder;
 import org.apache.aries.blueprint.mutable.MutableBeanMetadata;
+import org.apache.aries.blueprint.mutable.MutableServiceReferenceMetadata;
 import org.apache.aries.util.AriesFrameworkUtil;
 import org.opendaylight.controller.blueprint.BlueprintContainerRestartService;
 import org.osgi.framework.Bundle;
@@ -64,12 +66,25 @@ public class ComponentProcessor implements ComponentDefinitionRegistryProcessor 
         for(String name : registry.getComponentDefinitionNames()) {
             ComponentMetadata component = registry.getComponentDefinition(name);
             if(component instanceof MutableBeanMetadata) {
-                processMutableBeanMetadata((MutableBeanMetadata)component);
+                processBeanMetadata((MutableBeanMetadata)component);
+            } else if(component instanceof MutableServiceReferenceMetadata) {
+                processServiceReferenceMetadata((MutableServiceReferenceMetadata)component);
             }
         }
     }
 
-    private void processMutableBeanMetadata(MutableBeanMetadata bean) {
+    private void processServiceReferenceMetadata(MutableServiceReferenceMetadata serviceRef) {
+        String oldFilter = serviceRef.getFilter();
+
+        LOG.debug("{}: processServiceReferenceMetadata for {}, old filter: {}", bundle.getSymbolicName(),
+                serviceRef.getId(), oldFilter);
+
+        if(Strings.isNullOrEmpty(oldFilter)) {
+            serviceRef.setFilter("(|(type=default)(!(type=*)))");
+        }
+    }
+
+    private void processBeanMetadata(MutableBeanMetadata bean) {
         if(restartDependentsOnUpdate && bean.getRuntimeClass() != null &&
                 AbstractPropertyPlaceholder.class.isAssignableFrom(bean.getRuntimeClass())) {
             LOG.debug("{}: processMutableBeanMetadata: {}, runtime {}", bundle.getSymbolicName(), bean.getId(),
