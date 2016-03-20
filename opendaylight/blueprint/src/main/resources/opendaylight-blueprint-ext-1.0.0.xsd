@@ -10,4 +10,6 @@
   </xsd:complexType>
   <xsd:element name="processor" type="Tprocessor"/>
 
+  <xsd:attribute name="type" type="xsd:string"/>
+
 </xsd:schema>
