@@ -3,10 +3,29 @@
     targetNamespace="http://opendaylight.org/xmlns/blueprint/v1.0.0" elementFormDefault="qualified" 
     attributeFormDefault="unqualified" version="1.0.0">
 
-<!-- <xsd:import namespace="http://www.osgi.org/xmlns/blueprint/v1.0.0"/> -->
+  <xsd:import namespace="http://www.osgi.org/xmlns/blueprint/v1.0.0"/>
 
   <xsd:attribute name="restart-dependents-on-updates" type="xsd:boolean"/>
   <xsd:attribute name="use-default-for-reference-types" type="xsd:boolean"/>
   <xsd:attribute name="type" type="xsd:string"/>
+
+  <xsd:complexType name="TrpcImplementation">
+    <xsd:attribute name="interface" type="bp:Tclass" use="optional"/>
+    <xsd:attribute name="ref" type="bp:Tidref" use="required"/>
+  </xsd:complexType>
+  <xsd:element name="rpc-implementation" type="TrpcImplementation"/>
+
+  <xsd:complexType name="TroutedRpcImplementation">
+    <xsd:attribute name="interface" type="bp:Tclass" use="optional"/>
+    <xsd:attribute name="ref" type="bp:Tidref" use="required"/>
+    <xsd:attribute name="id" type="xsd:ID"/>
+  </xsd:complexType>
+  <xsd:element name="routed-rpc-implementation" type="TroutedRpcImplementation"/>
+
+  <xsd:complexType name="TrpcService">
+    <xsd:attribute name="interface" type="bp:Tclass" use="required"/>
+    <xsd:attribute name="id" type="xsd:ID"/>
+  </xsd:complexType>
+  <xsd:element name="rpc-service" type="TrpcService"/>
 
 </xsd:schema>
