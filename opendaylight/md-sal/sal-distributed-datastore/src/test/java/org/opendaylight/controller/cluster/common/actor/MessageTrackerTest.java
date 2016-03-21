@@ -6,7 +6,7 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.opendaylight.controller.cluster.datastore.utils;
+package org.opendaylight.controller.cluster.common.actor;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -20,12 +20,14 @@ import org.slf4j.LoggerFactory;
 
 public class MessageTrackerTest {
 
-    private final Logger LOG = LoggerFactory.getLogger(getClass());
+    private final static Logger LOG = LoggerFactory.getLogger(MessageTrackerTest.class);
 
-    private class Foo {}
+    private class Foo {
+
+    }
 
     @Test
-    public void testNoTracking(){
+    public void testNoTracking() {
         MessageTracker messageTracker = new MessageTracker(Foo.class, 10);
 
         MessageTracker.Context context1 = messageTracker.received(new Foo());
@@ -39,7 +41,7 @@ public class MessageTrackerTest {
     }
 
     @Test
-    public void testFailedExpectationOnTracking(){
+    public void testFailedExpectationOnTracking() {
         MessageTracker messageTracker = new MessageTracker(Foo.class, 10);
         messageTracker.begin();
 
@@ -55,7 +57,7 @@ public class MessageTrackerTest {
     }
 
     @Test
-    public void testFailedExpectationOnTrackingWithMessagesInBetween(){
+    public void testFailedExpectationOnTrackingWithMessagesInBetween() {
         MessageTracker messageTracker = new MessageTracker(Foo.class, 10);
         messageTracker.begin();
 
@@ -89,12 +91,11 @@ public class MessageTrackerTest {
         Assert.assertEquals(Foo.class, error.getCurrentExpectedMessage().getClass());
 
         LOG.error("An error occurred : {}" , error);
-
     }
 
 
     @Test
-    public void testMetExpectationOnTracking(){
+    public void testMetExpectationOnTracking() {
         MessageTracker messageTracker = new MessageTracker(Foo.class, 10);
         messageTracker.begin();
 
@@ -109,7 +110,7 @@ public class MessageTrackerTest {
     }
 
     @Test
-    public void testIllegalStateExceptionWhenDoneIsNotCalledWhileTracking(){
+    public void testIllegalStateExceptionWhenDoneIsNotCalledWhileTracking() {
         MessageTracker messageTracker = new MessageTracker(Foo.class, 10);
         messageTracker.begin();
 
@@ -124,7 +125,7 @@ public class MessageTrackerTest {
     }
 
     @Test
-    public void testNoIllegalStateExceptionWhenDoneIsNotCalledWhileNotTracking(){
+    public void testNoIllegalStateExceptionWhenDoneIsNotCalledWhileNotTracking() {
         MessageTracker messageTracker = new MessageTracker(Foo.class, 10);
 
         messageTracker.received(new Foo());
@@ -155,7 +156,7 @@ public class MessageTrackerTest {
     }
 
     @Test
-    public void testCallingBeginDoesNotResetWatch(){
+    public void testCallingBeginDoesNotResetWatch() {
         MessageTracker messageTracker = new MessageTracker(Foo.class, 10);
         messageTracker.begin();
 
@@ -170,7 +171,7 @@ public class MessageTrackerTest {
     }
 
     @Test
-    public void testMessagesSinceLastExpectedMessage(){
+    public void testMessagesSinceLastExpectedMessage() {
 
         MessageTracker messageTracker = new MessageTracker(Foo.class, 10);
         messageTracker.begin();
