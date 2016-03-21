@@ -29,6 +29,11 @@
   </xsd:complexType>
   <xsd:element name="rpc-service" type="TrpcService"/>
 
+  <xsd:complexType name="TnotificationListener">
+    <xsd:attribute name="ref" type="bp:Tidref" use="required"/>
+  </xsd:complexType>
+  <xsd:element name="notification-listener" type="TnotificationListener"/>
+
   <xsd:attribute name="type" type="xsd:string"/>
 
 </xsd:schema>
