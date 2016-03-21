@@ -22,6 +22,7 @@ import org.apache.aries.blueprint.mutable.MutableServiceMetadata;
 import org.apache.aries.blueprint.mutable.MutableServiceReferenceMetadata;
 import org.apache.aries.blueprint.mutable.MutableValueMetadata;
 import org.opendaylight.controller.blueprint.BlueprintContainerRestartService;
+import org.opendaylight.controller.md.sal.binding.api.NotificationService;
 import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
 import org.osgi.service.blueprint.container.ComponentDefinitionException;
 import org.osgi.service.blueprint.reflect.BeanMetadata;
@@ -47,6 +48,7 @@ public class OpendaylightNamespaceHandler implements NamespaceHandler {
     public static final String NAMESPACE_1_0_0 = "http://opendaylight.org/xmlns/blueprint/v1.0.0";
     static final String ROUTED_RPC_REG_CONVERTER_NAME = "org.opendaylight.blueprint.RoutedRpcRegConverter";
     static final String RPC_REGISTRY_NAME = "org.opendaylight.blueprint.RpcRegistry";
+    static final String NOTIFICATION_SERVICE_NAME = "org.opendaylight.blueprint.NotificationService";
 
     private static final Logger LOG = LoggerFactory.getLogger(OpendaylightNamespaceHandler.class);
     private static final String COMPONENT_PROCESSOR_NAME = ComponentProcessor.class.getName();
@@ -85,6 +87,8 @@ public class OpendaylightNamespaceHandler implements NamespaceHandler {
             return parseRoutedRpcImplementation(element, context);
         } else if (nodeNameEquals(element, RPC_SERVICE)) {
             return parseRpcService(element, context);
+        } else if (nodeNameEquals(element, NotificationListenerBean.NOTIFICATION_LISTENER)) {
+            return parseNotificationListener(element, context);
         }
 
         throw new ComponentDefinitionException("Unsupported standalone element: " + element.getNodeName());
@@ -273,6 +277,34 @@ public class OpendaylightNamespaceHandler implements NamespaceHandler {
         if(registry.getComponentDefinition(RPC_REGISTRY_NAME) == null) {
             MutableReferenceMetadata metadata = createServiceRef(context, RpcProviderRegistry.class, null);
             metadata.setId(RPC_REGISTRY_NAME);
+            registry.registerComponentDefinition(metadata);
+        }
+    }
+
+    private Metadata parseNotificationListener(Element element, ParserContext context) {
+        registerNotificationServiceRefBean(context);
+
+        MutableBeanMetadata metadata = context.createMetadata(MutableBeanMetadata.class);
+        metadata.setId(context.generateId());
+        metadata.setScope(BeanMetadata.SCOPE_SINGLETON);
+        metadata.setActivation(ReferenceMetadata.ACTIVATION_EAGER);
+        metadata.setRuntimeClass(NotificationListenerBean.class);
+        metadata.setInitMethod("init");
+        metadata.setDestroyMethod("destroy");
+        metadata.addProperty("bundle", createRef(context, "blueprintBundle"));
+        metadata.addProperty("notificationService", createRef(context, NOTIFICATION_SERVICE_NAME));
+        metadata.addProperty("notificationListener", createRef(context, element.getAttribute(REF_ATTR)));
+
+        LOG.debug("parseNotificationListener returning {}", metadata);
+
+        return metadata;
+    }
+
+     private void registerNotificationServiceRefBean(ParserContext context) {
+        ComponentDefinitionRegistry registry = context.getComponentDefinitionRegistry();
+        if(registry.getComponentDefinition(NOTIFICATION_SERVICE_NAME) == null) {
+            MutableReferenceMetadata metadata = createServiceRef(context, NotificationService.class, null);
+            metadata.setId(NOTIFICATION_SERVICE_NAME);
             registry.registerComponentDefinition(metadata);
         }
     }
