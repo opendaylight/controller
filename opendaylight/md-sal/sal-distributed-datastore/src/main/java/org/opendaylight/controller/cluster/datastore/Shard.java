@@ -25,6 +25,7 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.Nonnull;
 import org.opendaylight.controller.cluster.common.actor.CommonConfig;
 import org.opendaylight.controller.cluster.common.actor.MessageTracker;
+import org.opendaylight.controller.cluster.common.actor.MessageTracker.Error;
 import org.opendaylight.controller.cluster.common.actor.MeteringBehavior;
 import org.opendaylight.controller.cluster.datastore.ShardCommitCoordinator.CohortEntry;
 import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
@@ -210,11 +211,11 @@ public class Shard extends RaftActor {
     @Override
     protected void handleCommand(final Object message) {
 
-        MessageTracker.Context context = appendEntriesReplyTracker.received(message);
-
-        if(context.error().isPresent()){
+        final MessageTracker.Context context = appendEntriesReplyTracker.received(message);
+        final Optional<Error> maybeError = context.error();
+        if (maybeError.isPresent()) {
             LOG.trace("{} : AppendEntriesReply failed to arrive at the expected interval {}", persistenceId(),
-                context.error());
+                maybeError.get());
         }
 
         try {
