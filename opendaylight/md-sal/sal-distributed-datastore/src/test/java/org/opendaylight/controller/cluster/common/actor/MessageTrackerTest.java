@@ -8,47 +8,65 @@
 
 package org.opendaylight.controller.cluster.common.actor;
 
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
-import com.google.common.util.concurrent.Uninterruptibles;
+import com.google.common.base.Ticker;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class MessageTrackerTest {
 
+    private static final class TestTicker extends Ticker {
+        private long ticks;
+
+        @Override
+        public long read() {
+            return ticks;
+        }
+
+        void increment(final long ticks) {
+            this.ticks += ticks;
+        }
+    }
+
+    private static final class Foo {
+        // Intentionally empty
+    }
+
     private final static Logger LOG = LoggerFactory.getLogger(MessageTrackerTest.class);
 
-    private class Foo {
+    private TestTicker ticker;
+    private MessageTracker messageTracker;
 
+    @Before
+    public void setup() {
+        ticker = new TestTicker();
+        messageTracker = new MessageTracker(Foo.class, 10, ticker);
     }
 
     @Test
     public void testNoTracking() {
-        MessageTracker messageTracker = new MessageTracker(Foo.class, 10);
-
         MessageTracker.Context context1 = messageTracker.received(new Foo());
         context1.done();
 
-        Uninterruptibles.sleepUninterruptibly(20, TimeUnit.MILLISECONDS);
-
+        ticker.increment(MILLISECONDS.toNanos(20));
         MessageTracker.Context context2 = messageTracker.received(new Foo());
         context2.done();
-
     }
 
     @Test
     public void testFailedExpectationOnTracking() {
-        MessageTracker messageTracker = new MessageTracker(Foo.class, 10);
         messageTracker.begin();
 
         MessageTracker.Context context1 = messageTracker.received(new Foo());
         context1.done();
 
-        Uninterruptibles.sleepUninterruptibly(20, TimeUnit.MILLISECONDS);
+        ticker.increment(MILLISECONDS.toNanos(20));
 
         MessageTracker.Context context2 = messageTracker.received(new Foo());
         Assert.assertEquals(true, context2.error().isPresent());
@@ -58,17 +76,16 @@ public class MessageTrackerTest {
 
     @Test
     public void testFailedExpectationOnTrackingWithMessagesInBetween() {
-        MessageTracker messageTracker = new MessageTracker(Foo.class, 10);
         messageTracker.begin();
 
         MessageTracker.Context context1 = messageTracker.received(new Foo());
         context1.done();
 
         messageTracker.received("A").done();
-        messageTracker.received(Long.valueOf(10)).done();
-        MessageTracker.Context c = messageTracker.received(Integer.valueOf(100));
+        messageTracker.received(10L).done();
+        MessageTracker.Context c = messageTracker.received(100);
 
-        Uninterruptibles.sleepUninterruptibly(20, TimeUnit.MILLISECONDS);
+        ticker.increment(MILLISECONDS.toNanos(20));
 
         c.done();
 
@@ -86,7 +103,7 @@ public class MessageTrackerTest {
         Assert.assertEquals(String.class, messageProcessingTimes.get(0).getMessageClass());
         Assert.assertEquals(Long.class, messageProcessingTimes.get(1).getMessageClass());
         Assert.assertEquals(Integer.class, messageProcessingTimes.get(2).getMessageClass());
-        Assert.assertTrue(messageProcessingTimes.get(2).getElapsedTimeInNanos() > TimeUnit.MILLISECONDS.toNanos(10));
+        Assert.assertTrue(messageProcessingTimes.get(2).getElapsedTimeInNanos() > MILLISECONDS.toNanos(10));
         Assert.assertEquals(Foo.class, error.getLastExpectedMessage().getClass());
         Assert.assertEquals(Foo.class, error.getCurrentExpectedMessage().getClass());
 
@@ -96,13 +113,12 @@ public class MessageTrackerTest {
 
     @Test
     public void testMetExpectationOnTracking() {
-        MessageTracker messageTracker = new MessageTracker(Foo.class, 10);
         messageTracker.begin();
 
         MessageTracker.Context context1 = messageTracker.received(new Foo());
         context1.done();
 
-        Uninterruptibles.sleepUninterruptibly(1, TimeUnit.MILLISECONDS);
+        ticker.increment(MILLISECONDS.toNanos(1));
 
         MessageTracker.Context context2 = messageTracker.received(new Foo());
         Assert.assertEquals(false, context2.error().isPresent());
@@ -111,7 +127,6 @@ public class MessageTrackerTest {
 
     @Test
     public void testIllegalStateExceptionWhenDoneIsNotCalledWhileTracking() {
-        MessageTracker messageTracker = new MessageTracker(Foo.class, 10);
         messageTracker.begin();
 
         messageTracker.received(new Foo());
@@ -126,19 +141,15 @@ public class MessageTrackerTest {
 
     @Test
     public void testNoIllegalStateExceptionWhenDoneIsNotCalledWhileNotTracking() {
-        MessageTracker messageTracker = new MessageTracker(Foo.class, 10);
-
         messageTracker.received(new Foo());
         messageTracker.received(new Foo());
     }
 
     @Test
     public void testDelayInFirstExpectedMessageArrival(){
-
-        MessageTracker messageTracker = new MessageTracker(Foo.class, 10);
         messageTracker.begin();
 
-        Uninterruptibles.sleepUninterruptibly(20, TimeUnit.MILLISECONDS);
+        ticker.increment(MILLISECONDS.toNanos(20));
 
         MessageTracker.Context context = messageTracker.received(new Foo());
 
@@ -157,10 +168,9 @@ public class MessageTrackerTest {
 
     @Test
     public void testCallingBeginDoesNotResetWatch() {
-        MessageTracker messageTracker = new MessageTracker(Foo.class, 10);
         messageTracker.begin();
 
-        Uninterruptibles.sleepUninterruptibly(20, TimeUnit.MILLISECONDS);
+        ticker.increment(MILLISECONDS.toNanos(20));
 
         messageTracker.begin();
 
@@ -173,7 +183,6 @@ public class MessageTrackerTest {
     @Test
     public void testMessagesSinceLastExpectedMessage() {
 
-        MessageTracker messageTracker = new MessageTracker(Foo.class, 10);
         messageTracker.begin();
 
         MessageTracker.Context context1 = messageTracker.received(Integer.valueOf(45)).done();
