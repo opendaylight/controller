@@ -8,14 +8,17 @@
 
 package org.opendaylight.controller.cluster.datastore.messages;
 
-public class SwitchShardBehavior {
+import com.google.common.base.Preconditions;
+import org.opendaylight.controller.cluster.raft.RaftState;
+
+public final class SwitchShardBehavior {
     private final String shardName;
-    private final String newState;
+    private final RaftState newState;
     private final long term;
 
-    public SwitchShardBehavior(String shardName, String newState, long term) {
-        this.shardName = shardName;
-        this.newState = newState;
+    public SwitchShardBehavior(String shardName, RaftState newState, long term) {
+        this.shardName = Preconditions.checkNotNull(shardName);
+        this.newState = Preconditions.checkNotNull(newState);
         this.term = term;
     }
 
@@ -23,7 +26,7 @@ public class SwitchShardBehavior {
         return shardName;
     }
 
-    public String getNewState() {
+    public RaftState getNewState() {
         return newState;
     }
 

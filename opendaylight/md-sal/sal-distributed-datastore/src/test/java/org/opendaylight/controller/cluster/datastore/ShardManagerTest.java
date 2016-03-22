@@ -1171,7 +1171,7 @@ public class ShardManagerTest extends AbstractActorTest {
             shardManager.tell(new UpdateSchemaContext(TestModel.createTestContext()), getRef());
             shardManager.tell(new ActorInitialized(), mockShardActor);
 
-            shardManager.tell(new SwitchShardBehavior(mockShardName, "Leader", 1000), getRef());
+            shardManager.tell(new SwitchShardBehavior(mockShardName, RaftState.Leader, 1000), getRef());
 
             SwitchBehavior switchBehavior = MessageCollectorActor.expectFirstMatching(mockShardActor, SwitchBehavior.class);
 

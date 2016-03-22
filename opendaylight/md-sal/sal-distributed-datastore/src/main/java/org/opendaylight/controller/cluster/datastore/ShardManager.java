@@ -853,7 +853,7 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
         if(shardInformation != null && shardInformation.getActor() != null) {
             shardInformation.getActor().tell(
-                    new SwitchBehavior(RaftState.valueOf(message.getNewState()), message.getTerm()), getSelf());
+                    new SwitchBehavior(message.getNewState(), message.getTerm()), getSelf());
         } else {
             LOG.warn("Could not switch the behavior of shard {} to {} - shard is not yet available",
                     message.getShardName(), message.getNewState());

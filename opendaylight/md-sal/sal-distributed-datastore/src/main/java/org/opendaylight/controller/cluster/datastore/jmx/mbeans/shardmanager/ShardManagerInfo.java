@@ -87,7 +87,8 @@ public class ShardManagerInfo extends AbstractMXBean implements ShardManagerInfo
         Preconditions.checkArgument(localShards.contains(shardName), shardName + " is not local");
         Preconditions.checkArgument(ACCEPTABLE_STATES.contains(newState));
 
-        shardManager.getSelf().tell(new SwitchShardBehavior(shardName, newState, term), ActorRef.noSender());
+        shardManager.getSelf().tell(new SwitchShardBehavior(shardName, RaftState.valueOf(newState), term),
+            ActorRef.noSender());
     }
 
     public void setSyncStatus(boolean syncStatus){
