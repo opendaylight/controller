@@ -10,7 +10,8 @@ package org.opendaylight.controller.cluster.datastore.jmx.mbeans.shardmanager;
 
 import akka.actor.ActorRef;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
+import com.google.common.collect.ImmutableList;
+import java.util.Collection;
 import java.util.List;
 import org.opendaylight.controller.cluster.datastore.ShardManager;
 import org.opendaylight.controller.cluster.datastore.messages.SwitchShardBehavior;
@@ -21,11 +22,11 @@ import org.slf4j.LoggerFactory;
 
 public class ShardManagerInfo extends AbstractMXBean implements ShardManagerInfoMBean {
 
-    public static String JMX_CATEGORY_SHARD_MANAGER = "ShardManager";
+    public static final String JMX_CATEGORY_SHARD_MANAGER = "ShardManager";
 
     // The only states that you can switch to from outside. You cannot switch to Candidate/IsolatedLeader for example
-    private static final List<String> ACCEPTABLE_STATES
-            = Lists.newArrayList(RaftState.Leader.name(), RaftState.Follower.name());
+    private static final Collection<String> ACCEPTABLE_STATES
+            = ImmutableList.of(RaftState.Leader.name(), RaftState.Follower.name());
 
     private static final Logger LOG = LoggerFactory.getLogger(ShardManagerInfo.class);
 
