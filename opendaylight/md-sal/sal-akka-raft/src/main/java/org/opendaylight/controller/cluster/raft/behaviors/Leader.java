@@ -56,7 +56,7 @@ public class Leader extends AbstractLeader {
     private @Nullable LeadershipTransferContext leadershipTransferContext;
 
     public Leader(RaftActorContext context) {
-        super(context);
+        super(context, RaftState.Leader);
         isolatedLeaderCheck = Stopwatch.createStarted();
     }
 

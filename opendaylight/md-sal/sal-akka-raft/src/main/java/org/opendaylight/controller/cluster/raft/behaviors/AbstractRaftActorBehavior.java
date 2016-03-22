@@ -91,7 +91,7 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
     }
 
     @Override
-    public RaftState state() {
+    public final RaftState state() {
         return state;
     }
 

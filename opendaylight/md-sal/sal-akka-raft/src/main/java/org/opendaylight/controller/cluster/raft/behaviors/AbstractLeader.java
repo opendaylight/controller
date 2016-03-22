@@ -92,8 +92,8 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
 
     private Optional<SnapshotHolder> snapshot;
 
-    public AbstractLeader(RaftActorContext context) {
-        super(context, RaftState.Leader);
+    protected AbstractLeader(RaftActorContext context, RaftState state) {
+        super(context, state);
 
         setLeaderPayloadVersion(context.getPayloadVersion());
 

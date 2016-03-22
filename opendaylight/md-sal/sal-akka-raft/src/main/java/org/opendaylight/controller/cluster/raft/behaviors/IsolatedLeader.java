@@ -27,7 +27,7 @@ import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
  */
 public class IsolatedLeader extends AbstractLeader {
     public IsolatedLeader(RaftActorContext context) {
-        super(context);
+        super(context, RaftState.IsolatedLeader);
     }
 
     // we received an Append Entries reply, we should switch the Behavior to Leader
@@ -43,10 +43,5 @@ public class IsolatedLeader extends AbstractLeader {
             return internalSwitchBehavior(RaftState.Leader);
         }
         return ret;
-    }
-
-    @Override
-    public RaftState state() {
-        return RaftState.IsolatedLeader;
     }
 }
