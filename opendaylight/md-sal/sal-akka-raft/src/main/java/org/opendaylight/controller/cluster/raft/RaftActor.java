@@ -40,6 +40,7 @@ import org.opendaylight.controller.cluster.raft.base.messages.LeaderTransitionin
 import org.opendaylight.controller.cluster.raft.base.messages.Replicate;
 import org.opendaylight.controller.cluster.raft.base.messages.SwitchBehavior;
 import org.opendaylight.controller.cluster.raft.behaviors.AbstractLeader;
+import org.opendaylight.controller.cluster.raft.behaviors.AbstractRaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.behaviors.DelegatingRaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.behaviors.Follower;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
@@ -866,7 +867,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         @Override
         public RaftActorBehavior get() {
             if(this.message instanceof SwitchBehavior){
-                return ((SwitchBehavior) message).getNewState().createBehavior(getRaftActorContext());
+                return AbstractRaftActorBehavior.createBehavior(context, ((SwitchBehavior) message).getNewState());
             }
             return currentBehavior.handleMessage(sender, message);
         }

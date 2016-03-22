@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.raft.behaviors;
 
 import akka.actor.ActorRef;
 import akka.actor.Cancellable;
+import com.google.common.base.Preconditions;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.raft.ClientRequestTracker;
@@ -66,12 +67,27 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
 
     private final RaftState state;
 
-    protected AbstractRaftActorBehavior(RaftActorContext context, RaftState state) {
-        this.context = context;
-        this.state = state;
+    AbstractRaftActorBehavior(final RaftActorContext context, final RaftState state) {
+        this.context = Preconditions.checkNotNull(context);
+        this.state = Preconditions.checkNotNull(state);
         this.LOG = context.getLogger();
 
         logName = String.format("%s (%s)", context.getId(), state);
+    }
+
+    public static RaftActorBehavior createBehavior(final RaftActorContext context, final RaftState state) {
+        switch (state) {
+            case Candidate:
+                return new Candidate(context);
+            case Follower:
+                return new Follower(context);
+            case IsolatedLeader:
+                return new IsolatedLeader(context);
+            case Leader:
+                return new Leader(context);
+            default:
+                throw new IllegalArgumentException("Unhandled state " + state);
+        }
     }
 
     @Override
@@ -432,7 +448,7 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
 
     protected RaftActorBehavior internalSwitchBehavior(RaftState newState) {
         if(context.getRaftPolicy().automaticElectionsEnabled()){
-            return internalSwitchBehavior(newState.createBehavior(context));
+            return internalSwitchBehavior(createBehavior(context, newState));
         }
         return this;
     }
