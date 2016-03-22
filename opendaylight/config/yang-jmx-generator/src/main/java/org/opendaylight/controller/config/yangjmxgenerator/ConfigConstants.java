@@ -30,6 +30,7 @@ public final class ConfigConstants {
     public static final QName SERVICE_TYPE_Q_NAME = createConfigQName("service-type");
     public static final QName MODULE_TYPE_Q_NAME = createConfigQName("module-type");
     public static final QName JAVA_CLASS_EXTENSION_QNAME = createConfigQName("java-class");
+    public static final QName DISABLE_OSGI_SERVICE_REG_QNAME = createConfigQName("disable-osgi-service-registration");
     public static final QName REQUIRED_IDENTITY_EXTENSION_QNAME = createConfigQName("required-identity");
     public static final QName INNER_STATE_BEAN_EXTENSION_QNAME = createConfigQName("inner-state-bean");
     public static final QName PROVIDED_SERVICE_EXTENSION_QNAME = createConfigQName("provided-service");

@@ -29,6 +29,13 @@ module config {
         argument "name";
     }
 
+    extension disable-osgi-service-registration {
+        description
+            "YANG language extension carrying the fully-qualified name of
+             a Java class. Code generation tools use the provided reference
+             to tie a specific construct to its Java representation.";
+    }
+
     extension required-identity {
         description
             "YANG language extension which indicates that a particular
