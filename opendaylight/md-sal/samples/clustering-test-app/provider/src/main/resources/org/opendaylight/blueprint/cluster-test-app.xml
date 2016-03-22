@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+           xmlns:odl="http://opendaylight.org/xmlns/blueprint/v1.0.0"
+           xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0"
+    odl:use-default-for-reference-types="true">
+
+  <reference id="dataBroker" interface="org.opendaylight.controller.md.sal.binding.api.DataBroker"/>
+  <reference id="notificationService" interface="org.opendaylight.controller.sal.binding.api.NotificationProviderService"/>
+  <reference id="entityOwnershipService" interface="org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipService"/>
+
+  <bean id="purchaseCarProvider" class="org.opendaylight.controller.clustering.it.provider.PurchaseCarProvider" >
+    <property name="notificationProvider" ref="notificationService"/>
+  </bean>
+
+  <odl:routed-rpc-implementation id="carPurchaseRpcReg" ref="purchaseCarProvider"/>
+
+  <bean id="peopleProvider" class="org.opendaylight.controller.clustering.it.provider.PeopleProvider" >
+    <property name="dataProvider" ref="dataBroker"/>
+    <property name="rpcRegistration" ref="carPurchaseRpcReg"/>
+  </bean>
+
+  <bean id="carProvider" class="org.opendaylight.controller.clustering.it.provider.CarProvider" >
+    <argument ref="dataBroker"/>
+    <argument ref="entityOwnershipService"/>
+  </bean>
+
+  <odl:rpc-implementation ref="carProvider"/>
+  <odl:rpc-implementation ref="peopleProvider"/>
+
+  <bean id="peopleCarListener" class="org.opendaylight.controller.clustering.it.listener.PeopleCarListener" >
+    <property name="dataProvider" ref="dataBroker"/>
+  </bean>
+
+  <odl:notification-listener ref="peopleCarListener"/>
+
+</blueprint>
