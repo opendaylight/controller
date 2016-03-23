@@ -8,15 +8,10 @@
 package org.opendaylight.controller.config.yang.md.sal.binding.impl;
 
 import com.google.common.base.Preconditions;
-import java.util.Hashtable;
 import org.opendaylight.controller.md.sal.binding.impl.BindingToNormalizedNodeCodec;
-import org.opendaylight.controller.sal.binding.codegen.impl.SingletonHolder;
-import org.opendaylight.yangtools.binding.data.codec.gen.impl.StreamWriterGenerator;
-import org.opendaylight.yangtools.binding.data.codec.impl.BindingNormalizedNodeCodecRegistry;
-import org.opendaylight.yangtools.sal.binding.generator.api.ClassLoadingStrategy;
-import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
+import org.opendaylight.controller.sal.common.util.osgi.WaitingServiceTracker;
+import org.opendaylight.yangtools.binding.data.codec.api.BindingNormalizedNodeSerializer;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
 
 /**
  *
@@ -50,16 +45,18 @@ public final class RuntimeMappingModule extends AbstractRuntimeMappingModule {
 
     @Override
     public java.lang.AutoCloseable createInstance() {
-        final ClassLoadingStrategy classLoading = getGlobalClassLoadingStrategy();
-        final BindingNormalizedNodeCodecRegistry codecRegistry = new BindingNormalizedNodeCodecRegistry(StreamWriterGenerator.create(SingletonHolder.JAVASSIST));
-        final BindingToNormalizedNodeCodec instance = new BindingToNormalizedNodeCodec(classLoading, codecRegistry,getWaitForSchema());
-        bundleContext.registerService(SchemaContextListener.class, instance, new Hashtable<String,String>());
-        return instance;
-    }
+        // The service is provided via blueprint so wait for and return it here for backwards compatibility.
+        final WaitingServiceTracker<BindingNormalizedNodeSerializer> tracker = WaitingServiceTracker.create(
+                BindingNormalizedNodeSerializer.class, bundleContext);
+        BindingToNormalizedNodeCodec codec = (BindingToNormalizedNodeCodec) tracker.waitForService(
+                WaitingServiceTracker.FIVE_MINUTES);
 
-    private ClassLoadingStrategy getGlobalClassLoadingStrategy() {
-        final ServiceReference<ClassLoadingStrategy> ref = bundleContext.getServiceReference(ClassLoadingStrategy.class);
-        return bundleContext.getService(ref);
+        // We can't wrap the BindingToNormalizedNodeCodec to also close the tracker so we'll close it here.
+        // This is OK since the BindingToNormalizedNodeCodec doesn't do anything on close so if the
+        // blueprint was destroyed first and closed the BindingToNormalizedNodeCodec, it wouldn't hurt
+        // anything.
+        tracker.close();
+        return codec;
     }
 
     public void setBundleContext(final BundleContext bundleContext) {
