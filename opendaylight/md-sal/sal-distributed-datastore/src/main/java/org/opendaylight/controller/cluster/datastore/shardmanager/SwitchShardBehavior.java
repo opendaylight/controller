@@ -9,21 +9,23 @@
 package org.opendaylight.controller.cluster.datastore.shardmanager;
 
 import com.google.common.base.Preconditions;
+import javax.annotation.Nullable;
+import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.raft.RaftState;
 
 final class SwitchShardBehavior {
-    private final String shardName;
+    private final ShardIdentifier shardId;
     private final RaftState newState;
     private final long term;
 
-    SwitchShardBehavior(String shardName, RaftState newState, long term) {
-        this.shardName = Preconditions.checkNotNull(shardName);
+    SwitchShardBehavior(final ShardIdentifier shardId, final RaftState newState, final long term) {
         this.newState = Preconditions.checkNotNull(newState);
+        this.shardId = shardId;
         this.term = term;
     }
 
-    String getShardName() {
-        return shardName;
+    @Nullable ShardIdentifier getShardId() {
+        return shardId;
     }
 
     RaftState getNewState() {
@@ -37,7 +39,7 @@ final class SwitchShardBehavior {
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("SwitchShardBehavior{");
-        sb.append("shardName='").append(shardName).append('\'');
+        sb.append("shardId='").append(shardId).append('\'');
         sb.append(", newState='").append(newState).append('\'');
         sb.append(", term=").append(term);
         sb.append('}');

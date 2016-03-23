@@ -144,7 +144,7 @@ public class ShardManagerTest extends AbstractActorTest {
 
     private static TestActorRef<MessageCollectorActor> mockShardActor;
 
-    private static String mockShardName;
+    private static ShardIdentifier mockShardName;
 
     private final DatastoreContext.Builder datastoreContextBuilder = DatastoreContext.newBuilder().
             dataStoreName(shardMrgIDSuffix).shardInitializationTimeout(600, TimeUnit.MILLISECONDS)
@@ -162,8 +162,9 @@ public class ShardManagerTest extends AbstractActorTest {
         InMemorySnapshotStore.clear();
 
         if(mockShardActor == null) {
-            mockShardName = new ShardIdentifier(Shard.DEFAULT_NAME, "member-1", "config").toString();
-            mockShardActor = TestActorRef.create(getSystem(), Props.create(MessageCollectorActor.class), mockShardName);
+            mockShardName = new ShardIdentifier(Shard.DEFAULT_NAME, "member-1", "config");
+            mockShardActor = TestActorRef.create(getSystem(), Props.create(MessageCollectorActor.class),
+                    mockShardName.toString());
         }
 
         mockShardActor.underlyingActor().clear();
@@ -987,7 +988,7 @@ public class ShardManagerTest extends AbstractActorTest {
         InMemoryJournal.addEntry(persistenceID, 2L, new SchemaContextModules(ImmutableSet.of("bar")));
         InMemoryJournal.addDeleteMessagesCompleteLatch(persistenceID);
 
-        TestShardManager shardManager = newTestShardManager();
+        newTestShardManager();
 
         InMemoryJournal.waitForDeleteMessagesComplete(persistenceID);
 
