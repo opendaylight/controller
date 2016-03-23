@@ -9,6 +9,7 @@
 package org.opendaylight.controller.cluster.datastore.shardmanager;
 
 import com.google.common.base.Preconditions;
+import javax.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.RaftState;
 
 final class SwitchShardBehavior {
@@ -16,13 +17,13 @@ final class SwitchShardBehavior {
     private final RaftState newState;
     private final long term;
 
-    SwitchShardBehavior(String shardName, RaftState newState, long term) {
-        this.shardName = Preconditions.checkNotNull(shardName);
+    SwitchShardBehavior(final String shardName, final RaftState newState, final long term) {
         this.newState = Preconditions.checkNotNull(newState);
+        this.shardName = shardName;
         this.term = term;
     }
 
-    String getShardName() {
+    @Nullable String getShardName() {
         return shardName;
     }
 
