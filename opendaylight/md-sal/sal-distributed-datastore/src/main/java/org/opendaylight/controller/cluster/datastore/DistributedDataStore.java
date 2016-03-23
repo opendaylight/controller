@@ -20,7 +20,7 @@ import org.opendaylight.controller.cluster.datastore.identifiers.ShardManagerIde
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.DatastoreConfigurationMXBeanImpl;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.DatastoreInfoMXBeanImpl;
 import org.opendaylight.controller.cluster.datastore.messages.DatastoreSnapshot;
-import org.opendaylight.controller.cluster.datastore.shardmanager.ShardManager;
+import org.opendaylight.controller.cluster.datastore.shardmanager.ShardManagerCreator;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.controller.cluster.datastore.utils.Dispatchers;
 import org.opendaylight.controller.cluster.datastore.utils.PrimaryShardInfoFutureCache;
@@ -86,11 +86,11 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener,
 
         PrimaryShardInfoFutureCache primaryShardInfoCache = new PrimaryShardInfoFutureCache();
 
-        ShardManager.Builder builder = ShardManager.builder().cluster(cluster).configuration(configuration).
+        ShardManagerCreator creator = new ShardManagerCreator().cluster(cluster).configuration(configuration).
                 datastoreContextFactory(datastoreContextFactory).waitTillReadyCountdownLatch(waitTillReadyCountDownLatch).
                 primaryShardInfoCache(primaryShardInfoCache).restoreFromSnapshot(restoreFromSnapshot);
 
-        actorContext = new ActorContext(actorSystem, createShardManager(actorSystem, builder, shardDispatcher,
+        actorContext = new ActorContext(actorSystem, createShardManager(actorSystem, creator, shardDispatcher,
                 shardManagerId), cluster, configuration, datastoreContextFactory.getBaseDatastoreContext(), primaryShardInfoCache);
 
         this.waitTillReadyTimeInMillis =
@@ -233,13 +233,13 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener,
         }
     }
 
-    private static ActorRef createShardManager(ActorSystem actorSystem, ShardManager.Builder builder,
+    private static ActorRef createShardManager(ActorSystem actorSystem, ShardManagerCreator creator,
             String shardDispatcher, String shardManagerId) {
         Exception lastException = null;
 
         for(int i=0;i<100;i++) {
             try {
-                return actorSystem.actorOf(builder.props().withDispatcher(shardDispatcher).withMailbox(
+                return actorSystem.actorOf(creator.props().withDispatcher(shardDispatcher).withMailbox(
                         ActorContext.BOUNDED_MAILBOX), shardManagerId);
             } catch (Exception e){
                 lastException = e;
