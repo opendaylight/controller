@@ -7,8 +7,8 @@
  */
 package org.opendaylight.controller.cluster.datastore.messages;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import java.util.Optional;
 import javax.annotation.Nonnull;
 import org.opendaylight.controller.cluster.notifications.LeaderStateChanged;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
@@ -22,15 +22,21 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
  */
 public class ShardLeaderStateChanged extends LeaderStateChanged {
 
-    private final Optional<DataTree> localShardDataTree;
+    private final DataTree localShardDataTree;
 
     public ShardLeaderStateChanged(@Nonnull String memberId, @Nonnull String leaderId,
-            @Nonnull Optional<DataTree> localShardDataTree, short leaderPayloadVersion) {
+            @Nonnull DataTree localShardDataTree, short leaderPayloadVersion) {
         super(memberId, leaderId, leaderPayloadVersion);
         this.localShardDataTree = Preconditions.checkNotNull(localShardDataTree);
     }
 
+    public ShardLeaderStateChanged(@Nonnull String memberId, @Nonnull String leaderId,
+            short leaderPayloadVersion) {
+        super(memberId, leaderId, leaderPayloadVersion);
+        this.localShardDataTree = null;
+    }
+
     public @Nonnull Optional<DataTree> getLocalShardDataTree() {
-        return localShardDataTree;
+        return Optional.ofNullable(localShardDataTree);
     }
 }
