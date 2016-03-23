@@ -18,7 +18,6 @@
 package org.opendaylight.controller.config.yang.netty.eventexecutor;
 
 import static com.google.common.base.Preconditions.checkArgument;
-
 import org.opendaylight.controller.config.api.DependencyResolver;
 import org.osgi.framework.BundleContext;
 
@@ -29,12 +28,17 @@ public class GlobalEventExecutorModuleFactory extends org.opendaylight.controlle
     @Override
     public GlobalEventExecutorModule instantiateModule(String instanceName, DependencyResolver dependencyResolver, GlobalEventExecutorModule oldModule, AutoCloseable oldInstance, BundleContext bundleContext) {
         checkArgument(SINGLETON_NAME.equals(instanceName),"Illegal instance name '" + instanceName + "', only allowed name is " + SINGLETON_NAME);
-        return super.instantiateModule(instanceName, dependencyResolver, oldModule, oldInstance, bundleContext);
+        GlobalEventExecutorModule module = super.instantiateModule(instanceName, dependencyResolver, oldModule,
+                oldInstance, bundleContext);
+        module.setBundleContext(bundleContext);
+        return module;
     }
 
     @Override
     public GlobalEventExecutorModule instantiateModule(String instanceName, DependencyResolver dependencyResolver, BundleContext bundleContext) {
         checkArgument(SINGLETON_NAME.equals(instanceName),"Illegal instance name '" + instanceName + "', only allowed name is " + SINGLETON_NAME);
-        return super.instantiateModule(instanceName, dependencyResolver, bundleContext);
+        GlobalEventExecutorModule module = super.instantiateModule(instanceName, dependencyResolver, bundleContext);
+        module.setBundleContext(bundleContext);
+        return module;
     }
 }
