@@ -7,15 +7,11 @@
  */
 package org.opendaylight.controller.md.sal.binding.impl;
 
-import java.util.Hashtable;
 import org.opendaylight.controller.sal.binding.codegen.impl.SingletonHolder;
 import org.opendaylight.yangtools.binding.data.codec.gen.impl.StreamWriterGenerator;
 import org.opendaylight.yangtools.binding.data.codec.impl.BindingNormalizedNodeCodecRegistry;
 import org.opendaylight.yangtools.sal.binding.generator.api.ClassLoadingStrategy;
-import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
 import org.osgi.framework.BundleContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Factory class for creating and initializing a BindingToNormalizedNodeCodec instance.
@@ -23,8 +19,7 @@ import org.slf4j.LoggerFactory;
  * @author Thomas Pantelis
  */
 public class BindingToNormalizedNodeCodecFactory {
-    private static final Logger LOG = LoggerFactory.getLogger(BindingToNormalizedNodeCodecFactory.class);
-    private static final long WAIT_DURATION_MS = 5000;
+    private static volatile BindingToNormalizedNodeCodec instance;
 
     /**
      * Creates a BindingToNormalizedNodeCodec instance. The returned instance is registered with the
@@ -39,15 +34,11 @@ public class BindingToNormalizedNodeCodecFactory {
             BundleContext bundleContext) {
         BindingNormalizedNodeCodecRegistry codecRegistry = new BindingNormalizedNodeCodecRegistry(
                 StreamWriterGenerator.create(SingletonHolder.JAVASSIST));
-        BindingToNormalizedNodeCodec instance = new BindingToNormalizedNodeCodec(classLoadingStrategy,
-                codecRegistry, true);
+        instance = new BindingToNormalizedNodeCodec(classLoadingStrategy, codecRegistry, true);
+        return instance;
+    }
 
-        bundleContext.registerService(SchemaContextListener.class, instance, new Hashtable<String,String>());
-
-//        if(!instance.waitForSchemaContext(WAIT_DURATION_MS)) {
-//            LOG.warn("BindingToNormalizedNodeCodec did not receive SchemaContext within {}", WAIT_DURATION_MS);
-//        }
-
+    public static BindingToNormalizedNodeCodec getInstance() {
         return instance;
     }
 }
