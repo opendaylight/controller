@@ -9,7 +9,7 @@
 package org.opendaylight.controller.cluster.datastore.messages;
 
 /**
- * FindLocalShard is a message that should be sent to the {@link org.opendaylight.controller.cluster.datastore.ShardManager}
+ * FindLocalShard is a message that should be sent to the {@link org.opendaylight.controller.cluster.datastore.shardmanager.ShardManager}
  * when we need to find a reference to a LocalShard
  */
 public class FindLocalShard {
