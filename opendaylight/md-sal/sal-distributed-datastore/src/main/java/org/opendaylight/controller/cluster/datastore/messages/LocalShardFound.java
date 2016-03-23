@@ -11,7 +11,7 @@ package org.opendaylight.controller.cluster.datastore.messages;
 import akka.actor.ActorRef;
 
 /**
- * LocalShardFound is a message that is sent by the {@link org.opendaylight.controller.cluster.datastore.ShardManager}
+ * LocalShardFound is a message that is sent by the {@link org.opendaylight.controller.cluster.datastore.shardmanager.ShardManager}
  * when it finds a shard with the specified name in it's local shard registry
  */
 public class LocalShardFound {
