@@ -7,13 +7,18 @@
  */
 package org.opendaylight.controller.config.yang.md.sal.dom.impl;
 
+import com.google.common.util.concurrent.CheckedFuture;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
+import org.opendaylight.controller.sal.core.api.model.YangTextSourceProvider;
 import org.opendaylight.controller.sal.dom.broker.GlobalBundleScanningSchemaServiceImpl;
 import org.opendaylight.yangtools.concepts.Delegator;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
+import org.opendaylight.yangtools.yang.model.repo.api.SchemaSourceException;
+import org.opendaylight.yangtools.yang.model.repo.api.SourceIdentifier;
+import org.opendaylight.yangtools.yang.model.repo.api.YangTextSchemaSource;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,22 +61,20 @@ org.opendaylight.controller.config.yang.md.sal.dom.impl.AbstractSchemaServiceImp
 
     @Override
     public java.lang.AutoCloseable createInstance() {
-        return GlobalBundleScanningSchemaServiceImpl.getInstance();
+        return new GlobalSchemaServiceProxy(GlobalBundleScanningSchemaServiceImpl.getInstance());
     }
 
-    public class GlobalSchemaServiceProxy implements AutoCloseable, SchemaService, Delegator<SchemaService> {
+    private static class GlobalSchemaServiceProxy implements AutoCloseable, SchemaService, YangTextSourceProvider,
+            Delegator<SchemaService> {
+        private final GlobalBundleScanningSchemaServiceImpl delegate;
 
-        private SchemaService delegate;
-
-        public GlobalSchemaServiceProxy() {
-            this.delegate = GlobalBundleScanningSchemaServiceImpl.getInstance();
+        public GlobalSchemaServiceProxy(GlobalBundleScanningSchemaServiceImpl service) {
+            this.delegate = service;
         }
 
         @Override
-        public void close() throws Exception {
-            if (delegate != null) {
-                delegate = null;
-            }
+        public void close() {
+            // Intentional noop as the life-cycle is controlled via blueprint.
         }
 
         @Override
@@ -104,5 +107,10 @@ org.opendaylight.controller.config.yang.md.sal.dom.impl.AbstractSchemaServiceImp
             return delegate;
         }
 
+        @Override
+        public CheckedFuture<? extends YangTextSchemaSource, SchemaSourceException> getSource(
+                SourceIdentifier sourceIdentifier) {
+            return delegate.getSource(sourceIdentifier);
+        }
     }
 }
