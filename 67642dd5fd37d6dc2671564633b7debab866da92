@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a3f45e8_9ce79ce4",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/messages/ChangeServersVotingStatus.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-03-23T22:24:12Z",
+      "side": 1,
+      "message": "it seems callers of getServersVisited() perform a copy of the collection: ImmutableSet.copyOf() would make this safer, I think.",
+      "revId": "67642dd5fd37d6dc2671564633b7debab866da92",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a3f45e8_3ce2c8d5",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/messages/ChangeServersVotingStatus.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-03-23T22:24:12Z",
+      "side": 1,
+      "message": "does null here indicate a special case, or would an empty set work?",
+      "range": {
+        "startLine": 44,
+        "startChar": 4,
+        "endLine": 44,
+        "endChar": 13
+      },
+      "revId": "67642dd5fd37d6dc2671564633b7debab866da92",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
