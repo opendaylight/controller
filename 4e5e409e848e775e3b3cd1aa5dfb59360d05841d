@@ -154,6 +154,24 @@
     },
     {
       "key": {
+        "uuid": "5a3f45e8_5cb6b4dd",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 834,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-03-23T22:15:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5a3f45e8_dccda488",
+      "revId": "4e5e409e848e775e3b3cd1aa5dfb59360d05841d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a3f45e8_2976083f",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/messages/ChangeServersVotingStatus.java",
         "patchSetId": 10
@@ -189,6 +207,30 @@
       "side": 1,
       "message": "yeah it should be",
       "parentUuid": "5a3f45e8_2976083f",
+      "range": {
+        "startLine": 51,
+        "startChar": 93,
+        "endLine": 52,
+        "endChar": 87
+      },
+      "revId": "4e5e409e848e775e3b3cd1aa5dfb59360d05841d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a3f45e8_fca9807c",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/messages/ChangeServersVotingStatus.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-03-23T22:15:00Z",
+      "side": 1,
+      "message": "Fixed",
+      "parentUuid": "5a3f45e8_2949e8d0",
       "range": {
         "startLine": 51,
         "startChar": 93,
