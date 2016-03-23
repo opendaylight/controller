@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "5a3f45e8_e9a26099",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 203,
+      "author": {
+        "id": 3635
+      },
+      "writtenOn": "2016-03-23T19:59:19Z",
+      "side": 1,
+      "message": "Nevermind... that is just an inner class removal.",
+      "parentUuid": "5a3f45e8_c6d793be",
+      "range": {
+        "startLine": 203,
+        "startChar": 3,
+        "endLine": 203,
+        "endChar": 72
+      },
+      "revId": "4e5e409e848e775e3b3cd1aa5dfb59360d05841d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a3f45e8_26e597a8",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
         "patchSetId": 10
