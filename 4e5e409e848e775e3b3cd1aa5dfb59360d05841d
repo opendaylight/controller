@@ -136,6 +136,24 @@
     },
     {
       "key": {
+        "uuid": "5a3f45e8_dccda488",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 834,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-03-23T21:36:24Z",
+      "side": 1,
+      "message": "Yeah that would be better",
+      "parentUuid": "5a3f45e8_1c626cd8",
+      "revId": "4e5e409e848e775e3b3cd1aa5dfb59360d05841d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a3f45e8_2976083f",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/messages/ChangeServersVotingStatus.java",
         "patchSetId": 10
