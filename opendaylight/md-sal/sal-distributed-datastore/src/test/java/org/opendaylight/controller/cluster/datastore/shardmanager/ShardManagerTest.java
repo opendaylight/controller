@@ -313,8 +313,8 @@ public class ShardManagerTest extends AbstractActorTest {
         final PrimaryShardInfoFutureCache primaryShardInfoCache = new PrimaryShardInfoFutureCache();
         final CountDownLatch newShardActorLatch = new CountDownLatch(2);
         class LocalShardManager extends ShardManager {
-            public LocalShardManager(AbstractBuilder<?> builder) {
-                super(builder);
+            public LocalShardManager(AbstractShardManagerCreator<?> creator) {
+                super(creator);
             }
 
             @Override
@@ -335,7 +335,7 @@ public class ShardManagerTest extends AbstractActorTest {
             private static final long serialVersionUID = 1L;
             @Override
             public ShardManager create() throws Exception {
-                return new LocalShardManager(new GenericBuilder<LocalShardManager>(LocalShardManager.class).
+                return new LocalShardManager(new GenericCreator<LocalShardManager>(LocalShardManager.class).
                         datastoreContextFactory(mockFactory).primaryShardInfoCache(primaryShardInfoCache).
                         configuration(mockConfig));
             }
@@ -2086,7 +2086,7 @@ public class ShardManagerTest extends AbstractActorTest {
             return new Builder(datastoreContextBuilder);
         }
 
-        private static class Builder extends AbstractGenericBuilder<Builder, TestShardManager> {
+        private static class Builder extends AbstractGenericCreator<Builder, TestShardManager> {
             private ActorRef shardActor;
             private final Map<String, ActorRef> shardActors = new HashMap<>();
 
@@ -2133,11 +2133,11 @@ public class ShardManagerTest extends AbstractActorTest {
         }
     }
 
-    private static abstract class AbstractGenericBuilder<T extends AbstractGenericBuilder<T, ?>, C extends ShardManager>
-                                                     extends ShardManager.AbstractBuilder<T> {
+    private static abstract class AbstractGenericCreator<T extends AbstractGenericCreator<T, ?>, C extends ShardManager>
+                                                     extends AbstractShardManagerCreator<T> {
         private final Class<C> shardManagerClass;
 
-        AbstractGenericBuilder(Class<C> shardManagerClass) {
+        AbstractGenericCreator(Class<C> shardManagerClass) {
             this.shardManagerClass = shardManagerClass;
             cluster(new MockClusterWrapper()).configuration(new MockConfiguration()).
                     waitTillReadyCountdownLatch(ready).primaryShardInfoCache(new PrimaryShardInfoFutureCache());
@@ -2150,8 +2150,8 @@ public class ShardManagerTest extends AbstractActorTest {
         }
     }
 
-    private static class GenericBuilder<C extends ShardManager> extends AbstractGenericBuilder<GenericBuilder<C>, C> {
-        GenericBuilder(Class<C> shardManagerClass) {
+    private static class GenericCreator<C extends ShardManager> extends AbstractGenericCreator<GenericCreator<C>, C> {
+        GenericCreator(Class<C> shardManagerClass) {
             super(shardManagerClass);
         }
     }

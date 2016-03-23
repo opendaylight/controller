@@ -118,7 +118,7 @@ import scala.concurrent.duration.FiniteDuration;
  * <li> Monitor the cluster members and store their addresses
  * <ul>
  */
-public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
+class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
     private static final Logger LOG = LoggerFactory.getLogger(ShardManager.class);
 
@@ -157,19 +157,16 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
     private final String persistenceId;
 
-    /**
-     */
-    protected ShardManager(AbstractBuilder<?> builder) {
-
-        this.cluster = builder.cluster;
-        this.configuration = builder.configuration;
-        this.datastoreContextFactory = builder.datastoreContextFactory;
-        this.type = builder.datastoreContextFactory.getBaseDatastoreContext().getDataStoreName();
+    ShardManager(AbstractShardManagerCreator<?> builder) {
+        this.cluster = builder.getCluster();
+        this.configuration = builder.getConfiguration();
+        this.datastoreContextFactory = builder.getDdatastoreContextFactory();
+        this.type = datastoreContextFactory.getBaseDatastoreContext().getDataStoreName();
         this.shardDispatcherPath =
                 new Dispatchers(context().system().dispatchers()).getDispatcherPath(Dispatchers.DispatcherType.Shard);
-        this.waitTillReadyCountdownLatch = builder.waitTillReadyCountdownLatch;
-        this.primaryShardInfoCache = builder.primaryShardInfoCache;
-        this.restoreFromSnapshot = builder.restoreFromSnapshot;
+        this.waitTillReadyCountdownLatch = builder.getWaitTillReadyCountdownLatch();
+        this.primaryShardInfoCache = builder.getPrimaryShardInfoCache();
+        this.restoreFromSnapshot = builder.getRestoreFromSnapshot();
 
         String possiblePersistenceId = datastoreContextFactory.getBaseDatastoreContext().getShardManagerPersistenceId();
         persistenceId = possiblePersistenceId != null ? possiblePersistenceId : "shard-manager-" + type;
@@ -1591,82 +1588,6 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         OnShardInitialized getOnShardInitialized() {
             return onShardInitialized;
         }
-    }
-
-    public static Builder builder() {
-        return new Builder();
-    }
-
-    public static abstract class AbstractBuilder<T extends AbstractBuilder<T>> {
-        private ClusterWrapper cluster;
-        private Configuration configuration;
-        private DatastoreContextFactory datastoreContextFactory;
-        private CountDownLatch waitTillReadyCountdownLatch;
-        private PrimaryShardInfoFutureCache primaryShardInfoCache;
-        private DatastoreSnapshot restoreFromSnapshot;
-        private volatile boolean sealed;
-
-        @SuppressWarnings("unchecked")
-        private T self() {
-            return (T) this;
-        }
-
-        protected void checkSealed() {
-            Preconditions.checkState(!sealed, "Builder is already sealed - further modifications are not allowed");
-        }
-
-        public T cluster(ClusterWrapper cluster) {
-            checkSealed();
-            this.cluster = cluster;
-            return self();
-        }
-
-        public T configuration(Configuration configuration) {
-            checkSealed();
-            this.configuration = configuration;
-            return self();
-        }
-
-        public T datastoreContextFactory(DatastoreContextFactory datastoreContextFactory) {
-            checkSealed();
-            this.datastoreContextFactory = datastoreContextFactory;
-            return self();
-        }
-
-        public T waitTillReadyCountdownLatch(CountDownLatch waitTillReadyCountdownLatch) {
-            checkSealed();
-            this.waitTillReadyCountdownLatch = waitTillReadyCountdownLatch;
-            return self();
-        }
-
-        public T primaryShardInfoCache(PrimaryShardInfoFutureCache primaryShardInfoCache) {
-            checkSealed();
-            this.primaryShardInfoCache = primaryShardInfoCache;
-            return self();
-        }
-
-        public T restoreFromSnapshot(DatastoreSnapshot restoreFromSnapshot) {
-            checkSealed();
-            this.restoreFromSnapshot = restoreFromSnapshot;
-            return self();
-        }
-
-        protected void verify() {
-            sealed = true;
-            Preconditions.checkNotNull(cluster, "cluster should not be null");
-            Preconditions.checkNotNull(configuration, "configuration should not be null");
-            Preconditions.checkNotNull(datastoreContextFactory, "datastoreContextFactory should not be null");
-            Preconditions.checkNotNull(waitTillReadyCountdownLatch, "waitTillReadyCountdownLatch should not be null");
-            Preconditions.checkNotNull(primaryShardInfoCache, "primaryShardInfoCache should not be null");
-        }
-
-        public Props props() {
-            verify();
-            return Props.create(ShardManager.class, this);
-        }
-    }
-
-    public static class Builder extends AbstractBuilder<Builder> {
     }
 
     private void findPrimary(final String shardName, final FindPrimaryResponseHandler handler) {
