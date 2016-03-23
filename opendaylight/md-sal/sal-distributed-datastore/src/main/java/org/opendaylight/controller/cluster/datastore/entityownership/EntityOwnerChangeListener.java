@@ -8,11 +8,11 @@
 package org.opendaylight.controller.cluster.datastore.entityownership;
 
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.createEntity;
-import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import java.util.Collection;
+import java.util.Objects;
 import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
 import org.opendaylight.yangtools.yang.data.api.schema.LeafNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -55,9 +55,9 @@ class EntityOwnerChangeListener extends AbstractEntityOwnerChangeListener {
 
             LOG.debug("{}: New owner: {}, Original owner: {}", logId(), newOwner, origOwner);
 
-            if(!Objects.equal(origOwner, newOwner)) {
-                boolean isOwner = Objects.equal(localMemberName, newOwner);
-                boolean wasOwner = Objects.equal(localMemberName, origOwner);
+            if(!Objects.equals(origOwner, newOwner)) {
+                boolean isOwner = Objects.equals(localMemberName, newOwner);
+                boolean wasOwner = Objects.equals(localMemberName, origOwner);
                 boolean hasOwner = !Strings.isNullOrEmpty(newOwner);
 
                 Entity entity = createEntity(change.getRootPath());
