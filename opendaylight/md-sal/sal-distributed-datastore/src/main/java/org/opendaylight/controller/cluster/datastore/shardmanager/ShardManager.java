@@ -174,12 +174,9 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         // Subscribe this actor to cluster member events
         cluster.subscribeToMemberEvents(getSelf());
 
-        List<String> localShardActorNames = new ArrayList<>();
-        mBean = ShardManagerInfo.createShardManagerMBean(cluster.getCurrentMemberName(),
-                "shard-manager-" + this.type,
-                datastoreContextFactory.getBaseDatastoreContext().getDataStoreMXBeanType(),
-                localShardActorNames);
-        mBean.setShardManager(this);
+        mBean = new ShardManagerInfo(getSelf(), cluster.getCurrentMemberName(), "shard-manager-" + this.type,
+                datastoreContextFactory.getBaseDatastoreContext().getDataStoreMXBeanType());
+        mBean.registerMBean();
     }
 
     @Override
@@ -250,6 +247,8 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
                     persistenceId(), ((SaveSnapshotFailure) message).cause());
         } else if(message instanceof Shutdown) {
             onShutDown();
+        } else if (message instanceof GetLocalShardIds) {
+            onGetLocalShardIds();
         } else {
             unknownMessage(message);
         }
@@ -312,14 +311,13 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         if (replyMsg.getStatus() == ServerChangeStatus.OK) {
             LOG.debug ("{}: Leader shard successfully removed the replica shard {}", persistenceId(),
                     shardId.getShardName());
-            originalSender.tell(new akka.actor.Status.Success(null), getSelf());
+            originalSender.tell(new Status.Success(null), getSelf());
         } else {
             LOG.warn ("{}: Leader failed to remove shard replica {} with status {}",
                     persistenceId(), shardId, replyMsg.getStatus());
 
-            Exception failure = getServerChangeException(RemoveServer.class, replyMsg.getStatus(),
-                    leaderPath, shardId);
-            originalSender.tell(new akka.actor.Status.Failure(failure), getSelf());
+            Exception failure = getServerChangeException(RemoveServer.class, replyMsg.getStatus(), leaderPath, shardId);
+            originalSender.tell(new Status.Failure(failure), getSelf());
         }
     }
 
@@ -402,7 +400,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         }
 
         if(notInitialized != null) {
-            getSender().tell(new akka.actor.Status.Failure(new IllegalStateException(String.format(
+            getSender().tell(new Status.Failure(new IllegalStateException(String.format(
                     "%d shard(s) %s are not initialized", notInitialized.size(), notInitialized))), getSelf());
             return;
         }
@@ -429,14 +427,14 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             String shardName = createShard.getModuleShardConfig().getShardName();
             if(localShards.containsKey(shardName)) {
                 LOG.debug("{}: Shard {} already exists", persistenceId(), shardName);
-                reply = new akka.actor.Status.Success(String.format("Shard with name %s already exists", shardName));
+                reply = new Status.Success(String.format("Shard with name %s already exists", shardName));
             } else {
                 doCreateShard(createShard);
-                reply = new akka.actor.Status.Success(null);
+                reply = new Status.Success(null);
             }
         } catch (Exception e) {
             LOG.error("{}: onCreateShard failed", persistenceId(), e);
-            reply = new akka.actor.Status.Failure(e);
+            reply = new Status.Failure(e);
         }
 
         if(getSender() != null && !getContext().system().deadLetters().equals(getSender())) {
@@ -488,8 +486,6 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
                 shardDatastoreContext, createShard.getShardBuilder(), peerAddressResolver);
         info.setActiveMember(isActiveMember);
         localShards.put(info.getShardName(), info);
-
-        mBean.addLocalShard(shardId.toString());
 
         if(schemaContext != null) {
             info.setActor(newShardActor(schemaContext, info));
@@ -843,17 +839,44 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         }
     }
 
-    private void onSwitchShardBehavior(SwitchShardBehavior message) {
-        ShardIdentifier identifier = ShardIdentifier.builder().fromShardIdString(message.getShardName()).build();
+    private void onGetLocalShardIds() {
+        final List<String> response = new ArrayList<>(localShards.size());
 
-        ShardInformation shardInformation = localShards.get(identifier.getShardName());
+        for (ShardInformation info : localShards.values()) {
+            response.add(info.getShardId().toString());
+        }
 
-        if(shardInformation != null && shardInformation.getActor() != null) {
-            shardInformation.getActor().tell(
-                    new SwitchBehavior(message.getNewState(), message.getTerm()), getSelf());
+        getSender().tell(new Status.Success(response), getSelf());
+    }
+
+    private void onSwitchShardBehavior(final SwitchShardBehavior message) {
+        final ShardIdentifier identifier = message.getShardId();
+
+        if (identifier != null) {
+            final ShardInformation info = localShards.get(identifier.getShardName());
+            if (info == null) {
+                getSender().tell(new Status.Failure(
+                    new IllegalArgumentException("Shard " + identifier + " is not local")), getSelf());
+                return;
+            }
+
+            switchShardBehavior(info, new SwitchBehavior(message.getNewState(), message.getTerm()));
         } else {
+            for (ShardInformation info : localShards.values()) {
+                switchShardBehavior(info, new SwitchBehavior(message.getNewState(), message.getTerm()));
+            }
+        }
+
+        getSender().tell(new Status.Success(null), getSelf());
+    }
+
+    private void switchShardBehavior(final ShardInformation info, final SwitchBehavior switchBehavior) {
+        final ActorRef actor = info.getActor();
+        if (actor != null) {
+            actor.tell(switchBehavior, getSelf());
+          } else {
             LOG.warn("Could not switch the behavior of shard {} to {} - shard is not yet available",
-                    message.getShardName(), message.getNewState());
+                info.shardName, switchBehavior.getNewState());
         }
     }
 
@@ -984,7 +1007,6 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             localShards.put(shardName, new ShardInformation(shardName, shardId, peerAddresses,
                     newShardDatastoreContext(shardName), Shard.builder().restoreFromSnapshot(
                         shardSnapshots.get(shardName)), peerAddressResolver));
-            mBean.addLocalShard(shardId.toString());
         }
     }
 
@@ -1038,7 +1060,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         if (shardReplicaOperationsInProgress.contains(shardName)) {
             String msg = String.format("A shard replica operation for %s is already in progress", shardName);
             LOG.debug ("{}: {}", persistenceId(), msg);
-            sender.tell(new akka.actor.Status.Failure(new IllegalStateException(msg)), getSelf());
+            sender.tell(new Status.Failure(new IllegalStateException(msg)), getSelf());
             return true;
         }
 
@@ -1054,7 +1076,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         if (!(this.configuration.isShardConfigured(shardName))) {
             String msg = String.format("No module configuration exists for shard %s", shardName);
             LOG.debug ("{}: {}", persistenceId(), msg);
-            getSender().tell(new akka.actor.Status.Failure(new IllegalArgumentException(msg)), getSelf());
+            getSender().tell(new Status.Failure(new IllegalArgumentException(msg)), getSelf());
             return;
         }
 
@@ -1063,7 +1085,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             String msg = String.format(
                   "No SchemaContext is available in order to create a local shard instance for %s", shardName);
             LOG.debug ("{}: {}", persistenceId(), msg);
-            getSender().tell(new akka.actor.Status.Failure(new IllegalStateException(msg)), getSelf());
+            getSender().tell(new Status.Failure(new IllegalStateException(msg)), getSelf());
             return;
         }
 
@@ -1084,7 +1106,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     private void sendLocalReplicaAlreadyExistsReply(String shardName, ActorRef sender) {
         String msg = String.format("Local shard %s already exists", shardName);
         LOG.debug ("{}: {}", persistenceId(), msg);
-        sender.tell(new akka.actor.Status.Failure(new AlreadyExistsException(msg)), getSelf());
+        sender.tell(new Status.Failure(new AlreadyExistsException(msg)), getSelf());
     }
 
     private void addShard(final String shardName, final RemotePrimaryShardFound response, final ActorRef sender) {
@@ -1154,7 +1176,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             }
         }
 
-        sender.tell(new akka.actor.Status.Failure(message == null ? failure :
+        sender.tell(new Status.Failure(message == null ? failure :
             new RuntimeException(message, failure)), getSelf());
     }
 
@@ -1173,8 +1195,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             shardInfo.setActiveMember(true);
             persistShardList();
 
-            mBean.addLocalShard(shardInfo.getShardId().toString());
-            sender.tell(new akka.actor.Status.Success(null), getSelf());
+            sender.tell(new Status.Success(null), getSelf());
         } else if(replyMsg.getStatus() == ServerChangeStatus.ALREADY_EXISTS) {
             sendLocalReplicaAlreadyExistsReply(shardName, sender);
         } else {
@@ -1679,7 +1700,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         @Override
         public void onFailure(Throwable failure) {
             LOG.debug ("{}: Received failure from FindPrimary for shard {}", persistenceId, shardName, failure);
-            targetActor.tell(new akka.actor.Status.Failure(new RuntimeException(
+            targetActor.tell(new Status.Failure(new RuntimeException(
                     String.format("Failed to find leader for shard %s", shardName), failure)), shardManagerActor);
         }
 
@@ -1688,7 +1709,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             String msg = String.format("Failed to find leader for shard %s: received response: %s",
                     shardName, response);
             LOG.debug ("{}: {}", persistenceId, msg);
-            targetActor.tell(new akka.actor.Status.Failure(response instanceof Throwable ? (Throwable) response :
+            targetActor.tell(new Status.Failure(response instanceof Throwable ? (Throwable) response :
                     new RuntimeException(msg)), shardManagerActor);
         }
     }
