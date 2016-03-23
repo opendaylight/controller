@@ -8,8 +8,8 @@
 package org.opendaylight.controller.cluster.datastore.messages;
 
 import akka.actor.ActorSelection;
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import java.util.Optional;
 import javax.annotation.Nonnull;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
 
@@ -21,13 +21,19 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
 public class PrimaryShardInfo {
     private final ActorSelection primaryShardActor;
     private final short primaryShardVersion;
-    private final Optional<DataTree> localShardDataTree;
+    private final DataTree localShardDataTree;
 
     public PrimaryShardInfo(@Nonnull ActorSelection primaryShardActor, short primaryShardVersion,
-            @Nonnull Optional<DataTree> localShardDataTree) {
+            @Nonnull DataTree localShardDataTree) {
         this.primaryShardActor = Preconditions.checkNotNull(primaryShardActor);
         this.primaryShardVersion = primaryShardVersion;
         this.localShardDataTree = Preconditions.checkNotNull(localShardDataTree);
+    }
+
+    public PrimaryShardInfo(@Nonnull ActorSelection primaryShardActor, short primaryShardVersion) {
+        this.primaryShardActor = Preconditions.checkNotNull(primaryShardActor);
+        this.primaryShardVersion = primaryShardVersion;
+        this.localShardDataTree = null;
     }
 
     /**
@@ -49,6 +55,6 @@ public class PrimaryShardInfo {
      * to the caller. Otherwise the Optional value is absent.
      */
     public @Nonnull Optional<DataTree> getLocalShardDataTree() {
-        return localShardDataTree;
+        return Optional.ofNullable(localShardDataTree);
     }
 }

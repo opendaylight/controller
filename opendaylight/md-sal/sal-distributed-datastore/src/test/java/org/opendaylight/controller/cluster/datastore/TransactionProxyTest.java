@@ -667,8 +667,8 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
         doReturn(getSystem().actorSelection(shardActorRef.path())).
                 when(mockActorContext).actorSelection(shardActorRef.path().toString());
 
-        Optional<DataTree> mockDataTree = createDataTree();
-        DataTreeModification mockModification = mockDataTree.get().takeSnapshot().newModification();
+        DataTree mockDataTree = createDataTree();
+        DataTreeModification mockModification = mockDataTree.takeSnapshot().newModification();
         doThrow(new RuntimeException("mock")).when(mockModification).ready();
 
         doReturn(Futures.successful(newPrimaryShardInfo(shardActorRef, mockDataTree))).
@@ -788,13 +788,12 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
     }
 
     private PrimaryShardInfo newPrimaryShardInfo(ActorRef actorRef){
-        return new PrimaryShardInfo(getSystem().actorSelection(actorRef.path()), DataStoreVersions.CURRENT_VERSION,
-                Optional.<DataTree>absent());
+        return new PrimaryShardInfo(getSystem().actorSelection(actorRef.path()), DataStoreVersions.CURRENT_VERSION);
     }
 
-    private PrimaryShardInfo newPrimaryShardInfo(ActorRef actorRef, Optional<DataTree> dataTreeOptional){
+    private PrimaryShardInfo newPrimaryShardInfo(ActorRef actorRef, DataTree dataTree){
         return new PrimaryShardInfo(getSystem().actorSelection(actorRef.path()), DataStoreVersions.CURRENT_VERSION,
-                dataTreeOptional);
+                dataTree);
     }
 
 
@@ -884,14 +883,14 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
                 expected, (end-start)), (end - start) <= expected);
     }
 
-    private void completeOperationLocal(TransactionProxyOperation operation, Optional<DataTree> dataTreeOptional){
+    private void completeOperationLocal(TransactionProxyOperation operation, DataTree dataTree){
         ActorSystem actorSystem = getSystem();
         ActorRef shardActorRef = actorSystem.actorOf(Props.create(DoNothingActor.class));
 
         doReturn(actorSystem.actorSelection(shardActorRef.path())).
                 when(mockActorContext).actorSelection(shardActorRef.path().toString());
 
-        doReturn(Futures.successful(newPrimaryShardInfo(shardActorRef, dataTreeOptional))).
+        doReturn(Futures.successful(newPrimaryShardInfo(shardActorRef, dataTree))).
                 when(mockActorContext).findPrimaryShardAsync(eq(DefaultShardStrategy.DEFAULT_SHARD));
 
         TransactionProxy transactionProxy = new TransactionProxy(mockComponentFactory, READ_WRITE);
@@ -907,21 +906,19 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
                 expected, (end-start)), (end - start) <= expected);
     }
 
-    private static Optional<DataTree> createDataTree(){
+    private static DataTree createDataTree(){
         DataTree dataTree = mock(DataTree.class);
-        Optional<DataTree> dataTreeOptional = Optional.of(dataTree);
         DataTreeSnapshot dataTreeSnapshot = mock(DataTreeSnapshot.class);
         DataTreeModification dataTreeModification = mock(DataTreeModification.class);
 
         doReturn(dataTreeSnapshot).when(dataTree).takeSnapshot();
         doReturn(dataTreeModification).when(dataTreeSnapshot).newModification();
 
-        return dataTreeOptional;
+        return dataTree;
     }
 
-    private static Optional<DataTree> createDataTree(NormalizedNode<?, ?> readResponse){
+    private static DataTree createDataTree(NormalizedNode<?, ?> readResponse){
         DataTree dataTree = mock(DataTree.class);
-        Optional<DataTree> dataTreeOptional = Optional.of(dataTree);
         DataTreeSnapshot dataTreeSnapshot = mock(DataTreeSnapshot.class);
         DataTreeModification dataTreeModification = mock(DataTreeModification.class);
 
@@ -929,7 +926,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
         doReturn(dataTreeModification).when(dataTreeSnapshot).newModification();
         doReturn(Optional.of(readResponse)).when(dataTreeModification).readNode(any(YangInstanceIdentifier.class));
 
-        return dataTreeOptional;
+        return dataTree;
     }
 
 
