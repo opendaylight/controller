@@ -10,13 +10,13 @@ package org.opendaylight.controller.cluster.datastore.shardmanager;
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.serialization.Serialization;
-import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import javax.annotation.Nullable;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
@@ -155,7 +155,7 @@ final class ShardInformation {
     }
 
     boolean isLeader() {
-        return Objects.equal(leaderId, shardId.toString());
+        return Objects.equals(leaderId, shardId.toString());
     }
 
     String getSerializedLeaderActor() {
@@ -224,7 +224,7 @@ final class ShardInformation {
     }
 
     boolean setLeaderId(String leaderId) {
-        boolean changed = !Objects.equal(this.leaderId, leaderId);
+        boolean changed = !Objects.equals(this.leaderId, leaderId);
         this.leaderId = leaderId;
         if(leaderId != null) {
             this.leaderAvailable = true;

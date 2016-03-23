@@ -26,7 +26,6 @@ import akka.testkit.JavaTestKit;
 import akka.util.Timeout;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
-import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.CheckedFuture;
@@ -37,6 +36,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -450,8 +450,7 @@ public abstract class AbstractTransactionProxyTest {
                 }
             }
 
-            for(int i = 0; i < expReplies.length; i++) {
-                Object expReply = expReplies[i];
+            for (Object expReply : expReplies) {
                 boolean found = false;
                 Iterator<?> iter = futureResults.iterator();
                 while(iter.hasNext()) {
@@ -459,7 +458,7 @@ public abstract class AbstractTransactionProxyTest {
                     if(CommitTransactionReply.isSerializedType(expReply) &&
                        CommitTransactionReply.isSerializedType(actual)) {
                         found = true;
-                    } else if(expReply instanceof ActorSelection && Objects.equal(expReply, actual)) {
+                    } else if(expReply instanceof ActorSelection && Objects.equals(expReply, actual)) {
                         found = true;
                     } else if(expReply instanceof Class && ((Class<?>)expReply).isInstance(actual)) {
                         found = true;
