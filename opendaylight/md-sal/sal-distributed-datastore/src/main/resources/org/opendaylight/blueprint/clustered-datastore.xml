@@ -38,6 +38,9 @@
     <argument ref="blueprintBundleContext"/>
   </bean>
 
+  <service ref="configDatastore" interface="org.opendaylight.controller.sal.core.spi.data.DOMStore"
+        odl:type="distributed-config"/>
+
   <!-- Distributed Operational Datastore -->
 
   <bean id="operDatastoreContext" class="org.opendaylight.controller.config.yang.config.distributed_datastore_provider.DistributedOperationalDataStoreProviderModule"
@@ -51,6 +54,9 @@
     <argument ref="actorSystemProvider"/>
     <argument ref="blueprintBundleContext"/>
   </bean>
+
+  <service ref="operDatastore" interface="org.opendaylight.controller.sal.core.spi.data.DOMStore"
+        odl:type="distributed-operational"/>
 
   <!-- Concurrent DOMDataBroker -->
 
@@ -113,4 +119,13 @@
   <service ref="distributedEntityOwnershipService" interface="org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipService"
         odl:type="default"/>
 
+  <!-- ClusterAdminRpcService -->
+<!--
+  <bean id="clusterAdminService" class="org.opendaylight.controller.cluster.datastore.admin.ClusterAdminRpcService">
+    <argument ref="configDatastore"/>
+    <argument ref="operDatastore"/>
+  </bean>
+
+  <odl:rpc-implementation ref="clusterAdminService"/>
+-->
 </blueprint>

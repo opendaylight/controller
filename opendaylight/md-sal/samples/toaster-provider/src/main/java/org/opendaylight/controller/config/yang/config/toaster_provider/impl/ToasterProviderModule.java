@@ -17,10 +17,7 @@
 */
 package org.opendaylight.controller.config.yang.config.toaster_provider.impl;
 
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
-import org.opendaylight.controller.sample.toaster.provider.OpendaylightToaster;
-import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.ToasterService;
+import org.opendaylight.controller.sal.common.util.NoopAutoCloseable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,44 +49,8 @@ public final class ToasterProviderModule extends
 
     @Override
     public java.lang.AutoCloseable createInstance() {
-        final OpendaylightToaster opendaylightToaster = new OpendaylightToaster();
-
-        // Register to md-sal
-        opendaylightToaster.setNotificationProvider(getNotificationServiceDependency());
-
-        DataBroker dataBrokerService = getDataBrokerDependency();
-        opendaylightToaster.setDataProvider(dataBrokerService);
-
-        final BindingAwareBroker.RpcRegistration<ToasterService> rpcRegistration = getRpcRegistryDependency()
-                .addRpcImplementation(ToasterService.class, opendaylightToaster);
-
-        // Register runtimeBean for toaster statistics via JMX
-        final ToasterProviderRuntimeRegistration runtimeReg = getRootRuntimeBeanRegistratorWrapper().register(
-                opendaylightToaster);
-
-        // Wrap toaster as AutoCloseable and close registrations to md-sal at
-        // close()
-        final class AutoCloseableToaster implements AutoCloseable {
-
-            @Override
-            public void close() throws Exception {
-                rpcRegistration.close();
-                runtimeReg.close();
-                closeQuietly(opendaylightToaster);
-                log.info("Toaster provider (instance {}) torn down.", this);
-            }
-
-            private void closeQuietly(final AutoCloseable resource) {
-                try {
-                    resource.close();
-                } catch (final Exception e) {
-                    log.debug("Ignoring exception while closing {}", resource, e);
-                }
-            }
-        }
-
-        AutoCloseable ret = new AutoCloseableToaster();
-        log.info("Toaster provider (instance {}) initialized.", ret);
-        return ret;
+        // The components are created and wired via blueprint and, since this module doesn't advertise any
+        // services, return an empty AutoCloseable. The config module is kept for backwards compatibility.
+        return NoopAutoCloseable.INSTANCE;
     }
 }
