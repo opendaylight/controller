@@ -4,12 +4,12 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>commons.opendaylight</artifactId>
-    <version>1.6.1-Beryllium-SR1</version>
+    <version>1.6.2-SNAPSHOT</version>
     <relativePath>../opendaylight</relativePath>
   </parent>
 
   <artifactId>liblldp</artifactId>
-  <version>0.10.1-Beryllium-SR1</version>
+  <version>0.10.2-SNAPSHOT</version>
   <packaging>bundle</packaging>
   <dependencies>
     <dependency>

@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>sal-parent</artifactId>
-    <version>1.3.1-Beryllium-SR1</version>
+    <version>1.3.2-SNAPSHOT</version>
   </parent>
   <!-- FIXME Use org.opendaylight.mdsal:binding-parent -->
   <artifactId>sal-dom-xsql</artifactId>
@@ -67,7 +67,7 @@
           <dependency>
             <groupId>org.opendaylight.mdsal</groupId>
             <artifactId>maven-sal-api-gen-plugin</artifactId>
-            <version>0.8.1-Beryllium-SR1</version>
+            <version>0.8.2-SNAPSHOT</version>
             <type>jar</type>
           </dependency>
         </dependencies>
