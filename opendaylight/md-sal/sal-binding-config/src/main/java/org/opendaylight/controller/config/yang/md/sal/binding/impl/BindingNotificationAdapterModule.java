@@ -7,14 +7,18 @@
  */
 package org.opendaylight.controller.config.yang.md.sal.binding.impl;
 
+import com.google.common.collect.ForwardingObject;
 import org.opendaylight.controller.config.api.DependencyResolver;
 import org.opendaylight.controller.config.api.ModuleIdentifier;
-import org.opendaylight.controller.md.sal.binding.impl.BindingDOMNotificationServiceAdapter;
-import org.opendaylight.controller.md.sal.binding.impl.BindingToNormalizedNodeCodec;
-import org.opendaylight.controller.md.sal.dom.api.DOMNotificationService;
-import org.opendaylight.controller.sal.core.api.Broker;
+import org.opendaylight.controller.md.sal.binding.api.NotificationService;
+import org.opendaylight.controller.sal.common.util.osgi.OsgiServiceUtils;
+import org.opendaylight.yangtools.concepts.ListenerRegistration;
+import org.opendaylight.yangtools.yang.binding.NotificationListener;
+import org.osgi.framework.BundleContext;
 
 public class BindingNotificationAdapterModule extends AbstractBindingNotificationAdapterModule  {
+    private BundleContext bundleContext;
+
     public BindingNotificationAdapterModule(final ModuleIdentifier identifier, final DependencyResolver dependencyResolver) {
         super(identifier, dependencyResolver);
     }
@@ -29,11 +33,36 @@ public class BindingNotificationAdapterModule extends AbstractBindingNotificatio
     }
 
     @Override
-    public java.lang.AutoCloseable createInstance() {
-        final BindingToNormalizedNodeCodec codec = getBindingMappingServiceDependency();
-        final Broker.ProviderSession session = getDomAsyncBrokerDependency().registerProvider(new DummyDOMProvider());
-        final DOMNotificationService notifService = session.getService(DOMNotificationService.class);
-        return new BindingDOMNotificationServiceAdapter(codec.getCodecRegistry(), notifService);
+    public AutoCloseable createInstance() {
+        NotificationService delegate = OsgiServiceUtils.waitForService(
+                NotificationService.class, bundleContext, OsgiServiceUtils.FIVE_MINUTES, null);
+        return new ForwardingNotificationService(delegate);
     }
 
+    public void setBundleContext(final BundleContext bundleContext) {
+        this.bundleContext = bundleContext;
+    }
+
+    private static class ForwardingNotificationService extends ForwardingObject implements NotificationService, AutoCloseable {
+        private final NotificationService delegate;
+
+        public ForwardingNotificationService(NotificationService delegate) {
+            this.delegate = delegate;
+        }
+
+        @Override
+        public void close() throws Exception {
+            // Intentional noop as the life-cycle is controlled via blueprint.
+        }
+
+        @Override
+        public <T extends NotificationListener> ListenerRegistration<T> registerNotificationListener(T listener) {
+            return delegate().registerNotificationListener(listener);
+        }
+
+        @Override
+        protected NotificationService delegate() {
+            return delegate;
+        }
+    }
 }

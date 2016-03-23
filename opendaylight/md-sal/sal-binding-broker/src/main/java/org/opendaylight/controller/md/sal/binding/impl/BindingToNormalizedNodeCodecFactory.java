@@ -14,8 +14,6 @@ import org.opendaylight.yangtools.binding.data.codec.impl.BindingNormalizedNodeC
 import org.opendaylight.yangtools.sal.binding.generator.api.ClassLoadingStrategy;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
 import org.osgi.framework.BundleContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Factory class for creating and initializing a BindingToNormalizedNodeCodec instance.
@@ -23,9 +21,6 @@ import org.slf4j.LoggerFactory;
  * @author Thomas Pantelis
  */
 public class BindingToNormalizedNodeCodecFactory {
-    private static final Logger LOG = LoggerFactory.getLogger(BindingToNormalizedNodeCodecFactory.class);
-    private static final long WAIT_DURATION_MS = 5000;
-
     /**
      * Creates a BindingToNormalizedNodeCodec instance. The returned instance is registered with the
      * bundleContext as a SchemaContextListener and it waits a period of time to ensure the instance has a
@@ -43,11 +38,6 @@ public class BindingToNormalizedNodeCodecFactory {
                 codecRegistry, true);
 
         bundleContext.registerService(SchemaContextListener.class, instance, new Hashtable<String,String>());
-
-//        if(!instance.waitForSchemaContext(WAIT_DURATION_MS)) {
-//            LOG.warn("BindingToNormalizedNodeCodec did not receive SchemaContext within {}", WAIT_DURATION_MS);
-//        }
-
         return instance;
     }
 }

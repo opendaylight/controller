@@ -10,7 +10,6 @@ package org.opendaylight.controller.config.yang.md.sal.dom.impl;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ClassToInstanceMap;
 import com.google.common.collect.MutableClassToInstanceMap;
-import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPointService;
 import org.opendaylight.controller.md.sal.dom.api.DOMNotificationPublishService;
@@ -19,14 +18,15 @@ import org.opendaylight.controller.md.sal.dom.api.DOMRpcProviderService;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
 import org.opendaylight.controller.md.sal.dom.broker.impl.DOMNotificationRouter;
 import org.opendaylight.controller.md.sal.dom.broker.impl.DOMRpcRouter;
-import org.opendaylight.controller.md.sal.dom.broker.impl.mount.DOMMountPointServiceImpl;
+import org.opendaylight.controller.sal.common.util.osgi.OsgiServiceUtils;
 import org.opendaylight.controller.sal.core.api.BrokerService;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.opendaylight.controller.sal.dom.broker.BrokerImpl;
 import org.opendaylight.controller.sal.dom.broker.GlobalBundleScanningSchemaServiceImpl;
+import org.osgi.framework.BundleContext;
 
-public final class DomBrokerImplModule extends org.opendaylight.controller.config.yang.md.sal.dom.impl.AbstractDomBrokerImplModule
-{
+public final class DomBrokerImplModule extends org.opendaylight.controller.config.yang.md.sal.dom.impl.AbstractDomBrokerImplModule{
+    private BundleContext bundleContext;
 
     public DomBrokerImplModule(final org.opendaylight.controller.config.api.ModuleIdentifier identifier, final org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
         super(identifier, dependencyResolver);
@@ -45,25 +45,33 @@ public final class DomBrokerImplModule extends org.opendaylight.controller.confi
 
     @Override
     public java.lang.AutoCloseable createInstance() {
-        final DOMDataBroker asyncBroker= getAsyncDataBrokerDependency();
+        // The services are provided via blueprint so retrieve then from the OSGi service registry for
+        // backwards compatibility.
+
+        final DOMNotificationRouter domNotificationRouter = (DOMNotificationRouter) OsgiServiceUtils.waitForService(
+                DOMNotificationService.class, bundleContext, OsgiServiceUtils.FIVE_MINUTES, null);
+
+        final DOMRpcRouter rpcRouter = (DOMRpcRouter) OsgiServiceUtils.waitForService(
+                DOMRpcService.class, bundleContext, OsgiServiceUtils.FIVE_MINUTES, null);
+
+        final DOMMountPointService mountService = OsgiServiceUtils.waitForService(
+                DOMMountPointService.class, bundleContext, OsgiServiceUtils.FIVE_MINUTES, null);
+
+        final DOMDataBroker dataBroker = getAsyncDataBrokerDependency();
 
         final ClassToInstanceMap<BrokerService> services = MutableClassToInstanceMap.create();
 
-        final DOMNotificationRouter domNotificationRouter = DOMNotificationRouter.create(getNotificationQueueDepth().getValue().intValue(),
-            getNotificationQueueSpin().longValue(), getNotificationQueuePark().longValue(), TimeUnit.MILLISECONDS);
         services.putInstance(DOMNotificationService.class, domNotificationRouter);
         services.putInstance(DOMNotificationPublishService.class, domNotificationRouter);
 
         final SchemaService schemaService = getSchemaServiceImpl();
         services.putInstance(SchemaService.class, schemaService);
 
-        services.putInstance(DOMDataBroker.class, asyncBroker);
+        services.putInstance(DOMDataBroker.class, dataBroker);
 
-        final DOMRpcRouter rpcRouter = DOMRpcRouter.newInstance(schemaService);
         services.putInstance(DOMRpcService.class, rpcRouter);
         services.putInstance(DOMRpcProviderService.class, rpcRouter);
 
-        final DOMMountPointService mountService = new DOMMountPointServiceImpl();
         services.putInstance(DOMMountPointService.class, mountService);
 
         return new BrokerImpl(rpcRouter, services);
@@ -77,5 +85,9 @@ public final class DomBrokerImplModule extends org.opendaylight.controller.confi
             schemaService = GlobalBundleScanningSchemaServiceImpl.getInstance();
         }
         return schemaService;
+    }
+
+    public void setBundleContext(final BundleContext bundleContext) {
+        this.bundleContext = bundleContext;
     }
 }
