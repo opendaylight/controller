@@ -922,11 +922,11 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             return;
         }
 
-        Collection<String> visitedAddresses;
+        final Collection<String> visitedAddresses;
         if(message instanceof RemoteFindPrimary) {
             visitedAddresses = ((RemoteFindPrimary)message).getVisitedAddresses();
         } else {
-            visitedAddresses = new ArrayList<>();
+            visitedAddresses = new ArrayList<>(1);
         }
 
         visitedAddresses.add(peerAddressResolver.getShardManagerActorPathBuilder(cluster.getSelfAddress()).toString());
