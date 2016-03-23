@@ -87,8 +87,8 @@ public class Shard extends RaftActor {
     @VisibleForTesting
     static final Object GET_SHARD_MBEAN_MESSAGE = "getShardMBeanMessage";
 
-    @VisibleForTesting
-    static final String DEFAULT_NAME = "default";
+    // FIXME: shard names should be encapsulated in their own class and this should be exposed as a constant.
+    public static final String DEFAULT_NAME = "default";
 
     // The state of this Shard
     private final ShardDataTree store;

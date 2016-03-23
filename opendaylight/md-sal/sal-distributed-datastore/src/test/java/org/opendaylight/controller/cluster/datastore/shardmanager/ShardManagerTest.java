@@ -6,7 +6,7 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.opendaylight.controller.cluster.datastore;
+package org.opendaylight.controller.cluster.datastore.shardmanager;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -65,6 +65,14 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.opendaylight.controller.cluster.datastore.AbstractActorTest;
+import org.opendaylight.controller.cluster.datastore.ClusterWrapperImpl;
+import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
+import org.opendaylight.controller.cluster.datastore.DatastoreContext;
+import org.opendaylight.controller.cluster.datastore.DatastoreContextFactory;
+import org.opendaylight.controller.cluster.datastore.Shard;
+import org.opendaylight.controller.cluster.datastore.ShardManager.SchemaContextModules;
+import org.opendaylight.controller.cluster.datastore.ShardManagerSnapshot;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.config.ConfigurationImpl;
 import org.opendaylight.controller.cluster.datastore.config.EmptyModuleShardConfigProvider;
@@ -977,10 +985,8 @@ public class ShardManagerTest extends AbstractActorTest {
     @Test
     public void testOnRecoveryJournalIsCleaned() {
         String persistenceID = "shard-manager-" + shardMrgIDSuffix;
-        InMemoryJournal.addEntry(persistenceID, 1L, new ShardManager.SchemaContextModules(
-                ImmutableSet.of("foo")));
-        InMemoryJournal.addEntry(persistenceID, 2L, new ShardManager.SchemaContextModules(
-                ImmutableSet.of("bar")));
+        InMemoryJournal.addEntry(persistenceID, 1L, new SchemaContextModules(ImmutableSet.of("foo")));
+        InMemoryJournal.addEntry(persistenceID, 2L, new SchemaContextModules(ImmutableSet.of("bar")));
         InMemoryJournal.addDeleteMessagesCompleteLatch(persistenceID);
 
         TestShardManager shardManager = newTestShardManager();

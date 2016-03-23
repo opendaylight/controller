@@ -6,21 +6,21 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.opendaylight.controller.cluster.datastore.jmx.mbeans.shardmanager;
+package org.opendaylight.controller.cluster.datastore.shardmanager;
 
 import akka.actor.ActorRef;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import java.util.Collection;
 import java.util.List;
-import org.opendaylight.controller.cluster.datastore.ShardManager;
+import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shardmanager.ShardManagerInfoMBean;
 import org.opendaylight.controller.cluster.datastore.messages.SwitchShardBehavior;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.md.sal.common.util.jmx.AbstractMXBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ShardManagerInfo extends AbstractMXBean implements ShardManagerInfoMBean {
+final class ShardManagerInfo extends AbstractMXBean implements ShardManagerInfoMBean {
 
     public static final String JMX_CATEGORY_SHARD_MANAGER = "ShardManager";
 
@@ -37,13 +37,13 @@ public class ShardManagerInfo extends AbstractMXBean implements ShardManagerInfo
 
     private ShardManager shardManager;
 
-    public ShardManagerInfo(String memberName, String name, String mxBeanType, List<String> localShards) {
+    private ShardManagerInfo(String memberName, String name, String mxBeanType, List<String> localShards) {
         super(name, mxBeanType, JMX_CATEGORY_SHARD_MANAGER);
         this.memberName = memberName;
         this.localShards = localShards;
     }
 
-    public static ShardManagerInfo createShardManagerMBean(String memberName, String name, String mxBeanType,
+    static ShardManagerInfo createShardManagerMBean(String memberName, String name, String mxBeanType,
             List<String> localShards){
         ShardManagerInfo shardManagerInfo = new ShardManagerInfo(memberName, name, mxBeanType, localShards);
 
