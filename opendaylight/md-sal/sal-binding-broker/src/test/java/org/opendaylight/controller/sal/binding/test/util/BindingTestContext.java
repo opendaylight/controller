@@ -8,16 +8,13 @@
 package org.opendaylight.controller.sal.binding.test.util;
 
 import static com.google.common.base.Preconditions.checkState;
-
 import com.google.common.annotations.Beta;
 import com.google.common.collect.ClassToInstanceMap;
-import com.google.common.collect.ImmutableClassToInstanceMap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.MutableClassToInstanceMap;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
-import javassist.ClassPool;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.MountPointService;
 import org.opendaylight.controller.md.sal.binding.api.NotificationPublishService;
@@ -50,7 +47,6 @@ import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
 import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
 import org.opendaylight.controller.sal.binding.api.mount.MountProviderService;
 import org.opendaylight.controller.sal.binding.impl.RootBindingAwareBroker;
-import org.opendaylight.controller.sal.core.api.Broker.ProviderSession;
 import org.opendaylight.controller.sal.core.api.BrokerService;
 import org.opendaylight.controller.sal.core.spi.data.DOMStore;
 import org.opendaylight.controller.sal.dom.broker.BrokerImpl;
@@ -63,6 +59,7 @@ import org.opendaylight.yangtools.sal.binding.generator.util.JavassistUtils;
 import org.opendaylight.yangtools.yang.binding.YangModuleInfo;
 import org.opendaylight.yangtools.yang.binding.util.BindingReflections;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import javassist.ClassPool;
 
 @Beta
 public class BindingTestContext implements AutoCloseable {
@@ -173,33 +170,6 @@ public class BindingTestContext implements AutoCloseable {
 
     public void startForwarding() {
 
-    }
-
-    private ProviderSession createMockContext() {
-
-        final ClassToInstanceMap<BrokerService> domBrokerServices = ImmutableClassToInstanceMap
-                .<BrokerService> builder()
-                //
-                .put(DOMRpcRouter.class, biBrokerImpl.getRouter()) //
-                .put(DOMMountPointService.class, biMountImpl)
-                .build();
-
-        return new ProviderSession() {
-
-            @Override
-            public <T extends BrokerService> T getService(final Class<T> service) {
-                return domBrokerServices.getInstance(service);
-            }
-
-            @Override
-            public boolean isClosed() {
-                return false;
-            }
-
-            @Override
-            public void close() {
-            }
-        };
     }
 
     public void startBindingToDomMappingService() {
