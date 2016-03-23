@@ -234,8 +234,8 @@ public class ActorContext {
     private PrimaryShardInfo onPrimaryShardFound(String shardName, String primaryActorPath,
             short primaryVersion, DataTree localShardDataTree) {
         ActorSelection actorSelection = actorSystem.actorSelection(primaryActorPath);
-        PrimaryShardInfo info = new PrimaryShardInfo(actorSelection, primaryVersion,
-                Optional.fromNullable(localShardDataTree));
+        PrimaryShardInfo info = localShardDataTree == null ? new PrimaryShardInfo(actorSelection, primaryVersion) :
+            new PrimaryShardInfo(actorSelection, primaryVersion, localShardDataTree);
         primaryShardInfoCache.putSuccessful(shardName, info);
         return info;
     }

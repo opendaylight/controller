@@ -11,11 +11,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
 import akka.actor.ActorSelection;
-import com.google.common.base.Optional;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 import org.opendaylight.controller.cluster.datastore.messages.PrimaryShardInfo;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
 import scala.concurrent.Future;
 
 /**
@@ -31,8 +29,7 @@ public class PrimaryShardInfoFutureCacheTest {
 
         assertEquals("getIfPresent", null, cache.getIfPresent("foo"));
 
-        PrimaryShardInfo shardInfo = new PrimaryShardInfo(mock(ActorSelection.class), DataStoreVersions.CURRENT_VERSION,
-                Optional.<DataTree>absent());
+        PrimaryShardInfo shardInfo = new PrimaryShardInfo(mock(ActorSelection.class), DataStoreVersions.CURRENT_VERSION);
         cache.putSuccessful("foo", shardInfo);
 
         Future<PrimaryShardInfo> future = cache.getIfPresent("foo");
