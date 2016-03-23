@@ -137,6 +137,8 @@ public abstract class AbstractConfigTestBase {
                         .unpackDirectory(new File(PAX_EXAM_UNPACK_DIRECTORY))
                         .useDeployFolder(false),
                 when(Boolean.getBoolean(KEEP_UNPACK_DIRECTORY_PROP)).useOptions(keepRuntimeFolder()),
+                features(maven().groupId("org.apache.karaf.features").artifactId("standard").classifier("features")
+                        .type("xml").versionAsInProject(), "eventadmin"),
                 features(getFeatureRepo(), getFeatureName()),
                 getLoggingOption(),
                 mvnLocalRepoOption(),

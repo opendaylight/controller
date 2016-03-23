@@ -7,24 +7,16 @@
  */
 package org.opendaylight.controller.config.yang.config.concurrent_data_broker;
 
-import com.google.common.collect.Lists;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import org.opendaylight.controller.cluster.datastore.ConcurrentDOMDataBroker;
 import org.opendaylight.controller.config.api.DependencyResolver;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.util.jmx.AbstractMXBean;
-import org.opendaylight.controller.md.sal.common.util.jmx.ThreadExecutorStatsMXBeanImpl;
-import org.opendaylight.controller.md.sal.dom.broker.impl.jmx.CommitStatsMXBeanImpl;
-import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStoreFactory;
-import org.opendaylight.controller.sal.core.spi.data.DOMStore;
-import org.opendaylight.yangtools.util.DurationStatisticsTracker;
-import org.opendaylight.yangtools.util.concurrent.SpecialExecutors;
+import org.opendaylight.controller.config.api.osgi.WaitingServiceTracker;
+import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
+import org.opendaylight.controller.md.sal.dom.spi.ForwardingDOMDataBroker;
+import org.osgi.framework.BundleContext;
 
 public class DomConcurrentDataBrokerModule extends AbstractDomConcurrentDataBrokerModule {
     private static final String JMX_BEAN_TYPE = "DOMDataBroker";
+
+    private BundleContext bundleContext;
 
     public DomConcurrentDataBrokerModule(final org.opendaylight.controller.config.api.ModuleIdentifier identifier, final DependencyResolver dependencyResolver) {
         super(identifier, dependencyResolver);
@@ -41,64 +33,36 @@ public class DomConcurrentDataBrokerModule extends AbstractDomConcurrentDataBrok
 
     @Override
     public AutoCloseable createInstance() {
-        //Initializing Operational DOM DataStore defaulting to InMemoryDOMDataStore if one is not configured
-        DOMStore operStore =  getOperationalDataStoreDependency();
-        if(operStore == null){
-           //we will default to InMemoryDOMDataStore creation
-          operStore = InMemoryDOMDataStoreFactory.create("DOM-OPER", getSchemaServiceDependency());
+        // The ConcurrentDOMDataBroker is provided via blueprint so wait for and return it here for
+        // backwards compatibility.
+        WaitingServiceTracker<DOMDataBroker> tracker = WaitingServiceTracker.create(
+                DOMDataBroker.class, bundleContext, "(type=default)");
+        DOMDataBroker delegate = tracker.waitForService(WaitingServiceTracker.FIVE_MINUTES);
+        return new ForwardingConcurrentDOMBroker(delegate, tracker);
+    }
+
+    public void setBundleContext(final BundleContext bundleContext) {
+        this.bundleContext = bundleContext;
+    }
+
+    private static class ForwardingConcurrentDOMBroker extends ForwardingDOMDataBroker implements AutoCloseable {
+        private final DOMDataBroker delegate;
+        private final AutoCloseable closeable;
+
+        ForwardingConcurrentDOMBroker(DOMDataBroker delegate, AutoCloseable closeable) {
+            this.delegate = delegate;
+            this.closeable = closeable;
         }
 
-        DOMStore configStore = getConfigDataStoreDependency();
-        if(configStore == null){
-           //we will default to InMemoryDOMDataStore creation
-           configStore = InMemoryDOMDataStoreFactory.create("DOM-CFG", getSchemaServiceDependency());
+        @Override
+        protected DOMDataBroker delegate() {
+            return delegate;
         }
 
-        final Map<LogicalDatastoreType, DOMStore> datastores = new EnumMap<>(LogicalDatastoreType.class);
-        datastores.put(LogicalDatastoreType.OPERATIONAL, operStore);
-        datastores.put(LogicalDatastoreType.CONFIGURATION, configStore);
-
-        /*
-         * We use an executor for commit ListenableFuture callbacks that favors reusing available
-         * threads over creating new threads at the expense of execution time. The assumption is
-         * that most ListenableFuture callbacks won't execute a lot of business logic where we want
-         * it to run quicker - many callbacks will likely just handle error conditions and do
-         * nothing on success. The executor queue capacity is bounded and, if the capacity is
-         * reached, subsequent submitted tasks will block the caller.
-         */
-        ExecutorService listenableFutureExecutor = SpecialExecutors.newBlockingBoundedCachedThreadPool(
-                getMaxDataBrokerFutureCallbackPoolSize(), getMaxDataBrokerFutureCallbackQueueSize(),
-                "CommitFutures");
-
-        final List<AbstractMXBean> mBeans = Lists.newArrayList();
-
-        final DurationStatisticsTracker commitStatsTracker;
-        final ConcurrentDOMDataBroker cdb = new ConcurrentDOMDataBroker(datastores, listenableFutureExecutor);
-        commitStatsTracker = cdb.getCommitStatsTracker();
-
-        if(commitStatsTracker != null) {
-            final CommitStatsMXBeanImpl commitStatsMXBean = new CommitStatsMXBeanImpl(
-                    commitStatsTracker, JMX_BEAN_TYPE);
-            commitStatsMXBean.registerMBean();
-            mBeans.add(commitStatsMXBean);
+        @Override
+        public void close() throws Exception {
+            // We don't close the delegate as the life-cycle is controlled via blueprint.
+            closeable.close();
         }
-
-        final AbstractMXBean commitFutureStatsMXBean =
-                ThreadExecutorStatsMXBeanImpl.create(listenableFutureExecutor,
-                        "CommitFutureExecutorStats", JMX_BEAN_TYPE, null);
-        if(commitFutureStatsMXBean != null) {
-            mBeans.add(commitFutureStatsMXBean);
-        }
-
-        cdb.setCloseable(new AutoCloseable() {
-            @Override
-            public void close() {
-                for(AbstractMXBean mBean: mBeans) {
-                    mBean.unregisterMBean();
-                }
-            }
-        });
-
-        return cdb;
     }
 }
