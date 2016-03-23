@@ -16,27 +16,23 @@
  */
 package org.opendaylight.controller.config.yang.md.sal.binding.impl;
 
+import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.MountPointService;
-import org.opendaylight.controller.md.sal.binding.compat.HeliumRpcProviderRegistry;
+import org.opendaylight.controller.md.sal.binding.api.NotificationPublishService;
 import org.opendaylight.controller.md.sal.binding.compat.HydrogenMountProvisionServiceAdapter;
-import org.opendaylight.controller.md.sal.binding.impl.BindingDOMMountPointServiceAdapter;
-import org.opendaylight.controller.md.sal.binding.impl.BindingDOMRpcProviderServiceAdapter;
-import org.opendaylight.controller.md.sal.binding.impl.BindingDOMRpcServiceAdapter;
-import org.opendaylight.controller.md.sal.binding.impl.BindingToNormalizedNodeCodec;
-import org.opendaylight.controller.md.sal.dom.api.DOMMountPointService;
-import org.opendaylight.controller.md.sal.dom.api.DOMRpcProviderService;
-import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
+import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
 import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
 import org.opendaylight.controller.sal.binding.api.mount.MountProviderService;
 import org.opendaylight.controller.sal.binding.impl.RootBindingAwareBroker;
-import org.opendaylight.controller.sal.core.api.Broker;
-import org.opendaylight.controller.sal.core.api.Broker.ProviderSession;
+import org.opendaylight.controller.sal.common.util.osgi.OsgiServiceUtils;
+import org.osgi.framework.BundleContext;
 
 /**
 *
 */
 public final class BindingBrokerImplModule extends
         org.opendaylight.controller.config.yang.md.sal.binding.impl.AbstractBindingBrokerImplModule {
+    private BundleContext bundleContext;
 
     public BindingBrokerImplModule(final org.opendaylight.controller.config.api.ModuleIdentifier identifier,
             final org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
@@ -56,31 +52,42 @@ public final class BindingBrokerImplModule extends
 
     @Override
     public RootBindingAwareBroker createInstance() {
-        final Broker domBroker = getDomAsyncBrokerDependency();
-        final BindingToNormalizedNodeCodec codec = getBindingMappingServiceDependency();
-        final ProviderSession session = domBroker.registerProvider(new DummyDOMProvider());
+        // The services are provided via blueprint so retrieve then from the OSGi service registry for
+        // backwards compatibility.
 
-        final MountPointService mount = createMountPointAdapter(codec,session);
-        final BindingDOMRpcServiceAdapter rpcConsumer = createRpcConsumer(codec,session);
-        final BindingDOMRpcProviderServiceAdapter rpcProvider = createRpcProvider(codec,session);
+        final MountPointService mountPointService = OsgiServiceUtils.waitForService(
+                MountPointService.class, bundleContext, OsgiServiceUtils.FIVE_MINUTES, null);
+
+        final RpcProviderRegistry rpcProviderRegistry = OsgiServiceUtils.waitForService(
+                RpcProviderRegistry.class, bundleContext, OsgiServiceUtils.FIVE_MINUTES, null);
+
+        final DataBroker dataBroker = OsgiServiceUtils.waitForService(
+                DataBroker.class, bundleContext, OsgiServiceUtils.FIVE_MINUTES, null);
+
+        final NotificationProviderService notificationProviderService = OsgiServiceUtils.waitForService(
+                NotificationProviderService.class, bundleContext, OsgiServiceUtils.FIVE_MINUTES, null);
+
+        final NotificationPublishService notificationPublishService = OsgiServiceUtils.waitForService(
+                NotificationPublishService.class, bundleContext, OsgiServiceUtils.FIVE_MINUTES, null);
+
         final RootBindingAwareBroker broker = new RootBindingAwareBroker(getIdentifier().getInstanceName());
-        final RpcProviderRegistry heliumRpcBroker = new HeliumRpcProviderRegistry(rpcConsumer, rpcProvider);
-        final MountProviderService legacyMount = createLegacyMountPointService(mount);
-
+        final MountProviderService legacyMount = createLegacyMountPointService(mountPointService);
 
         broker.setLegacyDataBroker(getDataBrokerDependency());
-        broker.setNotificationBroker(getNotificationServiceDependency());
-        if (getNotificationPublishServiceDependency() != null) {
-            broker.setNotificationPublishService(getNotificationPublishServiceDependency());
-        }
-        broker.setRpcBroker(heliumRpcBroker);
-        broker.setDataBroker(getRootDataBrokerDependency());
-        broker.setMountService(mount);
+
+        broker.setNotificationBroker(notificationProviderService);
+        broker.setNotificationPublishService(notificationPublishService);
+        broker.setRpcBroker(rpcProviderRegistry);
+        broker.setDataBroker(dataBroker);
+        broker.setMountService(mountPointService);
         broker.setLegacyMountManager(legacyMount);
         broker.start();
         return broker;
     }
 
+    public void setBundleContext(final BundleContext bundleContext) {
+        this.bundleContext = bundleContext;
+    }
 
     @SuppressWarnings("deprecation")
     private MountProviderService createLegacyMountPointService(final MountPointService service) {
@@ -89,30 +96,4 @@ public final class BindingBrokerImplModule extends
         }
         return null;
     }
-
-    private BindingDOMRpcProviderServiceAdapter createRpcProvider(final BindingToNormalizedNodeCodec codec,
-            final ProviderSession session) {
-        final DOMRpcProviderService domService = session.getService(DOMRpcProviderService.class);
-        if(domService != null) {
-            return new BindingDOMRpcProviderServiceAdapter(domService, codec);
-        }
-        return null;
-    }
-
-    private BindingDOMRpcServiceAdapter createRpcConsumer(final BindingToNormalizedNodeCodec codec, final ProviderSession session) {
-        final DOMRpcService domService = session.getService(DOMRpcService.class);
-        if(domService != null) {
-            return new BindingDOMRpcServiceAdapter(domService, codec);
-        }
-        return null;
-    }
-
-    private MountPointService createMountPointAdapter(final BindingToNormalizedNodeCodec codec, final ProviderSession session) {
-        final DOMMountPointService domService = session.getService(DOMMountPointService.class);
-        if(domService != null) {
-            return new BindingDOMMountPointServiceAdapter(domService, codec);
-        }
-        return null;
-    }
-
 }

@@ -8,11 +8,9 @@
 
 package org.opendaylight.controller.config.yang.config.cluster_admin_provider;
 
-import com.google.common.base.Preconditions;
-import org.opendaylight.controller.cluster.datastore.DistributedDataStore;
-import org.opendaylight.controller.cluster.datastore.admin.ClusterAdminRpcService;
 import org.opendaylight.controller.config.api.DependencyResolver;
 import org.opendaylight.controller.config.api.ModuleIdentifier;
+import org.opendaylight.controller.sal.common.util.NoopAutoCloseable;
 
 public class ClusterAdminProviderModule extends AbstractClusterAdminProviderModule {
     public ClusterAdminProviderModule(ModuleIdentifier identifier, DependencyResolver dependencyResolver) {
@@ -30,14 +28,13 @@ public class ClusterAdminProviderModule extends AbstractClusterAdminProviderModu
     }
 
     @Override
+    public boolean canReuseInstance(AbstractClusterAdminProviderModule oldModule) {
+        return true;
+    }
+
+    @Override
     public AutoCloseable createInstance() {
-        Preconditions.checkArgument(getConfigDataStoreDependency() instanceof DistributedDataStore,
-                "Injected config DOMStore must be an instance of DistributedDataStore");
-        Preconditions.checkArgument(getOperDataStoreDependency() instanceof DistributedDataStore,
-                "Injected operational DOMStore must be an instance of DistributedDataStore");
-        ClusterAdminRpcService service = new ClusterAdminRpcService((DistributedDataStore)getConfigDataStoreDependency(),
-                (DistributedDataStore)getOperDataStoreDependency());
-        service.start(getRpcRegistryDependency());
-        return service;
+        // The ClusterAdminRpcService is created via blueprint so return a noop here for backwards compatibility.
+        return NoopAutoCloseable.INSTANCE;
     }
 }

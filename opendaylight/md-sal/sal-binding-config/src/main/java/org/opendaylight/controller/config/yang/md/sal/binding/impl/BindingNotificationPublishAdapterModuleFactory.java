@@ -6,6 +6,29 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 package org.opendaylight.controller.config.yang.md.sal.binding.impl;
-public class BindingNotificationPublishAdapterModuleFactory extends org.opendaylight.controller.config.yang.md.sal.binding.impl.AbstractBindingNotificationPublishAdapterModuleFactory {
 
+import org.opendaylight.controller.config.api.DependencyResolver;
+import org.opendaylight.controller.config.api.DynamicMBeanWithInstance;
+import org.opendaylight.controller.config.spi.Module;
+import org.osgi.framework.BundleContext;
+
+public class BindingNotificationPublishAdapterModuleFactory extends AbstractBindingNotificationPublishAdapterModuleFactory {
+
+    @Override
+    public Module createModule(String instanceName, DependencyResolver dependencyResolver,
+            BundleContext bundleContext) {
+        BindingNotificationPublishAdapterModule module = (BindingNotificationPublishAdapterModule)super.createModule(
+                instanceName, dependencyResolver, bundleContext);
+        module.setBundleContext(bundleContext);
+        return module;
+    }
+
+    @Override
+    public Module createModule(String instanceName, DependencyResolver dependencyResolver, DynamicMBeanWithInstance old,
+            BundleContext bundleContext) throws Exception {
+        BindingNotificationPublishAdapterModule module = (BindingNotificationPublishAdapterModule)super.createModule(
+                instanceName, dependencyResolver, old, bundleContext);
+        module.setBundleContext(bundleContext);
+        return module;
+    }
 }
