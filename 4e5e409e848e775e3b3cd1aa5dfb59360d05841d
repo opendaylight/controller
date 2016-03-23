@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a3f45e8_c6d793be",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 203,
+      "author": {
+        "id": 3635
+      },
+      "writtenOn": "2016-03-23T19:56:51Z",
+      "side": 1,
+      "message": "There is a separate patch aimed at removing this class;  is that no longer happening?",
+      "range": {
+        "startLine": 203,
+        "startChar": 3,
+        "endLine": 203,
+        "endChar": 72
+      },
+      "revId": "4e5e409e848e775e3b3cd1aa5dfb59360d05841d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a3f45e8_26e597a8",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 204,
+      "author": {
+        "id": 3635
+      },
+      "writtenOn": "2016-03-23T19:56:51Z",
+      "side": 1,
+      "message": "Should this be saved as a local variable?  It is called again in line 206.",
+      "range": {
+        "startLine": 204,
+        "startChar": 11,
+        "endLine": 204,
+        "endChar": 31
+      },
+      "revId": "4e5e409e848e775e3b3cd1aa5dfb59360d05841d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a3f45e8_69d01054",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 3635
+      },
+      "writtenOn": "2016-03-23T19:56:51Z",
+      "side": 1,
+      "message": "Is this effectively a null check?  Why not be explicit about it?",
+      "range": {
+        "startLine": 111,
+        "startChar": 58,
+        "endLine": 111,
+        "endChar": 66
+      },
+      "revId": "4e5e409e848e775e3b3cd1aa5dfb59360d05841d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a3f45e8_2976083f",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/messages/ChangeServersVotingStatus.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 3635
+      },
+      "writtenOn": "2016-03-23T19:56:51Z",
+      "side": 1,
+      "message": "Maybe this is a style convention for your toString() invocations, but shouldnt the comma be inside the \", serversVisited\u003d\"?",
+      "range": {
+        "startLine": 51,
+        "startChar": 93,
+        "endLine": 52,
+        "endChar": 87
+      },
+      "revId": "4e5e409e848e775e3b3cd1aa5dfb59360d05841d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
