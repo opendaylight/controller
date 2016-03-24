@@ -31,18 +31,24 @@ import org.opendaylight.yangtools.yang.binding.YangModuleInfo;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleEvent;
+import org.osgi.framework.SynchronousBundleListener;
 import org.osgi.util.tracker.BundleTracker;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ConfigManagerActivator implements BundleActivator {
+public class ConfigManagerActivator implements BundleActivator, SynchronousBundleListener {
 
     private static final Logger LOG = LoggerFactory.getLogger(ConfigManagerActivator.class);
+
+    private static final long SYSTEM_BUNDLE_ID = 0;
 
     private final MBeanServer configMBeanServer = ManagementFactory.getPlatformMBeanServer();
 
     private AutoCloseable autoCloseable;
+
+    private ConfigRegistryImpl configRegistry;
 
     @Override
     public void start(final BundleContext context) {
@@ -59,7 +65,7 @@ public class ConfigManagerActivator implements BundleActivator {
             // start config registry
             BundleContextBackedModuleFactoriesResolver bundleContextBackedModuleFactoriesResolver = new BundleContextBackedModuleFactoriesResolver(
                     context);
-            ConfigRegistryImpl configRegistry = new ConfigRegistryImpl(bundleContextBackedModuleFactoriesResolver, configMBeanServer,
+            configRegistry = new ConfigRegistryImpl(bundleContextBackedModuleFactoriesResolver, configMBeanServer,
                     bindingContextProvider);
 
             // track bundles containing factories
@@ -117,10 +123,12 @@ public class ConfigManagerActivator implements BundleActivator {
                     blankTransactionServiceTracker);
             serviceTracker.open();
 
-            List<AutoCloseable> list = Arrays.asList(bindingContextProvider, clsReg, configRegistry,
+            List<AutoCloseable> list = Arrays.asList(bindingContextProvider, clsReg,
                     wrap(moduleFactoryBundleTracker), moduleInfoBundleTracker,
                     configRegReg, configRegistryJMXRegistrator, configRegistryJMXRegistratorWithNotifications, wrap(serviceTracker), moduleInfoRegistryWrapper, notifyingConfigRegistry);
             autoCloseable = OsgiRegistrationUtil.aggregate(list);
+
+            context.addBundleListener(this);
         } catch(Exception e) {
             LOG.warn("Error starting config manager", e);
         } catch(Error e) {
@@ -133,6 +141,20 @@ public class ConfigManagerActivator implements BundleActivator {
 
     @Override
     public void stop(final BundleContext context) throws Exception {
+        context.removeBundleListener(this);
         autoCloseable.close();
+    }
+
+    @Override
+    public void bundleChanged(BundleEvent event) {
+        if(configRegistry == null) {
+            return;
+        }
+
+        // If the system bundle (id 0) is stopping close the ConfigRegistry so it destroys all modules. On
+        // shutdown the system bundle is stopped first.
+        if(event.getBundle().getBundleId() == SYSTEM_BUNDLE_ID && event.getType() == BundleEvent.STOPPING) {
+            configRegistry.close();
+        }
     }
 }
