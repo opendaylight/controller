@@ -9,7 +9,7 @@
 package org.opendaylight.controller.config.yang.config.cluster_admin_provider;
 
 import com.google.common.base.Preconditions;
-import org.opendaylight.controller.cluster.datastore.DistributedDataStore;
+import org.opendaylight.controller.cluster.databroker.DistributedDataStore;
 import org.opendaylight.controller.cluster.datastore.admin.ClusterAdminRpcService;
 import org.opendaylight.controller.config.api.DependencyResolver;
 import org.opendaylight.controller.config.api.ModuleIdentifier;

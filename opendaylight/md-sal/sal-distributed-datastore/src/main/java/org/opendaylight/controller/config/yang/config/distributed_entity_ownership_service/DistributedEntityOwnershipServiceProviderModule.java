@@ -9,7 +9,7 @@
 package org.opendaylight.controller.config.yang.config.distributed_entity_ownership_service;
 
 import com.google.common.base.Preconditions;
-import org.opendaylight.controller.cluster.datastore.DistributedDataStore;
+import org.opendaylight.controller.cluster.databroker.DistributedDataStore;
 import org.opendaylight.controller.cluster.datastore.entityownership.DistributedEntityOwnershipService;
 import org.opendaylight.controller.cluster.datastore.entityownership.selectionstrategy.EntityOwnerSelectionStrategyConfig;
 import org.opendaylight.controller.cluster.datastore.entityownership.selectionstrategy.EntityOwnerSelectionStrategyConfigReader;
