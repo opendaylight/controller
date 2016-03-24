@@ -1,0 +1,291 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a3f45e8_b07c3974",
+        "filename": "features/mdsal/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 142,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-03-24T20:44:45Z",
+      "side": 1,
+      "message": "use \u003cversion\u003e${controller.mdsal.version}\u003c/version\u003e",
+      "range": {
+        "startLine": 142,
+        "startChar": 6,
+        "endLine": 142,
+        "endChar": 39
+      },
+      "revId": "b0d2c6efcf07f533f3ee8a1d71689d325802a0b3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a3f45e8_f0952189",
+        "filename": "opendaylight/md-sal/mdsal-cli/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-03-24T20:44:45Z",
+      "side": 1,
+      "message": "Inocybe Technologies",
+      "range": {
+        "startLine": 3,
+        "startChar": 19,
+        "endLine": 3,
+        "endChar": 48
+      },
+      "revId": "b0d2c6efcf07f533f3ee8a1d71689d325802a0b3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a3f45e8_d092a59e",
+        "filename": "opendaylight/md-sal/mdsal-cli/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-03-24T20:44:45Z",
+      "side": 1,
+      "message": "1.4.0-SNAPSHOT\n\nPlease stick to the existing version",
+      "range": {
+        "startLine": 21,
+        "startChar": 11,
+        "endLine": 21,
+        "endChar": 25
+      },
+      "revId": "b0d2c6efcf07f533f3ee8a1d71689d325802a0b3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a3f45e8_70e9111a",
+        "filename": "opendaylight/md-sal/mdsal-cli/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-03-24T20:44:45Z",
+      "side": 1,
+      "message": "remove",
+      "range": {
+        "startLine": 24,
+        "startChar": 0,
+        "endLine": 26,
+        "endChar": 15
+      },
+      "revId": "b0d2c6efcf07f533f3ee8a1d71689d325802a0b3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a3f45e8_108d2d7c",
+        "filename": "opendaylight/md-sal/mdsal-cli/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-03-24T20:44:45Z",
+      "side": 1,
+      "message": "remove",
+      "revId": "b0d2c6efcf07f533f3ee8a1d71689d325802a0b3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a3f45e8_30902995",
+        "filename": "opendaylight/md-sal/mdsal-cli/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-03-24T20:44:45Z",
+      "side": 1,
+      "message": "remove",
+      "revId": "b0d2c6efcf07f533f3ee8a1d71689d325802a0b3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a3f45e8_50ee9523",
+        "filename": "opendaylight/md-sal/mdsal-cli/src/main/java/org/opendaylight/mdsal/cli/MdSALStatusInfo.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-03-24T20:44:45Z",
+      "side": 1,
+      "message": "Inocybe Technologies",
+      "range": {
+        "startLine": 2,
+        "startChar": 22,
+        "endLine": 2,
+        "endChar": 31
+      },
+      "revId": "b0d2c6efcf07f533f3ee8a1d71689d325802a0b3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a3f45e8_b0f39909",
+        "filename": "opendaylight/md-sal/mdsal-cli/src/main/java/org/opendaylight/mdsal/cli/MdSALStatusInfo.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-03-24T20:44:45Z",
+      "side": 1,
+      "message": "small \"s\"\n\n--\u003e status",
+      "range": {
+        "startLine": 22,
+        "startChar": 34,
+        "endLine": 22,
+        "endChar": 35
+      },
+      "revId": "b0d2c6efcf07f533f3ee8a1d71689d325802a0b3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a3f45e8_f0c36188",
+        "filename": "opendaylight/md-sal/mdsal-cli/src/main/java/org/opendaylight/mdsal/cli/MdSALStatusInfo.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-03-24T20:44:45Z",
+      "side": 1,
+      "message": "LOG at error level",
+      "range": {
+        "startLine": 46,
+        "startChar": 12,
+        "endLine": 46,
+        "endChar": 34
+      },
+      "revId": "b0d2c6efcf07f533f3ee8a1d71689d325802a0b3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a3f45e8_90f81de7",
+        "filename": "opendaylight/md-sal/mdsal-cli/src/main/java/org/opendaylight/mdsal/cli/MdSALTransactionInfo.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-03-24T20:44:45Z",
+      "side": 1,
+      "message": "inocybe technologies",
+      "range": {
+        "startLine": 2,
+        "startChar": 22,
+        "endLine": 2,
+        "endChar": 31
+      },
+      "revId": "b0d2c6efcf07f533f3ee8a1d71689d325802a0b3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a3f45e8_f0dc0177",
+        "filename": "opendaylight/md-sal/mdsal-cli/src/main/java/org/opendaylight/mdsal/cli/MdSALTransactionInfo.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-03-24T20:44:45Z",
+      "side": 1,
+      "message": "small \"i\"\n\n--\u003e info",
+      "range": {
+        "startLine": 23,
+        "startChar": 34,
+        "endLine": 23,
+        "endChar": 35
+      },
+      "revId": "b0d2c6efcf07f533f3ee8a1d71689d325802a0b3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a3f45e8_d0d90585",
+        "filename": "opendaylight/md-sal/mdsal-cli/src/main/java/org/opendaylight/mdsal/cli/MdSALTransactionInfo.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-03-24T20:44:45Z",
+      "side": 1,
+      "message": "wrong description\n\nmdsal:info",
+      "range": {
+        "startLine": 26,
+        "startChar": 70,
+        "endLine": 26,
+        "endChar": 79
+      },
+      "revId": "b0d2c6efcf07f533f3ee8a1d71689d325802a0b3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a3f45e8_90cf7db0",
+        "filename": "opendaylight/md-sal/mdsal-cli/src/main/java/org/opendaylight/mdsal/cli/MdSALTransactionInfo.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-03-24T20:44:45Z",
+      "side": 1,
+      "message": "Log at ERROR level",
+      "range": {
+        "startLine": 42,
+        "startChar": 11,
+        "endLine": 42,
+        "endChar": 34
+      },
+      "revId": "b0d2c6efcf07f533f3ee8a1d71689d325802a0b3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
