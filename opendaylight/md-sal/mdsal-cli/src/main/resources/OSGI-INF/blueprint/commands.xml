@@ -1,0 +1,12 @@
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
+  <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.1.0">
+      <command>
+          <action class="org.opendaylight.mdsal.cli.StatusInfo">
+          </action>
+      </command>
+      <command>
+          <action class="org.opendaylight.mdsal.cli.TransactionsInfo">
+          </action>
+      </command>
+  </command-bundle>
+</blueprint>
