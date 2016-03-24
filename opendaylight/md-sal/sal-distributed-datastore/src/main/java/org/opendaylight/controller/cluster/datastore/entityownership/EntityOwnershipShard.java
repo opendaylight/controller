@@ -55,6 +55,7 @@ import org.opendaylight.controller.cluster.datastore.messages.SuccessReply;
 import org.opendaylight.controller.cluster.datastore.modification.DeleteModification;
 import org.opendaylight.controller.cluster.datastore.modification.MergeModification;
 import org.opendaylight.controller.cluster.datastore.modification.WriteModification;
+import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
@@ -79,6 +80,7 @@ class EntityOwnershipShard extends Shard {
     private final EntityOwnerSelectionStrategyConfig strategyConfig;
     private final Map<YangInstanceIdentifier, Cancellable> entityToScheduledOwnershipTask = new HashMap<>();
     private final EntityOwnershipStatistics entityOwnershipStatistics;
+    private EntityOwnerChangeListener listener;
 
     private static DatastoreContext noPersistenceDatastoreContext(DatastoreContext datastoreContext) {
         return DatastoreContext.newBuilderFrom(datastoreContext).persistent(false).build();
@@ -109,7 +111,8 @@ class EntityOwnershipShard extends Shard {
         super.onRecoveryComplete();
 
         new CandidateListChangeListener(getSelf(), persistenceId()).init(getDataStore());
-        new EntityOwnerChangeListener(localMemberName, listenerSupport).init(getDataStore());
+        listener = new EntityOwnerChangeListener(localMemberName, listenerSupport);
+        listener.init(getDataStore());
     }
 
     @Override
@@ -253,13 +256,60 @@ class EntityOwnershipShard extends Shard {
         return getLeader() != null && !isIsolatedLeader();
     }
 
+    /**
+     * Determine if we are in jeopardy based on observed RAFT state.
+     */
+    private static boolean inJeopardy(final RaftState state) {
+        switch (state) {
+            case Candidate:
+            case Follower:
+            case Leader:
+                return false;
+            case IsolatedLeader:
+                return true;
+        }
+        throw new IllegalStateException("Unsupported RAFT state " + state);
+    }
+
+    private void notifyAllListeners() {
+        searchForEntities(new EntityWalker() {
+            @Override
+            public void onEntity(MapEntryNode entityTypeNode, MapEntryNode entityNode) {
+                Optional<DataContainerChild<?, ?>> possibleType = entityTypeNode.getChild(ENTITY_TYPE_NODE_ID);
+                if (possibleType.isPresent()) {
+                    final boolean hasOwner;
+                    final boolean isOwner;
+
+                    Optional<DataContainerChild<?, ?>> possibleOwner = entityNode.getChild(ENTITY_OWNER_NODE_ID);
+                    if (possibleOwner.isPresent()) {
+                        isOwner = localMemberName.equals(possibleOwner.get().getValue().toString());
+                        hasOwner = true;
+                    } else {
+                        isOwner = false;
+                        hasOwner = false;
+                    }
+
+                    Entity entity = new Entity(possibleType.get().getValue().toString(),
+                        (YangInstanceIdentifier) entityNode.getChild(ENTITY_ID_NODE_ID).get().getValue());
+
+                    listenerSupport.notifyEntityOwnershipListeners(entity, isOwner, isOwner, hasOwner);
+                }
+            }
+        });
+    }
+
     @Override
     protected void onStateChanged() {
         super.onStateChanged();
 
         boolean isLeader = isLeader();
-        if(LOG.isDebugEnabled()) {
-            LOG.debug("{}: onStateChanged: isLeader: {}, hasLeader: {}", persistenceId(), isLeader, hasLeader());
+        LOG.debug("{}: onStateChanged: isLeader: {}, hasLeader: {}", persistenceId(), isLeader, hasLeader());
+
+        // Examine current RAFT state to see if we are in jeopardy, potentially notifying all listeners
+        final boolean inJeopardy = inJeopardy(getRaftState());
+        final boolean wasInJeopardy = listenerSupport.setInJeopardy(inJeopardy);
+        if (inJeopardy != wasInJeopardy) {
+            notifyAllListeners();
         }
 
         commitCoordinator.onStateChanged(this, isLeader);
