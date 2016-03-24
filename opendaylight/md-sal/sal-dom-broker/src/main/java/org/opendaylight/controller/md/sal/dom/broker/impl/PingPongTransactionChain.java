@@ -207,19 +207,38 @@ public final class PingPongTransactionChain implements DOMTransactionChain {
         });
     }
 
-    private void processNextTransaction(final PingPongTransaction tx) {
+    /*
+     * We got invoked from the data store thread. We need to do two things:
+     * 1) release the in-flight transaction
+     * 2) process the potential next transaction
+     *
+     * We have to perform 2) under lock. We could perform 1) without locking, but that means the CAS result may
+     * not be accurate, as a user thread may submit the ready transaction before we acquire the lock -- and checking
+     * for next transaction is not enough, as that may have also be allocated (as a result of a quick
+     * submit/allocate/submit between 1) and 2)). Hence we'd end up doing the following:
+     * 1) CAS of inflightTx
+     * 2) take lock
+     * 3) volatile read of inflightTx
+     *
+     * Rather than doing that, we keep this method synchronized, hence performing only:
+     * 1) take lock
+     * 2) CAS of inflightTx
+     *
+     * Since the user thread is barred from submitting the transaction (in processIfReady), we can then proceed with
+     * the knowledge that inflightTx is null -- processTransaction() will still do a CAS, but that is only for
+     * correctness.
+     */
+    private synchronized void processNextTransaction(final PingPongTransaction tx) {
         final boolean success = INFLIGHT_UPDATER.compareAndSet(this, tx, null);
         Preconditions.checkState(success, "Completed transaction %s while %s was submitted", tx, inflightTx);
 
-        synchronized (this) {
-            final PingPongTransaction nextTx = READY_UPDATER.getAndSet(this, null);
-            if (nextTx != null) {
-                processTransaction(nextTx);
-            } else if (shutdownTx != null) {
-                processTransaction(shutdownTx);
-                delegate.close();
-                shutdownTx = null;
-            }
+        final PingPongTransaction nextTx = READY_UPDATER.getAndSet(this, null);
+        if (nextTx != null) {
+            processTransaction(nextTx);
+        } else if (shutdownTx != null) {
+            processTransaction(shutdownTx);
+            delegate.close();
+            shutdownTx = null;
         }
     }
 
