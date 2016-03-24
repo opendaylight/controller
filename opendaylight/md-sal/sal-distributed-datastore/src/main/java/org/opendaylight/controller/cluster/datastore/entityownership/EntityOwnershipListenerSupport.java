@@ -71,25 +71,27 @@ class EntityOwnershipListenerSupport {
         removeListener(listener, entityType);
     }
 
-    void notifyEntityOwnershipListeners(Entity entity, boolean wasOwner, boolean isOwner, boolean hasOwner) {
-        notifyListeners(entity, entity.getType(), wasOwner, isOwner, hasOwner);
+    void notifyEntityOwnershipListeners(Entity entity, boolean wasOwner, boolean isOwner, boolean hasOwner,
+            boolean inJeopardy) {
+        notifyListeners(entity, entity.getType(), wasOwner, isOwner, hasOwner, inJeopardy);
     }
 
     void notifyEntityOwnershipListener(Entity entity, boolean wasOwner, boolean isOwner, boolean hasOwner,
-            EntityOwnershipListener listener) {
-        notifyListeners(entity, wasOwner, isOwner, hasOwner, Collections.singleton(listener));
+            boolean inJeopardy, EntityOwnershipListener listener) {
+        notifyListeners(entity, wasOwner, isOwner, hasOwner, inJeopardy, Collections.singleton(listener));
     }
 
-    private void notifyListeners(Entity entity, String mapKey, boolean wasOwner, boolean isOwner, boolean hasOwner) {
+    private void notifyListeners(Entity entity, String mapKey, boolean wasOwner, boolean isOwner, boolean hasOwner,
+            boolean inJeopardy) {
         Collection<EntityOwnershipListener> listeners = entityTypeListenerMap.get(mapKey);
         if(!listeners.isEmpty()) {
-            notifyListeners(entity, wasOwner, isOwner, hasOwner, listeners);
+            notifyListeners(entity, wasOwner, isOwner, hasOwner, inJeopardy, listeners);
         }
     }
 
-    private void notifyListeners(Entity entity, boolean wasOwner, boolean isOwner, boolean hasOwner,
+    private void notifyListeners(Entity entity, boolean wasOwner, boolean isOwner, boolean hasOwner, boolean inJeopardy,
             Collection<EntityOwnershipListener> listeners) {
-        EntityOwnershipChange changed = new EntityOwnershipChange(entity, wasOwner, isOwner, hasOwner);
+        EntityOwnershipChange changed = new EntityOwnershipChange(entity, wasOwner, isOwner, hasOwner, inJeopardy);
         for(EntityOwnershipListener listener: listeners) {
             ActorRef listenerActor = listenerActorFor(listener);
 
