@@ -437,7 +437,7 @@ class ConfigTransactionControllerImpl implements
     }
 
     @Override
-    public synchronized void abortConfig() {
+    public void abortConfig() {
         transactionStatus.checkNotCommitStarted();
         transactionStatus.checkNotAborted();
         internalAbort();
