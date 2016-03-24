@@ -209,7 +209,7 @@ class EntityOwnershipShard extends Shard {
                     Entity entity = new Entity(entityType,
                         (YangInstanceIdentifier) entityNode.getChild(ENTITY_ID_NODE_ID).get().getValue());
 
-                    listenerSupport.notifyEntityOwnershipListener(entity, false, isOwner, hasOwner,
+                    listenerSupport.notifyEntityOwnershipListener(entity, false, isOwner, hasOwner, isIsolatedLeader(),
                         registerListener.getListener());
                 }
             }
