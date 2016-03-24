@@ -211,13 +211,9 @@ public class DataTreeChangeListenerProxyTest extends AbstractActorTest {
             ActorContext actorContext = mock(ActorContext.class);
             final YangInstanceIdentifier path = YangInstanceIdentifier.of(TestModel.TEST_QNAME);
 
+            String shardName = "shard-1";
             doReturn(executor).when(actorContext).getClientDispatcher();
             doReturn(mockActorSystem).when(actorContext).getActorSystem();
-
-            String shardName = "shard-1";
-            final DataTreeChangeListenerProxy<DOMDataTreeChangeListener> proxy =
-                    new DataTreeChangeListenerProxy<>(actorContext, mockListener);
-
             doReturn(duration("5 seconds")).when(actorContext).getOperationDuration();
             doReturn(Futures.successful(getRef())).when(actorContext).findLocalShardAsync(eq(shardName));
             doReturn(Futures.failed(new RuntimeException("mock"))).
@@ -225,7 +221,8 @@ public class DataTreeChangeListenerProxyTest extends AbstractActorTest {
                     any(Object.class), any(Timeout.class));
             doReturn(mock(DatastoreContext.class)).when(actorContext).getDatastoreContext();
 
-            proxy.init("shard-1", path);
+            final DataTreeChangeListenerProxy<DOMDataTreeChangeListener> proxy =
+                    DataTreeChangeListenerProxy.create(actorContext, "shard-1", path, mockListener);
 
             Assert.assertEquals("getListenerRegistrationActor", null,
                     proxy.getListenerRegistrationActor());
