@@ -42,7 +42,7 @@ final class DOMBrokerTransactionChain extends AbstractDOMTransactionFactory<DOMS
             AtomicReferenceFieldUpdater.newUpdater(DOMBrokerTransactionChain.class, State.class, "state");
     private static final Logger LOG = LoggerFactory.getLogger(DOMBrokerTransactionChain.class);
     private final AtomicLong txNum = new AtomicLong();
-    private final AbstractDOMBroker broker;
+    private final ConcurrentDOMDataBroker broker;
     private final TransactionChainListener listener;
     private final long chainId;
 
@@ -62,7 +62,7 @@ final class DOMBrokerTransactionChain extends AbstractDOMTransactionFactory<DOMS
      */
     public DOMBrokerTransactionChain(final long chainId,
                                      final Map<LogicalDatastoreType, DOMStoreTransactionChain> chains,
-                                     AbstractDOMBroker broker, final TransactionChainListener listener) {
+                                     ConcurrentDOMDataBroker broker, final TransactionChainListener listener) {
         super(chains);
         this.chainId = chainId;
         this.broker = Preconditions.checkNotNull(broker);

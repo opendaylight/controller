@@ -5,6 +5,7 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
+
 package org.opendaylight.controller.md.sal.dom.broker.impl;
 
 import static com.google.common.base.Preconditions.checkState;
@@ -101,6 +102,16 @@ public abstract class AbstractDOMDataBroker extends AbstractDOMForwardedTransact
         return extensions;
     }
 
+    /**
+     * Allocate the identifier of the next transaction chain. This method allocates identifiers which are monotonic
+     * for the lifetime of the process.
+     *
+     * @return Next transaction chain ID.
+     */
+    protected final long nextTransactionChainId() {
+        return chainNum.getAndIncrement();
+    }
+
     @Override
     public DOMTransactionChain createTransactionChain(final TransactionChainListener listener) {
         checkNotClosed();
@@ -110,7 +121,7 @@ public abstract class AbstractDOMDataBroker extends AbstractDOMForwardedTransact
             backingChains.put(entry.getKey(), entry.getValue().createTransactionChain());
         }
 
-        final long chainId = chainNum.getAndIncrement();
+        final long chainId = nextTransactionChainId();
         LOG.debug("Transactoin chain {} created with listener {}, backing store chains {}", chainId, listener,
                 backingChains);
         return new DOMDataBrokerTransactionChainImpl(chainId, backingChains, this, listener);

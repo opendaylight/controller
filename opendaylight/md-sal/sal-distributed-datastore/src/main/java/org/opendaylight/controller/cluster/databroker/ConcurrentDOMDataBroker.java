@@ -16,6 +16,7 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import java.util.Collection;
+import java.util.EnumMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -24,11 +25,15 @@ import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderExc
 import org.opendaylight.controller.cluster.datastore.exceptions.ShardLeaderNotRespondingException;
 import org.opendaylight.controller.md.sal.common.api.data.DataStoreUnavailableException;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListener;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
+import org.opendaylight.controller.md.sal.dom.api.DOMTransactionChain;
+import org.opendaylight.controller.md.sal.dom.broker.impl.AbstractDOMDataBroker;
 import org.opendaylight.controller.md.sal.dom.broker.impl.TransactionCommitFailedExceptionMapper;
 import org.opendaylight.controller.sal.core.spi.data.DOMStore;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
+import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionChain;
 import org.opendaylight.yangtools.util.DurationStatisticsTracker;
 import org.opendaylight.yangtools.util.concurrent.MappingCheckedFuture;
 import org.slf4j.Logger;
@@ -42,7 +47,7 @@ import org.slf4j.LoggerFactory;
  * @author Thomas Pantelis
  */
 @Beta
-public class ConcurrentDOMDataBroker extends AbstractDOMBroker {
+public class ConcurrentDOMDataBroker extends AbstractDOMDataBroker {
     private static final Logger LOG = LoggerFactory.getLogger(ConcurrentDOMDataBroker.class);
     private static final String CAN_COMMIT = "CAN_COMMIT";
     private static final String PRE_COMMIT = "PRE_COMMIT";
@@ -62,6 +67,21 @@ public class ConcurrentDOMDataBroker extends AbstractDOMBroker {
 
     public DurationStatisticsTracker getCommitStatsTracker() {
         return commitStatsTracker;
+    }
+
+    @Override
+    public DOMTransactionChain createTransactionChain(final TransactionChainListener listener) {
+        checkNotClosed();
+
+        final Map<LogicalDatastoreType, DOMStoreTransactionChain> backingChains = new EnumMap<>(LogicalDatastoreType.class);
+        for (Map.Entry<LogicalDatastoreType, DOMStore> entry : getTxFactories().entrySet()) {
+            backingChains.put(entry.getKey(), entry.getValue().createTransactionChain());
+        }
+
+        final long chainId = nextTransactionChainId();
+        LOG.debug("Transaction chain {} created with listener {}, backing store chains {}", chainId, listener,
+                backingChains);
+        return new DOMBrokerTransactionChain(chainId, backingChains, this, listener);
     }
 
     @Override
