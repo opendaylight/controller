@@ -37,6 +37,7 @@ class EntityOwnershipListenerSupport {
     private final Map<EntityOwnershipListener, ListenerActorRefEntry> listenerActorMap = new IdentityHashMap<>();
     private final Set<Entity> entitiesWithCandidateSet = new HashSet<>();
     private final Multimap<String, EntityOwnershipListener> entityTypeListenerMap = HashMultimap.create();
+    private volatile boolean inJeopardy = false;
 
     EntityOwnershipListenerSupport(ActorContext actorContext, String logId) {
         this.actorContext = actorContext;
@@ -45,6 +46,18 @@ class EntityOwnershipListenerSupport {
 
     String getLogId() {
         return logId;
+    }
+
+    /**
+     * Set the in-jeopardy flag and indicate its previous state.
+     *
+     * @param inJeopardy new value of the in-jeopardy flag
+     * @return Previous value of the flag.
+     */
+    boolean setInJeopardy(final boolean inJeopardy) {
+        final boolean wasInJeopardy = this.inJeopardy;
+        this.inJeopardy = inJeopardy;
+        return wasInJeopardy;
     }
 
     boolean hasCandidateForEntity(Entity entity) {
@@ -90,7 +103,7 @@ class EntityOwnershipListenerSupport {
 
     private void notifyListeners(Entity entity, boolean wasOwner, boolean isOwner, boolean hasOwner,
             Collection<EntityOwnershipListener> listeners) {
-        EntityOwnershipChange changed = new EntityOwnershipChange(entity, wasOwner, isOwner, hasOwner);
+        EntityOwnershipChange changed = new EntityOwnershipChange(entity, wasOwner, isOwner, hasOwner, inJeopardy);
         for(EntityOwnershipListener listener: listeners) {
             ActorRef listenerActor = listenerActorFor(listener);
 
