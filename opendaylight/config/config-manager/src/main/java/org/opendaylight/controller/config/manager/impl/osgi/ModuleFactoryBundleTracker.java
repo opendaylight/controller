@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
  * the services are unregistered automatically.
  * Code based on http://www.toedter.com/blog/?p=236
  */
-public class ModuleFactoryBundleTracker implements BundleTrackerCustomizer<Object> {
+public class ModuleFactoryBundleTracker implements BundleTrackerCustomizer<Boolean> {
     private final BlankTransactionServiceTracker blankTransactionServiceTracker;
     private static final Logger LOG = LoggerFactory.getLogger(ModuleFactoryBundleTracker.class);
 
@@ -39,7 +39,7 @@ public class ModuleFactoryBundleTracker implements BundleTrackerCustomizer<Objec
     }
 
     @Override
-    public Object addingBundle(Bundle bundle, BundleEvent event) {
+    public Boolean addingBundle(Bundle bundle, BundleEvent event) {
         URL resource = bundle.getEntry("META-INF/services/" + ModuleFactory.class.getName());
         LOG.trace("Got addingBundle event of bundle {}, resource {}, event {}",
                 bundle, resource, event);
@@ -48,23 +48,28 @@ public class ModuleFactoryBundleTracker implements BundleTrackerCustomizer<Objec
                 for (String factoryClassName : Resources.readLines(resource, Charsets.UTF_8)) {
                     registerFactory(factoryClassName, bundle);
                 }
+
+                return Boolean.TRUE;
             } catch (IOException e) {
                 LOG.error("Error while reading {}", resource, e);
                 throw new RuntimeException(e);
             }
         }
-        return bundle;
+
+        return Boolean.FALSE;
     }
 
     @Override
-    public void modifiedBundle(Bundle bundle, BundleEvent event, Object object) {
+    public void modifiedBundle(Bundle bundle, BundleEvent event, Boolean hasFactory) {
         // NOOP
     }
 
     @Override
-    public void removedBundle(Bundle bundle, BundleEvent event, Object object) {
-        // workaround for service tracker not getting removed service event
-        blankTransactionServiceTracker.blankTransaction();
+    public void removedBundle(Bundle bundle, BundleEvent event, Boolean hasFactory) {
+        if(hasFactory) {
+            // workaround for service tracker not getting removed service event
+            blankTransactionServiceTracker.blankTransactionSync();
+        }
     }
 
     @VisibleForTesting
