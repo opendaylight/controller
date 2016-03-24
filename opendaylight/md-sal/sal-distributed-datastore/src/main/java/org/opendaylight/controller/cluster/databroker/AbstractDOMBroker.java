@@ -31,7 +31,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class AbstractDOMBroker extends AbstractDOMTransactionFactory<DOMStore>
+abstract class AbstractDOMBroker extends AbstractDOMTransactionFactory<DOMStore>
         implements DOMDataBroker, AutoCloseable {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractDOMBroker.class);
