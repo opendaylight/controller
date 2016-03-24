@@ -114,7 +114,6 @@
         <bundle>mvn:org.opendaylight.controller.samples/clustering-it-model/{{VERSION}}</bundle>
         <bundle>mvn:org.opendaylight.controller.samples/clustering-it-provider/{{VERSION}}</bundle>
     </feature>
-
     <feature name='odl-message-bus-collector' version='${project.version}'>
         <!-- FIXME: Bug 4202: Switch to MD-SAL provided odl-mdsal-binding-base -->
         <bundle>mvn:org.opendaylight.controller.model/model-inventory/{{VERSION}}</bundle>
@@ -124,5 +123,9 @@
         <bundle>mvn:org.opendaylight.controller/messagebus-util/{{VERSION}}</bundle>
         <bundle>mvn:org.opendaylight.controller/messagebus-impl/{{VERSION}}</bundle>
         <configfile finalname="${config.configfile.directory}/05-message-bus.xml">mvn:org.opendaylight.controller/messagebus-config/{{VERSION}}/xml/config</configfile>
+    </feature>
+    <feature name ='odl-mdsal-cli' version='${project.version}' description="OpenDaylight :: MD-SAL :: MD-SAL Metrics Commands">
+      <feature version='${project.version}'>odl-mdsal-clustering</feature>
+      <bundle>mvn:org.opendaylight.controller/mdsal-cli/{{VERSION}}</bundle>
     </feature>
 </features>

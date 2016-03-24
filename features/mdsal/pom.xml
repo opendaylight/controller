@@ -147,6 +147,11 @@
 
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
+      <artifactId>mdsal-cli</artifactId>
+      <version>${controller.mdsal.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal-akka-raft</artifactId>
       <version>${controller.mdsal.version}</version>
     </dependency>

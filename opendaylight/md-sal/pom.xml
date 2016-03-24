@@ -89,9 +89,10 @@
     <module>sal-binding-it</module>
     <module>sal-binding-dom-it</module>
 
-    <!-- IT Base and Parent -->
+    <!-- IT Base, Parent and cli-->
     <module>mdsal-it-base</module>
     <module>mdsal-it-parent</module>
+    <module>mdsal-cli</module>
 
   </modules>
 
