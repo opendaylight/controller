@@ -6,15 +6,25 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.opendaylight.controller.cluster.datastore;
+package org.opendaylight.controller.cluster.databroker;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
+import com.google.common.annotations.Beta;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import org.opendaylight.controller.cluster.datastore.ClusterWrapper;
+import org.opendaylight.controller.cluster.datastore.DataChangeListenerRegistrationProxy;
+import org.opendaylight.controller.cluster.datastore.DataTreeChangeListenerProxy;
+import org.opendaylight.controller.cluster.datastore.DatastoreContextConfigAdminOverlay;
+import org.opendaylight.controller.cluster.datastore.DatastoreContextFactory;
+import org.opendaylight.controller.cluster.datastore.ShardManager;
+import org.opendaylight.controller.cluster.datastore.TransactionContextFactory;
+import org.opendaylight.controller.cluster.datastore.TransactionProxy;
+import org.opendaylight.controller.cluster.datastore.TransactionType;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardManagerIdentifier;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.DatastoreConfigurationMXBeanImpl;
@@ -41,10 +51,8 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- *
- */
-public class DistributedDataStore implements DOMStore, SchemaContextListener,
+@Beta
+public final class DistributedDataStore implements DOMStore, SchemaContextListener,
         DatastoreContextConfigAdminOverlay.Listener, DOMStoreTreeChangePublisher, AutoCloseable {
 
     private static final Logger LOG = LoggerFactory.getLogger(DistributedDataStore.class);
@@ -67,6 +75,7 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener,
 
     private final TransactionContextFactory txContextFactory;
 
+    @VisibleForTesting
     public DistributedDataStore(ActorSystem actorSystem, ClusterWrapper cluster,
             Configuration configuration, DatastoreContextFactory datastoreContextFactory,
             DatastoreSnapshot restoreFromSnapshot) {
@@ -151,8 +160,7 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener,
         LOG.debug("Registering tree listener: {} for tree: {} shard: {}", listener, treeId, shardName);
 
         final DataTreeChangeListenerProxy<L> listenerRegistrationProxy =
-                new DataTreeChangeListenerProxy<L>(actorContext, listener);
-        listenerRegistrationProxy.init(shardName, treeId);
+                DataTreeChangeListenerProxy.create(actorContext, shardName, treeId, listener);
 
         return listenerRegistrationProxy;
     }

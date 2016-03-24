@@ -33,7 +33,7 @@ import scala.concurrent.Future;
  *
  * @param <T> listener type
  */
-final class DataTreeChangeListenerProxy<T extends DOMDataTreeChangeListener> extends AbstractListenerRegistration<T> {
+public final class DataTreeChangeListenerProxy<T extends DOMDataTreeChangeListener> extends AbstractListenerRegistration<T> {
     private static final Logger LOG = LoggerFactory.getLogger(DataTreeChangeListenerProxy.class);
     private final ActorRef dataChangeListenerActor;
     private final ActorContext actorContext;
@@ -41,11 +41,19 @@ final class DataTreeChangeListenerProxy<T extends DOMDataTreeChangeListener> ext
     @GuardedBy("this")
     private ActorSelection listenerRegistrationActor;
 
-    public DataTreeChangeListenerProxy(final ActorContext actorContext, final T listener) {
+    DataTreeChangeListenerProxy(final ActorContext actorContext, final T listener) {
         super(listener);
         this.actorContext = Preconditions.checkNotNull(actorContext);
         this.dataChangeListenerActor = actorContext.getActorSystem().actorOf(
             DataTreeChangeListenerActor.props(getInstance()).withDispatcher(actorContext.getNotificationDispatcherPath()));
+    }
+
+    public static <T extends DOMDataTreeChangeListener> DataTreeChangeListenerProxy<T> create(
+             final ActorContext actorContext, final String shardName, final YangInstanceIdentifier treeId,
+             final T listener) {
+        final DataTreeChangeListenerProxy<T> ret = new DataTreeChangeListenerProxy<>(actorContext, listener);
+        ret.init(shardName, treeId);
+        return ret;
     }
 
     @Override

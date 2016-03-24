@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorSelection;
+import com.google.common.annotations.Beta;
 import java.util.Collection;
 import org.opendaylight.controller.cluster.datastore.identifiers.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.PrimaryShardInfo;
@@ -20,13 +21,14 @@ import scala.concurrent.Future;
  * An {@link AbstractTransactionContextFactory} which produces TransactionContext instances for single
  * transactions (ie not chained).
  */
-final class TransactionContextFactory extends AbstractTransactionContextFactory<LocalTransactionFactoryImpl> {
+@Beta
+public final class TransactionContextFactory extends AbstractTransactionContextFactory<LocalTransactionFactoryImpl> {
 
     private TransactionContextFactory(final ActorContext actorContext) {
         super(actorContext);
     }
 
-    static TransactionContextFactory create(final ActorContext actorContext) {
+    public static TransactionContextFactory create(final ActorContext actorContext) {
         return new TransactionContextFactory(actorContext);
     }
 
@@ -54,7 +56,7 @@ final class TransactionContextFactory extends AbstractTransactionContextFactory<
         // Transactions are disconnected, this is a no-op
     }
 
-    DOMStoreTransactionChain createTransactionChain() {
+    public DOMStoreTransactionChain createTransactionChain() {
         return new TransactionChainProxy(this);
     }
 
