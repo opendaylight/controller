@@ -19,9 +19,16 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.management.ManagementFactory;
+import java.net.URL;
+import java.net.URLStreamHandler;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import javax.management.ObjectName;
+import org.apache.karaf.features.Feature;
+import org.apache.karaf.features.internal.model.Features;
+import org.apache.karaf.features.internal.model.JaxbUtil;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.internal.AssumptionViolatedException;
@@ -77,6 +84,11 @@ public abstract class AbstractConfigTestBase {
      */
     private static final int MODULE_TIMEOUT_MILLIS = 60000;
 
+    private final URLStreamHandler mvnURLHandler = new org.ops4j.pax.url.mvn.Handler();
+
+    private String karafVersion;
+    private String karafDistroVersion;
+
     public abstract String getModuleName();
 
     public abstract String getInstanceName();
@@ -99,24 +111,11 @@ public abstract class AbstractConfigTestBase {
     public String getKarafDistro() {
         String groupId = System.getProperty(KARAF_DISTRO_GROUPID_PROP,KARAF_DISTRO_GROUPID);
         String artifactId = System.getProperty(KARAF_DISTRO_ARTIFACTID_PROP,KARAF_DISTRO_ARTIFACTID);
-        String version = System.getProperty(KARAF_DISTRO_VERSION_PROP);
         String type = System.getProperty(KARAF_DISTRO_TYPE_PROP,KARAF_DISTRO_TYPE);
-        if (version == null) {
-            // We use a properties file to retrieve ${karaf.version}, instead of .versionAsInProject()
-            // This avoids forcing all users to depend on Karaf in their POMs
-            Properties abstractConfigTestBaseProps = new Properties();
-            try (InputStream abstractConfigTestBaseInputStream = Thread.currentThread().getContextClassLoader()
-                    .getResourceAsStream(PROPERTIES_FILENAME)) {
-                abstractConfigTestBaseProps.load(abstractConfigTestBaseInputStream);
-            } catch (IOException e) {
-                LOG.error("Unable to load {} to determine the Karaf version", PROPERTIES_FILENAME, e);
-            }
-            version = abstractConfigTestBaseProps.getProperty(KARAF_DISTRO_VERSION_PROP);
-        }
         MavenArtifactUrlReference karafUrl = maven()
                 .groupId(groupId)
                 .artifactId(artifactId)
-                .version(version)
+                .version(getKarafDistroVersion())
                 .type(type);
         return karafUrl.getURL();
     }
@@ -137,11 +136,62 @@ public abstract class AbstractConfigTestBase {
                         .unpackDirectory(new File(PAX_EXAM_UNPACK_DIRECTORY))
                         .useDeployFolder(false),
                 when(Boolean.getBoolean(KEEP_UNPACK_DIRECTORY_PROP)).useOptions(keepRuntimeFolder()),
+                standardKarafFeatures(),
                 features(getFeatureRepo(), getFeatureName()),
                 getLoggingOption(),
                 mvnLocalRepoOption(),
                 editConfigurationFilePut(ETC_ORG_OPS4J_PAX_LOGGING_CFG, "log4j.rootLogger", "INFO, stdout, osgi:*")};
         return options;
+    }
+
+    private Option standardKarafFeatures() {
+        MavenUrlReference url = maven().groupId("org.apache.karaf.features").artifactId("standard").
+                classifier("features").type("xml").version(getKarafVersion());
+        try {
+            Features features = JaxbUtil.unmarshal(new URL(null, url.getURL(), mvnURLHandler).openStream(), false);
+            List<String> featureNames = new ArrayList<>();
+            for(Feature f: features.getFeature()) {
+                featureNames.add(f.getName());
+            }
+
+            return features(url, featureNames.toArray(new String[featureNames.size()]));
+        } catch(Exception e) {
+            throw new RuntimeException("Could not obtain features from URL " + url, e);
+        }
+    }
+
+    private String getKarafVersion() {
+        if(karafVersion == null) {
+            // We use a properties file to retrieve ${karaf.version}, instead of .versionAsInProject()
+            // This avoids forcing all users to depend on Karaf in their POMs
+            Properties singleFeatureTestProps = new Properties();
+            try (InputStream singleFeatureTestInputStream = Thread.currentThread().getContextClassLoader()
+                    .getResourceAsStream(PROPERTIES_FILENAME)) {
+                singleFeatureTestProps.load(singleFeatureTestInputStream);
+            } catch (IOException e) {
+                LOG.error("Unable to load {} to determine the Karaf version", PROPERTIES_FILENAME, e);
+            }
+            karafVersion = singleFeatureTestProps.getProperty(KARAF_DISTRO_VERSION_PROP);
+
+            LOG.info("Retrieved karafVersion {} from properties file {}", karafVersion, PROPERTIES_FILENAME);
+        } else {
+            LOG.info("Retrieved karafVersion {} from system property {}", karafVersion, KARAF_DISTRO_VERSION_PROP);
+        }
+
+        return karafVersion;
+    }
+
+    private String getKarafDistroVersion() {
+        if(karafDistroVersion == null) {
+            karafDistroVersion = System.getProperty(KARAF_DISTRO_VERSION_PROP);
+            if(karafDistroVersion == null) {
+                karafDistroVersion = getKarafVersion();
+            } else {
+                LOG.info("Retrieved karafDistroVersion {} from system property {}", karafVersion, KARAF_DISTRO_VERSION_PROP);
+            }
+        }
+
+        return karafDistroVersion;
     }
 
     @Before
@@ -205,5 +255,4 @@ public abstract class AbstractConfigTestBase {
             LOG.info("TestWatcher: Test skipped: {} ", description.getDisplayName(), ex);
         }
     };
-
 }
