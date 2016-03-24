@@ -133,7 +133,7 @@ public class ConfigPersisterActivator implements BundleActivator {
                             LOG.warn("Unable to process configs as BundleContext is null");
                         }
                     } catch (InterruptedException e) {
-                        LOG.info("ConfigPusher thread stopped",e);
+                        LOG.info("ConfigPusher thread stopped");
                     }
                     LOG.info("Configuration Persister initialization completed.");
                 }
