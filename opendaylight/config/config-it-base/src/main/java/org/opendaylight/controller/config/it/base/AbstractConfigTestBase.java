@@ -19,9 +19,16 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.management.ManagementFactory;
+import java.net.URL;
+import java.net.URLStreamHandler;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import javax.management.ObjectName;
+import org.apache.karaf.features.Feature;
+import org.apache.karaf.features.internal.model.Features;
+import org.apache.karaf.features.internal.model.JaxbUtil;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.internal.AssumptionViolatedException;
@@ -76,6 +83,8 @@ public abstract class AbstractConfigTestBase {
      * Wait up to 10s for our configured module to come up
      */
     private static final int MODULE_TIMEOUT_MILLIS = 60000;
+
+    private final URLStreamHandler mvnURLHandler = new org.ops4j.pax.url.mvn.Handler();
 
     public abstract String getModuleName();
 
@@ -137,11 +146,28 @@ public abstract class AbstractConfigTestBase {
                         .unpackDirectory(new File(PAX_EXAM_UNPACK_DIRECTORY))
                         .useDeployFolder(false),
                 when(Boolean.getBoolean(KEEP_UNPACK_DIRECTORY_PROP)).useOptions(keepRuntimeFolder()),
+                standardKarafFeatures(),
                 features(getFeatureRepo(), getFeatureName()),
                 getLoggingOption(),
                 mvnLocalRepoOption(),
                 editConfigurationFilePut(ETC_ORG_OPS4J_PAX_LOGGING_CFG, "log4j.rootLogger", "INFO, stdout, osgi:*")};
         return options;
+    }
+
+    private Option standardKarafFeatures() {
+        MavenUrlReference url = maven().groupId("org.apache.karaf.features").artifactId("standard").
+                classifier("features").type("xml").versionAsInProject();
+        try {
+            Features features = JaxbUtil.unmarshal(new URL(null, url.getURL(), mvnURLHandler).openStream(), false);
+            List<String> featureNames = new ArrayList<>();
+            for(Feature f: features.getFeature()) {
+                featureNames.add(f.getName());
+            }
+
+            return features(url, featureNames.toArray(new String[featureNames.size()]));
+        } catch(Exception e) {
+            throw new RuntimeException("Could not obtain features from URL " + url, e);
+        }
     }
 
     @Before
@@ -205,5 +231,4 @@ public abstract class AbstractConfigTestBase {
             LOG.info("TestWatcher: Test skipped: {} ", description.getDisplayName(), ex);
         }
     };
-
 }
