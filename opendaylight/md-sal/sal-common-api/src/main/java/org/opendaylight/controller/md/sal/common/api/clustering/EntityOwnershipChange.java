@@ -20,12 +20,19 @@ public class EntityOwnershipChange {
     private final boolean wasOwner;
     private final boolean isOwner;
     private final boolean hasOwner;
+    private final boolean inJeopardy;
 
     public EntityOwnershipChange(@Nonnull Entity entity, boolean wasOwner, boolean isOwner, boolean hasOwner) {
+        this(entity, wasOwner, isOwner, hasOwner, false);
+    }
+
+    public EntityOwnershipChange(@Nonnull Entity entity, boolean wasOwner, boolean isOwner, boolean hasOwner,
+            boolean inJeopardy) {
         this.entity = Preconditions.checkNotNull(entity, "entity can't be null");
         this.wasOwner = wasOwner;
         this.isOwner = isOwner;
         this.hasOwner = hasOwner;
+        this.inJeopardy = inJeopardy;
     }
 
     /**
@@ -61,9 +68,19 @@ public class EntityOwnershipChange {
         return hasOwner;
     }
 
+    /**
+     * Returns the current jeopardy state. When in a jeopardy state, the values from other methods may potentially
+     * be out of date.
+     *
+     * @return true if the local node is in a jeopardy state. If false, the reported information is accurate.
+     */
+    public boolean inJeopardy() {
+        return inJeopardy;
+    }
+
     @Override
     public String toString() {
         return "EntityOwnershipChanged [entity=" + entity + ", wasOwner=" + wasOwner + ", isOwner=" + isOwner
-                + ", hasOwner=" + hasOwner + "]";
+                + ", hasOwner=" + hasOwner + ", inJeopardy=" + inJeopardy + "]";
     }
 }
