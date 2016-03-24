@@ -5,10 +5,13 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.cluster.datastore;
+package org.opendaylight.controller.cluster.databroker;
 
 import akka.actor.ActorSystem;
-import org.opendaylight.controller.cluster.databroker.DistributedDataStore;
+import org.opendaylight.controller.cluster.datastore.ClusterWrapperImpl;
+import org.opendaylight.controller.cluster.datastore.DatastoreContext;
+import org.opendaylight.controller.cluster.datastore.DatastoreContextConfigAdminOverlay;
+import org.opendaylight.controller.cluster.datastore.DatastoreContextIntrospector;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.config.ConfigurationImpl;
 import org.opendaylight.controller.cluster.datastore.messages.DatastoreSnapshot;
