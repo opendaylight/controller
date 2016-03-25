@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a3f45e8_d022a500",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/shardmanager/ShardManagerSnapshot.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-03-25T04:08:31Z",
+      "side": 1,
+      "message": "Do you think it might be safer to use ArrayList? I\u0027m always nervous about serializing Lists obtained from 3rd party implementations. We\u0027d be screwed if ImmutableList changed internally somehow to lose serialization compatibility. So in these cases I stick with the tried and true ArrayList.",
+      "revId": "4da196006394cd9b3f1eaa5a7a4f943bac5286f5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
