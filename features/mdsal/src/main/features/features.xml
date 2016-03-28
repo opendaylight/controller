@@ -14,6 +14,7 @@
     <repository>mvn:org.opendaylight.controller/features-config-persister/{{VERSION}}/xml/features</repository>
     <repository>mvn:org.opendaylight.controller/features-config-netty/{{VERSION}}/xml/features</repository>
     <repository>mvn:org.opendaylight.odlparent/features-akka/{{VERSION}}/xml/features</repository>
+    <repository>mvn:org.opendaylight.controller/features-blueprint/{{VERSION}}/xml/features</repository>
     <feature name='odl-mdsal-all' version='${project.version}' description="OpenDaylight :: MDSAL :: All">
         <feature version='${project.version}'>odl-mdsal-broker</feature>
         <feature version='${project.version}'>odl-mdsal-broker-local</feature>
@@ -31,6 +32,7 @@
     </feature>
 
     <feature name='odl-mdsal-broker-local' version='${project.version}' description="OpenDaylight :: MDSAL :: Broker">
+        <feature version='${blueprint.version}'>odl-blueprint</feature>
         <feature version='${yangtools.version}'>odl-yangtools-common</feature>
         <feature version='${mdsal.version}'>odl-mdsal-binding-runtime</feature>
         <feature version='${mdsal.model.version}'>odl-mdsal-models</feature>

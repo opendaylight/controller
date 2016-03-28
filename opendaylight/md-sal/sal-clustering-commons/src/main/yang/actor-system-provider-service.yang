@@ -14,5 +14,6 @@ module actor-system-provider-service {
     identity actor-system-provider-service {
         base "config:service-type";
         config:java-class  "org.opendaylight.controller.cluster.ActorSystemProvider";
+        config:disable-osgi-service-registration;
     }
 }
