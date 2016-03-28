@@ -17,9 +17,24 @@
  */
 package org.opendaylight.controller.config.yang.config.kitchen_service.impl;
 
-/**
- *
- */
-public class KitchenServiceModuleFactory extends AbstractKitchenServiceModuleFactory {
+import org.opendaylight.controller.config.api.DependencyResolver;
+import org.osgi.framework.BundleContext;
 
+public class KitchenServiceModuleFactory extends AbstractKitchenServiceModuleFactory {
+    @Override
+    public KitchenServiceModule instantiateModule(String instanceName, DependencyResolver dependencyResolver,
+            KitchenServiceModule oldModule, AutoCloseable oldInstance, BundleContext bundleContext) {
+        KitchenServiceModule module = super.instantiateModule(instanceName, dependencyResolver, oldModule,
+                oldInstance, bundleContext);
+        module.setBundleContext(bundleContext);
+        return module;
+    }
+
+    @Override
+    public KitchenServiceModule instantiateModule(String instanceName, DependencyResolver dependencyResolver,
+            BundleContext bundleContext) {
+        KitchenServiceModule module = super.instantiateModule(instanceName, dependencyResolver, bundleContext);
+        module.setBundleContext(bundleContext);
+        return module;
+    }
 }
