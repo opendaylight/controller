@@ -17,26 +17,5 @@
 */
 package org.opendaylight.controller.config.yang.config.remote_rpc_connector;
 
-
-import org.opendaylight.controller.config.api.DependencyResolver;
-import org.opendaylight.controller.config.api.DynamicMBeanWithInstance;
-import org.opendaylight.controller.config.spi.Module;
-import org.osgi.framework.BundleContext;
-
-public class RemoteRPCBrokerModuleFactory extends org.opendaylight.controller.config.yang.config.remote_rpc_connector.AbstractRemoteRPCBrokerModuleFactory {
-  @Override
-  public Module createModule(String instanceName, DependencyResolver dependencyResolver, BundleContext bundleContext) {
-    RemoteRPCBrokerModule module = (RemoteRPCBrokerModule)super.createModule(instanceName,dependencyResolver,bundleContext);
-    module.setBundleContext(bundleContext);
-    return module;
-  }
-
-  @Override
-  public Module createModule(String instanceName, DependencyResolver dependencyResolver,
-                             DynamicMBeanWithInstance old, BundleContext bundleContext) throws Exception {
-    RemoteRPCBrokerModule module = (RemoteRPCBrokerModule)super.createModule(instanceName, dependencyResolver,
-        old, bundleContext);
-    module.setBundleContext(bundleContext);
-    return module;
-  }
+public class RemoteRPCBrokerModuleFactory extends AbstractRemoteRPCBrokerModuleFactory {
 }

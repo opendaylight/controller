@@ -8,16 +8,9 @@
 
 package org.opendaylight.controller.config.yang.config.remote_rpc_connector;
 
-import akka.actor.ActorSystem;
-import org.opendaylight.controller.md.sal.dom.api.DOMRpcProviderService;
-import org.opendaylight.controller.remote.rpc.RemoteRpcProvider;
-import org.opendaylight.controller.remote.rpc.RemoteRpcProviderConfig;
-import org.opendaylight.controller.remote.rpc.RemoteRpcProviderFactory;
-import org.opendaylight.controller.sal.core.api.Broker;
-import org.osgi.framework.BundleContext;
+import org.opendaylight.controller.sal.common.util.NoopAutoCloseable;
 
 public class RemoteRPCBrokerModule extends org.opendaylight.controller.config.yang.config.remote_rpc_connector.AbstractRemoteRPCBrokerModule {
-    private BundleContext bundleContext;
     public RemoteRPCBrokerModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier, org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
         super(identifier, dependencyResolver);
     }
@@ -37,22 +30,9 @@ public class RemoteRPCBrokerModule extends org.opendaylight.controller.config.ya
     }
 
     @Override
-    public java.lang.AutoCloseable createInstance() {
-        Broker broker = getDomBrokerDependency();
-
-        ActorSystem actorSystem = getActorSystemProviderDependency().getActorSystem();
-        RemoteRpcProviderConfig config = new RemoteRpcProviderConfig.Builder(actorSystem.name())
-                .metricCaptureEnabled(getEnableMetricCapture())
-                .mailboxCapacity(getBoundedMailboxCapacity())
-                .build();
-
-        RemoteRpcProvider rpcProvider = RemoteRpcProviderFactory.createInstance((DOMRpcProviderService)broker,
-                actorSystem, config);
-        broker.registerProvider(rpcProvider);
-        return rpcProvider;
-    }
-
-    public void setBundleContext(BundleContext bundleContext) {
-        this.bundleContext = bundleContext;
+    public AutoCloseable createInstance() {
+        // The RemoteRpcProvider is created via blueprint and doesn't advertise any services so return a
+        // no-op here for backwards compatibility.
+        return NoopAutoCloseable.INSTANCE;
     }
 }
