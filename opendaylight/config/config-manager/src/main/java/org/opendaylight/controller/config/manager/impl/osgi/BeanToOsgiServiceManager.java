@@ -8,7 +8,6 @@
 package org.opendaylight.controller.config.manager.impl.osgi;
 
 import static com.google.common.base.Preconditions.checkState;
-
 import java.util.Dictionary;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -72,7 +71,14 @@ public class BeanToOsgiServiceManager {
                                                                 Map<ServiceInterfaceAnnotation, String /* service ref name */> serviceNamesToAnnotations) {
             Set<ServiceRegistration<?>> serviceRegistrations = new HashSet<>();
             for (Entry<ServiceInterfaceAnnotation, String /* service ref name */> entry : serviceNamesToAnnotations.entrySet()) {
-                Class<?> requiredInterface = entry.getKey().osgiRegistrationType();
+                ServiceInterfaceAnnotation annotation = entry.getKey();
+                Class<?> requiredInterface = annotation.osgiRegistrationType();
+
+                if(!annotation.registerToOsgi()) {
+                    LOG.debug("registerToOsgi for service interface {} is false - not registering", requiredInterface);
+                    continue;
+                }
+
                 checkState(requiredInterface.isInstance(instance), instance.getClass().getName() +
                         " instance should implement " + requiredInterface.getName());
                 Dictionary<String, String> propertiesForOsgi = createProps(entry.getValue());
