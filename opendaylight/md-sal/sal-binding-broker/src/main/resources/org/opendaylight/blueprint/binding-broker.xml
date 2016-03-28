@@ -17,6 +17,7 @@
     <interfaces>
       <value>org.opendaylight.yangtools.binding.data.codec.api.BindingCodecTreeFactory</value>
       <value>org.opendaylight.yangtools.binding.data.codec.api.BindingNormalizedNodeSerializer</value>
+      <value>org.opendaylight.yangtools.yang.model.api.SchemaContextListener</value>
     </interfaces>
   </service>
 
@@ -56,17 +57,6 @@
   <service ref="bindingMountPointService" interface="org.opendaylight.controller.md.sal.binding.api.MountPointService"
           odl:type="default"/>
 
-  <bean id="bindingLegacyMountService" class="org.opendaylight.controller.md.sal.binding.compat.HydrogenMountProvisionServiceAdapter">
-    <argument ref="bindingMountPointService"/>
-  </bean>
-
-  <service ref="bindingLegacyMountService">
-    <interfaces>
-      <value>org.opendaylight.controller.sal.binding.api.mount.MountService</value>
-      <value>org.opendaylight.controller.sal.binding.api.mount.MountProviderService</value>
-    </interfaces>
-  </service>
-
   <!-- Binding Notification Service -->
 
   <reference id="domNotificationService" interface="org.opendaylight.controller.md.sal.dom.api.DOMNotificationService"/>
@@ -99,8 +89,12 @@
     <argument ref="domNotificationListenerRegistry"/>
   </bean>
 
-  <service ref="bindingNotificationProviderService" interface="org.opendaylight.controller.sal.binding.api.NotificationProviderService"
-          odl:type="default"/>
+  <service ref="bindingNotificationProviderService" odl:type="default">
+    <interfaces>
+      <value>org.opendaylight.controller.sal.binding.api.NotificationProviderService</value>
+      <value>org.opendaylight.controller.sal.binding.api.NotificationService</value>
+    </interfaces>
+  </service>
 
   <!-- Binding DataBroker -->
 

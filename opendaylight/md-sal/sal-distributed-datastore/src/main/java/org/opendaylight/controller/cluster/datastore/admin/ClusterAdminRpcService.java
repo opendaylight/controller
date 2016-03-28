@@ -28,7 +28,7 @@ import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.SerializationUtils;
-import org.opendaylight.controller.cluster.datastore.DistributedDataStore;
+import org.opendaylight.controller.cluster.datastore.DistributedDataStoreInterface;
 import org.opendaylight.controller.cluster.datastore.messages.AddShardReplica;
 import org.opendaylight.controller.cluster.datastore.messages.DatastoreSnapshot;
 import org.opendaylight.controller.cluster.datastore.messages.DatastoreSnapshotList;
@@ -67,11 +67,12 @@ public class ClusterAdminRpcService implements ClusterAdminService, AutoCloseabl
 
     private static final Logger LOG = LoggerFactory.getLogger(ClusterAdminRpcService.class);
 
-    private final DistributedDataStore configDataStore;
-    private final DistributedDataStore operDataStore;
+    private final DistributedDataStoreInterface configDataStore;
+    private final DistributedDataStoreInterface operDataStore;
     private RpcRegistration<ClusterAdminService> rpcRegistration;
 
-    public ClusterAdminRpcService(DistributedDataStore configDataStore, DistributedDataStore operDataStore) {
+    public ClusterAdminRpcService(DistributedDataStoreInterface configDataStore,
+            DistributedDataStoreInterface operDataStore) {
         this.configDataStore = configDataStore;
         this.operDataStore = operDataStore;
     }
