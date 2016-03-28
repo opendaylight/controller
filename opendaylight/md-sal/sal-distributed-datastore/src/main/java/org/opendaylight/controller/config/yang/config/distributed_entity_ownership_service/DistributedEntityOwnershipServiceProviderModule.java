@@ -8,19 +8,21 @@
 
 package org.opendaylight.controller.config.yang.config.distributed_entity_ownership_service;
 
-import com.google.common.base.Preconditions;
-import org.opendaylight.controller.cluster.datastore.DistributedDataStore;
-import org.opendaylight.controller.cluster.datastore.entityownership.DistributedEntityOwnershipService;
-import org.opendaylight.controller.cluster.datastore.entityownership.selectionstrategy.EntityOwnerSelectionStrategyConfig;
-import org.opendaylight.controller.cluster.datastore.entityownership.selectionstrategy.EntityOwnerSelectionStrategyConfigReader;
-import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
+import com.google.common.base.Optional;
+import com.google.common.collect.ForwardingObject;
 import org.opendaylight.controller.config.api.DependencyResolver;
 import org.opendaylight.controller.config.api.ModuleIdentifier;
-import org.opendaylight.controller.sal.core.spi.data.DOMStore;
+import org.opendaylight.controller.config.api.osgi.WaitingServiceTracker;
+import org.opendaylight.controller.md.sal.common.api.clustering.CandidateAlreadyRegisteredException;
+import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
+import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipCandidateRegistration;
+import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipListener;
+import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipListenerRegistration;
+import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipService;
+import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipState;
 import org.osgi.framework.BundleContext;
 
 public class DistributedEntityOwnershipServiceProviderModule extends AbstractDistributedEntityOwnershipServiceProviderModule {
-    private EntityOwnerSelectionStrategyConfig strategyConfig;
     private BundleContext bundleContext;
 
     public DistributedEntityOwnershipServiceProviderModule(final ModuleIdentifier identifier,
@@ -36,7 +38,6 @@ public class DistributedEntityOwnershipServiceProviderModule extends AbstractDis
 
     @Override
     public void customValidation() {
-        strategyConfig = EntityOwnerSelectionStrategyConfigReader.loadStrategyWithConfig(bundleContext);
     }
 
     @Override
@@ -46,17 +47,59 @@ public class DistributedEntityOwnershipServiceProviderModule extends AbstractDis
 
     @Override
     public AutoCloseable createInstance() {
-        // FIXME: EntityOwnership needs only the ActorContext, not the entire datastore
-        DOMStore dataStore = getDataStoreDependency();
-        Preconditions.checkArgument(dataStore instanceof DistributedDataStore,
-                "Injected DOMStore must be an instance of DistributedDataStore");
-
-        final ActorContext context = ((DistributedDataStore)dataStore).getActorContext();
-        return DistributedEntityOwnershipService.start(context, strategyConfig);
+        // The DistributedEntityOwnershipService is provided via blueprint so wait for and return it here for
+        // backwards compatibility.
+        WaitingServiceTracker<EntityOwnershipService> tracker = WaitingServiceTracker.create(
+                EntityOwnershipService.class, bundleContext);
+        EntityOwnershipService delegate = tracker.waitForService(WaitingServiceTracker.FIVE_MINUTES);
+        return new ForwardingEntityOwnershipService(delegate, tracker);
     }
 
     public void setBundleContext(final BundleContext bundleContext) {
-        // What do we need from the bundle context?
         this.bundleContext = bundleContext;
+    }
+
+    private static class ForwardingEntityOwnershipService extends ForwardingObject
+            implements EntityOwnershipService, AutoCloseable {
+        private final EntityOwnershipService delegate;
+        private final AutoCloseable closeable;
+
+        public ForwardingEntityOwnershipService(EntityOwnershipService delegate, AutoCloseable closeable) {
+            this.delegate = delegate;
+            this.closeable = closeable;
+        }
+
+        @Override
+        public EntityOwnershipCandidateRegistration registerCandidate(Entity entity)
+                throws CandidateAlreadyRegisteredException {
+            return delegate().registerCandidate(entity);
+        }
+
+        @Override
+        public EntityOwnershipListenerRegistration registerListener(String entityType,
+                EntityOwnershipListener listener) {
+            return delegate().registerListener(entityType, listener);
+        }
+
+        @Override
+        public Optional<EntityOwnershipState> getOwnershipState(Entity forEntity) {
+            return delegate().getOwnershipState(forEntity);
+        }
+
+        @Override
+        public boolean isCandidateRegistered(Entity entity) {
+            return delegate().isCandidateRegistered(entity);
+        }
+
+        @Override
+        protected EntityOwnershipService delegate() {
+            return delegate;
+        }
+
+        @Override
+        public void close() throws Exception {
+            // We don't close the delegate as the life-cycle is controlled via blueprint.
+            closeable.close();
+        }
     }
 }

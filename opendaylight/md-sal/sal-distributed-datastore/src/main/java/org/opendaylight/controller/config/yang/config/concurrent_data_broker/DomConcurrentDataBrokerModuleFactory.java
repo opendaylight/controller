@@ -7,6 +7,26 @@
  */
 package org.opendaylight.controller.config.yang.config.concurrent_data_broker;
 
-public class DomConcurrentDataBrokerModuleFactory extends AbstractDomConcurrentDataBrokerModuleFactory {
+import org.opendaylight.controller.config.api.DependencyResolver;
+import org.opendaylight.controller.config.api.DynamicMBeanWithInstance;
+import org.opendaylight.controller.config.spi.Module;
+import org.osgi.framework.BundleContext;
 
+public class DomConcurrentDataBrokerModuleFactory extends AbstractDomConcurrentDataBrokerModuleFactory {
+    @Override
+    public Module createModule(String instanceName, DependencyResolver dependencyResolver, BundleContext bundleContext) {
+        DomConcurrentDataBrokerModule module = (DomConcurrentDataBrokerModule)super.createModule(instanceName,
+                dependencyResolver, bundleContext);
+        module.setBundleContext(bundleContext);
+        return module;
+    }
+
+    @Override
+    public Module createModule(String instanceName, DependencyResolver dependencyResolver, DynamicMBeanWithInstance old,
+            BundleContext bundleContext) throws Exception {
+        DomConcurrentDataBrokerModule module = (DomConcurrentDataBrokerModule)super.createModule(instanceName,
+                dependencyResolver, old, bundleContext);
+        module.setBundleContext(bundleContext);
+        return module;
+    }
 }
