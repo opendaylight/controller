@@ -8,6 +8,12 @@
 
 package org.opendaylight.controller.config.yang.config.actor_system_provider.impl;
 
+import akka.actor.ActorSystem;
+import com.google.common.collect.ForwardingObject;
+import org.opendaylight.controller.cluster.ActorSystemProvider;
+import org.opendaylight.controller.cluster.ActorSystemProviderListener;
+import org.opendaylight.controller.config.api.osgi.WaitingServiceTracker;
+import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.osgi.framework.BundleContext;
 
 public class ActorSystemProviderModule extends AbstractActorSystemProviderModule {
@@ -27,11 +33,53 @@ public class ActorSystemProviderModule extends AbstractActorSystemProviderModule
     }
 
     @Override
-    public java.lang.AutoCloseable createInstance() {
-        return new ActorSystemProviderImpl(bundleContext);
+    public boolean canReuseInstance(AbstractActorSystemProviderModule oldModule) {
+        return true;
+    }
+
+    @Override
+    public AutoCloseable createInstance() {
+        // The service is provided via blueprint so wait for and return it here for backwards compatibility.
+        WaitingServiceTracker<ActorSystemProvider> tracker = WaitingServiceTracker.create(
+                ActorSystemProvider.class, bundleContext);
+        ActorSystemProvider delegate = tracker.waitForService(WaitingServiceTracker.FIVE_MINUTES);
+        return new ForardingActorSystemProvider(delegate, tracker);
     }
 
     public void setBundleContext(BundleContext bundleContext) {
         this.bundleContext = bundleContext;
+    }
+
+    private static class ForardingActorSystemProvider extends ForwardingObject
+            implements ActorSystemProvider, AutoCloseable {
+        private final ActorSystemProvider delegate;
+        private final AutoCloseable closeable;
+
+        ForardingActorSystemProvider(ActorSystemProvider delegate, AutoCloseable closeable) {
+            this.delegate = delegate;
+            this.closeable = closeable;
+        }
+
+        @Override
+        public ActorSystem getActorSystem() {
+            return delegate().getActorSystem();
+        }
+
+        @Override
+        public ListenerRegistration<ActorSystemProviderListener> registerActorSystemProviderListener(
+                ActorSystemProviderListener listener) {
+            return delegate().registerActorSystemProviderListener(listener);
+        }
+
+        @Override
+        protected ActorSystemProvider delegate() {
+            return delegate;
+        }
+
+        @Override
+        public void close() throws Exception {
+            // We don't close the delegate as the life-cycle is controlled via blueprint.
+            closeable.close();
+        }
     }
 }

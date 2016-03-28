@@ -68,7 +68,6 @@
           <instructions>
             <Bundle-Name>${project.groupId}.${project.artifactId}</Bundle-Name>
             <Export-Package>org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.netty.threadgroup.rev131107.*,</Export-Package>
-            <Import-Package>*,io.netty.channel</Import-Package>
           </instructions>
         </configuration>
       </plugin>

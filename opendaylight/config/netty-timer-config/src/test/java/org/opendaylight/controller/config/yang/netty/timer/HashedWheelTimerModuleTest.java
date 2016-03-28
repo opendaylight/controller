@@ -9,7 +9,12 @@ package org.opendaylight.controller.config.yang.netty.timer;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import io.netty.util.Timer;
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.InstanceNotFoundException;
 import javax.management.ObjectName;
@@ -23,6 +28,9 @@ import org.opendaylight.controller.config.manager.impl.factoriesresolver.Hardcod
 import org.opendaylight.controller.config.util.ConfigTransactionJMXClient;
 import org.opendaylight.controller.config.yang.threadpool.impl.NamingThreadFactoryModuleFactory;
 import org.opendaylight.controller.config.yang.threadpool.impl.NamingThreadFactoryModuleMXBean;
+import org.osgi.framework.Filter;
+import org.osgi.framework.ServiceListener;
+import org.osgi.framework.ServiceReference;
 
 public class HashedWheelTimerModuleTest extends AbstractConfigTest {
 
@@ -30,11 +38,21 @@ public class HashedWheelTimerModuleTest extends AbstractConfigTest {
     private NamingThreadFactoryModuleFactory threadFactory;
     private final String instanceName = "hashed-wheel-timer1";
 
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
         factory = new HashedWheelTimerModuleFactory();
         threadFactory = new NamingThreadFactoryModuleFactory();
         super.initConfigTransactionManagerImpl(new HardcodedModuleFactoriesResolver(mockedContext, factory, threadFactory));
+
+        Filter mockFilter = mock(Filter.class);
+        doReturn("mock").when(mockFilter).toString();
+        doReturn(mockFilter).when(mockedContext).createFilter(anyString());
+        doNothing().when(mockedContext).addServiceListener(any(ServiceListener.class), anyString());
+        ServiceReference mockServiceRef = mock(ServiceReference.class);
+        doReturn(new ServiceReference[]{mockServiceRef}).when(mockedContext).
+                getServiceReferences(anyString(), anyString());
+        doReturn(mock(Timer.class)).when(mockedContext).getService(mockServiceRef);
     }
 
     public void testValidationExceptionTickDuration() throws InstanceAlreadyExistsException {

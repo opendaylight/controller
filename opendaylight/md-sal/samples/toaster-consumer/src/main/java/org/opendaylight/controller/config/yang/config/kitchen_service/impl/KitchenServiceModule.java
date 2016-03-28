@@ -18,15 +18,12 @@
 package org.opendaylight.controller.config.yang.config.kitchen_service.impl;
 
 import java.util.concurrent.Future;
-
+import org.opendaylight.controller.config.api.osgi.WaitingServiceTracker;
 import org.opendaylight.controller.sample.kitchen.api.EggsType;
 import org.opendaylight.controller.sample.kitchen.api.KitchenService;
-import org.opendaylight.controller.sample.kitchen.impl.KitchenServiceImpl;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.ToastType;
-import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.ToasterService;
-import org.opendaylight.yangtools.concepts.ListenerRegistration;
-import org.opendaylight.yangtools.yang.binding.NotificationListener;
 import org.opendaylight.yangtools.yang.common.RpcResult;
+import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,6 +32,8 @@ import org.slf4j.LoggerFactory;
  */
 public final class KitchenServiceModule extends AbstractKitchenServiceModule {
     private static final Logger log = LoggerFactory.getLogger(KitchenServiceModule.class);
+
+    private BundleContext bundleContext;
 
     public KitchenServiceModule(final org.opendaylight.controller.config.api.ModuleIdentifier identifier, final org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
         super(identifier, dependencyResolver);
@@ -53,36 +52,34 @@ public final class KitchenServiceModule extends AbstractKitchenServiceModule {
     }
 
     @Override
-    public java.lang.AutoCloseable createInstance() {
-        ToasterService toasterService = getRpcRegistryDependency().getRpcService(ToasterService.class);
-
-        final KitchenServiceImpl kitchenService = new KitchenServiceImpl(toasterService);
-
-        final ListenerRegistration<NotificationListener> toasterListenerReg =
-                getNotificationServiceDependency().registerNotificationListener( kitchenService );
-
-        final KitchenServiceRuntimeRegistration runtimeReg =
-                getRootRuntimeBeanRegistratorWrapper().register( kitchenService );
+    public AutoCloseable createInstance() {
+        // The KitchenServiceImpl instance is created and advertised with the OSGi registry via blueprint
+        // so obtain it here so we can return it to the config system. It's possible the blueprint container
+        // hasn't been created yet so we busy wait 5 min for the service.
+        final WaitingServiceTracker<KitchenService> tracker = WaitingServiceTracker.create(
+                KitchenService.class, bundleContext);
+        final KitchenService kitchenService = tracker.waitForService(WaitingServiceTracker.FIVE_MINUTES);
 
         final class AutoCloseableKitchenService implements KitchenService, AutoCloseable {
-
             @Override
-            public void close() throws Exception {
-                toasterListenerReg.close();
-                runtimeReg.close();
-                log.info("Toaster consumer (instance {}) torn down.", this);
+            public void close() {
+                // We need to close the ServiceTracker however we don't want to close the actual
+                // KitchenService instance because its life-cycle is controlled via blueprint.
+                tracker.close();
+                log.info("KitchenService (instance {}) closed.", kitchenService);
             }
 
             @Override
-            public Future<RpcResult<Void>> makeBreakfast( final EggsType eggs,
-                                                          final Class<? extends ToastType> toast,
-                                                          final int toastDoneness ) {
-                return kitchenService.makeBreakfast( eggs, toast, toastDoneness );
+            public Future<RpcResult<Void>> makeBreakfast(final EggsType eggs, final Class<? extends ToastType> toast,
+                    final int toastDoneness) {
+                return kitchenService.makeBreakfast(eggs, toast, toastDoneness);
             }
         }
 
-        AutoCloseable ret = new AutoCloseableKitchenService();
-        log.info("KitchenService (instance {}) initialized.", ret );
-        return ret;
+        return new AutoCloseableKitchenService();
+    }
+
+    public void setBundleContext(BundleContext bundleContext) {
+        this.bundleContext = bundleContext;
     }
 }

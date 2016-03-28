@@ -19,18 +19,21 @@ module opendaylight-sal-binding-broker-impl {
     identity binding-dom-mapping-service {
         base config:service-type;
         config:java-class "org.opendaylight.controller.md.sal.binding.impl.BindingToNormalizedNodeCodec";
+        config:disable-osgi-service-registration;
     }
 
     /* FIXME: move to opendaylight-md-sal-binding (cannot be there due to Class name confict with old implementation)*/
     identity binding-new-notification-service {
         base config:service-type;
         config:java-class "org.opendaylight.controller.md.sal.binding.api.NotificationService";
+        config:disable-osgi-service-registration;
     }
 
     /* TODO: move to opendaylight-md-sal-binding (cannot be there due to Class name confict with old implementation)*/
     identity binding-new-notification-publish-service {
         base config:service-type;
         config:java-class "org.opendaylight.controller.md.sal.binding.api.NotificationPublishService";
+        config:disable-osgi-service-registration;
     }
 
     identity binding-broker-impl {
@@ -134,7 +137,7 @@ module opendaylight-sal-binding-broker-impl {
                 container notification-service {
                     uses config:service-ref {
                         refine type {
-                            mandatory true;
+                            mandatory false;
                             config:required-identity sal:binding-notification-service;
                         }
                     }

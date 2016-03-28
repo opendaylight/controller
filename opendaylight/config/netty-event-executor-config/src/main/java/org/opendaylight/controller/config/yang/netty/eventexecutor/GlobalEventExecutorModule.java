@@ -17,10 +17,14 @@
  */
 package org.opendaylight.controller.config.yang.netty.eventexecutor;
 
+import io.netty.util.concurrent.EventExecutor;
+import org.opendaylight.controller.config.api.osgi.WaitingServiceTracker;
 import org.opendaylight.controller.config.yang.netty.eventexecutor.AutoCloseableEventExecutor.CloseableEventExecutorMixin;
+import org.osgi.framework.BundleContext;
 
 public final class GlobalEventExecutorModule extends
         org.opendaylight.controller.config.yang.netty.eventexecutor.AbstractGlobalEventExecutorModule {
+    private BundleContext bundleContext;
 
     public GlobalEventExecutorModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier,
             org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
@@ -39,10 +43,15 @@ public final class GlobalEventExecutorModule extends
     }
 
     @Override
-    public java.lang.AutoCloseable createInstance() {
-        return CloseableEventExecutorMixin.globalEventExecutor();
+    public AutoCloseable createInstance() {
+        // The service is provided via blueprint so wait for and return it here for backwards compatibility.
+        final WaitingServiceTracker<EventExecutor> tracker = WaitingServiceTracker.create(
+                EventExecutor.class, bundleContext, "(type=global-event-executor)");
+        EventExecutor eventExecutor = tracker.waitForService(WaitingServiceTracker.FIVE_MINUTES);
+        return CloseableEventExecutorMixin.forwardingEventExecutor(eventExecutor, tracker);
     }
 
-
-
+    public void setBundleContext(final BundleContext bundleContext) {
+        this.bundleContext = bundleContext;
+    }
 }
