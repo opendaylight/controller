@@ -37,6 +37,11 @@ public @interface ServiceInterfaceAnnotation {
     Class<?> osgiRegistrationType();
 
     /**
+     * Determines whether or not the service instance should be registered with OSGi.
+     */
+    boolean registerToOsgi() default true;
+
+    /**
      * Get namespace of {@link #value()}
      */
     String namespace();
