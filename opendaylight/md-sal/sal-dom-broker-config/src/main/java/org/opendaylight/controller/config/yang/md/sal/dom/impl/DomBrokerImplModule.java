@@ -10,23 +10,27 @@ package org.opendaylight.controller.config.yang.md.sal.dom.impl;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ClassToInstanceMap;
 import com.google.common.collect.MutableClassToInstanceMap;
-import java.util.concurrent.TimeUnit;
+import java.util.ArrayList;
+import java.util.List;
+import org.opendaylight.controller.config.api.osgi.WaitingServiceTracker;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPointService;
 import org.opendaylight.controller.md.sal.dom.api.DOMNotificationPublishService;
 import org.opendaylight.controller.md.sal.dom.api.DOMNotificationService;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcProviderService;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
-import org.opendaylight.controller.md.sal.dom.broker.impl.DOMNotificationRouter;
-import org.opendaylight.controller.md.sal.dom.broker.impl.DOMRpcRouter;
-import org.opendaylight.controller.md.sal.dom.broker.impl.mount.DOMMountPointServiceImpl;
 import org.opendaylight.controller.sal.core.api.BrokerService;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.opendaylight.controller.sal.dom.broker.BrokerImpl;
 import org.opendaylight.controller.sal.dom.broker.GlobalBundleScanningSchemaServiceImpl;
+import org.osgi.framework.BundleContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public final class DomBrokerImplModule extends org.opendaylight.controller.config.yang.md.sal.dom.impl.AbstractDomBrokerImplModule
-{
+public final class DomBrokerImplModule extends org.opendaylight.controller.config.yang.md.sal.dom.impl.AbstractDomBrokerImplModule{
+    private static final Logger LOG = LoggerFactory.getLogger(DomBrokerImplModule.class);
+
+    private BundleContext bundleContext;
 
     public DomBrokerImplModule(final org.opendaylight.controller.config.api.ModuleIdentifier identifier, final org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
         super(identifier, dependencyResolver);
@@ -45,28 +49,63 @@ public final class DomBrokerImplModule extends org.opendaylight.controller.confi
 
     @Override
     public java.lang.AutoCloseable createInstance() {
-        final DOMDataBroker asyncBroker= getAsyncDataBrokerDependency();
+        // The services are provided via blueprint so retrieve then from the OSGi service registry for
+        // backwards compatibility.
+
+        final List<AutoCloseable> closeables = new ArrayList<>();
+        DOMNotificationService domNotificationService = newTracker(
+                DOMNotificationService.class, closeables).waitForService(WaitingServiceTracker.FIVE_MINUTES);
+
+        DOMNotificationPublishService domNotificationPublishService = newTracker(
+                DOMNotificationPublishService.class, closeables).waitForService(WaitingServiceTracker.FIVE_MINUTES);
+
+        DOMRpcService domRpcService = newTracker(
+                DOMRpcService.class, closeables).waitForService(WaitingServiceTracker.FIVE_MINUTES);
+
+        DOMRpcProviderService domRpcProvider = newTracker(
+                DOMRpcProviderService.class, closeables).waitForService(WaitingServiceTracker.FIVE_MINUTES);
+
+        DOMMountPointService mountService = newTracker(DOMMountPointService.class, closeables).
+                waitForService(WaitingServiceTracker.FIVE_MINUTES);
+
+        final DOMDataBroker dataBroker = getAsyncDataBrokerDependency();
 
         final ClassToInstanceMap<BrokerService> services = MutableClassToInstanceMap.create();
 
-        final DOMNotificationRouter domNotificationRouter = DOMNotificationRouter.create(getNotificationQueueDepth().getValue().intValue(),
-            getNotificationQueueSpin().longValue(), getNotificationQueuePark().longValue(), TimeUnit.MILLISECONDS);
-        services.putInstance(DOMNotificationService.class, domNotificationRouter);
-        services.putInstance(DOMNotificationPublishService.class, domNotificationRouter);
+        services.putInstance(DOMNotificationService.class, domNotificationService);
+        services.putInstance(DOMNotificationPublishService.class, domNotificationPublishService);
 
         final SchemaService schemaService = getSchemaServiceImpl();
         services.putInstance(SchemaService.class, schemaService);
 
-        services.putInstance(DOMDataBroker.class, asyncBroker);
+        services.putInstance(DOMDataBroker.class, dataBroker);
 
-        final DOMRpcRouter rpcRouter = DOMRpcRouter.newInstance(schemaService);
-        services.putInstance(DOMRpcService.class, rpcRouter);
-        services.putInstance(DOMRpcProviderService.class, rpcRouter);
+        services.putInstance(DOMRpcService.class, domRpcService);
+        services.putInstance(DOMRpcProviderService.class, domRpcProvider);
 
-        final DOMMountPointService mountService = new DOMMountPointServiceImpl();
         services.putInstance(DOMMountPointService.class, mountService);
 
-        return new BrokerImpl(rpcRouter, services);
+        BrokerImpl broker = new BrokerImpl(domRpcService, domRpcProvider, services);
+        broker.setDeactivator(new AutoCloseable() {
+            @Override
+            public void close() {
+                for(AutoCloseable ac: closeables) {
+                    try {
+                        ac.close();
+                    } catch(Exception e) {
+                        LOG.warn("Exception while closing {}", ac, e);
+                    }
+                }
+            }
+        });
+
+        return broker;
+    }
+
+    private <T> WaitingServiceTracker<T> newTracker(Class<T> serviceInterface, List<AutoCloseable> closeables) {
+        WaitingServiceTracker<T> tracker = WaitingServiceTracker.create(serviceInterface, bundleContext);
+        closeables.add(tracker);
+        return tracker;
     }
 
     private SchemaService getSchemaServiceImpl() {
@@ -77,5 +116,9 @@ public final class DomBrokerImplModule extends org.opendaylight.controller.confi
             schemaService = GlobalBundleScanningSchemaServiceImpl.getInstance();
         }
         return schemaService;
+    }
+
+    public void setBundleContext(final BundleContext bundleContext) {
+        this.bundleContext = bundleContext;
     }
 }
