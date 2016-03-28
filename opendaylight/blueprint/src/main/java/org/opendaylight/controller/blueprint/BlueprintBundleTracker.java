@@ -61,8 +61,6 @@ public class BlueprintBundleTracker implements BundleActivator, BundleTrackerCus
     public void start(BundleContext context) {
         LOG.info("Starting {}", getClass().getSimpleName());
 
-        System.setProperty("org.opendaylight.deactivate-configsystem", "true");
-
         registerBlueprintEventHandler(context);
 
         registerNamespaceHandler(context);
