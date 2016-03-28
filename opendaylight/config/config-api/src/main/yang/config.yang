@@ -29,6 +29,12 @@ module config {
         argument "name";
     }
 
+    extension disable-osgi-service-registration {
+        description
+            "YANG language extension that can be associated with a Service identity that
+            disables advertising the service instances to the OSGi registry.";
+    }
+
     extension required-identity {
         description
             "YANG language extension which indicates that a particular
