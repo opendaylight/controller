@@ -17,13 +17,20 @@
  */
 package org.opendaylight.controller.config.yang.netty.timer;
 
+import com.google.common.reflect.AbstractInvocationHandler;
+import com.google.common.reflect.Reflection;
+import io.netty.util.Timer;
+import java.lang.reflect.Method;
 import org.opendaylight.controller.config.api.JmxAttributeValidationException;
+import org.opendaylight.controller.config.api.osgi.WaitingServiceTracker;
+import org.osgi.framework.BundleContext;
 
 /**
 *
 */
 public final class HashedWheelTimerModule extends
         org.opendaylight.controller.config.yang.netty.timer.AbstractHashedWheelTimerModule {
+    private BundleContext bundleContext;
 
     public HashedWheelTimerModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier,
             org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
@@ -50,7 +57,29 @@ public final class HashedWheelTimerModule extends
     }
 
     @Override
-    public java.lang.AutoCloseable createInstance() {
-        return HashedWheelTimerCloseable.newInstance(getThreadFactoryDependency(), getTickDuration(), getTicksPerWheel());
+    public AutoCloseable createInstance() {
+        // The service is provided via blueprint so wait for and return it here for backwards compatibility.
+        final WaitingServiceTracker<Timer> tracker = WaitingServiceTracker.create(
+                Timer.class, bundleContext, "(type=global-timer)");
+        final Timer timer = tracker.waitForService(WaitingServiceTracker.FIVE_MINUTES);
+
+        return Reflection.newProxy(AutoCloseableTimerInterface.class, new AbstractInvocationHandler() {
+            @Override
+            protected Object handleInvocation(Object proxy, Method method, Object[] args) throws Throwable {
+                if (method.getName().equals("close")) {
+                    tracker.close();
+                    return null;
+                } else {
+                    return method.invoke(timer, args);
+                }
+            }
+        });
+    }
+
+    public void setBundleContext(BundleContext bundleContext) {
+        this.bundleContext = bundleContext;
+    }
+
+    private static interface AutoCloseableTimerInterface extends Timer, AutoCloseable {
     }
 }
