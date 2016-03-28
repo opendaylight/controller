@@ -73,7 +73,7 @@ public class Annotation {
         {
             List<Parameter> params = Lists.newArrayList(new Parameter("value", q(sie.getQName().toString())));
             params.add(new Parameter("osgiRegistrationType", exportedClassName + ".class"));
-
+            params.add(new Parameter("registerToOsgi", Boolean.toString(sie.isRegisterToOsgi())));
             params.add(new Parameter("namespace", q(sie.getQName().getNamespace().toString())));
             params.add(new Parameter("revision", q(sie.getQName().getFormattedRevision())));
             params.add(new Parameter("localName", q(sie.getQName().getLocalName())));
