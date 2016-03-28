@@ -9,8 +9,8 @@
 package org.opendaylight.controller.config.yang.config.distributed_datastore_provider;
 
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
-import org.opendaylight.controller.cluster.datastore.DatastoreSnapshotRestore;
-import org.opendaylight.controller.cluster.datastore.DistributedDataStoreFactory;
+import org.opendaylight.controller.cluster.datastore.DistributedDataStoreInterface;
+import org.opendaylight.controller.config.api.osgi.WaitingServiceTracker;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.osgi.framework.BundleContext;
 
@@ -43,12 +43,13 @@ public class DistributedConfigDataStoreProviderModule extends
     }
 
     @Override
-    public java.lang.AutoCloseable createInstance() {
-        DatastoreContext datastoreContext = newDatastoreContext(getConfigProperties());
-
-        return DistributedDataStoreFactory.createInstance(getConfigSchemaServiceDependency(),
-                datastoreContext, DatastoreSnapshotRestore.instance(),
-                getConfigActorSystemProviderDependency(), bundleContext);
+    public AutoCloseable createInstance() {
+        // The DistributedConfigDataStore is provided via blueprint so wait for and return it here for
+        // backwards compatibility.
+        WaitingServiceTracker<DistributedDataStoreInterface> tracker = WaitingServiceTracker.create(
+                DistributedDataStoreInterface.class, bundleContext, "(type=distributed-config)");
+        DistributedDataStoreInterface delegate = tracker.waitForService(WaitingServiceTracker.FIVE_MINUTES);
+        return new ForwardingDistributedDataStore(delegate, tracker);
     }
 
     public static DatastoreContext newDatastoreContext() {
