@@ -242,7 +242,7 @@ module distributed-datastore-provider {
                 container config-schema-service {
                     uses config:service-ref {
                         refine type {
-                            mandatory true;
+                            mandatory false;
                             config:required-identity sal:schema-service;
                         }
                     }
@@ -251,7 +251,7 @@ module distributed-datastore-provider {
                 container config-actor-system-provider {
                     uses config:service-ref {
                         refine type {
-                            mandatory true;
+                            mandatory false;
                             config:required-identity actor-system:actor-system-provider-service;
                         }
                     }
@@ -270,7 +270,7 @@ module distributed-datastore-provider {
                 container operational-schema-service {
                     uses config:service-ref {
                         refine type {
-                            mandatory true;
+                            mandatory false;
                             config:required-identity sal:schema-service;
                         }
                     }
@@ -279,7 +279,7 @@ module distributed-datastore-provider {
                 container operational-actor-system-provider {
                     uses config:service-ref {
                         refine type {
-                            mandatory true;
+                            mandatory false;
                             config:required-identity actor-system:actor-system-provider-service;
                         }
                     }
