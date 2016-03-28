@@ -27,33 +27,43 @@ public interface AutoCloseableEventExecutor extends EventExecutor, AutoCloseable
         }
 
         @Override
-        public void close() {
+        public void close() throws Exception {
             eventExecutor.shutdownGracefully(0, DEFAULT_SHUTDOWN_SECONDS, TimeUnit.SECONDS);
         }
 
 
-        private static AutoCloseableEventExecutor createCloseableProxy(final EventExecutor eventExecutor) {
-            final CloseableEventExecutorMixin closeableGlobalEventExecutorMixin =
-                    new CloseableEventExecutorMixin(eventExecutor);
+        private static AutoCloseableEventExecutor createCloseableProxy(
+                final CloseableEventExecutorMixin closeableEventExecutorMixin) {
             return Reflection.newProxy(AutoCloseableEventExecutor.class, new AbstractInvocationHandler() {
                 @Override
                 protected Object handleInvocation(Object proxy, Method method, Object[] args) throws Throwable {
                     if (method.getName().equals("close")) {
-                        closeableGlobalEventExecutorMixin.close();
+                        closeableEventExecutorMixin.close();
                         return null;
                     } else {
-                        return method.invoke(eventExecutor, args);
+                        return method.invoke(closeableEventExecutorMixin.eventExecutor, args);
                     }
                 }
             });
         }
 
         public static AutoCloseableEventExecutor globalEventExecutor() {
-            return createCloseableProxy(GlobalEventExecutor.INSTANCE);
+            return createCloseableProxy(new CloseableEventExecutorMixin(GlobalEventExecutor.INSTANCE));
         }
 
         public static AutoCloseableEventExecutor immediateEventExecutor() {
-            return createCloseableProxy(ImmediateEventExecutor.INSTANCE);
+            return createCloseableProxy(new CloseableEventExecutorMixin(ImmediateEventExecutor.INSTANCE));
+        }
+
+        public static AutoCloseableEventExecutor forwardingEventExecutor(final EventExecutor eventExecutor,
+                final AutoCloseable closeable) {
+            return createCloseableProxy(new CloseableEventExecutorMixin(eventExecutor) {
+                @Override
+                public void close() throws Exception {
+                    // Intentional no-op.
+                    closeable.close();
+                }
+            });
         }
     }
 }

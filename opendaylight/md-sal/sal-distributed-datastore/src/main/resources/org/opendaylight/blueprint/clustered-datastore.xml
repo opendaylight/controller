@@ -38,6 +38,12 @@
     <argument ref="blueprintBundleContext"/>
   </bean>
 
+  <service ref="configDatastore" odl:type="distributed-config">
+    <interfaces>
+      <value>org.opendaylight.controller.cluster.datastore.DistributedDataStoreInterface</value>
+    </interfaces>
+  </service>
+
   <!-- Distributed Operational Datastore -->
 
   <bean id="operDatastoreContext" class="org.opendaylight.controller.config.yang.config.distributed_datastore_provider.DistributedOperationalDataStoreProviderModule"
@@ -52,6 +58,12 @@
     <argument ref="blueprintBundleContext"/>
   </bean>
 
+  <service ref="operDatastore" odl:type="distributed-operational">
+    <interfaces>
+      <value>org.opendaylight.controller.cluster.datastore.DistributedDataStoreInterface</value>
+    </interfaces>
+  </service>
+
   <!-- Concurrent DOMDataBroker -->
 
   <bean id="listenableFutureExecutor" class="org.opendaylight.yangtools.util.concurrent.SpecialExecutors"
@@ -64,7 +76,7 @@
   <bean id="commitStatsTracker" class="org.opendaylight.yangtools.util.DurationStatisticsTracker"
           factory-method="createConcurrent"/>
 
-  <bean id="clusteredDOMDataBroker" class="org.opendaylight.controller.cluster.datastore.ConcurrentDOMDataBroker"
+  <bean id="clusteredDOMDataBroker" class="org.opendaylight.controller.cluster.databroker.ConcurrentDOMDataBroker"
           destroy-method="close">
     <argument>
       <map>
@@ -112,5 +124,4 @@
 
   <service ref="distributedEntityOwnershipService" interface="org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipService"
         odl:type="default"/>
-
 </blueprint>
