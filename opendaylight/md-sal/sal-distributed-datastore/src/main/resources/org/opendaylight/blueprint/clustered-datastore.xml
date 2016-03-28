@@ -38,6 +38,12 @@
     <argument ref="blueprintBundleContext"/>
   </bean>
 
+  <service ref="configDatastore" odl:type="distributed-config">
+    <interfaces>
+      <value>org.opendaylight.controller.cluster.datastore.DistributedDataStoreInterface</value>
+    </interfaces>
+  </service>
+
   <!-- Distributed Operational Datastore -->
 
   <bean id="operDatastoreContext" class="org.opendaylight.controller.config.yang.config.distributed_datastore_provider.DistributedOperationalDataStoreProviderModule"
@@ -51,6 +57,12 @@
     <argument ref="actorSystemProvider"/>
     <argument ref="blueprintBundleContext"/>
   </bean>
+
+  <service ref="operDatastore" odl:type="distributed-operational">
+    <interfaces>
+      <value>org.opendaylight.controller.cluster.datastore.DistributedDataStoreInterface</value>
+    </interfaces>
+  </service>
 
   <!-- Concurrent DOMDataBroker -->
 
@@ -112,5 +124,4 @@
 
   <service ref="distributedEntityOwnershipService" interface="org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipService"
         odl:type="default"/>
-
 </blueprint>
