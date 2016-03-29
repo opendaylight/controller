@@ -6,11 +6,11 @@
     <artifactId>sal-parent</artifactId>
     <version>1.4.0-SNAPSHOT</version>
   </parent>
-  <artifactId>sal-distributed-datastore</artifactId>
+  <artifactId>sal-cluster-admin</artifactId>
   <packaging>bundle</packaging>
 
   <dependencies>
-    <!-- Java -->
+    <!-- Tests -->
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
@@ -26,10 +26,18 @@
       <artifactId>slf4j-simple</artifactId>
       <scope>test</scope>
     </dependency>
-
     <dependency>
-      <groupId>org.osgi</groupId>
-      <artifactId>org.osgi.core</artifactId>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>sal-akka-raft</artifactId>
+      <type>test-jar</type>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>sal-distributed-datastore</artifactId>
+      <type>test-jar</type>
+      <version>1.4.0-SNAPSHOT</version>
+      <scope>test</scope>
     </dependency>
 
     <!-- Akka -->
@@ -39,37 +47,7 @@
     </dependency>
     <dependency>
       <groupId>com.typesafe.akka</groupId>
-      <artifactId>akka-cluster_${scala.version}</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.typesafe.akka</groupId>
-      <artifactId>akka-osgi_${scala.version}</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.typesafe.akka</groupId>
-      <artifactId>akka-persistence_${scala.version}</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.typesafe.akka</groupId>
-      <artifactId>akka-remote_${scala.version}</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.typesafe.akka</groupId>
-      <artifactId>akka-slf4j_${scala.version}</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.typesafe.akka</groupId>
       <artifactId>akka-testkit_${scala.version}</artifactId>
-    </dependency>
-
-    <!-- Codahale -->
-    <dependency>
-      <groupId>com.codahale.metrics</groupId>
-      <artifactId>metrics-core</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.codahale.metrics</groupId>
-      <artifactId>metrics-graphite</artifactId>
     </dependency>
 
     <!-- Google -->
@@ -91,60 +69,15 @@
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
-      <artifactId>sal-akka-raft</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>sal-akka-raft-example</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>sal-akka-raft</artifactId>
-      <type>test-jar</type>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal-binding-api</artifactId>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
-      <artifactId>sal-binding-config</artifactId>
+      <artifactId>sal-akka-raft</artifactId>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
-      <artifactId>sal-clustering-commons</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>sal-common-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>sal-common-util</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>sal-dom-broker-config</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>org.opendaylight.mdsal</groupId>
-      <artifactId>mdsal-dom-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>sal-core-spi</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>sal-inmemory-datastore</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>org.opendaylight.yangtools</groupId>
-      <artifactId>concepts</artifactId>
+      <artifactId>sal-distributed-datastore</artifactId>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.mdsal</groupId>
@@ -153,14 +86,6 @@
     <dependency>
       <groupId>org.opendaylight.yangtools</groupId>
       <artifactId>yang-common</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.yangtools</groupId>
-      <artifactId>yang-data-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.yangtools</groupId>
-      <artifactId>yang-data-impl</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.commons</groupId>
@@ -178,13 +103,7 @@
         <configuration>
           <instructions>
             <Bundle-Name>${project.groupId}.${project.artifactId}</Bundle-Name>
-            <Bundle-Activator>org.opendaylight.controller.cluster.datastore.osgi.Activator</Bundle-Activator>
-            <Export-Package>
-                org.opendaylight.controller.cluster.datastore;
-                org.opendaylight.controller.cluster.datastore.config;
-                org.opendaylight.controller.cluster.datastore.messages;
-                org.opendaylight.controller.cluster.datastore.utils;
-            </Export-Package>
+            <Export-Package></Export-Package>
             <Import-Package>
                 !*snappy;
                 !org.jboss.*;
@@ -192,42 +111,11 @@
                 !*jetty*;
                 !sun.security.*;
                 *;
-                org.opendaylight.controller.md.sal.dom.broker.impl.jmx
             </Import-Package>
-            <!--
-            <Embed-Dependency>
-                sal-clustering-commons;
-                sal-akka-raft;
-                *metrics*;
-                !sal*;
-                !*config-api*;
-                !*testkit*;
-                akka*;
-                *leveldb*;
-                *config*;
-                *hawt*;
-                *protobuf*;
-                *netty*;
-                *uncommons*;
-                *scala*;
-            </Embed-Dependency>
-            <Embed-Transitive>true</Embed-Transitive>
-            -->
           </instructions>
         </configuration>
       </plugin>
 
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jar-plugin</artifactId>
-        <executions>
-          <execution>
-            <goals>
-              <goal>test-jar</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
@@ -287,10 +175,4 @@
       </plugin>
     </plugins>
   </build>
-  <scm>
-    <connection>scm:git:http://git.opendaylight.org/gerrit/controller.git</connection>
-    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
-    <tag>HEAD</tag>
-    <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:MD-SAL:Architecture:Clustering</url>
-  </scm>
 </project>
