@@ -28,7 +28,7 @@ module cluster-admin-provider {
                 container config-data-store {
                     uses config:service-ref {
                         refine type {
-                            mandatory true;
+                            mandatory false;
                             config:required-identity config-dom-store-spi:config-dom-datastore;
                         }
                     }
@@ -37,7 +37,7 @@ module cluster-admin-provider {
                 container oper-data-store {
                     uses config:service-ref {
                         refine type {
-                            mandatory true;
+                            mandatory false;
                             config:required-identity operational-dom-store-spi:operational-dom-datastore;
                         }
                     }
@@ -46,7 +46,7 @@ module cluster-admin-provider {
                 container rpc-registry {
                     uses config:service-ref {
                         refine type {
-                            mandatory true;
+                            mandatory false;
                             config:required-identity mdsal:binding-rpc-registry;
                         }
                     }
