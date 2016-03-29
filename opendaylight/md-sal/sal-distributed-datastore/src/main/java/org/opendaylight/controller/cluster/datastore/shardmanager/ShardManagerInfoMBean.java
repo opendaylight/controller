@@ -6,7 +6,7 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.opendaylight.controller.cluster.datastore.jmx.mbeans.shardmanager;
+package org.opendaylight.controller.cluster.datastore.shardmanager;
 
 import java.util.List;
 
