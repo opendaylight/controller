@@ -16,6 +16,24 @@
       "revId": "f3db350c02fb2a4d094d37f0c88ea3c8b97acbe0",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a4c51b2_b0e3a004",
+        "filename": "opendaylight/md-sal/mdsal-cli/src/main/java/org/opendaylight/mdsal/cli/StatusInfo.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 4013
+      },
+      "writtenOn": "2016-03-29T21:39:44Z",
+      "side": 1,
+      "message": "sorry Robert, would you explain more what you mean by templating lang ? \nI just add space to align the text in the command line.",
+      "parentUuid": "3a4c51b2_e5a9ec7c",
+      "revId": "f3db350c02fb2a4d094d37f0c88ea3c8b97acbe0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
