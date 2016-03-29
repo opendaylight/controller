@@ -511,8 +511,18 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
         verifyOwner(leader, ENTITY_TYPE, ENTITY_ID1, LOCAL_MEMBER_NAME);
         verifyOwner(leader, ENTITY_TYPE, ENTITY_ID4, "");
 
-        // Add back candidate peerMember2 for entities 1, 2, & 3.
+        peer2.tell(new PeerAddressResolved(peerId1.toString(), peer1.path().toString()), ActorRef.noSender());
+        peer2.tell(new PeerAddressResolved(leaderId.toString(), leader.path().toString()), ActorRef.noSender());
+        peer2.tell(new PeerUp(LOCAL_MEMBER_NAME, leaderId.toString()), ActorRef.noSender());
+        peer2.tell(new PeerUp(peerMemberName1, peerId1.toString()), ActorRef.noSender());
 
+        // Add back candidate peerMember2 for entities 1, 2, & 3.
+        peer2.tell(new RegisterCandidateLocal(new Entity(ENTITY_TYPE, ENTITY_ID1)), kit.getRef());
+        kit.expectMsgClass(SuccessReply.class);
+        peer2.tell(new RegisterCandidateLocal(new Entity(ENTITY_TYPE, ENTITY_ID2)), kit.getRef());
+        kit.expectMsgClass(SuccessReply.class);
+        peer2.tell(new RegisterCandidateLocal(new Entity(ENTITY_TYPE, ENTITY_ID3)), kit.getRef());
+        kit.expectMsgClass(SuccessReply.class);
         commitModification(leader, entityOwnersWithCandidate(ENTITY_TYPE, ENTITY_ID1, peerMemberName2), kit);
         commitModification(leader, entityOwnersWithCandidate(ENTITY_TYPE, ENTITY_ID2, peerMemberName2), kit);
         commitModification(leader, entityOwnersWithCandidate(ENTITY_TYPE, ENTITY_ID3, peerMemberName2), kit);
@@ -559,9 +569,6 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
         // Kill the local leader and elect peer2 the leader. This should cause a new owner to be selected for
         // the entities (1 and 3) previously owned by the local leader member.
 
-        peer2.tell(new PeerAddressResolved(peerId1.toString(), peer1.path().toString()), ActorRef.noSender());
-        peer2.tell(new PeerUp(LOCAL_MEMBER_NAME, leaderId.toString()), ActorRef.noSender());
-        peer2.tell(new PeerUp(peerMemberName1, peerId1.toString()), ActorRef.noSender());
 
         leader.tell(PoisonPill.getInstance(), ActorRef.noSender());
         peer2.tell(new PeerDown(LOCAL_MEMBER_NAME, leaderId.toString()), ActorRef.noSender());
