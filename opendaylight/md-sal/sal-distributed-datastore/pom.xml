@@ -182,7 +182,6 @@
         <configuration>
           <instructions>
             <Bundle-Name>${project.groupId}.${project.artifactId}</Bundle-Name>
-            <Bundle-Activator>org.opendaylight.controller.cluster.datastore.osgi.Activator</Bundle-Activator>
             <Export-Package>
                 org.opendaylight.controller.cluster.datastore;
                 org.opendaylight.controller.cluster.datastore.config;
