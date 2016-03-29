@@ -49,6 +49,11 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
             <groupId>org.apache.sshd</groupId>
             <artifactId>sshd-core</artifactId>
           </exclusion>
+          <!-- We provide a newer version of Aries Proxy -->
+          <exclusion>
+            <groupId>org.apache.aries.proxy</groupId>
+            <artifactId>org.apache.aries.proxy.impl</artifactId>
+          </exclusion>
         </exclusions>
       </dependency>
     </dependencies>
@@ -61,7 +66,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <version>${karaf.version}</version>
       <type>xml</type>
       <classifier>features</classifier>
-      <scope>runtime</scope>
     </dependency>
     <!-- karaf region dependency -->
     <dependency>
@@ -83,6 +87,14 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>opendaylight-karaf-resources</artifactId>
       <version>${karaf.resources.version}</version>
+    </dependency>
+
+    <!-- Aries Proxy 1.0.5 contains important bug fixes -->
+    <!-- Once we upgrade to a version of Karaf which has at least 1.0.5, this can be removed -->
+    <dependency>
+      <groupId>org.apache.aries.proxy</groupId>
+      <artifactId>org.apache.aries.proxy.impl</artifactId>
+      <version>1.0.5</version>
     </dependency>
   </dependencies>
   <build>
@@ -350,6 +362,11 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
                       <include name="shell"/>
                     </fileset>
                   </chmod>
+                  <!-- Remove this once Karaf provides a new-enough version of Aries Proxy -->
+                  <replace dir="${project.build.directory}/assembly/etc" token="org.apache.aries.proxy.impl/1.0.4"
+                           value="org.apache.aries.proxy.impl/1.0.5">
+                    <include name="startup.properties"/>
+                  </replace>
                 </tasks>
               </configuration>
             </execution>
