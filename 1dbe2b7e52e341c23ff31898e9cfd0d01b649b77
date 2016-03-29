@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a4c51b2_f0a6c852",
+        "filename": "karaf/opendaylight-karaf-resources/src/main/resources/bin/karaf",
+        "patchSetId": 1
+      },
+      "lineNbr": 278,
+      "author": {
+        "id": 2264
+      },
+      "writtenOn": "2016-03-29T20:31:13Z",
+      "side": 1,
+      "message": "missing dash (-XX) I guess.",
+      "range": {
+        "startLine": 278,
+        "startChar": 111,
+        "endLine": 278,
+        "endChar": 113
+      },
+      "revId": "1dbe2b7e52e341c23ff31898e9cfd0d01b649b77",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
