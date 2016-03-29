@@ -9,6 +9,7 @@
 package org.opendaylight.controller.cluster.datastore.entityownership;
 
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.ENTITY_OWNERS_PATH;
+import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.ENTITY_OWNER_QNAME;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.ENTITY_QNAME;
 import org.opendaylight.controller.cluster.datastore.ShardDataTree;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeListener;
@@ -16,11 +17,13 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.LeafNode;
 
-public abstract class AbstractEntityOwnerChangeListener  implements DOMDataTreeChangeListener {
+public abstract class AbstractEntityOwnerChangeListener implements DOMDataTreeChangeListener {
+    private static final YangInstanceIdentifier EOS_PATH = YangInstanceIdentifier.builder(ENTITY_OWNERS_PATH)
+            .node(EntityType.QNAME).node(EntityType.QNAME).node(ENTITY_QNAME).node(ENTITY_QNAME)
+            .node(ENTITY_OWNER_QNAME).build();
 
     void init(ShardDataTree shardDataTree) {
-        shardDataTree.registerTreeChangeListener(YangInstanceIdentifier.builder(ENTITY_OWNERS_PATH).
-                node(EntityType.QNAME).node(EntityType.QNAME).node(ENTITY_QNAME).node(ENTITY_QNAME).node(EntityOwnersModel.ENTITY_OWNER_QNAME).build(), this);
+        shardDataTree.registerTreeChangeListener(EOS_PATH, this);
     }
 
     protected static String extractOwner(LeafNode<?> ownerLeaf) {
