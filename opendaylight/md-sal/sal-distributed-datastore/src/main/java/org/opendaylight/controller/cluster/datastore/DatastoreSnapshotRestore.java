@@ -35,24 +35,16 @@ public class DatastoreSnapshotRestore {
     private final String restoreDirectoryPath;
     private final Map<String, DatastoreSnapshot> datastoreSnapshots = new ConcurrentHashMap<>();
 
-    public static void createInstance(String restoreDirectoryPath) {
+    public static DatastoreSnapshotRestore instance(String restoreDirectoryPath) {
         instance.compareAndSet(null, new DatastoreSnapshotRestore(restoreDirectoryPath));
-    }
-
-    public static void removeInstance() {
-        instance.set(null);
-    }
-
-    public static DatastoreSnapshotRestore instance() {
-        DatastoreSnapshotRestore localInstance = instance.get();
-        return Preconditions.checkNotNull(localInstance, "DatastoreSnapshotRestore instance was not created");
+        return instance.get();
     }
 
     private DatastoreSnapshotRestore(String restoreDirectoryPath) {
         this.restoreDirectoryPath = Preconditions.checkNotNull(restoreDirectoryPath);
     }
 
-    // sychronize this method so that, in case of concurrent access to getAndRemove(),
+    // synchronize this method so that, in case of concurrent access to getAndRemove(),
     // no one ends up with partially initialized data
     private synchronized void initialize() {
 
