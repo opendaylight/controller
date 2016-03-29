@@ -43,6 +43,14 @@
       <type>xml</type>
     </dependency>
 
+    <!-- Aries Proxy 1.0.5 contains important bug fixes -->
+    <!-- Once we upgrade to a version of Karaf which has at least 1.0.5, this can be removed -->
+    <dependency>
+      <groupId>org.apache.aries.proxy</groupId>
+      <artifactId>org.apache.aries.proxy.impl</artifactId>
+      <version>1.0.5</version>
+    </dependency>
+
     <!--
           controller provided features:
           Note: Nothing should go here that is not locked
@@ -68,7 +76,6 @@
     <dependency>
       <groupId>org.opendaylight.mdsal</groupId>
       <artifactId>features-mdsal</artifactId>
-      <version>2.1.0-SNAPSHOT</version>
       <classifier>features</classifier>
       <type>xml</type>
       <scope>runtime</scope>
@@ -76,7 +83,6 @@
     <dependency>
       <groupId>org.opendaylight.mdsal.model</groupId>
       <artifactId>features-mdsal-model</artifactId>
-      <version>0.9.0-SNAPSHOT</version>
       <classifier>features</classifier>
       <type>xml</type>
       <scope>runtime</scope>
@@ -177,7 +183,6 @@
       <plugin>
         <groupId>org.apache.karaf.tooling</groupId>
         <artifactId>karaf-maven-plugin</artifactId>
-        <version>${karaf.version}</version>
         <extensions>true</extensions>
         <configuration>
           <!-- no startupFeatures -->
@@ -255,6 +260,23 @@
              <ignorePermissions>false</ignorePermissions>
             </configuration>
           </execution>
+          <execution>
+              <id>copy-dependencies</id>
+              <phase>prepare-package</phase>
+              <goals>
+                <goal>copy-dependencies</goal>
+              </goals>
+              <configuration>
+                <outputDirectory>${project.build.directory}/assembly/system</outputDirectory>
+                <excludeArtifactIds>distribution.vtn-coordinator</excludeArtifactIds>
+                <overWriteReleases>false</overWriteReleases>
+                <overWriteSnapshots>true</overWriteSnapshots>
+                <overWriteIfNewer>true</overWriteIfNewer>
+                <useRepositoryLayout>true</useRepositoryLayout>
+                <addParentPoms>true</addParentPoms>
+                <copyPom>true</copyPom>
+              </configuration>
+            </execution>
         </executions>
       </plugin>
       <plugin>
@@ -279,6 +301,12 @@
                           <include name="shell"/>
                         </fileset>
                     </chmod>
+                    <!-- Remove this once Karaf provides a new-enough version of Aries Proxy -->
+                    <replace dir="${project.build.directory}/assembly/etc"
+                             token="org.apache.aries.proxy.impl/1.0.4"
+                             value="org.apache.aries.proxy.impl/1.0.5">
+                      <include name="startup.properties"/>
+                    </replace>
                   </tasks>
                 </configuration>
             </execution>
