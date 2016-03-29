@@ -432,24 +432,34 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
         kit.expectMsgClass(SuccessReply.class);
         verifyCommittedEntityCandidate(leader, ENTITY_TYPE, ENTITY_ID1, LOCAL_MEMBER_NAME);
 
+        peer2.tell(new RegisterCandidateLocal(new Entity(ENTITY_TYPE, ENTITY_ID1)), kit.getRef());
+        kit.expectMsgClass(SuccessReply.class);
         commitModification(leader, entityOwnersWithCandidate(ENTITY_TYPE, ENTITY_ID1, peerMemberName2), kit);
         verifyCommittedEntityCandidate(leader, ENTITY_TYPE, ENTITY_ID1, peerMemberName2);
 
+        peer1.tell(new RegisterCandidateLocal(new Entity(ENTITY_TYPE, ENTITY_ID1)), kit.getRef());
+        kit.expectMsgClass(SuccessReply.class);
         commitModification(leader, entityOwnersWithCandidate(ENTITY_TYPE, ENTITY_ID1, peerMemberName1), kit);
         verifyCommittedEntityCandidate(leader, ENTITY_TYPE, ENTITY_ID1, peerMemberName1);
         verifyOwner(leader, ENTITY_TYPE, ENTITY_ID1, LOCAL_MEMBER_NAME);
 
         // Add candidates for entity2 with peerMember2 as the owner
 
+        peer2.tell(new RegisterCandidateLocal(new Entity(ENTITY_TYPE, ENTITY_ID2)), kit.getRef());
+        kit.expectMsgClass(SuccessReply.class);
         commitModification(leader, entityOwnersWithCandidate(ENTITY_TYPE, ENTITY_ID2, peerMemberName2), kit);
         verifyCommittedEntityCandidate(leader, ENTITY_TYPE, ENTITY_ID2, peerMemberName2);
 
+        peer1.tell(new RegisterCandidateLocal(new Entity(ENTITY_TYPE, ENTITY_ID2)), kit.getRef());
+        kit.expectMsgClass(SuccessReply.class);
         commitModification(leader, entityOwnersWithCandidate(ENTITY_TYPE, ENTITY_ID2, peerMemberName1), kit);
         verifyCommittedEntityCandidate(leader, ENTITY_TYPE, ENTITY_ID2, peerMemberName1);
         verifyOwner(leader, ENTITY_TYPE, ENTITY_ID2, peerMemberName2);
 
         // Add candidates for entity3 with peerMember2 as the owner.
 
+        peer2.tell(new RegisterCandidateLocal(new Entity(ENTITY_TYPE, ENTITY_ID3)), kit.getRef());
+        kit.expectMsgClass(SuccessReply.class);
         commitModification(leader, entityOwnersWithCandidate(ENTITY_TYPE, ENTITY_ID3, peerMemberName2), kit);
         verifyCommittedEntityCandidate(leader, ENTITY_TYPE, ENTITY_ID3, peerMemberName2);
 
@@ -457,18 +467,24 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
         kit.expectMsgClass(SuccessReply.class);
         verifyCommittedEntityCandidate(leader, ENTITY_TYPE, ENTITY_ID3, LOCAL_MEMBER_NAME);
 
+        peer1.tell(new RegisterCandidateLocal(new Entity(ENTITY_TYPE, ENTITY_ID3)), kit.getRef());
+        kit.expectMsgClass(SuccessReply.class);
         commitModification(leader, entityOwnersWithCandidate(ENTITY_TYPE, ENTITY_ID3, peerMemberName1), kit);
         verifyCommittedEntityCandidate(leader, ENTITY_TYPE, ENTITY_ID3, peerMemberName1);
         verifyOwner(leader, ENTITY_TYPE, ENTITY_ID3, peerMemberName2);
 
         // Add only candidate peerMember2 for entity4.
 
+        peer2.tell(new RegisterCandidateLocal(new Entity(ENTITY_TYPE, ENTITY_ID4)), kit.getRef());
+        kit.expectMsgClass(SuccessReply.class);
         commitModification(leader, entityOwnersWithCandidate(ENTITY_TYPE, ENTITY_ID4, peerMemberName2), kit);
         verifyCommittedEntityCandidate(leader, ENTITY_TYPE, ENTITY_ID4, peerMemberName2);
         verifyOwner(leader, ENTITY_TYPE, ENTITY_ID4, peerMemberName2);
 
         // Add only candidate peerMember1 for entity5.
 
+        peer1.tell(new RegisterCandidateLocal(new Entity(ENTITY_TYPE, ENTITY_ID5)), kit.getRef());
+        kit.expectMsgClass(SuccessReply.class);
         commitModification(leader, entityOwnersWithCandidate(ENTITY_TYPE, ENTITY_ID5, peerMemberName1), kit);
         verifyCommittedEntityCandidate(leader, ENTITY_TYPE, ENTITY_ID5, peerMemberName1);
         verifyOwner(leader, ENTITY_TYPE, ENTITY_ID5, peerMemberName1);
@@ -511,8 +527,18 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
         verifyOwner(leader, ENTITY_TYPE, ENTITY_ID1, LOCAL_MEMBER_NAME);
         verifyOwner(leader, ENTITY_TYPE, ENTITY_ID4, "");
 
-        // Add back candidate peerMember2 for entities 1, 2, & 3.
+        peer2.tell(new PeerAddressResolved(peerId1.toString(), peer1.path().toString()), ActorRef.noSender());
+        peer2.tell(new PeerAddressResolved(leaderId.toString(), leader.path().toString()), ActorRef.noSender());
+        peer2.tell(new PeerUp(LOCAL_MEMBER_NAME, leaderId.toString()), ActorRef.noSender());
+        peer2.tell(new PeerUp(peerMemberName1, peerId1.toString()), ActorRef.noSender());
 
+        // Add back candidate peerMember2 for entities 1, 2, & 3.
+        peer2.tell(new RegisterCandidateLocal(new Entity(ENTITY_TYPE, ENTITY_ID1)), kit.getRef());
+        kit.expectMsgClass(SuccessReply.class);
+        peer2.tell(new RegisterCandidateLocal(new Entity(ENTITY_TYPE, ENTITY_ID2)), kit.getRef());
+        kit.expectMsgClass(SuccessReply.class);
+        peer2.tell(new RegisterCandidateLocal(new Entity(ENTITY_TYPE, ENTITY_ID3)), kit.getRef());
+        kit.expectMsgClass(SuccessReply.class);
         commitModification(leader, entityOwnersWithCandidate(ENTITY_TYPE, ENTITY_ID1, peerMemberName2), kit);
         commitModification(leader, entityOwnersWithCandidate(ENTITY_TYPE, ENTITY_ID2, peerMemberName2), kit);
         commitModification(leader, entityOwnersWithCandidate(ENTITY_TYPE, ENTITY_ID3, peerMemberName2), kit);
@@ -559,9 +585,6 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
         // Kill the local leader and elect peer2 the leader. This should cause a new owner to be selected for
         // the entities (1 and 3) previously owned by the local leader member.
 
-        peer2.tell(new PeerAddressResolved(peerId1.toString(), peer1.path().toString()), ActorRef.noSender());
-        peer2.tell(new PeerUp(LOCAL_MEMBER_NAME, leaderId.toString()), ActorRef.noSender());
-        peer2.tell(new PeerUp(peerMemberName1, peerId1.toString()), ActorRef.noSender());
 
         leader.tell(PoisonPill.getInstance(), ActorRef.noSender());
         peer2.tell(new PeerDown(LOCAL_MEMBER_NAME, leaderId.toString()), ActorRef.noSender());
@@ -574,6 +597,59 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
         verifyOwner(peer2, ENTITY_TYPE, ENTITY_ID2, peerMemberName2);
         verifyOwner(peer2, ENTITY_TYPE, ENTITY_ID1, peerMemberName2);
     }
+
+    @Test
+    public void testCandidateRemovedWhenCandidateNotRegisteredLocally() throws Exception {
+        ShardTestKit kit = new ShardTestKit(getSystem());
+
+        dataStoreContextBuilder.shardHeartbeatIntervalInMillis(500).shardElectionTimeoutFactor(10000);
+
+        String peerMemberName1 = "peerMember1";
+        String peerMemberName2 = "peerMember2";
+
+        ShardIdentifier leaderId = newShardId(LOCAL_MEMBER_NAME);
+        ShardIdentifier peerId1 = newShardId(peerMemberName1);
+        ShardIdentifier peerId2 = newShardId(peerMemberName2);
+
+        TestActorRef<EntityOwnershipShard> peer1 = actorFactory.createTestActor(newShardProps(peerId1,
+                ImmutableMap.<String, String>builder().put(leaderId.toString(), "").put(peerId2.toString(), "").build(),
+                peerMemberName1, EntityOwnerSelectionStrategyConfig.newBuilder().build()).withDispatcher(Dispatchers.DefaultDispatcherId()), peerId1.toString());
+
+        TestActorRef<EntityOwnershipShard> peer2 = actorFactory.createTestActor(newShardProps(peerId2,
+                ImmutableMap.<String, String>builder().put(leaderId.toString(), "").put(peerId1.toString(), "").build(),
+                peerMemberName2, EntityOwnerSelectionStrategyConfig.newBuilder().build()).withDispatcher(Dispatchers.DefaultDispatcherId()), peerId2.toString());
+
+        TestActorRef<EntityOwnershipShard> leader = actorFactory.createTestActor(newShardProps(leaderId,
+                ImmutableMap.<String, String>builder().put(peerId1.toString(), peer1.path().toString()).
+                        put(peerId2.toString(), peer2.path().toString()).build(), LOCAL_MEMBER_NAME, EntityOwnerSelectionStrategyConfig.newBuilder().build()).
+                withDispatcher(Dispatchers.DefaultDispatcherId()), leaderId.toString());
+        leader.tell(new ElectionTimeout(), leader);
+
+        kit.waitUntilLeader(leader);
+
+        peer2.tell(new PeerAddressResolved(peerId1.toString(), peer1.path().toString()), ActorRef.noSender());
+        peer2.tell(new PeerAddressResolved(leaderId.toString(), leader.path().toString()), ActorRef.noSender());
+        peer1.tell(new PeerAddressResolved(peerId2.toString(), peer2.path().toString()), ActorRef.noSender());
+        peer1.tell(new PeerAddressResolved(leaderId.toString(), leader.path().toString()), ActorRef.noSender());
+
+        leader.tell(new RegisterCandidateLocal(new Entity(ENTITY_TYPE, ENTITY_ID1)), kit.getRef());
+        kit.expectMsgClass(SuccessReply.class);
+        verifyCommittedEntityCandidate(leader, ENTITY_TYPE, ENTITY_ID1, LOCAL_MEMBER_NAME);
+
+        peer2.tell(new RegisterCandidateLocal(new Entity(ENTITY_TYPE, ENTITY_ID1)), kit.getRef());
+        kit.expectMsgClass(SuccessReply.class);
+        commitModification(leader, entityOwnersWithCandidate(ENTITY_TYPE, ENTITY_ID1, peerMemberName2), kit);
+        verifyCommittedEntityCandidate(leader, ENTITY_TYPE, ENTITY_ID1, peerMemberName2);
+
+        // Try adding  peerMemberName1 as candidate without registering locally
+        commitModification(leader, entityOwnersWithCandidate(ENTITY_TYPE, ENTITY_ID1, peerMemberName1), kit);
+
+        verifyOwner(leader, ENTITY_TYPE, ENTITY_ID1, LOCAL_MEMBER_NAME);
+
+        // confirm peerMemberName1 is not candidate as was not registered locally
+        verifyNoEntityCandidate(leader, ENTITY_TYPE, ENTITY_ID1, peerMemberName1);
+    }
+
 
     @Test
     public void testLocalCandidateRemovedWithCandidateRegistered() throws Exception {

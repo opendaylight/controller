@@ -122,13 +122,13 @@ public class AbstractEntityOwnershipTest extends AbstractActorTest {
         Stopwatch sw = Stopwatch.createStarted();
         while(sw.elapsed(TimeUnit.MILLISECONDS) <= 5000) {
             try {
+                Uninterruptibles.sleepUninterruptibly(100, TimeUnit.MILLISECONDS);
                 NormalizedNode<?, ?> node = reader.apply(entityPath);
                 Assert.assertNotNull("Owner was not set for entityId: " + entityId, node);
                 Assert.assertEquals("Entity owner", expected, node.getValue().toString());
                 return;
             } catch(AssertionError e) {
                 lastError = e;
-                Uninterruptibles.sleepUninterruptibly(100, TimeUnit.MILLISECONDS);
             }
         }
 
