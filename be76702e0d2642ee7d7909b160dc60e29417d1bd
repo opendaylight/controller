@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a4c51b2_22f3ca74",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/EntityOwnershipListenerSupport.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-03-29T13:24:06Z",
+      "side": 1,
+      "message": "This doesn\u0027t need to be volatile since its part of the internal shard state.",
+      "revId": "be76702e0d2642ee7d7909b160dc60e29417d1bd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a4c51b2_02aa0e19",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/EntityOwnershipShard.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 269,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-03-29T13:24:06Z",
+      "side": 1,
+      "message": "Should we be paranoid here and throw ISE? That would get propagated to akka which would cause the actor to restart if we ever added a new raft state and forgot about this code. Perhaps we should print a warning and return false to be safe.",
+      "revId": "be76702e0d2642ee7d7909b160dc60e29417d1bd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a4c51b2_42eed68c",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/EntityOwnershipShard.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 310,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-03-29T13:24:06Z",
+      "side": 1,
+      "message": "persistenceId() should be the first format arg.",
+      "revId": "be76702e0d2642ee7d7909b160dc60e29417d1bd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
