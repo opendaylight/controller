@@ -24,7 +24,9 @@
   <!-- Distributed Config Datastore -->
 
   <bean id="datastoreSnapshotRestore" class="org.opendaylight.controller.cluster.datastore.DatastoreSnapshotRestore"
-          factory-method="instance" />
+          factory-method="instance">
+    <argument value="./clustered-datastore-restore"/>
+  </bean>
 
   <bean id="configDatastoreContext" class="org.opendaylight.controller.config.yang.config.distributed_datastore_provider.DistributedConfigDataStoreProviderModule"
           factory-method="newDatastoreContext" />
