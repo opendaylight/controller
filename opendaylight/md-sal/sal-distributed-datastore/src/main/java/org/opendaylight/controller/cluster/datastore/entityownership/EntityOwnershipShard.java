@@ -333,6 +333,16 @@ class EntityOwnershipShard extends Shard {
 
     private void onCandidateAdded(CandidateAdded message) {
         if(!isLeader()){
+            Entity entity = createEntity(message.getEntityPath());
+            if(!listenerSupport.hasCandidateForEntity(entity) && localMemberName.equals(message.getNewCandidate())) {
+                // This means CandidateAdded is received for local candidate before any local registration happens.
+                // This will happen only on a restart of a local node. So remove this candidate for now, it will be
+                // added back when a local registration is received again.
+                LOG.debug("Remove Candidate {} for {} as not registered as candidate yet locally.",
+                        message.getNewCandidate(), entity.getId());
+                YangInstanceIdentifier candidatePath = candidatePath(entity.getType(), entity.getId(), localMemberName);
+                commitCoordinator.commitModification(new DeleteModification(candidatePath), this);
+            }
             return;
         }
 
