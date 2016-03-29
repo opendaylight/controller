@@ -56,8 +56,8 @@ public abstract class AbstractConfigTestBase {
      * Default values for karaf distro type, groupId, and artifactId
      */
     private static final String KARAF_DISTRO_TYPE = "zip";
-    private static final String KARAF_DISTRO_ARTIFACTID = "apache-karaf";
-    private static final String KARAF_DISTRO_GROUPID = "org.apache.karaf";
+    private static final String KARAF_DISTRO_ARTIFACTID = "opendaylight-karaf-empty";
+    private static final String KARAF_DISTRO_GROUPID = "org.opendaylight.controller";
 
     /*
      * Property names to override defaults for karaf distro artifactId, groupId, version, and type
@@ -137,6 +137,7 @@ public abstract class AbstractConfigTestBase {
                         .unpackDirectory(new File(PAX_EXAM_UNPACK_DIRECTORY))
                         .useDeployFolder(false),
                 when(Boolean.getBoolean(KEEP_UNPACK_DIRECTORY_PROP)).useOptions(keepRuntimeFolder()),
+                keepRuntimeFolder(),
                 features(getFeatureRepo(), getFeatureName()),
                 getLoggingOption(),
                 mvnLocalRepoOption(),
