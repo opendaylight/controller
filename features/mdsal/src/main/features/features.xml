@@ -69,9 +69,9 @@
     </feature>
     <feature name ='odl-mdsal-clustering-commons' version='${project.version}'>
         <feature version='${project.version}'>odl-mdsal-broker-local</feature>
-        <feature version='${akka.version}'>odl-akka-system</feature>
-        <feature version='${akka.version}'>odl-akka-persistence</feature>
-        <feature version='${akka.version}'>odl-akka-clustering</feature>
+        <feature version='[2.4.1,2.5.0)'>odl-akka-system</feature>
+        <feature version='[2.4.1,2.5.0)'>odl-akka-persistence</feature>
+        <feature version='[2.4.1,2.5.0)'>odl-akka-clustering</feature>
         <bundle>mvn:org.opendaylight.controller/sal-clustering-commons/{{VERSION}}</bundle>
         <bundle>mvn:org.opendaylight.controller/sal-akka-raft/{{VERSION}}</bundle>
         <bundle>mvn:com.codahale.metrics/metrics-core/3.0.1</bundle>
