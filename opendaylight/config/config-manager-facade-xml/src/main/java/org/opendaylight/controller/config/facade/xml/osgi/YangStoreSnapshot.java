@@ -16,6 +16,7 @@ import com.google.common.collect.Sets;
 import com.google.common.io.ByteStreams;
 import com.google.common.util.concurrent.CheckedFuture;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.ref.SoftReference;
 import java.util.Collections;
 import java.util.HashMap;
@@ -156,7 +157,9 @@ final class YangStoreSnapshot implements YangStoreContext, EnumResolver {
 
         try {
             final YangTextSchemaSource yangTextSchemaSource = source.checkedGet();
-            return new String(ByteStreams.toByteArray(yangTextSchemaSource.openStream()), Charsets.UTF_8);
+            try(InputStream inStream = yangTextSchemaSource.openStream()) {
+                return new String(ByteStreams.toByteArray(inStream), Charsets.UTF_8);
+            }
         } catch (SchemaSourceException | IOException e) {
             LOG.warn("Unable to provide source for {}", moduleIdentifier, e);
             throw new IllegalArgumentException("Unable to provide source for " + moduleIdentifier, e);
