@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a4c51b2_e5a9ec7c",
+        "filename": "opendaylight/md-sal/mdsal-cli/src/main/java/org/opendaylight/mdsal/cli/StatusInfo.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-03-29T15:49:07Z",
+      "side": 1,
+      "message": "this looks like we\u0027d want some sort of templating language...",
+      "revId": "f3db350c02fb2a4d094d37f0c88ea3c8b97acbe0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
