@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a4c51b2_ebed3df1",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/entityownership/AbstractEntityOwnershipTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 1681
+      },
+      "writtenOn": "2016-03-29T23:37:54Z",
+      "side": 1,
+      "message": "This doesn\u0027t seem reasonable change, however without this the test was not passing. Only after this the \"verifyOwner\" calls in EntityOwnershipShardTest started passing. i.e. a delay before the read makes it more predictable in reading the changed data. Else it keeps reading the older data.",
+      "revId": "28488e2ab645e4b25e0fc9d8e2c30427720aab2d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a4c51b2_4bba71e2",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/entityownership/EntityOwnershipShardTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 520,
+      "author": {
+        "id": 1681
+      },
+      "writtenOn": "2016-03-29T23:37:54Z",
+      "side": 1,
+      "message": "This is needed due to new change in \"EntityOwnershipShard\" , i.e. local registration is necessary for candidate, else it gets removed.",
+      "revId": "28488e2ab645e4b25e0fc9d8e2c30427720aab2d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
