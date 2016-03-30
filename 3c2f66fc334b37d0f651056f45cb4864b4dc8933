@@ -16,6 +16,24 @@
       "revId": "3c2f66fc334b37d0f651056f45cb4864b4dc8933",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a4c51b2_63ddd114",
+        "filename": "opendaylight/config/config-it-base/pom.xml",
+        "patchSetId": 7
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-03-30T13:22:27Z",
+      "side": 1,
+      "message": "Yes - done",
+      "parentUuid": "3a4c51b2_b669d827",
+      "revId": "3c2f66fc334b37d0f651056f45cb4864b4dc8933",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
