@@ -12,8 +12,12 @@ import akka.actor.ActorSelection;
 import akka.actor.Status;
 import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-final class ShardFollowerBehavior extends ShardBehavior {
+final class ShardFollowerBehavior extends AbstractForwardingShardBehavior {
+    private static final Logger LOG = LoggerFactory.getLogger(ShardFollowerBehavior.class);
+
     ShardFollowerBehavior(final Shard shard, final RaftActorBehavior delegate) {
         super(shard, delegate);
     }

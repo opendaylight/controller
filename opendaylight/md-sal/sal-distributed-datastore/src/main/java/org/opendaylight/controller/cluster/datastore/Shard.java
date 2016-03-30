@@ -36,7 +36,6 @@ import org.opendaylight.controller.cluster.datastore.messages.ActorInitialized;
 import org.opendaylight.controller.cluster.datastore.messages.BatchedModifications;
 import org.opendaylight.controller.cluster.datastore.messages.CanCommitTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransactionChain;
-import org.opendaylight.controller.cluster.datastore.messages.CommitTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CommitTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.DatastoreSnapshot;
 import org.opendaylight.controller.cluster.datastore.messages.DatastoreSnapshot.ShardSnapshot;
@@ -222,8 +221,6 @@ public class Shard extends RaftActor {
                 handleReadyLocalTransaction((ReadyLocalTransaction)message);
             } else if (CanCommitTransaction.isSerializedType(message)) {
                 handleCanCommitTransaction(CanCommitTransaction.fromSerializable(message));
-            } else if (CommitTransaction.isSerializedType(message)) {
-                handleCommitTransaction(CommitTransaction.fromSerializable(message));
             } else if (AbortTransaction.isSerializedType(message)) {
                 handleAbortTransaction(AbortTransaction.fromSerializable(message));
             } else if (CloseTransactionChain.isSerializedType(message)) {
@@ -320,20 +317,13 @@ public class Shard extends RaftActor {
         }
     }
 
-    private void handleCommitTransaction(final CommitTransaction commit) {
-        if (isLeader()) {
-            if(!commitCoordinator.handleCommit(commit.getTransactionID(), getSender(), this)) {
-                shardMBean.incrementFailedTransactionsCount();
-            }
-        } else {
-            ActorSelection leader = getLeader();
-            if (leader == null) {
-                messageRetrySupport.addMessageToRetry(commit, getSender(),
-                        "Could not commit transaction " + commit.getTransactionID());
-            } else {
-                LOG.debug("{}: Forwarding CommitTransaction to leader {}", persistenceId(), leader);
-                leader.forward(commit, getContext());
-            }
+    void retryMessage(final ActorRef sender, final Object message, final String failureMessage) {
+        messageRetrySupport.addMessageToRetry(message, sender, failureMessage);
+    }
+
+    void commitTransaction(final String transactionId, final ActorRef sender) {
+        if (!commitCoordinator.handleCommit(transactionId, sender, this)) {
+            shardMBean.incrementFailedTransactionsCount();
         }
     }
 
