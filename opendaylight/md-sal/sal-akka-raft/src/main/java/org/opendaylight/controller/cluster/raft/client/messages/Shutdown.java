@@ -11,7 +11,8 @@ import java.io.Serializable;
 
 /**
  * Message sent to a raft actor to shutdown gracefully. If it's the leader it will transfer leadership to a
- * follower. As its last act, the actor self-destructs via a PoisonPill.
+ * follower. As its last act, the actor self-destructs via a PoisonPill. This message should only be used with
+ * Patterns.gracefulStop().
  *
  * @author Thomas Pantelis
  */
