@@ -14,14 +14,19 @@ import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfi
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.features;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.karafDistributionConfiguration;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.keepRuntimeFolder;
+
 import com.google.common.base.Stopwatch;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.management.ManagementFactory;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import javax.management.ObjectName;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.internal.AssumptionViolatedException;
@@ -87,9 +92,18 @@ public abstract class AbstractConfigTestBase {
 
     public Option getLoggingOption() {
         Option option = editConfigurationFilePut(ORG_OPS4J_PAX_LOGGING_CFG,
-                        logConfiguration(AbstractConfigTestBase.class),
-                        LogLevel.INFO.name());
+                logConfiguration(AbstractConfigTestBase.class),
+                LogLevel.INFO.name());
         return option;
+    }
+
+    /**
+     * Override this method to provide more options to config
+     *
+     * @return An array of additional config options
+     */
+    protected Option[] getAdditionalOptions() {
+        return null;
     }
 
     public String logConfiguration(Class<?> klazz) {
@@ -97,10 +111,10 @@ public abstract class AbstractConfigTestBase {
     }
 
     public String getKarafDistro() {
-        String groupId = System.getProperty(KARAF_DISTRO_GROUPID_PROP,KARAF_DISTRO_GROUPID);
-        String artifactId = System.getProperty(KARAF_DISTRO_ARTIFACTID_PROP,KARAF_DISTRO_ARTIFACTID);
+        String groupId = System.getProperty(KARAF_DISTRO_GROUPID_PROP, KARAF_DISTRO_GROUPID);
+        String artifactId = System.getProperty(KARAF_DISTRO_ARTIFACTID_PROP, KARAF_DISTRO_ARTIFACTID);
         String version = System.getProperty(KARAF_DISTRO_VERSION_PROP);
-        String type = System.getProperty(KARAF_DISTRO_TYPE_PROP,KARAF_DISTRO_TYPE);
+        String type = System.getProperty(KARAF_DISTRO_TYPE_PROP, KARAF_DISTRO_TYPE);
         if (version == null) {
             // We use a properties file to retrieve ${karaf.version}, instead of .versionAsInProject()
             // This avoids forcing all users to depend on Karaf in their POMs
@@ -130,36 +144,41 @@ public abstract class AbstractConfigTestBase {
 
     @Configuration
     public Option[] config() {
-        Option[] options = new Option[] {
-                when(Boolean.getBoolean(KARAF_DEBUG_PROP))
-                        .useOptions(KarafDistributionOption.debugConfiguration(KARAF_DEBUG_PORT, true)),
-                karafDistributionConfiguration().frameworkUrl(getKarafDistro())
-                        .unpackDirectory(new File(PAX_EXAM_UNPACK_DIRECTORY))
-                        .useDeployFolder(false),
-                when(Boolean.getBoolean(KEEP_UNPACK_DIRECTORY_PROP)).useOptions(keepRuntimeFolder()),
-                features(getFeatureRepo(), getFeatureName()),
-                getLoggingOption(),
-                mvnLocalRepoOption(),
-                editConfigurationFilePut(ETC_ORG_OPS4J_PAX_LOGGING_CFG, "log4j.rootLogger", "INFO, stdout, osgi:*")};
-        return options;
+        List<Option> options = new ArrayList<>();
+        options.add(when(Boolean.getBoolean(KARAF_DEBUG_PROP))
+                .useOptions(KarafDistributionOption.debugConfiguration(KARAF_DEBUG_PORT, true)));
+        options.add(karafDistributionConfiguration().frameworkUrl(getKarafDistro())
+                .unpackDirectory(new File(PAX_EXAM_UNPACK_DIRECTORY))
+                .useDeployFolder(false));
+        options.add(when(Boolean.getBoolean(KEEP_UNPACK_DIRECTORY_PROP)).useOptions(keepRuntimeFolder()));
+        options.add(features(getFeatureRepo(), getFeatureName()));
+        options.add(getLoggingOption());
+        options.add(mvnLocalRepoOption());
+        options.add(editConfigurationFilePut(ETC_ORG_OPS4J_PAX_LOGGING_CFG, "log4j.rootLogger", "INFO, stdout, osgi:*"));
+        // if there is any additional option, add them here
+        Option[] additionalOpts = getAdditionalOptions();
+        if (additionalOpts != null && additionalOpts.length > 0)
+            for (Option opt : additionalOpts)
+                options.add(opt);
+        return options.toArray(new Option[0]);
     }
 
     @Before
     public void setup() throws Exception {
         LOG.info("Module: {} Instance: {} attempting to configure.",
-                getModuleName(),getInstanceName());
+                getModuleName(), getInstanceName());
         Stopwatch stopWatch = Stopwatch.createStarted();
         ObjectName objectName = null;
-        for(int i = 0;i<MODULE_TIMEOUT_MILLIS;i++) {
+        for (int i = 0; i < MODULE_TIMEOUT_MILLIS; i++) {
             try {
                 ConfigRegistry configRegistryClient = new ConfigRegistryJMXClient(ManagementFactory
                         .getPlatformMBeanServer());
                 objectName = configRegistryClient.lookupConfigBean(getModuleName(), getInstanceName());
                 LOG.info("Module: {} Instance: {} ObjectName: {}.",
-                        getModuleName(),getInstanceName(),objectName);
+                        getModuleName(), getInstanceName(), objectName);
                 break;
             } catch (Exception e) {
-                if(i<MODULE_TIMEOUT_MILLIS) {
+                if (i < MODULE_TIMEOUT_MILLIS) {
                     Thread.sleep(1);
                     continue;
                 } else {
@@ -167,12 +186,12 @@ public abstract class AbstractConfigTestBase {
                 }
             }
         }
-        if(objectName != null) {
+        if (objectName != null) {
             LOG.info("Module: {} Instance: {} configured after {} ms",
-                getModuleName(),getInstanceName(),
-                stopWatch.elapsed(TimeUnit.MILLISECONDS));
+                    getModuleName(), getInstanceName(),
+                    stopWatch.elapsed(TimeUnit.MILLISECONDS));
         } else {
-            throw new RuntimeException("NOT FOUND Module: " +getModuleName() + " Instance: " + getInstanceName() +
+            throw new RuntimeException("NOT FOUND Module: " + getModuleName() + " Instance: " + getInstanceName() +
                     " configured after " + stopWatch.elapsed(TimeUnit.MILLISECONDS) + " ms");
         }
     }
