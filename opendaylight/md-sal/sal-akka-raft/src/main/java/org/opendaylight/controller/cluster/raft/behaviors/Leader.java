@@ -52,12 +52,11 @@ public class Leader extends AbstractLeader {
     @VisibleForTesting
     static final Object ISOLATED_LEADER_CHECK = new Object();
 
-    private final Stopwatch isolatedLeaderCheck;
+    private final Stopwatch isolatedLeaderCheck = Stopwatch.createStarted();
     private @Nullable LeadershipTransferContext leadershipTransferContext;
 
     public Leader(RaftActorContext context) {
         super(context, RaftState.Leader);
-        isolatedLeaderCheck = Stopwatch.createStarted();
     }
 
     @Override
