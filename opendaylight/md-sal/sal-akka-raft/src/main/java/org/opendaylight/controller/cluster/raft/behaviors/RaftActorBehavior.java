@@ -74,4 +74,7 @@ public interface RaftActorBehavior extends AutoCloseable{
      * @return The new behavior
      */
     RaftActorBehavior switchBehavior(RaftActorBehavior behavior);
+
+    @Override
+    void close();
 }

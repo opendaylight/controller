@@ -192,7 +192,8 @@ public class Candidate extends AbstractRaftActorBehavior {
         }
     }
 
-    @Override public void close() throws Exception {
+    @Override
+    public void close() {
         stopElection();
     }
 }
