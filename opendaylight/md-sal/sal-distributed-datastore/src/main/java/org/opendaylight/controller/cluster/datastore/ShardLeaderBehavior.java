@@ -12,6 +12,7 @@ import akka.serialization.Serialization;
 import com.google.common.base.Preconditions;
 import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardTransactionIdentifier;
+import org.opendaylight.controller.cluster.datastore.messages.CommitTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransactionReply;
 import org.opendaylight.controller.cluster.raft.RaftState;
@@ -49,6 +50,12 @@ final class ShardLeaderBehavior extends ShardBehavior {
     @Override
     ShardLeaderBehavior becomeLeader() {
         return nextLeader(RaftState.Leader);
+    }
+
+
+    @Override
+    void handleCommitTransaction(final ActorRef sender, final CommitTransaction message) {
+        getShard().commitTransaction(message.getTransactionID(), sender);
     }
 
     @Override
@@ -96,5 +103,4 @@ final class ShardLeaderBehavior extends ShardBehavior {
 
         return getShard().createTypedTransactionActor(type, transactionId, transactionChainId);
     }
-
 }
