@@ -770,7 +770,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         stopHeartBeat();
     }
 
