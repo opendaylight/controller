@@ -10,7 +10,7 @@ package org.opendaylight.controller.cluster.datastore;
 import akka.actor.ActorRef;
 import org.opendaylight.controller.cluster.raft.RaftState;
 
-final class ShardCandidateBehavior extends ShardBehavior {
+final class ShardCandidateBehavior extends AbstractForwardingShardBehavior {
     ShardCandidateBehavior(final Shard shard) {
         super(shard);
     }

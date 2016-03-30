@@ -34,9 +34,7 @@ import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStats
 import org.opendaylight.controller.cluster.datastore.messages.AbortTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.ActorInitialized;
 import org.opendaylight.controller.cluster.datastore.messages.BatchedModifications;
-import org.opendaylight.controller.cluster.datastore.messages.CanCommitTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransactionChain;
-import org.opendaylight.controller.cluster.datastore.messages.CommitTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CommitTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.DatastoreSnapshot;
 import org.opendaylight.controller.cluster.datastore.messages.DatastoreSnapshot.ShardSnapshot;
@@ -217,10 +215,6 @@ public class Shard extends RaftActor {
                 handleForwardedReadyTransaction((ForwardedReadyTransaction) message);
             } else if (message instanceof ReadyLocalTransaction) {
                 handleReadyLocalTransaction((ReadyLocalTransaction)message);
-            } else if (CanCommitTransaction.isSerializedType(message)) {
-                handleCanCommitTransaction(CanCommitTransaction.fromSerializable(message));
-            } else if (CommitTransaction.isSerializedType(message)) {
-                handleCommitTransaction(CommitTransaction.fromSerializable(message));
             } else if (AbortTransaction.isSerializedType(message)) {
                 handleAbortTransaction(AbortTransaction.fromSerializable(message));
             } else if (CloseTransactionChain.isSerializedType(message)) {
@@ -317,20 +311,23 @@ public class Shard extends RaftActor {
         }
     }
 
-    private void handleCommitTransaction(final CommitTransaction commit) {
-        if (isLeader()) {
-            if(!commitCoordinator.handleCommit(commit.getTransactionID(), getSender(), this)) {
-                shardMBean.incrementFailedTransactionsCount();
-            }
-        } else {
-            ActorSelection leader = getLeader();
-            if (leader == null) {
-                messageRetrySupport.addMessageToRetry(commit, getSender(),
-                        "Could not commit transaction " + commit.getTransactionID());
-            } else {
-                LOG.debug("{}: Forwarding CommitTransaction to leader {}", persistenceId(), leader);
-                leader.forward(commit, getContext());
-            }
+    // FIXME: BUG-5626: remove this bridge method
+    @Deprecated
+    void retryMessage(final ActorRef sender, final Object message, final String failureMessage) {
+        messageRetrySupport.addMessageToRetry(message, sender, failureMessage);
+    }
+
+    // FIXME: BUG-5626: remove this bridge method
+    @Deprecated
+    void canCommitTransaction(final String transactionId, final ActorRef sender) {
+        commitCoordinator.handleCanCommit(transactionId, sender, this);
+    }
+
+    // FIXME: BUG-5626: remove this bridge method
+    @Deprecated
+    void commitTransaction(final String transactionId, final ActorRef sender) {
+        if (!commitCoordinator.handleCommit(transactionId, sender, this)) {
+            shardMBean.incrementFailedTransactionsCount();
         }
     }
 
@@ -410,23 +407,6 @@ public class Shard extends RaftActor {
             }
         } else {
             finishCommit(sender, transactionID, cohortEntry);
-        }
-    }
-
-    private void handleCanCommitTransaction(final CanCommitTransaction canCommit) {
-        LOG.debug("{}: Can committing transaction {}", persistenceId(), canCommit.getTransactionID());
-
-        if (isLeader()) {
-            commitCoordinator.handleCanCommit(canCommit.getTransactionID(), getSender(), this);
-        } else {
-            ActorSelection leader = getLeader();
-            if (leader == null) {
-                messageRetrySupport.addMessageToRetry(canCommit, getSender(),
-                        "Could not canCommit transaction " + canCommit.getTransactionID());
-            } else {
-                LOG.debug("{}: Forwarding CanCommitTransaction to leader {}", persistenceId(), leader);
-                leader.forward(canCommit, getContext());
-            }
         }
     }
 
