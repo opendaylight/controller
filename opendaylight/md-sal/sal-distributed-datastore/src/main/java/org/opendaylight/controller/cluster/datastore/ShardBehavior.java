@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorRef;
 import com.google.common.base.Preconditions;
+import org.opendaylight.controller.cluster.datastore.messages.CommitTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransaction;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
@@ -66,6 +67,10 @@ abstract class ShardBehavior {
     }
 
     final ShardBehavior handleMessage(final ActorRef sender, final Object message) {
+        if (CommitTransaction.isSerializedType(message)) {
+            handleCommitTransaction(sender, CommitTransaction.fromSerializable(message));
+            return this;
+        }
         if (CreateTransaction.isSerializedType(message)) {
             handleCreateTransaction(sender, message);
             return this;
@@ -95,5 +100,6 @@ abstract class ShardBehavior {
     abstract ShardFollowerBehavior becomeFollower(RaftActorBehavior raftBehavior);
     abstract ShardLeaderBehavior becomeLeader(RaftActorBehavior raftBehavior);
 
+    abstract void handleCommitTransaction(ActorRef sender, CommitTransaction message);
     abstract void handleCreateTransaction(ActorRef sender, Object message);
 }
