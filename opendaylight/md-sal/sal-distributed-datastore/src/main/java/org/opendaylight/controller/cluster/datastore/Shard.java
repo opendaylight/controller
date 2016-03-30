@@ -244,7 +244,7 @@ public class Shard extends RaftActor {
                 PeerAddressResolved resolved = (PeerAddressResolved) message;
                 setPeerAddress(resolved.getPeerId().toString(),
                         resolved.getPeerAddress());
-            } else if (message.equals(TX_COMMIT_TIMEOUT_CHECK_MESSAGE)) {
+            } else if (TX_COMMIT_TIMEOUT_CHECK_MESSAGE.equals(message)) {
                 commitCoordinator.checkForExpiredTransactions(transactionCommitTimeout, this);
             } else if(message instanceof DatastoreContext) {
                 onDatastoreContext((DatastoreContext)message);
