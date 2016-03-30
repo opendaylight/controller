@@ -610,8 +610,8 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             // but transfer the previous leaderId so it doesn't immediately try to schedule an election. This
             // avoids potential disruption. Otherwise, switch to Follower normally.
             RaftActorBehavior behavior = getCurrentBehavior();
-            if(behavior instanceof Follower) {
-                String previousLeaderId = ((Follower)behavior).getLeaderId();
+            if (behavior != null && behavior.state() == RaftState.Follower) {
+                String previousLeaderId = behavior.getLeaderId();
                 short previousLeaderPayloadVersion = behavior.getLeaderPayloadVersion();
 
                 LOG.debug("{}: Re-initializing to Follower with previous leaderId {}", persistenceId(), previousLeaderId);
