@@ -427,7 +427,7 @@ public class Follower extends AbstractRaftActorBehavior {
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         stopElection();
     }
 
