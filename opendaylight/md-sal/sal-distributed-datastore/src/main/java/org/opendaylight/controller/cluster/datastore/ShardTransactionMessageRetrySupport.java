@@ -23,6 +23,7 @@ import scala.concurrent.duration.FiniteDuration;
  *
  * @author Thomas Pantelis
  */
+// TODO: BUG-5626: integrate this into AbstractForwardingShardBehavior
 class ShardTransactionMessageRetrySupport implements Closeable {
     private static final Logger LOG = LoggerFactory.getLogger(ShardTransactionMessageRetrySupport.class);
 
