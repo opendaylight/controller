@@ -32,6 +32,7 @@ import org.opendaylight.controller.config.api.ConfigRegistry;
 import org.opendaylight.controller.config.util.ConfigRegistryJMXClient;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
+import org.ops4j.pax.exam.OptionUtils;
 import org.ops4j.pax.exam.karaf.options.KarafDistributionOption;
 import org.ops4j.pax.exam.karaf.options.LogLevelOption.LogLevel;
 import org.ops4j.pax.exam.options.MavenArtifactUrlReference;
@@ -92,6 +93,15 @@ public abstract class AbstractConfigTestBase {
         return option;
     }
 
+    /**
+     * Override this method to provide more options to config
+     *
+     * @return An array of additional config options
+     */
+    protected Option[] getAdditionalOptions() {
+        return null;
+    }
+
     public String logConfiguration(Class<?> klazz) {
         return "log4j.logger." + klazz.getPackage().getName();
     }
@@ -141,7 +151,7 @@ public abstract class AbstractConfigTestBase {
                 getLoggingOption(),
                 mvnLocalRepoOption(),
                 editConfigurationFilePut(ETC_ORG_OPS4J_PAX_LOGGING_CFG, "log4j.rootLogger", "INFO, stdout, osgi:*")};
-        return options;
+        return OptionUtils.combine(options, getAdditionalOptions());
     }
 
     @Before
