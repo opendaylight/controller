@@ -274,15 +274,15 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         LOG.debug("{}: Initiating leader transfer", persistenceId());
 
         if(leadershipTransferInProgress == null) {
-            leadershipTransferInProgress = new RaftActorLeadershipTransferCohort(this, getSender());
+            leadershipTransferInProgress = new RaftActorLeadershipTransferCohort(this);
             leadershipTransferInProgress.addOnComplete(new RaftActorLeadershipTransferCohort.OnComplete() {
                 @Override
-                public void onSuccess(ActorRef raftActorRef, ActorRef replyTo) {
+                public void onSuccess(ActorRef raftActorRef) {
                     leadershipTransferInProgress = null;
                 }
 
                 @Override
-                public void onFailure(ActorRef raftActorRef, ActorRef replyTo) {
+                public void onFailure(ActorRef raftActorRef) {
                     leadershipTransferInProgress = null;
                 }
             });
@@ -314,13 +314,13 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         if (context.hasFollowers()) {
             initiateLeadershipTransfer(new RaftActorLeadershipTransferCohort.OnComplete() {
                 @Override
-                public void onSuccess(ActorRef raftActorRef, ActorRef replyTo) {
+                public void onSuccess(ActorRef raftActorRef) {
                     LOG.debug("{}: leader transfer succeeded - sending PoisonPill", persistenceId());
                     raftActorRef.tell(PoisonPill.getInstance(), raftActorRef);
                 }
 
                 @Override
-                public void onFailure(ActorRef raftActorRef, ActorRef replyTo) {
+                public void onFailure(ActorRef raftActorRef) {
                     LOG.debug("{}: leader transfer failed - sending PoisonPill", persistenceId());
                     raftActorRef.tell(PoisonPill.getInstance(), raftActorRef);
                 }
@@ -786,13 +786,13 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         if (isLeader()) {
             initiateLeadershipTransfer(new RaftActorLeadershipTransferCohort.OnComplete() {
                 @Override
-                public void onSuccess(ActorRef raftActorRef, ActorRef replyTo) {
+                public void onSuccess(ActorRef raftActorRef) {
                     LOG.debug("{}: leader transfer succeeded after change to non-voting", persistenceId());
                     ensureFollowerState();
                 }
 
                 @Override
-                public void onFailure(ActorRef raftActorRef, ActorRef replyTo) {
+                public void onFailure(ActorRef raftActorRef) {
                     LOG.debug("{}: leader transfer failed after change to non-voting", persistenceId());
                     ensureFollowerState();
                 }

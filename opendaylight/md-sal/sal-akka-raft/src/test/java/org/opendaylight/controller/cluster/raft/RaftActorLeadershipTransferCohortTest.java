@@ -41,7 +41,7 @@ public class RaftActorLeadershipTransferCohortTest extends AbstractActorTest {
         mockRaftActor = factory.<MockRaftActor>createTestActor(MockRaftActor.builder().id(persistenceId).config(
                 config).pauseLeaderFunction(pauseLeaderFunction).props().withDispatcher(Dispatchers.DefaultDispatcherId()),
                 persistenceId).underlyingActor();
-        cohort = new RaftActorLeadershipTransferCohort(mockRaftActor, null);
+        cohort = new RaftActorLeadershipTransferCohort(mockRaftActor);
         cohort.addOnComplete(onComplete);
         mockRaftActor.waitForInitializeBehaviorComplete();
     }
@@ -52,15 +52,15 @@ public class RaftActorLeadershipTransferCohortTest extends AbstractActorTest {
         cohort.setNewLeaderTimeoutInMillis(20000);
 
         cohort.onNewLeader("new-leader");
-        verify(onComplete, never()).onSuccess(mockRaftActor.self(), null);
+        verify(onComplete, never()).onSuccess(mockRaftActor.self());
 
         cohort.transferComplete();
 
         cohort.onNewLeader(null);
-        verify(onComplete, never()).onSuccess(mockRaftActor.self(), null);
+        verify(onComplete, never()).onSuccess(mockRaftActor.self());
 
         cohort.onNewLeader("new-leader");
-        verify(onComplete).onSuccess(mockRaftActor.self(), null);
+        verify(onComplete).onSuccess(mockRaftActor.self());
     }
 
     @Test
@@ -68,7 +68,7 @@ public class RaftActorLeadershipTransferCohortTest extends AbstractActorTest {
         setup("testNewLeaderTimeout");
         cohort.setNewLeaderTimeoutInMillis(200);
         cohort.transferComplete();
-        verify(onComplete, timeout(3000)).onSuccess(mockRaftActor.self(), null);
+        verify(onComplete, timeout(3000)).onSuccess(mockRaftActor.self());
     }
 
     @Test
@@ -76,14 +76,14 @@ public class RaftActorLeadershipTransferCohortTest extends AbstractActorTest {
         config.setCustomRaftPolicyImplementationClass(DisableElectionsRaftPolicy.class.getName());
         setup("testNotLeaderOnDoTransfer");
         cohort.doTransfer();
-        verify(onComplete).onSuccess(mockRaftActor.self(), null);
+        verify(onComplete).onSuccess(mockRaftActor.self());
     }
 
     @Test
     public void testAbortTransfer() {
         setup("testAbortTransfer");
         cohort.abortTransfer();
-        verify(onComplete).onFailure(mockRaftActor.self(), null);
+        verify(onComplete).onFailure(mockRaftActor.self());
     }
 
     @Test
@@ -97,6 +97,6 @@ public class RaftActorLeadershipTransferCohortTest extends AbstractActorTest {
 
         setup("testPauseLeaderTimeout");
         cohort.init();
-        verify(onComplete, timeout(2000)).onFailure(mockRaftActor.self(), null);
+        verify(onComplete, timeout(2000)).onFailure(mockRaftActor.self());
     }
 }

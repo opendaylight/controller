@@ -52,16 +52,14 @@ public class RaftActorLeadershipTransferCohort {
     private static final Logger LOG = LoggerFactory.getLogger(RaftActorLeadershipTransferCohort.class);
 
     private final RaftActor raftActor;
-    private final ActorRef replyTo;
     private Cancellable newLeaderTimer;
     private final List<OnComplete> onCompleteCallbacks = new ArrayList<>();
     private long newLeaderTimeoutInMillis = 2000;
     private final Stopwatch transferTimer = Stopwatch.createUnstarted();
     private boolean isTransferring;
 
-    RaftActorLeadershipTransferCohort(RaftActor raftActor, ActorRef replyTo) {
+    RaftActorLeadershipTransferCohort(RaftActor raftActor) {
         this.raftActor = raftActor;
-        this.replyTo = replyTo;
     }
 
     void init() {
@@ -170,9 +168,9 @@ public class RaftActorLeadershipTransferCohort {
 
         for(OnComplete onComplete: onCompleteCallbacks) {
             if(success) {
-                onComplete.onSuccess(raftActor.self(), replyTo);
+                onComplete.onSuccess(raftActor.self());
             } else {
-                onComplete.onFailure(raftActor.self(), replyTo);
+                onComplete.onFailure(raftActor.self());
             }
         }
     }
@@ -191,7 +189,7 @@ public class RaftActorLeadershipTransferCohort {
     }
 
     interface OnComplete {
-        void onSuccess(ActorRef raftActorRef, ActorRef replyTo);
-        void onFailure(ActorRef raftActorRef, ActorRef replyTo);
+        void onSuccess(ActorRef raftActorRef);
+        void onFailure(ActorRef raftActorRef);
     }
 }
