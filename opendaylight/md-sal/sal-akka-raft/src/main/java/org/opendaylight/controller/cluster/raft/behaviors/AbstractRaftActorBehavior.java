@@ -109,6 +109,11 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
         return replicatedToAllIndex;
     }
 
+    @Override
+    public final AbstractRaftActorBehavior getBaseBehavior() {
+        return this;
+    }
+
     /**
      * Derived classes should not directly handle AppendEntries messages it
      * should let the base class handle it first. Once the base class handles

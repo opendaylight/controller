@@ -407,8 +407,9 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             builder.lastLogTerm(lastLogEntry.getTerm());
         }
 
-        if(getCurrentBehavior() instanceof AbstractLeader) {
-            AbstractLeader leader = (AbstractLeader)getCurrentBehavior();
+        final AbstractRaftActorBehavior baseBehavior = currentBehavior.getBaseBehavior();
+        if (baseBehavior instanceof AbstractLeader) {
+            AbstractLeader leader = (AbstractLeader)baseBehavior;
             Collection<String> followerIds = leader.getFollowerIds();
             List<FollowerInfo> followerInfoList = Lists.newArrayListWithCapacity(followerIds.size());
             for(String id: followerIds) {

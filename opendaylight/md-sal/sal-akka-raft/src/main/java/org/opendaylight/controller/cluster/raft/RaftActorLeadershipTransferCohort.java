@@ -102,9 +102,9 @@ public class RaftActorLeadershipTransferCohort {
     void doTransfer() {
         RaftActorBehavior behavior = raftActor.getCurrentBehavior();
         // Sanity check...
-        if(behavior instanceof Leader) {
+        if (behavior != null && behavior.state() == RaftState.Leader) {
             isTransferring = true;
-            ((Leader)behavior).transferLeadership(this);
+            ((Leader)behavior.getBaseBehavior()).transferLeadership(this);
         } else {
             LOG.debug("{}: No longer the leader - skipping transfer", raftActor.persistenceId());
             finish(true);

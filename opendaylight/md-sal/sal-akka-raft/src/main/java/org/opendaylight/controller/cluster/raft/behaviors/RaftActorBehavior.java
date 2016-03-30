@@ -75,6 +75,13 @@ public interface RaftActorBehavior extends AutoCloseable{
      */
     RaftActorBehavior switchBehavior(RaftActorBehavior behavior);
 
+    /**
+     * Return the base (root) actor behavior. Implementations should forward this request towards any backing
+     * behavior they have received, as the returned object's identity will be examined by the implementation for
+     * well-know classes from this package.
+     */
+    AbstractRaftActorBehavior getBaseBehavior();
+
     @Override
     void close();
 }

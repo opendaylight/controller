@@ -11,6 +11,7 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.Cancellable;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Verify;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -25,6 +26,7 @@ import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
 import org.opendaylight.controller.cluster.raft.base.messages.SnapshotComplete;
 import org.opendaylight.controller.cluster.raft.behaviors.AbstractLeader;
+import org.opendaylight.controller.cluster.raft.behaviors.AbstractRaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.messages.AddServer;
 import org.opendaylight.controller.cluster.raft.messages.AddServerReply;
 import org.opendaylight.controller.cluster.raft.messages.ChangeServersVotingStatus;
@@ -86,6 +88,12 @@ class RaftActorServerConfigurationSupport {
         } else {
             return false;
         }
+    }
+
+    private AbstractLeader getLeaderBehavior() {
+        final AbstractRaftActorBehavior behavior = raftContext.getCurrentBehavior().getBaseBehavior();
+        Verify.verify(behavior instanceof AbstractLeader);
+        return (AbstractLeader) behavior;
     }
 
     void onNewLeader(String leaderId) {
@@ -377,7 +385,7 @@ class RaftActorServerConfigurationSupport {
 
             boolean isLeader = raftActor.isLeader();
             if(isLeader) {
-                AbstractLeader leader = (AbstractLeader) raftActor.getCurrentBehavior();
+                AbstractLeader leader = getLeaderBehavior();
                 leader.removeFollower(serverId);
             }
 
@@ -397,7 +405,7 @@ class RaftActorServerConfigurationSupport {
 
         @Override
         public void initiate() {
-            AbstractLeader leader = (AbstractLeader) raftActor.getCurrentBehavior();
+            AbstractLeader leader = getLeaderBehavior();
             AddServer addServer = getAddServerContext().getOperation();
 
             LOG.debug("{}: Initiating {}", raftContext.getId(), addServer);
@@ -465,7 +473,7 @@ class RaftActorServerConfigurationSupport {
             // Sanity check to guard against receiving an UnInitializedFollowerSnapshotReply from a prior
             // add server operation that timed out.
             if(getAddServerContext().getOperation().getNewServerId().equals(followerId) && raftActor.isLeader()) {
-                AbstractLeader leader = (AbstractLeader) raftActor.getCurrentBehavior();
+                AbstractLeader leader = getLeaderBehavior();
                 raftContext.getPeerInfo(followerId).setVotingState(VotingState.VOTING);
                 leader.updateMinReplicaCount();
 
@@ -501,8 +509,7 @@ class RaftActorServerConfigurationSupport {
                 return;
             }
 
-            AbstractLeader leader = (AbstractLeader) raftActor.getCurrentBehavior();
-            if(leader.initiateCaptureSnapshot(getAddServerContext().getOperation().getNewServerId())) {
+            if(getLeaderBehavior().initiateCaptureSnapshot(getAddServerContext().getOperation().getNewServerId())) {
                 LOG.debug("{}: Initiating capture snapshot for new server {}", raftContext.getId(),
                         getAddServerContext().getOperation().getNewServerId());
 
@@ -611,7 +618,7 @@ class RaftActorServerConfigurationSupport {
         public void initiate() {
             String serverId = getRemoveServerContext().getOperation().getServerId();
             raftContext.removePeer(serverId);
-            ((AbstractLeader)raftActor.getCurrentBehavior()).removeFollower(serverId);
+            getLeaderBehavior().removeFollower(serverId);
 
             persistNewServerConfiguration(getRemoveServerContext());
         }
@@ -727,9 +734,8 @@ class RaftActorServerConfigurationSupport {
             List<ServerInfo> newServerInfoList = newServerInfoList();
 
             raftContext.updatePeerIds(new ServerConfigurationPayload(newServerInfoList));
-            if(raftActor.getCurrentBehavior() instanceof AbstractLeader) {
-                AbstractLeader leader = (AbstractLeader) raftActor.getCurrentBehavior();
-                leader.updateMinReplicaCount();
+            if (raftActor.isLeader()) {
+                getLeaderBehavior().updateMinReplicaCount();
             }
         }
 
