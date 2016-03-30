@@ -12,7 +12,6 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.Cancellable;
 import akka.actor.Props;
-import akka.serialization.Serialization;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
@@ -28,7 +27,6 @@ import org.opendaylight.controller.cluster.common.actor.MessageTracker;
 import org.opendaylight.controller.cluster.common.actor.MessageTracker.Error;
 import org.opendaylight.controller.cluster.common.actor.MeteringBehavior;
 import org.opendaylight.controller.cluster.datastore.ShardCommitCoordinator.CohortEntry;
-import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardTransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardMBeanFactory;
@@ -40,8 +38,6 @@ import org.opendaylight.controller.cluster.datastore.messages.CanCommitTransacti
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransactionChain;
 import org.opendaylight.controller.cluster.datastore.messages.CommitTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CommitTransactionReply;
-import org.opendaylight.controller.cluster.datastore.messages.CreateTransaction;
-import org.opendaylight.controller.cluster.datastore.messages.CreateTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.DatastoreSnapshot;
 import org.opendaylight.controller.cluster.datastore.messages.DatastoreSnapshot.ShardSnapshot;
 import org.opendaylight.controller.cluster.datastore.messages.ForwardedReadyTransaction;
@@ -63,6 +59,7 @@ import org.opendaylight.controller.cluster.raft.RaftActorRecoveryCohort;
 import org.opendaylight.controller.cluster.raft.RaftActorSnapshotCohort;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.base.messages.FollowerInitialSyncUpStatus;
+import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.messages.ServerRemoved;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.CompositeModificationByteStringPayload;
@@ -197,6 +194,13 @@ public class Shard extends RaftActor {
     }
 
     @Override
+    protected void changeCurrentBehavior(final RaftActorBehavior newBehavior) {
+        // FIXME: this is a hack to make sure we get going: if the new behavior is not a shard behavior, make sure
+        //        we wrap it as needed
+        super.changeCurrentBehavior(ShardBehavior.forRaftBehavior(this, newBehavior));
+    }
+
+    @Override
     protected void handleRecover(final Object message) {
         LOG.debug("{}: onReceiveRecover: Received message {} from {}", persistenceId(), message.getClass(),
             getSender());
@@ -218,9 +222,7 @@ public class Shard extends RaftActor {
         }
 
         try {
-            if (CreateTransaction.isSerializedType(message)) {
-                handleCreateTransaction(message);
-            } else if (message instanceof BatchedModifications) {
+            if (message instanceof BatchedModifications) {
                 handleBatchedModifications((BatchedModifications)message);
             } else if (message instanceof ForwardedReadyTransaction) {
                 handleForwardedReadyTransaction((ForwardedReadyTransaction) message);
@@ -488,18 +490,6 @@ public class Shard extends RaftActor {
         }
     }
 
-    private boolean failIfIsolatedLeader(ActorRef sender) {
-        if(isIsolatedLeader()) {
-            sender.tell(new akka.actor.Status.Failure(new NoShardLeaderException(String.format(
-                    "Shard %s was the leader but has lost contact with all of its followers. Either all" +
-                    " other follower nodes are down or this node is isolated by a network partition.",
-                    persistenceId()))), getSelf());
-            return true;
-        }
-
-        return false;
-    }
-
     protected boolean isIsolatedLeader() {
         return getRaftState() == RaftState.IsolatedLeader;
     }
@@ -559,59 +549,20 @@ public class Shard extends RaftActor {
         commitCoordinator.handleAbort(transactionID, sender, this);
     }
 
-    private void handleCreateTransaction(final Object message) {
-        if (isLeader()) {
-            createTransaction(CreateTransaction.fromSerializable(message));
-        } else if (getLeader() != null) {
-            getLeader().forward(message, getContext());
-        } else {
-            getSender().tell(new akka.actor.Status.Failure(new NoShardLeaderException(
-                    "Could not create a shard transaction", persistenceId())), getSelf());
-        }
+    @Deprecated
+    @Override
+    protected ActorSelection getLeader() {
+        // Bridge method to allow behaviors to see this
+        return super.getLeader();
+    }
+
+    ActorRef createTypedTransactionActor(TransactionType type, ShardTransactionIdentifier transactionId,
+            String transactionChainId) {
+        return transactionActorFactory.newShardTransaction(type, transactionId, transactionChainId);
     }
 
     private void closeTransactionChain(final CloseTransactionChain closeTransactionChain) {
         store.closeTransactionChain(closeTransactionChain.getTransactionChainId());
-    }
-
-    private ActorRef createTypedTransactionActor(int transactionType,
-            ShardTransactionIdentifier transactionId, String transactionChainId) {
-
-        return transactionActorFactory.newShardTransaction(TransactionType.fromInt(transactionType),
-                transactionId, transactionChainId);
-    }
-
-    private void createTransaction(CreateTransaction createTransaction) {
-        try {
-            if(TransactionType.fromInt(createTransaction.getTransactionType()) != TransactionType.READ_ONLY &&
-                    failIfIsolatedLeader(getSender())) {
-                return;
-            }
-
-            ActorRef transactionActor = createTransaction(createTransaction.getTransactionType(),
-                createTransaction.getTransactionId(), createTransaction.getTransactionChainId());
-
-            getSender().tell(new CreateTransactionReply(Serialization.serializedActorPath(transactionActor),
-                    createTransaction.getTransactionId(), createTransaction.getVersion()).toSerializable(), getSelf());
-        } catch (Exception e) {
-            getSender().tell(new akka.actor.Status.Failure(e), getSelf());
-        }
-    }
-
-    private ActorRef createTransaction(int transactionType, String remoteTransactionId,
-            String transactionChainId) {
-
-
-        ShardTransactionIdentifier transactionId = new ShardTransactionIdentifier(remoteTransactionId);
-
-        if(LOG.isDebugEnabled()) {
-            LOG.debug("{}: Creating transaction : {} ", persistenceId(), transactionId);
-        }
-
-        ActorRef transactionActor = createTypedTransactionActor(transactionType, transactionId,
-                transactionChainId);
-
-        return transactionActor;
     }
 
     private void commitWithNewTransaction(final Modification modification) {
