@@ -305,7 +305,13 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         shuttingDown = true;
 
         final RaftActorBehavior currentBehavior = context.getCurrentBehavior();
-        if(currentBehavior.state() == RaftState.Leader && context.hasFollowers()) {
+        if (currentBehavior.state() != RaftState.Leader) {
+            // For non-leaders shutdown is a no-op
+            self().tell(PoisonPill.getInstance(), self());
+            return;
+        }
+
+        if (context.hasFollowers()) {
             initiateLeadershipTransfer(new RaftActorLeadershipTransferCohort.OnComplete() {
                 @Override
                 public void onSuccess(ActorRef raftActorRef, ActorRef replyTo) {
@@ -319,7 +325,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
                     raftActorRef.tell(PoisonPill.getInstance(), raftActorRef);
                 }
             });
-        } else if(currentBehavior.state() == RaftState.Leader) {
+        } else {
             pauseLeader(new TimedRunnable(context.getConfigParams().getElectionTimeOutInterval(), this) {
                 @Override
                 protected void doRun() {
@@ -331,8 +337,6 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
                     self().tell(PoisonPill.getInstance(), self());
                 }
             });
-        } else {
-            self().tell(PoisonPill.getInstance(), self());
         }
     }
 
