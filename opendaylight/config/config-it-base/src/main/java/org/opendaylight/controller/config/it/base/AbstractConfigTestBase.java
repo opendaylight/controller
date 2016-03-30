@@ -32,6 +32,7 @@ import org.opendaylight.controller.config.api.ConfigRegistry;
 import org.opendaylight.controller.config.util.ConfigRegistryJMXClient;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
+import org.ops4j.pax.exam.OptionUtils;
 import org.ops4j.pax.exam.karaf.options.KarafDistributionOption;
 import org.ops4j.pax.exam.karaf.options.LogLevelOption.LogLevel;
 import org.ops4j.pax.exam.options.MavenArtifactUrlReference;
@@ -87,9 +88,18 @@ public abstract class AbstractConfigTestBase {
 
     public Option getLoggingOption() {
         Option option = editConfigurationFilePut(ORG_OPS4J_PAX_LOGGING_CFG,
-                        logConfiguration(AbstractConfigTestBase.class),
-                        LogLevel.INFO.name());
+                logConfiguration(AbstractConfigTestBase.class),
+                LogLevel.INFO.name());
         return option;
+    }
+
+    /**
+     * Override this method to provide more options to config
+     *
+     * @return An array of additional config options
+     */
+    protected Option[] getAdditionalOptions() {
+        return null;
     }
 
     public String logConfiguration(Class<?> klazz) {
@@ -130,7 +140,7 @@ public abstract class AbstractConfigTestBase {
 
     @Configuration
     public Option[] config() {
-        Option[] options = new Option[] {
+        Option[] options = new Option[]{
                 when(Boolean.getBoolean(KARAF_DEBUG_PROP))
                         .useOptions(KarafDistributionOption.debugConfiguration(KARAF_DEBUG_PORT, true)),
                 karafDistributionConfiguration().frameworkUrl(getKarafDistro())
@@ -141,7 +151,7 @@ public abstract class AbstractConfigTestBase {
                 getLoggingOption(),
                 mvnLocalRepoOption(),
                 editConfigurationFilePut(ETC_ORG_OPS4J_PAX_LOGGING_CFG, "log4j.rootLogger", "INFO, stdout, osgi:*")};
-        return options;
+        return OptionUtils.combine(options, getAdditionalOptions());
     }
 
     @Before
@@ -156,7 +166,7 @@ public abstract class AbstractConfigTestBase {
                         .getPlatformMBeanServer());
                 objectName = configRegistryClient.lookupConfigBean(getModuleName(), getInstanceName());
                 LOG.info("Module: {} Instance: {} ObjectName: {}.",
-                        getModuleName(),getInstanceName(),objectName);
+                        getModuleName(), getInstanceName(), objectName);
                 break;
             } catch (Exception e) {
                 if(i<MODULE_TIMEOUT_MILLIS) {
