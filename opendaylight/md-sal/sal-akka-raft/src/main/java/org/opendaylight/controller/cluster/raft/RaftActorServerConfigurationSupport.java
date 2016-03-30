@@ -678,28 +678,8 @@ class RaftActorServerConfigurationSupport {
             // leadership.
             boolean localServerChangedToNonVoting = Boolean.FALSE.equals(getOperation().
                     getServerVotingStatusMap().get(raftActor.getRaftActorContext().getId()));
-            if(succeeded && localServerChangedToNonVoting && raftActor.isLeader()) {
-                raftActor.initiateLeadershipTransfer(new RaftActorLeadershipTransferCohort.OnComplete() {
-                    @Override
-                    public void onSuccess(ActorRef raftActorRef, ActorRef replyTo) {
-                        LOG.debug("{}: leader transfer succeeded after change to non-voting", raftActor.persistenceId());
-                        ensureFollowerState(raftActor);
-                    }
-
-                    @Override
-                    public void onFailure(ActorRef raftActorRef, ActorRef replyTo) {
-                        LOG.debug("{}: leader transfer failed after change to non-voting", raftActor.persistenceId());
-                        ensureFollowerState(raftActor);
-                    }
-
-                    private void ensureFollowerState(RaftActor raftActor) {
-                        // Whether or not leadership transfer succeeded, we have to step down as leader and
-                        // switch to Follower so ensure that.
-                        if(raftActor.getRaftState() != RaftState.Follower) {
-                            raftActor.initializeBehavior();
-                        }
-                    }
-                });
+            if (succeeded && localServerChangedToNonVoting) {
+               raftActor.becomeNonVoting();
             }
         }
 
