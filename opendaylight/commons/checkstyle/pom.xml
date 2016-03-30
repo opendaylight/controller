@@ -10,27 +10,19 @@
     <tag>HEAD</tag>
   </scm>
 
-  <properties>
-    <nexusproxy>http://nexus.opendaylight.org/content</nexusproxy>
-    <nexus.repository.release>opendaylight.release</nexus.repository.release>
-    <nexus.repository.snapshot>opendaylight.snapshot</nexus.repository.snapshot>
-    <sitedeploy>dav:http://nexus.opendaylight.org/content/sites/site</sitedeploy>
-  </properties>
+  <!--
+      Maven Site Configuration
+
+      The following configuration is necessary for maven-site-plugin to
+      correctly identify the correct deployment path for OpenDaylight Maven
+      sites.
+  -->
+  <url>${odl.site.url}/${project.groupId}/${stream}/${project.artifactId}/</url>
+
   <distributionManagement>
-    <!-- OpenDayLight Released artifact -->
-    <repository>
-      <id>opendaylight-release</id>
-      <url>${nexusproxy}/repositories/${nexus.repository.release}/</url>
-    </repository>
-    <!-- OpenDayLight Snapshot artifact -->
-    <snapshotRepository>
-      <id>opendaylight-snapshot</id>
-      <url>${nexusproxy}/repositories/${nexus.repository.snapshot}/</url>
-    </snapshotRepository>
-    <!-- Site deployment -->
     <site>
-      <id>website</id>
-      <url>${sitedeploy}</url>
+      <id>opendaylight-site</id>
+      <url>${nexus.site.url}/${project.artifactId}/</url>
     </site>
   </distributionManagement>
 </project>

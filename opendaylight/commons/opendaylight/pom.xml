@@ -95,8 +95,6 @@
     <maven.plugin.api.version>3.0.5</maven.plugin.api.version>
     <mdsal.version>1.4.0-SNAPSHOT</mdsal.version>
     <networkconfig.bridgedomain.northbound.version>0.3.0-SNAPSHOT</networkconfig.bridgedomain.northbound.version>
-    <!-- ODL repository / plugin repository -->
-    <nexusproxy>http://nexus.opendaylight.org/content</nexusproxy>
     <northbound.commons.version>0.7.0-SNAPSHOT</northbound.commons.version>
     <northbound.hosttracker.version>1.7.0-SNAPSHOT</northbound.hosttracker.version>
     <northbound.jolokia.version>1.7.0-SNAPSHOT</northbound.jolokia.version>
@@ -117,7 +115,6 @@
     <sanitytest.version>0.7.0-SNAPSHOT</sanitytest.version>
     <security.version>0.7.0-SNAPSHOT</security.version>
     <karaf.security.version>0.7.0-SNAPSHOT</karaf.security.version>
-    <sitedeploy>dav:http://nexus.opendaylight.org/content/sites/site</sitedeploy>
     <sonar.host.url>https://sonar.opendaylight.org/</sonar.host.url>
     <!-- Sonar properties using jacoco to retrieve integration test results -->
     <sonar-jacoco-listeners.version>2.4</sonar-jacoco-listeners.version>
@@ -1203,31 +1200,6 @@
     <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:Main</url>
   </scm>
 
-  <!-- distribution management only runs when you run mvn deploy
-       which is if you are deploying compiled artifacts to a
-       maven repository. In that case logic dictacts that you already
-       compiled and thus already have the necessary parent pom files
-       that do not exist in this project pulled down to your local
-       .m2. That way the variables can be resolved and artifacts can
-       be uploaded when running mvn deploy. -->
-  <distributionManagement>
-    <!-- OpenDayLight Released artifact -->
-    <repository>
-      <id>opendaylight-release</id>
-      <url>${nexusproxy}/repositories/opendaylight.release/</url>
-    </repository>
-    <!-- OpenDayLight Snapshot artifact -->
-    <snapshotRepository>
-      <id>opendaylight-snapshot</id>
-      <url>${nexusproxy}/repositories/opendaylight.snapshot/</url>
-    </snapshotRepository>
-    <!-- Site deployment -->
-    <site>
-      <id>website</id>
-      <url>${sitedeploy}</url>
-    </site>
-  </distributionManagement>
-
   <profiles>
     <profile>
       <id>viewbuild</id>
@@ -1282,4 +1254,20 @@
       </build>
     </profile>
   </profiles>
+
+  <!--
+      Maven Site Configuration
+
+      The following configuration is necessary for maven-site-plugin to
+      correctly identify the correct deployment path for OpenDaylight Maven
+      sites.
+  -->
+  <url>${odl.site.url}/${project.groupId}/${stream}/${project.artifactId}/</url>
+
+  <distributionManagement>
+    <site>
+      <id>opendaylight-site</id>
+      <url>${nexus.site.url}/${project.artifactId}/</url>
+    </site>
+  </distributionManagement>
 </project>
