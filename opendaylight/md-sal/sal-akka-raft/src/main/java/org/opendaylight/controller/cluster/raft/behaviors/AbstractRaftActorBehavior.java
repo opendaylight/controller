@@ -428,7 +428,8 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
         return this;
     }
 
-    @Override public String getLeaderId() {
+    @Override
+    public String getLeaderId() {
         return leaderId;
     }
 

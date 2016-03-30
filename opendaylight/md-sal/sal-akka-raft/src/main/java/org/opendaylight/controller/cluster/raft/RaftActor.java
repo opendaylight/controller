@@ -611,7 +611,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             // avoids potential disruption. Otherwise, switch to Follower normally.
             RaftActorBehavior behavior = getCurrentBehavior();
             if (behavior != null && behavior.state() == RaftState.Follower) {
-                String previousLeaderId = ((Follower)behavior).getLeaderId();
+                String previousLeaderId = behavior.getLeaderId();
                 short previousLeaderPayloadVersion = behavior.getLeaderPayloadVersion();
 
                 LOG.debug("{}: Re-initializing to Follower with previous leaderId {}", persistenceId(), previousLeaderId);
