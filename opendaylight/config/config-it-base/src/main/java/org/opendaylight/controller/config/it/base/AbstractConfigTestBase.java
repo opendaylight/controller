@@ -21,8 +21,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.management.ManagementFactory;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import javax.management.ObjectName;
@@ -37,6 +35,7 @@ import org.opendaylight.controller.config.api.ConfigRegistry;
 import org.opendaylight.controller.config.util.ConfigRegistryJMXClient;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
+import org.ops4j.pax.exam.OptionUtils;
 import org.ops4j.pax.exam.karaf.options.KarafDistributionOption;
 import org.ops4j.pax.exam.karaf.options.LogLevelOption.LogLevel;
 import org.ops4j.pax.exam.options.MavenArtifactUrlReference;
@@ -144,23 +143,18 @@ public abstract class AbstractConfigTestBase {
 
     @Configuration
     public Option[] config() {
-        List<Option> options = new ArrayList<>();
-        options.add(when(Boolean.getBoolean(KARAF_DEBUG_PROP))
-                .useOptions(KarafDistributionOption.debugConfiguration(KARAF_DEBUG_PORT, true)));
-        options.add(karafDistributionConfiguration().frameworkUrl(getKarafDistro())
-                .unpackDirectory(new File(PAX_EXAM_UNPACK_DIRECTORY))
-                .useDeployFolder(false));
-        options.add(when(Boolean.getBoolean(KEEP_UNPACK_DIRECTORY_PROP)).useOptions(keepRuntimeFolder()));
-        options.add(features(getFeatureRepo(), getFeatureName()));
-        options.add(getLoggingOption());
-        options.add(mvnLocalRepoOption());
-        options.add(editConfigurationFilePut(ETC_ORG_OPS4J_PAX_LOGGING_CFG, "log4j.rootLogger", "INFO, stdout, osgi:*"));
-        // if there is any additional option, add them here
-        Option[] additionalOpts = getAdditionalOptions();
-        if (additionalOpts != null && additionalOpts.length > 0)
-            for (Option opt : additionalOpts)
-                options.add(opt);
-        return options.toArray(new Option[0]);
+        Option[] options = new Option[]{
+                when(Boolean.getBoolean(KARAF_DEBUG_PROP))
+                        .useOptions(KarafDistributionOption.debugConfiguration(KARAF_DEBUG_PORT, true)),
+                karafDistributionConfiguration().frameworkUrl(getKarafDistro())
+                        .unpackDirectory(new File(PAX_EXAM_UNPACK_DIRECTORY))
+                        .useDeployFolder(false),
+                when(Boolean.getBoolean(KEEP_UNPACK_DIRECTORY_PROP)).useOptions(keepRuntimeFolder()),
+                features(getFeatureRepo(), getFeatureName()),
+                getLoggingOption(),
+                mvnLocalRepoOption(),
+                editConfigurationFilePut(ETC_ORG_OPS4J_PAX_LOGGING_CFG, "log4j.rootLogger", "INFO, stdout, osgi:*")};
+        return OptionUtils.combine(options, getAdditionalOptions());
     }
 
     @Before
