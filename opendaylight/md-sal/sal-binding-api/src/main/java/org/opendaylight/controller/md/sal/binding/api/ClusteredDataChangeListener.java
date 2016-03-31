@@ -19,7 +19,8 @@ package org.opendaylight.controller.md.sal.binding.api;
  * to data change notifications on any node of clustered datastore. DataChangeListener enables data change notifications
  * only at leader of the datastore shard.</p>
  *
+ * @Deprecated Replaced by {@link ClusteredDataTreeChangeListener}
  */
-
+@Deprecated
 public interface ClusteredDataChangeListener extends DataChangeListener{
 }
