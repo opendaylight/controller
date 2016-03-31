@@ -203,7 +203,24 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         handleBehaviorChange(reusableBehaviorStateHolder, getCurrentBehavior());
     }
 
+    /**
+     * Method exposed for subclasses to plug-in their logic. This method is invoked by {@link #handleCommand(Object)}
+     * for messages which are not handled by this class. Subclasses overriding this class should fall back to this
+     * implementation for messages which they do not handle
+     *
+     * @param message Incoming command message
+     */
+    protected void handleNonRaftCommand(final Object message) {
+        unhandled(message);
+    }
+
+    /**
+     * @deprecated This method is not final for testing purposes. DO NOT OVERRIDE IT, override
+     * {@link #handleNonRaftCommand(Object)} instead.
+     */
+    @Deprecated
     @Override
+    // FIXME: make this method final once our unit tests do not need to override it
     protected void handleCommand(final Object message) {
         if (serverConfigurationSupport.handleMessage(message, getSender())) {
             return;
@@ -266,7 +283,12 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         } else if(message instanceof Runnable) {
             ((Runnable)message).run();
         } else {
-            switchBehavior(reusableSwitchBehaviorSupplier.handleMessage(getSender(), message));
+            final SwitchBehaviorSupplier nextBehavior = reusableSwitchBehaviorSupplier.handleMessage(getSender(), message);
+            if (nextBehavior != null) {
+                switchBehavior(nextBehavior);
+            } else {
+                handleNonRaftCommand(message);
+            }
         }
     }
 

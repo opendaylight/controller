@@ -218,7 +218,7 @@ public class Shard extends RaftActor {
     }
 
     @Override
-    protected void handleCommand(final Object message) {
+    protected void handleNonRaftCommand(final Object message) {
         try (final MessageTracker.Context context = appendEntriesReplyTracker.received(message)) {
             final Optional<Error> maybeError = context.error();
             if (maybeError.isPresent()) {
@@ -270,7 +270,7 @@ public class Shard extends RaftActor {
             } else if(ShardTransactionMessageRetrySupport.TIMER_MESSAGE_CLASS.isInstance(message)) {
                 messageRetrySupport.onTimerMessage(message);
             } else {
-                super.handleCommand(message);
+                super.handleNonRaftCommand(message);
             }
         }
     }

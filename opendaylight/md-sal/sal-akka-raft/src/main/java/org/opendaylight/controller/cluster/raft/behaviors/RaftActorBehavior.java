@@ -9,6 +9,7 @@
 package org.opendaylight.controller.cluster.raft.behaviors;
 
 import akka.actor.ActorRef;
+import javax.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.RaftState;
 
 /**
@@ -34,9 +35,9 @@ public interface RaftActorBehavior extends AutoCloseable{
      * @param sender The sender of the message
      * @param message A message that needs to be processed
      *
-     * @return The new behavior or current behavior
+     * @return The new behavior or current behavior, or null if the message was not handled.
      */
-    RaftActorBehavior handleMessage(ActorRef sender, Object message);
+    @Nullable RaftActorBehavior handleMessage(ActorRef sender, Object message);
 
     /**
      *
