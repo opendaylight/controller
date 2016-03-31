@@ -58,7 +58,7 @@ public class ExampleActor extends RaftActor implements RaftActorRecoveryCohort, 
     }
 
     @Override
-    protected void handleCommand(Object message) {
+    protected void handleNonRaftCommand(Object message) {
         if(message instanceof KeyValue){
             if(isLeader()) {
                 String persistId = Long.toString(persistIdentifier++);
@@ -90,7 +90,7 @@ public class ExampleActor extends RaftActor implements RaftActorRecoveryCohort, 
             }
 
         } else {
-            super.handleCommand(message);
+            super.handleNonRaftCommand(message);
         }
     }
 
