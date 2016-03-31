@@ -2011,8 +2011,8 @@ public class ShardTest extends AbstractShardTest {
                 public Shard create() throws Exception {
                     return new Shard(newShardBuilder()) {
                         @Override
-                        public void handleCommand(final Object message) {
-                            super.handleCommand(message);
+                        public void handleNonRaftCommand(final Object message) {
+                            super.handleNonRaftCommand(message);
                             if(TX_COMMIT_TIMEOUT_CHECK_MESSAGE.equals(message)) {
                                 if(cleaupCheckLatch.get() != null) {
                                     cleaupCheckLatch.get().countDown();
