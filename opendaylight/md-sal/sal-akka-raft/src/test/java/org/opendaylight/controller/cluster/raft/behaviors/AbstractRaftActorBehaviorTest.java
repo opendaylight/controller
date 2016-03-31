@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.raft.behaviors;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.testkit.TestActorRef;
@@ -102,12 +103,11 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
 
         behavior = createBehavior(context);
 
-        // Send an unknown message so that the state of the RaftActor remains unchanged
-        RaftActorBehavior expected = behavior.handleMessage(behaviorActor, "unknown");
+        RaftState expected = behavior.state();
 
         RaftActorBehavior raftBehavior = behavior.handleMessage(behaviorActor, appendEntries);
 
-        assertEquals("Raft state", expected.state(), raftBehavior.state());
+        assertEquals("Raft state", expected, raftBehavior.state());
 
         // Also expect an AppendEntriesReply to be sent where success is false
 
@@ -138,12 +138,14 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
 
         assertFalse("This test should be overridden when testing Candidate", behavior instanceof Candidate);
 
-        // Send an unknown message so that the state of the RaftActor remains unchanged
-        RaftActorBehavior expected = behavior.handleMessage(behaviorActor, "unknown");
+        RaftState expected = behavior.state();
+
+        // Check that the behavior does not handle unknwon message
+        assertNull(behavior.handleMessage(behaviorActor, "unknown"));
 
         RaftActorBehavior raftBehavior = behavior.handleMessage(behaviorActor, appendEntries);
 
-        assertEquals("Raft state", expected.state(), raftBehavior.state());
+        assertEquals("Raft state", expected, raftBehavior.state());
 
         assertEquals("ReplicatedLog size", 1, context.getReplicatedLog().size());
 
