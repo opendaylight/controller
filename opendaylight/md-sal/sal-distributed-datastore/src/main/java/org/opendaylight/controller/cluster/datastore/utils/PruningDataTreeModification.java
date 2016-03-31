@@ -10,11 +10,7 @@ package org.opendaylight.controller.cluster.datastore.utils;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
 import java.io.IOException;
-import java.util.ArrayDeque;
-import java.util.Deque;
-import javax.annotation.Nonnull;
 import org.opendaylight.controller.cluster.datastore.node.utils.transformer.NormalizedNodePruner;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
@@ -147,8 +143,7 @@ public class PruningDataTreeModification implements DataTreeModification {
         return delegate;
     }
 
-    private static class PruningDataTreeModificationCursor implements DataTreeModificationCursor {
-        private final Deque<YangInstanceIdentifier> stack = new ArrayDeque<>();
+    private static class PruningDataTreeModificationCursor extends AbstractDataTreeModificationCursor {
         private final DataTreeModification toModification;
         private final PruningDataTreeModification pruningModification;
 
@@ -156,12 +151,11 @@ public class PruningDataTreeModification implements DataTreeModification {
                 PruningDataTreeModification pruningModification) {
             this.toModification = toModification;
             this.pruningModification = pruningModification;
-            stack.push(YangInstanceIdentifier.EMPTY);
         }
 
         @Override
         public void write(PathArgument child, NormalizedNode<?, ?> data) {
-            YangInstanceIdentifier path = stack.peek().node(child);
+            YangInstanceIdentifier path = next(child);
             NormalizedNode<?, ?> prunedNode = pruningModification.pruneNormalizedNode(path, data);
             if(prunedNode != null) {
                 toModification.write(path, prunedNode);
@@ -170,7 +164,7 @@ public class PruningDataTreeModification implements DataTreeModification {
 
         @Override
         public void merge(PathArgument child, NormalizedNode<?, ?> data) {
-            YangInstanceIdentifier path = stack.peek().node(child);
+            YangInstanceIdentifier path = next(child);
             NormalizedNode<?, ?> prunedNode = pruningModification.pruneNormalizedNode(path, data);
             if(prunedNode != null) {
                 toModification.merge(path, prunedNode);
@@ -180,51 +174,10 @@ public class PruningDataTreeModification implements DataTreeModification {
         @Override
         public void delete(PathArgument child) {
             try {
-                toModification.delete(stack.peek().node(child));
+                toModification.delete(next(child));
             } catch(SchemaValidationFailedException e) {
                 // Ignoring since we would've already logged this in the call to the original modification.
             }
-        }
-
-        @Override
-        public void enter(@Nonnull final PathArgument child) {
-            stack.push(stack.peek().node(child));
-        }
-
-        @Override
-        public void enter(@Nonnull final PathArgument... path) {
-            for (PathArgument arg : path) {
-                enter(arg);
-            }
-        }
-
-        @Override
-        public void enter(@Nonnull final Iterable<PathArgument> path) {
-            for (PathArgument arg : path) {
-                enter(arg);
-            }
-        }
-
-        @Override
-        public void exit() {
-            stack.pop();
-        }
-
-        @Override
-        public void exit(final int depth) {
-            Preconditions.checkArgument(depth < stack.size(), "Stack holds only %s elements, cannot exit %s levels", stack.size(), depth);
-            for (int i = 0; i < depth; ++i) {
-                stack.pop();
-            }
-        }
-
-        @Override
-        public Optional<NormalizedNode<?, ?>> readNode(@Nonnull final PathArgument child) {
-            throw new UnsupportedOperationException("Not implemented");
-        }
-
-        @Override
-        public void close() {
         }
     }
 }
