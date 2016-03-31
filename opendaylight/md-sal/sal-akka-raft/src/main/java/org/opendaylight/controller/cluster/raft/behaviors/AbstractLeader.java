@@ -380,23 +380,19 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
             beforeSendHeartbeat();
             sendHeartBeat();
             scheduleHeartBeat(context.getConfigParams().getHeartBeatInterval());
-            return this;
-
         } else if(message instanceof SendInstallSnapshot) {
             // received from RaftActor
             setSnapshot(((SendInstallSnapshot) message).getSnapshot());
             sendInstallSnapshot();
-
         } else if (message instanceof Replicate) {
             replicate((Replicate) message);
-
-        } else if (message instanceof InstallSnapshotReply){
+        } else if (message instanceof InstallSnapshotReply) {
             handleInstallSnapshotReply((InstallSnapshotReply) message);
-
+        } else {
+            return super.handleMessage(sender, message);
         }
 
-
-        return super.handleMessage(sender, message);
+        return this;
     }
 
     private void handleInstallSnapshotReply(InstallSnapshotReply reply) {
