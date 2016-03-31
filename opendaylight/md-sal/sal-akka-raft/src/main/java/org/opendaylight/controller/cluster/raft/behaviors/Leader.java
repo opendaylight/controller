@@ -63,14 +63,17 @@ public class Leader extends AbstractLeader {
     public RaftActorBehavior handleMessage(ActorRef sender, Object originalMessage) {
         Preconditions.checkNotNull(sender, "sender should not be null");
 
-        if (ISOLATED_LEADER_CHECK.equals(originalMessage) && isLeaderIsolated()) {
-            LOG.warn("{}: At least {} followers need to be active, Switching {} from Leader to IsolatedLeader",
-                context.getId(), getMinIsolatedLeaderPeerCount(), getLeaderId());
-
-            return internalSwitchBehavior(RaftState.IsolatedLeader);
+        if (ISOLATED_LEADER_CHECK.equals(originalMessage)) {
+            if (isLeaderIsolated()) {
+                LOG.warn("{}: At least {} followers need to be active, Switching {} from Leader to IsolatedLeader",
+                    context.getId(), getMinIsolatedLeaderPeerCount(), getLeaderId());
+                return internalSwitchBehavior(RaftState.IsolatedLeader);
+            } else {
+                return this;
+            }
+        } else {
+            return super.handleMessage(sender, originalMessage);
         }
-
-        return super.handleMessage(sender, originalMessage);
     }
 
     @Override

@@ -205,7 +205,24 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         handleBehaviorChange(state, newBehavior);
     }
 
+    /**
+     * Method exposed for subclasses to plug-in their logic. This method is invoked by {@link #handleCommand(Object)}
+     * for messages which are not handled by this class. Subclasses overriding this class should fall back to this
+     * implementation for messages which they do not handle
+     *
+     * @param message Incoming command message
+     */
+    protected void handleNonRaftCommand(final Object message) {
+        unhandled(message);
+    }
+
+    /**
+     * @deprecated This method is not final for testing purposes. DO NOT OVERRIDE IT, override
+     * {@link #handleNonRaftCommand(Object)} instead.
+     */
+    @Deprecated
     @Override
+    // FIXME: make this method final once our unit tests do not need to override it
     protected void handleCommand(final Object message) {
         if (serverConfigurationSupport.handleMessage(message, getSender())) {
             return;
@@ -273,8 +290,16 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             // Processing the message may affect the state, hence we need to capture it
             final RaftActorBehavior currentBehavior = getCurrentBehavior();
             final BehaviorState state = behaviorStateTracker.capture(currentBehavior);
+
+            // A behavior indicates that it processed the change by returning a reference to the next behavior
+            // to be used. A null return indicates it has not processed the message and we should be passing it to
+            // the subclass for handling.
             final RaftActorBehavior nextBehavior = currentBehavior.handleMessage(getSender(), message);
-            switchBehavior(state, nextBehavior);
+            if (nextBehavior != null) {
+                switchBehavior(state, nextBehavior);
+            } else {
+                handleNonRaftCommand(message);
+            }
         }
     }
 
