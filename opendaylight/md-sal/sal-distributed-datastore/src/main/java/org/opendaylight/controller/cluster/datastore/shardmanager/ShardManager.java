@@ -1026,12 +1026,10 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
                 new Function<Throwable, SupervisorStrategy.Directive>() {
             @Override
             public SupervisorStrategy.Directive apply(Throwable t) {
-                LOG.warn("Supervisor Strategy caught unexpected exception - resuming", t);
+                LOG.error("Supervisor Strategy caught unexpected exception - resuming", t);
                 return SupervisorStrategy.resume();
             }
-        }
-                );
-
+        });
     }
 
     @Override
