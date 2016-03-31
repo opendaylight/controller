@@ -8,8 +8,11 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import com.google.common.base.Preconditions;
+import java.io.File;
 import java.io.IOException;
 import org.opendaylight.controller.cluster.datastore.modification.MutableCompositeModification;
+import org.opendaylight.controller.cluster.datastore.utils.DataTreeModificationOutput;
+import org.opendaylight.controller.cluster.datastore.utils.NormalizedNodeXMLOutput;
 import org.opendaylight.controller.cluster.datastore.utils.PruningDataTreeModification;
 import org.opendaylight.controller.cluster.datastore.utils.SerializationUtils;
 import org.opendaylight.controller.cluster.raft.RaftActorRecoveryCohort;
@@ -20,6 +23,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidates;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataValidationFailedException;
+import org.opendaylight.yangtools.yang.data.impl.schema.tree.SchemaValidationFailedException;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.slf4j.Logger;
 
@@ -95,8 +99,13 @@ class ShardRecoveryCoordinator implements RaftActorRecoveryCohort {
         log.debug("{}: Applying current log recovery batch with size {}", shardName, size);
         try {
             commitTransaction(transaction);
-        } catch (DataValidationFailedException e) {
-            log.error("{}: Failed to apply recovery batch", shardName, e);
+        } catch (DataValidationFailedException | SchemaValidationFailedException e) {
+            File file = new File(System.getProperty("karaf.data", "."),
+                    "failed-recovery-batch-" + shardName + ".out");
+            DataTreeModificationOutput.toFile(file, transaction.getResultingModification());
+            throw new RuntimeException(String.format(
+                    "%s: Failed to apply recovery batch. Node data was written to file %s",
+                    shardName, file), e);
         }
         transaction = null;
     }
@@ -116,8 +125,13 @@ class ShardRecoveryCoordinator implements RaftActorRecoveryCohort {
         tx.write(YangInstanceIdentifier.EMPTY, node);
         try {
             commitTransaction(tx);
-        } catch (DataValidationFailedException e) {
-            log.error("{}: Failed to apply recovery snapshot", shardName, e);
+        } catch (DataValidationFailedException | SchemaValidationFailedException e) {
+            File file = new File(System.getProperty("karaf.data", "."),
+                    "failed-recovery-snapshot-" + shardName + ".xml");
+            NormalizedNodeXMLOutput.toFile(file, node);
+            throw new RuntimeException(String.format(
+                    "%s: Failed to apply recovery snapshot. Node data was written to file %s",
+                    shardName, file), e);
         }
     }
 
