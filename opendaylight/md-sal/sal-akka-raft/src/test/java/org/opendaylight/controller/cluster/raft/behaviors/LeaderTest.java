@@ -10,6 +10,8 @@ package org.opendaylight.controller.cluster.raft.behaviors;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -30,7 +32,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.DefaultConfigParamsImpl;
 import org.opendaylight.controller.cluster.raft.FollowerLogInformation;
@@ -94,10 +95,8 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         leader = new Leader(createActorContext());
 
-        // handle message should return the Leader state when it receives an
-        // unknown message
-        RaftActorBehavior behavior = leader.handleMessage(followerActor, "foo");
-        Assert.assertTrue(behavior instanceof Leader);
+        // handle message should null when it receives an unknown message
+        assertNull(leader.handleMessage(followerActor, "foo"));
     }
 
     @Test
@@ -713,7 +712,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         // if an initiate is started again when first is in progress, it shouldnt initiate Capture
         leader.handleMessage(leaderActor, new Replicate(null, "state-id", entry));
 
-        Assert.assertSame("CaptureSnapshot instance", cs, actorContext.getSnapshotManager().getCaptureSnapshot());
+        assertSame("CaptureSnapshot instance", cs, actorContext.getSnapshotManager().getCaptureSnapshot());
     }
 
     @Test
@@ -775,7 +774,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         // if an initiate is started again when first is in progress, it shouldnt initiate Capture
         leader.handleMessage(leaderActor, new Replicate(null, "state-id", entry));
 
-        Assert.assertSame("CaptureSnapshot instance", cs, actorContext.getSnapshotManager().getCaptureSnapshot());
+        assertSame("CaptureSnapshot instance", cs, actorContext.getSnapshotManager().getCaptureSnapshot());
     }
 
 
@@ -1014,7 +1013,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         installSnapshot = MessageCollectorActor.getFirstMatching(followerActor, InstallSnapshot.class);
 
-        Assert.assertNull(installSnapshot);
+        assertNull(installSnapshot);
     }
 
 
@@ -1832,7 +1831,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         leader = new Leader(leaderActorContext);
         RaftActorBehavior behavior = leader.handleMessage(leaderActor, Leader.ISOLATED_LEADER_CHECK);
-        Assert.assertTrue(behavior instanceof Leader);
+        assertTrue(behavior instanceof Leader);
     }
 
     private RaftActorBehavior setupIsolatedLeaderCheckTestWithTwoFollowers(RaftPolicy raftPolicy){
@@ -1853,8 +1852,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         leader.markFollowerActive("follower-1");
         leader.markFollowerActive("follower-2");
         RaftActorBehavior behavior = leader.handleMessage(leaderActor, Leader.ISOLATED_LEADER_CHECK);
-        Assert.assertTrue("Behavior not instance of Leader when all followers are active",
-                behavior instanceof Leader);
+        assertTrue("Behavior not instance of Leader when all followers are active", behavior instanceof Leader);
 
         // kill 1 follower and verify if that got killed
         final JavaTestKit probe = new JavaTestKit(getSystem());
@@ -1866,8 +1864,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         leader.markFollowerInActive("follower-1");
         leader.markFollowerActive("follower-2");
         behavior = leader.handleMessage(leaderActor, Leader.ISOLATED_LEADER_CHECK);
-        Assert.assertTrue("Behavior not instance of Leader when majority of followers are active",
-                behavior instanceof Leader);
+        assertTrue("Behavior not instance of Leader when majority of followers are active", behavior instanceof Leader);
 
         // kill 2nd follower and leader should change to Isolated leader
         followerActor2.tell(PoisonPill.getInstance(), null);
@@ -1886,7 +1883,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         RaftActorBehavior behavior = setupIsolatedLeaderCheckTestWithTwoFollowers(DefaultRaftPolicy.INSTANCE);
 
-        Assert.assertTrue("Behavior not instance of IsolatedLeader when majority followers are inactive",
+        assertTrue("Behavior not instance of IsolatedLeader when majority followers are inactive",
             behavior instanceof IsolatedLeader);
     }
 
@@ -1896,7 +1893,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         RaftActorBehavior behavior = setupIsolatedLeaderCheckTestWithTwoFollowers(createRaftPolicy(false, true));
 
-        Assert.assertTrue("Behavior should not switch to IsolatedLeader because elections are disabled",
+        assertTrue("Behavior should not switch to IsolatedLeader because elections are disabled",
                 behavior instanceof Leader);
     }
 

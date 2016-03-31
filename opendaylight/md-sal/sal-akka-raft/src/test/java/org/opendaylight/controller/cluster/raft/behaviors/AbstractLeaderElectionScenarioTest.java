@@ -62,10 +62,13 @@ public class AbstractLeaderElectionScenarioTest {
 
             try {
                 if(behavior != null && !dropMessagesToBehavior.containsKey(message.getClass())) {
-                    RaftActorBehavior oldBehavior = behavior;
-                    behavior = behavior.handleMessage(getSender(), message);
-                    if(behavior != oldBehavior && behaviorStateChangeLatch != null) {
-                        behaviorStateChangeLatch.countDown();
+                    final RaftActorBehavior nextBehavior = behavior.handleMessage(getSender(), message);
+                    if (nextBehavior != null) {
+                        RaftActorBehavior oldBehavior = behavior;
+                        behavior = nextBehavior;
+                        if(behavior != oldBehavior && behaviorStateChangeLatch != null) {
+                            behaviorStateChangeLatch.countDown();
+                        }
                     }
                 }
             } finally {

@@ -113,7 +113,7 @@ class EntityOwnershipShard extends Shard {
     }
 
     @Override
-    public void handleCommand(final Object message) {
+    public void handleNonRaftCommand(final Object message) {
         if(message instanceof RegisterCandidateLocal) {
             onRegisterCandidateLocal((RegisterCandidateLocal) message);
         } else if(message instanceof UnregisterCandidateLocal) {
@@ -133,7 +133,7 @@ class EntityOwnershipShard extends Shard {
         } else if(message instanceof SelectOwner) {
             onSelectOwner((SelectOwner) message);
         } else if(!commitCoordinator.handleMessage(message, this)) {
-            super.handleCommand(message);
+            super.handleNonRaftCommand(message);
         }
     }
 

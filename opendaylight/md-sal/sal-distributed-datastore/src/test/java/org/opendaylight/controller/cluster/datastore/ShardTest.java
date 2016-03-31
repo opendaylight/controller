@@ -31,6 +31,7 @@ import akka.persistence.SaveSnapshotSuccess;
 import akka.testkit.TestActorRef;
 import akka.util.Timeout;
 import com.google.common.base.Function;
+import com.google.common.base.Stopwatch;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.Uninterruptibles;
@@ -2011,8 +2012,8 @@ public class ShardTest extends AbstractShardTest {
                 public Shard create() throws Exception {
                     return new Shard(newShardBuilder()) {
                         @Override
-                        public void handleCommand(final Object message) {
-                            super.handleCommand(message);
+                        public void handleNonRaftCommand(final Object message) {
+                            super.handleNonRaftCommand(message);
                             if(TX_COMMIT_TIMEOUT_CHECK_MESSAGE.equals(message)) {
                                 if(cleaupCheckLatch.get() != null) {
                                     cleaupCheckLatch.get().countDown();
@@ -2284,19 +2285,29 @@ public class ShardTest extends AbstractShardTest {
         };
     }
 
+    private static void waitForStatus(final ShardStats mbean, final boolean expected) {
+        final Stopwatch sw = Stopwatch.createStarted();
+        while (mbean.getFollowerInitialSyncStatus() != expected && sw.elapsed(TimeUnit.SECONDS) < 5) {
+            Uninterruptibles.sleepUninterruptibly(5, TimeUnit.MILLISECONDS);
+        }
+
+        assertEquals(expected, mbean.getFollowerInitialSyncStatus());
+    }
+
     @Test
     public void testFollowerInitialSyncStatus() throws Exception {
         final TestActorRef<Shard> shard = actorFactory.createTestActor(
                 newShardProps().withDispatcher(Dispatchers.DefaultDispatcherId()),
                 "testFollowerInitialSyncStatus");
 
-        shard.underlyingActor().onReceiveCommand(new FollowerInitialSyncUpStatus(false, "member-1-shard-inventory-operational"));
+        final ShardStats mbean = shard.underlyingActor().getShardMBean();
+        assertFalse(mbean.getFollowerInitialSyncStatus());
 
-        assertEquals(false, shard.underlyingActor().getShardMBean().getFollowerInitialSyncStatus());
+        shard.tell(new FollowerInitialSyncUpStatus(true, "member-1-shard-inventory-operational"), ActorRef.noSender());
+        waitForStatus(mbean, true);
 
-        shard.underlyingActor().onReceiveCommand(new FollowerInitialSyncUpStatus(true, "member-1-shard-inventory-operational"));
-
-        assertEquals(true, shard.underlyingActor().getShardMBean().getFollowerInitialSyncStatus());
+        shard.tell(new FollowerInitialSyncUpStatus(false, "member-1-shard-inventory-operational"), ActorRef.noSender());
+        waitForStatus(mbean, false);
     }
 
     @Test
