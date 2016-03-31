@@ -22,6 +22,10 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * @Deprecated Replaced by {@link DataTreeChangeListener}
+ */
+@Deprecated
 public class DataChangeListener extends AbstractUntypedActor {
     private static final Logger LOG = LoggerFactory.getLogger(DataChangeListener.class);
 
