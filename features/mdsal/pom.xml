@@ -75,6 +75,12 @@
 
   <dependencies>
 
+    <dependency>
+      <groupId>net.java.dev.stax-utils</groupId>
+      <artifactId>stax-utils</artifactId>
+      <version>20070216</version>
+    </dependency>
+
     <!-- Required features repositories -->
     <dependency>
       <groupId>org.opendaylight.odlparent</groupId>

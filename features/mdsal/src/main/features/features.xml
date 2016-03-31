@@ -24,6 +24,7 @@
       <feature version='${yangtools.version}'>odl-yangtools-yang-data</feature>
       <feature version='${config.version}'>odl-config-api</feature>
       <feature version='${mdsal.version}'>odl-mdsal-binding-runtime</feature>
+      <bundle>wrap:mvn:net.java.dev.stax-utils/stax-utils/{{VERSION}}</bundle>
       <bundle>mvn:org.opendaylight.controller/sal-common-api/{{VERSION}}</bundle>
       <bundle>mvn:org.opendaylight.controller/sal-common-impl/{{VERSION}}</bundle>
       <bundle>mvn:org.opendaylight.controller/sal-common-util/{{VERSION}}</bundle>
