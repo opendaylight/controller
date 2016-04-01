@@ -29,7 +29,12 @@ import scala.concurrent.duration.Duration;
  * @author Thomas Pantelis
  */
 class RaftActorSnapshotMessageSupport {
-    static final String COMMIT_SNAPSHOT = "commit_snapshot";
+    static final Object COMMIT_SNAPSHOT = new Object() {
+        @Override
+        public String toString() {
+            return "commit_snapshot";
+        }
+    };
 
     private final RaftActorContext context;
     private final RaftActorSnapshotCohort cohort;
@@ -69,7 +74,7 @@ class RaftActorSnapshotMessageSupport {
             onSaveSnapshotFailure((SaveSnapshotFailure) message);
         } else if (message instanceof CaptureSnapshotReply) {
             onCaptureSnapshotReply(((CaptureSnapshotReply) message).getSnapshot());
-        } else if (message.equals(COMMIT_SNAPSHOT)) {
+        } else if (COMMIT_SNAPSHOT.equals(message)) {
             context.getSnapshotManager().commit(-1);
         } else if (message instanceof GetSnapshot) {
             onGetSnapshot(sender);
