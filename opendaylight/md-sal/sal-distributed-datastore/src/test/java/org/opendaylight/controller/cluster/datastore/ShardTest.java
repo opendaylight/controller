@@ -2013,7 +2013,7 @@ public class ShardTest extends AbstractShardTest {
                         @Override
                         public void handleCommand(final Object message) {
                             super.handleCommand(message);
-                            if(message.equals(TX_COMMIT_TIMEOUT_CHECK_MESSAGE)) {
+                            if(TX_COMMIT_TIMEOUT_CHECK_MESSAGE.equals(message)) {
                                 if(cleaupCheckLatch.get() != null) {
                                     cleaupCheckLatch.get().countDown();
                                 }
@@ -2110,7 +2110,8 @@ public class ShardTest extends AbstractShardTest {
                 public void handleCommand(final Object message) {
                     super.handleCommand(message);
 
-                    if (message instanceof SaveSnapshotSuccess || message.equals("commit_snapshot")) {
+                    // XXX:  commit_snapshot equality check references RaftActorSnapshotMessageSupport.COMMIT_SNAPSHOT
+                    if (message instanceof SaveSnapshotSuccess || "commit_snapshot".equals(message.toString())) {
                         latch.get().countDown();
                     }
                 }
