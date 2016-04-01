@@ -15,6 +15,8 @@ import akka.actor.PoisonPill;
 import akka.japi.Procedure;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
 import java.io.Serializable;
 import java.util.Collection;
@@ -24,6 +26,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.DelegatingPersistentDataProvider;
@@ -49,6 +52,7 @@ import org.opendaylight.controller.cluster.raft.client.messages.GetOnDemandRaftS
 import org.opendaylight.controller.cluster.raft.client.messages.OnDemandRaftState;
 import org.opendaylight.controller.cluster.raft.client.messages.Shutdown;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
+import org.opendaylight.yangtools.concepts.Immutable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -108,11 +112,11 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
     private final PersistentDataProvider persistentProvider;
 
+    private final BehaviorStateTracker behaviorStateTracker = new BehaviorStateTracker();
+
     private RaftActorRecoverySupport raftRecovery;
 
     private RaftActorSnapshotMessageSupport snapshotSupport;
-
-    private final BehaviorStateHolder reusableBehaviorStateHolder = new BehaviorStateHolder();
 
     private RaftActorServerConfigurationSupport serverConfigurationSupport;
 
@@ -196,9 +200,9 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             }
         }
 
-        reusableBehaviorStateHolder.init(currentBehavior);
+        final BehaviorState state = behaviorStateTracker.capture(currentBehavior);
         setCurrentBehavior(newBehavior);
-        handleBehaviorChange(reusableBehaviorStateHolder, newBehavior);
+        handleBehaviorChange(state, newBehavior);
     }
 
     @Override
@@ -264,12 +268,11 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         } else if(message instanceof Runnable) {
             ((Runnable)message).run();
         } else {
-            final RaftActorBehavior currentBehavior = getCurrentBehavior();
-
             // Processing the message may affect the state, hence we need to capture it
-            reusableBehaviorStateHolder.init(currentBehavior);
+            final RaftActorBehavior currentBehavior = getCurrentBehavior();
+            final BehaviorState state = behaviorStateTracker.capture(currentBehavior);
             final RaftActorBehavior nextBehavior = currentBehavior.handleMessage(getSender(), message);
-            switchBehavior(nextBehavior);
+            switchBehavior(state, nextBehavior);
         }
     }
 
@@ -356,10 +359,8 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         if(!getRaftActorContext().getRaftPolicy().automaticElectionsEnabled()) {
             RaftState newState = message.getNewState();
             if( newState == RaftState.Leader || newState == RaftState.Follower) {
-                reusableBehaviorStateHolder.init(getCurrentBehavior());
-                final RaftActorBehavior nextBehavior = AbstractRaftActorBehavior.createBehavior(context,
-                    message.getNewState());
-                switchBehavior(nextBehavior);
+                switchBehavior(behaviorStateTracker.capture(getCurrentBehavior()),
+                    AbstractRaftActorBehavior.createBehavior(context, message.getNewState()));
                 getRaftActorContext().getTermInformation().updateAndPersist(message.getNewTerm(), "");
             } else {
                 LOG.warn("Switching to behavior : {} - not supported", newState);
@@ -367,9 +368,9 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         }
     }
 
-    private void switchBehavior(final RaftActorBehavior nextBehavior) {
+    private void switchBehavior(final BehaviorState oldBehaviorState, final RaftActorBehavior nextBehavior) {
         setCurrentBehavior(nextBehavior);
-        handleBehaviorChange(reusableBehaviorStateHolder, nextBehavior);
+        handleBehaviorChange(oldBehaviorState, nextBehavior);
     }
 
     @VisibleForTesting
@@ -427,7 +428,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
     }
 
-    private void handleBehaviorChange(BehaviorStateHolder oldBehaviorState, RaftActorBehavior currentBehavior) {
+    private void handleBehaviorChange(BehaviorState oldBehaviorState, RaftActorBehavior currentBehavior) {
         RaftActorBehavior oldBehavior = oldBehaviorState.getBehavior();
 
         if (oldBehavior != currentBehavior){
@@ -856,31 +857,88 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         }
     }
 
-    private static class BehaviorStateHolder {
-        private RaftActorBehavior behavior;
-        private String lastValidLeaderId;
-        private short leaderPayloadVersion;
+    /**
+     * A point-in-time capture of {@link RaftActorBehavior} state critical for transitioning between behaviors.
+     */
+    private static abstract class BehaviorState implements Immutable {
+        @Nullable abstract RaftActorBehavior getBehavior();
+        @Nullable abstract String getLastValidLeaderId();
+        @Nullable abstract short getLeaderPayloadVersion();
+    }
 
-        void init(RaftActorBehavior behavior) {
-            this.behavior = behavior;
-            this.leaderPayloadVersion = behavior != null ? behavior.getLeaderPayloadVersion() : -1;
+    /**
+     * A {@link BehaviorState} corresponding to non-null {@link RaftActorBehavior} state.
+     */
+    private static final class SimpleBehaviorState extends BehaviorState {
+        private final RaftActorBehavior behavior;
+        private final String lastValidLeaderId;
+        private final short leaderPayloadVersion;
 
-            String behaviorLeaderId = behavior != null ? behavior.getLeaderId() : null;
-            if(behaviorLeaderId != null) {
-                this.lastValidLeaderId = behaviorLeaderId;
-            }
+        SimpleBehaviorState(final String lastValidLeaderId, final RaftActorBehavior behavior) {
+            this.lastValidLeaderId = lastValidLeaderId;
+            this.behavior = Preconditions.checkNotNull(behavior);
+            this.leaderPayloadVersion = behavior.getLeaderPayloadVersion();
         }
 
+        @Override
         RaftActorBehavior getBehavior() {
             return behavior;
         }
 
+        @Override
         String getLastValidLeaderId() {
             return lastValidLeaderId;
         }
 
+        @Override
         short getLeaderPayloadVersion() {
             return leaderPayloadVersion;
         }
     }
+
+    /**
+     * Class tracking behavior-related information, which we need to keep around and pass across behavior switches.
+     * An instance is created for each RaftActor. It has two functions:
+     * - it keeps track of the last leader ID we have encountered since we have been created
+     * - it creates state capture needed to transition from one behavior to the next
+     */
+    private static final class BehaviorStateTracker {
+        /**
+         * A {@link BehaviorState} corresponding to null {@link RaftActorBehavior} state. Since null behavior is only
+         * allowed before we receive the first message, we know the leader ID to be null.
+         */
+        private static final BehaviorState NULL_BEHAVIOR_STATE = new BehaviorState() {
+            @Override
+            RaftActorBehavior getBehavior() {
+                return null;
+            }
+
+            @Override
+            String getLastValidLeaderId() {
+                return null;
+            }
+
+            @Override
+            short getLeaderPayloadVersion() {
+                return -1;
+            }
+        };
+
+        private String lastValidLeaderId;
+
+        BehaviorState capture(final RaftActorBehavior behavior) {
+            if (behavior == null) {
+                Verify.verify(lastValidLeaderId == null, "Null behavior with non-null last leader");
+                return NULL_BEHAVIOR_STATE;
+            }
+
+            final String leaderId = behavior.getLeaderId();
+            if (leaderId != null) {
+                lastValidLeaderId = leaderId;
+            }
+
+            return new SimpleBehaviorState(lastValidLeaderId, behavior);
+        }
+    }
+
 }
