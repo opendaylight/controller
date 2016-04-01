@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Supplier;
 import javax.annotation.Nonnull;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
@@ -114,8 +113,6 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     private RaftActorSnapshotMessageSupport snapshotSupport;
 
     private final BehaviorStateHolder reusableBehaviorStateHolder = new BehaviorStateHolder();
-
-    private final SwitchBehaviorSupplier reusableSwitchBehaviorSupplier = new SwitchBehaviorSupplier();
 
     private RaftActorServerConfigurationSupport serverConfigurationSupport;
 
@@ -266,7 +263,8 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         } else if(message instanceof Runnable) {
             ((Runnable)message).run();
         } else {
-            switchBehavior(reusableSwitchBehaviorSupplier.handleMessage(getSender(), message));
+            final RaftActorBehavior nextBehavior = getCurrentBehavior().handleMessage(getSender(), message);
+            switchBehavior(nextBehavior);
         }
     }
 
@@ -353,7 +351,9 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         if(!getRaftActorContext().getRaftPolicy().automaticElectionsEnabled()) {
             RaftState newState = message.getNewState();
             if( newState == RaftState.Leader || newState == RaftState.Follower) {
-                switchBehavior(reusableSwitchBehaviorSupplier.handleMessage(getSender(), message));
+                final RaftActorBehavior nextBehavior = AbstractRaftActorBehavior.createBehavior(context,
+                    message.getNewState());
+                switchBehavior(nextBehavior);
                 getRaftActorContext().getTermInformation().updateAndPersist(message.getNewTerm(), "");
             } else {
                 LOG.warn("Switching to behavior : {} - not supported", newState);
@@ -361,12 +361,12 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         }
     }
 
-    private void switchBehavior(Supplier<RaftActorBehavior> supplier){
+    private void switchBehavior(final RaftActorBehavior nextBehavior) {
         reusableBehaviorStateHolder.init(getCurrentBehavior());
 
-        setCurrentBehavior(supplier.get());
+        setCurrentBehavior(nextBehavior);
 
-        handleBehaviorChange(reusableBehaviorStateHolder, getCurrentBehavior());
+        handleBehaviorChange(reusableBehaviorStateHolder, nextBehavior);
     }
 
     @VisibleForTesting
@@ -878,25 +878,6 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
         short getLeaderPayloadVersion() {
             return leaderPayloadVersion;
-        }
-    }
-
-    private class SwitchBehaviorSupplier implements Supplier<RaftActorBehavior> {
-        private Object message;
-        private ActorRef sender;
-
-        public SwitchBehaviorSupplier handleMessage(ActorRef sender, Object message){
-            this.sender = sender;
-            this.message = message;
-            return this;
-        }
-
-        @Override
-        public RaftActorBehavior get() {
-            if(this.message instanceof SwitchBehavior){
-                return AbstractRaftActorBehavior.createBehavior(context, ((SwitchBehavior) message).getNewState());
-            }
-            return getCurrentBehavior().handleMessage(sender, message);
         }
     }
 }
