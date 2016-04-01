@@ -209,15 +209,13 @@ public class Shard extends RaftActor {
 
     @Override
     protected void handleCommand(final Object message) {
+        try (final MessageTracker.Context context = appendEntriesReplyTracker.received(message)) {
+            final Optional<Error> maybeError = context.error();
+            if (maybeError.isPresent()) {
+                LOG.trace("{} : AppendEntriesReply failed to arrive at the expected interval {}", persistenceId(),
+                    maybeError.get());
+            }
 
-        final MessageTracker.Context context = appendEntriesReplyTracker.received(message);
-        final Optional<Error> maybeError = context.error();
-        if (maybeError.isPresent()) {
-            LOG.trace("{} : AppendEntriesReply failed to arrive at the expected interval {}", persistenceId(),
-                maybeError.get());
-        }
-
-        try {
             if (CreateTransaction.isSerializedType(message)) {
                 handleCreateTransaction(message);
             } else if (message instanceof BatchedModifications) {
@@ -264,8 +262,6 @@ public class Shard extends RaftActor {
             } else {
                 super.handleCommand(message);
             }
-        } finally {
-            context.done();
         }
     }
 
