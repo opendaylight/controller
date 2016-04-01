@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a4c51b2_682648bc",
+        "filename": "opendaylight/config/config-it-base/src/main/java/org/opendaylight/controller/config/it/base/AbstractConfigTestBase.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-04-01T01:16:23Z",
+      "side": 1,
+      "message": "Please remove the blank lines here and above.",
+      "revId": "69c590d3002bdeeb5506ba5a2ccf1ae57739d015",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a4c51b2_081a246e",
+        "filename": "opendaylight/config/config-it-base/src/main/java/org/opendaylight/controller/config/it/base/AbstractConfigTestBase.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 166,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-04-01T01:16:23Z",
+      "side": 1,
+      "message": "It looks like you have format on save enabled in your IDE. I would suggest to turn this off. It can cause too many extraneous changes that make it difficult for the reviewer to distinguish what really changed. Also unneeded changes increase the chances for merge conflicts. \n\nIf you find bad formatting in a file you want to change, generally it\u0027s better to push a separate patch with just the formatting changes.\n\nI\u0027m fine with leaving these changes as there\u0027s not many and this is a test class that isn\u0027t touched often.  Just suggestions for the future...\n\nWrt to a space before paren, generally from what I\u0027ve seen most code, at least in the core projects, does not have a space (that\u0027s my preference).",
+      "revId": "69c590d3002bdeeb5506ba5a2ccf1ae57739d015",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
