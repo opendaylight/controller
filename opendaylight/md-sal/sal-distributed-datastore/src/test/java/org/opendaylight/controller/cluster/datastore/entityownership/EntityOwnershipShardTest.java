@@ -825,7 +825,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
                 type("operational" + NEXT_SHARD_NUM.getAndIncrement()).build();
     }
 
-    public static class TestEntityOwnershipShard extends EntityOwnershipShard {
+    private static class TestEntityOwnershipShard extends EntityOwnershipShard {
 
         TestEntityOwnershipShard(ShardIdentifier name, Map<String, String> peerAddresses,
                 DatastoreContext datastoreContext) {
@@ -841,7 +841,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
         }
     }
 
-    public static class MockFollower extends UntypedActor {
+    private static class MockFollower extends UntypedActor {
         volatile boolean grantVote;
         volatile boolean dropAppendEntries;
         private final String myId;
@@ -958,7 +958,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
         verifyOwner(shard, ENTITY_TYPE, ENTITY_ID1, LOCAL_MEMBER_NAME);
     }
 
-    public static class MockLeader extends UntypedActor {
+    private static class MockLeader extends UntypedActor {
         volatile CountDownLatch modificationsReceived = new CountDownLatch(1);
         List<Modification> receivedModifications = new ArrayList<>();
         volatile boolean sendReply = true;
