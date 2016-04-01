@@ -83,10 +83,20 @@ import scala.concurrent.duration.FiniteDuration;
  */
 public class Shard extends RaftActor {
 
-    protected static final Object TX_COMMIT_TIMEOUT_CHECK_MESSAGE = "txCommitTimeoutCheck";
+    protected static final Object TX_COMMIT_TIMEOUT_CHECK_MESSAGE = new Object() {
+        @Override
+        public String toString() {
+            return "txCommitTimeoutCheck";
+        }
+    };
 
     @VisibleForTesting
-    static final Object GET_SHARD_MBEAN_MESSAGE = "getShardMBeanMessage";
+    static final Object GET_SHARD_MBEAN_MESSAGE = new Object() {
+        @Override
+        public String toString() {
+            return "getShardMBeanMessage";
+        }
+    };
 
     // FIXME: shard names should be encapsulated in their own class and this should be exposed as a constant.
     public static final String DEFAULT_NAME = "default";
