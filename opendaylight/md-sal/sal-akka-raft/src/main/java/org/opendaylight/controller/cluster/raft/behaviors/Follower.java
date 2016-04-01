@@ -11,6 +11,7 @@ package org.opendaylight.controller.cluster.raft.behaviors;
 import akka.actor.ActorRef;
 import akka.japi.Procedure;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
 import java.util.ArrayList;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
@@ -50,6 +51,8 @@ public class Follower extends AbstractRaftActorBehavior {
     };
 
     private SnapshotTracker snapshotTracker = null;
+    private String leaderId;
+    private short leaderPayloadVersion;
 
     public Follower(RaftActorContext context) {
         this(context, null, (short)-1);
@@ -57,8 +60,8 @@ public class Follower extends AbstractRaftActorBehavior {
 
     public Follower(RaftActorContext context, String initialLeaderId, short initialLeaderPayloadVersion) {
         super(context, RaftState.Follower);
-        leaderId = initialLeaderId;
-        setLeaderPayloadVersion(initialLeaderPayloadVersion);
+        this.leaderId = initialLeaderId;
+        this.leaderPayloadVersion = initialLeaderPayloadVersion;
 
         initialSyncStatusTracker = new SyncStatusTracker(context.getActor(), getId(), SYNC_THRESHOLD);
 
@@ -69,7 +72,26 @@ public class Follower extends AbstractRaftActorBehavior {
                 scheduleElection(electionDuration());
             }
         }
+    }
 
+    @Override
+    public final String getLeaderId() {
+        return leaderId;
+    }
+
+    @VisibleForTesting
+    protected final void setLeaderId(final String leaderId) {
+        this.leaderId = Preconditions.checkNotNull(leaderId);
+    }
+
+    @Override
+    public short getLeaderPayloadVersion() {
+        return leaderPayloadVersion;
+    }
+
+    @VisibleForTesting
+    protected final void setLeaderPayloadVersion(short leaderPayloadVersion) {
+        this.leaderPayloadVersion = leaderPayloadVersion;
     }
 
     private boolean isLogEntryPresent(long index){
@@ -103,8 +125,8 @@ public class Follower extends AbstractRaftActorBehavior {
         initialSyncStatusTracker.update(leaderId, currentLeaderCommit, context.getCommitIndex());
     }
 
-    @Override protected RaftActorBehavior handleAppendEntries(ActorRef sender,
-                                                              AppendEntries appendEntries) {
+    @Override
+    protected RaftActorBehavior handleAppendEntries(ActorRef sender, AppendEntries appendEntries) {
 
         int numLogEntries = appendEntries.getEntries() != null ? appendEntries.getEntries().size() : 0;
         if(LOG.isTraceEnabled()) {
@@ -132,8 +154,7 @@ public class Follower extends AbstractRaftActorBehavior {
 
         // If we got here then we do appear to be talking to the leader
         leaderId = appendEntries.getLeaderId();
-
-        setLeaderPayloadVersion(appendEntries.getPayloadVersion());
+        leaderPayloadVersion = appendEntries.getPayloadVersion();
 
         updateInitialSyncStatus(appendEntries.getLeaderCommit(), appendEntries.getLeaderId());
         // First check if the logs are in sync or not
@@ -312,17 +333,20 @@ public class Follower extends AbstractRaftActorBehavior {
         return outOfSync;
     }
 
-    @Override protected RaftActorBehavior handleAppendEntriesReply(ActorRef sender,
+    @Override
+    protected RaftActorBehavior handleAppendEntriesReply(ActorRef sender,
         AppendEntriesReply appendEntriesReply) {
         return this;
     }
 
-    @Override protected RaftActorBehavior handleRequestVoteReply(ActorRef sender,
+    @Override
+    protected RaftActorBehavior handleRequestVoteReply(ActorRef sender,
         RequestVoteReply requestVoteReply) {
         return this;
     }
 
-    @Override public RaftActorBehavior handleMessage(ActorRef sender, Object originalMessage) {
+    @Override
+    public RaftActorBehavior handleMessage(ActorRef sender, Object originalMessage) {
 
         Object message = fromSerializableMessage(originalMessage);
 

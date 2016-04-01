@@ -95,14 +95,10 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
     protected AbstractLeader(RaftActorContext context, RaftState state) {
         super(context, state);
 
-        setLeaderPayloadVersion(context.getPayloadVersion());
-
         for(PeerInfo peerInfo: context.getPeers()) {
             FollowerLogInformation followerLogInformation = new FollowerLogInformationImpl(peerInfo, -1, context);
             followerToLog.put(peerInfo.getId(), followerLogInformation);
         }
-
-        leaderId = context.getId();
 
         LOG.debug("{}: Election: Leader has following peers: {}", logName(), getFollowerIds());
 
@@ -775,8 +771,13 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
     }
 
     @Override
-    public String getLeaderId() {
+    public final String getLeaderId() {
         return context.getId();
+    }
+
+    @Override
+    public final short getLeaderPayloadVersion() {
+        return context.getPayloadVersion();
     }
 
     protected boolean isLeaderIsolated() {
