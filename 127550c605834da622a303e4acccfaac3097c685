@@ -46,6 +46,30 @@
       "revId": "127550c605834da622a303e4acccfaac3097c685",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a4c51b2_28e72042",
+        "filename": "features/mdsal/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-04-01T03:16:06Z",
+      "side": 1,
+      "message": "Actually I\u0027m mistaken - not sure what I was thinking. I removed the version.",
+      "parentUuid": "3a4c51b2_088d047c",
+      "range": {
+        "startLine": 81,
+        "startChar": 15,
+        "endLine": 81,
+        "endChar": 23
+      },
+      "revId": "127550c605834da622a303e4acccfaac3097c685",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
