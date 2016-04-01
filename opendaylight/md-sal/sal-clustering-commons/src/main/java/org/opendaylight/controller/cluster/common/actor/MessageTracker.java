@@ -41,29 +41,30 @@ import org.slf4j.LoggerFactory;
  *
  *     .....
  *
- *     MessageTracker.Context context = tracker.received(message);
+ *     try (MessageTracker.Context context = tracker.received(message)) {
  *
- *     if(context.error().isPresent()){
- *         LOG.error("{}", context.error().get());
+ *         if (context.error().isPresent()){
+ *             LOG.error("{}", context.error().get());
+ *         }
+ *
+ *         // Some custom processing
+ *         process(message);
  *     }
- *
- *     // Some custom processing
- *     process(message);
- *
- *     context.done();
  *
  * </pre>
  */
 @Beta
 @NotThreadSafe
 public final class MessageTracker {
-    public static abstract class Context {
+    public static abstract class Context implements AutoCloseable {
         Context() {
             // Hidden to prevent outside instantiation
         }
 
-        public abstract Context done();
         public abstract Optional<Error> error();
+
+        @Override
+        public abstract void close();
     }
 
     public interface Error {
@@ -102,8 +103,8 @@ public final class MessageTracker {
     private static final Logger LOG = LoggerFactory.getLogger(MessageTracker.class);
     private static final Context NO_OP_CONTEXT = new Context() {
         @Override
-        public Context done() {
-            return this;
+        public void close() {
+            // No-op
         }
 
         @Override
@@ -236,9 +237,8 @@ public final class MessageTracker {
         abstract Stopwatch stopTimer();
 
         @Override
-        public final Context done() {
+        public final void close() {
             processed(message(), stopTimer().elapsed(NANOSECONDS));
-            return this;
         }
     }
 
