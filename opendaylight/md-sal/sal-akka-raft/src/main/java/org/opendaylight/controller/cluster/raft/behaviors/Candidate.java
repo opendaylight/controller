@@ -70,11 +70,20 @@ public class Candidate extends AbstractRaftActorBehavior {
         } else {
             scheduleElection(electionDuration());
         }
-
-
     }
 
-    @Override protected RaftActorBehavior handleAppendEntries(ActorRef sender,
+    @Override
+    public final String getLeaderId() {
+        return null;
+    }
+
+    @Override
+    public final short getLeaderPayloadVersion() {
+        return -1;
+    }
+
+    @Override
+    protected RaftActorBehavior handleAppendEntries(ActorRef sender,
         AppendEntries appendEntries) {
 
         if(LOG.isDebugEnabled()) {
@@ -92,17 +101,14 @@ public class Candidate extends AbstractRaftActorBehavior {
         return this;
     }
 
-    @Override protected RaftActorBehavior handleAppendEntriesReply(ActorRef sender,
-        AppendEntriesReply appendEntriesReply) {
-
+    @Override
+    protected RaftActorBehavior handleAppendEntriesReply(ActorRef sender, AppendEntriesReply appendEntriesReply) {
         return this;
     }
 
-    @Override protected RaftActorBehavior handleRequestVoteReply(ActorRef sender,
-            RequestVoteReply requestVoteReply) {
-
-        LOG.debug("{}: handleRequestVoteReply: {}, current voteCount: {}", logName(), requestVoteReply,
-                voteCount);
+    @Override
+    protected RaftActorBehavior handleRequestVoteReply(ActorRef sender, RequestVoteReply requestVoteReply) {
+        LOG.debug("{}: handleRequestVoteReply: {}, current voteCount: {}", logName(), requestVoteReply, voteCount);
 
         if (requestVoteReply.isVoteGranted()) {
             voteCount++;

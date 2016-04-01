@@ -86,6 +86,7 @@ public class RaftActorContextImpl implements RaftActorContext {
         }
     }
 
+    @VisibleForTesting
     public void setPayloadVersion(short payloadVersion) {
         this.payloadVersion = payloadVersion;
     }
