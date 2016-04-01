@@ -80,6 +80,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
     static final String NEW_SERVER_ID = "new-server";
     static final String NEW_SERVER_ID2 = "new-server2";
     private static final Logger LOG = LoggerFactory.getLogger(RaftActorServerConfigurationSupportTest.class);
+    private static final Class<?> COMMIT_MESSAGE_CLASS = RaftActorSnapshotMessageSupport.COMMIT_SNAPSHOT.getClass();
     private static final boolean NO_PERSISTENCE = false;
     private static final boolean PERSISTENT = true;
 
@@ -436,7 +437,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
         leaderActor.tell(new InitiateCaptureSnapshot(), leaderActor);
 
-        String commitMsg = expectFirstMatching(leaderCollectorActor, String.class);
+        Object commitMsg = expectFirstMatching(leaderCollectorActor, COMMIT_MESSAGE_CLASS);
 
         leaderActor.tell(new AddServer(NEW_SERVER_ID, newFollowerRaftActor.path().toString(), true), testKit.getRef());
 
@@ -479,7 +480,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         ((DefaultConfigParamsImpl)leaderActorContext.getConfigParams()).setElectionTimeoutFactor(1);
 
         // Drop commit message so the snapshot doesn't complete.
-        leaderRaftActor.setDropMessageOfType(String.class);
+        leaderRaftActor.setDropMessageOfType(COMMIT_MESSAGE_CLASS);
 
         leaderActor.tell(new InitiateCaptureSnapshot(), leaderActor);
 
@@ -512,13 +513,13 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         TestActorRef<MessageCollectorActor> leaderCollectorActor = newLeaderCollectorActor(leaderRaftActor);
 
         // Drop the commit message so the snapshot doesn't complete yet.
-        leaderRaftActor.setDropMessageOfType(String.class);
+        leaderRaftActor.setDropMessageOfType(COMMIT_MESSAGE_CLASS);
 
         leaderActor.tell(new InitiateCaptureSnapshot(), leaderActor);
 
         leaderActor.tell(new AddServer(NEW_SERVER_ID, newFollowerRaftActor.path().toString(), true), testKit.getRef());
 
-        String commitMsg = expectFirstMatching(leaderCollectorActor, String.class);
+        Object commitMsg = expectFirstMatching(leaderCollectorActor, COMMIT_MESSAGE_CLASS);
 
         // Change the leader behavior to follower
         leaderActor.tell(new Follower(leaderActorContext), leaderActor);
