@@ -28,7 +28,12 @@ import scala.concurrent.duration.FiniteDuration;
  * @author Thomas Pantelis
  */
 class EntityOwnershipShardCommitCoordinator {
-    private static final Object COMMIT_RETRY_MESSAGE = "entityCommitRetry";
+    private static final Object COMMIT_RETRY_MESSAGE = new Object() {
+        @Override
+        public String toString() {
+            return "entityCommitRetry";
+        }
+    };
 
     private final Logger log;
     private int transactionIDCounter = 0;
@@ -50,7 +55,7 @@ class EntityOwnershipShardCommitCoordinator {
         } else if(message instanceof akka.actor.Status.Failure) {
             // Failure reply from a local commit.
             inflightCommitFailure(((Failure)message).cause(), shard);
-        } else if(message.equals(COMMIT_RETRY_MESSAGE)) {
+        } else if(COMMIT_RETRY_MESSAGE.equals(message)) {
             retryInflightCommit(shard);
         } else {
             handled = false;
