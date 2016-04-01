@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "3a4c51b2_f1ac0038",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/EntityOwnershipListenerSupport.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-04-01T20:52:55Z",
+      "side": 1,
+      "message": "That is true, but it is accessed from a DataTreeChangeListener -- and that is dispatched from a different threadpool, right?",
+      "parentUuid": "3a4c51b2_22f3ca74",
+      "revId": "be76702e0d2642ee7d7909b160dc60e29417d1bd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a4c51b2_02aa0e19",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/EntityOwnershipShard.java",
         "patchSetId": 6
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "3a4c51b2_31a78851",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/EntityOwnershipShard.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 269,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-04-01T20:52:55Z",
+      "side": 1,
+      "message": "Well, the way this is written we will get an eclipse warning and we really want to be catching these inconsistencies as soon as possible...",
+      "parentUuid": "3a4c51b2_02aa0e19",
+      "revId": "be76702e0d2642ee7d7909b160dc60e29417d1bd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a4c51b2_42eed68c",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/EntityOwnershipShard.java",
         "patchSetId": 6
@@ -47,6 +83,24 @@
       "writtenOn": "2016-03-29T13:24:06Z",
       "side": 1,
       "message": "persistenceId() should be the first format arg.",
+      "revId": "be76702e0d2642ee7d7909b160dc60e29417d1bd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a4c51b2_7168f0f5",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/EntityOwnershipShard.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 310,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-04-01T20:52:55Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3a4c51b2_42eed68c",
       "revId": "be76702e0d2642ee7d7909b160dc60e29417d1bd",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
