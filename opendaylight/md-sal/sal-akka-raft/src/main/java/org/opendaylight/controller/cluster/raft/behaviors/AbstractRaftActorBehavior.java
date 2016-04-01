@@ -54,13 +54,6 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
      */
     private Cancellable electionCancel = null;
 
-    /**
-     *
-     */
-    protected String leaderId = null;
-
-    private short leaderPayloadVersion = -1;
-
     private long replicatedToAllIndex = -1;
 
     private final String logName;
@@ -95,7 +88,7 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
         return state;
     }
 
-    public String logName() {
+    protected final String logName() {
         return logName;
     }
 
@@ -426,20 +419,6 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
             return handleRequestVoteReply(sender, (RequestVoteReply) message);
         }
         return this;
-    }
-
-    @Override
-    public String getLeaderId() {
-        return leaderId;
-    }
-
-    @Override
-    public short getLeaderPayloadVersion() {
-        return leaderPayloadVersion;
-    }
-
-    public void setLeaderPayloadVersion(short leaderPayloadVersion) {
-        this.leaderPayloadVersion = leaderPayloadVersion;
     }
 
     @Override
