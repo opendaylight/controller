@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "3a4c51b2_d4261268",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/EntityOwnershipListenerSupport.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-04-01T23:13:44Z",
+      "side": 1,
+      "message": "The DTCLs are notified directly by the ShardDataTree. At least they used to be. I recently changed it to offload event generation to a separate actor so that makes EOS DTCL access to this class unsafe. Damn.",
+      "parentUuid": "3a4c51b2_f1ac0038",
+      "revId": "be76702e0d2642ee7d7909b160dc60e29417d1bd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a4c51b2_02aa0e19",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/EntityOwnershipShard.java",
         "patchSetId": 6
@@ -66,6 +84,24 @@
       "side": 1,
       "message": "Well, the way this is written we will get an eclipse warning and we really want to be catching these inconsistencies as soon as possible...",
       "parentUuid": "3a4c51b2_02aa0e19",
+      "revId": "be76702e0d2642ee7d7909b160dc60e29417d1bd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a4c51b2_b42b862f",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/EntityOwnershipShard.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 269,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-04-01T23:13:44Z",
+      "side": 1,
+      "message": "We do but this could easily be missed if a new RaftState is added. But I suppose we would see test failures or runtime issues before release occurs as this is called onStateChanged.",
+      "parentUuid": "3a4c51b2_31a78851",
       "revId": "be76702e0d2642ee7d7909b160dc60e29417d1bd",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
