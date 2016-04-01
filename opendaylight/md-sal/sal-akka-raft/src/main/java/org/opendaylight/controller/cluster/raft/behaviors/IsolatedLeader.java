@@ -39,7 +39,7 @@ public class IsolatedLeader extends AbstractLeader {
         // it can happen that this isolated leader interacts with a new leader in the cluster and
         // changes its state to Follower, hence we only need to switch to Leader if the state is still Isolated
         if (ret.state() == RaftState.IsolatedLeader && !isLeaderIsolated()) {
-            LOG.info("IsolatedLeader {} switching from IsolatedLeader to Leader", leaderId);
+            LOG.info("IsolatedLeader {} switching from IsolatedLeader to Leader", getLeaderId());
             return internalSwitchBehavior(RaftState.Leader);
         }
         return ret;

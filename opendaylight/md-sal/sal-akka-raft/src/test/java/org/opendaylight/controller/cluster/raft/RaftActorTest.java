@@ -505,7 +505,7 @@ public class RaftActorTest extends AbstractActorTest {
             Follower follower = new Follower(raftActor.getRaftActorContext()) {
                 @Override
                 public RaftActorBehavior handleMessage(ActorRef sender, Object message) {
-                    leaderId = newLeaderId;
+                    setLeaderId(newLeaderId);
                     setLeaderPayloadVersion(newLeaderVersion);
                     return this;
                 }
