@@ -123,9 +123,25 @@ public class Candidate extends AbstractRaftActorBehavior {
 
     @Override
     public RaftActorBehavior handleMessage(ActorRef sender, Object originalMessage) {
+        if (originalMessage instanceof ElectionTimeout) {
+            LOG.debug("{}: Received ElectionTimeout", logName());
 
-        Object message = fromSerializableMessage(originalMessage);
+            if (votesRequired == 0) {
+                // If there are no peers then we should be a Leader
+                // We wait for the election timeout to occur before declare
+                // ourselves the leader. This gives enough time for a leader
+                // who we do not know about (as a peer)
+                // to send a message to the candidate
 
+                return internalSwitchBehavior(RaftState.Leader);
+            }
+
+            startNewTerm();
+            scheduleElection(electionDuration());
+            return this;
+        }
+
+        final Object message = fromSerializableMessage(originalMessage);
         if (message instanceof RaftRPC) {
 
             RaftRPC rpc = (RaftRPC) message;
@@ -143,23 +159,6 @@ public class Candidate extends AbstractRaftActorBehavior {
 
                 return internalSwitchBehavior(RaftState.Follower);
             }
-        }
-
-        if (message instanceof ElectionTimeout) {
-            LOG.debug("{}: Received ElectionTimeout", logName());
-
-            if (votesRequired == 0) {
-                // If there are no peers then we should be a Leader
-                // We wait for the election timeout to occur before declare
-                // ourselves the leader. This gives enough time for a leader
-                // who we do not know about (as a peer)
-                // to send a message to the candidate
-
-                return internalSwitchBehavior(RaftState.Leader);
-            }
-            startNewTerm();
-            scheduleElection(electionDuration());
-            return this;
         }
 
         return super.handleMessage(sender, message);

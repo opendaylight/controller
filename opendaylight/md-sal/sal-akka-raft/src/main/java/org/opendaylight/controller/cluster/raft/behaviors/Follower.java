@@ -347,9 +347,16 @@ public class Follower extends AbstractRaftActorBehavior {
 
     @Override
     public RaftActorBehavior handleMessage(ActorRef sender, Object originalMessage) {
+        if (originalMessage instanceof ElectionTimeout) {
+            if (canStartElection()) {
+                LOG.debug("{}: Received ElectionTimeout - switching to Candidate", logName());
+                return internalSwitchBehavior(RaftState.Candidate);
+            } else {
+                return this;
+            }
+        }
 
-        Object message = fromSerializableMessage(originalMessage);
-
+        final Object message = fromSerializableMessage(originalMessage);
         if (message instanceof RaftRPC) {
             RaftRPC rpc = (RaftRPC) message;
             // If RPC request or response contains term T > currentTerm:
@@ -363,20 +370,12 @@ public class Follower extends AbstractRaftActorBehavior {
             }
         }
 
-        if (message instanceof ElectionTimeout) {
-            if(canStartElection()) {
-                LOG.debug("{}: Received ElectionTimeout - switching to Candidate", logName());
-                return internalSwitchBehavior(RaftState.Candidate);
-            } else {
-                return this;
-            }
-
-        } else if (message instanceof InstallSnapshot) {
+        if (message instanceof InstallSnapshot) {
             InstallSnapshot installSnapshot = (InstallSnapshot) message;
             handleInstallSnapshot(sender, installSnapshot);
         }
 
-        if(message instanceof RaftRPC && (!(message instanceof RequestVote) || (canGrantVote((RequestVote) message)))){
+        if (message instanceof RaftRPC && (!(message instanceof RequestVote) || (canGrantVote((RequestVote) message)))){
             scheduleElection(electionDuration());
         }
 
