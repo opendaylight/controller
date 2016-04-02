@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a4c51b2_74f3be73",
+        "filename": "opendaylight/config/config-manager/src/main/java/org/opendaylight/controller/config/manager/impl/ConfigRegistryImpl.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 182,
+      "author": {
+        "id": 3635
+      },
+      "writtenOn": "2016-04-02T14:02:33Z",
+      "side": 1,
+      "message": "Increment operator is non-atomic;  making it volatile only solves the visibility issue, not the synchronization concerns.  Can we make versionCounter an AtomicLong instead?",
+      "range": {
+        "startLine": 182,
+        "startChar": 8,
+        "endLine": 182,
+        "endChar": 25
+      },
+      "revId": "f16e2952e597e779f10c947f7e248c08650b0814",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a4c51b2_349016ec",
+        "filename": "opendaylight/config/config-manager/src/main/java/org/opendaylight/controller/config/manager/impl/osgi/BlankTransactionServiceTracker.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 3635
+      },
+      "writtenOn": "2016-04-02T14:02:33Z",
+      "side": 1,
+      "message": "If we want to cherry-pick this back to Beryllium, we are going to have to change this...",
+      "range": {
+        "startLine": 70,
+        "startChar": 8,
+        "endLine": 70,
+        "endChar": 62
+      },
+      "revId": "f16e2952e597e779f10c947f7e248c08650b0814",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a4c51b2_94bc8a6e",
+        "filename": "opendaylight/config/config-manager/src/main/java/org/opendaylight/controller/config/manager/impl/osgi/BlankTransactionServiceTracker.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 3635
+      },
+      "writtenOn": "2016-04-02T14:02:33Z",
+      "side": 1,
+      "message": "Is there any way we can handle this better than using a busy wait?  I know this isn\u0027t something you added but something that seemed a bit odd.",
+      "range": {
+        "startLine": 85,
+        "startChar": 20,
+        "endLine": 85,
+        "endChar": 39
+      },
+      "revId": "f16e2952e597e779f10c947f7e248c08650b0814",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
