@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "3a4c51b2_b47266e3",
+        "filename": "opendaylight/config/config-manager/src/main/java/org/opendaylight/controller/config/manager/impl/ConfigRegistryImpl.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 182,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-04-02T17:18:18Z",
+      "side": 1,
+      "message": "This method is called while holding the configTransactionLock so the increment is thread-safe. It is read in commitConfigSafe which also holds the configTransactionLock. The only reason I made it volatile is b/c it\u0027s also read in toString although it doesn\u0027t really matter if it sees the most up to date value. In fact toString is probably not even invoked anywhere.",
+      "parentUuid": "3a4c51b2_74f3be73",
+      "range": {
+        "startLine": 182,
+        "startChar": 8,
+        "endLine": 182,
+        "endChar": 25
+      },
+      "revId": "f16e2952e597e779f10c947f7e248c08650b0814",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a4c51b2_349016ec",
         "filename": "opendaylight/config/config-manager/src/main/java/org/opendaylight/controller/config/manager/impl/osgi/BlankTransactionServiceTracker.java",
         "patchSetId": 6
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "3a4c51b2_744f3e93",
+        "filename": "opendaylight/config/config-manager/src/main/java/org/opendaylight/controller/config/manager/impl/osgi/BlankTransactionServiceTracker.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-04-02T17:18:18Z",
+      "side": 1,
+      "message": "That\u0027s fine. We probably don\u0027t need to cherry-pick this anyway. The main reason for these changes is for the blueprint work.",
+      "parentUuid": "3a4c51b2_349016ec",
+      "range": {
+        "startLine": 70,
+        "startChar": 8,
+        "endLine": 70,
+        "endChar": 62
+      },
+      "revId": "f16e2952e597e779f10c947f7e248c08650b0814",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a4c51b2_94bc8a6e",
         "filename": "opendaylight/config/config-manager/src/main/java/org/opendaylight/controller/config/manager/impl/osgi/BlankTransactionServiceTracker.java",
         "patchSetId": 6
@@ -59,6 +107,30 @@
       "writtenOn": "2016-04-02T14:02:33Z",
       "side": 1,
       "message": "Is there any way we can handle this better than using a busy wait?  I know this isn\u0027t something you added but something that seemed a bit odd.",
+      "range": {
+        "startLine": 85,
+        "startChar": 20,
+        "endLine": 85,
+        "endChar": 39
+      },
+      "revId": "f16e2952e597e779f10c947f7e248c08650b0814",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a4c51b2_3455b61d",
+        "filename": "opendaylight/config/config-manager/src/main/java/org/opendaylight/controller/config/manager/impl/osgi/BlankTransactionServiceTracker.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-04-02T17:18:18Z",
+      "side": 1,
+      "message": "Not sure. But as you said it\u0027s existing code and if we want to change this part I\u0027d rather it be done in another patch as it\u0027s not related to my changes.",
+      "parentUuid": "3a4c51b2_94bc8a6e",
       "range": {
         "startLine": 85,
         "startChar": 20,
