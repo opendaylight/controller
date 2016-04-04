@@ -17,14 +17,12 @@ public class ApplyState implements Serializable {
     private final ActorRef clientActor;
     private final String identifier;
     private final ReplicatedLogEntry replicatedLogEntry;
-    private final long startTime;
 
     public ApplyState(ActorRef clientActor, String identifier,
         ReplicatedLogEntry replicatedLogEntry) {
         this.clientActor = clientActor;
         this.identifier = identifier;
         this.replicatedLogEntry = replicatedLogEntry;
-        this.startTime = System.nanoTime();
     }
 
     public ActorRef getClientActor() {
@@ -39,16 +37,11 @@ public class ApplyState implements Serializable {
         return replicatedLogEntry;
     }
 
-    public long getStartTime() {
-        return startTime;
-    }
-
     @Override
     public String toString() {
         return "ApplyState{" +
                 "identifier='" + identifier + '\'' +
                 ", replicatedLogEntry.index =" + replicatedLogEntry.getIndex() +
-                ", startTime=" + startTime +
                 '}';
     }
 }
