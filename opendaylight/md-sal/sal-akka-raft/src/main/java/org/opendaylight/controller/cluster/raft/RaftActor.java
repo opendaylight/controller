@@ -217,11 +217,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         if (message instanceof ApplyState) {
             ApplyState applyState = (ApplyState) message;
 
-            long elapsedTime = (System.nanoTime() - applyState.getStartTime());
-            if(elapsedTime >= APPLY_STATE_DELAY_THRESHOLD_IN_NANOS){
-                LOG.warn("ApplyState took more time than expected. Elapsed Time = {} ms ApplyState = {}",
-                        TimeUnit.NANOSECONDS.toMillis(elapsedTime), applyState);
-            }
+            long startTime = System.nanoTime();
 
             if(LOG.isDebugEnabled()) {
                 LOG.debug("{}: Applying state for log index {} data {}",
@@ -231,6 +227,12 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
             applyState(applyState.getClientActor(), applyState.getIdentifier(),
                 applyState.getReplicatedLogEntry().getData());
+
+            long elapsedTime = System.nanoTime() - startTime;
+            if(elapsedTime >= APPLY_STATE_DELAY_THRESHOLD_IN_NANOS){
+                LOG.warn("ApplyState took more time than expected. Elapsed Time = {} ms ApplyState = {}",
+                        TimeUnit.NANOSECONDS.toMillis(elapsedTime), applyState);
+            }
 
             if (!hasFollowers()) {
                 // for single node, the capture should happen after the apply state
