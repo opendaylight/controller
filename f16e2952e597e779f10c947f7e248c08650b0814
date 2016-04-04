@@ -2,6 +2,52 @@
   "comments": [
     {
       "key": {
+        "uuid": "3a4c51b2_62a020f5",
+        "filename": "opendaylight/config/config-manager/src/main/java/org/opendaylight/controller/config/manager/impl/ConfigRegistryImpl.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-04-04T10:35:22Z",
+      "side": 1,
+      "message": "the changes to this method look dodgy, especially the \u0027noop\u0027 part and how that is made special. Can we can an explanation of what is going on there?",
+      "range": {
+        "startLine": 155,
+        "startChar": 8,
+        "endLine": 155,
+        "endChar": 26
+      },
+      "revId": "f16e2952e597e779f10c947f7e248c08650b0814",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a4c51b2_22b6183e",
+        "filename": "opendaylight/config/config-manager/src/main/java/org/opendaylight/controller/config/manager/impl/ConfigRegistryImpl.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 166,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-04-04T10:35:22Z",
+      "side": 1,
+      "message": "log the exception. thread interruption state is lost -- it should be restored.",
+      "range": {
+        "startLine": 166,
+        "startChar": 76,
+        "endLine": 166,
+        "endChar": 80
+      },
+      "revId": "f16e2952e597e779f10c947f7e248c08650b0814",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a4c51b2_74f3be73",
         "filename": "opendaylight/config/config-manager/src/main/java/org/opendaylight/controller/config/manager/impl/ConfigRegistryImpl.java",
         "patchSetId": 6
