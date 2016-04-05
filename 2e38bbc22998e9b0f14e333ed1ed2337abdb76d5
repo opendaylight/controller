@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a4c51b2_4e1a6a6f",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/BlueprintBundleTracker.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-04-05T19:48:41Z",
+      "side": 1,
+      "message": "Disables the CSS pusher. This was temporary for initial testing and is removed in a subsequent patch that \"flips the blueprint switch\".",
+      "revId": "2e38bbc22998e9b0f14e333ed1ed2337abdb76d5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a4c51b2_ae268eb8",
+        "filename": "opendaylight/config/config-persister-impl/src/main/java/org/opendaylight/controller/config/persist/impl/osgi/ConfigPersisterActivator.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-04-05T19:48:41Z",
+      "side": 1,
+      "message": "Disables the CSS pusher. This was temporary for initial testing and is removed in a subsequent patch that \"flips the blueprint switch\".",
+      "revId": "2e38bbc22998e9b0f14e333ed1ed2337abdb76d5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
