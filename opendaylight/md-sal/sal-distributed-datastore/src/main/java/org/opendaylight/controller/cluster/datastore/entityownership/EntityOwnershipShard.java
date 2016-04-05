@@ -279,15 +279,12 @@ class EntityOwnershipShard extends Shard {
             // This allows the strategies to be re-initialized with existing statistics maintained by
             // EntityOwnershipStatistics
             strategyConfig.clearStrategies();
-            // We were just elected leader. If the old leader is down, select new owners for the entities
-            // owned by the down leader.
 
-            String oldLeaderMemberName = peerIdToMemberNames.get(oldLeader);
-
-            LOG.debug("{}: oldLeaderMemberName: {}", persistenceId(), oldLeaderMemberName);
-
-            if(downPeerMemberNames.contains(oldLeaderMemberName)) {
-                removeCandidateFromEntities(oldLeaderMemberName);
+            // Remove the candidates for all members that are known to be down. In a cluster which has greater than
+            // 3 nodes it is possible for a some node beside the leader being down when the leadership transitions
+            // it makes sense to use this event to remove all the candidates for those downed nodes
+            for(String downPeerName : downPeerMemberNames){
+                removeCandidateFromEntities(downPeerName);
             }
         } else {
             // The leader changed - notify the coordinator to check if pending modifications need to be sent.
