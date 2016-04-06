@@ -59,7 +59,7 @@ public class FilterValve extends ValveBase {
     /**
      * Called by Tomcat when configurationFile attribute is set.
      * @param fileName path to xml file containing valve configuration
-     * @throws Exception
+     * @throws Exception exception
      */
     public void setConfigurationFile(String fileName) throws Exception {
         File configurationFile = new File(fileName);
