@@ -42,9 +42,9 @@ public class Filter implements FilterConfig {
 
 
     /**
-     * Called in filter-template nodes defined in <Host/> node - do not actually initialize the filter.
+     * Called in filter-template nodes defined in &lt;Host/&gt; node - do not actually initialize the filter.
      * In this case filter is only used to hold values of init params to be merged with
-     * filter defined in <Context/>
+     * filter defined in &lt;Context/&gt;.
      */
     public synchronized void initializeTemplate(){
         checkState(initialized == false, "Already initialized");
