@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a4c51b2_6ec48640",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 7
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-04-06T00:11:30Z",
+      "side": 1,
+      "message": "The first line of the commit message should be a short summary. Also please add more detail as to what you\u0027re adding.",
+      "revId": "70f26426a52359facd958970fb7468282e94fce2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
