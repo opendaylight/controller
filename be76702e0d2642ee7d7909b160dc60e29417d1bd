@@ -73,6 +73,24 @@
     },
     {
       "key": {
+        "uuid": "3a4c51b2_7a2b9c82",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/EntityOwnershipListenerSupport.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-04-06T16:47:15Z",
+      "side": 1,
+      "message": "sounds good. Doesn\u0027t hurt to make it volatile.",
+      "parentUuid": "3a4c51b2_9aff8801",
+      "revId": "be76702e0d2642ee7d7909b160dc60e29417d1bd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a4c51b2_02aa0e19",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/EntityOwnershipShard.java",
         "patchSetId": 6
