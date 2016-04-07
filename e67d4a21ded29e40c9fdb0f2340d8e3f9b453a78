@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a4c51b2_a6c86e75",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/BlueprintContainerRestartServiceImpl.java",
+        "patchSetId": 19
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-04-07T15:50:16Z",
+      "side": 1,
+      "message": "To avoid subtle bugs in the future it may be worth documenting here that containerBundlesSet must preserve insertion order, hence the use of a LinkedHashSet.",
+      "revId": "e67d4a21ded29e40c9fdb0f2340d8e3f9b453a78",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a4c51b2_46cb6a72",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/BlueprintContainerRestartServiceImpl.java",
+        "patchSetId": 19
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-04-07T15:50:16Z",
+      "side": 1,
+      "message": "You can combine this (and save a double presence check) like this:\n\n    if (containerBundles.add(bundle)) {\n        ServiceReference\u003c?\u003e[] references \u003d bundle.getRegisteredServices();\n        ...\n    }",
+      "revId": "e67d4a21ded29e40c9fdb0f2340d8e3f9b453a78",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a4c51b2_c6301a59",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/OpendaylightNamespaceHandler.java",
+        "patchSetId": 19
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-04-07T15:50:16Z",
+      "side": 1,
+      "message": "This can be simplified to\n\n    if (!Boolean.valueOf(attr.getValue())) {\n\nor even\n\n    if (!Boolean.parseBoolean(attr.getValue())) {",
+      "revId": "e67d4a21ded29e40c9fdb0f2340d8e3f9b453a78",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
