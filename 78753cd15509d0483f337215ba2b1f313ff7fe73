@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "3a4c51b2_e47c3575",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/BlueprintBundleTracker.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-04-07T13:14:21Z",
+      "side": 1,
+      "message": "Unfortunately it is b/c org.osgi... has 2 EventConstants enums.",
+      "parentUuid": "3a4c51b2_09cb3c73",
+      "revId": "78753cd15509d0483f337215ba2b1f313ff7fe73",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a4c51b2_29cef883",
         "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/BlueprintBundleTracker.java",
         "patchSetId": 13
@@ -30,6 +48,24 @@
       "writtenOn": "2016-04-06T07:52:39Z",
       "side": 1,
       "message": "If there\u0027s no special requirement to return Collections.emptyList(), the following seems clearer to me\n\n    List\u003cObject\u003e paths \u003d new ArrayList\u003c\u003e();\n    Enumeration\u003cURL\u003e e \u003d bundle.findEntries(BLUEPRINT_FILE_PATH, BLUEPRINT_FILE_PATTERN, false);\n    while (e !\u003d null \u0026\u0026 e.hasMoreElements()) {\n        paths.add(e.nextElement());\n    }\n\n    return paths;\n\nThe OSGi bundle APIs are so bad... (findEntries() returning null if nothing is found!)",
+      "revId": "78753cd15509d0483f337215ba2b1f313ff7fe73",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a4c51b2_44b6c93e",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/BlueprintBundleTracker.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 150,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-04-07T13:14:21Z",
+      "side": 1,
+      "message": "yeah - another one is Configuration.getProperties returns null if the cfg file doesn\u0027t exist. But at least they document the null returns :)\n\nI did it this way to avoid creating extra garbage for bundles that have no blueprint files which is most. I simplified it using Collections.list.",
+      "parentUuid": "3a4c51b2_29cef883",
       "revId": "78753cd15509d0483f337215ba2b1f313ff7fe73",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
