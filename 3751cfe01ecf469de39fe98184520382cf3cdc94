@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a4c51b2_e64a7682",
+        "filename": "opendaylight/config/config-api/src/main/java/org/opendaylight/controller/config/api/annotations/ServiceInterfaceAnnotation.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 3635
+      },
+      "writtenOn": "2016-04-07T16:48:40Z",
+      "side": 1,
+      "message": "This is cool!",
+      "range": {
+        "startLine": 42,
+        "startChar": 29,
+        "endLine": 42,
+        "endChar": 41
+      },
+      "revId": "3751cfe01ecf469de39fe98184520382cf3cdc94",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
