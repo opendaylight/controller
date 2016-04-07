@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a4c51b2_c93cad96",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/OpendaylightNamespaceHandler.java",
+        "patchSetId": 20
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 3635
+      },
+      "writtenOn": "2016-04-07T18:02:33Z",
+      "side": 1,
+      "message": "Could be pulled into an local variable to avoid multiple calls.",
+      "range": {
+        "startLine": 127,
+        "startChar": 27,
+        "endLine": 127,
+        "endChar": 57
+      },
+      "revId": "f97a4d1ed0bfc5451298bdc987b3c96801917c3f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
