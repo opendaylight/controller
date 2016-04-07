@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "3a4c51b2_49109d4e",
+        "filename": "opendaylight/blueprint/pom.xml",
+        "patchSetId": 14
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 3635
+      },
+      "writtenOn": "2016-04-07T17:06:26Z",
+      "side": 1,
+      "message": "https://git.opendaylight.org/gerrit/37281\n\nWe can modify this later to drop the version.",
+      "parentUuid": "3a4c51b2_46ad2a31",
+      "range": {
+        "startLine": 25,
+        "startChar": 6,
+        "endLine": 25,
+        "endChar": 30
+      },
+      "revId": "471b6f26a81d0a78f7e99c326f75074dcb8a22e1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a4c51b2_60548e54",
         "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/BlueprintBundleTracker.java",
         "patchSetId": 14
