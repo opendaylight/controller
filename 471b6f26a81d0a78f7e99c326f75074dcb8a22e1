@@ -16,6 +16,24 @@
       "revId": "471b6f26a81d0a78f7e99c326f75074dcb8a22e1",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a4c51b2_e318a886",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/BlueprintBundleTracker.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 153,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-04-07T13:14:21Z",
+      "side": 1,
+      "message": "Found that shortcut but unfortunately had to cast :(",
+      "parentUuid": "3a4c51b2_60548e54",
+      "revId": "471b6f26a81d0a78f7e99c326f75074dcb8a22e1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
