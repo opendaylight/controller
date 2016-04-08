@@ -715,6 +715,88 @@ public class DistributedEntityOwnershipIntegrationTest {
         });
     }
 
+    @Test
+    public void testOwnerSelectedOnRapidUnregisteringAndRegisteringOfCandidates() throws Exception {
+        String name = "test";
+        MemberNode leaderNode = MemberNode.builder(memberNodes).akkaConfig("Member1").testName(name ).
+                moduleShardsConfig(MODULE_SHARDS_CONFIG).schemaContext(SCHEMA_CONTEXT).createOperDatastore(false).
+                datastoreContextBuilder(leaderDatastoreContextBuilder).build();
+
+        MemberNode follower1Node = MemberNode.builder(memberNodes).akkaConfig("Member2").testName(name ).
+                moduleShardsConfig(MODULE_SHARDS_CONFIG).schemaContext(SCHEMA_CONTEXT).createOperDatastore(false).
+                datastoreContextBuilder(followerDatastoreContextBuilder).build();
+
+        MemberNode follower2Node = MemberNode.builder(memberNodes).akkaConfig("Member3").testName(name ).
+                moduleShardsConfig(MODULE_SHARDS_CONFIG).schemaContext(SCHEMA_CONTEXT).createOperDatastore(false).
+                datastoreContextBuilder(followerDatastoreContextBuilder).build();
+
+        DistributedDataStore leaderDistributedDataStore = leaderNode.configDataStore();
+
+        leaderDistributedDataStore.waitTillReady();
+        follower1Node.configDataStore().waitTillReady();
+        follower2Node.configDataStore().waitTillReady();
+
+        EntityOwnershipService leaderEntityOwnershipService = newOwnershipService(leaderDistributedDataStore);
+        EntityOwnershipService follower1EntityOwnershipService = newOwnershipService(follower1Node.configDataStore());
+        EntityOwnershipService follower2EntityOwnershipService = newOwnershipService(follower2Node.configDataStore());
+
+        leaderNode.kit().waitUntilLeader(leaderNode.configDataStore().getActorContext(), ENTITY_OWNERSHIP_SHARD_NAME);
+
+        // Register leader candidate for entity1 and verify it becomes owner
+
+        EntityOwnershipCandidateRegistration leaderEntity1Reg = leaderEntityOwnershipService.registerCandidate(ENTITY1);
+
+        verifyCandidates(leaderDistributedDataStore, ENTITY1, "member-1");
+        verifyOwner(leaderDistributedDataStore, ENTITY1, "member-1");
+
+        leaderEntity1Reg.close();
+        follower1EntityOwnershipService.registerCandidate(ENTITY1);
+
+        verifyCandidates(leaderDistributedDataStore, ENTITY1, "member-2");
+        verifyOwner(leaderDistributedDataStore, ENTITY1, "member-2");
+    }
+
+    @Test
+    public void testOwnerSelectedOnRapidRegisteringAndUnregisteringOfCandidates() throws Exception {
+        String name = "test";
+        MemberNode leaderNode = MemberNode.builder(memberNodes).akkaConfig("Member1").testName(name ).
+                moduleShardsConfig(MODULE_SHARDS_CONFIG).schemaContext(SCHEMA_CONTEXT).createOperDatastore(false).
+                datastoreContextBuilder(leaderDatastoreContextBuilder).build();
+
+        MemberNode follower1Node = MemberNode.builder(memberNodes).akkaConfig("Member2").testName(name ).
+                moduleShardsConfig(MODULE_SHARDS_CONFIG).schemaContext(SCHEMA_CONTEXT).createOperDatastore(false).
+                datastoreContextBuilder(followerDatastoreContextBuilder).build();
+
+        MemberNode follower2Node = MemberNode.builder(memberNodes).akkaConfig("Member3").testName(name ).
+                moduleShardsConfig(MODULE_SHARDS_CONFIG).schemaContext(SCHEMA_CONTEXT).createOperDatastore(false).
+                datastoreContextBuilder(followerDatastoreContextBuilder).build();
+
+        DistributedDataStore leaderDistributedDataStore = leaderNode.configDataStore();
+
+        leaderDistributedDataStore.waitTillReady();
+        follower1Node.configDataStore().waitTillReady();
+        follower2Node.configDataStore().waitTillReady();
+
+        EntityOwnershipService leaderEntityOwnershipService = newOwnershipService(leaderDistributedDataStore);
+        EntityOwnershipService follower1EntityOwnershipService = newOwnershipService(follower1Node.configDataStore());
+        EntityOwnershipService follower2EntityOwnershipService = newOwnershipService(follower2Node.configDataStore());
+
+        leaderNode.kit().waitUntilLeader(leaderNode.configDataStore().getActorContext(), ENTITY_OWNERSHIP_SHARD_NAME);
+
+        // Register leader candidate for entity1 and verify it becomes owner
+
+        EntityOwnershipCandidateRegistration leaderEntity1Reg = leaderEntityOwnershipService.registerCandidate(ENTITY1);
+
+        verifyCandidates(leaderDistributedDataStore, ENTITY1, "member-1");
+        verifyOwner(leaderDistributedDataStore, ENTITY1, "member-1");
+
+        follower1EntityOwnershipService.registerCandidate(ENTITY1);
+        leaderEntity1Reg.close();
+
+        verifyCandidates(leaderDistributedDataStore, ENTITY1, "member-2");
+        verifyOwner(leaderDistributedDataStore, ENTITY1, "member-2");
+    }
+
     private static void verifyGetOwnershipState(EntityOwnershipService service, Entity entity,
             boolean isOwner, boolean hasOwner) {
         Optional<EntityOwnershipState> state = service.getOwnershipState(entity);
