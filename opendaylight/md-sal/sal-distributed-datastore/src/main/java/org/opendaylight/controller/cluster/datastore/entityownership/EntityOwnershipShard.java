@@ -347,8 +347,9 @@ class EntityOwnershipShard extends Shard {
         // So if there are 2 peers and 1 is down then availableMembers will be 2
         final int availableMembers = (peerIdToMemberNames.size() - downPeerMemberNames.size()) + 1;
 
-        LOG.debug("{}: Using strategy {} to select owner", persistenceId(), strategy);
-        if(Strings.isNullOrEmpty(currentOwner)){
+        LOG.debug("{}: Using strategy {} to select owner, currentOwner = {}", persistenceId(), strategy, currentOwner);
+
+        if(!message.getAllCandidates().contains(currentOwner)){
             if(strategy.getSelectionDelayInMillis() == 0L) {
                 writeNewOwner(message.getEntityPath(), newOwner(currentOwner, message.getAllCandidates(),
                         entityOwnershipStatistics.byEntityType(entityType), strategy));
