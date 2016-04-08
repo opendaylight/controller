@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "3a4c51b2_5a65f9df",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/OpendaylightNamespaceHandler.java",
+        "patchSetId": 21
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-04-08T12:50:40Z",
+      "side": 1,
+      "message": "decorate checks for the base interface ServiceMetadata. I could check for MutableServiceMetadata there and ignore if it\u0027s ServiceMetadata but not MutableServiceMetadata. This was the pattern I borrowed from Aries code in their extensions, i.e. they fail if the component isn\u0027t mutable.  All the components created internally by Aries are mutable. In extensions, they strongly recommend you return mutable metadata instances so they can be extended by others. Not sure of their motivation for hard failure if not mutable.\n\nGiven that, I think we\u0027re safe to just check for MutableServiceMetadata in decorate and ignore if not. What do you think? If we agree I\u0027ll do it in my follow-up.",
+      "parentUuid": "3a4c51b2_0fba15de",
+      "revId": "83c5bbb865803e0a06e0c24e9de849af10bb4993",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a4c51b2_4fcb7d72",
         "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/OpendaylightNamespaceHandler.java",
         "patchSetId": 21
