@@ -55,6 +55,24 @@
     },
     {
       "key": {
+        "uuid": "3a4c51b2_1ae37108",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/OpendaylightNamespaceHandler.java",
+        "patchSetId": 21
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-04-08T13:46:35Z",
+      "side": 1,
+      "message": "I still need to check for ServiceMetadata and fail if \"type\" is used in a wrong element. That\u0027s why I checked for Mutable here so as not to clutter decorate with too much logic as it\u0027s intended as a simple delegator. I think decorate is cleaner with single top-level instanceof check -\u003e delegate method.",
+      "parentUuid": "3a4c51b2_5ada1979",
+      "revId": "83c5bbb865803e0a06e0c24e9de849af10bb4993",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a4c51b2_4fcb7d72",
         "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/OpendaylightNamespaceHandler.java",
         "patchSetId": 21
