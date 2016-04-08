@@ -91,6 +91,24 @@
     },
     {
       "key": {
+        "uuid": "3a4c51b2_fa604537",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/OpendaylightNamespaceHandler.java",
+        "patchSetId": 21
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-04-08T14:36:05Z",
+      "side": 1,
+      "message": "yeah they decided to define one generic decorate method instead of defining one for each component type. There\u0027s pros and cons to each way. This way the interface is simpler, less unused methods to stub out although they could have added an abstract base class to do the delegation. It is what is...",
+      "parentUuid": "3a4c51b2_badb5d1a",
+      "revId": "83c5bbb865803e0a06e0c24e9de849af10bb4993",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a4c51b2_4fcb7d72",
         "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/OpendaylightNamespaceHandler.java",
         "patchSetId": 21
