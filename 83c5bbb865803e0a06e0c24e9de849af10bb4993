@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a4c51b2_0fba15de",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/OpendaylightNamespaceHandler.java",
+        "patchSetId": 21
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-04-08T09:27:34Z",
+      "side": 1,
+      "message": "Why not declare the component parameter as a MutableServiceMetadata in the method signature? The call is protected by an instanceof check in decorate() anyway...",
+      "revId": "83c5bbb865803e0a06e0c24e9de849af10bb4993",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a4c51b2_4fcb7d72",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/OpendaylightNamespaceHandler.java",
+        "patchSetId": 21
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-04-08T09:27:34Z",
+      "side": 1,
+      "message": "Same as above.",
+      "revId": "83c5bbb865803e0a06e0c24e9de849af10bb4993",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
