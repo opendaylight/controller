@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "3a4c51b2_f5e9761b",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/OpendaylightNamespaceHandler.java",
+        "patchSetId": 19
+      },
+      "lineNbr": 221,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-04-08T19:19:21Z",
+      "side": 1,
+      "message": "They\u0027re specific method names on the RpcImplementationBean class so not reusable. I tend not to go crazy defining constant strings unless they\u0027re reusable or really help to clarify the code. If you think constants would help clarity I can make them constants.",
+      "parentUuid": "3a4c51b2_1abc1169",
+      "range": {
+        "startLine": 221,
+        "startChar": 31,
+        "endLine": 221,
+        "endChar": 37
+      },
+      "revId": "706ffcdbbd904b137ee94ba73779a93f2c6782ad",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a4c51b2_5a74d9ce",
         "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/RoutedRpcMetadata.java",
         "patchSetId": 19
@@ -36,6 +60,30 @@
       "writtenOn": "2016-04-08T16:06:40Z",
       "side": 1,
       "message": "I think we are fine without checking isAssignableFrom here, since OpendaylightNamespaceHandler is a non-null constant.  Just making sure...",
+      "range": {
+        "startLine": 67,
+        "startChar": 8,
+        "endLine": 68,
+        "endChar": 64
+      },
+      "revId": "706ffcdbbd904b137ee94ba73779a93f2c6782ad",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a4c51b2_d5d55a44",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/RoutedRpcMetadata.java",
+        "patchSetId": 19
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-04-08T19:19:21Z",
+      "side": 1,
+      "message": "Not sure what you mean by non-null constant - can you clarify? The RPC_REGISTRY_NAME service bean is created by OpendaylightNamespaceHandler and will be an RpcProviderRegistry instance and this code uses that knowledge. The OpendaylightNamespaceHandler also creates this bean so I think it\u0027s safe to trust the OpendaylightNamespaceHandler. Even if I checked isAssignableFrom what would be recourse if that check fails? Probably throw an exception similar to ClassCastEx so might as well let the JRE throw it.",
+      "parentUuid": "3a4c51b2_5a74d9ce",
       "range": {
         "startLine": 67,
         "startChar": 8,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "3a4c51b2_d53c3a96",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/RoutedRpcMetadata.java",
+        "patchSetId": 19
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-04-08T19:19:21Z",
+      "side": 1,
+      "message": "No, RpcImplementationBean.getImplementedRpcServiceInterfaces throws an exception if no interfaces found. That would be a user error.",
+      "parentUuid": "3a4c51b2_9a7e61ad",
+      "range": {
+        "startLine": 90,
+        "startChar": 45,
+        "endLine": 90,
+        "endChar": 77
+      },
+      "revId": "706ffcdbbd904b137ee94ba73779a93f2c6782ad",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a4c51b2_fa4a0582",
         "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/RoutedRpcMetadata.java",
         "patchSetId": 19
@@ -82,6 +154,30 @@
       "writtenOn": "2016-04-08T16:06:40Z",
       "side": 1,
       "message": "Please remove this space.",
+      "range": {
+        "startLine": 108,
+        "startChar": 10,
+        "endLine": 108,
+        "endChar": 11
+      },
+      "revId": "706ffcdbbd904b137ee94ba73779a93f2c6782ad",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a4c51b2_3542be10",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/RoutedRpcMetadata.java",
+        "patchSetId": 19
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-04-08T19:19:21Z",
+      "side": 1,
+      "message": "Will do in follow-up.",
+      "parentUuid": "3a4c51b2_fa4a0582",
       "range": {
         "startLine": 108,
         "startChar": 10,
@@ -111,6 +207,24 @@
     },
     {
       "key": {
+        "uuid": "3a4c51b2_35591eff",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/RoutedRpcRegistrationConverter.java",
+        "patchSetId": 19
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-04-08T19:19:21Z",
+      "side": 1,
+      "message": "Correct. Will remove in follow-up.",
+      "parentUuid": "3a4c51b2_f52696b9",
+      "revId": "706ffcdbbd904b137ee94ba73779a93f2c6782ad",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a4c51b2_3a458d70",
         "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/RpcImplementationBean.java",
         "patchSetId": 19
@@ -134,6 +248,30 @@
     },
     {
       "key": {
+        "uuid": "3a4c51b2_55482a2d",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/RpcImplementationBean.java",
+        "patchSetId": 19
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-04-08T19:19:21Z",
+      "side": 1,
+      "message": "Will remove in follow-up.",
+      "parentUuid": "3a4c51b2_3a458d70",
+      "range": {
+        "startLine": 36,
+        "startChar": 89,
+        "endLine": 36,
+        "endChar": 90
+      },
+      "revId": "706ffcdbbd904b137ee94ba73779a93f2c6782ad",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a4c51b2_9a03010f",
         "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/RpcServiceMetadata.java",
         "patchSetId": 19
@@ -145,6 +283,30 @@
       "writtenOn": "2016-04-08T16:06:40Z",
       "side": 1,
       "message": "String concatenation is cheaper.",
+      "range": {
+        "startLine": 96,
+        "startChar": 8,
+        "endLine": 97,
+        "endChar": 29
+      },
+      "revId": "706ffcdbbd904b137ee94ba73779a93f2c6782ad",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a4c51b2_f55e96e8",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/RpcServiceMetadata.java",
+        "patchSetId": 19
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-04-08T19:19:21Z",
+      "side": 1,
+      "message": "Yeah - I had eclipse use concatenation but then created a new workspace. Need to set concatenation default again.",
+      "parentUuid": "3a4c51b2_9a03010f",
       "range": {
         "startLine": 96,
         "startChar": 8,
