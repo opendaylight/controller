@@ -73,6 +73,24 @@
     },
     {
       "key": {
+        "uuid": "3a4c51b2_badb5d1a",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/OpendaylightNamespaceHandler.java",
+        "patchSetId": 21
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-04-08T14:06:47Z",
+      "side": 1,
+      "message": "Yes, I agree. It\u0027s just that I find it surprising to have a method which doesn\u0027t have any particular requirements on its signature (e.g. from a method it\u0027s overriding), which declares a parameter with a given type then immediately checks that instances passed in are actually of a more restrictive type...",
+      "parentUuid": "3a4c51b2_1ae37108",
+      "revId": "83c5bbb865803e0a06e0c24e9de849af10bb4993",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a4c51b2_4fcb7d72",
         "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/OpendaylightNamespaceHandler.java",
         "patchSetId": 21
