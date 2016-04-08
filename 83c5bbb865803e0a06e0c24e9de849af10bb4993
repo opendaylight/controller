@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "3a4c51b2_5ada1979",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/OpendaylightNamespaceHandler.java",
+        "patchSetId": 21
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-04-08T13:19:41Z",
+      "side": 1,
+      "message": "Ah yes, I hadn\u0027t noticed the absence of Mutable in the decorate() checks. I agree we can just check for MutableServiceMetadata in decorate(), and ignore (with a log message) if not.",
+      "parentUuid": "3a4c51b2_5a65f9df",
+      "revId": "83c5bbb865803e0a06e0c24e9de849af10bb4993",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a4c51b2_4fcb7d72",
         "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/OpendaylightNamespaceHandler.java",
         "patchSetId": 21
