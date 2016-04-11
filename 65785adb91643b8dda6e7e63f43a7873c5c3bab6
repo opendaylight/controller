@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "1a494da4_414a5684",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/NotificationListenerBean.java",
+        "patchSetId": 18
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-04-11T13:57:16Z",
+      "side": 1,
+      "message": "yup - fixed in follow-up",
+      "parentUuid": "1a494da4_fe021db3",
+      "revId": "65785adb91643b8dda6e7e63f43a7873c5c3bab6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a494da4_9e1cb915",
         "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/NotificationListenerBean.java",
         "patchSetId": 18
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "1a494da4_214f4a94",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/NotificationListenerBean.java",
+        "patchSetId": 18
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-04-11T13:57:16Z",
+      "side": 1,
+      "message": "sure.",
+      "parentUuid": "1a494da4_9e1cb915",
+      "revId": "65785adb91643b8dda6e7e63f43a7873c5c3bab6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a494da4_7edd6d42",
         "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/OpendaylightNamespaceHandler.java",
         "patchSetId": 18
@@ -47,6 +83,24 @@
       "writtenOn": "2016-04-11T07:19:26Z",
       "side": 1,
       "message": "Any chance there\u0027s a potential race condition here?",
+      "revId": "65785adb91643b8dda6e7e63f43a7873c5c3bab6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a494da4_81445e75",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/OpendaylightNamespaceHandler.java",
+        "patchSetId": 18
+      },
+      "lineNbr": 305,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-04-11T13:57:16Z",
+      "side": 1,
+      "message": "No - the blueprint container is not concurrent - creation of components is synchronous.",
+      "parentUuid": "1a494da4_7edd6d42",
       "revId": "65785adb91643b8dda6e7e63f43a7873c5c3bab6",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
