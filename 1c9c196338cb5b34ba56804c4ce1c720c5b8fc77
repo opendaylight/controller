@@ -55,6 +55,24 @@
     },
     {
       "key": {
+        "uuid": "1a494da4_04497cd0",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ConcurrentDOMDataBroker.java",
+        "patchSetId": 20
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-04-11T16:33:54Z",
+      "side": 1,
+      "message": "I usually only add @Nonnull, @Nullable to public APIs. IMO, adding it to everything is overkill and unnecessary. This class really isn\u0027t a public API - the class itself is public in order to be accessed via blueprint.",
+      "parentUuid": "1a494da4_e4ba9009",
+      "revId": "1c9c196338cb5b34ba56804c4ce1c720c5b8fc77",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a494da4_fec33d36",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/yang/distributed-datastore-provider.yang",
         "patchSetId": 20
