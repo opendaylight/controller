@@ -14,7 +14,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 /**
  * DOMDataChangeListener enables data change notifications only at leader of the datastore shard.
  */
-
+@Deprecated
 public interface DOMDataChangeListener extends AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>> {
 
 }
