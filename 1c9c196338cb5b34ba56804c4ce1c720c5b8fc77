@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a494da4_fec33d36",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/yang/distributed-datastore-provider.yang",
+        "patchSetId": 20
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-04-11T07:57:22Z",
+      "side": 1,
+      "message": "Why does the timeout factor need increasing? It might be worth documenting this in the commit message.",
+      "revId": "1c9c196338cb5b34ba56804c4ce1c720c5b8fc77",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
