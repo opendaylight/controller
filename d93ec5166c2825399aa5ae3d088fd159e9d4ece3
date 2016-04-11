@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a494da4_01fcce3d",
+        "filename": "opendaylight/config/netty-threadgroup-config/src/main/resources/org/opendaylight/blueprint/netty-threadgroup.xml",
+        "patchSetId": 24
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 3635
+      },
+      "writtenOn": "2016-04-11T13:34:08Z",
+      "side": 1,
+      "message": "Should we add documentation that \"0\" indicates to use default number of threads:\n\nhttp://netty.io/4.0/api/io/netty/channel/nio/NioEventLoopGroup.html#NioEventLoopGroup()",
+      "range": {
+        "startLine": 9,
+        "startChar": 6,
+        "endLine": 9,
+        "endChar": 68
+      },
+      "revId": "d93ec5166c2825399aa5ae3d088fd159e9d4ece3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a494da4_219aaa14",
+        "filename": "opendaylight/config/netty-timer-config/src/main/java/org/opendaylight/controller/config/yang/netty/timer/HashedWheelTimerCloseable.java",
+        "patchSetId": 24
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 3635
+      },
+      "writtenOn": "2016-04-11T13:34:08Z",
+      "side": 1,
+      "message": "Can we decrease scope?",
+      "range": {
+        "startLine": 19,
+        "startChar": 0,
+        "endLine": 19,
+        "endChar": 6
+      },
+      "revId": "d93ec5166c2825399aa5ae3d088fd159e9d4ece3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
