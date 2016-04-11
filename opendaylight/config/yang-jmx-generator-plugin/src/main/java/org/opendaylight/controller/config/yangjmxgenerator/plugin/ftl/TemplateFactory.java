@@ -690,8 +690,8 @@ public class TemplateFactory {
 
                 String setterBody = "this." + varName + " = " + varName + ";";
                 if (isListOfDependencies) {
-                    String nullCheck = String.format("if (%s == null) throw new IllegalArgumentException(\"Null not supported\");%n",
-                            varName);
+                    String nullCheck = String.format("if (%s == null) {\n%s = new java.util.ArrayList<>(); \n}%n",
+                            varName, varName);
                     setterBody = nullCheck + setterBody;
                 }
                 MethodDefinition setter = new MethodDefinition("void",

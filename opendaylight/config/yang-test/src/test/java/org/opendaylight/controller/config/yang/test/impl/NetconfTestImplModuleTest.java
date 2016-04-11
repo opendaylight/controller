@@ -8,9 +8,7 @@
 package org.opendaylight.controller.config.yang.test.impl;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doReturn;
 
 import com.google.common.collect.Lists;
@@ -112,15 +110,8 @@ public class NetconfTestImplModuleTest  extends AbstractConfigTest {
 
         ObjectName on = createInstance(transaction, instanceName, 4);
         NetconfTestImplModuleMXBean proxy = transaction.newMXBeanProxy(on, NetconfTestImplModuleMXBean.class);
-        try{
-            proxy.setTestingDeps(null);
-            fail();
-        }catch(RuntimeException e) {
-            Throwable cause = e.getCause();
-            assertNotNull(cause);
-            assertTrue("Invalid type " + cause, cause instanceof IllegalArgumentException);
-            assertEquals("Null not supported", cause.getMessage());
-        }
+        proxy.setTestingDeps(null);
+        assertTrue(proxy.getTestingDeps().isEmpty());
         proxy.setTestingDeps(Collections.<ObjectName>emptyList());
     }
 
