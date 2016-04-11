@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a494da4_fe021db3",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/NotificationListenerBean.java",
+        "patchSetId": 18
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-04-11T07:16:51Z",
+      "side": 1,
+      "message": "Something left over here ;-).",
+      "revId": "65785adb91643b8dda6e7e63f43a7873c5c3bab6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a494da4_9e1cb915",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/NotificationListenerBean.java",
+        "patchSetId": 18
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-04-11T07:16:51Z",
+      "side": 1,
+      "message": "I\u0027m not sure how likely this is, but in the interest of debuggability, would it be worth logging a warning here if destroy() is called with registration \u003d\u003d null? Since init() doesn\u0027t have any checked exceptions it looks like the only way regitration can be null here (barring runtime exceptions) is if init() was never called.\n\nProbably follow-up material...",
+      "revId": "65785adb91643b8dda6e7e63f43a7873c5c3bab6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
