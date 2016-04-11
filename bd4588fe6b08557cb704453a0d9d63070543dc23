@@ -22,6 +22,30 @@
       "revId": "bd4588fe6b08557cb704453a0d9d63070543dc23",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a494da4_c10b062a",
+        "filename": "opendaylight/md-sal/samples/toaster-consumer/src/main/resources/org/opendaylight/blueprint/toaster-consumer.xml",
+        "patchSetId": 25
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-04-11T16:35:28Z",
+      "side": 1,
+      "message": "fixed in follow-up",
+      "parentUuid": "1a494da4_61edd28b",
+      "range": {
+        "startLine": 18,
+        "startChar": 2,
+        "endLine": 18,
+        "endChar": 3
+      },
+      "revId": "bd4588fe6b08557cb704453a0d9d63070543dc23",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
