@@ -16,6 +16,24 @@
       "revId": "8a3511db579debf46f80b503673c4a5a46a7d43a",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a494da4_559b2cc9",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/ConcurrentDOMDataBroker.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-04-12T08:33:56Z",
+      "side": 1,
+      "message": "It is a public class, which is actually implementation-internal. The point is that outside users must be ready to handle API changes.\n\nThe reason for doing this is that it is moved to a new package -- hence it begins a new life.",
+      "parentUuid": "3a4c51b2_8648d25c",
+      "revId": "8a3511db579debf46f80b503673c4a5a46a7d43a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
