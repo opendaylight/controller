@@ -19,14 +19,20 @@ import org.opendaylight.controller.cluster.raft.base.messages.DeleteEntries;
 class ReplicatedLogImpl extends AbstractReplicatedLogImpl {
     private static final int DATA_SIZE_DIVIDER = 5;
 
-    private long dataSizeSinceLastSnapshot = 0L;
-    private final RaftActorContext context;
-
     private final Procedure<DeleteEntries> deleteProcedure = new Procedure<DeleteEntries>() {
         @Override
         public void apply(final DeleteEntries notUsed) {
         }
     };
+
+    private final RaftActorContext context;
+    private long dataSizeSinceLastSnapshot = 0L;
+
+    private ReplicatedLogImpl(final long snapshotIndex, final long snapshotTerm, final List<ReplicatedLogEntry> unAppliedEntries,
+            final RaftActorContext context) {
+        super(snapshotIndex, snapshotTerm, unAppliedEntries);
+        this.context = Preconditions.checkNotNull(context);
+    }
 
     static ReplicatedLog newInstance(final Snapshot snapshot, final RaftActorContext context) {
         return new ReplicatedLogImpl(snapshot.getLastAppliedIndex(), snapshot.getLastAppliedTerm(),
@@ -35,12 +41,6 @@ class ReplicatedLogImpl extends AbstractReplicatedLogImpl {
 
     static ReplicatedLog newInstance(final RaftActorContext context) {
         return new ReplicatedLogImpl(-1L, -1L, Collections.<ReplicatedLogEntry>emptyList(), context);
-    }
-
-    private ReplicatedLogImpl(final long snapshotIndex, final long snapshotTerm, final List<ReplicatedLogEntry> unAppliedEntries,
-            final RaftActorContext context) {
-        super(snapshotIndex, snapshotTerm, unAppliedEntries);
-        this.context = Preconditions.checkNotNull(context);
     }
 
     @Override
@@ -59,25 +59,20 @@ class ReplicatedLogImpl extends AbstractReplicatedLogImpl {
 
     @Override
     public void captureSnapshotIfReady(final ReplicatedLogEntry replicatedLogEntry) {
-        long journalSize = replicatedLogEntry.getIndex() + 1;
-        long dataThreshold = context.getTotalMemory() *
-                context.getConfigParams().getSnapshotDataThresholdPercentage() / 100;
+        final ConfigParams config = context.getConfigParams();
+        final long journalSize = replicatedLogEntry.getIndex() + 1;
+        final long dataThreshold = context.getTotalMemory() * config.getSnapshotDataThresholdPercentage() / 100;
 
-        if ((journalSize % context.getConfigParams().getSnapshotBatchCount() == 0
-                || getDataSizeForSnapshotCheck() > dataThreshold)) {
-
+        if (journalSize % config.getSnapshotBatchCount() == 0 || getDataSizeForSnapshotCheck() > dataThreshold) {
             boolean started = context.getSnapshotManager().capture(replicatedLogEntry,
                     context.getCurrentBehavior().getReplicatedToAllIndex());
-            if (started) {
-                if (!context.hasFollowers()) {
-                    dataSizeSinceLastSnapshot = 0;
-                }
+            if (started && !context.hasFollowers()) {
+                dataSizeSinceLastSnapshot = 0;
             }
         }
     }
 
     private long getDataSizeForSnapshotCheck() {
-        long dataSizeForCheck = dataSize();
         if (!context.hasFollowers()) {
             // When we do not have followers we do not maintain an in-memory log
             // due to this the journalSize will never become anything close to the
@@ -90,18 +85,17 @@ class ReplicatedLogImpl extends AbstractReplicatedLogImpl {
             // need of doing a snapshot just for the sake of freeing up memory we adjust
             // the real size of data by the DATA_SIZE_DIVIDER so that we do not snapshot as often
             // as if we were maintaining a real snapshot
-            dataSizeForCheck = dataSizeSinceLastSnapshot / DATA_SIZE_DIVIDER;
+            return dataSizeSinceLastSnapshot / DATA_SIZE_DIVIDER;
+        } else {
+            return dataSize();
         }
-        return dataSizeForCheck;
     }
 
     @Override
     public void appendAndPersist(final ReplicatedLogEntry replicatedLogEntry,
             final Procedure<ReplicatedLogEntry> callback)  {
 
-        if (context.getLogger().isDebugEnabled()) {
-            context.getLogger().debug("{}: Append log entry and persist {} ", context.getId(), replicatedLogEntry);
-        }
+        context.getLogger().debug("{}: Append log entry and persist {} ", context.getId(), replicatedLogEntry);
 
         // FIXME : By adding the replicated log entry to the in-memory journal we are not truly ensuring durability of the logs
         append(replicatedLogEntry);
