@@ -142,14 +142,15 @@ public final class Services {
     }
 
     public static Element toXml(ServiceRegistryWrapper serviceRegistryWrapper, Document document) {
-        Element root = XmlUtil.createElement(document, XmlMappingConstants.SERVICES_KEY, Optional.of(XmlMappingConstants.URN_OPENDAYLIGHT_PARAMS_XML_NS_YANG_CONTROLLER_CONFIG));
+        final Optional<String> configNs = Optional.of(XmlMappingConstants.URN_OPENDAYLIGHT_PARAMS_XML_NS_YANG_CONTROLLER_CONFIG);
+        Element root = XmlUtil.createElement(document, XmlMappingConstants.SERVICES_KEY, configNs);
 
         Map<String, Map<String, Map<String, String>>> mappedServices = serviceRegistryWrapper.getMappedServices();
         for (Entry<String, Map<String, Map<String, String>>> namespaceToRefEntry : mappedServices.entrySet()) {
 
             for (Entry<String, Map<String, String>> serviceEntry : namespaceToRefEntry.getValue().entrySet()) {
                 // service belongs to config.yang namespace
-                Element serviceElement = XmlUtil.createElement(document, SERVICE_KEY, Optional.<String>absent());
+                Element serviceElement = XmlUtil.createElement(document, SERVICE_KEY, configNs);
                 root.appendChild(serviceElement);
 
                 // type belongs to config.yang namespace
