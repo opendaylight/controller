@@ -8,21 +8,24 @@
 
 package org.opendaylight.controller.cluster.raft;
 
+import com.google.common.base.Preconditions;
 import java.io.Serializable;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 
-public class ReplicatedLogImplEntry implements ReplicatedLogEntry, Serializable {
+/**
+ * A {@link ReplicatedLogEntry} implementation.
+ */
+public final class ReplicatedLogImplEntry implements ReplicatedLogEntry, Serializable {
     private static final long serialVersionUID = -9085798014576489130L;
 
     private final long index;
     private final long term;
     private final Payload payload;
 
-    public ReplicatedLogImplEntry(long index, long term, Payload payload) {
-
+    public ReplicatedLogImplEntry(final long index, final long term, final Payload payload) {
         this.index = index;
         this.term = term;
-        this.payload = payload;
+        this.payload = Preconditions.checkNotNull(payload);
     }
 
     @Override
@@ -47,9 +50,6 @@ public class ReplicatedLogImplEntry implements ReplicatedLogEntry, Serializable 
 
     @Override
     public String toString() {
-        return "Entry{" +
-            "index=" + index +
-            ", term=" + term +
-            '}';
+        return "Entry{index=" + index + ", term=" + term + '}';
     }
 }
