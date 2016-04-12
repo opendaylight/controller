@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Supplier;
 import org.junit.After;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyJournalEntries;
@@ -85,17 +84,7 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
         }
 
         void setMockTotalMemory(final long mockTotalMemory) {
-            if(mockTotalMemory > 0) {
-                getRaftActorContext().setTotalMemoryRetriever(new Supplier<Long>() {
-                    @Override
-                    public Long get() {
-                        return mockTotalMemory;
-                    }
-
-                });
-            } else {
-                getRaftActorContext().setTotalMemoryRetriever(null);
-            }
+            getRaftActorContext().setTotalMemoryRetriever(mockTotalMemory > 0 ? () -> mockTotalMemory : null);
         }
 
         @Override
