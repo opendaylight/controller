@@ -30,7 +30,7 @@ import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
 import org.slf4j.Logger;
 
 public class RaftActorContextImpl implements RaftActorContext {
-    private static final LongSupplier JVM_MEMORY_RETRIEVER = () -> Runtime.getRuntime().totalMemory();
+    private static final LongSupplier JVM_MEMORY_RETRIEVER = () -> Runtime.getRuntime().maxMemory();
 
     private final ActorRef actor;
 
