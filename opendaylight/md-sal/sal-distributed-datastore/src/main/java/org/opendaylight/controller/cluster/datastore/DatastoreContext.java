@@ -220,6 +220,8 @@ public class DatastoreContext {
     }
 
     private void setSnapshotDataThresholdPercentage(int shardSnapshotDataThresholdPercentage) {
+        Preconditions.checkArgument(shardSnapshotDataThresholdPercentage >= 0
+                && shardSnapshotDataThresholdPercentage <= 100);
         raftConfig.setSnapshotDataThresholdPercentage(shardSnapshotDataThresholdPercentage);
     }
 
