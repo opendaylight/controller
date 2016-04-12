@@ -101,7 +101,7 @@ module distributed-datastore-provider {
          leaf shard-snapshot-data-threshold-percentage {
             default 12;
             type percentage;
-            description "The percentage of Runtime.totalMemory() used by the in-memory journal log before a snapshot is to be taken";
+            description "The percentage of Runtime.maxMemory() used by the in-memory journal log before a snapshot is to be taken";
          }
 
 
