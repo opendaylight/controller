@@ -15,7 +15,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import akka.japi.Procedure;
 import java.util.Collections;
-import java.util.function.Supplier;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
@@ -125,12 +124,7 @@ public class ReplicatedLogImplTest {
     public void testAppendAndPersistExpectingCaptureDueToDataSize() throws Exception {
         doReturn(1L).when(mockBehavior).getReplicatedToAllIndex();
 
-        context.setTotalMemoryRetriever(new Supplier<Long>() {
-            @Override
-            public Long get() {
-                return 100L;
-            }
-        });
+        context.setTotalMemoryRetriever(() -> 100);
 
         ReplicatedLog log = ReplicatedLogImpl.newInstance(context);
 

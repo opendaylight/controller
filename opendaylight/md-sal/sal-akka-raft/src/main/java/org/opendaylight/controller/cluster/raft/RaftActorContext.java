@@ -14,7 +14,7 @@ import akka.actor.ActorSystem;
 import akka.actor.Props;
 import com.google.common.annotations.VisibleForTesting;
 import java.util.Collection;
-import java.util.function.Supplier;
+import java.util.function.LongSupplier;
 import javax.annotation.Nullable;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
@@ -208,7 +208,7 @@ public interface RaftActorContext {
      * @param retriever a supplier of the total memory metric
      */
     @VisibleForTesting
-    void setTotalMemoryRetriever(Supplier<Long> retriever);
+    void setTotalMemoryRetriever(LongSupplier retriever);
 
     /**
      *

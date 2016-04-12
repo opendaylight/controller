@@ -22,7 +22,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Supplier;
+import java.util.function.LongSupplier;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.ServerConfigurationPayload.ServerInfo;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
@@ -30,6 +30,7 @@ import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
 import org.slf4j.Logger;
 
 public class RaftActorContextImpl implements RaftActorContext {
+    private static final LongSupplier JVM_MEMORY_RETRIEVER = () -> Runtime.getRuntime().totalMemory();
 
     private final ActorRef actor;
 
@@ -54,7 +55,7 @@ public class RaftActorContextImpl implements RaftActorContext {
     private boolean dynamicServerConfiguration = false;
 
     @VisibleForTesting
-    private Supplier<Long> totalMemoryRetriever;
+    private LongSupplier totalMemoryRetriever = JVM_MEMORY_RETRIEVER;
 
     // Snapshot manager will need to be created on demand as it needs raft actor context which cannot
     // be passed to it in the constructor
@@ -272,12 +273,12 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     @Override
     public long getTotalMemory() {
-        return totalMemoryRetriever != null ? totalMemoryRetriever.get() : Runtime.getRuntime().totalMemory();
+        return totalMemoryRetriever.getAsLong();
     }
 
     @Override
-    public void setTotalMemoryRetriever(Supplier<Long> retriever) {
-        totalMemoryRetriever = retriever;
+    public void setTotalMemoryRetriever(LongSupplier retriever) {
+        totalMemoryRetriever = retriever == null ? JVM_MEMORY_RETRIEVER : retriever;
     }
 
     @Override
