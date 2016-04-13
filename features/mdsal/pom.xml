@@ -22,7 +22,6 @@
     <config.version>0.5.0-SNAPSHOT</config.version>
     <commons.opendaylight.version>1.7.0-SNAPSHOT</commons.opendaylight.version>
     <akka.features.version>1.7.0-SNAPSHOT</akka.features.version>
-    <akka.version>2.4.1</akka.version>
     <features.file>features.xml</features.file>
     <config.configfile.directory>etc/opendaylight/karaf</config.configfile.directory>
     <config.clustering.configfile>05-clustering.xml</config.clustering.configfile>
