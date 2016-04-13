@@ -25,6 +25,7 @@
     <bundle>mvn:com.google.guava/guava/{{VERSION}}</bundle>
     <bundle>mvn:commons-io/commons-io/{{VERSION}}</bundle>
     <bundle>mvn:org.apache.commons/commons-lang3/{{VERSION}}</bundle>
+    <bundle>wrap:mvn:javax.validation/validation-api/{{VERSION}}</bundle>
     <bundle>mvn:org.eclipse.persistence/org.eclipse.persistence.core/{{VERSION}}</bundle>
     <bundle>mvn:org.eclipse.persistence/org.eclipse.persistence.moxy/{{VERSION}}</bundle>
   </feature>
