@@ -1,0 +1,61 @@
+= Distributed Data Store implementation
+
+== Overview
+The implementation builds on sal-akka-raft and adds business logic to
+create a strongly-consistent, replicated, DataTree. It does this by introducing
+a finite state machine to interact with local and remote clients and replicates
+this using RAFT. The FSM is built around an internal InMemoryDataTree instance,
+which holds the actual data being replicated and takes care of performing
+individual operations (bundled in transactions) on the data.
+
+It exposes an MD-SAL DOMDataBroker interface, which individual applications use,
+directly, or via the Binding Adaptor, to perform operations.
+
+The implementation is split into two major blocks:
+
+- *Backend* - The actual implementation of the replicated data tree. It is pivoted
+  around Shard, a subclass of RaftActor, and provides a set of messages for the
+  *Frontend* to submit work to the Leader, which is then replicated to Followers.
+
+- *Frontend* - The MD-SAL layer, which is co-located with the application accessing
+  data stored in the data store. It is responsible for implementing MD-SAL
+  DOMDataBroker and related interfaces and translate them to messages, which drive
+  the Backend. It is also responsible with dealing with common failures occuring
+  in communication with the Backend, such as messages getting lost and Shard
+  Leader moving in the system, to the extent reasonably possible.
+
+Both Backend and Frontend share a common Actor System on the local node. Nodes are
+connected together using Akka Clustering. There can be at most one Frontend instance
+running in an Actor System. For each individual shard, there can be at most one
+instance running in an Actor System.
+
+=== Concepts
+
+- *Shard Name* - The logical name of a part of the Conceptual Data Tree. It is
+  associated with a Shard instance. Each member can run at most one such instance
+  for a particular name. For current implementation it is a String, but that can
+  change to a more structured identifier (such as YangInstanceIdentifier) in future.
+
+- *Global History* - Is the aggregated history of all operations successfully
+  committed in the datastore. It is resilient to concurrent failure of N members,
+  if total number of members is (2N + 1).
+
+- *Transaction* - A set of operations on the data tree which are treated as an
+  atomic unit. All operations in a transaction share fate, e.g. either abort or
+  complete successfully.
+
+- *Local History* - This is a generalized concept behind a TransactionChain. It
+  includes all transactions committed in the *Global History* at the point when
+  it was created and any transactions submitted in the TransactionChain.
+  FIXME: This means that Local History is completely isolated and does not observe
+         transactions from other Local Histories -- unless we become idle, with
+         no running transactions. If that happens, the history is re-started
+         from global history.
+
+- *Member Name* - The name for a logical node participating in Akka Clustering and
+  is synonymous to a Actor System instance. For deployment purposes, it is a simple
+  String, which uniquely identifies an OpenDaylight instance. This name does not
+  change for as long as an instance exists.
+
+- *Local History Identifier* - A generalized identifier of a TransactionChain. This
+  identifier is unique within 
