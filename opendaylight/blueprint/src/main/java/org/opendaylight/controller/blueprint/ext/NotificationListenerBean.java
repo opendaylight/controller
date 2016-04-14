@@ -40,7 +40,6 @@ public class NotificationListenerBean {
         this.bundle = bundle;
     }
 
-    @SuppressWarnings({ })
     public void init() {
         LOG.debug("{}: init - registering NotificationListener {}", bundle.getSymbolicName(), notificationListener);
 
@@ -49,7 +48,10 @@ public class NotificationListenerBean {
 
     public void destroy() {
         if(registration != null) {
+            LOG.debug("{}: destroy - closing ListenerRegistration {}", bundle.getSymbolicName(), notificationListener);
             registration.close();
+        } else {
+            LOG.debug("{}: destroy - listener was not registered", bundle.getSymbolicName());
         }
     }
 }
