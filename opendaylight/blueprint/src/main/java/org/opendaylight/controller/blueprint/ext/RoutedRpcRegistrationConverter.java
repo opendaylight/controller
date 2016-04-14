@@ -28,7 +28,7 @@ public class RoutedRpcRegistrationConverter implements Converter {
     }
 
     @Override
-    public Object convert(Object sourceObject, ReifiedType targetType) throws Exception {
+    public Object convert(Object sourceObject, ReifiedType targetType) {
         return sourceObject;
     }
 }
