@@ -43,19 +43,19 @@ public class ActorSystemProviderModule extends AbstractActorSystemProviderModule
         WaitingServiceTracker<ActorSystemProvider> tracker = WaitingServiceTracker.create(
                 ActorSystemProvider.class, bundleContext);
         ActorSystemProvider delegate = tracker.waitForService(WaitingServiceTracker.FIVE_MINUTES);
-        return new ForardingActorSystemProvider(delegate, tracker);
+        return new ForwardingActorSystemProvider(delegate, tracker);
     }
 
     public void setBundleContext(BundleContext bundleContext) {
         this.bundleContext = bundleContext;
     }
 
-    private static class ForardingActorSystemProvider extends ForwardingObject
+    private static class ForwardingActorSystemProvider extends ForwardingObject
             implements ActorSystemProvider, AutoCloseable {
         private final ActorSystemProvider delegate;
         private final AutoCloseable closeable;
 
-        ForardingActorSystemProvider(ActorSystemProvider delegate, AutoCloseable closeable) {
+        ForwardingActorSystemProvider(ActorSystemProvider delegate, AutoCloseable closeable) {
             this.delegate = delegate;
             this.closeable = closeable;
         }

@@ -181,7 +181,7 @@ public class OpendaylightNamespaceHandler implements NamespaceHandler {
 
         LOG.debug("{}: {}", propertyName, attr.getValue());
 
-        if(!Boolean.TRUE.equals(Boolean.valueOf(attr.getValue()))) {
+        if(!Boolean.parseBoolean(attr.getValue())) {
             return component;
         }
 

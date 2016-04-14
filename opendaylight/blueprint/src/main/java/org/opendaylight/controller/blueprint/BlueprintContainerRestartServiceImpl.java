@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.blueprint;
 
+import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -20,7 +21,8 @@ import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** Implementation of the BlueprintContainerRestartService.
+/**
+ * Implementation of the BlueprintContainerRestartService.
  *
  * @author Thomas Pantelis
  */
@@ -49,6 +51,7 @@ class BlueprintContainerRestartServiceImpl implements AutoCloseable, BlueprintCo
     }
 
     private void restartContainerAndDependentsInternal(Bundle forBundle) {
+        // We use a LinkedHashSet to preserve insertion order as we walk the service usage hierarchy.
         Set<Bundle> containerBundlesSet = new LinkedHashSet<>();
         findDependentContainersRecursively(forBundle, containerBundlesSet);
 
@@ -58,8 +61,7 @@ class BlueprintContainerRestartServiceImpl implements AutoCloseable, BlueprintCo
                 containerBundles.subList(1, containerBundles.size()));
 
         // Destroy the containers in reverse order with 'forBundle' last, ie bottom-up in the service tree.
-        for(int i = containerBundles.size() - 1; i >= 0; i--) {
-            Bundle bundle = containerBundles.get(i);
+        for(Bundle bundle: Lists.reverse(containerBundles)) {
             blueprintExtenderService.destroyContainer(bundle, blueprintExtenderService.getContainer(bundle));
         }
 
@@ -81,11 +83,11 @@ class BlueprintContainerRestartServiceImpl implements AutoCloseable, BlueprintCo
      * @param containerBundles the current set of bundles containing blueprint containers
      */
     private void findDependentContainersRecursively(Bundle bundle, Set<Bundle> containerBundles) {
-        if(containerBundles.contains(bundle)) {
+        if(!containerBundles.add(bundle)) {
+            // Already seen this bundle...
             return;
         }
 
-        containerBundles.add(bundle);
         ServiceReference<?>[] references = bundle.getRegisteredServices();
         if (references != null) {
             for (ServiceReference<?> reference : references) {
