@@ -33,7 +33,7 @@ public class RpcImplementationBean {
     private Bundle bundle;
     private String interfaceName;
     private RpcService implementation;
-    private final List<RpcRegistration<RpcService>> rpcRegistrations = new ArrayList<>();;
+    private final List<RpcRegistration<RpcService>> rpcRegistrations = new ArrayList<>();
 
     public void setRpcRegistry(RpcProviderRegistry rpcRegistry) {
         this.rpcRegistry = rpcRegistry;
