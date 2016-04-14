@@ -128,7 +128,7 @@ public class ComponentProcessor implements ComponentDefinitionRegistryProcessor 
     }
 
     private void registerManagedService(final String persistentId) {
-        // Register a ManagedService so we git updates from the ConfigAdmin when the cfg file corresponding
+        // Register a ManagedService so we get updates from the ConfigAdmin when the cfg file corresponding
         // to the persistentId changes.
         ManagedService managedService = new ManagedService() {
             private volatile boolean initialUpdate = true;

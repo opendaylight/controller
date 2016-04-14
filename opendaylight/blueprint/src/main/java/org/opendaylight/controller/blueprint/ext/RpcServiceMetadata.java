@@ -92,9 +92,6 @@ class RpcServiceMetadata implements ComponentFactoryMetadata {
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("RpcServiceMetadata [id=").append(id).append(", interfaceName=").append(interfaceName)
-                .append("]");
-        return builder.toString();
+        return "RpcServiceMetadata [id=" + id + ", interfaceName=" + interfaceName + ", container=" + container + "]";
     }
 }

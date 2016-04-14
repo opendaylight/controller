@@ -105,7 +105,7 @@ class RoutedRpcMetadata implements ComponentFactoryMetadata {
     public void destroy(Object instance) {
         LOG.debug("{}: In destroy: instance: {}", logName(), instance);
 
-        (( RoutedRpcRegistration<?>)instance).close();
+        ((RoutedRpcRegistration<?>)instance).close();
     }
 
     private String logName() {
