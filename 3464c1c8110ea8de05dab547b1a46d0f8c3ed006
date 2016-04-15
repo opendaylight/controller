@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a494da4_e136f0e6",
+        "filename": "karaf/opendaylight-karaf/pom.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-04-15T19:41:43Z",
+      "side": 1,
+      "message": "Adding this also means the eventadmin feature won\u0027t get installed via startup.properties which is needed by the blueprint stuff. We should add eventadmin  to \u003cbootFeatures\u003e in the karaf-maven-plugin.",
+      "revId": "3464c1c8110ea8de05dab547b1a46d0f8c3ed006",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
