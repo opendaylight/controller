@@ -41,6 +41,7 @@ import org.opendaylight.controller.config.manager.impl.jmx.TransactionModuleJMXR
 import org.opendaylight.controller.config.manager.impl.jmx.TransactionModuleJMXRegistrator.TransactionModuleJMXRegistration;
 import org.opendaylight.controller.config.manager.impl.osgi.mapping.BindingContextProvider;
 import org.opendaylight.controller.config.manager.impl.util.InterfacesHelper;
+import org.opendaylight.controller.config.spi.AbstractModule;
 import org.opendaylight.controller.config.spi.Module;
 import org.opendaylight.controller.config.spi.ModuleFactory;
 import org.opendaylight.yangtools.concepts.Identifiable;
@@ -240,6 +241,21 @@ class ConfigTransactionControllerImpl implements
         boolean defaultBean = false;
         return putConfigBeanToJMXAndInternalMaps(moduleIdentifier, module,
                 moduleFactory, null, dependencyResolver, defaultBean, bundleContext);
+    }
+
+    @Override
+    public synchronized void reCreateModule(ObjectName objectName) throws InstanceNotFoundException {
+        transactionStatus.checkNotCommitStarted();
+        transactionStatus.checkNotAborted();
+        checkTransactionName(objectName);
+        ObjectNameUtil.checkDomain(objectName);
+        ModuleIdentifier moduleIdentifier = ObjectNameUtil.fromON(objectName, ObjectNameUtil.TYPE_MODULE);
+
+        ModuleInternalTransactionalInfo txInfo = dependencyResolverManager.findModuleInternalTransactionalInfo(moduleIdentifier);
+        Module realModule = txInfo.getRealModule();
+        if(realModule instanceof AbstractModule) {
+            ((AbstractModule<?>)realModule).setCanReuseInstance(false);
+        }
     }
 
     private synchronized ObjectName putConfigBeanToJMXAndInternalMaps(
