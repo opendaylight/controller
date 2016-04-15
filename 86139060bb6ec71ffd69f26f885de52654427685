@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a494da4_10540853",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/site/asciidoc/distributed-data-store.adoc",
+        "patchSetId": 2
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2016-04-15T09:07:15Z",
+      "side": 1,
+      "message": "I think labelled list (definition list) would be better\nand easier to read.\nSee http://asciidoctor.org/docs/asciidoc-writers-guide/#labeled-lists",
+      "range": {
+        "startLine": 16,
+        "startChar": 0,
+        "endLine": 25,
+        "endChar": 65
+      },
+      "revId": "86139060bb6ec71ffd69f26f885de52654427685",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a494da4_304b04b2",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/site/asciidoc/distributed-data-store.adoc",
+        "patchSetId": 2
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2016-04-15T09:07:15Z",
+      "side": 1,
+      "message": "I think labelled list (definition list) would be better\nand easier to read.\nSee http://asciidoctor.org/docs/asciidoc-writers-guide/#labeled-lists",
+      "range": {
+        "startLine": 34,
+        "startChar": 2,
+        "endLine": 57,
+        "endChar": 78
+      },
+      "revId": "86139060bb6ec71ffd69f26f885de52654427685",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
