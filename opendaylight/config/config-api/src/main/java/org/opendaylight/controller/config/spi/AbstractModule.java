@@ -27,6 +27,7 @@ public abstract class AbstractModule<M extends AbstractModule<M>> implements org
     private AutoCloseable oldInstance;
     private M oldModule;
     private AutoCloseable instance;
+    private boolean canReuseInstance = true;
 
     /**
      * Called when module is configured.
@@ -58,6 +59,10 @@ public abstract class AbstractModule<M extends AbstractModule<M>> implements org
         return identifier;
     }
 
+    public final void setCanReuseInstance(boolean canReuseInstance) {
+        this.canReuseInstance = canReuseInstance;
+    }
+
     /**
      *
      * General algorithm for spawning/closing and reusing wrapped instances.
@@ -67,7 +72,7 @@ public abstract class AbstractModule<M extends AbstractModule<M>> implements org
     @Override
     public final AutoCloseable getInstance() {
         if (instance == null) {
-            if (oldInstance != null && canReuseInstance(oldModule)) {
+            if (oldInstance != null && canReuseInstance && canReuseInstance(oldModule)) {
                 resolveDependencies();
                 instance = reuseInstance(oldInstance);
             } else {
@@ -102,7 +107,7 @@ public abstract class AbstractModule<M extends AbstractModule<M>> implements org
     public final boolean canReuse(final Module oldModule) {
         // Just cast into a specific instance
         // TODO unify this method with canReuseInstance (required Module interface to be generic which requires quite a lot of changes)
-        return getClass().isInstance(oldModule) ? canReuseInstance((M) oldModule) : false;
+        return canReuseInstance && getClass().isInstance(oldModule) ? canReuseInstance((M) oldModule) : false;
     }
 
     /**

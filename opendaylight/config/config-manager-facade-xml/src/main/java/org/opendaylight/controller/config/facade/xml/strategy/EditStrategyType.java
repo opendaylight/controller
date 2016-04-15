@@ -17,7 +17,7 @@ public enum EditStrategyType {
     // can be default
     merge, replace, none,
     // additional per element
-    delete, remove;
+    delete, remove, recreate;
 
     private static final Set<EditStrategyType> defaultStrats = EnumSet.of(merge, replace, none);
 
@@ -31,6 +31,7 @@ public enum EditStrategyType {
         case none:
         case remove:
         case delete:
+        case recreate:
             return false;
         case replace:
             return true;
@@ -64,6 +65,8 @@ public enum EditStrategyType {
             return new DeleteEditConfigStrategy();
         case remove:
             return new RemoveEditConfigStrategy();
+        case recreate:
+            return new ReCreateEditConfigStrategy();
         case none:
             return new NoneEditConfigStrategy();
         default:

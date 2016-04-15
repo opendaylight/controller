@@ -89,6 +89,11 @@ public class ConfigTransactionJMXClient implements ConfigTransactionClient {
     }
 
     @Override
+    public void reCreateModule(ObjectName objectName) throws InstanceNotFoundException {
+        configTransactionControllerMXBeanProxy.reCreateModule(objectName);
+    }
+
+    @Override
     public void destroyModule(ObjectName objectName)
             throws InstanceNotFoundException {
         configTransactionControllerMXBeanProxy.destroyModule(objectName);

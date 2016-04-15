@@ -30,6 +30,20 @@ public interface ConfigTransactionController extends LookupRegistry, ServiceRefe
             throws InstanceAlreadyExistsException;
 
     /**
+     * Re-creates an existing module configuration bean.
+     *
+     * @param objectName
+     *            can be either read-only module name that can be obtained using
+     *            {@link ConfigRegistry#lookupConfigBean(String, String)} or
+     *            writable module name that must contain current transaction name.
+     * @throws InstanceNotFoundException
+     *             if module is not found
+     * @throws IllegalArgumentException
+     *             if object name contains wrong transaction name or domain
+     */
+    void reCreateModule(ObjectName objectName) throws InstanceNotFoundException;
+
+    /**
      * Destroy existing module.
      *
      * @param objectName

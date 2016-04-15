@@ -9,7 +9,6 @@
 package org.opendaylight.controller.config.facade.xml.mapping.config;
 
 import static com.google.common.base.Preconditions.checkState;
-
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.HashMultimap;
@@ -128,6 +127,12 @@ public class Config {
         dataElement.appendChild(Services.toXml(serviceTracker, document));
 
         return dataElement;
+    }
+
+    public Element moduleToXml(String moduleNamespace, String factoryName, String instanceName,
+        ObjectName instanceON, Document document) {
+        ModuleConfig moduleConfig = getModuleMapping(moduleNamespace, instanceName, factoryName);
+        return moduleConfig.toXml(instanceON, document, moduleNamespace, enumResolver);
     }
 
     // TODO refactor, replace string representing namespace with namespace class

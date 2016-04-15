@@ -63,6 +63,10 @@ public class TestingConfigTransactionController implements
     }
 
     @Override
+    public void reCreateModule(ObjectName objectName) {
+    }
+
+    @Override
     public void destroyModule(ObjectName objectName)
             throws InstanceNotFoundException {
         if(objectName != null){
