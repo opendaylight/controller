@@ -215,7 +215,9 @@ state and recovery strategies taken.
   with FrontendIdentifier, it also uniquely identifies any transaction that has
   ever executed in the cluster, e.g. forming a GlobalTransactionIdentifier.
 
-== Frontend persistence
+== Persistence model
+
+=== Frontend persistence
   As noted above, implementation of the Frontend Generation requires each member
   to persistently store a single 64 bit counter. To keep the persistence interfaces
   within a member consistent, Frontend uses Akka Persistence to maintain this
@@ -225,7 +227,7 @@ state and recovery strategies taken.
   it being completed. If an inconsistency occurs (due to messages getting lost
   or Shard Leader failing), the Frontend will retransmit this state to the Backend.
 
-== Backend persistence
+=== Backend persistence
   The Backend needs to persist and replicate enough state to ensure that Shard
   Leader movement does not render Local Histories inoperable, as that has
   a direct impact on applications, which need to have a state reconciliation
@@ -241,7 +243,7 @@ state and recovery strategies taken.
   by the application and enough metadata about Local Histories and Transactions
   to make state recovery across shard leadership movement possible.
 
-=== User Data persistence
+==== User Data persistence
   The Snapshot needs to identify all transactions which have been integrated
   into it. Enumerating all of them is clearly not practical, hence we exploit
   the monotonic nature of identifiers' relationship to Global History. For each
@@ -259,7 +261,7 @@ state and recovery strategies taken.
   delta carried in that entry. This information is used to summarize transaction
   metadata when this entry is snapshotted.
 
-=== Internal state persistence
+==== Internal state persistence
   The Backend creates a hierarchy of actors to track interactions with the Frontend.
   Information necessary to recreate these actors needs to be persisted within
   the journal. This boils down to existence of Local Histories and the last
@@ -275,4 +277,41 @@ state and recovery strategies taken.
   In order to minimize overhead on Followers, the actor hierarchy is not created
   until the actor transitions to Shard Leader state. It only tracks the information
   required.
+
+== Actor model
+  Both Backend and Frontend are implemented as a set of cooperating actors. This section
+  outlines the structure and how it relates to user application interactions.
+
+=== Frontend actor model
+  The current implementation does not have explicit actors, which means that every
+  interaction with the Backend is done via Patterns.ask(), which creates implicit
+  actors. This model proposes to change that, making the model explicit -- allowing
+  us to better track state of interactions.
+
+==== FrontendActor
+  FrontendActor acts as the single, root-level actor. It is tied to
+  a ConcurrentDataBroker instance. Its resposibility is to maintain the generation
+  number (hence it is a PersistentActor), maintain information about individual
+  ShardLeader locations and direct this information to its children. It maintains
+  a set of LocalHistoryActors and a set of SingleTransactionActors.
+
+  Its responsibility is to talk to ShardManager and propagate information about
+  Shard Leader location towards its child actors.
+
+==== LocalHistoryActor
+  A LocalHistoryActor is tied to a DOMTransactionChain, maintains all local state
+  to it and also tracks its propagation to the Shard Leader. This is not a persistent
+  actor.
+
+  It maintains a relationship to its Backend counterpart and routes operations
+  (remote) and transactions (local) towards it. Should a request time out, it
+  transitions to idle state and informs FrontendActor, which will resume it once
+  the leader location information is refreshed.
+
+==== SingleTransactionActor
+  A SingleTransactionActor takes care of transactions which are not tied to a
+  LocalHistory, e.g. single transactions instatiated via
+  DOMDataBroker.newXXXTransaction()). These actors instantiated for each transaction
+  separately and get terminated once the transaction is completed, successfully or not.
+
 
