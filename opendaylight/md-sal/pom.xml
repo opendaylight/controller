@@ -55,8 +55,8 @@
     <!--InMemory DOM DataStore-->
     <module>sal-inmemory-datastore</module>
 
-    <!--sal-protocolbuffer-encoding is now part of sal-clutering-commons-->
     <module>sal-clustering-commons</module>
+    <module>cds-access-api</module>
 
     <!-- sal clustering configuration -->
     <module>sal-clustering-config</module>
