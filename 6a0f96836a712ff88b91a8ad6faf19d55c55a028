@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa57193c_34bb10c6",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/site/asciidoc/distributed-data-store.adoc",
+        "patchSetId": 2
+      },
+      "lineNbr": 306,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-04-19T11:42:53Z",
+      "side": 1,
+      "message": "These actors are ...",
+      "revId": "6a0f96836a712ff88b91a8ad6faf19d55c55a028",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
