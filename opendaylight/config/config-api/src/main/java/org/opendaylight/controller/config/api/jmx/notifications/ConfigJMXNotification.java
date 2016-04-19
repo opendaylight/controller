@@ -50,8 +50,6 @@ public abstract class ConfigJMXNotification extends Notification {
      *
      * Intended for config-persister.
      *
-     * @param transactionName
-     * @param cfgSnapshot
      */
     public static CommitJMXNotification afterCommit(NotificationBroadcasterSupport source, String messages) {
         return new CommitJMXNotification(source, messages);

@@ -11,7 +11,6 @@ package org.opendaylight.controller.liblldp;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -104,7 +103,8 @@ public class Ethernet extends Packet {
 
     /**
      * Sets the destination MAC address for the current Ethernet object instance
-     * @param byte[] - the destinationMACAddress to set
+     *
+     * @param destinationMACAddress - the destinationMACAddress to set
      */
     public Ethernet setDestinationMACAddress(byte[] destinationMACAddress) {
         fieldValues.put(DMAC, destinationMACAddress);
@@ -113,7 +113,8 @@ public class Ethernet extends Packet {
 
     /**
      * Sets the source MAC address for the current Ethernet object instance
-     * @param byte[] - the sourceMACAddress to set
+     *
+     * @param sourceMACAddress - the sourceMACAddress to set
      */
     public Ethernet setSourceMACAddress(byte[] sourceMACAddress) {
         fieldValues.put(SMAC, sourceMACAddress);
@@ -122,7 +123,8 @@ public class Ethernet extends Packet {
 
     /**
      * Sets the etherType for the current Ethernet object instance
-     * @param short - the etherType to set
+     *
+     * @param etherType the etherType to set
      */
     public Ethernet setEtherType(short etherType) {
         byte[] ethType = BitBufferHelper.toByteArray(etherType);

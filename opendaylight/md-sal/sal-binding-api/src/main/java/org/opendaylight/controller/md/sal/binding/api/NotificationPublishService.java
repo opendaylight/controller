@@ -51,37 +51,32 @@ public interface NotificationPublishService extends BindingService {
     void putNotification(Notification notification) throws InterruptedException;
 
     /**
-     * Publishes a notification to subscribed listeners. This initiates
-     * the process of sending the notification, but delivery to the
-     * listeners can happen asynchronously, potentially after a call to
-     * this method returns.
+     * Publishes a notification to subscribed listeners. This initiates the process of sending the
+     * notification, but delivery to the listeners can happen asynchronously, potentially after a
+     * call to this method returns.
      *
      * Still guaranteed not to block. Returns Listenable Future which will complete once.
      *
-     * @param notification
-     *            the notification to publish.
+     * @param notification the notification to publish.
      * @return A listenable future which will report completion when the service has finished
-     * propagating the notification to its immediate registrants, or {@value #REJECTED} if resource
-     * constraints prevent
+     *         propagating the notification to its immediate registrants, or {@link #REJECTED} if
+     *         resource constraints prevent
      * @throws NullPointerException if the notification is null
      */
     ListenableFuture<? extends Object> offerNotification(Notification notification);
 
     /**
-     * Publishes a notification to subscribed listeners. This initiates
-     * the process of sending the notification, but delivery to the
-     * listeners can happen asynchronously, potentially after a call to
-     * this method returns. This method is guaranteed not to block more
-     * than the specified timeout.
+     * Publishes a notification to subscribed listeners. This initiates the process of sending the
+     * notification, but delivery to the listeners can happen asynchronously, potentially after a
+     * call to this method returns. This method is guaranteed not to block more than the specified
+     * timeout.
      *
-     * @param notification
-     *            the notification to publish.
+     * @param notification the notification to publish.
      * @param timeout how long to wait before giving up, in units of unit
-     * @param unit a TimeUnit determining how to interpret the
-     *             timeout parameter
+     * @param unit a TimeUnit determining how to interpret the timeout parameter
      * @return A listenable future which will report completion when the service has finished
-     * propagating the notification to its immediate registrants, or {@value #REJECTED} if resource
-     * constraints prevent
+     *         propagating the notification to its immediate registrants, or {@link #REJECTED} if
+     *         resource constraints prevent
      * @throws InterruptedException if interrupted while waiting
      * @throws NullPointerException if the notification or unit is null
      * @throws IllegalArgumentException if timeout is negative.

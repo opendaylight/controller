@@ -9,7 +9,6 @@ package org.opendaylight.controller.sal.binding.api;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -77,22 +76,14 @@ public abstract class AbstractBrokerAwareActivator implements BundleActivator {
 
 
     /**
-     * Called when this bundle is started (before
-     * {@link #onSessionInitiated(ProviderContext)} so the Framework can perform
-     * the bundle-specific activities necessary to start this bundle. This
-     * method can be used to register services or to allocate any resources that
-     * this bundle needs.
+     * Called when this bundle is started so the Framework can perform the bundle-specific
+     * activities necessary to start this bundle. This method can be used to register services or to
+     * allocate any resources that this bundle needs.
      *
      * <p>
      * This method must complete and return to its caller in a timely manner.
      *
-     * @param context
-     *            The execution context of the bundle being started.
-     * @throws Exception
-     *             If this method throws an exception, this bundle is marked as
-     *             stopped and the Framework will remove this bundle's
-     *             listeners, unregister all services registered by this bundle,
-     *             and release all services used by this bundle.
+     * @param context The execution context of the bundle being started.
      */
     protected void startImpl(BundleContext context) {
         // NOOP
@@ -110,10 +101,6 @@ public abstract class AbstractBrokerAwareActivator implements BundleActivator {
      * This method must complete and return to its caller in a timely manner.
      *
      * @param context The execution context of the bundle being stopped.
-     * @throws Exception If this method throws an exception, the bundle is still
-     *         marked as stopped, and the Framework will remove the bundle's
-     *         listeners, unregister all services registered by the bundle, and
-     *         release all services used by the bundle.
      */
     protected void stopImpl(BundleContext context) {
         // NOOP

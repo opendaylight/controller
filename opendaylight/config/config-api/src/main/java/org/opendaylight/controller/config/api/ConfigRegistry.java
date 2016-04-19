@@ -29,7 +29,7 @@ public interface ConfigRegistry extends LookupRegistry, ServiceReferenceReadable
     /**
      * Opens new configuration transaction.
      *
-     * @return {@link ObjectName} of {@link ConfigTransactionControllerMXBean}
+     * @return {@link ObjectName} of {@link org.opendaylight.controller.config.api.jmx.ConfigTransactionControllerMXBean}
      */
     ObjectName beginConfig();
 
@@ -38,7 +38,7 @@ public interface ConfigRegistry extends LookupRegistry, ServiceReferenceReadable
      *
      * @param transactionControllerON
      *            {@link ObjectName} of
-     *            {@link ConfigTransactionControllerMXBean} that was received in
+     *            {@link org.opendaylight.controller.config.api.jmx.ConfigTransactionControllerMXBean} that was received in
      *            {@link #beginConfig()} method call.
      * @return CommitStatus
      * @throws ValidationException

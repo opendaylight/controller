@@ -40,7 +40,7 @@ public final class DataTreeIdentifier<T extends DataObject> implements Immutable
     }
 
     /**
-     * Return the {@link YangInstanceIdentifier} of the root node.
+     * Return the {@link InstanceIdentifier} of the root node.
      *
      * @return Instance identifier corresponding to the root node.
      */

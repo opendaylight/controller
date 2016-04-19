@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.sal.binding.api;
 
+
 import org.opendaylight.controller.md.sal.common.api.routing.RoutedRegistration;
 import org.opendaylight.yangtools.concepts.ObjectRegistration;
 import org.opendaylight.yangtools.yang.binding.BaseIdentity;
@@ -17,15 +18,13 @@ import org.osgi.framework.BundleContext;
 /**
  * Binding-aware core of the SAL layer responsible for wiring the SAL consumers.
  *
- * The responsibility of the broker is to maintain registration of SAL
- * functionality {@link Consumer}s and {@link Provider}s, store provider and
- * consumer specific context and functionality registration via
- * {@link ConsumerContext} and provide access to infrastructure services, which
- * removes direct dependencies between providers and consumers.
+ * The responsibility of the broker is to maintain registration of SAL functionality
+ * {@link BindingAwareConsumer}s and {@link BindingAwareProvider}s, store provider and consumer
+ * specific context and functionality registration via {@link ConsumerContext} and provide access to
+ * infrastructure services, which removes direct dependencies between providers and consumers.
  *
- * The Binding-aware broker is also responsible for translation from Java
- * classes modeling the functionality and data to binding-independent form which
- * is used in SAL Core.
+ * The Binding-aware broker is also responsible for translation from Java classes modeling the
+ * functionality and data to binding-independent form which is used in SAL Core.
  *
  *
  * <h3>Infrastructure services</h3> Some examples of infrastructure services:
@@ -36,7 +35,8 @@ import org.osgi.framework.BundleContext;
  * <li>Notification Service - see {@link NotificationService} and
  * {@link NotificationProviderService}
  * <li>Functionality and Data model
- * <li>Data Store access and modification - see {@link org.opendaylight.controller.sal.binding.api.data.DataBrokerService} and
+ * <li>Data Store access and modification - see
+ * {@link org.opendaylight.controller.sal.binding.api.data.DataBrokerService} and
  * {@link org.opendaylight.controller.sal.binding.api.data.DataProviderService}
  * </ul>
  *
@@ -44,11 +44,11 @@ import org.osgi.framework.BundleContext;
  *
  * <h3>Session-based access</h3>
  *
- * The providers and consumers needs to register in order to use the
- * binding-independent SAL layer and to expose functionality via SAL layer.
+ * The providers and consumers needs to register in order to use the binding-independent SAL layer
+ * and to expose functionality via SAL layer.
  *
- * For more information about session-based access see {@link ConsumerContext}
- * and {@link ProviderContext}
+ * For more information about session-based access see {@link ConsumerContext} and
+ * {@link ProviderContext}
  */
 public interface BindingAwareBroker {
     /*
@@ -61,22 +61,18 @@ public interface BindingAwareBroker {
      * Registers the {@link BindingAwareConsumer}, which will use the SAL layer.
      *
      * <p>
-     * Note that consumer could register additional functionality at later point
-     * by using service and functionality specific APIs.
+     * Note that consumer could register additional functionality at later point by using service
+     * and functionality specific APIs.
      *
      * <p>
-     * The consumer is required to use returned session for all communication
-     * with broker or one of the broker services. The session is announced to
-     * the consumer by invoking
-     * {@link Consumer#onSessionInitiated(ConsumerContext)}.
+     * The consumer is required to use returned session for all communication with broker or one of
+     * the broker services. The session is announced to the consumer by invoking
+     * {@link BindingAwareConsumer#onSessionInitialized(ConsumerContext)}.
      *
-     * @param cons
-     *            Consumer to be registered.
+     * @param consumer Consumer to be registered.
      * @return a session specific to consumer registration
-     * @throws IllegalArgumentException
-     *             If the consumer is <code>null</code>.
-     * @throws IllegalStateException
-     *             If the consumer is already registered.
+     * @throws IllegalArgumentException If the consumer is <code>null</code>.
+     * @throws IllegalStateException If the consumer is already registered.
      */
     ConsumerContext registerConsumer(BindingAwareConsumer consumer);
 
@@ -90,29 +86,19 @@ public interface BindingAwareBroker {
      * Registers the {@link BindingAwareProvider}, which will use the SAL layer.
      *
      * <p>
-     * During the registration, the broker obtains the initial functionality
-     * from consumer, using the
-     * {@link BindingAwareProvider#getImplementations()}, and register that
-     * functionality into system and concrete infrastructure services.
+     * Note that provider could register additional functionality at later point by using service
+     * and functionality specific APIs.
      *
      * <p>
-     * Note that provider could register additional functionality at later point
-     * by using service and functionality specific APIs.
-     *
-     * <p>
-     * The consumer is <b>required to use</b> returned session for all
-     * communication with broker or one of the broker services. The session is
-     * announced to the consumer by invoking
+     * The consumer is <b>required to use</b> returned session for all communication with broker or
+     * one of the broker services. The session is announced to the consumer by invoking
      * {@link BindingAwareProvider#onSessionInitiated(ProviderContext)}.
      *
      *
-     * @param prov
-     *            Provider to be registered.
+     * @param provider Provider to be registered.
      * @return a session unique to the provider registration.
-     * @throws IllegalArgumentException
-     *             If the provider is <code>null</code>.
-     * @throws IllegalStateException
-     *             If the consumer is already registered.
+     * @throws IllegalArgumentException If the provider is <code>null</code>.
+     * @throws IllegalStateException If the consumer is already registered.
      */
     ProviderContext registerProvider(BindingAwareProvider provider);
 
@@ -120,14 +106,13 @@ public interface BindingAwareBroker {
      * {@link BindingAwareConsumer} specific access to the SAL functionality.
      *
      * <p>
-     * ConsumerSession is {@link BindingAwareConsumer}-specific access to the
-     * SAL functionality and infrastructure services.
+     * ConsumerSession is {@link BindingAwareConsumer}-specific access to the SAL functionality and
+     * infrastructure services.
      *
      * <p>
-     * The session serves to store SAL context (e.g. registration of
-     * functionality) for the consumer and provides access to the SAL
-     * infrastructure services and other functionality provided by
-     * {@link Provider}s.
+     * The session serves to store SAL context (e.g. registration of functionality) for the consumer
+     * and provides access to the SAL infrastructure services and other functionality provided by
+     * {@link BindingAwareProvider}s.
      */
     public interface ConsumerContext extends RpcConsumerRegistry {
 
@@ -189,10 +174,11 @@ public interface BindingAwareBroker {
             RoutedRegistration<Class<? extends BaseIdentity>, InstanceIdentifier<?>, T> {
 
         /**
-         * Register particular instance identifier to be processed by this
-         * RpcService
+         * Register particular instance identifier to be processed by this RpcService
          *
-         * Deprecated in favor of {@link RoutedRegistration#registerPath(Object, Object)}.
+         * Deprecated in favor of
+         * {@link RoutedRegistration#registerPath(Object, org.opendaylight.yangtools.concepts.Path)}
+         * .
          *
          * @param context
          * @param instance
@@ -201,10 +187,11 @@ public interface BindingAwareBroker {
         void registerInstance(Class<? extends BaseIdentity> context, InstanceIdentifier<?> instance);
 
         /**
-         * Unregister particular instance identifier to be processed by this
-         * RpcService
+         * Unregister particular instance identifier to be processed by this RpcService
          *
-         * Deprecated in favor of {@link RoutedRegistration#unregisterPath(Object, Object)}.
+         * Deprecated in favor of
+         * {@link RoutedRegistration#unregisterPath(Object, org.opendaylight.yangtools.concepts.Path)}
+         * .
          *
          * @param context
          * @param instance
