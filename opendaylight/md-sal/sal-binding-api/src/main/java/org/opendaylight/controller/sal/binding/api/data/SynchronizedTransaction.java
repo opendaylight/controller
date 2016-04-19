@@ -7,10 +7,10 @@
  */
 package org.opendaylight.controller.sal.binding.api.data;
 
+import com.google.common.base.Preconditions;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Future;
-
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.yangtools.concepts.Delegator;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
@@ -18,18 +18,18 @@ import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 
-import com.google.common.base.Preconditions;
-
 /**
  * Synchronized wrapper for DataModificationTransaction.
  *
  * To get instance of synchronized wrapper use {@link #from(DataModificationTransaction)}
  *
  * @deprecated Replaced by more specific transaction types. Please use
- *          {@link org.opendaylight.controller.md.sal.binding.api.DataBroker#newReadOnlyTransaction(),
- *          {@link org.opendaylight.controller.md.sal.binding.api.DataBroker#newReadWriteTransaction()
- *          or
- *          {@link org.opendaylight.controller.md.sal.binding.api.DataBroker#newWriteOnlyTransaction().
+ *             {@link org.opendaylight.controller.md.sal.binding.api.DataBroker#newReadOnlyTransaction()}
+ *             ,
+ *             {@link org.opendaylight.controller.md.sal.binding.api.DataBroker#newReadWriteTransaction()}
+ *             or
+ *             {@link org.opendaylight.controller.md.sal.binding.api.DataBroker#newWriteOnlyTransaction()}
+ *             .
  *
  */
 @Deprecated

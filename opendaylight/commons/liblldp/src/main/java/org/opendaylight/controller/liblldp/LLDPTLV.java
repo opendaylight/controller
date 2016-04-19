@@ -8,18 +8,17 @@
 
 package org.opendaylight.controller.liblldp;
 
-import org.apache.commons.lang3.ArrayUtils;
-import org.slf4j.LoggerFactory;
-
-import org.slf4j.Logger;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Class that represents the LLDPTLV objects
@@ -121,7 +120,7 @@ public class LLDPTLV extends Packet {
     }
 
     /**
-     * @param byte - the type to set
+     * @param type - the type to set
      * @return LLDPTLV
      */
     public LLDPTLV setType(byte type) {
@@ -131,7 +130,7 @@ public class LLDPTLV extends Packet {
     }
 
     /**
-     * @param short - the length to set
+     * @param length - the length to set
      * @return LLDPTLV
      */
     public LLDPTLV setLength(short length) {
@@ -140,7 +139,7 @@ public class LLDPTLV extends Packet {
     }
 
     /**
-     * @param byte[] - the value to set
+     * @param value - the value to set
      * @return LLDPTLV
      */
     public LLDPTLV setValue(byte[] value) {
@@ -264,12 +263,12 @@ public class LLDPTLV extends Packet {
     }
 
     /**
-     * Creates the custom TLV value including OUI, subtype and custom string
+     * Creates the custom TLV value including OUI, subtype and custom string See also
+     * {@link #createCustomTLVValue(byte[], byte[])}
      *
-     * @param portId
-     *            port identifier string
+     * @param customString port identifier string
      * @return the custom TLV value in byte array
-     * @see {@link #createCustomTLVValue(byte,String)}
+     *
      */
     static public byte[] createCustomTLVValue(String customString) {
         byte[] customByteArray = customString.getBytes(Charset.defaultCharset());
@@ -278,9 +277,9 @@ public class LLDPTLV extends Packet {
 
     /**
      * Creates the custom TLV value including OUI, subtype and custom string
+     *
      * @param subtype openflow subtype
-     * @param portId
-     *            port identifier string
+     * @param customByteArray port identifier string
      * @return the custom TLV value in byte array
      */
     static public byte[] createCustomTLVValue(byte[] subtype, byte[] customByteArray) {

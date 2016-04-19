@@ -57,15 +57,6 @@ import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ConsumerCo
 * rpcFlowSalService can be used like any other object by invoking its methods.  Note, nothing special needs to be done
 * for RoutedRPCs.  They just work.
 *
-* To get a DataBroker to allow access to the data tree:
-*
-* {code
-* public void onSessionInitiated(final ProviderContext session) {
-*      DataBroker databroker = session.getSALService(BindingDataBroker.class);
-* }
-* }
-* @see org.opendaylight.controller.md.sal.common.api.data.BindingDataBroker
-* for more info on using the DataBroker.
 *
 */
 public interface BindingAwareConsumer {

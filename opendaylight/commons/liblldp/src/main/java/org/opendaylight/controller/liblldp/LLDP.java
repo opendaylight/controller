@@ -53,8 +53,7 @@ public class LLDP extends Packet {
     }
 
     /**
-     * @param String
-     *            - description of the type of TLV
+     * @param typeDesc - description of the type of TLV
      * @return byte - type of TLV
      */
     private byte getType(String typeDesc) {
@@ -90,8 +89,7 @@ public class LLDP extends Packet {
     }
 
     /**
-     * @param String
-     *            - description of the type of TLV
+     * @param type description of the type of TLV
      * @return LLDPTLV - full TLV
      */
     public LLDPTLV getTLV(String type) {
@@ -103,11 +101,8 @@ public class LLDP extends Packet {
     }
 
     /**
-     * @param String
-     *            - description of the type of TLV
-     * @param LLDPTLV
-     *            - tlv to set
-     * @return void
+     * @param type - description of the type of TLV
+     * @param tlv - tlv to set
      */
     public void setTLV(String type, LLDPTLV tlv) {
         putToTLVs(getType(type), tlv);
@@ -121,8 +116,7 @@ public class LLDP extends Packet {
     }
 
     /**
-     * @param LLDPTLV
-     *            - the chassisId to set
+     * @param chassisId - the chassisId to set
      */
     public LLDP setChassisId(LLDPTLV chassisId) {
         setTLV(CHASSISID, chassisId);
@@ -137,8 +131,7 @@ public class LLDP extends Packet {
     }
 
     /**
-     * @param LLDPTLV
-     *            - the chassisId to set
+     * @param systemNameId - the chassisId to set
      */
     public LLDP setSystemNameId(LLDPTLV systemNameId) {
         setTLV(SYSTEMNAMEID, systemNameId);
@@ -153,8 +146,7 @@ public class LLDP extends Packet {
     }
 
     /**
-     * @param LLDPTLV
-     *            - the portId to set
+     * @param portId - the portId to set
      * @return LLDP
      */
     public LLDP setPortId(LLDPTLV portId) {
@@ -170,8 +162,7 @@ public class LLDP extends Packet {
     }
 
     /**
-     * @param LLDPTLV
-     *            - the ttl to set
+     * @param ttl - the ttl to set
      * @return LLDP
      */
     public LLDP setTtl(LLDPTLV ttl) {
@@ -206,8 +197,7 @@ public class LLDP extends Packet {
     }
 
     /**
-     * @param customTLVList
-     *            the list of custom TLVs to set
+     * @param customTLV the list of custom TLVs to set
      * @return this LLDP
      */
     public LLDP addCustomTLV(final LLDPTLV customTLV) {

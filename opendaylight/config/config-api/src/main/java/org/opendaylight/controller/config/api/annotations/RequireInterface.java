@@ -13,20 +13,23 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Indicates what service interface is expected to be obtained as a dependency
- * of a module. This annotation must be present for each dependency setter in
- * {@link org.opendaylight.controller.config.spi.Module} M(X)Bean interface.
- * Together with name of dependent bean the {@link #value()} will be used to get
- * {@link ObjectName} of dependency.
+ * Indicates what service interface is expected to be obtained as a dependency of a module. This
+ * annotation must be present for each dependency setter in
+ * {@link org.opendaylight.controller.config.spi.Module} M(X)Bean interface. Together with name of
+ * dependent bean the {@link #value()} will be used to get {@link javax.management.ObjectName} of
+ * dependency.
  *
  * <p>
  * Example:<br>
  *
+ * <pre>
  * <code>
  *
- * @RequireInterface(value = ThreadPoolServiceInterface.class, optional =
- *                         false)<br/> void setThreadPool(ObjectName on);
- *                         </code>
+ * &#64;RequireInterface(value = ThreadPoolServiceInterface.class, optional =
+ *                         false)
+ * void setThreadPool(ObjectName on);
+ * </code>
+ * </pre>
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)

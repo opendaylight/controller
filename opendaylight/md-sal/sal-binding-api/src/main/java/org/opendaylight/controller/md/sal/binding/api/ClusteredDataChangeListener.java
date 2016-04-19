@@ -11,15 +11,17 @@ package org.opendaylight.controller.md.sal.binding.api;
 
 /**
  * <p>
- * ClusteredDataChangeListener is a marker interface to enable data change notifications on all instances in a cluster,
- * where this listener is registered.
+ * ClusteredDataChangeListener is a marker interface to enable data change notifications on all
+ * instances in a cluster, where this listener is registered.
  * </p>
  *
- * <p>Applications should implement ClusteredDataChangeListener instead of DataChangeListener, if they want to listen
- * to data change notifications on any node of clustered datastore. DataChangeListener enables data change notifications
- * only at leader of the datastore shard.</p>
+ * <p>
+ * Applications should implement ClusteredDataChangeListener instead of DataChangeListener, if they
+ * want to listen to data change notifications on any node of clustered datastore.
+ * DataChangeListener enables data change notifications only at leader of the datastore shard.
+ * </p>
  *
- * @Deprecated Replaced by {@link ClusteredDataTreeChangeListener}
+ * @deprecated Replaced by {@link ClusteredDataTreeChangeListener}
  */
 @Deprecated
 public interface ClusteredDataChangeListener extends DataChangeListener{

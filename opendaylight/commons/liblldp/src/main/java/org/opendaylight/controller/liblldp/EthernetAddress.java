@@ -9,7 +9,6 @@
 package org.opendaylight.controller.liblldp;
 
 import java.util.Arrays;
-
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -46,14 +45,12 @@ public class EthernetAddress extends DataLinkAddress {
     }
 
     /**
-     * Public constructor for an Ethernet MAC address starting from
-     * the byte constituing the address, the constructor validate the
-     * size of the arrive to make sure it met the expected size
+     * Public constructor for an Ethernet MAC address starting from the byte constituing the
+     * address, the constructor validate the size of the arrive to make sure it met the expected
+     * size
      *
-     * @param macAddress A byte array in big endian format
-     * representing the Ethernet MAC Address
+     * @param macAddress A byte array in big endian format representing the Ethernet MAC Address
      *
-     * @return The constructed object if valid
      */
     public EthernetAddress(byte[] macAddress) throws ConstructionException {
         super(addressName);
@@ -71,6 +68,7 @@ public class EthernetAddress extends DataLinkAddress {
         System.arraycopy(macAddress, 0, this.macAddress, 0, SIZE);
     }
 
+    @Override
     public EthernetAddress clone() {
         try {
             return new EthernetAddress(this.macAddress.clone());

@@ -29,10 +29,12 @@ public interface DataBrokerService extends BindingAwareService,
      *
      * @return new blank data modification transaction.
      * @deprecated Replaced by more specific transaction types. Please use
-     *          {@link org.opendaylight.controller.md.sal.binding.api.DataBroker#newReadOnlyTransaction(),
-     *          {@link org.opendaylight.controller.md.sal.binding.api.DataBroker#newReadWriteTransaction()
-     *          or
-     *          {@link org.opendaylight.controller.md.sal.binding.api.DataBroker#newWriteOnlyTransaction().
+     *             {@link org.opendaylight.controller.md.sal.binding.api.DataBroker#newReadOnlyTransaction()}
+     *             ,
+     *             {@link org.opendaylight.controller.md.sal.binding.api.DataBroker#newReadWriteTransaction()}
+     *             or
+     *             {@link org.opendaylight.controller.md.sal.binding.api.DataBroker#newWriteOnlyTransaction()}
+     *             .
      */
     @Deprecated
     DataModificationTransaction beginTransaction();

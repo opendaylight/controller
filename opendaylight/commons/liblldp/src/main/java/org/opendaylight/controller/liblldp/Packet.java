@@ -11,7 +11,6 @@ package org.opendaylight.controller.liblldp;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Map.Entry;
-
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,13 +72,12 @@ public abstract class Packet {
     }
 
     /**
-     * This method deserializes the data bits obtained from the wire into the
-     * respective header and payload which are of type Packet
+     * This method deserializes the data bits obtained from the wire into the respective header and
+     * payload which are of type Packet
      *
-     * @param byte[] data - data from wire to deserialize
-     * @param int bitOffset bit position where packet header starts in data
-     *        array
-     * @param int size of packet in bits
+     * @param data - data from wire to deserialize
+     * @param bitOffset bit position where packet header starts in data array
+     * @param size of packet in bits
      * @return Packet
      * @throws PacketException
      */
@@ -199,13 +197,12 @@ public abstract class Packet {
     }
 
     /**
-     * This method gets called at the end of the serialization process It is
-     * intended for the child packets to insert some custom data into the output
-     * byte stream which cannot be done or cannot be done efficiently during the
-     * normal Packet.serialize() path. An example is the checksum computation
-     * for IPv4
+     * This method gets called at the end of the serialization process It is intended for the child
+     * packets to insert some custom data into the output byte stream which cannot be done or cannot
+     * be done efficiently during the normal Packet.serialize() path. An example is the checksum
+     * computation for IPv4
      *
-     * @param byte[] - serialized bytes
+     * @param myBytes - serialized bytes
      * @throws PacketException
      */
     protected void postSerializeCustomOperation(byte[] myBytes)
@@ -214,14 +211,14 @@ public abstract class Packet {
     }
 
     /**
-     * This method re-computes the checksum of the bits received on the wire and
-     * validates it with the checksum in the bits received Since the computation
-     * of checksum varies based on the protocol, this method is overridden.
-     * Currently only IPv4 and ICMP do checksum computation and validation. TCP
-     * and UDP need to implement these if required.
+     * This method re-computes the checksum of the bits received on the wire and validates it with
+     * the checksum in the bits received Since the computation of checksum varies based on the
+     * protocol, this method is overridden. Currently only IPv4 and ICMP do checksum computation and
+     * validation. TCP and UDP need to implement these if required.
      *
-     * @param byte[] data The byte stream representing the Ethernet frame
-     * @param int startBitOffset The bit offset from where the byte array corresponding to this Packet starts in the frame
+     * @param data The byte stream representing the Ethernet frame
+     * @param startBitOffset The bit offset from where the byte array corresponding to this Packet
+     *        starts in the frame
      * @throws PacketException
      */
     protected void postDeserializeCustomOperation(byte[] data, int startBitOffset)
@@ -251,26 +248,22 @@ public abstract class Packet {
     }
 
     /**
-     * This method fetches the start bit offset for header field specified by
-     * 'fieldname'. The offset is present in the hdrFieldCoordMap of the
-     * respective packet class
+     * This method fetches the start bit offset for header field specified by 'fieldname'. The
+     * offset is present in the hdrFieldCoordMap of the respective packet class
      *
-     * @param String
-     *            fieldName
-     * @return Integer - startOffset of the requested field
+     * @param fieldName
+     * @return startOffset of the requested field
      */
     public int getfieldOffset(String fieldName) {
         return hdrFieldCoordMap.get(fieldName).getLeft();
     }
 
     /**
-     * This method fetches the number of bits for header field specified by
-     * 'fieldname'. The numBits are present in the hdrFieldCoordMap of the
-     * respective packet class
+     * This method fetches the number of bits for header field specified by 'fieldname'. The numBits
+     * are present in the hdrFieldCoordMap of the respective packet class
      *
-     * @param String
-     *            fieldName
-     * @return Integer - number of bits of the requested field
+     * @param fieldName
+     * @return number of bits of the requested field
      */
     public int getfieldnumBits(String fieldName) {
         return hdrFieldCoordMap.get(fieldName).getRight();

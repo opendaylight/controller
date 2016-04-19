@@ -56,7 +56,7 @@ import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderCo
  *
  * {code
  * public void onSessionInitiated(ProviderContext session) {
- *    RpcRegistration<MyService> registration = session.addRpcImplementation(MyService.class, myImplementationInstance);
+ *    RpcRegistration&lt;MyService&gt; registration = session.addRpcImplementation(MyService.class, myImplementationInstance);
  * }
  *
  * <p>
@@ -67,7 +67,7 @@ import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderCo
  * To register a Routed RPC Implementation:
  * {code
  * public void onSessionInitiated(ProviderContext session) {
- *   RoutedRpcRegistration<SalFlowService> flowRegistration = session.addRoutedRpcImplementation(SalFlowService.class, salFlowServiceImplementationInstance);
+ *   RoutedRpcRegistration&lt;SalFlowService&gt; flowRegistration = session.addRoutedRpcImplementation(SalFlowService.class, salFlowServiceImplementationInstance);
      flowRegistration.registerPath(NodeContext.class, nodeInstanceId);
  * }
  * }
@@ -89,16 +89,6 @@ import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderCo
  * it *for that node*.
  *
  *<p>
- *
- * To get a DataBroker to allow access to the data tree:
- *
- * {code
- * public void onSessionInitiated(final ProviderContext session) {
- *      DataBroker databroker = session.getSALService(BindingDataBroker.class);
- * }
- * }
- * @see org.opendaylight.controller.md.sal.common.api.data.BindingDataBroker
- * for more info on using the DataBroker.
  *
  */
 public interface BindingAwareProvider {
