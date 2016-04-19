@@ -18,6 +18,12 @@
     <argument value="${ticks-per-wheel}"/>
   </bean>
 
-  <service ref="timer" interface="io.netty.util.Timer" odl:type="global-timer"/>
+  <service ref="timer" interface="io.netty.util.Timer" odl:type="global-timer">
+    <service-properties>
+      <entry key="config-module-namespace" value="urn:opendaylight:params:xml:ns:yang:controller:netty:timer"/>
+      <entry key="config-module-name" value="netty-hashed-wheel-timer"/>
+      <entry key="config-instance-name" value="global-timer"/>
+    </service-properties>
+  </service>
 
 </blueprint>
