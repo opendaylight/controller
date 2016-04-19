@@ -9,7 +9,7 @@
   <properties>
     <nexus.repository.release>opendaylight.release</nexus.repository.release>
     <nexus.repository.snapshot>opendaylight.snapshot</nexus.repository.snapshot>
-    <nexusproxy>http://nexus.opendaylight.org/content</nexusproxy>
+    <nexusproxy>https://nexus.opendaylight.org/content</nexusproxy>
     <releaseplugin.version>2.3.2</releaseplugin.version>
     <sitedeploy>dav:http://nexus.opendaylight.org/content/sites/site</sitedeploy>
   </properties>
