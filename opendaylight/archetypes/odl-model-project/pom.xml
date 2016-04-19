@@ -14,7 +14,6 @@
   <packaging>maven-archetype</packaging>
 
   <properties>
-    <nexusproxy>http://nexus.opendaylight.org/content</nexusproxy>
     <nexus.repository.release>opendaylight.release</nexus.repository.release>
     <nexus.repository.snapshot>opendaylight.snapshot</nexus.repository.snapshot>
   </properties>

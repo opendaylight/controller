@@ -11,7 +11,7 @@
     <nexus.repository.snapshot>opendaylight.snapshot</nexus.repository.snapshot>
     <nexusproxy>https://nexus.opendaylight.org/content</nexusproxy>
     <releaseplugin.version>2.3.2</releaseplugin.version>
-    <sitedeploy>dav:http://nexus.opendaylight.org/content/sites/site</sitedeploy>
+    <sitedeploy>dav:https://nexus.opendaylight.org/content/sites/site</sitedeploy>
   </properties>
   <build>
     <plugins>

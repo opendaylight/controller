@@ -8,7 +8,7 @@
   <packaging>bundle</packaging>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <nexusproxy>http://nexus.opendaylight.org/content</nexusproxy>
+    <nexusproxy>https://nexus.opendaylight.org/content</nexusproxy>
     <nexus.repository.release>opendaylight.release</nexus.repository.release>
     <nexus.repository.snapshot>opendaylight.release</nexus.repository.snapshot>
     <yang.version>0.7.5-SNAPSHOT</yang.version>

@@ -11,10 +11,10 @@
   </scm>
 
   <properties>
-    <nexusproxy>http://nexus.opendaylight.org/content</nexusproxy>
+    <nexusproxy>https://nexus.opendaylight.org/content</nexusproxy>
     <nexus.repository.release>opendaylight.release</nexus.repository.release>
     <nexus.repository.snapshot>opendaylight.snapshot</nexus.repository.snapshot>
-    <sitedeploy>dav:http://nexus.opendaylight.org/content/sites/site</sitedeploy>
+    <sitedeploy>dav:https://nexus.opendaylight.org/content/sites/site</sitedeploy>
   </properties>
   <distributionManagement>
     <!-- OpenDayLight Released artifact -->
