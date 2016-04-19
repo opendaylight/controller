@@ -17,13 +17,25 @@
     <argument value="${global-boss-group-thread-count}"/>
   </bean>
 
-  <service ref="globalBossGroup" interface="io.netty.channel.EventLoopGroup" odl:type="global-boss-group"/>
+  <service ref="globalBossGroup" interface="io.netty.channel.EventLoopGroup" odl:type="global-boss-group">
+  <service-properties>
+      <entry key="config-module-namespace" value="urn:opendaylight:params:xml:ns:yang:controller:netty:threadgroup"/>
+      <entry key="config-module-name" value="netty-threadgroup-fixed"/>
+      <entry key="config-instance-name" value="global-boss-group"/>
+    </service-properties>
+  </service>
 
   <bean id="globalWorkerGroup" class="org.opendaylight.controller.config.yang.netty.threadgroup.NioEventLoopGroupCloseable"
           factory-method="newInstance">
     <argument value="${global-worker-group-thread-count}"/>
   </bean>
 
-  <service ref="globalWorkerGroup" interface="io.netty.channel.EventLoopGroup" odl:type="global-worker-group"/>
+  <service ref="globalWorkerGroup" interface="io.netty.channel.EventLoopGroup" odl:type="global-worker-group">
+  <service-properties>
+      <entry key="config-module-namespace" value="urn:opendaylight:params:xml:ns:yang:controller:netty:threadgroup"/>
+      <entry key="config-module-name" value="netty-threadgroup-fixed"/>
+      <entry key="config-instance-name" value="global-worker-group"/>
+    </service-properties>
+  </service>
 
 </blueprint>

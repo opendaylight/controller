@@ -32,6 +32,7 @@ module netty {
 
         base "config:service-type";
         config:java-class "io.netty.channel.EventLoopGroup";
+        config:disable-osgi-service-registration;
     }
 
     identity netty-event-executor {
@@ -40,6 +41,7 @@ module netty {
 
         base "config:service-type";
         config:java-class "io.netty.util.concurrent.EventExecutor";
+        config:disable-osgi-service-registration;
     }
 
     identity netty-timer {
@@ -48,6 +50,7 @@ module netty {
 
         base "config:service-type";
         config:java-class "io.netty.util.Timer";
+        config:disable-osgi-service-registration;
     }
 
     identity channel-factory {
@@ -56,5 +59,6 @@ module netty {
 
         base "config:service-type";
         config:java-class "io.netty.bootstrap.ChannelFactory";
+        config:disable-osgi-service-registration;
     }
 }
