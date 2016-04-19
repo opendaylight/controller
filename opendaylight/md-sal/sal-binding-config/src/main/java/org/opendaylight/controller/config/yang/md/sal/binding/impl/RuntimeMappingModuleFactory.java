@@ -7,14 +7,14 @@
  */
 package org.opendaylight.controller.config.yang.md.sal.binding.impl;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import org.opendaylight.controller.config.api.DependencyResolver;
 import org.osgi.framework.BundleContext;
 
-import static com.google.common.base.Preconditions.checkArgument;
-
 /**
- *
+ * @deprecated Replaced by blueprint wiring
  */
+@Deprecated
 public class RuntimeMappingModuleFactory extends
         org.opendaylight.controller.config.yang.md.sal.binding.impl.AbstractRuntimeMappingModuleFactory {
 

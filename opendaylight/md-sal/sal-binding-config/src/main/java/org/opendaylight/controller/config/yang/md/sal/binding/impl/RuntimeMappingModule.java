@@ -16,8 +16,9 @@ import org.opendaylight.controller.md.sal.binding.impl.BindingToNormalizedNodeCo
 import org.osgi.framework.BundleContext;
 
 /**
- *
-**/
+ * @deprecated Replaced by blueprint wiring
+ */
+@Deprecated
 public final class RuntimeMappingModule extends AbstractRuntimeMappingModule {
     private static final long WAIT_IN_MINUTES = 5;
 
