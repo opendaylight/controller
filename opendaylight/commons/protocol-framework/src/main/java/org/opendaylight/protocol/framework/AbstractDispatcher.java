@@ -7,15 +7,7 @@
  */
 package org.opendaylight.protocol.framework;
 
-import java.io.Closeable;
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.common.base.Preconditions;
-
 import io.netty.bootstrap.Bootstrap;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
@@ -34,6 +26,11 @@ import io.netty.util.concurrent.EventExecutor;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GlobalEventExecutor;
 import io.netty.util.concurrent.Promise;
+import java.io.Closeable;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Dispatcher class for creating servers and clients. The idea is to first create servers and clients and the run the
@@ -274,10 +271,10 @@ public abstract class AbstractDispatcher<S extends ProtocolSession<?>, L extends
     @Deprecated
     @Override
     public void close() {
-        try {
-            this.workerGroup.shutdownGracefully();
-        } finally {
-            this.bossGroup.shutdownGracefully();
-        }
+//        try {
+//            this.workerGroup.shutdownGracefully();
+//        } finally {
+//            this.bossGroup.shutdownGracefully();
+//        }
     }
 }
