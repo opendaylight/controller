@@ -23,6 +23,10 @@ import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * @deprecated Replaced by blueprint wiring
+ */
+@Deprecated
 public final class SchemaServiceImplSingletonModule extends
 org.opendaylight.controller.config.yang.md.sal.dom.impl.AbstractSchemaServiceImplSingletonModule {
 

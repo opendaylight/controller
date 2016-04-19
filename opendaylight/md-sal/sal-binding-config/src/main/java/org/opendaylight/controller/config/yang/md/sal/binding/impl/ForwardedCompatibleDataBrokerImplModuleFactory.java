@@ -7,11 +7,7 @@
  */
 package org.opendaylight.controller.config.yang.md.sal.binding.impl;
 
-
-
-/**
-*
-*/
+@Deprecated
 public class ForwardedCompatibleDataBrokerImplModuleFactory extends org.opendaylight.controller.config.yang.md.sal.binding.impl.AbstractForwardedCompatibleDataBrokerImplModuleFactory
 {
 

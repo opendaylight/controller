@@ -12,6 +12,10 @@ import org.opendaylight.controller.config.api.DynamicMBeanWithInstance;
 import org.opendaylight.controller.config.spi.Module;
 import org.osgi.framework.BundleContext;
 
+/**
+ * @deprecated Replaced by blueprint wiring
+ */
+@Deprecated
 public class DomBrokerImplModuleFactory extends
         org.opendaylight.controller.config.yang.md.sal.dom.impl.AbstractDomBrokerImplModuleFactory {
 
