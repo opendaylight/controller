@@ -23,6 +23,7 @@ module opendaylight-sal-dom-broker-impl {
     }
 
     identity dom-broker-impl {
+        status deprecated;
         base config:module-type;
         config:provided-service sal:dom-broker-osgi-registry;
         config:java-name-prefix DomBrokerImpl;
@@ -30,11 +31,13 @@ module opendaylight-sal-dom-broker-impl {
 
 
     identity dom-inmemory-data-broker {
+        status obsolete;
         base config:module-type;
         config:provided-service sal:dom-async-data-broker;
     }
 
     identity schema-service-singleton {
+        status deprecated;
         base config:module-type;
         config:provided-service sal:schema-service;
         config:provided-service sal:yang-text-source-provider;
@@ -61,6 +64,7 @@ module opendaylight-sal-dom-broker-impl {
             }
 
             container root-schema-service {
+                status obsolete;
                 uses config:service-ref {
                     refine type {
                         mandatory false;
@@ -70,17 +74,20 @@ module opendaylight-sal-dom-broker-impl {
             }
 
             leaf notification-queue-depth {
+                status obsolete;
                 description "Maximum number of elements in the notification queue, must be power-of-two.";
                 type max-queue-depth;
                 default 65536;
             }
             leaf notification-queue-spin {
+                status obsolete;
                 description "Number of milliseconds notification queue should spin for new requests before parking.";
                 type uint16;
                 units milliseconds;
                 default 1;
             }
             leaf notification-queue-park {
+                status obsolete;
                 description "Number of milliseconds notification queue should park for new requests before blocking.";
                 type uint16;
                 units milliseconds;
@@ -90,6 +97,7 @@ module opendaylight-sal-dom-broker-impl {
     }
 
     grouping dom-broker-config {
+        status obsolete;
         container schema-service {
             uses config:service-ref {
                 refine type {
@@ -137,6 +145,7 @@ module opendaylight-sal-dom-broker-impl {
     }
 
     grouping dom-broker-operational {
+        status obsolete;
         leaf total-commits {
             type uint64;
         }

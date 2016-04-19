@@ -6,6 +6,9 @@
  This program and the accompanying materials are made available under the
  terms of the Eclipse Public License v1.0 which accompanies this distribution,
  and is available at http://www.eclipse.org/legal/epl-v10.html
+
+ NOTE: This file is deprecated as wiring is now done via blueprint. This file is kept for backwards
+       compatibility. Runtime modifications may not be honored.
 -->
 <snapshot>
     <configuration>
@@ -172,9 +175,6 @@
                         <type xmlns:dom="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom">dom:dom-async-data-broker</type>
                         <name>inmemory-data-broker</name>
                     </async-data-broker>
-                    <notification-queue-depth>65536</notification-queue-depth>
-                    <notification-queue-spin>0</notification-queue-spin>
-                    <notification-queue-park>0</notification-queue-park>
                 </module>
                 <module>
                     <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">prefix:binding-data-compatible-broker</type>

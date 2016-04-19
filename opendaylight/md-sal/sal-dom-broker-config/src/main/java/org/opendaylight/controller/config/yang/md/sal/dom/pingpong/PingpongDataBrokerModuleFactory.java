@@ -7,6 +7,10 @@
  */
 package org.opendaylight.controller.config.yang.md.sal.dom.pingpong;
 
+/**
+ * @deprecated Replaced by blueprint wiring
+ */
+@Deprecated
 public class PingpongDataBrokerModuleFactory extends AbstractPingpongDataBrokerModuleFactory {
 
 }
