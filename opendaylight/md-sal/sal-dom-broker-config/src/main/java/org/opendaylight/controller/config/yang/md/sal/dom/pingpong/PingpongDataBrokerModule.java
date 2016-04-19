@@ -11,6 +11,10 @@ import org.opendaylight.controller.config.api.DependencyResolver;
 import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.md.sal.dom.broker.impl.PingPongDataBroker;
 
+/**
+ * @deprecated Replaced by blueprint wiring
+ */
+@Deprecated
 public class PingpongDataBrokerModule extends AbstractPingpongDataBrokerModule {
     public PingpongDataBrokerModule(final ModuleIdentifier identifier, final DependencyResolver dependencyResolver) {
         super(identifier, dependencyResolver);

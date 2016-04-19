@@ -7,10 +7,10 @@
  */
 package org.opendaylight.controller.config.yang.md.sal.dom.impl;
 
-
 /**
-*
-*/
+ * @deprecated Replaced by the clustered data store.
+ */
+@Deprecated
 public class DomInmemoryDataBrokerModuleFactory extends org.opendaylight.controller.config.yang.md.sal.dom.impl.AbstractDomInmemoryDataBrokerModuleFactory
 {
 

@@ -24,6 +24,7 @@ module opendaylight-sal-binding-broker-impl {
 
     /* FIXME: move to opendaylight-md-sal-binding (cannot be there due to Class name confict with old implementation)*/
     identity binding-new-notification-service {
+        status deprecated;
         base config:service-type;
         config:java-class "org.opendaylight.controller.md.sal.binding.api.NotificationService";
         config:disable-osgi-service-registration;
@@ -31,12 +32,14 @@ module opendaylight-sal-binding-broker-impl {
 
     /* TODO: move to opendaylight-md-sal-binding (cannot be there due to Class name confict with old implementation)*/
     identity binding-new-notification-publish-service {
+        status deprecated;
         base config:service-type;
         config:java-class "org.opendaylight.controller.md.sal.binding.api.NotificationPublishService";
         config:disable-osgi-service-registration;
     }
 
     identity binding-broker-impl {
+        status deprecated;
         base config:module-type;
         config:provided-service sal:binding-broker-osgi-registry;
         config:provided-service sal:binding-rpc-registry;
@@ -44,6 +47,7 @@ module opendaylight-sal-binding-broker-impl {
     }
 
     identity binding-data-compatible-broker {
+        status deprecated;
         base config:module-type;
         config:provided-service sal:binding-data-broker;
         config:provided-service sal:binding-data-consumer-broker;
@@ -51,18 +55,14 @@ module opendaylight-sal-binding-broker-impl {
     }
 
     identity binding-forwarded-data-broker {
+        status deprecated;
         base config:module-type;
         config:provided-service sal:binding-async-data-broker;
         config:java-name-prefix BindingAsyncDataBrokerImpl;
     }
 
-    identity binding-rpc-broker {
-        base config:module-type;
-        config:provided-service sal:binding-rpc-registry;
-        config:java-name-prefix RpcBrokerImpl;
-    }
-
     identity binding-notification-broker {
+        status deprecated;
         base config:module-type;
         config:provided-service sal:binding-notification-service;
         config:provided-service sal:binding-notification-subscription-service;
@@ -70,6 +70,7 @@ module opendaylight-sal-binding-broker-impl {
     }
 
     identity runtime-generated-mapping {
+        status deprecated;
         base config:module-type;
         config:provided-service binding-dom-mapping-service;
         config:provided-service sal:binding-codec-tree-factory;
@@ -78,18 +79,21 @@ module opendaylight-sal-binding-broker-impl {
     }
 
     identity binding-notification-adapter {
+        status deprecated;
         base config:module-type;
         config:provided-service binding-new-notification-service;
         config:java-name-prefix BindingNotificationAdapter;
     }
 
     identity binding-notification-publish-adapter {
+        status deprecated;
         base config:module-type;
         config:provided-service binding-new-notification-publish-service;
         config:java-name-prefix BindingNotificationPublishAdapter;
     }
 
     grouping dom-forwarding-component {
+        status deprecated;
         container dom-async-broker {
                 uses config:service-ref {
                     refine type {
@@ -126,6 +130,7 @@ module opendaylight-sal-binding-broker-impl {
                 uses dom-forwarding-component;
     
                 container data-broker {
+                    status deprecated;
                     uses config:service-ref {
                         refine type {
                             mandatory false;
@@ -135,6 +140,7 @@ module opendaylight-sal-binding-broker-impl {
                 }
     
                 container notification-service {
+                    status deprecated;
                     uses config:service-ref {
                         refine type {
                             mandatory false;
@@ -144,6 +150,7 @@ module opendaylight-sal-binding-broker-impl {
                 }
     
                 container root-data-broker {
+                    status deprecated;
                     uses config:service-ref {
                         refine type {
                             mandatory false;
@@ -153,6 +160,7 @@ module opendaylight-sal-binding-broker-impl {
                 }
 
                 container notification-publish-service {
+                    status deprecated;
                     uses config:service-ref {
                         refine type {
                             mandatory false;
@@ -173,6 +181,7 @@ module opendaylight-sal-binding-broker-impl {
 
             container binding-data-compatible-broker {
                 container data-broker {
+                    status deprecated;
                     uses config:service-ref {
                         refine type {
                             mandatory false;
@@ -189,6 +198,7 @@ module opendaylight-sal-binding-broker-impl {
             when "/config:modules/config:module/config:type = 'binding-forwarded-data-broker'";
             container binding-forwarded-data-broker {
                 container dom-async-broker {
+                    status deprecated;
                     uses config:service-ref {
                         refine type {
                             mandatory true;
@@ -198,6 +208,7 @@ module opendaylight-sal-binding-broker-impl {
                 }
 
                 container binding-mapping-service {
+                    status deprecated;
                     uses config:service-ref {
                         refine type {
                             mandatory true;
@@ -207,6 +218,7 @@ module opendaylight-sal-binding-broker-impl {
                 }
 
                 container schema-service {
+                    status deprecated;
                     uses config:service-ref {
                         refine type {
                             mandatory true;
@@ -223,16 +235,10 @@ module opendaylight-sal-binding-broker-impl {
         case runtime-generated-mapping {
             when "/config:modules/config:module/config:type = 'runtime-generated-mapping'";
             leaf wait-for-schema {
+                status deprecated;
                 default "false";
                 type boolean;
             }
-        }
-    }
-
-    augment "/config:modules/config:module/config:state" {
-        case binding-rpc-broker {
-            when "/config:modules/config:module/config:type = 'binding-rpc-broker'";
-            uses common:rpc-state;
         }
     }
 
@@ -240,6 +246,7 @@ module opendaylight-sal-binding-broker-impl {
         case binding-notification-broker {
             when "/config:modules/config:module/config:type = 'binding-notification-broker'";
             container notification-adapter {
+                status deprecated;
                 uses config:service-ref {
                     refine type {
                         mandatory false;
@@ -249,6 +256,7 @@ module opendaylight-sal-binding-broker-impl {
             }
 
             container notification-publish-adapter {
+                status deprecated;
                 uses config:service-ref {
                     refine type {
                         mandatory false;
@@ -270,6 +278,7 @@ module opendaylight-sal-binding-broker-impl {
         case binding-notification-adapter {
             when "/config:modules/config:module/config:type = 'binding-notification-adapter'";
             container binding-notification-adapter {
+                status deprecated;
                 uses dom-forwarding-component;
             }
         }
@@ -279,6 +288,7 @@ module opendaylight-sal-binding-broker-impl {
         case binding-notification-publish-adapter {
             when "/config:modules/config:module/config:type = 'binding-notification-publish-adapter'";
             container binding-notification-publish-adapter {
+                status deprecated;
                 uses dom-forwarding-component;
             }
         }

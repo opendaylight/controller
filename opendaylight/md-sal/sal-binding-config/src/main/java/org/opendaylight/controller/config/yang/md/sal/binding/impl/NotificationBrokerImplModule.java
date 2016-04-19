@@ -19,8 +19,9 @@ import org.opendaylight.controller.md.sal.dom.spi.DOMNotificationSubscriptionLis
 import org.opendaylight.controller.sal.binding.codegen.impl.SingletonHolder;
 
 /**
-*
-*/
+ * @deprecated Replaced by blueprint wiring
+ */
+@Deprecated
 public final class NotificationBrokerImplModule extends
         org.opendaylight.controller.config.yang.md.sal.binding.impl.AbstractNotificationBrokerImplModule {
 
