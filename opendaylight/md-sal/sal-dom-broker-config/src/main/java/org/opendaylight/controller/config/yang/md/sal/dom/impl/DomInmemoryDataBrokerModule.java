@@ -25,8 +25,9 @@ import org.opendaylight.yangtools.util.concurrent.DeadlockDetectingListeningExec
 import org.opendaylight.yangtools.util.concurrent.SpecialExecutors;
 
 /**
-*
-*/
+ * @deprecated Replaced by the clustered data store.
+ */
+@Deprecated
 public final class DomInmemoryDataBrokerModule extends
         org.opendaylight.controller.config.yang.md.sal.dom.impl.AbstractDomInmemoryDataBrokerModule {
 

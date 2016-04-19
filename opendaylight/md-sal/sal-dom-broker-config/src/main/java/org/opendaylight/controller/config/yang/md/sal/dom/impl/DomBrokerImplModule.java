@@ -27,6 +27,10 @@ import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * @deprecated Replaced by blueprint wiring
+ */
+@Deprecated
 public final class DomBrokerImplModule extends org.opendaylight.controller.config.yang.md.sal.dom.impl.AbstractDomBrokerImplModule{
     private static final Logger LOG = LoggerFactory.getLogger(DomBrokerImplModule.class);
 

@@ -8,10 +8,14 @@
 
 package org.opendaylight.controller.config.yang.md.sal.binding.impl;
 
-import org.opendaylight.controller.md.sal.binding.impl.BindingToNormalizedNodeCodec;
 import org.opendaylight.controller.md.sal.binding.impl.BindingDOMDataBrokerAdapter;
+import org.opendaylight.controller.md.sal.binding.impl.BindingToNormalizedNodeCodec;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 
+/**
+ * @deprecated Replaced by blueprint wiring
+ */
+@Deprecated
 public class BindingAsyncDataBrokerImplModule extends
         org.opendaylight.controller.config.yang.md.sal.binding.impl.AbstractBindingAsyncDataBrokerImplModule {
 
