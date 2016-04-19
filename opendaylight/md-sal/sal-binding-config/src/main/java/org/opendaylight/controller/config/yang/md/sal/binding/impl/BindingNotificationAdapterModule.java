@@ -14,6 +14,10 @@ import org.opendaylight.controller.md.sal.binding.impl.BindingToNormalizedNodeCo
 import org.opendaylight.controller.md.sal.dom.api.DOMNotificationService;
 import org.opendaylight.controller.sal.core.api.Broker;
 
+/**
+ * @deprecated Replaced by blueprint wiring
+ */
+@Deprecated
 public class BindingNotificationAdapterModule extends AbstractBindingNotificationAdapterModule  {
     public BindingNotificationAdapterModule(final ModuleIdentifier identifier, final DependencyResolver dependencyResolver) {
         super(identifier, dependencyResolver);

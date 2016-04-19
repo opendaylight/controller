@@ -33,8 +33,9 @@ import org.opendaylight.controller.sal.core.api.Broker;
 import org.opendaylight.controller.sal.core.api.Broker.ProviderSession;
 
 /**
-*
-*/
+ * @deprecated Replaced by blueprint wiring
+ */
+@Deprecated
 public final class BindingBrokerImplModule extends
         org.opendaylight.controller.config.yang.md.sal.binding.impl.AbstractBindingBrokerImplModule {
 

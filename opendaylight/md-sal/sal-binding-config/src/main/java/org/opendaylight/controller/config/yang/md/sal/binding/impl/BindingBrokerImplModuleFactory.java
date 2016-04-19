@@ -16,10 +16,10 @@
 */
 package org.opendaylight.controller.config.yang.md.sal.binding.impl;
 
-
 /**
-*
-*/
+ * @deprecated Replaced by blueprint wiring
+ */
+@Deprecated
 public class BindingBrokerImplModuleFactory extends org.opendaylight.controller.config.yang.md.sal.binding.impl.AbstractBindingBrokerImplModuleFactory {
 
 }

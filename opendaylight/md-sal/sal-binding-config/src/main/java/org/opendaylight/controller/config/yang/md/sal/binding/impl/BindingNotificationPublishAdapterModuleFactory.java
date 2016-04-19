@@ -6,6 +6,11 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 package org.opendaylight.controller.config.yang.md.sal.binding.impl;
+
+/**
+ * @deprecated Replaced by blueprint wiring
+ */
+@Deprecated
 public class BindingNotificationPublishAdapterModuleFactory extends org.opendaylight.controller.config.yang.md.sal.binding.impl.AbstractBindingNotificationPublishAdapterModuleFactory {
 
 }
