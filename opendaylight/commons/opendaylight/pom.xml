@@ -120,7 +120,6 @@
     <netconf.version>0.3.5-SNAPSHOT</netconf.version>
     <networkconfig.bridgedomain.northbound.version>0.1.5-SNAPSHOT</networkconfig.bridgedomain.northbound.version>
     <!-- ODL repository / plugin repository -->
-    <nexusproxy>http://nexus.opendaylight.org/content</nexusproxy>
     <northbound.commons.version>0.5.5-SNAPSHOT</northbound.commons.version>
     <northbound.hosttracker.version>1.5.5-SNAPSHOT</northbound.hosttracker.version>
     <northbound.jolokia.version>1.5.5-SNAPSHOT</northbound.jolokia.version>
@@ -1856,7 +1855,7 @@
       </snapshots>
       <id>opendaylight-mirror</id>
       <name>opendaylight-mirror</name>
-      <url>http://nexus.opendaylight.org/content/groups/public/</url>
+      <url>https://nexus.opendaylight.org/content/groups/public/</url>
     </repository>
     <!-- OpenDayLight Snapshot artifact -->
     <repository>
@@ -1868,7 +1867,7 @@
       </snapshots>
       <id>opendaylight-snapshot</id>
       <name>opendaylight-snapshot</name>
-      <url>http://nexus.opendaylight.org/content/repositories/opendaylight.snapshot/</url>
+      <url>https://nexus.opendaylight.org/content/repositories/opendaylight.snapshot/</url>
     </repository>
   </repositories>
 
@@ -1884,7 +1883,7 @@
       </snapshots>
       <id>opendaylight-mirror</id>
       <name>opendaylight-mirror</name>
-      <url>http://nexus.opendaylight.org/content/groups/public/</url>
+      <url>https://nexus.opendaylight.org/content/groups/public/</url>
     </pluginRepository>
     <!-- OpenDayLight Snapshot artifact -->
     <pluginRepository>
@@ -1896,7 +1895,7 @@
       </snapshots>
       <id>opendaylight-snapshot</id>
       <name>opendaylight-snapshot</name>
-      <url>http://nexus.opendaylight.org/content/repositories/opendaylight.snapshot/</url>
+      <url>https://nexus.opendaylight.org/content/repositories/opendaylight.snapshot/</url>
     </pluginRepository>
   </pluginRepositories>
 
