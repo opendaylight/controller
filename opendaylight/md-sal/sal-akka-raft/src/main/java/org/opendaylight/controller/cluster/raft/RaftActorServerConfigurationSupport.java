@@ -681,7 +681,8 @@ class RaftActorServerConfigurationSupport {
             boolean localServerChangedToNonVoting = Boolean.FALSE.equals(getOperation().
                     getServerVotingStatusMap().get(raftActor.getRaftActorContext().getId()));
             if (succeeded && localServerChangedToNonVoting) {
-               raftActor.becomeNonVoting();
+                LOG.debug("Leader changed to non-voting - trying leadership transfer");
+                raftActor.becomeNonVoting();
             }
         }
 
@@ -707,9 +708,7 @@ class RaftActorServerConfigurationSupport {
 
             if(tryToElectLeader) {
                 initiateLocalLeaderElection();
-            } else {
-                updateLocalPeerInfo();
-
+            } else if(updateLocalPeerInfo()) {
                 persistNewServerConfiguration(changeVotingStatusContext);
             }
         }
@@ -718,21 +717,39 @@ class RaftActorServerConfigurationSupport {
             LOG.debug("{}: Sending local ElectionTimeout to start leader election", raftContext.getId());
 
             ServerConfigurationPayload previousServerConfig = raftContext.getPeerServerInfo(true);
-            updateLocalPeerInfo();
+            if(!updateLocalPeerInfo()) {
+                return;
+            }
 
             raftContext.getActor().tell(ElectionTimeout.INSTANCE, raftContext.getActor());
 
             currentOperationState = new WaitingForLeaderElected(changeVotingStatusContext, previousServerConfig);
         }
 
-        private void updateLocalPeerInfo() {
+        private boolean updateLocalPeerInfo() {
             List<ServerInfo> newServerInfoList = newServerInfoList();
+
+            // Check if new voting state would leave us with no voting members.
+            boolean atLeastOneVoting = false;
+            for(ServerInfo info: newServerInfoList) {
+                if(info.isVoting()) {
+                    atLeastOneVoting = true;
+                    break;
+                }
+            }
+
+            if(!atLeastOneVoting) {
+                operationComplete(changeVotingStatusContext, ServerChangeStatus.INVALID_REQUEST);
+                return false;
+            }
 
             raftContext.updatePeerIds(new ServerConfigurationPayload(newServerInfoList));
             if(raftActor.getCurrentBehavior() instanceof AbstractLeader) {
                 AbstractLeader leader = (AbstractLeader) raftActor.getCurrentBehavior();
                 leader.updateMinReplicaCount();
             }
+
+            return true;
         }
 
         private List<ServerInfo> newServerInfoList() {
