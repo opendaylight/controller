@@ -66,6 +66,8 @@ public interface ShardStatsMXBean {
 
    boolean isSnapshotCaptureInitiated();
 
+   boolean isVoting();
+
    void resetTransactionCounters();
 
    long getInMemoryJournalDataSize();
@@ -77,6 +79,8 @@ public interface ShardStatsMXBean {
    List<FollowerInfo> getFollowerInfo();
 
    String getPeerAddresses();
+
+   String getPeerVotingStates();
 
    long getLeadershipChangeCount();
 
