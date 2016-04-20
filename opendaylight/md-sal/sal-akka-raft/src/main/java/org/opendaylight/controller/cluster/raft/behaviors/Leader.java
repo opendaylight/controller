@@ -161,7 +161,9 @@ public class Leader extends AbstractLeader {
     @Override
     public void close() {
         if(leadershipTransferContext != null) {
-            leadershipTransferContext.transferCohort.abortTransfer();
+            LeadershipTransferContext localLeadershipTransferContext = leadershipTransferContext;
+            leadershipTransferContext = null;
+            localLeadershipTransferContext.transferCohort.abortTransfer();
         }
 
         super.close();

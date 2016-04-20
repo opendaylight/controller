@@ -194,6 +194,15 @@ public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
     public String getVotedFor() {
         return getOnDemandRaftState().getVotedFor();
     }
+    @Override
+    public boolean isVoting() {
+        return getOnDemandRaftState().isVoting();
+    }
+
+    @Override
+    public String getPeerVotingStates() {
+        return toStringMap(getOnDemandRaftState().getPeerVotingStates());
+    }
 
     @Override
     public boolean isSnapshotCaptureInitiated() {
@@ -302,9 +311,13 @@ public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
 
     @Override
     public String getPeerAddresses() {
+        return toStringMap(getOnDemandRaftState().getPeerAddresses());
+    }
+
+    private static String toStringMap(Map<?, ?> map) {
         StringBuilder builder = new StringBuilder();
         int i = 0;
-        for(Map.Entry<String, String> e: getOnDemandRaftState().getPeerAddresses().entrySet()) {
+        for(Map.Entry<?, ?> e: map.entrySet()) {
             if(i++ > 0) {
                 builder.append(", ");
             }
@@ -347,6 +360,7 @@ public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
         return shard.getPendingTxCommitQueueSize();
     }
 
+    @Override
     public int getTxCohortCacheSize() {
         return shard.getCohortCacheSize();
     }
@@ -357,5 +371,4 @@ public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
             shard.getSelf().tell(new InitiateCaptureSnapshot(), ActorRef.noSender());
         }
     }
-
 }
