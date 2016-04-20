@@ -21,6 +21,10 @@ import static com.google.common.base.Preconditions.checkArgument;
 import org.opendaylight.controller.config.api.DependencyResolver;
 import org.osgi.framework.BundleContext;
 
+/**
+ * @deprecated Replaced by blueprint wiring
+ */
+@Deprecated
 public class GlobalEventExecutorModuleFactory extends org.opendaylight.controller.config.yang.netty.eventexecutor.AbstractGlobalEventExecutorModuleFactory {
     public static final String SINGLETON_NAME = "singleton";
 

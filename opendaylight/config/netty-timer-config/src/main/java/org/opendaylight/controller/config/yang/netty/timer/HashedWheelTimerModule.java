@@ -26,8 +26,9 @@ import org.opendaylight.controller.config.api.osgi.WaitingServiceTracker;
 import org.osgi.framework.BundleContext;
 
 /**
-*
-*/
+ * @deprecated Replaced by blueprint wiring
+ */
+@Deprecated
 public final class HashedWheelTimerModule extends
         org.opendaylight.controller.config.yang.netty.timer.AbstractHashedWheelTimerModule {
     private BundleContext bundleContext;
