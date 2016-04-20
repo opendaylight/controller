@@ -20,6 +20,10 @@ package org.opendaylight.controller.config.yang.netty.timer;
 import org.opendaylight.controller.config.api.DependencyResolver;
 import org.osgi.framework.BundleContext;
 
+/**
+ * @deprecated Replaced by blueprint wiring
+ */
+@Deprecated
 public class HashedWheelTimerModuleFactory extends AbstractHashedWheelTimerModuleFactory {
     @Override
     public HashedWheelTimerModule instantiateModule(String instanceName, DependencyResolver dependencyResolver,

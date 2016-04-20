@@ -6,7 +6,7 @@
 
   <cm:property-placeholder persistent-id="org.opendaylight.netty.threadgroup" update-strategy="none">
     <cm:default-properties>
-      <!-- 0 means use the default number of threads  -->
+      <!-- 0 means use the default number of threads which is 2 * number of CPUs -->
       <cm:property name="global-boss-group-thread-count" value="0"/>
       <cm:property name="global-worker-group-thread-count" value="0"/>
     </cm:default-properties>

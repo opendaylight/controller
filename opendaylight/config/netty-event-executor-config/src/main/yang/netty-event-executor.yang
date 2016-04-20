@@ -28,6 +28,7 @@ module netty-event-executor {
     }
 
     identity netty-global-event-executor {
+        status deprecated;
         base config:module-type;
         config:provided-service netty:netty-event-executor;
         config:java-name-prefix GlobalEventExecutor;
@@ -40,6 +41,7 @@ module netty-event-executor {
     }
 
     identity netty-immediate-event-executor {
+        status deprecated;
         base config:module-type;
         config:provided-service netty:netty-event-executor;
         config:java-name-prefix ImmediateEventExecutor;
