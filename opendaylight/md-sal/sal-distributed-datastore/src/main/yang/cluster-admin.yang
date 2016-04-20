@@ -47,7 +47,21 @@ module cluster-admin {
             description "The list of results, one per shard";
         }
     }
-    
+
+    grouping member-voting-states-input {
+        list member-voting-state {
+            leaf member-name {
+                type string;
+            }
+
+            leaf voting {
+                type boolean;
+            }
+
+            description "The list of member voting states";
+        }
+    }
+
     rpc add-shard-replica {
         input {
             leaf shard-name {
@@ -112,40 +126,62 @@ module cluster-admin {
                 description "The cluster member from which the shard replicas should be removed";
             }
         }
-        
+
         output {
             uses shard-result-output;
         }
-        
+
         description "Removes replicas for all shards on this node. This is equivalent to issuing
             a remove-shard-replica for all shards and essentially removes this node from a cluster.";
     }
 
-    rpc convert-members-to-nonvoting-for-all-shards {
+    rpc change-member-voting-states-for-shard {
         input {
-            leaf-list member-names {
+            leaf shard-name {
+                mandatory true;
                 type string;
-                description "The names of the cluster members to convert.";
+                description "The name of the shard for which to change voting state.";
             }
+
+            leaf data-store-type {
+                mandatory true;
+                type data-store-type;
+                description "The type of the data store to which the shard belongs";
+            }
+
+            uses member-voting-states-input;
         }
-        
-        description "Converts the given cluster members to non-voting for all shards. The members will no 
-            longer participate in leader elections and consensus but will be replicated. This is useful for
-            having a set of members serve as a backup cluster in case the primary voting cluster suffers
-            catastrophic failure. This RPC can be issued to any cluster member and will be forwarded
-            to the leader.";
+
+        description "Changes the voting states, either voting or non-voting, of cluster members for a shard.
+            Non-voting members will no longer participate in leader elections and consensus but will be
+            replicated. This is useful for having a set of members serve as a backup cluster in case the
+            primary voting cluster suffers catastrophic failure. This RPC can be issued to any cluster member
+            and will be forwarded to the leader.";
     }
 
-    rpc convert-members-to-voting-for-all-shards {
+    rpc change-member-voting-states-for-all-shards {
         input {
-            leaf-list member-names {
-                type string;
-                description "The names of the cluster members to convert.";
-            }
+            uses member-voting-states-input;
         }
 
-        description "Converts the given cluster members to voting for all shards. The members will 
-            participate in leader elections and consensus.";
+        output {
+            uses shard-result-output;
+        }
+
+        description "Changes the voting states, either voting or non-voting, of cluster members for all shards.
+            Non-voting members will no longer participate in leader elections and consensus but will be
+            replicated. This is useful for having a set of members serve as a backup cluster in case the
+            primary voting cluster suffers catastrophic failure. This RPC can be issued to any cluster member
+            and will be forwarded to the leader.";
+    }
+
+    rpc flip-member-voting-states-for-all-shards {
+        output {
+            uses shard-result-output;
+        }
+
+        description "Flips the voting states of all cluster members for all shards, such that if a member
+            was voting it becomes non-voting and vice versa.";
     }
 
     rpc backup-datastore {

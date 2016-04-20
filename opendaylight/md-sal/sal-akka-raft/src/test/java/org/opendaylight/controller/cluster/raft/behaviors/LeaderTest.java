@@ -1816,6 +1816,25 @@ public class LeaderTest extends AbstractLeaderTest {
         Assert.assertTrue(behavior instanceof Leader);
     }
 
+    @Test
+    public void testIsolatedLeaderCheckNoVotingFollowers() {
+        logStart("testIsolatedLeaderCheckNoVotingFollowers");
+
+        MockRaftActorContext followerActorContext = createFollowerActorContextWithLeader();
+        Follower follower = new Follower(followerActorContext);
+        followerActor.underlyingActor().setBehavior(follower);
+
+        MockRaftActorContext leaderActorContext = createActorContextWithFollower();
+        ((DefaultConfigParamsImpl)leaderActorContext.getConfigParams()).setHeartBeatInterval(
+                new FiniteDuration(1000, TimeUnit.SECONDS));
+        leaderActorContext.getPeerInfo(FOLLOWER_ID).setVotingState(VotingState.NON_VOTING);
+
+        leader = new Leader(leaderActorContext);
+        leader.getFollower(FOLLOWER_ID).markFollowerActive();
+        RaftActorBehavior behavior = leader.handleMessage(leaderActor, Leader.ISOLATED_LEADER_CHECK);
+        assertTrue("Expected Leader", behavior instanceof Leader);
+    }
+
     private RaftActorBehavior setupIsolatedLeaderCheckTestWithTwoFollowers(RaftPolicy raftPolicy){
         ActorRef followerActor1 = getSystem().actorOf(MessageCollectorActor.props(), "follower-1");
         ActorRef followerActor2 = getSystem().actorOf(MessageCollectorActor.props(), "follower-2");

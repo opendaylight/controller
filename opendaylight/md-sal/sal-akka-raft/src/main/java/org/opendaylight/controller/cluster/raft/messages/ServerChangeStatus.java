@@ -48,4 +48,9 @@ public enum ServerChangeStatus {
      * An unsupported request, for example removing the leader in a single node cluster.
      */
     NOT_SUPPORTED,
+
+    /**
+     * Some part of the request is invalid.
+     */
+    INVALID_REQUEST,
 }
