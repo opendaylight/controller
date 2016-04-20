@@ -9,6 +9,10 @@ package org.opendaylight.controller.config.yang.netty.eventexecutor;
 
 import org.opendaylight.controller.config.yang.netty.eventexecutor.AutoCloseableEventExecutor.CloseableEventExecutorMixin;
 
+/**
+ * @deprecated Replaced by blueprint wiring
+ */
+@Deprecated
 public final class ImmediateEventExecutorModule extends org.opendaylight.controller.config.yang.netty.eventexecutor.AbstractImmediateEventExecutorModule {
 
     public ImmediateEventExecutorModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier, org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
