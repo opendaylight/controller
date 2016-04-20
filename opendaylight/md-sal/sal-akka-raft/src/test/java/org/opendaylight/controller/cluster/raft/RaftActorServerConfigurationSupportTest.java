@@ -1084,6 +1084,21 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
     }
 
     @Test
+    public void testChangeLeaderToNonVotingInSingleNode() {
+        LOG.info("testChangeLeaderToNonVotingInSingleNode starting");
+
+        TestActorRef<MockLeaderRaftActor> leaderActor = actorFactory.createTestActor(
+                MockLeaderRaftActor.props(ImmutableMap.<String, String>of(), new MockRaftActorContext()).
+                        withDispatcher(Dispatchers.DefaultDispatcherId()), actorFactory.generateActorId(LEADER_ID));
+
+        leaderActor.tell(new ChangeServersVotingStatus(ImmutableMap.of(LEADER_ID, false)), testKit.getRef());
+        ServerChangeReply reply = testKit.expectMsgClass(JavaTestKit.duration("5 seconds"), ServerChangeReply.class);
+        assertEquals("getStatus", ServerChangeStatus.INVALID_REQUEST, reply.getStatus());
+
+        LOG.info("testChangeLeaderToNonVotingInSingleNode ending");
+    }
+
+    @Test
     public void testChangeToVotingWithNoLeader() {
         LOG.info("testChangeToVotingWithNoLeader starting");
 
