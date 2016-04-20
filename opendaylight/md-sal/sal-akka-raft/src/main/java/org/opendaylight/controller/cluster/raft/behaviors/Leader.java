@@ -46,7 +46,7 @@ import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
  * set commitIndex = N (§5.3, §5.4).
  */
 public class Leader extends AbstractLeader {
-    private static final IsolatedLeaderCheck ISOLATED_LEADER_CHECK = new IsolatedLeaderCheck();
+    static final IsolatedLeaderCheck ISOLATED_LEADER_CHECK = new IsolatedLeaderCheck();
     private final Stopwatch isolatedLeaderCheck;
     private @Nullable LeadershipTransferContext leadershipTransferContext;
 
@@ -155,7 +155,9 @@ public class Leader extends AbstractLeader {
     @Override
     public void close() throws Exception {
         if(leadershipTransferContext != null) {
-            leadershipTransferContext.transferCohort.abortTransfer();
+            LeadershipTransferContext localLeadershipTransferContext = leadershipTransferContext;
+            leadershipTransferContext = null;
+            localLeadershipTransferContext.transferCohort.abortTransfer();
         }
 
         super.close();

@@ -11,6 +11,7 @@ package org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard;
 import akka.actor.ActorRef;
 import akka.pattern.Patterns;
 import akka.util.Timeout;
+import com.google.common.base.Joiner;
 import com.google.common.base.Stopwatch;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -194,6 +195,15 @@ public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
     public String getVotedFor() {
         return getOnDemandRaftState().getVotedFor();
     }
+    @Override
+    public boolean isVoting() {
+        return getOnDemandRaftState().isVoting();
+    }
+
+    @Override
+    public String getPeerVotingStates() {
+        return toStringMap(getOnDemandRaftState().getPeerVotingStates());
+    }
 
     @Override
     public boolean isSnapshotCaptureInitiated() {
@@ -302,17 +312,11 @@ public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
 
     @Override
     public String getPeerAddresses() {
-        StringBuilder builder = new StringBuilder();
-        int i = 0;
-        for(Map.Entry<String, String> e: getOnDemandRaftState().getPeerAddresses().entrySet()) {
-            if(i++ > 0) {
-                builder.append(", ");
-            }
+        return toStringMap(getOnDemandRaftState().getPeerAddresses());
+    }
 
-            builder.append(e.getKey()).append(": ").append(e.getValue());
-        }
-
-        return builder.toString();
+    private static String toStringMap(Map<?, ?> map) {
+        return Joiner.on(", ").withKeyValueSeparator(": ").join(map);
     }
 
     @Override
@@ -347,6 +351,7 @@ public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
         return shard.getPendingTxCommitQueueSize();
     }
 
+    @Override
     public int getTxCohortCacheSize() {
         return shard.getCohortCacheSize();
     }
@@ -357,5 +362,4 @@ public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
             shard.getSelf().tell(new InitiateCaptureSnapshot(), ActorRef.noSender());
         }
     }
-
 }
