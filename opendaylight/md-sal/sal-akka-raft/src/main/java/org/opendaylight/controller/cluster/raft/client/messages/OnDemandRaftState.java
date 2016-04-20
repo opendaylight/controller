@@ -34,9 +34,11 @@ public class OnDemandRaftState {
     private String votedFor;
     private boolean isSnapshotCaptureInitiated;
     private String customRaftPolicyClassName;
+    private boolean isVoting;
 
     private List<FollowerInfo> followerInfoList = Collections.emptyList();
     private Map<String, String> peerAddresses = Collections.emptyMap();
+    private Map<String, Boolean> peerVotingStates = Collections.emptyMap();
 
     private OnDemandRaftState() {
     }
@@ -109,12 +111,20 @@ public class OnDemandRaftState {
         return isSnapshotCaptureInitiated;
     }
 
+    public boolean isVoting() {
+        return isVoting;
+    }
+
     public List<FollowerInfo> getFollowerInfoList() {
         return followerInfoList;
     }
 
     public Map<String, String> getPeerAddresses() {
         return peerAddresses;
+    }
+
+    public Map<String, Boolean> getPeerVotingStates() {
+        return peerVotingStates;
     }
 
     public String getCustomRaftPolicyClassName() {
@@ -199,6 +209,11 @@ public class OnDemandRaftState {
             return this;
         }
 
+        public Builder isVoting(boolean isVoting) {
+            stats.isVoting = isVoting;
+            return this;
+        }
+
         public Builder followerInfoList(List<FollowerInfo> followerInfoList) {
             stats.followerInfoList = followerInfoList;
             return this;
@@ -206,6 +221,11 @@ public class OnDemandRaftState {
 
         public Builder peerAddresses(Map<String, String> peerAddresses) {
             stats.peerAddresses = peerAddresses;
+            return this;
+        }
+
+        public Builder peerVotingStates(Map<String, Boolean> peerVotingStates) {
+            stats.peerVotingStates = peerVotingStates;
             return this;
         }
 
