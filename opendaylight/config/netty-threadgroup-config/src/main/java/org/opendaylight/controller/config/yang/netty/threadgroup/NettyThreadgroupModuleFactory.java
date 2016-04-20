@@ -20,6 +20,10 @@ package org.opendaylight.controller.config.yang.netty.threadgroup;
 import org.opendaylight.controller.config.api.DependencyResolver;
 import org.osgi.framework.BundleContext;
 
+/**
+ * @deprecated Replaced by blueprint wiring
+ */
+@Deprecated
 public class NettyThreadgroupModuleFactory extends AbstractNettyThreadgroupModuleFactory {
     @Override
     public NettyThreadgroupModule instantiateModule(String instanceName, DependencyResolver dependencyResolver,

@@ -27,6 +27,7 @@ module netty {
     }
 
     identity netty-threadgroup {
+        status deprecated;
         description
             "Configuration wrapper around netty's threadgroup";
 
@@ -36,6 +37,7 @@ module netty {
     }
 
     identity netty-event-executor {
+        status deprecated;
         description
             "Configuration wrapper around netty's event executor";
 
@@ -45,6 +47,7 @@ module netty {
     }
 
     identity netty-timer {
+        status deprecated;
         description
             "Configuration wrapper around netty's timer";
 
@@ -54,6 +57,7 @@ module netty {
     }
 
     identity channel-factory {
+        status deprecated;
         description
             "Configuration wrapper around netty's channel factory";
 
