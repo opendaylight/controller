@@ -73,6 +73,24 @@
     },
     {
       "key": {
+        "uuid": "fa57193c_bcf37b09",
+        "filename": "opendaylight/config/netty-event-executor-config/src/main/java/org/opendaylight/controller/config/yang/netty/eventexecutor/AutoCloseableEventExecutor.java",
+        "patchSetId": 25
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-04-22T14:22:04Z",
+      "side": 1,
+      "message": "Oops, yes indeed, I hadn\u0027t realised that the inner class overrides this one :-/",
+      "parentUuid": "fa57193c_9112e0b2",
+      "revId": "5c9ac1f9dd51b021f220fa2cc9e27d6a08e99312",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa57193c_ae8861e8",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/config/yang/config/actor_system_provider/impl/ActorSystemProviderModule.java",
         "patchSetId": 25
