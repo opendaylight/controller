@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa57193c_71946c37",
+        "filename": "opendaylight/config/netty-event-executor-config/src/main/java/org/opendaylight/controller/config/yang/netty/eventexecutor/AutoCloseableEventExecutor.java",
+        "patchSetId": 25
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-04-22T11:47:46Z",
+      "side": 1,
+      "message": "Because of the closeable.close() call on line 64 below",
+      "parentUuid": "fa57193c_2e1d71be",
+      "revId": "5c9ac1f9dd51b021f220fa2cc9e27d6a08e99312",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa57193c_ae8861e8",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/config/yang/config/actor_system_provider/impl/ActorSystemProviderModule.java",
         "patchSetId": 25
@@ -30,6 +48,24 @@
       "writtenOn": "2016-04-22T06:17:37Z",
       "side": 1,
       "message": "Missing \u0027w\u0027 here ;-).",
+      "revId": "5c9ac1f9dd51b021f220fa2cc9e27d6a08e99312",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_d199f86f",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/config/yang/config/actor_system_provider/impl/ActorSystemProviderModule.java",
+        "patchSetId": 25
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-04-22T11:47:46Z",
+      "side": 1,
+      "message": "Right - fixed in follow-up",
+      "parentUuid": "fa57193c_ae8861e8",
       "revId": "5c9ac1f9dd51b021f220fa2cc9e27d6a08e99312",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
