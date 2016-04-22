@@ -10,8 +10,6 @@ package org.opendaylight.controller.test.sal.binding.it;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-
-import javax.inject.Inject;
 import java.util.concurrent.Future;
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
@@ -19,7 +17,6 @@ import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ConsumerCo
 import org.opendaylight.controller.sal.binding.api.BindingAwareConsumer;
 import org.opendaylight.controller.sal.binding.api.data.DataBrokerService;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
-import org.opendaylight.controller.sal.core.api.Broker;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.store.rev140422.Lists;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.store.rev140422.lists.UnorderedContainer;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.store.rev140422.lists.unordered.container.UnorderedList;
@@ -33,11 +30,7 @@ import org.opendaylight.yangtools.yang.common.RpcResult;
  * covers creating, reading and deleting of an item in dataStore
  */
 public class DataServiceIT extends AbstractIT {
-
     protected DataBrokerService consumerDataService;
-
-    @Inject
-    Broker broker2;
 
     /**
      *
@@ -49,14 +42,15 @@ public class DataServiceIT extends AbstractIT {
      */
     @Test
     public void test() throws Exception {
-        BindingAwareConsumer consumer1 = new BindingAwareConsumer() {
+        BindingAwareConsumer consumer = new BindingAwareConsumer() {
 
             @Override
             public void onSessionInitialized(final ConsumerContext session) {
                 consumerDataService = session.getSALService(DataBrokerService.class);
             }
         };
-        broker.registerConsumer(consumer1);
+
+        broker.registerConsumer(consumer);
 
         assertNotNull(consumerDataService);
 

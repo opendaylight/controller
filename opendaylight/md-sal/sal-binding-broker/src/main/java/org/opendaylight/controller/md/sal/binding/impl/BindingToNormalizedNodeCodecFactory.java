@@ -39,10 +39,15 @@ public class BindingToNormalizedNodeCodecFactory {
 
         BindingNormalizedNodeCodecRegistry codecRegistry = new BindingNormalizedNodeCodecRegistry(
                 StreamWriterGenerator.create(SingletonHolder.JAVASSIST));
-        instance = new BindingToNormalizedNodeCodec(classLoadingStrategy, codecRegistry, true);
+        BindingToNormalizedNodeCodec localInstance = new BindingToNormalizedNodeCodec(
+                classLoadingStrategy, codecRegistry, true);
 
-        schemaService.registerSchemaContextListener(instance);
+        schemaService.registerSchemaContextListener(localInstance);
 
+        // Publish the BindingToNormalizedNodeCodec instance after we've registered it as a
+        // SchemaContextListener to avoid a race condition by publishing it too early when it isn't
+        // fully initialized.
+        instance = localInstance;
         return instance;
     }
 

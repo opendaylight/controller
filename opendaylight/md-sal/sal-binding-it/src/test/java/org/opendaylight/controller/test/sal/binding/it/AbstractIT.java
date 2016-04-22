@@ -7,82 +7,47 @@
  */
 package org.opendaylight.controller.test.sal.binding.it;
 
-import static org.opendaylight.controller.test.sal.binding.it.TestHelper.baseModelBundles;
-import static org.opendaylight.controller.test.sal.binding.it.TestHelper.bindingAwareSalBundles;
-import static org.opendaylight.controller.test.sal.binding.it.TestHelper.configMinumumBundles;
-import static org.opendaylight.controller.test.sal.binding.it.TestHelper.junitAndMockitoBundles;
-import static org.opendaylight.controller.test.sal.binding.it.TestHelper.mdSalCoreBundles;
-import static org.opendaylight.controller.test.sal.binding.it.TestHelper.salTestModelBundles;
+import static org.ops4j.pax.exam.CoreOptions.maven;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
-import static org.ops4j.pax.exam.CoreOptions.options;
-import static org.ops4j.pax.exam.CoreOptions.systemPackages;
-import static org.ops4j.pax.exam.CoreOptions.systemProperty;
-
 import javax.inject.Inject;
 import org.junit.runner.RunWith;
+import org.opendaylight.controller.mdsal.it.base.AbstractMdsalTestBase;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
-import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
+import org.ops4j.pax.exam.options.MavenUrlReference;
 import org.ops4j.pax.exam.util.Filter;
-import org.osgi.framework.BundleContext;
 
 @RunWith(PaxExam.class)
-public abstract class AbstractIT {
-
-    public static final String CONTROLLER = "org.opendaylight.controller";
-    public static final String YANGTOOLS = "org.opendaylight.yangtools";
-
-    public static final String CONTROLLER_MODELS = "org.opendaylight.controller.model";
-    public static final String YANGTOOLS_MODELS = "org.opendaylight.yangtools.model";
+public abstract class AbstractIT extends AbstractMdsalTestBase {
 
     @Inject
     @Filter(timeout=120*1000)
     BindingAwareBroker broker;
 
-    @Inject
-    BundleContext bundleContext;
-
-    public BindingAwareBroker getBroker() {
-        return broker;
+    @Override
+    public String getModuleName() {
+        return "binding-broker-impl";
     }
 
-    public void setBroker(final BindingAwareBroker broker) {
-        this.broker = broker;
+    @Override
+    public String getInstanceName() {
+        return "binding-broker-impl";
     }
 
-    public BundleContext getBundleContext() {
-        return bundleContext;
+    @Override
+    public MavenUrlReference getFeatureRepo() {
+        return maven().groupId("org.opendaylight.controller").artifactId("features-mdsal").classifier("features")
+                .type("xml").versionAsInProject();
     }
 
-    public void setBundleContext(final BundleContext bundleContext) {
-        this.bundleContext = bundleContext;
+    @Override
+    public String getFeatureName() {
+        return "odl-mdsal-broker";
     }
 
-    @Configuration
-    public Option[] config() {
-        return options(systemProperty("osgi.console").value("2401"), mavenBundle("org.slf4j", "slf4j-api")
-                .versionAsInProject(), //
-                mavenBundle("org.slf4j", "log4j-over-slf4j").versionAsInProject(), //
-                mavenBundle("ch.qos.logback", "logback-core").versionAsInProject(), //
-                mavenBundle("ch.qos.logback", "logback-classic").versionAsInProject(),
-                mavenBundle("openexi", "nagasena").versionAsInProject(),
-                mavenBundle("openexi", "nagasena-rta").versionAsInProject(),
-                 //
-                systemProperty("osgi.bundles.defaultStartLevel").value("4"),
-                systemPackages("sun.nio.ch"),
-
-                mdSalCoreBundles(),
-                configMinumumBundles(),
-                bindingAwareSalBundles(),
-
-                // BASE Models
-                baseModelBundles(),
-                salTestModelBundles(),
-
-                // Set fail if unresolved bundle present
-                systemProperty("pax.exam.osgi.unresolved.fail").value("true"),
-                junitAndMockitoBundles());
+    @Override
+    protected Option[] getAdditionalOptions() {
+        return new Option[]{mavenBundle("org.opendaylight.controller", "sal-test-model").versionAsInProject()};
     }
-
 }

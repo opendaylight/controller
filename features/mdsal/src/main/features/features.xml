@@ -42,7 +42,7 @@
         <!-- FIXME: Bug 4202: Add MD-SAL provided odl-mdsal-dom-broker -->
         <bundle>mvn:org.opendaylight.controller/sal-core-api/{{VERSION}}</bundle>
         <bundle>mvn:org.opendaylight.controller/sal-core-spi/{{VERSION}}</bundle>
-        <bundle>mvn:org.opendaylight.controller/sal-broker-impl/{{VERSION}}</bundle>
+        <bundle start-level="70">mvn:org.opendaylight.controller/sal-broker-impl/{{VERSION}}</bundle>
         <bundle>mvn:org.opendaylight.controller/sal-binding-api/{{VERSION}}</bundle>
         <bundle>mvn:org.opendaylight.controller/sal-binding-broker-impl/{{VERSION}}</bundle>
         <bundle>mvn:org.opendaylight.controller/sal-binding-util/{{VERSION}}</bundle>

@@ -13,7 +13,6 @@ import static org.junit.Assert.assertSame;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-
 import com.google.common.util.concurrent.Futures;
 import org.junit.Before;
 import org.junit.Test;
@@ -68,7 +67,7 @@ public class RoutedServiceIT extends AbstractIT {
     @Test
     public void testServiceRegistration() {
 
-        assertNotNull(getBroker());
+        assertNotNull(broker);
 
         final BindingAwareProvider provider1 = new AbstractTestProvider() {
             @Override
