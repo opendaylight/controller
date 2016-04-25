@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa57193c_cf25ccac",
+        "filename": "opendaylight/md-sal/sal-cluster-admin/src/main/resources/org/opendaylight/blueprint/cluster-admin.xml",
+        "patchSetId": 15
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 3635
+      },
+      "writtenOn": "2016-04-25T12:33:49Z",
+      "side": 1,
+      "message": "Maybe I am just unfamiliar with the nomenclature;  I always refer to this using the un-abbreviated name.  I.e., operationalDataStore, not operDataStore.  Will introducing this shortened version cause confusion as to what its actually called?",
+      "range": {
+        "startLine": 15,
+        "startChar": 19,
+        "endLine": 15,
+        "endChar": 32
+      },
+      "revId": "db0329f525e84f6a9f96bcd53eba0f863d4a0f96",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
