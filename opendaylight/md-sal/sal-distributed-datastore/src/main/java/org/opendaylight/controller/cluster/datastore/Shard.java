@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nonnull;
+import org.opendaylight.controller.cluster.access.commands.FrontendRequest;
 import org.opendaylight.controller.cluster.common.actor.CommonConfig;
 import org.opendaylight.controller.cluster.common.actor.MessageTracker;
 import org.opendaylight.controller.cluster.common.actor.MessageTracker.Error;
@@ -133,6 +134,8 @@ public class Shard extends RaftActor {
 
     private final ShardTransactionMessageRetrySupport messageRetrySupport;
 
+    private final LeaderFrontendTracker frontendTracker = new LeaderFrontendTracker(this);
+
     protected Shard(AbstractBuilder<?, ?> builder) {
         super(builder.getId().toString(), builder.getPeerAddresses(),
                 Optional.of(builder.getDatastoreContext().getShardRaftConfig()), DataStoreVersions.CURRENT_VERSION);
@@ -226,7 +229,9 @@ public class Shard extends RaftActor {
                     maybeError.get());
             }
 
-            if (CreateTransaction.isSerializedType(message)) {
+            if (message instanceof FrontendRequest) {
+                frontendTracker.handleRequest((FrontendRequest<?>)message);
+            } else if (CreateTransaction.isSerializedType(message)) {
                 handleCreateTransaction(message);
             } else if (message instanceof BatchedModifications) {
                 handleBatchedModifications((BatchedModifications)message);
