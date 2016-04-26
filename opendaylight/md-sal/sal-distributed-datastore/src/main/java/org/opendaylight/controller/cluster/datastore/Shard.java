@@ -23,11 +23,13 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nonnull;
+import org.opendaylight.controller.cluster.access.commands.FrontendRequest;
 import org.opendaylight.controller.cluster.common.actor.CommonConfig;
 import org.opendaylight.controller.cluster.common.actor.MessageTracker;
 import org.opendaylight.controller.cluster.common.actor.MessageTracker.Error;
 import org.opendaylight.controller.cluster.common.actor.MeteringBehavior;
 import org.opendaylight.controller.cluster.datastore.ShardCommitCoordinator.CohortEntry;
+import org.opendaylight.controller.cluster.datastore.actors.localhistory.PersistTransactionRequest;
 import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardTransactionIdentifier;
@@ -134,6 +136,8 @@ public class Shard extends RaftActor {
 
     private final ShardTransactionMessageRetrySupport messageRetrySupport;
 
+    private final LeaderFrontendTracker frontendTracker = new LeaderFrontendTracker(this);
+
     protected Shard(AbstractBuilder<?, ?> builder) {
         super(builder.getId().toString(), builder.getPeerAddresses(),
                 Optional.of(builder.getDatastoreContext().getShardRaftConfig()), DataStoreVersions.CURRENT_VERSION);
@@ -227,7 +231,11 @@ public class Shard extends RaftActor {
                     maybeError.get());
             }
 
-            if (CreateTransaction.isSerializedType(message)) {
+            if (message instanceof FrontendRequest) {
+                frontendTracker.handleRequest((FrontendRequest<?>)message);
+            } else if (message instanceof PersistTransactionRequest) {
+                handlePersistTransactionRequest((PersistTransactionRequest) message);
+            } else if (CreateTransaction.isSerializedType(message)) {
                 handleCreateTransaction(message);
             } else if (message instanceof BatchedModifications) {
                 handleBatchedModifications((BatchedModifications)message);
@@ -277,6 +285,22 @@ public class Shard extends RaftActor {
                 super.handleNonRaftCommand(message);
             }
         }
+    }
+
+    private void handlePersistTransactionRequest(final PersistTransactionRequest message) {
+        switch (message.getFate()) {
+            case ABORTED:
+                // FIXME: persist a tombstone
+                return;
+            case SIMPLE_COMMIT:
+                // FIXME: commit, persist and respond
+                return;
+            case COORDINATED_COMMIT:
+                // FIXME: commit and respond with a driver handle
+                return;
+        }
+
+        throw new IllegalArgumentException("Unhandled fate " + message.getFate());
     }
 
     private boolean hasLeader() {
