@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "fa57193c_1f6febc6",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/messages/ServerChangeStatus.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-04-28T18:19:48Z",
+      "side": 1,
+      "message": "I thought about using NOT_SUPPORTED for input that would leave no voting members. But I think this case is really invalid user input and NOT_SUPPORTED was intended for functionality that isn\u0027t implemented or supported yet.",
+      "parentUuid": "fa57193c_9f349bdf",
+      "range": {
+        "startLine": 55,
+        "startChar": 4,
+        "endLine": 55,
+        "endChar": 20
+      },
+      "revId": "c4ff1a0a93f2f477d1ac42d76b438c8e223ca566",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa57193c_7f31c7eb",
         "filename": "opendaylight/md-sal/sal-cluster-admin/src/main/java/org/opendaylight/controller/cluster/datastore/admin/ClusterAdminRpcService.java",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2016-04-28T16:59:14Z",
       "side": 1,
       "message": "If this is every going to be backported, then this lambda will need to be expanded.",
+      "range": {
+        "startLine": 179,
+        "startChar": 61,
+        "endLine": 179,
+        "endChar": 63
+      },
+      "revId": "c4ff1a0a93f2f477d1ac42d76b438c8e223ca566",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_ff7317af",
+        "filename": "opendaylight/md-sal/sal-cluster-admin/src/main/java/org/opendaylight/controller/cluster/datastore/admin/ClusterAdminRpcService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 179,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-04-28T18:19:48Z",
+      "side": 1,
+      "message": "Yup - cross that bridge later if needed. I don\u0027t think that should deter us from using Java 8 features going forward. Also these changes would have to be manually cherry-picked anyway.",
+      "parentUuid": "fa57193c_7f31c7eb",
       "range": {
         "startLine": 179,
         "startChar": 61,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "fa57193c_1f7d2b6f",
+        "filename": "opendaylight/md-sal/sal-cluster-admin/src/main/java/org/opendaylight/controller/cluster/datastore/admin/ClusterAdminRpcService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 222,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-04-28T18:19:48Z",
+      "side": 1,
+      "message": "I can although JIT would optimize/inline it anyway if necessary.",
+      "parentUuid": "fa57193c_df4d7374",
+      "range": {
+        "startLine": 222,
+        "startChar": 11,
+        "endLine": 222,
+        "endChar": 39
+      },
+      "revId": "c4ff1a0a93f2f477d1ac42d76b438c8e223ca566",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa57193c_bf523f11",
         "filename": "opendaylight/md-sal/sal-cluster-admin/src/main/java/org/opendaylight/controller/cluster/datastore/admin/ClusterAdminRpcService.java",
         "patchSetId": 1
@@ -94,6 +166,30 @@
     },
     {
       "key": {
+        "uuid": "fa57193c_ff81574b",
+        "filename": "opendaylight/md-sal/sal-cluster-admin/src/main/java/org/opendaylight/controller/cluster/datastore/admin/ClusterAdminRpcService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 254,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-04-28T18:19:48Z",
+      "side": 1,
+      "message": "ok",
+      "parentUuid": "fa57193c_bf523f11",
+      "range": {
+        "startLine": 254,
+        "startChar": 11,
+        "endLine": 254,
+        "endChar": 39
+      },
+      "revId": "c4ff1a0a93f2f477d1ac42d76b438c8e223ca566",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa57193c_1f588b31",
         "filename": "opendaylight/md-sal/sal-cluster-admin/src/main/java/org/opendaylight/controller/cluster/datastore/admin/ClusterAdminRpcService.java",
         "patchSetId": 1
@@ -105,6 +201,30 @@
       "writtenOn": "2016-04-28T16:59:14Z",
       "side": 1,
       "message": "So I take it that this variable is side-effected by sendMessageToManagerForConfiguredShards?  Why not return instead?",
+      "range": {
+        "startLine": 264,
+        "startChar": 70,
+        "endLine": 264,
+        "endChar": 85
+      },
+      "revId": "c4ff1a0a93f2f477d1ac42d76b438c8e223ca566",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_5f968395",
+        "filename": "opendaylight/md-sal/sal-cluster-admin/src/main/java/org/opendaylight/controller/cluster/datastore/admin/ClusterAdminRpcService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 264,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-04-28T18:19:48Z",
+      "side": 1,
+      "message": "It\u0027s populated by sendMessageToManagerForConfiguredShards which is called twice, once for each data store.",
+      "parentUuid": "fa57193c_1f588b31",
       "range": {
         "startLine": 264,
         "startChar": 70,
@@ -163,6 +283,30 @@
     },
     {
       "key": {
+        "uuid": "fa57193c_9f901b97",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/jmx/mbeans/shard/ShardStats.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 329,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-04-28T18:19:48Z",
+      "side": 1,
+      "message": "didn\u0027t know about it.",
+      "parentUuid": "fa57193c_3f3e2fb9",
+      "range": {
+        "startLine": 317,
+        "startChar": 4,
+        "endLine": 329,
+        "endChar": 5
+      },
+      "revId": "c4ff1a0a93f2f477d1ac42d76b438c8e223ca566",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa57193c_9f4bfb58",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/shardmanager/ShardManager.java",
         "patchSetId": 1
@@ -174,6 +318,30 @@
       "writtenOn": "2016-04-28T16:59:14Z",
       "side": 1,
       "message": "Magic numbers make me feel somewhat uncomfortable.  Could we put this in a constant?",
+      "range": {
+        "startLine": 1325,
+        "startChar": 34,
+        "endLine": 1325,
+        "endChar": 36
+      },
+      "revId": "c4ff1a0a93f2f477d1ac42d76b438c8e223ca566",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_7f8d477b",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/shardmanager/ShardManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1325,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-04-28T18:19:48Z",
+      "side": 1,
+      "message": "I can but why does this one make you feel uncomfortable? I generally use a constant if it\u0027s referenced in multiple places or if the code isn\u0027t clear w/o it but, in this case, with TimeUnit.SECONDS following it, I think it\u0027s pretty clear what it means.",
+      "parentUuid": "fa57193c_9f4bfb58",
       "range": {
         "startLine": 1325,
         "startChar": 34,
