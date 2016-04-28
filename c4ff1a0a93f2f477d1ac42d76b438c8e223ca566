@@ -1,0 +1,188 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa57193c_9f349bdf",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/messages/ServerChangeStatus.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 3635
+      },
+      "writtenOn": "2016-04-28T16:59:14Z",
+      "side": 1,
+      "message": "How does this differ from NOT_SUPPORTED?  Is this the \"catch-all\" case?",
+      "range": {
+        "startLine": 55,
+        "startChar": 4,
+        "endLine": 55,
+        "endChar": 20
+      },
+      "revId": "c4ff1a0a93f2f477d1ac42d76b438c8e223ca566",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_7f31c7eb",
+        "filename": "opendaylight/md-sal/sal-cluster-admin/src/main/java/org/opendaylight/controller/cluster/datastore/admin/ClusterAdminRpcService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 179,
+      "author": {
+        "id": 3635
+      },
+      "writtenOn": "2016-04-28T16:59:14Z",
+      "side": 1,
+      "message": "If this is every going to be backported, then this lambda will need to be expanded.",
+      "range": {
+        "startLine": 179,
+        "startChar": 61,
+        "endLine": 179,
+        "endChar": 63
+      },
+      "revId": "c4ff1a0a93f2f477d1ac42d76b438c8e223ca566",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_df4d7374",
+        "filename": "opendaylight/md-sal/sal-cluster-admin/src/main/java/org/opendaylight/controller/cluster/datastore/admin/ClusterAdminRpcService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 222,
+      "author": {
+        "id": 3635
+      },
+      "writtenOn": "2016-04-28T16:59:14Z",
+      "side": 1,
+      "message": "Move this into a local variable so that you don\u0027t need to call it multiple times.",
+      "range": {
+        "startLine": 222,
+        "startChar": 11,
+        "endLine": 222,
+        "endChar": 39
+      },
+      "revId": "c4ff1a0a93f2f477d1ac42d76b438c8e223ca566",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_bf523f11",
+        "filename": "opendaylight/md-sal/sal-cluster-admin/src/main/java/org/opendaylight/controller/cluster/datastore/admin/ClusterAdminRpcService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 254,
+      "author": {
+        "id": 3635
+      },
+      "writtenOn": "2016-04-28T16:59:14Z",
+      "side": 1,
+      "message": "Pull into a local variable to avoid duplicate call.",
+      "range": {
+        "startLine": 254,
+        "startChar": 11,
+        "endLine": 254,
+        "endChar": 39
+      },
+      "revId": "c4ff1a0a93f2f477d1ac42d76b438c8e223ca566",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_1f588b31",
+        "filename": "opendaylight/md-sal/sal-cluster-admin/src/main/java/org/opendaylight/controller/cluster/datastore/admin/ClusterAdminRpcService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 264,
+      "author": {
+        "id": 3635
+      },
+      "writtenOn": "2016-04-28T16:59:14Z",
+      "side": 1,
+      "message": "So I take it that this variable is side-effected by sendMessageToManagerForConfiguredShards?  Why not return instead?",
+      "range": {
+        "startLine": 264,
+        "startChar": 70,
+        "endLine": 264,
+        "endChar": 85
+      },
+      "revId": "c4ff1a0a93f2f477d1ac42d76b438c8e223ca566",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_5f416338",
+        "filename": "opendaylight/md-sal/sal-cluster-admin/src/main/yang/cluster-admin.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 3635
+      },
+      "writtenOn": "2016-04-28T16:59:14Z",
+      "side": 1,
+      "message": "Please remove these spaces.",
+      "range": {
+        "startLine": 56,
+        "startChar": 0,
+        "endLine": 56,
+        "endChar": 12
+      },
+      "revId": "c4ff1a0a93f2f477d1ac42d76b438c8e223ca566",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_3f3e2fb9",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/jmx/mbeans/shard/ShardStats.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 329,
+      "author": {
+        "id": 3635
+      },
+      "writtenOn": "2016-04-28T16:59:14Z",
+      "side": 1,
+      "message": "Why not use Joiner.MapJoiner?",
+      "range": {
+        "startLine": 317,
+        "startChar": 4,
+        "endLine": 329,
+        "endChar": 5
+      },
+      "revId": "c4ff1a0a93f2f477d1ac42d76b438c8e223ca566",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_9f4bfb58",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/shardmanager/ShardManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1325,
+      "author": {
+        "id": 3635
+      },
+      "writtenOn": "2016-04-28T16:59:14Z",
+      "side": 1,
+      "message": "Magic numbers make me feel somewhat uncomfortable.  Could we put this in a constant?",
+      "range": {
+        "startLine": 1325,
+        "startChar": 34,
+        "endLine": 1325,
+        "endChar": 36
+      },
+      "revId": "c4ff1a0a93f2f477d1ac42d76b438c8e223ca566",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
