@@ -233,10 +233,10 @@ public class ReplicationAndSnapshotsIntegrationTest extends AbstractRaftActorInt
         MessageCollectorActor.expectFirstMatching(follower1CollectorActor, SaveSnapshotSuccess.class);
         persistedSnapshots = InMemorySnapshotStore.getSnapshots(follower1Id, Snapshot.class);
         assertEquals("Persisted snapshots size", 1, persistedSnapshots.size());
-        verifySnapshot("Persisted", persistedSnapshots.get(0), initialTerm, 2, currentTerm, 3);
-        unAppliedEntry = persistedSnapshots.get(0).getUnAppliedEntries();
-        assertEquals("Persisted Snapshot getUnAppliedEntries size", 1, unAppliedEntry.size());
-        verifyReplicatedLogEntry(unAppliedEntry.get(0), currentTerm, 3, payload3);
+        // The last applied index in the snapshot may or may not be the last log entry depending on
+        // timing so to avoid intermittent test failures, we'll just verify the snapshot's last term/index.
+        assertEquals("Follower1 Snapshot getLastTerm", currentTerm, persistedSnapshots.get(0).getLastTerm());
+        assertEquals("Follower1 Snapshot getLastIndex", 3, persistedSnapshots.get(0).getLastIndex());
 
         MessageCollectorActor.expectFirstMatching(follower2CollectorActor, SaveSnapshotSuccess.class);
 
