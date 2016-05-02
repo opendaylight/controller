@@ -962,6 +962,9 @@ public class DistributedDataStoreRemotingIntegrationTest {
         IntegrationTestKit follower2TestKit = new IntegrationTestKit(follower2System, follower2DatastoreContextBuilder);
         follower2TestKit.setupDistributedDataStore(testName, MODULE_SHARDS_CARS_PEOPLE_1_2_3, false, CARS);
 
+        followerTestKit.waitForMembersUp("member-1", "member-3");
+        follower2TestKit.waitForMembersUp("member-1", "member-2");
+
         // Do an initial read to get the primary shard info cached.
 
         DOMStoreReadTransaction readTx = followerDistributedDataStore.newReadOnlyTransaction();
