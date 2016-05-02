@@ -83,21 +83,7 @@ public class MemberNode {
     }
 
     public void waitForMembersUp(String... otherMembers) {
-        Set<String> otherMembersSet = Sets.newHashSet(otherMembers);
-        Stopwatch sw = Stopwatch.createStarted();
-        while(sw.elapsed(TimeUnit.SECONDS) <= 10) {
-            CurrentClusterState state = Cluster.get(kit.getSystem()).state();
-            for(Member m: state.getMembers()) {
-                if(m.status() == MemberStatus.up() && otherMembersSet.remove(m.getRoles().iterator().next()) &&
-                        otherMembersSet.isEmpty()) {
-                    return;
-                }
-            }
-
-            Uninterruptibles.sleepUninterruptibly(100, TimeUnit.MILLISECONDS);
-        }
-
-        fail("Member(s) " + otherMembersSet + " are not Up");
+        kit.waitForMembersUp(otherMembers);
     }
 
     public void waitForMemberDown(String member) {
