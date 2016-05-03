@@ -30,7 +30,6 @@
     <config.netty.configfile>00-netty.xml</config.netty.configfile>
     <config.mdsal.configfile>01-md-sal.xml</config.mdsal.configfile>
     <config.xsql.configfile>04-xsql.xml</config.xsql.configfile>
-    <config.toaster.configfile>03-toaster-sample.xml</config.toaster.configfile>
   </properties>
 
   <dependencyManagement>
@@ -352,13 +351,6 @@
     <dependency>
       <groupId>org.opendaylight.controller.samples</groupId>
       <artifactId>sample-toaster-provider</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller.samples</groupId>
-      <artifactId>toaster-config</artifactId>
-      <version>${controller.mdsal.version}</version>
-      <type>xml</type>
-      <classifier>config</classifier>
     </dependency>
 
   </dependencies>

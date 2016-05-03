@@ -15,7 +15,6 @@
     <module>toaster</module>
     <module>toaster-consumer</module>
     <module>toaster-provider</module>
-    <module>toaster-config</module>
     <module>clustering-test-app</module>
     <module>toaster-it</module>
   </modules>
