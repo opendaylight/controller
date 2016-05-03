@@ -61,7 +61,6 @@
         <bundle>mvn:org.opendaylight.controller.samples/sample-toaster/{{VERSION}}</bundle>
         <bundle>mvn:org.opendaylight.controller.samples/sample-toaster-consumer/{{VERSION}}</bundle>
         <bundle>mvn:org.opendaylight.controller.samples/sample-toaster-provider/{{VERSION}}</bundle>
-        <configfile finalname="${config.configfile.directory}/${config.toaster.configfile}">mvn:org.opendaylight.controller.samples/toaster-config/{{VERSION}}/xml/config</configfile>
     </feature>
     <feature name ='odl-mdsal-xsql' version='${project.version}'>
         <feature version='${project.version}'>odl-mdsal-broker</feature>
