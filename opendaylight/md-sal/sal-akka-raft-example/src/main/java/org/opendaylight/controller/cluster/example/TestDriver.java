@@ -134,7 +134,7 @@ public class TestDriver {
     }
 
     // create the listener using a separate actor system for each example actor
-    private void createClusterRoleChangeListener(List<String> memberIds) {
+    private static void createClusterRoleChangeListener(List<String> memberIds) {
         System.out.println("memberIds="+memberIds);
         for (String memberId : memberIds) {
             ActorRef listenerActor = listenerActorSystem.actorOf(

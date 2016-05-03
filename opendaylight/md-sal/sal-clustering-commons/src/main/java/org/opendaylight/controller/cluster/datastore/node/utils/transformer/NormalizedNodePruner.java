@@ -243,7 +243,7 @@ public class NormalizedNodePruner implements NormalizedNodeStreamWriter {
         Preconditions.checkState(!sealed, "Pruner can be used only once");
     }
 
-    private boolean hasValidSchema(QName name, NormalizedNodeBuilderWrapper parent) {
+    private static boolean hasValidSchema(QName name, NormalizedNodeBuilderWrapper parent) {
         boolean valid = parent.getSchema().isPresent() && parent.getSchema().get().getChild(name) != null;
         if(!valid) {
             LOG.debug("Schema not found for {}", name);

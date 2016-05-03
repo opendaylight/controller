@@ -68,7 +68,7 @@ public class InstallSnapshotTest {
         assertEquals("isSerializedType", false, InstallSnapshot.isSerializedType(new Object()));
     }
 
-    private void verifyInstallSnapshot(InstallSnapshot expected, InstallSnapshot actual) {
+    private static void verifyInstallSnapshot(InstallSnapshot expected, InstallSnapshot actual) {
         assertEquals("getTerm", expected.getTerm(), actual.getTerm());
         assertEquals("getChunkIndex", expected.getChunkIndex(), actual.getChunkIndex());
         assertEquals("getTotalChunks", expected.getTotalChunks(), actual.getTotalChunks());
