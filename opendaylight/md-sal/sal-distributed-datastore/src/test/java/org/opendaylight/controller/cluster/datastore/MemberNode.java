@@ -113,7 +113,7 @@ public class MemberNode {
             cleanedUp = true;
             kit.cleanup(configDataStore);
             kit.cleanup(operDataStore);
-            kit.shutdownActorSystem(kit.getSystem(), Boolean.TRUE);
+            IntegrationTestKit.shutdownActorSystem(kit.getSystem(), Boolean.TRUE);
         }
     }
 
@@ -150,12 +150,7 @@ public class MemberNode {
                 type(datastore.getActorContext().getDataStoreName()).build().toString());
         }
 
-        verifyRaftState(datastore, shardName, new RaftStateVerifier() {
-            @Override
-            public void verify(OnDemandRaftState raftState) {
-                assertEquals("Peers for shard " + shardName, peerIds, raftState.getPeerAddresses().keySet());
-            }
-        });
+        verifyRaftState(datastore, shardName, raftState -> assertEquals("Peers for shard " + shardName, peerIds, raftState.getPeerAddresses().keySet()));
     }
 
     public static void verifyNoShardPresent(DistributedDataStore datastore, String shardName) {
