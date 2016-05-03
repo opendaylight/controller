@@ -28,6 +28,7 @@ import org.opendaylight.controller.cluster.raft.client.messages.GetOnDemandRaftS
 import org.opendaylight.controller.cluster.raft.client.messages.OnDemandRaftState;
 import org.opendaylight.controller.cluster.raft.client.messages.Shutdown;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
+import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
@@ -196,8 +197,7 @@ public class LeadershipTransferIntegrationTest extends AbstractRaftActorIntegrat
 
         createRaftActors();
 
-        follower1Actor.underlyingActor().startDropMessages(AppendEntries.class);
-        follower2Actor.underlyingActor().startDropMessages(AppendEntries.class);
+        leaderActor.underlyingActor().startDropMessages(AppendEntriesReply.class);
 
         sendShutDown(leaderActor);
 
