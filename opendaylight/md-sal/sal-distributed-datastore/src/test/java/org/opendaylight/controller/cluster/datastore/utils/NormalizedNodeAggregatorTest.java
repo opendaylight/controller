@@ -11,7 +11,7 @@ package org.opendaylight.controller.cluster.datastore.utils;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import com.google.common.base.Optional;
-import com.google.common.collect.Lists;
+import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.CheckedFuture;
 import java.util.Collection;
 import java.util.concurrent.ExecutionException;
@@ -42,7 +42,7 @@ public class NormalizedNodeAggregatorTest {
         NormalizedNode<?, ?> expectedNode2 = ImmutableNodes.containerNode(CarsModel.CARS_QNAME);
 
         Optional<NormalizedNode<?, ?>> optional = NormalizedNodeAggregator.aggregate(YangInstanceIdentifier.builder().build(),
-                Lists.newArrayList(
+                ImmutableList.of(
                         Optional.<NormalizedNode<?, ?>>of(getRootNode(expectedNode1, schemaContext)),
                         Optional.<NormalizedNode<?, ?>>of(getRootNode(expectedNode2, schemaContext))),
                 schemaContext);
