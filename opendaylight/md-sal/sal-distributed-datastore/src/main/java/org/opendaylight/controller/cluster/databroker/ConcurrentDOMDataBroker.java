@@ -340,7 +340,7 @@ public class ConcurrentDOMDataBroker extends AbstractDOMBroker implements DOMDat
         throw new UnsupportedOperationException("Commit cohort is not supported for " + path);
     }
 
-    private LogicalDatastoreType toLegacy(org.opendaylight.mdsal.common.api.LogicalDatastoreType datastoreType) {
+    private static LogicalDatastoreType toLegacy(org.opendaylight.mdsal.common.api.LogicalDatastoreType datastoreType) {
         switch (datastoreType) {
             case CONFIGURATION:
                 return LogicalDatastoreType.CONFIGURATION;

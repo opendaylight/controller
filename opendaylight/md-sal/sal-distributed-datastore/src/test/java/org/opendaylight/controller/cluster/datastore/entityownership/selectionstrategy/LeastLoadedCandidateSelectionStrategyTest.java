@@ -79,7 +79,7 @@ public class LeastLoadedCandidateSelectionStrategyTest {
         return viableCandidates;
     }
 
-    private void assertStatistics(Map<String, Long> statistics, long... count){
+    private static void assertStatistics(Map<String, Long> statistics, long... count){
         for(int i=0;i<count.length;i++){
             assertEquals(count[i], (long) statistics.get("member-" + (i+1)));
         }
