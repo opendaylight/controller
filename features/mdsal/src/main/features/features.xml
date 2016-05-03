@@ -109,7 +109,6 @@
         <feature version='${project.version}'>odl-mdsal-broker</feature>
         <bundle>mvn:org.opendaylight.controller.samples/clustering-it-model/{{VERSION}}</bundle>
         <bundle>mvn:org.opendaylight.controller.samples/clustering-it-provider/{{VERSION}}</bundle>
-        <configfile finalname="${config.configfile.directory}/20-clustering-test-app.xml">mvn:org.opendaylight.controller.samples/clustering-it-config/{{VERSION}}/xml/config</configfile>
     </feature>
 
     <feature name='odl-message-bus-collector' version='${project.version}'>

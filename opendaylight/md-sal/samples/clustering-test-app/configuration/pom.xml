@@ -30,11 +30,6 @@
             <phase>package</phase>
             <configuration>
               <artifacts>
-                <artifact>
-                  <file>${project.build.directory}/classes/initial/20-clustering-test-app.xml</file>
-                  <type>xml</type>
-                  <classifier>config</classifier>
-                </artifact>
                   <artifact>
                       <file>${project.build.directory}/classes/initial/module-shards.conf</file>
                       <type>xml</type>
