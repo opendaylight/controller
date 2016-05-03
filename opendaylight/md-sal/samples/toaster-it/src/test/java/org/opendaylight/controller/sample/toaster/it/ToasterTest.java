@@ -32,16 +32,6 @@ public class ToasterTest extends AbstractMdsalTestBase {
     KitchenService kitchenService;
 
     @Override
-    public String getModuleName() {
-        return "toaster-provider-impl";
-    }
-
-    @Override
-    public String getInstanceName() {
-        return "toaster-provider-impl";
-    }
-
-    @Override
     public MavenUrlReference getFeatureRepo() {
         return maven().groupId("org.opendaylight.controller").artifactId("features-mdsal").classifier("features")
                 .type("xml").versionAsInProject();
