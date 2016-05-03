@@ -1186,13 +1186,8 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         final String node1ID = "node1";
         final String node2ID = "node2";
 
-        PeerAddressResolver peerAddressResolver = new PeerAddressResolver() {
-            @Override
-            public String resolve(String peerId) {
-                return peerId.equals(node1ID) ? actorFactory.createTestActorPath(node1ID) :
-                    peerId.equals(node2ID) ? actorFactory.createTestActorPath(node2ID) : null;
-            }
-        };
+        PeerAddressResolver peerAddressResolver = peerId -> peerId.equals(node1ID) ? actorFactory.createTestActorPath(node1ID) :
+            peerId.equals(node2ID) ? actorFactory.createTestActorPath(node2ID) : null;
 
         ServerConfigurationPayload persistedServerConfig = new ServerConfigurationPayload(Arrays.asList(
                 new ServerInfo(node1ID, false), new ServerInfo(node2ID, true)));
@@ -1256,13 +1251,8 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         final String node1ID = "node1";
         final String node2ID = "node2";
 
-        PeerAddressResolver peerAddressResolver = new PeerAddressResolver() {
-            @Override
-            public String resolve(String peerId) {
-                return peerId.equals(node1ID) ? actorFactory.createTestActorPath(node1ID) :
-                    peerId.equals(node2ID) ? actorFactory.createTestActorPath(node2ID) : null;
-            }
-        };
+        PeerAddressResolver peerAddressResolver = peerId -> peerId.equals(node1ID) ? actorFactory.createTestActorPath(node1ID) :
+            peerId.equals(node2ID) ? actorFactory.createTestActorPath(node2ID) : null;
 
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
         configParams.setHeartBeatInterval(new FiniteDuration(100, TimeUnit.MILLISECONDS));
@@ -1335,13 +1325,8 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         final String node1ID = "node1";
         final String node2ID = "node2";
 
-        configParams.setPeerAddressResolver(new PeerAddressResolver() {
-            @Override
-            public String resolve(String peerId) {
-                return peerId.equals(node1ID) ? actorFactory.createTestActorPath(node1ID) :
-                    peerId.equals(node2ID) ? actorFactory.createTestActorPath(node2ID) : null;
-            }
-        });
+        configParams.setPeerAddressResolver(peerId -> peerId.equals(node1ID) ? actorFactory.createTestActorPath(node1ID) :
+            peerId.equals(node2ID) ? actorFactory.createTestActorPath(node2ID) : null);
 
         ServerConfigurationPayload persistedServerConfig = new ServerConfigurationPayload(Arrays.asList(
                 new ServerInfo(node1ID, false), new ServerInfo(node2ID, true)));
@@ -1403,7 +1388,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         LOG.info("testChangeToVotingWithNoLeaderAndOtherLeaderElected ending");
     }
 
-    private void verifyRaftState(RaftState expState, RaftActor... raftActors) {
+    private static void verifyRaftState(RaftState expState, RaftActor... raftActors) {
         Stopwatch sw = Stopwatch.createStarted();
         while(sw.elapsed(TimeUnit.SECONDS) <= 5) {
             for(RaftActor raftActor: raftActors) {

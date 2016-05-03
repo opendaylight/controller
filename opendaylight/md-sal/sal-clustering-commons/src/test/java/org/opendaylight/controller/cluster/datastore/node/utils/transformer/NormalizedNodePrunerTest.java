@@ -24,7 +24,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockitoAnnotations;
 import org.opendaylight.controller.cluster.datastore.node.utils.NormalizedNodeNavigator;
-import org.opendaylight.controller.cluster.datastore.node.utils.NormalizedNodeVisitor;
 import org.opendaylight.controller.cluster.datastore.util.TestModel;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.AugmentationIdentifier;
@@ -52,15 +51,15 @@ public class NormalizedNodePrunerTest {
         MockitoAnnotations.initMocks(this);
     }
 
-    private NormalizedNodePruner prunerFullSchema(YangInstanceIdentifier path) {
+    private static NormalizedNodePruner prunerFullSchema(YangInstanceIdentifier path) {
         return new NormalizedNodePruner(path, FULL_SCHEMA);
     }
 
-    private NormalizedNodePruner prunerNoAugSchema(YangInstanceIdentifier path) {
+    private static NormalizedNodePruner prunerNoAugSchema(YangInstanceIdentifier path) {
         return new NormalizedNodePruner(path, NO_AUG_SCHEMA);
     }
 
-    private NormalizedNodePruner prunerNoTestSchema(YangInstanceIdentifier path) {
+    private static NormalizedNodePruner prunerNoTestSchema(YangInstanceIdentifier path) {
         return new NormalizedNodePruner(path, NO_TEST_SCHEMA);
     }
 
@@ -145,14 +144,10 @@ public class NormalizedNodePrunerTest {
             return 0;
         }
         final AtomicInteger count = new AtomicInteger();
-        new NormalizedNodeNavigator(new NormalizedNodeVisitor() {
-
-            @Override
-            public void visitNode(int level, String parentPath, NormalizedNode<?, ?> normalizedNode) {
-                if(!(normalizedNode.getIdentifier() instanceof AugmentationIdentifier)) {
-                    if (normalizedNode.getIdentifier().getNodeType().getNamespace().toString().contains(namespaceFilter)) {
-                        count.incrementAndGet();
-                    }
+        new NormalizedNodeNavigator((level, parentPath, normalizedNode1) -> {
+            if(!(normalizedNode1.getIdentifier() instanceof AugmentationIdentifier)) {
+                if (normalizedNode1.getIdentifier().getNodeType().getNamespace().toString().contains(namespaceFilter)) {
+                    count.incrementAndGet();
                 }
             }
         }).navigate(YangInstanceIdentifier.EMPTY.toString(), normalizedNode);
