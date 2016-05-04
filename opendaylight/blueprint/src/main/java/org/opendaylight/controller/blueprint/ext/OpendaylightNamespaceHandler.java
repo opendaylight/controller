@@ -8,9 +8,11 @@
 package org.opendaylight.controller.blueprint.ext;
 
 import com.google.common.base.Strings;
+import java.io.StringReader;
 import java.net.URL;
 import java.util.Collections;
 import java.util.Set;
+import javax.xml.parsers.DocumentBuilderFactory;
 import org.apache.aries.blueprint.ComponentDefinitionRegistry;
 import org.apache.aries.blueprint.NamespaceHandler;
 import org.apache.aries.blueprint.ParserContext;
@@ -38,6 +40,8 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 
 /**
  * The NamespaceHandler for Opendaylight blueprint extensions.
@@ -54,11 +58,14 @@ public class OpendaylightNamespaceHandler implements NamespaceHandler {
     private static final String COMPONENT_PROCESSOR_NAME = ComponentProcessor.class.getName();
     private static final String RESTART_DEPENDENTS_ON_UPDATES = "restart-dependents-on-updates";
     private static final String USE_DEFAULT_FOR_REFERENCE_TYPES = "use-default-for-reference-types";
+    private static final String CLUSTERED_APP_CONFIG = "clustered-app-config";
     private static final String TYPE_ATTR = "type";
     private static final String INTERFACE = "interface";
     private static final String REF_ATTR = "ref";
     private static final String ID_ATTR = "id";
     private static final String RPC_SERVICE = "rpc-service";
+    private static final String BINDING_CLASS = "binding-class";
+    private static final String DEFAULT_CONFIG = "default-config";
 
     @SuppressWarnings("rawtypes")
     @Override
@@ -89,6 +96,8 @@ public class OpendaylightNamespaceHandler implements NamespaceHandler {
             return parseRpcService(element, context);
         } else if (nodeNameEquals(element, NotificationListenerBean.NOTIFICATION_LISTENER)) {
             return parseNotificationListener(element, context);
+        } else if (nodeNameEquals(element, CLUSTERED_APP_CONFIG)) {
+            return parseClusteredAppConfig(element, context);
         }
 
         throw new ComponentDefinitionException("Unsupported standalone element: " + element.getNodeName());
@@ -300,12 +309,57 @@ public class OpendaylightNamespaceHandler implements NamespaceHandler {
         return metadata;
     }
 
-     private void registerNotificationServiceRefBean(ParserContext context) {
+    private void registerNotificationServiceRefBean(ParserContext context) {
         ComponentDefinitionRegistry registry = context.getComponentDefinitionRegistry();
         if(registry.getComponentDefinition(NOTIFICATION_SERVICE_NAME) == null) {
             MutableReferenceMetadata metadata = createServiceRef(context, NotificationService.class, null);
             metadata.setId(NOTIFICATION_SERVICE_NAME);
             registry.registerComponentDefinition(metadata);
+        }
+    }
+
+    private Metadata parseClusteredAppConfig(Element element, ParserContext context) {
+        LOG.debug("parseClusteredAppConfig");
+
+        // Find the default-config child element representing the default app config XML, if present.
+        Element defaultConfigElement = null;
+        NodeList children = element.getChildNodes();
+        for(int i = 0; i < children.getLength(); i++) {
+            Node child = children.item(i);
+            if(nodeNameEquals(child, DEFAULT_CONFIG)) {
+                defaultConfigElement = (Element) child;
+                break;
+            }
+        }
+
+        Element defaultAppConfigElement = null;
+        if(defaultConfigElement != null) {
+            // Find the CDATA element containing the default app config XML.
+            children = defaultConfigElement.getChildNodes();
+            for(int i = 0; i < children.getLength(); i++) {
+                Node child = children.item(i);
+                if(child.getNodeType() == Node.CDATA_SECTION_NODE) {
+                    defaultAppConfigElement = parseXML(DEFAULT_CONFIG, child.getTextContent());
+                    break;
+                }
+            }
+        }
+
+        return new DataStoreAppConfigMetadata(getId(context, element), element.getAttribute(BINDING_CLASS),
+                defaultAppConfigElement);
+    }
+
+    private Element parseXML(String name, String xml) {
+        DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
+        builderFactory.setNamespaceAware(true);
+        builderFactory.setCoalescing(true);
+        builderFactory.setIgnoringElementContentWhitespace(true);
+        builderFactory.setIgnoringComments(true);
+
+        try {
+            return builderFactory.newDocumentBuilder().parse(new InputSource(new StringReader(xml))).getDocumentElement();
+        } catch(Exception e) {
+            throw new ComponentDefinitionException(String.format("Error %s parsing XML: %s", name, xml));
         }
     }
 
