@@ -54,11 +54,13 @@ public class OpendaylightNamespaceHandler implements NamespaceHandler {
     private static final String COMPONENT_PROCESSOR_NAME = ComponentProcessor.class.getName();
     private static final String RESTART_DEPENDENTS_ON_UPDATES = "restart-dependents-on-updates";
     private static final String USE_DEFAULT_FOR_REFERENCE_TYPES = "use-default-for-reference-types";
+    private static final String CLUSTERED_APP_CONFIG = "clustered-app-config";
     private static final String TYPE_ATTR = "type";
     private static final String INTERFACE = "interface";
     private static final String REF_ATTR = "ref";
     private static final String ID_ATTR = "id";
     private static final String RPC_SERVICE = "rpc-service";
+    private static final String BINDING_CLASS = "binding-class";
 
     @SuppressWarnings("rawtypes")
     @Override
@@ -89,6 +91,8 @@ public class OpendaylightNamespaceHandler implements NamespaceHandler {
             return parseRpcService(element, context);
         } else if (nodeNameEquals(element, NotificationListenerBean.NOTIFICATION_LISTENER)) {
             return parseNotificationListener(element, context);
+        } else if (nodeNameEquals(element, CLUSTERED_APP_CONFIG)) {
+            return parseClusteredAppConfig(element, context);
         }
 
         throw new ComponentDefinitionException("Unsupported standalone element: " + element.getNodeName());
@@ -300,13 +304,18 @@ public class OpendaylightNamespaceHandler implements NamespaceHandler {
         return metadata;
     }
 
-     private void registerNotificationServiceRefBean(ParserContext context) {
+    private void registerNotificationServiceRefBean(ParserContext context) {
         ComponentDefinitionRegistry registry = context.getComponentDefinitionRegistry();
         if(registry.getComponentDefinition(NOTIFICATION_SERVICE_NAME) == null) {
             MutableReferenceMetadata metadata = createServiceRef(context, NotificationService.class, null);
             metadata.setId(NOTIFICATION_SERVICE_NAME);
             registry.registerComponentDefinition(metadata);
         }
+    }
+
+    private Metadata parseClusteredAppConfig(Element element, ParserContext context) {
+        LOG.debug("parseClusteredAppConfig");
+        return new DataStoreAppConfigMetadata(getId(context, element), element.getAttribute(BINDING_CLASS));
     }
 
     private static ValueMetadata createValue(ParserContext context, String value) {
