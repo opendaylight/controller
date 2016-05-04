@@ -45,6 +45,8 @@ import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.ToasterRestocked;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.ToasterRestockedBuilder;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.ToasterService;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.toaster.app.config.rev160503.ToasterAppConfig;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.toaster.app.config.rev160503.ToasterAppConfigBuilder;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcError;
@@ -81,9 +83,17 @@ public class OpendaylightToaster extends AbstractMXBean implements ToasterServic
     // Thread safe holder for our darkness multiplier.
     private final AtomicLong darknessFactor = new AtomicLong( 1000 );
 
+    private final ToasterAppConfig toasterAppConfig;
+
     public OpendaylightToaster() {
+        this(new ToasterAppConfigBuilder().setManufacturer(TOASTER_MANUFACTURER).setModelNumber(TOASTER_MODEL_NUMBER).
+                setMaxMakeToastTries(2).build());
+    }
+
+    public OpendaylightToaster(ToasterAppConfig toasterAppConfig) {
         super("OpendaylightToaster", "toaster-provider", null);
         executor = Executors.newFixedThreadPool(1);
+        this.toasterAppConfig = toasterAppConfig;
     }
 
     public void setNotificationProvider(final NotificationPublishService notificationPublishService) {
@@ -131,8 +141,8 @@ public class OpendaylightToaster extends AbstractMXBean implements ToasterServic
         // note - we are simulating a device whose manufacture and model are
         // fixed (embedded) into the hardware.
         // This is why the manufacture and model number are hardcoded.
-        return new ToasterBuilder().setToasterManufacturer( TOASTER_MANUFACTURER )
-                                   .setToasterModelNumber( TOASTER_MODEL_NUMBER )
+        return new ToasterBuilder().setToasterManufacturer( toasterAppConfig.getManufacturer() )
+                                   .setToasterModelNumber( toasterAppConfig.getModelNumber() )
                                    .setToasterStatus( status )
                                    .build();
     }
@@ -186,7 +196,7 @@ public class OpendaylightToaster extends AbstractMXBean implements ToasterServic
 
         final SettableFuture<RpcResult<Void>> futureResult = SettableFuture.create();
 
-        checkStatusAndMakeToast( input, futureResult, 2 );
+        checkStatusAndMakeToast( input, futureResult, toasterAppConfig.getMaxMakeToastTries() );
 
         return futureResult;
     }
