@@ -33,4 +33,14 @@
   </xsd:complexType>
   <xsd:element name="notification-listener" type="TnotificationListener"/>
 
+  <xsd:complexType name="TclusteredAppConfig">
+    <xsd:sequence>
+      <!--<xsd:any namespace="##other" processContents="skip" minOccurs="0" maxOccurs="1"/>-->
+      <xsd:element name="default-config" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+    </xsd:sequence>
+    <xsd:attribute name="binding-class" type="bp:Tclass" use="required"/>
+    <xsd:attribute name="list-key-value" type="xsd:string" use="optional"/>
+    <xsd:attribute name="id" type="xsd:ID" use="required"/>
+  </xsd:complexType>
+  <xsd:element name="clustered-app-config" type="TclusteredAppConfig"/>
 </xsd:schema>

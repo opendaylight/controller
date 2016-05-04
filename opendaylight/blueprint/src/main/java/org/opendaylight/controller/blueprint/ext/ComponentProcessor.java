@@ -36,6 +36,8 @@ import org.slf4j.LoggerFactory;
  * @author Thomas Pantelis
  */
 public class ComponentProcessor implements ComponentDefinitionRegistryProcessor {
+    static final String DEFAULT_TYPE_FILTER = "(|(type=default)(!(type=*)))";
+
     private static final Logger LOG = LoggerFactory.getLogger(ComponentProcessor.class);
     private static final String CM_PERSISTENT_ID_PROPERTY = "persistentId";
 
@@ -94,7 +96,7 @@ public class ComponentProcessor implements ComponentDefinitionRegistryProcessor 
                 serviceRef.getId(), filter, extFilter);
 
         if(Strings.isNullOrEmpty(filter) && Strings.isNullOrEmpty(extFilter)) {
-            serviceRef.setFilter("(|(type=default)(!(type=*)))");
+            serviceRef.setFilter(DEFAULT_TYPE_FILTER);
 
             LOG.debug("{}: processServiceReferenceMetadata for {} set filter to {}", logName(),
                     serviceRef.getId(), serviceRef.getFilter());
