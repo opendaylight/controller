@@ -18,7 +18,7 @@
 
     <!-- md-sal  Portion-->
     <module>opendaylight/md-sal</module>
-    <!-- config -->
+    <!-- configuration -->
     <module>opendaylight/config</module>
 
     <module>opendaylight/model</module>
