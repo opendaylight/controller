@@ -33,4 +33,9 @@
   </xsd:complexType>
   <xsd:element name="notification-listener" type="TnotificationListener"/>
 
+  <xsd:complexType name="TclusteredAppConfig">
+    <xsd:attribute name="binding-class" type="bp:Tclass" use="required"/>
+    <xsd:attribute name="id" type="xsd:ID" use="required"/>
+  </xsd:complexType>
+  <xsd:element name="clustered-app-config" type="TclusteredAppConfig"/>
 </xsd:schema>
