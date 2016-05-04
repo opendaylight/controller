@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa57193c_076f95c6",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 5972
+      },
+      "writtenOn": "2016-05-04T00:29:57Z",
+      "side": 1,
+      "message": "ok",
+      "revId": "c7b5b548c48bf496b267acb607547135bb4a886a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
