@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa57193c_077f92e1",
+        "filename": "pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 5448
+      },
+      "writtenOn": "2016-05-05T06:08:33Z",
+      "side": 1,
+      "message": "This is ok. But this need not be checked in",
+      "range": {
+        "startLine": 19,
+        "startChar": 17,
+        "endLine": 19,
+        "endChar": 24
+      },
+      "revId": "1382fdf6adc50be17020839c398717eeb7b26e41",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
