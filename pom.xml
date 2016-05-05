@@ -16,7 +16,7 @@
 
   <modules>
 
-    <!-- md-sal -->
+    <!-- md-sal  Portion-->
     <module>opendaylight/md-sal</module>
     <!-- config -->
     <module>opendaylight/config</module>
