@@ -42,6 +42,17 @@
     ]]></odl:default-config>
   </odl:clustered-app-config>
 
+  <odl:clustered-app-config id="listAppConfig"
+      binding-class="org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.toaster.app.config.rev160503.ListAppConfig"
+      list-key-value="one">
+    <odl:default-config><![CDATA[
+      <list-app-config xmlns="urn:opendaylight:params:xml:ns:yang:controller:toaster-app-config">
+        <instance-id>one</instance-id>
+        <string-leaf>raiders</string-leaf>
+      </list-app-config>
+    ]]></odl:default-config>
+  </odl:clustered-app-config>
+
   <!-- Import MD-SAL services. For the DataBroker, we explicitly specify the odl:type which is configurable
        via the cfg file. In this manner the toaster can be configured to use the default clustered DataBroker
        or the specialized "pingpong" DataBroker (or any other DataBroker implementation).

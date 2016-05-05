@@ -30,4 +30,21 @@ module toaster-app-config {
             default 2;
         }
     }
+    
+    list list-app-config {
+        key "instance-id";
+        leaf instance-id {
+            type string;
+        }
+        
+        leaf int-leaf {
+           type uint16;
+           default 10;
+        }
+        
+        leaf string-leaf {
+           type string;
+           default "foo";
+        }
+    }
 }
