@@ -1,0 +1,96 @@
+
+= Shard-Raft behaviour Documentation
+
+[NOTE]
+
+This is evolving document describing the shard/raft actor split and their modified interactions thereby.
+
+This document is in no sense complete, it describes the intenteded implementation.It is subject to revisions as feedback is received and as the implementation evolves.
+
+
+== Overview
+
+The actual implementation of the replicated data tree is the  *Backend*. It is pivoted  around `Shard` a subclass of `RaftActor`, and provides a set of messages for the *Frontend* to submit work to the Leader, which is then replicated to Followers. The RaftActor implements time-sensitive messaging exchange and is subclassed to provide specific subclass operations.
+
+When the subclass is targeted with a lot of messages, this can lead to timeouts in the RAFT underlay -- hence potentially disrupting stability.
+
+This way we can ensure that the RAFT algorithm operates isolated from any floods incurred by the implementation above, leading to better stability.
+
+[source,java]
+
+Performance impact and interactions with persistence need to be evaluated before this becomes our default design.
+
+== Design Details
+
+Even when we separate the two actors, the interchange is logically split into
+two separate classes:
+
+*RaftActor* -> *RaftActor*: ControlMessages, since RAFT convergence is the top priority.
+
+*Shard* -> *RaftActor*: normal message, just a request to persist a Payload.
+
+*RaftActor* -> *Shard*: ControlMessages, as these propagate role (Leader/Follower) and we do not want to reorder w.r.t. responses to Payload persistence
+
+[*] -> *Shard*: normal messages, as these are work items which generate code and therefore need to be subjected to backpressure when RAFT is in flux and cannot keep up. Most notably this will favor delivering Payload response messages before client requests, because without them the system is not making forward
+progress.
+
+
+Now the shard Manager is a separate actor by itself. As a result of this separation, additional messages will be required to be crafted between the Shard
+Actor and the Raft Actor.
+
+The design will result in both the Shard and RaftActor becoming UntypedPersistentActor(s) themselves. 
+
+
+== Current Messages 
+
+The current shard manager messages:
+
+1. FindPrimary -- shard manager to shard only
+2. FindLocalShard -- shardmanager to shard and then to Raft( need it for the leadership election details)
+3. UpdateSchemaContext -- shardmanager to shard only, however in the event of shard creation we need some SA/RA communication
+4. ActorInitialized -- RA to SA to shard manager notification saying that the actor initialisation is completely
+5. DatastoreContextFactory -- SM to SA
+6. RoleChangeNotifier:Shard ==> 1:1
+7. ShardManagwr handles the rolechange Notification which represents the raft state of the current member of the given shard.
+8. FollowerInitialSyncUpStatus: pure raft message . Push it from raft Actor towards SM
+9. ShardNotInitializedTimeout -- shard specific
+10. ShardLeaderStateChanged -- 2 be sent from Raft Actor to Shard Manager for a specific shard 
+11. SwitchShardBehavior -- shard to raft actor
+12. CreateShard -- to be sent from shard-manager to shard and then RaftActor to elect a leader
+13. AddShardReplica -- from shard-manager to shard
+14. ForwardedAddServerReply -- SM to SA
+15. ForwardedAddServerfailure -- SM to SA
+16. PrimaryShardFoundForContext -- SM to SA to RA
+17. RemoveShardReplica -- SM to SA 
+18. WrappedShardResponse -- SM to SA
+19. GetSnapshot -- SM to SA 
+20. ServerRemoved -- RA to SM to SA (and perhaps RA for (persistence))
+21. SaveSnapshotSuccess/SaveSnapshotFailure -- RA to SM post which it deletes the snapshots ( not used as of now)
+22. Shutdown -- shutdown SM and then SA (for eac hof the shards)
+23. GetLocalShardIds -- SM to SA to retrieve local shard Ids
+
+The current shard messages are :
+
+1. BatchedModifications -- incoming to shard from RemoteShardContext, ShardCommitCoordinator, EOSSCC, goes to ShardCommitCoordinator
+2. ForwardedReadyTransaction -- incoming from ShardWriteTx(readyTx) , goes to ShardCommitCoordinator( handleForwardedReadyTranscation)
+3. ReadyLocalTransaction -- incoming from shard itself(handlefwdedReadyTx) and Local3phaseCommitCohort
+4. CreateTx/CanCommitTx/CommitTx/AbortTx/CloseTxChain --
+5. RegisterChangeListener -- datachangelistenerRegistrationProxy(doRegistration) , given back to shard
+6. RegisterDataTreeChangeListener -- datatreechangelistenerProxy (doRegistration), given back to shard
+7. UpdateSchemaContext -- from ActorContext to shardmanager to shard
+8. PeerAddressResolved - shard manager (memberUp/memberReachable)-- addPeerAddress --updatePeerAddress, goes to RaftActor
+9. RegisterRoleChangeListener - incoming from shardmanager onActorInitialized markShardAsInitialized . In details onRecoveryComplete triggers ActorInitialized
+10. DatastoreContext -- incoming from DataStoreContext results in updateConfigParams on the Raft Actor
+11. FollowerInitialSyncUpStatus -- SyncStatusTracker(update initialSyncStatus) from Follower in Raft behaviour updateInitialSyncStatus (HandleAppendEntries/HandleInstallSnapshots)
+12. GetShardDataTree -- Local message sent to a Shard to retrieve its data tree instance.
+13. ServerRemoved -- RaftActorConfigurationSupport.OperationState operationComplete()
+14. TX_COMMIT_TIMEOUT_CHECK_MESSAGE
+15. GET_SHARD_MBEAN_MESSAGE
+16. ShardTransactionMessageRetrySupport.TIMER_MESSAGE_CLASS
+
+
+Shard Lifecycle :
+=================
+
+On receiving a CreateShard() message we create a particular shard and create the raft actor corresponding to it.
+
