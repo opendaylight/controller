@@ -1,0 +1,11 @@
+
+= Shard-Raft behaviour Documentation
+
+
+[NOTE]
+.This is evolving document describing the shard/raft actor split.
+
+This document is in no sense complete, it describes the intenteded implementation.It is subject to revisions as feedback is received and as the implementation evolves.
+
+
+==Overview
