@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "fa57193c_c4fc6d41",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardRecoveryCoordinator.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-05-09T12:52:19Z",
+      "side": 1,
+      "message": "Have to b/c the data tree code can throw all kinds of undocumented, unchecked runtime exceptions.",
+      "parentUuid": "fa57193c_84543555",
+      "range": {
+        "startLine": 101,
+        "startChar": 17,
+        "endLine": 101,
+        "endChar": 26
+      },
+      "revId": "d1cb37492f3ad35c5ae39279b3e06de4dd6425cd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa57193c_64512162",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardRecoveryCoordinator.java",
         "patchSetId": 4
@@ -36,6 +60,30 @@
       "writtenOn": "2016-05-09T12:45:45Z",
       "side": 1,
       "message": "Should we timestamp this file?",
+      "range": {
+        "startLine": 102,
+        "startChar": 52,
+        "endLine": 103,
+        "endChar": 65
+      },
+      "revId": "d1cb37492f3ad35c5ae39279b3e06de4dd6425cd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_44a05d43",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardRecoveryCoordinator.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-05-09T12:52:19Z",
+      "side": 1,
+      "message": "We could but I didn\u0027t think that was necessary.",
+      "parentUuid": "fa57193c_64512162",
       "range": {
         "startLine": 102,
         "startChar": 52,
@@ -65,6 +113,24 @@
     },
     {
       "key": {
+        "uuid": "fa57193c_24a56953",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/DataTreeModificationOutput.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-05-09T12:52:19Z",
+      "side": 1,
+      "message": "yup - that was blatant - not sure what i was thinking.",
+      "parentUuid": "fa57193c_44d21dd3",
+      "revId": "d1cb37492f3ad35c5ae39279b3e06de4dd6425cd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa57193c_84db95ec",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/NormalizedNodeXMLOutput.java",
         "patchSetId": 4
@@ -76,6 +142,24 @@
       "writtenOn": "2016-05-09T12:45:45Z",
       "side": 1,
       "message": "missing {} and please log exception.",
+      "revId": "d1cb37492f3ad35c5ae39279b3e06de4dd6425cd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_8489d5cc",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/NormalizedNodeXMLOutput.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-05-09T12:52:19Z",
+      "side": 1,
+      "message": "yup",
+      "parentUuid": "fa57193c_84db95ec",
       "revId": "d1cb37492f3ad35c5ae39279b3e06de4dd6425cd",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
