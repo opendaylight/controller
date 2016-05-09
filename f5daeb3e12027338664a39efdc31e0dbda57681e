@@ -1,0 +1,165 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa57193c_44369d53",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/DataStoreAppConfigMetadata.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 3635
+      },
+      "writtenOn": "2016-05-09T12:30:21Z",
+      "side": 1,
+      "message": "extra space.",
+      "range": {
+        "startLine": 101,
+        "startChar": 61,
+        "endLine": 101,
+        "endChar": 62
+      },
+      "revId": "f5daeb3e12027338664a39efdc31e0dbda57681e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_643c8130",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/DataStoreAppConfigMetadata.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 3635
+      },
+      "writtenOn": "2016-05-09T12:30:21Z",
+      "side": 1,
+      "message": "Can we get a bit more specific?",
+      "range": {
+        "startLine": 160,
+        "startChar": 20,
+        "endLine": 160,
+        "endChar": 29
+      },
+      "revId": "f5daeb3e12027338664a39efdc31e0dbda57681e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_6423e105",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/DataStoreAppConfigMetadata.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 398,
+      "author": {
+        "id": 3635
+      },
+      "writtenOn": "2016-05-09T12:30:21Z",
+      "side": 1,
+      "message": "This isn\u0027t necessary.",
+      "range": {
+        "startLine": 398,
+        "startChar": 12,
+        "endLine": 398,
+        "endChar": 24
+      },
+      "revId": "f5daeb3e12027338664a39efdc31e0dbda57681e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_c420edf9",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/DataStoreAppConfigMetadata.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 449,
+      "author": {
+        "id": 3635
+      },
+      "writtenOn": "2016-05-09T12:30:21Z",
+      "side": 1,
+      "message": "This isn\u0027t necessary, though I now realize that might be a stylistic choice :).",
+      "range": {
+        "startLine": 449,
+        "startChar": 16,
+        "endLine": 449,
+        "endChar": 28
+      },
+      "revId": "f5daeb3e12027338664a39efdc31e0dbda57681e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_e47ed1e3",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/DataStoreAppConfigMetadata.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 559,
+      "author": {
+        "id": 3635
+      },
+      "writtenOn": "2016-05-09T12:30:21Z",
+      "side": 1,
+      "message": "I believe that it must be by definition?  7.8.2: \"The \"key\" statement, which MUST be present if the list represents configuration, and MAY be present otherwise, takes as an argument a string that specifies a space-separated list of leaf identifiers of this list.\"  Just pointing out that the assumption should be safe for other reviewers, and it made me double check RFC6020.",
+      "range": {
+        "startLine": 559,
+        "startChar": 12,
+        "endLine": 559,
+        "endChar": 58
+      },
+      "revId": "f5daeb3e12027338664a39efdc31e0dbda57681e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_646ac11b",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/OpendaylightNamespaceHandler.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 360,
+      "author": {
+        "id": 3635
+      },
+      "writtenOn": "2016-05-09T12:30:21Z",
+      "side": 1,
+      "message": "SAXException | IOException",
+      "range": {
+        "startLine": 360,
+        "startChar": 16,
+        "endLine": 360,
+        "endChar": 25
+      },
+      "revId": "f5daeb3e12027338664a39efdc31e0dbda57681e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_04614539",
+        "filename": "opendaylight/blueprint/src/main/resources/opendaylight-blueprint-ext-1.0.0.xsd",
+        "patchSetId": 5
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 3635
+      },
+      "writtenOn": "2016-05-09T12:30:21Z",
+      "side": 1,
+      "message": "Should this be here?",
+      "range": {
+        "startLine": 38,
+        "startChar": 6,
+        "endLine": 38,
+        "endChar": 94
+      },
+      "revId": "f5daeb3e12027338664a39efdc31e0dbda57681e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
