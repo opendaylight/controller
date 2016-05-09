@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "fa57193c_e4cc1138",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/DataStoreAppConfigMetadata.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-05-09T12:47:30Z",
+      "side": 1,
+      "message": "will fix",
+      "parentUuid": "fa57193c_44369d53",
+      "range": {
+        "startLine": 101,
+        "startChar": 61,
+        "endLine": 101,
+        "endChar": 62
+      },
+      "revId": "f5daeb3e12027338664a39efdc31e0dbda57681e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa57193c_643c8130",
         "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/DataStoreAppConfigMetadata.java",
         "patchSetId": 5
@@ -36,6 +60,30 @@
       "writtenOn": "2016-05-09T12:30:21Z",
       "side": 1,
       "message": "Can we get a bit more specific?",
+      "range": {
+        "startLine": 160,
+        "startChar": 20,
+        "endLine": 160,
+        "endChar": 29
+      },
+      "revId": "f5daeb3e12027338664a39efdc31e0dbda57681e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_2460c931",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/DataStoreAppConfigMetadata.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-05-09T12:47:30Z",
+      "side": 1,
+      "message": "There\u0027s too many to list - would look ugly - easier to just say Exception",
+      "parentUuid": "fa57193c_643c8130",
       "range": {
         "startLine": 160,
         "startChar": 20,
@@ -94,6 +142,30 @@
     },
     {
       "key": {
+        "uuid": "fa57193c_c44e2dc1",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/DataStoreAppConfigMetadata.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 449,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-05-09T12:47:30Z",
+      "side": 1,
+      "message": "This code was refactored a bit. The return was necessary before but isn\u0027t now although doesn\u0027t hurt - it is a safety measure in case more code is added after this, although I don\u0027t foresee that.",
+      "parentUuid": "fa57193c_c420edf9",
+      "range": {
+        "startLine": 449,
+        "startChar": 16,
+        "endLine": 449,
+        "endChar": 28
+      },
+      "revId": "f5daeb3e12027338664a39efdc31e0dbda57681e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa57193c_e47ed1e3",
         "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/DataStoreAppConfigMetadata.java",
         "patchSetId": 5
@@ -105,6 +177,30 @@
       "writtenOn": "2016-05-09T12:30:21Z",
       "side": 1,
       "message": "I believe that it must be by definition?  7.8.2: \"The \"key\" statement, which MUST be present if the list represents configuration, and MAY be present otherwise, takes as an argument a string that specifies a space-separated list of leaf identifiers of this list.\"  Just pointing out that the assumption should be safe for other reviewers, and it made me double check RFC6020.",
+      "range": {
+        "startLine": 559,
+        "startChar": 12,
+        "endLine": 559,
+        "endChar": 58
+      },
+      "revId": "f5daeb3e12027338664a39efdc31e0dbda57681e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_04c82521",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/DataStoreAppConfigMetadata.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 559,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-05-09T12:47:30Z",
+      "side": 1,
+      "message": "That\u0027s referring to the actual key statement. I\u0027m referring to the key leaf type, which can be anything.",
+      "parentUuid": "fa57193c_e47ed1e3",
       "range": {
         "startLine": 559,
         "startChar": 12,
@@ -140,6 +236,30 @@
     },
     {
       "key": {
+        "uuid": "fa57193c_24d729c3",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/OpendaylightNamespaceHandler.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 360,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-05-09T12:47:30Z",
+      "side": 1,
+      "message": "Yeah but in this case I just want to catch all exceptions. Listing them all out isn\u0027t necessary.",
+      "parentUuid": "fa57193c_646ac11b",
+      "range": {
+        "startLine": 360,
+        "startChar": 16,
+        "endLine": 360,
+        "endChar": 25
+      },
+      "revId": "f5daeb3e12027338664a39efdc31e0dbda57681e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa57193c_04614539",
         "filename": "opendaylight/blueprint/src/main/resources/opendaylight-blueprint-ext-1.0.0.xsd",
         "patchSetId": 5
@@ -151,6 +271,30 @@
       "writtenOn": "2016-05-09T12:30:21Z",
       "side": 1,
       "message": "Should this be here?",
+      "range": {
+        "startLine": 38,
+        "startChar": 6,
+        "endLine": 38,
+        "endChar": 94
+      },
+      "revId": "f5daeb3e12027338664a39efdc31e0dbda57681e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_e4f37171",
+        "filename": "opendaylight/blueprint/src/main/resources/opendaylight-blueprint-ext-1.0.0.xsd",
+        "patchSetId": 5
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-05-09T12:47:30Z",
+      "side": 1,
+      "message": "no - that was when I tried embedding the default config XML with \"any\", which mostly worked.",
+      "parentUuid": "fa57193c_04614539",
       "range": {
         "startLine": 38,
         "startChar": 6,
