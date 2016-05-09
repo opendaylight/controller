@@ -304,9 +304,34 @@ state and recovery strategies taken.
   actor.
 
   It maintains a relationship to its Backend counterpart and routes operations
-  (remote) and transactions (local) towards it. Should a request time out, it
-  transitions to idle state and informs FrontendActor, which will resume it once
-  the leader location information is refreshed.
+  (remote) and transactions (local) towards it.
+
+  Requests sent from the frontend to the local history actor are subjects to timeouts.
+  If a timeout occurs, the frontend is expected to perform full backend leader
+  discovery, contact the leader and reconcile transaction state with it.
+
+  In order to minimize messaging latency while maintaining resiliency to message
+  loss (due to TCP connectivity issues), there are two messaging patterns:
+
+  -- Frontend talks to the Shard. This is used during instantiation of a local
+     history, as well as state reconciliation after a retriable failure has
+     occurred (such as a request timeout).
+
+  -- Frontend talks to the Local History Actor. This is used during transaction
+     operation, e.g. when a transaction is being built up. Once the transaction
+     is readied, the LHA will send a message to the Shard, which takes ownership
+     of that transaction's state. Since this handoff is not observable by
+     the frontend (which would require additional round-trip), the Shard
+     replicates its responses to the LHA. In case a timeout occurs, the frontend
+     will contact the LHA (as that's the last endpoint it knows about), which
+     will replay the Shard message.
+
+  Messaging between a Local History Actor and its associated Shard is expected
+  to be reliable. This is guaranteed by the parent/child relationship, where 
+  Shard is the parent. If a Shard fails, all of its children will be restarted,
+  losing all state. If an LHA fails, Shard will be notified with Akka DeathWatch
+  pattern.
+
 
 ==== SingleTransactionActor
   A SingleTransactionActor takes care of transactions which are not tied to a
