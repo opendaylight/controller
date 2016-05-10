@@ -35,6 +35,7 @@ import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages;
+import org.opendaylight.yangtools.util.StringIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
@@ -106,7 +107,8 @@ public class PreLithiumShardTest extends AbstractShardTest {
 
             NormalizedNode<?, ?> node = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
-            ApplyState applyState = new ApplyState(null, "test", new ReplicatedLogImplEntry(1, 2,
+            ApplyState applyState = new ApplyState(null, new StringIdentifier("test"),
+                new ReplicatedLogImplEntry(1, 2,
                     newLegacyByteStringPayload(new WriteModification(TestModel.TEST_PATH, node))));
 
             shard.underlyingActor().onReceiveCommand(applyState);

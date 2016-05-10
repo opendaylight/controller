@@ -9,6 +9,7 @@
 package org.opendaylight.controller.cluster.raft;
 
 import akka.actor.ActorRef;
+import org.opendaylight.yangtools.concepts.Identifier;
 
 public interface ClientRequestTracker {
     /**
@@ -22,7 +23,7 @@ public interface ClientRequestTracker {
      * @return the identifier of the object that is to be replicated. For example a transaction identifier in the case
      * of a transaction
      */
-    String getIdentifier();
+    Identifier getIdentifier();
 
     /**
      *

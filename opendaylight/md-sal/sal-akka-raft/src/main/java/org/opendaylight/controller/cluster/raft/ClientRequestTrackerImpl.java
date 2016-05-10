@@ -9,15 +9,15 @@
 package org.opendaylight.controller.cluster.raft;
 
 import akka.actor.ActorRef;
+import org.opendaylight.yangtools.concepts.Identifier;
 
 public class ClientRequestTrackerImpl implements ClientRequestTracker {
 
     private final ActorRef clientActor;
-    private final String identifier;
+    private final Identifier identifier;
     private final long logIndex;
 
-    public ClientRequestTrackerImpl(ActorRef clientActor, String identifier,
-        long logIndex) {
+    public ClientRequestTrackerImpl(ActorRef clientActor, Identifier identifier, long logIndex) {
 
         this.clientActor = clientActor;
 
@@ -26,15 +26,18 @@ public class ClientRequestTrackerImpl implements ClientRequestTracker {
         this.logIndex = logIndex;
     }
 
-    @Override public ActorRef getClientActor() {
+    @Override
+    public ActorRef getClientActor() {
         return clientActor;
     }
 
-    @Override public long getIndex() {
+    @Override
+    public long getIndex() {
         return logIndex;
     }
 
-    public String getIdentifier() {
+    @Override
+    public Identifier getIdentifier() {
         return identifier;
     }
 }

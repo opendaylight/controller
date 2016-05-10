@@ -63,6 +63,7 @@ import org.opendaylight.controller.cluster.raft.policy.DefaultRaftPolicy;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
 import org.opendaylight.controller.cluster.raft.utils.ForwardMessageToBehaviorActor;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
+import org.opendaylight.yangtools.util.StringIdentifier;
 import scala.concurrent.duration.FiniteDuration;
 
 public class LeaderTest extends AbstractLeaderTest<Leader> {
@@ -515,7 +516,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         actorContext.getReplicatedLog().append(newEntry);
 
         RaftActorBehavior raftBehavior = leader.handleMessage(leaderActor,
-                new Replicate(leaderActor, "state-id", newEntry));
+                new Replicate(leaderActor, new StringIdentifier("state-id"), newEntry));
 
         // State should not change
         assertTrue(raftBehavior instanceof Leader);
@@ -652,7 +653,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         // this should invoke a sendinstallsnapshot as followersLastIndex < snapshotIndex
         RaftActorBehavior raftBehavior = leader.handleMessage(
-                leaderActor, new Replicate(null, "state-id", entry));
+                leaderActor, new Replicate(null, new StringIdentifier("state-id"), entry));
 
         assertTrue(raftBehavior instanceof Leader);
 
@@ -697,7 +698,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         //update follower timestamp
         leader.markFollowerActive(FOLLOWER_ID);
 
-        leader.handleMessage(leaderActor, new Replicate(null, "state-id", entry));
+        leader.handleMessage(leaderActor, new Replicate(null, new StringIdentifier("state-id"), entry));
 
         assertEquals("isCapturing", true, actorContext.getSnapshotManager().isCapturing());
 
@@ -710,7 +711,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         assertEquals(2, cs.getLastTerm());
 
         // if an initiate is started again when first is in progress, it shouldnt initiate Capture
-        leader.handleMessage(leaderActor, new Replicate(null, "state-id", entry));
+        leader.handleMessage(leaderActor, new Replicate(null, new StringIdentifier("state-id"), entry));
 
         assertSame("CaptureSnapshot instance", cs, actorContext.getSnapshotManager().getCaptureSnapshot());
     }
@@ -771,8 +772,8 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         assertEquals(4, cs.getLastIndex());
         assertEquals(2, cs.getLastTerm());
 
-        // if an initiate is started again when first is in progress, it shouldnt initiate Capture
-        leader.handleMessage(leaderActor, new Replicate(null, "state-id", entry));
+        // if an initiate is started again when first is in progress, it should not initiate Capture
+        leader.handleMessage(leaderActor, new Replicate(null, new StringIdentifier("state-id"), entry));
 
         assertSame("CaptureSnapshot instance", cs, actorContext.getSnapshotManager().getCaptureSnapshot());
     }

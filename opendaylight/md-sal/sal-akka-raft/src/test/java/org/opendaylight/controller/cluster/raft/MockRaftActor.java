@@ -28,6 +28,7 @@ import javax.annotation.Nonnull;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
+import org.opendaylight.yangtools.concepts.Identifier;
 
 public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort, RaftActorSnapshotCohort {
     public static final short PAYLOAD_VERSION = 5;
@@ -114,7 +115,8 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
     }
 
 
-    @Override protected void applyState(ActorRef clientActor, String identifier, Object data) {
+    @Override
+    protected void applyState(ActorRef clientActor, Identifier identifier, Object data) {
         actorDelegate.applyState(clientActor, identifier, data);
         LOG.info("{}: applyState called: {}", persistenceId(), data);
 
