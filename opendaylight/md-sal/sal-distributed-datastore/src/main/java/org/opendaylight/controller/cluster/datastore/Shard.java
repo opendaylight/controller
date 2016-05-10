@@ -66,6 +66,8 @@ import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.messages.ServerRemoved;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.CompositeModificationByteStringPayload;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.CompositeModificationPayload;
+import org.opendaylight.yangtools.concepts.Identifier;
+import org.opendaylight.yangtools.util.StringIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataValidationFailedException;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.ModificationType;
@@ -330,16 +332,16 @@ public class Shard extends RaftActor {
         if ((!hasFollowers() && !persistence().isRecoveryApplicable()) || isEmptyCommit(candidate)) {
             applyModificationToState(cohortEntry.getReplySender(), cohortEntry.getTransactionID(), candidate);
         } else {
-            Shard.this.persistData(cohortEntry.getReplySender(), cohortEntry.getTransactionID(),
+            persistData(cohortEntry.getReplySender(), cohortEntry.getTransactionID(),
                     DataTreeCandidatePayload.create(candidate));
         }
     }
 
     private void handleCommitTransaction(final CommitTransaction commit) {
         if (isLeader()) {
-        if(!commitCoordinator.handleCommit(commit.getTransactionID(), getSender(), this)) {
-            shardMBean.incrementFailedTransactionsCount();
-        }
+            if(!commitCoordinator.handleCommit(new StringIdentifier(commit.getTransactionID()), getSender(), this)) {
+                shardMBean.incrementFailedTransactionsCount();
+            }
         } else {
             ActorSelection leader = getLeader();
             if (leader == null) {
@@ -352,7 +354,8 @@ public class Shard extends RaftActor {
         }
     }
 
-    private void finishCommit(@Nonnull final ActorRef sender, @Nonnull final String transactionID, @Nonnull final CohortEntry cohortEntry) {
+    private void finishCommit(@Nonnull final ActorRef sender, @Nonnull final Identifier transactionID,
+            @Nonnull final CohortEntry cohortEntry) {
         LOG.debug("{}: Finishing commit for transaction {}", persistenceId(), cohortEntry.getTransactionID());
 
         try {
@@ -394,7 +397,7 @@ public class Shard extends RaftActor {
         }
     }
 
-    private void finishCommit(@Nonnull final ActorRef sender, final @Nonnull String transactionID) {
+    private void finishCommit(@Nonnull final ActorRef sender, final @Nonnull Identifier transactionID) {
         // With persistence enabled, this method is called via applyState by the leader strategy
         // after the commit has been replicated to a majority of the followers.
 
@@ -435,7 +438,7 @@ public class Shard extends RaftActor {
         LOG.debug("{}: Can committing transaction {}", persistenceId(), canCommit.getTransactionID());
 
         if (isLeader()) {
-        commitCoordinator.handleCanCommit(canCommit.getTransactionID(), getSender(), this);
+        commitCoordinator.handleCanCommit(new StringIdentifier(canCommit.getTransactionID()), getSender(), this);
         } else {
             ActorSelection leader = getLeader();
             if (leader == null) {
@@ -566,7 +569,7 @@ public class Shard extends RaftActor {
     }
 
     void doAbortTransaction(final String transactionID, final ActorRef sender) {
-        commitCoordinator.handleAbort(transactionID, sender, this);
+        commitCoordinator.handleAbort(new StringIdentifier(transactionID), sender, this);
     }
 
     private void handleCreateTransaction(final Object message) {
@@ -683,7 +686,7 @@ public class Shard extends RaftActor {
     }
 
     @Override
-    protected void applyState(final ActorRef clientActor, final String identifier, final Object data) {
+    protected void applyState(final ActorRef clientActor, final Identifier identifier, final Object data) {
         if (data instanceof DataTreeCandidatePayload) {
             if (clientActor == null) {
                 // No clientActor indicates a replica coming from the leader
@@ -711,7 +714,7 @@ public class Shard extends RaftActor {
         }
     }
 
-    private void applyModificationToState(ActorRef clientActor, String identifier, Object modification) {
+    private void applyModificationToState(ActorRef clientActor, Identifier identifier, Object modification) {
         if(modification == null) {
             LOG.error(
                     "{}: modification is null - this is very unexpected, clientActor = {}, identifier = {}",

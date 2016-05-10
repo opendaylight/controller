@@ -16,7 +16,6 @@ import akka.actor.Terminated;
 import akka.dispatch.Dispatchers;
 import akka.testkit.JavaTestKit;
 import akka.testkit.TestActorRef;
-import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.ArrayList;
@@ -36,6 +35,8 @@ import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payloa
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
+import org.opendaylight.yangtools.concepts.Identifier;
+import org.opendaylight.yangtools.util.StringIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.duration.FiniteDuration;
@@ -91,7 +92,7 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
         public void handleCommand(Object message) {
             if(message instanceof MockPayload) {
                 MockPayload payload = (MockPayload)message;
-                super.persistData(collectorActor, payload.toString(), payload);
+                super.persistData(collectorActor, new StringIdentifier(payload.toString()), payload);
                 return;
             }
 
@@ -246,12 +247,7 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
     }
 
     protected void verifyApplyJournalEntries(ActorRef actor, final long expIndex) {
-        MessageCollectorActor.expectFirstMatching(actor, ApplyJournalEntries.class, new Predicate<ApplyJournalEntries>() {
-            @Override
-            public boolean apply(ApplyJournalEntries msg) {
-                return msg.getToIndex() == expIndex;
-            }
-        });
+        MessageCollectorActor.expectFirstMatching(actor, ApplyJournalEntries.class, msg -> msg.getToIndex() == expIndex);
     }
 
     @SuppressWarnings("unchecked")
@@ -300,7 +296,9 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
     protected void verifyApplyState(ApplyState applyState, ActorRef expClientActor,
             String expId, long expTerm, long expIndex, MockPayload payload) {
         assertEquals("ApplyState getClientActor", expClientActor, applyState.getClientActor());
-        assertEquals("ApplyState getIdentifier", expId, applyState.getIdentifier());
+
+        final Identifier id = expId == null ? null : new StringIdentifier(expId);
+        assertEquals("ApplyState getIdentifier", id, applyState.getIdentifier());
         ReplicatedLogEntry replicatedLogEntry = applyState.getReplicatedLogEntry();
         verifyReplicatedLogEntry(replicatedLogEntry, expTerm, expIndex, payload);
     }
