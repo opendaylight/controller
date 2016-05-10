@@ -25,6 +25,7 @@ import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
+import org.opendaylight.yangtools.concepts.Identifier;
 import org.slf4j.Logger;
 import scala.concurrent.duration.FiniteDuration;
 
@@ -363,30 +364,28 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
     protected void applyLogToStateMachine(final long index) {
         long newLastApplied = context.getLastApplied();
         // Now maybe we apply to the state machine
-        for (long i = context.getLastApplied() + 1;
-             i < index + 1; i++) {
-            ActorRef clientActor = null;
-            String identifier = null;
-            ClientRequestTracker tracker = removeClientRequestTracker(i);
-
+        for (long i = context.getLastApplied() + 1; i < index + 1; i++) {
+            final ActorRef clientActor;
+            final Identifier identifier;
+            final ClientRequestTracker tracker = removeClientRequestTracker(i);
             if (tracker != null) {
                 clientActor = tracker.getClientActor();
                 identifier = tracker.getIdentifier();
+            } else {
+                clientActor = null;
+                identifier = null;
             }
-            ReplicatedLogEntry replicatedLogEntry =
-                context.getReplicatedLog().get(i);
 
+            ReplicatedLogEntry replicatedLogEntry = context.getReplicatedLog().get(i);
             if (replicatedLogEntry != null) {
                 // Send a local message to the local RaftActor (it's derived class to be
                 // specific to apply the log to it's index)
-                actor().tell(new ApplyState(clientActor, identifier,
-                    replicatedLogEntry), actor());
+                actor().tell(new ApplyState(clientActor, identifier, replicatedLogEntry), actor());
                 newLastApplied = i;
             } else {
                 //if one index is not present in the log, no point in looping
                 // around as the rest wont be present either
-                LOG.warn(
-                        "{}: Missing index {} from log. Cannot apply state. Ignoring {} to {}",
+                LOG.warn("{}: Missing index {} from log. Cannot apply state. Ignoring {} to {}",
                         logName(), i, i, index);
                 break;
             }
