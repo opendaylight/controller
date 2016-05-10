@@ -11,15 +11,15 @@ package org.opendaylight.controller.cluster.raft.base.messages;
 import akka.actor.ActorRef;
 import java.io.Serializable;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
+import org.opendaylight.yangtools.concepts.Identifier;
 
 public class ApplyState implements Serializable {
     private static final long serialVersionUID = 1L;
     private final ActorRef clientActor;
-    private final String identifier;
+    private final Identifier identifier;
     private final ReplicatedLogEntry replicatedLogEntry;
 
-    public ApplyState(ActorRef clientActor, String identifier,
-        ReplicatedLogEntry replicatedLogEntry) {
+    public ApplyState(ActorRef clientActor, Identifier identifier, ReplicatedLogEntry replicatedLogEntry) {
         this.clientActor = clientActor;
         this.identifier = identifier;
         this.replicatedLogEntry = replicatedLogEntry;
@@ -29,7 +29,7 @@ public class ApplyState implements Serializable {
         return clientActor;
     }
 
-    public String getIdentifier() {
+    public Identifier getIdentifier() {
         return identifier;
     }
 
