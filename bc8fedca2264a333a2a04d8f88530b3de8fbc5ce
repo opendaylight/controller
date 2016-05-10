@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa57193c_4535f4d8",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/CohortEntry.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-05-10T21:52:26Z",
+      "side": 1,
+      "message": "Minor thing but this should probably carry the copyright from ShardCommitCoordinator or at least include the Copyright from Brocade.",
+      "revId": "bc8fedca2264a333a2a04d8f88530b3de8fbc5ce",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
