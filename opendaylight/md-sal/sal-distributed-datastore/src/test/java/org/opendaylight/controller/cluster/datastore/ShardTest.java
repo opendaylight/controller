@@ -20,7 +20,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.opendaylight.controller.cluster.datastore.DataStoreVersions.CURRENT_VERSION;
-
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.Props;
@@ -102,6 +101,7 @@ import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelpe
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import org.opendaylight.yangtools.util.StringIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
@@ -446,8 +446,8 @@ public class ShardTest extends AbstractShardTest {
         writeMod.write(TestModel.TEST_PATH, node);
         writeMod.ready();
 
-        final ApplyState applyState = new ApplyState(null, "test", new ReplicatedLogImplEntry(1, 2,
-                payloadForModification(source, writeMod)));
+        final ApplyState applyState = new ApplyState(null, new StringIdentifier("test"),
+            new ReplicatedLogImplEntry(1, 2, payloadForModification(source, writeMod)));
 
         shard.tell(applyState, shard);
 
@@ -679,15 +679,12 @@ public class ShardTest extends AbstractShardTest {
             final FiniteDuration duration = duration("5 seconds");
 
             final AtomicReference<ShardDataTreeCohort> mockCohort = new AtomicReference<>();
-            final ShardCommitCoordinator.CohortDecorator cohortDecorator = new ShardCommitCoordinator.CohortDecorator() {
-                @Override
-                public ShardDataTreeCohort decorate(final String txID, final ShardDataTreeCohort actual) {
-                    if(mockCohort.get() == null) {
-                        mockCohort.set(createDelegatingMockCohort("cohort", actual));
-                    }
-
-                    return mockCohort.get();
+            final ShardCommitCoordinator.CohortDecorator cohortDecorator = (txID, actual) -> {
+                if(mockCohort.get() == null) {
+                    mockCohort.set(createDelegatingMockCohort("cohort", actual));
                 }
+
+                return mockCohort.get();
             };
 
             shard.underlyingActor().getCommitCoordinator().setCohortDecorator(cohortDecorator);
@@ -745,15 +742,12 @@ public class ShardTest extends AbstractShardTest {
             final FiniteDuration duration = duration("5 seconds");
 
             final AtomicReference<ShardDataTreeCohort> mockCohort = new AtomicReference<>();
-            final ShardCommitCoordinator.CohortDecorator cohortDecorator = new ShardCommitCoordinator.CohortDecorator() {
-                @Override
-                public ShardDataTreeCohort decorate(final String txID, final ShardDataTreeCohort actual) {
-                    if(mockCohort.get() == null) {
-                        mockCohort.set(createDelegatingMockCohort("cohort", actual));
-                    }
-
-                    return mockCohort.get();
+            final ShardCommitCoordinator.CohortDecorator cohortDecorator = (txID, actual) -> {
+                if(mockCohort.get() == null) {
+                    mockCohort.set(createDelegatingMockCohort("cohort", actual));
                 }
+
+                return mockCohort.get();
             };
 
             shard.underlyingActor().getCommitCoordinator().setCohortDecorator(cohortDecorator);
@@ -1614,23 +1608,20 @@ public class ShardTest extends AbstractShardTest {
 
             final String transactionID = "tx1";
             final Function<ShardDataTreeCohort, ListenableFuture<Void>> preCommit =
-                          new Function<ShardDataTreeCohort, ListenableFuture<Void>>() {
-                @Override
-                public ListenableFuture<Void> apply(final ShardDataTreeCohort cohort) {
-                    final ListenableFuture<Void> preCommitFuture = cohort.preCommit();
+                          cohort -> {
+                final ListenableFuture<Void> preCommitFuture = cohort.preCommit();
 
-                    // Simulate an AbortTransaction message occurring during replication, after
-                    // persisting and before finishing the commit to the in-memory store.
-                    // We have no followers so due to optimizations in the RaftActor, it does not
-                    // attempt replication and thus we can't send an AbortTransaction message b/c
-                    // it would be processed too late after CommitTransaction completes. So we'll
-                    // simulate an AbortTransaction message occurring during replication by calling
-                    // the shard directly.
-                    //
-                    shard.underlyingActor().doAbortTransaction(transactionID, null);
+                // Simulate an AbortTransaction message occurring during replication, after
+                // persisting and before finishing the commit to the in-memory store.
+                // We have no followers so due to optimizations in the RaftActor, it does not
+                // attempt replication and thus we can't send an AbortTransaction message b/c
+                // it would be processed too late after CommitTransaction completes. So we'll
+                // simulate an AbortTransaction message occurring during replication by calling
+                // the shard directly.
+                //
+                shard.underlyingActor().doAbortTransaction(transactionID, null);
 
-                    return preCommitFuture;
-                }
+                return preCommitFuture;
             };
 
             final MutableCompositeModification modification = new MutableCompositeModification();
@@ -1996,20 +1987,15 @@ public class ShardTest extends AbstractShardTest {
         new ShardTestKit(getSystem()) {{
             final AtomicReference<CountDownLatch> cleaupCheckLatch = new AtomicReference<>();
             @SuppressWarnings("serial")
-            final Creator<Shard> creator = new Creator<Shard>() {
+            final Creator<Shard> creator = () -> new Shard(newShardBuilder()) {
                 @Override
-                public Shard create() throws Exception {
-                    return new Shard(newShardBuilder()) {
-                        @Override
-                        public void handleCommand(final Object message) {
-                            super.handleCommand(message);
-                            if(TX_COMMIT_TIMEOUT_CHECK_MESSAGE.equals(message)) {
-                                if(cleaupCheckLatch.get() != null) {
-                                    cleaupCheckLatch.get().countDown();
-                                }
-                            }
+                public void handleCommand(final Object message) {
+                    super.handleCommand(message);
+                    if(TX_COMMIT_TIMEOUT_CHECK_MESSAGE.equals(message)) {
+                        if(cleaupCheckLatch.get() != null) {
+                            cleaupCheckLatch.get().countDown();
                         }
-                    };
+                    }
                 }
             };
 
@@ -2112,12 +2098,7 @@ public class ShardTest extends AbstractShardTest {
                 }
             }
 
-            final Creator<Shard> creator = new Creator<Shard>() {
-                @Override
-                public Shard create() throws Exception {
-                    return new TestShard(newShardBuilder());
-                }
-            };
+            final Creator<Shard> creator = () -> new TestShard(newShardBuilder());
 
             final TestActorRef<Shard> shard = actorFactory.createTestActor(
                     Props.create(new DelegatingShardCreator(creator)), shardActorName);
