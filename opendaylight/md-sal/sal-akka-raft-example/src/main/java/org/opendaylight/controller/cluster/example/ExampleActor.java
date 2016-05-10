@@ -33,6 +33,8 @@ import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
 import org.opendaylight.controller.cluster.raft.behaviors.Leader;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
+import org.opendaylight.yangtools.concepts.Identifier;
+import org.opendaylight.yangtools.util.StringIdentifier;
 
 /**
  * A sample actor showing how the RaftActor is to be extended
@@ -61,8 +63,7 @@ public class ExampleActor extends RaftActor implements RaftActorRecoveryCohort, 
     protected void handleNonRaftCommand(Object message) {
         if(message instanceof KeyValue){
             if(isLeader()) {
-                String persistId = Long.toString(persistIdentifier++);
-                persistData(getSender(), persistId, (Payload) message);
+                persistData(getSender(), new StringIdentifier(String.valueOf(persistIdentifier++)), (Payload) message);
             } else {
                 if(getLeader() != null) {
                     getLeader().forward(message, getContext());
@@ -111,8 +112,8 @@ public class ExampleActor extends RaftActor implements RaftActorRecoveryCohort, 
         return roleChangeNotifier;
     }
 
-    @Override protected void applyState(final ActorRef clientActor, final String identifier,
-        final Object data) {
+    @Override
+    protected void applyState(final ActorRef clientActor, final Identifier identifier, final Object data) {
         if(data instanceof KeyValue){
             KeyValue kv = (KeyValue) data;
             state.put(kv.getKey(), kv.getValue());
