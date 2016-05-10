@@ -16,6 +16,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import org.opendaylight.controller.cluster.datastore.ShardCommitCoordinator.CohortDecorator;
 import org.opendaylight.controller.cluster.datastore.modification.Modification;
+import org.opendaylight.yangtools.util.StringIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -34,7 +35,7 @@ final class CohortEntry {
 
     private final Stopwatch lastAccessTimer = Stopwatch.createStarted();
     private final ReadWriteShardDataTreeTransaction transaction;
-    private final String transactionID;
+    private final StringIdentifier transactionID;
     private final CompositeDataTreeCohort userCohorts;
     private final short clientVersion;
 
@@ -49,14 +50,14 @@ final class CohortEntry {
     CohortEntry(String transactionID, ReadWriteShardDataTreeTransaction transaction,
             DataTreeCohortActorRegistry cohortRegistry, SchemaContext schema, short clientVersion) {
         this.transaction = Preconditions.checkNotNull(transaction);
-        this.transactionID = transactionID;
+        this.transactionID = new StringIdentifier(transactionID);
         this.clientVersion = clientVersion;
         this.userCohorts = new CompositeDataTreeCohort(cohortRegistry, transactionID, schema, COMMIT_STEP_TIMEOUT);
     }
 
     CohortEntry(String transactionID, ShardDataTreeCohort cohort, DataTreeCohortActorRegistry cohortRegistry,
             SchemaContext schema, short clientVersion) {
-        this.transactionID = transactionID;
+        this.transactionID = new StringIdentifier(transactionID);
         this.cohort = cohort;
         this.transaction = null;
         this.clientVersion = clientVersion;
@@ -68,7 +69,7 @@ final class CohortEntry {
         lastAccessTimer.start();
     }
 
-    String getTransactionID() {
+    StringIdentifier getTransactionID() {
         return transactionID;
     }
 
