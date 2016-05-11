@@ -20,12 +20,18 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
+import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
+import org.opendaylight.controller.cluster.access.concepts.MemberName;
+import org.opendaylight.controller.cluster.databroker.actors.dds.DistributedDataStoreFrontend;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import scala.concurrent.duration.FiniteDuration;
 
 public class DistributedDataStoreTest extends AbstractActorTest {
+    private static final ClientIdentifier<DistributedDataStoreFrontend> UNKNOWN_ID = ClientIdentifier.create(
+            FrontendIdentifier.create(MemberName.forName("local"),new DistributedDataStoreFrontend("unknown")), 0);
 
     private SchemaContext schemaContext;
 
@@ -50,7 +56,7 @@ public class DistributedDataStoreTest extends AbstractActorTest {
 
     @Test
     public void testRateLimitingUsedInReadWriteTxCreation(){
-        try (DistributedDataStore distributedDataStore = new DistributedDataStore(actorContext)) {
+        try (DistributedDataStore distributedDataStore = new DistributedDataStore(actorContext, UNKNOWN_ID)) {
 
             distributedDataStore.newReadWriteTransaction();
 
@@ -60,7 +66,7 @@ public class DistributedDataStoreTest extends AbstractActorTest {
 
     @Test
     public void testRateLimitingUsedInWriteOnlyTxCreation(){
-        try (DistributedDataStore distributedDataStore = new DistributedDataStore(actorContext)) {
+        try (DistributedDataStore distributedDataStore = new DistributedDataStore(actorContext, UNKNOWN_ID)) {
 
             distributedDataStore.newWriteOnlyTransaction();
 
@@ -70,7 +76,7 @@ public class DistributedDataStoreTest extends AbstractActorTest {
 
     @Test
     public void testRateLimitingNotUsedInReadOnlyTxCreation(){
-        try (DistributedDataStore distributedDataStore = new DistributedDataStore(actorContext)) {
+        try (DistributedDataStore distributedDataStore = new DistributedDataStore(actorContext, UNKNOWN_ID)) {
 
             distributedDataStore.newReadOnlyTransaction();
             distributedDataStore.newReadOnlyTransaction();
@@ -85,7 +91,7 @@ public class DistributedDataStoreTest extends AbstractActorTest {
         doReturn(datastoreContext).when(actorContext).getDatastoreContext();
         doReturn(shardElectionTimeout).when(datastoreContext).getShardLeaderElectionTimeout();
         doReturn(FiniteDuration.apply(50, TimeUnit.MILLISECONDS)).when(shardElectionTimeout).duration();
-        try (DistributedDataStore distributedDataStore = new DistributedDataStore(actorContext)) {
+        try (DistributedDataStore distributedDataStore = new DistributedDataStore(actorContext, UNKNOWN_ID)) {
 
             long start = System.currentTimeMillis();
 
@@ -99,17 +105,14 @@ public class DistributedDataStoreTest extends AbstractActorTest {
 
     @Test
     public void testWaitTillReadyCountDown(){
-        try (final DistributedDataStore distributedDataStore = new DistributedDataStore(actorContext)) {
+        try (final DistributedDataStore distributedDataStore = new DistributedDataStore(actorContext, UNKNOWN_ID)) {
             doReturn(datastoreContext).when(actorContext).getDatastoreContext();
             doReturn(shardElectionTimeout).when(datastoreContext).getShardLeaderElectionTimeout();
             doReturn(FiniteDuration.apply(5000, TimeUnit.MILLISECONDS)).when(shardElectionTimeout).duration();
 
-            Executors.newSingleThreadExecutor().submit(new Runnable() {
-                @Override
-                public void run() {
-                    Uninterruptibles.sleepUninterruptibly(500, TimeUnit.MILLISECONDS);
-                    distributedDataStore.getWaitTillReadyCountDownLatch().countDown();
-                }
+            Executors.newSingleThreadExecutor().submit(() -> {
+                Uninterruptibles.sleepUninterruptibly(500, TimeUnit.MILLISECONDS);
+                distributedDataStore.getWaitTillReadyCountDownLatch().countDown();
             });
 
             long start = System.currentTimeMillis();
