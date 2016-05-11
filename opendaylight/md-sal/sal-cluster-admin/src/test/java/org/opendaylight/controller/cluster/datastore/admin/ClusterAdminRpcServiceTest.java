@@ -24,6 +24,7 @@ import akka.cluster.Cluster;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import java.io.File;
 import java.io.FileInputStream;
@@ -87,9 +88,10 @@ public class ClusterAdminRpcServiceTest {
 
     @After
     public void tearDown() {
-        for(MemberNode m: memberNodes) {
+        for (MemberNode m : Lists.reverse(memberNodes)) {
             m.cleanup();
         }
+        memberNodes.clear();
     }
 
     @Test
