@@ -141,6 +141,13 @@ public class DistributedDataStoreRemotingIntegrationTest {
 
     @After
     public void tearDown() {
+        if (followerDistributedDataStore != null) {
+            leaderDistributedDataStore.close();
+        }
+        if (leaderDistributedDataStore != null) {
+            leaderDistributedDataStore.close();
+        }
+
         JavaTestKit.shutdownActorSystem(leaderSystem);
         JavaTestKit.shutdownActorSystem(followerSystem);
         JavaTestKit.shutdownActorSystem(follower2System);
