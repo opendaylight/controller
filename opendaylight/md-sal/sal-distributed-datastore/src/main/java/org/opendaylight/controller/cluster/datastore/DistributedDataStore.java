@@ -15,6 +15,8 @@ import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
+import org.opendaylight.controller.cluster.databroker.actors.DistributedDataStoreFrontend;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardManagerIdentifier;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.DatastoreConfigurationMXBeanImpl;
@@ -51,7 +53,6 @@ public class DistributedDataStore implements DistributedDataStoreInterface, Sche
         DatastoreContextConfigAdminOverlay.Listener, DOMStoreTreeChangePublisher, DOMDataTreeCommitCohortRegistry, AutoCloseable {
 
     private static final Logger LOG = LoggerFactory.getLogger(DistributedDataStore.class);
-    private static final String UNKNOWN_TYPE = "unknown";
 
     private static final long READY_WAIT_FACTOR = 3;
 
@@ -66,7 +67,7 @@ public class DistributedDataStore implements DistributedDataStoreInterface, Sche
 
     private final CountDownLatch waitTillReadyCountDownLatch = new CountDownLatch(1);
 
-    private final String type;
+    private final FrontendIdentifier<DistributedDataStoreFrontend> identifier;
 
     private final TransactionContextFactory txContextFactory;
 
@@ -78,9 +79,10 @@ public class DistributedDataStore implements DistributedDataStoreInterface, Sche
         Preconditions.checkNotNull(configuration, "configuration should not be null");
         Preconditions.checkNotNull(datastoreContextFactory, "datastoreContextFactory should not be null");
 
-        this.type = datastoreContextFactory.getBaseDatastoreContext().getDataStoreName();
+        this.identifier = FrontendIdentifier.create(cluster.getCurrentMemberName(),
+            new DistributedDataStoreFrontend(datastoreContextFactory.getBaseDatastoreContext().getDataStoreName()));
 
-        String shardManagerId = ShardManagerIdentifier.builder().type(type).build().toString();
+        String shardManagerId = ShardManagerIdentifier.builder().type(identifier.getClientType().getStoreName()).build().toString();
 
         LOG.info("Creating ShardManager : {}", shardManagerId);
 
@@ -112,10 +114,10 @@ public class DistributedDataStore implements DistributedDataStoreInterface, Sche
     }
 
     @VisibleForTesting
-    DistributedDataStore(ActorContext actorContext) {
+    DistributedDataStore(ActorContext actorContext, FrontendIdentifier<DistributedDataStoreFrontend> identifier) {
         this.actorContext = Preconditions.checkNotNull(actorContext, "actorContext should not be null");
+        this.identifier = Preconditions.checkNotNull(identifier);
         this.txContextFactory = TransactionContextFactory.create(actorContext);
-        this.type = UNKNOWN_TYPE;
         this.waitTillReadyTimeInMillis =
                 actorContext.getDatastoreContext().getShardLeaderElectionTimeout().duration().toMillis() * READY_WAIT_FACTOR;
     }
@@ -214,7 +216,7 @@ public class DistributedDataStore implements DistributedDataStoreInterface, Sche
 
     @Override
     public void close() {
-        LOG.info("Closing data store {}", type);
+        LOG.info("Closing data store {}", identifier);
 
         if (datastoreConfigMXBean != null) {
             datastoreConfigMXBean.unregisterMBean();
@@ -241,11 +243,11 @@ public class DistributedDataStore implements DistributedDataStoreInterface, Sche
     }
 
     public void waitTillReady(){
-        LOG.info("Beginning to wait for data store to become ready : {}", type);
+        LOG.info("Beginning to wait for data store to become ready : {}", identifier);
 
         try {
             if (waitTillReadyCountDownLatch.await(waitTillReadyTimeInMillis, TimeUnit.MILLISECONDS)) {
-                LOG.debug("Data store {} is now ready", type);
+                LOG.debug("Data store {} is now ready", identifier);
             } else {
                 LOG.error("Shared leaders failed to settle in {} seconds, giving up", TimeUnit.MILLISECONDS.toSeconds(waitTillReadyTimeInMillis));
             }
