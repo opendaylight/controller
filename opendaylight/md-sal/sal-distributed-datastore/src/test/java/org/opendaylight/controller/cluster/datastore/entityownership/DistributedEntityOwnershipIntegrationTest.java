@@ -30,6 +30,7 @@ import akka.testkit.JavaTestKit;
 import com.google.common.base.Optional;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -115,9 +116,10 @@ public class DistributedEntityOwnershipIntegrationTest {
 
     @After
     public void tearDown() {
-        for(MemberNode m: memberNodes) {
+        for (MemberNode m : Lists.reverse(memberNodes)) {
             m.cleanup();
         }
+        memberNodes.clear();
     }
 
     private static DistributedEntityOwnershipService newOwnershipService(final DistributedDataStore datastore) {
