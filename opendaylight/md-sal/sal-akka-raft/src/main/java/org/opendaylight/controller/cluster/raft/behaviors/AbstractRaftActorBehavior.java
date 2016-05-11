@@ -25,7 +25,6 @@ import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
-import org.opendaylight.yangtools.concepts.Identifier;
 import org.slf4j.Logger;
 import scala.concurrent.duration.FiniteDuration;
 
@@ -318,18 +317,9 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
      * @param logIndex
      * @return the client request tracker for the specified logIndex
      */
-    protected ClientRequestTracker findClientRequestTracker(long logIndex) {
-        return null;
-    }
-
-    /**
-     * @param logIndex
-     * @return the client request tracker for the specified logIndex
-     */
     protected ClientRequestTracker removeClientRequestTracker(long logIndex) {
         return null;
     }
-
 
     /**
      *
@@ -365,22 +355,21 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
         long newLastApplied = context.getLastApplied();
         // Now maybe we apply to the state machine
         for (long i = context.getLastApplied() + 1; i < index + 1; i++) {
-            final ActorRef clientActor;
-            final Identifier identifier;
-            final ClientRequestTracker tracker = removeClientRequestTracker(i);
-            if (tracker != null) {
-                clientActor = tracker.getClientActor();
-                identifier = tracker.getIdentifier();
-            } else {
-                clientActor = null;
-                identifier = null;
-            }
 
             ReplicatedLogEntry replicatedLogEntry = context.getReplicatedLog().get(i);
             if (replicatedLogEntry != null) {
                 // Send a local message to the local RaftActor (it's derived class to be
                 // specific to apply the log to it's index)
-                actor().tell(new ApplyState(clientActor, identifier, replicatedLogEntry), actor());
+
+                final ApplyState msg;
+                final ClientRequestTracker tracker = removeClientRequestTracker(i);
+                if (tracker != null) {
+                    msg = new ApplyState(tracker.getClientActor(), tracker.getIdentifier(), replicatedLogEntry);
+                } else {
+                    msg = new ApplyState(null, null, replicatedLogEntry);
+                }
+
+                actor().tell(msg, actor());
                 newLastApplied = i;
             } else {
                 //if one index is not present in the log, no point in looping

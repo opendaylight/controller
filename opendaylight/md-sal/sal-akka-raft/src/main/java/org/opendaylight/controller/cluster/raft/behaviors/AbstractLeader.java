@@ -25,6 +25,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Queue;
 import javax.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.ClientRequestTracker;
 import org.opendaylight.controller.cluster.raft.ClientRequestTrackerImpl;
@@ -84,13 +85,18 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
     private final Map<String, FollowerLogInformation> followerToLog = new HashMap<>();
     private final Map<String, FollowerToSnapshot> mapFollowerToSnapshot = new HashMap<>();
 
+    /**
+     * Lookup table for request contexts based on journal index. We could use a {@link Map} here, but we really
+     * expect the entries to be modified in sequence, hence we open-code the lookup.
+     *
+     * TODO: Evaluate the use of ArrayDeque(), as that has lower memory overhead. Non-head removals are more costly,
+     *       but we already expect those to be far from frequent.
+     */
+    private final Queue<ClientRequestTracker> trackers = new LinkedList<>();
+
     private Cancellable heartbeatSchedule = null;
-
-    private final Collection<ClientRequestTracker> trackerList = new LinkedList<>();
-
-    private int minReplicationCount;
-
     private Optional<SnapshotHolder> snapshot;
+    private int minReplicationCount;
 
     protected AbstractLeader(RaftActorContext context, RaftState state) {
         super(context, state);
@@ -325,7 +331,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
 
     @Override
     protected ClientRequestTracker removeClientRequestTracker(long logIndex) {
-        final Iterator<ClientRequestTracker> it = trackerList.iterator();
+        final Iterator<ClientRequestTracker> it = trackers.iterator();
         while (it.hasNext()) {
             final ClientRequestTracker t = it.next();
             if (t.getIndex() == logIndex) {
@@ -334,16 +340,6 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
             }
         }
 
-        return null;
-    }
-
-    @Override
-    protected ClientRequestTracker findClientRequestTracker(long logIndex) {
-        for (ClientRequestTracker tracker : trackerList) {
-            if (tracker.getIndex() == logIndex) {
-                return tracker;
-            }
-        }
         return null;
     }
 
@@ -493,7 +489,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
 
         // Create a tracker entry we will use this later to notify the
         // client actor
-        trackerList.add(
+        trackers.add(
             new ClientRequestTrackerImpl(replicate.getClientActor(),
                 replicate.getIdentifier(),
                 logIndex)
