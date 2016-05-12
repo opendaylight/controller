@@ -601,9 +601,12 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
         String actorName = sender.path().name();
         //find shard name from actor name; actor name is stringified shardId
-        ShardIdentifier shardId = ShardIdentifier.builder().fromShardIdString(actorName).build();
 
-        if (shardId.getShardName() == null) {
+        final ShardIdentifier shardId;
+        try {
+            shardId = ShardIdentifier.fromShardIdString(actorName);
+        } catch (IllegalArgumentException e) {
+            LOG.debug("{}: ignoring actor {}", actorName, e);
             return;
         }
 
