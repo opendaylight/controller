@@ -12,15 +12,16 @@ import com.google.common.collect.ImmutableSet;
 import java.util.Collection;
 import java.util.Set;
 import javax.annotation.Nonnull;
+import org.opendaylight.controller.cluster.access.concepts.MemberName;
 
 /**
  * Encapsulated configuration for a shard.
  */
 public class ShardConfig {
     private final String name;
-    private final Set<String> replicas;
+    private final Set<MemberName> replicas;
 
-    public ShardConfig(@Nonnull final String name, @Nonnull final Collection<String> replicas) {
+    public ShardConfig(@Nonnull final String name, @Nonnull final Collection<MemberName> replicas) {
         this.name = Preconditions.checkNotNull(name);
         this.replicas = ImmutableSet.copyOf(Preconditions.checkNotNull(replicas));
     }
@@ -31,7 +32,7 @@ public class ShardConfig {
     }
 
     @Nonnull
-    public Set<String> getReplicas() {
+    public Set<MemberName> getReplicas() {
         return replicas;
     }
 }

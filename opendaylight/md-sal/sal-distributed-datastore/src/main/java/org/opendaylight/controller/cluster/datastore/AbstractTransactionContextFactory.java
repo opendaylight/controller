@@ -16,6 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicLong;
 import javax.annotation.Nonnull;
+import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.identifiers.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.PrimaryShardInfo;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
@@ -34,6 +35,7 @@ import scala.util.Try;
  */
 abstract class AbstractTransactionContextFactory<F extends LocalTransactionFactory> implements AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractTransactionContextFactory.class);
+    private static final MemberName UNKNOWN_MEMBER = MemberName.forName("UNKNOWN-MEMBER");
 
     protected static final AtomicLong TX_COUNTER = new AtomicLong();
 
@@ -145,13 +147,9 @@ abstract class AbstractTransactionContextFactory<F extends LocalTransactionFacto
         }
     }
 
-    protected String getMemberName() {
-        String memberName = getActorContext().getCurrentMemberName();
-        if (memberName == null) {
-            memberName = "UNKNOWN-MEMBER";
-        }
-
-        return memberName;
+    protected MemberName getMemberName() {
+        final MemberName ret = getActorContext().getCurrentMemberName();
+        return ret == null ? UNKNOWN_MEMBER : ret;
     }
 
     /**

@@ -9,16 +9,17 @@
 package org.opendaylight.controller.cluster.datastore.identifiers;
 
 import com.google.common.base.Preconditions;
+import org.opendaylight.controller.cluster.access.concepts.MemberName;
 
 public class TransactionIdentifier {
     protected static final String TX_SEPARATOR = "-txn-";
 
-    private final String memberName;
+    private final MemberName memberName;
     private final long counter;
     private final long timestamp;
     private String stringRepresentation;
 
-    public TransactionIdentifier(String memberName, long counter) {
+    public TransactionIdentifier(MemberName memberName, long counter) {
         this.memberName = Preconditions.checkNotNull(memberName, "memberName should not be null");
         this.counter = counter;
         this.timestamp = System.currentTimeMillis();
@@ -28,7 +29,7 @@ public class TransactionIdentifier {
         return "";
     }
 
-    protected String getMemberName() {
+    protected MemberName getMemberName() {
         return memberName;
     }
 
@@ -40,7 +41,7 @@ public class TransactionIdentifier {
         return timestamp;
     }
 
-    public static TransactionIdentifier create(String memberName, long counter) {
+    public static TransactionIdentifier create(MemberName memberName, long counter) {
         return new TransactionIdentifier(memberName, counter);
     }
 
@@ -82,8 +83,8 @@ public class TransactionIdentifier {
     @Override
     public String toString() {
         if(stringRepresentation == null) {
-            stringRepresentation = new StringBuilder(memberName.length() + TX_SEPARATOR.length() + 21).
-                append(memberName).append(TX_SEPARATOR).append(counter).append('-').append(timestamp).toString();
+            stringRepresentation = new StringBuilder(memberName.getName().length() + TX_SEPARATOR.length() + 21).
+                append(memberName.getName()).append(TX_SEPARATOR).append(counter).append('-').append(timestamp).toString();
         }
 
         return stringRepresentation;
