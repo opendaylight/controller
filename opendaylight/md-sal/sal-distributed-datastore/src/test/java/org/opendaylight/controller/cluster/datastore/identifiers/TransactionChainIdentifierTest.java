@@ -12,11 +12,14 @@ import static org.hamcrest.CoreMatchers.startsWith;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import org.junit.Test;
+import org.opendaylight.controller.cluster.access.concepts.MemberName;
 
 public class TransactionChainIdentifierTest {
+    private static final MemberName MEMBER_1 = MemberName.forName("member-1");
+
     @Test
     public void testToString(){
-        TransactionChainIdentifier transactionChainIdentifier = new TransactionChainIdentifier("member-1", 99);
+        TransactionChainIdentifier transactionChainIdentifier = new TransactionChainIdentifier(MEMBER_1, 99);
 
         String id = transactionChainIdentifier.toString();
 
@@ -25,7 +28,7 @@ public class TransactionChainIdentifierTest {
 
     @Test
     public void testNewTransactionIdentifier(){
-        TransactionChainIdentifier transactionChainIdentifier = new TransactionChainIdentifier("member-1", 99);
+        TransactionChainIdentifier transactionChainIdentifier = new TransactionChainIdentifier(MEMBER_1, 99);
 
         TransactionIdentifier txId1 = transactionChainIdentifier.newTransactionIdentifier();
 
