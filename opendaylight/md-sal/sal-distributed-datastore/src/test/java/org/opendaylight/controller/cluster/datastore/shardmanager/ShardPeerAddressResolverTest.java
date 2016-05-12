@@ -65,8 +65,7 @@ public class ShardPeerAddressResolverTest {
         ShardPeerAddressResolver resolver = new ShardPeerAddressResolver(type, MEMBER_1);
 
         MemberName memberName = MEMBER_2;
-        String peerId = ShardIdentifier.builder().memberName(memberName).shardName("default").
-                type(type).build().toString();
+        String peerId = ShardIdentifier.create("default", memberName, type).toString();
 
         assertEquals("resolve", null, resolver.resolve(peerId));
 

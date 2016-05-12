@@ -16,8 +16,7 @@ public class ShardIdentifierTest {
 
     @Test
     public void testBasic(){
-        ShardIdentifier id = ShardIdentifier.builder().memberName(MemberName.forName("member-1"))
-            .shardName("inventory").type("config").build();
+        ShardIdentifier id = ShardIdentifier.create("inventory", MemberName.forName("member-1"), "config");
 
         assertEquals("member-1-shard-inventory-config", id.toString());
     }
@@ -26,7 +25,7 @@ public class ShardIdentifierTest {
     public void testFromShardIdString(){
         String shardIdStr = "member-1-shard-inventory-config";
 
-        ShardIdentifier id = ShardIdentifier.builder().fromShardIdString(shardIdStr).build();
+        ShardIdentifier id = ShardIdentifier.fromShardIdString(shardIdStr);
 
         assertEquals("member-1", id.getMemberName());
         assertEquals("inventory", id.getShardName());

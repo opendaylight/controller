@@ -147,11 +147,12 @@ public class MemberNode {
             String... peerMemberNames) throws Exception {
         final Set<String> peerIds = Sets.newHashSet();
         for(String p: peerMemberNames) {
-            peerIds.add(ShardIdentifier.builder().memberName(MemberName.forName(p)).shardName(shardName).
-                type(datastore.getActorContext().getDataStoreName()).build().toString());
+            peerIds.add(ShardIdentifier.create(shardName, MemberName.forName(p),
+                datastore.getActorContext().getDataStoreName()).toString());
         }
 
-        verifyRaftState(datastore, shardName, raftState -> assertEquals("Peers for shard " + shardName, peerIds, raftState.getPeerAddresses().keySet()));
+        verifyRaftState(datastore, shardName, raftState -> assertEquals("Peers for shard " + shardName, peerIds,
+            raftState.getPeerAddresses().keySet()));
     }
 
     public static void verifyNoShardPresent(DistributedDataStore datastore, String shardName) {
