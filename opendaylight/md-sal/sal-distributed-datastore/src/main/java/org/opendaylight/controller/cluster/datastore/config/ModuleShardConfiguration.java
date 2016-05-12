@@ -12,6 +12,7 @@ import java.net.URI;
 import java.util.Collection;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import org.opendaylight.controller.cluster.access.concepts.MemberName;
 
 /**
  * Encapsulates information for adding a new module shard configuration.
@@ -23,7 +24,7 @@ public class ModuleShardConfiguration {
     private final String moduleName;
     private final String shardName;
     private final String shardStrategyName;
-    private final Collection<String> shardMemberNames;
+    private final Collection<MemberName> shardMemberNames;
 
     /**
      * Constructs a new instance.
@@ -36,7 +37,7 @@ public class ModuleShardConfiguration {
      * @param shardMemberNames the names of the shard's member replicas.
      */
     public ModuleShardConfiguration(@Nonnull URI namespace, @Nonnull String moduleName, @Nonnull String shardName,
-            @Nullable String shardStrategyName, @Nonnull Collection<String> shardMemberNames) {
+            @Nullable String shardStrategyName, @Nonnull Collection<MemberName> shardMemberNames) {
         this.namespace = Preconditions.checkNotNull(namespace, "nameSpace should not be null");
         this.moduleName = Preconditions.checkNotNull(moduleName, "moduleName should not be null");
         this.shardName = Preconditions.checkNotNull(shardName, "shardName should not be null");
@@ -60,7 +61,7 @@ public class ModuleShardConfiguration {
         return shardStrategyName;
     }
 
-    public Collection<String> getShardMemberNames() {
+    public Collection<MemberName> getShardMemberNames() {
         return shardMemberNames;
     }
 
