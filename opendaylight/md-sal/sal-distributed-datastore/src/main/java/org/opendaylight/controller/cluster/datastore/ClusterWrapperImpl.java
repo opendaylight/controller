@@ -14,10 +14,11 @@ import akka.actor.Address;
 import akka.cluster.Cluster;
 import akka.cluster.ClusterEvent;
 import com.google.common.base.Preconditions;
+import org.opendaylight.controller.cluster.access.concepts.MemberName;
 
 public class ClusterWrapperImpl implements ClusterWrapper {
     private final Cluster cluster;
-    private final String currentMemberName;
+    private final MemberName currentMemberName;
     private final Address selfAddress;
 
     public ClusterWrapperImpl(ActorSystem actorSystem){
@@ -32,7 +33,7 @@ public class ClusterWrapperImpl implements ClusterWrapper {
                 "member-3 here would be the name of the member"
         );
 
-        currentMemberName = cluster.getSelfRoles().iterator().next();
+        currentMemberName = MemberName.forName(cluster.getSelfRoles().iterator().next());
         selfAddress = cluster.selfAddress();
     }
 
@@ -47,7 +48,7 @@ public class ClusterWrapperImpl implements ClusterWrapper {
     }
 
     @Override
-    public String getCurrentMemberName() {
+    public MemberName getCurrentMemberName() {
         return currentMemberName;
     }
 
