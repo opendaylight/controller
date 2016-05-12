@@ -42,8 +42,7 @@ public class ShardTransactionFailureTest extends AbstractActorTest {
     private static final ShardDataTree store = new ShardDataTree(testSchemaContext, TreeType.OPERATIONAL);
 
     private static final ShardIdentifier SHARD_IDENTIFIER =
-        ShardIdentifier.builder().memberName(MemberName.forName("member-1"))
-            .shardName("inventory").type("operational").build();
+        ShardIdentifier.create("inventory", MemberName.forName("member-1"), "operational");
 
     private final DatastoreContext datastoreContext = DatastoreContext.newBuilder().build();
 
