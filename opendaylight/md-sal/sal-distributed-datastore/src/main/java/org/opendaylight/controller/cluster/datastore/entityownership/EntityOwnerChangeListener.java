@@ -11,8 +11,10 @@ import static org.opendaylight.controller.cluster.datastore.entityownership.Enti
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import com.google.common.base.Verify;
 import java.util.Collection;
 import java.util.Objects;
+import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
 import org.opendaylight.yangtools.yang.data.api.schema.LeafNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -32,8 +34,8 @@ class EntityOwnerChangeListener extends AbstractEntityOwnerChangeListener {
     private final String localMemberName;
     private final EntityOwnershipListenerSupport listenerSupport;
 
-    EntityOwnerChangeListener(final String localMemberName, final EntityOwnershipListenerSupport listenerSupport) {
-        this.localMemberName = Preconditions.checkNotNull(localMemberName);
+    EntityOwnerChangeListener(final MemberName localMemberName, final EntityOwnershipListenerSupport listenerSupport) {
+        this.localMemberName = Verify.verifyNotNull(localMemberName.getName());
         this.listenerSupport = Preconditions.checkNotNull(listenerSupport);
     }
 
@@ -55,9 +57,9 @@ class EntityOwnerChangeListener extends AbstractEntityOwnerChangeListener {
 
             LOG.debug("{}: New owner: {}, Original owner: {}", logId(), newOwner, origOwner);
 
-            if(!Objects.equals(origOwner, newOwner)) {
-                boolean isOwner = Objects.equals(localMemberName, newOwner);
-                boolean wasOwner = Objects.equals(localMemberName, origOwner);
+            if (!Objects.equals(origOwner, newOwner)) {
+                boolean isOwner = localMemberName.equals(newOwner);
+                boolean wasOwner = localMemberName.equals(origOwner);
                 boolean hasOwner = !Strings.isNullOrEmpty(newOwner);
 
                 Entity entity = createEntity(change.getRootPath());

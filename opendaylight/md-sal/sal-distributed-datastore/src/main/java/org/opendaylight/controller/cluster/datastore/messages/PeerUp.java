@@ -7,24 +7,25 @@
  */
 package org.opendaylight.controller.cluster.datastore.messages;
 
+import org.opendaylight.controller.cluster.access.concepts.MemberName;
+
 /**
  * Message sent to a shard actor indicating one of its peers is up.
  *
  * @author Thomas Pantelis
  */
 public class PeerUp {
-    private final String memberName;
+    private final MemberName memberName;
     private final String peerId;
 
-    public PeerUp(String memberName, String peerId) {
+    public PeerUp(MemberName memberName, String peerId) {
         this.memberName = memberName;
         this.peerId = peerId;
     }
 
-    public String getMemberName() {
+    public MemberName getMemberName() {
         return memberName;
     }
-
 
     public String getPeerId() {
         return peerId;
@@ -32,6 +33,6 @@ public class PeerUp {
 
     @Override
     public String toString() {
-        return "PeerUp [memberName=" + memberName + ", peerId=" + peerId + "]";
+        return "PeerUp [memberName=" + memberName.getName() + ", peerId=" + peerId + "]";
     }
 }
