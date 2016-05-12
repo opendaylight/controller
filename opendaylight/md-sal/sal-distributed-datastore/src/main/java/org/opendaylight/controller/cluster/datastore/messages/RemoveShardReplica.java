@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.datastore.messages;
 
 import com.google.common.base.Preconditions;
 import javax.annotation.Nonnull;
+import org.opendaylight.controller.cluster.access.concepts.MemberName;
 
 /**
  * A message sent to the ShardManager to dynamically remove a local shard
@@ -18,14 +19,14 @@ import javax.annotation.Nonnull;
 public class RemoveShardReplica {
 
     private final String shardName;
-    private final String memberName;
+    private final MemberName memberName;
 
     /**
      * Constructor.
      *
      * @param shardName name of the local shard that is to be dynamically removed.
      */
-    public RemoveShardReplica (@Nonnull String shardName, @Nonnull String memberName) {
+    public RemoveShardReplica (@Nonnull String shardName, @Nonnull MemberName memberName) {
         this.shardName = Preconditions.checkNotNull(shardName, "shardName should not be null");
         this.memberName = Preconditions.checkNotNull(memberName, "memberName should not be null");
     }
@@ -34,7 +35,7 @@ public class RemoveShardReplica {
         return shardName;
     }
 
-    public String getMemberName() {
+    public MemberName getMemberName() {
         return memberName;
     }
 

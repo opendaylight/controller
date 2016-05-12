@@ -45,6 +45,7 @@ import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext.Builder;
 import org.opendaylight.controller.cluster.datastore.TransactionProxyTest.TestException;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
@@ -162,7 +163,7 @@ public abstract class AbstractTransactionProxyTest {
 
         doReturn(getSystem()).when(mockActorContext).getActorSystem();
         doReturn(getSystem().dispatchers().defaultGlobalDispatcher()).when(mockActorContext).getClientDispatcher();
-        doReturn(memberName).when(mockActorContext).getCurrentMemberName();
+        doReturn(MemberName.forName(memberName)).when(mockActorContext).getCurrentMemberName();
         doReturn(new ShardStrategyFactory(configuration)).when(mockActorContext).getShardStrategyFactory();
         doReturn(schemaContext).when(mockActorContext).getSchemaContext();
         doReturn(new Timeout(operationTimeoutInSeconds, TimeUnit.SECONDS)).when(mockActorContext).getOperationTimeout();

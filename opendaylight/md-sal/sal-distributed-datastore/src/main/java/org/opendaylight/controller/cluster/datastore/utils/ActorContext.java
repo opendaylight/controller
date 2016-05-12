@@ -26,6 +26,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
+import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.ClusterWrapper;
 import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
@@ -391,7 +392,7 @@ public class ActorContext {
         return clusterWrapper;
     }
 
-    public String getCurrentMemberName(){
+    public MemberName getCurrentMemberName(){
         return clusterWrapper.getCurrentMemberName();
     }
 
