@@ -96,7 +96,7 @@ class EntityOwnershipShard extends Shard {
         this.entityOwnershipStatistics.init(getDataStore());
 
         for(String peerId: getRaftActorContext().getPeerIds()) {
-            ShardIdentifier shardId = ShardIdentifier.builder().fromShardIdString(peerId).build();
+            ShardIdentifier shardId = ShardIdentifier.fromShardIdString(peerId);
             peerIdToMemberNames.put(peerId, shardId.getMemberName());
         }
     }

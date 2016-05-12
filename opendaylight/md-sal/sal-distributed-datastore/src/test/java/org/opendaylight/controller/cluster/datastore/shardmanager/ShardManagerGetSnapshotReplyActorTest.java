@@ -57,18 +57,18 @@ public class ShardManagerGetSnapshotReplyActorTest extends AbstractActorTest {
         kit.watch(replyActor);
 
         byte[] shard1Snapshot = new byte[]{1,2,3};
-        replyActor.tell(new GetSnapshotReply(ShardIdentifier.builder().memberName(MEMBER_1).type("config").
-                shardName("shard1").build().toString(), shard1Snapshot), ActorRef.noSender());
+        replyActor.tell(new GetSnapshotReply(ShardIdentifier.create("shard1", MEMBER_1, "config").toString(),
+            shard1Snapshot), ActorRef.noSender());
 
         byte[] shard2Snapshot = new byte[]{4,5,6};
-        replyActor.tell(new GetSnapshotReply(ShardIdentifier.builder().memberName(MEMBER_1).type("config").
-                shardName("shard2").build().toString(), shard2Snapshot), ActorRef.noSender());
+        replyActor.tell(new GetSnapshotReply(ShardIdentifier.create("shard2", MEMBER_1, "config").toString(),
+            shard2Snapshot), ActorRef.noSender());
 
         kit.expectNoMsg(FiniteDuration.create(500, TimeUnit.MILLISECONDS));
 
         byte[] shard3Snapshot = new byte[]{7,8,9};
-        replyActor.tell(new GetSnapshotReply(ShardIdentifier.builder().memberName(MEMBER_1).type("config").
-                shardName("shard3").build().toString(), shard3Snapshot), ActorRef.noSender());
+        replyActor.tell(new GetSnapshotReply(ShardIdentifier.create("shard3", MEMBER_1, "config").toString(),
+            shard3Snapshot), ActorRef.noSender());
 
         DatastoreSnapshot datastoreSnapshot = kit.expectMsgClass(DatastoreSnapshot.class);
 
@@ -98,8 +98,8 @@ public class ShardManagerGetSnapshotReplyActorTest extends AbstractActorTest {
 
         kit.watch(replyActor);
 
-        replyActor.tell(new GetSnapshotReply(ShardIdentifier.builder().memberName(MEMBER_1).type("config").
-                shardName("shard1").build().toString(), new byte[]{1,2,3}), ActorRef.noSender());
+        replyActor.tell(new GetSnapshotReply(ShardIdentifier.create("shard1", MEMBER_1, "config").toString(),
+            new byte[]{1,2,3}), ActorRef.noSender());
 
         replyActor.tell(new Failure(new RuntimeException()), ActorRef.noSender());
 
