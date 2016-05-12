@@ -823,8 +823,8 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
     }
 
     private static ShardIdentifier newShardId(String memberName) {
-        return ShardIdentifier.builder().memberName(MemberName.forName(memberName)).shardName("entity-ownership").
-                type("operational" + NEXT_SHARD_NUM.getAndIncrement()).build();
+        return ShardIdentifier.create("entity-ownership", MemberName.forName(memberName),
+            "operational" + NEXT_SHARD_NUM.getAndIncrement());
     }
 
     private static class TestEntityOwnershipShard extends EntityOwnershipShard {

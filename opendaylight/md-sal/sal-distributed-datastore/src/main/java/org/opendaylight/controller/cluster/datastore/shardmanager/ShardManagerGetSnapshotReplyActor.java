@@ -72,7 +72,7 @@ class ShardManagerGetSnapshotReplyActor extends UntypedActor {
     private void onGetSnapshotReply(GetSnapshotReply getSnapshotReply) {
         LOG.debug("{}: Received {}", params.id, getSnapshotReply);
 
-        ShardIdentifier shardId = ShardIdentifier.builder().fromShardIdString(getSnapshotReply.getId()).build();
+        ShardIdentifier shardId = ShardIdentifier.fromShardIdString(getSnapshotReply.getId());
         shardSnapshots.add(new ShardSnapshot(shardId.getShardName(), getSnapshotReply.getSnapshot()));
 
         remainingShardNames.remove(shardId.getShardName());
