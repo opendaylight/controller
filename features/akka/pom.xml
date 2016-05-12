@@ -11,19 +11,19 @@
    <parent>
     <groupId>org.opendaylight.odlparent</groupId>
     <artifactId>features-parent</artifactId>
-    <version>1.6.2-SNAPSHOT</version>
+    <version>1.6.2-Beryllium-SR2</version>
     <relativePath/>
    </parent>
    <artifactId>features-akka</artifactId>
    <groupId>org.opendaylight.controller</groupId>
-   <version>1.6.2-SNAPSHOT</version>
+   <version>1.6.2-Beryllium-SR2</version>
    <packaging>pom</packaging>
    <properties>
       <features.file>features.xml</features.file>
-      <branding.version>1.2.2-SNAPSHOT</branding.version>
-      <karaf.resources.version>1.6.2-SNAPSHOT</karaf.resources.version>
-      <feature.test.version>0.8.2-SNAPSHOT</feature.test.version>
-      <karaf.empty.version>1.6.2-SNAPSHOT</karaf.empty.version>
+      <branding.version>1.2.2-Beryllium-SR2</branding.version>
+      <karaf.resources.version>1.6.2-Beryllium-SR2</karaf.resources.version>
+      <feature.test.version>0.8.2-Beryllium-SR2</feature.test.version>
+      <karaf.empty.version>1.6.2-Beryllium-SR2</karaf.empty.version>
       <surefire.version>2.16</surefire.version>
       <akka.version>2.3.14</akka.version>
       <scala.version>2.11</scala.version>
@@ -33,7 +33,7 @@
             <dependency>
                 <groupId>org.opendaylight.controller</groupId>
                 <artifactId>commons.opendaylight</artifactId>
-                <version>1.6.2-SNAPSHOT</version>
+                <version>1.6.2-Beryllium-SR2</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
