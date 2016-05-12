@@ -11,6 +11,7 @@ package org.opendaylight.controller.cluster.datastore.identifiers;
 import com.google.common.base.Preconditions;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.opendaylight.controller.cluster.access.concepts.MemberName;
 
 public class ShardIdentifier {
     // This pattern needs to remain in sync with toString(), which produces
@@ -18,11 +19,11 @@ public class ShardIdentifier {
     private static final Pattern PATTERN = Pattern.compile("(\\S+)-shard-(\\S+)-(\\S+)");
 
     private final String shardName;
-    private final String memberName;
+    private final MemberName memberName;
     private final String type;
     private final String fullName;
 
-    public ShardIdentifier(String shardName, String memberName, String type) {
+    public ShardIdentifier(String shardName, MemberName memberName, String type) {
 
         Preconditions.checkNotNull(shardName, "shardName should not be null");
         Preconditions.checkNotNull(memberName, "memberName should not be null");
@@ -32,7 +33,7 @@ public class ShardIdentifier {
         this.memberName = memberName;
         this.type = type;
 
-        fullName = new StringBuilder(memberName).append("-shard-").append(shardName).append("-")
+        fullName = new StringBuilder(memberName.getName()).append("-shard-").append(shardName).append("-")
                 .append(type).toString();
     }
 
@@ -82,7 +83,7 @@ public class ShardIdentifier {
         return shardName;
     }
 
-    public String getMemberName() {
+    public MemberName getMemberName() {
         return memberName;
     }
 
@@ -92,7 +93,7 @@ public class ShardIdentifier {
 
     public static class Builder {
         private String shardName;
-        private String memberName;
+        private MemberName memberName;
         private String type;
 
         public ShardIdentifier build(){
@@ -104,7 +105,7 @@ public class ShardIdentifier {
             return this;
         }
 
-        public Builder memberName(String memberName){
+        public Builder memberName(MemberName memberName){
             this.memberName = memberName;
             return this;
         }
@@ -118,7 +119,7 @@ public class ShardIdentifier {
             Matcher matcher = PATTERN.matcher(shardId);
 
             if (matcher.matches()) {
-                memberName = matcher.group(1);
+                memberName = MemberName.forName(matcher.group(1));
                 shardName = matcher.group(2);
                 type = matcher.group(3);
             }

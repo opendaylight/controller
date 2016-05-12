@@ -38,6 +38,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.DatastoreContextFactory;
 import org.opendaylight.controller.cluster.datastore.DistributedDataStore;
@@ -87,8 +88,8 @@ public class DistributedEntityOwnershipServiceTest extends AbstractEntityOwnersh
 
         Configuration configuration = new ConfigurationImpl(new EmptyModuleShardConfigProvider()) {
             @Override
-            public Collection<String> getUniqueMemberNamesForAllShards() {
-                return Sets.newHashSet("member-1");
+            public Collection<MemberName> getUniqueMemberNamesForAllShards() {
+                return Sets.newHashSet(MemberName.forName("member-1"));
             }
         };
 
@@ -137,7 +138,7 @@ public class DistributedEntityOwnershipServiceTest extends AbstractEntityOwnersh
         verifyRegisterCandidateLocal(service, entity);
         verifyEntityOwnershipCandidateRegistration(entity, reg);
         verifyEntityCandidate(service.getLocalEntityOwnershipShard(), ENTITY_TYPE, entityId,
-                dataStore.getActorContext().getCurrentMemberName());
+                dataStore.getActorContext().getCurrentMemberName().getName());
 
         // Register the same entity - should throw exception
 
@@ -157,7 +158,7 @@ public class DistributedEntityOwnershipServiceTest extends AbstractEntityOwnersh
         verifyRegisterCandidateLocal(service, entity2);
         verifyEntityOwnershipCandidateRegistration(entity2, reg2);
         verifyEntityCandidate(service.getLocalEntityOwnershipShard(), ENTITY_TYPE2, entityId,
-                dataStore.getActorContext().getCurrentMemberName());
+                dataStore.getActorContext().getCurrentMemberName().getName());
 
         service.close();
     }

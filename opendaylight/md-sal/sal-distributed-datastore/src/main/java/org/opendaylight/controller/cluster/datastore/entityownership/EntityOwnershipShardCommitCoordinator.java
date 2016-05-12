@@ -13,6 +13,7 @@ import akka.actor.Status.Failure;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Queue;
+import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
 import org.opendaylight.controller.cluster.datastore.identifiers.TransactionIdentifier;
@@ -37,12 +38,12 @@ class EntityOwnershipShardCommitCoordinator {
 
     private final Logger log;
     private int transactionIDCounter = 0;
-    private final String localMemberName;
+    private final MemberName localMemberName;
     private final Queue<Modification> pendingModifications = new LinkedList<>();
     private BatchedModifications inflightCommit;
     private Cancellable retryCommitSchedule;
 
-    EntityOwnershipShardCommitCoordinator(String localMemberName, Logger log) {
+    EntityOwnershipShardCommitCoordinator(MemberName localMemberName, Logger log) {
         this.localMemberName = localMemberName;
         this.log = log;
     }
