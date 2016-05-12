@@ -36,6 +36,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.Shard;
 import org.opendaylight.controller.cluster.datastore.entityownership.messages.CandidateAdded;
@@ -72,11 +73,11 @@ import scala.concurrent.duration.FiniteDuration;
  * @author Thomas Pantelis
  */
 class EntityOwnershipShard extends Shard {
-    private final String localMemberName;
+    private final MemberName localMemberName;
     private final EntityOwnershipShardCommitCoordinator commitCoordinator;
     private final EntityOwnershipListenerSupport listenerSupport;
-    private final Set<String> downPeerMemberNames = new HashSet<>();
-    private final Map<String, String> peerIdToMemberNames = new HashMap<>();
+    private final Set<MemberName> downPeerMemberNames = new HashSet<>();
+    private final Map<String, MemberName> peerIdToMemberNames = new HashMap<>();
     private final EntityOwnerSelectionStrategyConfig strategyConfig;
     private final Map<YangInstanceIdentifier, Cancellable> entityToScheduledOwnershipTask = new HashMap<>();
     private final EntityOwnershipStatistics entityOwnershipStatistics;
@@ -164,7 +165,7 @@ class EntityOwnershipShard extends Shard {
         listenerSupport.setHasCandidateForEntity(registerCandidate.getEntity());
 
         NormalizedNode<?, ?> entityOwners = entityOwnersWithCandidate(registerCandidate.getEntity().getType(),
-                registerCandidate.getEntity().getId(), localMemberName);
+                registerCandidate.getEntity().getId(), localMemberName.getName());
         commitCoordinator.commitModification(new MergeModification(ENTITY_OWNERS_PATH, entityOwners), this);
 
         getSender().tell(SuccessReply.INSTANCE, getSelf());
@@ -176,7 +177,7 @@ class EntityOwnershipShard extends Shard {
         Entity entity = unregisterCandidate.getEntity();
         listenerSupport.unsetHasCandidateForEntity(entity);
 
-        YangInstanceIdentifier candidatePath = candidatePath(entity.getType(), entity.getId(), localMemberName);
+        YangInstanceIdentifier candidatePath = candidatePath(entity.getType(), entity.getId(), localMemberName.getName());
         commitCoordinator.commitModification(new DeleteModification(candidatePath), this);
 
         getSender().tell(SuccessReply.INSTANCE, getSelf());
@@ -189,30 +190,27 @@ class EntityOwnershipShard extends Shard {
 
         getSender().tell(SuccessReply.INSTANCE, getSelf());
 
-        searchForEntities(new EntityWalker() {
-            @Override
-            public void onEntity(MapEntryNode entityTypeNode, MapEntryNode entityNode) {
-                Optional<DataContainerChild<?, ?>> possibleType = entityTypeNode.getChild(ENTITY_TYPE_NODE_ID);
-                String entityType = possibleType.isPresent() ? possibleType.get().getValue().toString() : null;
-                if (registerListener.getEntityType().equals(entityType)) {
-                    final boolean hasOwner;
-                    final boolean isOwner;
+        searchForEntities((entityTypeNode, entityNode) -> {
+            Optional<DataContainerChild<?, ?>> possibleType = entityTypeNode.getChild(ENTITY_TYPE_NODE_ID);
+            String entityType = possibleType.isPresent() ? possibleType.get().getValue().toString() : null;
+            if (registerListener.getEntityType().equals(entityType)) {
+                final boolean hasOwner;
+                final boolean isOwner;
 
-                    Optional<DataContainerChild<?, ?>> possibleOwner = entityNode.getChild(ENTITY_OWNER_NODE_ID);
-                    if (possibleOwner.isPresent()) {
-                        isOwner = localMemberName.equals(possibleOwner.get().getValue().toString());
-                        hasOwner = true;
-                    } else {
-                        isOwner = false;
-                        hasOwner = false;
-                    }
-
-                    Entity entity = new Entity(entityType,
-                        (YangInstanceIdentifier) entityNode.getChild(ENTITY_ID_NODE_ID).get().getValue());
-
-                    listenerSupport.notifyEntityOwnershipListener(entity, false, isOwner, hasOwner,
-                        registerListener.getListener());
+                Optional<DataContainerChild<?, ?>> possibleOwner = entityNode.getChild(ENTITY_OWNER_NODE_ID);
+                if (possibleOwner.isPresent()) {
+                    isOwner = localMemberName.equals(possibleOwner.get().getValue().toString());
+                    hasOwner = true;
+                } else {
+                    isOwner = false;
+                    hasOwner = false;
                 }
+
+                Entity entity = new Entity(entityType,
+                    (YangInstanceIdentifier) entityNode.getChild(ENTITY_ID_NODE_ID).get().getValue());
+
+                listenerSupport.notifyEntityOwnershipListener(entity, false, isOwner, hasOwner,
+                    registerListener.getListener());
             }
         });
     }
@@ -270,28 +268,25 @@ class EntityOwnershipShard extends Shard {
     }
 
     private void notifyAllListeners() {
-        searchForEntities(new EntityWalker() {
-            @Override
-            public void onEntity(MapEntryNode entityTypeNode, MapEntryNode entityNode) {
-                Optional<DataContainerChild<?, ?>> possibleType = entityTypeNode.getChild(ENTITY_TYPE_NODE_ID);
-                if (possibleType.isPresent()) {
-                    final boolean hasOwner;
-                    final boolean isOwner;
+        searchForEntities((entityTypeNode, entityNode) -> {
+            Optional<DataContainerChild<?, ?>> possibleType = entityTypeNode.getChild(ENTITY_TYPE_NODE_ID);
+            if (possibleType.isPresent()) {
+                final boolean hasOwner;
+                final boolean isOwner;
 
-                    Optional<DataContainerChild<?, ?>> possibleOwner = entityNode.getChild(ENTITY_OWNER_NODE_ID);
-                    if (possibleOwner.isPresent()) {
-                        isOwner = localMemberName.equals(possibleOwner.get().getValue().toString());
-                        hasOwner = true;
-                    } else {
-                        isOwner = false;
-                        hasOwner = false;
-                    }
-
-                    Entity entity = new Entity(possibleType.get().getValue().toString(),
-                        (YangInstanceIdentifier) entityNode.getChild(ENTITY_ID_NODE_ID).get().getValue());
-
-                    listenerSupport.notifyEntityOwnershipListeners(entity, isOwner, isOwner, hasOwner);
+                Optional<DataContainerChild<?, ?>> possibleOwner = entityNode.getChild(ENTITY_OWNER_NODE_ID);
+                if (possibleOwner.isPresent()) {
+                    isOwner = localMemberName.equals(possibleOwner.get().getValue().toString());
+                    hasOwner = true;
+                } else {
+                    isOwner = false;
+                    hasOwner = false;
                 }
+
+                Entity entity = new Entity(possibleType.get().getValue().toString(),
+                    (YangInstanceIdentifier) entityNode.getChild(ENTITY_ID_NODE_ID).get().getValue());
+
+                listenerSupport.notifyEntityOwnershipListeners(entity, isOwner, isOwner, hasOwner);
             }
         });
     }
@@ -323,7 +318,7 @@ class EntityOwnershipShard extends Shard {
         LOG.debug("{}: onLeaderChanged: oldLeader: {}, newLeader: {}, isLeader: {}", persistenceId(), oldLeader,
                 newLeader, isLeader);
 
-        if(isLeader) {
+        if (isLeader) {
 
             // Clear all existing strategies so that they get re-created when we call createStrategy again
             // This allows the strategies to be re-initialized with existing statistics maintained by
@@ -333,7 +328,7 @@ class EntityOwnershipShard extends Shard {
             // Remove the candidates for all members that are known to be down. In a cluster which has greater than
             // 3 nodes it is possible for a some node beside the leader being down when the leadership transitions
             // it makes sense to use this event to remove all the candidates for those downed nodes
-            for(String downPeerName : downPeerMemberNames){
+            for (MemberName downPeerName : downPeerMemberNames) {
                 removeCandidateFromEntities(downPeerName);
             }
         } else {
@@ -367,8 +362,8 @@ class EntityOwnershipShard extends Shard {
                     " - adding back local candidate", message.getEntityPath());
 
                 commitCoordinator.commitModification(new MergeModification(
-                        candidatePath(message.getEntityPath(), localMemberName),
-                        candidateMapEntry(localMemberName)), this);
+                        candidatePath(message.getEntityPath(), localMemberName.getName()),
+                        candidateMapEntry(localMemberName.getName())), this);
             }
         }
     }
@@ -418,7 +413,7 @@ class EntityOwnershipShard extends Shard {
     private void onPeerDown(PeerDown peerDown) {
         LOG.info("{}: onPeerDown: {}", persistenceId(), peerDown);
 
-        String downMemberName = peerDown.getMemberName();
+        MemberName downMemberName = peerDown.getMemberName();
         if(downPeerMemberNames.add(downMemberName) && isLeader()) {
             // Remove the down peer as a candidate from all entities.
             removeCandidateFromEntities(downMemberName);
@@ -437,31 +432,29 @@ class EntityOwnershipShard extends Shard {
         commitCoordinator.onStateChanged(this, isLeader());
     }
 
-    private void removeCandidateFromEntities(final String owner) {
+    private void removeCandidateFromEntities(final MemberName owner) {
         final BatchedModifications modifications = commitCoordinator.newBatchedModifications();
-        searchForEntities(new EntityWalker() {
-            @Override
-            public void onEntity(MapEntryNode entityTypeNode, MapEntryNode entityNode) {
-                if (hasCandidate(entityNode, owner)) {
-                    YangInstanceIdentifier entityId =
-                            (YangInstanceIdentifier) entityNode.getIdentifier().getKeyValues().get(ENTITY_ID_QNAME);
-                    YangInstanceIdentifier candidatePath = candidatePath(
-                            entityTypeNode.getIdentifier().getKeyValues().get(ENTITY_TYPE_QNAME).toString(),
-                            entityId, owner);
+        searchForEntities((entityTypeNode, entityNode) -> {
+            if (hasCandidate(entityNode, owner)) {
+                YangInstanceIdentifier entityId =
+                        (YangInstanceIdentifier) entityNode.getIdentifier().getKeyValues().get(ENTITY_ID_QNAME);
+                YangInstanceIdentifier candidatePath = candidatePath(
+                        entityTypeNode.getIdentifier().getKeyValues().get(ENTITY_TYPE_QNAME).toString(),
+                        entityId, owner.getName());
 
-                    LOG.info("{}: Found entity {}, removing candidate {}, path {}", persistenceId(), entityId,
-                            owner, candidatePath);
+                LOG.info("{}: Found entity {}, removing candidate {}, path {}", persistenceId(), entityId,
+                        owner, candidatePath);
 
-                    modifications.addModification(new DeleteModification(candidatePath));
-                }
+                modifications.addModification(new DeleteModification(candidatePath));
             }
         });
 
         commitCoordinator.commitModifications(modifications, this);
     }
 
-    private static boolean hasCandidate(MapEntryNode entity, String candidateName) {
-        return ((MapNode)entity.getChild(CANDIDATE_NODE_ID).get()).getChild(candidateNodeKey(candidateName)).isPresent();
+    private static boolean hasCandidate(MapEntryNode entity, MemberName candidateName) {
+        return ((MapNode)entity.getChild(CANDIDATE_NODE_ID).get()).getChild(candidateNodeKey(candidateName.getName()))
+                .isPresent();
     }
 
     private void searchForEntities(EntityWalker walker) {
@@ -553,14 +546,14 @@ class EntityOwnershipShard extends Shard {
     }
 
     static class Builder extends Shard.AbstractBuilder<Builder, EntityOwnershipShard> {
-        private String localMemberName;
+        private MemberName localMemberName;
         private EntityOwnerSelectionStrategyConfig ownerSelectionStrategyConfig;
 
         protected Builder() {
             super(EntityOwnershipShard.class);
         }
 
-        Builder localMemberName(String localMemberName) {
+        Builder localMemberName(MemberName localMemberName) {
             checkSealed();
             this.localMemberName = localMemberName;
             return this;

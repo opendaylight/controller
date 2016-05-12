@@ -14,6 +14,8 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategyFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -97,7 +99,8 @@ public class FileModuleShardConfigProvider implements ModuleShardConfigProvider 
 
             for(ConfigObject shard : shardsConfigObjectList){
                 String shardName = shard.get("name").unwrapped().toString();
-                List<String> replicas = shard.toConfig().getStringList("replicas");
+                List<MemberName> replicas = shard.toConfig().getStringList("replicas").stream()
+                        .map(MemberName::forName).collect(Collectors.toList());
                 builder.shardConfig(shardName, replicas);
             }
 

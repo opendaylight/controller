@@ -19,6 +19,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategy;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategyFactory;
 
@@ -67,13 +68,14 @@ public class ConfigurationImpl implements Configuration {
     }
 
     @Override
-    public Collection<String> getMemberShardNames(final String memberName){
+    public Collection<String> getMemberShardNames(final MemberName memberName){
         Preconditions.checkNotNull(memberName, "memberName should not be null");
 
         List<String> shards = new ArrayList<>();
         for(ModuleConfig moduleConfig: moduleConfigMap.values()) {
             for(ShardConfig shardConfig: moduleConfig.getShardConfigs()) {
-                if(shardConfig.getReplicas().contains(memberName)) {
+                // FIXME: propagate MemberName into getReplicas()
+                if(shardConfig.getReplicas().contains(memberName.getName())) {
                     shards.add(shardConfig.getName());
                 }
             }
@@ -108,7 +110,7 @@ public class ConfigurationImpl implements Configuration {
     }
 
     @Override
-    public Collection<String> getMembersFromShardName(final String shardName) {
+    public Collection<MemberName> getMembersFromShardName(final String shardName) {
         Preconditions.checkNotNull(shardName, "shardName should not be null");
 
         for(ModuleConfig moduleConfig: moduleConfigMap.values()) {
@@ -127,8 +129,8 @@ public class ConfigurationImpl implements Configuration {
     }
 
     @Override
-    public Collection<String> getUniqueMemberNamesForAllShards() {
-        Set<String> allNames = new HashSet<>();
+    public Collection<MemberName> getUniqueMemberNamesForAllShards() {
+        Set<MemberName> allNames = new HashSet<>();
         for(String shardName: getAllShardNames()) {
             allNames.addAll(getMembersFromShardName(shardName));
         }
@@ -163,14 +165,14 @@ public class ConfigurationImpl implements Configuration {
     }
 
     @Override
-    public void addMemberReplicaForShard (String shardName, String newMemberName) {
+    public void addMemberReplicaForShard (String shardName, MemberName newMemberName) {
         Preconditions.checkNotNull(shardName, "shardName should not be null");
         Preconditions.checkNotNull(newMemberName, "MemberName should not be null");
 
         for(ModuleConfig moduleConfig: moduleConfigMap.values()) {
             ShardConfig shardConfig = moduleConfig.getShardConfig(shardName);
             if(shardConfig != null) {
-                Set<String> replicas = new HashSet<>(shardConfig.getReplicas());
+                Set<MemberName> replicas = new HashSet<>(shardConfig.getReplicas());
                 replicas.add(newMemberName);
                 updateModuleConfigMap(ModuleConfig.builder(moduleConfig).shardConfig(shardName, replicas).build());
                 return;
@@ -179,14 +181,14 @@ public class ConfigurationImpl implements Configuration {
     }
 
     @Override
-    public void removeMemberReplicaForShard (String shardName, String newMemberName) {
+    public void removeMemberReplicaForShard (String shardName, MemberName newMemberName) {
         Preconditions.checkNotNull(shardName, "shardName should not be null");
         Preconditions.checkNotNull(newMemberName, "MemberName should not be null");
 
         for(ModuleConfig moduleConfig: moduleConfigMap.values()) {
             ShardConfig shardConfig = moduleConfig.getShardConfig(shardName);
             if(shardConfig != null) {
-                Set<String> replicas = new HashSet<>(shardConfig.getReplicas());
+                Set<MemberName> replicas = new HashSet<>(shardConfig.getReplicas());
                 replicas.remove(newMemberName);
                 updateModuleConfigMap(ModuleConfig.builder(moduleConfig).shardConfig(shardName, replicas).build());
                 return;

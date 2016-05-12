@@ -8,15 +8,15 @@
 
 package org.opendaylight.controller.cluster.datastore.identifiers;
 
-import org.junit.Test;
-
 import static org.junit.Assert.assertEquals;
+import org.junit.Test;
+import org.opendaylight.controller.cluster.access.concepts.MemberName;
 
 public class ShardIdentifierTest {
 
     @Test
     public void testBasic(){
-        ShardIdentifier id = ShardIdentifier.builder().memberName("member-1")
+        ShardIdentifier id = ShardIdentifier.builder().memberName(MemberName.forName("member-1"))
             .shardName("inventory").type("config").build();
 
         assertEquals("member-1-shard-inventory-config", id.toString());
