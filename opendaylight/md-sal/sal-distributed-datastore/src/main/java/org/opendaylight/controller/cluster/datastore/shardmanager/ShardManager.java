@@ -146,7 +146,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     ShardManager(AbstractShardManagerCreator<?> builder) {
         this.cluster = builder.getCluster();
         this.configuration = builder.getConfiguration();
-        this.datastoreContextFactory = builder.getDdatastoreContextFactory();
+        this.datastoreContextFactory = builder.getDatastoreContextFactory();
         this.type = datastoreContextFactory.getBaseDatastoreContext().getDataStoreName();
         this.shardDispatcherPath =
                 new Dispatchers(context().system().dispatchers()).getDispatcherPath(Dispatchers.DispatcherType.Shard);

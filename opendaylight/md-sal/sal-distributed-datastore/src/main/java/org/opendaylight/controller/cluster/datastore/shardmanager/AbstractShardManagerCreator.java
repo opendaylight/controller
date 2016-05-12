@@ -58,7 +58,7 @@ public abstract class AbstractShardManagerCreator<T extends AbstractShardManager
         return self();
     }
 
-    DatastoreContextFactory getDdatastoreContextFactory() {
+    DatastoreContextFactory getDatastoreContextFactory() {
         return datastoreContextFactory;
     }
 
