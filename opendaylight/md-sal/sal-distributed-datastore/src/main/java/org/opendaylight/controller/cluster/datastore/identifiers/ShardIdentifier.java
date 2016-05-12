@@ -23,18 +23,23 @@ public class ShardIdentifier {
     private final String type;
     private final String fullName;
 
-    public ShardIdentifier(String shardName, MemberName memberName, String type) {
+    private ShardIdentifier(String shardName, MemberName memberName, String type) {
+        this.shardName = Preconditions.checkNotNull(shardName, "shardName should not be null");
+        this.memberName = Preconditions.checkNotNull(memberName, "memberName should not be null");
+        this.type = Preconditions.checkNotNull(type, "type should not be null");
 
-        Preconditions.checkNotNull(shardName, "shardName should not be null");
-        Preconditions.checkNotNull(memberName, "memberName should not be null");
-        Preconditions.checkNotNull(type, "type should not be null");
+        fullName = memberName.getName() + "-shard-" + shardName + "-" + type;
+    }
 
-        this.shardName = shardName;
-        this.memberName = memberName;
-        this.type = type;
+    public static ShardIdentifier create(final String shardName, final MemberName memberName, final String type) {
+        return new ShardIdentifier(shardName, memberName, type);
+    }
 
-        fullName = new StringBuilder(memberName.getName()).append("-shard-").append(shardName).append("-")
-                .append(type).toString();
+    public static ShardIdentifier fromShardIdString(final String shardIdString) {
+        final Matcher matcher = PATTERN.matcher(shardIdString);
+        Preconditions.checkArgument(matcher.matches(), "Invalid shard id \"%s\"", shardIdString);
+
+        return new ShardIdentifier(matcher.group(2), MemberName.forName(matcher.group(1)), matcher.group(3));
     }
 
     @Override
@@ -71,12 +76,8 @@ public class ShardIdentifier {
 
     @Override
     public String toString() {
-        //ensure the output of toString matches the pattern above
+        // ensure the output of toString matches the pattern above
         return fullName;
-    }
-
-    public static Builder builder(){
-        return new Builder();
     }
 
     public String getShardName() {

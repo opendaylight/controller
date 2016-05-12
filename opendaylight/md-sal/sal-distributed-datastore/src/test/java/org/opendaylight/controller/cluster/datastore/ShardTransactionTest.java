@@ -62,8 +62,7 @@ public class ShardTransactionTest extends AbstractActorTest {
     private static final TransactionType WO = TransactionType.WRITE_ONLY;
 
     private static final ShardIdentifier SHARD_IDENTIFIER =
-        ShardIdentifier.builder().memberName(MemberName.forName("member-1"))
-            .shardName("inventory").type("config").build();
+        ShardIdentifier.create("inventory", MemberName.forName("member-1"), "config");
 
     private DatastoreContext datastoreContext = DatastoreContext.newBuilder().build();
 
