@@ -40,6 +40,7 @@ import org.apache.commons.lang3.SerializationUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.DistributedDataStore;
 import org.opendaylight.controller.cluster.datastore.MemberNode;
@@ -73,6 +74,9 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
  * @author Thomas Pantelis
  */
 public class ClusterAdminRpcServiceTest {
+    private static final MemberName MEMBER_1 = MemberName.forName("member-1");
+    private static final MemberName MEMBER_2 = MemberName.forName("member-2");
+    private static final MemberName MEMBER_3 = MemberName.forName("member-3");
     private final List<MemberNode> memberNodes = new ArrayList<>();
 
     @Before
@@ -415,7 +419,7 @@ public class ClusterAdminRpcServiceTest {
                 moduleShardsConfig(moduleShardsConfig).waitForShardLeader("cars", "people").build();
 
         ModuleShardConfiguration petsModuleConfig = new ModuleShardConfiguration(URI.create("pets-ns"), "pets-module",
-                "pets", null, Arrays.asList("member-1"));
+                "pets", null, Arrays.asList(MEMBER_1));
         leaderNode1.configDataStore().getActorContext().getShardManager().tell(
                 new CreateShard(petsModuleConfig, Shard.builder(), null), leaderNode1.kit().getRef());
         leaderNode1.kit().expectMsgClass(Success.class);
@@ -433,7 +437,7 @@ public class ClusterAdminRpcServiceTest {
 
         newReplicaNode2.operDataStore().getActorContext().getShardManager().tell(
                 new CreateShard(new ModuleShardConfiguration(URI.create("no-leader-ns"), "no-leader-module",
-                        "no-leader", null, Arrays.asList("member-1")), Shard.builder(), null),
+                        "no-leader", null, Arrays.asList(MEMBER_1)), Shard.builder(), null),
                                 newReplicaNode2.kit().getRef());
         newReplicaNode2.kit().expectMsgClass(Success.class);
 
@@ -478,7 +482,7 @@ public class ClusterAdminRpcServiceTest {
         verifyRaftPeersPresent(replicaNode3.configDataStore(), "cars", "member-1", "member-2");
 
         ModuleShardConfiguration petsModuleConfig = new ModuleShardConfiguration(URI.create("pets-ns"), "pets-module",
-                "pets", null, Arrays.asList("member-1", "member-2", "member-3"));
+                "pets", null, Arrays.asList(MEMBER_1, MEMBER_2, MEMBER_3));
         leaderNode1.configDataStore().getActorContext().getShardManager().tell(
                 new CreateShard(petsModuleConfig, Shard.builder(), null), leaderNode1.kit().getRef());
         leaderNode1.kit().expectMsgClass(Success.class);
