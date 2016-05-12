@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.datastore;
 
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
+import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.identifiers.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.BatchedModificationsReply;
 import org.opendaylight.controller.cluster.datastore.messages.DataExistsReply;
@@ -23,7 +24,7 @@ public class OperationLimiterTest {
     @Test
     public void testOnComplete() throws Exception {
         int permits = 10;
-        OperationLimiter limiter = new OperationLimiter(new TransactionIdentifier("foo", 1), permits, 1);
+        OperationLimiter limiter = new OperationLimiter(new TransactionIdentifier(MemberName.forName("foo"), 1), permits, 1);
         limiter.acquire(permits);
         int availablePermits = 0;
 

@@ -13,6 +13,7 @@ import akka.pattern.Patterns;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import java.util.List;
+import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.md.sal.common.util.jmx.AbstractMXBean;
@@ -29,12 +30,12 @@ final class ShardManagerInfo extends AbstractMXBean implements ShardManagerInfoM
     private static final long ASK_TIMEOUT_MILLIS = 5000;
 
     private final ActorRef shardManager;
-    private final String memberName;
+    private final MemberName memberName;
 
     private volatile boolean syncStatus = false;
 
 
-    ShardManagerInfo(final ActorRef shardManager, final String memberName, final String name,
+    ShardManagerInfo(final ActorRef shardManager, final MemberName memberName, final String name,
         final String mxBeanType) {
         super(name, mxBeanType, JMX_CATEGORY_SHARD_MANAGER);
         this.shardManager = Preconditions.checkNotNull(shardManager);
@@ -63,7 +64,7 @@ final class ShardManagerInfo extends AbstractMXBean implements ShardManagerInfoM
 
     @Override
     public String getMemberName() {
-        return memberName;
+        return memberName.getName();
     }
 
     private void requestSwitchShardState(final ShardIdentifier shardId, final String newState, final long term) {
