@@ -23,6 +23,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nonnull;
+import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.config.ModuleShardConfiguration;
 import org.opendaylight.controller.cluster.datastore.entityownership.messages.RegisterCandidateLocal;
@@ -81,7 +82,7 @@ public class DistributedEntityOwnershipService implements EntityOwnershipService
         ActorRef shardManagerActor = context.getShardManager();
 
         Configuration configuration = context.getConfiguration();
-        Collection<String> entityOwnersMemberNames = configuration.getUniqueMemberNamesForAllShards();
+        Collection<MemberName> entityOwnersMemberNames = configuration.getUniqueMemberNamesForAllShards();
         CreateShard createShard = new CreateShard(new ModuleShardConfiguration(EntityOwners.QNAME.getNamespace(),
                 "entity-owners", ENTITY_OWNERSHIP_SHARD_NAME, ModuleShardStrategy.NAME, entityOwnersMemberNames),
                         newShardBuilder(context, strategyConfig), null);
@@ -198,11 +199,11 @@ public class DistributedEntityOwnershipService implements EntityOwnershipService
             return Optional.absent();
         }
 
-        String localMemberName = context.getCurrentMemberName();
+        MemberName localMemberName = context.getCurrentMemberName();
         Optional<DataContainerChild<? extends PathArgument, ?>> ownerLeaf = entity.getChild(ENTITY_OWNER_NODE_ID);
         String owner = ownerLeaf.isPresent() ? ownerLeaf.get().getValue().toString() : null;
         boolean hasOwner = !Strings.isNullOrEmpty(owner);
-        boolean isOwner = hasOwner && localMemberName.equals(owner);
+        boolean isOwner = hasOwner && localMemberName.getName().equals(owner);
 
         return Optional.of(new EntityOwnershipState(isOwner, hasOwner));
     }

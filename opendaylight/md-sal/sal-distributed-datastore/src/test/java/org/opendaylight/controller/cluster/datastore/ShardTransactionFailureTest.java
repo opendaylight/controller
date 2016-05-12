@@ -13,6 +13,7 @@ import akka.actor.Props;
 import akka.testkit.TestActorRef;
 import java.util.concurrent.TimeUnit;
 import org.junit.Test;
+import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStats;
 import org.opendaylight.controller.cluster.datastore.messages.DataExists;
@@ -41,7 +42,7 @@ public class ShardTransactionFailureTest extends AbstractActorTest {
     private static final ShardDataTree store = new ShardDataTree(testSchemaContext, TreeType.OPERATIONAL);
 
     private static final ShardIdentifier SHARD_IDENTIFIER =
-        ShardIdentifier.builder().memberName("member-1")
+        ShardIdentifier.builder().memberName(MemberName.forName("member-1"))
             .shardName("inventory").type("operational").build();
 
     private final DatastoreContext datastoreContext = DatastoreContext.newBuilder().build();

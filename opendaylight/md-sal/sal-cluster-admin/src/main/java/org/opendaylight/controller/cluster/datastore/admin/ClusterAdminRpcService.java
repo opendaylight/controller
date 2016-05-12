@@ -28,6 +28,7 @@ import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.SerializationUtils;
+import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.DistributedDataStoreInterface;
 import org.opendaylight.controller.cluster.datastore.messages.AddShardReplica;
 import org.opendaylight.controller.cluster.datastore.messages.DatastoreSnapshot;
@@ -144,7 +145,7 @@ public class ClusterAdminRpcService implements ClusterAdminService, AutoCloseabl
 
         final SettableFuture<RpcResult<Void>> returnFuture = SettableFuture.create();
         ListenableFuture<Success> future = sendMessageToShardManager(dataStoreType,
-                new RemoveShardReplica(shardName, memberName));
+                new RemoveShardReplica(shardName, MemberName.forName(memberName)));
         Futures.addCallback(future, new FutureCallback<Success>() {
             @Override
             public void onSuccess(Success success) {
@@ -199,7 +200,7 @@ public class ClusterAdminRpcService implements ClusterAdminService, AutoCloseabl
         Function<String, Object> messageSupplier = new Function<String, Object>() {
             @Override
             public Object apply(String shardName) {
-                return new RemoveShardReplica(shardName, memberName);
+                return new RemoveShardReplica(shardName, MemberName.forName(memberName));
             }
         };
 

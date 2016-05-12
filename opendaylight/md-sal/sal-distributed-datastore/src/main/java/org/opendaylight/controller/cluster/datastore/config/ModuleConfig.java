@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategy;
 
 /**
@@ -107,7 +108,7 @@ public class ModuleConfig {
             return this;
         }
 
-        public Builder shardConfig(String name, Collection<String> replicas) {
+        public Builder shardConfig(String name, Collection<MemberName> replicas) {
             shardConfigs.put(name, new ShardConfig(name, replicas));
             return this;
         }

@@ -19,6 +19,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import javax.annotation.Nullable;
+import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.Shard;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
@@ -129,13 +130,13 @@ final class ShardInformation {
         notifyOnShardInitializedCallbacks();
     }
 
-    void peerDown(String memberName, String peerId, ActorRef sender) {
+    void peerDown(MemberName memberName, String peerId, ActorRef sender) {
         if(actor != null) {
             actor.tell(new PeerDown(memberName, peerId), sender);
         }
     }
 
-    void peerUp(String memberName, String peerId, ActorRef sender) {
+    void peerUp(MemberName memberName, String peerId, ActorRef sender) {
         if(actor != null) {
             actor.tell(new PeerUp(memberName, peerId), sender);
         }

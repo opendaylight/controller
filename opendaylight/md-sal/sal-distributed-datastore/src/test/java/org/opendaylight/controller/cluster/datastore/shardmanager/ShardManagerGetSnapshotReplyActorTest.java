@@ -19,6 +19,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import org.junit.After;
 import org.junit.Test;
+import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.AbstractActorTest;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.DatastoreSnapshot;
@@ -34,6 +35,8 @@ import scala.concurrent.duration.FiniteDuration;
  * @author Thomas Pantelis
  */
 public class ShardManagerGetSnapshotReplyActorTest extends AbstractActorTest {
+    private static final MemberName MEMBER_1 = MemberName.forName("member-1");
+
     private final TestActorFactory actorFactory = new TestActorFactory(getSystem());
 
     @After
@@ -54,17 +57,17 @@ public class ShardManagerGetSnapshotReplyActorTest extends AbstractActorTest {
         kit.watch(replyActor);
 
         byte[] shard1Snapshot = new byte[]{1,2,3};
-        replyActor.tell(new GetSnapshotReply(ShardIdentifier.builder().memberName("member-1").type("config").
+        replyActor.tell(new GetSnapshotReply(ShardIdentifier.builder().memberName(MEMBER_1).type("config").
                 shardName("shard1").build().toString(), shard1Snapshot), ActorRef.noSender());
 
         byte[] shard2Snapshot = new byte[]{4,5,6};
-        replyActor.tell(new GetSnapshotReply(ShardIdentifier.builder().memberName("member-1").type("config").
+        replyActor.tell(new GetSnapshotReply(ShardIdentifier.builder().memberName(MEMBER_1).type("config").
                 shardName("shard2").build().toString(), shard2Snapshot), ActorRef.noSender());
 
         kit.expectNoMsg(FiniteDuration.create(500, TimeUnit.MILLISECONDS));
 
         byte[] shard3Snapshot = new byte[]{7,8,9};
-        replyActor.tell(new GetSnapshotReply(ShardIdentifier.builder().memberName("member-1").type("config").
+        replyActor.tell(new GetSnapshotReply(ShardIdentifier.builder().memberName(MEMBER_1).type("config").
                 shardName("shard3").build().toString(), shard3Snapshot), ActorRef.noSender());
 
         DatastoreSnapshot datastoreSnapshot = kit.expectMsgClass(DatastoreSnapshot.class);
@@ -95,7 +98,7 @@ public class ShardManagerGetSnapshotReplyActorTest extends AbstractActorTest {
 
         kit.watch(replyActor);
 
-        replyActor.tell(new GetSnapshotReply(ShardIdentifier.builder().memberName("member-1").type("config").
+        replyActor.tell(new GetSnapshotReply(ShardIdentifier.builder().memberName(MEMBER_1).type("config").
                 shardName("shard1").build().toString(), new byte[]{1,2,3}), ActorRef.noSender());
 
         replyActor.tell(new Failure(new RuntimeException()), ActorRef.noSender());

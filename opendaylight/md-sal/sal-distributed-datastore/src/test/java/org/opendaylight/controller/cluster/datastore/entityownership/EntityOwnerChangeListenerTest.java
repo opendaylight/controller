@@ -19,6 +19,7 @@ import static org.opendaylight.controller.cluster.datastore.entityownership.Enti
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.entityPath;
 import org.junit.Before;
 import org.junit.Test;
+import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.ShardDataTree;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
 import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
@@ -53,7 +54,7 @@ public class EntityOwnerChangeListenerTest {
 
     @Before
     public void setup() {
-        listener = new EntityOwnerChangeListener(LOCAL_MEMBER_NAME, mockListenerSupport);
+        listener = new EntityOwnerChangeListener(MemberName.forName(LOCAL_MEMBER_NAME), mockListenerSupport);
         listener.init(shardDataTree);
     }
 
