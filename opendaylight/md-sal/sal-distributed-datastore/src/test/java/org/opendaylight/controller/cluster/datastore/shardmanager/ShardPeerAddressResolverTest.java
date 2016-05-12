@@ -12,6 +12,7 @@ import akka.actor.Address;
 import com.google.common.collect.Sets;
 import java.util.Collection;
 import org.junit.Test;
+import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 
 /**
@@ -20,48 +21,51 @@ import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier
  * @author Thomas Pantelis
  */
 public class ShardPeerAddressResolverTest {
+    private static final MemberName MEMBER_1 = MemberName.forName("member-1");
+    private static final MemberName MEMBER_2 = MemberName.forName("member-2");
+    private static final MemberName MEMBER_3 = MemberName.forName("member-3");
 
     @Test
     public void testGetShardActorAddress() {
-        ShardPeerAddressResolver resolver = new ShardPeerAddressResolver("config", "member-1");
+        ShardPeerAddressResolver resolver = new ShardPeerAddressResolver("config", MEMBER_1);
 
-        assertEquals("getShardActorAddress", null, resolver.getShardActorAddress("default", "member-2"));
+        assertEquals("getShardActorAddress", null, resolver.getShardActorAddress("default", MEMBER_2));
 
         Address address2 = new Address("tcp", "system2");
-        resolver.addPeerAddress("member-2", address2);
-        assertEquals("getPeerAddress", address2, resolver.getPeerAddress("member-2"));
+        resolver.addPeerAddress(MEMBER_2, address2);
+        assertEquals("getPeerAddress", address2, resolver.getPeerAddress(MEMBER_2));
 
         Address address3 = new Address("tcp", "system3");
-        resolver.addPeerAddress("member-3", address3);
-        assertEquals("getPeerAddress", address3, resolver.getPeerAddress("member-3"));
+        resolver.addPeerAddress(MEMBER_3, address3);
+        assertEquals("getPeerAddress", address3, resolver.getPeerAddress(MEMBER_3));
 
         assertEquals("getShardActorAddress", address2.toString() +
                 "/user/shardmanager-config/member-2-shard-default-config",
-                resolver.getShardActorAddress("default", "member-2"));
+                resolver.getShardActorAddress("default", MEMBER_2));
 
         assertEquals("getShardActorAddress", address3.toString() +
                 "/user/shardmanager-config/member-3-shard-default-config",
-                resolver.getShardActorAddress("default", "member-3"));
+                resolver.getShardActorAddress("default", MEMBER_3));
 
         assertEquals("getShardActorAddress", address2.toString() +
                 "/user/shardmanager-config/member-2-shard-topology-config",
-                resolver.getShardActorAddress("topology", "member-2"));
+                resolver.getShardActorAddress("topology", MEMBER_2));
 
-        resolver.removePeerAddress("member-2");
-        assertEquals("getShardActorAddress", null, resolver.getShardActorAddress("default", "member-2"));
-        assertEquals("getShardActorAddress", null, resolver.getShardActorAddress("topology", "member-2"));
+        resolver.removePeerAddress(MEMBER_2);
+        assertEquals("getShardActorAddress", null, resolver.getShardActorAddress("default", MEMBER_2));
+        assertEquals("getShardActorAddress", null, resolver.getShardActorAddress("topology", MEMBER_2));
         assertEquals("getShardActorAddress", address3.toString() +
                 "/user/shardmanager-config/member-3-shard-default-config",
-                resolver.getShardActorAddress("default", "member-3"));
+                resolver.getShardActorAddress("default", MEMBER_3));
     }
 
     @Test
     public void testResolve() {
         String type = "config";
-        ShardPeerAddressResolver resolver = new ShardPeerAddressResolver(type, "member-1");
+        ShardPeerAddressResolver resolver = new ShardPeerAddressResolver(type, MEMBER_1);
 
-        String memberName = "member-2";
-        String peerId = ShardIdentifier.builder().memberName(memberName ).shardName("default").
+        MemberName memberName = MEMBER_2;
+        String peerId = ShardIdentifier.builder().memberName(memberName).shardName("default").
                 type(type).build().toString();
 
         assertEquals("resolve", null, resolver.resolve(peerId));
@@ -78,15 +82,15 @@ public class ShardPeerAddressResolverTest {
 
     @Test
     public void testGetShardManagerPeerActorAddresses() {
-        ShardPeerAddressResolver resolver = new ShardPeerAddressResolver("config", "member-1");
+        ShardPeerAddressResolver resolver = new ShardPeerAddressResolver("config", MEMBER_1);
 
-        resolver.addPeerAddress("member-1", new Address("tcp", "system1"));
+        resolver.addPeerAddress(MEMBER_1, new Address("tcp", "system1"));
 
         Address address2 = new Address("tcp", "system2");
-        resolver.addPeerAddress("member-2", address2);
+        resolver.addPeerAddress(MEMBER_2, address2);
 
         Address address3 = new Address("tcp", "system3");
-        resolver.addPeerAddress("member-3", address3);
+        resolver.addPeerAddress(MEMBER_3, address3);
 
         Collection<String> peerAddresses = resolver.getShardManagerPeerActorAddresses();
         assertEquals("getShardManagerPeerActorAddresses", Sets.newHashSet(

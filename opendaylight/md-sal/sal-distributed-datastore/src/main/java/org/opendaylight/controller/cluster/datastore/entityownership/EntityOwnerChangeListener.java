@@ -13,6 +13,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import java.util.Collection;
 import java.util.Objects;
+import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
 import org.opendaylight.yangtools.yang.data.api.schema.LeafNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -29,10 +30,10 @@ import org.slf4j.LoggerFactory;
 class EntityOwnerChangeListener extends AbstractEntityOwnerChangeListener {
     private static final Logger LOG = LoggerFactory.getLogger(EntityOwnerChangeListener.class);
 
-    private final String localMemberName;
+    private final MemberName localMemberName;
     private final EntityOwnershipListenerSupport listenerSupport;
 
-    EntityOwnerChangeListener(final String localMemberName, final EntityOwnershipListenerSupport listenerSupport) {
+    EntityOwnerChangeListener(final MemberName localMemberName, final EntityOwnershipListenerSupport listenerSupport) {
         this.localMemberName = Preconditions.checkNotNull(localMemberName);
         this.listenerSupport = Preconditions.checkNotNull(listenerSupport);
     }

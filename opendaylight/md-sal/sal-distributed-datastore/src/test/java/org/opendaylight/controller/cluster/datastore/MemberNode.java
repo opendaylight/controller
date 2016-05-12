@@ -26,6 +26,7 @@ import com.typesafe.config.ConfigFactory;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.controller.cluster.raft.client.messages.GetOnDemandRaftState;
@@ -146,7 +147,7 @@ public class MemberNode {
             String... peerMemberNames) throws Exception {
         final Set<String> peerIds = Sets.newHashSet();
         for(String p: peerMemberNames) {
-            peerIds.add(ShardIdentifier.builder().memberName(p).shardName(shardName).
+            peerIds.add(ShardIdentifier.builder().memberName(MemberName.forName(p)).shardName(shardName).
                 type(datastore.getActorContext().getDataStoreName()).build().toString());
         }
 
@@ -269,7 +270,7 @@ public class MemberNode {
 
             node.kit = new IntegrationTestKit(system, datastoreContextBuilder);
 
-            String memberName = new ClusterWrapperImpl(system).getCurrentMemberName();
+            String memberName = new ClusterWrapperImpl(system).getCurrentMemberName().getName();
             node.kit.getDatastoreContextBuilder().shardManagerPersistenceId("shard-manager-config-" + memberName);
             node.configDataStore = node.kit.setupDistributedDataStore("config_" + testName, moduleShardsConfig,
                     true, schemaContext, waitForshardLeader);

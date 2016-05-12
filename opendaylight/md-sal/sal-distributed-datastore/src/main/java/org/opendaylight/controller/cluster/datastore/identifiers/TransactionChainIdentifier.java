@@ -11,6 +11,7 @@ package org.opendaylight.controller.cluster.datastore.identifiers;
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import java.util.concurrent.atomic.AtomicLong;
+import org.opendaylight.controller.cluster.access.concepts.MemberName;
 
 public class TransactionChainIdentifier {
 
@@ -18,18 +19,15 @@ public class TransactionChainIdentifier {
 
     private final AtomicLong txnCounter = new AtomicLong();
     private final Supplier<String> stringRepresentation;
-    private final String memberName;
+    private final MemberName memberName;
 
-    public TransactionChainIdentifier(final String memberName, final long counter) {
+    public TransactionChainIdentifier(final MemberName memberName, final long counter) {
         this.memberName = memberName;
-        stringRepresentation = Suppliers.memoize(new Supplier<String>() {
-            @Override
-            public String get() {
-                final StringBuilder sb = new StringBuilder();
-                sb.append(memberName).append(CHAIN_SEPARATOR);
-                sb.append(counter);
-                return sb.toString();
-            }
+        stringRepresentation = Suppliers.memoize(() -> {
+            final StringBuilder sb = new StringBuilder();
+            sb.append(memberName.getName()).append(CHAIN_SEPARATOR);
+            sb.append(counter);
+            return sb.toString();
         });
     }
     @Override
@@ -41,7 +39,7 @@ public class TransactionChainIdentifier {
         return new ChainedTransactionIdentifier(this, txnCounter.incrementAndGet());
     }
 
-    public String getMemberName() {
+    public MemberName getMemberName() {
         return memberName;
     }
 }
