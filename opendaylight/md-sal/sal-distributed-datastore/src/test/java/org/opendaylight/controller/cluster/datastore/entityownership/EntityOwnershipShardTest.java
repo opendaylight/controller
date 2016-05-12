@@ -39,6 +39,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.After;
 import org.junit.Test;
+import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.AbstractShardTest;
 import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
@@ -423,8 +424,8 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
 
         // Send PeerDown and PeerUp with no entities
 
-        leader.tell(new PeerDown(peerMemberName2, peerId2.toString()), ActorRef.noSender());
-        leader.tell(new PeerUp(peerMemberName2, peerId2.toString()), ActorRef.noSender());
+        leader.tell(new PeerDown(peerId2.getMemberName(), peerId2.toString()), ActorRef.noSender());
+        leader.tell(new PeerUp(peerId2.getMemberName(), peerId2.toString()), ActorRef.noSender());
 
         // Add candidates for entity1 with the local leader as the owner
 
@@ -481,10 +482,10 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
         kit.expectMsgClass(JavaTestKit.duration("5 seconds"), Terminated.class);
         kit.unwatch(peer2);
 
-        leader.tell(new PeerDown(peerMemberName2, peerId2.toString()), ActorRef.noSender());
+        leader.tell(new PeerDown(peerId2.getMemberName(), peerId2.toString()), ActorRef.noSender());
         // Send PeerDown again - should be noop
-        leader.tell(new PeerDown(peerMemberName2, peerId2.toString()), ActorRef.noSender());
-        peer1.tell(new PeerDown(peerMemberName2, peerId2.toString()), ActorRef.noSender());
+        leader.tell(new PeerDown(peerId2.getMemberName(), peerId2.toString()), ActorRef.noSender());
+        peer1.tell(new PeerDown(peerId2.getMemberName(), peerId2.toString()), ActorRef.noSender());
 
         verifyOwner(leader, ENTITY_TYPE, ENTITY_ID4, ""); // no other candidates so should clear
         verifyOwner(leader, ENTITY_TYPE, ENTITY_ID3, LOCAL_MEMBER_NAME);
@@ -501,10 +502,10 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
         peer2 = actorFactory.createTestActor(newShardProps(peerId2,
                 ImmutableMap.<String, String>builder().put(leaderId.toString(), ""). put(peerId1.toString(), "").build(),
                         peerMemberName2, EntityOwnerSelectionStrategyConfig.newBuilder().build()). withDispatcher(Dispatchers.DefaultDispatcherId()), peerId2.toString());
-        leader.tell(new PeerUp(peerMemberName2, peerId2.toString()), ActorRef.noSender());
+        leader.tell(new PeerUp(peerId2.getMemberName(), peerId2.toString()), ActorRef.noSender());
         // Send PeerUp again - should be noop
-        leader.tell(new PeerUp(peerMemberName2, peerId2.toString()), ActorRef.noSender());
-        peer1.tell(new PeerUp(peerMemberName2, peerId2.toString()), ActorRef.noSender());
+        leader.tell(new PeerUp(peerId2.getMemberName(), peerId2.toString()), ActorRef.noSender());
+        peer1.tell(new PeerUp(peerId2.getMemberName(), peerId2.toString()), ActorRef.noSender());
 
         verifyOwner(leader, ENTITY_TYPE, ENTITY_ID3, LOCAL_MEMBER_NAME);
         verifyOwner(leader, ENTITY_TYPE, ENTITY_ID2, peerMemberName1);
@@ -526,7 +527,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
         // Kill peerMember1 and send PeerDown - entity 2 should get a new owner selected
 
         peer1.tell(PoisonPill.getInstance(), ActorRef.noSender());
-        leader.tell(new PeerDown(peerMemberName1, peerId1.toString()), ActorRef.noSender());
+        leader.tell(new PeerDown(peerId1.getMemberName(), peerId1.toString()), ActorRef.noSender());
 
         verifyOwner(leader, ENTITY_TYPE, ENTITY_ID2, peerMemberName2);
 
@@ -542,7 +543,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
         peer1 = actorFactory.createTestActor(newShardProps(peerId1,
                 ImmutableMap.<String, String>builder().put(leaderId.toString(), ""). put(peerId2.toString(), "").build(),
                         peerMemberName1, EntityOwnerSelectionStrategyConfig.newBuilder().build()).withDispatcher(Dispatchers.DefaultDispatcherId()), peerId1.toString());
-        leader.tell(new PeerUp(peerMemberName1, peerId1.toString()), ActorRef.noSender());
+        leader.tell(new PeerUp(peerId1.getMemberName(), peerId1.toString()), ActorRef.noSender());
 
         verifyOwner(leader, ENTITY_TYPE, ENTITY_ID4, "");
         verifyOwner(leader, ENTITY_TYPE, ENTITY_ID3, LOCAL_MEMBER_NAME);
@@ -560,11 +561,11 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
         // the entities (1 and 3) previously owned by the local leader member.
 
         peer2.tell(new PeerAddressResolved(peerId1.toString(), peer1.path().toString()), ActorRef.noSender());
-        peer2.tell(new PeerUp(LOCAL_MEMBER_NAME, leaderId.toString()), ActorRef.noSender());
-        peer2.tell(new PeerUp(peerMemberName1, peerId1.toString()), ActorRef.noSender());
+        peer2.tell(new PeerUp(leaderId.getMemberName(), leaderId.toString()), ActorRef.noSender());
+        peer2.tell(new PeerUp(peerId1.getMemberName(), peerId1.toString()), ActorRef.noSender());
 
         leader.tell(PoisonPill.getInstance(), ActorRef.noSender());
-        peer2.tell(new PeerDown(LOCAL_MEMBER_NAME, leaderId.toString()), ActorRef.noSender());
+        peer2.tell(new PeerDown(leaderId.getMemberName(), leaderId.toString()), ActorRef.noSender());
         peer2.tell(ElectionTimeout.INSTANCE, peer2);
 
         ShardTestKit.waitUntilLeader(peer2);
@@ -614,7 +615,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
         // Simulate a replicated commit from the leader to remove the local candidate that would occur after a
         // network partition is healed.
 
-        leader.tell(new PeerDown(LOCAL_MEMBER_NAME, localId.toString()), ActorRef.noSender());
+        leader.tell(new PeerDown(localId.getMemberName(), localId.toString()), ActorRef.noSender());
 
         verify(listener, timeout(5000)).ownershipChanged(ownershipChange(entity, true, false, false));
 
@@ -809,7 +810,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
         return newShardProps(newShardId(LOCAL_MEMBER_NAME), peers, LOCAL_MEMBER_NAME, strategyConfig);
     }
 
-    private Props newShardProps(Map<String,String> peers) {
+    private Props newShardProps(Map<String, String> peers) {
         return newShardProps(newShardId(LOCAL_MEMBER_NAME), peers, LOCAL_MEMBER_NAME, EntityOwnerSelectionStrategyConfig.newBuilder().build());
     }
 
@@ -817,11 +818,12 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
                                 EntityOwnerSelectionStrategyConfig config) {
         return EntityOwnershipShard.newBuilder().id(shardId).peerAddresses(peers).
                 datastoreContext(dataStoreContextBuilder.build()).schemaContext(SCHEMA_CONTEXT).
-                localMemberName(memberName).ownerSelectionStrategyConfig(config).props().withDispatcher(Dispatchers.DefaultDispatcherId());
+                localMemberName(MemberName.forName(memberName)).ownerSelectionStrategyConfig(config).props()
+                .withDispatcher(Dispatchers.DefaultDispatcherId());
     }
 
     private static ShardIdentifier newShardId(String memberName) {
-        return ShardIdentifier.builder().memberName(memberName).shardName("entity-ownership").
+        return ShardIdentifier.builder().memberName(MemberName.forName(memberName)).shardName("entity-ownership").
                 type("operational" + NEXT_SHARD_NUM.getAndIncrement()).build();
     }
 
@@ -830,7 +832,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
         TestEntityOwnershipShard(ShardIdentifier name, Map<String, String> peerAddresses,
                 DatastoreContext datastoreContext) {
             super(newBuilder().id(name).peerAddresses(peerAddresses).datastoreContext(datastoreContext).
-                    schemaContext(SCHEMA_CONTEXT).localMemberName(LOCAL_MEMBER_NAME));
+                    schemaContext(SCHEMA_CONTEXT).localMemberName(MemberName.forName(LOCAL_MEMBER_NAME)));
         }
 
         @Override

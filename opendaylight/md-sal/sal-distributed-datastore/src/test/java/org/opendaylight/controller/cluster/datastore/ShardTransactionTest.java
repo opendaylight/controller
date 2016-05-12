@@ -23,6 +23,7 @@ import java.util.concurrent.TimeUnit;
 import org.junit.Test;
 import org.mockito.InOrder;
 import org.mockito.Mockito;
+import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.exceptions.UnknownMessageException;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStats;
@@ -61,7 +62,7 @@ public class ShardTransactionTest extends AbstractActorTest {
     private static final TransactionType WO = TransactionType.WRITE_ONLY;
 
     private static final ShardIdentifier SHARD_IDENTIFIER =
-        ShardIdentifier.builder().memberName("member-1")
+        ShardIdentifier.builder().memberName(MemberName.forName("member-1"))
             .shardName("inventory").type("config").build();
 
     private DatastoreContext datastoreContext = DatastoreContext.newBuilder().build();

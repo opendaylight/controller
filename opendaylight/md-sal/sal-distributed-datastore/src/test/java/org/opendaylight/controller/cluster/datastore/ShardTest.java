@@ -47,6 +47,7 @@ import org.junit.Test;
 import org.mockito.InOrder;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.DelegatingPersistentDataProvider;
+import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStats;
@@ -389,7 +390,7 @@ public class ShardTest extends AbstractShardTest {
     @Test
     public void testPeerAddressResolved() throws Exception {
         new ShardTestKit(getSystem()) {{
-            ShardIdentifier peerID = ShardIdentifier.builder().memberName("member-2")
+            ShardIdentifier peerID = ShardIdentifier.builder().memberName(MemberName.forName("member-2"))
                     .shardName("inventory").type("config").build();
             final TestActorRef<Shard> shard = actorFactory.createTestActor(newShardBuilder().
                     peerAddresses(Collections.<String, String>singletonMap(peerID.toString(), null)).props().
@@ -2307,11 +2308,13 @@ public class ShardTest extends AbstractShardTest {
     public void testClusteredDataChangeListenerRegistration() throws Exception {
         new ShardTestKit(getSystem()) {{
             String testName = "testClusteredDataChangeListenerRegistration";
-            final ShardIdentifier followerShardID = ShardIdentifier.builder().memberName(
-                    actorFactory.generateActorId(testName + "-follower")).shardName("inventory").type("config").build();
+            final ShardIdentifier followerShardID = ShardIdentifier.builder()
+                    .memberName(MemberName.forName(actorFactory.generateActorId(testName + "-follower")))
+                    .shardName("inventory").type("config").build();
 
-            final ShardIdentifier leaderShardID = ShardIdentifier.builder().memberName(
-                    actorFactory.generateActorId(testName + "-leader")).shardName("inventory").type("config").build();
+            final ShardIdentifier leaderShardID = ShardIdentifier.builder()
+                    .memberName(MemberName.forName(actorFactory.generateActorId(testName + "-leader")))
+                    .shardName("inventory").type("config").build();
 
             final TestActorRef<Shard> followerShard = actorFactory.createTestActor(
                     Shard.builder().id(followerShardID).
@@ -2383,11 +2386,13 @@ public class ShardTest extends AbstractShardTest {
     public void testClusteredDataTreeChangeListenerRegistration() throws Exception {
         new ShardTestKit(getSystem()) {{
             String testName = "testClusteredDataTreeChangeListenerRegistration";
-            final ShardIdentifier followerShardID = ShardIdentifier.builder().memberName(
-                    actorFactory.generateActorId(testName + "-follower")).shardName("inventory").type("config").build();
+            final ShardIdentifier followerShardID = ShardIdentifier.builder()
+                    .memberName(MemberName.forName(actorFactory.generateActorId(testName + "-follower")))
+                    .shardName("inventory").type("config").build();
 
-            final ShardIdentifier leaderShardID = ShardIdentifier.builder().memberName(
-                    actorFactory.generateActorId(testName + "-leader")).shardName("inventory").type("config").build();
+            final ShardIdentifier leaderShardID = ShardIdentifier.builder()
+                    .memberName(MemberName.forName(actorFactory.generateActorId(testName + "-leader")))
+                    .shardName("inventory").type("config").build();
 
             final TestActorRef<Shard> followerShard = actorFactory.createTestActor(
                     Shard.builder().id(followerShardID).

@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.Set;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategy;
 
 public interface Configuration {
@@ -19,7 +20,7 @@ public interface Configuration {
     /**
      * Returns all the shard names that belong on the member by the given name.
      */
-    @Nonnull Collection<String> getMemberShardNames(@Nonnull String memberName);
+    @Nonnull Collection<String> getMemberShardNames(@Nonnull MemberName memberName);
 
     /**
      * Returns the module name for the given namespace name or null if not found.
@@ -34,7 +35,7 @@ public interface Configuration {
     /**
      * Returns the member replicas for the given shard name.
      */
-    @Nonnull Collection<String> getMembersFromShardName(@Nonnull String shardName);
+    @Nonnull Collection<MemberName> getMembersFromShardName(@Nonnull String shardName);
 
     /**
      * Returns the ShardStrategy for the given module name or null if the module is not found.
@@ -54,7 +55,7 @@ public interface Configuration {
     /**
      * Returns a unique set of all member names configured for all shards.
      */
-    Collection<String> getUniqueMemberNamesForAllShards();
+    Collection<MemberName> getUniqueMemberNamesForAllShards();
 
     /*
      * Verifies if the given module shard in available in the cluster
@@ -64,10 +65,10 @@ public interface Configuration {
     /**
      * Adds the given member as the new replica for the given shardName
      */
-    void addMemberReplicaForShard (String shardName, String memberName);
+    void addMemberReplicaForShard (String shardName, MemberName memberName);
 
     /**
      * Removes the given member as a replica for the given shardName
      */
-    void removeMemberReplicaForShard (String shardName, String memberName);
+    void removeMemberReplicaForShard (String shardName, MemberName memberName);
 }
