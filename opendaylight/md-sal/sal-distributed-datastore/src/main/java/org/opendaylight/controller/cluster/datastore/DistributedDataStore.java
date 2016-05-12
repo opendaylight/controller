@@ -265,7 +265,8 @@ public class DistributedDataStore implements DistributedDataStoreInterface, Sche
             } catch (Exception e){
                 lastException = e;
                 Uninterruptibles.sleepUninterruptibly(100, TimeUnit.MILLISECONDS);
-                LOG.debug(String.format("Could not create actor %s because of %s - waiting for sometime before retrying (retry count = %d)", shardManagerId, e.getMessage(), i));
+                LOG.debug("Could not create actor {} because of {} - waiting for sometime before retrying (retry count = {})",
+                    shardManagerId, e.getMessage(), i);
             }
         }
 
