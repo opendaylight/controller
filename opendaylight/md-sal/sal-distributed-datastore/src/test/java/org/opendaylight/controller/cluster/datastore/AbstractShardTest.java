@@ -88,8 +88,8 @@ public abstract class AbstractShardTest extends AbstractActorTest{
 
     private static final AtomicInteger NEXT_SHARD_NUM = new AtomicInteger();
 
-    protected final ShardIdentifier shardID = ShardIdentifier.builder().memberName(MemberName.forName("member-1"))
-            .shardName("inventory").type("config" + NEXT_SHARD_NUM.getAndIncrement()).build();
+    protected final ShardIdentifier shardID = ShardIdentifier.create("inventory", MemberName.forName("member-1"),
+        "config" + NEXT_SHARD_NUM.getAndIncrement());
 
     protected final Builder dataStoreContextBuilder = DatastoreContext.newBuilder().
             shardJournalRecoveryLogBatchSize(3).shardSnapshotBatchCount(5000).

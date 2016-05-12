@@ -97,8 +97,7 @@ final class ShardManagerInfo extends AbstractMXBean implements ShardManagerInfoM
 
     @Override
     public void switchShardState(String shardId, String newState, long term) {
-        final ShardIdentifier identifier = ShardIdentifier.builder().fromShardIdString(
-                Preconditions.checkNotNull(shardId, "Shard id may not be null")).build();
+        final ShardIdentifier identifier = ShardIdentifier.fromShardIdString(shardId);
         LOG.info("switchShardState called shardName = {}, newState = {}, term = {}", shardId, newState, term);
         requestSwitchShardState(identifier, newState, term);
     }
