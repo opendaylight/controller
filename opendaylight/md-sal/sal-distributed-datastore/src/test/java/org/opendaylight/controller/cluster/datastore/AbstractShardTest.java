@@ -42,6 +42,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext.Builder;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.BatchedModifications;
@@ -87,7 +88,7 @@ public abstract class AbstractShardTest extends AbstractActorTest{
 
     private static final AtomicInteger NEXT_SHARD_NUM = new AtomicInteger();
 
-    protected final ShardIdentifier shardID = ShardIdentifier.builder().memberName("member-1")
+    protected final ShardIdentifier shardID = ShardIdentifier.builder().memberName(MemberName.forName("member-1"))
             .shardName("inventory").type("config" + NEXT_SHARD_NUM.getAndIncrement()).build();
 
     protected final Builder dataStoreContextBuilder = DatastoreContext.newBuilder().
@@ -129,8 +130,7 @@ public abstract class AbstractShardTest extends AbstractActorTest{
         final CountDownLatch recoveryComplete = new CountDownLatch(1);
 
         @SuppressWarnings("serial")
-        final
-        Creator<Shard> creator = new Creator<Shard>() {
+        final Creator<Shard> creator = new Creator<Shard>() {
             @Override
             public Shard create() throws Exception {
                 return new Shard(newShardBuilder()) {

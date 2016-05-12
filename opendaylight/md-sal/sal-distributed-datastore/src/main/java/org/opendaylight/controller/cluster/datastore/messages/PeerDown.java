@@ -7,21 +7,23 @@
  */
 package org.opendaylight.controller.cluster.datastore.messages;
 
+import org.opendaylight.controller.cluster.access.concepts.MemberName;
+
 /**
  * Message sent to a shard actor indicating one of its peers is down.
  *
  * @author Thomas Pantelis
  */
 public class PeerDown {
-    private final String memberName;
+    private final MemberName memberName;
     private final String peerId;
 
-    public PeerDown(String memberName, String peerId) {
+    public PeerDown(MemberName memberName, String peerId) {
         this.memberName = memberName;
         this.peerId = peerId;
     }
 
-    public String getMemberName() {
+    public MemberName getMemberName() {
         return memberName;
     }
 
@@ -32,6 +34,6 @@ public class PeerDown {
 
     @Override
     public String toString() {
-        return "PeerDown [memberName=" + memberName + ", peerId=" + peerId + "]";
+        return "PeerDown [memberName=" + memberName.getName() + ", peerId=" + peerId + "]";
     }
 }

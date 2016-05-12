@@ -13,10 +13,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.opendaylight.controller.cluster.datastore.config.Configuration;
+import java.util.stream.Collectors;
+import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.config.ConfigurationImpl;
 import org.opendaylight.controller.cluster.datastore.config.ModuleConfig;
-import org.opendaylight.controller.cluster.datastore.config.ModuleShardConfigProvider;
 
 public class MockConfiguration extends ConfigurationImpl {
     public MockConfiguration() {
@@ -24,17 +24,16 @@ public class MockConfiguration extends ConfigurationImpl {
     }
 
     public MockConfiguration(final Map<String, List<String>> shardMembers) {
-        super(new ModuleShardConfigProvider() {
-            @Override
-            public Map<String, ModuleConfig.Builder> retrieveModuleConfigs(Configuration configuration) {
-                Map<String, ModuleConfig.Builder> retMap = new HashMap<>();
-                for(Map.Entry<String, List<String>> e : shardMembers.entrySet()) {
-                    String shardName = e.getKey();
-                    retMap.put(shardName, ModuleConfig.builder(shardName).shardConfig(shardName, e.getValue()));
-                }
-
-                return retMap;
+        super(configuration -> {
+            Map<String, ModuleConfig.Builder> retMap = new HashMap<>();
+            for(Map.Entry<String, List<String>> e : shardMembers.entrySet()) {
+                String shardName = e.getKey();
+                retMap.put(shardName,
+                    ModuleConfig.builder(shardName).shardConfig(
+                        shardName, e.getValue().stream().map(MemberName::forName).collect(Collectors.toList())));
             }
+
+            return retMap;
         });
     }
 }
