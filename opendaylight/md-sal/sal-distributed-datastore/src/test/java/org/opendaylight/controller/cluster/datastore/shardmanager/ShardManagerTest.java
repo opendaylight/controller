@@ -166,7 +166,7 @@ public class ShardManagerTest extends AbstractActorTest {
         InMemorySnapshotStore.clear();
 
         if(mockShardActor == null) {
-            mockShardName = new ShardIdentifier(Shard.DEFAULT_NAME, MEMBER_1, "config");
+            mockShardName = ShardIdentifier.create(Shard.DEFAULT_NAME, MEMBER_1, "config");
             mockShardActor = TestActorRef.create(getSystem(), Props.create(MessageCollectorActor.class),
                     mockShardName.toString());
         }
@@ -193,7 +193,7 @@ public class ShardManagerTest extends AbstractActorTest {
     }
 
     private ActorRef newMockShardActor(ActorSystem system, String shardName, String memberName) {
-        String name = new ShardIdentifier(shardName, MemberName.forName(memberName), "config").toString();
+        String name = ShardIdentifier.create(shardName, MemberName.forName(memberName), "config").toString();
         if(system == getSystem()) {
             return actorFactory.createTestActor(Props.create(MessageCollectorActor.class), name);
         }
@@ -1222,10 +1222,10 @@ public class ShardManagerTest extends AbstractActorTest {
             assertTrue("Epxected ShardPeerAddressResolver", shardBuilder.getDatastoreContext().getShardRaftConfig().
                     getPeerAddressResolver() instanceof ShardPeerAddressResolver);
             assertEquals("peerMembers", Sets.newHashSet(
-                new ShardIdentifier("foo", MemberName.forName("member-5"), shardMrgIDSuffix).toString(),
-                new ShardIdentifier("foo", MemberName.forName("member-6"), shardMrgIDSuffix).toString()),
+                ShardIdentifier.create("foo", MemberName.forName("member-5"), shardMrgIDSuffix).toString(),
+                ShardIdentifier.create("foo", MemberName.forName("member-6"), shardMrgIDSuffix).toString()),
                 shardBuilder.getPeerAddresses().keySet());
-            assertEquals("ShardIdentifier", new ShardIdentifier("foo", MEMBER_1, shardMrgIDSuffix),
+            assertEquals("ShardIdentifier", ShardIdentifier.create("foo", MEMBER_1, shardMrgIDSuffix),
                     shardBuilder.getId());
             assertSame("schemaContext", schemaContext, shardBuilder.getSchemaContext());
 
@@ -1443,7 +1443,7 @@ public class ShardManagerTest extends AbstractActorTest {
         final ActorSystem system2 = newActorSystem("Member2");
         Cluster.get(system2).join(AddressFromURIString.parse("akka.tcp://cluster-test@127.0.0.1:2558"));
 
-        String name = new ShardIdentifier("astronauts", MEMBER_2, "config").toString();
+        String name = ShardIdentifier.create("astronauts", MEMBER_2, "config").toString();
         final TestActorRef<MockRespondActor> mockShardLeaderActor =
                 TestActorRef.create(system2, Props.create(MockRespondActor.class).
                         withDispatcher(Dispatchers.DefaultDispatcherId()), name);
@@ -1690,7 +1690,7 @@ public class ShardManagerTest extends AbstractActorTest {
             respondActor.underlyingActor().updateResponse(new RemoveServerReply(ServerChangeStatus.OK, null));
             shardManager.tell(new RemoveShardReplica(Shard.DEFAULT_NAME, MEMBER_1), getRef());
             final RemoveServer removeServer = MessageCollectorActor.expectFirstMatching(respondActor, RemoveServer.class);
-            assertEquals(new ShardIdentifier("default", MEMBER_1, shardMrgIDSuffix).toString(),
+            assertEquals(ShardIdentifier.create("default", MEMBER_1, shardMrgIDSuffix).toString(),
                     removeServer.getServerId());
             expectMsgClass(duration("5 seconds"), Success.class);
         }};
@@ -1719,7 +1719,7 @@ public class ShardManagerTest extends AbstractActorTest {
         final ActorSystem system2 = newActorSystem("Member2");
         Cluster.get(system2).join(AddressFromURIString.parse("akka.tcp://cluster-test@127.0.0.1:2558"));
 
-        String name = new ShardIdentifier("default", MEMBER_2, shardMrgIDSuffix).toString();
+        String name = ShardIdentifier.create("default", MEMBER_2, shardMrgIDSuffix).toString();
         final TestActorRef<MockRespondActor> mockShardLeaderActor =
                 TestActorRef.create(system2, Props.create(MockRespondActor.class), name);
 
@@ -1777,7 +1777,7 @@ public class ShardManagerTest extends AbstractActorTest {
             newReplicaShardManager.tell(new RemoveShardReplica("default", MEMBER_1), getRef());
             RemoveServer removeServer = MessageCollectorActor.expectFirstMatching(mockShardLeaderActor,
                     RemoveServer.class);
-            String removeServerId = new ShardIdentifier("default", MEMBER_1, shardMrgIDSuffix).toString();
+            String removeServerId = ShardIdentifier.create("default", MEMBER_1, shardMrgIDSuffix).toString();
             assertEquals("RemoveServer serverId", removeServerId, removeServer.getServerId());
             expectMsgClass(duration("5 seconds"), Status.Success.class);
         }};
@@ -1867,8 +1867,7 @@ public class ShardManagerTest extends AbstractActorTest {
                             put("astronauts", Arrays.asList("member-2")).
                             put("people", Arrays.asList("member-1", "member-2")).build());
 
-            String shardId = ShardIdentifier.builder().shardName("default").memberName(MEMBER_1).
-                    type(shardMrgIDSuffix).build().toString();
+            String shardId = ShardIdentifier.create("default", MEMBER_1, shardMrgIDSuffix).toString();
             TestActorRef<MessageCollectorActor> shard = actorFactory.createTestActor(
                     MessageCollectorActor.props(), shardId);
 
@@ -1940,13 +1939,11 @@ public class ShardManagerTest extends AbstractActorTest {
                             put("shard1", Arrays.asList("member-1")).
                             put("shard2", Arrays.asList("member-1")).build());
 
-            String shardId1 = ShardIdentifier.builder().shardName("shard1").memberName(MEMBER_1).
-                    type(shardMrgIDSuffix).build().toString();
+            String shardId1 = ShardIdentifier.create("shard1", MEMBER_1, shardMrgIDSuffix).toString();
             TestActorRef<MessageCollectorActor> shard1 = actorFactory.createTestActor(
                     MessageCollectorActor.props().withDispatcher(Dispatchers.DefaultDispatcherId()), shardId1);
 
-            String shardId2 = ShardIdentifier.builder().shardName("shard2").memberName(MEMBER_1).
-                    type(shardMrgIDSuffix).build().toString();
+            String shardId2 = ShardIdentifier.create("shard2", MEMBER_1, shardMrgIDSuffix).toString();
             TestActorRef<MessageCollectorActor> shard2 = actorFactory.createTestActor(
                     MessageCollectorActor.props().withDispatcher(Dispatchers.DefaultDispatcherId()), shardId2);
 

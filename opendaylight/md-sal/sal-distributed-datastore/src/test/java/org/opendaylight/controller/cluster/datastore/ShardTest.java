@@ -390,8 +390,7 @@ public class ShardTest extends AbstractShardTest {
     @Test
     public void testPeerAddressResolved() throws Exception {
         new ShardTestKit(getSystem()) {{
-            ShardIdentifier peerID = ShardIdentifier.builder().memberName(MemberName.forName("member-2"))
-                    .shardName("inventory").type("config").build();
+            ShardIdentifier peerID = ShardIdentifier.create("inventory", MemberName.forName("member-2"), "config");
             final TestActorRef<Shard> shard = actorFactory.createTestActor(newShardBuilder().
                     peerAddresses(Collections.<String, String>singletonMap(peerID.toString(), null)).props().
                         withDispatcher(Dispatchers.DefaultDispatcherId()), "testPeerAddressResolved");
@@ -2308,13 +2307,11 @@ public class ShardTest extends AbstractShardTest {
     public void testClusteredDataChangeListenerRegistration() throws Exception {
         new ShardTestKit(getSystem()) {{
             String testName = "testClusteredDataChangeListenerRegistration";
-            final ShardIdentifier followerShardID = ShardIdentifier.builder()
-                    .memberName(MemberName.forName(actorFactory.generateActorId(testName + "-follower")))
-                    .shardName("inventory").type("config").build();
+            final ShardIdentifier followerShardID = ShardIdentifier.create("inventory",
+                    MemberName.forName(actorFactory.generateActorId(testName + "-follower")), "config");
 
-            final ShardIdentifier leaderShardID = ShardIdentifier.builder()
-                    .memberName(MemberName.forName(actorFactory.generateActorId(testName + "-leader")))
-                    .shardName("inventory").type("config").build();
+            final ShardIdentifier leaderShardID = ShardIdentifier.create("inventory",
+                    MemberName.forName(actorFactory.generateActorId(testName + "-leader")), "config");
 
             final TestActorRef<Shard> followerShard = actorFactory.createTestActor(
                     Shard.builder().id(followerShardID).
@@ -2386,13 +2383,11 @@ public class ShardTest extends AbstractShardTest {
     public void testClusteredDataTreeChangeListenerRegistration() throws Exception {
         new ShardTestKit(getSystem()) {{
             String testName = "testClusteredDataTreeChangeListenerRegistration";
-            final ShardIdentifier followerShardID = ShardIdentifier.builder()
-                    .memberName(MemberName.forName(actorFactory.generateActorId(testName + "-follower")))
-                    .shardName("inventory").type("config").build();
+            final ShardIdentifier followerShardID = ShardIdentifier.create("inventory",
+                    MemberName.forName(actorFactory.generateActorId(testName + "-follower")), "config");
 
-            final ShardIdentifier leaderShardID = ShardIdentifier.builder()
-                    .memberName(MemberName.forName(actorFactory.generateActorId(testName + "-leader")))
-                    .shardName("inventory").type("config").build();
+            final ShardIdentifier leaderShardID = ShardIdentifier.create("inventory",
+                    MemberName.forName(actorFactory.generateActorId(testName + "-leader")), "config");
 
             final TestActorRef<Shard> followerShard = actorFactory.createTestActor(
                     Shard.builder().id(followerShardID).
