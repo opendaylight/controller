@@ -62,8 +62,8 @@ class ShardPeerAddressResolver implements PeerAddressResolver {
         return peerAddresses;
     }
 
-    ShardIdentifier getShardIdentifier(MemberName memberName, String shardName){
-        return ShardIdentifier.builder().memberName(memberName).shardName(shardName).type(shardManagerType).build();
+    ShardIdentifier getShardIdentifier(MemberName memberName, String shardName) {
+        return ShardIdentifier.create(shardName, memberName, shardManagerType);
     }
 
     String getShardActorAddress(String shardName, MemberName memberName) {
@@ -82,11 +82,11 @@ class ShardPeerAddressResolver implements PeerAddressResolver {
 
     @Override
     public String resolve(String peerId) {
-        if(peerId == null) {
+        if (peerId == null) {
             return null;
         }
 
-        ShardIdentifier shardId = ShardIdentifier.builder().fromShardIdString(peerId).build();
+        ShardIdentifier shardId = ShardIdentifier.fromShardIdString(peerId);
         return getShardActorAddress(shardId.getShardName(), shardId.getMemberName());
     }
 }
