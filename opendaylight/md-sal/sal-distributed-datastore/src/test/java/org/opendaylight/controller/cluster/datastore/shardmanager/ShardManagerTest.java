@@ -653,6 +653,7 @@ public class ShardManagerTest extends AbstractActorTest {
                 newTestShardMgrBuilderWithMockShardActor().cluster(
                         new ClusterWrapperImpl(system1)).props().withDispatcher(
                                 Dispatchers.DefaultDispatcherId()), shardManagerID);
+        shardManager1.underlyingActor().waitForMemberUp();
 
         // Create an ActorSystem ShardManager actor for member-2.
 
@@ -1432,6 +1433,7 @@ public class ShardManagerTest extends AbstractActorTest {
         final TestActorRef<TestShardManager> newReplicaShardManager = TestActorRef.create(system1,
                 newTestShardMgrBuilder(mockConfig).shardActor(mockDefaultShardActor).cluster(
                         new ClusterWrapperImpl(system1)).props().withDispatcher(Dispatchers.DefaultDispatcherId()), shardManagerID);
+        newReplicaShardManager.underlyingActor().waitForMemberUp();
 
         // Create an ActorSystem ShardManager actor for member-2.
         final ActorSystem system2 = newActorSystem("Member2");
