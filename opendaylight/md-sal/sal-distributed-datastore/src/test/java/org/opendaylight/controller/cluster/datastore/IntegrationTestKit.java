@@ -216,12 +216,6 @@ public class IntegrationTestKit extends ShardTestKit {
         cohort.commit().get(5, TimeUnit.SECONDS);
     }
 
-    public void cleanup(DistributedDataStore dataStore) {
-        if(dataStore != null) {
-            dataStore.getActorContext().getShardManager().tell(PoisonPill.getInstance(), null);
-        }
-    }
-
     void assertExceptionOnCall(Callable<Void> callable, Class<? extends Exception> expType)
             throws Exception {
         try {

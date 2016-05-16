@@ -112,8 +112,13 @@ public class MemberNode {
     public void cleanup() {
         if(!cleanedUp) {
             cleanedUp = true;
-            kit.cleanup(configDataStore);
-            kit.cleanup(operDataStore);
+            if (configDataStore != null) {
+                configDataStore.close();
+            }
+            if (operDataStore != null) {
+                operDataStore.close();
+            }
+
             IntegrationTestKit.shutdownActorSystem(kit.getSystem(), Boolean.TRUE);
         }
     }
