@@ -12,7 +12,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
-import akka.actor.PoisonPill;
 import akka.cluster.Cluster;
 import akka.cluster.ClusterEvent.CurrentClusterState;
 import akka.cluster.Member;
@@ -214,12 +213,6 @@ public class IntegrationTestKit extends ShardTestKit {
         assertEquals("canCommit", true, canCommit);
         cohort.preCommit().get(5, TimeUnit.SECONDS);
         cohort.commit().get(5, TimeUnit.SECONDS);
-    }
-
-    public void cleanup(DistributedDataStore dataStore) {
-        if(dataStore != null) {
-            dataStore.getActorContext().getShardManager().tell(PoisonPill.getInstance(), null);
-        }
     }
 
     void assertExceptionOnCall(Callable<Void> callable, Class<? extends Exception> expType)
