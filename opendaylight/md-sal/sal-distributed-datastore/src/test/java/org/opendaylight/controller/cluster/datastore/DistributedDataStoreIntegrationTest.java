@@ -110,65 +110,63 @@ public class DistributedDataStoreIntegrationTest {
     @Test
     public void testWriteTransactionWithSingleShard() throws Exception{
         new IntegrationTestKit(getSystem(), datastoreContextBuilder) {{
-            DistributedDataStore dataStore =
-                    setupDistributedDataStore("transactionIntegrationTest", "test-1");
+            try (DistributedDataStore dataStore =
+                    setupDistributedDataStore("transactionIntegrationTest", "test-1")) {
 
-            testWriteTransaction(dataStore, TestModel.TEST_PATH,
+                testWriteTransaction(dataStore, TestModel.TEST_PATH,
                     ImmutableNodes.containerNode(TestModel.TEST_QNAME));
 
-            testWriteTransaction(dataStore, TestModel.OUTER_LIST_PATH,
+                testWriteTransaction(dataStore, TestModel.OUTER_LIST_PATH,
                     ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME).build());
-
-            cleanup(dataStore);
+            }
         }};
     }
 
     @Test
     public void testWriteTransactionWithMultipleShards() throws Exception{
         new IntegrationTestKit(getSystem(), datastoreContextBuilder) {{
-            DistributedDataStore dataStore =
-                    setupDistributedDataStore("testWriteTransactionWithMultipleShards", "cars-1", "people-1");
+            try (DistributedDataStore dataStore =
+                    setupDistributedDataStore("testWriteTransactionWithMultipleShards", "cars-1", "people-1")) {
 
-            DOMStoreWriteTransaction writeTx = dataStore.newWriteOnlyTransaction();
-            assertNotNull("newWriteOnlyTransaction returned null", writeTx);
+                DOMStoreWriteTransaction writeTx = dataStore.newWriteOnlyTransaction();
+                assertNotNull("newWriteOnlyTransaction returned null", writeTx);
 
-            writeTx.write(CarsModel.BASE_PATH, CarsModel.emptyContainer());
-            writeTx.write(PeopleModel.BASE_PATH, PeopleModel.emptyContainer());
+                writeTx.write(CarsModel.BASE_PATH, CarsModel.emptyContainer());
+                writeTx.write(PeopleModel.BASE_PATH, PeopleModel.emptyContainer());
 
-            doCommit(writeTx.ready());
+                doCommit(writeTx.ready());
 
-            writeTx = dataStore.newWriteOnlyTransaction();
+                writeTx = dataStore.newWriteOnlyTransaction();
 
-            writeTx.write(CarsModel.CAR_LIST_PATH, CarsModel.newCarMapNode());
-            writeTx.write(PeopleModel.PERSON_LIST_PATH, PeopleModel.newPersonMapNode());
+                writeTx.write(CarsModel.CAR_LIST_PATH, CarsModel.newCarMapNode());
+                writeTx.write(PeopleModel.PERSON_LIST_PATH, PeopleModel.newPersonMapNode());
 
-            doCommit(writeTx.ready());
+                doCommit(writeTx.ready());
 
-            writeTx = dataStore.newWriteOnlyTransaction();
+                writeTx = dataStore.newWriteOnlyTransaction();
 
-            MapEntryNode car = CarsModel.newCarEntry("optima", BigInteger.valueOf(20000));
-            YangInstanceIdentifier carPath = CarsModel.newCarPath("optima");
-            writeTx.write(carPath, car);
+                MapEntryNode car = CarsModel.newCarEntry("optima", BigInteger.valueOf(20000));
+                YangInstanceIdentifier carPath = CarsModel.newCarPath("optima");
+                writeTx.write(carPath, car);
 
-            MapEntryNode person = PeopleModel.newPersonEntry("jack");
-            YangInstanceIdentifier personPath = PeopleModel.newPersonPath("jack");
-            writeTx.write(personPath, person);
+                MapEntryNode person = PeopleModel.newPersonEntry("jack");
+                YangInstanceIdentifier personPath = PeopleModel.newPersonPath("jack");
+                writeTx.write(personPath, person);
 
-            doCommit(writeTx.ready());
+                doCommit(writeTx.ready());
 
-            // Verify the data in the store
+                // Verify the data in the store
 
-            DOMStoreReadTransaction readTx = dataStore.newReadOnlyTransaction();
+                DOMStoreReadTransaction readTx = dataStore.newReadOnlyTransaction();
 
-            Optional<NormalizedNode<?, ?>> optional = readTx.read(carPath).get(5, TimeUnit.SECONDS);
-            assertEquals("isPresent", true, optional.isPresent());
-            assertEquals("Data node", car, optional.get());
+                Optional<NormalizedNode<?, ?>> optional = readTx.read(carPath).get(5, TimeUnit.SECONDS);
+                assertEquals("isPresent", true, optional.isPresent());
+                assertEquals("Data node", car, optional.get());
 
-            optional = readTx.read(personPath).get(5, TimeUnit.SECONDS);
-            assertEquals("isPresent", true, optional.isPresent());
-            assertEquals("Data node", person, optional.get());
-
-            cleanup(dataStore);
+                optional = readTx.read(personPath).get(5, TimeUnit.SECONDS);
+                assertEquals("isPresent", true, optional.isPresent());
+                assertEquals("Data node", person, optional.get());
+            }
         }};
     }
 
@@ -176,134 +174,132 @@ public class DistributedDataStoreIntegrationTest {
     public void testReadWriteTransactionWithSingleShard() throws Exception{
         System.setProperty("shard.persistent", "true");
         new IntegrationTestKit(getSystem(), datastoreContextBuilder) {{
-            DistributedDataStore dataStore =
-                    setupDistributedDataStore("testReadWriteTransactionWithSingleShard", "test-1");
+            try (DistributedDataStore dataStore =
+                    setupDistributedDataStore("testReadWriteTransactionWithSingleShard", "test-1")) {
 
-            // 1. Create a read-write Tx
+                // 1. Create a read-write Tx
 
-            DOMStoreReadWriteTransaction readWriteTx = dataStore.newReadWriteTransaction();
-            assertNotNull("newReadWriteTransaction returned null", readWriteTx);
+                DOMStoreReadWriteTransaction readWriteTx = dataStore.newReadWriteTransaction();
+                assertNotNull("newReadWriteTransaction returned null", readWriteTx);
 
-            // 2. Write some data
+                // 2. Write some data
 
-            YangInstanceIdentifier nodePath = TestModel.TEST_PATH;
-            NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
-            readWriteTx.write(nodePath, nodeToWrite );
+                YangInstanceIdentifier nodePath = TestModel.TEST_PATH;
+                NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+                readWriteTx.write(nodePath, nodeToWrite );
 
-            // 3. Read the data from Tx
+                // 3. Read the data from Tx
 
-            Boolean exists = readWriteTx.exists(nodePath).checkedGet(5, TimeUnit.SECONDS);
-            assertEquals("exists", true, exists);
+                Boolean exists = readWriteTx.exists(nodePath).checkedGet(5, TimeUnit.SECONDS);
+                assertEquals("exists", true, exists);
 
-            Optional<NormalizedNode<?, ?>> optional = readWriteTx.read(nodePath).get(5, TimeUnit.SECONDS);
-            assertEquals("isPresent", true, optional.isPresent());
-            assertEquals("Data node", nodeToWrite, optional.get());
+                Optional<NormalizedNode<?, ?>> optional = readWriteTx.read(nodePath).get(5, TimeUnit.SECONDS);
+                assertEquals("isPresent", true, optional.isPresent());
+                assertEquals("Data node", nodeToWrite, optional.get());
 
-            // 4. Ready the Tx for commit
+                // 4. Ready the Tx for commit
 
-            DOMStoreThreePhaseCommitCohort cohort = readWriteTx.ready();
+                DOMStoreThreePhaseCommitCohort cohort = readWriteTx.ready();
 
-            // 5. Commit the Tx
+                // 5. Commit the Tx
 
-            doCommit(cohort);
+                doCommit(cohort);
 
-            // 6. Verify the data in the store
+                // 6. Verify the data in the store
 
-            DOMStoreReadTransaction readTx = dataStore.newReadOnlyTransaction();
+                DOMStoreReadTransaction readTx = dataStore.newReadOnlyTransaction();
 
-            optional = readTx.read(nodePath).get(5, TimeUnit.SECONDS);
-            assertEquals("isPresent", true, optional.isPresent());
-            assertEquals("Data node", nodeToWrite, optional.get());
-
-            cleanup(dataStore);
+                optional = readTx.read(nodePath).get(5, TimeUnit.SECONDS);
+                assertEquals("isPresent", true, optional.isPresent());
+                assertEquals("Data node", nodeToWrite, optional.get());
+            }
         }};
     }
 
     @Test
     public void testReadWriteTransactionWithMultipleShards() throws Exception{
         new IntegrationTestKit(getSystem(), datastoreContextBuilder) {{
-            DistributedDataStore dataStore =
-                    setupDistributedDataStore("testReadWriteTransactionWithMultipleShards", "cars-1", "people-1");
+            try (DistributedDataStore dataStore =
+                    setupDistributedDataStore("testReadWriteTransactionWithMultipleShards", "cars-1", "people-1")) {
 
-            DOMStoreReadWriteTransaction readWriteTx = dataStore.newReadWriteTransaction();
-            assertNotNull("newReadWriteTransaction returned null", readWriteTx);
+                DOMStoreReadWriteTransaction readWriteTx = dataStore.newReadWriteTransaction();
+                assertNotNull("newReadWriteTransaction returned null", readWriteTx);
 
-            readWriteTx.write(CarsModel.BASE_PATH, CarsModel.emptyContainer());
-            readWriteTx.write(PeopleModel.BASE_PATH, PeopleModel.emptyContainer());
+                readWriteTx.write(CarsModel.BASE_PATH, CarsModel.emptyContainer());
+                readWriteTx.write(PeopleModel.BASE_PATH, PeopleModel.emptyContainer());
 
-            doCommit(readWriteTx.ready());
+                doCommit(readWriteTx.ready());
 
-            readWriteTx = dataStore.newReadWriteTransaction();
+                readWriteTx = dataStore.newReadWriteTransaction();
 
-            readWriteTx.write(CarsModel.CAR_LIST_PATH, CarsModel.newCarMapNode());
-            readWriteTx.write(PeopleModel.PERSON_LIST_PATH, PeopleModel.newPersonMapNode());
+                readWriteTx.write(CarsModel.CAR_LIST_PATH, CarsModel.newCarMapNode());
+                readWriteTx.write(PeopleModel.PERSON_LIST_PATH, PeopleModel.newPersonMapNode());
 
-            doCommit(readWriteTx.ready());
+                doCommit(readWriteTx.ready());
 
-            readWriteTx = dataStore.newReadWriteTransaction();
+                readWriteTx = dataStore.newReadWriteTransaction();
 
-            MapEntryNode car = CarsModel.newCarEntry("optima", BigInteger.valueOf(20000));
-            YangInstanceIdentifier carPath = CarsModel.newCarPath("optima");
-            readWriteTx.write(carPath, car);
+                MapEntryNode car = CarsModel.newCarEntry("optima", BigInteger.valueOf(20000));
+                YangInstanceIdentifier carPath = CarsModel.newCarPath("optima");
+                readWriteTx.write(carPath, car);
 
-            MapEntryNode person = PeopleModel.newPersonEntry("jack");
-            YangInstanceIdentifier personPath = PeopleModel.newPersonPath("jack");
-            readWriteTx.write(personPath, person);
+                MapEntryNode person = PeopleModel.newPersonEntry("jack");
+                YangInstanceIdentifier personPath = PeopleModel.newPersonPath("jack");
+                readWriteTx.write(personPath, person);
 
-            Boolean exists = readWriteTx.exists(carPath).checkedGet(5, TimeUnit.SECONDS);
-            assertEquals("exists", true, exists);
+                Boolean exists = readWriteTx.exists(carPath).checkedGet(5, TimeUnit.SECONDS);
+                assertEquals("exists", true, exists);
 
-            Optional<NormalizedNode<?, ?>> optional = readWriteTx.read(carPath).get(5, TimeUnit.SECONDS);
-            assertEquals("isPresent", true, optional.isPresent());
-            assertEquals("Data node", car, optional.get());
+                Optional<NormalizedNode<?, ?>> optional = readWriteTx.read(carPath).get(5, TimeUnit.SECONDS);
+                assertEquals("isPresent", true, optional.isPresent());
+                assertEquals("Data node", car, optional.get());
 
-            doCommit(readWriteTx.ready());
+                doCommit(readWriteTx.ready());
 
-            // Verify the data in the store
+                // Verify the data in the store
 
-            DOMStoreReadTransaction readTx = dataStore.newReadOnlyTransaction();
+                DOMStoreReadTransaction readTx = dataStore.newReadOnlyTransaction();
 
-            optional = readTx.read(carPath).get(5, TimeUnit.SECONDS);
-            assertEquals("isPresent", true, optional.isPresent());
-            assertEquals("Data node", car, optional.get());
+                optional = readTx.read(carPath).get(5, TimeUnit.SECONDS);
+                assertEquals("isPresent", true, optional.isPresent());
+                assertEquals("Data node", car, optional.get());
 
-            optional = readTx.read(personPath).get(5, TimeUnit.SECONDS);
-            assertEquals("isPresent", true, optional.isPresent());
-            assertEquals("Data node", person, optional.get());
+                optional = readTx.read(personPath).get(5, TimeUnit.SECONDS);
+                assertEquals("isPresent", true, optional.isPresent());
+                assertEquals("Data node", person, optional.get());
 
-            cleanup(dataStore);
+            }
         }};
     }
 
     @Test
     public void testSingleTransactionsWritesInQuickSuccession() throws Exception{
         new IntegrationTestKit(getSystem(), datastoreContextBuilder) {{
-            DistributedDataStore dataStore = setupDistributedDataStore(
-                    "testSingleTransactionsWritesInQuickSuccession", "cars-1");
+            try (DistributedDataStore dataStore = setupDistributedDataStore(
+                    "testSingleTransactionsWritesInQuickSuccession", "cars-1")) {
 
-            DOMStoreTransactionChain txChain = dataStore.createTransactionChain();
+                DOMStoreTransactionChain txChain = dataStore.createTransactionChain();
 
-            DOMStoreWriteTransaction writeTx = txChain.newWriteOnlyTransaction();
-            writeTx.write(CarsModel.BASE_PATH, CarsModel.emptyContainer());
-            writeTx.write(CarsModel.CAR_LIST_PATH, CarsModel.newCarMapNode());
-            doCommit(writeTx.ready());
+                DOMStoreWriteTransaction writeTx = txChain.newWriteOnlyTransaction();
+                writeTx.write(CarsModel.BASE_PATH, CarsModel.emptyContainer());
+                writeTx.write(CarsModel.CAR_LIST_PATH, CarsModel.newCarMapNode());
+                doCommit(writeTx.ready());
 
-            writeTx = txChain.newWriteOnlyTransaction();
+                writeTx = txChain.newWriteOnlyTransaction();
 
-            int nCars = 5;
-            for(int i = 0; i < nCars; i++) {
-                writeTx.write(CarsModel.newCarPath("car" + i),
+                int nCars = 5;
+                for(int i = 0; i < nCars; i++) {
+                    writeTx.write(CarsModel.newCarPath("car" + i),
                         CarsModel.newCarEntry("car" + i, BigInteger.valueOf(20000)));
-            }
+                }
 
-            doCommit(writeTx.ready());
+                doCommit(writeTx.ready());
 
-            Optional<NormalizedNode<?, ?>> optional = txChain.newReadOnlyTransaction().read(
+                Optional<NormalizedNode<?, ?>> optional = txChain.newReadOnlyTransaction().read(
                     CarsModel.CAR_LIST_PATH).get(5, TimeUnit.SECONDS);
-            assertEquals("isPresent", true, optional.isPresent());
-            assertEquals("# cars", nCars, ((Collection<?>)optional.get().getValue()).size());
-
-            cleanup(dataStore);
+                assertEquals("isPresent", true, optional.isPresent());
+                assertEquals("# cars", nCars, ((Collection<?>)optional.get().getValue()).size());
+            }
         }};
     }
 
@@ -318,83 +314,82 @@ public class DistributedDataStoreIntegrationTest {
             CountDownLatch blockRecoveryLatch = new CountDownLatch(1);
             InMemoryJournal.addBlockReadMessagesLatch(persistentID, blockRecoveryLatch);
 
-            DistributedDataStore dataStore = setupDistributedDataStore(testName, false, shardName);
+            try (DistributedDataStore dataStore = setupDistributedDataStore(testName, false, shardName)) {
 
-            // Create the write Tx
+                // Create the write Tx
 
-            final DOMStoreWriteTransaction writeTx = writeOnly ? dataStore.newWriteOnlyTransaction() :
+                final DOMStoreWriteTransaction writeTx = writeOnly ? dataStore.newWriteOnlyTransaction() :
                     dataStore.newReadWriteTransaction();
-            assertNotNull("newReadWriteTransaction returned null", writeTx);
+                assertNotNull("newReadWriteTransaction returned null", writeTx);
 
-            // Do some modification operations and ready the Tx on a separate thread.
+                // Do some modification operations and ready the Tx on a separate thread.
 
-            final YangInstanceIdentifier listEntryPath = YangInstanceIdentifier.builder(
+                final YangInstanceIdentifier listEntryPath = YangInstanceIdentifier.builder(
                     TestModel.OUTER_LIST_PATH).nodeWithKey(TestModel.OUTER_LIST_QNAME,
-                            TestModel.ID_QNAME, 1).build();
+                        TestModel.ID_QNAME, 1).build();
 
-            final AtomicReference<DOMStoreThreePhaseCommitCohort> txCohort = new AtomicReference<>();
-            final AtomicReference<Exception> caughtEx = new AtomicReference<>();
-            final CountDownLatch txReady = new CountDownLatch(1);
-            Thread txThread = new Thread() {
-                @Override
-                public void run() {
-                    try {
-                        writeTx.write(TestModel.TEST_PATH,
+                final AtomicReference<DOMStoreThreePhaseCommitCohort> txCohort = new AtomicReference<>();
+                final AtomicReference<Exception> caughtEx = new AtomicReference<>();
+                final CountDownLatch txReady = new CountDownLatch(1);
+                Thread txThread = new Thread() {
+                    @Override
+                    public void run() {
+                        try {
+                            writeTx.write(TestModel.TEST_PATH,
                                 ImmutableNodes.containerNode(TestModel.TEST_QNAME));
 
-                        writeTx.merge(TestModel.OUTER_LIST_PATH, ImmutableNodes.mapNodeBuilder(
+                            writeTx.merge(TestModel.OUTER_LIST_PATH, ImmutableNodes.mapNodeBuilder(
                                 TestModel.OUTER_LIST_QNAME).build());
 
-                        writeTx.write(listEntryPath, ImmutableNodes.mapEntry(
+                            writeTx.write(listEntryPath, ImmutableNodes.mapEntry(
                                 TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1));
 
-                        writeTx.delete(listEntryPath);
+                            writeTx.delete(listEntryPath);
 
-                        txCohort.set(writeTx.ready());
-                    } catch(Exception e) {
-                        caughtEx.set(e);
-                        return;
-                    } finally {
-                        txReady.countDown();
+                            txCohort.set(writeTx.ready());
+                        } catch(Exception e) {
+                            caughtEx.set(e);
+                            return;
+                        } finally {
+                            txReady.countDown();
+                        }
                     }
+                };
+
+                txThread.start();
+
+                // Wait for the Tx operations to complete.
+
+                boolean done = Uninterruptibles.awaitUninterruptibly(txReady, 5, TimeUnit.SECONDS);
+                if(caughtEx.get() != null) {
+                    throw caughtEx.get();
                 }
-            };
 
-            txThread.start();
+                assertEquals("Tx ready", true, done);
 
-            // Wait for the Tx operations to complete.
+                // At this point the Tx operations should be waiting for the shard to initialize so
+                // trigger the latch to let the shard recovery to continue.
 
-            boolean done = Uninterruptibles.awaitUninterruptibly(txReady, 5, TimeUnit.SECONDS);
-            if(caughtEx.get() != null) {
-                throw caughtEx.get();
+                blockRecoveryLatch.countDown();
+
+                // Wait for the Tx commit to complete.
+
+                doCommit(txCohort.get());
+
+                // Verify the data in the store
+
+                DOMStoreReadTransaction readTx = dataStore.newReadOnlyTransaction();
+
+                Optional<NormalizedNode<?, ?>> optional = readTx.read(TestModel.TEST_PATH).
+                        get(5, TimeUnit.SECONDS);
+                assertEquals("isPresent", true, optional.isPresent());
+
+                optional = readTx.read(TestModel.OUTER_LIST_PATH).get(5, TimeUnit.SECONDS);
+                assertEquals("isPresent", true, optional.isPresent());
+
+                optional = readTx.read(listEntryPath).get(5, TimeUnit.SECONDS);
+                assertEquals("isPresent", false, optional.isPresent());
             }
-
-            assertEquals("Tx ready", true, done);
-
-            // At this point the Tx operations should be waiting for the shard to initialize so
-            // trigger the latch to let the shard recovery to continue.
-
-            blockRecoveryLatch.countDown();
-
-            // Wait for the Tx commit to complete.
-
-            doCommit(txCohort.get());
-
-            // Verify the data in the store
-
-            DOMStoreReadTransaction readTx = dataStore.newReadOnlyTransaction();
-
-            Optional<NormalizedNode<?, ?>> optional = readTx.read(TestModel.TEST_PATH).
-                    get(5, TimeUnit.SECONDS);
-            assertEquals("isPresent", true, optional.isPresent());
-
-            optional = readTx.read(TestModel.OUTER_LIST_PATH).get(5, TimeUnit.SECONDS);
-            assertEquals("isPresent", true, optional.isPresent());
-
-            optional = readTx.read(listEntryPath).get(5, TimeUnit.SECONDS);
-            assertEquals("isPresent", false, optional.isPresent());
-
-            cleanup(dataStore);
         }};
     }
 
@@ -421,64 +416,63 @@ public class DistributedDataStoreIntegrationTest {
             CountDownLatch blockRecoveryLatch = new CountDownLatch(1);
             InMemoryJournal.addBlockReadMessagesLatch(persistentID, blockRecoveryLatch);
 
-            DistributedDataStore dataStore = setupDistributedDataStore(testName, false, shardName);
+            try (DistributedDataStore dataStore = setupDistributedDataStore(testName, false, shardName)) {
 
-            // Create the read-write Tx
+                // Create the read-write Tx
 
-            final DOMStoreReadWriteTransaction readWriteTx = dataStore.newReadWriteTransaction();
-            assertNotNull("newReadWriteTransaction returned null", readWriteTx);
+                final DOMStoreReadWriteTransaction readWriteTx = dataStore.newReadWriteTransaction();
+                assertNotNull("newReadWriteTransaction returned null", readWriteTx);
 
-            // Do some reads on the Tx on a separate thread.
+                // Do some reads on the Tx on a separate thread.
 
-            final AtomicReference<CheckedFuture<Boolean, ReadFailedException>> txExistsFuture =
-                    new AtomicReference<>();
-            final AtomicReference<CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException>>
-                    txReadFuture = new AtomicReference<>();
-            final AtomicReference<Exception> caughtEx = new AtomicReference<>();
-            final CountDownLatch txReadsDone = new CountDownLatch(1);
-            Thread txThread = new Thread() {
-                @Override
-                public void run() {
-                    try {
-                        readWriteTx.write(TestModel.TEST_PATH,
+                final AtomicReference<CheckedFuture<Boolean, ReadFailedException>> txExistsFuture =
+                        new AtomicReference<>();
+                final AtomicReference<CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException>>
+                txReadFuture = new AtomicReference<>();
+                final AtomicReference<Exception> caughtEx = new AtomicReference<>();
+                final CountDownLatch txReadsDone = new CountDownLatch(1);
+                Thread txThread = new Thread() {
+                    @Override
+                    public void run() {
+                        try {
+                            readWriteTx.write(TestModel.TEST_PATH,
                                 ImmutableNodes.containerNode(TestModel.TEST_QNAME));
 
-                        txExistsFuture.set(readWriteTx.exists(TestModel.TEST_PATH));
+                            txExistsFuture.set(readWriteTx.exists(TestModel.TEST_PATH));
 
-                        txReadFuture.set(readWriteTx.read(TestModel.TEST_PATH));
-                    } catch(Exception e) {
-                        caughtEx.set(e);
-                        return;
-                    } finally {
-                        txReadsDone.countDown();
+                            txReadFuture.set(readWriteTx.read(TestModel.TEST_PATH));
+                        } catch(Exception e) {
+                            caughtEx.set(e);
+                            return;
+                        } finally {
+                            txReadsDone.countDown();
+                        }
                     }
+                };
+
+                txThread.start();
+
+                // Wait for the Tx operations to complete.
+
+                boolean done = Uninterruptibles.awaitUninterruptibly(txReadsDone, 5, TimeUnit.SECONDS);
+                if(caughtEx.get() != null) {
+                    throw caughtEx.get();
                 }
-            };
 
-            txThread.start();
+                assertEquals("Tx reads done", true, done);
 
-            // Wait for the Tx operations to complete.
+                // At this point the Tx operations should be waiting for the shard to initialize so
+                // trigger the latch to let the shard recovery to continue.
 
-            boolean done = Uninterruptibles.awaitUninterruptibly(txReadsDone, 5, TimeUnit.SECONDS);
-            if(caughtEx.get() != null) {
-                throw caughtEx.get();
+                blockRecoveryLatch.countDown();
+
+                // Wait for the reads to complete and verify.
+
+                assertEquals("exists", true, txExistsFuture.get().checkedGet(5, TimeUnit.SECONDS));
+                assertEquals("read", true, txReadFuture.get().checkedGet(5, TimeUnit.SECONDS).isPresent());
+
+                readWriteTx.close();
             }
-
-            assertEquals("Tx reads done", true, done);
-
-            // At this point the Tx operations should be waiting for the shard to initialize so
-            // trigger the latch to let the shard recovery to continue.
-
-            blockRecoveryLatch.countDown();
-
-            // Wait for the reads to complete and verify.
-
-            assertEquals("exists", true, txExistsFuture.get().checkedGet(5, TimeUnit.SECONDS));
-            assertEquals("read", true, txReadFuture.get().checkedGet(5, TimeUnit.SECONDS).isPresent());
-
-            readWriteTx.close();
-
-            cleanup(dataStore);
         }};
     }
 
@@ -500,56 +494,56 @@ public class DistributedDataStoreIntegrationTest {
 
             InMemoryJournal.addEntry(persistentID, 1, "Dummy data so akka will read from persistence");
 
-            DistributedDataStore dataStore = setupDistributedDataStore(testName, false, shardName);
+            try (DistributedDataStore dataStore = setupDistributedDataStore(testName, false, shardName)) {
 
-            // Create the write Tx
+                // Create the write Tx
 
-            final DOMStoreWriteTransaction writeTx = dataStore.newWriteOnlyTransaction();
-            assertNotNull("newReadWriteTransaction returned null", writeTx);
+                final DOMStoreWriteTransaction writeTx = dataStore.newWriteOnlyTransaction();
+                assertNotNull("newReadWriteTransaction returned null", writeTx);
 
-            // Do some modifications and ready the Tx on a separate thread.
+                // Do some modifications and ready the Tx on a separate thread.
 
-            final AtomicReference<DOMStoreThreePhaseCommitCohort> txCohort = new AtomicReference<>();
-            final AtomicReference<Exception> caughtEx = new AtomicReference<>();
-            final CountDownLatch txReady = new CountDownLatch(1);
-            Thread txThread = new Thread() {
-                @Override
-                public void run() {
-                    try {
-                        writeTx.write(TestModel.TEST_PATH,
+                final AtomicReference<DOMStoreThreePhaseCommitCohort> txCohort = new AtomicReference<>();
+                final AtomicReference<Exception> caughtEx = new AtomicReference<>();
+                final CountDownLatch txReady = new CountDownLatch(1);
+                Thread txThread = new Thread() {
+                    @Override
+                    public void run() {
+                        try {
+                            writeTx.write(TestModel.TEST_PATH,
                                 ImmutableNodes.containerNode(TestModel.TEST_QNAME));
 
-                        txCohort.set(writeTx.ready());
-                    } catch(Exception e) {
-                        caughtEx.set(e);
-                        return;
-                    } finally {
-                        txReady.countDown();
+                            txCohort.set(writeTx.ready());
+                        } catch(Exception e) {
+                            caughtEx.set(e);
+                            return;
+                        } finally {
+                            txReady.countDown();
+                        }
                     }
+                };
+
+                txThread.start();
+
+                // Wait for the Tx operations to complete.
+
+                boolean done = Uninterruptibles.awaitUninterruptibly(txReady, 5, TimeUnit.SECONDS);
+                if(caughtEx.get() != null) {
+                    throw caughtEx.get();
                 }
-            };
 
-            txThread.start();
+                assertEquals("Tx ready", true, done);
 
-            // Wait for the Tx operations to complete.
+                // Wait for the commit to complete. Since the shard never initialized, the Tx should
+                // have timed out and throw an appropriate exception cause.
 
-            boolean done = Uninterruptibles.awaitUninterruptibly(txReady, 5, TimeUnit.SECONDS);
-            if(caughtEx.get() != null) {
-                throw caughtEx.get();
-            }
-
-            assertEquals("Tx ready", true, done);
-
-            // Wait for the commit to complete. Since the shard never initialized, the Tx should
-            // have timed out and throw an appropriate exception cause.
-
-            try {
-                txCohort.get().canCommit().get(5, TimeUnit.SECONDS);
-            } catch(ExecutionException e) {
-                throw e.getCause();
-            } finally {
-                blockRecoveryLatch.countDown();
-                cleanup(dataStore);
+                try {
+                    txCohort.get().canCommit().get(5, TimeUnit.SECONDS);
+                } catch(ExecutionException e) {
+                    throw e.getCause();
+                } finally {
+                    blockRecoveryLatch.countDown();
+                }
             }
         }};
     }
@@ -572,59 +566,59 @@ public class DistributedDataStoreIntegrationTest {
 
             InMemoryJournal.addEntry(persistentID, 1, "Dummy data so akka will read from persistence");
 
-            DistributedDataStore dataStore = setupDistributedDataStore(testName, false, shardName);
+            try (DistributedDataStore dataStore = setupDistributedDataStore(testName, false, shardName)) {
 
-            // Create the read-write Tx
+                // Create the read-write Tx
 
-            final DOMStoreReadWriteTransaction readWriteTx = dataStore.newReadWriteTransaction();
-            assertNotNull("newReadWriteTransaction returned null", readWriteTx);
+                final DOMStoreReadWriteTransaction readWriteTx = dataStore.newReadWriteTransaction();
+                assertNotNull("newReadWriteTransaction returned null", readWriteTx);
 
-            // Do a read on the Tx on a separate thread.
+                // Do a read on the Tx on a separate thread.
 
-            final AtomicReference<CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException>>
-                    txReadFuture = new AtomicReference<>();
-            final AtomicReference<Exception> caughtEx = new AtomicReference<>();
-            final CountDownLatch txReadDone = new CountDownLatch(1);
-            Thread txThread = new Thread() {
-                @Override
-                public void run() {
-                    try {
-                        readWriteTx.write(TestModel.TEST_PATH,
+                final AtomicReference<CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException>>
+                txReadFuture = new AtomicReference<>();
+                final AtomicReference<Exception> caughtEx = new AtomicReference<>();
+                final CountDownLatch txReadDone = new CountDownLatch(1);
+                Thread txThread = new Thread() {
+                    @Override
+                    public void run() {
+                        try {
+                            readWriteTx.write(TestModel.TEST_PATH,
                                 ImmutableNodes.containerNode(TestModel.TEST_QNAME));
 
-                        txReadFuture.set(readWriteTx.read(TestModel.TEST_PATH));
+                            txReadFuture.set(readWriteTx.read(TestModel.TEST_PATH));
 
-                        readWriteTx.close();
-                    } catch(Exception e) {
-                        caughtEx.set(e);
-                        return;
-                    } finally {
-                        txReadDone.countDown();
+                            readWriteTx.close();
+                        } catch(Exception e) {
+                            caughtEx.set(e);
+                            return;
+                        } finally {
+                            txReadDone.countDown();
+                        }
                     }
+                };
+
+                txThread.start();
+
+                // Wait for the Tx operations to complete.
+
+                boolean done = Uninterruptibles.awaitUninterruptibly(txReadDone, 5, TimeUnit.SECONDS);
+                if(caughtEx.get() != null) {
+                    throw caughtEx.get();
                 }
-            };
 
-            txThread.start();
+                assertEquals("Tx read done", true, done);
 
-            // Wait for the Tx operations to complete.
+                // Wait for the read to complete. Since the shard never initialized, the Tx should
+                // have timed out and throw an appropriate exception cause.
 
-            boolean done = Uninterruptibles.awaitUninterruptibly(txReadDone, 5, TimeUnit.SECONDS);
-            if(caughtEx.get() != null) {
-                throw caughtEx.get();
-            }
-
-            assertEquals("Tx read done", true, done);
-
-            // Wait for the read to complete. Since the shard never initialized, the Tx should
-            // have timed out and throw an appropriate exception cause.
-
-            try {
-                txReadFuture.get().checkedGet(5, TimeUnit.SECONDS);
-            } catch(ReadFailedException e) {
-                throw e.getCause();
-            } finally {
-                blockRecoveryLatch.countDown();
-                cleanup(dataStore);
+                try {
+                    txReadFuture.get().checkedGet(5, TimeUnit.SECONDS);
+                } catch(ReadFailedException e) {
+                    throw e.getCause();
+                } finally {
+                    blockRecoveryLatch.countDown();
+                }
             }
         }};
     }
@@ -641,60 +635,60 @@ public class DistributedDataStoreIntegrationTest {
             datastoreContextBuilder.shardHeartbeatIntervalInMillis(100).shardElectionTimeoutFactor(1).
                     shardInitializationTimeout(200, TimeUnit.MILLISECONDS);
 
-            DistributedDataStore dataStore = setupDistributedDataStore(testName, false, shardName);
+            try (DistributedDataStore dataStore = setupDistributedDataStore(testName, false, shardName)) {
 
-            Object result = dataStore.getActorContext().executeOperation(dataStore.getActorContext().getShardManager(),
-                    new FindLocalShard(shardName, true));
-            assertTrue("Expected LocalShardFound. Actual: " + result, result instanceof LocalShardFound);
+                Object result = dataStore.getActorContext().executeOperation(
+                    dataStore.getActorContext().getShardManager(), new FindLocalShard(shardName, true));
+                assertTrue("Expected LocalShardFound. Actual: " + result, result instanceof LocalShardFound);
 
-            // Create the write Tx.
+                // Create the write Tx.
 
-            final DOMStoreWriteTransaction writeTx = writeOnly ? dataStore.newWriteOnlyTransaction() :
-                dataStore.newReadWriteTransaction();
-            assertNotNull("newReadWriteTransaction returned null", writeTx);
+                try (final DOMStoreWriteTransaction writeTx = writeOnly ? dataStore.newWriteOnlyTransaction() :
+                    dataStore.newReadWriteTransaction()) {
+                    assertNotNull("newReadWriteTransaction returned null", writeTx);
 
-            // Do some modifications and ready the Tx on a separate thread.
+                    // Do some modifications and ready the Tx on a separate thread.
 
-            final AtomicReference<DOMStoreThreePhaseCommitCohort> txCohort = new AtomicReference<>();
-            final AtomicReference<Exception> caughtEx = new AtomicReference<>();
-            final CountDownLatch txReady = new CountDownLatch(1);
-            Thread txThread = new Thread() {
-                @Override
-                public void run() {
+                    final AtomicReference<DOMStoreThreePhaseCommitCohort> txCohort = new AtomicReference<>();
+                    final AtomicReference<Exception> caughtEx = new AtomicReference<>();
+                    final CountDownLatch txReady = new CountDownLatch(1);
+                    Thread txThread = new Thread() {
+                        @Override
+                        public void run() {
+                            try {
+                                writeTx.write(TestModel.JUNK_PATH,
+                                    ImmutableNodes.containerNode(TestModel.JUNK_QNAME));
+
+                                txCohort.set(writeTx.ready());
+                            } catch(Exception e) {
+                                caughtEx.set(e);
+                                return;
+                            } finally {
+                                txReady.countDown();
+                            }
+                        }
+                    };
+
+                    txThread.start();
+
+                    // Wait for the Tx operations to complete.
+
+                    boolean done = Uninterruptibles.awaitUninterruptibly(txReady, 5, TimeUnit.SECONDS);
+                    if(caughtEx.get() != null) {
+                        throw caughtEx.get();
+                    }
+
+                    assertEquals("Tx ready", true, done);
+
+                    // Wait for the commit to complete. Since no shard leader was elected in time, the Tx
+                    // should have timed out and throw an appropriate exception cause.
+
                     try {
-                        writeTx.write(TestModel.JUNK_PATH,
-                                ImmutableNodes.containerNode(TestModel.JUNK_QNAME));
-
-                        txCohort.set(writeTx.ready());
-                    } catch(Exception e) {
-                        caughtEx.set(e);
-                        return;
-                    } finally {
-                        txReady.countDown();
+                        txCohort.get().canCommit().get(5, TimeUnit.SECONDS);
+                    } catch(ExecutionException e) {
+                        throw e.getCause();
                     }
                 }
-            };
-
-            txThread.start();
-
-            // Wait for the Tx operations to complete.
-
-            boolean done = Uninterruptibles.awaitUninterruptibly(txReady, 5, TimeUnit.SECONDS);
-            if(caughtEx.get() != null) {
-                throw caughtEx.get();
-            }
-
-            assertEquals("Tx ready", true, done);
-
-            // Wait for the commit to complete. Since no shard leader was elected in time, the Tx
-            // should have timed out and throw an appropriate exception cause.
-
-            try {
-                txCohort.get().canCommit().get(5, TimeUnit.SECONDS);
-            } catch(ExecutionException e) {
-                throw e.getCause();
-            } finally {
-                cleanup(dataStore);
             }
         }};
     }
@@ -713,455 +707,453 @@ public class DistributedDataStoreIntegrationTest {
     @Test
     public void testTransactionAbort() throws Exception{
         new IntegrationTestKit(getSystem(), datastoreContextBuilder) {{
-            DistributedDataStore dataStore =
-                    setupDistributedDataStore("transactionAbortIntegrationTest", "test-1");
+            try (DistributedDataStore dataStore =
+                    setupDistributedDataStore("transactionAbortIntegrationTest", "test-1")) {
 
-            DOMStoreWriteTransaction writeTx = dataStore.newWriteOnlyTransaction();
-            assertNotNull("newWriteOnlyTransaction returned null", writeTx);
+                DOMStoreWriteTransaction writeTx = dataStore.newWriteOnlyTransaction();
+                assertNotNull("newWriteOnlyTransaction returned null", writeTx);
 
-            writeTx.write(TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
+                writeTx.write(TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
 
-            DOMStoreThreePhaseCommitCohort cohort = writeTx.ready();
+                DOMStoreThreePhaseCommitCohort cohort = writeTx.ready();
 
-            cohort.canCommit().get(5, TimeUnit.SECONDS);
+                cohort.canCommit().get(5, TimeUnit.SECONDS);
 
-            cohort.abort().get(5, TimeUnit.SECONDS);
+                cohort.abort().get(5, TimeUnit.SECONDS);
 
-            testWriteTransaction(dataStore, TestModel.TEST_PATH,
+                testWriteTransaction(dataStore, TestModel.TEST_PATH,
                     ImmutableNodes.containerNode(TestModel.TEST_QNAME));
-
-            cleanup(dataStore);
+            }
         }};
     }
 
     @Test
     public void testTransactionChainWithSingleShard() throws Exception{
         new IntegrationTestKit(getSystem(), datastoreContextBuilder) {{
-            DistributedDataStore dataStore = setupDistributedDataStore("testTransactionChainWithSingleShard", "test-1");
+            try (DistributedDataStore dataStore =
+                    setupDistributedDataStore("testTransactionChainWithSingleShard", "test-1")) {
 
-            // 1. Create a Tx chain and write-only Tx
+                // 1. Create a Tx chain and write-only Tx
 
-            DOMStoreTransactionChain txChain = dataStore.createTransactionChain();
+                DOMStoreTransactionChain txChain = dataStore.createTransactionChain();
 
-            DOMStoreWriteTransaction writeTx = txChain.newWriteOnlyTransaction();
-            assertNotNull("newWriteOnlyTransaction returned null", writeTx);
+                DOMStoreWriteTransaction writeTx = txChain.newWriteOnlyTransaction();
+                assertNotNull("newWriteOnlyTransaction returned null", writeTx);
 
-            // 2. Write some data
+                // 2. Write some data
 
-            NormalizedNode<?, ?> testNode = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
-            writeTx.write(TestModel.TEST_PATH, testNode);
+                NormalizedNode<?, ?> testNode = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+                writeTx.write(TestModel.TEST_PATH, testNode);
 
-            // 3. Ready the Tx for commit
+                // 3. Ready the Tx for commit
 
-            final DOMStoreThreePhaseCommitCohort cohort1 = writeTx.ready();
+                final DOMStoreThreePhaseCommitCohort cohort1 = writeTx.ready();
 
-            // 4. Commit the Tx on another thread that first waits for the second read Tx.
+                // 4. Commit the Tx on another thread that first waits for the second read Tx.
 
-            final CountDownLatch continueCommit1 = new CountDownLatch(1);
-            final CountDownLatch commit1Done = new CountDownLatch(1);
-            final AtomicReference<Exception> commit1Error = new AtomicReference<>();
-            new Thread() {
-                @Override
-                public void run() {
-                    try {
-                        continueCommit1.await();
-                        doCommit(cohort1);
-                    } catch (Exception e) {
-                        commit1Error.set(e);
-                    } finally {
-                        commit1Done.countDown();
+                final CountDownLatch continueCommit1 = new CountDownLatch(1);
+                final CountDownLatch commit1Done = new CountDownLatch(1);
+                final AtomicReference<Exception> commit1Error = new AtomicReference<>();
+                new Thread() {
+                    @Override
+                    public void run() {
+                        try {
+                            continueCommit1.await();
+                            doCommit(cohort1);
+                        } catch (Exception e) {
+                            commit1Error.set(e);
+                        } finally {
+                            commit1Done.countDown();
+                        }
                     }
+                }.start();
+
+                // 5. Create a new read Tx from the chain to read and verify the data from the first
+                // Tx is visible after being readied.
+
+                DOMStoreReadTransaction readTx = txChain.newReadOnlyTransaction();
+                Optional<NormalizedNode<?, ?>> optional = readTx.read(TestModel.TEST_PATH).get(5, TimeUnit.SECONDS);
+                assertEquals("isPresent", true, optional.isPresent());
+                assertEquals("Data node", testNode, optional.get());
+
+                // 6. Create a new RW Tx from the chain, write more data, and ready it
+
+                DOMStoreReadWriteTransaction rwTx = txChain.newReadWriteTransaction();
+                MapNode outerNode = ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME).build();
+                rwTx.write(TestModel.OUTER_LIST_PATH, outerNode);
+
+                DOMStoreThreePhaseCommitCohort cohort2 = rwTx.ready();
+
+                // 7. Create a new read Tx from the chain to read the data from the last RW Tx to
+                // verify it is visible.
+
+                readTx = txChain.newReadWriteTransaction();
+                optional = readTx.read(TestModel.OUTER_LIST_PATH).get(5, TimeUnit.SECONDS);
+                assertEquals("isPresent", true, optional.isPresent());
+                assertEquals("Data node", outerNode, optional.get());
+
+                // 8. Wait for the 2 commits to complete and close the chain.
+
+                continueCommit1.countDown();
+                Uninterruptibles.awaitUninterruptibly(commit1Done, 5, TimeUnit.SECONDS);
+
+                if(commit1Error.get() != null) {
+                    throw commit1Error.get();
                 }
-            }.start();
 
-            // 5. Create a new read Tx from the chain to read and verify the data from the first
-            // Tx is visible after being readied.
+                doCommit(cohort2);
 
-            DOMStoreReadTransaction readTx = txChain.newReadOnlyTransaction();
-            Optional<NormalizedNode<?, ?>> optional = readTx.read(TestModel.TEST_PATH).get(5, TimeUnit.SECONDS);
-            assertEquals("isPresent", true, optional.isPresent());
-            assertEquals("Data node", testNode, optional.get());
+                txChain.close();
 
-            // 6. Create a new RW Tx from the chain, write more data, and ready it
+                // 9. Create a new read Tx from the data store and verify committed data.
 
-            DOMStoreReadWriteTransaction rwTx = txChain.newReadWriteTransaction();
-            MapNode outerNode = ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME).build();
-            rwTx.write(TestModel.OUTER_LIST_PATH, outerNode);
-
-            DOMStoreThreePhaseCommitCohort cohort2 = rwTx.ready();
-
-            // 7. Create a new read Tx from the chain to read the data from the last RW Tx to
-            // verify it is visible.
-
-            readTx = txChain.newReadWriteTransaction();
-            optional = readTx.read(TestModel.OUTER_LIST_PATH).get(5, TimeUnit.SECONDS);
-            assertEquals("isPresent", true, optional.isPresent());
-            assertEquals("Data node", outerNode, optional.get());
-
-            // 8. Wait for the 2 commits to complete and close the chain.
-
-            continueCommit1.countDown();
-            Uninterruptibles.awaitUninterruptibly(commit1Done, 5, TimeUnit.SECONDS);
-
-            if(commit1Error.get() != null) {
-                throw commit1Error.get();
+                readTx = dataStore.newReadOnlyTransaction();
+                optional = readTx.read(TestModel.OUTER_LIST_PATH).get(5, TimeUnit.SECONDS);
+                assertEquals("isPresent", true, optional.isPresent());
+                assertEquals("Data node", outerNode, optional.get());
             }
-
-            doCommit(cohort2);
-
-            txChain.close();
-
-            // 9. Create a new read Tx from the data store and verify committed data.
-
-            readTx = dataStore.newReadOnlyTransaction();
-            optional = readTx.read(TestModel.OUTER_LIST_PATH).get(5, TimeUnit.SECONDS);
-            assertEquals("isPresent", true, optional.isPresent());
-            assertEquals("Data node", outerNode, optional.get());
-
-            cleanup(dataStore);
         }};
     }
 
     @Test
     public void testTransactionChainWithMultipleShards() throws Exception{
         new IntegrationTestKit(getSystem(), datastoreContextBuilder) {{
-            DistributedDataStore dataStore = setupDistributedDataStore("testTransactionChainWithMultipleShards",
-                    "cars-1", "people-1");
+            try (DistributedDataStore dataStore = setupDistributedDataStore("testTransactionChainWithMultipleShards",
+                    "cars-1", "people-1")) {
 
-            DOMStoreTransactionChain txChain = dataStore.createTransactionChain();
+                DOMStoreTransactionChain txChain = dataStore.createTransactionChain();
 
-            DOMStoreWriteTransaction writeTx = txChain.newWriteOnlyTransaction();
-            assertNotNull("newWriteOnlyTransaction returned null", writeTx);
+                DOMStoreWriteTransaction writeTx = txChain.newWriteOnlyTransaction();
+                assertNotNull("newWriteOnlyTransaction returned null", writeTx);
 
-            writeTx.write(CarsModel.BASE_PATH, CarsModel.emptyContainer());
-            writeTx.write(PeopleModel.BASE_PATH, PeopleModel.emptyContainer());
+                writeTx.write(CarsModel.BASE_PATH, CarsModel.emptyContainer());
+                writeTx.write(PeopleModel.BASE_PATH, PeopleModel.emptyContainer());
 
-            writeTx.write(CarsModel.CAR_LIST_PATH, CarsModel.newCarMapNode());
-            writeTx.write(PeopleModel.PERSON_LIST_PATH, PeopleModel.newPersonMapNode());
+                writeTx.write(CarsModel.CAR_LIST_PATH, CarsModel.newCarMapNode());
+                writeTx.write(PeopleModel.PERSON_LIST_PATH, PeopleModel.newPersonMapNode());
 
-            DOMStoreThreePhaseCommitCohort cohort1 = writeTx.ready();
+                DOMStoreThreePhaseCommitCohort cohort1 = writeTx.ready();
 
-            DOMStoreReadWriteTransaction readWriteTx = txChain.newReadWriteTransaction();
+                DOMStoreReadWriteTransaction readWriteTx = txChain.newReadWriteTransaction();
 
-            MapEntryNode car = CarsModel.newCarEntry("optima", BigInteger.valueOf(20000));
-            YangInstanceIdentifier carPath = CarsModel.newCarPath("optima");
-            readWriteTx.write(carPath, car);
+                MapEntryNode car = CarsModel.newCarEntry("optima", BigInteger.valueOf(20000));
+                YangInstanceIdentifier carPath = CarsModel.newCarPath("optima");
+                readWriteTx.write(carPath, car);
 
-            MapEntryNode person = PeopleModel.newPersonEntry("jack");
-            YangInstanceIdentifier personPath = PeopleModel.newPersonPath("jack");
-            readWriteTx.merge(personPath, person);
+                MapEntryNode person = PeopleModel.newPersonEntry("jack");
+                YangInstanceIdentifier personPath = PeopleModel.newPersonPath("jack");
+                readWriteTx.merge(personPath, person);
 
-            Optional<NormalizedNode<?, ?>> optional = readWriteTx.read(carPath).get(5, TimeUnit.SECONDS);
-            assertEquals("isPresent", true, optional.isPresent());
-            assertEquals("Data node", car, optional.get());
+                Optional<NormalizedNode<?, ?>> optional = readWriteTx.read(carPath).get(5, TimeUnit.SECONDS);
+                assertEquals("isPresent", true, optional.isPresent());
+                assertEquals("Data node", car, optional.get());
 
-            optional = readWriteTx.read(personPath).get(5, TimeUnit.SECONDS);
-            assertEquals("isPresent", true, optional.isPresent());
-            assertEquals("Data node", person, optional.get());
+                optional = readWriteTx.read(personPath).get(5, TimeUnit.SECONDS);
+                assertEquals("isPresent", true, optional.isPresent());
+                assertEquals("Data node", person, optional.get());
 
-            DOMStoreThreePhaseCommitCohort cohort2 = readWriteTx.ready();
+                DOMStoreThreePhaseCommitCohort cohort2 = readWriteTx.ready();
 
-            writeTx = txChain.newWriteOnlyTransaction();
+                writeTx = txChain.newWriteOnlyTransaction();
 
-            writeTx.delete(carPath);
+                writeTx.delete(carPath);
 
-            DOMStoreThreePhaseCommitCohort cohort3 = writeTx.ready();
+                DOMStoreThreePhaseCommitCohort cohort3 = writeTx.ready();
 
-            ListenableFuture<Boolean> canCommit1 = cohort1.canCommit();
-            ListenableFuture<Boolean> canCommit2 = cohort2.canCommit();
+                ListenableFuture<Boolean> canCommit1 = cohort1.canCommit();
+                ListenableFuture<Boolean> canCommit2 = cohort2.canCommit();
 
-            doCommit(canCommit1, cohort1);
-            doCommit(canCommit2, cohort2);
-            doCommit(cohort3);
+                doCommit(canCommit1, cohort1);
+                doCommit(canCommit2, cohort2);
+                doCommit(cohort3);
 
-            txChain.close();
+                txChain.close();
 
-            DOMStoreReadTransaction readTx = dataStore.newReadOnlyTransaction();
+                DOMStoreReadTransaction readTx = dataStore.newReadOnlyTransaction();
 
-            optional = readTx.read(carPath).get(5, TimeUnit.SECONDS);
-            assertEquals("isPresent", false, optional.isPresent());
+                optional = readTx.read(carPath).get(5, TimeUnit.SECONDS);
+                assertEquals("isPresent", false, optional.isPresent());
 
-            optional = readTx.read(personPath).get(5, TimeUnit.SECONDS);
-            assertEquals("isPresent", true, optional.isPresent());
-            assertEquals("Data node", person, optional.get());
-
-            cleanup(dataStore);
+                optional = readTx.read(personPath).get(5, TimeUnit.SECONDS);
+                assertEquals("isPresent", true, optional.isPresent());
+                assertEquals("Data node", person, optional.get());
+            }
         }};
     }
 
     @Test
     public void testCreateChainedTransactionsInQuickSuccession() throws Exception{
         new IntegrationTestKit(getSystem(), datastoreContextBuilder) {{
-            DistributedDataStore dataStore = setupDistributedDataStore(
-                    "testCreateChainedTransactionsInQuickSuccession", "cars-1");
+            try (DistributedDataStore dataStore = setupDistributedDataStore(
+                    "testCreateChainedTransactionsInQuickSuccession", "cars-1")) {
 
-            ConcurrentDOMDataBroker broker = new ConcurrentDOMDataBroker(
+                ConcurrentDOMDataBroker broker = new ConcurrentDOMDataBroker(
                     ImmutableMap.<LogicalDatastoreType, DOMStore>builder().put(
-                            LogicalDatastoreType.CONFIGURATION, dataStore).build(), MoreExecutors.directExecutor());
+                        LogicalDatastoreType.CONFIGURATION, dataStore).build(), MoreExecutors.directExecutor());
 
-            TransactionChainListener listener = Mockito.mock(TransactionChainListener.class);
-            DOMTransactionChain txChain = broker.createTransactionChain(listener);
+                TransactionChainListener listener = Mockito.mock(TransactionChainListener.class);
+                DOMTransactionChain txChain = broker.createTransactionChain(listener);
 
-            List<CheckedFuture<Void, TransactionCommitFailedException>> futures = new ArrayList<>();
+                List<CheckedFuture<Void, TransactionCommitFailedException>> futures = new ArrayList<>();
 
-            DOMDataWriteTransaction writeTx = txChain.newWriteOnlyTransaction();
-            writeTx.put(LogicalDatastoreType.CONFIGURATION, CarsModel.BASE_PATH, CarsModel.emptyContainer());
-            writeTx.put(LogicalDatastoreType.CONFIGURATION, CarsModel.CAR_LIST_PATH, CarsModel.newCarMapNode());
-            futures.add(writeTx.submit());
+                DOMDataWriteTransaction writeTx = txChain.newWriteOnlyTransaction();
+                writeTx.put(LogicalDatastoreType.CONFIGURATION, CarsModel.BASE_PATH, CarsModel.emptyContainer());
+                writeTx.put(LogicalDatastoreType.CONFIGURATION, CarsModel.CAR_LIST_PATH, CarsModel.newCarMapNode());
+                futures.add(writeTx.submit());
 
-            int nCars = 100;
-            for(int i = 0; i < nCars; i++) {
-                DOMDataReadWriteTransaction rwTx = txChain.newReadWriteTransaction();
+                int nCars = 100;
+                for(int i = 0; i < nCars; i++) {
+                    DOMDataReadWriteTransaction rwTx = txChain.newReadWriteTransaction();
 
-                rwTx.merge(LogicalDatastoreType.CONFIGURATION, CarsModel.newCarPath("car" + i),
+                    rwTx.merge(LogicalDatastoreType.CONFIGURATION, CarsModel.newCarPath("car" + i),
                         CarsModel.newCarEntry("car" + i, BigInteger.valueOf(20000)));
 
-                futures.add(rwTx.submit());
-            }
+                    futures.add(rwTx.submit());
+                }
 
-            for(CheckedFuture<Void, TransactionCommitFailedException> f: futures) {
-                f.checkedGet();
-            }
+                for(CheckedFuture<Void, TransactionCommitFailedException> f: futures) {
+                    f.checkedGet();
+                }
 
-            Optional<NormalizedNode<?, ?>> optional = txChain.newReadOnlyTransaction().read(
+                Optional<NormalizedNode<?, ?>> optional = txChain.newReadOnlyTransaction().read(
                     LogicalDatastoreType.CONFIGURATION, CarsModel.CAR_LIST_PATH).get(5, TimeUnit.SECONDS);
-            assertEquals("isPresent", true, optional.isPresent());
-            assertEquals("# cars", nCars, ((Collection<?>)optional.get().getValue()).size());
+                assertEquals("isPresent", true, optional.isPresent());
+                assertEquals("# cars", nCars, ((Collection<?>)optional.get().getValue()).size());
 
-            txChain.close();
+                txChain.close();
 
-            broker.close();
-
-            cleanup(dataStore);
+                broker.close();
+            }
         }};
     }
 
     @Test
     public void testCreateChainedTransactionAfterEmptyTxReadied() throws Exception{
         new IntegrationTestKit(getSystem(), datastoreContextBuilder) {{
-            DistributedDataStore dataStore = setupDistributedDataStore(
-                    "testCreateChainedTransactionAfterEmptyTxReadied", "test-1");
+            try (DistributedDataStore dataStore = setupDistributedDataStore(
+                    "testCreateChainedTransactionAfterEmptyTxReadied", "test-1")) {
 
-            DOMStoreTransactionChain txChain = dataStore.createTransactionChain();
+                DOMStoreTransactionChain txChain = dataStore.createTransactionChain();
 
-            DOMStoreReadWriteTransaction rwTx1 = txChain.newReadWriteTransaction();
+                DOMStoreReadWriteTransaction rwTx1 = txChain.newReadWriteTransaction();
 
-            rwTx1.ready();
+                rwTx1.ready();
 
-            DOMStoreReadWriteTransaction rwTx2 = txChain.newReadWriteTransaction();
+                DOMStoreReadWriteTransaction rwTx2 = txChain.newReadWriteTransaction();
 
-            Optional<NormalizedNode<?, ?>> optional = rwTx2.read(TestModel.TEST_PATH).get(5, TimeUnit.SECONDS);
-            assertEquals("isPresent", false, optional.isPresent());
+                Optional<NormalizedNode<?, ?>> optional = rwTx2.read(TestModel.TEST_PATH).get(5, TimeUnit.SECONDS);
+                assertEquals("isPresent", false, optional.isPresent());
 
-            txChain.close();
-
-            cleanup(dataStore);
+                txChain.close();
+            }
         }};
     }
 
     @Test
     public void testCreateChainedTransactionWhenPreviousNotReady() throws Throwable {
         new IntegrationTestKit(getSystem(), datastoreContextBuilder) {{
-            DistributedDataStore dataStore = setupDistributedDataStore(
-                    "testCreateChainedTransactionWhenPreviousNotReady", "test-1");
+            try (DistributedDataStore dataStore = setupDistributedDataStore(
+                "testCreateChainedTransactionWhenPreviousNotReady", "test-1")) {
 
-            final DOMStoreTransactionChain txChain = dataStore.createTransactionChain();
+                final DOMStoreTransactionChain txChain = dataStore.createTransactionChain();
 
-            DOMStoreWriteTransaction writeTx = txChain.newWriteOnlyTransaction();
-            assertNotNull("newWriteOnlyTransaction returned null", writeTx);
+                DOMStoreWriteTransaction writeTx = txChain.newWriteOnlyTransaction();
+                assertNotNull("newWriteOnlyTransaction returned null", writeTx);
 
-            writeTx.write(TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
+                writeTx.write(TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
 
-            // Try to create another Tx of each type - each should fail b/c the previous Tx wasn't
-            // readied.
+                // Try to create another Tx of each type - each should fail b/c the previous Tx wasn't
+                // readied.
 
-            assertExceptionOnTxChainCreates(txChain, IllegalStateException.class);
+                assertExceptionOnTxChainCreates(txChain, IllegalStateException.class);
+            }
         }};
     }
 
     @Test
     public void testCreateChainedTransactionAfterClose() throws Throwable {
         new IntegrationTestKit(getSystem(), datastoreContextBuilder) {{
-            DistributedDataStore dataStore = setupDistributedDataStore(
-                    "testCreateChainedTransactionAfterClose", "test-1");
+            try (DistributedDataStore dataStore = setupDistributedDataStore(
+                "testCreateChainedTransactionAfterClose", "test-1")) {
 
-            DOMStoreTransactionChain txChain = dataStore.createTransactionChain();
+                DOMStoreTransactionChain txChain = dataStore.createTransactionChain();
 
-            txChain.close();
+                txChain.close();
 
-            // Try to create another Tx of each type - should fail b/c the previous Tx was closed.
+                // Try to create another Tx of each type - should fail b/c the previous Tx was closed.
 
-            assertExceptionOnTxChainCreates(txChain, TransactionChainClosedException.class);
+                assertExceptionOnTxChainCreates(txChain, TransactionChainClosedException.class);
+            }
         }};
     }
 
     @Test
     public void testChainWithReadOnlyTxAfterPreviousReady() throws Throwable {
         new IntegrationTestKit(getSystem(), datastoreContextBuilder) {{
-            DistributedDataStore dataStore = setupDistributedDataStore(
-                    "testChainWithReadOnlyTxAfterPreviousReady", "test-1");
+            try (DistributedDataStore dataStore = setupDistributedDataStore(
+                "testChainWithReadOnlyTxAfterPreviousReady", "test-1")) {
 
-            final DOMStoreTransactionChain txChain = dataStore.createTransactionChain();
+                final DOMStoreTransactionChain txChain = dataStore.createTransactionChain();
 
-            // Create a write tx and submit.
+                // Create a write tx and submit.
 
-            DOMStoreWriteTransaction writeTx = txChain.newWriteOnlyTransaction();
-            writeTx.write(TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
-            DOMStoreThreePhaseCommitCohort cohort1 = writeTx.ready();
+                DOMStoreWriteTransaction writeTx = txChain.newWriteOnlyTransaction();
+                writeTx.write(TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
+                DOMStoreThreePhaseCommitCohort cohort1 = writeTx.ready();
 
-            // Create read-only tx's and issue a read.
+                // Create read-only tx's and issue a read.
 
-            CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> readFuture1 =
-                    txChain.newReadOnlyTransaction().read(TestModel.TEST_PATH);
+                CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> readFuture1 =
+                        txChain.newReadOnlyTransaction().read(TestModel.TEST_PATH);
 
-            CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> readFuture2 =
-                    txChain.newReadOnlyTransaction().read(TestModel.TEST_PATH);
+                CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> readFuture2 =
+                        txChain.newReadOnlyTransaction().read(TestModel.TEST_PATH);
 
-            // Create another write tx and issue the write.
+                // Create another write tx and issue the write.
 
-            DOMStoreWriteTransaction writeTx2 = txChain.newWriteOnlyTransaction();
-            writeTx2.write(TestModel.OUTER_LIST_PATH,
+                DOMStoreWriteTransaction writeTx2 = txChain.newWriteOnlyTransaction();
+                writeTx2.write(TestModel.OUTER_LIST_PATH,
                     ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME).build());
 
-            // Ensure the reads succeed.
+                // Ensure the reads succeed.
 
-            assertEquals("isPresent", true, readFuture1.checkedGet(5, TimeUnit.SECONDS).isPresent());
-            assertEquals("isPresent", true, readFuture2.checkedGet(5, TimeUnit.SECONDS).isPresent());
+                assertEquals("isPresent", true, readFuture1.checkedGet(5, TimeUnit.SECONDS).isPresent());
+                assertEquals("isPresent", true, readFuture2.checkedGet(5, TimeUnit.SECONDS).isPresent());
 
-            // Ensure the writes succeed.
+                // Ensure the writes succeed.
 
-            DOMStoreThreePhaseCommitCohort cohort2 = writeTx2.ready();
+                DOMStoreThreePhaseCommitCohort cohort2 = writeTx2.ready();
 
-            doCommit(cohort1);
-            doCommit(cohort2);
+                doCommit(cohort1);
+                doCommit(cohort2);
 
-            assertEquals("isPresent", true, txChain.newReadOnlyTransaction().read(TestModel.OUTER_LIST_PATH).
+                assertEquals("isPresent", true, txChain.newReadOnlyTransaction().read(TestModel.OUTER_LIST_PATH).
                     checkedGet(5, TimeUnit.SECONDS).isPresent());
+            }
         }};
     }
 
     @Test
     public void testChainedTransactionFailureWithSingleShard() throws Exception{
         new IntegrationTestKit(getSystem(), datastoreContextBuilder) {{
-            DistributedDataStore dataStore = setupDistributedDataStore(
-                    "testChainedTransactionFailureWithSingleShard", "cars-1");
+            try (DistributedDataStore dataStore = setupDistributedDataStore(
+                    "testChainedTransactionFailureWithSingleShard", "cars-1")) {
 
-            ConcurrentDOMDataBroker broker = new ConcurrentDOMDataBroker(
+                ConcurrentDOMDataBroker broker = new ConcurrentDOMDataBroker(
                     ImmutableMap.<LogicalDatastoreType, DOMStore>builder().put(
-                            LogicalDatastoreType.CONFIGURATION, dataStore).build(), MoreExecutors.directExecutor());
+                        LogicalDatastoreType.CONFIGURATION, dataStore).build(), MoreExecutors.directExecutor());
 
-            TransactionChainListener listener = Mockito.mock(TransactionChainListener.class);
-            DOMTransactionChain txChain = broker.createTransactionChain(listener);
+                TransactionChainListener listener = Mockito.mock(TransactionChainListener.class);
+                DOMTransactionChain txChain = broker.createTransactionChain(listener);
 
-            DOMDataReadWriteTransaction rwTx = txChain.newReadWriteTransaction();
+                DOMDataReadWriteTransaction rwTx = txChain.newReadWriteTransaction();
 
-            ContainerNode invalidData = ImmutableContainerNodeBuilder.create().withNodeIdentifier(
+                ContainerNode invalidData = ImmutableContainerNodeBuilder.create().withNodeIdentifier(
                     new YangInstanceIdentifier.NodeIdentifier(CarsModel.BASE_QNAME)).
                         withChild(ImmutableNodes.leafNode(TestModel.JUNK_QNAME, "junk")).build();
 
-            rwTx.merge(LogicalDatastoreType.CONFIGURATION, CarsModel.BASE_PATH, invalidData);
+                rwTx.merge(LogicalDatastoreType.CONFIGURATION, CarsModel.BASE_PATH, invalidData);
 
-            try {
-                rwTx.submit().checkedGet(5, TimeUnit.SECONDS);
-                fail("Expected TransactionCommitFailedException");
-            } catch (TransactionCommitFailedException e) {
-                // Expected
+                try {
+                    rwTx.submit().checkedGet(5, TimeUnit.SECONDS);
+                    fail("Expected TransactionCommitFailedException");
+                } catch (TransactionCommitFailedException e) {
+                    // Expected
+                }
+
+                verify(listener, timeout(5000)).onTransactionChainFailed(eq(txChain), eq(rwTx), any(Throwable.class));
+
+                txChain.close();
+                broker.close();
             }
-
-            verify(listener, timeout(5000)).onTransactionChainFailed(eq(txChain), eq(rwTx), any(Throwable.class));
-
-            txChain.close();
-            broker.close();
-            cleanup(dataStore);
         }};
     }
 
     @Test
     public void testChainedTransactionFailureWithMultipleShards() throws Exception{
         new IntegrationTestKit(getSystem(), datastoreContextBuilder) {{
-            DistributedDataStore dataStore = setupDistributedDataStore(
-                    "testChainedTransactionFailureWithMultipleShards", "cars-1", "people-1");
+            try (DistributedDataStore dataStore = setupDistributedDataStore(
+                    "testChainedTransactionFailureWithMultipleShards", "cars-1", "people-1")) {
 
-            ConcurrentDOMDataBroker broker = new ConcurrentDOMDataBroker(
+                ConcurrentDOMDataBroker broker = new ConcurrentDOMDataBroker(
                     ImmutableMap.<LogicalDatastoreType, DOMStore>builder().put(
-                            LogicalDatastoreType.CONFIGURATION, dataStore).build(), MoreExecutors.directExecutor());
+                        LogicalDatastoreType.CONFIGURATION, dataStore).build(), MoreExecutors.directExecutor());
 
-            TransactionChainListener listener = Mockito.mock(TransactionChainListener.class);
-            DOMTransactionChain txChain = broker.createTransactionChain(listener);
+                TransactionChainListener listener = Mockito.mock(TransactionChainListener.class);
+                DOMTransactionChain txChain = broker.createTransactionChain(listener);
 
-            DOMDataWriteTransaction writeTx = txChain.newWriteOnlyTransaction();
+                DOMDataWriteTransaction writeTx = txChain.newWriteOnlyTransaction();
 
-            writeTx.put(LogicalDatastoreType.CONFIGURATION, PeopleModel.BASE_PATH, PeopleModel.emptyContainer());
+                writeTx.put(LogicalDatastoreType.CONFIGURATION, PeopleModel.BASE_PATH, PeopleModel.emptyContainer());
 
-            ContainerNode invalidData = ImmutableContainerNodeBuilder.create().withNodeIdentifier(
+                ContainerNode invalidData = ImmutableContainerNodeBuilder.create().withNodeIdentifier(
                     new YangInstanceIdentifier.NodeIdentifier(CarsModel.BASE_QNAME)).
                         withChild(ImmutableNodes.leafNode(TestModel.JUNK_QNAME, "junk")).build();
 
-            // Note that merge will validate the data and fail but put succeeds b/c deep validation is not
-            // done for put for performance reasons.
-            writeTx.merge(LogicalDatastoreType.CONFIGURATION, CarsModel.BASE_PATH, invalidData);
+                // Note that merge will validate the data and fail but put succeeds b/c deep validation is not
+                // done for put for performance reasons.
+                writeTx.merge(LogicalDatastoreType.CONFIGURATION, CarsModel.BASE_PATH, invalidData);
 
-            try {
-                writeTx.submit().checkedGet(5, TimeUnit.SECONDS);
-                fail("Expected TransactionCommitFailedException");
-            } catch (TransactionCommitFailedException e) {
-                // Expected
+                try {
+                    writeTx.submit().checkedGet(5, TimeUnit.SECONDS);
+                    fail("Expected TransactionCommitFailedException");
+                } catch (TransactionCommitFailedException e) {
+                    // Expected
+                }
+
+                verify(listener, timeout(5000)).onTransactionChainFailed(eq(txChain), eq(writeTx), any(Throwable.class));
+
+                txChain.close();
+                broker.close();
             }
-
-            verify(listener, timeout(5000)).onTransactionChainFailed(eq(txChain), eq(writeTx), any(Throwable.class));
-
-            txChain.close();
-            broker.close();
-            cleanup(dataStore);
         }};
     }
 
     @Test
     public void testChangeListenerRegistration() throws Exception{
         new IntegrationTestKit(getSystem(), datastoreContextBuilder) {{
-            DistributedDataStore dataStore =
-                    setupDistributedDataStore("testChangeListenerRegistration", "test-1");
+            try (DistributedDataStore dataStore =
+                    setupDistributedDataStore("testChangeListenerRegistration", "test-1")) {
 
-            testWriteTransaction(dataStore, TestModel.TEST_PATH,
+                testWriteTransaction(dataStore, TestModel.TEST_PATH,
                     ImmutableNodes.containerNode(TestModel.TEST_QNAME));
 
-            MockDataChangeListener listener = new MockDataChangeListener(1);
+                MockDataChangeListener listener = new MockDataChangeListener(1);
 
-            ListenerRegistration<MockDataChangeListener>
-                    listenerReg = dataStore.registerChangeListener(TestModel.TEST_PATH, listener,
-                            DataChangeScope.SUBTREE);
+                ListenerRegistration<MockDataChangeListener>
+                listenerReg = dataStore.registerChangeListener(TestModel.TEST_PATH, listener,
+                    DataChangeScope.SUBTREE);
 
-            assertNotNull("registerChangeListener returned null", listenerReg);
+                assertNotNull("registerChangeListener returned null", listenerReg);
 
-            // Wait for the initial notification
+                // Wait for the initial notification
 
-            listener.waitForChangeEvents(TestModel.TEST_PATH);
+                listener.waitForChangeEvents(TestModel.TEST_PATH);
 
-            listener.reset(2);
+                listener.reset(2);
 
-            // Write 2 updates.
+                // Write 2 updates.
 
-            testWriteTransaction(dataStore, TestModel.OUTER_LIST_PATH,
+                testWriteTransaction(dataStore, TestModel.OUTER_LIST_PATH,
                     ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME).build());
 
-            YangInstanceIdentifier listPath = YangInstanceIdentifier.builder(TestModel.OUTER_LIST_PATH).
-                    nodeWithKey(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1).build();
-            testWriteTransaction(dataStore, listPath,
+                YangInstanceIdentifier listPath = YangInstanceIdentifier.builder(TestModel.OUTER_LIST_PATH).
+                        nodeWithKey(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1).build();
+                testWriteTransaction(dataStore, listPath,
                     ImmutableNodes.mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1));
 
-            // Wait for the 2 updates.
+                // Wait for the 2 updates.
 
-            listener.waitForChangeEvents(TestModel.OUTER_LIST_PATH, listPath);
+                listener.waitForChangeEvents(TestModel.OUTER_LIST_PATH, listPath);
 
-            listenerReg.close();
+                listenerReg.close();
 
-            testWriteTransaction(dataStore, YangInstanceIdentifier.builder(TestModel.OUTER_LIST_PATH).
+                testWriteTransaction(dataStore, YangInstanceIdentifier.builder(TestModel.OUTER_LIST_PATH).
                     nodeWithKey(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 2).build(),
                     ImmutableNodes.mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 2));
 
-            listener.expectNoMoreChanges("Received unexpected change after close");
-
-            cleanup(dataStore);
+                listener.expectNoMoreChanges("Received unexpected change after close");
+            }
         }};
     }
 
@@ -1196,20 +1188,19 @@ public class DistributedDataStoreIntegrationTest {
                     new DatastoreSnapshot.ShardSnapshot("people",
                             org.apache.commons.lang3.SerializationUtils.serialize(peopleSnapshot))));
 
-            DistributedDataStore dataStore = setupDistributedDataStore(name, "module-shards-member1.conf",
-                    true, "cars", "people");
+            try (DistributedDataStore dataStore = setupDistributedDataStore(name, "module-shards-member1.conf",
+                    true, "cars", "people")) {
 
-            DOMStoreReadTransaction readTx = dataStore.newReadOnlyTransaction();
+                DOMStoreReadTransaction readTx = dataStore.newReadOnlyTransaction();
 
-            Optional<NormalizedNode<?, ?>> optional = readTx.read(CarsModel.BASE_PATH).get(5, TimeUnit.SECONDS);
-            assertEquals("isPresent", true, optional.isPresent());
-            assertEquals("Data node", carsNode, optional.get());
+                Optional<NormalizedNode<?, ?>> optional = readTx.read(CarsModel.BASE_PATH).get(5, TimeUnit.SECONDS);
+                assertEquals("isPresent", true, optional.isPresent());
+                assertEquals("Data node", carsNode, optional.get());
 
-            optional = readTx.read(PeopleModel.BASE_PATH).get(5, TimeUnit.SECONDS);
-            assertEquals("isPresent", true, optional.isPresent());
-            assertEquals("Data node", peopleNode, optional.get());
-
-            cleanup(dataStore);
+                optional = readTx.read(PeopleModel.BASE_PATH).get(5, TimeUnit.SECONDS);
+                assertEquals("isPresent", true, optional.isPresent());
+                assertEquals("Data node", peopleNode, optional.get());
+            }
         }};
     }
 }
