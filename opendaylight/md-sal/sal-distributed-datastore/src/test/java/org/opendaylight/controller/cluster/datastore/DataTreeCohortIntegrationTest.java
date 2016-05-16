@@ -14,7 +14,6 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
-
 import akka.actor.ActorSystem;
 import akka.actor.Address;
 import akka.actor.AddressFromURIString;
@@ -91,25 +90,25 @@ public class DataTreeCohortIntegrationTest {
         ArgumentCaptor<DOMDataTreeCandidate> candidateCapt = ArgumentCaptor.forClass(DOMDataTreeCandidate.class);
         new IntegrationTestKit(getSystem(), datastoreContextBuilder) {
             {
-                final DistributedDataStore dataStore = setupDistributedDataStore("transactionIntegrationTest", "test-1");
-                final ObjectRegistration<DOMDataTreeCommitCohort> cohortReg = dataStore.registerCommitCohort(TEST_ID, cohort);
-                Thread.sleep(1000); // Registration is asynchronous
-                assertNotNull(cohortReg);
-                testWriteTransaction(dataStore, TestModel.TEST_PATH,
+                try (final DistributedDataStore dataStore = setupDistributedDataStore("transactionIntegrationTest", "test-1")) {
+                    final ObjectRegistration<DOMDataTreeCommitCohort> cohortReg = dataStore.registerCommitCohort(TEST_ID, cohort);
+                    Thread.sleep(1000); // Registration is asynchronous
+                    assertNotNull(cohortReg);
+                    testWriteTransaction(dataStore, TestModel.TEST_PATH,
                         ImmutableNodes.containerNode(TestModel.TEST_QNAME));
-                Mockito.verify(cohort).canCommit(any(Object.class), candidateCapt.capture(), any(SchemaContext.class));
-                DOMDataTreeCandidate candidate = candidateCapt.getValue();
-                assertNotNull(candidate);
-                assertEquals(TEST_ID, candidate.getRootPath());
-                testWriteTransaction(dataStore, TestModel.OUTER_LIST_PATH,
+                    Mockito.verify(cohort).canCommit(any(Object.class), candidateCapt.capture(), any(SchemaContext.class));
+                    DOMDataTreeCandidate candidate = candidateCapt.getValue();
+                    assertNotNull(candidate);
+                    assertEquals(TEST_ID, candidate.getRootPath());
+                    testWriteTransaction(dataStore, TestModel.OUTER_LIST_PATH,
                         ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME).build());
-                Mockito.verify(cohort, Mockito.times(2)).canCommit(any(Object.class), any(DOMDataTreeCandidate.class),
+                    Mockito.verify(cohort, Mockito.times(2)).canCommit(any(Object.class), any(DOMDataTreeCandidate.class),
                         any(SchemaContext.class));
-                cohortReg.close();
-                testWriteTransaction(dataStore, TestModel.TEST_PATH,
+                    cohortReg.close();
+                    testWriteTransaction(dataStore, TestModel.TEST_PATH,
                         ImmutableNodes.containerNode(TestModel.TEST_QNAME));
-                Mockito.verifyNoMoreInteractions(cohort);
-                cleanup(dataStore);
+                    Mockito.verifyNoMoreInteractions(cohort);
+                }
             }
         };
     }
@@ -123,23 +122,23 @@ public class DataTreeCohortIntegrationTest {
 
         new IntegrationTestKit(getSystem(), datastoreContextBuilder) {
             {
-                final DistributedDataStore dataStore =
-                        setupDistributedDataStore("transactionIntegrationTest", "test-1");
-                dataStore.registerCommitCohort(TEST_ID, failedCohort);
-                Thread.sleep(1000); // Registration is asynchronous
+                try (final DistributedDataStore dataStore =
+                        setupDistributedDataStore("transactionIntegrationTest", "test-1")) {
+                    dataStore.registerCommitCohort(TEST_ID, failedCohort);
+                    Thread.sleep(1000); // Registration is asynchronous
 
-                DOMStoreWriteTransaction writeTx = dataStore.newWriteOnlyTransaction();
-                writeTx.write(TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
-                DOMStoreThreePhaseCommitCohort dsCohort = writeTx.ready();
-                try {
-                    // FIXME: Weird thing is that invoking canCommit on front-end invokes also
-                    // preCommit on backend.
-                    dsCohort.canCommit().get();
-                    fail("Exception should be raised.");
-                } catch (Exception e) {
-                    assertSame(FAILED_CAN_COMMIT, Throwables.getRootCause(e));
+                    DOMStoreWriteTransaction writeTx = dataStore.newWriteOnlyTransaction();
+                    writeTx.write(TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
+                    DOMStoreThreePhaseCommitCohort dsCohort = writeTx.ready();
+                    try {
+                        // FIXME: Weird thing is that invoking canCommit on front-end invokes also
+                        // preCommit on backend.
+                        dsCohort.canCommit().get();
+                        fail("Exception should be raised.");
+                    } catch (Exception e) {
+                        assertSame(FAILED_CAN_COMMIT, Throwables.getRootCause(e));
+                    }
                 }
-                cleanup(dataStore);
             }
         };
     }
@@ -160,19 +159,19 @@ public class DataTreeCohortIntegrationTest {
         Mockito.doReturn(ThreePhaseCommitStep.NOOP_ABORT_FUTURE).when(stepToAbort).abort();
         new IntegrationTestKit(getSystem(), datastoreContextBuilder) {
             {
-                final DistributedDataStore dataStore =
-                        setupDistributedDataStore("transactionIntegrationTest", "test-1");
-                dataStore.registerCommitCohort(TEST_ID, cohortToAbort);
-                Thread.sleep(1000); // Registration is asynchronous
+                try (final DistributedDataStore dataStore =
+                        setupDistributedDataStore("transactionIntegrationTest", "test-1")) {
+                    dataStore.registerCommitCohort(TEST_ID, cohortToAbort);
+                    Thread.sleep(1000); // Registration is asynchronous
 
-                DOMStoreWriteTransaction writeTx = dataStore.newWriteOnlyTransaction();
-                writeTx.write(TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
-                DOMStoreThreePhaseCommitCohort dsCohort = writeTx.ready();
+                    DOMStoreWriteTransaction writeTx = dataStore.newWriteOnlyTransaction();
+                    writeTx.write(TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
+                    DOMStoreThreePhaseCommitCohort dsCohort = writeTx.ready();
 
-                dsCohort.canCommit().get();
-                dsCohort.abort().get();
-                Mockito.verify(stepToAbort, Mockito.times(1)).abort();
-                cleanup(dataStore);
+                    dsCohort.canCommit().get();
+                    dsCohort.abort().get();
+                    Mockito.verify(stepToAbort, Mockito.times(1)).abort();
+                }
             }
         };
     }
