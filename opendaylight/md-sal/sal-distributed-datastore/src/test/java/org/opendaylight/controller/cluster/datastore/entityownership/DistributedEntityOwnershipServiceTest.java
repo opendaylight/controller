@@ -28,7 +28,6 @@ import static org.opendaylight.controller.cluster.datastore.entityownership.Enti
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.entityPath;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.entityTypeEntryWithEntityEntry;
 import akka.actor.ActorRef;
-import akka.actor.PoisonPill;
 import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
 import java.util.Collection;
@@ -104,7 +103,7 @@ public class DistributedEntityOwnershipServiceTest extends AbstractEntityOwnersh
 
     @After
     public void tearDown() {
-        dataStore.getActorContext().getShardManager().tell(PoisonPill.getInstance(), ActorRef.noSender());
+        dataStore.close();
     }
 
     private static <T> T verifyMessage(final DistributedEntityOwnershipService mock, final Class<T> type) {
