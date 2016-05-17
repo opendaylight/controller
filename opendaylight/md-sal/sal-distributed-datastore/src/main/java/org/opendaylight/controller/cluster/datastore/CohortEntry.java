@@ -14,9 +14,9 @@ import com.google.common.base.Stopwatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.ShardCommitCoordinator.CohortDecorator;
 import org.opendaylight.controller.cluster.datastore.modification.Modification;
-import org.opendaylight.yangtools.util.StringIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -35,7 +35,7 @@ final class CohortEntry {
 
     private final Stopwatch lastAccessTimer = Stopwatch.createStarted();
     private final ReadWriteShardDataTreeTransaction transaction;
-    private final StringIdentifier transactionID;
+    private final TransactionIdentifier<?> transactionID;
     private final CompositeDataTreeCohort userCohorts;
     private final short clientVersion;
 
@@ -47,17 +47,17 @@ final class CohortEntry {
     private ActorRef replySender;
     private Shard shard;
 
-    CohortEntry(String transactionID, ReadWriteShardDataTreeTransaction transaction,
+    CohortEntry(TransactionIdentifier<?> transactionID, ReadWriteShardDataTreeTransaction transaction,
             DataTreeCohortActorRegistry cohortRegistry, SchemaContext schema, short clientVersion) {
         this.transaction = Preconditions.checkNotNull(transaction);
-        this.transactionID = new StringIdentifier(transactionID);
+        this.transactionID = Preconditions.checkNotNull(transactionID);
         this.clientVersion = clientVersion;
         this.userCohorts = new CompositeDataTreeCohort(cohortRegistry, transactionID, schema, COMMIT_STEP_TIMEOUT);
     }
 
-    CohortEntry(String transactionID, ShardDataTreeCohort cohort, DataTreeCohortActorRegistry cohortRegistry,
+    CohortEntry(TransactionIdentifier<?> transactionID, ShardDataTreeCohort cohort, DataTreeCohortActorRegistry cohortRegistry,
             SchemaContext schema, short clientVersion) {
-        this.transactionID = new StringIdentifier(transactionID);
+        this.transactionID = Preconditions.checkNotNull(transactionID);
         this.cohort = cohort;
         this.transaction = null;
         this.clientVersion = clientVersion;
@@ -69,7 +69,7 @@ final class CohortEntry {
         lastAccessTimer.start();
     }
 
-    StringIdentifier getTransactionID() {
+    TransactionIdentifier<?> getTransactionID() {
         return transactionID;
     }
 

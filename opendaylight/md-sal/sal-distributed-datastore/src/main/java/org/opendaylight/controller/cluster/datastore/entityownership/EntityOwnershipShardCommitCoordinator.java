@@ -220,8 +220,8 @@ class EntityOwnershipShardCommitCoordinator {
     }
 
     BatchedModifications newBatchedModifications() {
-        BatchedModifications modifications = new BatchedModifications(TransactionIdentifierUtils.actorNameFor(
-            new TransactionIdentifier<>(historyId, ++transactionIDCounter)), DataStoreVersions.CURRENT_VERSION, "");
+        BatchedModifications modifications = new BatchedModifications(
+            new TransactionIdentifier<>(historyId, ++transactionIDCounter), DataStoreVersions.CURRENT_VERSION);
         modifications.setDoCommitOnReady(true);
         modifications.setReady(true);
         modifications.setTotalMessagesSent(1);
