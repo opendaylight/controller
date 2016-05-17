@@ -10,6 +10,12 @@ package org.opendaylight.controller.cluster.datastore;
 import akka.actor.ActorRef;
 import com.google.common.base.Preconditions;
 import java.util.concurrent.ExecutionException;
+import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
+import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
+import org.opendaylight.controller.cluster.access.concepts.FrontendType;
+import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
+import org.opendaylight.controller.cluster.access.concepts.MemberName;
+import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.CreateSnapshot;
 import org.opendaylight.controller.cluster.datastore.utils.SerializationUtils;
 import org.opendaylight.controller.cluster.raft.RaftActorSnapshotCohort;
@@ -23,19 +29,52 @@ import org.slf4j.Logger;
  * @author Thomas Pantelis
  */
 class ShardSnapshotCohort implements RaftActorSnapshotCohort {
+    private static final FrontendType SNAPSHOT_APPLY = new FrontendType() {
+        private static final long serialVersionUID = 1L;
+
+        @Override
+        public String toSimpleString() {
+            return "snapshot-apply";
+        }
+
+        private Object readResolve() {
+            return SNAPSHOT_APPLY;
+        }
+    };
+    private static final FrontendType SNAPSHOT_READ = new FrontendType() {
+        private static final long serialVersionUID = 1L;
+
+        @Override
+        public String toSimpleString() {
+            return "snapshot-read";
+        }
+
+        private Object readResolve() {
+            return SNAPSHOT_READ;
+        }
+    };
+
     private final ShardTransactionActorFactory transactionActorFactory;
+    private final LocalHistoryIdentifier<?> applyHistoryId;
+    private final LocalHistoryIdentifier<?> readHistoryId;
     private final ShardDataTree store;
     private final String logId;
     private final Logger log;
 
-    private int createSnapshotTransactionCounter;
+    private long applyCounter;
+    private long readCounter;
 
-    ShardSnapshotCohort(ShardTransactionActorFactory transactionActorFactory, ShardDataTree store,
+    ShardSnapshotCohort(MemberName memberName, ShardTransactionActorFactory transactionActorFactory, ShardDataTree store,
             Logger log, String logId) {
-        this.transactionActorFactory = transactionActorFactory;
+        this.transactionActorFactory = Preconditions.checkNotNull(transactionActorFactory);
         this.store = Preconditions.checkNotNull(store);
         this.log = log;
         this.logId = logId;
+
+        this.applyHistoryId = new LocalHistoryIdentifier<>(ClientIdentifier.create(
+            FrontendIdentifier.create(memberName, SNAPSHOT_APPLY), 0), 0);
+        this.readHistoryId = new LocalHistoryIdentifier<>(ClientIdentifier.create(
+            FrontendIdentifier.create(memberName, SNAPSHOT_READ), 0), 0);
     }
 
     @Override
@@ -45,7 +84,7 @@ class ShardSnapshotCohort implements RaftActorSnapshotCohort {
         // after processing the CreateSnapshot message.
 
         ActorRef createSnapshotTransaction = transactionActorFactory.newShardTransaction(
-                TransactionType.READ_ONLY, "createSnapshot" + ++createSnapshotTransactionCounter, "");
+                TransactionType.READ_ONLY, new TransactionIdentifier<>(readHistoryId, readCounter++));
 
         createSnapshotTransaction.tell(CreateSnapshot.INSTANCE, actorRef);
     }
@@ -59,7 +98,8 @@ class ShardSnapshotCohort implements RaftActorSnapshotCohort {
         log.info("{}: Applying snapshot", logId);
 
         try {
-            ReadWriteShardDataTreeTransaction transaction = store.newReadWriteTransaction("snapshot-" + logId, null);
+            ReadWriteShardDataTreeTransaction transaction = store.newReadWriteTransaction(
+                new TransactionIdentifier<>(applyHistoryId, applyCounter++));
 
             NormalizedNode<?, ?> node = SerializationUtils.deserializeNormalizedNode(snapshotBytes);
 

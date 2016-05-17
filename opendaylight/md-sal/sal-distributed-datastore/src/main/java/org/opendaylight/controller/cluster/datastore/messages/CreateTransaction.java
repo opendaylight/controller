@@ -12,26 +12,24 @@ import com.google.common.base.Preconditions;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 
 public class CreateTransaction extends VersionedExternalizableMessage {
     private static final long serialVersionUID = 1L;
 
-    private String transactionId;
+    private TransactionIdentifier<?> transactionId;
     private int transactionType;
-    private String transactionChainId;
 
     public CreateTransaction() {
     }
 
-    public CreateTransaction(String transactionId, int transactionType, String transactionChainId,
-            short version) {
+    public CreateTransaction(TransactionIdentifier<?> transactionId, int transactionType, short version) {
         super(version);
         this.transactionId = Preconditions.checkNotNull(transactionId);
         this.transactionType = transactionType;
-        this.transactionChainId = transactionChainId != null ? transactionChainId : "";
     }
 
-    public String getTransactionId() {
+    public TransactionIdentifier<?> getTransactionId() {
         return transactionId;
     }
 
@@ -39,30 +37,23 @@ public class CreateTransaction extends VersionedExternalizableMessage {
         return transactionType;
     }
 
-    public String getTransactionChainId() {
-        return transactionChainId;
-    }
-
     @Override
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         super.readExternal(in);
-        transactionId = in.readUTF();
+        transactionId = (TransactionIdentifier<?>) in.readObject();
         transactionType = in.readInt();
-        transactionChainId = in.readUTF();
     }
 
     @Override
     public void writeExternal(ObjectOutput out) throws IOException {
         super.writeExternal(out);
-        out.writeUTF(transactionId);
+        out.writeObject(transactionId);
         out.writeInt(transactionType);
-        out.writeUTF(transactionChainId);
     }
 
     @Override
     public String toString() {
-        return "CreateTransaction [transactionId=" + transactionId + ", transactionType=" + transactionType
-                + ", transactionChainId=" + transactionChainId + "]";
+        return "CreateTransaction [transactionId=" + transactionId + ", transactionType=" + transactionType + "]";
     }
 
     public static CreateTransaction fromSerializable(Object message) {
