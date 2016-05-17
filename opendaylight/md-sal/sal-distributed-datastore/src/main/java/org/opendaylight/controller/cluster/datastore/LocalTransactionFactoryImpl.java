@@ -11,7 +11,7 @@ import akka.actor.ActorSelection;
 import com.google.common.base.Preconditions;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import org.opendaylight.controller.cluster.datastore.identifiers.TransactionIdentifier;
+import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
@@ -28,7 +28,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification
  * disconnected from each other, ie not chained. These are used by {@link AbstractTransactionContextFactory}
  * to instantiate transactions on shards which are co-located with the shard leader.
  */
-final class LocalTransactionFactoryImpl extends TransactionReadyPrototype<TransactionIdentifier>
+final class LocalTransactionFactoryImpl extends TransactionReadyPrototype<TransactionIdentifier<?>>
         implements LocalTransactionFactory {
 
     private final ActorSelection leader;
@@ -46,27 +46,27 @@ final class LocalTransactionFactoryImpl extends TransactionReadyPrototype<Transa
     }
 
     @Override
-    public DOMStoreReadTransaction newReadOnlyTransaction(TransactionIdentifier identifier) {
+    public DOMStoreReadTransaction newReadOnlyTransaction(TransactionIdentifier<?> identifier) {
         return SnapshotBackedTransactions.newReadTransaction(identifier, false, dataTree.takeSnapshot());
     }
 
     @Override
-    public DOMStoreReadWriteTransaction newReadWriteTransaction(TransactionIdentifier identifier) {
+    public DOMStoreReadWriteTransaction newReadWriteTransaction(TransactionIdentifier<?> identifier) {
         return SnapshotBackedTransactions.newReadWriteTransaction(identifier, false, dataTree.takeSnapshot(), this);
     }
 
     @Override
-    public DOMStoreWriteTransaction newWriteOnlyTransaction(TransactionIdentifier identifier) {
+    public DOMStoreWriteTransaction newWriteOnlyTransaction(TransactionIdentifier<?> identifier) {
         return SnapshotBackedTransactions.newWriteTransaction(identifier, false, dataTree.takeSnapshot(), this);
     }
 
     @Override
-    protected void transactionAborted(final SnapshotBackedWriteTransaction<TransactionIdentifier> tx) {
+    protected void transactionAborted(final SnapshotBackedWriteTransaction<TransactionIdentifier<?>> tx) {
         // No-op
     }
 
     @Override
-    protected DOMStoreThreePhaseCommitCohort transactionReady(final SnapshotBackedWriteTransaction<TransactionIdentifier> tx,
+    protected DOMStoreThreePhaseCommitCohort transactionReady(final SnapshotBackedWriteTransaction<TransactionIdentifier<?>> tx,
             final DataTreeModification tree) {
         return new LocalThreePhaseCommitCohort(actorContext, leader, tx, tree);
     }
@@ -77,7 +77,7 @@ final class LocalTransactionFactoryImpl extends TransactionReadyPrototype<Transa
             @Nullable Exception operationError) {
         if(operationError != null) {
             return new LocalThreePhaseCommitCohort(actorContext, leader,
-                    (SnapshotBackedWriteTransaction<TransactionIdentifier>)tx, operationError);
+                    (SnapshotBackedWriteTransaction<TransactionIdentifier<?>>)tx, operationError);
         }
 
         try {
@@ -86,7 +86,7 @@ final class LocalTransactionFactoryImpl extends TransactionReadyPrototype<Transa
             // Unfortunately we need to cast to SnapshotBackedWriteTransaction here as it's required by
             // LocalThreePhaseCommitCohort.
             return new LocalThreePhaseCommitCohort(actorContext, leader,
-                    (SnapshotBackedWriteTransaction<TransactionIdentifier>)tx, e);
+                    (SnapshotBackedWriteTransaction<TransactionIdentifier<?>>)tx, e);
         }
     }
 }

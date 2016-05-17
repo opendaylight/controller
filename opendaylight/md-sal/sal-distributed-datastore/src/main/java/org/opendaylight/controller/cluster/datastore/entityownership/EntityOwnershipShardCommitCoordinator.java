@@ -10,13 +10,18 @@ package org.opendaylight.controller.cluster.datastore.entityownership;
 import akka.actor.ActorRef;
 import akka.actor.Cancellable;
 import akka.actor.Status.Failure;
+import com.google.common.base.Preconditions;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Queue;
+import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
+import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
+import org.opendaylight.controller.cluster.access.concepts.FrontendType;
+import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
+import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
-import org.opendaylight.controller.cluster.datastore.identifiers.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.BatchedModifications;
 import org.opendaylight.controller.cluster.datastore.messages.CommitTransactionReply;
 import org.opendaylight.controller.cluster.datastore.modification.Modification;
@@ -35,17 +40,31 @@ class EntityOwnershipShardCommitCoordinator {
             return "entityCommitRetry";
         }
     };
+    private static final FrontendType FRONTEND_TYPE = new FrontendType() {
+        private static final long serialVersionUID = 1L;
 
-    private final Logger log;
-    private int transactionIDCounter = 0;
-    private final MemberName localMemberName;
+        @Override
+        public String toString() {
+            return "ENTITY FRONTEND";
+        }
+
+        private Object readResolve() {
+            return FRONTEND_TYPE;
+        }
+    };
+
     private final Queue<Modification> pendingModifications = new LinkedList<>();
+    private final LocalHistoryIdentifier<?> historyId;
+    private final Logger log;
+
     private BatchedModifications inflightCommit;
     private Cancellable retryCommitSchedule;
+    private long transactionIDCounter = 0;
 
     EntityOwnershipShardCommitCoordinator(MemberName localMemberName, Logger log) {
-        this.localMemberName = localMemberName;
-        this.log = log;
+        this.log = Preconditions.checkNotNull(log);
+        historyId = new LocalHistoryIdentifier<>(
+                ClientIdentifier.create(FrontendIdentifier.create(localMemberName, FRONTEND_TYPE), 0), 0);
     }
 
     boolean handleMessage(Object message, EntityOwnershipShard shard) {
@@ -195,7 +214,7 @@ class EntityOwnershipShardCommitCoordinator {
 
     BatchedModifications newBatchedModifications() {
         BatchedModifications modifications = new BatchedModifications(
-                TransactionIdentifier.create(localMemberName, ++transactionIDCounter).toString(),
+            new TransactionIdentifier<>(historyId, ++transactionIDCounter).toString(),
                 DataStoreVersions.CURRENT_VERSION, "");
         modifications.setDoCommitOnReady(true);
         modifications.setReady(true);
