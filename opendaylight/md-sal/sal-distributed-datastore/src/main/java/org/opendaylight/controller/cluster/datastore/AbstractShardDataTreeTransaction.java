@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.datastore;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
 import javax.annotation.concurrent.NotThreadSafe;
+import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
 
 /**
@@ -20,15 +21,15 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
 @NotThreadSafe
 abstract class AbstractShardDataTreeTransaction<T extends DataTreeSnapshot> {
     private final T snapshot;
-    private final String id;
+    private final TransactionIdentifier id;
     private boolean closed;
 
-    protected AbstractShardDataTreeTransaction(final String id, final T snapshot) {
+    protected AbstractShardDataTreeTransaction(final TransactionIdentifier id, final T snapshot) {
         this.snapshot = Preconditions.checkNotNull(snapshot);
         this.id = Preconditions.checkNotNull(id);
     }
 
-    String getId() {
+    final TransactionIdentifier getId() {
         return id;
     }
 
