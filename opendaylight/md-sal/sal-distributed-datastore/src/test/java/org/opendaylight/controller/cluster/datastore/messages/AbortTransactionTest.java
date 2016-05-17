@@ -12,6 +12,7 @@ import java.io.Serializable;
 import org.apache.commons.lang.SerializationUtils;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
+import org.opendaylight.controller.cluster.datastore.MockIdentifiers;
 
 /**
  * Unit tests for AbortTransaction.
@@ -22,7 +23,8 @@ public class AbortTransactionTest {
 
     @Test
     public void testSerialization() {
-        AbortTransaction expected = new AbortTransaction("txId", DataStoreVersions.CURRENT_VERSION);
+        AbortTransaction expected = new AbortTransaction(
+            MockIdentifiers.transactionIdentifier(AbortTransactionTest.class, "mock"), DataStoreVersions.CURRENT_VERSION);
 
         Object serialized = expected.toSerializable();
         assertEquals("Serialized type", AbortTransaction.class, serialized.getClass());
