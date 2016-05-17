@@ -9,12 +9,13 @@ package org.opendaylight.controller.cluster.datastore;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import javax.annotation.concurrent.NotThreadSafe;
+import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
+import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeListener;
@@ -48,7 +49,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     private static final Logger LOG = LoggerFactory.getLogger(ShardDataTree.class);
     private static final YangInstanceIdentifier ROOT_PATH = YangInstanceIdentifier.builder().build();
 
-    private final Map<String, ShardDataTreeTransactionChain> transactionChains = new HashMap<>();
+    private final Map<LocalHistoryIdentifier<?>, ShardDataTreeTransactionChain> transactionChains = new HashMap<>();
     private final ShardDataTreeChangeListenerPublisher treeChangeListenerPublisher;
     private final ShardDataChangeListenerPublisher dataChangeListenerPublisher;
     private final TipProducingDataTree dataTree;
@@ -84,31 +85,31 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         dataTree.setSchemaContext(schemaContext);
     }
 
-    private ShardDataTreeTransactionChain ensureTransactionChain(final String chainId) {
-        ShardDataTreeTransactionChain chain = transactionChains.get(chainId);
+    private ShardDataTreeTransactionChain ensureTransactionChain(final LocalHistoryIdentifier<?> localHistoryIdentifier) {
+        ShardDataTreeTransactionChain chain = transactionChains.get(localHistoryIdentifier);
         if (chain == null) {
-            chain = new ShardDataTreeTransactionChain(chainId, this);
-            transactionChains.put(chainId, chain);
+            chain = new ShardDataTreeTransactionChain(localHistoryIdentifier, this);
+            transactionChains.put(localHistoryIdentifier, chain);
         }
 
         return chain;
     }
 
-    ReadOnlyShardDataTreeTransaction newReadOnlyTransaction(final String txId, final String chainId) {
-        if (Strings.isNullOrEmpty(chainId)) {
+    ReadOnlyShardDataTreeTransaction newReadOnlyTransaction(final TransactionIdentifier<?> txId) {
+        if (txId.getHistoryId().getHistoryId() == 0) {
             return new ReadOnlyShardDataTreeTransaction(txId, dataTree.takeSnapshot());
         }
 
-        return ensureTransactionChain(chainId).newReadOnlyTransaction(txId);
+        return ensureTransactionChain(txId.getHistoryId()).newReadOnlyTransaction(txId);
     }
 
-    ReadWriteShardDataTreeTransaction newReadWriteTransaction(final String txId, final String chainId) {
-        if (Strings.isNullOrEmpty(chainId)) {
+    ReadWriteShardDataTreeTransaction newReadWriteTransaction(final TransactionIdentifier<?> txId) {
+        if (txId.getHistoryId().getHistoryId() == 0) {
             return new ReadWriteShardDataTreeTransaction(ShardDataTree.this, txId, dataTree.takeSnapshot()
                     .newModification());
         }
 
-        return ensureTransactionChain(chainId).newReadWriteTransaction(txId);
+        return ensureTransactionChain(txId.getHistoryId()).newReadWriteTransaction(txId);
     }
 
     public void notifyListeners(final DataTreeCandidate candidate) {

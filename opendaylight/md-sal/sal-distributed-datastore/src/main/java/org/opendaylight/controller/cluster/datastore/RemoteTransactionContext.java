@@ -105,8 +105,7 @@ public class RemoteTransactionContext extends AbstractTransactionContext {
     }
 
     private BatchedModifications newBatchedModifications() {
-        return new BatchedModifications(getIdentifier().toString(), getTransactionVersion(),
-            RemoteTransactionContextSupport.compatTransactionChainId(getIdentifier()));
+        return new BatchedModifications(getIdentifier(), getTransactionVersion());
     }
 
     private void batchModification(Modification modification) {
