@@ -10,18 +10,15 @@ package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorSystem;
 import akka.testkit.JavaTestKit;
-
+import java.io.IOException;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
-import java.io.IOException;
-
-public abstract class AbstractActorTest {
+public abstract class AbstractActorTest extends AbstractTest {
     private static ActorSystem system;
 
     @BeforeClass
     public static void setUpClass() throws IOException {
-
         System.setProperty("shard.persistent", "false");
         system = ActorSystem.create("test");
     }
@@ -32,7 +29,7 @@ public abstract class AbstractActorTest {
         system = null;
     }
 
-    protected ActorSystem getSystem() {
+    protected static ActorSystem getSystem() {
         return system;
     }
 }
