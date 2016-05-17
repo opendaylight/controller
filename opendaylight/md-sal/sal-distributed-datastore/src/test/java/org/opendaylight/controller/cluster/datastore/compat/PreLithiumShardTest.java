@@ -80,7 +80,7 @@ public class PreLithiumShardTest extends AbstractShardTest {
 
         writeToStore(store, TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
 
-        YangInstanceIdentifier root = YangInstanceIdentifier.builder().build();
+        YangInstanceIdentifier root = YangInstanceIdentifier.EMPTY;
         NormalizedNode<?,?> expected = readStore(store, root);
 
         NormalizedNodeMessages.Container encode = codec.encode(expected);
