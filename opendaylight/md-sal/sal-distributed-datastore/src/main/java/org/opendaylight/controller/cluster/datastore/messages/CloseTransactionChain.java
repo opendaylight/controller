@@ -12,34 +12,35 @@ import com.google.common.base.Preconditions;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 
 public class CloseTransactionChain extends VersionedExternalizableMessage {
     private static final long serialVersionUID = 1L;
 
-    private String transactionChainId;
+    private LocalHistoryIdentifier<?> transactionChainId;
 
     public CloseTransactionChain() {
     }
 
-    public CloseTransactionChain(final String transactionChainId, final short version) {
+    public CloseTransactionChain(final LocalHistoryIdentifier<?> transactionChainId, final short version) {
         super(version);
-        this.transactionChainId = transactionChainId;
+        this.transactionChainId = Preconditions.checkNotNull(transactionChainId);
     }
 
-    public String getTransactionChainId() {
+    public LocalHistoryIdentifier<?> getTransactionChainId() {
         return transactionChainId;
     }
 
     @Override
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         super.readExternal(in);
-        transactionChainId = in.readUTF();
+        transactionChainId = (LocalHistoryIdentifier<?>) in.readObject();
     }
 
     @Override
     public void writeExternal(ObjectOutput out) throws IOException {
         super.writeExternal(out);
-        out.writeUTF(transactionChainId);
+        out.writeObject(transactionChainId);
     }
 
     public static CloseTransactionChain fromSerializable(final Object serializable){
