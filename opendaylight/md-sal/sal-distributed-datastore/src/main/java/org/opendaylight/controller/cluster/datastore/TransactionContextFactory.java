@@ -9,7 +9,10 @@ package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorSelection;
 import java.util.Collection;
-import org.opendaylight.controller.cluster.datastore.identifiers.TransactionIdentifier;
+import java.util.concurrent.atomic.AtomicLongFieldUpdater;
+import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
+import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
+import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.PrimaryShardInfo;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionChain;
@@ -21,22 +24,18 @@ import scala.concurrent.Future;
  * transactions (ie not chained).
  */
 final class TransactionContextFactory extends AbstractTransactionContextFactory<LocalTransactionFactoryImpl> {
+    private static final AtomicLongFieldUpdater<TransactionContextFactory> NEXT_HISTORY_UPDATER =
+            AtomicLongFieldUpdater.newUpdater(TransactionContextFactory.class, "nextHistory");
+    // This field is used via NEXT_HISTORY_UPDATER. Counters starts at 1, since 0 is reserved
+    @SuppressWarnings("unused")
+    private volatile long nextHistory = 1;
 
-    private TransactionContextFactory(final ActorContext actorContext) {
-        super(actorContext);
-    }
-
-    static TransactionContextFactory create(final ActorContext actorContext) {
-        return new TransactionContextFactory(actorContext);
+    TransactionContextFactory(final ActorContext actorContext, final ClientIdentifier clientId) {
+        super(actorContext, new LocalHistoryIdentifier(clientId, 0));
     }
 
     @Override
     public void close() {
-    }
-
-    @Override
-    protected TransactionIdentifier nextIdentifier() {
-        return TransactionIdentifier.create(getMemberName(), TX_COUNTER.getAndIncrement());
     }
 
     @Override
@@ -55,10 +54,11 @@ final class TransactionContextFactory extends AbstractTransactionContextFactory<
     }
 
     DOMStoreTransactionChain createTransactionChain() {
-        return new TransactionChainProxy(this);
+        return new TransactionChainProxy(this, new LocalHistoryIdentifier(getHistoryId().getClientId(),
+                NEXT_HISTORY_UPDATER.getAndIncrement(this)));
     }
 
     @Override
-    protected void onTransactionContextCreated(TransactionIdentifier transactionId) {
+    protected void onTransactionContextCreated(final TransactionIdentifier transactionId) {
     }
 }
