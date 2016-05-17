@@ -31,7 +31,6 @@ public class CreateTransactionTest {
                 SerializationUtils.clone((Serializable) serialized));
         assertEquals("getTransactionId", expected.getTransactionId(), actual.getTransactionId());
         assertEquals("getTransactionType", expected.getTransactionType(), actual.getTransactionType());
-        assertEquals("getTransactionChainId", expected.getTransactionChainId(), actual.getTransactionChainId());
         assertEquals("getVersion", DataStoreVersions.CURRENT_VERSION, actual.getVersion());
     }
 
@@ -47,7 +46,6 @@ public class CreateTransactionTest {
                 SerializationUtils.clone((Serializable) serialized));
         assertEquals("getTransactionId", expected.getTransactionId(), actual.getTransactionId());
         assertEquals("getTransactionType", expected.getTransactionType(), actual.getTransactionType());
-        assertEquals("getTransactionChainId", expected.getTransactionChainId(), actual.getTransactionChainId());
         assertEquals("getVersion", DataStoreVersions.CURRENT_VERSION, actual.getVersion());
     }
 

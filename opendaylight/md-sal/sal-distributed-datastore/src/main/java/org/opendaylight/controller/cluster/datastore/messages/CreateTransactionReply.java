@@ -12,41 +12,43 @@ import com.google.common.base.Preconditions;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 
 public class CreateTransactionReply extends VersionedExternalizableMessage {
     private static final long serialVersionUID = 1L;
 
     private String transactionPath;
-    private String transactionId;
+    private TransactionIdentifier<?> transactionId;
 
     public CreateTransactionReply() {
     }
 
-    public CreateTransactionReply(final String transactionPath, final String transactionId, final short version) {
+    public CreateTransactionReply(final String transactionPath, final TransactionIdentifier<?> transactionId,
+            final short version) {
         super(version);
-        this.transactionPath = transactionPath;
-        this.transactionId = transactionId;
+        this.transactionPath = Preconditions.checkNotNull(transactionPath);
+        this.transactionId = Preconditions.checkNotNull(transactionId);
     }
 
     public String getTransactionPath() {
         return transactionPath;
     }
 
-    public String getTransactionId() {
+    public TransactionIdentifier<?> getTransactionId() {
         return transactionId;
     }
 
     @Override
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         super.readExternal(in);
-        transactionId = in.readUTF();
+        transactionId = (TransactionIdentifier<?>) in.readObject();
         transactionPath = in.readUTF();
     }
 
     @Override
     public void writeExternal(ObjectOutput out) throws IOException {
         super.writeExternal(out);
-        out.writeUTF(transactionId);
+        out.writeObject(transactionId);
         out.writeUTF(transactionPath);
     }
 

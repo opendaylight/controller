@@ -190,7 +190,7 @@ public abstract class AbstractTransactionProxyTest {
             public boolean matches(Object argument) {
                 if(CreateTransaction.class.equals(argument.getClass())) {
                     CreateTransaction obj = CreateTransaction.fromSerializable(argument);
-                    return obj.getTransactionId().startsWith(memberName + ':') &&
+                    return obj.getTransactionId().getHistoryId().getClienId().getFrontendId().getMemberName().getName().equals(memberName) &&
                             obj.getTransactionType() == type.ordinal();
                 }
 
