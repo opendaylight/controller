@@ -43,6 +43,7 @@ import org.junit.Before;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
+import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext.Builder;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.BatchedModifications;
@@ -208,7 +209,7 @@ public abstract class AbstractShardTest extends AbstractActorTest{
             final MutableCompositeModification modification,
             final Function<ShardDataTreeCohort, ListenableFuture<Void>> preCommit) {
 
-        final ReadWriteShardDataTreeTransaction tx = dataStore.newReadWriteTransaction("setup-mock-" + cohortName, null);
+        final ReadWriteShardDataTreeTransaction tx = dataStore.newReadWriteTransaction(nextTransactionId());
         tx.getSnapshot().write(path, data);
         final ShardDataTreeCohort cohort = createDelegatingMockCohort(cohortName, dataStore.finishTransaction(tx), preCommit);
 
@@ -270,9 +271,8 @@ public abstract class AbstractShardTest extends AbstractActorTest{
     }
 
     protected Object prepareReadyTransactionMessage(boolean remoteReadWriteTransaction, Shard shard, ShardDataTreeCohort cohort,
-                                                                  String transactionID,
-                                                                  MutableCompositeModification modification,
-                                                                  boolean doCommitOnReady) {
+            TransactionIdentifier<?> transactionID, MutableCompositeModification modification,
+            boolean doCommitOnReady) {
         if(remoteReadWriteTransaction){
             return prepareForwardedReadyTransaction(cohort, transactionID, CURRENT_VERSION,
                     doCommitOnReady);
@@ -299,15 +299,14 @@ public abstract class AbstractShardTest extends AbstractActorTest{
     }
 
     protected ForwardedReadyTransaction prepareForwardedReadyTransaction(ShardDataTreeCohort cohort,
-            String transactionID, short version, boolean doCommitOnReady) {
+            TransactionIdentifier<?> transactionID, short version, boolean doCommitOnReady) {
         return new ForwardedReadyTransaction(transactionID, version,
                 new ReadWriteShardDataTreeTransaction(newShardDataTreeTransactionParent(cohort), transactionID,
                         mock(DataTreeModification.class)), doCommitOnReady);
     }
 
     protected Object prepareReadyTransactionMessage(boolean remoteReadWriteTransaction, Shard shard, ShardDataTreeCohort cohort,
-                                                                  String transactionID,
-                                                                  MutableCompositeModification modification) {
+            TransactionIdentifier<?> transactionID, MutableCompositeModification modification) {
         return prepareReadyTransactionMessage(remoteReadWriteTransaction, shard, cohort, transactionID, modification, false);
     }
 
@@ -320,15 +319,15 @@ public abstract class AbstractShardTest extends AbstractActorTest{
         });
     }
 
-    protected BatchedModifications prepareBatchedModifications(String transactionID,
+    protected BatchedModifications prepareBatchedModifications(TransactionIdentifier<?> transactionID,
                                                                MutableCompositeModification modification) {
         return prepareBatchedModifications(transactionID, modification, false);
     }
 
-    private static BatchedModifications prepareBatchedModifications(String transactionID,
+    private static BatchedModifications prepareBatchedModifications(TransactionIdentifier<?> transactionID,
                                                              MutableCompositeModification modification,
                                                              boolean doCommitOnReady) {
-        final BatchedModifications batchedModifications = new BatchedModifications(transactionID, CURRENT_VERSION, null);
+        final BatchedModifications batchedModifications = new BatchedModifications(transactionID, CURRENT_VERSION);
         batchedModifications.addModification(modification);
         batchedModifications.setReady(true);
         batchedModifications.setDoCommitOnReady(doCommitOnReady);
@@ -346,9 +345,9 @@ public abstract class AbstractShardTest extends AbstractActorTest{
         return store.takeSnapshot().readNode(id).orNull();
     }
 
-    public static void writeToStore(final TestActorRef<Shard> shard, final YangInstanceIdentifier id,
+    public void writeToStore(final TestActorRef<Shard> shard, final YangInstanceIdentifier id,
             final NormalizedNode<?,?> node) throws InterruptedException, ExecutionException {
-        Future<Object> future = Patterns.ask(shard, newBatchedModifications("tx", id, node, true, true, 1),
+        Future<Object> future = Patterns.ask(shard, newBatchedModifications(nextTransactionId(), id, node, true, true, 1),
                 new Timeout(5, TimeUnit.SECONDS));
         try {
             Await.ready(future, Duration.create(5, TimeUnit.SECONDS));
@@ -359,7 +358,7 @@ public abstract class AbstractShardTest extends AbstractActorTest{
 
     public static void writeToStore(final ShardDataTree store, final YangInstanceIdentifier id,
             final NormalizedNode<?,?> node) throws InterruptedException, ExecutionException {
-        final ReadWriteShardDataTreeTransaction transaction = store.newReadWriteTransaction("writeToStore", null);
+        final ReadWriteShardDataTreeTransaction transaction = store.newReadWriteTransaction(nextTransactionId());
 
         transaction.getSnapshot().write(id, node);
         final ShardDataTreeCohort cohort = transaction.ready();
@@ -368,9 +367,9 @@ public abstract class AbstractShardTest extends AbstractActorTest{
         cohort.commit();
     }
 
-    public static void mergeToStore(final ShardDataTree store, final YangInstanceIdentifier id,
+    public void mergeToStore(final ShardDataTree store, final YangInstanceIdentifier id,
             final NormalizedNode<?,?> node) throws InterruptedException, ExecutionException {
-        final ReadWriteShardDataTreeTransaction transaction = store.newReadWriteTransaction("writeToStore", null);
+        final ReadWriteShardDataTreeTransaction transaction = store.newReadWriteTransaction(nextTransactionId());
 
         transaction.getSnapshot().merge(id, node);
         final ShardDataTreeCohort cohort = transaction.ready();
@@ -411,15 +410,10 @@ public abstract class AbstractShardTest extends AbstractActorTest{
         return DataTreeCandidatePayload.create(candidate);
     }
 
-    static BatchedModifications newBatchedModifications(final String transactionID, final YangInstanceIdentifier path,
-            final NormalizedNode<?, ?> data, final boolean ready, final boolean doCommitOnReady, final int messagesSent) {
-        return newBatchedModifications(transactionID, null, path, data, ready, doCommitOnReady, messagesSent);
-    }
-
-    static BatchedModifications newBatchedModifications(final String transactionID, final String transactionChainID,
+    static BatchedModifications newBatchedModifications(final TransactionIdentifier<?> transactionID,
             final YangInstanceIdentifier path, final NormalizedNode<?, ?> data, final boolean ready, final boolean doCommitOnReady,
             final int messagesSent) {
-        final BatchedModifications batched = new BatchedModifications(transactionID, CURRENT_VERSION, transactionChainID);
+        final BatchedModifications batched = new BatchedModifications(transactionID, CURRENT_VERSION);
         batched.addModification(new WriteModification(path, data));
         batched.setReady(ready);
         batched.setDoCommitOnReady(doCommitOnReady);
