@@ -19,8 +19,8 @@ import org.opendaylight.controller.cluster.datastore.messages.ReadData;
  */
 public class ShardReadWriteTransaction extends ShardWriteTransaction {
     public ShardReadWriteTransaction(ReadWriteShardDataTreeTransaction transaction, ActorRef shardActor,
-            ShardStats shardStats, String transactionID) {
-        super(transaction, shardActor, shardStats, transactionID);
+            ShardStats shardStats) {
+        super(transaction, shardActor, shardStats);
     }
 
     @Override
