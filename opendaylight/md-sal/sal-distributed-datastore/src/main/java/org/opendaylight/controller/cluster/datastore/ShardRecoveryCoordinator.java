@@ -9,12 +9,9 @@ package org.opendaylight.controller.cluster.datastore;
 
 import com.google.common.base.Preconditions;
 import java.io.IOException;
-import org.opendaylight.controller.cluster.datastore.modification.MutableCompositeModification;
 import org.opendaylight.controller.cluster.datastore.utils.PruningDataTreeModification;
 import org.opendaylight.controller.cluster.datastore.utils.SerializationUtils;
 import org.opendaylight.controller.cluster.raft.RaftActorRecoveryCohort;
-import org.opendaylight.controller.cluster.raft.protobuff.client.messages.CompositeModificationByteStringPayload;
-import org.opendaylight.controller.cluster.raft.protobuff.client.messages.CompositeModificationPayload;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -64,14 +61,6 @@ class ShardRecoveryCoordinator implements RaftActorRecoveryCohort {
         try {
             if (payload instanceof DataTreeCandidatePayload) {
                 DataTreeCandidates.applyToModification(transaction, ((DataTreeCandidatePayload)payload).getCandidate());
-                size++;
-            } else if (payload instanceof CompositeModificationPayload) {
-                MutableCompositeModification.fromSerializable(
-                    ((CompositeModificationPayload) payload).getModification()).apply(transaction);
-                size++;
-            } else if (payload instanceof CompositeModificationByteStringPayload) {
-                MutableCompositeModification.fromSerializable(
-                        ((CompositeModificationByteStringPayload) payload).getModification()).apply(transaction);
                 size++;
             } else {
                 log.error("{}: Unknown payload {} received during recovery", shardName, payload);
