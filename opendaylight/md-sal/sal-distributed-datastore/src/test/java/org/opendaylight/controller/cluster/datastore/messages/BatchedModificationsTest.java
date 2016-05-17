@@ -53,7 +53,6 @@ public class BatchedModificationsTest {
 
         assertEquals("getVersion", DataStoreVersions.CURRENT_VERSION, clone.getVersion());
         assertEquals("getTransactionID", "tx1", clone.getTransactionID());
-        assertEquals("getTransactionChainID", "txChain", clone.getTransactionChainID());
         assertEquals("isReady", true, clone.isReady());
         assertEquals("getTotalMessagesSent", 5, clone.getTotalMessagesSent());
 
@@ -81,7 +80,6 @@ public class BatchedModificationsTest {
 
         assertEquals("getVersion", DataStoreVersions.CURRENT_VERSION, clone.getVersion());
         assertEquals("getTransactionID", "tx2", clone.getTransactionID());
-        assertEquals("getTransactionChainID", "", clone.getTransactionChainID());
         assertEquals("isReady", false, clone.isReady());
 
         assertEquals("getModifications size", 0, clone.getModifications().size());
