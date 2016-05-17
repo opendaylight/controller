@@ -65,7 +65,6 @@ import org.opendaylight.controller.cluster.notifications.RoleChanged;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;
 import org.opendaylight.controller.cluster.raft.ServerConfigurationPayload.ServerInfo;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyJournalEntries;
-import org.opendaylight.controller.cluster.raft.base.messages.ApplyLogEntries;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
@@ -310,9 +309,6 @@ public class RaftActorTest extends AbstractActorTest {
         ApplyJournalEntries applyJournalEntries = new ApplyJournalEntries(2);
         mockRaftActor.handleRecover(applyJournalEntries);
 
-        ApplyLogEntries applyLogEntries = new ApplyLogEntries(0);
-        mockRaftActor.handleRecover(applyLogEntries);
-
         DeleteEntries deleteEntries = new DeleteEntries(1);
         mockRaftActor.handleRecover(deleteEntries);
 
@@ -330,7 +326,6 @@ public class RaftActorTest extends AbstractActorTest {
         verify(mockSupport).handleRecoveryMessage(same(snapshotOffer), any(PersistentDataProvider.class));
         verify(mockSupport).handleRecoveryMessage(same(logEntry), any(PersistentDataProvider.class));
         verify(mockSupport).handleRecoveryMessage(same(applyJournalEntries), any(PersistentDataProvider.class));
-        verify(mockSupport).handleRecoveryMessage(same(applyLogEntries), any(PersistentDataProvider.class));
         verify(mockSupport).handleRecoveryMessage(same(deleteEntries), any(PersistentDataProvider.class));
         verify(mockSupport).handleRecoveryMessage(same(deprecatedDeleteEntries), any(PersistentDataProvider.class));
         verify(mockSupport).handleRecoveryMessage(same(updateElectionTerm), any(PersistentDataProvider.class));
