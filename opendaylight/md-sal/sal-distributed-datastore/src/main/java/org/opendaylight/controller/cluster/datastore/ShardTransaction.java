@@ -52,9 +52,8 @@ public abstract class ShardTransaction extends AbstractUntypedActorWithMetering 
     }
 
     public static Props props(TransactionType type, AbstractShardDataTreeTransaction<?> transaction, ActorRef shardActor,
-            DatastoreContext datastoreContext, ShardStats shardStats, String transactionID) {
-        return Props.create(new ShardTransactionCreator(type, transaction, shardActor,
-           datastoreContext, shardStats, transactionID));
+            DatastoreContext datastoreContext, ShardStats shardStats) {
+        return Props.create(new ShardTransactionCreator(type, transaction, shardActor, datastoreContext, shardStats));
     }
 
     protected abstract AbstractShardDataTreeTransaction<?> getDOMStoreTransaction();
@@ -131,16 +130,14 @@ public abstract class ShardTransaction extends AbstractUntypedActorWithMetering 
         final ActorRef shardActor;
         final DatastoreContext datastoreContext;
         final ShardStats shardStats;
-        final String transactionID;
         final TransactionType type;
 
         ShardTransactionCreator(TransactionType type, AbstractShardDataTreeTransaction<?> transaction, ActorRef shardActor,
-                DatastoreContext datastoreContext, ShardStats shardStats, String transactionID) {
+                DatastoreContext datastoreContext, ShardStats shardStats) {
             this.transaction = Preconditions.checkNotNull(transaction);
             this.shardActor = shardActor;
             this.shardStats = shardStats;
             this.datastoreContext = datastoreContext;
-            this.transactionID = Preconditions.checkNotNull(transactionID);
             this.type = type;
         }
 
@@ -149,16 +146,13 @@ public abstract class ShardTransaction extends AbstractUntypedActorWithMetering 
             final ShardTransaction tx;
             switch (type) {
             case READ_ONLY:
-                tx = new ShardReadTransaction(transaction, shardActor,
-                    shardStats, transactionID);
+                tx = new ShardReadTransaction(transaction, shardActor, shardStats);
                 break;
             case READ_WRITE:
-                tx = new ShardReadWriteTransaction((ReadWriteShardDataTreeTransaction)transaction,
-                    shardActor, shardStats, transactionID);
+                tx = new ShardReadWriteTransaction((ReadWriteShardDataTreeTransaction)transaction, shardActor, shardStats);
                 break;
             case WRITE_ONLY:
-                tx = new ShardWriteTransaction((ReadWriteShardDataTreeTransaction)transaction,
-                    shardActor, shardStats, transactionID);
+                tx = new ShardWriteTransaction((ReadWriteShardDataTreeTransaction)transaction, shardActor, shardStats);
                 break;
             default:
                 throw new IllegalArgumentException("Unhandled transaction type " + type);
