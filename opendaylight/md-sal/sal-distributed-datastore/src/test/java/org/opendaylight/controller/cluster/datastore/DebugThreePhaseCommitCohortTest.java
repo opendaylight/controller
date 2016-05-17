@@ -21,8 +21,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.Test;
-import org.opendaylight.controller.cluster.access.concepts.MemberName;
-import org.opendaylight.controller.cluster.datastore.identifiers.TransactionIdentifier;
+import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.slf4j.Logger;
 import scala.concurrent.Future;
 
@@ -32,6 +31,8 @@ import scala.concurrent.Future;
  * @author Thomas Pantelis
  */
 public class DebugThreePhaseCommitCohortTest {
+    private final TransactionIdentifier transactionId = MockIdentifiers.transactionIdentifier(
+        DebugThreePhaseCommitCohortTest.class, "mock");
 
     @Test
     public void test() {
@@ -48,9 +49,8 @@ public class DebugThreePhaseCommitCohortTest {
         List<Future<Object>> expCohortFutures = new ArrayList<>();
         doReturn(expCohortFutures).when(mockDelegate).getCohortFutures();
 
-        TransactionIdentifier transactionId = TransactionIdentifier.create(MemberName.forName("1"), 1);
         Throwable debugContext = new RuntimeException("mock");
-        DebugThreePhaseCommitCohort cohort = new DebugThreePhaseCommitCohort(transactionId , mockDelegate , debugContext );
+        DebugThreePhaseCommitCohort cohort = new DebugThreePhaseCommitCohort(transactionId , mockDelegate , debugContext);
 
         Logger mockLogger = mock(Logger.class);
         cohort.setLogger(mockLogger);
