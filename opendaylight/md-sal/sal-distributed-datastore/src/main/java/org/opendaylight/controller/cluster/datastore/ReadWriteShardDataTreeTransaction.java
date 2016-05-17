@@ -8,12 +8,14 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import com.google.common.base.Preconditions;
+import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 
 public final class ReadWriteShardDataTreeTransaction extends AbstractShardDataTreeTransaction<DataTreeModification> {
     private final ShardDataTreeTransactionParent parent;
 
-    protected ReadWriteShardDataTreeTransaction(final ShardDataTreeTransactionParent parent, final String id, final DataTreeModification modification) {
+    protected ReadWriteShardDataTreeTransaction(final ShardDataTreeTransactionParent parent,
+            final TransactionIdentifier<?> id, final DataTreeModification modification) {
         super(id, modification);
         this.parent = Preconditions.checkNotNull(parent);
     }

@@ -11,6 +11,7 @@ import com.google.common.base.Preconditions;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.modification.MutableCompositeModification;
 
 /**
@@ -24,16 +25,14 @@ public class BatchedModifications extends MutableCompositeModification {
     private boolean ready;
     private boolean doCommitOnReady;
     private int totalMessagesSent;
-    private String transactionID;
-    private String transactionChainID;
+    private TransactionIdentifier<?> transactionID;
 
     public BatchedModifications() {
     }
 
-    public BatchedModifications(String transactionID, short version, String transactionChainID) {
+    public BatchedModifications(TransactionIdentifier<?> transactionID, short version) {
         super(version);
         this.transactionID = Preconditions.checkNotNull(transactionID, "transactionID can't be null");
-        this.transactionChainID = transactionChainID != null ? transactionChainID : "";
     }
 
     public boolean isReady() {
@@ -60,19 +59,15 @@ public class BatchedModifications extends MutableCompositeModification {
         this.totalMessagesSent = totalMessagesSent;
     }
 
-    public String getTransactionID() {
+    public TransactionIdentifier<?> getTransactionID() {
         return transactionID;
     }
 
-    public String getTransactionChainID() {
-        return transactionChainID;
-    }
 
     @Override
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         super.readExternal(in);
-        transactionID = in.readUTF();
-        transactionChainID = in.readUTF();
+        transactionID = (TransactionIdentifier<?>) in.readObject();
         ready = in.readBoolean();
         totalMessagesSent = in.readInt();
         doCommitOnReady = in.readBoolean();
@@ -81,8 +76,7 @@ public class BatchedModifications extends MutableCompositeModification {
     @Override
     public void writeExternal(ObjectOutput out) throws IOException {
         super.writeExternal(out);
-        out.writeUTF(transactionID);
-        out.writeUTF(transactionChainID);
+        out.writeObject(transactionID);
         out.writeBoolean(ready);
         out.writeInt(totalMessagesSent);
         out.writeBoolean(doCommitOnReady);
@@ -91,10 +85,9 @@ public class BatchedModifications extends MutableCompositeModification {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("BatchedModifications [transactionID=").append(transactionID).append(", transactionChainID=")
-                .append(transactionChainID).append(", ready=").append(ready).append(", totalMessagesSent=")
-                .append(totalMessagesSent).append(", modifications size=").append(getModifications().size())
-                .append("]");
+        builder.append("BatchedModifications [transactionID=").append(transactionID).append(", ready=").append(ready)
+            .append(", totalMessagesSent=").append(totalMessagesSent).append(", modifications size=")
+            .append(getModifications().size()).append("]");
         return builder.toString();
     }
 }
