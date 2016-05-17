@@ -21,7 +21,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.opendaylight.controller.cluster.datastore.identifiers.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.DataExists;
 import org.opendaylight.controller.cluster.datastore.messages.ReadData;
 import org.opendaylight.controller.cluster.datastore.modification.DeleteModification;
@@ -37,18 +36,15 @@ import scala.concurrent.Future;
 public class LocalTransactionContextTest {
 
     @Mock
-    OperationLimiter limiter;
+    private OperationLimiter limiter;
 
     @Mock
-    TransactionIdentifier identifier;
+    private DOMStoreReadWriteTransaction readWriteTransaction;
 
     @Mock
-    DOMStoreReadWriteTransaction readWriteTransaction;
+    private LocalTransactionReadySupport mockReadySupport;
 
-    @Mock
-    LocalTransactionReadySupport mockReadySupport;
-
-    LocalTransactionContext localTransactionContext;
+    private LocalTransactionContext localTransactionContext;
 
     @Before
     public void setUp() {

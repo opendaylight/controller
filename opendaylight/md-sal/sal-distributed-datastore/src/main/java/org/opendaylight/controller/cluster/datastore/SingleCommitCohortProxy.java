@@ -8,10 +8,12 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import akka.dispatch.OnComplete;
+import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import java.util.Arrays;
 import java.util.List;
+import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 import org.slf4j.Logger;
@@ -30,15 +32,15 @@ class SingleCommitCohortProxy extends AbstractThreePhaseCommitCohort<Object> {
 
     private final ActorContext actorContext;
     private final Future<Object> cohortFuture;
-    private final String transactionId;
+    private final TransactionIdentifier transactionId;
     private volatile DOMStoreThreePhaseCommitCohort delegateCohort = NoOpDOMStoreThreePhaseCommitCohort.INSTANCE;
     private final OperationCallback.Reference operationCallbackRef;
 
-    SingleCommitCohortProxy(ActorContext actorContext, Future<Object> cohortFuture, String transactionId,
+    SingleCommitCohortProxy(ActorContext actorContext, Future<Object> cohortFuture, TransactionIdentifier transactionId,
             OperationCallback.Reference operationCallbackRef) {
         this.actorContext = actorContext;
         this.cohortFuture = cohortFuture;
-        this.transactionId = transactionId;
+        this.transactionId = Preconditions.checkNotNull(transactionId);
         this.operationCallbackRef = operationCallbackRef;
     }
 
