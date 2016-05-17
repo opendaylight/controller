@@ -12,10 +12,11 @@ import akka.dispatch.Futures;
 import akka.dispatch.OnComplete;
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.ListenableFuture;
-import org.opendaylight.controller.cluster.datastore.identifiers.TransactionIdentifier;
+import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.CommitTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.ReadyLocalTransaction;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
+import org.opendaylight.controller.cluster.datastore.utils.TransactionIdentifierUtils;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.controller.sal.core.spi.data.SnapshotBackedWriteTransaction;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
@@ -62,8 +63,8 @@ class LocalThreePhaseCommitCohort implements DOMStoreThreePhaseCommitCohort {
             return Futures.failed(operationError);
         }
 
-        final ReadyLocalTransaction message = new ReadyLocalTransaction(transaction.getIdentifier().toString(),
-                modification, immediate);
+        final ReadyLocalTransaction message = new ReadyLocalTransaction(
+            TransactionIdentifierUtils.actorNameFor(transaction.getIdentifier()), modification, immediate);
         return actorContext.executeOperationAsync(leader, message, actorContext.getTransactionCommitOperationTimeout());
     }
 
