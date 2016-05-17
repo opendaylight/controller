@@ -29,7 +29,6 @@ import org.opendaylight.controller.cluster.common.actor.MessageTracker.Error;
 import org.opendaylight.controller.cluster.common.actor.MeteringBehavior;
 import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
-import org.opendaylight.controller.cluster.datastore.identifiers.ShardTransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardMBeanFactory;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStats;
 import org.opendaylight.controller.cluster.datastore.messages.AbortTransaction;
@@ -602,8 +601,7 @@ public class Shard extends RaftActor {
         }
     }
 
-    private ActorRef createTransaction(int transactionType, String remoteTransactionId, String transactionChainId) {
-        ShardTransactionIdentifier transactionId = new ShardTransactionIdentifier(remoteTransactionId);
+    private ActorRef createTransaction(int transactionType, String transactionId, String transactionChainId) {
         LOG.debug("{}: Creating transaction : {} ", persistenceId(), transactionId);
         return transactionActorFactory.newShardTransaction(TransactionType.fromInt(transactionType),
             transactionId, transactionChainId);
