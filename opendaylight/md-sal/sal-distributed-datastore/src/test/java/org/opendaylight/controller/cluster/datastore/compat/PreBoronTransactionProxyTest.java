@@ -119,7 +119,7 @@ public class PreBoronTransactionProxyTest extends AbstractTransactionProxyTest {
     }
 
     @Test
-    public void testClose() throws Exception{
+    public void testClose() {
         ActorRef actorRef = setupPreBoronActorContextWithInitialCreateTransaction(getSystem(), READ_WRITE);
 
         expectBatchedModifications(actorRef, 1);

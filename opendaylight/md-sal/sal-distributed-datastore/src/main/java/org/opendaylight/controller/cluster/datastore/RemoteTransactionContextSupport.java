@@ -14,9 +14,9 @@ import akka.pattern.AskTimeoutException;
 import akka.util.Timeout;
 import com.google.common.base.Preconditions;
 import java.util.concurrent.TimeUnit;
+import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
 import org.opendaylight.controller.cluster.datastore.exceptions.ShardLeaderNotRespondingException;
-import org.opendaylight.controller.cluster.datastore.identifiers.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.PrimaryShardInfo;
@@ -90,7 +90,7 @@ final class RemoteTransactionContextSupport {
         return parent.getActorContext();
     }
 
-    private TransactionIdentifier getIdentifier() {
+    private TransactionIdentifier<?> getIdentifier() {
         return parent.getIdentifier();
     }
 
@@ -117,6 +117,15 @@ final class RemoteTransactionContextSupport {
     }
 
     /**
+     * @deprecated Temporary utility for extracting transaction chain ID from a {@link TransactionIdentifier}
+     */
+    @Deprecated
+    static String compatTransactionChainId(final TransactionIdentifier<?> txId) {
+        final long historyId = txId.getHistoryId().getHistoryId();
+        return historyId == 0 ? "" : Long.toUnsignedString(historyId);
+    }
+
+    /**
      * Performs a CreateTransaction try async.
      */
     private void tryCreateTransaction() {
@@ -126,7 +135,7 @@ final class RemoteTransactionContextSupport {
         }
 
         Object serializedCreateMessage = new CreateTransaction(getIdentifier().toString(),
-                getTransactionType().ordinal(), getIdentifier().getChainId(),
+                getTransactionType().ordinal(), compatTransactionChainId(getIdentifier()),
                     primaryShardInfo.getPrimaryShardVersion()).toSerializable();
 
         Future<Object> createTxFuture = getActorContext().executeOperationAsync(

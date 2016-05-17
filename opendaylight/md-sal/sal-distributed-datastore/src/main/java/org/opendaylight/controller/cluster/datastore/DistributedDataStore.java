@@ -119,7 +119,7 @@ public class DistributedDataStore implements DistributedDataStoreInterface, Sche
         this.waitTillReadyTimeInMillis =
                 actorContext.getDatastoreContext().getShardLeaderElectionTimeout().duration().toMillis() * READY_WAIT_FACTOR;
 
-        this.txContextFactory = TransactionContextFactory.create(actorContext);
+        this.txContextFactory = new TransactionContextFactory(actorContext, identifier);
 
         datastoreConfigMXBean = new DatastoreConfigurationMXBeanImpl(
                 datastoreContextFactory.getBaseDatastoreContext().getDataStoreMXBeanType());
@@ -136,7 +136,7 @@ public class DistributedDataStore implements DistributedDataStoreInterface, Sche
         this.actorContext = Preconditions.checkNotNull(actorContext, "actorContext should not be null");
         this.client = null;
         this.identifier = Preconditions.checkNotNull(identifier);
-        this.txContextFactory = TransactionContextFactory.create(actorContext);
+        this.txContextFactory = new TransactionContextFactory(actorContext, identifier);
         this.waitTillReadyTimeInMillis =
                 actorContext.getDatastoreContext().getShardLeaderElectionTimeout().duration().toMillis() * READY_WAIT_FACTOR;
     }

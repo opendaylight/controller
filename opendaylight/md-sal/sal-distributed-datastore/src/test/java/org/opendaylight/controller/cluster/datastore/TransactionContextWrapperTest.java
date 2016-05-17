@@ -15,27 +15,23 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.opendaylight.controller.cluster.datastore.identifiers.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 
 public class TransactionContextWrapperTest {
+    @Mock
+    private ActorContext actorContext;
 
     @Mock
-    TransactionIdentifier identifier;
+    private TransactionContext transactionContext;
 
-    @Mock
-    ActorContext actorContext;
-
-    @Mock
-    TransactionContext transactionContext;
-
-    TransactionContextWrapper transactionContextWrapper;
+    private TransactionContextWrapper transactionContextWrapper;
 
     @Before
     public void setUp(){
         MockitoAnnotations.initMocks(this);
         doReturn(DatastoreContext.newBuilder().build()).when(actorContext).getDatastoreContext();
-        transactionContextWrapper = new TransactionContextWrapper(identifier, actorContext);
+        transactionContextWrapper = new TransactionContextWrapper(MockIdentifiers.transactionIdentifier(
+            TransactionContextWrapperTest.class, "mock"), actorContext);
     }
 
     @Test
