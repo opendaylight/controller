@@ -10,6 +10,8 @@ package org.opendaylight.controller.cluster.datastore;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
 import javax.annotation.concurrent.NotThreadSafe;
+import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
+import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,15 +23,15 @@ import org.slf4j.LoggerFactory;
 final class ShardDataTreeTransactionChain extends ShardDataTreeTransactionParent {
     private static final Logger LOG = LoggerFactory.getLogger(ShardDataTreeTransactionChain.class);
     private final ShardDataTree dataTree;
-    private final String chainId;
+    private final LocalHistoryIdentifier<?> chainId;
 
     private ReadWriteShardDataTreeTransaction previousTx;
     private ReadWriteShardDataTreeTransaction openTransaction;
     private boolean closed;
 
-    ShardDataTreeTransactionChain(final String chainId, final ShardDataTree dataTree) {
+    ShardDataTreeTransactionChain(final LocalHistoryIdentifier<?> localHistoryIdentifier, final ShardDataTree dataTree) {
         this.dataTree = Preconditions.checkNotNull(dataTree);
-        this.chainId = Preconditions.checkNotNull(chainId);
+        this.chainId = Preconditions.checkNotNull(localHistoryIdentifier);
     }
 
     private DataTreeSnapshot getSnapshot() {
@@ -43,14 +45,14 @@ final class ShardDataTreeTransactionChain extends ShardDataTreeTransactionParent
         }
     }
 
-    ReadOnlyShardDataTreeTransaction newReadOnlyTransaction(final String txId) {
+    ReadOnlyShardDataTreeTransaction newReadOnlyTransaction(final TransactionIdentifier<?> txId) {
         final DataTreeSnapshot snapshot = getSnapshot();
         LOG.debug("Allocated read-only transaction {} snapshot {}", txId, snapshot);
 
         return new ReadOnlyShardDataTreeTransaction(txId, snapshot);
     }
 
-    ReadWriteShardDataTreeTransaction newReadWriteTransaction(final String txId) {
+    ReadWriteShardDataTreeTransaction newReadWriteTransaction(final TransactionIdentifier<?> txId) {
         final DataTreeSnapshot snapshot = getSnapshot();
         LOG.debug("Allocated read-write transaction {} snapshot {}", txId, snapshot);
 
