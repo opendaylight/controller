@@ -10,6 +10,10 @@ package org.opendaylight.controller.cluster.datastore;
 import akka.actor.ActorRef;
 import akka.actor.UntypedActorContext;
 import com.google.common.base.Preconditions;
+import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
+import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
+import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
+import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStats;
 
 /**
@@ -36,19 +40,35 @@ class ShardTransactionActorFactory {
         this.shardActor = shardActor;
     }
 
-    ActorRef newShardTransaction(TransactionType type, String transactionID, String transactionChainID) {
+    private static String actorNameFor(final TransactionIdentifier txId) {
+        final LocalHistoryIdentifier historyId = txId.getHistoryId();
+        final ClientIdentifier clientId = historyId.getClientId();
+        final FrontendIdentifier frontendId = clientId.getFrontendId();
+
+        final StringBuilder sb = new StringBuilder("shard-");
+        sb.append(frontendId.getMemberName().getName()).append(':');
+        sb.append(frontendId.getClientType().getName()).append('@');
+        sb.append(clientId.getGeneration()).append(':');
+        if (historyId.getHistoryId() != 0) {
+            sb.append(historyId.getHistoryId()).append('-');
+        }
+
+        return sb.append(txId.getTransactionId()).toString();
+    }
+
+    ActorRef newShardTransaction(TransactionType type, TransactionIdentifier transactionID) {
         final AbstractShardDataTreeTransaction<?> transaction;
         switch (type) {
         case READ_ONLY:
-            transaction = dataTree.newReadOnlyTransaction(transactionID, transactionChainID);
+            transaction = dataTree.newReadOnlyTransaction(transactionID);
             shardMBean.incrementReadOnlyTransactionCount();
             break;
         case READ_WRITE:
-            transaction = dataTree.newReadWriteTransaction(transactionID, transactionChainID);
+            transaction = dataTree.newReadWriteTransaction(transactionID);
             shardMBean.incrementReadWriteTransactionCount();
             break;
         case WRITE_ONLY:
-            transaction = dataTree.newReadWriteTransaction(transactionID, transactionChainID);
+            transaction = dataTree.newReadWriteTransaction(transactionID);
             shardMBean.incrementWriteOnlyTransactionCount();
             break;
         default:
@@ -56,6 +76,6 @@ class ShardTransactionActorFactory {
         }
 
         return actorContext.actorOf(ShardTransaction.props(type, transaction, shardActor, datastoreContext, shardMBean)
-            .withDispatcher(txnDispatcherPath), "shard-" + transactionID);
+            .withDispatcher(txnDispatcherPath), actorNameFor(transactionID));
     }
 }

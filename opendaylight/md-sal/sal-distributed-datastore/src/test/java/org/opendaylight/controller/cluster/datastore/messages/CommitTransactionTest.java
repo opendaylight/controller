@@ -11,6 +11,7 @@ import static org.junit.Assert.assertEquals;
 import java.io.Serializable;
 import org.apache.commons.lang.SerializationUtils;
 import org.junit.Test;
+import org.opendaylight.controller.cluster.datastore.AbstractTest;
 import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 
 /**
@@ -18,11 +19,11 @@ import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
  *
  * @author Thomas Pantelis
  */
-public class CommitTransactionTest {
+public class CommitTransactionTest extends AbstractTest {
 
     @Test
     public void testSerialization() {
-        CommitTransaction expected = new CommitTransaction("txId", DataStoreVersions.CURRENT_VERSION);
+        CommitTransaction expected = new CommitTransaction(nextTransactionId(), DataStoreVersions.CURRENT_VERSION);
 
         Object serialized = expected.toSerializable();
         assertEquals("Serialized type", CommitTransaction.class, serialized.getClass());
