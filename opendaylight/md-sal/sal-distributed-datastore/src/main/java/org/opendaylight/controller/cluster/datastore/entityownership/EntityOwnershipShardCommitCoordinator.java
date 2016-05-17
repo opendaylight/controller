@@ -25,7 +25,6 @@ import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderExc
 import org.opendaylight.controller.cluster.datastore.messages.BatchedModifications;
 import org.opendaylight.controller.cluster.datastore.messages.CommitTransactionReply;
 import org.opendaylight.controller.cluster.datastore.modification.Modification;
-import org.opendaylight.controller.cluster.datastore.utils.TransactionIdentifierUtils;
 import org.slf4j.Logger;
 import scala.concurrent.duration.FiniteDuration;
 
@@ -203,8 +202,8 @@ class EntityOwnershipShardCommitCoordinator {
     }
 
     BatchedModifications newBatchedModifications() {
-        BatchedModifications modifications = new BatchedModifications(TransactionIdentifierUtils.actorNameFor(
-            new TransactionIdentifier(historyId, ++transactionIDCounter)), DataStoreVersions.CURRENT_VERSION, "");
+        BatchedModifications modifications = new BatchedModifications(
+            new TransactionIdentifier(historyId, ++transactionIDCounter), DataStoreVersions.CURRENT_VERSION);
         modifications.setDoCommitOnReady(true);
         modifications.setReady(true);
         modifications.setTotalMessagesSent(1);
