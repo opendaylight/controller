@@ -22,7 +22,6 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import akka.actor.ActorRef;
-import akka.japi.Procedure;
 import akka.persistence.SnapshotSelectionCriteria;
 import akka.testkit.TestActorRef;
 import java.util.Arrays;
@@ -59,7 +58,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
     private RaftActorBehavior mockRaftActorBehavior;
 
     @Mock
-    private Procedure<Void> mockProcedure;
+    private Runnable mockProcedure;
 
     @Mock
     private ElectionTerm mockElectionTerm;
@@ -94,7 +93,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
         actorRef = factory.createTestActor(MessageCollectorActor.props(), factory.generateActorId("test-"));
         doReturn(actorRef).when(mockRaftActorContext).getActor();
 
-        snapshotManager.setCreateSnapshotCallable(mockProcedure);
+        snapshotManager.setCreateSnapshotRunnable(mockProcedure);
     }
 
     @After
@@ -116,7 +115,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
         assertEquals(true, snapshotManager.isCapturing());
 
-        verify(mockProcedure).apply(null);
+        verify(mockProcedure).run();
 
         CaptureSnapshot captureSnapshot = snapshotManager.getCaptureSnapshot();
 
@@ -143,7 +142,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
         assertEquals(true, snapshotManager.isCapturing());
 
-        verify(mockProcedure).apply(null);
+        verify(mockProcedure).run();
 
         CaptureSnapshot captureSnapshot = snapshotManager.getCaptureSnapshot();
 
@@ -171,7 +170,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
         assertEquals(true, snapshotManager.isCapturing());
 
-        verify(mockProcedure).apply(null);
+        verify(mockProcedure).run();
 
         CaptureSnapshot captureSnapshot = snapshotManager.getCaptureSnapshot();
 
@@ -194,7 +193,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
     @Test
     public void testCaptureWithCreateProcedureError () throws Exception {
-        doThrow(new Exception("mock")).when(mockProcedure).apply(null);
+        doThrow(new Exception("mock")).when(mockProcedure).run();
 
         boolean capture = snapshotManager.capture(new MockRaftActorContext.MockReplicatedLogEntry(1,9,
                 new MockRaftActorContext.MockPayload()), 9);
@@ -203,7 +202,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
         assertEquals(false, snapshotManager.isCapturing());
 
-        verify(mockProcedure).apply(null);
+        verify(mockProcedure).run();
     }
 
     @Test
@@ -213,7 +212,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
         assertTrue(capture);
 
-        verify(mockProcedure).apply(null);
+        verify(mockProcedure).run();
 
         reset(mockProcedure);
 
@@ -223,7 +222,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
         assertFalse(capture);
 
-        verify(mockProcedure, never()).apply(null);
+        verify(mockProcedure, never()).run();
     }
 
     @Test

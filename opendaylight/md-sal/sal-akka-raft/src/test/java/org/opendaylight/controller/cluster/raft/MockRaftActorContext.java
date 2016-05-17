@@ -116,7 +116,7 @@ public class MockRaftActorContext extends RaftActorContextImpl {
     @Override
     public SnapshotManager getSnapshotManager() {
         SnapshotManager snapshotManager = super.getSnapshotManager();
-        snapshotManager.setCreateSnapshotCallable(NoopProcedure.<Void>instance());
+        snapshotManager.setCreateSnapshotRunnable(() -> { });
         return snapshotManager;
     }
 

@@ -8,7 +8,6 @@
 package org.opendaylight.controller.cluster.raft;
 
 import akka.actor.ActorRef;
-import akka.japi.Procedure;
 import akka.persistence.SaveSnapshotFailure;
 import akka.persistence.SaveSnapshotSuccess;
 import com.google.common.annotations.VisibleForTesting;
@@ -40,20 +39,6 @@ class RaftActorSnapshotMessageSupport {
     private final RaftActorSnapshotCohort cohort;
     private final Logger log;
 
-    private final Procedure<Void> createSnapshotProcedure = new Procedure<Void>() {
-        @Override
-        public void apply(Void notUsed) {
-            cohort.createSnapshot(context.getActor());
-        }
-    };
-
-    private final Procedure<byte[]> applySnapshotProcedure = new Procedure<byte[]>() {
-        @Override
-        public void apply(byte[] state) {
-            cohort.applySnapshot(state);
-        }
-    };
-
     private Duration snapshotReplyActorTimeout = Duration.create(30, TimeUnit.SECONDS);
 
     RaftActorSnapshotMessageSupport(final RaftActorContext context, final RaftActorSnapshotCohort cohort) {
@@ -61,8 +46,8 @@ class RaftActorSnapshotMessageSupport {
         this.cohort = cohort;
         this.log = context.getLogger();
 
-        context.getSnapshotManager().setCreateSnapshotCallable(createSnapshotProcedure);
-        context.getSnapshotManager().setApplySnapshotProcedure(applySnapshotProcedure);
+        context.getSnapshotManager().setCreateSnapshotRunnable(() -> cohort.createSnapshot(context.getActor()));
+        context.getSnapshotManager().setApplySnapshotConsumer(cohort::applySnapshot);
     }
 
     boolean handleSnapshotMessage(Object message, ActorRef sender) {
