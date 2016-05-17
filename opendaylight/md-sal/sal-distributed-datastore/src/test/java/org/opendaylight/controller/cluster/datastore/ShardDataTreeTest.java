@@ -28,7 +28,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.TreeType;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
-public class ShardDataTreeTest {
+public class ShardDataTreeTest extends AbstractTest {
 
     SchemaContext fullSchema;
 
@@ -52,7 +52,7 @@ public class ShardDataTreeTest {
 
         assertEquals(fullSchema, shardDataTree.getSchemaContext());
 
-        ReadWriteShardDataTreeTransaction transaction = shardDataTree.newReadWriteTransaction("txn-1", null);
+        ReadWriteShardDataTreeTransaction transaction = shardDataTree.newReadWriteTransaction(nextTransactionId());
 
         DataTreeModification snapshot = transaction.getSnapshot();
 
@@ -72,7 +72,7 @@ public class ShardDataTreeTest {
         cohort.commit().get();
 
 
-        ReadOnlyShardDataTreeTransaction readOnlyShardDataTreeTransaction = shardDataTree.newReadOnlyTransaction("txn-2", null);
+        ReadOnlyShardDataTreeTransaction readOnlyShardDataTreeTransaction = shardDataTree.newReadOnlyTransaction(nextTransactionId());
 
         DataTreeSnapshot snapshot1 = readOnlyShardDataTreeTransaction.getSnapshot();
 
@@ -123,45 +123,36 @@ public class ShardDataTreeTest {
     }
 
     private static NormalizedNode<?, ?> getCars(ShardDataTree shardDataTree) {
-        ReadOnlyShardDataTreeTransaction readOnlyShardDataTreeTransaction = shardDataTree.newReadOnlyTransaction("txn-2", null);
+        ReadOnlyShardDataTreeTransaction readOnlyShardDataTreeTransaction = shardDataTree.newReadOnlyTransaction(nextTransactionId());
         DataTreeSnapshot snapshot1 = readOnlyShardDataTreeTransaction.getSnapshot();
 
         Optional<NormalizedNode<?, ?>> optional = snapshot1.readNode(CarsModel.BASE_PATH);
 
         assertEquals(true, optional.isPresent());
 
-        System.out.println(optional.get());
-
         return optional.get();
     }
 
     private static DataTreeCandidateTip addCar(ShardDataTree shardDataTree) throws ExecutionException, InterruptedException {
-        return doTransaction(shardDataTree, new DataTreeOperation() {
-            @Override
-            public void execute(DataTreeModification snapshot) {
+        return doTransaction(shardDataTree, snapshot -> {
                 snapshot.merge(CarsModel.BASE_PATH, CarsModel.emptyContainer());
                 snapshot.merge(CarsModel.CAR_LIST_PATH, CarsModel.newCarMapNode());
                 snapshot.write(CarsModel.newCarPath("altima"), CarsModel.newCarEntry("altima", new BigInteger("100")));
-            }
-        });
+            });
     }
 
     private static DataTreeCandidateTip removeCar(ShardDataTree shardDataTree) throws ExecutionException, InterruptedException {
-        return doTransaction(shardDataTree, new DataTreeOperation() {
-            @Override
-            public void execute(DataTreeModification snapshot) {
-                snapshot.delete(CarsModel.newCarPath("altima"));
-            }
-        });
+        return doTransaction(shardDataTree, snapshot -> snapshot.delete(CarsModel.newCarPath("altima")));
     }
 
-    private abstract static class DataTreeOperation {
-        public abstract void execute(DataTreeModification snapshot);
+    @FunctionalInterface
+    private static interface DataTreeOperation {
+        void execute(DataTreeModification snapshot);
     }
 
     private static DataTreeCandidateTip doTransaction(ShardDataTree shardDataTree, DataTreeOperation operation)
             throws ExecutionException, InterruptedException {
-        ReadWriteShardDataTreeTransaction transaction = shardDataTree.newReadWriteTransaction("txn-1", null);
+        ReadWriteShardDataTreeTransaction transaction = shardDataTree.newReadWriteTransaction(nextTransactionId());
         DataTreeModification snapshot = transaction.getSnapshot();
         operation.execute(snapshot);
         ShardDataTreeCohort cohort = shardDataTree.finishTransaction(transaction);
@@ -176,7 +167,7 @@ public class ShardDataTreeTest {
 
     private static DataTreeCandidateTip applyCandidates(ShardDataTree shardDataTree, List<DataTreeCandidateTip> candidates)
             throws ExecutionException, InterruptedException {
-        ReadWriteShardDataTreeTransaction transaction = shardDataTree.newReadWriteTransaction("txn-1", null);
+        ReadWriteShardDataTreeTransaction transaction = shardDataTree.newReadWriteTransaction(nextTransactionId());
         DataTreeModification snapshot = transaction.getSnapshot();
         for(DataTreeCandidateTip candidateTip : candidates){
             DataTreeCandidates.applyToModification(snapshot, candidateTip);
