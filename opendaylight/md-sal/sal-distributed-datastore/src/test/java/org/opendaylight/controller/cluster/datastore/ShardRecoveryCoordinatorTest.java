@@ -11,14 +11,9 @@ package org.opendaylight.controller.cluster.datastore;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import com.google.common.base.Optional;
-import java.io.IOException;
 import org.junit.Before;
 import org.junit.Test;
-import org.opendaylight.controller.cluster.datastore.modification.MutableCompositeModification;
-import org.opendaylight.controller.cluster.datastore.modification.WriteModification;
 import org.opendaylight.controller.cluster.datastore.utils.SerializationUtils;
-import org.opendaylight.controller.cluster.raft.protobuff.client.messages.CompositeModificationByteStringPayload;
-import org.opendaylight.controller.cluster.raft.protobuff.client.messages.CompositeModificationPayload;
 import org.opendaylight.controller.md.cluster.datastore.model.CarsModel;
 import org.opendaylight.controller.md.cluster.datastore.model.PeopleModel;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
@@ -60,36 +55,6 @@ public class ShardRecoveryCoordinatorTest {
         }
 
         coordinator.applyCurrentLogRecoveryBatch();
-    }
-
-    @Test
-    public void testAppendRecoveredLogEntryCompositeModificationPayload() throws IOException {
-        final ShardRecoveryCoordinator coordinator = new ShardRecoveryCoordinator(peopleDataTree,
-                peopleSchemaContext, null, "foobar", LoggerFactory.getLogger("foo"));
-        coordinator.startLogRecoveryBatch(10);
-        try {
-            final MutableCompositeModification modification  = new MutableCompositeModification((short) 1);
-            modification.addModification(new WriteModification(CarsModel.BASE_PATH, CarsModel.create()));
-            coordinator.appendRecoveredLogEntry(new CompositeModificationPayload(modification.toSerializable()));
-        } catch(final SchemaValidationFailedException e){
-            fail("SchemaValidationFailedException should not happen if pruning is done");
-        }
-    }
-
-    @Test
-    public void testAppendRecoveredLogEntryCompositeModificationByteStringPayload() throws IOException {
-        final ShardRecoveryCoordinator coordinator = new ShardRecoveryCoordinator(peopleDataTree,
-                peopleSchemaContext, null, "foobar", LoggerFactory.getLogger("foo"));
-        coordinator.startLogRecoveryBatch(10);
-        try {
-            final MutableCompositeModification modification  = new MutableCompositeModification((short) 1);
-            modification.addModification(new WriteModification(CarsModel.BASE_PATH, CarsModel.create()));
-            coordinator.appendRecoveredLogEntry(new CompositeModificationByteStringPayload(modification.toSerializable()));
-        } catch(final SchemaValidationFailedException e){
-            fail("SchemaValidationFailedException should not happen if pruning is done");
-        }
-
-        assertEquals(false, readCars(peopleDataTree).isPresent());
     }
 
     @Test
@@ -171,7 +136,5 @@ public class ShardRecoveryCoordinatorTest {
         final byte[] bytes = SerializationUtils.serializeNormalizedNode(optional.get());
 
         return bytes;
-
-
     }
 }
