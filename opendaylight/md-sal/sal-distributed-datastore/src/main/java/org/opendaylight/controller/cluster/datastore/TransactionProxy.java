@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import org.opendaylight.controller.cluster.datastore.identifiers.TransactionIdentifier;
+import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.AbstractRead;
 import org.opendaylight.controller.cluster.datastore.messages.DataExists;
 import org.opendaylight.controller.cluster.datastore.messages.ReadData;
@@ -35,6 +35,7 @@ import org.opendaylight.controller.cluster.datastore.modification.MergeModificat
 import org.opendaylight.controller.cluster.datastore.modification.WriteModification;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.controller.cluster.datastore.utils.NormalizedNodeAggregator;
+import org.opendaylight.controller.cluster.datastore.utils.TransactionIdentifierUtils;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.sal.core.spi.data.AbstractDOMStoreTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
@@ -50,7 +51,7 @@ import scala.concurrent.Promise;
 /**
  * A transaction potentially spanning multiple backend shards.
  */
-public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIdentifier> implements DOMStoreReadWriteTransaction {
+public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIdentifier<?>> implements DOMStoreReadWriteTransaction {
     private static enum TransactionState {
         OPEN,
         READY,
@@ -263,8 +264,8 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
             future = getDirectCommitFuture(transactionContext, operationCallbackRef);
         }
 
-        return new SingleCommitCohortProxy(txContextFactory.getActorContext(), future, getIdentifier().toString(),
-                operationCallbackRef);
+        return new SingleCommitCohortProxy(txContextFactory.getActorContext(), future, getIdentifier(),
+            operationCallbackRef);
     }
 
     private Future<?> getDirectCommitFuture(TransactionContext transactionContext,
@@ -299,7 +300,7 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
         }
 
         return new ThreePhaseCommitCohortProxy(txContextFactory.getActorContext(), cohorts,
-                getIdentifier().toString());
+                TransactionIdentifierUtils.actorNameFor(getIdentifier()));
     }
 
     private String shardNameFromIdentifier(final YangInstanceIdentifier path) {

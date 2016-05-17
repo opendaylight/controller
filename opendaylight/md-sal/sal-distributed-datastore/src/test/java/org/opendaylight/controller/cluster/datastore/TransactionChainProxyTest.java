@@ -28,6 +28,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import org.junit.Assert;
 import org.junit.Test;
+import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.BatchedModifications;
 import org.opendaylight.controller.cluster.datastore.modification.WriteModification;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.DefaultShardStrategy;
@@ -41,52 +42,49 @@ import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import scala.concurrent.Promise;
 
 public class TransactionChainProxyTest extends AbstractTransactionProxyTest {
+    private LocalHistoryIdentifier<?> historyId;
+
+    @Override
+    public void setUp() {
+        super.setUp();
+        historyId = MockIdentifiers.historyIdentifier(TransactionChainProxyTest.class, memberName);
+    }
 
     @SuppressWarnings("resource")
     @Test
-    public void testNewReadOnlyTransaction() throws Exception {
+    public void testNewReadOnlyTransaction() {
 
-        DOMStoreTransaction dst = new TransactionChainProxy(mockComponentFactory).newReadOnlyTransaction();
+        DOMStoreTransaction dst = new TransactionChainProxy(mockComponentFactory, historyId).newReadOnlyTransaction();
         Assert.assertTrue(dst instanceof DOMStoreReadTransaction);
 
     }
 
     @SuppressWarnings("resource")
     @Test
-    public void testNewReadWriteTransaction() throws Exception {
-        DOMStoreTransaction dst = new TransactionChainProxy(mockComponentFactory).newReadWriteTransaction();
+    public void testNewReadWriteTransaction() {
+        DOMStoreTransaction dst = new TransactionChainProxy(mockComponentFactory, historyId).newReadWriteTransaction();
         Assert.assertTrue(dst instanceof DOMStoreReadWriteTransaction);
 
     }
 
     @SuppressWarnings("resource")
     @Test
-    public void testNewWriteOnlyTransaction() throws Exception {
-        DOMStoreTransaction dst = new TransactionChainProxy(mockComponentFactory).newWriteOnlyTransaction();
+    public void testNewWriteOnlyTransaction() {
+        DOMStoreTransaction dst = new TransactionChainProxy(mockComponentFactory, historyId).newWriteOnlyTransaction();
         Assert.assertTrue(dst instanceof DOMStoreWriteTransaction);
 
     }
 
     @Test
-    public void testClose() throws Exception {
-        new TransactionChainProxy(mockComponentFactory).close();
+    public void testClose() {
+        new TransactionChainProxy(mockComponentFactory, historyId).close();
 
         verify(mockActorContext, times(1)).broadcast(any(Function.class));
     }
 
     @Test
-    public void testTransactionChainsHaveUniqueId() {
-        try (TransactionChainProxy one = new TransactionChainProxy(mockComponentFactory)) {
-            try (TransactionChainProxy two = new TransactionChainProxy(mockComponentFactory)) {
-
-                Assert.assertNotEquals(one.getTransactionChainId(), two.getTransactionChainId());
-            }
-        }
-    }
-
-    @Test
     public void testRateLimitingUsedInReadWriteTxCreation() {
-        try (TransactionChainProxy txChainProxy = new TransactionChainProxy(mockComponentFactory)) {
+        try (TransactionChainProxy txChainProxy = new TransactionChainProxy(mockComponentFactory, historyId)) {
 
             txChainProxy.newReadWriteTransaction();
 
@@ -96,7 +94,7 @@ public class TransactionChainProxyTest extends AbstractTransactionProxyTest {
 
     @Test
     public void testRateLimitingUsedInWriteOnlyTxCreation() {
-        try (TransactionChainProxy txChainProxy = new TransactionChainProxy(mockComponentFactory)) {
+        try (TransactionChainProxy txChainProxy = new TransactionChainProxy(mockComponentFactory, historyId)) {
 
             txChainProxy.newWriteOnlyTransaction();
 
@@ -106,7 +104,7 @@ public class TransactionChainProxyTest extends AbstractTransactionProxyTest {
 
     @Test
     public void testRateLimitingNotUsedInReadOnlyTxCreation() {
-        try (TransactionChainProxy txChainProxy = new TransactionChainProxy(mockComponentFactory)) {
+        try (TransactionChainProxy txChainProxy = new TransactionChainProxy(mockComponentFactory, historyId)) {
 
             txChainProxy.newReadOnlyTransaction();
 
@@ -122,7 +120,7 @@ public class TransactionChainProxyTest extends AbstractTransactionProxyTest {
     public void testChainedWriteOnlyTransactions() throws Exception {
         dataStoreContextBuilder.writeOnlyTransactionOptimizationsEnabled(true);
 
-        try (TransactionChainProxy txChainProxy = new TransactionChainProxy(mockComponentFactory)) {
+        try (TransactionChainProxy txChainProxy = new TransactionChainProxy(mockComponentFactory, historyId)) {
 
             ActorRef txActorRef1 = setupActorContextWithoutInitialCreateTransaction(getSystem());
 
@@ -190,7 +188,7 @@ public class TransactionChainProxyTest extends AbstractTransactionProxyTest {
      */
     @Test
     public void testChainedReadWriteTransactions() throws Exception {
-        try (TransactionChainProxy txChainProxy = new TransactionChainProxy(mockComponentFactory)) {
+        try (TransactionChainProxy txChainProxy = new TransactionChainProxy(mockComponentFactory, historyId)) {
 
             ActorRef txActorRef1 = setupActorContextWithInitialCreateTransaction(getSystem(), READ_WRITE);
 
@@ -258,12 +256,12 @@ public class TransactionChainProxyTest extends AbstractTransactionProxyTest {
     }
 
     @Test(expected = IllegalStateException.class)
-    public void testChainedWriteTransactionsWithPreviousTxNotReady() throws Exception {
+    public void testChainedWriteTransactionsWithPreviousTxNotReady() {
         ActorRef actorRef = setupActorContextWithInitialCreateTransaction(getSystem(), WRITE_ONLY);
 
         expectBatchedModifications(actorRef, 1);
 
-        try (TransactionChainProxy txChainProxy = new TransactionChainProxy(mockComponentFactory)) {
+        try (TransactionChainProxy txChainProxy = new TransactionChainProxy(mockComponentFactory, historyId)) {
 
             DOMStoreWriteTransaction writeTx1 = txChainProxy.newWriteOnlyTransaction();
 

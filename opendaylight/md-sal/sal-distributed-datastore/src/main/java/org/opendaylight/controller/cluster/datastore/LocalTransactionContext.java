@@ -12,7 +12,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.SettableFuture;
-import org.opendaylight.controller.cluster.datastore.identifiers.TransactionIdentifier;
+import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.AbstractRead;
 import org.opendaylight.controller.cluster.datastore.modification.AbstractModification;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
@@ -31,7 +31,7 @@ abstract class LocalTransactionContext extends AbstractTransactionContext {
     private final LocalTransactionReadySupport readySupport;
     private Exception operationError;
 
-    LocalTransactionContext(DOMStoreTransaction txDelegate, TransactionIdentifier identifier,
+    LocalTransactionContext(DOMStoreTransaction txDelegate, TransactionIdentifier<?> identifier,
             LocalTransactionReadySupport readySupport) {
         super(identifier);
         this.txDelegate = Preconditions.checkNotNull(txDelegate);
