@@ -151,10 +151,6 @@ final class TransactionChainProxy extends AbstractTransactionContextFactory<Loca
         this.parent = parent;
     }
 
-    public String getTransactionChainId() {
-        return getHistoryId().toString();
-    }
-
     @Override
     public DOMStoreReadTransaction newReadOnlyTransaction() {
         currentState.checkReady();
@@ -184,7 +180,7 @@ final class TransactionChainProxy extends AbstractTransactionContextFactory<Loca
         getActorContext().broadcast(new Function<Short, Object>() {
             @Override
             public Object apply(Short version) {
-                return new CloseTransactionChain(getHistoryId().toString(), version).toSerializable();
+                return new CloseTransactionChain(getHistoryId(), version).toSerializable();
             }
         });
     }
@@ -229,7 +225,7 @@ final class TransactionChainProxy extends AbstractTransactionContextFactory<Loca
             LOG.debug("Tx: {} - waiting for ready futures with pending Tx {}", txId, previousTransactionId);
         } else {
             previousTransactionId = "";
-            LOG.debug("Waiting for ready futures on chain {}", getTransactionChainId());
+            LOG.debug("Waiting for ready futures on chain {}", getHistoryId());
         }
 
         previous = combineFutureWithPossiblePriorReadOnlyTxFutures(previous, txId);

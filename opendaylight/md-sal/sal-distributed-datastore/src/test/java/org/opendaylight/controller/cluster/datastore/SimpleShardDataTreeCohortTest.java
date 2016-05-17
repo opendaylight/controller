@@ -36,7 +36,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.TipProducingDataTree
  *
  * @author Thomas Pantelis
  */
-public class SimpleShardDataTreeCohortTest {
+public class SimpleShardDataTreeCohortTest extends AbstractTest {
     @Mock
     private TipProducingDataTree mockDataTree;
 
@@ -54,7 +54,7 @@ public class SimpleShardDataTreeCohortTest {
 
         doReturn(mockDataTree).when(mockShardDataTree).getDataTree();
 
-        cohort = new SimpleShardDataTreeCohort(mockShardDataTree, mockModification, "tx");
+        cohort = new SimpleShardDataTreeCohort(mockShardDataTree, mockModification, nextTransactionId());
     }
 
     @Test
