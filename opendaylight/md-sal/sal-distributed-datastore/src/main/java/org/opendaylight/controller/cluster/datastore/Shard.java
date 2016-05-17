@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nonnull;
+import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.common.actor.CommonConfig;
 import org.opendaylight.controller.cluster.common.actor.MessageTracker;
 import org.opendaylight.controller.cluster.common.actor.MessageTracker.Error;
@@ -62,7 +63,6 @@ import org.opendaylight.controller.cluster.raft.base.messages.FollowerInitialSyn
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.messages.ServerRemoved;
 import org.opendaylight.yangtools.concepts.Identifier;
-import org.opendaylight.yangtools.util.StringIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataValidationFailedException;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.ModificationType;
@@ -334,7 +334,7 @@ public class Shard extends RaftActor {
 
     private void handleCommitTransaction(final CommitTransaction commit) {
         if (isLeader()) {
-            if(!commitCoordinator.handleCommit(new StringIdentifier(commit.getTransactionID()), getSender(), this)) {
+            if(!commitCoordinator.handleCommit(commit.getTransactionID(), getSender(), this)) {
                 shardMBean.incrementFailedTransactionsCount();
             }
         } else {
@@ -433,7 +433,7 @@ public class Shard extends RaftActor {
         LOG.debug("{}: Can committing transaction {}", persistenceId(), canCommit.getTransactionID());
 
         if (isLeader()) {
-        commitCoordinator.handleCanCommit(new StringIdentifier(canCommit.getTransactionID()), getSender(), this);
+        commitCoordinator.handleCanCommit(canCommit.getTransactionID(), getSender(), this);
         } else {
             ActorSelection leader = getLeader();
             if (leader == null) {
@@ -563,8 +563,8 @@ public class Shard extends RaftActor {
         doAbortTransaction(abort.getTransactionID(), getSender());
     }
 
-    void doAbortTransaction(final String transactionID, final ActorRef sender) {
-        commitCoordinator.handleAbort(new StringIdentifier(transactionID), sender, this);
+    void doAbortTransaction(final TransactionIdentifier<?> transactionID, final ActorRef sender) {
+        commitCoordinator.handleAbort(transactionID, sender, this);
     }
 
     private void handleCreateTransaction(final Object message) {
@@ -590,7 +590,7 @@ public class Shard extends RaftActor {
             }
 
             ActorRef transactionActor = createTransaction(createTransaction.getTransactionType(),
-                createTransaction.getTransactionId(), createTransaction.getTransactionChainId());
+                createTransaction.getTransactionId());
 
             getSender().tell(new CreateTransactionReply(Serialization.serializedActorPath(transactionActor),
                     createTransaction.getTransactionId(), createTransaction.getVersion()).toSerializable(), getSelf());
@@ -599,15 +599,14 @@ public class Shard extends RaftActor {
         }
     }
 
-    private ActorRef createTransaction(int transactionType, String transactionId, String transactionChainId) {
+    private ActorRef createTransaction(int transactionType, TransactionIdentifier<?> transactionId) {
         LOG.debug("{}: Creating transaction : {} ", persistenceId(), transactionId);
         return transactionActorFactory.newShardTransaction(TransactionType.fromInt(transactionType),
-            transactionId, transactionChainId);
+            transactionId);
     }
 
     private void commitWithNewTransaction(final BatchedModifications modification) {
-        ReadWriteShardDataTreeTransaction tx = store.newReadWriteTransaction(modification.getTransactionID(),
-            modification.getTransactionChainID());
+        ReadWriteShardDataTreeTransaction tx = store.newReadWriteTransaction(modification.getTransactionID());
         modification.apply(tx.getSnapshot());
         try {
             snapshotCohort.syncCommitTransaction(tx);
