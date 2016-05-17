@@ -37,7 +37,6 @@ import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.PersistentDataProvider;
 import org.opendaylight.controller.cluster.raft.ServerConfigurationPayload.ServerInfo;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyJournalEntries;
-import org.opendaylight.controller.cluster.raft.base.messages.ApplyLogEntries;
 import org.opendaylight.controller.cluster.raft.base.messages.DeleteEntries;
 import org.opendaylight.controller.cluster.raft.base.messages.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
@@ -157,18 +156,6 @@ public class RaftActorRecoverySupportTest {
         inOrder.verify(mockCohort).appendRecoveredLogEntry(replicatedLog.get(replicatedLog.size() - 1).getData());
 
         inOrder.verifyNoMoreInteractions();
-    }
-
-    @Test
-    public void testOnApplyLogEntries() {
-        ReplicatedLog replicatedLog = context.getReplicatedLog();
-        replicatedLog.append(new MockRaftActorContext.MockReplicatedLogEntry(1,
-                0, new MockRaftActorContext.MockPayload("0")));
-
-        sendMessageToSupport(new ApplyLogEntries(0));
-
-        assertEquals("Last applied", 0, context.getLastApplied());
-        assertEquals("Commit index", 0, context.getCommitIndex());
     }
 
     @Test
