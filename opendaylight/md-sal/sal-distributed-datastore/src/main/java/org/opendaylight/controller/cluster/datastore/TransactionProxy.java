@@ -298,8 +298,7 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
             cohorts.add(new ThreePhaseCommitCohortProxy.CohortInfo(wrapper.readyTransaction(), txVersionSupplier));
         }
 
-        return new ThreePhaseCommitCohortProxy(txContextFactory.getActorContext(), cohorts,
-                getIdentifier().toString());
+        return new ThreePhaseCommitCohortProxy(txContextFactory.getActorContext(), cohorts, getIdentifier());
     }
 
     private String shardNameFromIdentifier(final YangInstanceIdentifier path) {
