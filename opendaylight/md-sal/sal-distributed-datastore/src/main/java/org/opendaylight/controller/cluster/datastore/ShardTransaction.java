@@ -15,6 +15,7 @@ import akka.actor.ReceiveTimeout;
 import akka.japi.Creator;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActorWithMetering;
 import org.opendaylight.controller.cluster.datastore.exceptions.UnknownMessageException;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStats;
@@ -43,9 +44,9 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 public abstract class ShardTransaction extends AbstractUntypedActorWithMetering {
     private final ActorRef shardActor;
     private final ShardStats shardStats;
-    private final String transactionID;
+    private final TransactionIdentifier<?> transactionID;
 
-    protected ShardTransaction(ActorRef shardActor, ShardStats shardStats, String transactionID) {
+    protected ShardTransaction(ActorRef shardActor, ShardStats shardStats, TransactionIdentifier<?> transactionID) {
         super("shard-tx"); //actor name override used for metering. This does not change the "real" actor name
         this.shardActor = shardActor;
         this.shardStats = shardStats;
@@ -53,7 +54,7 @@ public abstract class ShardTransaction extends AbstractUntypedActorWithMetering 
     }
 
     public static Props props(TransactionType type, AbstractShardDataTreeTransaction<?> transaction, ActorRef shardActor,
-            DatastoreContext datastoreContext, ShardStats shardStats, String transactionID) {
+            DatastoreContext datastoreContext, ShardStats shardStats, TransactionIdentifier<?> transactionID) {
         return Props.create(new ShardTransactionCreator(type, transaction, shardActor,
            datastoreContext, shardStats, transactionID));
     }
@@ -64,7 +65,7 @@ public abstract class ShardTransaction extends AbstractUntypedActorWithMetering 
         return shardActor;
     }
 
-    protected String getTransactionID() {
+    protected final TransactionIdentifier<?> getTransactionID() {
         return transactionID;
     }
 
@@ -134,11 +135,11 @@ public abstract class ShardTransaction extends AbstractUntypedActorWithMetering 
         final ActorRef shardActor;
         final DatastoreContext datastoreContext;
         final ShardStats shardStats;
-        final String transactionID;
+        final TransactionIdentifier<?> transactionID;
         final TransactionType type;
 
         ShardTransactionCreator(TransactionType type, AbstractShardDataTreeTransaction<?> transaction, ActorRef shardActor,
-                DatastoreContext datastoreContext, ShardStats shardStats, String transactionID) {
+                DatastoreContext datastoreContext, ShardStats shardStats, TransactionIdentifier<?> transactionID) {
             this.transaction = Preconditions.checkNotNull(transaction);
             this.shardActor = shardActor;
             this.shardStats = shardStats;

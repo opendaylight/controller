@@ -11,6 +11,7 @@ package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorRef;
 import akka.actor.PoisonPill;
+import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStats;
 import org.opendaylight.controller.cluster.datastore.messages.BatchedModifications;
 import org.opendaylight.controller.cluster.datastore.messages.BatchedModificationsReply;
@@ -30,7 +31,7 @@ public class ShardWriteTransaction extends ShardTransaction {
     private final ReadWriteShardDataTreeTransaction transaction;
 
     public ShardWriteTransaction(ReadWriteShardDataTreeTransaction transaction, ActorRef shardActor,
-            ShardStats shardStats, String transactionID) {
+            ShardStats shardStats, TransactionIdentifier<?> transactionID) {
         super(shardActor, shardStats, transactionID);
         this.transaction = transaction;
     }
@@ -107,7 +108,7 @@ public class ShardWriteTransaction extends ShardTransaction {
     }
 
     private void readyTransaction(boolean returnSerialized, boolean doImmediateCommit, short clientTxVersion) {
-        String transactionID = getTransactionID();
+        TransactionIdentifier<?> transactionID = getTransactionID();
 
         LOG.debug("readyTransaction : {}", transactionID);
 

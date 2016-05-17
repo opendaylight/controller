@@ -9,6 +9,7 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorRef;
+import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStats;
 import org.opendaylight.controller.cluster.datastore.messages.DataExists;
 import org.opendaylight.controller.cluster.datastore.messages.ReadData;
@@ -19,7 +20,7 @@ import org.opendaylight.controller.cluster.datastore.messages.ReadData;
  */
 public class ShardReadWriteTransaction extends ShardWriteTransaction {
     public ShardReadWriteTransaction(ReadWriteShardDataTreeTransaction transaction, ActorRef shardActor,
-            ShardStats shardStats, String transactionID) {
+            ShardStats shardStats, TransactionIdentifier<?> transactionID) {
         super(transaction, shardActor, shardStats, transactionID);
     }
 
