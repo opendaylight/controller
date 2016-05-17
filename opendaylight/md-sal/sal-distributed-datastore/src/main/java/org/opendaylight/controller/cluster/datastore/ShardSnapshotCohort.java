@@ -10,7 +10,6 @@ package org.opendaylight.controller.cluster.datastore;
 import akka.actor.ActorRef;
 import com.google.common.base.Preconditions;
 import java.util.concurrent.ExecutionException;
-import org.opendaylight.controller.cluster.datastore.identifiers.ShardTransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.CreateSnapshot;
 import org.opendaylight.controller.cluster.datastore.utils.SerializationUtils;
 import org.opendaylight.controller.cluster.raft.RaftActorSnapshotCohort;
@@ -45,11 +44,8 @@ class ShardSnapshotCohort implements RaftActorSnapshotCohort {
         // so that this actor does not get block building the snapshot. THe transaction actor will
         // after processing the CreateSnapshot message.
 
-        ShardTransactionIdentifier transactionID = new ShardTransactionIdentifier(
-                "createSnapshot" + ++createSnapshotTransactionCounter);
-
         ActorRef createSnapshotTransaction = transactionActorFactory.newShardTransaction(
-                TransactionType.READ_ONLY, transactionID, "");
+                TransactionType.READ_ONLY, "createSnapshot" + ++createSnapshotTransactionCounter, "");
 
         createSnapshotTransaction.tell(CreateSnapshot.INSTANCE, actorRef);
     }
