@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.concurrent.NotThreadSafe;
+import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.DataTreeCohortActor.CanCommit;
 import org.opendaylight.controller.md.sal.dom.spi.AbstractRegistrationTree;
 import org.opendaylight.controller.md.sal.dom.spi.RegistrationTreeNode;
@@ -75,8 +76,8 @@ class DataTreeCohortActorRegistry extends AbstractRegistrationTree<ActorRef> {
         cohort.tell(PoisonPill.getInstance(), cohort);
     }
 
-    Collection<DataTreeCohortActor.CanCommit> createCanCommitMessages(String txId, DataTreeCandidate candidate,
-            SchemaContext schema) {
+    Collection<DataTreeCohortActor.CanCommit> createCanCommitMessages(TransactionIdentifier txId,
+            DataTreeCandidate candidate, SchemaContext schema) {
         try (RegistrationTreeSnapshot<ActorRef> cohorts = takeSnapshot()) {
             return new CanCommitMessageBuilder(txId, candidate, schema).perform(cohorts.getRootNode());
         }
@@ -129,13 +130,13 @@ class DataTreeCohortActorRegistry extends AbstractRegistrationTree<ActorRef> {
 
     private static class CanCommitMessageBuilder {
 
-        private final String txId;
+        private final TransactionIdentifier txId;
         private final DataTreeCandidate candidate;
         private final SchemaContext schema;
         private final Collection<DataTreeCohortActor.CanCommit> messages =
                 new ArrayList<>();
 
-        CanCommitMessageBuilder(String txId, DataTreeCandidate candidate, SchemaContext schema) {
+        CanCommitMessageBuilder(TransactionIdentifier txId, DataTreeCandidate candidate, SchemaContext schema) {
             this.txId = Preconditions.checkNotNull(txId);
             this.candidate = Preconditions.checkNotNull(candidate);
             this.schema = schema;

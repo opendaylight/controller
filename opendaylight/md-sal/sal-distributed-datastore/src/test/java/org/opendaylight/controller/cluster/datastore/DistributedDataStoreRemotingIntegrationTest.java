@@ -43,6 +43,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.databroker.ConcurrentDOMDataBroker;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext.Builder;
 import org.opendaylight.controller.cluster.datastore.IntegrationTestKit.ShardStatsVerifier;
@@ -99,7 +100,7 @@ import scala.concurrent.duration.FiniteDuration;
  *
  * @author Thomas Pantelis
  */
-public class DistributedDataStoreRemotingIntegrationTest {
+public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
     private static final String[] CARS_AND_PEOPLE = {"cars", "people"};
     private static final String[] CARS = {"cars"};
@@ -121,6 +122,8 @@ public class DistributedDataStoreRemotingIntegrationTest {
     private final DatastoreContext.Builder followerDatastoreContextBuilder =
             DatastoreContext.newBuilder().shardHeartbeatIntervalInMillis(100).shardElectionTimeoutFactor(5).
                 customRaftPolicyImplementation(DisableElectionsRaftPolicy.class.getName());
+    private final TransactionIdentifier tx1 = nextTransactionId();
+    private final TransactionIdentifier tx2 = nextTransactionId();
 
     private DistributedDataStore followerDistributedDataStore;
     private DistributedDataStore leaderDistributedDataStore;
@@ -575,7 +578,7 @@ public class DistributedDataStoreRemotingIntegrationTest {
         new WriteModification(CarsModel.newCarPath("optima"), car1).apply(modification);
         modification.ready();
 
-        ReadyLocalTransaction readyLocal = new ReadyLocalTransaction("tx-1" , modification, true);
+        ReadyLocalTransaction readyLocal = new ReadyLocalTransaction(tx1 , modification, true);
 
         carsFollowerShard.get().tell(readyLocal, followerTestKit.getRef());
         Object resp = followerTestKit.expectMsgClass(Object.class);
@@ -594,7 +597,7 @@ public class DistributedDataStoreRemotingIntegrationTest {
         new WriteModification(CarsModel.newCarPath("sportage"), car2).apply(modification);
         modification.ready();
 
-        readyLocal = new ReadyLocalTransaction("tx-2" , modification, false);
+        readyLocal = new ReadyLocalTransaction(tx2 , modification, false);
 
         carsFollowerShard.get().tell(readyLocal, followerTestKit.getRef());
         resp = followerTestKit.expectMsgClass(Object.class);
@@ -611,7 +614,7 @@ public class DistributedDataStoreRemotingIntegrationTest {
         Mockito.doReturn(DataStoreVersions.CURRENT_VERSION).when(versionSupplier).get();
         ThreePhaseCommitCohortProxy cohort = new ThreePhaseCommitCohortProxy(
                 leaderDistributedDataStore.getActorContext(), Arrays.asList(
-                        new ThreePhaseCommitCohortProxy.CohortInfo(Futures.successful(txActor), versionSupplier)), "tx-2");
+                        new ThreePhaseCommitCohortProxy.CohortInfo(Futures.successful(txActor), versionSupplier)), tx2);
         cohort.canCommit().get(5, TimeUnit.SECONDS);
         cohort.preCommit().get(5, TimeUnit.SECONDS);
         cohort.commit().get(5, TimeUnit.SECONDS);
@@ -640,9 +643,9 @@ public class DistributedDataStoreRemotingIntegrationTest {
         MapEntryNode car1 = CarsModel.newCarEntry("optima", BigInteger.valueOf(20000));
         new WriteModification(CarsModel.newCarPath("optima"), car1).apply(modification);
 
-        ForwardedReadyTransaction forwardedReady = new ForwardedReadyTransaction("tx-1",
+        ForwardedReadyTransaction forwardedReady = new ForwardedReadyTransaction(tx1,
                 DataStoreVersions.CURRENT_VERSION, new ReadWriteShardDataTreeTransaction(
-                        Mockito.mock(ShardDataTreeTransactionParent.class), "tx-1", modification), true);
+                        Mockito.mock(ShardDataTreeTransactionParent.class), tx1, modification), true);
 
         carsFollowerShard.get().tell(forwardedReady, followerTestKit.getRef());
         Object resp = followerTestKit.expectMsgClass(Object.class);
@@ -660,9 +663,9 @@ public class DistributedDataStoreRemotingIntegrationTest {
         MapEntryNode car2 = CarsModel.newCarEntry("sportage", BigInteger.valueOf(30000));
         new WriteModification(CarsModel.newCarPath("sportage"), car2).apply(modification);
 
-        forwardedReady = new ForwardedReadyTransaction("tx-2",
+        forwardedReady = new ForwardedReadyTransaction(tx2,
                 DataStoreVersions.CURRENT_VERSION, new ReadWriteShardDataTreeTransaction(
-                        Mockito.mock(ShardDataTreeTransactionParent.class), "tx-2", modification), false);
+                        Mockito.mock(ShardDataTreeTransactionParent.class), tx2, modification), false);
 
         carsFollowerShard.get().tell(forwardedReady, followerTestKit.getRef());
         resp = followerTestKit.expectMsgClass(Object.class);
@@ -679,7 +682,7 @@ public class DistributedDataStoreRemotingIntegrationTest {
         Mockito.doReturn(DataStoreVersions.CURRENT_VERSION).when(versionSupplier).get();
         ThreePhaseCommitCohortProxy cohort = new ThreePhaseCommitCohortProxy(
                 leaderDistributedDataStore.getActorContext(), Arrays.asList(
-                        new ThreePhaseCommitCohortProxy.CohortInfo(Futures.successful(txActor), versionSupplier)), "tx-2");
+                        new ThreePhaseCommitCohortProxy.CohortInfo(Futures.successful(txActor), versionSupplier)), tx2);
         cohort.canCommit().get(5, TimeUnit.SECONDS);
         cohort.preCommit().get(5, TimeUnit.SECONDS);
         cohort.commit().get(5, TimeUnit.SECONDS);

@@ -862,7 +862,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
 
         ActorRef txActorRef = actorSystem.actorOf(Props.create(DoNothingActor.class));
         String actorPath = txActorRef.path().toString();
-        CreateTransactionReply createTransactionReply = new CreateTransactionReply(actorPath, "txn-1",
+        CreateTransactionReply createTransactionReply = new CreateTransactionReply(actorPath, nextTransactionId(),
                 DataStoreVersions.CURRENT_VERSION);
 
         doReturn(actorSystem.actorSelection(actorPath)).when(mockActorContext).actorSelection(actorPath);

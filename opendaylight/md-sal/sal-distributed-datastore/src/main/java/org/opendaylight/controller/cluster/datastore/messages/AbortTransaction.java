@@ -9,6 +9,7 @@
 package org.opendaylight.controller.cluster.datastore.messages;
 
 import com.google.common.base.Preconditions;
+import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 
 public class AbortTransaction extends AbstractThreePhaseCommitMessage {
     private static final long serialVersionUID = 1L;
@@ -16,7 +17,7 @@ public class AbortTransaction extends AbstractThreePhaseCommitMessage {
     public AbortTransaction() {
     }
 
-    public AbortTransaction(String transactionID, final short version) {
+    public AbortTransaction(TransactionIdentifier transactionID, final short version) {
         super(transactionID, version);
     }
 

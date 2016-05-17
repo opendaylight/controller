@@ -35,7 +35,6 @@ import org.opendaylight.controller.cluster.datastore.messages.ReadyTransactionRe
 import org.opendaylight.controller.cluster.datastore.utils.AbstractBatchedModificationsCursor;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.yangtools.concepts.Identifier;
-import org.opendaylight.yangtools.util.StringIdentifier;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.slf4j.Logger;
 
@@ -174,10 +173,10 @@ final class ShardCommitCoordinator {
      * @param shard the transaction's shard actor
      */
     void handleBatchedModifications(BatchedModifications batched, ActorRef sender, Shard shard, SchemaContext schema) {
-        CohortEntry cohortEntry = cohortCache.get(new StringIdentifier(batched.getTransactionID()));
+        CohortEntry cohortEntry = cohortCache.get(batched.getTransactionID());
         if(cohortEntry == null) {
             cohortEntry = new CohortEntry(batched.getTransactionID(),
-                    dataTree.newReadWriteTransaction(batched.getTransactionID(), batched.getTransactionChainID()),
+                    dataTree.newReadWriteTransaction(batched.getTransactionID()),
                     cohortRegistry, schema,  batched.getVersion());
             cohortCache.put(cohortEntry.getTransactionID(), cohortEntry);
         }
@@ -260,7 +259,7 @@ final class ShardCommitCoordinator {
 
     Collection<BatchedModifications> createForwardedBatchedModifications(final BatchedModifications from,
             final int maxModificationsPerBatch) {
-        CohortEntry cohortEntry = getAndRemoveCohortEntry(new StringIdentifier(from.getTransactionID()));
+        CohortEntry cohortEntry = getAndRemoveCohortEntry(from.getTransactionID());
         if(cohortEntry == null || cohortEntry.getTransaction() == null) {
             return Collections.singletonList(from);
         }
@@ -273,8 +272,7 @@ final class ShardCommitCoordinator {
             protected BatchedModifications getModifications() {
                 if(newModifications.isEmpty() ||
                         newModifications.getLast().getModifications().size() >= maxModificationsPerBatch) {
-                    newModifications.add(new BatchedModifications(from.getTransactionID(),
-                            from.getVersion(), from.getTransactionChainID()));
+                    newModifications.add(new BatchedModifications(from.getTransactionID(), from.getVersion()));
                 }
 
                 return newModifications.getLast();
@@ -539,8 +537,8 @@ final class ShardCommitCoordinator {
                 protected BatchedModifications getModifications() {
                     if(newModifications.isEmpty() ||
                             newModifications.getLast().getModifications().size() >= maxModificationsPerBatch) {
-                        newModifications.add(new BatchedModifications(cohortEntry.getTransactionID().getString(),
-                                cohortEntry.getClientVersion(), ""));
+                        newModifications.add(new BatchedModifications(cohortEntry.getTransactionID(),
+                                cohortEntry.getClientVersion()));
         }
 
                     return newModifications.getLast();
@@ -555,12 +553,12 @@ final class ShardCommitCoordinator {
                 messages.addAll(newModifications);
 
                 if(!cohortEntry.isDoImmediateCommit() && cohortEntry.getState() == CohortEntry.State.CAN_COMMITTED) {
-                    messages.add(new CanCommitTransaction(cohortEntry.getTransactionID().getString(),
+                    messages.add(new CanCommitTransaction(cohortEntry.getTransactionID(),
                             cohortEntry.getClientVersion()));
                 }
 
                 if(!cohortEntry.isDoImmediateCommit() && cohortEntry.getState() == CohortEntry.State.PRE_COMMITTED) {
-                    messages.add(new CommitTransaction(cohortEntry.getTransactionID().getString(),
+                    messages.add(new CommitTransaction(cohortEntry.getTransactionID(),
                             cohortEntry.getClientVersion()));
                 }
             }

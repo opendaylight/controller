@@ -88,7 +88,7 @@ import scala.concurrent.duration.Duration;
  *
  * @author Thomas Pantelis
  */
-public abstract class AbstractTransactionProxyTest {
+public abstract class AbstractTransactionProxyTest extends AbstractTest {
     protected final Logger log = LoggerFactory.getLogger(getClass());
 
     private static ActorSystem system;
@@ -190,7 +190,7 @@ public abstract class AbstractTransactionProxyTest {
             public boolean matches(Object argument) {
                 if(CreateTransaction.class.equals(argument.getClass())) {
                     CreateTransaction obj = CreateTransaction.fromSerializable(argument);
-                    return obj.getTransactionId().startsWith(memberName + ':') &&
+                    return obj.getTransactionId().getHistoryId().getClientId().getFrontendId().getMemberName().getName().equals(memberName) &&
                             obj.getTransactionType() == type.ordinal();
                 }
 
@@ -291,7 +291,7 @@ public abstract class AbstractTransactionProxyTest {
     }
 
     protected CreateTransactionReply createTransactionReply(ActorRef actorRef, short transactionVersion){
-        return new CreateTransactionReply(actorRef.path().toString(), "txn-1", transactionVersion);
+        return new CreateTransactionReply(actorRef.path().toString(), nextTransactionId(), transactionVersion);
     }
 
     protected ActorRef setupActorContextWithoutInitialCreateTransaction(ActorSystem actorSystem) {

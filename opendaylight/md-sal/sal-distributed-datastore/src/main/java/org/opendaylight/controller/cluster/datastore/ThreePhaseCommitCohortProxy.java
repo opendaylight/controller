@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.AbortTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.AbortTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.CanCommitTransaction;
@@ -41,7 +42,7 @@ public class ThreePhaseCommitCohortProxy extends AbstractThreePhaseCommitCohort<
 
     private static final MessageSupplier COMMIT_MESSAGE_SUPPLIER = new MessageSupplier() {
         @Override
-        public Object newMessage(String transactionId, short version) {
+        public Object newMessage(TransactionIdentifier transactionId, short version) {
             return new CommitTransaction(transactionId, version).toSerializable();
         }
 
@@ -53,7 +54,7 @@ public class ThreePhaseCommitCohortProxy extends AbstractThreePhaseCommitCohort<
 
     private static final MessageSupplier ABORT_MESSAGE_SUPPLIER = new MessageSupplier() {
         @Override
-        public Object newMessage(String transactionId, short version) {
+        public Object newMessage(TransactionIdentifier transactionId, short version) {
             return new AbortTransaction(transactionId, version).toSerializable();
         }
 
@@ -66,13 +67,14 @@ public class ThreePhaseCommitCohortProxy extends AbstractThreePhaseCommitCohort<
     private final ActorContext actorContext;
     private final List<CohortInfo> cohorts;
     private final SettableFuture<Void> cohortsResolvedFuture = SettableFuture.create();
-    private final String transactionId;
+    private final TransactionIdentifier transactionId;
     private volatile OperationCallback commitOperationCallback;
 
-    public ThreePhaseCommitCohortProxy(ActorContext actorContext, List<CohortInfo> cohorts, String transactionId) {
+    public ThreePhaseCommitCohortProxy(ActorContext actorContext, List<CohortInfo> cohorts,
+            TransactionIdentifier transactionId) {
         this.actorContext = actorContext;
         this.cohorts = cohorts;
-        this.transactionId = transactionId;
+        this.transactionId = Preconditions.checkNotNull(transactionId);
 
         if(cohorts.isEmpty()) {
             cohortsResolvedFuture.set(null);
@@ -392,7 +394,7 @@ public class ThreePhaseCommitCohortProxy extends AbstractThreePhaseCommitCohort<
     }
 
     private interface MessageSupplier {
-        Object newMessage(String transactionId, short version);
+        Object newMessage(TransactionIdentifier transactionId, short version);
         boolean isSerializedReplyType(Object reply);
     }
 }

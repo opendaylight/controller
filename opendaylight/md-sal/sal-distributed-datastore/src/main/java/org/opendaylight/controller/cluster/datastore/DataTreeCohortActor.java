@@ -12,6 +12,7 @@ import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.actor.Status;
 import com.google.common.base.Preconditions;
+import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActor;
 import org.opendaylight.mdsal.common.api.PostCanCommitStep;
 import org.opendaylight.mdsal.common.api.PostPreCommitStep;
@@ -49,13 +50,13 @@ final class DataTreeCohortActor extends AbstractUntypedActor {
      */
     static abstract class CommitProtocolCommand<R extends CommitReply> {
 
-        private final String txId;
+        private final TransactionIdentifier txId;
 
-        final String getTxId() {
+        final TransactionIdentifier getTxId() {
             return txId;
         }
 
-        protected CommitProtocolCommand(String txId) {
+        protected CommitProtocolCommand(TransactionIdentifier txId) {
             this.txId = Preconditions.checkNotNull(txId);
         }
     }
@@ -66,7 +67,7 @@ final class DataTreeCohortActor extends AbstractUntypedActor {
         private final ActorRef cohort;
         private final SchemaContext schema;
 
-        CanCommit(String txId, DOMDataTreeCandidate candidate, SchemaContext schema, ActorRef cohort) {
+        CanCommit(TransactionIdentifier txId, DOMDataTreeCandidate candidate, SchemaContext schema, ActorRef cohort) {
             super(txId);
             this.cohort = Preconditions.checkNotNull(cohort);
             this.candidate = Preconditions.checkNotNull(candidate);
@@ -90,9 +91,9 @@ final class DataTreeCohortActor extends AbstractUntypedActor {
     static abstract class CommitReply {
 
         private final ActorRef cohortRef;
-        private final String txId;
+        private final TransactionIdentifier txId;
 
-        protected CommitReply(ActorRef cohortRef, String txId) {
+        protected CommitReply(ActorRef cohortRef, TransactionIdentifier txId) {
             this.cohortRef = Preconditions.checkNotNull(cohortRef);
             this.txId = Preconditions.checkNotNull(txId);
         }
@@ -101,15 +102,14 @@ final class DataTreeCohortActor extends AbstractUntypedActor {
             return cohortRef;
         }
 
-        final String getTxId() {
+        final TransactionIdentifier getTxId() {
             return txId;
         }
-
     }
 
     static final class Success extends CommitReply {
 
-        public Success(ActorRef cohortRef, String txId) {
+        public Success(ActorRef cohortRef, TransactionIdentifier txId) {
             super(cohortRef, txId);
         }
 
@@ -117,21 +117,21 @@ final class DataTreeCohortActor extends AbstractUntypedActor {
 
     static final class PreCommit extends CommitProtocolCommand<Success> {
 
-        public PreCommit(String txId) {
+        public PreCommit(TransactionIdentifier txId) {
             super(txId);
         }
     }
 
     static final class Abort extends CommitProtocolCommand<Success> {
 
-        public Abort(String txId) {
+        public Abort(TransactionIdentifier txId) {
             super(txId);
         }
     }
 
     static final class Commit extends CommitProtocolCommand<Success> {
 
-        public Commit(String txId) {
+        public Commit(TransactionIdentifier txId) {
             super(txId);
         }
     }
@@ -187,9 +187,9 @@ final class DataTreeCohortActor extends AbstractUntypedActor {
             extends CohortBehaviour<M> {
 
         private final S step;
-        private final String txId;
+        private final TransactionIdentifier txId;
 
-        CohortStateWithStep(String txId, S step) {
+        CohortStateWithStep(TransactionIdentifier txId, S step) {
             this.txId = Preconditions.checkNotNull(txId);
             this.step = Preconditions.checkNotNull(step);
         }
@@ -198,7 +198,7 @@ final class DataTreeCohortActor extends AbstractUntypedActor {
             return step;
         }
 
-        final String getTxId() {
+        final TransactionIdentifier getTxId() {
             return txId;
         }
 
@@ -219,7 +219,7 @@ final class DataTreeCohortActor extends AbstractUntypedActor {
 
     private class PostCanCommit extends CohortStateWithStep<PreCommit, PostCanCommitStep> {
 
-        PostCanCommit(String txId, PostCanCommitStep nextStep) {
+        PostCanCommit(TransactionIdentifier txId, PostCanCommitStep nextStep) {
             super(txId, nextStep);
         }
 
@@ -245,7 +245,7 @@ final class DataTreeCohortActor extends AbstractUntypedActor {
 
     private class PostPreCommit extends CohortStateWithStep<Commit, PostPreCommitStep> {
 
-        PostPreCommit(String txId, PostPreCommitStep step) {
+        PostPreCommit(TransactionIdentifier txId, PostPreCommitStep step) {
             super(txId, step);
         }
 

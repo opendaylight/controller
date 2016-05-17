@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
+import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.DataTreeCohortActor.CanCommit;
 import org.opendaylight.controller.cluster.datastore.DataTreeCohortActor.Success;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidateTip;
@@ -91,15 +92,16 @@ class CompositeDataTreeCohort {
 
 
     private final DataTreeCohortActorRegistry registry;
-    private final String txId;
+    private final TransactionIdentifier txId;
     private final SchemaContext schema;
     private final Timeout timeout;
     private Iterable<Success> successfulFromPrevious;
     private State state = State.IDLE;
 
-    CompositeDataTreeCohort(DataTreeCohortActorRegistry registry, String txId, SchemaContext schema, Timeout timeout) {
+    CompositeDataTreeCohort(DataTreeCohortActorRegistry registry, TransactionIdentifier transactionID,
+        SchemaContext schema, Timeout timeout) {
         this.registry = Preconditions.checkNotNull(registry);
-        this.txId = Preconditions.checkNotNull(txId);
+        this.txId = Preconditions.checkNotNull(transactionID);
         this.schema = Preconditions.checkNotNull(schema);
         this.timeout = Preconditions.checkNotNull(timeout);
     }

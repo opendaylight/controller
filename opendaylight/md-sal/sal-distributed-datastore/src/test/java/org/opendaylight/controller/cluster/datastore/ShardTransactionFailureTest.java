@@ -59,7 +59,7 @@ public class ShardTransactionFailureTest extends AbstractActorTest {
     public void testNegativeReadWithReadOnlyTransactionClosed() throws Throwable {
 
         final ActorRef shard = createShard();
-        final Props props = ShardTransaction.props(RO, store.newReadOnlyTransaction("test-txn", null), shard,
+        final Props props = ShardTransaction.props(RO, store.newReadOnlyTransaction(nextTransactionId()), shard,
                 datastoreContext, shardStats);
 
         final TestActorRef<ShardTransaction> subject = TestActorRef.create(getSystem(), props,
@@ -81,7 +81,7 @@ public class ShardTransactionFailureTest extends AbstractActorTest {
     public void testNegativeReadWithReadWriteTransactionClosed() throws Throwable {
 
         final ActorRef shard = createShard();
-        final Props props = ShardTransaction.props(RW, store.newReadWriteTransaction("test-txn", null), shard,
+        final Props props = ShardTransaction.props(RW, store.newReadWriteTransaction(nextTransactionId()), shard,
                 datastoreContext, shardStats);
 
         final TestActorRef<ShardTransaction> subject = TestActorRef.create(getSystem(), props,
@@ -102,7 +102,7 @@ public class ShardTransactionFailureTest extends AbstractActorTest {
     public void testNegativeExistsWithReadWriteTransactionClosed() throws Throwable {
 
         final ActorRef shard = createShard();
-        final Props props = ShardTransaction.props(RW, store.newReadWriteTransaction("test-txn", null), shard,
+        final Props props = ShardTransaction.props(RW, store.newReadWriteTransaction(nextTransactionId()), shard,
                 datastoreContext, shardStats);
 
         final TestActorRef<ShardTransaction> subject = TestActorRef.create(getSystem(), props,

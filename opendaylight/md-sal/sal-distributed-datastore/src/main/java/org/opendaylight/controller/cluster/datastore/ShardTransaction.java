@@ -15,6 +15,7 @@ import akka.actor.ReceiveTimeout;
 import akka.japi.Creator;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActorWithMetering;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStats;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransaction;
@@ -42,9 +43,9 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 public abstract class ShardTransaction extends AbstractUntypedActorWithMetering {
     private final ActorRef shardActor;
     private final ShardStats shardStats;
-    private final String transactionID;
+    private final TransactionIdentifier transactionID;
 
-    protected ShardTransaction(ActorRef shardActor, ShardStats shardStats, String transactionID) {
+    protected ShardTransaction(ActorRef shardActor, ShardStats shardStats, TransactionIdentifier transactionID) {
         super("shard-tx"); //actor name override used for metering. This does not change the "real" actor name
         this.shardActor = shardActor;
         this.shardStats = shardStats;
@@ -62,7 +63,7 @@ public abstract class ShardTransaction extends AbstractUntypedActorWithMetering 
         return shardActor;
     }
 
-    protected String getTransactionID() {
+    protected final TransactionIdentifier getTransactionID() {
         return transactionID;
     }
 

@@ -35,7 +35,6 @@ import org.opendaylight.controller.cluster.datastore.modification.MergeModificat
 import org.opendaylight.controller.cluster.datastore.modification.WriteModification;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.controller.cluster.datastore.utils.NormalizedNodeAggregator;
-import org.opendaylight.controller.cluster.datastore.utils.TransactionIdentifierUtils;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.sal.core.spi.data.AbstractDOMStoreTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
@@ -299,8 +298,7 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
             cohorts.add(new ThreePhaseCommitCohortProxy.CohortInfo(wrapper.readyTransaction(), txVersionSupplier));
         }
 
-        return new ThreePhaseCommitCohortProxy(txContextFactory.getActorContext(), cohorts,
-                TransactionIdentifierUtils.actorNameFor(getIdentifier()));
+        return new ThreePhaseCommitCohortProxy(txContextFactory.getActorContext(), cohorts, getIdentifier());
     }
 
     private String shardNameFromIdentifier(final YangInstanceIdentifier path) {

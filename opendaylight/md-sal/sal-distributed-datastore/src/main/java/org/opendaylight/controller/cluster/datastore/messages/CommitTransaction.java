@@ -9,6 +9,7 @@
 package org.opendaylight.controller.cluster.datastore.messages;
 
 import com.google.common.base.Preconditions;
+import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 
 public class CommitTransaction extends AbstractThreePhaseCommitMessage {
     private static final long serialVersionUID = 1L;
@@ -16,14 +17,13 @@ public class CommitTransaction extends AbstractThreePhaseCommitMessage {
     public CommitTransaction() {
     }
 
-    public CommitTransaction(String transactionID, final short version) {
+    public CommitTransaction(TransactionIdentifier transactionID, final short version) {
         super(transactionID, version);
     }
 
     public static CommitTransaction fromSerializable(Object serializable) {
         Preconditions.checkArgument(serializable instanceof CommitTransaction);
         return (CommitTransaction)serializable;
-
     }
 
     public static boolean isSerializedType(Object message) {
