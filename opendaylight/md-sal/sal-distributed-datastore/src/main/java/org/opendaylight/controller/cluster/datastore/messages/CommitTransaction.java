@@ -8,6 +8,7 @@
 
 package org.opendaylight.controller.cluster.datastore.messages;
 
+import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 import org.opendaylight.controller.protobuff.messages.cohort3pc.ThreePhaseCommitCohortMessages;
 
@@ -17,7 +18,7 @@ public class CommitTransaction extends AbstractThreePhaseCommitMessage {
     public CommitTransaction() {
     }
 
-    public CommitTransaction(String transactionID, final short version) {
+    public CommitTransaction(TransactionIdentifier<?> transactionID, final short version) {
         super(transactionID, version);
     }
 
