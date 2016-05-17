@@ -8,6 +8,10 @@
 
 package org.opendaylight.controller.cluster.datastore.node;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.node.utils.NormalizedNodeGetter;
@@ -21,12 +25,6 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-
-import java.util.List;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 public class NormalizedNodeToNodeCodecTest {
   private SchemaContext schemaContext;
@@ -52,7 +50,7 @@ public class NormalizedNodeToNodeCodecTest {
 
     NormalizedNodeGetter normalizedNodeGetter = new NormalizedNodeGetter(id);
     new NormalizedNodeNavigator(normalizedNodeGetter).navigate(
-        PathUtils.toString(YangInstanceIdentifier.builder().build()), documentOne);
+        PathUtils.toString(YangInstanceIdentifier.EMPTY), documentOne);
 
     // Validate the value of id can be retrieved from the normalized node
     NormalizedNode<?, ?> output = normalizedNodeGetter.getOutput();

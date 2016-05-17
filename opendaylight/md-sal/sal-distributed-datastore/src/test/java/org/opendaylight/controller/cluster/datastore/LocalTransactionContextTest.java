@@ -68,7 +68,7 @@ public class LocalTransactionContextTest {
 
     @Test
     public void testWrite() {
-        YangInstanceIdentifier yangInstanceIdentifier = YangInstanceIdentifier.builder().build();
+        YangInstanceIdentifier yangInstanceIdentifier = YangInstanceIdentifier.EMPTY;
         NormalizedNode<?, ?> normalizedNode = mock(NormalizedNode.class);
         localTransactionContext.executeModification(new WriteModification(yangInstanceIdentifier, normalizedNode));
         verify(readWriteTransaction).write(yangInstanceIdentifier, normalizedNode);
@@ -76,7 +76,7 @@ public class LocalTransactionContextTest {
 
     @Test
     public void testMerge() {
-        YangInstanceIdentifier yangInstanceIdentifier = YangInstanceIdentifier.builder().build();
+        YangInstanceIdentifier yangInstanceIdentifier = YangInstanceIdentifier.EMPTY;
         NormalizedNode<?, ?> normalizedNode = mock(NormalizedNode.class);
         localTransactionContext.executeModification(new MergeModification(yangInstanceIdentifier, normalizedNode));
         verify(readWriteTransaction).merge(yangInstanceIdentifier, normalizedNode);
@@ -84,7 +84,7 @@ public class LocalTransactionContextTest {
 
     @Test
     public void testDelete() {
-        YangInstanceIdentifier yangInstanceIdentifier = YangInstanceIdentifier.builder().build();
+        YangInstanceIdentifier yangInstanceIdentifier = YangInstanceIdentifier.EMPTY;
         localTransactionContext.executeModification(new DeleteModification(yangInstanceIdentifier));
         verify(readWriteTransaction).delete(yangInstanceIdentifier);
     }
@@ -92,7 +92,7 @@ public class LocalTransactionContextTest {
 
     @Test
     public void testRead() {
-        YangInstanceIdentifier yangInstanceIdentifier = YangInstanceIdentifier.builder().build();
+        YangInstanceIdentifier yangInstanceIdentifier = YangInstanceIdentifier.EMPTY;
         NormalizedNode<?, ?> normalizedNode = mock(NormalizedNode.class);
         doReturn(Futures.immediateCheckedFuture(Optional.of(normalizedNode))).when(readWriteTransaction).read(yangInstanceIdentifier);
         localTransactionContext.executeRead(new ReadData(yangInstanceIdentifier, DataStoreVersions.CURRENT_VERSION),
@@ -102,7 +102,7 @@ public class LocalTransactionContextTest {
 
     @Test
     public void testExists() {
-        YangInstanceIdentifier yangInstanceIdentifier = YangInstanceIdentifier.builder().build();
+        YangInstanceIdentifier yangInstanceIdentifier = YangInstanceIdentifier.EMPTY;
         doReturn(Futures.immediateCheckedFuture(true)).when(readWriteTransaction).exists(yangInstanceIdentifier);
         localTransactionContext.executeRead(new DataExists(yangInstanceIdentifier, DataStoreVersions.CURRENT_VERSION),
                 SettableFuture.<Boolean>create());
@@ -123,7 +123,7 @@ public class LocalTransactionContextTest {
 
     @Test
     public void testReadyWithWriteError() {
-        YangInstanceIdentifier yangInstanceIdentifier = YangInstanceIdentifier.builder().build();
+        YangInstanceIdentifier yangInstanceIdentifier = YangInstanceIdentifier.EMPTY;
         NormalizedNode<?, ?> normalizedNode = mock(NormalizedNode.class);
         RuntimeException error = new RuntimeException("mock");
         doThrow(error).when(readWriteTransaction).write(yangInstanceIdentifier, normalizedNode);
@@ -138,7 +138,7 @@ public class LocalTransactionContextTest {
 
     @Test
     public void testReadyWithMergeError() {
-        YangInstanceIdentifier yangInstanceIdentifier = YangInstanceIdentifier.builder().build();
+        YangInstanceIdentifier yangInstanceIdentifier = YangInstanceIdentifier.EMPTY;
         NormalizedNode<?, ?> normalizedNode = mock(NormalizedNode.class);
         RuntimeException error = new RuntimeException("mock");
         doThrow(error).when(readWriteTransaction).merge(yangInstanceIdentifier, normalizedNode);
@@ -153,7 +153,7 @@ public class LocalTransactionContextTest {
 
     @Test
     public void testReadyWithDeleteError() {
-        YangInstanceIdentifier yangInstanceIdentifier = YangInstanceIdentifier.builder().build();
+        YangInstanceIdentifier yangInstanceIdentifier = YangInstanceIdentifier.EMPTY;
         RuntimeException error = new RuntimeException("mock");
         doThrow(error).when(readWriteTransaction).delete(yangInstanceIdentifier);
 

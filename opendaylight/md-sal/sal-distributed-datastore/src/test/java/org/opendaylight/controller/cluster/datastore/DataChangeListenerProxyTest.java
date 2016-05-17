@@ -38,13 +38,13 @@ public class DataChangeListenerProxyTest extends AbstractActorTest {
 
     @Override
     public Map<YangInstanceIdentifier, NormalizedNode<?, ?>> getCreatedData() {
-      createdData.put(YangInstanceIdentifier.builder().build(), CompositeModel.createDocumentOne(CompositeModel.createTestContext()));
+      createdData.put(YangInstanceIdentifier.EMPTY, CompositeModel.createDocumentOne(CompositeModel.createTestContext()));
       return createdData;
     }
 
     @Override
     public Map<YangInstanceIdentifier, NormalizedNode<?, ?>> getUpdatedData() {
-      updatedData.put(YangInstanceIdentifier.builder().build(), CompositeModel.createTestContainer());
+      updatedData.put(YangInstanceIdentifier.EMPTY, CompositeModel.createTestContainer());
       return updatedData;
 
     }
@@ -58,7 +58,7 @@ public class DataChangeListenerProxyTest extends AbstractActorTest {
 
     @Override
     public Map<YangInstanceIdentifier, NormalizedNode<?, ?>> getOriginalData() {
-      originalData.put(YangInstanceIdentifier.builder().build(), CompositeModel.createFamily());
+      originalData.put(YangInstanceIdentifier.EMPTY, CompositeModel.createFamily());
       return originalData;
     }
 
