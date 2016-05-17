@@ -16,7 +16,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.concurrent.GuardedBy;
-import org.opendaylight.controller.cluster.datastore.identifiers.TransactionIdentifier;
+import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +39,7 @@ class TransactionContextWrapper {
     @GuardedBy("queuedTxOperations")
     private final List<TransactionOperation> queuedTxOperations = Lists.newArrayList();
 
-    private final TransactionIdentifier identifier;
+    private final TransactionIdentifier<?> identifier;
 
     /**
      * The resulting TransactionContext.
@@ -48,7 +48,7 @@ class TransactionContextWrapper {
 
     private final OperationLimiter limiter;
 
-    TransactionContextWrapper(TransactionIdentifier identifier, final ActorContext actorContext) {
+    TransactionContextWrapper(final TransactionIdentifier<?> identifier, final ActorContext actorContext) {
         this.identifier = Preconditions.checkNotNull(identifier);
         this.limiter = new OperationLimiter(identifier,
                 actorContext.getDatastoreContext().getShardBatchedModificationCount() + 1, // 1 extra permit for the ready operation
@@ -59,7 +59,7 @@ class TransactionContextWrapper {
         return transactionContext;
     }
 
-    TransactionIdentifier getIdentifier() {
+    TransactionIdentifier<?> getIdentifier() {
         return identifier;
     }
 
