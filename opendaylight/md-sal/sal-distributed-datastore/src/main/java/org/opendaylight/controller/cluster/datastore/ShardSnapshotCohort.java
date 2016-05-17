@@ -24,14 +24,12 @@ import org.slf4j.Logger;
  * @author Thomas Pantelis
  */
 class ShardSnapshotCohort implements RaftActorSnapshotCohort {
-
-    private static final YangInstanceIdentifier DATASTORE_ROOT = YangInstanceIdentifier.builder().build();
-
-    private int createSnapshotTransactionCounter;
     private final ShardTransactionActorFactory transactionActorFactory;
     private final ShardDataTree store;
-    private final Logger log;
     private final String logId;
+    private final Logger log;
+
+    private int createSnapshotTransactionCounter;
 
     ShardSnapshotCohort(ShardTransactionActorFactory transactionActorFactory, ShardDataTree store,
             Logger log, String logId) {
@@ -70,10 +68,10 @@ class ShardSnapshotCohort implements RaftActorSnapshotCohort {
             NormalizedNode<?, ?> node = SerializationUtils.deserializeNormalizedNode(snapshotBytes);
 
             // delete everything first
-            transaction.getSnapshot().delete(DATASTORE_ROOT);
+            transaction.getSnapshot().delete(YangInstanceIdentifier.EMPTY);
 
             // Add everything from the remote node back
-            transaction.getSnapshot().write(DATASTORE_ROOT, node);
+            transaction.getSnapshot().write(YangInstanceIdentifier.EMPTY, node);
             syncCommitTransaction(transaction);
         } catch (InterruptedException | ExecutionException e) {
             log.error("{}: An exception occurred when applying snapshot", logId, e);
