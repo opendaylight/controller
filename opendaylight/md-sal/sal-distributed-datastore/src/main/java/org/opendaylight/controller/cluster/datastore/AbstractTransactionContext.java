@@ -8,7 +8,7 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import javax.annotation.Nonnull;
-import org.opendaylight.controller.cluster.datastore.identifiers.TransactionIdentifier;
+import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,8 +23,7 @@ abstract class AbstractTransactionContext implements TransactionContext {
         this(transactionIdentifier, DataStoreVersions.CURRENT_VERSION);
     }
 
-    protected AbstractTransactionContext(TransactionIdentifier transactionIdentifier,
-            short transactionVersion) {
+    protected AbstractTransactionContext(TransactionIdentifier transactionIdentifier, short transactionVersion) {
         this.transactionIdentifier = transactionIdentifier;
         this.transactionVersion = transactionVersion;
     }

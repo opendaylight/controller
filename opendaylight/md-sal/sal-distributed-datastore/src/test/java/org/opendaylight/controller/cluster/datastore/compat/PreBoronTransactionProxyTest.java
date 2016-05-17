@@ -53,7 +53,7 @@ public class PreBoronTransactionProxyTest extends AbstractTransactionProxyTest {
             public boolean matches(Object argument) {
                 if(ShardTransactionMessages.CreateTransaction.class.equals(argument.getClass())) {
                     CreateTransaction obj = CreateTransaction.fromSerializable(argument);
-                    return obj.getTransactionId().startsWith(memberName) &&
+                    return obj.getTransactionId().startsWith(memberName + ':') &&
                             obj.getTransactionType() == type.ordinal();
                 }
 
@@ -119,7 +119,7 @@ public class PreBoronTransactionProxyTest extends AbstractTransactionProxyTest {
     }
 
     @Test
-    public void testClose() throws Exception{
+    public void testClose() {
         ActorRef actorRef = setupPreBoronActorContextWithInitialCreateTransaction(getSystem(), READ_WRITE);
 
         expectBatchedModifications(actorRef, 1);
