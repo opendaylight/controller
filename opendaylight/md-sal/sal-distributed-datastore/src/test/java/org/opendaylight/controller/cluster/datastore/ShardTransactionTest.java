@@ -108,8 +108,8 @@ public class ShardTransactionTest extends AbstractActorTest {
         }
 
         private void testOnReceiveReadData(final ActorRef transaction) {
-            transaction.tell(new ReadData(YangInstanceIdentifier.builder().build(),
-                    DataStoreVersions.CURRENT_VERSION),getRef());
+            transaction.tell(new ReadData(YangInstanceIdentifier.EMPTY,
+                    DataStoreVersions.CURRENT_VERSION), getRef());
 
             ReadDataReply reply = expectMsgClass(duration("5 seconds"), ReadDataReply.class);
 
@@ -151,8 +151,8 @@ public class ShardTransactionTest extends AbstractActorTest {
         }
 
         private void testOnReceiveDataExistsPositive(final ActorRef transaction) {
-            transaction.tell(new DataExists(YangInstanceIdentifier.builder().build(),
-                    DataStoreVersions.CURRENT_VERSION),getRef());
+            transaction.tell(new DataExists(YangInstanceIdentifier.EMPTY,
+                    DataStoreVersions.CURRENT_VERSION), getRef());
 
             DataExistsReply reply = expectMsgClass(duration("5 seconds"), DataExistsReply.class);
 
@@ -347,7 +347,7 @@ public class ShardTransactionTest extends AbstractActorTest {
                     ImmutableNodes.containerNode(TestModel.TEST_QNAME));
 
             NormalizedNode<?,?> expectedRoot = ShardTest.readStore(store.getDataTree(),
-                    YangInstanceIdentifier.builder().build());
+                    YangInstanceIdentifier.EMPTY);
 
             final ActorRef transaction = newTransactionActor(TransactionType.READ_ONLY, readOnlyTransaction(),
                     "testOnReceiveCreateSnapshot");

@@ -41,7 +41,7 @@ public class NormalizedNodeAggregatorTest {
         NormalizedNode<?, ?> expectedNode1 = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
         NormalizedNode<?, ?> expectedNode2 = ImmutableNodes.containerNode(CarsModel.CARS_QNAME);
 
-        Optional<NormalizedNode<?, ?>> optional = NormalizedNodeAggregator.aggregate(YangInstanceIdentifier.builder().build(),
+        Optional<NormalizedNode<?, ?>> optional = NormalizedNodeAggregator.aggregate(YangInstanceIdentifier.EMPTY,
                 ImmutableList.of(
                         Optional.<NormalizedNode<?, ?>>of(getRootNode(expectedNode1, schemaContext)),
                         Optional.<NormalizedNode<?, ?>>of(getRootNode(expectedNode2, schemaContext))),
@@ -77,7 +77,7 @@ public class NormalizedNodeAggregatorTest {
 
             DOMStoreWriteTransaction writeTransaction = store.newWriteOnlyTransaction();
 
-            writeTransaction.merge(YangInstanceIdentifier.builder().node(moduleNode.getNodeType()).build(), moduleNode);
+            writeTransaction.merge(YangInstanceIdentifier.of(moduleNode.getNodeType()), moduleNode);
 
             DOMStoreThreePhaseCommitCohort ready = writeTransaction.ready();
 
@@ -88,7 +88,7 @@ public class NormalizedNodeAggregatorTest {
             DOMStoreReadTransaction readTransaction = store.newReadOnlyTransaction();
 
             CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> read = readTransaction
-                    .read(YangInstanceIdentifier.builder().build());
+                    .read(YangInstanceIdentifier.EMPTY);
 
             Optional<NormalizedNode<?, ?>> nodeOptional = read.checkedGet();
 

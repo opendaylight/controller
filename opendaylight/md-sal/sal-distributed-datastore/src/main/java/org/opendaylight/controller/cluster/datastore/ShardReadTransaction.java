@@ -25,8 +25,6 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
  * Date: 8/6/14
  */
 public class ShardReadTransaction extends ShardTransaction {
-    private static final YangInstanceIdentifier DATASTORE_ROOT = YangInstanceIdentifier.builder().build();
-
     private final AbstractShardDataTreeTransaction<?> transaction;
 
     public ShardReadTransaction(AbstractShardDataTreeTransaction<?> transaction, ActorRef shardActor,
@@ -57,7 +55,7 @@ public class ShardReadTransaction extends ShardTransaction {
 
         final ActorRef sender = getSender();
         final ActorRef self = getSelf();
-        final Optional<NormalizedNode<?, ?>> result = transaction.getSnapshot().readNode(DATASTORE_ROOT);
+        final Optional<NormalizedNode<?, ?>> result = transaction.getSnapshot().readNode(YangInstanceIdentifier.EMPTY);
 
         byte[] serialized = SerializationUtils.serializeNormalizedNode(result.get());
         sender.tell(new CaptureSnapshotReply(serialized), self);

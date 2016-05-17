@@ -1169,7 +1169,7 @@ public class DistributedDataStoreIntegrationTest {
             ShardDataTree dataTree = new ShardDataTree(SchemaContextHelper.full(), TreeType.OPERATIONAL);
             AbstractShardTest.writeToStore(dataTree, CarsModel.BASE_PATH, carsNode);
             NormalizedNode<?, ?> root = AbstractShardTest.readStore(dataTree.getDataTree(),
-                    YangInstanceIdentifier.builder().build());
+                    YangInstanceIdentifier.EMPTY);
 
             Snapshot carsSnapshot = Snapshot.create(SerializationUtils.serializeNormalizedNode(root),
                     Collections.<ReplicatedLogEntry>emptyList(), 2, 1, 2, 1, 1, "member-1");
@@ -1177,7 +1177,7 @@ public class DistributedDataStoreIntegrationTest {
             NormalizedNode<?, ?> peopleNode = PeopleModel.create();
             dataTree = new ShardDataTree(SchemaContextHelper.full(), TreeType.OPERATIONAL);
             AbstractShardTest.writeToStore(dataTree, PeopleModel.BASE_PATH, peopleNode);
-            root = AbstractShardTest.readStore(dataTree.getDataTree(), YangInstanceIdentifier.builder().build());
+            root = AbstractShardTest.readStore(dataTree.getDataTree(), YangInstanceIdentifier.EMPTY);
 
             Snapshot peopleSnapshot = Snapshot.create(SerializationUtils.serializeNormalizedNode(root),
                     Collections.<ReplicatedLogEntry>emptyList(), 2, 1, 2, 1, 1, "member-1");

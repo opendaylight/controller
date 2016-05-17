@@ -164,7 +164,7 @@ final class DOMRpcRoutingTable {
                 for (DataSchemaNode c : input.getChildNodes()) {
                     for (UnknownSchemaNode extension : c.getUnknownSchemaNodes()) {
                         if (CONTEXT_REFERENCE.equals(extension.getNodeType())) {
-                            final YangInstanceIdentifier keyId = YangInstanceIdentifier.builder().node(c.getQName()).build();
+                            final YangInstanceIdentifier keyId = YangInstanceIdentifier.of(c.getQName());
                             return new RoutedDOMRpcRoutingTableEntry(rpcDef, keyId, implementations);
                         }
                     }
