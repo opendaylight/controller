@@ -11,6 +11,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import java.util.List;
 import org.junit.Test;
+import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
+import org.opendaylight.controller.cluster.datastore.AbstractTest;
 import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 import org.opendaylight.controller.cluster.datastore.modification.MergeModification;
 import org.opendaylight.controller.cluster.datastore.modification.Modification;
@@ -29,7 +31,7 @@ import org.opendaylight.yangtools.yang.data.impl.schema.tree.InMemoryDataTreeFac
  *
  * @author Thomas Pantelis
  */
-public class ReadyLocalTransactionSerializerTest {
+public class ReadyLocalTransactionSerializerTest extends AbstractTest {
 
     @Test
     public void testToAndFromBinary() {
@@ -42,7 +44,7 @@ public class ReadyLocalTransactionSerializerTest {
         MapNode mergeData = ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME).build();
         new MergeModification(TestModel.OUTER_LIST_PATH, mergeData).apply(modification);
 
-        String txId = "tx-id";
+        TransactionIdentifier<?> txId = nextTransactionId();
         ReadyLocalTransaction readyMessage = new ReadyLocalTransaction(txId, modification, true);
 
         ReadyLocalTransactionSerializer serializer = new ReadyLocalTransactionSerializer();
