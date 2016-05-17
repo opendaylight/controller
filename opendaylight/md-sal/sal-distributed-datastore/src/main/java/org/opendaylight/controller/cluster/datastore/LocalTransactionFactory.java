@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
-import org.opendaylight.controller.cluster.datastore.identifiers.TransactionIdentifier;
+import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
@@ -19,9 +19,9 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
  * @author Thomas Pantelis
  */
 interface LocalTransactionFactory extends LocalTransactionReadySupport {
-    DOMStoreReadTransaction newReadOnlyTransaction(TransactionIdentifier identifier);
+    DOMStoreReadTransaction newReadOnlyTransaction(TransactionIdentifier<?> identifier);
 
-    DOMStoreReadWriteTransaction newReadWriteTransaction(TransactionIdentifier identifier);
+    DOMStoreReadWriteTransaction newReadWriteTransaction(TransactionIdentifier<?> identifier);
 
-    DOMStoreWriteTransaction newWriteOnlyTransaction(TransactionIdentifier identifier);
+    DOMStoreWriteTransaction newWriteOnlyTransaction(TransactionIdentifier<?> identifier);
 }
