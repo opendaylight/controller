@@ -45,6 +45,7 @@ import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext.Builder;
 import org.opendaylight.controller.cluster.datastore.TransactionProxyTest.TestException;
@@ -171,7 +172,8 @@ public abstract class AbstractTransactionProxyTest {
         doReturn(mockClusterWrapper).when(mockActorContext).getClusterWrapper();
         doReturn(dataStoreContextBuilder.build()).when(mockActorContext).getDatastoreContext();
 
-        mockComponentFactory = TransactionContextFactory.create(mockActorContext);
+        final ClientIdentifier<?> mockClientId = MockIdentifiers.clientIdentifier(getClass(), memberName);
+        mockComponentFactory = new TransactionContextFactory(mockActorContext, mockClientId);
 
         Timer timer = new MetricRegistry().timer("test");
         doReturn(timer).when(mockActorContext).getOperationTimer(any(String.class));
@@ -188,7 +190,7 @@ public abstract class AbstractTransactionProxyTest {
             public boolean matches(Object argument) {
                 if(CreateTransaction.class.equals(argument.getClass())) {
                     CreateTransaction obj = CreateTransaction.fromSerializable(argument);
-                    return obj.getTransactionId().startsWith(memberName) &&
+                    return obj.getTransactionId().startsWith(memberName + ':') &&
                             obj.getTransactionType() == type.ordinal();
                 }
 

@@ -13,7 +13,7 @@ import akka.dispatch.OnComplete;
 import akka.util.Timeout;
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.SettableFuture;
-import org.opendaylight.controller.cluster.datastore.identifiers.TransactionIdentifier;
+import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.AbstractRead;
 import org.opendaylight.controller.cluster.datastore.messages.BatchedModifications;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransaction;
@@ -21,6 +21,7 @@ import org.opendaylight.controller.cluster.datastore.messages.SerializableMessag
 import org.opendaylight.controller.cluster.datastore.modification.AbstractModification;
 import org.opendaylight.controller.cluster.datastore.modification.Modification;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
+import org.opendaylight.controller.cluster.datastore.utils.TransactionIdentifierUtils;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +43,7 @@ public class RemoteTransactionContext extends AbstractTransactionContext {
     private BatchedModifications batchedModifications;
     private int totalBatchedModificationsSent;
 
-    protected RemoteTransactionContext(TransactionIdentifier identifier, ActorSelection actor,
+    protected RemoteTransactionContext(TransactionIdentifier<?> identifier, ActorSelection actor,
             ActorContext actorContext, short remoteTransactionVersion, OperationLimiter limiter) {
         super(identifier, remoteTransactionVersion);
         this.limiter = Preconditions.checkNotNull(limiter);
@@ -105,8 +106,8 @@ public class RemoteTransactionContext extends AbstractTransactionContext {
     }
 
     private BatchedModifications newBatchedModifications() {
-        return new BatchedModifications(getIdentifier().toString(), getTransactionVersion(),
-                getIdentifier().getChainId());
+        return new BatchedModifications(TransactionIdentifierUtils.actorNameFor(getIdentifier()),
+            getTransactionVersion(), RemoteTransactionContextSupport.compatTransactionChainId(getIdentifier()));
     }
 
     private void batchModification(Modification modification) {
