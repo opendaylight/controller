@@ -34,7 +34,7 @@ public final class ReadyLocalTransactionSerializer extends JSerializer {
         Preconditions.checkArgument(obj instanceof ReadyLocalTransaction, "Unsupported object type %s", obj.getClass());
         final ReadyLocalTransaction readyLocal = (ReadyLocalTransaction) obj;
         final BatchedModifications batched = new BatchedModifications(readyLocal.getTransactionID(),
-                readyLocal.getRemoteVersion(), "");
+                readyLocal.getRemoteVersion());
         batched.setDoCommitOnReady(readyLocal.isDoCommitOnReady());
         batched.setTotalMessagesSent(1);
         batched.setReady(true);
