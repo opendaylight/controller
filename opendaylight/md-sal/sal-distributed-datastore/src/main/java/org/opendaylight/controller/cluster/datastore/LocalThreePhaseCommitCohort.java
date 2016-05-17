@@ -16,7 +16,6 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
 import org.opendaylight.controller.cluster.datastore.messages.CommitTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.ReadyLocalTransaction;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
-import org.opendaylight.controller.cluster.datastore.utils.TransactionIdentifierUtils;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.controller.sal.core.spi.data.SnapshotBackedWriteTransaction;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
@@ -34,14 +33,14 @@ import scala.concurrent.Future;
 class LocalThreePhaseCommitCohort implements DOMStoreThreePhaseCommitCohort {
     private static final Logger LOG = LoggerFactory.getLogger(LocalThreePhaseCommitCohort.class);
 
-    private final SnapshotBackedWriteTransaction<TransactionIdentifier<?>> transaction;
+    private final SnapshotBackedWriteTransaction<TransactionIdentifier> transaction;
     private final DataTreeModification modification;
     private final ActorContext actorContext;
     private final ActorSelection leader;
     private final Exception operationError;
 
     protected LocalThreePhaseCommitCohort(final ActorContext actorContext, final ActorSelection leader,
-            final SnapshotBackedWriteTransaction<TransactionIdentifier<?>> transaction, final DataTreeModification modification) {
+            final SnapshotBackedWriteTransaction<TransactionIdentifier> transaction, final DataTreeModification modification) {
         this.actorContext = Preconditions.checkNotNull(actorContext);
         this.leader = Preconditions.checkNotNull(leader);
         this.transaction = Preconditions.checkNotNull(transaction);
@@ -50,7 +49,7 @@ class LocalThreePhaseCommitCohort implements DOMStoreThreePhaseCommitCohort {
     }
 
     protected LocalThreePhaseCommitCohort(final ActorContext actorContext, final ActorSelection leader,
-            final SnapshotBackedWriteTransaction<TransactionIdentifier<?>> transaction, final Exception operationError) {
+            final SnapshotBackedWriteTransaction<TransactionIdentifier> transaction, final Exception operationError) {
         this.actorContext = Preconditions.checkNotNull(actorContext);
         this.leader = Preconditions.checkNotNull(leader);
         this.transaction = Preconditions.checkNotNull(transaction);
@@ -63,8 +62,8 @@ class LocalThreePhaseCommitCohort implements DOMStoreThreePhaseCommitCohort {
             return Futures.failed(operationError);
         }
 
-        final ReadyLocalTransaction message = new ReadyLocalTransaction(
-            TransactionIdentifierUtils.actorNameFor(transaction.getIdentifier()), modification, immediate);
+        final ReadyLocalTransaction message = new ReadyLocalTransaction(transaction.getIdentifier(),
+                modification, immediate);
         return actorContext.executeOperationAsync(leader, message, actorContext.getTransactionCommitOperationTimeout());
     }
 
@@ -133,9 +132,9 @@ class LocalThreePhaseCommitCohort implements DOMStoreThreePhaseCommitCohort {
         throw new UnsupportedOperationException();
     }
 
-    protected void transactionAborted(SnapshotBackedWriteTransaction<TransactionIdentifier<?>> transaction) {
+    protected void transactionAborted(SnapshotBackedWriteTransaction<TransactionIdentifier> transaction) {
     }
 
-    protected void transactionCommitted(SnapshotBackedWriteTransaction<TransactionIdentifier<?>> transaction) {
+    protected void transactionCommitted(SnapshotBackedWriteTransaction<TransactionIdentifier> transaction) {
     }
 }
