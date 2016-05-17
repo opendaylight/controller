@@ -13,7 +13,7 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import java.util.List;
-import org.opendaylight.controller.cluster.datastore.identifiers.TransactionIdentifier;
+import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.Future;
@@ -29,10 +29,10 @@ class DebugThreePhaseCommitCohort extends AbstractThreePhaseCommitCohort<Object>
 
     private final AbstractThreePhaseCommitCohort<?> delegate;
     private final Throwable debugContext;
-    private final TransactionIdentifier transactionId;
+    private final TransactionIdentifier<?> transactionId;
     private Logger log = LOG;
 
-    DebugThreePhaseCommitCohort(TransactionIdentifier transactionId, AbstractThreePhaseCommitCohort<?> delegate,
+    DebugThreePhaseCommitCohort(TransactionIdentifier<?> transactionId, AbstractThreePhaseCommitCohort<?> delegate,
             Throwable debugContext) {
         this.delegate = Preconditions.checkNotNull(delegate);
         this.debugContext = Preconditions.checkNotNull(debugContext);

@@ -11,7 +11,7 @@ import akka.actor.ActorSelection;
 import com.google.common.base.Preconditions;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import org.opendaylight.controller.cluster.datastore.identifiers.TransactionIdentifier;
+import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.sal.core.spi.data.AbstractSnapshotBackedTransactionChain;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
@@ -26,7 +26,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
  * Transaction chain instantiated on top of a locally-available DataTree. It does not instantiate
  * a transaction in the leader and rather chains transactions on top of themselves.
  */
-final class LocalTransactionChain extends AbstractSnapshotBackedTransactionChain<TransactionIdentifier>
+final class LocalTransactionChain extends AbstractSnapshotBackedTransactionChain<TransactionIdentifier<?>>
         implements LocalTransactionFactory {
     private static final Throwable ABORTED = new Throwable("Transaction aborted");
     private final TransactionChainProxy parent;
@@ -44,7 +44,7 @@ final class LocalTransactionChain extends AbstractSnapshotBackedTransactionChain
     }
 
     @Override
-    protected TransactionIdentifier nextTransactionIdentifier() {
+    protected TransactionIdentifier<?> nextTransactionIdentifier() {
         throw new UnsupportedOperationException();
     }
 
@@ -59,22 +59,24 @@ final class LocalTransactionChain extends AbstractSnapshotBackedTransactionChain
     }
 
     @Override
-    protected DOMStoreThreePhaseCommitCohort createCohort(final SnapshotBackedWriteTransaction<TransactionIdentifier> transaction, final DataTreeModification modification) {
+    protected DOMStoreThreePhaseCommitCohort createCohort(
+            final SnapshotBackedWriteTransaction<TransactionIdentifier<?>> transaction,
+            final DataTreeModification modification) {
         return new LocalChainThreePhaseCommitCohort(transaction, modification);
     }
 
     @Override
-    public DOMStoreReadTransaction newReadOnlyTransaction(TransactionIdentifier identifier) {
+    public DOMStoreReadTransaction newReadOnlyTransaction(TransactionIdentifier<?> identifier) {
         return super.newReadOnlyTransaction(identifier);
     }
 
     @Override
-    public DOMStoreReadWriteTransaction newReadWriteTransaction(TransactionIdentifier identifier) {
+    public DOMStoreReadWriteTransaction newReadWriteTransaction(TransactionIdentifier<?> identifier) {
         return super.newReadWriteTransaction(identifier);
     }
 
     @Override
-    public DOMStoreWriteTransaction newWriteOnlyTransaction(TransactionIdentifier identifier) {
+    public DOMStoreWriteTransaction newWriteOnlyTransaction(TransactionIdentifier<?> identifier) {
         return super.newWriteOnlyTransaction(identifier);
     }
 
@@ -83,7 +85,7 @@ final class LocalTransactionChain extends AbstractSnapshotBackedTransactionChain
     public LocalThreePhaseCommitCohort onTransactionReady(@Nonnull DOMStoreWriteTransaction tx,
             @Nullable Exception operationError) {
         if(operationError != null) {
-            return new LocalChainThreePhaseCommitCohort((SnapshotBackedWriteTransaction<TransactionIdentifier>)tx,
+            return new LocalChainThreePhaseCommitCohort((SnapshotBackedWriteTransaction<TransactionIdentifier<?>>)tx,
                     operationError);
         }
 
@@ -92,29 +94,29 @@ final class LocalTransactionChain extends AbstractSnapshotBackedTransactionChain
         } catch (Exception e) {
             // Unfortunately we need to cast to SnapshotBackedWriteTransaction here as it's required by
             // LocalThreePhaseCommitCohort and the base class.
-            return new LocalChainThreePhaseCommitCohort((SnapshotBackedWriteTransaction<TransactionIdentifier>)tx, e);
+            return new LocalChainThreePhaseCommitCohort((SnapshotBackedWriteTransaction<TransactionIdentifier<?>>)tx, e);
         }
     }
 
     private class LocalChainThreePhaseCommitCohort extends LocalThreePhaseCommitCohort {
 
-        protected LocalChainThreePhaseCommitCohort(SnapshotBackedWriteTransaction<TransactionIdentifier> transaction,
+        protected LocalChainThreePhaseCommitCohort(SnapshotBackedWriteTransaction<TransactionIdentifier<?>> transaction,
                 DataTreeModification modification) {
             super(parent.getActorContext(), leader, transaction, modification);
         }
 
-        protected LocalChainThreePhaseCommitCohort(SnapshotBackedWriteTransaction<TransactionIdentifier> transaction,
+        protected LocalChainThreePhaseCommitCohort(SnapshotBackedWriteTransaction<TransactionIdentifier<?>> transaction,
                 Exception operationError) {
             super(parent.getActorContext(), leader, transaction, operationError);
         }
 
         @Override
-        protected void transactionAborted(SnapshotBackedWriteTransaction<TransactionIdentifier> transaction) {
+        protected void transactionAborted(SnapshotBackedWriteTransaction<TransactionIdentifier<?>> transaction) {
             onTransactionFailed(transaction, ABORTED);
         }
 
         @Override
-        protected void transactionCommitted(SnapshotBackedWriteTransaction<TransactionIdentifier> transaction) {
+        protected void transactionCommitted(SnapshotBackedWriteTransaction<TransactionIdentifier<?>> transaction) {
             onTransactionCommited(transaction);
         }
     }
