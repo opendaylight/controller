@@ -10,7 +10,6 @@ package org.opendaylight.controller.cluster.datastore;
 import akka.actor.ActorRef;
 import akka.actor.UntypedActorContext;
 import com.google.common.base.Preconditions;
-import org.opendaylight.controller.cluster.datastore.identifiers.ShardTransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStats;
 
 /**
@@ -37,28 +36,26 @@ class ShardTransactionActorFactory {
         this.shardActor = shardActor;
     }
 
-    ActorRef newShardTransaction(TransactionType type, ShardTransactionIdentifier transactionID,
-            String transactionChainID) {
+    ActorRef newShardTransaction(TransactionType type, String transactionID, String transactionChainID) {
         final AbstractShardDataTreeTransaction<?> transaction;
         switch (type) {
         case READ_ONLY:
-            transaction = dataTree.newReadOnlyTransaction(transactionID.toString(), transactionChainID);
+            transaction = dataTree.newReadOnlyTransaction(transactionID, transactionChainID);
             shardMBean.incrementReadOnlyTransactionCount();
             break;
         case READ_WRITE:
-            transaction = dataTree.newReadWriteTransaction(transactionID.toString(), transactionChainID);
+            transaction = dataTree.newReadWriteTransaction(transactionID, transactionChainID);
             shardMBean.incrementReadWriteTransactionCount();
             break;
         case WRITE_ONLY:
-            transaction = dataTree.newReadWriteTransaction(transactionID.toString(), transactionChainID);
+            transaction = dataTree.newReadWriteTransaction(transactionID, transactionChainID);
             shardMBean.incrementWriteOnlyTransactionCount();
             break;
         default:
             throw new IllegalArgumentException("Unsupported transaction type " + type);
         }
 
-        return actorContext.actorOf(ShardTransaction.props(type, transaction, shardActor, datastoreContext, shardMBean,
-                transactionID.getRemoteTransactionId()).withDispatcher(txnDispatcherPath),
-                transactionID.toString());
+        return actorContext.actorOf(ShardTransaction.props(type, transaction, shardActor, datastoreContext, shardMBean)
+            .withDispatcher(txnDispatcherPath), "shard-" + transactionID);
     }
 }
