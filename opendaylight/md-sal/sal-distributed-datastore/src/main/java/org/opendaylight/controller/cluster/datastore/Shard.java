@@ -64,8 +64,6 @@ import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.base.messages.FollowerInitialSyncUpStatus;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.messages.ServerRemoved;
-import org.opendaylight.controller.cluster.raft.protobuff.client.messages.CompositeModificationByteStringPayload;
-import org.opendaylight.controller.cluster.raft.protobuff.client.messages.CompositeModificationPayload;
 import org.opendaylight.yangtools.concepts.Identifier;
 import org.opendaylight.yangtools.util.StringIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
@@ -683,18 +681,9 @@ public class Shard extends RaftActor {
                 // Replication consensus reached, proceed to commit
                 finishCommit(clientActor, identifier);
             }
-        } else if (data instanceof CompositeModificationPayload) {
-            Object modification = ((CompositeModificationPayload) data).getModification();
-
-            applyModificationToState(clientActor, identifier, modification);
-        } else if(data instanceof CompositeModificationByteStringPayload ){
-            Object modification = ((CompositeModificationByteStringPayload) data).getModification();
-
-            applyModificationToState(clientActor, identifier, modification);
         } else {
-            LOG.error("{}: Unknown state received {} Class loader = {} CompositeNodeMod.ClassLoader = {}",
-                    persistenceId(), data, data.getClass().getClassLoader(),
-                    CompositeModificationPayload.class.getClassLoader());
+            LOG.error("{}: Unknown state received {} ClassLoader {}", persistenceId(), data,
+                data.getClass().getClassLoader());
         }
     }
 
