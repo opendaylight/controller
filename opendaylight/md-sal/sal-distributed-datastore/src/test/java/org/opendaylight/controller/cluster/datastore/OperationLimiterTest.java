@@ -9,8 +9,9 @@ package org.opendaylight.controller.cluster.datastore;
 
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
-import org.opendaylight.controller.cluster.access.concepts.MemberName;
-import org.opendaylight.controller.cluster.datastore.identifiers.TransactionIdentifier;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.BatchedModificationsReply;
 import org.opendaylight.controller.cluster.datastore.messages.DataExistsReply;
 
@@ -20,11 +21,15 @@ import org.opendaylight.controller.cluster.datastore.messages.DataExistsReply;
  * @author Thomas Pantelis
  */
 public class OperationLimiterTest {
+    @Mock
+    private TransactionIdentifier<?> transactionId;
 
     @Test
     public void testOnComplete() throws Exception {
+        MockitoAnnotations.initMocks(OperationLimiterTest.class);
+
         int permits = 10;
-        OperationLimiter limiter = new OperationLimiter(new TransactionIdentifier(MemberName.forName("foo"), 1), permits, 1);
+        OperationLimiter limiter = new OperationLimiter(transactionId, permits, 1);
         limiter.acquire(permits);
         int availablePermits = 0;
 
