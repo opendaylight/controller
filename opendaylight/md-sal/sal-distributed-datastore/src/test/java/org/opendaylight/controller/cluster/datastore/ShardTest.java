@@ -421,7 +421,7 @@ public class ShardTest extends AbstractShardTest {
 
         writeToStore(store, TestModel.TEST_PATH, container);
 
-        final YangInstanceIdentifier root = YangInstanceIdentifier.builder().build();
+        final YangInstanceIdentifier root = YangInstanceIdentifier.EMPTY;
         final NormalizedNode<?,?> expected = readStore(store, root);
 
         final Snapshot snapshot = Snapshot.create(SerializationUtils.serializeNormalizedNode(expected),
@@ -1213,7 +1213,7 @@ public class ShardTest extends AbstractShardTest {
 
                 final String transactionID = "tx1";
                 final MutableCompositeModification modification = new MutableCompositeModification();
-                modification.addModification(new DeleteModification(YangInstanceIdentifier.builder().build()));
+                modification.addModification(new DeleteModification(YangInstanceIdentifier.EMPTY));
                 final ShardDataTreeCohort cohort = mock(ShardDataTreeCohort.class, "cohort1");
                 doReturn(Futures.immediateFuture(Boolean.TRUE)).when(cohort).canCommit();
                 doReturn(Futures.immediateFuture(Boolean.TRUE)).when(cohort).preCommit();
@@ -2106,7 +2106,7 @@ public class ShardTest extends AbstractShardTest {
             waitUntilLeader(shard);
             writeToStore(shard, TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
 
-            final NormalizedNode<?,?> expectedRoot = readStore(shard, YangInstanceIdentifier.builder().build());
+            final NormalizedNode<?,?> expectedRoot = readStore(shard, YangInstanceIdentifier.EMPTY);
 
             // Trigger creation of a snapshot by ensuring
             final RaftActorContext raftActorContext = ((TestShard) shard.underlyingActor()).getRaftActorContext();
@@ -2153,16 +2153,16 @@ public class ShardTest extends AbstractShardTest {
         commitTransaction(store, putTransaction);
 
 
-        final NormalizedNode<?, ?> expected = readStore(store, YangInstanceIdentifier.builder().build());
+        final NormalizedNode<?, ?> expected = readStore(store, YangInstanceIdentifier.EMPTY);
 
         final DataTreeModification writeTransaction = store.takeSnapshot().newModification();
 
-        writeTransaction.delete(YangInstanceIdentifier.builder().build());
-        writeTransaction.write(YangInstanceIdentifier.builder().build(), expected);
+        writeTransaction.delete(YangInstanceIdentifier.EMPTY);
+        writeTransaction.write(YangInstanceIdentifier.EMPTY, expected);
 
         commitTransaction(store, writeTransaction);
 
-        final NormalizedNode<?, ?> actual = readStore(store, YangInstanceIdentifier.builder().build());
+        final NormalizedNode<?, ?> actual = readStore(store, YangInstanceIdentifier.EMPTY);
 
         assertEquals(expected, actual);
     }
