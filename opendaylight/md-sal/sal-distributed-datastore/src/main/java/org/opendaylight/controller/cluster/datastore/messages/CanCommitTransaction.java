@@ -9,6 +9,7 @@
 package org.opendaylight.controller.cluster.datastore.messages;
 
 import com.google.common.base.Preconditions;
+import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 
 public class CanCommitTransaction extends AbstractThreePhaseCommitMessage {
     private static final long serialVersionUID = 1L;
@@ -16,7 +17,7 @@ public class CanCommitTransaction extends AbstractThreePhaseCommitMessage {
     public CanCommitTransaction() {
     }
 
-    public CanCommitTransaction(String transactionID, final short version) {
+    public CanCommitTransaction(TransactionIdentifier<?> transactionID, final short version) {
         super(transactionID, version);
     }
 

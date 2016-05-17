@@ -11,6 +11,7 @@ package org.opendaylight.controller.cluster.datastore;
 import akka.actor.ActorRef;
 import akka.actor.PoisonPill;
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStats;
 import org.opendaylight.controller.cluster.datastore.messages.CreateSnapshot;
 import org.opendaylight.controller.cluster.datastore.messages.DataExists;
@@ -30,7 +31,7 @@ public class ShardReadTransaction extends ShardTransaction {
     public ShardReadTransaction(AbstractShardDataTreeTransaction<?> transaction, ActorRef shardActor,
             ShardStats shardStats) {
         super(shardActor, shardStats, transaction.getId());
-        this.transaction = transaction;
+        this.transaction = Preconditions.checkNotNull(transaction);
     }
 
     @Override
@@ -41,7 +42,6 @@ public class ShardReadTransaction extends ShardTransaction {
             readData(transaction, ReadData.fromSerializable(message));
         } else if(DataExists.isSerializedType(message)) {
             dataExists(transaction, DataExists.fromSerializable(message));
-
         } else {
             super.handleReceive(message);
         }
