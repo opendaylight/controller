@@ -45,6 +45,7 @@ import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext.Builder;
 import org.opendaylight.controller.cluster.datastore.TransactionProxyTest.TestException;
@@ -133,6 +134,9 @@ public abstract class AbstractTransactionProxyTest {
     @Mock
     private ClusterWrapper mockClusterWrapper;
 
+    @Mock
+    private ClientIdentifier<?> mockClientId;
+
     protected final String memberName = "mock-member";
 
     private final int operationTimeoutInSeconds = 2;
@@ -171,7 +175,7 @@ public abstract class AbstractTransactionProxyTest {
         doReturn(mockClusterWrapper).when(mockActorContext).getClusterWrapper();
         doReturn(dataStoreContextBuilder.build()).when(mockActorContext).getDatastoreContext();
 
-        mockComponentFactory = TransactionContextFactory.create(mockActorContext);
+        mockComponentFactory = new TransactionContextFactory(mockActorContext, mockClientId);
 
         Timer timer = new MetricRegistry().timer("test");
         doReturn(timer).when(mockActorContext).getOperationTimer(any(String.class));
