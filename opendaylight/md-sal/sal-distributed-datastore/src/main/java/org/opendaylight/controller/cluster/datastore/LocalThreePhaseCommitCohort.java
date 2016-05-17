@@ -63,8 +63,8 @@ class LocalThreePhaseCommitCohort implements DOMStoreThreePhaseCommitCohort {
             return Futures.failed(operationError);
         }
 
-        final ReadyLocalTransaction message = new ReadyLocalTransaction(
-            TransactionIdentifierUtils.actorNameFor(transaction.getIdentifier()), modification, immediate);
+        final ReadyLocalTransaction message = new ReadyLocalTransaction(transaction.getIdentifier(),
+                modification, immediate);
         return actorContext.executeOperationAsync(leader, message, actorContext.getTransactionCommitOperationTimeout());
     }
 
