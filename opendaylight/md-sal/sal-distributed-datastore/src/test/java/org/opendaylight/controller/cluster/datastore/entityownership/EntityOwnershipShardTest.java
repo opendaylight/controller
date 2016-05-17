@@ -725,7 +725,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
     }
 
     private static BatchedModifications newBatchedModifications() {
-        BatchedModifications modifications = new BatchedModifications("tnx", DataStoreVersions.CURRENT_VERSION, "");
+        BatchedModifications modifications = new BatchedModifications(nextTransactionId(), DataStoreVersions.CURRENT_VERSION);
         modifications.setDoCommitOnReady(true);
         modifications.setReady(true);
         modifications.setTotalMessagesSent(1);
@@ -848,6 +848,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
         volatile boolean dropAppendEntries;
         private final String myId;
 
+        @SuppressWarnings("unused")
         public MockFollower(String myId) {
             this(myId, true);
         }
