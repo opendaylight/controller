@@ -15,13 +15,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.opendaylight.controller.cluster.datastore.identifiers.TransactionIdentifier;
+import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 
 public class TransactionContextWrapperTest {
 
     @Mock
-    TransactionIdentifier identifier;
+    TransactionIdentifier<?> identifier;
 
     @Mock
     ActorContext actorContext;

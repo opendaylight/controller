@@ -21,7 +21,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.opendaylight.controller.cluster.datastore.identifiers.TransactionIdentifier;
+import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.DataExists;
 import org.opendaylight.controller.cluster.datastore.messages.ReadData;
 import org.opendaylight.controller.cluster.datastore.modification.DeleteModification;
@@ -40,7 +40,7 @@ public class LocalTransactionContextTest {
     OperationLimiter limiter;
 
     @Mock
-    TransactionIdentifier identifier;
+    TransactionIdentifier<?> identifier;
 
     @Mock
     DOMStoreReadWriteTransaction readWriteTransaction;
