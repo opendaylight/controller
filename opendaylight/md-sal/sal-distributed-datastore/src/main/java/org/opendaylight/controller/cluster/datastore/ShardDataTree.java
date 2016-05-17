@@ -46,7 +46,6 @@ import org.slf4j.LoggerFactory;
 @NotThreadSafe
 public class ShardDataTree extends ShardDataTreeTransactionParent {
     private static final Logger LOG = LoggerFactory.getLogger(ShardDataTree.class);
-    private static final YangInstanceIdentifier ROOT_PATH = YangInstanceIdentifier.builder().build();
 
     private final Map<String, ShardDataTreeTransactionChain> transactionChains = new HashMap<>();
     private final ShardDataTreeChangeListenerPublisher treeChangeListenerPublisher;
@@ -164,9 +163,9 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     }
 
     private Optional<DataTreeCandidate> readCurrentData() {
-        final Optional<NormalizedNode<?, ?>> currentState = dataTree.takeSnapshot().readNode(ROOT_PATH);
+        final Optional<NormalizedNode<?, ?>> currentState = dataTree.takeSnapshot().readNode(YangInstanceIdentifier.EMPTY);
         return currentState.isPresent() ? Optional.of(DataTreeCandidates.fromNormalizedNode(
-                ROOT_PATH, currentState.get())) : Optional.<DataTreeCandidate>absent();
+            YangInstanceIdentifier.EMPTY, currentState.get())) : Optional.<DataTreeCandidate>absent();
     }
 
     public Entry<ListenerRegistration<DOMDataTreeChangeListener>, Optional<DataTreeCandidate>> registerTreeChangeListener(
