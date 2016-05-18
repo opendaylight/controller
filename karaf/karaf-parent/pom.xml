@@ -24,7 +24,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <branding.version>1.3.0-SNAPSHOT</branding.version>
     <karaf.resources.version>1.7.0-SNAPSHOT</karaf.resources.version>
     <karaf.localFeature>standard</karaf.localFeature>
-    <!--  Karaf Maven plugin 3.023 reinstalls already installed
+    <!--  Karaf Maven plugin 3.0.3 reinstalls already installed
           boot features to container, which could be observed
           in huge logs and seems like loop in build, even if it
           is not.
