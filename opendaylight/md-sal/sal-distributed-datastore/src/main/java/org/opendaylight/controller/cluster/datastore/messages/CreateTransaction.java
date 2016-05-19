@@ -12,7 +12,6 @@ import com.google.common.base.Preconditions;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
-import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages;
 
 public class CreateTransaction extends VersionedExternalizableMessage {
     private static final long serialVersionUID = 1L;
@@ -60,14 +59,6 @@ public class CreateTransaction extends VersionedExternalizableMessage {
         out.writeUTF(transactionChainId);
     }
 
-    @Deprecated
-    @Override
-    protected Object newLegacySerializedInstance() {
-        return ShardTransactionMessages.CreateTransaction.newBuilder().setTransactionId(transactionId)
-                .setTransactionType(transactionType).setTransactionChainId(transactionChainId)
-                .setMessageVersion(getVersion()).build();
-    }
-
     @Override
     public String toString() {
         return "CreateTransaction [transactionId=" + transactionId + ", transactionType=" + transactionType
@@ -75,18 +66,11 @@ public class CreateTransaction extends VersionedExternalizableMessage {
     }
 
     public static CreateTransaction fromSerializable(Object message) {
-        if(message instanceof CreateTransaction) {
-            return (CreateTransaction)message;
-        } else {
-            ShardTransactionMessages.CreateTransaction createTransaction =
-                    (ShardTransactionMessages.CreateTransaction) message;
-            return new CreateTransaction(createTransaction.getTransactionId(),
-                    createTransaction.getTransactionType(), createTransaction.getTransactionChainId(),
-                    (short)createTransaction.getMessageVersion());
-        }
+        Preconditions.checkArgument(message instanceof CreateTransaction);
+        return (CreateTransaction)message;
     }
 
     public static boolean isSerializedType(Object message) {
-        return message instanceof CreateTransaction || message instanceof ShardTransactionMessages.CreateTransaction;
+        return message instanceof CreateTransaction;
     }
 }
