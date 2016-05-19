@@ -12,7 +12,6 @@ import java.io.Serializable;
 import org.apache.commons.lang.SerializationUtils;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
-import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages;
 
 /**
  * Unit tests for DataExistsReply.
@@ -34,22 +33,7 @@ public class DataExistsReplyTest {
     }
 
     @Test
-    public void testSerializationWithPreBoronVersion() {
-        DataExistsReply expected = new DataExistsReply(true, DataStoreVersions.LITHIUM_VERSION);
-
-        Object serialized = expected.toSerializable();
-        assertEquals("Serialized type", ShardTransactionMessages.DataExistsReply.class, serialized.getClass());
-
-        DataExistsReply actual = DataExistsReply.fromSerializable(SerializationUtils.clone((Serializable) serialized));
-        assertEquals("exists", expected.exists(), actual.exists());
-        assertEquals("getVersion", DataStoreVersions.LITHIUM_VERSION, actual.getVersion());
-    }
-
-    @Test
     public void testIsSerializedType() {
-        assertEquals("isSerializedType", true, DataExistsReply.isSerializedType(
-                ShardTransactionMessages.DataExistsReply.newBuilder().setExists(true).build()));
-
         assertEquals("isSerializedType", true, DataExistsReply.isSerializedType(new DataExistsReply()));
         assertEquals("isSerializedType", false, DataExistsReply.isSerializedType(new Object()));
     }
