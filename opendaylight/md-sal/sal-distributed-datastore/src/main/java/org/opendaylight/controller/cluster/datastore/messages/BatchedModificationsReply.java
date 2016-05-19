@@ -45,12 +45,6 @@ public class BatchedModificationsReply extends VersionedExternalizableMessage {
     }
 
     @Override
-    protected Object newLegacySerializedInstance() {
-        // no legacy serialized type for this class; return self
-        return this;
-    }
-
-    @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("BatchedModificationsReply [numBatched=").append(numBatched).append("]");

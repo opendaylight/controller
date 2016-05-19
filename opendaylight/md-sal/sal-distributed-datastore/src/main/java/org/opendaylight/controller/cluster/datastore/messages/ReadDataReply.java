@@ -43,12 +43,6 @@ public class ReadDataReply extends VersionedExternalizableMessage {
         SerializationUtils.serializeNormalizedNode(normalizedNode, out);
     }
 
-    @Override
-    protected Object newLegacySerializedInstance() {
-        // no legacy serialized type for this class; return self
-        return this;
-    }
-
     public static ReadDataReply fromSerializable(Object serializable) {
         return (ReadDataReply) serializable;
     }
