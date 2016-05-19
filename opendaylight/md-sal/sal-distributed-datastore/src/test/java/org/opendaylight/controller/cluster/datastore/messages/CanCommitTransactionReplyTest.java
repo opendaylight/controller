@@ -12,7 +12,6 @@ import java.io.Serializable;
 import org.apache.commons.lang.SerializationUtils;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
-import org.opendaylight.controller.protobuff.messages.cohort3pc.ThreePhaseCommitCohortMessages;
 
 /**
  * Unit tests for CanCommitTransactionReply.
@@ -40,18 +39,7 @@ public class CanCommitTransactionReplyTest {
     }
 
     @Test
-    public void testSerializationWithPreBoronVersion() {
-        testSerialization(CanCommitTransactionReply.yes(DataStoreVersions.LITHIUM_VERSION),
-                ThreePhaseCommitCohortMessages.CanCommitTransactionReply.class);
-        testSerialization(CanCommitTransactionReply.no(DataStoreVersions.LITHIUM_VERSION),
-                ThreePhaseCommitCohortMessages.CanCommitTransactionReply.class);
-    }
-
-    @Test
     public void testIsSerializedType() {
-        assertEquals("isSerializedType", true, CanCommitTransactionReply.isSerializedType(
-                ThreePhaseCommitCohortMessages.CanCommitTransactionReply.newBuilder().setCanCommit(true).build()));
-
         assertEquals("isSerializedType", true, CanCommitTransactionReply.isSerializedType(
                 new CanCommitTransactionReply()));
         assertEquals("isSerializedType", false, CanCommitTransactionReply.isSerializedType(new Object()));
