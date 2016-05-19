@@ -50,8 +50,6 @@ import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeList
 import org.opendaylight.controller.cluster.datastore.messages.RegisterDataTreeChangeListener;
 import org.opendaylight.controller.cluster.datastore.messages.ShardLeaderStateChanged;
 import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContext;
-import org.opendaylight.controller.cluster.datastore.modification.Modification;
-import org.opendaylight.controller.cluster.datastore.modification.MutableCompositeModification;
 import org.opendaylight.controller.cluster.datastore.utils.Dispatchers;
 import org.opendaylight.controller.cluster.notifications.LeaderStateChanged;
 import org.opendaylight.controller.cluster.notifications.RegisterRoleChangeListener;
@@ -607,8 +605,9 @@ public class Shard extends RaftActor {
             transactionId, transactionChainId);
     }
 
-    private void commitWithNewTransaction(final Modification modification) {
-        ReadWriteShardDataTreeTransaction tx = store.newReadWriteTransaction(modification.toString(), null);
+    private void commitWithNewTransaction(final BatchedModifications modification) {
+        ReadWriteShardDataTreeTransaction tx = store.newReadWriteTransaction(modification.getTransactionID(),
+            modification.getTransactionChainID());
         modification.apply(tx.getSnapshot());
         try {
             snapshotCohort.syncCommitTransaction(tx);
@@ -693,7 +692,11 @@ public class Shard extends RaftActor {
         } else if(clientActor == null) {
             // There's no clientActor to which to send a commit reply so we must be applying
             // replicated state from the leader.
-            commitWithNewTransaction(MutableCompositeModification.fromSerializable(modification));
+
+            // The only implementation we know of is BatchedModifications, which also carries a transaction
+            // identifier -- which we really need that.
+            Preconditions.checkArgument(modification instanceof BatchedModifications);
+            commitWithNewTransaction((BatchedModifications)modification);
         } else {
             // This must be the OK to commit after replication consensus.
             finishCommit(clientActor, identifier);
