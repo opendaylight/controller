@@ -8,25 +8,17 @@
 
 package org.opendaylight.controller.cluster.datastore.messages;
 
+import com.google.common.base.Preconditions;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
-import org.opendaylight.controller.protobuff.messages.cohort3pc.ThreePhaseCommitCohortMessages;
 
 public class CanCommitTransactionReply extends VersionedExternalizableMessage {
     private static final CanCommitTransactionReply YES =
             new CanCommitTransactionReply(true, DataStoreVersions.CURRENT_VERSION);
     private static final CanCommitTransactionReply NO =
             new CanCommitTransactionReply(false, DataStoreVersions.CURRENT_VERSION);
-
-    @Deprecated
-    private static final ThreePhaseCommitCohortMessages.CanCommitTransactionReply YES_SERIALIZED =
-            ThreePhaseCommitCohortMessages.CanCommitTransactionReply.newBuilder().setCanCommit(true).build();
-
-    @Deprecated
-    private static final ThreePhaseCommitCohortMessages.CanCommitTransactionReply NO_SERIALIZED =
-            ThreePhaseCommitCohortMessages.CanCommitTransactionReply.newBuilder().setCanCommit(false).build();
 
     private boolean canCommit;
 
@@ -54,12 +46,6 @@ public class CanCommitTransactionReply extends VersionedExternalizableMessage {
         out.writeBoolean(canCommit);
     }
 
-    @Deprecated
-    @Override
-    protected Object newLegacySerializedInstance() {
-        return canCommit ? YES_SERIALIZED : NO_SERIALIZED;
-    }
-
     @Override
     public String toString() {
         return "CanCommitTransactionReply [canCommit=" + canCommit + ", version=" + getVersion() + "]";
@@ -74,17 +60,11 @@ public class CanCommitTransactionReply extends VersionedExternalizableMessage {
     }
 
     public static CanCommitTransactionReply fromSerializable(final Object serializable) {
-        if(serializable instanceof CanCommitTransactionReply) {
-            return (CanCommitTransactionReply)serializable;
-        } else {
-            ThreePhaseCommitCohortMessages.CanCommitTransactionReply serialized =
-                    (ThreePhaseCommitCohortMessages.CanCommitTransactionReply) serializable;
-            return serialized.getCanCommit() ? YES : NO;
-        }
+        Preconditions.checkArgument(serializable instanceof CanCommitTransactionReply);
+        return (CanCommitTransactionReply)serializable;
     }
 
     public static boolean isSerializedType(Object message) {
-        return message instanceof CanCommitTransactionReply ||
-                message instanceof ThreePhaseCommitCohortMessages.CanCommitTransactionReply;
+        return message instanceof CanCommitTransactionReply;
     }
 }
