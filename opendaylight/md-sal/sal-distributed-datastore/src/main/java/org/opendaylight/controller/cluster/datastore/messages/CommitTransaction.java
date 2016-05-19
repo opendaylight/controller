@@ -8,8 +8,7 @@
 
 package org.opendaylight.controller.cluster.datastore.messages;
 
-import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
-import org.opendaylight.controller.protobuff.messages.cohort3pc.ThreePhaseCommitCohortMessages;
+import com.google.common.base.Preconditions;
 
 public class CommitTransaction extends AbstractThreePhaseCommitMessage {
     private static final long serialVersionUID = 1L;
@@ -21,24 +20,13 @@ public class CommitTransaction extends AbstractThreePhaseCommitMessage {
         super(transactionID, version);
     }
 
-    @Deprecated
-    @Override
-    protected Object newLegacySerializedInstance() {
-        return ThreePhaseCommitCohortMessages.CommitTransaction.newBuilder().setTransactionId(
-                getTransactionID()).build();
-    }
-
     public static CommitTransaction fromSerializable(Object serializable) {
-        if(serializable instanceof CommitTransaction) {
-            return (CommitTransaction)serializable;
-        } else {
-            return new CommitTransaction(((ThreePhaseCommitCohortMessages.CommitTransaction)serializable).
-                    getTransactionId(), DataStoreVersions.LITHIUM_VERSION);
-        }
+        Preconditions.checkArgument(serializable instanceof CommitTransaction);
+        return (CommitTransaction)serializable;
+
     }
 
     public static boolean isSerializedType(Object message) {
-        return message instanceof CommitTransaction ||
-                message instanceof ThreePhaseCommitCohortMessages.CommitTransaction;
+        return message instanceof CommitTransaction;
     }
 }
