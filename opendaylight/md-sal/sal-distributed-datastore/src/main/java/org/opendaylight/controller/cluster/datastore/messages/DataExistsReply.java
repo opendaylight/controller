@@ -8,21 +8,13 @@
 
 package org.opendaylight.controller.cluster.datastore.messages;
 
+import com.google.common.base.Preconditions;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
-import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
-import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages;
 
 public class DataExistsReply extends VersionedExternalizableMessage {
     private static final long serialVersionUID = 1L;
-
-    @Deprecated
-    private static final ShardTransactionMessages.DataExistsReply SERIALIZABLE_TRUE =
-            ShardTransactionMessages.DataExistsReply.newBuilder().setExists(true).build();
-    @Deprecated
-    private static final ShardTransactionMessages.DataExistsReply SERIALIZABLE_FALSE =
-            ShardTransactionMessages.DataExistsReply.newBuilder().setExists(false).build();
 
     private boolean exists;
 
@@ -50,22 +42,12 @@ public class DataExistsReply extends VersionedExternalizableMessage {
         out.writeBoolean(exists);
     }
 
-    @Deprecated
-    @Override
-    protected Object newLegacySerializedInstance() {
-        return exists ? SERIALIZABLE_TRUE : SERIALIZABLE_FALSE;
-    }
-
     public static DataExistsReply fromSerializable(final Object serializable) {
-        if(serializable instanceof DataExistsReply) {
-            return (DataExistsReply)serializable;
-        } else {
-            ShardTransactionMessages.DataExistsReply o = (ShardTransactionMessages.DataExistsReply) serializable;
-            return new DataExistsReply(o.getExists(), DataStoreVersions.LITHIUM_VERSION);
-        }
+        Preconditions.checkArgument(serializable instanceof DataExistsReply);
+        return (DataExistsReply)serializable;
     }
 
     public static boolean isSerializedType(Object message) {
-        return message instanceof DataExistsReply || message instanceof ShardTransactionMessages.DataExistsReply;
+        return message instanceof DataExistsReply;
     }
 }

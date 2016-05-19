@@ -13,10 +13,4 @@ public class CloseTransactionReply extends VersionedExternalizableMessage {
 
     public CloseTransactionReply() {
     }
-
-    @Override
-    protected Object newLegacySerializedInstance() {
-        // no legacy serialized type for this class; return self
-        return this;
-    }
 }

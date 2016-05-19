@@ -12,7 +12,6 @@ import java.io.Serializable;
 import org.apache.commons.lang.SerializationUtils;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
-import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionChainMessages;
 
 /**
  * Unit tests for CloseTransactionChain.
@@ -35,23 +34,7 @@ public class CloseTransactionChainTest {
     }
 
     @Test
-    public void testSerializationWithPreBoronVersion() {
-        CloseTransactionChain expected = new CloseTransactionChain("txId", DataStoreVersions.LITHIUM_VERSION);
-
-        Object serialized = expected.toSerializable();
-        assertEquals("Serialized type", ShardTransactionChainMessages.CloseTransactionChain.class, serialized.getClass());
-
-        CloseTransactionChain actual = CloseTransactionChain.fromSerializable(
-                SerializationUtils.clone((Serializable) serialized));
-        assertEquals("getTransactionChainId", expected.getTransactionChainId(), actual.getTransactionChainId());
-        assertEquals("getVersion", DataStoreVersions.LITHIUM_VERSION, actual.getVersion());
-    }
-
-    @Test
     public void testIsSerializedType() {
-        assertEquals("isSerializedType", true, CloseTransactionChain.isSerializedType(
-                ShardTransactionChainMessages.CloseTransactionChain.newBuilder().setTransactionChainId("").build()));
-
         assertEquals("isSerializedType", true, CloseTransactionChain.isSerializedType(new CloseTransactionChain()));
         assertEquals("isSerializedType", false, CloseTransactionChain.isSerializedType(new Object()));
     }

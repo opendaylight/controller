@@ -12,7 +12,6 @@ import java.io.Serializable;
 import org.apache.commons.lang.SerializationUtils;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
-import org.opendaylight.controller.protobuff.messages.cohort3pc.ThreePhaseCommitCohortMessages;
 
 /**
  * Unit tests for AbortTransaction.
@@ -35,23 +34,7 @@ public class AbortTransactionTest {
     }
 
     @Test
-    public void testSerializationWithPreBoronVersion() {
-        AbortTransaction expected = new AbortTransaction("txId", DataStoreVersions.LITHIUM_VERSION);
-
-        Object serialized = expected.toSerializable();
-        assertEquals("Serialized type", ThreePhaseCommitCohortMessages.AbortTransaction.class, serialized.getClass());
-
-        AbortTransaction actual = AbortTransaction.fromSerializable(
-                SerializationUtils.clone((Serializable) serialized));
-        assertEquals("getTransactionID", expected.getTransactionID(), actual.getTransactionID());
-        assertEquals("getVersion", DataStoreVersions.LITHIUM_VERSION, actual.getVersion());
-    }
-
-    @Test
     public void testIsSerializedType() {
-        assertEquals("isSerializedType", true, AbortTransaction.isSerializedType(
-                ThreePhaseCommitCohortMessages.AbortTransaction.newBuilder().setTransactionId("").build()));
-
         assertEquals("isSerializedType", true, AbortTransaction.isSerializedType(new AbortTransaction()));
         assertEquals("isSerializedType", false, AbortTransaction.isSerializedType(new Object()));
     }

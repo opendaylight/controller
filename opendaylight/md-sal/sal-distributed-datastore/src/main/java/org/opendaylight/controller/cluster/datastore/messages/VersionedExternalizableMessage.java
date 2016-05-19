@@ -44,15 +44,13 @@ public abstract class VersionedExternalizableMessage implements Externalizable, 
         out.writeShort(version);
     }
 
-    /**
-     * @deprecated Pre-Boron compatibility.
-     */
-    @Deprecated
-    protected abstract Object newLegacySerializedInstance();
-
     @Override
     public final Object toSerializable() {
-        return getVersion() >= DataStoreVersions.BORON_VERSION ? this : newLegacySerializedInstance();
+        if (getVersion() < DataStoreVersions.BORON_VERSION) {
+            throw new UnsupportedOperationException("Versions prior to " + DataStoreVersions.BORON_VERSION + " are not supported");
+        }
+
+        return this;
     }
 
     @Override
