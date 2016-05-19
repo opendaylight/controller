@@ -44,7 +44,6 @@ import org.opendaylight.controller.cluster.datastore.modification.WriteModificat
 import org.opendaylight.controller.cluster.datastore.utils.SerializationUtils;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
-import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -439,36 +438,6 @@ public class ShardTransactionTest extends AbstractActorTest {
             expectMsgClass(duration("3 seconds"), Terminated.class);
         }};
     }
-
-    @Test
-    public void testOnReceivePreBoronReadData() throws Exception {
-        new JavaTestKit(getSystem()) {{
-            ActorRef transaction = newTransactionActor(RO, readOnlyTransaction(), createShard(),
-                    "testOnReceivePreBoronReadData");
-
-            transaction.tell(new ReadData(YangInstanceIdentifier.EMPTY, DataStoreVersions.LITHIUM_VERSION).
-                    toSerializable(), getRef());
-
-            Object replySerialized = expectMsgClass(duration("5 seconds"), ReadDataReply.class);
-            assertNotNull(ReadDataReply.fromSerializable(replySerialized).getNormalizedNode());
-        }};
-    }
-
-    @Test
-    public void testOnReceivePreBoronDataExists() throws Exception {
-        new JavaTestKit(getSystem()) {{
-            ActorRef transaction = newTransactionActor(RO, readOnlyTransaction(), createShard(),
-                    "testOnReceivePreBoronDataExists");
-
-            transaction.tell(new DataExists(YangInstanceIdentifier.EMPTY, DataStoreVersions.LITHIUM_VERSION).
-                    toSerializable(), getRef());
-
-            Object replySerialized = expectMsgClass(duration("5 seconds"),
-                    ShardTransactionMessages.DataExistsReply.class);
-            assertTrue(DataExistsReply.fromSerializable(replySerialized).exists());
-        }};
-    }
-
     public static class TestException extends RuntimeException {
         private static final long serialVersionUID = 1L;
     }

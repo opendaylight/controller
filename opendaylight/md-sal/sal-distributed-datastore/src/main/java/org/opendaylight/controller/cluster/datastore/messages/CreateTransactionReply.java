@@ -8,10 +8,10 @@
 
 package org.opendaylight.controller.cluster.datastore.messages;
 
+import com.google.common.base.Preconditions;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
-import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages;
 
 public class CreateTransactionReply extends VersionedExternalizableMessage {
     private static final long serialVersionUID = 1L;
@@ -50,13 +50,6 @@ public class CreateTransactionReply extends VersionedExternalizableMessage {
         out.writeUTF(transactionPath);
     }
 
-    @Deprecated
-    @Override
-    protected Object newLegacySerializedInstance() {
-        return ShardTransactionMessages.CreateTransactionReply.newBuilder().setTransactionActorPath(transactionPath)
-                .setTransactionId(transactionId).setMessageVersion(getVersion()).build();
-    }
-
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
@@ -66,18 +59,11 @@ public class CreateTransactionReply extends VersionedExternalizableMessage {
     }
 
     public static CreateTransactionReply fromSerializable(Object serializable) {
-        if(serializable instanceof CreateTransactionReply) {
-            return (CreateTransactionReply)serializable;
-        } else {
-            ShardTransactionMessages.CreateTransactionReply o =
-                    (ShardTransactionMessages.CreateTransactionReply) serializable;
-            return new CreateTransactionReply(o.getTransactionActorPath(), o.getTransactionId(),
-                    (short)o.getMessageVersion());
-        }
+        Preconditions.checkNotNull(serializable instanceof CreateTransactionReply);
+        return (CreateTransactionReply)serializable;
     }
 
     public static boolean isSerializedType(Object message) {
-        return message instanceof CreateTransactionReply ||
-                message instanceof ShardTransactionMessages.CreateTransactionReply;
+        return message instanceof CreateTransactionReply;
     }
 }
