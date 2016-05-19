@@ -48,7 +48,6 @@ import org.opendaylight.controller.cluster.datastore.utils.MockConfiguration;
 import org.opendaylight.controller.cluster.datastore.utils.PrimaryShardInfoFutureCache;
 import org.opendaylight.controller.cluster.raft.TestActorFactory;
 import org.opendaylight.controller.cluster.raft.utils.DoNothingActor;
-import org.opendaylight.controller.protobuff.messages.cohort3pc.ThreePhaseCommitCohortMessages;
 
 public class ThreePhaseCommitCohortProxyTest extends AbstractActorTest {
 
@@ -251,23 +250,6 @@ public class ThreePhaseCommitCohortProxyTest extends AbstractActorTest {
     public void testWithNoCohorts() throws Exception {
         ThreePhaseCommitCohortProxy proxy = new ThreePhaseCommitCohortProxy(actorContext,
                 Collections.<CohortInfo>emptyList(), "txn-1");
-
-        verifyCanCommit(proxy.canCommit(), true);
-        verifySuccessfulFuture(proxy.preCommit());
-        verifySuccessfulFuture(proxy.commit());
-        verifyCohortActors();
-    }
-
-    @Test
-    public void testBackwardsCompatibilityWithPreBoron() throws Exception {
-        List<CohortInfo> cohorts = Arrays.asList(
-                newCohortInfo(new CohortActor.Builder("txn-1").
-                        expectCanCommit(ThreePhaseCommitCohortMessages.CanCommitTransaction.class,
-                                CanCommitTransactionReply.yes(DataStoreVersions.LITHIUM_VERSION)).
-                        expectCommit(ThreePhaseCommitCohortMessages.CommitTransaction.class,
-                                CommitTransactionReply.instance(DataStoreVersions.LITHIUM_VERSION)),
-                        DataStoreVersions.LITHIUM_VERSION));
-        ThreePhaseCommitCohortProxy proxy = new ThreePhaseCommitCohortProxy(actorContext, cohorts, "txn-1");
 
         verifyCanCommit(proxy.canCommit(), true);
         verifySuccessfulFuture(proxy.preCommit());

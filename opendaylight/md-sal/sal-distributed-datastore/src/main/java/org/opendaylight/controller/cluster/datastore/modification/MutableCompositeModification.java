@@ -8,6 +8,7 @@
 
 package org.opendaylight.controller.cluster.datastore.modification;
 
+import com.google.common.base.Preconditions;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
@@ -18,7 +19,6 @@ import org.opendaylight.controller.cluster.datastore.messages.VersionedExternali
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeInputOutput;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeInputStreamReader;
 import org.opendaylight.controller.cluster.datastore.utils.SerializationUtils;
-import org.opendaylight.controller.protobuff.messages.persistent.PersistentMessages;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 
@@ -125,48 +125,8 @@ public class MutableCompositeModification extends VersionedExternalizableMessage
         }
     }
 
-    @Override
-    @Deprecated
-    protected Object newLegacySerializedInstance() {
-        if(getVersion() >= DataStoreVersions.LITHIUM_VERSION) {
-            return this;
-        } else {
-            PersistentMessages.CompositeModification.Builder builder =
-                    PersistentMessages.CompositeModification.newBuilder();
-
-            builder.setTimeStamp(System.nanoTime());
-
-            for (Modification m : modifications) {
-                builder.addModification((PersistentMessages.Modification) m.toSerializable());
-            }
-
-            return builder.build();
-        }
-    }
-
     public static MutableCompositeModification fromSerializable(Object serializable) {
-        if(serializable instanceof MutableCompositeModification) {
-            return (MutableCompositeModification)serializable;
-        } else {
-            return fromLegacySerializable(serializable);
-        }
-    }
-
-    @Deprecated
-    private static MutableCompositeModification fromLegacySerializable(Object serializable) {
-        PersistentMessages.CompositeModification o = (PersistentMessages.CompositeModification) serializable;
-        MutableCompositeModification compositeModification = new MutableCompositeModification();
-
-        for(PersistentMessages.Modification m : o.getModificationList()){
-            if(m.getType().equals(DeleteModification.class.toString())){
-                compositeModification.addModification(DeleteModification.fromSerializable(m));
-            } else if(m.getType().equals(WriteModification.class.toString())){
-                compositeModification.addModification(WriteModification.fromSerializable(m));
-            } else if(m.getType().equals(MergeModification.class.toString())){
-                compositeModification.addModification(MergeModification.fromSerializable(m));
-            }
-        }
-
-        return compositeModification;
+        Preconditions.checkArgument(serializable instanceof MutableCompositeModification);
+        return (MutableCompositeModification)serializable;
     }
 }

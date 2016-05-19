@@ -46,12 +46,6 @@ public class ReadyTransactionReply extends VersionedExternalizableMessage {
         out.writeUTF(cohortPath);
     }
 
-    @Override
-    protected Object newLegacySerializedInstance() {
-        // no legacy serialized type for this class; return self
-        return this;
-    }
-
     public static ReadyTransactionReply fromSerializable(Object serializable) {
         return (ReadyTransactionReply)serializable;
     }
