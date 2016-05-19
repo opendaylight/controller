@@ -10,14 +10,18 @@
  */
 package org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.${artifactId}.impl.rev141210;
 
+import org.opendaylight.controller.config.api.DependencyResolver;
+import org.opendaylight.controller.config.api.ModuleIdentifier;
 import ${package}.impl.${classPrefix}Provider;
 
-public class ${classPrefix}Module extends org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.${artifactId}.impl.rev141210.Abstract${classPrefix}Module {
-    public ${classPrefix}Module(org.opendaylight.controller.config.api.ModuleIdentifier identifier, org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
+public class ${classPrefix}Module extends Abstract${classPrefix}Module {
+
+    public ${classPrefix}Module(ModuleIdentifier identifier, DependencyResolver dependencyResolver) {
         super(identifier, dependencyResolver);
     }
 
-    public ${classPrefix}Module(org.opendaylight.controller.config.api.ModuleIdentifier identifier, org.opendaylight.controller.config.api.DependencyResolver dependencyResolver, org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.${artifactId}.impl.rev141210.${classPrefix}Module oldModule, java.lang.AutoCloseable oldInstance) {
+    public ${classPrefix}Module(ModuleIdentifier identifier, DependencyResolver dependencyResolver, ${classPrefix}Module oldModule,
+            AutoCloseable oldInstance) {
         super(identifier, dependencyResolver, oldModule, oldInstance);
     }
 
