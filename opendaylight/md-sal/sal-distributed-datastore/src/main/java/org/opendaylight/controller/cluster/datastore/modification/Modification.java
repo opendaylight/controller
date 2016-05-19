@@ -48,7 +48,4 @@ public interface Modification extends Externalizable {
     void apply(DataTreeModification transaction);
 
     byte getType();
-
-    @Deprecated
-    Object toSerializable();
 }
