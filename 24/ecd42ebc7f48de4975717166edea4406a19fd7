@@ -1,0 +1,10 @@
+Verified+1: jenkins-releng <jenkins-releng@opendaylight.org>
+Code-Review+1: Robert Varga <nite@hq.sk>
+Code-Review+1: Ryan Goulding <ryandgoulding@gmail.com>
+Code-Review+1: Jamo Luhrsen <jluhrsen@redhat.com>
+Code-Review+2: Tom Pantelis <tpanteli@brocade.com>
+Submitted-by: Tony Tkacik <ttkacik@cisco.com>
+Submitted-at: Fri, 20 May 2016 08:32:39 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/36812
+Project: controller
+Branch: refs/heads/stable/beryllium
