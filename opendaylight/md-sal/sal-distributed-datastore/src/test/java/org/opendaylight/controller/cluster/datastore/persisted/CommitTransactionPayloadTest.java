@@ -1,11 +1,11 @@
 /*
- * Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2016 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.cluster.datastore;
+package org.opendaylight.controller.cluster.datastore.persisted;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -16,6 +16,7 @@ import java.util.Collection;
 import org.apache.commons.lang3.SerializationUtils;
 import org.junit.Before;
 import org.junit.Test;
+import org.opendaylight.controller.cluster.datastore.AbstractTest;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -30,8 +31,7 @@ import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
 
-@Deprecated
-public class DataTreeCandidatePayloadTest {
+public class CommitTransactionPayloadTest extends AbstractTest {
     static final QName LEAF_SET = QName.create(TestModel.TEST_QNAME, "leaf-set");
 
     private DataTreeCandidate candidate;
@@ -112,19 +112,19 @@ public class DataTreeCandidatePayloadTest {
 
     @Test
     public void testCandidateSerialization() throws IOException {
-        final DataTreeCandidatePayload payload = DataTreeCandidatePayload.create(candidate);
-        assertEquals("payload size", 141, payload.size());
+        final CommitTransactionPayload payload = CommitTransactionPayload.create(nextTransactionId(), candidate);
+        assertEquals("payload size", 201, payload.size());
     }
 
     @Test
     public void testCandidateSerDes() throws IOException {
-        final DataTreeCandidatePayload payload = DataTreeCandidatePayload.create(candidate);
+        final CommitTransactionPayload payload = CommitTransactionPayload.create(nextTransactionId(), candidate);
         assertCandidateEquals(candidate, payload.getCandidate());
     }
 
     @Test
     public void testPayloadSerDes() throws IOException {
-        final DataTreeCandidatePayload payload = DataTreeCandidatePayload.create(candidate);
+        final CommitTransactionPayload payload = CommitTransactionPayload.create(nextTransactionId(), candidate);
         assertCandidateEquals(candidate, SerializationUtils.clone(payload).getCandidate());
     }
 
@@ -139,7 +139,7 @@ public class DataTreeCandidatePayloadTest {
                 withNodeIdentifier(entryPathArg).withValue("one").build();
 
         DataTreeCandidate candidate = DataTreeCandidates.fromNormalizedNode(leafSetEntryPath, leafSetEntryNode);
-        DataTreeCandidatePayload payload = DataTreeCandidatePayload.create(candidate);
+        CommitTransactionPayload payload = CommitTransactionPayload.create(nextTransactionId(), candidate);
         assertCandidateEquals(candidate, payload.getCandidate());
     }
 
@@ -155,7 +155,7 @@ public class DataTreeCandidatePayloadTest {
                 new YangInstanceIdentifier.NodeIdentifier(LEAF_SET)).withChild(leafSetEntryNode).build();
 
         DataTreeCandidate candidate = DataTreeCandidates.fromNormalizedNode(leafSetPath, leafSetNode);
-        DataTreeCandidatePayload payload = DataTreeCandidatePayload.create(candidate);
+        CommitTransactionPayload payload = CommitTransactionPayload.create(nextTransactionId(), candidate);
         assertCandidateEquals(candidate, payload.getCandidate());
     }
 
@@ -171,7 +171,7 @@ public class DataTreeCandidatePayloadTest {
                 new YangInstanceIdentifier.NodeIdentifier(LEAF_SET)).withChild(leafSetEntryNode).build();
 
         DataTreeCandidate candidate = DataTreeCandidates.fromNormalizedNode(leafSetPath, leafSetNode);
-        DataTreeCandidatePayload payload = DataTreeCandidatePayload.create(candidate);
+        CommitTransactionPayload payload = CommitTransactionPayload.create(nextTransactionId(), candidate);
         assertCandidateEquals(candidate, payload.getCandidate());
     }
 
@@ -182,7 +182,7 @@ public class DataTreeCandidatePayloadTest {
                 new YangInstanceIdentifier.NodeIdentifier(TestModel.DESC_QNAME)).withValue("test").build();
 
         DataTreeCandidate candidate = DataTreeCandidates.fromNormalizedNode(leafPath, leafNode);
-        DataTreeCandidatePayload payload = DataTreeCandidatePayload.create(candidate);
+        CommitTransactionPayload payload = CommitTransactionPayload.create(nextTransactionId(), candidate);
         assertCandidateEquals(candidate, payload.getCandidate());
     }
 }
