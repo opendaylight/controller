@@ -23,7 +23,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
  * @deprecated Deprecated in Boron in favor of CommitTransactionPayload
  */
 @Deprecated
-final class DataTreeCandidatePayload extends Payload implements DataTreeCandidateSupplier, Externalizable {
+final class DataTreeCandidatePayload implements DataTreeCandidateSupplier, Externalizable, Payload {
     private static final long serialVersionUID = 1L;
 
     private transient byte[] serialized;
