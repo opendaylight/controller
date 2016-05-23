@@ -20,8 +20,8 @@ import java.util.Collection;
 import java.util.Collections;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeDataInput;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeDataOutput;
-import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeInputStreamReader;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeInputOutput;
+import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeInputStreamReader;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
@@ -33,7 +33,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.ModificationType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-final class DataTreeCandidatePayload extends Payload implements Externalizable {
+final class DataTreeCandidatePayload implements Externalizable, Payload {
     private static final Logger LOG = LoggerFactory.getLogger(DataTreeCandidatePayload.class);
     private static final long serialVersionUID = 1L;
     private static final byte DELETE = 0;

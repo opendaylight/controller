@@ -8,10 +8,11 @@
 package org.opendaylight.controller.cluster.raft.protobuff.client.messages;
 
 /**
- * This is a tagging interface for a Payload implementation that needs to always be persisted regardless of
+ * This is a tagging interface for a {@link Payload} implementation that needs to always be persisted regardless of
  * whether or not the component is configured to be persistent.
  *
  * @author Thomas Pantelis
  */
-public interface PersistentPayload {
+public interface PersistentPayload extends Payload {
+
 }
