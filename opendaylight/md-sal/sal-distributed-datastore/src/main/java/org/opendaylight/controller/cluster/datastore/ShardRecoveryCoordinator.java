@@ -10,6 +10,8 @@ package org.opendaylight.controller.cluster.datastore;
 import com.google.common.base.Preconditions;
 import java.io.File;
 import java.io.IOException;
+import org.opendaylight.controller.cluster.datastore.persisted.DataTreeCandidateSupplier;
+import org.opendaylight.controller.cluster.datastore.persisted.CommitTransactionPayload;
 import org.opendaylight.controller.cluster.datastore.utils.DataTreeModificationOutput;
 import org.opendaylight.controller.cluster.datastore.utils.NormalizedNodeXMLOutput;
 import org.opendaylight.controller.cluster.datastore.utils.PruningDataTreeModification;
@@ -62,14 +64,18 @@ class ShardRecoveryCoordinator implements RaftActorRecoveryCohort {
         Preconditions.checkState(transaction != null, "call startLogRecovery before calling appendRecoveredLogEntry");
 
         try {
-            if (payload instanceof DataTreeCandidatePayload) {
-                DataTreeCandidates.applyToModification(transaction, ((DataTreeCandidatePayload)payload).getCandidate());
+            if (payload instanceof DataTreeCandidateSupplier) {
+                DataTreeCandidates.applyToModification(transaction, ((DataTreeCandidateSupplier)payload).getCandidate());
                 size++;
+
+                if (payload instanceof CommitTransactionPayload) {
+                    // FIXME: BUG-5280: propagate transaction state
+                }
             } else {
                 log.error("{}: Unknown payload {} received during recovery", shardName, payload);
             }
         } catch (IOException e) {
-            log.error("{}: Error extracting ModificationPayload", shardName, e);
+            log.error("{}: Error extracting payload", shardName, e);
         }
     }
 
