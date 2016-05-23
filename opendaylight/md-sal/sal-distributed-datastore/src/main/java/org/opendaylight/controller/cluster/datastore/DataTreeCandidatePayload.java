@@ -15,11 +15,15 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import org.opendaylight.controller.cluster.datastore.persisted.DataTreeCandidateInputOutput;
+import org.opendaylight.controller.cluster.datastore.persisted.DataTreeCandidateSupplier;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 
-final class DataTreeCandidatePayload extends Payload implements Externalizable {
-    private static final Logger LOG = LoggerFactory.getLogger(DataTreeCandidatePayload.class);
+/**
+ * @deprecated Deprecated in Boron in favor of CommitTransactionPayload
+ */
+@Deprecated
+final class DataTreeCandidatePayload extends Payload implements DataTreeCandidateSupplier, Externalizable {
     private static final long serialVersionUID = 1L;
 
     private transient byte[] serialized;
@@ -32,6 +36,10 @@ final class DataTreeCandidatePayload extends Payload implements Externalizable {
         this.serialized = Preconditions.checkNotNull(serialized);
     }
 
+    /**
+     * @deprecated Use CommitTransactionPayload instead
+     */
+    @Deprecated
     static DataTreeCandidatePayload create(final DataTreeCandidate candidate) {
         final ByteArrayDataOutput out = ByteStreams.newDataOutput();
         try {
@@ -44,7 +52,8 @@ final class DataTreeCandidatePayload extends Payload implements Externalizable {
     }
 
 
-    DataTreeCandidate getCandidate() throws IOException {
+    @Override
+    public DataTreeCandidate getCandidate() throws IOException {
         return DataTreeCandidateInputOutput.readDataTreeCandidate(ByteStreams.newDataInput(serialized));
     }
 
