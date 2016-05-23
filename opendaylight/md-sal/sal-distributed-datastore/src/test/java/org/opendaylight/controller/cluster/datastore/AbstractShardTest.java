@@ -30,6 +30,7 @@ import com.google.common.base.Optional;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.Uninterruptibles;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
@@ -50,6 +51,7 @@ import org.opendaylight.controller.cluster.datastore.messages.BatchedModificatio
 import org.opendaylight.controller.cluster.datastore.messages.ForwardedReadyTransaction;
 import org.opendaylight.controller.cluster.datastore.modification.MutableCompositeModification;
 import org.opendaylight.controller.cluster.datastore.modification.WriteModification;
+import org.opendaylight.controller.cluster.datastore.persisted.CommitTransactionPayload;
 import org.opendaylight.controller.cluster.datastore.utils.SerializationUtils;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.Snapshot;
@@ -403,11 +405,12 @@ public abstract class AbstractShardTest extends AbstractActorTest{
         return testStore;
     }
 
-    static DataTreeCandidatePayload payloadForModification(final DataTree source, final DataTreeModification mod) throws DataValidationFailedException {
+    static CommitTransactionPayload payloadForModification(final DataTree source, final DataTreeModification mod,
+            final TransactionIdentifier<?> transactionId) throws DataValidationFailedException, IOException {
         source.validate(mod);
         final DataTreeCandidate candidate = source.prepare(mod);
         source.commit(candidate);
-        return DataTreeCandidatePayload.create(candidate);
+        return CommitTransactionPayload.create(transactionId, candidate);
     }
 
     static BatchedModifications newBatchedModifications(final TransactionIdentifier transactionID,
