@@ -23,6 +23,7 @@ import java.util.concurrent.TimeUnit;
 import org.junit.Test;
 import org.mockito.InOrder;
 import org.mockito.Mockito;
+import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.exceptions.UnknownMessageException;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
@@ -106,8 +107,7 @@ public class ShardTransactionTest extends AbstractActorTest {
         }
 
         private void testOnReceiveReadData(final ActorRef transaction) {
-            transaction.tell(new ReadData(YangInstanceIdentifier.EMPTY,
-                    DataStoreVersions.CURRENT_VERSION), getRef());
+            transaction.tell(new ReadData(YangInstanceIdentifier.EMPTY, ABIVersion.current()), getRef());
 
             ReadDataReply reply = expectMsgClass(duration("5 seconds"), ReadDataReply.class);
 
@@ -128,7 +128,7 @@ public class ShardTransactionTest extends AbstractActorTest {
         }
 
         private void testOnReceiveReadDataWhenDataNotFound(final ActorRef transaction) {
-            transaction.tell(new ReadData(TestModel.TEST_PATH, DataStoreVersions.CURRENT_VERSION),getRef());
+            transaction.tell(new ReadData(TestModel.TEST_PATH, ABIVersion.current()),getRef());
 
             ReadDataReply reply = expectMsgClass(duration("5 seconds"), ReadDataReply.class);
 
@@ -149,8 +149,7 @@ public class ShardTransactionTest extends AbstractActorTest {
         }
 
         private void testOnReceiveDataExistsPositive(final ActorRef transaction) {
-            transaction.tell(new DataExists(YangInstanceIdentifier.EMPTY,
-                    DataStoreVersions.CURRENT_VERSION), getRef());
+            transaction.tell(new DataExists(YangInstanceIdentifier.EMPTY, ABIVersion.current()), getRef());
 
             DataExistsReply reply = expectMsgClass(duration("5 seconds"), DataExistsReply.class);
 
@@ -171,7 +170,7 @@ public class ShardTransactionTest extends AbstractActorTest {
         }
 
         private void testOnReceiveDataExistsNegative(final ActorRef transaction) {
-            transaction.tell(new DataExists(TestModel.TEST_PATH, DataStoreVersions.CURRENT_VERSION),getRef());
+            transaction.tell(new DataExists(TestModel.TEST_PATH, ABIVersion.current()),getRef());
 
             DataExistsReply reply = expectMsgClass(duration("5 seconds"), DataExistsReply.class);
 
@@ -200,7 +199,7 @@ public class ShardTransactionTest extends AbstractActorTest {
 
             YangInstanceIdentifier deletePath = TestModel.TEST_PATH;
 
-            BatchedModifications batched = new BatchedModifications(nextTransactionId(), DataStoreVersions.CURRENT_VERSION);
+            BatchedModifications batched = new BatchedModifications(nextTransactionId(), ABIVersion.current());
             batched.addModification(new WriteModification(writePath, writeData));
             batched.addModification(new MergeModification(mergePath, mergeData));
             batched.addModification(new DeleteModification(deletePath));
@@ -233,14 +232,14 @@ public class ShardTransactionTest extends AbstractActorTest {
                     withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo")).build();
 
             final TransactionIdentifier<?> tx1 = nextTransactionId();
-            BatchedModifications batched = new BatchedModifications(tx1, DataStoreVersions.CURRENT_VERSION);
+            BatchedModifications batched = new BatchedModifications(tx1, ABIVersion.current());
             batched.addModification(new WriteModification(writePath, writeData));
 
             transaction.tell(batched, getRef());
             BatchedModificationsReply reply = expectMsgClass(duration("5 seconds"), BatchedModificationsReply.class);
             assertEquals("getNumBatched", 1, reply.getNumBatched());
 
-            batched = new BatchedModifications(tx1, DataStoreVersions.CURRENT_VERSION);
+            batched = new BatchedModifications(tx1, ABIVersion.current());
             batched.setReady(true);
             batched.setTotalMessagesSent(2);
 
@@ -265,7 +264,7 @@ public class ShardTransactionTest extends AbstractActorTest {
                     new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME)).
                     withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo")).build();
 
-            BatchedModifications batched = new BatchedModifications(nextTransactionId(), DataStoreVersions.CURRENT_VERSION);
+            BatchedModifications batched = new BatchedModifications(nextTransactionId(), ABIVersion.current());
             batched.addModification(new WriteModification(writePath, writeData));
             batched.setReady(true);
             batched.setDoCommitOnReady(true);
@@ -297,13 +296,13 @@ public class ShardTransactionTest extends AbstractActorTest {
             doThrow(new TestException()).when(mockModification).write(path, node);
 
             final TransactionIdentifier<?> tx1 = nextTransactionId();
-            BatchedModifications batched = new BatchedModifications(tx1, DataStoreVersions.CURRENT_VERSION);
+            BatchedModifications batched = new BatchedModifications(tx1, ABIVersion.current());
             batched.addModification(new WriteModification(path, node));
 
             transaction.tell(batched, getRef());
             expectMsgClass(duration("5 seconds"), akka.actor.Status.Failure.class);
 
-            batched = new BatchedModifications(tx1, DataStoreVersions.CURRENT_VERSION);
+            batched = new BatchedModifications(tx1, ABIVersion.current());
             batched.setReady(true);
             batched.setTotalMessagesSent(2);
 
@@ -327,7 +326,7 @@ public class ShardTransactionTest extends AbstractActorTest {
             JavaTestKit watcher = new JavaTestKit(getSystem());
             watcher.watch(transaction);
 
-            BatchedModifications batched = new BatchedModifications(nextTransactionId(), DataStoreVersions.CURRENT_VERSION);
+            BatchedModifications batched = new BatchedModifications(nextTransactionId(), ABIVersion.current());
             batched.setReady(true);
             batched.setTotalMessagesSent(2);
 
@@ -422,8 +421,7 @@ public class ShardTransactionTest extends AbstractActorTest {
                 datastoreContext, shardStats);
         final TestActorRef<ShardTransaction> transaction = TestActorRef.apply(props,getSystem());
 
-        transaction.receive(new BatchedModifications(nextTransactionId(), DataStoreVersions.CURRENT_VERSION),
-                ActorRef.noSender());
+        transaction.receive(new BatchedModifications(nextTransactionId(), ABIVersion.current()), ActorRef.noSender());
     }
 
     @Test

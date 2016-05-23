@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.datastore;
 
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
+import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.BatchedModificationsReply;
 import org.opendaylight.controller.cluster.datastore.messages.DataExistsReply;
@@ -29,10 +30,10 @@ public class OperationLimiterTest {
         limiter.acquire(permits);
         int availablePermits = 0;
 
-        limiter.onComplete(null, new DataExistsReply(true, DataStoreVersions.CURRENT_VERSION));
+        limiter.onComplete(null, new DataExistsReply(true, ABIVersion.current()));
         assertEquals("availablePermits", ++availablePermits, limiter.availablePermits());
 
-        limiter.onComplete(null, new DataExistsReply(true, DataStoreVersions.CURRENT_VERSION));
+        limiter.onComplete(null, new DataExistsReply(true, ABIVersion.current()));
         assertEquals("availablePermits", ++availablePermits, limiter.availablePermits());
 
         limiter.onComplete(null, new IllegalArgumentException());

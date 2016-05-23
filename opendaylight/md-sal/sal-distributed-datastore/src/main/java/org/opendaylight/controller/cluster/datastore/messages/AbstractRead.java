@@ -13,6 +13,7 @@ import com.google.common.util.concurrent.SettableFuture;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.datastore.utils.SerializationUtils;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
@@ -32,7 +33,7 @@ public abstract class AbstractRead<T> extends VersionedExternalizableMessage {
     protected AbstractRead() {
     }
 
-    public AbstractRead(final YangInstanceIdentifier path, final short version) {
+    public AbstractRead(final YangInstanceIdentifier path, final ABIVersion version) {
         super(version);
         this.path = path;
     }
@@ -53,7 +54,7 @@ public abstract class AbstractRead<T> extends VersionedExternalizableMessage {
         SerializationUtils.serializePath(path, out);
     }
 
-    public AbstractRead<T> asVersion(short version) {
+    public AbstractRead<T> asVersion(ABIVersion version) {
         return version == getVersion() ? this : newInstance(version);
     }
 
@@ -61,5 +62,5 @@ public abstract class AbstractRead<T> extends VersionedExternalizableMessage {
 
     public abstract void processResponse(Object reponse, SettableFuture<T> promise);
 
-    protected abstract AbstractRead<T> newInstance(short withVersion);
+    protected abstract AbstractRead<T> newInstance(ABIVersion withVersion);
 }

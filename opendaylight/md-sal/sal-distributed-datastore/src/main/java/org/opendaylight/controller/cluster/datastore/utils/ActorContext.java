@@ -26,9 +26,9 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
+import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.ClusterWrapper;
-import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.DatastoreContextFactory;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
@@ -216,7 +216,7 @@ public class ActorContext {
                 } else if(response instanceof LocalPrimaryShardFound) {
                     LOG.debug("findPrimaryShardAsync received: {}", response);
                     LocalPrimaryShardFound found = (LocalPrimaryShardFound)response;
-                    return onPrimaryShardFound(shardName, found.getPrimaryPath(), DataStoreVersions.CURRENT_VERSION,
+                    return onPrimaryShardFound(shardName, found.getPrimaryPath(), ABIVersion.current(),
                             found.getLocalShardDataTree());
                 } else if(response instanceof NotInitializedException) {
                     throw (NotInitializedException)response;
@@ -233,7 +233,7 @@ public class ActorContext {
     }
 
     private PrimaryShardInfo onPrimaryShardFound(String shardName, String primaryActorPath,
-            short primaryVersion, DataTree localShardDataTree) {
+            ABIVersion primaryVersion, DataTree localShardDataTree) {
         ActorSelection actorSelection = actorSystem.actorSelection(primaryActorPath);
         PrimaryShardInfo info = localShardDataTree == null ? new PrimaryShardInfo(actorSelection, primaryVersion) :
             new PrimaryShardInfo(actorSelection, primaryVersion, localShardDataTree);

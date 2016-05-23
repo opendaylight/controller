@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.datastore.messages;
 
 import com.google.common.base.Preconditions;
+import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.ReadWriteShardDataTreeTransaction;
 
@@ -20,9 +21,9 @@ public class ForwardedReadyTransaction {
     private final TransactionIdentifier<?> transactionID;
     private final ReadWriteShardDataTreeTransaction transaction;
     private final boolean doImmediateCommit;
-    private final short txnClientVersion;
+    private final ABIVersion txnClientVersion;
 
-    public ForwardedReadyTransaction(TransactionIdentifier<?> transactionID, short txnClientVersion,
+    public ForwardedReadyTransaction(TransactionIdentifier<?> transactionID, ABIVersion txnClientVersion,
             ReadWriteShardDataTreeTransaction transaction, boolean doImmediateCommit) {
         this.transactionID = Preconditions.checkNotNull(transactionID);
         this.transaction = Preconditions.checkNotNull(transaction);
@@ -38,7 +39,7 @@ public class ForwardedReadyTransaction {
         return transaction;
     }
 
-    public short getTxnClientVersion() {
+    public ABIVersion getTxnClientVersion() {
         return txnClientVersion;
     }
 

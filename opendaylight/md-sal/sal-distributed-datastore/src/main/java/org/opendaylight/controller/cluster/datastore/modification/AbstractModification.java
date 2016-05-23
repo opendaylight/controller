@@ -9,6 +9,7 @@
 package org.opendaylight.controller.cluster.datastore.modification;
 
 
+import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 /**
@@ -17,9 +18,9 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 public abstract class AbstractModification implements Modification {
 
     private YangInstanceIdentifier path;
-    private short version;
+    private ABIVersion version;
 
-    protected AbstractModification(short version) {
+    protected AbstractModification(ABIVersion version) {
         this.version = version;
     }
 
@@ -35,7 +36,7 @@ public abstract class AbstractModification implements Modification {
         return path;
     }
 
-    public short getVersion() {
+    public ABIVersion getVersion() {
         return version;
     }
 }

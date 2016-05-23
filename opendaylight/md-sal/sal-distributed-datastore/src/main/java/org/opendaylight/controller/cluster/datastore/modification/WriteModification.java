@@ -11,7 +11,7 @@ package org.opendaylight.controller.cluster.datastore.modification;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
-import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
+import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.datastore.utils.SerializationUtils;
 import org.opendaylight.controller.cluster.datastore.utils.SerializationUtils.Applier;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
@@ -28,10 +28,10 @@ public class WriteModification extends AbstractModification {
     private NormalizedNode<?, ?> data;
 
     public WriteModification() {
-        this(DataStoreVersions.CURRENT_VERSION);
+        this(ABIVersion.current());
     }
 
-    public WriteModification(short version) {
+    public WriteModification(ABIVersion version) {
         super(version);
     }
 
@@ -69,7 +69,7 @@ public class WriteModification extends AbstractModification {
         SerializationUtils.serializePathAndNode(getPath(), data, out);
     }
 
-    public static WriteModification fromStream(ObjectInput in, short version)
+    public static WriteModification fromStream(ObjectInput in, ABIVersion version)
             throws ClassNotFoundException, IOException {
         WriteModification mod = new WriteModification(version);
         mod.readExternal(in);

@@ -9,6 +9,7 @@
 package org.opendaylight.controller.cluster.datastore.messages;
 
 import com.google.common.base.Preconditions;
+import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 
 public class CommitTransaction extends AbstractThreePhaseCommitMessage {
@@ -17,7 +18,7 @@ public class CommitTransaction extends AbstractThreePhaseCommitMessage {
     public CommitTransaction() {
     }
 
-    public CommitTransaction(TransactionIdentifier<?> transactionID, final short version) {
+    public CommitTransaction(TransactionIdentifier<?> transactionID, final ABIVersion version) {
         super(transactionID, version);
     }
 

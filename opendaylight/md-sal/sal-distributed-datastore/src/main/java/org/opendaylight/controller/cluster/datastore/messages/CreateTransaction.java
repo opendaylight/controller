@@ -12,6 +12,7 @@ import com.google.common.base.Preconditions;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 
 public class CreateTransaction extends VersionedExternalizableMessage {
@@ -23,7 +24,7 @@ public class CreateTransaction extends VersionedExternalizableMessage {
     public CreateTransaction() {
     }
 
-    public CreateTransaction(TransactionIdentifier<?> transactionId, int transactionType, short version) {
+    public CreateTransaction(TransactionIdentifier<?> transactionId, int transactionType, ABIVersion version) {
         super(version);
         this.transactionId = Preconditions.checkNotNull(transactionId);
         this.transactionType = transactionType;

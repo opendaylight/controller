@@ -11,7 +11,7 @@ package org.opendaylight.controller.cluster.datastore.modification;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
-import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
+import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.datastore.utils.SerializationUtils;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -24,10 +24,10 @@ public class DeleteModification extends AbstractModification {
     private static final long serialVersionUID = 1L;
 
     public DeleteModification() {
-        this(DataStoreVersions.CURRENT_VERSION);
+        this(ABIVersion.current());
     }
 
-    public DeleteModification(short version) {
+    public DeleteModification(ABIVersion version) {
         super(version);
     }
 
@@ -60,7 +60,7 @@ public class DeleteModification extends AbstractModification {
         SerializationUtils.serializePath(getPath(), out);
     }
 
-    public static DeleteModification fromStream(ObjectInput in, short version)
+    public static DeleteModification fromStream(ObjectInput in, ABIVersion version)
             throws ClassNotFoundException, IOException {
         DeleteModification mod = new DeleteModification(version);
         mod.readExternal(in);

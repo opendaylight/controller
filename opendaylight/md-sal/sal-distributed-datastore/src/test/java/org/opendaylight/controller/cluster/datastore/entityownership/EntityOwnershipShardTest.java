@@ -39,6 +39,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.After;
 import org.junit.Test;
+import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.AbstractShardTest;
 import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
@@ -725,7 +726,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
     }
 
     private static BatchedModifications newBatchedModifications() {
-        BatchedModifications modifications = new BatchedModifications(nextTransactionId(), DataStoreVersions.CURRENT_VERSION);
+        BatchedModifications modifications = new BatchedModifications(nextTransactionId(), ABIVersion.current());
         modifications.setDoCommitOnReady(true);
         modifications.setReady(true);
         modifications.setTotalMessagesSent(1);
@@ -983,8 +984,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
                         }
                     }
 
-                    getSender().tell(CommitTransactionReply.instance(DataStoreVersions.CURRENT_VERSION).
-                            toSerializable(), getSelf());
+                    getSender().tell(CommitTransactionReply.instance(ABIVersion.current()).toSerializable(), getSelf());
                 } else {
                     sendReply = true;
                 }

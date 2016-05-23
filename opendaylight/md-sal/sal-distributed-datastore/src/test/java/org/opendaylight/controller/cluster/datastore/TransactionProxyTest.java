@@ -43,6 +43,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.InOrder;
 import org.mockito.Mockito;
+import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
@@ -378,7 +379,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
                     }
                 });
 
-        createTxPromise.success(createTransactionReply(actorRef, DataStoreVersions.CURRENT_VERSION));
+        createTxPromise.success(createTransactionReply(actorRef, ABIVersion.current()));
 
         Uninterruptibles.awaitUninterruptibly(readComplete, 5, TimeUnit.SECONDS);
 
@@ -789,12 +790,11 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
     }
 
     private PrimaryShardInfo newPrimaryShardInfo(ActorRef actorRef){
-        return new PrimaryShardInfo(getSystem().actorSelection(actorRef.path()), DataStoreVersions.CURRENT_VERSION);
+        return new PrimaryShardInfo(getSystem().actorSelection(actorRef.path()), ABIVersion.current());
     }
 
     private PrimaryShardInfo newPrimaryShardInfo(ActorRef actorRef, DataTree dataTree){
-        return new PrimaryShardInfo(getSystem().actorSelection(actorRef.path()), DataStoreVersions.CURRENT_VERSION,
-                dataTree);
+        return new PrimaryShardInfo(getSystem().actorSelection(actorRef.path()), ABIVersion.current(), dataTree);
     }
 
 
@@ -863,7 +863,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
         ActorRef txActorRef = actorSystem.actorOf(Props.create(DoNothingActor.class));
         String actorPath = txActorRef.path().toString();
         CreateTransactionReply createTransactionReply = new CreateTransactionReply(actorPath, nextTransactionId(),
-                DataStoreVersions.CURRENT_VERSION);
+            ABIVersion.current());
 
         doReturn(actorSystem.actorSelection(actorPath)).when(mockActorContext).actorSelection(actorPath);
 
@@ -1539,7 +1539,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
         doReturn(actorSystem.actorSelection(txActorRef.path())).
                 when(mockActorContext).actorSelection(txActorRef.path().toString());
 
-        doReturn(Futures.successful(createTransactionReply(txActorRef, DataStoreVersions.CURRENT_VERSION))).when(mockActorContext).
+        doReturn(Futures.successful(createTransactionReply(txActorRef, ABIVersion.current()))).when(mockActorContext).
                 executeOperationAsync(eq(actorSystem.actorSelection(shardActorRef.path())),
                         eqCreateTransaction(memberName, TransactionType.READ_ONLY), any(Timeout.class));
 

@@ -11,7 +11,7 @@ import static org.junit.Assert.assertEquals;
 import java.io.Serializable;
 import org.apache.commons.lang.SerializationUtils;
 import org.junit.Test;
-import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
+import org.opendaylight.controller.cluster.access.ABIVersion;
 
 /**
  * Unit test for CloseTransaction and CloseTransactionReply.
@@ -21,13 +21,13 @@ import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 public class CloseTransactionTest {
     @Test
     public void testCloseTransactionSerialization() {
-        CloseTransaction expected = new CloseTransaction(DataStoreVersions.CURRENT_VERSION);
+        CloseTransaction expected = new CloseTransaction(ABIVersion.current());
 
         Object serialized = expected.toSerializable();
         assertEquals("Serialized type", CloseTransaction.class, serialized.getClass());
 
         CloseTransaction actual = (CloseTransaction)SerializationUtils.clone((Serializable) serialized);
-        assertEquals("getVersion", DataStoreVersions.CURRENT_VERSION, actual.getVersion());
+        assertEquals("getVersion", ABIVersion.current(), actual.getVersion());
     }
 
     @Test
@@ -38,6 +38,6 @@ public class CloseTransactionTest {
         assertEquals("Serialized type", CloseTransactionReply.class, serialized.getClass());
 
         CloseTransactionReply actual = (CloseTransactionReply)SerializationUtils.clone((Serializable) serialized);
-        assertEquals("getVersion", DataStoreVersions.CURRENT_VERSION, actual.getVersion());
+        assertEquals("getVersion", ABIVersion.current(), actual.getVersion());
     }
 }

@@ -11,6 +11,7 @@ import com.google.common.base.Preconditions;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 
 /**
@@ -26,7 +27,7 @@ public abstract class AbstractThreePhaseCommitMessage extends VersionedExternali
     protected AbstractThreePhaseCommitMessage() {
     }
 
-    protected AbstractThreePhaseCommitMessage(final TransactionIdentifier<?> transactionID, final short version) {
+    protected AbstractThreePhaseCommitMessage(final TransactionIdentifier<?> transactionID, final ABIVersion version) {
         super(version);
         this.transactionID = Preconditions.checkNotNull(transactionID);
     }

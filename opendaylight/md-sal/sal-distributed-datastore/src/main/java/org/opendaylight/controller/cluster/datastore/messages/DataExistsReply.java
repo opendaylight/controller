@@ -12,6 +12,7 @@ import com.google.common.base.Preconditions;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import org.opendaylight.controller.cluster.access.ABIVersion;
 
 public class DataExistsReply extends VersionedExternalizableMessage {
     private static final long serialVersionUID = 1L;
@@ -21,7 +22,7 @@ public class DataExistsReply extends VersionedExternalizableMessage {
     public DataExistsReply() {
     }
 
-    public DataExistsReply(final boolean exists, final short version) {
+    public DataExistsReply(final boolean exists, final ABIVersion version) {
         super(version);
         this.exists = exists;
     }

@@ -13,6 +13,7 @@ import akka.actor.Props;
 import akka.testkit.TestActorRef;
 import java.util.concurrent.TimeUnit;
 import org.junit.Test;
+import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStats;
@@ -66,13 +67,13 @@ public class ShardTransactionFailureTest extends AbstractActorTest {
                 "testNegativeReadWithReadOnlyTransactionClosed");
 
         Future<Object> future = akka.pattern.Patterns.ask(subject,
-                new ReadData(YangInstanceIdentifier.EMPTY, DataStoreVersions.CURRENT_VERSION), 3000);
+                new ReadData(YangInstanceIdentifier.EMPTY, ABIVersion.current()), 3000);
         Await.result(future, Duration.create(3, TimeUnit.SECONDS));
 
         subject.underlyingActor().getDOMStoreTransaction().abort();
 
         future = akka.pattern.Patterns.ask(subject, new ReadData(YangInstanceIdentifier.EMPTY,
-                DataStoreVersions.CURRENT_VERSION), 3000);
+            ABIVersion.current()), 3000);
         Await.result(future, Duration.create(3, TimeUnit.SECONDS));
     }
 
@@ -88,13 +89,13 @@ public class ShardTransactionFailureTest extends AbstractActorTest {
                 "testNegativeReadWithReadWriteTransactionClosed");
 
         Future<Object> future = akka.pattern.Patterns.ask(subject,
-                new ReadData(YangInstanceIdentifier.EMPTY, DataStoreVersions.CURRENT_VERSION), 3000);
+                new ReadData(YangInstanceIdentifier.EMPTY, ABIVersion.current()), 3000);
         Await.result(future, Duration.create(3, TimeUnit.SECONDS));
 
         subject.underlyingActor().getDOMStoreTransaction().abort();
 
         future = akka.pattern.Patterns.ask(subject, new ReadData(YangInstanceIdentifier.EMPTY,
-                DataStoreVersions.CURRENT_VERSION), 3000);
+            ABIVersion.current()), 3000);
         Await.result(future, Duration.create(3, TimeUnit.SECONDS));
     }
 
@@ -109,13 +110,13 @@ public class ShardTransactionFailureTest extends AbstractActorTest {
                 "testNegativeExistsWithReadWriteTransactionClosed");
 
         Future<Object> future = akka.pattern.Patterns.ask(subject,
-                new DataExists(YangInstanceIdentifier.EMPTY, DataStoreVersions.CURRENT_VERSION), 3000);
+                new DataExists(YangInstanceIdentifier.EMPTY, ABIVersion.current()), 3000);
         Await.result(future, Duration.create(3, TimeUnit.SECONDS));
 
         subject.underlyingActor().getDOMStoreTransaction().abort();
 
         future = akka.pattern.Patterns.ask(subject,
-                new DataExists(YangInstanceIdentifier.EMPTY, DataStoreVersions.CURRENT_VERSION), 3000);
+                new DataExists(YangInstanceIdentifier.EMPTY, ABIVersion.current()), 3000);
         Await.result(future, Duration.create(3, TimeUnit.SECONDS));
     }
 }

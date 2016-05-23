@@ -11,6 +11,7 @@ import static org.junit.Assert.assertEquals;
 import java.io.Serializable;
 import org.apache.commons.lang.SerializationUtils;
 import org.junit.Test;
+import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.AbstractTest;
 import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
@@ -44,7 +45,7 @@ public class BatchedModificationsTest extends AbstractTest {
         YangInstanceIdentifier deletePath = TestModel.TEST_PATH;
 
         final TransactionIdentifier<?> tx1 = nextTransactionId();
-        BatchedModifications batched = new BatchedModifications(tx1, DataStoreVersions.CURRENT_VERSION);
+        BatchedModifications batched = new BatchedModifications(tx1, ABIVersion.current());
         batched.addModification(new WriteModification(writePath, writeData));
         batched.addModification(new MergeModification(mergePath, mergeData));
         batched.addModification(new DeleteModification(deletePath));
@@ -77,7 +78,7 @@ public class BatchedModificationsTest extends AbstractTest {
 
         // Test with different params.
         final TransactionIdentifier<?> tx2 = nextTransactionId();
-        batched = new BatchedModifications(tx2, (short)10000);
+        batched = new BatchedModifications(tx2, ABIVersion.TEST_FUTURE_VERSION);
 
         clone = (BatchedModifications) SerializationUtils.clone((Serializable) batched.toSerializable());
 
