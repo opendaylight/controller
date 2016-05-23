@@ -11,8 +11,10 @@ package org.opendaylight.controller.cluster.datastore;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import com.google.common.base.Optional;
+import java.io.IOException;
 import org.junit.Before;
 import org.junit.Test;
+import org.opendaylight.controller.cluster.datastore.persisted.CommitTransactionPayload;
 import org.opendaylight.controller.cluster.datastore.utils.SerializationUtils;
 import org.opendaylight.controller.md.cluster.datastore.model.CarsModel;
 import org.opendaylight.controller.md.cluster.datastore.model.PeopleModel;
@@ -29,7 +31,7 @@ import org.opendaylight.yangtools.yang.data.impl.schema.tree.SchemaValidationFai
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.slf4j.LoggerFactory;
 
-public class ShardRecoveryCoordinatorTest {
+public class ShardRecoveryCoordinatorTest extends AbstractTest {
 
     private ShardDataTree peopleDataTree;
     private SchemaContext peopleSchemaContext;
@@ -43,6 +45,7 @@ public class ShardRecoveryCoordinatorTest {
         peopleDataTree = new ShardDataTree(peopleSchemaContext, TreeType.OPERATIONAL);
     }
 
+    @Deprecated
     @Test
     public void testAppendRecoveredLogEntryDataTreeCandidatePayload(){
         final ShardRecoveryCoordinator coordinator = new ShardRecoveryCoordinator(peopleDataTree,
@@ -50,6 +53,20 @@ public class ShardRecoveryCoordinatorTest {
         coordinator.startLogRecoveryBatch(10);
         try {
             coordinator.appendRecoveredLogEntry(DataTreeCandidatePayload.create(createCar()));
+        } catch(final SchemaValidationFailedException e){
+            fail("SchemaValidationFailedException should not happen if pruning is done");
+        }
+
+        coordinator.applyCurrentLogRecoveryBatch();
+    }
+
+    @Test
+    public void testAppendRecoveredLogEntryCommitTransactionPayload() throws IOException {
+        final ShardRecoveryCoordinator coordinator = new ShardRecoveryCoordinator(peopleDataTree,
+                peopleSchemaContext, null, "foobar", LoggerFactory.getLogger("foo"));
+        coordinator.startLogRecoveryBatch(10);
+        try {
+            coordinator.appendRecoveredLogEntry(CommitTransactionPayload.create(nextTransactionId(), createCar()));
         } catch(final SchemaValidationFailedException e){
             fail("SchemaValidationFailedException should not happen if pruning is done");
         }
