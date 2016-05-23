@@ -8,7 +8,7 @@
 
 package org.opendaylight.controller.cluster.raft.protobuff.client.messages;
 
-
+import java.io.Serializable;
 
 /**
  * An instance of a Payload class is meant to be used as the Payload for
@@ -20,6 +20,11 @@ package org.opendaylight.controller.cluster.raft.protobuff.client.messages;
  * be applied to the derived RaftActor it will be passed an instance of the
  * Payload class.
  */
-public abstract class Payload {
-    public abstract int size();
+public interface Payload extends Serializable {
+    /**
+     * Return the serialized size of this payload for accounting and batching purposes.
+     *
+     * @return Raw payload size
+     */
+    int size();
 }

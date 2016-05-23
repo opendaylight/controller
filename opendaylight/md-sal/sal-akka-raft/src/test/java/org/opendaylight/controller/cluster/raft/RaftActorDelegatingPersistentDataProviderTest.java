@@ -87,7 +87,9 @@ public class RaftActorDelegatingPersistentDataProviderTest {
         verify(mockDelegateProvider).persist(OTHER_DATA_OBJECT, mockProcedure);
     }
 
-    static class TestNonPersistentPayload extends Payload {
+    static class TestNonPersistentPayload implements Payload {
+        private static final long serialVersionUID = 1L;
+
         @Override
         public int size() {
             return 0;
@@ -95,5 +97,6 @@ public class RaftActorDelegatingPersistentDataProviderTest {
     }
 
     static class TestPersistentPayload extends TestNonPersistentPayload implements PersistentPayload {
+        private static final long serialVersionUID = 1L;
     }
 }
