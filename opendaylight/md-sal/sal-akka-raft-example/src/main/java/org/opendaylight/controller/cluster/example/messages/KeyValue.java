@@ -8,10 +8,9 @@
 
 package org.opendaylight.controller.cluster.example.messages;
 
-import java.io.Serializable;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 
-public class KeyValue extends Payload implements Serializable {
+public class KeyValue implements Payload {
     private static final long serialVersionUID = 1L;
     private String key;
     private String value;
