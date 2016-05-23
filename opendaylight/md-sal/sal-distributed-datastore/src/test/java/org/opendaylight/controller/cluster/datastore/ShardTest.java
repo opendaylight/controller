@@ -104,7 +104,6 @@ import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelpe
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
-import org.opendaylight.yangtools.util.StringIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
@@ -448,8 +447,9 @@ public class ShardTest extends AbstractShardTest {
         writeMod.write(TestModel.TEST_PATH, node);
         writeMod.ready();
 
-        final ApplyState applyState = new ApplyState(null, new StringIdentifier("test"),
-            new ReplicatedLogImplEntry(1, 2, payloadForModification(source, writeMod)));
+        final TransactionIdentifier<?> tx = nextTransactionId();
+        final ApplyState applyState = new ApplyState(null, tx,
+            new ReplicatedLogImplEntry(1, 2, payloadForModification(source, writeMod, tx)));
 
         shard.tell(applyState, shard);
 
@@ -478,7 +478,8 @@ public class ShardTest extends AbstractShardTest {
         InMemoryJournal.addEntry(shardID.toString(), 0, DUMMY_DATA);
 
         // Set up the InMemoryJournal.
-        InMemoryJournal.addEntry(shardID.toString(), 1, new ReplicatedLogImplEntry(0, 1, payloadForModification(source, writeMod)));
+        InMemoryJournal.addEntry(shardID.toString(), 1, new ReplicatedLogImplEntry(0, 1,
+            payloadForModification(source, writeMod, nextTransactionId())));
 
         final int nListEntries = 16;
         final Set<Integer> listEntryKeys = new HashSet<>();
@@ -493,8 +494,9 @@ public class ShardTest extends AbstractShardTest {
             final DataTreeModification mod = source.takeSnapshot().newModification();
             mod.merge(path, ImmutableNodes.mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, i));
             mod.ready();
+
             InMemoryJournal.addEntry(shardID.toString(), i+1, new ReplicatedLogImplEntry(i, 1,
-                payloadForModification(source, mod)));
+                payloadForModification(source, mod, nextTransactionId())));
         }
 
         InMemoryJournal.addEntry(shardID.toString(), nListEntries + 2,
