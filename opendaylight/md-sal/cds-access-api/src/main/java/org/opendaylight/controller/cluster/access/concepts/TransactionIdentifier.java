@@ -25,7 +25,7 @@ import org.opendaylight.yangtools.concepts.Identifier;
  * @author Robert Varga
  */
 @Beta
-public final class TransactionIdentifier<T extends FrontendType> implements Identifier {
+public final class TransactionIdentifier<T extends FrontendType> implements Identifier, WritableObject {
     private static final class Proxy<T extends FrontendType> implements Externalizable {
         private static final long serialVersionUID = 1L;
         private LocalHistoryIdentifier<T> historyId;
@@ -42,14 +42,13 @@ public final class TransactionIdentifier<T extends FrontendType> implements Iden
 
         @Override
         public void writeExternal(final ObjectOutput out) throws IOException {
-            out.writeObject(historyId);
+            historyId.writeTo(out);
             out.writeLong(transactionId);
         }
 
-        @SuppressWarnings("unchecked")
         @Override
         public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
-            historyId = (LocalHistoryIdentifier<T>) in.readObject();
+            historyId = LocalHistoryIdentifier.readFrom(in);
             transactionId = in.readLong();
         }
 
@@ -65,6 +64,17 @@ public final class TransactionIdentifier<T extends FrontendType> implements Iden
     public TransactionIdentifier(final @Nonnull LocalHistoryIdentifier<T> historyId, final long transactionId) {
         this.historyId = Preconditions.checkNotNull(historyId);
         this.transactionId = transactionId;
+    }
+
+    public static <T extends FrontendType> TransactionIdentifier<T> readFrom(ObjectInput in) throws IOException, ClassNotFoundException {
+        final LocalHistoryIdentifier<T> historyId = LocalHistoryIdentifier.readFrom(in);
+        return new TransactionIdentifier<>(historyId, in.readLong());
+    }
+
+    @Override
+    public void writeTo(ObjectOutput out) throws IOException {
+        historyId.writeTo(out);
+        out.writeLong(transactionId);
     }
 
     public LocalHistoryIdentifier<T> getHistoryId() {

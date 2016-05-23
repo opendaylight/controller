@@ -22,7 +22,7 @@ import org.opendaylight.yangtools.concepts.Identifier;
  *
  * @author Robert Varga
  */
-public final class LocalHistoryIdentifier<T extends FrontendType> implements Identifier {
+public final class LocalHistoryIdentifier<T extends FrontendType> implements Identifier, WritableObject {
     private static final class Proxy<T extends FrontendType> implements Externalizable {
         private static final long serialVersionUID = 1L;
         private ClientIdentifier<T> clientId;
@@ -39,14 +39,13 @@ public final class LocalHistoryIdentifier<T extends FrontendType> implements Ide
 
         @Override
         public void writeExternal(final ObjectOutput out) throws IOException {
-            out.writeObject(clientId);
+            clientId.writeTo(out);
             out.writeLong(historyId);
         }
 
-        @SuppressWarnings("unchecked")
         @Override
         public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
-            clientId = (ClientIdentifier<T>) in.readObject();
+            clientId = ClientIdentifier.readFrom(in);
             historyId = in.readLong();
         }
 
@@ -62,6 +61,17 @@ public final class LocalHistoryIdentifier<T extends FrontendType> implements Ide
     public LocalHistoryIdentifier(final ClientIdentifier<T> frontendId, final long historyId) {
         this.clientId = Preconditions.checkNotNull(frontendId);
         this.historyId = historyId;
+    }
+
+    public static <T extends FrontendType> LocalHistoryIdentifier<T> readFrom(ObjectInput in) throws IOException, ClassNotFoundException {
+        final ClientIdentifier<T> clientId = ClientIdentifier.readFrom(in);
+        return new LocalHistoryIdentifier<>(clientId, in.readLong());
+    }
+
+    @Override
+    public void writeTo(ObjectOutput out) throws IOException {
+        clientId.writeTo(out);
+        out.writeLong(historyId);
     }
 
     public ClientIdentifier<T> getClienId() {

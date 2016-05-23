@@ -23,7 +23,7 @@ import org.opendaylight.yangtools.concepts.Identifier;
  * @author Robert Varga
  */
 @Beta
-public final class ClientIdentifier<T extends FrontendType> implements Identifier {
+public final class ClientIdentifier<T extends FrontendType> implements Identifier, WritableObject {
     private static final class Proxy<T extends FrontendType> implements Externalizable {
         private static final long serialVersionUID = 1L;
         private FrontendIdentifier<T> frontendId;
@@ -40,14 +40,13 @@ public final class ClientIdentifier<T extends FrontendType> implements Identifie
 
         @Override
         public void writeExternal(ObjectOutput out) throws IOException {
-            out.writeObject(frontendId);
+            frontendId.writeTo(out);
             out.writeLong(generation);
         }
 
-        @SuppressWarnings("unchecked")
         @Override
         public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-            frontendId = (FrontendIdentifier<T>) in.readObject();
+            frontendId = FrontendIdentifier.readFrom(in);
             generation = in.readLong();
         }
 
@@ -68,6 +67,17 @@ public final class ClientIdentifier<T extends FrontendType> implements Identifie
     public static <T extends FrontendType> ClientIdentifier<T> create(final FrontendIdentifier<T> frontendId,
             final long generation) {
         return new ClientIdentifier<>(frontendId, generation);
+    }
+
+    public static <T extends FrontendType> ClientIdentifier<T> readFrom(ObjectInput in) throws IOException, ClassNotFoundException {
+        final FrontendIdentifier<T> frontendId = FrontendIdentifier.readFrom(in);
+        return new ClientIdentifier<T>(frontendId, in.readLong());
+    }
+
+    @Override
+    public void writeTo(ObjectOutput out) throws IOException {
+        frontendId.writeTo(out);
+        out.writeLong(generation);
     }
 
     public FrontendIdentifier<T> getFrontendId() {

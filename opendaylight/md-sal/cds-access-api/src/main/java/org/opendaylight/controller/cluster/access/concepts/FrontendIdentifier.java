@@ -23,7 +23,7 @@ import org.opendaylight.yangtools.concepts.Identifier;
  * @author Robert Varga
  */
 @Beta
-public final class FrontendIdentifier<T extends FrontendType> implements Identifier {
+public final class FrontendIdentifier<T extends FrontendType> implements Identifier, WritableObject {
     private static final class Proxy<T extends FrontendType> implements Externalizable {
         private static final long serialVersionUID = 1L;
         private MemberName memberName;
@@ -40,14 +40,14 @@ public final class FrontendIdentifier<T extends FrontendType> implements Identif
 
         @Override
         public void writeExternal(ObjectOutput out) throws IOException {
-            out.writeObject(memberName);
+            memberName.writeTo(out);
             out.writeObject(clientType);
         }
 
         @SuppressWarnings("unchecked")
         @Override
         public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-            memberName = (MemberName) in.readObject();
+            memberName = MemberName.readFrom(in);
             clientType = (T) in.readObject();
         }
 
@@ -67,6 +67,19 @@ public final class FrontendIdentifier<T extends FrontendType> implements Identif
 
     public static <T extends FrontendType> FrontendIdentifier<T> create(MemberName memberName, final T clientType) {
         return new FrontendIdentifier<>(memberName, clientType);
+    }
+
+    public static <T extends FrontendType> FrontendIdentifier<T> readFrom(ObjectInput in) throws IOException, ClassNotFoundException {
+        final MemberName memberName = MemberName.readFrom(in);
+        @SuppressWarnings("unchecked")
+        final T clientType = (T) in.readObject();
+        return new FrontendIdentifier<T>(memberName, clientType);
+    }
+
+    @Override
+    public void writeTo(ObjectOutput out) throws IOException {
+        memberName.writeTo(out);
+        out.writeObject(clientType);
     }
 
     public T getClientType() {
