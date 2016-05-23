@@ -163,7 +163,7 @@ public class MockRaftActorContext extends RaftActorContextImpl {
         }
     }
 
-    public static class MockPayload extends Payload implements Serializable {
+    public static class MockPayload implements Payload {
         private static final long serialVersionUID = 3121380393130864247L;
         private String value = "";
         private int size;
