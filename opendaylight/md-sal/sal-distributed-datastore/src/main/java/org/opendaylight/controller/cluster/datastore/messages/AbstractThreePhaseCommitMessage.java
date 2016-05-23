@@ -49,7 +49,6 @@ public abstract class AbstractThreePhaseCommitMessage extends VersionedExternali
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + " [transactionID=" + transactionID + ", version=" + getVersion()
-                + "]";
+        return getClass().getSimpleName() + " [transactionID=" + transactionID + ", version=" + getVersion() + "]";
     }
 }
