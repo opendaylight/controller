@@ -15,13 +15,13 @@ import com.google.common.base.Preconditions;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Queue;
+import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendType;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
-import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
 import org.opendaylight.controller.cluster.datastore.messages.BatchedModifications;
 import org.opendaylight.controller.cluster.datastore.messages.CommitTransactionReply;
@@ -220,7 +220,7 @@ class EntityOwnershipShardCommitCoordinator {
 
     BatchedModifications newBatchedModifications() {
         BatchedModifications modifications = new BatchedModifications(
-            new TransactionIdentifier<>(historyId, ++transactionIDCounter), DataStoreVersions.CURRENT_VERSION);
+            new TransactionIdentifier<>(historyId, ++transactionIDCounter), ABIVersion.current());
         modifications.setDoCommitOnReady(true);
         modifications.setReady(true);
         modifications.setTotalMessagesSent(1);

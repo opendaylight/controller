@@ -28,6 +28,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import org.junit.Assert;
 import org.junit.Test;
+import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.BatchedModifications;
 import org.opendaylight.controller.cluster.datastore.modification.WriteModification;
@@ -210,7 +211,7 @@ public class TransactionChainProxyTest extends AbstractTransactionProxyTest {
             String tx2MemberName = "mock-member";
             ActorRef shardActorRef2 = setupActorContextWithoutInitialCreateTransaction(getSystem());
             ActorRef txActorRef2 = setupActorContextWithInitialCreateTransaction(getSystem(), READ_WRITE,
-                    DataStoreVersions.CURRENT_VERSION, tx2MemberName, shardActorRef2);
+                ABIVersion.current(), tx2MemberName, shardActorRef2);
 
             expectBatchedModifications(txActorRef2, 1);
 

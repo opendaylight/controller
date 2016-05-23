@@ -16,7 +16,6 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import static org.opendaylight.controller.cluster.datastore.DataStoreVersions.CURRENT_VERSION;
 import akka.actor.ActorRef;
 import akka.actor.PoisonPill;
 import akka.actor.Props;
@@ -42,6 +41,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext.Builder;
@@ -274,7 +274,7 @@ public abstract class AbstractShardTest extends AbstractActorTest{
             TransactionIdentifier<?> transactionID, MutableCompositeModification modification,
             boolean doCommitOnReady) {
         if(remoteReadWriteTransaction){
-            return prepareForwardedReadyTransaction(cohort, transactionID, CURRENT_VERSION,
+            return prepareForwardedReadyTransaction(cohort, transactionID, ABIVersion.current(),
                     doCommitOnReady);
         } else {
             setupCohortDecorator(shard, cohort);
@@ -299,7 +299,7 @@ public abstract class AbstractShardTest extends AbstractActorTest{
     }
 
     protected ForwardedReadyTransaction prepareForwardedReadyTransaction(ShardDataTreeCohort cohort,
-            TransactionIdentifier<?> transactionID, short version, boolean doCommitOnReady) {
+            TransactionIdentifier<?> transactionID, ABIVersion version, boolean doCommitOnReady) {
         return new ForwardedReadyTransaction(transactionID, version,
                 new ReadWriteShardDataTreeTransaction(newShardDataTreeTransactionParent(cohort), transactionID,
                         mock(DataTreeModification.class)), doCommitOnReady);
@@ -327,7 +327,7 @@ public abstract class AbstractShardTest extends AbstractActorTest{
     private static BatchedModifications prepareBatchedModifications(TransactionIdentifier<?> transactionID,
                                                              MutableCompositeModification modification,
                                                              boolean doCommitOnReady) {
-        final BatchedModifications batchedModifications = new BatchedModifications(transactionID, CURRENT_VERSION);
+        final BatchedModifications batchedModifications = new BatchedModifications(transactionID, ABIVersion.current());
         batchedModifications.addModification(modification);
         batchedModifications.setReady(true);
         batchedModifications.setDoCommitOnReady(doCommitOnReady);
@@ -413,7 +413,7 @@ public abstract class AbstractShardTest extends AbstractActorTest{
     static BatchedModifications newBatchedModifications(final TransactionIdentifier<?> transactionID,
             final YangInstanceIdentifier path, final NormalizedNode<?, ?> data, final boolean ready, final boolean doCommitOnReady,
             final int messagesSent) {
-        final BatchedModifications batched = new BatchedModifications(transactionID, CURRENT_VERSION);
+        final BatchedModifications batched = new BatchedModifications(transactionID, ABIVersion.current());
         batched.addModification(new WriteModification(path, data));
         batched.setReady(ready);
         batched.setDoCommitOnReady(doCommitOnReady);

@@ -21,6 +21,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.datastore.messages.DataExists;
 import org.opendaylight.controller.cluster.datastore.messages.ReadData;
 import org.opendaylight.controller.cluster.datastore.modification.DeleteModification;
@@ -91,7 +92,7 @@ public class LocalTransactionContextTest {
         YangInstanceIdentifier yangInstanceIdentifier = YangInstanceIdentifier.EMPTY;
         NormalizedNode<?, ?> normalizedNode = mock(NormalizedNode.class);
         doReturn(Futures.immediateCheckedFuture(Optional.of(normalizedNode))).when(readWriteTransaction).read(yangInstanceIdentifier);
-        localTransactionContext.executeRead(new ReadData(yangInstanceIdentifier, DataStoreVersions.CURRENT_VERSION),
+        localTransactionContext.executeRead(new ReadData(yangInstanceIdentifier, ABIVersion.current()),
                 SettableFuture.<Optional<NormalizedNode<?,?>>>create());
         verify(readWriteTransaction).read(yangInstanceIdentifier);
     }
@@ -100,7 +101,7 @@ public class LocalTransactionContextTest {
     public void testExists() {
         YangInstanceIdentifier yangInstanceIdentifier = YangInstanceIdentifier.EMPTY;
         doReturn(Futures.immediateCheckedFuture(true)).when(readWriteTransaction).exists(yangInstanceIdentifier);
-        localTransactionContext.executeRead(new DataExists(yangInstanceIdentifier, DataStoreVersions.CURRENT_VERSION),
+        localTransactionContext.executeRead(new DataExists(yangInstanceIdentifier, ABIVersion.current()),
                 SettableFuture.<Boolean>create());
         verify(readWriteTransaction).exists(yangInstanceIdentifier);
     }

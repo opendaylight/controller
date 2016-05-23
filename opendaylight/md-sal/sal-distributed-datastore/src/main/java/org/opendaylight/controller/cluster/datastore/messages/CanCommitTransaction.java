@@ -9,6 +9,7 @@
 package org.opendaylight.controller.cluster.datastore.messages;
 
 import com.google.common.base.Preconditions;
+import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 
 public class CanCommitTransaction extends AbstractThreePhaseCommitMessage {
@@ -17,7 +18,7 @@ public class CanCommitTransaction extends AbstractThreePhaseCommitMessage {
     public CanCommitTransaction() {
     }
 
-    public CanCommitTransaction(TransactionIdentifier<?> transactionID, final short version) {
+    public CanCommitTransaction(TransactionIdentifier<?> transactionID, final ABIVersion version) {
         super(transactionID, version);
     }
 

@@ -12,20 +12,20 @@ import com.google.common.base.Preconditions;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
-import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
+import org.opendaylight.controller.cluster.access.ABIVersion;
 
 public class CanCommitTransactionReply extends VersionedExternalizableMessage {
     private static final CanCommitTransactionReply YES =
-            new CanCommitTransactionReply(true, DataStoreVersions.CURRENT_VERSION);
+            new CanCommitTransactionReply(true, ABIVersion.current());
     private static final CanCommitTransactionReply NO =
-            new CanCommitTransactionReply(false, DataStoreVersions.CURRENT_VERSION);
+            new CanCommitTransactionReply(false, ABIVersion.current());
 
     private boolean canCommit;
 
     public CanCommitTransactionReply() {
     }
 
-    private CanCommitTransactionReply(final boolean canCommit, final short version) {
+    private CanCommitTransactionReply(final boolean canCommit, final ABIVersion version) {
         super(version);
         this.canCommit = canCommit;
     }
@@ -51,12 +51,12 @@ public class CanCommitTransactionReply extends VersionedExternalizableMessage {
         return "CanCommitTransactionReply [canCommit=" + canCommit + ", version=" + getVersion() + "]";
     }
 
-    public static CanCommitTransactionReply yes(short version) {
-        return version == DataStoreVersions.CURRENT_VERSION ? YES : new CanCommitTransactionReply(true, version);
+    public static CanCommitTransactionReply yes(ABIVersion version) {
+        return version == ABIVersion.current() ? YES : new CanCommitTransactionReply(true, version);
     }
 
-    public static CanCommitTransactionReply no(short version) {
-        return version == DataStoreVersions.CURRENT_VERSION ? NO : new CanCommitTransactionReply(false, version);
+    public static CanCommitTransactionReply no(ABIVersion version) {
+        return version == ABIVersion.current() ? NO : new CanCommitTransactionReply(false, version);
     }
 
     public static CanCommitTransactionReply fromSerializable(final Object serializable) {

@@ -8,7 +8,7 @@
 
 package org.opendaylight.controller.cluster.datastore.messages;
 
-import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
+import org.opendaylight.controller.cluster.access.ABIVersion;
 
 public class CommitTransactionReply extends VersionedExternalizableMessage {
     public static final CommitTransactionReply INSTANCE = new CommitTransactionReply();
@@ -16,12 +16,12 @@ public class CommitTransactionReply extends VersionedExternalizableMessage {
     public CommitTransactionReply() {
     }
 
-    private CommitTransactionReply(short version) {
+    private CommitTransactionReply(ABIVersion version) {
         super(version);
     }
 
-    public static CommitTransactionReply instance(short version) {
-        return version == DataStoreVersions.CURRENT_VERSION ? INSTANCE : new CommitTransactionReply(version);
+    public static CommitTransactionReply instance(ABIVersion version) {
+        return version == ABIVersion.current() ? INSTANCE : new CommitTransactionReply(version);
     }
 
     public static boolean isSerializedType(Object message) {

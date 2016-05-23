@@ -10,7 +10,7 @@ package org.opendaylight.controller.cluster.datastore.modification;
 
 import java.io.IOException;
 import java.io.ObjectInput;
-import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
+import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -23,10 +23,10 @@ public class MergeModification extends WriteModification {
     private static final long serialVersionUID = 1L;
 
     public MergeModification() {
-        this(DataStoreVersions.CURRENT_VERSION);
+        this(ABIVersion.current());
     }
 
-    public MergeModification(short version) {
+    public MergeModification(ABIVersion version) {
         super(version);
     }
 
@@ -49,7 +49,7 @@ public class MergeModification extends WriteModification {
         return MERGE;
     }
 
-    public static MergeModification fromStream(ObjectInput in, short version)
+    public static MergeModification fromStream(ObjectInput in, ABIVersion version)
             throws ClassNotFoundException, IOException {
         MergeModification mod = new MergeModification(version);
         mod.readExternal(in);

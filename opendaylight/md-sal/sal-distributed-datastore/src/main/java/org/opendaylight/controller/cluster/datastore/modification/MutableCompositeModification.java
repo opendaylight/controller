@@ -14,7 +14,7 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.util.ArrayList;
 import java.util.List;
-import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
+import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.datastore.messages.VersionedExternalizableMessage;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeInputOutput;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeInputStreamReader;
@@ -32,10 +32,10 @@ public class MutableCompositeModification extends VersionedExternalizableMessage
     private final List<Modification> modifications = new ArrayList<>();
 
     public MutableCompositeModification() {
-        this(DataStoreVersions.CURRENT_VERSION);
+        this(ABIVersion.current());
     }
 
-    public MutableCompositeModification(short version) {
+    public MutableCompositeModification(ABIVersion version) {
         super(version);
     }
 

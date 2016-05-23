@@ -66,6 +66,7 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.AbstractActorTest;
 import org.opendaylight.controller.cluster.datastore.ClusterWrapperImpl;
@@ -889,7 +890,7 @@ public class ShardManagerTest extends AbstractActorTest {
             assertTrue("Unexpected primary path " + path, path.contains("member-2-shard-default-config"));
 
             primaryShardInfoCache.putSuccessful("default", new PrimaryShardInfo(system1.actorSelection(
-                    mockShardActor1.path()), DataStoreVersions.CURRENT_VERSION));
+                    mockShardActor1.path()), ABIVersion.current()));
 
             shardManager1.tell(MockClusterWrapper.
                 createUnreachableMember("member-2", "akka.tcp://cluster-test@127.0.0.1:2558"), getRef());

@@ -8,13 +8,15 @@
 
 package org.opendaylight.controller.cluster.datastore.messages;
 
+import org.opendaylight.controller.cluster.access.ABIVersion;
+
 public class CloseTransaction extends VersionedExternalizableMessage {
     private static final long serialVersionUID = 1L;
 
     public CloseTransaction() {
     }
 
-    public CloseTransaction(short version) {
+    public CloseTransaction(ABIVersion version) {
         super(version);
     }
 

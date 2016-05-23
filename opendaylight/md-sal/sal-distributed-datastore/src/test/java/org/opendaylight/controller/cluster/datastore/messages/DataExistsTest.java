@@ -11,7 +11,7 @@ import static org.junit.Assert.assertEquals;
 import java.io.Serializable;
 import org.apache.commons.lang.SerializationUtils;
 import org.junit.Test;
-import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
+import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 
 /**
@@ -23,14 +23,14 @@ public class DataExistsTest {
 
     @Test
     public void testSerialization() {
-        DataExists expected = new DataExists(TestModel.TEST_PATH, DataStoreVersions.CURRENT_VERSION);
+        DataExists expected = new DataExists(TestModel.TEST_PATH, ABIVersion.current());
 
         Object serialized = expected.toSerializable();
         assertEquals("Serialized type", DataExists.class, serialized.getClass());
 
         DataExists actual = DataExists.fromSerializable(SerializationUtils.clone((Serializable) serialized));
         assertEquals("getPath", expected.getPath(), actual.getPath());
-        assertEquals("getVersion", DataStoreVersions.CURRENT_VERSION, actual.getVersion());
+        assertEquals("getVersion", ABIVersion.current(), actual.getVersion());
     }
 
     @Test

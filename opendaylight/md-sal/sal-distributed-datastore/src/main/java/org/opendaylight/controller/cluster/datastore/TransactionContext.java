@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorSelection;
 import com.google.common.util.concurrent.SettableFuture;
+import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.datastore.messages.AbstractRead;
 import org.opendaylight.controller.cluster.datastore.modification.AbstractModification;
 import scala.concurrent.Future;
@@ -44,5 +45,5 @@ interface TransactionContext {
      */
     boolean usesOperationLimiting();
 
-    short getTransactionVersion();
+    ABIVersion getTransactionVersion();
 }

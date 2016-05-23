@@ -11,7 +11,7 @@ import static org.junit.Assert.assertEquals;
 import java.io.Serializable;
 import org.apache.commons.lang.SerializationUtils;
 import org.junit.Test;
-import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
+import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -31,14 +31,14 @@ public class ReadDataReplyTest {
                 new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME)).
                 withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo")).build();
 
-        ReadDataReply expected = new ReadDataReply(data, DataStoreVersions.CURRENT_VERSION);
+        ReadDataReply expected = new ReadDataReply(data, ABIVersion.current());
 
         Object serialized = expected.toSerializable();
         assertEquals("Serialized type", ReadDataReply.class, serialized.getClass());
 
         ReadDataReply actual = ReadDataReply.fromSerializable(SerializationUtils.clone(
                 (Serializable) serialized));
-        assertEquals("getVersion", DataStoreVersions.CURRENT_VERSION, actual.getVersion());
+        assertEquals("getVersion", ABIVersion.current(), actual.getVersion());
         assertEquals("getNormalizedNode", expected.getNormalizedNode(), actual.getNormalizedNode());
     }
 

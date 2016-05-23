@@ -14,6 +14,7 @@ import akka.pattern.AskTimeoutException;
 import akka.util.Timeout;
 import com.google.common.base.Preconditions;
 import java.util.concurrent.TimeUnit;
+import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
 import org.opendaylight.controller.cluster.datastore.exceptions.ShardLeaderNotRespondingException;
@@ -247,7 +248,7 @@ final class RemoteTransactionContextSupport {
     }
 
     private TransactionContext createValidTransactionContext(ActorSelection transactionActor, String transactionPath,
-            short remoteTransactionVersion) {
+            ABIVersion remoteTransactionVersion) {
         final TransactionContext ret = new RemoteTransactionContext(transactionContextWrapper.getIdentifier(),
                 transactionActor, getActorContext(), remoteTransactionVersion, transactionContextWrapper.getLimiter());
 

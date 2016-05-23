@@ -11,7 +11,7 @@ import static org.junit.Assert.assertEquals;
 import java.io.Serializable;
 import org.apache.commons.lang.SerializationUtils;
 import org.junit.Test;
-import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
+import org.opendaylight.controller.cluster.access.ABIVersion;
 
 /**
  * Unit tests for DataExistsReply.
@@ -22,14 +22,14 @@ public class DataExistsReplyTest {
 
     @Test
     public void testSerialization() {
-        DataExistsReply expected = new DataExistsReply(true, DataStoreVersions.CURRENT_VERSION);
+        DataExistsReply expected = new DataExistsReply(true, ABIVersion.current());
 
         Object serialized = expected.toSerializable();
         assertEquals("Serialized type", DataExistsReply.class, serialized.getClass());
 
         DataExistsReply actual = DataExistsReply.fromSerializable(SerializationUtils.clone((Serializable) serialized));
         assertEquals("exists", expected.exists(), actual.exists());
-        assertEquals("getVersion", DataStoreVersions.CURRENT_VERSION, actual.getVersion());
+        assertEquals("getVersion", ABIVersion.current(), actual.getVersion());
     }
 
     @Test
