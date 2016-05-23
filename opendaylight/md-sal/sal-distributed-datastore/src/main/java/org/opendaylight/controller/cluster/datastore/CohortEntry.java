@@ -14,6 +14,7 @@ import com.google.common.base.Stopwatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.ShardCommitCoordinator.CohortDecorator;
 import org.opendaylight.controller.cluster.datastore.modification.Modification;
@@ -37,7 +38,7 @@ final class CohortEntry {
     private final ReadWriteShardDataTreeTransaction transaction;
     private final TransactionIdentifier<?> transactionID;
     private final CompositeDataTreeCohort userCohorts;
-    private final short clientVersion;
+    private final ABIVersion clientVersion;
 
     private State state = State.PENDING;
     private RuntimeException lastBatchedModificationsException;
@@ -48,19 +49,19 @@ final class CohortEntry {
     private Shard shard;
 
     CohortEntry(TransactionIdentifier<?> transactionID, ReadWriteShardDataTreeTransaction transaction,
-            DataTreeCohortActorRegistry cohortRegistry, SchemaContext schema, short clientVersion) {
+            DataTreeCohortActorRegistry cohortRegistry, SchemaContext schema, ABIVersion clientVersion) {
         this.transaction = Preconditions.checkNotNull(transaction);
         this.transactionID = Preconditions.checkNotNull(transactionID);
-        this.clientVersion = clientVersion;
+        this.clientVersion = Preconditions.checkNotNull(clientVersion);
         this.userCohorts = new CompositeDataTreeCohort(cohortRegistry, transactionID, schema, COMMIT_STEP_TIMEOUT);
     }
 
     CohortEntry(TransactionIdentifier<?> transactionID, ShardDataTreeCohort cohort, DataTreeCohortActorRegistry cohortRegistry,
-            SchemaContext schema, short clientVersion) {
+            SchemaContext schema, ABIVersion clientVersion) {
         this.transactionID = Preconditions.checkNotNull(transactionID);
         this.cohort = cohort;
         this.transaction = null;
-        this.clientVersion = clientVersion;
+        this.clientVersion = Preconditions.checkNotNull(clientVersion);
         this.userCohorts = new CompositeDataTreeCohort(cohortRegistry, transactionID, schema, COMMIT_STEP_TIMEOUT);
     }
 
@@ -73,7 +74,7 @@ final class CohortEntry {
         return transactionID;
     }
 
-    short getClientVersion() {
+    ABIVersion getClientVersion() {
         return clientVersion;
     }
 

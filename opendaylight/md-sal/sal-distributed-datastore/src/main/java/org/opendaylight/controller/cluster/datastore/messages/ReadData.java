@@ -12,6 +12,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.SettableFuture;
+import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -23,7 +24,7 @@ public class ReadData extends AbstractRead<Optional<NormalizedNode<?, ?>>> {
     public ReadData() {
     }
 
-    public ReadData(final YangInstanceIdentifier path, short version) {
+    public ReadData(final YangInstanceIdentifier path, ABIVersion version) {
         super(path, version);
     }
 
@@ -43,7 +44,7 @@ public class ReadData extends AbstractRead<Optional<NormalizedNode<?, ?>>> {
     }
 
     @Override
-    protected AbstractRead<Optional<NormalizedNode<?, ?>>> newInstance(short withVersion) {
+    protected AbstractRead<Optional<NormalizedNode<?, ?>>> newInstance(ABIVersion withVersion) {
         return new ReadData(getPath(), withVersion);
     }
 

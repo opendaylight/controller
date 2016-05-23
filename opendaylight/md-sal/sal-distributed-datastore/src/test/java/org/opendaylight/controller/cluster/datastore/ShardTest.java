@@ -19,7 +19,6 @@ import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
-import static org.opendaylight.controller.cluster.datastore.DataStoreVersions.CURRENT_VERSION;
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.Props;
@@ -47,6 +46,7 @@ import org.junit.Test;
 import org.mockito.InOrder;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.DelegatingPersistentDataProvider;
+import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
@@ -359,7 +359,7 @@ public class ShardTest extends AbstractShardTest {
             shard.tell(new UpdateSchemaContext(TestModel.createTestContext()), getRef());
 
             shard.tell(new CreateTransaction(nextTransactionId(), TransactionType.READ_ONLY.ordinal(),
-                    DataStoreVersions.CURRENT_VERSION).toSerializable(), getRef());
+                ABIVersion.current()).toSerializable(), getRef());
 
             final CreateTransactionReply reply = expectMsgClass(duration("3 seconds"),
                     CreateTransactionReply.class);
@@ -378,7 +378,7 @@ public class ShardTest extends AbstractShardTest {
             waitUntilLeader(shard);
 
             shard.tell(new CreateTransaction(nextTransactionId(),TransactionType.READ_ONLY.ordinal(),
-                    DataStoreVersions.CURRENT_VERSION).toSerializable(), getRef());
+                ABIVersion.current()).toSerializable(), getRef());
 
             final CreateTransactionReply reply = expectMsgClass(duration("3 seconds"),
                     CreateTransactionReply.class);
@@ -547,7 +547,7 @@ public class ShardTest extends AbstractShardTest {
 
             // Send the CanCommitTransaction message for the first Tx.
 
-            shard.tell(new CanCommitTransaction(transactionID1, CURRENT_VERSION).toSerializable(), getRef());
+            shard.tell(new CanCommitTransaction(transactionID1, ABIVersion.current()).toSerializable(), getRef());
             final CanCommitTransactionReply canCommitReply = CanCommitTransactionReply.fromSerializable(
                     expectMsgClass(duration, CanCommitTransactionReply.class));
             assertEquals("Can commit", true, canCommitReply.getCanCommit());
@@ -562,15 +562,15 @@ public class ShardTest extends AbstractShardTest {
             // processed after the first Tx completes.
 
             final Future<Object> canCommitFuture1 = Patterns.ask(shard,
-                    new CanCommitTransaction(transactionID2, CURRENT_VERSION).toSerializable(), timeout);
+                    new CanCommitTransaction(transactionID2, ABIVersion.current()).toSerializable(), timeout);
 
             final Future<Object> canCommitFuture2 = Patterns.ask(shard,
-                    new CanCommitTransaction(transactionID3, CURRENT_VERSION).toSerializable(), timeout);
+                    new CanCommitTransaction(transactionID3, ABIVersion.current()).toSerializable(), timeout);
 
             // Send the CommitTransaction message for the first Tx. After it completes, it should
             // trigger the 2nd Tx to proceed which should in turn then trigger the 3rd.
 
-            shard.tell(new CommitTransaction(transactionID1, CURRENT_VERSION).toSerializable(), getRef());
+            shard.tell(new CommitTransaction(transactionID1, ABIVersion.current()).toSerializable(), getRef());
             expectMsgClass(duration, CommitTransactionReply.class);
 
             // Wait for the next 2 Tx's to complete.
@@ -630,7 +630,7 @@ public class ShardTest extends AbstractShardTest {
                     assertEquals("Can commit", true, canCommitReply.getCanCommit());
 
                     final Future<Object> commitFuture = Patterns.ask(shard,
-                            new CommitTransaction(transactionID, CURRENT_VERSION).toSerializable(), timeout);
+                            new CommitTransaction(transactionID, ABIVersion.current()).toSerializable(), timeout);
                     commitFuture.onComplete(new OnCommitFutureComplete(), getSystem().dispatcher());
                 }
             }
@@ -710,14 +710,14 @@ public class ShardTest extends AbstractShardTest {
 
             // Send the CanCommitTransaction message.
 
-            shard.tell(new CanCommitTransaction(transactionID, CURRENT_VERSION).toSerializable(), getRef());
+            shard.tell(new CanCommitTransaction(transactionID, ABIVersion.current()).toSerializable(), getRef());
             final CanCommitTransactionReply canCommitReply = CanCommitTransactionReply.fromSerializable(
                     expectMsgClass(duration, CanCommitTransactionReply.class));
             assertEquals("Can commit", true, canCommitReply.getCanCommit());
 
             // Send the CanCommitTransaction message.
 
-            shard.tell(new CommitTransaction(transactionID, CURRENT_VERSION).toSerializable(), getRef());
+            shard.tell(new CommitTransaction(transactionID, ABIVersion.current()).toSerializable(), getRef());
             expectMsgClass(duration, CommitTransactionReply.class);
 
             final InOrder inOrder = inOrder(mockCohort.get());
@@ -793,7 +793,7 @@ public class ShardTest extends AbstractShardTest {
             waitUntilLeader(shard);
 
             final TransactionIdentifier<?> transactionID = nextTransactionId();
-            final BatchedModifications batched = new BatchedModifications(transactionID, DataStoreVersions.CURRENT_VERSION);
+            final BatchedModifications batched = new BatchedModifications(transactionID, ABIVersion.current());
             batched.setReady(true);
             batched.setTotalMessagesSent(2);
 
@@ -825,14 +825,14 @@ public class ShardTest extends AbstractShardTest {
                     new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME)).
                         withChild(ImmutableNodes.leafNode(TestModel.JUNK_QNAME, "junk")).build();
 
-            BatchedModifications batched = new BatchedModifications(transactionID, CURRENT_VERSION);
+            BatchedModifications batched = new BatchedModifications(transactionID, ABIVersion.current());
             batched.addModification(new MergeModification(TestModel.TEST_PATH, invalidData));
             shard.tell(batched, getRef());
             Failure failure = expectMsgClass(duration("5 seconds"), akka.actor.Status.Failure.class);
 
             Throwable cause = failure.cause();
 
-            batched = new BatchedModifications(transactionID, DataStoreVersions.CURRENT_VERSION);
+            batched = new BatchedModifications(transactionID, ABIVersion.current());
             batched.setReady(true);
             batched.setTotalMessagesSent(2);
 
@@ -868,23 +868,23 @@ public class ShardTest extends AbstractShardTest {
             // Create a read Tx on the same chain.
 
             shard.tell(new CreateTransaction(transactionID2, TransactionType.READ_ONLY.ordinal(),
-                    DataStoreVersions.CURRENT_VERSION).toSerializable(), getRef());
+                ABIVersion.current()).toSerializable(), getRef());
 
             final CreateTransactionReply createReply = expectMsgClass(duration("3 seconds"), CreateTransactionReply.class);
 
             getSystem().actorSelection(createReply.getTransactionPath()).tell(
-                    new ReadData(path, DataStoreVersions.CURRENT_VERSION), getRef());
+                    new ReadData(path, ABIVersion.current()), getRef());
             final ReadDataReply readReply = expectMsgClass(duration("3 seconds"), ReadDataReply.class);
             assertEquals("Read node", containerNode, readReply.getNormalizedNode());
 
             // Commit the write transaction.
 
-            shard.tell(new CanCommitTransaction(transactionID1, CURRENT_VERSION).toSerializable(), getRef());
+            shard.tell(new CanCommitTransaction(transactionID1, ABIVersion.current()).toSerializable(), getRef());
             final CanCommitTransactionReply canCommitReply = CanCommitTransactionReply.fromSerializable(
                     expectMsgClass(duration, CanCommitTransactionReply.class));
             assertEquals("Can commit", true, canCommitReply.getCanCommit());
 
-            shard.tell(new CommitTransaction(transactionID1, CURRENT_VERSION).toSerializable(), getRef());
+            shard.tell(new CommitTransaction(transactionID1, ABIVersion.current()).toSerializable(), getRef());
             expectMsgClass(duration, CommitTransactionReply.class);
 
             // Verify data in the data store.
@@ -925,7 +925,7 @@ public class ShardTest extends AbstractShardTest {
 
             overrideLeaderCalls.set(true);
 
-            final BatchedModifications batched = new BatchedModifications(nextTransactionId(), DataStoreVersions.CURRENT_VERSION);
+            final BatchedModifications batched = new BatchedModifications(nextTransactionId(), ABIVersion.current());
 
             shard.tell(batched, ActorRef.noSender());
 
@@ -945,12 +945,12 @@ public class ShardTest extends AbstractShardTest {
             waitUntilNoLeader(shard);
 
             final TransactionIdentifier<?> txId = nextTransactionId();
-            shard.tell(new BatchedModifications(txId, DataStoreVersions.CURRENT_VERSION), getRef());
+            shard.tell(new BatchedModifications(txId, ABIVersion.current()), getRef());
             Failure failure = expectMsgClass(Failure.class);
             assertEquals("Failure cause type", NoShardLeaderException.class, failure.cause().getClass());
 
             shard.tell(prepareForwardedReadyTransaction(mock(ShardDataTreeCohort.class), txId,
-                    DataStoreVersions.CURRENT_VERSION, true), getRef());
+                ABIVersion.current(), true), getRef());
             failure = expectMsgClass(Failure.class);
             assertEquals("Failure cause type", NoShardLeaderException.class, failure.cause().getClass());
 
@@ -1061,14 +1061,14 @@ public class ShardTest extends AbstractShardTest {
 
             // Send the CanCommitTransaction message.
 
-            shard.tell(new CanCommitTransaction(txId, CURRENT_VERSION).toSerializable(), getRef());
+            shard.tell(new CanCommitTransaction(txId, ABIVersion.current()).toSerializable(), getRef());
             final CanCommitTransactionReply canCommitReply = CanCommitTransactionReply.fromSerializable(
                     expectMsgClass(CanCommitTransactionReply.class));
             assertEquals("Can commit", true, canCommitReply.getCanCommit());
 
             // Send the CanCommitTransaction message.
 
-            shard.tell(new CommitTransaction(txId, CURRENT_VERSION).toSerializable(), getRef());
+            shard.tell(new CommitTransaction(txId, ABIVersion.current()).toSerializable(), getRef());
             expectMsgClass(CommitTransactionReply.class);
 
             final NormalizedNode<?, ?> actualNode = readStore(shard, TestModel.OUTER_LIST_PATH);
@@ -1112,14 +1112,14 @@ public class ShardTest extends AbstractShardTest {
 
             // Send the CanCommitTransaction message.
 
-            shard.tell(new CanCommitTransaction(transactionID, CURRENT_VERSION).toSerializable(), getRef());
+            shard.tell(new CanCommitTransaction(transactionID, ABIVersion.current()).toSerializable(), getRef());
             final CanCommitTransactionReply canCommitReply = CanCommitTransactionReply.fromSerializable(
                     expectMsgClass(duration, CanCommitTransactionReply.class));
             assertEquals("Can commit", true, canCommitReply.getCanCommit());
 
             // Send the CanCommitTransaction message.
 
-            shard.tell(new CommitTransaction(transactionID, CURRENT_VERSION).toSerializable(), getRef());
+            shard.tell(new CommitTransaction(transactionID, ABIVersion.current()).toSerializable(), getRef());
             expectMsgClass(duration, CommitTransactionReply.class);
 
             final InOrder inOrder = inOrder(cohort);
@@ -1168,12 +1168,12 @@ public class ShardTest extends AbstractShardTest {
 
                 // Send the CanCommitTransaction message.
 
-                shard.tell(new CanCommitTransaction(transactionID, CURRENT_VERSION).toSerializable(), getRef());
+                shard.tell(new CanCommitTransaction(transactionID, ABIVersion.current()).toSerializable(), getRef());
                 final CanCommitTransactionReply canCommitReply = CanCommitTransactionReply.fromSerializable(
                         expectMsgClass(duration, CanCommitTransactionReply.class));
                 assertEquals("Can commit", true, canCommitReply.getCanCommit());
 
-                shard.tell(new CommitTransaction(transactionID, CURRENT_VERSION).toSerializable(), getRef());
+                shard.tell(new CommitTransaction(transactionID, ABIVersion.current()).toSerializable(), getRef());
                 expectMsgClass(duration, CommitTransactionReply.class);
 
                 final InOrder inOrder = inOrder(cohort);
@@ -1229,12 +1229,12 @@ public class ShardTest extends AbstractShardTest {
 
                 // Send the CanCommitTransaction message.
 
-                shard.tell(new CanCommitTransaction(transactionID, CURRENT_VERSION).toSerializable(), getRef());
+                shard.tell(new CanCommitTransaction(transactionID, ABIVersion.current()).toSerializable(), getRef());
                 final CanCommitTransactionReply canCommitReply = CanCommitTransactionReply.fromSerializable(
                         expectMsgClass(duration, CanCommitTransactionReply.class));
                 assertEquals("Can commit", true, canCommitReply.getCanCommit());
 
-                shard.tell(new CommitTransaction(transactionID, CURRENT_VERSION).toSerializable(), getRef());
+                shard.tell(new CommitTransaction(transactionID, ABIVersion.current()).toSerializable(), getRef());
                 expectMsgClass(duration, CommitTransactionReply.class);
 
                 final InOrder inOrder = inOrder(cohort);
@@ -1296,7 +1296,7 @@ public class ShardTest extends AbstractShardTest {
 
             // Send the CanCommitTransaction message for the first Tx.
 
-            shard.tell(new CanCommitTransaction(transactionID1, CURRENT_VERSION).toSerializable(), getRef());
+            shard.tell(new CanCommitTransaction(transactionID1, ABIVersion.current()).toSerializable(), getRef());
             final CanCommitTransactionReply canCommitReply = CanCommitTransactionReply.fromSerializable(
                     expectMsgClass(duration, CanCommitTransactionReply.class));
             assertEquals("Can commit", true, canCommitReply.getCanCommit());
@@ -1305,12 +1305,12 @@ public class ShardTest extends AbstractShardTest {
             // processed after the first Tx completes.
 
             final Future<Object> canCommitFuture = Patterns.ask(shard,
-                    new CanCommitTransaction(transactionID2, CURRENT_VERSION).toSerializable(), timeout);
+                    new CanCommitTransaction(transactionID2, ABIVersion.current()).toSerializable(), timeout);
 
             // Send the CommitTransaction message for the first Tx. This should send back an error
             // and trigger the 2nd Tx to proceed.
 
-            shard.tell(new CommitTransaction(transactionID1, CURRENT_VERSION).toSerializable(), getRef());
+            shard.tell(new CommitTransaction(transactionID1, ABIVersion.current()).toSerializable(), getRef());
             expectMsgClass(duration, akka.actor.Status.Failure.class);
 
             // Wait for the 2nd Tx to complete the canCommit phase.
@@ -1369,7 +1369,7 @@ public class ShardTest extends AbstractShardTest {
 
             // Send the CanCommitTransaction message for the first Tx.
 
-            shard.tell(new CanCommitTransaction(transactionID1, CURRENT_VERSION).toSerializable(), getRef());
+            shard.tell(new CanCommitTransaction(transactionID1, ABIVersion.current()).toSerializable(), getRef());
             final CanCommitTransactionReply canCommitReply = CanCommitTransactionReply.fromSerializable(
                 expectMsgClass(duration, CanCommitTransactionReply.class));
             assertEquals("Can commit", true, canCommitReply.getCanCommit());
@@ -1378,12 +1378,12 @@ public class ShardTest extends AbstractShardTest {
             // processed after the first Tx completes.
 
             final Future<Object> canCommitFuture = Patterns.ask(shard,
-                    new CanCommitTransaction(transactionID2, CURRENT_VERSION).toSerializable(), timeout);
+                    new CanCommitTransaction(transactionID2, ABIVersion.current()).toSerializable(), timeout);
 
             // Send the CommitTransaction message for the first Tx. This should send back an error
             // and trigger the 2nd Tx to proceed.
 
-            shard.tell(new CommitTransaction(transactionID1, CURRENT_VERSION).toSerializable(), getRef());
+            shard.tell(new CommitTransaction(transactionID1, ABIVersion.current()).toSerializable(), getRef());
             expectMsgClass(duration, akka.actor.Status.Failure.class);
 
             // Wait for the 2nd Tx to complete the canCommit phase.
@@ -1431,7 +1431,7 @@ public class ShardTest extends AbstractShardTest {
 
             // Send the CanCommitTransaction message.
 
-            shard.tell(new CanCommitTransaction(transactionID1, CURRENT_VERSION).toSerializable(), getRef());
+            shard.tell(new CanCommitTransaction(transactionID1, ABIVersion.current()).toSerializable(), getRef());
             expectMsgClass(duration, akka.actor.Status.Failure.class);
 
             // Send another can commit to ensure the failed one got cleaned up.
@@ -1444,7 +1444,7 @@ public class ShardTest extends AbstractShardTest {
             shard.tell(prepareReadyTransactionMessage(readWrite, shard.underlyingActor(), cohort, transactionID2, modification), getRef());
             expectMsgClass(duration, ReadyTransactionReply.class);
 
-            shard.tell(new CanCommitTransaction(transactionID2, CURRENT_VERSION).toSerializable(), getRef());
+            shard.tell(new CanCommitTransaction(transactionID2, ABIVersion.current()).toSerializable(), getRef());
             final CanCommitTransactionReply reply = CanCommitTransactionReply.fromSerializable(
                     expectMsgClass(CanCommitTransactionReply.class));
             assertEquals("getCanCommit", true, reply.getCanCommit());
@@ -1477,7 +1477,7 @@ public class ShardTest extends AbstractShardTest {
 
             // Send the CanCommitTransaction message.
 
-            shard.tell(new CanCommitTransaction(transactionID1, CURRENT_VERSION).toSerializable(), getRef());
+            shard.tell(new CanCommitTransaction(transactionID1, ABIVersion.current()).toSerializable(), getRef());
             CanCommitTransactionReply reply = CanCommitTransactionReply.fromSerializable(
                     expectMsgClass(CanCommitTransactionReply.class));
             assertEquals("getCanCommit", false, reply.getCanCommit());
@@ -1492,7 +1492,7 @@ public class ShardTest extends AbstractShardTest {
             shard.tell(prepareReadyTransactionMessage(readWrite, shard.underlyingActor(), cohort, transactionID2, modification), getRef());
             expectMsgClass(duration, ReadyTransactionReply.class);
 
-            shard.tell(new CanCommitTransaction(transactionID2, CURRENT_VERSION).toSerializable(), getRef());
+            shard.tell(new CanCommitTransaction(transactionID2, ABIVersion.current()).toSerializable(), getRef());
             reply = CanCommitTransactionReply.fromSerializable(
                     expectMsgClass(CanCommitTransactionReply.class));
             assertEquals("getCanCommit", true, reply.getCanCommit());
@@ -1634,12 +1634,12 @@ public class ShardTest extends AbstractShardTest {
             shard.tell(prepareReadyTransactionMessage(readWrite, shard.underlyingActor(), cohort, transactionID, modification), getRef());
             expectMsgClass(duration, ReadyTransactionReply.class);
 
-            shard.tell(new CanCommitTransaction(transactionID, CURRENT_VERSION).toSerializable(), getRef());
+            shard.tell(new CanCommitTransaction(transactionID, ABIVersion.current()).toSerializable(), getRef());
             final CanCommitTransactionReply canCommitReply = CanCommitTransactionReply.fromSerializable(
                 expectMsgClass(duration, CanCommitTransactionReply.class));
             assertEquals("Can commit", true, canCommitReply.getCanCommit());
 
-            shard.tell(new CommitTransaction(transactionID, CURRENT_VERSION).toSerializable(), getRef());
+            shard.tell(new CommitTransaction(transactionID, ABIVersion.current()).toSerializable(), getRef());
             expectMsgClass(duration, CommitTransactionReply.class);
 
             final NormalizedNode<?, ?> node = readStore(shard, TestModel.TEST_PATH);
@@ -1706,22 +1706,22 @@ public class ShardTest extends AbstractShardTest {
 
             // canCommit 1st Tx. We don't send the commit so it should timeout.
 
-            shard.tell(new CanCommitTransaction(transactionID1, CURRENT_VERSION).toSerializable(), getRef());
+            shard.tell(new CanCommitTransaction(transactionID1, ABIVersion.current()).toSerializable(), getRef());
             expectMsgClass(duration, CanCommitTransactionReply.class);
 
             // canCommit the 2nd Tx - it should complete after the 1st Tx times out.
 
-            shard.tell(new CanCommitTransaction(transactionID2, CURRENT_VERSION).toSerializable(), getRef());
+            shard.tell(new CanCommitTransaction(transactionID2, ABIVersion.current()).toSerializable(), getRef());
             expectMsgClass(duration, CanCommitTransactionReply.class);
 
             // Try to commit the 1st Tx - should fail as it's not the current Tx.
 
-            shard.tell(new CommitTransaction(transactionID1, CURRENT_VERSION).toSerializable(), getRef());
+            shard.tell(new CommitTransaction(transactionID1, ABIVersion.current()).toSerializable(), getRef());
             expectMsgClass(duration, akka.actor.Status.Failure.class);
 
             // Commit the 2nd Tx.
 
-            shard.tell(new CommitTransaction(transactionID2, CURRENT_VERSION).toSerializable(), getRef());
+            shard.tell(new CommitTransaction(transactionID2, ABIVersion.current()).toSerializable(), getRef());
             expectMsgClass(duration, CommitTransactionReply.class);
 
             final NormalizedNode<?, ?> node = readStore(shard, listNodePath);
@@ -1776,16 +1776,16 @@ public class ShardTest extends AbstractShardTest {
 
             // canCommit 1st Tx.
 
-            shard.tell(new CanCommitTransaction(transactionID1, CURRENT_VERSION).toSerializable(), getRef());
+            shard.tell(new CanCommitTransaction(transactionID1, ABIVersion.current()).toSerializable(), getRef());
             expectMsgClass(duration, CanCommitTransactionReply.class);
 
             // canCommit the 2nd Tx - it should get queued.
 
-            shard.tell(new CanCommitTransaction(transactionID2, CURRENT_VERSION).toSerializable(), getRef());
+            shard.tell(new CanCommitTransaction(transactionID2, ABIVersion.current()).toSerializable(), getRef());
 
             // canCommit the 3rd Tx - should exceed queue capacity and fail.
 
-            shard.tell(new CanCommitTransaction(transactionID3, CURRENT_VERSION).toSerializable(), getRef());
+            shard.tell(new CanCommitTransaction(transactionID3, ABIVersion.current()).toSerializable(), getRef());
             expectMsgClass(duration, akka.actor.Status.Failure.class);
         }};
     }
@@ -1832,7 +1832,7 @@ public class ShardTest extends AbstractShardTest {
             // All Tx's are readied. We'll send canCommit for the last one but not the others. The others
             // should expire from the queue and the last one should be processed.
 
-            shard.tell(new CanCommitTransaction(transactionID3, CURRENT_VERSION).toSerializable(), getRef());
+            shard.tell(new CanCommitTransaction(transactionID3, ABIVersion.current()).toSerializable(), getRef());
             expectMsgClass(duration, CanCommitTransactionReply.class);
         }};
     }
@@ -1862,7 +1862,7 @@ public class ShardTest extends AbstractShardTest {
 
             // CanCommit the first one so it's the current in-progress CohortEntry.
 
-            shard.tell(new CanCommitTransaction(transactionID1, CURRENT_VERSION).toSerializable(), getRef());
+            shard.tell(new CanCommitTransaction(transactionID1, ABIVersion.current()).toSerializable(), getRef());
             expectMsgClass(duration, CanCommitTransactionReply.class);
 
             // Ready the second Tx.
@@ -1889,7 +1889,7 @@ public class ShardTest extends AbstractShardTest {
             // Commit the first Tx. After completing, the second should expire from the queue and the third
             // Tx committed.
 
-            shard.tell(new CommitTransaction(transactionID1, CURRENT_VERSION).toSerializable(), getRef());
+            shard.tell(new CommitTransaction(transactionID1, ABIVersion.current()).toSerializable(), getRef());
             expectMsgClass(duration, CommitTransactionReply.class);
 
             // Expect commit reply from the third Tx.
@@ -1908,7 +1908,7 @@ public class ShardTest extends AbstractShardTest {
                     newShardProps().withDispatcher(Dispatchers.DefaultDispatcherId()),
                     "testCanCommitBeforeReadyFailure");
 
-            shard.tell(new CanCommitTransaction(nextTransactionId(), CURRENT_VERSION).toSerializable(), getRef());
+            shard.tell(new CanCommitTransaction(nextTransactionId(), ABIVersion.current()).toSerializable(), getRef());
             expectMsgClass(duration("5 seconds"), akka.actor.Status.Failure.class);
         }};
     }
@@ -1951,7 +1951,7 @@ public class ShardTest extends AbstractShardTest {
 
             // Send the CanCommitTransaction message for the first Tx.
 
-            shard.tell(new CanCommitTransaction(transactionID1, CURRENT_VERSION).toSerializable(), getRef());
+            shard.tell(new CanCommitTransaction(transactionID1, ABIVersion.current()).toSerializable(), getRef());
             final CanCommitTransactionReply canCommitReply = CanCommitTransactionReply.fromSerializable(
                     expectMsgClass(duration, CanCommitTransactionReply.class));
             assertEquals("Can commit", true, canCommitReply.getCanCommit());
@@ -1960,12 +1960,12 @@ public class ShardTest extends AbstractShardTest {
             // processed after the first Tx completes.
 
             final Future<Object> canCommitFuture = Patterns.ask(shard,
-                    new CanCommitTransaction(transactionID2, CURRENT_VERSION).toSerializable(), timeout);
+                    new CanCommitTransaction(transactionID2, ABIVersion.current()).toSerializable(), timeout);
 
             // Send the AbortTransaction message for the first Tx. This should trigger the 2nd
             // Tx to proceed.
 
-            shard.tell(new AbortTransaction(transactionID1, CURRENT_VERSION).toSerializable(), getRef());
+            shard.tell(new AbortTransaction(transactionID1, ABIVersion.current()).toSerializable(), getRef());
             expectMsgClass(duration, AbortTransactionReply.class);
 
             // Wait for the 2nd Tx to complete the canCommit phase.
@@ -2023,7 +2023,7 @@ public class ShardTest extends AbstractShardTest {
 
             // Send the AbortTransaction message.
 
-            shard.tell(new AbortTransaction(transactionID, CURRENT_VERSION).toSerializable(), getRef());
+            shard.tell(new AbortTransaction(transactionID, ABIVersion.current()).toSerializable(), getRef());
             expectMsgClass(duration, AbortTransactionReply.class);
 
             verify(cohort).abort();
@@ -2038,7 +2038,7 @@ public class ShardTest extends AbstractShardTest {
 
             // Now send CanCommitTransaction - should fail.
 
-            shard.tell(new CanCommitTransaction(transactionID, CURRENT_VERSION).toSerializable(), getRef());
+            shard.tell(new CanCommitTransaction(transactionID, ABIVersion.current()).toSerializable(), getRef());
 
             Throwable failure = expectMsgClass(duration, akka.actor.Status.Failure.class).cause();
             assertTrue("Failure type", failure instanceof IllegalStateException);

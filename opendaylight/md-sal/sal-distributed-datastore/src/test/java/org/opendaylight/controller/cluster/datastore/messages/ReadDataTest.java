@@ -11,6 +11,7 @@ import static org.junit.Assert.assertEquals;
 import java.io.Serializable;
 import org.apache.commons.lang.SerializationUtils;
 import org.junit.Test;
+import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 
@@ -23,7 +24,7 @@ public class ReadDataTest {
 
     @Test
     public void testSerialization() {
-        ReadData expected = new ReadData(TestModel.TEST_PATH, DataStoreVersions.CURRENT_VERSION);
+        ReadData expected = new ReadData(TestModel.TEST_PATH, ABIVersion.current());
 
         Object serialized = expected.toSerializable();
         assertEquals("Serialized type", ReadData.class, serialized.getClass());

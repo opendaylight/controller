@@ -43,6 +43,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.databroker.ConcurrentDOMDataBroker;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext.Builder;
@@ -644,7 +645,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         new WriteModification(CarsModel.newCarPath("optima"), car1).apply(modification);
 
         ForwardedReadyTransaction forwardedReady = new ForwardedReadyTransaction(tx1,
-                DataStoreVersions.CURRENT_VERSION, new ReadWriteShardDataTreeTransaction(
+            ABIVersion.current(), new ReadWriteShardDataTreeTransaction(
                         Mockito.mock(ShardDataTreeTransactionParent.class), tx1, modification), true);
 
         carsFollowerShard.get().tell(forwardedReady, followerTestKit.getRef());
@@ -664,7 +665,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         new WriteModification(CarsModel.newCarPath("sportage"), car2).apply(modification);
 
         forwardedReady = new ForwardedReadyTransaction(tx2,
-                DataStoreVersions.CURRENT_VERSION, new ReadWriteShardDataTreeTransaction(
+            ABIVersion.current(), new ReadWriteShardDataTreeTransaction(
                         Mockito.mock(ShardDataTreeTransactionParent.class), tx2, modification), false);
 
         carsFollowerShard.get().tell(forwardedReady, followerTestKit.getRef());

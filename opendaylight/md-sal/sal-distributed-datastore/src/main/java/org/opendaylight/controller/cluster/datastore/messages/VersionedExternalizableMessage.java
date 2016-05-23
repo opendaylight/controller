@@ -7,11 +7,12 @@
  */
 package org.opendaylight.controller.cluster.datastore.messages;
 
+import com.google.common.base.Preconditions;
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
-import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
+import org.opendaylight.controller.cluster.access.ABIVersion;
 
 /**
  * Abstract base class for a versioned Externalizable message.
@@ -21,33 +22,38 @@ import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 public abstract class VersionedExternalizableMessage implements Externalizable, SerializableMessage {
     private static final long serialVersionUID = 1L;
 
-    private short version = DataStoreVersions.CURRENT_VERSION;
+    private ABIVersion version;
 
     public VersionedExternalizableMessage() {
+        // For Externalizable
     }
 
-    public VersionedExternalizableMessage(short version) {
-        this.version = version <= DataStoreVersions.CURRENT_VERSION ? version: DataStoreVersions.CURRENT_VERSION;
+    protected VersionedExternalizableMessage(final ABIVersion version) {
+        if (ABIVersion.current().compareTo(version) > 0) {
+            this.version = ABIVersion.current();
+        } else {
+            this.version = Preconditions.checkNotNull(version);
+        }
     }
 
-    public short getVersion() {
+    public final ABIVersion getVersion() {
         return version;
     }
 
     @Override
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-        version = in.readShort();
+        version = ABIVersion.read(in);
     }
 
     @Override
     public void writeExternal(ObjectOutput out) throws IOException {
-        out.writeShort(version);
+        out.writeShort(version.shortValue());
     }
 
     @Override
     public final Object toSerializable() {
-        if (getVersion() < DataStoreVersions.BORON_VERSION) {
-            throw new UnsupportedOperationException("Versions prior to " + DataStoreVersions.BORON_VERSION + " are not supported");
+        if (ABIVersion.BORON.compareTo(version) > 0) {
+            throw new UnsupportedOperationException("Versions prior to " + ABIVersion.BORON + " are not supported");
         }
 
         return this;

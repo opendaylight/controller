@@ -35,6 +35,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.ThreePhaseCommitCohortProxy.CohortInfo;
 import org.opendaylight.controller.cluster.datastore.messages.AbortTransaction;
@@ -104,7 +105,7 @@ public class ThreePhaseCommitCohortProxyTest extends AbstractActorTest {
     public void testCanCommitYesWithOneCohort() throws Exception {
         ThreePhaseCommitCohortProxy proxy = new ThreePhaseCommitCohortProxy(actorContext, Arrays.asList(
                 newCohortInfo(new CohortActor.Builder(tx).expectCanCommit(
-                        CanCommitTransactionReply.yes(CURRENT_VERSION)))), tx);
+                        CanCommitTransactionReply.yes(ABIVersion.current())))), tx);
 
         verifyCanCommit(proxy.canCommit(), true);
         verifyCohortActors();
@@ -114,7 +115,7 @@ public class ThreePhaseCommitCohortProxyTest extends AbstractActorTest {
     public void testCanCommitNoWithOneCohort() throws Exception {
         ThreePhaseCommitCohortProxy proxy = new ThreePhaseCommitCohortProxy(actorContext, Arrays.asList(
                 newCohortInfo(new CohortActor.Builder(tx).expectCanCommit(
-                        CanCommitTransactionReply.no(CURRENT_VERSION)))), tx);
+                        CanCommitTransactionReply.no(ABIVersion.current())))), tx);
 
         verifyCanCommit(proxy.canCommit(), false);
         verifyCohortActors();
@@ -124,9 +125,9 @@ public class ThreePhaseCommitCohortProxyTest extends AbstractActorTest {
     public void testCanCommitYesWithTwoCohorts() throws Exception {
         List<CohortInfo> cohorts = Arrays.asList(
                 newCohortInfo(new CohortActor.Builder(tx).expectCanCommit(
-                        CanCommitTransactionReply.yes(CURRENT_VERSION))),
+                        CanCommitTransactionReply.yes(ABIVersion.current()))),
                 newCohortInfo(new CohortActor.Builder(tx).expectCanCommit(
-                        CanCommitTransactionReply.yes(CURRENT_VERSION))));
+                        CanCommitTransactionReply.yes(ABIVersion.current()))));
         ThreePhaseCommitCohortProxy proxy = new ThreePhaseCommitCohortProxy(actorContext, cohorts, tx);
 
         verifyCanCommit(proxy.canCommit(), true);
@@ -137,9 +138,9 @@ public class ThreePhaseCommitCohortProxyTest extends AbstractActorTest {
     public void testCanCommitNoWithThreeCohorts() throws Exception {
         List<CohortInfo> cohorts = Arrays.asList(
                 newCohortInfo(new CohortActor.Builder(tx).expectCanCommit(
-                        CanCommitTransactionReply.yes(CURRENT_VERSION))),
+                        CanCommitTransactionReply.yes(ABIVersion.current()))),
                 newCohortInfo(new CohortActor.Builder(tx).expectCanCommit(
-                        CanCommitTransactionReply.no(CURRENT_VERSION))),
+                        CanCommitTransactionReply.no(ABIVersion.current()))),
                 newCohortInfo(new CohortActor.Builder(tx)));
         ThreePhaseCommitCohortProxy proxy = new ThreePhaseCommitCohortProxy(actorContext, cohorts, tx);
 
@@ -178,11 +179,11 @@ public class ThreePhaseCommitCohortProxyTest extends AbstractActorTest {
     public void testAllThreePhasesSuccessful() throws Exception {
         List<CohortInfo> cohorts = Arrays.asList(
                 newCohortInfo(new CohortActor.Builder(tx).
-                        expectCanCommit(CanCommitTransactionReply.yes(CURRENT_VERSION)).
-                        expectCommit(CommitTransactionReply.instance(CURRENT_VERSION))),
+                        expectCanCommit(CanCommitTransactionReply.yes(ABIVersion.current())).
+                        expectCommit(CommitTransactionReply.instance(ABIVersion.current()))),
                 newCohortInfo(new CohortActor.Builder(tx).
-                        expectCanCommit(CanCommitTransactionReply.yes(CURRENT_VERSION)).
-                        expectCommit(CommitTransactionReply.instance(CURRENT_VERSION))));
+                        expectCanCommit(CanCommitTransactionReply.yes(ABIVersion.current())).
+                        expectCommit(CommitTransactionReply.instance(ABIVersion.current()))));
         ThreePhaseCommitCohortProxy proxy = new ThreePhaseCommitCohortProxy(actorContext, cohorts, tx);
 
         verifyCanCommit(proxy.canCommit(), true);
@@ -195,10 +196,10 @@ public class ThreePhaseCommitCohortProxyTest extends AbstractActorTest {
     public void testCommitWithExceptionFailure() throws Throwable {
         List<CohortInfo> cohorts = Arrays.asList(
                 newCohortInfo(new CohortActor.Builder(tx).
-                        expectCanCommit(CanCommitTransactionReply.yes(CURRENT_VERSION)).
-                        expectCommit(CommitTransactionReply.instance(CURRENT_VERSION))),
+                        expectCanCommit(CanCommitTransactionReply.yes(ABIVersion.current())).
+                        expectCommit(CommitTransactionReply.instance(ABIVersion.current()))),
                 newCohortInfo(new CohortActor.Builder(tx).
-                        expectCanCommit(CanCommitTransactionReply.yes(CURRENT_VERSION)).
+                        expectCanCommit(CanCommitTransactionReply.yes(ABIVersion.current())).
                         expectCommit(new TestException())));
         ThreePhaseCommitCohortProxy proxy = new ThreePhaseCommitCohortProxy(actorContext, cohorts, tx);
 
@@ -211,7 +212,7 @@ public class ThreePhaseCommitCohortProxyTest extends AbstractActorTest {
     public void testCommitWithInvalidResponseType() throws Throwable {
         ThreePhaseCommitCohortProxy proxy = new ThreePhaseCommitCohortProxy(actorContext, Arrays.asList(
                 newCohortInfo(new CohortActor.Builder(tx).
-                        expectCanCommit(CanCommitTransactionReply.yes(CURRENT_VERSION)).
+                        expectCanCommit(CanCommitTransactionReply.yes(ABIVersion.current())).
                         expectCommit("invalid"))), tx);
 
         verifyCanCommit(proxy.canCommit(), true);
@@ -223,7 +224,7 @@ public class ThreePhaseCommitCohortProxyTest extends AbstractActorTest {
     public void testAbort() throws Exception {
         ThreePhaseCommitCohortProxy proxy = new ThreePhaseCommitCohortProxy(actorContext, Arrays.asList(
                 newCohortInfo(new CohortActor.Builder(tx).expectAbort(
-                        AbortTransactionReply.instance(CURRENT_VERSION)))), tx);
+                        AbortTransactionReply.instance(ABIVersion.current())))), tx);
 
         verifySuccessfulFuture(proxy.abort());
         verifyCohortActors();

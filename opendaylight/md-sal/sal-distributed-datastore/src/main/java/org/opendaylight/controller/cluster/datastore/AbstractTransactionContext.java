@@ -7,7 +7,9 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import com.google.common.base.Preconditions;
 import javax.annotation.Nonnull;
+import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,16 +19,16 @@ abstract class AbstractTransactionContext implements TransactionContext {
     private final TransactionIdentifier<?> transactionIdentifier;
     private long modificationCount = 0;
     private boolean handOffComplete;
-    private final short transactionVersion;
+    private final ABIVersion transactionVersion;
 
     protected AbstractTransactionContext(TransactionIdentifier<?> transactionIdentifier) {
-        this(transactionIdentifier, DataStoreVersions.CURRENT_VERSION);
+        this(transactionIdentifier, ABIVersion.current());
     }
 
     protected AbstractTransactionContext(TransactionIdentifier<?> transactionIdentifier,
-            short transactionVersion) {
+            ABIVersion transactionVersion) {
         this.transactionIdentifier = transactionIdentifier;
-        this.transactionVersion = transactionVersion;
+        this.transactionVersion = Preconditions.checkNotNull(transactionVersion);
     }
 
     /**
@@ -61,7 +63,7 @@ abstract class AbstractTransactionContext implements TransactionContext {
     }
 
     @Override
-    public short getTransactionVersion() {
+    public ABIVersion getTransactionVersion() {
         return transactionVersion;
     }
 }

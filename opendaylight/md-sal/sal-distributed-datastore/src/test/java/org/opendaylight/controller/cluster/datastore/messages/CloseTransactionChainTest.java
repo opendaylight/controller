@@ -11,6 +11,7 @@ import static org.junit.Assert.assertEquals;
 import java.io.Serializable;
 import org.apache.commons.lang.SerializationUtils;
 import org.junit.Test;
+import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.datastore.AbstractTest;
 import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 
@@ -23,7 +24,7 @@ public class CloseTransactionChainTest extends AbstractTest {
 
     @Test
     public void testSerialization() {
-        CloseTransactionChain expected = new CloseTransactionChain(nextHistoryId(), DataStoreVersions.CURRENT_VERSION);
+        CloseTransactionChain expected = new CloseTransactionChain(nextHistoryId(), ABIVersion.current());
 
         Object serialized = expected.toSerializable();
         assertEquals("Serialized type", CloseTransactionChain.class, serialized.getClass());
@@ -31,7 +32,7 @@ public class CloseTransactionChainTest extends AbstractTest {
         CloseTransactionChain actual = CloseTransactionChain.fromSerializable(
                 SerializationUtils.clone((Serializable) serialized));
         assertEquals("getTransactionChainId", expected.getTransactionChainId(), actual.getTransactionChainId());
-        assertEquals("getVersion", DataStoreVersions.CURRENT_VERSION, actual.getVersion());
+        assertEquals("getVersion", ABIVersion.current(), actual.getVersion());
     }
 
     @Test

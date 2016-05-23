@@ -39,6 +39,7 @@ import java.util.function.Function;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.datastore.AbstractActorTest;
 import org.opendaylight.controller.cluster.datastore.ClusterWrapper;
 import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
@@ -357,7 +358,7 @@ public class ActorContextTest extends AbstractActorTest{
                     shardLeaderElectionTimeout(100, TimeUnit.MILLISECONDS).build();
 
             final String expPrimaryPath = "akka://test-system/find-primary-shard";
-            final short expPrimaryVersion = DataStoreVersions.CURRENT_VERSION;
+            final ABIVersion expPrimaryVersion = ABIVersion.current();
             ActorContext actorContext =
                     new ActorContext(getSystem(), shardManager, mock(ClusterWrapper.class),
                             mock(Configuration.class), dataStoreContext, new PrimaryShardInfoFutureCache()) {
@@ -485,9 +486,9 @@ public class ActorContextTest extends AbstractActorTest{
             TestActorRef<MockShardManager> shardManagerActorRef = TestActorRef.create(getSystem(), MockShardManager.props());
             MockShardManager shardManagerActor = shardManagerActorRef.underlyingActor();
             shardManagerActor.addFindPrimaryResp("shard1", new RemotePrimaryShardFound(shardActorRef1.path().toString(),
-                    DataStoreVersions.CURRENT_VERSION));
+                ABIVersion.current()));
             shardManagerActor.addFindPrimaryResp("shard2", new RemotePrimaryShardFound(shardActorRef2.path().toString(),
-                    DataStoreVersions.CURRENT_VERSION));
+                ABIVersion.current()));
             shardManagerActor.addFindPrimaryResp("shard3", new NoShardLeaderException("not found"));
 
             Configuration mockConfig = mock(Configuration.class);

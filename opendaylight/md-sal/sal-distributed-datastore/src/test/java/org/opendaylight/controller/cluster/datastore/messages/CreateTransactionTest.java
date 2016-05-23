@@ -11,6 +11,7 @@ import static org.junit.Assert.assertEquals;
 import java.io.Serializable;
 import org.apache.commons.lang.SerializationUtils;
 import org.junit.Test;
+import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.datastore.AbstractTest;
 import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 
@@ -23,7 +24,7 @@ public class CreateTransactionTest extends AbstractTest {
 
     @Test
     public void testSerialization() {
-        CreateTransaction expected = new CreateTransaction(nextTransactionId(), 2, DataStoreVersions.CURRENT_VERSION);
+        CreateTransaction expected = new CreateTransaction(nextTransactionId(), 2, ABIVersion.current());
 
         Object serialized = expected.toSerializable();
         assertEquals("Serialized type", CreateTransaction.class, serialized.getClass());
@@ -37,8 +38,7 @@ public class CreateTransactionTest extends AbstractTest {
 
     @Test
     public void testSerializationWithNewerVersion() {
-        short newerVersion = DataStoreVersions.CURRENT_VERSION + (short)1;
-        CreateTransaction expected = new CreateTransaction(nextTransactionId(), 2, newerVersion);
+        CreateTransaction expected = new CreateTransaction(nextTransactionId(), 2, ABIVersion.TEST_FUTURE_VERSION);
 
         Object serialized = expected.toSerializable();
         assertEquals("Serialized type", CreateTransaction.class, serialized.getClass());

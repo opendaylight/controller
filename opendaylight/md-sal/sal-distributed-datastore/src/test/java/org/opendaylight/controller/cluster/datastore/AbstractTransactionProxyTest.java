@@ -45,6 +45,7 @@ import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext.Builder;
@@ -234,11 +235,11 @@ public abstract class AbstractTransactionProxyTest extends AbstractTest {
 
 
     protected Future<ReadDataReply> readDataReply(NormalizedNode<?, ?> data) {
-        return Futures.successful(new ReadDataReply(data, DataStoreVersions.CURRENT_VERSION));
+        return Futures.successful(new ReadDataReply(data, ABIVersion.current()));
     }
 
     protected Future<DataExistsReply> dataExistsReply(boolean exists) {
-        return Futures.successful(new DataExistsReply(exists, DataStoreVersions.CURRENT_VERSION));
+        return Futures.successful(new DataExistsReply(exists, ABIVersion.current()));
     }
 
     protected Future<BatchedModificationsReply> batchedModificationsReply(int count) {
@@ -290,7 +291,7 @@ public abstract class AbstractTransactionProxyTest extends AbstractTest {
                     eq(actorSelection(actorRef)), isA(ReadyLocalTransaction.class), any(Timeout.class));
     }
 
-    protected CreateTransactionReply createTransactionReply(ActorRef actorRef, short transactionVersion){
+    protected CreateTransactionReply createTransactionReply(ActorRef actorRef, ABIVersion transactionVersion){
         return new CreateTransactionReply(actorRef.path().toString(), nextTransactionId(), transactionVersion);
     }
 
@@ -299,21 +300,21 @@ public abstract class AbstractTransactionProxyTest extends AbstractTest {
     }
 
     protected Future<PrimaryShardInfo> primaryShardInfoReply(ActorSystem actorSystem, ActorRef actorRef) {
-        return primaryShardInfoReply(actorSystem, actorRef, DataStoreVersions.CURRENT_VERSION);
+        return primaryShardInfoReply(actorSystem, actorRef, ABIVersion.current());
     }
 
     protected Future<PrimaryShardInfo> primaryShardInfoReply(ActorSystem actorSystem, ActorRef actorRef,
-            short transactionVersion) {
+            ABIVersion transactionVersion) {
         return Futures.successful(new PrimaryShardInfo(actorSystem.actorSelection(actorRef.path()),
                 transactionVersion));
     }
 
     protected ActorRef setupActorContextWithoutInitialCreateTransaction(ActorSystem actorSystem, String shardName) {
-        return setupActorContextWithoutInitialCreateTransaction(actorSystem, shardName, DataStoreVersions.CURRENT_VERSION);
+        return setupActorContextWithoutInitialCreateTransaction(actorSystem, shardName, ABIVersion.current());
     }
 
     protected ActorRef setupActorContextWithoutInitialCreateTransaction(ActorSystem actorSystem, String shardName,
-            short transactionVersion) {
+            ABIVersion transactionVersion) {
         ActorRef actorRef = actorSystem.actorOf(Props.create(DoNothingActor.class));
         log.info("Created mock shard actor {}", actorRef);
 
@@ -327,7 +328,7 @@ public abstract class AbstractTransactionProxyTest extends AbstractTest {
     }
 
     protected ActorRef setupActorContextWithInitialCreateTransaction(ActorSystem actorSystem,
-            TransactionType type, short transactionVersion, String shardName) {
+            TransactionType type, ABIVersion transactionVersion, String shardName) {
         ActorRef shardActorRef = setupActorContextWithoutInitialCreateTransaction(actorSystem, shardName,
                 transactionVersion);
 
@@ -336,7 +337,7 @@ public abstract class AbstractTransactionProxyTest extends AbstractTest {
     }
 
     protected ActorRef setupActorContextWithInitialCreateTransaction(ActorSystem actorSystem,
-            TransactionType type, short transactionVersion, String prefix, ActorRef shardActorRef) {
+            TransactionType type, ABIVersion transactionVersion, String prefix, ActorRef shardActorRef) {
 
         ActorRef txActorRef;
         if(type == TransactionType.WRITE_ONLY &&
@@ -358,14 +359,13 @@ public abstract class AbstractTransactionProxyTest extends AbstractTest {
     }
 
     protected ActorRef setupActorContextWithInitialCreateTransaction(ActorSystem actorSystem, TransactionType type) {
-        return setupActorContextWithInitialCreateTransaction(actorSystem, type, DataStoreVersions.CURRENT_VERSION,
+        return setupActorContextWithInitialCreateTransaction(actorSystem, type, ABIVersion.current(),
                 DefaultShardStrategy.DEFAULT_SHARD);
     }
 
     protected ActorRef setupActorContextWithInitialCreateTransaction(ActorSystem actorSystem, TransactionType type,
             String shardName) {
-        return setupActorContextWithInitialCreateTransaction(actorSystem, type, DataStoreVersions.CURRENT_VERSION,
-                shardName);
+        return setupActorContextWithInitialCreateTransaction(actorSystem, type, ABIVersion.current(), shardName);
     }
 
     protected void propagateReadFailedExceptionCause(CheckedFuture<?, ReadFailedException> future)

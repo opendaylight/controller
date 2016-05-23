@@ -11,7 +11,7 @@ import static org.junit.Assert.assertEquals;
 import java.io.Serializable;
 import org.apache.commons.lang.SerializationUtils;
 import org.junit.Test;
-import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
+import org.opendaylight.controller.cluster.access.ABIVersion;
 
 /**
  * Unit tests for AbortTransactionReply.
@@ -22,13 +22,13 @@ public class AbortTransactionReplyTest {
 
     @Test
     public void testSerialization() {
-        AbortTransactionReply expected = AbortTransactionReply.instance(DataStoreVersions.CURRENT_VERSION);
+        AbortTransactionReply expected = AbortTransactionReply.instance(ABIVersion.current());
 
         Object serialized = expected.toSerializable();
         assertEquals("Serialized type", AbortTransactionReply.class, serialized.getClass());
 
         AbortTransactionReply actual = (AbortTransactionReply)SerializationUtils.clone((Serializable) serialized);
-        assertEquals("getVersion", DataStoreVersions.CURRENT_VERSION, actual.getVersion());
+        assertEquals("getVersion", ABIVersion.current(), actual.getVersion());
     }
 
     @Test

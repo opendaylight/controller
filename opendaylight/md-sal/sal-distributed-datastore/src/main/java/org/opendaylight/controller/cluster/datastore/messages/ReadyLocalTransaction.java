@@ -8,8 +8,8 @@
 package org.opendaylight.controller.cluster.datastore.messages;
 
 import com.google.common.base.Preconditions;
+import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
-import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 
 /**
@@ -25,7 +25,7 @@ public final class ReadyLocalTransaction {
     private final boolean doCommitOnReady;
 
     // The version of the remote system used only when needing to convert to BatchedModifications.
-    private short remoteVersion = DataStoreVersions.CURRENT_VERSION;
+    private ABIVersion remoteVersion = ABIVersion.current();
 
     public ReadyLocalTransaction(final TransactionIdentifier<?> transactionID, final DataTreeModification modification,
             final boolean doCommitOnReady) {
@@ -46,11 +46,11 @@ public final class ReadyLocalTransaction {
         return doCommitOnReady;
     }
 
-    public short getRemoteVersion() {
+    public ABIVersion getRemoteVersion() {
         return remoteVersion;
     }
 
-    public void setRemoteVersion(short remoteVersion) {
-        this.remoteVersion = remoteVersion;
+    public void setRemoteVersion(ABIVersion remoteVersion) {
+        this.remoteVersion = Preconditions.checkNotNull(remoteVersion);
     }
 }

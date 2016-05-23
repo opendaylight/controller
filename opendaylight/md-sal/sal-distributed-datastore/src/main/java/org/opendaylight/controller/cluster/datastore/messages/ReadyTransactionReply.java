@@ -11,7 +11,7 @@ package org.opendaylight.controller.cluster.datastore.messages;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
-import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
+import org.opendaylight.controller.cluster.access.ABIVersion;
 
 public class ReadyTransactionReply extends VersionedExternalizableMessage {
     private static final long serialVersionUID = 1L;
@@ -22,10 +22,10 @@ public class ReadyTransactionReply extends VersionedExternalizableMessage {
     }
 
     public ReadyTransactionReply(String cohortPath) {
-        this(cohortPath, DataStoreVersions.CURRENT_VERSION);
+        this(cohortPath, ABIVersion.current());
     }
 
-    public ReadyTransactionReply(String cohortPath, short version) {
+    public ReadyTransactionReply(String cohortPath, ABIVersion version) {
         super(version);
         this.cohortPath = cohortPath;
     }

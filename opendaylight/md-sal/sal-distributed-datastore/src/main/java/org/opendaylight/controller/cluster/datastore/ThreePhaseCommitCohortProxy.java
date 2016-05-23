@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.AbortTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.AbortTransactionReply;
@@ -42,7 +43,7 @@ public class ThreePhaseCommitCohortProxy extends AbstractThreePhaseCommitCohort<
 
     private static final MessageSupplier COMMIT_MESSAGE_SUPPLIER = new MessageSupplier() {
         @Override
-        public Object newMessage(TransactionIdentifier<?> transactionId, short version) {
+        public Object newMessage(TransactionIdentifier<?> transactionId, ABIVersion version) {
             return new CommitTransaction(transactionId, version).toSerializable();
         }
 
@@ -54,7 +55,7 @@ public class ThreePhaseCommitCohortProxy extends AbstractThreePhaseCommitCohort<
 
     private static final MessageSupplier ABORT_MESSAGE_SUPPLIER = new MessageSupplier() {
         @Override
-        public Object newMessage(TransactionIdentifier<?> transactionId, short version) {
+        public Object newMessage(TransactionIdentifier<?> transactionId, ABIVersion version) {
             return new AbortTransaction(transactionId, version).toSerializable();
         }
 
@@ -394,7 +395,7 @@ public class ThreePhaseCommitCohortProxy extends AbstractThreePhaseCommitCohort<
     }
 
     private interface MessageSupplier {
-        Object newMessage(TransactionIdentifier<?> transactionId, short version);
+        Object newMessage(TransactionIdentifier<?> transactionId, ABIVersion version);
         boolean isSerializedReplyType(Object reply);
     }
 }

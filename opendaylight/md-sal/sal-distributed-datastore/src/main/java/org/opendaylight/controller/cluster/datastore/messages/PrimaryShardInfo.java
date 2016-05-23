@@ -11,6 +11,7 @@ import akka.actor.ActorSelection;
 import com.google.common.base.Preconditions;
 import java.util.Optional;
 import javax.annotation.Nonnull;
+import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
 
 /**
@@ -20,19 +21,19 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
  */
 public class PrimaryShardInfo {
     private final ActorSelection primaryShardActor;
-    private final short primaryShardVersion;
+    private final ABIVersion primaryShardVersion;
     private final DataTree localShardDataTree;
 
-    public PrimaryShardInfo(@Nonnull ActorSelection primaryShardActor, short primaryShardVersion,
+    public PrimaryShardInfo(@Nonnull ActorSelection primaryShardActor, ABIVersion primaryShardVersion,
             @Nonnull DataTree localShardDataTree) {
         this.primaryShardActor = Preconditions.checkNotNull(primaryShardActor);
-        this.primaryShardVersion = primaryShardVersion;
+        this.primaryShardVersion = Preconditions.checkNotNull(primaryShardVersion);
         this.localShardDataTree = Preconditions.checkNotNull(localShardDataTree);
     }
 
-    public PrimaryShardInfo(@Nonnull ActorSelection primaryShardActor, short primaryShardVersion) {
+    public PrimaryShardInfo(@Nonnull ActorSelection primaryShardActor, ABIVersion primaryShardVersion) {
         this.primaryShardActor = Preconditions.checkNotNull(primaryShardActor);
-        this.primaryShardVersion = primaryShardVersion;
+        this.primaryShardVersion = Preconditions.checkNotNull(primaryShardVersion);
         this.localShardDataTree = null;
     }
 
@@ -46,7 +47,7 @@ public class PrimaryShardInfo {
     /**
      * Returns the version of the primary shard.
      */
-    public short getPrimaryShardVersion() {
+    public ABIVersion getPrimaryShardVersion() {
         return primaryShardVersion;
     }
 
