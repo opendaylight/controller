@@ -7,27 +7,27 @@
  */
 package org.opendaylight.controller.cluster.access.concepts;
 
-public class LocalHistoryIdentifierTest extends AbstractIdentifierTest<LocalHistoryIdentifier<?>> {
-    private static final FrontendIdentifier<?> FRONTEND =
-            new FrontendIdentifier<>(MemberName.forName("test"), FrontendIdentifierTest.ONE_FRONTEND_TYPE);
-    private static final ClientIdentifier<?> CLIENT = new ClientIdentifier<>(FRONTEND, 0);
+public class LocalHistoryIdentifierTest extends AbstractIdentifierTest<LocalHistoryIdentifier> {
+    private static final FrontendIdentifier FRONTEND =
+            new FrontendIdentifier(MemberName.forName("test"), FrontendIdentifierTest.ONE_FRONTEND_TYPE);
+    private static final ClientIdentifier CLIENT = new ClientIdentifier(FRONTEND, 0);
 
-    private static final LocalHistoryIdentifier<?> OBJECT = new LocalHistoryIdentifier<>(CLIENT, 0);
-    private static final LocalHistoryIdentifier<?> DIFFERENT_OBJECT = new LocalHistoryIdentifier<>(CLIENT, 1);
-    private static final LocalHistoryIdentifier<?> EQUAL_OBJECT = new LocalHistoryIdentifier<>(CLIENT, 0);
+    private static final LocalHistoryIdentifier OBJECT = new LocalHistoryIdentifier(CLIENT, 0);
+    private static final LocalHistoryIdentifier DIFFERENT_OBJECT = new LocalHistoryIdentifier(CLIENT, 1);
+    private static final LocalHistoryIdentifier EQUAL_OBJECT = new LocalHistoryIdentifier(CLIENT, 0);
 
     @Override
-    LocalHistoryIdentifier<?> object() {
+    LocalHistoryIdentifier object() {
         return OBJECT;
     }
 
     @Override
-    LocalHistoryIdentifier<?> differentObject() {
+    LocalHistoryIdentifier differentObject() {
         return DIFFERENT_OBJECT;
     }
 
     @Override
-    LocalHistoryIdentifier<?> equalObject() {
+    LocalHistoryIdentifier equalObject() {
         return EQUAL_OBJECT;
     }
 }
