@@ -23,53 +23,64 @@ import org.opendaylight.yangtools.concepts.Identifier;
  * @author Robert Varga
  */
 @Beta
-public final class FrontendIdentifier<T extends FrontendType> implements Identifier {
-    private static final class Proxy<T extends FrontendType> implements Externalizable {
+public final class FrontendIdentifier implements Identifier, WritableObject {
+    private static final class Proxy implements Externalizable {
         private static final long serialVersionUID = 1L;
         private MemberName memberName;
-        private T clientType;
+        private FrontendType clientType;
 
         public Proxy() {
             // Needed for Externalizable
         }
 
-        Proxy(final MemberName memberName, final T clientType) {
+        Proxy(final MemberName memberName, final FrontendType clientType) {
             this.memberName = Preconditions.checkNotNull(memberName);
             this.clientType = Preconditions.checkNotNull(clientType);
         }
 
         @Override
         public void writeExternal(ObjectOutput out) throws IOException {
-            out.writeObject(memberName);
-            out.writeObject(clientType);
+            memberName.writeTo(out);
+            clientType.writeTo(out);
         }
 
-        @SuppressWarnings("unchecked")
         @Override
         public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-            memberName = (MemberName) in.readObject();
-            clientType = (T) in.readObject();
+            memberName = MemberName.readFrom(in);
+            clientType = FrontendType.readFrom(in);
         }
 
         private Object readResolve() {
-            return new FrontendIdentifier<>(memberName, clientType);
+            return new FrontendIdentifier(memberName, clientType);
         }
     }
 
     private static final long serialVersionUID = 1L;
     private final MemberName memberName;
-    private final T clientType;
+    private final FrontendType clientType;
 
-    FrontendIdentifier(final MemberName memberName, final T clientType) {
+    FrontendIdentifier(final MemberName memberName, final FrontendType clientType) {
         this.clientType = Preconditions.checkNotNull(clientType);
         this.memberName = Preconditions.checkNotNull(memberName);
     }
 
-    public static <T extends FrontendType> FrontendIdentifier<T> create(MemberName memberName, final T clientType) {
-        return new FrontendIdentifier<>(memberName, clientType);
+    public static FrontendIdentifier create(MemberName memberName, final FrontendType clientType) {
+        return new FrontendIdentifier(memberName, clientType);
     }
 
-    public T getClientType() {
+    public static FrontendIdentifier readFrom(ObjectInput in) throws IOException, ClassNotFoundException {
+        final MemberName memberName = MemberName.readFrom(in);
+        final FrontendType clientType = FrontendType.readFrom(in);
+        return new FrontendIdentifier(memberName, clientType);
+    }
+
+    @Override
+    public void writeTo(ObjectOutput out) throws IOException {
+        memberName.writeTo(out);
+        clientType.writeTo(out);
+    }
+
+    public FrontendType getClientType() {
         return clientType;
     }
 
@@ -91,7 +102,7 @@ public final class FrontendIdentifier<T extends FrontendType> implements Identif
             return false;
         }
 
-        final FrontendIdentifier<?> other = (FrontendIdentifier<?>) o;
+        final FrontendIdentifier other = (FrontendIdentifier) o;
         return memberName.equals(other.memberName) && clientType.equals(other.clientType);
     }
 
@@ -102,6 +113,6 @@ public final class FrontendIdentifier<T extends FrontendType> implements Identif
     }
 
     private Object writeReplace() {
-        return new Proxy<>(memberName, clientType);
+        return new Proxy(memberName, clientType);
     }
 }
