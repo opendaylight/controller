@@ -42,7 +42,7 @@ import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import scala.concurrent.Promise;
 
 public class TransactionChainProxyTest extends AbstractTransactionProxyTest {
-    private LocalHistoryIdentifier<?> historyId;
+    private LocalHistoryIdentifier historyId;
 
     @Override
     public void setUp() {

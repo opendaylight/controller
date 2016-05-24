@@ -21,24 +21,24 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
 public abstract class AbstractThreePhaseCommitMessage extends VersionedExternalizableMessage {
     private static final long serialVersionUID = 1L;
 
-    private TransactionIdentifier<?> transactionID;
+    private TransactionIdentifier transactionID;
 
     protected AbstractThreePhaseCommitMessage() {
     }
 
-    protected AbstractThreePhaseCommitMessage(final TransactionIdentifier<?> transactionID, final short version) {
+    protected AbstractThreePhaseCommitMessage(final TransactionIdentifier transactionID, final short version) {
         super(version);
         this.transactionID = Preconditions.checkNotNull(transactionID);
     }
 
-    public TransactionIdentifier<?> getTransactionID() {
+    public TransactionIdentifier getTransactionID() {
         return transactionID;
     }
 
     @Override
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         super.readExternal(in);
-        transactionID = (TransactionIdentifier<?>) in.readObject();
+        transactionID = (TransactionIdentifier) in.readObject();
     }
 
     @Override
@@ -49,7 +49,6 @@ public abstract class AbstractThreePhaseCommitMessage extends VersionedExternali
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + " [transactionID=" + transactionID + ", version=" + getVersion()
-                + "]";
+        return getClass().getSimpleName() + " [transactionID=" + transactionID + ", version=" + getVersion() + "]";
     }
 }

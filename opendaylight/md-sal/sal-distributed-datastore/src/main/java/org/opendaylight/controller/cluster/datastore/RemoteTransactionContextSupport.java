@@ -90,7 +90,7 @@ final class RemoteTransactionContextSupport {
         return parent.getActorContext();
     }
 
-    private TransactionIdentifier<?> getIdentifier() {
+    private TransactionIdentifier getIdentifier() {
         return parent.getIdentifier();
     }
 

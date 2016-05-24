@@ -44,9 +44,9 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 public abstract class ShardTransaction extends AbstractUntypedActorWithMetering {
     private final ActorRef shardActor;
     private final ShardStats shardStats;
-    private final TransactionIdentifier<?> transactionID;
+    private final TransactionIdentifier transactionID;
 
-    protected ShardTransaction(ActorRef shardActor, ShardStats shardStats, TransactionIdentifier<?> transactionID) {
+    protected ShardTransaction(ActorRef shardActor, ShardStats shardStats, TransactionIdentifier transactionID) {
         super("shard-tx"); //actor name override used for metering. This does not change the "real" actor name
         this.shardActor = shardActor;
         this.shardStats = shardStats;
@@ -64,7 +64,7 @@ public abstract class ShardTransaction extends AbstractUntypedActorWithMetering 
         return shardActor;
     }
 
-    protected final TransactionIdentifier<?> getTransactionID() {
+    protected final TransactionIdentifier getTransactionID() {
         return transactionID;
     }
 

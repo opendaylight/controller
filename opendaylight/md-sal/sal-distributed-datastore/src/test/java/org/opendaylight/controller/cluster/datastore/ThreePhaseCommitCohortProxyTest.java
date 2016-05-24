@@ -70,7 +70,7 @@ public class ThreePhaseCommitCohortProxyTest extends AbstractActorTest {
 
     private final TestActorFactory actorFactory = new TestActorFactory(getSystem());
     private final List<TestActorRef<CohortActor>> cohortActors = new ArrayList<>();
-    private final TransactionIdentifier<?> tx = nextTransactionId();
+    private final TransactionIdentifier tx = nextTransactionId();
 
 
     @Before
@@ -388,9 +388,9 @@ public class ThreePhaseCommitCohortProxyTest extends AbstractActorTest {
             private Object canCommitReply;
             private Object commitReply;
             private Object abortReply;
-            private final TransactionIdentifier<?> transactionId;
+            private final TransactionIdentifier transactionId;
 
-            Builder(TransactionIdentifier<?> transactionId) {
+            Builder(TransactionIdentifier transactionId) {
                 this.transactionId = Preconditions.checkNotNull(transactionId);
             }
 

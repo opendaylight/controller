@@ -34,10 +34,10 @@ public class TransactionReadyReplyMapper extends Mapper<Object, ActorSelection> 
         }
     };
     private static final Logger LOG = LoggerFactory.getLogger(TransactionReadyReplyMapper.class);
-    private final TransactionIdentifier<?> identifier;
+    private final TransactionIdentifier identifier;
     private final ActorContext actorContext;
 
-    protected TransactionReadyReplyMapper(final ActorContext actorContext, final TransactionIdentifier<?> identifier) {
+    protected TransactionReadyReplyMapper(final ActorContext actorContext, final TransactionIdentifier identifier) {
         this.actorContext = Preconditions.checkNotNull(actorContext);
         this.identifier = Preconditions.checkNotNull(identifier);
     }
@@ -67,7 +67,7 @@ public class TransactionReadyReplyMapper extends Mapper<Object, ActorSelection> 
     }
 
     static Future<ActorSelection> transform(final Future<Object> readyReplyFuture, final ActorContext actorContext,
-            final TransactionIdentifier<?> identifier) {
+            final TransactionIdentifier identifier) {
         return readyReplyFuture.transform(new TransactionReadyReplyMapper(actorContext, identifier),
             SAME_FAILURE_TRANSFORMER, actorContext.getClientDispatcher());
     }
