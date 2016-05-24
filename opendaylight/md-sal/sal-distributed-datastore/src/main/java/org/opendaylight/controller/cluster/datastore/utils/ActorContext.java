@@ -29,7 +29,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.ClusterWrapper;
-import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.DatastoreContextFactory;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
@@ -47,6 +46,7 @@ import org.opendaylight.controller.cluster.datastore.messages.LocalShardNotFound
 import org.opendaylight.controller.cluster.datastore.messages.PrimaryShardInfo;
 import org.opendaylight.controller.cluster.datastore.messages.RemotePrimaryShardFound;
 import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContext;
+import org.opendaylight.controller.cluster.datastore.persisted.StateVersion;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategyFactory;
 import org.opendaylight.controller.cluster.raft.client.messages.Shutdown;
 import org.opendaylight.controller.cluster.reporting.MetricsReporter;
@@ -222,7 +222,7 @@ public class ActorContext {
                 } else if (response instanceof LocalPrimaryShardFound) {
                     LOG.debug("findPrimaryShardAsync received: {}", response);
                     LocalPrimaryShardFound found = (LocalPrimaryShardFound)response;
-                    return onPrimaryShardFound(shardName, found.getPrimaryPath(), DataStoreVersions.CURRENT_VERSION,
+                    return onPrimaryShardFound(shardName, found.getPrimaryPath(), StateVersion.current(),
                             found.getLocalShardDataTree());
                 } else if (response instanceof NotInitializedException) {
                     throw (NotInitializedException)response;
@@ -239,7 +239,7 @@ public class ActorContext {
     }
 
     private PrimaryShardInfo onPrimaryShardFound(String shardName, String primaryActorPath,
-            short primaryVersion, DataTree localShardDataTree) {
+            StateVersion primaryVersion, DataTree localShardDataTree) {
         ActorSelection actorSelection = actorSystem.actorSelection(primaryActorPath);
         PrimaryShardInfo info = localShardDataTree == null ? new PrimaryShardInfo(actorSelection, primaryVersion) :
             new PrimaryShardInfo(actorSelection, primaryVersion, localShardDataTree);
