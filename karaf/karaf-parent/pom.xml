@@ -376,6 +376,22 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
                            value="org.apache.aries.proxy.impl/1.0.5">
                     <include name="startup.properties"/>
                   </replace>
+
+                  <!-- BUG-5917, BUG-5943: remove overrides for platform factories and neuter Xalan's services-->
+                  <replace dir="${project.build.directory}/assembly/etc" token="javax.xml.parsers.DocumentBuilderFactory="
+                           value="# BUG-5943: javax.xml.parsers.DocumentBuilderFactory=">
+                    <include name="system.properties"/>
+                  </replace>
+                  <replace dir="${project.build.directory}/assembly/etc" token="javax.xml.transform.TransformerFactory="
+                           value="# BUG-5917: javax.xml.transform.TransformerFactory=">
+                    <include name="system.properties"/>
+                  </replace>
+                  <jar destfile="${project.build.directory}/assembly/lib/endorsed/odl-org.apache.servicemix.bundles.xalan-2.7.2_2_odl.jar">
+                    <zipfileset src="${project.build.directory}/assembly/lib/endorsed/org.apache.servicemix.bundles.xalan-2.7.2_2.jar"
+                                excludes="META-INF/services/javax.xml.*" erroronmissingarchive="false"/>
+                  </jar>
+                  <delete file="${project.build.directory}/assembly/lib/endorsed/org.apache.servicemix.bundles.xalan-2.7.2_2.jar" />
+
                 </tasks>
               </configuration>
             </execution>
