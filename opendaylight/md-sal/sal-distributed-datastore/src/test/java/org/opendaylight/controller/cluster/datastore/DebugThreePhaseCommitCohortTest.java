@@ -31,7 +31,7 @@ import scala.concurrent.Future;
  * @author Thomas Pantelis
  */
 public class DebugThreePhaseCommitCohortTest {
-    private final TransactionIdentifier<?> transactionId = MockIdentifiers.transactionIdentifier(
+    private final TransactionIdentifier transactionId = MockIdentifiers.transactionIdentifier(
         DebugThreePhaseCommitCohortTest.class, "mock");
 
     @Test

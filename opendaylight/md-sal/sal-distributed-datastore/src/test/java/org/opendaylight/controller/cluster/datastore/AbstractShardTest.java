@@ -273,7 +273,7 @@ public abstract class AbstractShardTest extends AbstractActorTest{
     }
 
     protected Object prepareReadyTransactionMessage(boolean remoteReadWriteTransaction, Shard shard, ShardDataTreeCohort cohort,
-            TransactionIdentifier<?> transactionID, MutableCompositeModification modification,
+            TransactionIdentifier transactionID, MutableCompositeModification modification,
             boolean doCommitOnReady) {
         if(remoteReadWriteTransaction){
             return prepareForwardedReadyTransaction(cohort, transactionID, CURRENT_VERSION,
@@ -301,14 +301,14 @@ public abstract class AbstractShardTest extends AbstractActorTest{
     }
 
     protected ForwardedReadyTransaction prepareForwardedReadyTransaction(ShardDataTreeCohort cohort,
-            TransactionIdentifier<?> transactionID, short version, boolean doCommitOnReady) {
+            TransactionIdentifier transactionID, short version, boolean doCommitOnReady) {
         return new ForwardedReadyTransaction(transactionID, version,
                 new ReadWriteShardDataTreeTransaction(newShardDataTreeTransactionParent(cohort), transactionID,
                         mock(DataTreeModification.class)), doCommitOnReady);
     }
 
     protected Object prepareReadyTransactionMessage(boolean remoteReadWriteTransaction, Shard shard, ShardDataTreeCohort cohort,
-            TransactionIdentifier<?> transactionID, MutableCompositeModification modification) {
+            TransactionIdentifier transactionID, MutableCompositeModification modification) {
         return prepareReadyTransactionMessage(remoteReadWriteTransaction, shard, cohort, transactionID, modification, false);
     }
 
@@ -321,12 +321,12 @@ public abstract class AbstractShardTest extends AbstractActorTest{
         });
     }
 
-    protected BatchedModifications prepareBatchedModifications(TransactionIdentifier<?> transactionID,
+    protected BatchedModifications prepareBatchedModifications(TransactionIdentifier transactionID,
                                                                MutableCompositeModification modification) {
         return prepareBatchedModifications(transactionID, modification, false);
     }
 
-    private static BatchedModifications prepareBatchedModifications(TransactionIdentifier<?> transactionID,
+    private static BatchedModifications prepareBatchedModifications(TransactionIdentifier transactionID,
                                                              MutableCompositeModification modification,
                                                              boolean doCommitOnReady) {
         final BatchedModifications batchedModifications = new BatchedModifications(transactionID, CURRENT_VERSION);
@@ -406,14 +406,14 @@ public abstract class AbstractShardTest extends AbstractActorTest{
     }
 
     static CommitTransactionPayload payloadForModification(final DataTree source, final DataTreeModification mod,
-            final TransactionIdentifier<?> transactionId) throws DataValidationFailedException, IOException {
+            final TransactionIdentifier transactionId) throws DataValidationFailedException, IOException {
         source.validate(mod);
         final DataTreeCandidate candidate = source.prepare(mod);
         source.commit(candidate);
         return CommitTransactionPayload.create(transactionId, candidate);
     }
 
-    static BatchedModifications newBatchedModifications(final TransactionIdentifier<?> transactionID,
+    static BatchedModifications newBatchedModifications(final TransactionIdentifier transactionID,
             final YangInstanceIdentifier path, final NormalizedNode<?, ?> data, final boolean ready, final boolean doCommitOnReady,
             final int messagesSent) {
         final BatchedModifications batched = new BatchedModifications(transactionID, CURRENT_VERSION);

@@ -12,7 +12,6 @@ import akka.actor.PoisonPill;
 import akka.persistence.UntypedPersistentActor;
 import com.google.common.annotations.Beta;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
-import org.opendaylight.controller.cluster.access.concepts.FrontendType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,13 +21,13 @@ import org.slf4j.LoggerFactory;
  * @author Robert Varga
  */
 @Beta
-public abstract class AbstractClientActor<T extends FrontendType> extends UntypedPersistentActor {
+public abstract class AbstractClientActor extends UntypedPersistentActor {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractClientActor.class);
     private AbstractClientActorBehavior<?> currentBehavior;
 
-    protected AbstractClientActor(final FrontendIdentifier<T> frontendId) {
-        currentBehavior = new RecoveringClientActorBehavior<>(
-                new InitialClientActorContext<>(this, frontendId.toString()), frontendId);
+    protected AbstractClientActor(final FrontendIdentifier frontendId) {
+        currentBehavior = new RecoveringClientActorBehavior(
+                new InitialClientActorContext(this, frontendId.toString()), frontendId);
     }
 
     @Override
@@ -68,5 +67,5 @@ public abstract class AbstractClientActor<T extends FrontendType> extends Untype
         switchBehavior(currentBehavior.onReceiveRecover(recover));
     }
 
-    protected abstract ClientActorBehavior<T> initialBehavior(ClientActorContext<T> context);
+    protected abstract ClientActorBehavior initialBehavior(ClientActorContext context);
 }

@@ -30,8 +30,8 @@ final class TransactionContextFactory extends AbstractTransactionContextFactory<
     @SuppressWarnings("unused")
     private volatile long nextHistory = 1;
 
-    TransactionContextFactory(final ActorContext actorContext, final ClientIdentifier<?> clientId) {
-        super(actorContext, new LocalHistoryIdentifier<>(clientId, 0));
+    TransactionContextFactory(final ActorContext actorContext, final ClientIdentifier clientId) {
+        super(actorContext, new LocalHistoryIdentifier(clientId, 0));
     }
 
     @Override
@@ -44,21 +44,21 @@ final class TransactionContextFactory extends AbstractTransactionContextFactory<
     }
 
     @Override
-    protected Future<PrimaryShardInfo> findPrimaryShard(final String shardName, TransactionIdentifier<?> txId) {
+    protected Future<PrimaryShardInfo> findPrimaryShard(final String shardName, TransactionIdentifier txId) {
         return getActorContext().findPrimaryShardAsync(shardName);
     }
 
     @Override
-    protected <T> void onTransactionReady(final TransactionIdentifier<?> transaction, final Collection<Future<T>> cohortFutures) {
+    protected <T> void onTransactionReady(final TransactionIdentifier transaction, final Collection<Future<T>> cohortFutures) {
         // Transactions are disconnected, this is a no-op
     }
 
     DOMStoreTransactionChain createTransactionChain() {
-        return new TransactionChainProxy(this, new LocalHistoryIdentifier<>(getHistoryId().getClienId(),
+        return new TransactionChainProxy(this, new LocalHistoryIdentifier(getHistoryId().getClientId(),
                 NEXT_HISTORY_UPDATER.getAndIncrement(this)));
     }
 
     @Override
-    protected void onTransactionContextCreated(final TransactionIdentifier<?> transactionId) {
+    protected void onTransactionContextCreated(final TransactionIdentifier transactionId) {
     }
 }

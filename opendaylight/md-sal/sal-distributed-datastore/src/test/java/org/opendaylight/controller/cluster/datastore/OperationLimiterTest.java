@@ -19,7 +19,7 @@ import org.opendaylight.controller.cluster.datastore.messages.DataExistsReply;
  * @author Thomas Pantelis
  */
 public class OperationLimiterTest {
-    private final TransactionIdentifier<?> transactionId = MockIdentifiers.transactionIdentifier(
+    private final TransactionIdentifier transactionId = MockIdentifiers.transactionIdentifier(
         OperationLimiterTest.class, "mock");
 
     @Test

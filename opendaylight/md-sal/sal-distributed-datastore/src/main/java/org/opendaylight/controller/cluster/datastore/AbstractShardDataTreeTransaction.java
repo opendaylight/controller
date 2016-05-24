@@ -21,15 +21,15 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
 @NotThreadSafe
 abstract class AbstractShardDataTreeTransaction<T extends DataTreeSnapshot> {
     private final T snapshot;
-    private final TransactionIdentifier<?> id;
+    private final TransactionIdentifier id;
     private boolean closed;
 
-    protected AbstractShardDataTreeTransaction(final TransactionIdentifier<?> id, final T snapshot) {
+    protected AbstractShardDataTreeTransaction(final TransactionIdentifier id, final T snapshot) {
         this.snapshot = Preconditions.checkNotNull(snapshot);
         this.id = Preconditions.checkNotNull(id);
     }
 
-    TransactionIdentifier<?> getId() {
+    final TransactionIdentifier getId() {
         return id;
     }
 

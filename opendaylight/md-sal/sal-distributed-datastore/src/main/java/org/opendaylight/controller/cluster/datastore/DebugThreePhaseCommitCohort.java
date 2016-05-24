@@ -29,10 +29,10 @@ class DebugThreePhaseCommitCohort extends AbstractThreePhaseCommitCohort<Object>
 
     private final AbstractThreePhaseCommitCohort<?> delegate;
     private final Throwable debugContext;
-    private final TransactionIdentifier<?> transactionId;
+    private final TransactionIdentifier transactionId;
     private Logger log = LOG;
 
-    DebugThreePhaseCommitCohort(TransactionIdentifier<?> transactionId, AbstractThreePhaseCommitCohort<?> delegate,
+    DebugThreePhaseCommitCohort(TransactionIdentifier transactionId, AbstractThreePhaseCommitCohort<?> delegate,
             Throwable debugContext) {
         this.delegate = Preconditions.checkNotNull(delegate);
         this.debugContext = Preconditions.checkNotNull(debugContext);

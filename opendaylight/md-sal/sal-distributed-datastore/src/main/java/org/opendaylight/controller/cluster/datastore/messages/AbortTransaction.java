@@ -17,7 +17,7 @@ public class AbortTransaction extends AbstractThreePhaseCommitMessage {
     public AbortTransaction() {
     }
 
-    public AbortTransaction(TransactionIdentifier<?> transactionID, final short version) {
+    public AbortTransaction(TransactionIdentifier transactionID, final short version) {
         super(transactionID, version);
     }
 

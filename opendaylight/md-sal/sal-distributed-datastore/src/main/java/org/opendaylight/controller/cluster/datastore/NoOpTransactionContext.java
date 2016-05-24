@@ -24,7 +24,7 @@ final class NoOpTransactionContext extends AbstractTransactionContext {
 
     private final Throwable failure;
 
-    public NoOpTransactionContext(Throwable failure, TransactionIdentifier<?> identifier) {
+    public NoOpTransactionContext(Throwable failure, TransactionIdentifier identifier) {
         super(identifier);
         this.failure = failure;
     }

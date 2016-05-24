@@ -27,11 +27,11 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
     private static final ListenableFuture<Void> VOID_FUTURE = Futures.immediateFuture(null);
     private final DataTreeModification transaction;
     private final ShardDataTree dataTree;
-    private final TransactionIdentifier<?> transactionId;
+    private final TransactionIdentifier transactionId;
     private DataTreeCandidateTip candidate;
 
     SimpleShardDataTreeCohort(final ShardDataTree dataTree, final DataTreeModification transaction,
-            final TransactionIdentifier<?> transactionId) {
+            final TransactionIdentifier transactionId) {
         this.dataTree = Preconditions.checkNotNull(dataTree);
         this.transaction = Preconditions.checkNotNull(transaction);
         this.transactionId = Preconditions.checkNotNull(transactionId);

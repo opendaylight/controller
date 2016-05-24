@@ -22,16 +22,16 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
+import org.opendaylight.controller.cluster.access.concepts.FrontendType;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
-import org.opendaylight.controller.cluster.databroker.actors.dds.DistributedDataStoreFrontend;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import scala.concurrent.duration.FiniteDuration;
 
 public class DistributedDataStoreTest extends AbstractActorTest {
-    private static final ClientIdentifier<DistributedDataStoreFrontend> UNKNOWN_ID = ClientIdentifier.create(
-            FrontendIdentifier.create(MemberName.forName("local"),new DistributedDataStoreFrontend("unknown")), 0);
+    private static final ClientIdentifier UNKNOWN_ID = ClientIdentifier.create( FrontendIdentifier.create(
+        MemberName.forName("local"), FrontendType.forName("unknown")), 0);
 
     private SchemaContext schemaContext;
 

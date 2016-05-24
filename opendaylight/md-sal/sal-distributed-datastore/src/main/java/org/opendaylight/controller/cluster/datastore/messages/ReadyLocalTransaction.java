@@ -21,20 +21,20 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification
  */
 public final class ReadyLocalTransaction {
     private final DataTreeModification modification;
-    private final TransactionIdentifier<?> transactionID;
+    private final TransactionIdentifier transactionID;
     private final boolean doCommitOnReady;
 
     // The version of the remote system used only when needing to convert to BatchedModifications.
     private short remoteVersion = DataStoreVersions.CURRENT_VERSION;
 
-    public ReadyLocalTransaction(final TransactionIdentifier<?> transactionID, final DataTreeModification modification,
+    public ReadyLocalTransaction(final TransactionIdentifier transactionID, final DataTreeModification modification,
             final boolean doCommitOnReady) {
         this.transactionID = Preconditions.checkNotNull(transactionID);
         this.modification = Preconditions.checkNotNull(modification);
         this.doCommitOnReady = doCommitOnReady;
     }
 
-    public TransactionIdentifier<?> getTransactionID() {
+    public TransactionIdentifier getTransactionID() {
         return transactionID;
     }
 

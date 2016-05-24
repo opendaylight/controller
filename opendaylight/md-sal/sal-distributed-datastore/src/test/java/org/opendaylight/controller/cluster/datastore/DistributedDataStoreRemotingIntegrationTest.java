@@ -122,8 +122,8 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
     private final DatastoreContext.Builder followerDatastoreContextBuilder =
             DatastoreContext.newBuilder().shardHeartbeatIntervalInMillis(100).shardElectionTimeoutFactor(5).
                 customRaftPolicyImplementation(DisableElectionsRaftPolicy.class.getName());
-    private final TransactionIdentifier<?> tx1 = nextTransactionId();
-    private final TransactionIdentifier<?> tx2 = nextTransactionId();
+    private final TransactionIdentifier tx1 = nextTransactionId();
+    private final TransactionIdentifier tx2 = nextTransactionId();
 
     private DistributedDataStore followerDistributedDataStore;
     private DistributedDataStore leaderDistributedDataStore;

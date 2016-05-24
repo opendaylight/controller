@@ -42,7 +42,7 @@ public class RemoteTransactionContext extends AbstractTransactionContext {
     private BatchedModifications batchedModifications;
     private int totalBatchedModificationsSent;
 
-    protected RemoteTransactionContext(TransactionIdentifier<?> identifier, ActorSelection actor,
+    protected RemoteTransactionContext(TransactionIdentifier identifier, ActorSelection actor,
             ActorContext actorContext, short remoteTransactionVersion, OperationLimiter limiter) {
         super(identifier, remoteTransactionVersion);
         this.limiter = Preconditions.checkNotNull(limiter);

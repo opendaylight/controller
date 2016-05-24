@@ -25,12 +25,12 @@ public class BatchedModifications extends MutableCompositeModification {
     private boolean ready;
     private boolean doCommitOnReady;
     private int totalMessagesSent;
-    private TransactionIdentifier<?> transactionID;
+    private TransactionIdentifier transactionID;
 
     public BatchedModifications() {
     }
 
-    public BatchedModifications(TransactionIdentifier<?> transactionID, short version) {
+    public BatchedModifications(TransactionIdentifier transactionID, short version) {
         super(version);
         this.transactionID = Preconditions.checkNotNull(transactionID, "transactionID can't be null");
     }
@@ -59,7 +59,7 @@ public class BatchedModifications extends MutableCompositeModification {
         this.totalMessagesSent = totalMessagesSent;
     }
 
-    public TransactionIdentifier<?> getTransactionID() {
+    public TransactionIdentifier getTransactionID() {
         return transactionID;
     }
 
@@ -67,7 +67,7 @@ public class BatchedModifications extends MutableCompositeModification {
     @Override
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         super.readExternal(in);
-        transactionID = (TransactionIdentifier<?>) in.readObject();
+        transactionID = (TransactionIdentifier) in.readObject();
         ready = in.readBoolean();
         totalMessagesSent = in.readInt();
         doCommitOnReady = in.readBoolean();

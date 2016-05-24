@@ -17,31 +17,20 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
 
 public abstract class AbstractTest {
     protected static final MemberName MEMBER_NAME = MemberName.forName("member-1");
-    private static final FrontendType FRONTEND_TYPE = new FrontendType() {
-        private static final long serialVersionUID = 1L;
+    private static final FrontendType FRONTEND_TYPE = FrontendType.forName(ShardTransactionTest.class.getSimpleName());
 
-        @Override
-        public String toSimpleString() {
-            return ShardTransactionTest.class.getSimpleName();
-        }
+    protected static final FrontendIdentifier FRONTEND_ID = FrontendIdentifier.create(MEMBER_NAME, FRONTEND_TYPE);
 
-        private Object readResolve() {
-            return FRONTEND_TYPE;
-        }
-    };
-
-    protected static final FrontendIdentifier<?> FRONTEND_ID = FrontendIdentifier.create(MEMBER_NAME, FRONTEND_TYPE);
-
-    private static final ClientIdentifier<?> CLIENT_ID = ClientIdentifier.create(FRONTEND_ID, 0);
-    private static final LocalHistoryIdentifier<?> HISTORY_ID = new LocalHistoryIdentifier<>(CLIENT_ID, 0);
+    private static final ClientIdentifier CLIENT_ID = ClientIdentifier.create(FRONTEND_ID, 0);
+    private static final LocalHistoryIdentifier HISTORY_ID = new LocalHistoryIdentifier(CLIENT_ID, 0);
     private static final AtomicLong HISTORY_COUNTER = new AtomicLong();
     private static final AtomicLong TX_COUNTER = new AtomicLong();
 
-    protected static TransactionIdentifier<?> nextTransactionId() {
-        return new TransactionIdentifier<>(HISTORY_ID, TX_COUNTER.getAndIncrement());
+    protected static TransactionIdentifier nextTransactionId() {
+        return new TransactionIdentifier(HISTORY_ID, TX_COUNTER.getAndIncrement());
     }
 
-    protected static LocalHistoryIdentifier<?> nextHistoryId() {
-        return new LocalHistoryIdentifier<>(CLIENT_ID, HISTORY_COUNTER.incrementAndGet());
+    protected static LocalHistoryIdentifier nextHistoryId() {
+        return new LocalHistoryIdentifier(CLIENT_ID, HISTORY_COUNTER.incrementAndGet());
     }
 }

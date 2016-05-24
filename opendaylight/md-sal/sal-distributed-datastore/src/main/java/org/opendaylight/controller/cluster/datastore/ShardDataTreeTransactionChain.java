@@ -23,13 +23,13 @@ import org.slf4j.LoggerFactory;
 final class ShardDataTreeTransactionChain extends ShardDataTreeTransactionParent {
     private static final Logger LOG = LoggerFactory.getLogger(ShardDataTreeTransactionChain.class);
     private final ShardDataTree dataTree;
-    private final LocalHistoryIdentifier<?> chainId;
+    private final LocalHistoryIdentifier chainId;
 
     private ReadWriteShardDataTreeTransaction previousTx;
     private ReadWriteShardDataTreeTransaction openTransaction;
     private boolean closed;
 
-    ShardDataTreeTransactionChain(final LocalHistoryIdentifier<?> localHistoryIdentifier, final ShardDataTree dataTree) {
+    ShardDataTreeTransactionChain(final LocalHistoryIdentifier localHistoryIdentifier, final ShardDataTree dataTree) {
         this.dataTree = Preconditions.checkNotNull(dataTree);
         this.chainId = Preconditions.checkNotNull(localHistoryIdentifier);
     }
@@ -45,14 +45,14 @@ final class ShardDataTreeTransactionChain extends ShardDataTreeTransactionParent
         }
     }
 
-    ReadOnlyShardDataTreeTransaction newReadOnlyTransaction(final TransactionIdentifier<?> txId) {
+    ReadOnlyShardDataTreeTransaction newReadOnlyTransaction(final TransactionIdentifier txId) {
         final DataTreeSnapshot snapshot = getSnapshot();
         LOG.debug("Allocated read-only transaction {} snapshot {}", txId, snapshot);
 
         return new ReadOnlyShardDataTreeTransaction(txId, snapshot);
     }
 
-    ReadWriteShardDataTreeTransaction newReadWriteTransaction(final TransactionIdentifier<?> txId) {
+    ReadWriteShardDataTreeTransaction newReadWriteTransaction(final TransactionIdentifier txId) {
         final DataTreeSnapshot snapshot = getSnapshot();
         LOG.debug("Allocated read-write transaction {} snapshot {}", txId, snapshot);
 
