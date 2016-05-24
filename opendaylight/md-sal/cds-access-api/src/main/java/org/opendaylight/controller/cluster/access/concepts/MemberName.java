@@ -12,6 +12,8 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.base.Verify;
+import java.io.DataInput;
+import java.io.DataOutput;
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
@@ -25,7 +27,7 @@ import org.opendaylight.yangtools.concepts.Identifier;
  * @author Robert Varga
  */
 @Beta
-public final class MemberName implements Comparable<MemberName>, Identifier {
+public final class MemberName implements Comparable<MemberName>, Identifier, WritableObject {
     private static final class Proxy implements Externalizable {
         private static final long serialVersionUID = 1L;
         private byte[] serialized;
@@ -34,8 +36,8 @@ public final class MemberName implements Comparable<MemberName>, Identifier {
             // For Externalizable
         }
 
-        Proxy(final String name) {
-            serialized = name.getBytes(StandardCharsets.UTF_8);
+        Proxy(final byte[] serialized) {
+            this.serialized = Preconditions.checkNotNull(serialized);
         }
 
         @Override
@@ -45,34 +47,47 @@ public final class MemberName implements Comparable<MemberName>, Identifier {
         }
 
         @Override
-        public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        public void readExternal(ObjectInput in) throws IOException {
             serialized = new byte[in.readInt()];
             in.readFully(serialized);
         }
 
         private Object readResolve() {
             // TODO: consider caching instances here
-            return new MemberName(new String(serialized, StandardCharsets.UTF_8), this);
+            return new MemberName(new String(serialized, StandardCharsets.UTF_8), serialized);
         }
     }
 
     private static final long serialVersionUID = 1L;
     private final String name;
-    private volatile Proxy proxy;
+    private volatile byte[] serialized;
 
-    MemberName(final String name) {
+    private MemberName(final String name) {
         this.name = Preconditions.checkNotNull(name);
     }
 
-    MemberName(final String name, final Proxy proxy) {
-        this.name = Preconditions.checkNotNull(name);
-        this.proxy = Verify.verifyNotNull(proxy);
+    MemberName(final String name, final byte[] serialized) {
+        this(name);
+        this.serialized = Verify.verifyNotNull(serialized);
     }
 
     public static MemberName forName(final String name) {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(name));
         // TODO: consider caching instances here
         return new MemberName(name);
+    }
+
+    public static MemberName readFrom(final DataInput in) throws IOException {
+        final byte[] serialized = new byte[in.readInt()];
+        in.readFully(serialized);
+        return new MemberName(new String(serialized, StandardCharsets.UTF_8));
+    }
+
+    @Override
+    public void writeTo(final DataOutput out) throws IOException {
+        final byte[] serialized = getSerialized();
+        out.writeInt(serialized.length);
+        out.write(serialized);
     }
 
     public String getName() {
@@ -99,14 +114,16 @@ public final class MemberName implements Comparable<MemberName>, Identifier {
         return MoreObjects.toStringHelper(MemberName.class).add("name", name).toString();
     }
 
-    Object writeReplace() {
-        Proxy ret = proxy;
-        if (ret == null) {
-            // We do not really care if multiple threads race here
-            ret = new Proxy(name);
-            proxy = ret;
+    private byte[] getSerialized() {
+        byte[] local = serialized;
+        if (local == null) {
+            local = name.getBytes(StandardCharsets.UTF_8);
+            serialized = local;
         }
+        return local;
+    }
 
-        return ret;
+    Object writeReplace() {
+        return new Proxy(getSerialized());
     }
 }
