@@ -40,14 +40,14 @@ class ShardTransactionActorFactory {
         this.shardActor = shardActor;
     }
 
-    private static String actorNameFor(final TransactionIdentifier<?> txId) {
-        final LocalHistoryIdentifier<?> historyId = txId.getHistoryId();
-        final ClientIdentifier<?> clientId = historyId.getClienId();
-        final FrontendIdentifier<?> frontendId = clientId.getFrontendId();
+    private static String actorNameFor(final TransactionIdentifier txId) {
+        final LocalHistoryIdentifier historyId = txId.getHistoryId();
+        final ClientIdentifier clientId = historyId.getClientId();
+        final FrontendIdentifier frontendId = clientId.getFrontendId();
 
         final StringBuilder sb = new StringBuilder("shard-");
         sb.append(frontendId.getMemberName().getName()).append(':');
-        sb.append(frontendId.getClientType().toSimpleString()).append('@');
+        sb.append(frontendId.getClientType().getName()).append('@');
         sb.append(clientId.getGeneration()).append(':');
         if (historyId.getHistoryId() != 0) {
             sb.append(historyId.getHistoryId()).append('-');
@@ -56,7 +56,7 @@ class ShardTransactionActorFactory {
         return sb.append(txId.getTransactionId()).toString();
     }
 
-    ActorRef newShardTransaction(TransactionType type, TransactionIdentifier<?> transactionID) {
+    ActorRef newShardTransaction(TransactionType type, TransactionIdentifier transactionID) {
         final AbstractShardDataTreeTransaction<?> transaction;
         switch (type) {
         case READ_ONLY:

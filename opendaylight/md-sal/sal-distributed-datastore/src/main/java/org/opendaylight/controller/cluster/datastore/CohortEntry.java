@@ -35,7 +35,7 @@ final class CohortEntry {
 
     private final Stopwatch lastAccessTimer = Stopwatch.createStarted();
     private final ReadWriteShardDataTreeTransaction transaction;
-    private final TransactionIdentifier<?> transactionID;
+    private final TransactionIdentifier transactionID;
     private final CompositeDataTreeCohort userCohorts;
     private final short clientVersion;
 
@@ -47,7 +47,7 @@ final class CohortEntry {
     private ActorRef replySender;
     private Shard shard;
 
-    CohortEntry(TransactionIdentifier<?> transactionID, ReadWriteShardDataTreeTransaction transaction,
+    CohortEntry(TransactionIdentifier transactionID, ReadWriteShardDataTreeTransaction transaction,
             DataTreeCohortActorRegistry cohortRegistry, SchemaContext schema, short clientVersion) {
         this.transaction = Preconditions.checkNotNull(transaction);
         this.transactionID = Preconditions.checkNotNull(transactionID);
@@ -55,7 +55,7 @@ final class CohortEntry {
         this.userCohorts = new CompositeDataTreeCohort(cohortRegistry, transactionID, schema, COMMIT_STEP_TIMEOUT);
     }
 
-    CohortEntry(TransactionIdentifier<?> transactionID, ShardDataTreeCohort cohort, DataTreeCohortActorRegistry cohortRegistry,
+    CohortEntry(TransactionIdentifier transactionID, ShardDataTreeCohort cohort, DataTreeCohortActorRegistry cohortRegistry,
             SchemaContext schema, short clientVersion) {
         this.transactionID = Preconditions.checkNotNull(transactionID);
         this.cohort = cohort;
@@ -69,7 +69,7 @@ final class CohortEntry {
         lastAccessTimer.start();
     }
 
-    TransactionIdentifier<?> getTransactionID() {
+    TransactionIdentifier getTransactionID() {
         return transactionID;
     }
 

@@ -10,7 +10,6 @@ package org.opendaylight.controller.cluster.datastore.entityownership;
 import akka.actor.ActorRef;
 import akka.actor.Cancellable;
 import akka.actor.Status.Failure;
-import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -41,26 +40,10 @@ class EntityOwnershipShardCommitCoordinator {
             return "entityCommitRetry";
         }
     };
-    private static final FrontendType FRONTEND_TYPE = new FrontendType() {
-        private static final long serialVersionUID = 1L;
-
-        @Override
-        public String toString() {
-            return MoreObjects.toStringHelper(FrontendType.class).toString();
-        }
-
-        private Object readResolve() {
-            return FRONTEND_TYPE;
-        }
-
-        @Override
-        public String toSimpleString() {
-            return "entity-ownership-internal";
-        }
-    };
+    private static final FrontendType FRONTEND_TYPE = FrontendType.forName("entity-ownership-internal");
 
     private final Queue<Modification> pendingModifications = new LinkedList<>();
-    private final LocalHistoryIdentifier<?> historyId;
+    private final LocalHistoryIdentifier historyId;
     private final Logger log;
 
     private BatchedModifications inflightCommit;
@@ -69,7 +52,7 @@ class EntityOwnershipShardCommitCoordinator {
 
     EntityOwnershipShardCommitCoordinator(MemberName localMemberName, Logger log) {
         this.log = Preconditions.checkNotNull(log);
-        historyId = new LocalHistoryIdentifier<>(
+        historyId = new LocalHistoryIdentifier(
                 ClientIdentifier.create(FrontendIdentifier.create(localMemberName, FRONTEND_TYPE), 0), 0);
     }
 
@@ -220,7 +203,7 @@ class EntityOwnershipShardCommitCoordinator {
 
     BatchedModifications newBatchedModifications() {
         BatchedModifications modifications = new BatchedModifications(
-            new TransactionIdentifier<>(historyId, ++transactionIDCounter), DataStoreVersions.CURRENT_VERSION);
+            new TransactionIdentifier(historyId, ++transactionIDCounter), DataStoreVersions.CURRENT_VERSION);
         modifications.setDoCommitOnReady(true);
         modifications.setReady(true);
         modifications.setTotalMessagesSent(1);

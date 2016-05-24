@@ -43,7 +43,7 @@ public class BatchedModificationsTest extends AbstractTest {
 
         YangInstanceIdentifier deletePath = TestModel.TEST_PATH;
 
-        final TransactionIdentifier<?> tx1 = nextTransactionId();
+        final TransactionIdentifier tx1 = nextTransactionId();
         BatchedModifications batched = new BatchedModifications(tx1, DataStoreVersions.CURRENT_VERSION);
         batched.addModification(new WriteModification(writePath, writeData));
         batched.addModification(new MergeModification(mergePath, mergeData));
@@ -76,7 +76,7 @@ public class BatchedModificationsTest extends AbstractTest {
         assertEquals("getPath", deletePath, delete.getPath());
 
         // Test with different params.
-        final TransactionIdentifier<?> tx2 = nextTransactionId();
+        final TransactionIdentifier tx2 = nextTransactionId();
         batched = new BatchedModifications(tx2, (short)10000);
 
         clone = (BatchedModifications) SerializationUtils.clone((Serializable) batched.toSerializable());

@@ -41,7 +41,7 @@ abstract class AbstractTransactionContextFactory<F extends LocalTransactionFacto
             AtomicLongFieldUpdater.newUpdater(AbstractTransactionContextFactory.class, "nextTx");
 
     private final ConcurrentMap<String, F> knownLocal = new ConcurrentHashMap<>();
-    private final LocalHistoryIdentifier<?> historyId;
+    private final LocalHistoryIdentifier historyId;
     private final ActorContext actorContext;
 
     // Used via TX_COUNTER_UPDATER
@@ -49,7 +49,7 @@ abstract class AbstractTransactionContextFactory<F extends LocalTransactionFacto
     private volatile long nextTx;
 
     protected AbstractTransactionContextFactory(final ActorContext actorContext,
-            final LocalHistoryIdentifier<?> historyId) {
+            final LocalHistoryIdentifier historyId) {
         this.actorContext = Preconditions.checkNotNull(actorContext);
         this.historyId = Preconditions.checkNotNull(historyId);
     }
@@ -58,7 +58,7 @@ abstract class AbstractTransactionContextFactory<F extends LocalTransactionFacto
         return actorContext;
     }
 
-    final LocalHistoryIdentifier<?> getHistoryId() {
+    final LocalHistoryIdentifier getHistoryId() {
         return historyId;
     }
 
@@ -158,7 +158,7 @@ abstract class AbstractTransactionContextFactory<F extends LocalTransactionFacto
     }
 
     protected final MemberName getMemberName() {
-        return historyId.getClienId().getFrontendId().getMemberName();
+        return historyId.getClientId().getFrontendId().getMemberName();
     }
 
     /**
@@ -166,8 +166,8 @@ abstract class AbstractTransactionContextFactory<F extends LocalTransactionFacto
      * factory.
      * @return Transaction identifier, may not be null.
      */
-    protected final TransactionIdentifier<?> nextIdentifier() {
-        return new TransactionIdentifier<>(historyId, TX_COUNTER_UPDATER.getAndIncrement(this));
+    protected final TransactionIdentifier nextIdentifier() {
+        return new TransactionIdentifier(historyId, TX_COUNTER_UPDATER.getAndIncrement(this));
     }
 
     /**
@@ -177,7 +177,7 @@ abstract class AbstractTransactionContextFactory<F extends LocalTransactionFacto
      * @return Future containing shard information.
      */
     protected abstract Future<PrimaryShardInfo> findPrimaryShard(@Nonnull String shardName,
-            @Nonnull TransactionIdentifier<?> txId);
+            @Nonnull TransactionIdentifier txId);
 
     /**
      * Create local transaction factory for specified shard, backed by specified shard leader
@@ -196,14 +196,14 @@ abstract class AbstractTransactionContextFactory<F extends LocalTransactionFacto
      * be waited for before the next transaction is allocated.
      * @param cohortFutures Collection of futures
      */
-    protected abstract <T> void onTransactionReady(@Nonnull TransactionIdentifier<?> transaction, @Nonnull Collection<Future<T>> cohortFutures);
+    protected abstract <T> void onTransactionReady(@Nonnull TransactionIdentifier transaction, @Nonnull Collection<Future<T>> cohortFutures);
 
     /**
      * Callback invoked when the internal TransactionContext has been created for a transaction.
      *
      * @param transactionId the ID of the transaction.
      */
-    protected abstract void onTransactionContextCreated(@Nonnull TransactionIdentifier<?> transactionId);
+    protected abstract void onTransactionContextCreated(@Nonnull TransactionIdentifier transactionId);
 
     private static TransactionContext createLocalTransactionContext(final LocalTransactionFactory factory,
                                                                     final TransactionProxy parent) {

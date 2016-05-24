@@ -11,20 +11,17 @@ import akka.persistence.SaveSnapshotFailure;
 import akka.persistence.SaveSnapshotSuccess;
 import com.google.common.base.Preconditions;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
-import org.opendaylight.controller.cluster.access.concepts.FrontendType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * @param <T> Frontend type
- *
  * @author Robert Varga
  */
-final class SavingClientActorBehavior<T extends FrontendType> extends RecoveredClientActorBehavior<InitialClientActorContext<T>, T> {
+final class SavingClientActorBehavior extends RecoveredClientActorBehavior<InitialClientActorContext> {
     private static final Logger LOG = LoggerFactory.getLogger(SavingClientActorBehavior.class);
-    private final ClientIdentifier<T> myId;
+    private final ClientIdentifier myId;
 
-    SavingClientActorBehavior(final InitialClientActorContext<T> context, final ClientIdentifier<T> nextId) {
+    SavingClientActorBehavior(final InitialClientActorContext context, final ClientIdentifier nextId) {
         super(context);
         this.myId = Preconditions.checkNotNull(nextId);
     }
@@ -36,7 +33,7 @@ final class SavingClientActorBehavior<T extends FrontendType> extends RecoveredC
             return null;
         } else if (command instanceof SaveSnapshotSuccess) {
             context().unstash();
-            return context().createBehavior(new ClientActorContext<>(self(), persistenceId(), myId));
+            return context().createBehavior(new ClientActorContext(self(), persistenceId(), myId));
         } else {
             LOG.debug("{}: stashing command {}", persistenceId(), command);
             context().stash();

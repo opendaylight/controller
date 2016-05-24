@@ -7,16 +7,12 @@
  */
 package org.opendaylight.controller.cluster.datastore.actors.client;
 
-import org.opendaylight.controller.cluster.access.concepts.FrontendType;
-
 /**
  * @param <C> Concrete context type
- * @param <T> Frontend type
  *
  * @author Robert Varga
  */
-abstract class RecoveredClientActorBehavior<C extends AbstractClientActorContext, T extends FrontendType> extends
-    AbstractClientActorBehavior<C> {
+abstract class RecoveredClientActorBehavior<C extends AbstractClientActorContext> extends AbstractClientActorBehavior<C> {
 
     RecoveredClientActorBehavior(final C context) {
         super(context);

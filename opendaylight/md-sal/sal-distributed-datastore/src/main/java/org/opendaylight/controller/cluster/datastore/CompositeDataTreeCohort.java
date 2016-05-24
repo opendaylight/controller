@@ -92,13 +92,13 @@ class CompositeDataTreeCohort {
 
 
     private final DataTreeCohortActorRegistry registry;
-    private final TransactionIdentifier<?> txId;
+    private final TransactionIdentifier txId;
     private final SchemaContext schema;
     private final Timeout timeout;
     private Iterable<Success> successfulFromPrevious;
     private State state = State.IDLE;
 
-    CompositeDataTreeCohort(DataTreeCohortActorRegistry registry, TransactionIdentifier<?> transactionID,
+    CompositeDataTreeCohort(DataTreeCohortActorRegistry registry, TransactionIdentifier transactionID,
         SchemaContext schema, Timeout timeout) {
         this.registry = Preconditions.checkNotNull(registry);
         this.txId = Preconditions.checkNotNull(transactionID);

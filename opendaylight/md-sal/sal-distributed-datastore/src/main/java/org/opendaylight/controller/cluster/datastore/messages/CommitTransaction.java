@@ -17,7 +17,7 @@ public class CommitTransaction extends AbstractThreePhaseCommitMessage {
     public CommitTransaction() {
     }
 
-    public CommitTransaction(TransactionIdentifier<?> transactionID, final short version) {
+    public CommitTransaction(TransactionIdentifier transactionID, final short version) {
         super(transactionID, version);
     }
 

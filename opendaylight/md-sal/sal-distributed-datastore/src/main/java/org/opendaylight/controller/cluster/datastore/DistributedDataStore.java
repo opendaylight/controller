@@ -21,7 +21,6 @@ import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.databroker.actors.dds.DistributedDataStoreClient;
 import org.opendaylight.controller.cluster.databroker.actors.dds.DistributedDataStoreClientActor;
-import org.opendaylight.controller.cluster.databroker.actors.dds.DistributedDataStoreFrontend;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardManagerIdentifier;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.DatastoreConfigurationMXBeanImpl;
@@ -72,7 +71,7 @@ public class DistributedDataStore implements DistributedDataStoreInterface, Sche
 
     private final CountDownLatch waitTillReadyCountDownLatch = new CountDownLatch(1);
 
-    private final ClientIdentifier<DistributedDataStoreFrontend> identifier;
+    private final ClientIdentifier identifier;
     private final DistributedDataStoreClient client;
 
     private final TransactionContextFactory txContextFactory;
@@ -100,7 +99,7 @@ public class DistributedDataStore implements DistributedDataStoreInterface, Sche
         LOG.debug("Distributed data store client {} started", identifier);
 
         String shardManagerId = ShardManagerIdentifier.builder()
-                .type(identifier.getFrontendId().getClientType().getStoreName()).build().toString();
+                .type(datastoreContextFactory.getBaseDatastoreContext().getDataStoreName()).build().toString();
 
         LOG.info("Creating ShardManager : {}", shardManagerId);
 
@@ -132,7 +131,7 @@ public class DistributedDataStore implements DistributedDataStoreInterface, Sche
     }
 
     @VisibleForTesting
-    DistributedDataStore(ActorContext actorContext, ClientIdentifier<DistributedDataStoreFrontend> identifier) {
+    DistributedDataStore(ActorContext actorContext, ClientIdentifier identifier) {
         this.actorContext = Preconditions.checkNotNull(actorContext, "actorContext should not be null");
         this.client = null;
         this.identifier = Preconditions.checkNotNull(identifier);

@@ -12,7 +12,6 @@ import akka.persistence.SnapshotOffer;
 import com.google.common.base.Preconditions;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
-import org.opendaylight.controller.cluster.access.concepts.FrontendType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,12 +20,12 @@ import org.slf4j.LoggerFactory;
  *
  * @author Robert Varga
  */
-final class RecoveringClientActorBehavior<T extends FrontendType> extends AbstractClientActorBehavior<InitialClientActorContext<T>> {
+final class RecoveringClientActorBehavior extends AbstractClientActorBehavior<InitialClientActorContext> {
     private static final Logger LOG = LoggerFactory.getLogger(RecoveringClientActorBehavior.class);
-    private final FrontendIdentifier<T> currentFrontend;
-    private ClientIdentifier<T> lastId = null;
+    private final FrontendIdentifier currentFrontend;
+    private ClientIdentifier lastId = null;
 
-    RecoveringClientActorBehavior(final InitialClientActorContext<T> context, final FrontendIdentifier<T> frontendId) {
+    RecoveringClientActorBehavior(final InitialClientActorContext context, final FrontendIdentifier frontendId) {
         super(context);
         currentFrontend = Preconditions.checkNotNull(frontendId);
     }
@@ -36,11 +35,10 @@ final class RecoveringClientActorBehavior<T extends FrontendType> extends Abstra
         throw new IllegalStateException("Frontend is recovering");
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     AbstractClientActorBehavior<?> onReceiveRecover(final Object recover) {
         if (recover instanceof RecoveryCompleted) {
-            final ClientIdentifier<T> nextId;
+            final ClientIdentifier nextId;
             if (lastId != null) {
                 if (!currentFrontend.equals(lastId.getFrontendId())) {
                     LOG.error("Mismatched frontend identifier, shutting down. Current: {} Saved: {}", currentFrontend,
@@ -55,9 +53,9 @@ final class RecoveringClientActorBehavior<T extends FrontendType> extends Abstra
 
             LOG.debug("{}: persisting new identifier {}", persistenceId(), nextId);
             context().saveSnapshot(nextId);
-            return new SavingClientActorBehavior<T>(context(), nextId);
+            return new SavingClientActorBehavior(context(), nextId);
         } else if (recover instanceof SnapshotOffer) {
-            lastId = (ClientIdentifier<T>) ((SnapshotOffer)recover).snapshot();
+            lastId = (ClientIdentifier) ((SnapshotOffer)recover).snapshot();
             LOG.debug("{}: recovered identifier {}", lastId);
         } else {
             LOG.warn("{}: ignoring recovery message {}", recover);

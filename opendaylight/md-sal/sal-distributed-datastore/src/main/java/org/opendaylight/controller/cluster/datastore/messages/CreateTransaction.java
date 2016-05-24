@@ -17,19 +17,19 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
 public class CreateTransaction extends VersionedExternalizableMessage {
     private static final long serialVersionUID = 1L;
 
-    private TransactionIdentifier<?> transactionId;
+    private TransactionIdentifier transactionId;
     private int transactionType;
 
     public CreateTransaction() {
     }
 
-    public CreateTransaction(TransactionIdentifier<?> transactionId, int transactionType, short version) {
+    public CreateTransaction(TransactionIdentifier transactionId, int transactionType, short version) {
         super(version);
         this.transactionId = Preconditions.checkNotNull(transactionId);
         this.transactionType = transactionType;
     }
 
-    public TransactionIdentifier<?> getTransactionId() {
+    public TransactionIdentifier getTransactionId() {
         return transactionId;
     }
 
@@ -40,7 +40,7 @@ public class CreateTransaction extends VersionedExternalizableMessage {
     @Override
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         super.readExternal(in);
-        transactionId = (TransactionIdentifier<?>) in.readObject();
+        transactionId = (TransactionIdentifier) in.readObject();
         transactionType = in.readInt();
     }
 
