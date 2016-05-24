@@ -8,7 +8,9 @@
 
 package org.opendaylight.controller.cluster.datastore.messages;
 
+import com.google.common.base.Preconditions;
 import java.io.Serializable;
+import org.opendaylight.controller.cluster.datastore.persisted.StateVersion;
 
 /**
  * Local or remote message sent in reply to FindPrimaryShard to indicate the primary shard is remote to the caller.
@@ -17,18 +19,18 @@ public class RemotePrimaryShardFound implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private final String primaryPath;
-    private final short primaryVersion;
+    private final StateVersion primaryVersion;
 
-    public RemotePrimaryShardFound(final String primaryPath, short primaryVersion) {
-        this.primaryPath = primaryPath;
-        this.primaryVersion = primaryVersion;
+    public RemotePrimaryShardFound(final String primaryPath, final StateVersion primaryVersion) {
+        this.primaryPath = Preconditions.checkNotNull(primaryPath);
+        this.primaryVersion = Preconditions.checkNotNull(primaryVersion);
     }
 
     public String getPrimaryPath() {
         return primaryPath;
     }
 
-    public short getPrimaryVersion() {
+    public StateVersion getPrimaryVersion() {
         return primaryVersion;
     }
 
