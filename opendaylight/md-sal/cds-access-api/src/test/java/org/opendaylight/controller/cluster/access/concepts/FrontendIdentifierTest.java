@@ -7,49 +7,27 @@
  */
 package org.opendaylight.controller.cluster.access.concepts;
 
-public class FrontendIdentifierTest extends AbstractIdentifierTest<FrontendIdentifier<?>> {
-    static final FrontendType ONE_FRONTEND_TYPE = new FrontendType() {
-        private static final long serialVersionUID = 1L;
-
-        @Override
-        public String toSimpleString() {
-            return "one";
-        }
-
-        private Object readResolve() {
-            return ONE_FRONTEND_TYPE;
-        }
-    };
-    static final FrontendType OTHER_FRONTEND_TYPE = new FrontendType() {
-        private static final long serialVersionUID = 1L;
-
-        @Override
-        public String toSimpleString() {
-            return "two";
-        }
-
-        private Object readResolve() {
-            return OTHER_FRONTEND_TYPE;
-        }
-    };
+public class FrontendIdentifierTest extends AbstractIdentifierTest<FrontendIdentifier> {
+    static final FrontendType ONE_FRONTEND_TYPE = FrontendType.forName("one");
+    static final FrontendType OTHER_FRONTEND_TYPE = FrontendType.forName("two");
 
     private static final MemberName MEMBER = MemberName.forName("test");
-    private static final FrontendIdentifier<?> OBJECT = new FrontendIdentifier<>(MEMBER, ONE_FRONTEND_TYPE);
-    private static final FrontendIdentifier<?> DIFFERENT_OBJECT = new FrontendIdentifier<>(MEMBER, OTHER_FRONTEND_TYPE);
-    private static final FrontendIdentifier<?> EQUAL_OBJECT = new FrontendIdentifier<>(MEMBER, ONE_FRONTEND_TYPE);
+    private static final FrontendIdentifier OBJECT = new FrontendIdentifier(MEMBER, ONE_FRONTEND_TYPE);
+    private static final FrontendIdentifier DIFFERENT_OBJECT = new FrontendIdentifier(MEMBER, OTHER_FRONTEND_TYPE);
+    private static final FrontendIdentifier EQUAL_OBJECT = new FrontendIdentifier(MEMBER, ONE_FRONTEND_TYPE);
 
     @Override
-    FrontendIdentifier<?> object() {
+    FrontendIdentifier object() {
         return OBJECT;
     }
 
     @Override
-    FrontendIdentifier<?> differentObject() {
+    FrontendIdentifier differentObject() {
         return DIFFERENT_OBJECT;
     }
 
     @Override
-    FrontendIdentifier<?> equalObject() {
+    FrontendIdentifier equalObject() {
         return EQUAL_OBJECT;
     }
 }
