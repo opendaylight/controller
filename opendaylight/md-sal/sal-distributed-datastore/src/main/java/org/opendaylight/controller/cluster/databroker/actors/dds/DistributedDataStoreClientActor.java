@@ -15,6 +15,7 @@ import com.google.common.base.Throwables;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nonnull;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
+import org.opendaylight.controller.cluster.access.concepts.FrontendType;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.actors.client.AbstractClientActor;
 import org.opendaylight.controller.cluster.datastore.actors.client.ClientActorBehavior;
@@ -29,7 +30,7 @@ import scala.runtime.AbstractFunction1;
  *
  * @author Robert Varga
  */
-public final class DistributedDataStoreClientActor extends AbstractClientActor<DistributedDataStoreFrontend> {
+public final class DistributedDataStoreClientActor extends AbstractClientActor {
     // Unfortunately Akka's explicit ask pattern does not work with its Java API, as it fails to invoke passed message.
     // In order to make this work for now, we tap directly into ExplicitAskSupport and use a Scala function instead
     // of akka.japi.Function.
@@ -41,19 +42,19 @@ public final class DistributedDataStoreClientActor extends AbstractClientActor<D
         }
     };
 
-    private DistributedDataStoreClientActor(final FrontendIdentifier<DistributedDataStoreFrontend> frontendId) {
+    private DistributedDataStoreClientActor(final FrontendIdentifier frontendId) {
         super(frontendId);
     }
 
     @Override
-    protected ClientActorBehavior<DistributedDataStoreFrontend> initialBehavior(
-            final ClientActorContext<DistributedDataStoreFrontend> context) {
+    protected ClientActorBehavior initialBehavior(final ClientActorContext context) {
         return new DistributedDataStoreClientBehavior(context);
     }
 
     public static Props props(final @Nonnull MemberName memberName, @Nonnull final String storeName) {
+        final String name = "DistributedDataStore:storeName='" + storeName + "'";
         return Props.create(DistributedDataStoreClientActor.class, () -> new DistributedDataStoreClientActor(
-            FrontendIdentifier.create(memberName, new DistributedDataStoreFrontend(storeName))));
+            FrontendIdentifier.create(memberName, FrontendType.forName(name))));
     }
 
     public static DistributedDataStoreClient getDistributedDataStoreClient(final @Nonnull ActorRef actor,

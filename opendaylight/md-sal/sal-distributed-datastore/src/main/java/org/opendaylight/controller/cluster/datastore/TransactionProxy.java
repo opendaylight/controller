@@ -50,7 +50,7 @@ import scala.concurrent.Promise;
 /**
  * A transaction potentially spanning multiple backend shards.
  */
-public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIdentifier<?>> implements DOMStoreReadWriteTransaction {
+public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIdentifier> implements DOMStoreReadWriteTransaction {
     private static enum TransactionState {
         OPEN,
         READY,

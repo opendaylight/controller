@@ -17,7 +17,7 @@ public class CanCommitTransaction extends AbstractThreePhaseCommitMessage {
     public CanCommitTransaction() {
     }
 
-    public CanCommitTransaction(TransactionIdentifier<?> transactionID, final short version) {
+    public CanCommitTransaction(TransactionIdentifier transactionID, final short version) {
         super(transactionID, version);
     }
 

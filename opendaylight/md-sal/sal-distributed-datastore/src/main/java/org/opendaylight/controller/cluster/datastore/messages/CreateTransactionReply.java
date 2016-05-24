@@ -18,12 +18,12 @@ public class CreateTransactionReply extends VersionedExternalizableMessage {
     private static final long serialVersionUID = 1L;
 
     private String transactionPath;
-    private TransactionIdentifier<?> transactionId;
+    private TransactionIdentifier transactionId;
 
     public CreateTransactionReply() {
     }
 
-    public CreateTransactionReply(final String transactionPath, final TransactionIdentifier<?> transactionId,
+    public CreateTransactionReply(final String transactionPath, final TransactionIdentifier transactionId,
             final short version) {
         super(version);
         this.transactionPath = Preconditions.checkNotNull(transactionPath);
@@ -34,14 +34,14 @@ public class CreateTransactionReply extends VersionedExternalizableMessage {
         return transactionPath;
     }
 
-    public TransactionIdentifier<?> getTransactionId() {
+    public TransactionIdentifier getTransactionId() {
         return transactionId;
     }
 
     @Override
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         super.readExternal(in);
-        transactionId = (TransactionIdentifier<?>) in.readObject();
+        transactionId = (TransactionIdentifier) in.readObject();
         transactionPath = in.readUTF();
     }
 

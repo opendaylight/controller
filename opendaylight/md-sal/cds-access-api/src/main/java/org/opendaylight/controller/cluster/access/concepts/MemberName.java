@@ -61,12 +61,12 @@ public final class MemberName implements Comparable<MemberName>, Identifier, Wri
     private final String name;
     private volatile byte[] serialized;
 
-    MemberName(final String name) {
+    private MemberName(final String name) {
         this.name = Preconditions.checkNotNull(name);
     }
 
     MemberName(final String name, final byte[] serialized) {
-        this.name = Preconditions.checkNotNull(name);
+        this(name);
         this.serialized = Verify.verifyNotNull(serialized);
     }
 

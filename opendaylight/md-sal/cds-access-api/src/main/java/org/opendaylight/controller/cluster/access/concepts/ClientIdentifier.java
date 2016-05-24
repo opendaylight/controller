@@ -23,17 +23,17 @@ import org.opendaylight.yangtools.concepts.Identifier;
  * @author Robert Varga
  */
 @Beta
-public final class ClientIdentifier<T extends FrontendType> implements Identifier, WritableObject {
-    private static final class Proxy<T extends FrontendType> implements Externalizable {
+public final class ClientIdentifier implements Identifier, WritableObject {
+    private static final class Proxy implements Externalizable {
         private static final long serialVersionUID = 1L;
-        private FrontendIdentifier<T> frontendId;
+        private FrontendIdentifier frontendId;
         private long generation;
 
         public Proxy() {
             // Needed for Externalizable
         }
 
-        Proxy(final FrontendIdentifier<T> frontendId, final long generation) {
+        Proxy(final FrontendIdentifier frontendId, final long generation) {
             this.frontendId = Preconditions.checkNotNull(frontendId);
             this.generation = generation;
         }
@@ -51,27 +51,27 @@ public final class ClientIdentifier<T extends FrontendType> implements Identifie
         }
 
         private Object readResolve() {
-            return new ClientIdentifier<>(frontendId, generation);
+            return new ClientIdentifier(frontendId, generation);
         }
     }
 
     private static final long serialVersionUID = 1L;
-    private final FrontendIdentifier<T> frontendId;
+    private final FrontendIdentifier frontendId;
     private final long generation;
 
-    ClientIdentifier(final FrontendIdentifier<T> frontendId, final long generation) {
+    ClientIdentifier(final FrontendIdentifier frontendId, final long generation) {
         this.frontendId = Preconditions.checkNotNull(frontendId);
         this.generation = generation;
     }
 
-    public static <T extends FrontendType> ClientIdentifier<T> create(final FrontendIdentifier<T> frontendId,
+    public static ClientIdentifier create(final FrontendIdentifier frontendId,
             final long generation) {
-        return new ClientIdentifier<>(frontendId, generation);
+        return new ClientIdentifier(frontendId, generation);
     }
 
-    public static <T extends FrontendType> ClientIdentifier<T> readFrom(ObjectInput in) throws IOException, ClassNotFoundException {
-        final FrontendIdentifier<T> frontendId = FrontendIdentifier.readFrom(in);
-        return new ClientIdentifier<T>(frontendId, in.readLong());
+    public static ClientIdentifier readFrom(ObjectInput in) throws IOException, ClassNotFoundException {
+        final FrontendIdentifier frontendId = FrontendIdentifier.readFrom(in);
+        return new ClientIdentifier(frontendId, in.readLong());
     }
 
     @Override
@@ -80,7 +80,7 @@ public final class ClientIdentifier<T extends FrontendType> implements Identifie
         out.writeLong(generation);
     }
 
-    public FrontendIdentifier<T> getFrontendId() {
+    public FrontendIdentifier getFrontendId() {
         return frontendId;
     }
 
@@ -102,7 +102,7 @@ public final class ClientIdentifier<T extends FrontendType> implements Identifie
             return false;
         }
 
-        final ClientIdentifier<?> other = (ClientIdentifier<?>) o;
+        final ClientIdentifier other = (ClientIdentifier) o;
         return generation == other.generation && frontendId.equals(other.frontendId);
     }
 
@@ -113,6 +113,6 @@ public final class ClientIdentifier<T extends FrontendType> implements Identifie
     }
 
     private Object writeReplace() {
-        return new Proxy<>(frontendId, generation);
+        return new Proxy(frontendId, generation);
     }
 }

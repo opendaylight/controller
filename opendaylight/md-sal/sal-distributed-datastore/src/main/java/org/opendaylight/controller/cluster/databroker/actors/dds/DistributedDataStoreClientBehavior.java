@@ -43,8 +43,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Robert Varga
  */
-final class DistributedDataStoreClientBehavior extends ClientActorBehavior<DistributedDataStoreFrontend>
-        implements DistributedDataStoreClient {
+final class DistributedDataStoreClientBehavior extends ClientActorBehavior implements DistributedDataStoreClient {
     private static final Logger LOG = LoggerFactory.getLogger(DistributedDataStoreClientBehavior.class);
     private static final Object SHUTDOWN = new Object() {
         @Override
@@ -55,7 +54,7 @@ final class DistributedDataStoreClientBehavior extends ClientActorBehavior<Distr
 
     private long nextHistoryId;
 
-    DistributedDataStoreClientBehavior(final ClientActorContext<DistributedDataStoreFrontend> context) {
+    DistributedDataStoreClientBehavior(final ClientActorContext context) {
         super(context);
     }
 
@@ -67,8 +66,7 @@ final class DistributedDataStoreClientBehavior extends ClientActorBehavior<Distr
 
     private void createLocalHistory(final CreateLocalHistoryCommand command) {
         final CompletableFuture<ClientLocalHistory> future = command.future();
-        final LocalHistoryIdentifier<DistributedDataStoreFrontend> historyId =
-                new LocalHistoryIdentifier<>(getIdentifier(), nextHistoryId++);
+        final LocalHistoryIdentifier historyId = new LocalHistoryIdentifier(getIdentifier(), nextHistoryId++);
         LOG.debug("{}: creating a new local history {} for {}", persistenceId(), historyId, future);
 
         // FIXME: initiate backend instantiation
@@ -76,7 +74,7 @@ final class DistributedDataStoreClientBehavior extends ClientActorBehavior<Distr
     }
 
     @Override
-    protected ClientActorBehavior<DistributedDataStoreFrontend> onCommand(final Object command) {
+    protected ClientActorBehavior onCommand(final Object command) {
         if (command instanceof CreateLocalHistoryCommand) {
             createLocalHistory((CreateLocalHistoryCommand) command);
         } else if (command instanceof GetClientRequest) {

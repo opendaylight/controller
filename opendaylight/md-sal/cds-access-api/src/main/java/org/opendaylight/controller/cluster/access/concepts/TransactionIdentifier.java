@@ -25,17 +25,17 @@ import org.opendaylight.yangtools.concepts.Identifier;
  * @author Robert Varga
  */
 @Beta
-public final class TransactionIdentifier<T extends FrontendType> implements Identifier, WritableObject {
-    private static final class Proxy<T extends FrontendType> implements Externalizable {
+public final class TransactionIdentifier implements Identifier, WritableObject {
+    private static final class Proxy implements Externalizable {
         private static final long serialVersionUID = 1L;
-        private LocalHistoryIdentifier<T> historyId;
+        private LocalHistoryIdentifier historyId;
         private long transactionId;
 
         public Proxy() {
             // For Externalizable
         }
 
-        Proxy(final LocalHistoryIdentifier<T> historyId, final long transactionId) {
+        Proxy(final LocalHistoryIdentifier historyId, final long transactionId) {
             this.historyId = Preconditions.checkNotNull(historyId);
             this.transactionId = transactionId;
         }
@@ -53,22 +53,22 @@ public final class TransactionIdentifier<T extends FrontendType> implements Iden
         }
 
         private Object readResolve() {
-            return new TransactionIdentifier<>(historyId, transactionId);
+            return new TransactionIdentifier(historyId, transactionId);
         }
     }
 
     private static final long serialVersionUID = 1L;
-    private final LocalHistoryIdentifier<T> historyId;
+    private final LocalHistoryIdentifier historyId;
     private final long transactionId;
 
-    public TransactionIdentifier(final @Nonnull LocalHistoryIdentifier<T> historyId, final long transactionId) {
+    public TransactionIdentifier(final @Nonnull LocalHistoryIdentifier historyId, final long transactionId) {
         this.historyId = Preconditions.checkNotNull(historyId);
         this.transactionId = transactionId;
     }
 
-    public static <T extends FrontendType> TransactionIdentifier<T> readFrom(ObjectInput in) throws IOException, ClassNotFoundException {
-        final LocalHistoryIdentifier<T> historyId = LocalHistoryIdentifier.readFrom(in);
-        return new TransactionIdentifier<>(historyId, in.readLong());
+    public static TransactionIdentifier readFrom(ObjectInput in) throws IOException, ClassNotFoundException {
+        final LocalHistoryIdentifier historyId = LocalHistoryIdentifier.readFrom(in);
+        return new TransactionIdentifier(historyId, in.readLong());
     }
 
     @Override
@@ -77,7 +77,7 @@ public final class TransactionIdentifier<T extends FrontendType> implements Iden
         out.writeLong(transactionId);
     }
 
-    public LocalHistoryIdentifier<T> getHistoryId() {
+    public LocalHistoryIdentifier getHistoryId() {
         return historyId;
     }
 
@@ -99,7 +99,7 @@ public final class TransactionIdentifier<T extends FrontendType> implements Iden
             return false;
         }
 
-        final TransactionIdentifier<?> other = (TransactionIdentifier<?>) o;
+        final TransactionIdentifier other = (TransactionIdentifier) o;
         return transactionId == other.transactionId && historyId.equals(other.historyId);
     }
 
@@ -110,6 +110,6 @@ public final class TransactionIdentifier<T extends FrontendType> implements Iden
     }
 
     private Object writeReplace() {
-        return new Proxy<>(historyId, transactionId);
+        return new Proxy(historyId, transactionId);
     }
 }

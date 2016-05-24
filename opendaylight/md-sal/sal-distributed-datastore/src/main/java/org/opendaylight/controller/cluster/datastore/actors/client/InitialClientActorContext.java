@@ -9,25 +9,24 @@ package org.opendaylight.controller.cluster.datastore.actors.client;
 
 import com.google.common.base.Preconditions;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
-import org.opendaylight.controller.cluster.access.concepts.FrontendType;
 
 /**
  *
  * @author Robert Varga
  */
-final class InitialClientActorContext<T extends FrontendType> extends AbstractClientActorContext {
-    private final AbstractClientActor<T> actor;
+final class InitialClientActorContext extends AbstractClientActorContext {
+    private final AbstractClientActor actor;
 
-    InitialClientActorContext(final AbstractClientActor<T> actor, final String persistenceId) {
+    InitialClientActorContext(final AbstractClientActor actor, final String persistenceId) {
         super(actor.self(), persistenceId);
         this.actor = Preconditions.checkNotNull(actor);
     }
 
-    void saveSnapshot(final ClientIdentifier<?> snapshot) {
+    void saveSnapshot(final ClientIdentifier snapshot) {
         actor.saveSnapshot(snapshot);
     }
 
-    ClientActorBehavior<T> createBehavior(final ClientActorContext<T> context) {
+    ClientActorBehavior createBehavior(final ClientActorContext context) {
         return actor.initialBehavior(context);
     }
 

@@ -42,7 +42,7 @@ public class ThreePhaseCommitCohortProxy extends AbstractThreePhaseCommitCohort<
 
     private static final MessageSupplier COMMIT_MESSAGE_SUPPLIER = new MessageSupplier() {
         @Override
-        public Object newMessage(TransactionIdentifier<?> transactionId, short version) {
+        public Object newMessage(TransactionIdentifier transactionId, short version) {
             return new CommitTransaction(transactionId, version).toSerializable();
         }
 
@@ -54,7 +54,7 @@ public class ThreePhaseCommitCohortProxy extends AbstractThreePhaseCommitCohort<
 
     private static final MessageSupplier ABORT_MESSAGE_SUPPLIER = new MessageSupplier() {
         @Override
-        public Object newMessage(TransactionIdentifier<?> transactionId, short version) {
+        public Object newMessage(TransactionIdentifier transactionId, short version) {
             return new AbortTransaction(transactionId, version).toSerializable();
         }
 
@@ -67,11 +67,11 @@ public class ThreePhaseCommitCohortProxy extends AbstractThreePhaseCommitCohort<
     private final ActorContext actorContext;
     private final List<CohortInfo> cohorts;
     private final SettableFuture<Void> cohortsResolvedFuture = SettableFuture.create();
-    private final TransactionIdentifier<?> transactionId;
+    private final TransactionIdentifier transactionId;
     private volatile OperationCallback commitOperationCallback;
 
     public ThreePhaseCommitCohortProxy(ActorContext actorContext, List<CohortInfo> cohorts,
-            TransactionIdentifier<?> transactionId) {
+            TransactionIdentifier transactionId) {
         this.actorContext = actorContext;
         this.cohorts = cohorts;
         this.transactionId = Preconditions.checkNotNull(transactionId);
@@ -394,7 +394,7 @@ public class ThreePhaseCommitCohortProxy extends AbstractThreePhaseCommitCohort<
     }
 
     private interface MessageSupplier {
-        Object newMessage(TransactionIdentifier<?> transactionId, short version);
+        Object newMessage(TransactionIdentifier transactionId, short version);
         boolean isSerializedReplyType(Object reply);
     }
 }

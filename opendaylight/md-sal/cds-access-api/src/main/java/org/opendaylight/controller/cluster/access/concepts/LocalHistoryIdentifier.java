@@ -22,17 +22,17 @@ import org.opendaylight.yangtools.concepts.Identifier;
  *
  * @author Robert Varga
  */
-public final class LocalHistoryIdentifier<T extends FrontendType> implements Identifier, WritableObject {
-    private static final class Proxy<T extends FrontendType> implements Externalizable {
+public final class LocalHistoryIdentifier implements Identifier, WritableObject {
+    private static final class Proxy implements Externalizable {
         private static final long serialVersionUID = 1L;
-        private ClientIdentifier<T> clientId;
+        private ClientIdentifier clientId;
         private long historyId;
 
         public Proxy() {
             // For Externalizable
         }
 
-        Proxy(final ClientIdentifier<T> frontendId, final long historyId) {
+        Proxy(final ClientIdentifier frontendId, final long historyId) {
             this.clientId = Preconditions.checkNotNull(frontendId);
             this.historyId = historyId;
         }
@@ -50,22 +50,22 @@ public final class LocalHistoryIdentifier<T extends FrontendType> implements Ide
         }
 
         private Object readResolve() {
-            return new LocalHistoryIdentifier<>(clientId, historyId);
+            return new LocalHistoryIdentifier(clientId, historyId);
         }
     }
 
     private static final long serialVersionUID = 1L;
-    private final ClientIdentifier<T> clientId;
+    private final ClientIdentifier clientId;
     private final long historyId;
 
-    public LocalHistoryIdentifier(final ClientIdentifier<T> frontendId, final long historyId) {
+    public LocalHistoryIdentifier(final ClientIdentifier frontendId, final long historyId) {
         this.clientId = Preconditions.checkNotNull(frontendId);
         this.historyId = historyId;
     }
 
-    public static <T extends FrontendType> LocalHistoryIdentifier<T> readFrom(ObjectInput in) throws IOException, ClassNotFoundException {
-        final ClientIdentifier<T> clientId = ClientIdentifier.readFrom(in);
-        return new LocalHistoryIdentifier<>(clientId, in.readLong());
+    public static LocalHistoryIdentifier readFrom(ObjectInput in) throws IOException, ClassNotFoundException {
+        final ClientIdentifier clientId = ClientIdentifier.readFrom(in);
+        return new LocalHistoryIdentifier(clientId, in.readLong());
     }
 
     @Override
@@ -74,7 +74,7 @@ public final class LocalHistoryIdentifier<T extends FrontendType> implements Ide
         out.writeLong(historyId);
     }
 
-    public ClientIdentifier<T> getClienId() {
+    public ClientIdentifier getClientId() {
         return clientId;
     }
 
@@ -96,7 +96,7 @@ public final class LocalHistoryIdentifier<T extends FrontendType> implements Ide
             return false;
         }
 
-        final LocalHistoryIdentifier<?> other = (LocalHistoryIdentifier<?>) o;
+        final LocalHistoryIdentifier other = (LocalHistoryIdentifier) o;
         return historyId == other.historyId && clientId.equals(other.clientId);
     }
 
@@ -107,6 +107,6 @@ public final class LocalHistoryIdentifier<T extends FrontendType> implements Ide
     }
 
     private Object writeReplace() {
-        return new Proxy<>(clientId, historyId);
+        return new Proxy(clientId, historyId);
     }
 }

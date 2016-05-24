@@ -32,7 +32,7 @@ public final class ClientLocalHistory implements AutoCloseable {
     private static final int IDLE_STATE = 0;
     private static final int CLOSED_STATE = 1;
 
-    private final LocalHistoryIdentifier<DistributedDataStoreFrontend> historyId;
+    private final LocalHistoryIdentifier historyId;
     private final ActorRef backendActor;
     private final ActorRef clientActor;
 
@@ -42,7 +42,7 @@ public final class ClientLocalHistory implements AutoCloseable {
             final ActorRef backendActor) {
         this.clientActor = client.self();
         this.backendActor = Preconditions.checkNotNull(backendActor);
-        this.historyId = new LocalHistoryIdentifier<>(client.getIdentifier(), historyId);
+        this.historyId = new LocalHistoryIdentifier(client.getIdentifier(), historyId);
     }
 
     private void checkNotClosed() {

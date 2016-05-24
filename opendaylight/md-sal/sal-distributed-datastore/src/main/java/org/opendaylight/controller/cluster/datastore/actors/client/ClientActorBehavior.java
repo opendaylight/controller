@@ -11,7 +11,6 @@ import com.google.common.annotations.Beta;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
-import org.opendaylight.controller.cluster.access.concepts.FrontendType;
 import org.opendaylight.yangtools.concepts.Identifiable;
 
 /**
@@ -22,20 +21,20 @@ import org.opendaylight.yangtools.concepts.Identifiable;
  * @author Robert Varga
  */
 @Beta
-public abstract class ClientActorBehavior<T extends FrontendType> extends
-        RecoveredClientActorBehavior<ClientActorContext<T>, T> implements Identifiable<ClientIdentifier<T>> {
-    protected ClientActorBehavior(final @Nonnull ClientActorContext<T> context) {
+public abstract class ClientActorBehavior extends RecoveredClientActorBehavior<ClientActorContext>
+        implements Identifiable<ClientIdentifier> {
+    protected ClientActorBehavior(final @Nonnull ClientActorContext context) {
         super(context);
     }
 
     @Override
-    final ClientActorBehavior<T> onReceiveCommand(final Object command) {
+    final ClientActorBehavior onReceiveCommand(final Object command) {
         // TODO: any client-common logic (such as validation and common dispatch) needs to go here
         return onCommand(command);
     }
 
     @Override
-    public final @Nonnull ClientIdentifier<T> getIdentifier() {
+    public final @Nonnull ClientIdentifier getIdentifier() {
         return context().getIdentifier();
     }
 
@@ -45,5 +44,5 @@ public abstract class ClientActorBehavior<T extends FrontendType> extends
      * @param command
      * @return Next behavior to use, null if this actor should shut down.
      */
-    protected abstract @Nullable ClientActorBehavior<T> onCommand(@Nonnull Object command);
+    protected abstract @Nullable ClientActorBehavior onCommand(@Nonnull Object command);
 }

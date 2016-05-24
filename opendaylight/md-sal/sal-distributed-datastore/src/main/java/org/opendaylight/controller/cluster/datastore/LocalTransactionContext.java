@@ -31,7 +31,7 @@ abstract class LocalTransactionContext extends AbstractTransactionContext {
     private final LocalTransactionReadySupport readySupport;
     private Exception operationError;
 
-    LocalTransactionContext(DOMStoreTransaction txDelegate, TransactionIdentifier<?> identifier,
+    LocalTransactionContext(DOMStoreTransaction txDelegate, TransactionIdentifier identifier,
             LocalTransactionReadySupport readySupport) {
         super(identifier);
         this.txDelegate = Preconditions.checkNotNull(txDelegate);

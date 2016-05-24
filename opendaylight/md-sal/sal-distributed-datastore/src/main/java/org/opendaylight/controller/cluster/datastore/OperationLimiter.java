@@ -23,12 +23,12 @@ import org.slf4j.LoggerFactory;
  */
 public class OperationLimiter extends OnComplete<Object> {
     private static final Logger LOG = LoggerFactory.getLogger(OperationLimiter.class);
-    private final TransactionIdentifier<?> identifier;
+    private final TransactionIdentifier identifier;
     private final long acquireTimeout;
     private final Semaphore semaphore;
     private final int maxPermits;
 
-    OperationLimiter(final TransactionIdentifier<?> identifier, final int maxPermits, final long acquireTimeoutSeconds) {
+    OperationLimiter(final TransactionIdentifier identifier, final int maxPermits, final long acquireTimeoutSeconds) {
         this.identifier = Preconditions.checkNotNull(identifier);
 
         Preconditions.checkArgument(acquireTimeoutSeconds >= 0);
@@ -66,7 +66,7 @@ public class OperationLimiter extends OnComplete<Object> {
         }
     }
 
-    public TransactionIdentifier<?> getIdentifier() {
+    public TransactionIdentifier getIdentifier() {
         return identifier;
     }
 

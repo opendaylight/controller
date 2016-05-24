@@ -48,7 +48,7 @@ import org.slf4j.LoggerFactory;
 public class ShardDataTree extends ShardDataTreeTransactionParent {
     private static final Logger LOG = LoggerFactory.getLogger(ShardDataTree.class);
 
-    private final Map<LocalHistoryIdentifier<?>, ShardDataTreeTransactionChain> transactionChains = new HashMap<>();
+    private final Map<LocalHistoryIdentifier, ShardDataTreeTransactionChain> transactionChains = new HashMap<>();
     private final ShardDataTreeChangeListenerPublisher treeChangeListenerPublisher;
     private final ShardDataChangeListenerPublisher dataChangeListenerPublisher;
     private final TipProducingDataTree dataTree;
@@ -84,7 +84,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         dataTree.setSchemaContext(schemaContext);
     }
 
-    private ShardDataTreeTransactionChain ensureTransactionChain(final LocalHistoryIdentifier<?> localHistoryIdentifier) {
+    private ShardDataTreeTransactionChain ensureTransactionChain(final LocalHistoryIdentifier localHistoryIdentifier) {
         ShardDataTreeTransactionChain chain = transactionChains.get(localHistoryIdentifier);
         if (chain == null) {
             chain = new ShardDataTreeTransactionChain(localHistoryIdentifier, this);
@@ -94,7 +94,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         return chain;
     }
 
-    ReadOnlyShardDataTreeTransaction newReadOnlyTransaction(final TransactionIdentifier<?> txId) {
+    ReadOnlyShardDataTreeTransaction newReadOnlyTransaction(final TransactionIdentifier txId) {
         if (txId.getHistoryId().getHistoryId() == 0) {
             return new ReadOnlyShardDataTreeTransaction(txId, dataTree.takeSnapshot());
         }
@@ -102,7 +102,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         return ensureTransactionChain(txId.getHistoryId()).newReadOnlyTransaction(txId);
     }
 
-    ReadWriteShardDataTreeTransaction newReadWriteTransaction(final TransactionIdentifier<?> txId) {
+    ReadWriteShardDataTreeTransaction newReadWriteTransaction(final TransactionIdentifier txId) {
         if (txId.getHistoryId().getHistoryId() == 0) {
             return new ReadWriteShardDataTreeTransaction(ShardDataTree.this, txId, dataTree.takeSnapshot()
                     .newModification());
@@ -144,7 +144,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         transactionChains.clear();
     }
 
-    void closeTransactionChain(final LocalHistoryIdentifier<?> transactionChainId) {
+    void closeTransactionChain(final LocalHistoryIdentifier transactionChainId) {
         final ShardDataTreeTransactionChain chain = transactionChains.remove(transactionChainId);
         if (chain != null) {
             chain.close();
