@@ -172,7 +172,7 @@ public abstract class AbstractTransactionProxyTest extends AbstractTest {
         doReturn(mockClusterWrapper).when(mockActorContext).getClusterWrapper();
         doReturn(dataStoreContextBuilder.build()).when(mockActorContext).getDatastoreContext();
 
-        final ClientIdentifier<?> mockClientId = MockIdentifiers.clientIdentifier(getClass(), memberName);
+        final ClientIdentifier mockClientId = MockIdentifiers.clientIdentifier(getClass(), memberName);
         mockComponentFactory = new TransactionContextFactory(mockActorContext, mockClientId);
 
         Timer timer = new MetricRegistry().timer("test");
@@ -190,7 +190,7 @@ public abstract class AbstractTransactionProxyTest extends AbstractTest {
             public boolean matches(Object argument) {
                 if(CreateTransaction.class.equals(argument.getClass())) {
                     CreateTransaction obj = CreateTransaction.fromSerializable(argument);
-                    return obj.getTransactionId().getHistoryId().getClienId().getFrontendId().getMemberName().getName().equals(memberName) &&
+                    return obj.getTransactionId().getHistoryId().getClientId().getFrontendId().getMemberName().getName().equals(memberName) &&
                             obj.getTransactionType() == type.ordinal();
                 }
 

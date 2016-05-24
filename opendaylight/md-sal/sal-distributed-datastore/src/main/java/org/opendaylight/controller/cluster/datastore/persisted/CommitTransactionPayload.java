@@ -30,19 +30,19 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
  */
 @Beta
 public final class CommitTransactionPayload implements DataTreeCandidateSupplier,
-        Identifiable<TransactionIdentifier<?>>, Payload {
-    private static final class Decoded implements Identifiable<TransactionIdentifier<?>> {
-        private final TransactionIdentifier<?> identifier;
+        Identifiable<TransactionIdentifier>, Payload {
+    private static final class Decoded implements Identifiable<TransactionIdentifier> {
+        private final TransactionIdentifier identifier;
         private final DataTreeCandidate candidate;
 
-        Decoded(TransactionIdentifier<?> identifier, DataTreeCandidate candidate) {
+        Decoded(TransactionIdentifier identifier, DataTreeCandidate candidate) {
             this.identifier = Preconditions.checkNotNull(identifier);
             this.candidate = Preconditions.checkNotNull(candidate);
         }
 
         static Decoded fromSerialized(final byte[] serialized) throws IOException {
             try (ObjectInputStream in = new ObjectInputStream(new ByteArrayInputStream(serialized))) {
-                final TransactionIdentifier<?> identifier;
+                final TransactionIdentifier identifier;
                 try {
                     identifier = TransactionIdentifier.readFrom(in);
                 } catch (ClassNotFoundException e) {
@@ -54,7 +54,7 @@ public final class CommitTransactionPayload implements DataTreeCandidateSupplier
         }
 
         @Override
-        public TransactionIdentifier<?> getIdentifier() {
+        public TransactionIdentifier getIdentifier() {
             return identifier;
         }
 
@@ -102,13 +102,13 @@ public final class CommitTransactionPayload implements DataTreeCandidateSupplier
         this.serialized = Preconditions.checkNotNull(serialized);
     }
 
-    private CommitTransactionPayload(final byte[] serialized, final TransactionIdentifier<?> transactionId,
+    private CommitTransactionPayload(final byte[] serialized, final TransactionIdentifier transactionId,
             final DataTreeCandidate candidate) {
         this(serialized);
         this.decoded = new Decoded(transactionId, candidate);
     }
 
-    public static CommitTransactionPayload create(final TransactionIdentifier<?> transactionId,
+    public static CommitTransactionPayload create(final TransactionIdentifier transactionId,
             final DataTreeCandidate candidate) throws IOException {
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
             try (ObjectOutputStream out = new ObjectOutputStream(bos)) {
@@ -133,7 +133,7 @@ public final class CommitTransactionPayload implements DataTreeCandidateSupplier
     }
 
     @Override
-    public TransactionIdentifier<?> getIdentifier() {
+    public TransactionIdentifier getIdentifier() {
         try {
             return getDecoded().getIdentifier();
         } catch (IOException e) {

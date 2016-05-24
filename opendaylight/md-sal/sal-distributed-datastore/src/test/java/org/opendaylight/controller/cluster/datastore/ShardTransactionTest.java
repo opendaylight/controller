@@ -232,7 +232,7 @@ public class ShardTransactionTest extends AbstractActorTest {
                     new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME)).
                     withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo")).build();
 
-            final TransactionIdentifier<?> tx1 = nextTransactionId();
+            final TransactionIdentifier tx1 = nextTransactionId();
             BatchedModifications batched = new BatchedModifications(tx1, DataStoreVersions.CURRENT_VERSION);
             batched.addModification(new WriteModification(writePath, writeData));
 
@@ -296,7 +296,7 @@ public class ShardTransactionTest extends AbstractActorTest {
 
             doThrow(new TestException()).when(mockModification).write(path, node);
 
-            final TransactionIdentifier<?> tx1 = nextTransactionId();
+            final TransactionIdentifier tx1 = nextTransactionId();
             BatchedModifications batched = new BatchedModifications(tx1, DataStoreVersions.CURRENT_VERSION);
             batched.addModification(new WriteModification(path, node));
 

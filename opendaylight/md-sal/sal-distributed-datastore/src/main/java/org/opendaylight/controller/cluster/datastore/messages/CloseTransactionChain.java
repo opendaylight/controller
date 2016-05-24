@@ -17,24 +17,24 @@ import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifie
 public class CloseTransactionChain extends VersionedExternalizableMessage {
     private static final long serialVersionUID = 1L;
 
-    private LocalHistoryIdentifier<?> transactionChainId;
+    private LocalHistoryIdentifier transactionChainId;
 
     public CloseTransactionChain() {
     }
 
-    public CloseTransactionChain(final LocalHistoryIdentifier<?> transactionChainId, final short version) {
+    public CloseTransactionChain(final LocalHistoryIdentifier transactionChainId, final short version) {
         super(version);
         this.transactionChainId = Preconditions.checkNotNull(transactionChainId);
     }
 
-    public LocalHistoryIdentifier<?> getTransactionChainId() {
+    public LocalHistoryIdentifier getTransactionChainId() {
         return transactionChainId;
     }
 
     @Override
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         super.readExternal(in);
-        transactionChainId = (LocalHistoryIdentifier<?>) in.readObject();
+        transactionChainId = (LocalHistoryIdentifier) in.readObject();
     }
 
     @Override

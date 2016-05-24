@@ -32,11 +32,11 @@ class SingleCommitCohortProxy extends AbstractThreePhaseCommitCohort<Object> {
 
     private final ActorContext actorContext;
     private final Future<Object> cohortFuture;
-    private final TransactionIdentifier<?> transactionId;
+    private final TransactionIdentifier transactionId;
     private volatile DOMStoreThreePhaseCommitCohort delegateCohort = NoOpDOMStoreThreePhaseCommitCohort.INSTANCE;
     private final OperationCallback.Reference operationCallbackRef;
 
-    SingleCommitCohortProxy(ActorContext actorContext, Future<Object> cohortFuture, TransactionIdentifier<?> transactionId,
+    SingleCommitCohortProxy(ActorContext actorContext, Future<Object> cohortFuture, TransactionIdentifier transactionId,
             OperationCallback.Reference operationCallbackRef) {
         this.actorContext = actorContext;
         this.cohortFuture = cohortFuture;

@@ -39,7 +39,7 @@ class TransactionContextWrapper {
     @GuardedBy("queuedTxOperations")
     private final List<TransactionOperation> queuedTxOperations = Lists.newArrayList();
 
-    private final TransactionIdentifier<?> identifier;
+    private final TransactionIdentifier identifier;
 
     /**
      * The resulting TransactionContext.
@@ -48,7 +48,7 @@ class TransactionContextWrapper {
 
     private final OperationLimiter limiter;
 
-    TransactionContextWrapper(final TransactionIdentifier<?> identifier, final ActorContext actorContext) {
+    TransactionContextWrapper(final TransactionIdentifier identifier, final ActorContext actorContext) {
         this.identifier = Preconditions.checkNotNull(identifier);
         this.limiter = new OperationLimiter(identifier,
                 actorContext.getDatastoreContext().getShardBatchedModificationCount() + 1, // 1 extra permit for the ready operation
@@ -59,7 +59,7 @@ class TransactionContextWrapper {
         return transactionContext;
     }
 
-    TransactionIdentifier<?> getIdentifier() {
+    TransactionIdentifier getIdentifier() {
         return identifier;
     }
 

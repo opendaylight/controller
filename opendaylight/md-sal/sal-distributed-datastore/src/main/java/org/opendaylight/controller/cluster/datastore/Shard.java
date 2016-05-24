@@ -325,7 +325,7 @@ public class Shard extends RaftActor {
 
     void continueCommit(final CohortEntry cohortEntry) {
         final DataTreeCandidate candidate = cohortEntry.getCandidate();
-        final TransactionIdentifier<?> transactionId = cohortEntry.getTransactionID();
+        final TransactionIdentifier transactionId = cohortEntry.getTransactionID();
 
         // If we do not have any followers and we are not using persistence
         // or if cohortEntry has no modifications
@@ -579,7 +579,7 @@ public class Shard extends RaftActor {
         doAbortTransaction(abort.getTransactionID(), getSender());
     }
 
-    void doAbortTransaction(final TransactionIdentifier<?> transactionID, final ActorRef sender) {
+    void doAbortTransaction(final TransactionIdentifier transactionID, final ActorRef sender) {
         commitCoordinator.handleAbort(transactionID, sender, this);
     }
 
@@ -615,7 +615,7 @@ public class Shard extends RaftActor {
         }
     }
 
-    private ActorRef createTransaction(int transactionType, TransactionIdentifier<?> transactionId) {
+    private ActorRef createTransaction(int transactionType, TransactionIdentifier transactionId) {
         LOG.debug("{}: Creating transaction : {} ", persistenceId(), transactionId);
         return transactionActorFactory.newShardTransaction(TransactionType.fromInt(transactionType),
             transactionId);

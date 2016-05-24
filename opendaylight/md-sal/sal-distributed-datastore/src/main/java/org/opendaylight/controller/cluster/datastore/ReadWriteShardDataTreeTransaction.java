@@ -15,7 +15,7 @@ public final class ReadWriteShardDataTreeTransaction extends AbstractShardDataTr
     private final ShardDataTreeTransactionParent parent;
 
     protected ReadWriteShardDataTreeTransaction(final ShardDataTreeTransactionParent parent,
-            final TransactionIdentifier<?> id, final DataTreeModification modification) {
+            final TransactionIdentifier id, final DataTreeModification modification) {
         super(id, modification);
         this.parent = Preconditions.checkNotNull(parent);
     }

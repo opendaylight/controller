@@ -44,7 +44,7 @@ public class ReadyLocalTransactionSerializerTest extends AbstractTest {
         MapNode mergeData = ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME).build();
         new MergeModification(TestModel.OUTER_LIST_PATH, mergeData).apply(modification);
 
-        TransactionIdentifier<?> txId = nextTransactionId();
+        TransactionIdentifier txId = nextTransactionId();
         ReadyLocalTransaction readyMessage = new ReadyLocalTransaction(txId, modification, true);
 
         ReadyLocalTransactionSerializer serializer = new ReadyLocalTransactionSerializer();
