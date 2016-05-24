@@ -25,49 +25,59 @@ import org.opendaylight.yangtools.concepts.Identifier;
  * @author Robert Varga
  */
 @Beta
-public final class TransactionIdentifier<T extends FrontendType> implements Identifier {
-    private static final class Proxy<T extends FrontendType> implements Externalizable {
+public final class TransactionIdentifier implements Identifier, WritableObject {
+    private static final class Proxy implements Externalizable {
         private static final long serialVersionUID = 1L;
-        private LocalHistoryIdentifier<T> historyId;
+        private LocalHistoryIdentifier historyId;
         private long transactionId;
 
         public Proxy() {
             // For Externalizable
         }
 
-        Proxy(final LocalHistoryIdentifier<T> historyId, final long transactionId) {
+        Proxy(final LocalHistoryIdentifier historyId, final long transactionId) {
             this.historyId = Preconditions.checkNotNull(historyId);
             this.transactionId = transactionId;
         }
 
         @Override
         public void writeExternal(final ObjectOutput out) throws IOException {
-            out.writeObject(historyId);
+            historyId.writeTo(out);
             out.writeLong(transactionId);
         }
 
-        @SuppressWarnings("unchecked")
         @Override
         public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
-            historyId = (LocalHistoryIdentifier<T>) in.readObject();
+            historyId = LocalHistoryIdentifier.readFrom(in);
             transactionId = in.readLong();
         }
 
         private Object readResolve() {
-            return new TransactionIdentifier<>(historyId, transactionId);
+            return new TransactionIdentifier(historyId, transactionId);
         }
     }
 
     private static final long serialVersionUID = 1L;
-    private final LocalHistoryIdentifier<T> historyId;
+    private final LocalHistoryIdentifier historyId;
     private final long transactionId;
 
-    public TransactionIdentifier(final @Nonnull LocalHistoryIdentifier<T> historyId, final long transactionId) {
+    public TransactionIdentifier(final @Nonnull LocalHistoryIdentifier historyId, final long transactionId) {
         this.historyId = Preconditions.checkNotNull(historyId);
         this.transactionId = transactionId;
     }
 
-    public LocalHistoryIdentifier<T> getHistoryId() {
+    public static TransactionIdentifier readFrom(ObjectInput in) throws IOException, ClassNotFoundException {
+        final LocalHistoryIdentifier historyId = LocalHistoryIdentifier.readFrom(in);
+        return new TransactionIdentifier(historyId, in.readLong());
+    }
+
+    @Override
+    public void writeTo(ObjectOutput out) throws IOException {
+        historyId.writeTo(out);
+        out.writeLong(transactionId);
+    }
+
+    public LocalHistoryIdentifier getHistoryId() {
         return historyId;
     }
 
@@ -89,7 +99,7 @@ public final class TransactionIdentifier<T extends FrontendType> implements Iden
             return false;
         }
 
-        final TransactionIdentifier<?> other = (TransactionIdentifier<?>) o;
+        final TransactionIdentifier other = (TransactionIdentifier) o;
         return transactionId == other.transactionId && historyId.equals(other.historyId);
     }
 
@@ -100,6 +110,6 @@ public final class TransactionIdentifier<T extends FrontendType> implements Iden
     }
 
     private Object writeReplace() {
-        return new Proxy<>(historyId, transactionId);
+        return new Proxy(historyId, transactionId);
     }
 }
