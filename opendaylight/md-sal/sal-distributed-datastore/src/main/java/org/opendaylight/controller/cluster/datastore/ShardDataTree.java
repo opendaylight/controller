@@ -390,6 +390,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         if (chain == null) {
             chain = new ShardDataTreeTransactionChain(localHistoryIdentifier, this);
             transactionChains.put(localHistoryIdentifier, chain);
+            // FIXME: BUG-5280: persist a CreateLocalHistoryPayload
         }
 
         return chain;
@@ -449,6 +450,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         final ShardDataTreeTransactionChain chain = transactionChains.remove(transactionChainId);
         if (chain != null) {
             chain.close();
+            // FIXME: BUG-5280: persist a CloseLocalHistoryPayload
         } else {
             LOG.debug("{}: Closing non-existent transaction chain {}", logContext, transactionChainId);
         }
