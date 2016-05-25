@@ -80,9 +80,10 @@ final class LocalFrontendHistory extends AbstractFrontendHistory {
 
             // FIXME: add any finalization as needed
             state = State.CLOSED;
+
+            // FIXME: BUG-5280: record a DESTROY tombstone in the journal
         }
 
-        // FIXME: record a DESTROY tombstone in the journal
         return new LocalHistorySuccess(getIdentifier(), sequence);
     }
 
