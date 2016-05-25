@@ -208,7 +208,7 @@ public class ActorContext {
 
         return future.transform(new Mapper<Object, PrimaryShardInfo>() {
             @Override
-            public PrimaryShardInfo checkedApply(Object response) throws Exception {
+            public PrimaryShardInfo checkedApply(Object response) throws UnknownMessageException {
                 if(response instanceof RemotePrimaryShardFound) {
                     LOG.debug("findPrimaryShardAsync received: {}", response);
                     RemotePrimaryShardFound found = (RemotePrimaryShardFound)response;
