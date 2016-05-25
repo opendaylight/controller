@@ -13,8 +13,9 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
+import org.opendaylight.yangtools.concepts.Identifiable;
 
-public class CloseTransactionChain extends VersionedExternalizableMessage {
+public class CloseTransactionChain extends VersionedExternalizableMessage implements Identifiable<LocalHistoryIdentifier> {
     private static final long serialVersionUID = 1L;
 
     private LocalHistoryIdentifier transactionChainId;
@@ -27,7 +28,8 @@ public class CloseTransactionChain extends VersionedExternalizableMessage {
         this.transactionChainId = Preconditions.checkNotNull(transactionChainId);
     }
 
-    public LocalHistoryIdentifier getTransactionChainId() {
+    @Override
+    public LocalHistoryIdentifier getIdentifier() {
         return transactionChainId;
     }
 
