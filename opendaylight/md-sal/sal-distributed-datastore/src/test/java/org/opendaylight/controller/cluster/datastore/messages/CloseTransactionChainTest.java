@@ -30,7 +30,7 @@ public class CloseTransactionChainTest extends AbstractTest {
 
         CloseTransactionChain actual = CloseTransactionChain.fromSerializable(
                 SerializationUtils.clone((Serializable) serialized));
-        assertEquals("getTransactionChainId", expected.getTransactionChainId(), actual.getTransactionChainId());
+        assertEquals("getIdentifier", expected.getIdentifier(), actual.getIdentifier());
         assertEquals("getVersion", DataStoreVersions.CURRENT_VERSION, actual.getVersion());
     }
 
