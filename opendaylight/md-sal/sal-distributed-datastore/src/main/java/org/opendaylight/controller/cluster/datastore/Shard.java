@@ -595,7 +595,7 @@ public class Shard extends RaftActor {
     }
 
     private void closeTransactionChain(final CloseTransactionChain closeTransactionChain) {
-        store.closeTransactionChain(closeTransactionChain.getTransactionChainId());
+        store.closeTransactionChain(closeTransactionChain.getIdentifier());
     }
 
     private void createTransaction(CreateTransaction createTransaction) {
