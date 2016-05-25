@@ -75,6 +75,11 @@ final class FrontendMetadata extends ShardDataTreeMetadata<FrontendShardDataTree
     }
 
     @Override
+    void onHistoryCreated(final LocalHistoryIdentifier historyId) {
+        ensureClient(historyId.getClientId()).onHistoryCreated(historyId);
+    }
+
+    @Override
     void onHistoryClosed(final LocalHistoryIdentifier historyId) {
         ensureClient(historyId.getClientId()).onHistoryClosed(historyId);
     }
