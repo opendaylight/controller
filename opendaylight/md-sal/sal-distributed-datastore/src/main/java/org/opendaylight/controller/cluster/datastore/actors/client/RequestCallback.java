@@ -10,15 +10,14 @@ package org.opendaylight.controller.cluster.datastore.actors.client;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.Response;
-import org.opendaylight.yangtools.concepts.WritableIdentifier;
 
 @FunctionalInterface
-public interface RequestCallback<T extends WritableIdentifier> {
+public interface RequestCallback {
     /**
      * Invoked when a particular request completes.
      *
      * @param response Response to the request
      * @return Next client actor behavior
      */
-    @Nullable ClientActorBehavior complete(@Nonnull Response<T, ?> response);
+    @Nullable ClientActorBehavior complete(@Nonnull Response<?, ?> response);
 }
