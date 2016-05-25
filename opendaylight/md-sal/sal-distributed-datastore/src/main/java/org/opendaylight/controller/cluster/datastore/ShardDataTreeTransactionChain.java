@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 @NotThreadSafe
 final class ShardDataTreeTransactionChain extends ShardDataTreeTransactionParent
         implements Identifiable<LocalHistoryIdentifier> {
+
     private static final Logger LOG = LoggerFactory.getLogger(ShardDataTreeTransactionChain.class);
     private final LocalHistoryIdentifier chainId;
     private final ShardDataTree dataTree;
@@ -67,6 +68,7 @@ final class ShardDataTreeTransactionChain extends ShardDataTreeTransactionParent
 
     void close() {
         closed = true;
+        LOG.debug("Closing chain {}", chainId);
     }
 
     @Override

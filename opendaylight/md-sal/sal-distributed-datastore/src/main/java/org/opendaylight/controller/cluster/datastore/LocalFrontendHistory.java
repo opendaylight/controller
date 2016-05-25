@@ -8,10 +8,10 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import com.google.common.base.Preconditions;
-import com.google.common.base.Ticker;
 import org.opendaylight.controller.cluster.access.commands.DeadTransactionException;
 import org.opendaylight.controller.cluster.access.commands.LocalHistorySuccess;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
+import org.opendaylight.controller.cluster.access.concepts.RequestEnvelope;
 import org.opendaylight.controller.cluster.access.concepts.RequestException;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
@@ -25,20 +25,17 @@ import org.slf4j.LoggerFactory;
  * @author Robert Varga
  */
 final class LocalFrontendHistory extends AbstractFrontendHistory {
-    private enum State {
-        OPEN,
-        CLOSED,
-    }
-
     private static final Logger LOG = LoggerFactory.getLogger(LocalFrontendHistory.class);
 
     private final ShardDataTreeTransactionChain chain;
+    private final ShardDataTree tree;
 
     private Long lastSeenTransaction;
-    private State state = State.OPEN;
 
-    LocalFrontendHistory(final String persistenceId, final Ticker ticker, final ShardDataTreeTransactionChain chain) {
-        super(persistenceId, ticker);
+    LocalFrontendHistory(final String persistenceId, final ShardDataTree tree,
+            final ShardDataTreeTransactionChain chain) {
+        super(persistenceId, tree.ticker());
+        this.tree = Preconditions.checkNotNull(tree);
         this.chain = Preconditions.checkNotNull(chain);
     }
 
@@ -74,20 +71,19 @@ final class LocalFrontendHistory extends AbstractFrontendHistory {
         return chain.createReadyCohort(id, mod);
     }
 
-    LocalHistorySuccess destroy(final long sequence, final long now) throws RequestException {
-        if (state != State.CLOSED) {
-            LOG.debug("{}: closing history {}", persistenceId(), getIdentifier());
-
-            // FIXME: add any finalization as needed
-            state = State.CLOSED;
-        }
-
-        // FIXME: record a DESTROY tombstone in the journal
-        return new LocalHistorySuccess(getIdentifier(), sequence);
+    void destroy(final long sequence, final RequestEnvelope envelope, final long now)
+            throws RequestException {
+        LOG.debug("{}: closing history {}", persistenceId(), getIdentifier());
+        tree.closeTransactionChain(getIdentifier(), () -> {
+            envelope.sendSuccess(new LocalHistorySuccess(getIdentifier(), sequence), readTime() - now);
+        });
     }
 
-    boolean isDestroyed() {
-        return state == State.CLOSED;
+    void purge(final long sequence, final RequestEnvelope envelope, final long now) {
+        LOG.debug("{}: purging history {}", persistenceId(), getIdentifier());
+        tree.purgeTransactionChain(getIdentifier(), () -> {
+            envelope.sendSuccess(new LocalHistorySuccess(getIdentifier(), sequence), readTime() - now);
+        });
     }
 
     private void checkDeadTransaction(final TransactionIdentifier id) throws RequestException {
