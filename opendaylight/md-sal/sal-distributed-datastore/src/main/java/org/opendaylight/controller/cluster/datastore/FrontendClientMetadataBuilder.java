@@ -54,6 +54,11 @@ final class FrontendClientMetadataBuilder implements Builder<FrontendClientMetad
         return identifier;
     }
 
+    void onHistoryCreated(final LocalHistoryIdentifier historyId) {
+        // TODO Auto-generated method stub
+
+    }
+
     void onHistoryClosed(final LocalHistoryIdentifier historyId) {
         ensureHistory(historyId).onHistoryClosed();
     }

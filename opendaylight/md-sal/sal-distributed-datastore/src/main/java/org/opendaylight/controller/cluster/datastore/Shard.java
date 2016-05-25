@@ -453,13 +453,13 @@ public class Shard extends RaftActor {
     }
 
     // applyState() will be invoked once consensus is reached on the payload
-    void persistPayload(final TransactionIdentifier transactionId, final Payload payload, boolean batchHint) {
+    void persistPayload(final Identifier id, final Payload payload, final boolean batchHint) {
         boolean canSkipPayload = !hasFollowers() && !persistence().isRecoveryApplicable();
         if (canSkipPayload) {
-            applyState(self(), transactionId, payload);
+            applyState(self(), id, payload);
         } else {
             // We are faking the sender
-            persistData(self(), transactionId, payload, batchHint);
+            persistData(self(), id, payload, batchHint);
         }
     }
 
@@ -614,7 +614,7 @@ public class Shard extends RaftActor {
         doAbortTransaction(abort.getTransactionId(), getSender());
     }
 
-    void doAbortTransaction(final TransactionIdentifier transactionID, final ActorRef sender) {
+    void doAbortTransaction(final Identifier transactionID, final ActorRef sender) {
         commitCoordinator.handleAbort(transactionID, sender, this);
     }
 
