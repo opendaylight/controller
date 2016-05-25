@@ -105,6 +105,7 @@ import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelpe
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import org.opendaylight.yangtools.concepts.Identifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
@@ -1445,15 +1446,15 @@ public class ShardTest extends AbstractShardTest {
             {
                 final Creator<Shard> creator = () -> new Shard(newShardBuilder()) {
                     @Override
-                    void persistPayload(final TransactionIdentifier transactionId, final Payload payload,
-                            boolean batchHint) {
+                    void persistPayload(final Identifier id, final Payload payload,
+                            final boolean batchHint) {
                         // Simulate an AbortTransaction message occurring during
                         // replication, after
                         // persisting and before finishing the commit to the
                         // in-memory store.
 
-                        doAbortTransaction(transactionId, null);
-                        super.persistPayload(transactionId, payload, batchHint);
+                        doAbortTransaction(id, null);
+                        super.persistPayload(id, payload, batchHint);
                     }
                 };
 
