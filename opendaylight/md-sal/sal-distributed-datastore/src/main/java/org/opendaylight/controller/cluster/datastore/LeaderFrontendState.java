@@ -101,9 +101,9 @@ final class LeaderFrontendState implements Identifiable<ClientIdentifier> {
             if (request instanceof CreateLocalHistoryRequest) {
                 return handleCreateHistory((CreateLocalHistoryRequest) request);
             } else if (request instanceof DestroyLocalHistoryRequest) {
-                return handleDestroyHistory((DestroyLocalHistoryRequest) request, now);
+                return handleDestroyHistory((DestroyLocalHistoryRequest) request, envelope, now);
             } else if (request instanceof PurgeLocalHistoryRequest) {
-                return handlePurgeHistory((PurgeLocalHistoryRequest)request, now);
+                return handlePurgeHistory((PurgeLocalHistoryRequest)request, envelope, now);
             } else {
                 throw new UnsupportedRequestException(request);
             }
@@ -133,12 +133,13 @@ final class LeaderFrontendState implements Identifiable<ClientIdentifier> {
             lastSeenHistory = id.getHistoryId();
         }
 
-        localHistories.put(id, new LocalFrontendHistory(persistenceId, tree.ticker(), tree.ensureTransactionChain(id)));
+        localHistories.put(id, new LocalFrontendHistory(persistenceId, tree, tree.ensureTransactionChain(id)));
         LOG.debug("{}: created history {}", persistenceId, id);
         return new LocalHistorySuccess(id, request.getSequence());
     }
 
-    private LocalHistorySuccess handleDestroyHistory(final DestroyLocalHistoryRequest request, final long now)
+    private LocalHistorySuccess handleDestroyHistory(final DestroyLocalHistoryRequest request,
+            final RequestEnvelope envelope, final long now)
             throws RequestException {
         final LocalHistoryIdentifier id = request.getTarget();
         final LocalFrontendHistory existing = localHistories.get(id);
@@ -148,29 +149,23 @@ final class LeaderFrontendState implements Identifiable<ClientIdentifier> {
             return new LocalHistorySuccess(id, request.getSequence());
         }
 
-        return existing.destroy(request.getSequence(), now);
+        existing.destroy(request.getSequence(), envelope, now);
+        return null;
     }
 
-    private LocalHistorySuccess handlePurgeHistory(final PurgeLocalHistoryRequest request, final long now)
-            throws RequestException {
+    private LocalHistorySuccess handlePurgeHistory(final PurgeLocalHistoryRequest request,
+            final RequestEnvelope envelope, final long now) throws RequestException {
         final LocalHistoryIdentifier id = request.getTarget();
         final LocalFrontendHistory existing = localHistories.remove(id);
-        if (existing != null) {
-            purgedHistories.add(Range.singleton(UnsignedLong.fromLongBits(id.getHistoryId())));
-
-            if (!existing.isDestroyed()) {
-                LOG.warn("{}: purging undestroyed history {}", persistenceId, id);
-                existing.destroy(request.getSequence(), now);
-            }
-
-            // FIXME: record a PURGE tombstone in the journal
-
-            LOG.debug("{}: purged history {}", persistenceId, id);
-        } else {
+        if (existing == null) {
             LOG.debug("{}: history {} has already been purged", persistenceId, id);
+            return new LocalHistorySuccess(id, request.getSequence());
         }
 
-        return new LocalHistorySuccess(id, request.getSequence());
+        LOG.debug("{}: purging history {}", persistenceId, id);
+        purgedHistories.add(Range.singleton(UnsignedLong.fromLongBits(id.getHistoryId())));
+        existing.purge(request.getSequence(), envelope, now);
+        return null;
     }
 
     @Nullable TransactionSuccess<?> handleTransactionRequest(final TransactionRequest<?> request,
