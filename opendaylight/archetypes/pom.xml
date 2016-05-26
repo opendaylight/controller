@@ -61,7 +61,6 @@
   </build>
 
   <modules>
-    <module>odl-model-project</module>
     <module>opendaylight-configfile-archetype</module>
     <module>opendaylight-karaf-distro-archetype</module>
     <module>opendaylight-karaf-features</module>
