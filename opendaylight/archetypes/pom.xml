@@ -14,29 +14,23 @@
   <version>0.7.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
+  <properties>
+    <!-- TODO Bump maven-archetype-plugin version in odlparent instead of here: -->
+    <maven.archetype.version>3.0.1</maven.archetype.version>
+    <!-- TODO Figure out why SFT fails on archetype self test with:
+         ArtifactResolutionException: Error resolving artifact org.opendaylight.odlparent:opendaylight-karaf-empty:zip:2.0.4 -->
+    <archetype.test.skip>true</archetype.test.skip>
+  </properties>
+
   <build>
     <extensions>
       <extension>
         <groupId>org.apache.maven.archetype</groupId>
         <artifactId>archetype-packaging</artifactId>
-        <version>2.4</version>
+        <version>${maven.archetype.version}</version>
       </extension>
     </extensions>
-    <pluginManagement>
-      <plugins>
-        <plugin>
-          <artifactId>maven-archetype-plugin</artifactId>
-          <version>2.4</version>
-          <dependencies>
-            <dependency>
-              <groupId>commons-lang</groupId>
-              <artifactId>commons-lang</artifactId>
-              <version>2.6</version>
-            </dependency>
-          </dependencies>
-        </plugin>
-      </plugins>
-    </pluginManagement>
+
     <plugins>
       <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -45,6 +39,36 @@
             <!-- Required so that .gitignore gets included in archetypes; see https://issues.apache.org/jira/browse/MRESOURCES-190 -->
             <addDefaultExcludes>false</addDefaultExcludes>
           </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-help-plugin</artifactId>
+        <version>2.2</version>
+        <configuration>
+          <output>${project.build.directory}/effective-settings.xml</output>
+        </configuration>
+        <executions>
+          <execution>
+            <!-- This makes sure we run before maven-archetype-plugin -->
+            <phase>pre-integration-test</phase>
+            <goals>
+              <goal>effective-settings</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-archetype-plugin</artifactId>
+        <version>${maven.archetype.version}</version>
+        <configuration>
+          <settingsFile>${project.build.directory}/effective-settings.xml</settingsFile>
+        </configuration>
+        <dependencies>
+          <dependency>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+            <version>2.6</version>
+          </dependency>
+        </dependencies>
       </plugin>
     </plugins>
   </build>
