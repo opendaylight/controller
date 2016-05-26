@@ -2,6 +2,7 @@
 <archetype-descriptor xsi:schemaLocation="http://maven.apache.org/plugins/maven-archetype-plugin/archetype-descriptor/1.0.0 http://maven.apache.org/xsd/archetype-descriptor-1.0.0.xsd" name="example-aggregator"
     xmlns="http://maven.apache.org/plugins/maven-archetype-plugin/archetype-descriptor/1.0.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
   <requiredProperties>
     <requiredProperty key="classPrefix" >
         <defaultValue>
@@ -48,7 +49,6 @@
     </fileSet>
 
     <!-- features -->
-
     <fileSet filtered="true" encoding="UTF-8">
         <directory>features</directory>
         <includes>
@@ -56,14 +56,37 @@
         </includes>
     </fileSet>
     <fileSet filtered="true" encoding="UTF-8">
-        <directory>features/src/main/features</directory>
+        <directory>features/features-X</directory>
         <includes>
-            <include>**/*.xml</include>
-          </includes>
+            <include>pom.xml</include>
+        </includes>
+    </fileSet>
+    <fileSet filtered="true" encoding="UTF-8">
+        <directory>features/odl-X-api</directory>
+        <includes>
+            <include>pom.xml</include>
+        </includes>
+    </fileSet>
+    <fileSet filtered="true" encoding="UTF-8">
+        <directory>features/odl-X</directory>
+        <includes>
+            <include>pom.xml</include>
+        </includes>
+    </fileSet>
+    <fileSet filtered="true" encoding="UTF-8">
+        <directory>features/odl-X-cli</directory>
+        <includes>
+            <include>pom.xml</include>
+        </includes>
+    </fileSet>
+    <fileSet filtered="true" encoding="UTF-8">
+        <directory>features/odl-X-rest</directory>
+        <includes>
+            <include>pom.xml</include>
+        </includes>
     </fileSet>
 
     <!-- impl -->
-
     <fileSet filtered="true" encoding="UTF-8">
         <directory>impl</directory>
         <includes>
@@ -90,7 +113,6 @@
     </fileSet>
 
      <!-- api -->
-
      <fileSet filtered="true" encoding="UTF-8">
        <directory>api</directory>
        <includes>

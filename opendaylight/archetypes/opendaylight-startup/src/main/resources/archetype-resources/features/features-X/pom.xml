@@ -15,22 +15,34 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
 
   <parent>
     <groupId>org.opendaylight.odlparent</groupId>
-    <artifactId>odlparent-lite</artifactId>
+    <artifactId>feature-repo-parent</artifactId>
     <version>2.0.4</version>
     <relativePath/>
   </parent>
 
   <groupId>${groupId}</groupId>
-  <artifactId>${artifactId}-features-aggregator</artifactId>
+  <artifactId>features-${artifactId}</artifactId>
   <version>${version}</version>
-  <packaging>pom</packaging>
+  <packaging>feature</packaging>
+  <!-- <name> formatting is used by autorelease to parse and notify projects on
+       build failure. Please do not modify this unless you have a good reason. -->
   <name>ODL :: ${groupId} :: ${project.artifactId}</name>
 
-  <modules>
-    <module>features-X</module>
-    <module>odl-X-api</module>
-    <module>odl-X</module>
-    <module>odl-X-rest</module>
-    <module>odl-X-cli</module>
-  </modules>
+  <properties>
+    <mdsal.model.version>0.12.0-SNAPSHOT</mdsal.model.version>
+    <mdsal.version>1.7.0-SNAPSHOT</mdsal.version>
+    <restconf.version>1.7.0-SNAPSHOT</restconf.version>
+    <yangtools.version>2.0.0-SNAPSHOT</yangtools.version>
+    <configfile.directory>etc/opendaylight/karaf</configfile.directory>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>${symbol_dollar}{project.groupId}</groupId>
+      <artifactId>odl-${artifactId}-api</artifactId>
+      <version>${symbol_dollar}{project.version}</version>
+      <type>xml</type>
+      <classifier>features</classifier>
+    </dependency>
+  </dependencies>
 </project>
