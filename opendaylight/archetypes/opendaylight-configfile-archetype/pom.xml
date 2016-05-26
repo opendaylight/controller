@@ -15,24 +15,4 @@
 
   <description>Configuration files for md-sal</description>
 
-  <scm>
-    <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git/md-sal-config</connection>
-    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git/md-sal-config</developerConnection>
-    <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:MD-SAL/md-sal-config</url>
-  </scm>
-
-  <distributionManagement>
-    <repository>
-      <id>opendaylight-release</id>
-      <url>${nexusproxy}/repositories/opendaylight.release/</url>
-    </repository>
-    <snapshotRepository>
-      <id>opendaylight-snapshot</id>
-      <url>${nexusproxy}/repositories/opendaylight.snapshot/</url>
-    </snapshotRepository>
-    <site>
-      <id>website</id>
-      <url>dav:${nexusproxy}/sites/site/sal-parent</url>
-    </site>
-  </distributionManagement>
 </project>
