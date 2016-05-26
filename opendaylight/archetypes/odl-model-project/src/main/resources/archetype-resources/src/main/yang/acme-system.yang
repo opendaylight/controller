@@ -1,0 +1,50 @@
+// Contents of "acme-system.yang"
+module acme-system {
+    namespace "http://acme.example.com/system";
+    prefix "acme";
+    
+    organization "ACME Inc.";
+    contact "joe@acme.example.com";
+    
+    description
+        "The module for entities implementing the ACME system.";
+    
+    revision 2007-06-09 {
+        description "Initial revision.";
+    }
+    
+    container system {
+        leaf host-name {
+            type string;
+            description "Hostname for this system";
+        }
+    
+        leaf-list domain-search {
+            type string;
+            description "List of domain names to search";
+        }
+    
+        container login {
+            leaf message {
+                type string;
+                description
+                    "Message given at start of login session";
+            }
+    
+            list user {
+                key "name";
+                leaf name {
+                    type string;
+                }
+    
+                leaf full-name {
+                    type string;
+                }
+                
+                leaf class {
+                    type string;
+                }
+            }
+        }
+    }
+}

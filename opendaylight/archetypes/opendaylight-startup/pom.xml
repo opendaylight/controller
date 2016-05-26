@@ -15,14 +15,4 @@
 
   <name>${project.artifactId}</name>
 
-  <build>
-    <plugins>
-      <plugin>
-        <artifactId>maven-checkstyle-plugin</artifactId>
-        <configuration>
-          <failsOnError>false</failsOnError>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
 </project>
