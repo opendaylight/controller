@@ -34,17 +34,19 @@ public class ModuleConfig {
     }
 
     public Element toXml(ObjectName instanceON, Document document, String namespace, final EnumResolver enumResolver) {
-        Element root = XmlUtil.createElement(document, XmlMappingConstants.MODULE_KEY, Optional.<String>absent());
+        final Optional<String> configNs =
+                Optional.of(XmlMappingConstants.URN_OPENDAYLIGHT_PARAMS_XML_NS_YANG_CONTROLLER_CONFIG);
+        Element root = XmlUtil.createElement(document, XmlMappingConstants.MODULE_KEY, configNs);
 
         // type belongs to config.yang namespace, but needs to be <type prefix:moduleNS>prefix:moduleName</type>
 
         Element typeElement = XmlUtil.createTextElementWithNamespacedContent(document, XmlMappingConstants.TYPE_KEY,
-                XmlMappingConstants.PREFIX, namespace, moduleName);
+                XmlMappingConstants.PREFIX, namespace, moduleName, configNs);
 
         root.appendChild(typeElement);
         // name belongs to config.yang namespace
         String instanceName = ObjectNameUtil.getInstanceName(instanceON);
-        Element nameElement = XmlUtil.createTextElement(document, XmlMappingConstants.NAME_KEY, instanceName, Optional.<String>absent());
+        Element nameElement = XmlUtil.createTextElement(document, XmlMappingConstants.NAME_KEY, instanceName, configNs);
 
         root.appendChild(nameElement);
 

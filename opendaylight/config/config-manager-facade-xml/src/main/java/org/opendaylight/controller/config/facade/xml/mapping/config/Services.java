@@ -155,19 +155,23 @@ public final class Services {
 
                 // type belongs to config.yang namespace
                 String serviceType = serviceEntry.getKey();
-                Element typeElement = XmlUtil.createTextElementWithNamespacedContent(document, XmlMappingConstants.TYPE_KEY,
-                        XmlMappingConstants.PREFIX, namespaceToRefEntry.getKey(), serviceType);
+                Element typeElement = XmlUtil.createTextElementWithNamespacedContent(
+                        document, XmlMappingConstants.TYPE_KEY, XmlMappingConstants.PREFIX,
+                        namespaceToRefEntry.getKey(), serviceType, configNs);
 
                 serviceElement.appendChild(typeElement);
 
                 for (Entry<String, String> instanceEntry : serviceEntry.getValue().entrySet()) {
-                    Element instanceElement = XmlUtil.createElement(document, XmlMappingConstants.INSTANCE_KEY, Optional.<String>absent());
+                    Element instanceElement = XmlUtil.createElement(
+                            document, XmlMappingConstants.INSTANCE_KEY, configNs);
                     serviceElement.appendChild(instanceElement);
 
-                    Element nameElement = XmlUtil.createTextElement(document, NAME_KEY, instanceEntry.getKey(), Optional.<String>absent());
+                    Element nameElement = XmlUtil.createTextElement(
+                            document, NAME_KEY, instanceEntry.getKey(), configNs);
                     instanceElement.appendChild(nameElement);
 
-                    Element providerElement = XmlUtil.createTextElement(document, PROVIDER_KEY, instanceEntry.getValue(), Optional.<String>absent());
+                    Element providerElement = XmlUtil.createTextElement(
+                            document, PROVIDER_KEY, instanceEntry.getValue(), configNs);
                     instanceElement.appendChild(providerElement);
                 }
             }
