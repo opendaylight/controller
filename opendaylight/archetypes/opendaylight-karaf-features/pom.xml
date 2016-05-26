@@ -7,16 +7,11 @@
      <artifactId>archetypes-parent</artifactId>
      <version>0.4.0-SNAPSHOT</version>
   </parent>
+
   <groupId>org.opendaylight.controller</groupId>
   <artifactId>opendaylight-karaf-features-archetype</artifactId>
   <version>1.3.0-SNAPSHOT</version>
   <packaging>maven-archetype</packaging>
-
   <name>opendaylight-karaf-features-archetype</name>
 
-  <scm>
-    <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git/</connection>
-    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git/</developerConnection>
-    <url>https://git.opendaylight.org/gerrit/gitweb?p=controller.git;a=summary</url>
-  </scm>
 </project>
