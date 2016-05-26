@@ -27,7 +27,7 @@ public abstract class AbstractRequestFailureProxy<T extends Identifier & Writabl
     private static final long serialVersionUID = 1L;
     private RequestException cause;
 
-    public AbstractRequestFailureProxy() {
+    protected AbstractRequestFailureProxy() {
         // For Externalizable
     }
 

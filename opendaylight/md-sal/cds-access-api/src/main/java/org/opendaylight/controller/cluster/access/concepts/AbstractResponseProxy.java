@@ -22,7 +22,7 @@ abstract class AbstractResponseProxy<T extends Identifier & WritableObject, C ex
         extends AbstractMessageProxy<T, C> {
     private static final long serialVersionUID = 1L;
 
-    public AbstractResponseProxy() {
+    AbstractResponseProxy() {
         // for Externalizable
     }
 
