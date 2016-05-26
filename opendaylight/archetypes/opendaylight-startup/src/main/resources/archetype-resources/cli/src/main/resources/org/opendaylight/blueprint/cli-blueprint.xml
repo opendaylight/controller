@@ -21,14 +21,15 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <bean id="cliCommandsImpl" class="${package}.cli.impl.${classPrefix}CliCommandsImpl">
     <argument ref="dataBroker" />
   </bean>
+
   <service ref="cliCommandsImpl" odl:type="default"
     interface="${package}.cli.api.${classPrefix}CliCommands" />
 
-    <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.0.0">
-        <command name="test-command">
-            <action class="${package}.cli.commands.${classPrefix}CliTestCommand">
-                <argument ref="cliCommandsImpl"/>
-            </action>
-        </command>
-    </command-bundle>
+  <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.1.0">
+    <command>
+        <action class="${package}.cli.commands.${classPrefix}CliTestCommand">
+            <argument ref="cliCommandsImpl"/>
+        </action>
+    </command>
+  </command-bundle>
 </blueprint>

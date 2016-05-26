@@ -10,13 +10,13 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
     <groupId>org.opendaylight.odlparent</groupId>
-    <artifactId>karaf-parent</artifactId>
+    <artifactId>karaf4-parent</artifactId>
     <version>2.0.4</version>
+    <relativePath/>
   </parent>
 
   <groupId>${groupId}</groupId>
@@ -27,7 +27,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
   <name>ODL :: ${groupId} :: ${project.artifactId}</name>
 
   <properties>
-    <karaf.localFeature>odl-${artifactId}-ui</karaf.localFeature>
+    <!-- TODO <karaf.localFeature>odl-${artifactId}-rest</karaf.localFeature> -->
   </properties>
 
   <dependencyManagement>
@@ -53,7 +53,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
 
     <dependency>
       <groupId>${symbol_dollar}{project.groupId}</groupId>
-      <artifactId>${artifactId}-features</artifactId>
+      <artifactId>features-${artifactId}</artifactId>
       <classifier>features</classifier>
       <type>xml</type>
       <scope>runtime</scope>
