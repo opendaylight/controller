@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.access.concepts;
 import com.google.common.annotations.Beta;
 import java.io.DataOutput;
 import java.io.IOException;
+import javax.annotation.Nonnull;
 
 /**
  * Marker interface for an object which can be written out to an {@link DataOutput}. Classes implementing this
@@ -32,6 +33,7 @@ public interface WritableObject {
      *
      * @param out Output
      * @throws IOException if the output fails
+     * @throws NullPointerException if out is null
      */
-    void writeTo(DataOutput out) throws IOException;
+    void writeTo(@Nonnull DataOutput out) throws IOException;
 }
