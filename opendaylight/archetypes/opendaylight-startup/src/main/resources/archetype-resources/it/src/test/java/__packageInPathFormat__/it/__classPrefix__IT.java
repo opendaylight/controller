@@ -36,7 +36,7 @@ public class ${classPrefix}IT extends AbstractMdsalTestBase {
     public MavenUrlReference getFeatureRepo() {
         return maven()
                 .groupId("${groupId}")
-                .artifactId("${artifactId}-features")
+                .artifactId("features-${artifactId}")
                 .classifier("features")
                 .type("xml")
                 .versionAsInProject();
@@ -44,7 +44,7 @@ public class ${classPrefix}IT extends AbstractMdsalTestBase {
 
     @Override
     public String getFeatureName() {
-        return "odl-${artifactId}-ui";
+        return "odl-${artifactId}-rest";
     }
 
     @Override
