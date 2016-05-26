@@ -30,7 +30,7 @@ abstract class AbstractMessageProxy<T extends Identifier & WritableObject, C ext
     private T target;
     private long sequence;
 
-    public AbstractMessageProxy() {
+    protected AbstractMessageProxy() {
         // For Externalizable
     }
 

@@ -24,7 +24,7 @@ public abstract class AbstractSuccessProxy<T extends Identifier & WritableObject
         extends AbstractResponseProxy<T, C> implements Externalizable {
     private static final long serialVersionUID = 1L;
 
-    public AbstractSuccessProxy() {
+    protected AbstractSuccessProxy() {
         // For Externalizable
     }
 

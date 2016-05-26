@@ -28,7 +28,7 @@ public abstract class AbstractRequestProxy<T extends Identifier & WritableObject
     private static final long serialVersionUID = 1L;
     private ActorRef replyTo;
 
-    public AbstractRequestProxy() {
+    protected AbstractRequestProxy() {
         // For Externalizable
     }
 
