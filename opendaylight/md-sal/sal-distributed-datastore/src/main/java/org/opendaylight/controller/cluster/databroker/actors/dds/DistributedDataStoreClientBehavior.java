@@ -89,6 +89,11 @@ final class DistributedDataStoreClientBehavior extends ClientActorBehavior imple
         return this;
     }
 
+    @Override
+    protected void haltClient(final Throwable cause) {
+        // Add state flushing here once we have state
+    }
+
     //
     //
     // Methods below are invoked from application threads
