@@ -26,7 +26,11 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <mdsal.version>1.4.0-SNAPSHOT</mdsal.version>
     <yangtools.version>1.0.0-SNAPSHOT</yangtools.version>
     <jmxGeneratorPath>target/generated-sources/config-binding</jmxGeneratorPath>
-    <config.file>src/main/config/default-config.xml</config.file>
+    <config.dir>src/main/config</config.dir>
+    <config.filename>default-config.xml</config.filename>
+    <config.file>${config.dir}/${config.filename}</config.file>
+    <generated.config.dir>target/generated-config</generated.config.dir>
+    <generated.config.file>${generated.config.dir}/${config.filename}</generated.config.file>
   </properties>
 
   <dependencyManagement>
@@ -164,6 +168,28 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
         <pluginManagement>
           <plugins>
             <plugin>
+              <artifactId>maven-resources-plugin</artifactId>
+              <version>3.0.0</version>
+              <executions>
+                <execution>
+                  <id>copy-resources</id>
+                  <phase>validate</phase>
+                  <goals>
+                    <goal>copy-resources</goal>
+                  </goals>
+                  <configuration>
+                    <outputDirectory>${generated.config.dir}</outputDirectory>
+                    <resources>
+                      <resource>
+                        <directory>${config.dir}</directory>
+                        <filtering>true</filtering>
+                      </resource>
+                    </resources>
+                  </configuration>
+                </execution>
+              </executions>
+            </plugin>
+            <plugin>
               <groupId>org.codehaus.mojo</groupId>
               <artifactId>build-helper-maven-plugin</artifactId>
               <executions>
@@ -176,7 +202,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
                   <configuration>
                     <artifacts>
                       <artifact>
-                        <file>${config.file}</file>
+                        <file>${generated.config.file}</file>
                         <type>xml</type>
                         <classifier>config</classifier>
                       </artifact>
