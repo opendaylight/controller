@@ -12,6 +12,7 @@ import akka.actor.Status;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
+import org.opendaylight.controller.cluster.access.concepts.Response;
 import org.opendaylight.controller.cluster.datastore.actors.client.ClientActorBehavior;
 import org.opendaylight.controller.cluster.datastore.actors.client.ClientActorContext;
 import org.slf4j.Logger;
@@ -87,6 +88,12 @@ final class DistributedDataStoreClientBehavior extends ClientActorBehavior imple
         }
 
         return this;
+    }
+
+    @Override
+    protected ClientActorBehavior onLeaderResponse(final Response<?, ?> response, final Object context) {
+        // TODO Auto-generated method stub
+        return null;
     }
 
     //

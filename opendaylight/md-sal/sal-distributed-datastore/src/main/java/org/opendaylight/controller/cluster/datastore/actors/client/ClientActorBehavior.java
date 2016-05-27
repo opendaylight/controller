@@ -11,6 +11,8 @@ import com.google.common.annotations.Beta;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
+import org.opendaylight.controller.cluster.access.concepts.Request;
+import org.opendaylight.controller.cluster.access.concepts.Response;
 import org.opendaylight.yangtools.concepts.Identifiable;
 
 /**
@@ -37,6 +39,26 @@ public abstract class ClientActorBehavior extends RecoveredClientActorBehavior<C
     public final @Nonnull ClientIdentifier getIdentifier() {
         return context().getIdentifier();
     }
+
+    /**
+     * Send a {@link Request} to the leader. The request will be properly queued based on the target entity and
+     * sequence. Any soft failures will be retried internally. The final response will be delivered via
+     * {@link #onLeaderResponse(Response, Object), which will also return the specified context object. Users can
+     * use the context to pass request-related context and thus avoid having to look it up.
+     *
+     * @param request Request to send
+     * @param context Optional client-specific context associated with the request
+     * @throws IllegalArgumentException if the request is out of observed sequence
+     * @throws NullPointerException if request is null
+     */
+    public final void askLeader(final @Nonnull Request<?, ?> request, final @Nullable Object context) {
+        context().enqueueRequest(request, context);
+
+        // FIXME: if we have a leader, send the request, too
+    }
+
+    protected abstract @Nullable ClientActorBehavior onLeaderResponse(@Nonnull Response<?, ?> response,
+            @Nullable Object context);
 
     /**
      * Override this method to handle any command which is not handled by the base behavior.
