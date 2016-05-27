@@ -18,5 +18,21 @@
     <module>protocol-framework</module>
     <module>extras</module>
     <module>benchmark</module>
+    <module>odl-config-all</module>
+    <module>odl-config-api</module>
+    <module>odl-config-core</module>
+    <module>odl-config-manager</module>
+    <module>odl-config-manager-facade-xml</module>
+    <module>odl-config-netty</module>
+    <module>odl-config-netty-config-api</module>
+    <module>odl-config-persister</module>
+    <module>odl-config-startup</module>
+    <module>odl-mdsal-broker</module>
+    <module>odl-mdsal-broker-local</module>
+    <module>odl-mdsal-clustering-commons</module>
+    <module>odl-mdsal-common</module>
+    <module>odl-mdsal-distributed-datastore</module>
+    <module>odl-mdsal-remoterpc-connector</module>
+    <module>odl-protocol-framework</module>
   </modules>
 </project>

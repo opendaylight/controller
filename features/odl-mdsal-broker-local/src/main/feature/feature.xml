@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<features name="odl-mdsal-broker-local-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.2.1">
+    <feature name="odl-mdsal-broker-local">
+        <bundle start-level="70">mvn:org.opendaylight.controller/sal-broker-impl/${project.version}</bundle>
+        <bundle start-level="40">mvn:org.opendaylight.controller/blueprint/${controller.blueprint.version}</bundle>
+        <configfile finalname="${config.configfile.directory}/${config.mdsal.configfile}">mvn:org.opendaylight.controller/md-sal-config/${project.version}/xml/config</configfile>
+    </feature>
+</features>

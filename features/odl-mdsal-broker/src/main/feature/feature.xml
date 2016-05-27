@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<features name="odl-mdsal-broker-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.2.1">
+    <feature name ="odl-mdsal-broker">
+        <configfile finalname="${config.configfile.directory}/${config.clustering.configfile}">mvn:org.opendaylight.controller/sal-clustering-config/${project.version}/xml/config</configfile>
+        <configfile finalname="${config.configfile.directory}/${config.clustered-entity-ownership.configfile}">mvn:org.opendaylight.controller/sal-clustering-config/${project.version}/xml/entityownershipconfig</configfile>
+        <configfile finalname="configuration/initial/akka.conf">mvn:org.opendaylight.controller/sal-clustering-config/${project.version}/xml/akkaconf</configfile>
+        <configfile finalname="configuration/factory/akka.conf" override="true">mvn:org.opendaylight.controller/sal-clustering-config/${project.version}/xml/factoryakkaconf</configfile>
+        <configfile finalname="configuration/initial/module-shards.conf">mvn:org.opendaylight.controller/sal-clustering-config/${project.version}/xml/moduleshardconf</configfile>
+        <configfile finalname="configuration/initial/modules.conf">mvn:org.opendaylight.controller/sal-clustering-config/${project.version}/xml/moduleconf</configfile>
+        <configfile finalname="etc/org.opendaylight.controller.cluster.datastore.cfg">mvn:org.opendaylight.controller/sal-clustering-config/${project.version}/cfg/datastore</configfile>
+    </feature>
+</features>

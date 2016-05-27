@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<features xmlns="http://karaf.apache.org/xmlns/features/v1.2.1" name="odl-config-netty-${project.version}">
+    <feature name="odl-config-netty" version="${project.version}">
+        <configfile finalname="${config.configfile.directory}/${config.netty.configfile}">mvn:org.opendaylight.controller/config-netty-config/${project.version}/xml/config</configfile>
+    </feature>
+</features>
