@@ -64,6 +64,11 @@ final class DistributedDataStoreClientBehavior extends ClientActorBehavior imple
     //
     //
 
+    @Override
+    protected void hacf(final Throwable cause) {
+        // FIXME: Add state flushing here once we have state
+    }
+
     private void createLocalHistory(final CreateLocalHistoryCommand command) {
         final CompletableFuture<ClientLocalHistory> future = command.future();
         final LocalHistoryIdentifier historyId = new LocalHistoryIdentifier(getIdentifier(), nextHistoryId++);
@@ -80,7 +85,7 @@ final class DistributedDataStoreClientBehavior extends ClientActorBehavior imple
         } else if (command instanceof GetClientRequest) {
             ((GetClientRequest) command).getReplyTo().tell(new Status.Success(this), ActorRef.noSender());
         } else if (SHUTDOWN.equals(command)) {
-            // Add shutdown procedures here
+            // FIXME: Add shutdown procedures here
             return null;
         } else {
             LOG.warn("{}: ignoring unhandled command {}", persistenceId(), command);
