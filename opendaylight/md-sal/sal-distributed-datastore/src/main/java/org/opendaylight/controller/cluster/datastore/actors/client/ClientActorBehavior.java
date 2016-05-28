@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.datastore.actors.client;
 
 import com.google.common.annotations.Beta;
+import com.google.common.base.Preconditions;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
@@ -29,9 +30,11 @@ import org.slf4j.LoggerFactory;
 public abstract class ClientActorBehavior extends RecoveredClientActorBehavior<ClientActorContext>
         implements Identifiable<ClientIdentifier> {
     private static final Logger LOG = LoggerFactory.getLogger(ClientActorBehavior.class);
+    private final Object resolver;
 
-    protected ClientActorBehavior(final @Nonnull ClientActorContext context) {
+    protected ClientActorBehavior(final @Nonnull ClientActorContext context, final ShardLeaderResolver resolver) {
         super(context);
+        this.resolver = Preconditions.checkNotNull(resolver);
     }
 
     @Override
@@ -53,6 +56,10 @@ public abstract class ClientActorBehavior extends RecoveredClientActorBehavior<C
     @Override
     public final @Nonnull ClientIdentifier getIdentifier() {
         return context().getIdentifier();
+    }
+
+    protected final ShardLeaderResolver resolver() {
+        return resolver();
     }
 
     /**

@@ -55,7 +55,7 @@ final class DistributedDataStoreClientBehavior extends ClientActorBehavior imple
     private long nextHistoryId;
 
     DistributedDataStoreClientBehavior(final ClientActorContext context) {
-        super(context);
+        super(context, new ModuleShardLeaderResolver());
     }
 
     //
@@ -71,7 +71,8 @@ final class DistributedDataStoreClientBehavior extends ClientActorBehavior imple
 
     private void createLocalHistory(final CreateLocalHistoryCommand command) {
         final CompletableFuture<ClientLocalHistory> future = command.future();
-        final LocalHistoryIdentifier historyId = new LocalHistoryIdentifier(getIdentifier(), nextHistoryId++);
+        // FIXME: assign shard cookie
+        final LocalHistoryIdentifier historyId = new LocalHistoryIdentifier(getIdentifier(), nextHistoryId++, 0);
         LOG.debug("{}: creating a new local history {} for {}", persistenceId(), historyId, future);
 
         // FIXME: initiate backend instantiation
