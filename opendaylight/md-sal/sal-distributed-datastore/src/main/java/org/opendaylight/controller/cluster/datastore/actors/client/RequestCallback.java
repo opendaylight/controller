@@ -9,20 +9,16 @@ package org.opendaylight.controller.cluster.datastore.actors.client;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import org.opendaylight.controller.cluster.access.concepts.Response;
+import org.opendaylight.yangtools.concepts.WritableIdentifier;
 
-/**
- * This interface is used to pass the unit of work via the actors mailbox. The command can alter behavior of the actor
- * by returning a new behavior.
- *
- * @author Robert Varga
- */
 @FunctionalInterface
-public interface InternalCommand {
+public interface RequestCallback<T extends WritableIdentifier> {
     /**
-     * Run command actions.
+     * Invoked when a particular request completes.
      *
-     * @param currentBehavior Current Behavior
-     * @return Next behavior to use in the client actor
+     * @param response Response to the request
+     * @return Next client actor behavior
      */
-    @Nullable ClientActorBehavior execute(@Nonnull ClientActorBehavior currentBehavior);
+    @Nullable ClientActorBehavior complete(@Nonnull Response<T, ?> response);
 }
