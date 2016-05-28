@@ -7,12 +7,9 @@
  */
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
-import akka.actor.ActorRef;
 import com.google.common.annotations.Beta;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Verify;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
-import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 
 /**
@@ -26,31 +23,22 @@ import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifie
  * @author Robert Varga
  */
 @Beta
-public final class ClientLocalHistory implements AutoCloseable {
+public final class ClientLocalHistory extends AbstractClientHistory implements AutoCloseable {
     private static final AtomicIntegerFieldUpdater<ClientLocalHistory> STATE_UPDATER =
             AtomicIntegerFieldUpdater.newUpdater(ClientLocalHistory.class, "state");
     private static final int IDLE_STATE = 0;
     private static final int CLOSED_STATE = 1;
 
-    private final ClientIdentifier clientId;
-    private final long historyId;
-    private final ActorRef backendActor;
-    private final ActorRef clientActor;
-
     private volatile int state = IDLE_STATE;
 
-    ClientLocalHistory(final DistributedDataStoreClientBehavior client, final long historyId,
-            final ActorRef backendActor) {
-        this.clientActor = client.self();
-        this.backendActor = Preconditions.checkNotNull(backendActor);
-        this.clientId = Verify.verifyNotNull(client.getIdentifier());
-        this.historyId = historyId;
+    // FIXME: assign shard cookie
+
+    ClientLocalHistory(final DistributedDataStoreClientBehavior client, final LocalHistoryIdentifier historyId) {
+        super(client, historyId);
     }
 
     private void checkNotClosed() {
-        if (state == CLOSED_STATE) {
-            throw new IllegalStateException("Local history " + new LocalHistoryIdentifier(clientId, historyId) + " is closed");
-        }
+        Preconditions.checkState(state != CLOSED_STATE, "Local history %s is closed", this);
     }
 
     @Override
