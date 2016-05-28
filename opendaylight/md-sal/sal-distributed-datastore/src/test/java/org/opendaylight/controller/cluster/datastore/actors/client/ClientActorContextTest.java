@@ -9,6 +9,8 @@ package org.opendaylight.controller.cluster.datastore.actors.client;
 
 import static org.junit.Assert.assertSame;
 import akka.actor.ActorRef;
+import akka.actor.Scheduler;
+import akka.dispatch.Dispatcher;
 import com.google.common.base.Ticker;
 import org.junit.Before;
 import org.junit.Test;
@@ -30,6 +32,12 @@ public class ClientActorContextTest {
     @Mock
     private ActorRef mockSelf;
 
+    @Mock
+    private Scheduler mockScheduler;
+
+    @Mock
+    private Dispatcher mockDispatcher;
+
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
@@ -37,7 +45,7 @@ public class ClientActorContextTest {
 
     @Test
     public void testMockingControl() {
-        ClientActorContext ctx = new ClientActorContext(mockSelf, PERSISTENCE_ID, CLIENT_ID);
+        ClientActorContext ctx = new ClientActorContext(mockSelf, mockScheduler, mockDispatcher, PERSISTENCE_ID, CLIENT_ID);
         assertSame(CLIENT_ID, ctx.getIdentifier());
         assertSame(PERSISTENCE_ID, ctx.persistenceId());
         assertSame(mockSelf, ctx.self());
@@ -45,7 +53,7 @@ public class ClientActorContextTest {
 
     @Test
     public void testTicker() {
-        ClientActorContext ctx = new ClientActorContext(mockSelf, PERSISTENCE_ID, CLIENT_ID);
+        ClientActorContext ctx = new ClientActorContext(mockSelf, mockScheduler, mockDispatcher, PERSISTENCE_ID, CLIENT_ID);
         assertSame(Ticker.systemTicker(), ctx.ticker());
     }
 }
