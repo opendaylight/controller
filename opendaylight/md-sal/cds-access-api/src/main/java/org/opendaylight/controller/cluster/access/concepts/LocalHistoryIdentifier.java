@@ -40,13 +40,13 @@ public final class LocalHistoryIdentifier implements Identifier, WritableObject 
         @Override
         public void writeExternal(final ObjectOutput out) throws IOException {
             clientId.writeTo(out);
-            out.writeLong(historyId);
+            WritableObjects.writeLong(out, historyId);
         }
 
         @Override
         public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
             clientId = ClientIdentifier.readFrom(in);
-            historyId = in.readLong();
+            historyId = WritableObjects.readLong(in);
         }
 
         private Object readResolve() {
@@ -65,13 +65,13 @@ public final class LocalHistoryIdentifier implements Identifier, WritableObject 
 
     public static LocalHistoryIdentifier readFrom(final DataInput in) throws IOException {
         final ClientIdentifier clientId = ClientIdentifier.readFrom(in);
-        return new LocalHistoryIdentifier(clientId, in.readLong());
+        return new LocalHistoryIdentifier(clientId, WritableObjects.readLong(in));
     }
 
     @Override
     public void writeTo(final DataOutput out) throws IOException {
         clientId.writeTo(out);
-        out.writeLong(historyId);
+        WritableObjects.writeLong(out, historyId);
     }
 
     public ClientIdentifier getClientId() {

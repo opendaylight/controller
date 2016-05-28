@@ -43,13 +43,13 @@ public final class ClientIdentifier implements Identifier, WritableObject {
         @Override
         public void writeExternal(final ObjectOutput out) throws IOException {
             frontendId.writeTo(out);
-            out.writeLong(generation);
+            WritableObjects.writeLong(out, generation);
         }
 
         @Override
         public void readExternal(final ObjectInput in) throws IOException {
             frontendId = FrontendIdentifier.readFrom(in);
-            generation = in.readLong();
+            generation = WritableObjects.readLong(in);
         }
 
         private Object readResolve() {
@@ -73,13 +73,13 @@ public final class ClientIdentifier implements Identifier, WritableObject {
 
     public static ClientIdentifier readFrom(final DataInput in) throws IOException {
         final FrontendIdentifier frontendId = FrontendIdentifier.readFrom(in);
-        return new ClientIdentifier(frontendId, in.readLong());
+        return new ClientIdentifier(frontendId, WritableObjects.readLong(in));
     }
 
     @Override
     public void writeTo(final DataOutput out) throws IOException {
         frontendId.writeTo(out);
-        out.writeLong(generation);
+        WritableObjects.writeLong(out, generation);
     }
 
     public FrontendIdentifier getFrontendId() {

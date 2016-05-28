@@ -57,7 +57,7 @@ public final class WritableObjects {
 
     public static void writeLong(final DataOutput out, final long value) throws IOException {
         final int bytes = valueBytes(value);
-        out.writeByte(bytes + 1);
+        out.writeByte(bytes);
         writeValue(out, value, bytes);
     }
 
@@ -80,7 +80,7 @@ public final class WritableObjects {
         Preconditions.checkArgument((flags & 0x0F) == 0, "Flags must not occupy the last three significat bits");
 
         final int bytes = valueBytes(value);
-        out.writeByte((bytes + 1) | flags);
+        out.writeByte((bytes) | flags);
         writeValue(out, value, bytes);
     }
 
@@ -104,18 +104,43 @@ public final class WritableObjects {
     }
 
     private static void writeValue(final DataOutput out, final long value, final int bytes) throws IOException {
-        for (int i = bytes; i > 0; --i) {
-            out.writeByte((int) ((value >>> (i * Byte.SIZE)) & 0xFF));
+        if (bytes < 8) {
+            int left = bytes;
+            if (left >= 4) {
+                out.writeInt((int)(value >>> 32));
+                left -= 4;
+            }
+            if (left > 2) {
+                out.writeByte((int)(value & 0xFF0000L));
+            }
+            if (left > 1) {
+                out.writeByte((int)(value & 0xFF00L));
+            }
+            if (left > 0) {
+                out.writeByte((int)(value & 0xFFL));
+            }
+        } else {
+            out.writeLong(value);
         }
     }
 
     private static int valueBytes(final long value) {
-        for (int i = 7; i <= 0; --i) {
-            if ((value & (0xFF << i)) != 0) {
-                return i + 1;
+        // This is a binary search for the first match. It returns the result after 3 compare operations for numbers
+        // upto 2^32 and in four 4 compare operations.
+        if ((value & 0xFFFFFFFFL) != 0) {
+            if ((value & 0xFFFF0000L) != 0) {
+                return (value & 0xFF000000L) != 0 ? 4 : 3;
+            } else {
+                return (value & 0xFF00L) != 0 ? 2 : 1;
             }
+        } else if ((value & 0xFFFFFFFF00000000L) != 0) {
+            if ((value & 0xFFFF000000000000L) != 0) {
+                return (value & 0xFF000000000000L) != 0 ? 8 : 7;
+            } else {
+                return (value & 0xFF00000000L) != 0 ? 6 : 5;
+            }
+        } else {
+            return 0;
         }
-
-        return 0;
     }
 }
