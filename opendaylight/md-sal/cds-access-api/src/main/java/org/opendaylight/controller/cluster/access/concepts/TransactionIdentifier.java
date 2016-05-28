@@ -43,13 +43,13 @@ public final class TransactionIdentifier implements Identifier, WritableObject {
         @Override
         public void writeExternal(final ObjectOutput out) throws IOException {
             historyId.writeTo(out);
-            out.writeLong(transactionId);
+            WritableObjects.writeLong(out, transactionId);
         }
 
         @Override
         public void readExternal(final ObjectInput in) throws IOException {
             historyId = LocalHistoryIdentifier.readFrom(in);
-            transactionId = in.readLong();
+            transactionId = WritableObjects.readLong(in);
         }
 
         private Object readResolve() {
@@ -68,13 +68,13 @@ public final class TransactionIdentifier implements Identifier, WritableObject {
 
     public static TransactionIdentifier readFrom(final DataInput in) throws IOException {
         final LocalHistoryIdentifier historyId = LocalHistoryIdentifier.readFrom(in);
-        return new TransactionIdentifier(historyId, in.readLong());
+        return new TransactionIdentifier(historyId, WritableObjects.readLong(in));
     }
 
     @Override
     public void writeTo(final DataOutput out) throws IOException {
         historyId.writeTo(out);
-        out.writeLong(transactionId);
+        WritableObjects.writeLong(out, transactionId);
     }
 
     public LocalHistoryIdentifier getHistoryId() {

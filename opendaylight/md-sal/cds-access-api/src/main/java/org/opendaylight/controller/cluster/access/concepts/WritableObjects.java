@@ -7,58 +7,15 @@
  */
 package org.opendaylight.controller.cluster.access.concepts;
 
-import com.google.common.base.Preconditions;
+import com.google.common.io.ByteStreams;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import org.opendaylight.yangtools.concepts.Immutable;
 
 //FIXME: this really should go into yangtools/common/concepts.
 public final class WritableObjects {
-    public static final class LongWithFlags implements Immutable {
-        private final byte flags;
-        private final long value;
-
-        public LongWithFlags(final byte flags, final long value) {
-            this.flags = flags;
-            this.value = value;
-        }
-
-        public byte getFlags() {
-            return flags;
-        }
-
-        public long getValue() {
-            return value;
-        }
-
-        @Override
-        public int hashCode() {
-            return flags * 31 + Long.hashCode(value);
-        }
-
-        @Override
-        public boolean equals(final Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (!(o instanceof LongWithFlags)) {
-                return false;
-            }
-
-            final LongWithFlags other = (LongWithFlags) o;
-            return flags == other.flags && value == other.value;
-        }
-    }
-
     private WritableObjects() {
         throw new UnsupportedOperationException();
-    }
-
-    public static void writeLong(final DataOutput out, final long value) throws IOException {
-        final int bytes = valueBytes(value);
-        out.writeByte(bytes + 1);
-        writeValue(out, value, bytes);
     }
 
     /**
@@ -66,27 +23,16 @@ public final class WritableObjects {
      * serializing counters and similar, which have a wide range, but typically do not use it. The value provided is
      * treated as unsigned.
      *
-     * This methods writes the number of trailing non-zero in the value. Since it needs to expend a full byte while
-     * only needing four bits, it allows the caller to specify four high-order bits with caller-specific data. This is
-     * useful in serialization for encoding presence of optional fields.
-     *
-     * It then writes the minimum required bytes to reconstruct the value by left-padding zeroes.
+     * This methods writes the number of trailing non-zero in the value. It then writes the minimum required bytes
+     * to reconstruct the value by left-padding zeroes. Inverse operation is performed by {@link #readLong(DataInput)}.
      *
      * @param out Output
      * @param value long value to write
-     * @param flags additional flags
      */
-    public static void writeLongWithFlags(final DataOutput out, final long value, final int flags) throws IOException {
-        Preconditions.checkArgument((flags & 0x0F) == 0, "Flags must not occupy the last three significat bits");
-
+    public static void writeLong(final DataOutput out, final long value) throws IOException {
         final int bytes = valueBytes(value);
-        out.writeByte((bytes + 1) | flags);
+        out.writeByte(bytes);
         writeValue(out, value, bytes);
-    }
-
-    public static LongWithFlags readLongWithFlags(final DataInput in) throws IOException {
-        final byte flags = in.readByte();
-        return new LongWithFlags((byte)(flags & 0xF0), readValue(in, flags));
     }
 
     public static long readLong(final DataInput in) throws IOException {
@@ -94,28 +40,53 @@ public final class WritableObjects {
     }
 
     private static long readValue(final DataInput in, final int flags) throws IOException {
-        final int bytes = flags & 0x0F;
-
         long value = 0;
-        for (int i = bytes; i > 0; --i) {
+        for (int i = flags & 0x0F; i > 0; --i) {
             value |= in.readByte() << (i * Byte.SIZE);
         }
         return value;
     }
 
     private static void writeValue(final DataOutput out, final long value, final int bytes) throws IOException {
-        for (int i = bytes; i > 0; --i) {
-            out.writeByte((int) ((value >>> (i * Byte.SIZE)) & 0xFF));
+        if (bytes < 8) {
+            int left = bytes;
+            if (left >= 4) {
+                out.writeInt((int)(value >>> 32));
+                left -= 4;
+            }
+            if (left > 2) {
+                out.writeByte(*(int)(value >>> 24) & 0xFF));
+            }
+            if (left > 1) {
+                out.writeByte(((int)(value >>> 16) & 0xFF));
+            }
+            if (left > 0) {
+                out.writeByte((int)(value & 0xFF));
+            }
+        } else {
+            out.writeLong(value);
         }
+
+        ByteStreams.newDataOutput()
     }
 
     private static int valueBytes(final long value) {
-        for (int i = 7; i <= 0; --i) {
-            if ((value & (0xFF << i)) != 0) {
-                return i + 1;
+        // This is a binary search for the first match. It returns the result after 3 compare operations for numbers
+        // upto 2^32 and in four 4 compare operations.
+        if ((value & 0xFFFFFFFFL) != 0) {
+            if ((value & 0xFFFF0000L) != 0) {
+                return (value & 0xFF000000L) != 0 ? 4 : 3;
+            } else {
+                return (value & 0xFF00L) != 0 ? 2 : 1;
             }
+        } else if ((value & 0xFFFFFFFF00000000L) != 0) {
+            if ((value & 0xFFFF000000000000L) != 0) {
+                return (value & 0xFF000000000000L) != 0 ? 8 : 7;
+            } else {
+                return (value & 0xFF00000000L) != 0 ? 6 : 5;
+            }
+        } else {
+            return 0;
         }
-
-        return 0;
     }
 }
