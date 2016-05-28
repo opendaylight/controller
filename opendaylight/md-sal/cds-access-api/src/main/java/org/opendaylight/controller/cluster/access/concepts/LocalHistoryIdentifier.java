@@ -18,7 +18,10 @@ import java.io.ObjectOutput;
 import org.opendaylight.yangtools.concepts.Identifier;
 
 /**
- * Globally-unique identifier of a local history.
+ * Globally-unique identifier of a local history. This identifier is assigned on the frontend and is coposed of
+ * - a {@link ClientIdentifier}, which uniquely identifies a single instantiation of a particular frontend
+ * - an unsigned long, which uniquely identifies the history on the backend
+ * - an unsigned long cookie, assigned by the client and meaningless on the backend, which just reflects it back
  *
  * @author Robert Varga
  */
@@ -27,14 +30,16 @@ public final class LocalHistoryIdentifier implements Identifier, WritableObject 
         private static final long serialVersionUID = 1L;
         private ClientIdentifier clientId;
         private long historyId;
+        private long cookie;
 
         public Proxy() {
             // For Externalizable
         }
 
-        Proxy(final ClientIdentifier frontendId, final long historyId) {
+        Proxy(final ClientIdentifier frontendId, final long historyId, final long cookie) {
             this.clientId = Preconditions.checkNotNull(frontendId);
             this.historyId = historyId;
+            this.cookie = cookie;
         }
 
         @Override
@@ -50,28 +55,36 @@ public final class LocalHistoryIdentifier implements Identifier, WritableObject 
         }
 
         private Object readResolve() {
-            return new LocalHistoryIdentifier(clientId, historyId);
+            return new LocalHistoryIdentifier(clientId, historyId, cookie);
         }
     }
 
     private static final long serialVersionUID = 1L;
     private final ClientIdentifier clientId;
     private final long historyId;
+    private final long cookie;
 
     public LocalHistoryIdentifier(final ClientIdentifier frontendId, final long historyId) {
+        this(frontendId, historyId, 0);
+    }
+
+    public LocalHistoryIdentifier(final ClientIdentifier frontendId, final long historyId, final long cookie) {
         this.clientId = Preconditions.checkNotNull(frontendId);
         this.historyId = historyId;
+        this.cookie = cookie;
     }
 
     public static LocalHistoryIdentifier readFrom(final DataInput in) throws IOException {
         final ClientIdentifier clientId = ClientIdentifier.readFrom(in);
-        return new LocalHistoryIdentifier(clientId, WritableObjects.readLong(in));
+        final long historyId = WritableObjects.readLong(in);
+        return new LocalHistoryIdentifier(clientId, historyId, WritableObjects.readLong(in));
     }
 
     @Override
     public void writeTo(final DataOutput out) throws IOException {
         clientId.writeTo(out);
         WritableObjects.writeLong(out, historyId);
+        WritableObjects.writeLong(out, cookie);
     }
 
     public ClientIdentifier getClientId() {
@@ -82,9 +95,16 @@ public final class LocalHistoryIdentifier implements Identifier, WritableObject 
         return historyId;
     }
 
+    public long getCookie() {
+        return cookie;
+    }
+
     @Override
     public int hashCode() {
-        return clientId.hashCode() * 31 + Long.hashCode(historyId);
+        int ret = clientId.hashCode();
+        ret = 31 * ret + Long.hashCode(historyId);
+        ret = 31 * ret + Long.hashCode(cookie);
+        return ret;
     }
 
     @Override
@@ -97,16 +117,17 @@ public final class LocalHistoryIdentifier implements Identifier, WritableObject 
         }
 
         final LocalHistoryIdentifier other = (LocalHistoryIdentifier) o;
-        return historyId == other.historyId && clientId.equals(other.clientId);
+        return historyId == other.historyId && cookie == other.cookie && clientId.equals(other.clientId);
     }
 
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(LocalHistoryIdentifier.class).add("client", clientId)
-                .add("history", Long.toUnsignedString(historyId)).toString();
+                .add("history", Long.toUnsignedString(historyId, 16))
+                .add("cookie", Long.toUnsignedString(cookie, 16)).toString();
     }
 
     private Object writeReplace() {
-        return new Proxy(clientId, historyId);
+        return new Proxy(clientId, historyId, cookie);
     }
 }
