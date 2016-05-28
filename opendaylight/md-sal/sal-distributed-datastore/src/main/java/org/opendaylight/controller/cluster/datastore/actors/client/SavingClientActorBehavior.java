@@ -33,7 +33,7 @@ final class SavingClientActorBehavior extends RecoveredClientActorBehavior<Initi
             return null;
         } else if (command instanceof SaveSnapshotSuccess) {
             context().unstash();
-            return context().createBehavior(new ClientActorContext(self(), persistenceId(), myId));
+            return context().createBehavior(myId);
         } else {
             LOG.debug("{}: stashing command {}", persistenceId(), command);
             context().stash();

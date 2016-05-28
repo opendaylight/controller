@@ -66,16 +66,17 @@ final class DistributedDataStoreClientBehavior extends ClientActorBehavior imple
         // FIXME: Add state flushing here once we have state
     }
 
-    private ClientActorBehavior createLocalHistory(final CompletableFuture<ClientLocalHistory> future) {
+    private ClientActorBehavior createLocalHistory(final ClientActorBehavior currentBehavior,
+            final CompletableFuture<ClientLocalHistory> future) {
         final LocalHistoryIdentifier historyId = new LocalHistoryIdentifier(getIdentifier(), nextHistoryId++);
         LOG.debug("{}: creating a new local history {} for {}", persistenceId(), historyId, future);
 
         // FIXME: initiate backend instantiation
         future.completeExceptionally(new UnsupportedOperationException("Not implemented yet"));
-        return this;
+        return currentBehavior;
     }
 
-    private ClientActorBehavior shutdown() {
+    private ClientActorBehavior shutdown(final ClientActorBehavior currentBehavior) {
         // FIXME: Add shutdown procedures here
         return null;
     }
@@ -100,7 +101,7 @@ final class DistributedDataStoreClientBehavior extends ClientActorBehavior imple
     @Override
     public CompletionStage<ClientLocalHistory> createLocalHistory() {
         final CompletableFuture<ClientLocalHistory> future = new CompletableFuture<>();
-        context().executeInActor(() -> createLocalHistory(future));
+        context().executeInActor(currentBehavior -> createLocalHistory(currentBehavior, future));
         return future;
     }
 
