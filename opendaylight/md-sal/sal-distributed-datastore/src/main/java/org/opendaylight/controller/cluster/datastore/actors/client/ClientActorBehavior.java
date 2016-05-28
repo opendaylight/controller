@@ -11,9 +11,12 @@ import com.google.common.annotations.Beta;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
+import org.opendaylight.controller.cluster.access.concepts.Request;
 import org.opendaylight.controller.cluster.access.concepts.RequestException;
 import org.opendaylight.controller.cluster.access.concepts.RequestFailure;
+import org.opendaylight.controller.cluster.access.concepts.RequestSuccess;
 import org.opendaylight.controller.cluster.access.concepts.RetiredGenerationException;
+import org.opendaylight.controller.cluster.access.concepts.WritableIdentifier;
 import org.opendaylight.yangtools.concepts.Identifiable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,18 +41,35 @@ public abstract class ClientActorBehavior extends RecoveredClientActorBehavior<C
     final ClientActorBehavior onReceiveCommand(final Object command) {
         if (command instanceof InternalCommand) {
             return ((InternalCommand) command).execute();
-        } else if (command instanceof RequestFailure) {
-            final RequestFailure<?, ?> failure = (RequestFailure<?, ?>) command;
-            final RequestException cause = failure.getCause();
-            if (cause instanceof RetiredGenerationException) {
-                LOG.error("{}: current generation {} has been superseded", persistenceId(), getIdentifier(), cause);
-                haltClient(cause);
-                return null;
-            }
+        }
+        if (command instanceof RequestSuccess) {
+            return onRequestSuccess((RequestSuccess<?, ?>) command);
+        }
+        if (command instanceof RequestFailure) {
+            return onRequestFailure((RequestFailure<?, ?>) command);
         }
 
-        // TODO: any client-common logic (such as validation and common dispatch) needs to go here
         return onCommand(command);
+    }
+
+    private ClientActorBehavior onRequestSuccess(final RequestSuccess<?, ?> success) {
+        return context().completeRequest(this, success);
+    }
+
+    private ClientActorBehavior onRequestFailure(final RequestFailure<?, ?> failure) {
+        final RequestException cause = failure.getCause();
+        if (cause instanceof RetiredGenerationException) {
+            LOG.error("{}: current generation {} has been superseded", persistenceId(), getIdentifier(), cause);
+            hacf(cause);
+            return null;
+        }
+
+        if (failure.isHardFailure()) {
+            return context().completeRequest(this, failure);
+        }
+
+        context().retryRequest(failure, resolver());
+        return this;
     }
 
     @Override
@@ -58,12 +78,30 @@ public abstract class ClientActorBehavior extends RecoveredClientActorBehavior<C
     }
 
     /**
-     * Halt processing on this client. Implementation need to ensure they initiate state flush procedures. No attempt
+     * Update a Request with new shard information. This method is invoked on each request which is being sent out
+     * to a backend actor. The default implementation just converts the version.
+     *
+     * This method can be subclassed to perform either payload or plain request replacement. Resulting request must
+     * have the same identifier as the input request.
+     *
+     * @param info Current shard information
+     * @param request Request to be updated
+     * @return A new request.
+     */
+    static <I extends WritableIdentifier, T extends Request<I, T>> Request<I, ?> updateRequest(
+            final @Nonnull BackendInfo info, final @Nonnull T request) {
+        return request.toVersion(info.getVersion());
+    }
+
+    /**
+     * Halt A Catch Fire.
+     *
+     * Halt processing on this client. Implementations need to ensure they initiate state flush procedures. No attempt
      * to use this instance should be made after this method returns. Any such use may result in undefined behavior.
      *
      * @param cause Failure cause
      */
-    protected abstract void haltClient(Throwable cause);
+    protected abstract void hacf(@Nonnull Throwable cause);
 
     /**
      * Override this method to handle any command which is not handled by the base behavior.
@@ -72,4 +110,11 @@ public abstract class ClientActorBehavior extends RecoveredClientActorBehavior<C
      * @return Next behavior to use, null if this actor should shut down.
      */
     protected abstract @Nullable ClientActorBehavior onCommand(@Nonnull Object command);
+
+    /**
+     * Override this method to provide a backend resolver instance.
+     *
+     * @return
+     */
+    protected abstract @Nonnull BackendInfoResolver<?> resolver();
 }

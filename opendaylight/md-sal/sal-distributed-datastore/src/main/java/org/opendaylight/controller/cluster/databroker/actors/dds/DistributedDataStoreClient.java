@@ -34,8 +34,13 @@ public interface DistributedDataStoreClient extends Identifiable<ClientIdentifie
      *
      * @return Future client history handle
      */
-    // FIXME:
     CompletionStage<ClientLocalHistory> createLocalHistory();
+
+    /**
+     * Create a new free-standing transaction. This method initiates an asynchronous instantiation of a transaction
+     * handle.
+     */
+    CompletionStage<ClientSingleTransaction> createTransaction();
 
     // TODO: add methods required by DistributedDataStore
 
