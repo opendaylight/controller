@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.datastore.actors.client;
 
+import akka.actor.ActorSystem;
 import com.google.common.base.Preconditions;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 
@@ -26,7 +27,11 @@ final class InitialClientActorContext extends AbstractClientActorContext {
         actor.saveSnapshot(snapshot);
     }
 
-    ClientActorBehavior createBehavior(final ClientActorContext context) {
+    ClientActorBehavior createBehavior(final ClientIdentifier clientId) {
+        final ActorSystem system = actor.getContext().system();
+        final ClientActorContext context = new ClientActorContext(self(), system.scheduler(), system.dispatcher(),
+            persistenceId(), clientId);
+
         return actor.initialBehavior(context);
     }
 
