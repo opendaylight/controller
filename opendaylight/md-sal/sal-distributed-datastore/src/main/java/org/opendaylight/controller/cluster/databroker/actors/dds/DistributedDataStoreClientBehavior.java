@@ -9,9 +9,19 @@ package org.opendaylight.controller.cluster.databroker.actors.dds;
 
 import akka.actor.ActorRef;
 import akka.actor.Status;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Verify;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import javax.annotation.Nonnull;
+import org.opendaylight.controller.cluster.access.commands.CommitLocalTransactionRequest;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
+import org.opendaylight.controller.cluster.access.concepts.Request;
+import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
+import org.opendaylight.controller.cluster.access.concepts.WritableIdentifier;
+import org.opendaylight.controller.cluster.datastore.actors.client.BackendInfo;
 import org.opendaylight.controller.cluster.datastore.actors.client.ClientActorBehavior;
 import org.opendaylight.controller.cluster.datastore.actors.client.ClientActorContext;
 import org.slf4j.Logger;
@@ -46,10 +56,15 @@ import org.slf4j.LoggerFactory;
 final class DistributedDataStoreClientBehavior extends ClientActorBehavior implements DistributedDataStoreClient {
     private static final Logger LOG = LoggerFactory.getLogger(DistributedDataStoreClientBehavior.class);
 
-    private long nextHistoryId;
+    private final Map<TransactionIdentifier, ClientSingleTransaction> transactions = new HashMap<>();
+    private final Map<LocalHistoryIdentifier, ClientLocalHistory> histories = new HashMap<>();
+    private final SingleClientHistory singleHistory;
+    private long nextHistoryId = 1;
+    private long nextTransactionId = 0;
 
     DistributedDataStoreClientBehavior(final ClientActorContext context) {
         super(context);
+        singleHistory = new SingleClientHistory(new LocalHistoryIdentifier(getIdentifier(), 0));
     }
 
     //
@@ -65,12 +80,24 @@ final class DistributedDataStoreClientBehavior extends ClientActorBehavior imple
 
     private ClientActorBehavior createLocalHistory(final CompletableFuture<ClientLocalHistory> future) {
         final LocalHistoryIdentifier historyId = new LocalHistoryIdentifier(getIdentifier(), nextHistoryId++);
-        LOG.debug("{}: creating a new local history {} for {}", persistenceId(), historyId, future);
+        final ClientLocalHistory history = new ClientLocalHistory(this, historyId);
+        LOG.debug("{}: creating a new local history {}", persistenceId(), history);
 
-        // FIXME: initiate backend instantiation
-        future.completeExceptionally(new UnsupportedOperationException("Not implemented yet"));
+        Verify.verify(histories.put(historyId, history) == null);
+        future.complete(history);
         return this;
     }
+
+    private ClientActorBehavior createTransaction(final CompletableFuture<ClientSingleTransaction> future) {
+        final TransactionIdentifier txId = new TransactionIdentifier(singleHistory.getIdentifier(), nextTransactionId++);
+        final ClientSingleTransaction tx = new ClientSingleTransaction(this, singleHistory, txId);
+        LOG.debug("{}: creating a new transaction {}", persistenceId(), tx);
+
+        Verify.verify(transactions.put(txId, tx) == null);
+        future.complete(tx);
+        return this;
+    }
+
 
     private ClientActorBehavior shutdown() {
         // FIXME: Add shutdown procedures here
@@ -88,6 +115,20 @@ final class DistributedDataStoreClientBehavior extends ClientActorBehavior imple
         return this;
     }
 
+    @Override
+    protected <I extends WritableIdentifier, T extends Request<I, T>> Request<I, ?> updateRequest(
+            final @Nonnull BackendInfo info, final @Nonnull T request) {
+        Preconditions.checkArgument(info instanceof ShardBackendInfo);
+        final ShardBackendInfo shardInfo = (ShardBackendInfo) info;
+
+        if (CommitLocalTransactionRequest.class.isInstance(request) && !shardInfo.getDataTree().isPresent()) {
+            // FIXME: convert to remote
+            throw new UnsupportedOperationException("FIXME: this conversion needs to be implemented");
+        } else {
+            return super.updateRequest(info, request);
+        }
+    }
+
     //
     //
     // Methods below are invoked from application threads
@@ -102,7 +143,15 @@ final class DistributedDataStoreClientBehavior extends ClientActorBehavior imple
     }
 
     @Override
+    public CompletionStage<ClientSingleTransaction> createTransaction() {
+        final CompletableFuture<ClientSingleTransaction> future = new CompletableFuture<>();
+        context().executeInActor(() -> createTransaction(future));
+        return future;
+    }
+
+    @Override
     public void close() {
         context().executeInActor(this::shutdown);
     }
+
 }
