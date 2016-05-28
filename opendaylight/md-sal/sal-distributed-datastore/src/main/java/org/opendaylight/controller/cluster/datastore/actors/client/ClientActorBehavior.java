@@ -11,9 +11,11 @@ import com.google.common.annotations.Beta;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
+import org.opendaylight.controller.cluster.access.concepts.Request;
 import org.opendaylight.controller.cluster.access.concepts.RequestException;
 import org.opendaylight.controller.cluster.access.concepts.RequestFailure;
 import org.opendaylight.controller.cluster.access.concepts.RetiredGenerationException;
+import org.opendaylight.controller.cluster.access.concepts.WritableIdentifier;
 import org.opendaylight.yangtools.concepts.Identifiable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,6 +57,22 @@ public abstract class ClientActorBehavior extends RecoveredClientActorBehavior<C
     @Override
     public final @Nonnull ClientIdentifier getIdentifier() {
         return context().getIdentifier();
+    }
+
+    /**
+     * Update a Request with new shard information. This method is invoked on each request which is being sent out
+     * to a backend actor. The default implementation just converts the version.
+     *
+     * This method can be subclassed to perform either payload or plain request replacement. Resulting request must
+     * have the same identifier as the input request.
+     *
+     * @param info Current shard information
+     * @param request Request to be updated
+     * @return A new request.
+     */
+    protected <I extends WritableIdentifier, T extends Request<I, T>> Request<I, ?> updateRequest(
+            final @Nonnull ShardInformation info, final @Nonnull T request) {
+        return request.toVersion(info.getVersion());
     }
 
     /**
