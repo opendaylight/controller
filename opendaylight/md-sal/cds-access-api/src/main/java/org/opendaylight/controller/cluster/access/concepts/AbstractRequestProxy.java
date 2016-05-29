@@ -8,6 +8,8 @@
 package org.opendaylight.controller.cluster.access.concepts;
 
 import akka.actor.ActorRef;
+import akka.serialization.JavaSerializer;
+import akka.serialization.Serialization;
 import com.google.common.annotations.Beta;
 import java.io.IOException;
 import java.io.ObjectInput;
@@ -40,15 +42,13 @@ public abstract class AbstractRequestProxy<T extends Identifier & WritableObject
     @Override
     public void writeExternal(final ObjectOutput out) throws IOException {
         super.writeExternal(out);
-        // TODO: http://doc.akka.io/docs/akka/current/java/serialization.html#Serializing_ActorRefs seems to be
-        //       a more efficient and complete way of doing serialization.
-        out.writeObject(replyTo);
+        out.writeUTF(Serialization.serializedActorPath(replyTo));
     }
 
     @Override
     public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
         super.readExternal(in);
-        replyTo = (ActorRef) in.readObject();
+        replyTo = JavaSerializer.currentSystem().value().provider().resolveActorRef(in.readUTF());
     }
 
     @Override
