@@ -11,7 +11,6 @@ package org.opendaylight.controller.cluster.common.actor;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
-import com.google.common.base.Ticker;
 import java.util.List;
 import org.junit.Assert;
 import org.junit.Before;
@@ -20,20 +19,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class MessageTrackerTest {
-
-    private static final class TestTicker extends Ticker {
-        private long ticks;
-
-        @Override
-        public long read() {
-            return ticks;
-        }
-
-        void increment(final long ticks) {
-            this.ticks += ticks;
-        }
-    }
-
     private static final class Foo {
         // Intentionally empty
     }
