@@ -49,4 +49,13 @@ public class ClientActorContext extends AbstractClientActorContext implements Id
     public @Nonnull Ticker ticker() {
         return Ticker.systemTicker();
     }
+
+    /**
+     * Execute a command in the context of the client actor.
+     *
+     * @param command Block of code which needs to be execute
+     */
+    public void executeInActor(final @Nonnull InternalCommand command) {
+        self().tell(Preconditions.checkNotNull(command), ActorRef.noSender());
+    }
 }
