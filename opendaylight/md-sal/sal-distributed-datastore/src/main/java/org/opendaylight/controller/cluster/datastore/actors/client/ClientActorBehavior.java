@@ -36,7 +36,9 @@ public abstract class ClientActorBehavior extends RecoveredClientActorBehavior<C
 
     @Override
     final ClientActorBehavior onReceiveCommand(final Object command) {
-        if (command instanceof RequestFailure) {
+        if (command instanceof InternalCommand) {
+            return ((InternalCommand) command).execute();
+        } else if (command instanceof RequestFailure) {
             final RequestFailure<?, ?> failure = (RequestFailure<?, ?>) command;
             final RequestException cause = failure.getCause();
             if (cause instanceof RetiredGenerationException) {
