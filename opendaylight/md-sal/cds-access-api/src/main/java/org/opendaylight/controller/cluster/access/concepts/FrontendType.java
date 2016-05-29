@@ -20,6 +20,7 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.nio.charset.StandardCharsets;
 import java.util.regex.Pattern;
+import javax.annotation.RegEx;
 import org.opendaylight.yangtools.concepts.Identifier;
 
 /**
@@ -61,7 +62,9 @@ public final class FrontendType implements Comparable<FrontendType>, Identifier,
         }
     }
 
-    private static final Pattern SIMPLE_STRING_PATTERN = Pattern.compile("^[a-zA-Z-_.*+:=,!~';]+$");
+    @RegEx
+    private static final String SIMPLE_STRING_REGEX = "^[a-zA-Z0-9-_.*+:=,!~';]+$";
+    private static final Pattern SIMPLE_STRING_PATTERN = Pattern.compile(SIMPLE_STRING_REGEX);
     private static final long serialVersionUID = 1L;
     private final String name;
     private volatile byte[] serialized;
@@ -78,7 +81,7 @@ public final class FrontendType implements Comparable<FrontendType>, Identifier,
     /**
      * Return a {@link FrontendType} corresponding to a string representation. Input string has constraints
      * on what characters it can contain. It may contain the following:
-     * - US-ASCII letters
+     * - US-ASCII letters and numbers
      * - special characters: -_.*+:=,!~';
      *
      * @return A {@link FrontendType} instance
@@ -86,7 +89,8 @@ public final class FrontendType implements Comparable<FrontendType>, Identifier,
      */
     public static FrontendType forName(final String name) {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(name));
-        Preconditions.checkArgument(SIMPLE_STRING_PATTERN.matcher(name).matches());
+        Preconditions.checkArgument(SIMPLE_STRING_PATTERN.matcher(name).matches(),
+            "Supplied name %s does not patch pattern %s", name, SIMPLE_STRING_REGEX);
         return new FrontendType(name);
     }
 
