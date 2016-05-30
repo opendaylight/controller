@@ -10,8 +10,9 @@ package org.opendaylight.controller.cluster.databroker.actors.dds;
 import akka.actor.ActorRef;
 import com.google.common.annotations.Beta;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Verify;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
-import javax.annotation.concurrent.NotThreadSafe;
+import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 
 /**
@@ -25,14 +26,14 @@ import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifie
  * @author Robert Varga
  */
 @Beta
-@NotThreadSafe
 public final class ClientLocalHistory implements AutoCloseable {
-    private static final AtomicIntegerFieldUpdater<ClientLocalHistory> CLOSED_UPDATER =
+    private static final AtomicIntegerFieldUpdater<ClientLocalHistory> STATE_UPDATER =
             AtomicIntegerFieldUpdater.newUpdater(ClientLocalHistory.class, "state");
     private static final int IDLE_STATE = 0;
     private static final int CLOSED_STATE = 1;
 
-    private final LocalHistoryIdentifier historyId;
+    private final ClientIdentifier clientId;
+    private final long historyId;
     private final ActorRef backendActor;
     private final ActorRef clientActor;
 
@@ -42,16 +43,19 @@ public final class ClientLocalHistory implements AutoCloseable {
             final ActorRef backendActor) {
         this.clientActor = client.self();
         this.backendActor = Preconditions.checkNotNull(backendActor);
-        this.historyId = new LocalHistoryIdentifier(client.getIdentifier(), historyId);
+        this.clientId = Verify.verifyNotNull(client.getIdentifier());
+        this.historyId = historyId;
     }
 
     private void checkNotClosed() {
-        Preconditions.checkState(state != CLOSED_STATE, "Local history %s has been closed", historyId);
+        if (state == CLOSED_STATE) {
+            throw new IllegalStateException("Local history " + new LocalHistoryIdentifier(clientId, historyId) + " is closed");
+        }
     }
 
     @Override
     public void close() {
-        if (CLOSED_UPDATER.compareAndSet(this, IDLE_STATE, CLOSED_STATE)) {
+        if (STATE_UPDATER.compareAndSet(this, IDLE_STATE, CLOSED_STATE)) {
             // FIXME: signal close to both client actor and backend actor
         } else if (state != CLOSED_STATE) {
             throw new IllegalStateException("Cannot close history with an open transaction");
@@ -59,4 +63,6 @@ public final class ClientLocalHistory implements AutoCloseable {
     }
 
     // FIXME: add client requests related to a particular local history
+
+
 }
