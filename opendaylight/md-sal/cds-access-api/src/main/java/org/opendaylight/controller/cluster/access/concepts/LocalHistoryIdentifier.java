@@ -19,60 +19,86 @@ import org.opendaylight.yangtools.concepts.WritableIdentifier;
 import org.opendaylight.yangtools.concepts.WritableObjects;
 
 /**
- * Globally-unique identifier of a local history.
+ * Globally-unique identifier of a local history. This identifier is assigned on the frontend and is coposed of
+ * - a {@link ClientIdentifier}, which uniquely identifies a single instantiation of a particular frontend
+ * - an unsigned long, which uniquely identifies the history on the backend
+ * - an unsigned long cookie, assigned by the client and meaningless on the backend, which just reflects it back
  *
  * @author Robert Varga
  */
 public final class LocalHistoryIdentifier implements WritableIdentifier {
+    /*
+     * Implementation note: cookie is currently required only for module-based sharding, which is implemented as part
+     *                      of normal DataBroker interfaces. For DOMDataTreeProducer cookie will always be zero, hence
+     *                      we may end up not needing cookie at all.
+     *
+     *                      We use WritableObjects.writeLongs() to output historyId and cookie (in that order). If we
+     *                      end up not needing the cookie at all, we can switch to writeLong() and use zero flags for
+     *                      compatibility.
+     */
     private static final class Proxy implements Externalizable {
         private static final long serialVersionUID = 1L;
         private ClientIdentifier clientId;
         private long historyId;
+        private long cookie;
 
         public Proxy() {
             // For Externalizable
         }
 
-        Proxy(final ClientIdentifier frontendId, final long historyId) {
+        Proxy(final ClientIdentifier frontendId, final long historyId, final long cookie) {
             this.clientId = Preconditions.checkNotNull(frontendId);
             this.historyId = historyId;
+            this.cookie = cookie;
         }
 
         @Override
         public void writeExternal(final ObjectOutput out) throws IOException {
             clientId.writeTo(out);
-            WritableObjects.writeLong(out, historyId);
+            WritableObjects.writeLongs(out, historyId, cookie);
         }
 
         @Override
         public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
             clientId = ClientIdentifier.readFrom(in);
-            historyId = WritableObjects.readLong(in);
+
+            final byte header = WritableObjects.readLongHeader(in);
+            historyId = WritableObjects.readFirstLong(in, header);
+            cookie = WritableObjects.readSecondLong(in, header);
         }
 
         private Object readResolve() {
-            return new LocalHistoryIdentifier(clientId, historyId);
+            return new LocalHistoryIdentifier(clientId, historyId, cookie);
         }
     }
 
     private static final long serialVersionUID = 1L;
     private final ClientIdentifier clientId;
     private final long historyId;
+    private final long cookie;
 
     public LocalHistoryIdentifier(final ClientIdentifier frontendId, final long historyId) {
+        this(frontendId, historyId, 0);
+    }
+
+    public LocalHistoryIdentifier(final ClientIdentifier frontendId, final long historyId, final long cookie) {
         this.clientId = Preconditions.checkNotNull(frontendId);
         this.historyId = historyId;
+        this.cookie = cookie;
     }
 
     public static LocalHistoryIdentifier readFrom(final DataInput in) throws IOException {
         final ClientIdentifier clientId = ClientIdentifier.readFrom(in);
-        return new LocalHistoryIdentifier(clientId, WritableObjects.readLong(in));
+
+        final byte header = WritableObjects.readLongHeader(in);
+        return new LocalHistoryIdentifier(clientId, WritableObjects.readFirstLong(in, header),
+            WritableObjects.readSecondLong(in, header));
     }
 
     @Override
     public void writeTo(final DataOutput out) throws IOException {
         clientId.writeTo(out);
-        WritableObjects.writeLong(out, historyId);
+        WritableObjects.writeLongs(out, historyId, cookie);
     }
 
     public ClientIdentifier getClientId() {
@@ -83,9 +109,16 @@ public final class LocalHistoryIdentifier implements WritableIdentifier {
         return historyId;
     }
 
+    public long getCookie() {
+        return cookie;
+    }
+
     @Override
     public int hashCode() {
-        return clientId.hashCode() * 31 + Long.hashCode(historyId);
+        int ret = clientId.hashCode();
+        ret = 31 * ret + Long.hashCode(historyId);
+        ret = 31 * ret + Long.hashCode(cookie);
+        return ret;
     }
 
     @Override
@@ -98,16 +131,17 @@ public final class LocalHistoryIdentifier implements WritableIdentifier {
         }
 
         final LocalHistoryIdentifier other = (LocalHistoryIdentifier) o;
-        return historyId == other.historyId && clientId.equals(other.clientId);
+        return historyId == other.historyId && cookie == other.cookie && clientId.equals(other.clientId);
     }
 
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(LocalHistoryIdentifier.class).add("client", clientId)
-                .add("history", Long.toUnsignedString(historyId)).toString();
+                .add("history", Long.toUnsignedString(historyId, 16))
+                .add("cookie", Long.toUnsignedString(cookie, 16)).toString();
     }
 
     private Object writeReplace() {
-        return new Proxy(clientId, historyId);
+        return new Proxy(clientId, historyId, cookie);
     }
 }
