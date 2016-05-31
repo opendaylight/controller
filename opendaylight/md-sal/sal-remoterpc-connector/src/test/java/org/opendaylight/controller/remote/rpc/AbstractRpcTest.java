@@ -16,9 +16,12 @@ import static org.junit.Assert.assertTrue;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.testkit.JavaTestKit;
-import java.io.File;
+import com.google.common.collect.Lists;
+import com.google.common.io.ByteSource;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collection;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -40,7 +43,9 @@ import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
-import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
+import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
+import org.opendaylight.yangtools.yang.parser.stmt.reactor.CrossSourceStatementReactor;
+import org.opendaylight.yangtools.yang.parser.stmt.rfc6020.YangInferencePipeline;
 
 /**
  * Base class for RPC tests.
@@ -95,9 +100,22 @@ public class AbstractRpcTest {
     }
 
     @Before
-    public void setUp() {
-        schemaContext = new YangParserImpl().parseFiles(Arrays.asList(
-                new File(RpcBrokerTest.class.getResource("/test-rpc.yang").getPath())));
+    public void setUp() throws Exception {
+        final ByteSource byteSource = new ByteSource() {
+            @Override
+            public InputStream openStream() throws IOException {
+                return AbstractRpcTest.this.getClass().getResourceAsStream("/test-rpc.yang");
+            }
+        };
+
+        final CrossSourceStatementReactor.BuildAction reactor = YangInferencePipeline.RFC6020_REACTOR.newBuild();
+        final ArrayList<ByteSource> sources = Lists.newArrayList(byteSource);
+
+        try {
+            schemaContext = reactor.buildEffective(sources);
+        } catch (ReactorException e) {
+            throw new RuntimeException("Unable to build schema context from " + sources, e);
+        }
 
         domRpcService1 = Mockito.mock(DOMRpcService.class);
         domRpcService2 = Mockito.mock(DOMRpcService.class);
@@ -107,7 +125,6 @@ public class AbstractRpcTest {
         rpcBroker2 = node2.actorOf(RpcBroker.props(domRpcService2));
         remoteRpcImpl1 = new RemoteRpcImplementation(rpcRegistry1Probe.getRef(), config1);
         remoteRpcImpl2 = new RemoteRpcImplementation(rpcRegistry2Probe.getRef(), config2);
-
 
     }
 

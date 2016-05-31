@@ -11,6 +11,7 @@ package org.opendaylight.controller.cluster.datastore.util;
 import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapEntry;
 import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapEntryBuilder;
 import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapNodeBuilder;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import java.io.InputStream;
@@ -47,9 +48,10 @@ import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableCo
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableLeafSetEntryNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableLeafSetNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableMapEntryNodeBuilder;
-import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
+import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
+import org.opendaylight.yangtools.yang.parser.stmt.reactor.CrossSourceStatementReactor;
+import org.opendaylight.yangtools.yang.parser.stmt.rfc6020.YangInferencePipeline;
 
 public class TestModel {
 
@@ -148,7 +150,6 @@ public class TestModel {
     private static final String FIRST_GRAND_CHILD_NAME = "first grand child";
     private static final String SECOND_GRAND_CHILD_NAME = "second grand child";
 
-
     private static final MapEntryNode BAR_NODE = mapEntryBuilder(
             OUTER_LIST_QNAME, ID_QNAME, TWO_ID) //
             .withChild(mapNodeBuilder(INNER_LIST_QNAME) //
@@ -179,18 +180,14 @@ public class TestModel {
         inputStreams.add(getDatastoreAugInputStream());
         inputStreams.add(getDatastoreTestNotificationInputStream());
 
-        YangParserImpl parser = new YangParserImpl();
-        Set<Module> modules = parser.parseYangModelsFromStreams(inputStreams);
-        return parser.resolveSchemaContext(modules);
+        return resolveSchemaContext(inputStreams);
     }
 
     public static SchemaContext createTestContextWithoutTestSchema() {
         List<InputStream> inputStreams = new ArrayList<>();
         inputStreams.add(getDatastoreTestNotificationInputStream());
 
-        YangParserImpl parser = new YangParserImpl();
-        Set<Module> modules = parser.parseYangModelsFromStreams(inputStreams);
-        return parser.resolveSchemaContext(modules);
+        return resolveSchemaContext(inputStreams);
     }
 
 
@@ -199,11 +196,20 @@ public class TestModel {
         inputStreams.add(getDatastoreTestInputStream());
         inputStreams.add(getDatastoreTestNotificationInputStream());
 
-        YangParserImpl parser = new YangParserImpl();
-        Set<Module> modules = parser.parseYangModelsFromStreams(inputStreams);
-        return parser.resolveSchemaContext(modules);
+        return resolveSchemaContext(inputStreams);
     }
 
+    private static SchemaContext resolveSchemaContext(List<InputStream> streams) {
+        final CrossSourceStatementReactor.BuildAction reactor = YangInferencePipeline.RFC6020_REACTOR.newBuild();
+        final SchemaContext schemaContext;
+
+        try {
+            schemaContext = reactor.buildEffective(streams);
+        } catch (ReactorException e) {
+            throw new RuntimeException("Unable to build schema context from " + streams, e);
+        }
+        return schemaContext;
+    }
 
     /**
      * Returns a test document
