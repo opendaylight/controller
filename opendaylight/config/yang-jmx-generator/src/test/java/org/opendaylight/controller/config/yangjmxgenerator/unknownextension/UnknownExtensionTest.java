@@ -13,13 +13,12 @@ import static org.junit.Assert.fail;
 import com.google.common.collect.Lists;
 import java.io.InputStream;
 import java.util.List;
-import java.util.Set;
 import org.junit.Test;
 import org.opendaylight.controller.config.yangjmxgenerator.ConfigConstants;
 import org.opendaylight.controller.config.yangjmxgenerator.ServiceInterfaceEntryTest;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.util.YangModelSearchUtils;
-import org.opendaylight.yangtools.yang.model.api.Module;
-import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
+import org.opendaylight.yangtools.yang.parser.stmt.reactor.CrossSourceStatementReactor;
+import org.opendaylight.yangtools.yang.parser.stmt.rfc6020.YangInferencePipeline;
 
 public class UnknownExtensionTest extends ServiceInterfaceEntryTest {
 
@@ -29,10 +28,8 @@ public class UnknownExtensionTest extends ServiceInterfaceEntryTest {
                 .getResourceAsStream("test-ifcWithUnknownExtension.yang"));
         yangISs.addAll(getConfigApiYangInputStreams());
         try {
-            YangParserImpl parser = new YangParserImpl();
-            Set<Module> modulesToBuild = parser
-                    .parseYangModelsFromStreams(yangISs);
-            context = parser.resolveSchemaContext(modulesToBuild);
+            final CrossSourceStatementReactor.BuildAction reactor = YangInferencePipeline.RFC6020_REACTOR.newBuild();
+            context = reactor.buildEffective(yangISs);
             namesToModules = YangModelSearchUtils.mapModulesByNames(context
                     .getModules());
             configModule = namesToModules.get(ConfigConstants.CONFIG_MODULE);
