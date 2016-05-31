@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da5c1566_e88ffbca",
+        "filename": "karaf/karaf-parent/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 344,
+      "author": {
+        "id": 2046
+      },
+      "writtenOn": "2016-05-31T12:24:52Z",
+      "side": 1,
+      "message": "That is Lithium, master is 1.7.0-SNAPSHOT currently.",
+      "range": {
+        "startLine": 344,
+        "startChar": 19,
+        "endLine": 344,
+        "endChar": 33
+      },
+      "revId": "f33fd27d619199180422bed996eedf77ecdd5e21",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
