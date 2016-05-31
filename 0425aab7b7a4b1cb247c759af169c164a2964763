@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da5c1566_8d5ad181",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/ServerConfigurationPayload.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-05-31T08:19:21Z",
+      "side": 1,
+      "message": "Are you sure this isn\u0027t an incompatible serialized class change even though we haven\u0027t changed serialVersionUID? It would be good to write a unit test, i.e. serialize an instance prior to the changes to a file and ensure it deserializes after the change.",
+      "revId": "0425aab7b7a4b1cb247c759af169c164a2964763",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_ed4a6dab",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeCandidatePayload.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-05-31T08:19:21Z",
+      "side": 1,
+      "message": "I assume this should be backwards compatible, i.e. removing the base class since it was Externalizable before? It\u0027s always tricky trying to figure out what changes are compatible but Externalizable provides more leeway as just the class name is serialized so it seems this should be fine...",
+      "revId": "0425aab7b7a4b1cb247c759af169c164a2964763",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
