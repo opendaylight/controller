@@ -11,8 +11,7 @@ package org.opendaylight.xsql.test;
 import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.Collections;
-import java.util.Set;
-
+import java.util.List;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -21,9 +20,10 @@ import org.opendaylight.controller.md.sal.dom.xsql.XSQLAdapter;
 import org.opendaylight.controller.md.sal.dom.xsql.XSQLBluePrint;
 import org.opendaylight.controller.md.sal.dom.xsql.jdbc.JDBCResultSet;
 import org.opendaylight.controller.md.sal.dom.xsql.jdbc.JDBCServer;
-import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
+import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
+import org.opendaylight.yangtools.yang.parser.stmt.reactor.CrossSourceStatementReactor;
+import org.opendaylight.yangtools.yang.parser.stmt.rfc6020.YangInferencePipeline;
 
 public class XSQLTest {
     private static final String DATASTORE_TEST_YANG = "/sal-persisted-dom-test.yang";
@@ -187,17 +187,20 @@ public class XSQLTest {
         System.out.println(str);
     }
 
-    public static final InputStream getDatastoreTestInputStream() {
-        return getInputStream(DATASTORE_TEST_YANG);
-    }
-
-    private static InputStream getInputStream(final String resourceName) {
+    private static InputStream getInputStream() {
         return XSQLTest.class.getResourceAsStream(DATASTORE_TEST_YANG);
     }
 
     public static SchemaContext createTestContext() {
-        YangParserImpl parser = new YangParserImpl();
-        Set<Module> modules = parser.parseYangModelsFromStreams(Collections.singletonList(getDatastoreTestInputStream()));
-        return parser.resolveSchemaContext(modules);
+        final CrossSourceStatementReactor.BuildAction reactor = YangInferencePipeline.RFC6020_REACTOR.newBuild();
+        final SchemaContext schemaContext;
+        final List<InputStream> streams = Collections.singletonList(getInputStream());
+
+        try {
+            schemaContext = reactor.buildEffective(streams);
+        } catch (ReactorException e) {
+            throw new RuntimeException("Unable to build schema context from " + streams, e);
+        }
+        return schemaContext;
     }
 }

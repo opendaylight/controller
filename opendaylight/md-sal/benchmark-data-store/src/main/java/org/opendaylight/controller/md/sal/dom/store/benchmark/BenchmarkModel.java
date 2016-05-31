@@ -9,13 +9,9 @@ package org.opendaylight.controller.md.sal.dom.store.benchmark;
 
 import java.io.InputStream;
 import java.util.Collections;
-import java.util.Set;
-
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
 
 /**
  * Benchmark Model class loads the odl-datastore-test.yang model from resources.
@@ -36,20 +32,23 @@ public final class BenchmarkModel {
     private static final String DATASTORE_TEST_YANG = "/odl-datastore-test.yang";
 
     public static final YangInstanceIdentifier TEST_PATH = YangInstanceIdentifier.of(TEST_QNAME);
-    public static final YangInstanceIdentifier OUTER_LIST_PATH = YangInstanceIdentifier.builder(TEST_PATH).node(OUTER_LIST_QNAME).build();
+    public static final YangInstanceIdentifier OUTER_LIST_PATH =
+            YangInstanceIdentifier.builder(TEST_PATH).node(OUTER_LIST_QNAME).build();
 
-    public static final InputStream getDatastoreBenchmarkInputStream() {
-        return getInputStream(DATASTORE_TEST_YANG);
-    }
-
-    private static InputStream getInputStream(final String resourceName) {
-        return BenchmarkModel.class.getResourceAsStream(resourceName);
+    private static InputStream getInputStream() {
+        return BenchmarkModel.class.getResourceAsStream(DATASTORE_TEST_YANG);
     }
 
     public static SchemaContext createTestContext() {
-        YangParserImpl parser = new YangParserImpl();
-        Set<Module> modules = parser.parseYangModelsFromStreams(Collections.singletonList(
-            getDatastoreBenchmarkInputStream()));
-        return parser.resolveSchemaContext(modules);
+        final CrossSourceStatementReactor.BuildAction reactor = YangInferencePipeline.RFC6020_REACTOR.newBuild();
+        final SchemaContext schemaContext;
+        final List<InputStream> streams = Collections.singletonList(getInputStream());
+
+        try {
+            schemaContext = reactor.buildEffective(streams);
+        } catch (ReactorException e) {
+            throw new RuntimeException("Unable to build schema context from " + streams, e);
+        }
+        return schemaContext;
     }
 }
