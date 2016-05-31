@@ -7,10 +7,12 @@
  */
 package org.opendaylight.controller.cluster.datastore.actors.client;
 
+import akka.actor.ActorRef;
 import com.google.common.annotations.Beta;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
+import org.opendaylight.controller.cluster.access.concepts.Request;
 import org.opendaylight.controller.cluster.access.concepts.RequestException;
 import org.opendaylight.controller.cluster.access.concepts.RequestFailure;
 import org.opendaylight.controller.cluster.access.concepts.RetiredGenerationException;
@@ -72,4 +74,31 @@ public abstract class ClientActorBehavior extends RecoveredClientActorBehavior<C
      * @return Next behavior to use, null if this actor should shut down.
      */
     protected abstract @Nullable ClientActorBehavior onCommand(@Nonnull Object command);
+
+
+    /**
+     * Send a request to a backend identified by
+     * @param request
+     * @param resendTransform
+     * @param completion
+     * @param leaderHint
+     */
+    public void sendRequest(final @Nonnull Request<?, ?> request, final @Nonnull RequestTransformer resendTransform,
+            final @Nonnull RequestCompletion completion, final @Nullable ShardLeaderInfo leaderHint) {
+        final ShardLeaderInfo leader;
+        if (leaderHint != null) {
+            leader = leaderHint;
+        } else {
+            // FIXME: lookup in cache
+            leader = null;
+        }
+
+        if (leader != null) {
+            final Request<?, ?> req = request.toVersion(leader.getVersion());
+            self().tell(req, ActorRef.noSender());
+            leader.getActor().tell(req, ActorRef.noSender());
+        } else {
+            self().tell(request, ActorRef.noSender());
+        }
+    }
 }
