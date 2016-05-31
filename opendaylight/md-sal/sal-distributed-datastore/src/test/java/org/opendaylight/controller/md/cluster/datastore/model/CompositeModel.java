@@ -11,6 +11,7 @@ package org.opendaylight.controller.md.cluster.datastore.model;
 import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapEntry;
 import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapEntryBuilder;
 import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapNodeBuilder;
+
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -33,9 +34,10 @@ import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.DataContaine
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableLeafSetEntryNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableLeafSetNodeBuilder;
-import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
+import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
+import org.opendaylight.yangtools.yang.parser.stmt.reactor.CrossSourceStatementReactor;
+import org.opendaylight.yangtools.yang.parser.stmt.rfc6020.YangInferencePipeline;
 
 public class CompositeModel {
 
@@ -213,7 +215,7 @@ public class CompositeModel {
   }
 
   private static InputStream getInputStream(final String resourceName) {
-    return TestModel.class.getResourceAsStream(resourceName);
+    return CompositeModel.class.getResourceAsStream(resourceName);
   }
 
   public static SchemaContext createTestContext() {
@@ -222,9 +224,15 @@ public class CompositeModel {
     inputStreams.add(getDatastoreAugInputStream());
     inputStreams.add(getDatastoreTestNotificationInputStream());
 
-    YangParserImpl parser = new YangParserImpl();
-    Set<Module> modules = parser.parseYangModelsFromStreams(inputStreams);
-    return parser.resolveSchemaContext(modules);
+    final CrossSourceStatementReactor.BuildAction reactor = YangInferencePipeline.RFC6020_REACTOR.newBuild();
+    final SchemaContext schemaContext;
+
+    try {
+      schemaContext = reactor.buildEffective(inputStreams);
+    } catch (ReactorException e) {
+        throw new RuntimeException("Unable to build schema context from " + inputStreams, e);
+    }
+    return schemaContext;
   }
 
   /**

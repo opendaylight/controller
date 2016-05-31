@@ -10,13 +10,13 @@ package org.opendaylight.controller.sal.binding.test.connect.dom;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.MoreExecutors;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import org.junit.After;
@@ -43,11 +43,10 @@ import org.opendaylight.yangtools.yang.binding.util.BindingReflections;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
-import org.opendaylight.yangtools.yang.model.parser.api.YangContextParser;
-import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
+import org.opendaylight.yangtools.yang.parser.stmt.reactor.CrossSourceStatementReactor;
+import org.opendaylight.yangtools.yang.parser.stmt.rfc6020.YangInferencePipeline;
 
 /**
  * Test case for reported bug 560
@@ -89,16 +88,14 @@ public class DOMRpcServiceTestBugfix560 {
         bindingMountPointService = testContext.getBindingMountProviderService();
         assertNotNull(domMountPointService);
 
-        final YangContextParser parser = new YangParserImpl();
         final InputStream moduleStream = BindingReflections.getModuleInfo(
                 OpendaylightTestRpcServiceService.class)
                 .getModuleSourceStream();
 
         assertNotNull(moduleStream);
         final List<InputStream> rpcModels = Collections.singletonList(moduleStream);
-        final Set<Module> modules = parser.parseYangModelsFromStreams(rpcModels);
-        final SchemaContext mountSchemaContext = parser.resolveSchemaContext(modules);
-        schemaContext = mountSchemaContext;
+        final CrossSourceStatementReactor.BuildAction reactor = YangInferencePipeline.RFC6020_REACTOR.newBuild();
+        schemaContext = reactor.buildEffective(rpcModels);
     }
 
     private static org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier createBITllIdentifier(
@@ -118,8 +115,7 @@ public class DOMRpcServiceTestBugfix560 {
 
     @Test
     public void test() throws ExecutionException, InterruptedException {
-        // FIXME: This is made to only make sure instance identifier codec
-        // for path is instantiated.
+        // FIXME: This is made to only make sure instance identifier codec for path is instantiated.
         domMountPointService
                 .createMountPoint(BI_MOUNT_ID).addService(DOMRpcService.class, new DOMRpcService() {
 

@@ -12,12 +12,15 @@ import com.google.common.collect.Lists;
 import com.google.common.io.ByteSource;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import javax.xml.parsers.DocumentBuilderFactory;
 import org.junit.Before;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.RpcDefinition;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
+import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
+import org.opendaylight.yangtools.yang.parser.stmt.reactor.CrossSourceStatementReactor;
+import org.opendaylight.yangtools.yang.parser.stmt.rfc6020.YangInferencePipeline;
 
 // FIXME : CompositeNode is not avaliable anymore so fix the test to use NormalizedNodeContainer ASAP
 public class XmlUtilsTest {
@@ -33,7 +36,7 @@ public class XmlUtilsTest {
     BUILDERFACTORY = factory;
   }
 
-  private SchemaContext schema;
+  private SchemaContext schemaContext;
   private RpcDefinition testRpc;
 
   public static final String XML_CONTENT = "<add-flow xmlns=\"urn:opendaylight:controller:rpc:test\"><input xmlns=\"urn:opendaylight:controller:rpc:test\">" +
@@ -49,8 +52,18 @@ public class XmlUtilsTest {
         return XmlUtilsTest.this.getClass().getResourceAsStream("rpcTest.yang");
       }
     };
-    schema = new YangParserImpl().parseSources(Lists.newArrayList(byteSource));
-    final Module rpcTestModule = schema.getModules().iterator().next();
+
+    final CrossSourceStatementReactor.BuildAction reactor = YangInferencePipeline.RFC6020_REACTOR.newBuild();
+    final ArrayList<ByteSource> sources = Lists.newArrayList(byteSource);
+
+    try {
+
+      schemaContext = reactor.buildEffective(sources);
+    } catch (ReactorException e) {
+      throw new RuntimeException("Unable to build schema context from " + sources, e);
+    }
+
+    final Module rpcTestModule = schemaContext.getModules().iterator().next();
     testRpc = rpcTestModule.getRpcs().iterator().next();
   }
 

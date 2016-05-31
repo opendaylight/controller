@@ -7,10 +7,11 @@
  */
 package org.opendaylight.controller.md.cluster.datastore.model;
 
+import com.google.common.io.ByteSource;
 import com.google.common.io.Resources;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Collections;
+import java.util.Set;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
@@ -22,19 +23,20 @@ import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.CollectionNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-import org.opendaylight.yangtools.yang.model.parser.api.YangSyntaxErrorException;
-import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
+import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
+import org.opendaylight.yangtools.yang.parser.stmt.reactor.CrossSourceStatementReactor;
+import org.opendaylight.yangtools.yang.parser.stmt.rfc6020.YangInferencePipeline;
 
 public class TestModel {
 
-    public static final QName TEST_QNAME = QName.create("urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test", "2014-03-13",
-            "test");
+    public static final QName TEST_QNAME =
+            QName.create("urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test", "2014-03-13", "test");
 
-    public static final QName TEST2_QNAME = QName.create("urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test", "2014-03-13",
-            "test2");
+    public static final QName TEST2_QNAME =
+            QName.create("urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test", "2014-03-13", "test2");
 
-    public static final QName JUNK_QNAME = QName.create("urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:junk", "2014-03-13",
-            "junk");
+    public static final QName JUNK_QNAME =
+            QName.create("urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:junk", "2014-03-13", "junk");
 
 
     public static final QName OUTER_LIST_QNAME = QName.create(TEST_QNAME, "outer-list");
@@ -57,18 +59,20 @@ public class TestModel {
     public static final QName TWO_QNAME = QName.create(TEST_QNAME,"two");
     public static final QName THREE_QNAME = QName.create(TEST_QNAME,"three");
 
-
-    public static final InputStream getDatastoreTestInputStream() {
-        return TestModel.class.getResourceAsStream(DATASTORE_TEST_YANG);
-    }
-
     public static SchemaContext createTestContext() {
-        YangParserImpl parser = new YangParserImpl();
+        final CrossSourceStatementReactor.BuildAction reactor = YangInferencePipeline.RFC6020_REACTOR.newBuild();
+        final SchemaContext schemaContext;
+        final Set<ByteSource> sources = Collections.singleton(Resources.asByteSource(TestModel.class.getResource
+                (DATASTORE_TEST_YANG)));
+
         try {
-            return parser.parseSources(Collections.singleton(Resources.asByteSource(TestModel.class.getResource(DATASTORE_TEST_YANG))));
-        } catch (IOException | YangSyntaxErrorException e) {
-            throw new ExceptionInInitializerError(e);
+            schemaContext = reactor.buildEffective(sources);
+        } catch (IOException e1) {
+            throw new ExceptionInInitializerError(e1);
+        }  catch (ReactorException e2) {
+            throw new RuntimeException("Unable to build schema context from " + sources, e2);
         }
+        return schemaContext;
     }
 
     public static DataContainerChild<?, ?> outerNode(int... ids) {
