@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.util.NameConflictException;
@@ -26,7 +25,8 @@ import org.opendaylight.controller.config.yangjmxgenerator.plugin.util.YangModel
 import org.opendaylight.yangtools.sal.binding.yang.types.TypeProviderImpl;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.model.api.Module;
-import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
+import org.opendaylight.yangtools.yang.parser.stmt.reactor.CrossSourceStatementReactor;
+import org.opendaylight.yangtools.yang.parser.stmt.rfc6020.YangInferencePipeline;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -120,13 +120,12 @@ public class ModuleMXBeanEntryNameConflictTest extends AbstractYangTest {
 
         yangISs.addAll(getConfigApiYangInputStreams());
 
-        YangParserImpl parser = new YangParserImpl();
-        Set<Module> modulesToBuild = parser.parseYangModelsFromStreams(yangISs);
+        CrossSourceStatementReactor.BuildAction reactor = YangInferencePipeline.RFC6020_REACTOR.newBuild();
+        context = reactor.buildEffective(yangISs);
         // close ISs
         for (InputStream is : yangISs) {
             is.close();
         }
-        context = parser.resolveSchemaContext(modulesToBuild);
         namesToModules = YangModelSearchUtils.mapModulesByNames(context
                 .getModules());
         configModule = namesToModules.get(ConfigConstants.CONFIG_MODULE);

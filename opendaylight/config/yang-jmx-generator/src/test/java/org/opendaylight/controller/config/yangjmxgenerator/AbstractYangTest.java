@@ -27,7 +27,8 @@ import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.model.api.IdentitySchemaNode;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
+import org.opendaylight.yangtools.yang.parser.stmt.reactor.CrossSourceStatementReactor;
+import org.opendaylight.yangtools.yang.parser.stmt.rfc6020.YangInferencePipeline;
 
 public abstract class AbstractYangTest {
     protected SchemaContext context;
@@ -56,13 +57,12 @@ public abstract class AbstractYangTest {
 
         yangISs.addAll(getConfigApiYangInputStreams());
 
-        YangParserImpl parser = new YangParserImpl();
-        Set<Module> modulesToBuild = parser.parseYangModelsFromStreams(yangISs);
+        CrossSourceStatementReactor.BuildAction reactor = YangInferencePipeline.RFC6020_REACTOR.newBuild();
+        context = reactor.buildEffective(yangISs);
         // close ISs
         for (InputStream is : yangISs) {
             is.close();
         }
-        context = parser.resolveSchemaContext(modulesToBuild);
         namesToModules = YangModelSearchUtils.mapModulesByNames(context
                 .getModules());
         configModule = namesToModules.get(ConfigConstants.CONFIG_MODULE);
