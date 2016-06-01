@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.nio.charset.StandardCharsets;
-import org.opendaylight.yangtools.concepts.Identifier;
 
 /**
  * Type-safe encapsulation of a cluster member name.
@@ -27,7 +26,7 @@ import org.opendaylight.yangtools.concepts.Identifier;
  * @author Robert Varga
  */
 @Beta
-public final class MemberName implements Comparable<MemberName>, Identifier, WritableObject {
+public final class MemberName implements Comparable<MemberName>, WritableIdentifier {
     private static final class Proxy implements Externalizable {
         private static final long serialVersionUID = 1L;
         private byte[] serialized;
@@ -41,13 +40,13 @@ public final class MemberName implements Comparable<MemberName>, Identifier, Wri
         }
 
         @Override
-        public void writeExternal(ObjectOutput out) throws IOException {
+        public void writeExternal(final ObjectOutput out) throws IOException {
             out.writeInt(serialized.length);
             out.write(serialized);
         }
 
         @Override
-        public void readExternal(ObjectInput in) throws IOException {
+        public void readExternal(final ObjectInput in) throws IOException {
             serialized = new byte[in.readInt()];
             in.readFully(serialized);
         }
