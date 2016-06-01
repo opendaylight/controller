@@ -30,7 +30,7 @@ import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 
-public class OpenDaylightToasterTest extends AbstractDataBrokerTest{
+public class OpenDaylightToasterTest extends AbstractDataBrokerTest {
 
     private static InstanceIdentifier<Toaster> TOASTER_IID =
                         InstanceIdentifier.builder( Toaster.class ).build();
