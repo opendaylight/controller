@@ -11,7 +11,7 @@ import com.google.common.annotations.Beta;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import org.opendaylight.controller.cluster.access.concepts.WritableObject;
+import org.opendaylight.yangtools.concepts.WritableObject;
 
 /**
  * Enumeration of transaction persistence protocols. These govern which protocol is executed between the frontend
