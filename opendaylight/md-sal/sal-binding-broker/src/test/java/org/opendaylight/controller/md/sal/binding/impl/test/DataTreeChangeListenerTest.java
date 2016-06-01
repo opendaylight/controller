@@ -18,7 +18,6 @@ import static org.opendaylight.controller.md.sal.test.model.util.ListsBindingUti
 import static org.opendaylight.controller.md.sal.test.model.util.ListsBindingUtils.path;
 import static org.opendaylight.controller.md.sal.test.model.util.ListsBindingUtils.top;
 import static org.opendaylight.controller.md.sal.test.model.util.ListsBindingUtils.topLevelList;
-
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.util.concurrent.SettableFuture;
@@ -150,8 +149,8 @@ private static final DataTreeIdentifier<Top> TOP_IDENTIFIER = new DataTreeIdenti
         assertEquals(TOP_INITIAL_DATA, initialNode.getDataAfter());
     }
 
-    private void verifyModification(final DataObjectModification<? extends DataObject> barWrite, final PathArgument pathArg,
-            final ModificationType eventType) {
+    private static void verifyModification(final DataObjectModification<? extends DataObject> barWrite,
+            final PathArgument pathArg, final ModificationType eventType) {
         assertEquals(pathArg.getType(), barWrite.getDataType());
         assertEquals(eventType,barWrite.getModificationType());
         assertEquals(pathArg, barWrite.getIdentifier());

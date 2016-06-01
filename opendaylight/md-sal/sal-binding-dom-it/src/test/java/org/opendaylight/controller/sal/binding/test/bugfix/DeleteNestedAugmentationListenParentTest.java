@@ -13,7 +13,6 @@ import com.google.common.util.concurrent.SettableFuture;
 import java.util.concurrent.ExecutionException;
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.common.api.data.DataChangeEvent;
-import org.opendaylight.controller.sal.binding.api.data.DataChangeListener;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
 import org.opendaylight.controller.sal.binding.test.AbstractDataServiceTest;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.of.migration.test.model.rev150210.List11SimpleAugment;
@@ -58,13 +57,7 @@ public class DeleteNestedAugmentationListenParentTest extends AbstractDataServic
 
         final SettableFuture<DataChangeEvent<InstanceIdentifier<?>, DataObject>> event = SettableFuture.create();
 
-        baDataService.registerDataChangeListener(LIST11_PATH, new DataChangeListener() {
-
-            @Override
-            public void onDataChanged(final DataChangeEvent<InstanceIdentifier<?>, DataObject> change) {
-                event.set(change);
-            }
-        });
+        baDataService.registerDataChangeListener(LIST11_PATH, change -> event.set(change));
 
         DataModificationTransaction deleteTx = baDataService.beginTransaction();
         deleteTx.removeOperationalData(LIST11_PATH.augmentation(List11SimpleAugment.class));
@@ -74,7 +67,7 @@ public class DeleteNestedAugmentationListenParentTest extends AbstractDataServic
         assertFalse(receivedEvent.getRemovedOperationalData().contains(TLL_COMPLEX_AUGMENT_PATH));
     }
 
-    private List11 createList11() {
+    private static List11 createList11() {
         List11Builder builder = new List11Builder()
             .setKey(LIST11_KEY)
             .addAugmentation(List11SimpleAugment.class,new List11SimpleAugmentBuilder()

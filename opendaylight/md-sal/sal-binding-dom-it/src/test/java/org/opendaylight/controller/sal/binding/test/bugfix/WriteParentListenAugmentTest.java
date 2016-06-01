@@ -34,13 +34,13 @@ public class WriteParentListenAugmentTest extends AbstractDataServiceTest {
 
     private static final TopLevelListKey TLL_KEY = new TopLevelListKey(TLL_NAME);
     private static final InstanceIdentifier<TopLevelList> TLL_INSTANCE_ID_BA = InstanceIdentifier.builder(Top.class) //
-            .child(TopLevelList.class, TLL_KEY).toInstance();
+            .child(TopLevelList.class, TLL_KEY).build();
 
     private static final InstanceIdentifier<TreeComplexUsesAugment> AUGMENT_WILDCARDED_PATH = InstanceIdentifier
-            .builder(Top.class).child(TopLevelList.class).augmentation(TreeComplexUsesAugment.class).toInstance();
+            .builder(Top.class).child(TopLevelList.class).augmentation(TreeComplexUsesAugment.class).build();
 
     private static final InstanceIdentifier<TreeComplexUsesAugment> AUGMENT_TLL_PATH = InstanceIdentifier
-            .builder(Top.class).child(TopLevelList.class, TLL_KEY).augmentation(TreeComplexUsesAugment.class).toInstance();
+            .builder(Top.class).child(TopLevelList.class, TLL_KEY).augmentation(TreeComplexUsesAugment.class).build();
 
     @Test
     public void writeNodeListenAugment() throws Exception {
@@ -48,13 +48,7 @@ public class WriteParentListenAugmentTest extends AbstractDataServiceTest {
         final SettableFuture<DataChangeEvent<InstanceIdentifier<?>, DataObject>> event = SettableFuture.create();
 
         ListenerRegistration<DataChangeListener> dclRegistration = baDataService.registerDataChangeListener(
-                AUGMENT_WILDCARDED_PATH, new DataChangeListener() {
-
-                    @Override
-                    public void onDataChanged(final DataChangeEvent<InstanceIdentifier<?>, DataObject> change) {
-                        event.set(change);
-                    }
-                });
+                AUGMENT_WILDCARDED_PATH, change -> event.set(change));
 
         DataModificationTransaction modification = baDataService.beginTransaction();
 
@@ -78,7 +72,7 @@ public class WriteParentListenAugmentTest extends AbstractDataServiceTest {
 
     }
 
-    private TreeComplexUsesAugment treeComplexUsesAugment(final String value) {
+    private static TreeComplexUsesAugment treeComplexUsesAugment(final String value) {
         return new TreeComplexUsesAugmentBuilder() //
                 .setContainerWithUses(new ContainerWithUsesBuilder().setLeafFromGrouping(value).build()) //
                 .build();
