@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import javax.annotation.Nonnull;
-import org.opendaylight.yangtools.concepts.Identifier;
 
 /**
  * Abstract Externalizable proxy for use with {@link Message} subclasses.
@@ -24,8 +23,7 @@ import org.opendaylight.yangtools.concepts.Identifier;
  * @param <T> Target identifier type
  * @param <C> Message class
  */
-abstract class AbstractMessageProxy<T extends Identifier & WritableObject, C extends Message<T, C>>
-        implements Externalizable {
+abstract class AbstractMessageProxy<T extends WritableIdentifier, C extends Message<T, C>> implements Externalizable {
     private static final long serialVersionUID = 1L;
     private T target;
     private long sequence;
