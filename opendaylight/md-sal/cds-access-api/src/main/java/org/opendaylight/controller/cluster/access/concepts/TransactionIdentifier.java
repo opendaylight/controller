@@ -17,7 +17,6 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import javax.annotation.Nonnull;
-import org.opendaylight.yangtools.concepts.Identifier;
 
 /**
  * Globally-unique identifier of a transaction.
@@ -25,7 +24,7 @@ import org.opendaylight.yangtools.concepts.Identifier;
  * @author Robert Varga
  */
 @Beta
-public final class TransactionIdentifier implements Identifier, WritableObject {
+public final class TransactionIdentifier implements WritableIdentifier {
     private static final class Proxy implements Externalizable {
         private static final long serialVersionUID = 1L;
         private LocalHistoryIdentifier historyId;
