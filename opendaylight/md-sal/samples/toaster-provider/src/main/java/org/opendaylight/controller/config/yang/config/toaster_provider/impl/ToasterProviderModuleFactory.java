@@ -17,11 +17,5 @@
 */
 package org.opendaylight.controller.config.yang.config.toaster_provider.impl;
 
-/**
-*
-*/
-public class ToasterProviderModuleFactory extends org.opendaylight.controller.config.yang.config.toaster_provider.impl.AbstractToasterProviderModuleFactory
-{
-
-
+public class ToasterProviderModuleFactory extends AbstractToasterProviderModuleFactory {
 }

@@ -17,33 +17,27 @@
 */
 package org.opendaylight.controller.config.yang.config.toaster_provider.impl;
 
+import org.opendaylight.controller.config.api.DependencyResolver;
+import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.sal.common.util.NoopAutoCloseable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-/**
-*
-*/
-public final class ToasterProviderModule extends
-        org.opendaylight.controller.config.yang.config.toaster_provider.impl.AbstractToasterProviderModule {
-    private static final Logger log = LoggerFactory.getLogger(ToasterProviderModule.class);
+public final class ToasterProviderModule extends AbstractToasterProviderModule {
 
-    public ToasterProviderModule(final org.opendaylight.controller.config.api.ModuleIdentifier identifier,
-            final org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
+    // private static final Logger log = LoggerFactory.getLogger(ToasterProviderModule.class);
+
+    public ToasterProviderModule(final ModuleIdentifier identifier, final DependencyResolver dependencyResolver) {
         super(identifier, dependencyResolver);
     }
 
-    public ToasterProviderModule(final org.opendaylight.controller.config.api.ModuleIdentifier identifier,
-            final org.opendaylight.controller.config.api.DependencyResolver dependencyResolver,
-            final ToasterProviderModule oldModule, final java.lang.AutoCloseable oldInstance) {
+    public ToasterProviderModule(final ModuleIdentifier identifier, final DependencyResolver dependencyResolver,
+            final ToasterProviderModule oldModule, final AutoCloseable oldInstance) {
 
         super(identifier, dependencyResolver, oldModule, oldInstance);
     }
 
     @Override
     protected void customValidation() {
-        // No need to validate dependencies, since all dependencies have
-        // mandatory true flag in yang
+        // No need to validate dependencies, since all dependencies have mandatory true flag in yang
         // config-subsystem will perform the validation for dependencies
     }
 
