@@ -14,7 +14,7 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import javax.annotation.Nonnull;
-import org.opendaylight.controller.cluster.access.concepts.WritableObject;
+import org.opendaylight.yangtools.concepts.WritableObject;
 
 /**
  * Enumeration of all ABI versions supported by this implementation of the client access API.
