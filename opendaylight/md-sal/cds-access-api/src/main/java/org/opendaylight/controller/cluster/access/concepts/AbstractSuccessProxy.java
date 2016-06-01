@@ -10,7 +10,6 @@ package org.opendaylight.controller.cluster.access.concepts;
 import com.google.common.annotations.Beta;
 import java.io.Externalizable;
 import javax.annotation.Nonnull;
-import org.opendaylight.yangtools.concepts.Identifier;
 
 /**
  * Abstract Externalizable proxy for use with {@link RequestSuccess} subclasses.
@@ -20,7 +19,7 @@ import org.opendaylight.yangtools.concepts.Identifier;
  * @param <T> Target identifier type
  */
 @Beta
-public abstract class AbstractSuccessProxy<T extends Identifier & WritableObject, C extends RequestSuccess<T, C>>
+public abstract class AbstractSuccessProxy<T extends WritableIdentifier, C extends RequestSuccess<T, C>>
         extends AbstractResponseProxy<T, C> implements Externalizable {
     private static final long serialVersionUID = 1L;
 

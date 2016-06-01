@@ -17,7 +17,6 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.util.Objects;
-import org.opendaylight.yangtools.concepts.Identifier;
 
 /**
  * A cluster-wide unique identifier of a frontend type located at a cluster member.
@@ -25,7 +24,7 @@ import org.opendaylight.yangtools.concepts.Identifier;
  * @author Robert Varga
  */
 @Beta
-public final class FrontendIdentifier implements Identifier, WritableObject {
+public final class FrontendIdentifier implements WritableIdentifier {
     private static final class Proxy implements Externalizable {
         private static final long serialVersionUID = 1L;
         private MemberName memberName;
