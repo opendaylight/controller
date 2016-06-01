@@ -31,7 +31,7 @@ import org.opendaylight.yangtools.concepts.Identifier;
  * @author Robert Varga
  */
 @Beta
-public final class FrontendType implements Comparable<FrontendType>, Identifier, WritableObject {
+public final class FrontendType implements Comparable<FrontendType>, WritableIdentifier {
     private static final class Proxy implements Externalizable {
         private static final long serialVersionUID = 1L;
         private byte[] serialized;

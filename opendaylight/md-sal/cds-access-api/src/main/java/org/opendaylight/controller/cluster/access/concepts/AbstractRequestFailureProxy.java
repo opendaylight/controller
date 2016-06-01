@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import javax.annotation.Nonnull;
-import org.opendaylight.yangtools.concepts.Identifier;
 
 /**
  * Abstract Externalizable proxy for use with {@link RequestFailure} subclasses.
@@ -22,7 +21,7 @@ import org.opendaylight.yangtools.concepts.Identifier;
  * @param <T> Target identifier type
  */
 @Beta
-public abstract class AbstractRequestFailureProxy<T extends Identifier & WritableObject, C extends RequestFailure<T, C>>
+public abstract class AbstractRequestFailureProxy<T extends WritableIdentifier, C extends RequestFailure<T, C>>
         extends AbstractResponseProxy<T, C> {
     private static final long serialVersionUID = 1L;
     private RequestException cause;
