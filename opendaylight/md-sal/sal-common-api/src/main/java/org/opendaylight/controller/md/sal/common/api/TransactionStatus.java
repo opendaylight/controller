@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.md.sal.common.api;
 
+@Deprecated
 public enum TransactionStatus {
     /**
      * The transaction has been freshly allocated. The user is still accessing
