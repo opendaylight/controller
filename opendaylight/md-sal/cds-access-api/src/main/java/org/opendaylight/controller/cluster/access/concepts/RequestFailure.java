@@ -12,7 +12,7 @@ import com.google.common.base.MoreObjects.ToStringHelper;
 import com.google.common.base.Preconditions;
 import javax.annotation.Nonnull;
 import org.opendaylight.controller.cluster.access.ABIVersion;
-import org.opendaylight.yangtools.concepts.Identifier;
+import org.opendaylight.yangtools.concepts.WritableIdentifier;
 
 /**
  * A failure response to a {@link Request}. Contains a {@link RequestException} detailing the cause for this failure.
@@ -23,7 +23,7 @@ import org.opendaylight.yangtools.concepts.Identifier;
  * @param <C> Message class
  */
 @Beta
-public abstract class RequestFailure<T extends Identifier & WritableObject, C extends RequestFailure<T, C>> extends Response<T, C> {
+public abstract class RequestFailure<T extends WritableIdentifier, C extends RequestFailure<T, C>> extends Response<T, C> {
     private static final long serialVersionUID = 1L;
     private final RequestException cause;
 
