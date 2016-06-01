@@ -14,7 +14,7 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import javax.annotation.Nonnull;
-import org.opendaylight.controller.cluster.access.concepts.WritableObject;
+import org.opendaylight.yangtools.concepts.WritableObject;
 
 /**
  * Enumeration of all ABI versions supported by this implementation of persistence. An ABI version has to be bumped
@@ -102,7 +102,7 @@ public enum PayloadVersion implements WritableObject {
     }
 
     @Override
-    public void writeTo(DataOutput out) throws IOException {
+    public void writeTo(final DataOutput out) throws IOException {
         out.writeShort(value);
     }
 
