@@ -8,7 +8,7 @@
 package org.opendaylight.controller.cluster.access.concepts;
 
 import javax.annotation.Nonnull;
-import org.opendaylight.yangtools.concepts.Identifier;
+import org.opendaylight.yangtools.concepts.WritableIdentifier;
 
 /**
  * Abstract Externalizable proxy class to use with {@link Response} subclasses.
@@ -18,7 +18,7 @@ import org.opendaylight.yangtools.concepts.Identifier;
  * @param <T> Target identifier type
  * @param <C> Message class
  */
-abstract class AbstractResponseProxy<T extends Identifier & WritableObject, C extends Response<T, C>>
+abstract class AbstractResponseProxy<T extends WritableIdentifier, C extends Response<T, C>>
         extends AbstractMessageProxy<T, C> {
     private static final long serialVersionUID = 1L;
 
