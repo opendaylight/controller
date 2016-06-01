@@ -413,6 +413,8 @@ public class ShardTransactionTest extends AbstractActorTest {
         }};
     }
 
+    // Unknown operations are being logged
+    @Ignore
     @Test(expected=UnknownMessageException.class)
     public void testNegativePerformingWriteOperationOnReadTransaction() throws Exception {
         final ActorRef shard = createShard();
