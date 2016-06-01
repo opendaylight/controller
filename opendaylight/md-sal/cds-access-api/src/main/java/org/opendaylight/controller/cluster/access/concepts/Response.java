@@ -10,7 +10,7 @@ package org.opendaylight.controller.cluster.access.concepts;
 import com.google.common.annotations.Beta;
 import javax.annotation.Nonnull;
 import org.opendaylight.controller.cluster.access.ABIVersion;
-import org.opendaylight.yangtools.concepts.Identifier;
+import org.opendaylight.yangtools.concepts.WritableIdentifier;
 
 /**
  * Abstract counterpart to a {@link Request}. This class should not be instantiated directly, but rather through
@@ -23,7 +23,7 @@ import org.opendaylight.yangtools.concepts.Identifier;
  * @param <C> Message type
  */
 @Beta
-public abstract class Response<T extends Identifier & WritableObject, C extends Response<T, C>> extends Message<T, C> {
+public abstract class Response<T extends WritableIdentifier, C extends Response<T, C>> extends Message<T, C> {
     private static final long serialVersionUID = 1L;
 
     Response(final @Nonnull C response, final @Nonnull ABIVersion version) {

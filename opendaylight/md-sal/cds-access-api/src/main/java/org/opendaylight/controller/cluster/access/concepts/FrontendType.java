@@ -22,6 +22,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.regex.Pattern;
 import javax.annotation.RegEx;
 import org.opendaylight.yangtools.concepts.Identifier;
+import org.opendaylight.yangtools.concepts.WritableIdentifier;
 
 /**
  * An {@link Identifier} identifying a data store frontend type, which is able to access the data store backend.
@@ -31,7 +32,7 @@ import org.opendaylight.yangtools.concepts.Identifier;
  * @author Robert Varga
  */
 @Beta
-public final class FrontendType implements Comparable<FrontendType>, Identifier, WritableObject {
+public final class FrontendType implements Comparable<FrontendType>, WritableIdentifier {
     private static final class Proxy implements Externalizable {
         private static final long serialVersionUID = 1L;
         private byte[] serialized;

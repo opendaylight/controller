@@ -16,8 +16,8 @@ import com.google.common.base.Verify;
 import java.io.Serializable;
 import javax.annotation.Nonnull;
 import org.opendaylight.controller.cluster.access.ABIVersion;
-import org.opendaylight.yangtools.concepts.Identifier;
 import org.opendaylight.yangtools.concepts.Immutable;
+import org.opendaylight.yangtools.concepts.WritableIdentifier;
 
 /**
  * An abstract concept of a Message. This class cannot be instantiated directly, use its specializations {@link Request}
@@ -47,7 +47,7 @@ import org.opendaylight.yangtools.concepts.Immutable;
  * @param <C> Message type
  */
 @Beta
-public abstract class Message<T extends Identifier & WritableObject, C extends Message<T, C>> implements Immutable,
+public abstract class Message<T extends WritableIdentifier, C extends Message<T, C>> implements Immutable,
         Serializable {
     private static final long serialVersionUID = 1L;
     private final T target;
