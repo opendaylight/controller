@@ -13,7 +13,6 @@ import static org.opendaylight.controller.md.sal.binding.test.AssertCollections.
 import static org.opendaylight.controller.md.sal.test.model.util.ListsBindingUtils.TOP_FOO_KEY;
 import static org.opendaylight.controller.md.sal.test.model.util.ListsBindingUtils.path;
 import static org.opendaylight.controller.md.sal.test.model.util.ListsBindingUtils.topLevelList;
-
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.binding.test.AbstractDataChangeListenerTest;
@@ -66,8 +65,7 @@ public class Bug1125RegressionTest extends AbstractDataChangeListenerTest {
         assertCommit(tx.submit());
     }
 
-    private void verifyRemoved(
-            final AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> event) {
+    private static void verifyRemoved(final AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> event) {
         assertEmpty(event.getCreatedData());
         assertEmpty(event.getUpdatedData());
         assertContains(event.getRemovedPaths(), FOO_AUGMENT_PATH);

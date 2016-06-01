@@ -126,10 +126,10 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
 
     }
 
-    private static final class LeafListEntryNormalization extends SimpleTypeNormalization<NodeWithValue> {
+    private static final class LeafListEntryNormalization extends SimpleTypeNormalization<NodeWithValue<?>> {
 
         public LeafListEntryNormalization(final LeafListSchemaNode potential) {
-            super(new NodeWithValue(potential.getQName(), null),potential);
+            super(new NodeWithValue<>(potential.getQName(), null),potential);
         }
 
         @Override

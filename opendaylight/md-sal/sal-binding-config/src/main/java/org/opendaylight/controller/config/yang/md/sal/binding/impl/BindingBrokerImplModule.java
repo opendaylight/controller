@@ -83,14 +83,14 @@ public final class BindingBrokerImplModule extends
 
 
     @SuppressWarnings("deprecation")
-    private MountProviderService createLegacyMountPointService(final MountPointService service) {
+    private static MountProviderService createLegacyMountPointService(final MountPointService service) {
         if(service != null) {
             return new HydrogenMountProvisionServiceAdapter(service);
         }
         return null;
     }
 
-    private BindingDOMRpcProviderServiceAdapter createRpcProvider(final BindingToNormalizedNodeCodec codec,
+    private static BindingDOMRpcProviderServiceAdapter createRpcProvider(final BindingToNormalizedNodeCodec codec,
             final ProviderSession session) {
         final DOMRpcProviderService domService = session.getService(DOMRpcProviderService.class);
         if(domService != null) {
@@ -99,7 +99,7 @@ public final class BindingBrokerImplModule extends
         return null;
     }
 
-    private BindingDOMRpcServiceAdapter createRpcConsumer(final BindingToNormalizedNodeCodec codec, final ProviderSession session) {
+    private static BindingDOMRpcServiceAdapter createRpcConsumer(final BindingToNormalizedNodeCodec codec, final ProviderSession session) {
         final DOMRpcService domService = session.getService(DOMRpcService.class);
         if(domService != null) {
             return new BindingDOMRpcServiceAdapter(domService, codec);
@@ -107,7 +107,7 @@ public final class BindingBrokerImplModule extends
         return null;
     }
 
-    private MountPointService createMountPointAdapter(final BindingToNormalizedNodeCodec codec, final ProviderSession session) {
+    private static MountPointService createMountPointAdapter(final BindingToNormalizedNodeCodec codec, final ProviderSession session) {
         final DOMMountPointService domService = session.getService(DOMMountPointService.class);
         if(domService != null) {
             return new BindingDOMMountPointServiceAdapter(domService, codec);
