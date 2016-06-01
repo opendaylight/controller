@@ -16,7 +16,8 @@ import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
-import org.opendaylight.yangtools.concepts.Identifier;
+import org.opendaylight.yangtools.concepts.WritableIdentifier;
+import org.opendaylight.yangtools.concepts.WritableObjects;
 
 /**
  * A cluster-wide unique identifier of a frontend instance. This identifier discerns between individual incarnations
@@ -25,7 +26,7 @@ import org.opendaylight.yangtools.concepts.Identifier;
  * @author Robert Varga
  */
 @Beta
-public final class ClientIdentifier implements Identifier, WritableObject {
+public final class ClientIdentifier implements WritableIdentifier {
     private static final class Proxy implements Externalizable {
         private static final long serialVersionUID = 1L;
         private FrontendIdentifier frontendId;

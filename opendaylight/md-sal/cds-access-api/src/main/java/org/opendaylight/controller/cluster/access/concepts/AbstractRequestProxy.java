@@ -15,7 +15,7 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import javax.annotation.Nonnull;
-import org.opendaylight.yangtools.concepts.Identifier;
+import org.opendaylight.yangtools.concepts.WritableIdentifier;
 
 /**
  * Abstract Externalizable proxy for use with {@link Request} subclasses.
@@ -25,7 +25,7 @@ import org.opendaylight.yangtools.concepts.Identifier;
  * @param <T> Target identifier type
  */
 @Beta
-public abstract class AbstractRequestProxy<T extends Identifier & WritableObject, C extends Request<T, C>>
+public abstract class AbstractRequestProxy<T extends WritableIdentifier, C extends Request<T, C>>
         extends AbstractMessageProxy<T, C> {
     private static final long serialVersionUID = 1L;
     private ActorRef replyTo;

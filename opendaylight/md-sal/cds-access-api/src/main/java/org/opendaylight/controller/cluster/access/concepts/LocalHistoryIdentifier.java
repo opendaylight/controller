@@ -15,14 +15,15 @@ import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
-import org.opendaylight.yangtools.concepts.Identifier;
+import org.opendaylight.yangtools.concepts.WritableIdentifier;
+import org.opendaylight.yangtools.concepts.WritableObjects;
 
 /**
  * Globally-unique identifier of a local history.
  *
  * @author Robert Varga
  */
-public final class LocalHistoryIdentifier implements Identifier, WritableObject {
+public final class LocalHistoryIdentifier implements WritableIdentifier {
     private static final class Proxy implements Externalizable {
         private static final long serialVersionUID = 1L;
         private ClientIdentifier clientId;
