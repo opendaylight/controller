@@ -10,7 +10,6 @@ package org.opendaylight.controller.cluster.access.concepts;
 import com.google.common.annotations.Beta;
 import javax.annotation.Nonnull;
 import org.opendaylight.controller.cluster.access.ABIVersion;
-import org.opendaylight.yangtools.concepts.Identifier;
 
 /**
  * A successful reply to a {@link Request}.
@@ -20,7 +19,7 @@ import org.opendaylight.yangtools.concepts.Identifier;
  * @param <T> Target identifier type
  */
 @Beta
-public abstract class RequestSuccess<T extends Identifier & WritableObject, C extends RequestSuccess<T, C>> extends
+public abstract class RequestSuccess<T extends WritableIdentifier, C extends RequestSuccess<T, C>> extends
         Response<T, C> {
     private static final long serialVersionUID = 1L;
 
