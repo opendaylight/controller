@@ -35,7 +35,6 @@ import com.typesafe.config.ConfigFactory;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -79,13 +78,13 @@ public class ActorContextTest extends AbstractActorTest{
         private final ActorRef actorRef;
         private final Map<String,Object> findPrimaryResponses = Maps.newHashMap();
 
-        private MockShardManager(boolean found, ActorRef actorRef){
+        private MockShardManager(final boolean found, final ActorRef actorRef){
 
             this.found = found;
             this.actorRef = actorRef;
         }
 
-        @Override public void onReceive(Object message) throws Exception {
+        @Override public void onReceive(final Object message) throws Exception {
             if(message instanceof FindPrimary) {
                 FindPrimary fp = (FindPrimary)message;
                 Object resp = findPrimaryResponses.get(fp.getShardName());
@@ -105,7 +104,7 @@ public class ActorContextTest extends AbstractActorTest{
             }
         }
 
-        void addFindPrimaryResp(String shardName, Object resp) {
+        void addFindPrimaryResp(final String shardName, final Object resp) {
             findPrimaryResponses.put(shardName, resp);
         }
 
@@ -127,7 +126,7 @@ public class ActorContextTest extends AbstractActorTest{
                 this.actorRef = null;
             }
 
-            MockShardManagerCreator(boolean found, ActorRef actorRef) {
+            MockShardManagerCreator(final boolean found, final ActorRef actorRef) {
                 this.found = found;
                 this.actorRef = actorRef;
             }
@@ -362,7 +361,7 @@ public class ActorContextTest extends AbstractActorTest{
                     new ActorContext(getSystem(), shardManager, mock(ClusterWrapper.class),
                             mock(Configuration.class), dataStoreContext, new PrimaryShardInfoFutureCache()) {
                         @Override
-                        protected Future<Object> doAsk(ActorRef actorRef, Object message, Timeout timeout) {
+                        protected Future<Object> doAsk(final ActorRef actorRef, final Object message, final Timeout timeout) {
                             return Futures.successful((Object) new RemotePrimaryShardFound(expPrimaryPath, expPrimaryVersion));
                         }
                     };
@@ -405,7 +404,7 @@ public class ActorContextTest extends AbstractActorTest{
                     new ActorContext(getSystem(), shardManager, mock(ClusterWrapper.class),
                             mock(Configuration.class), dataStoreContext, new PrimaryShardInfoFutureCache()) {
                         @Override
-                        protected Future<Object> doAsk(ActorRef actorRef, Object message, Timeout timeout) {
+                        protected Future<Object> doAsk(final ActorRef actorRef, final Object message, final Timeout timeout) {
                             return Futures.successful((Object) new LocalPrimaryShardFound(expPrimaryPath, mockDataTree));
                         }
                     };
@@ -443,7 +442,7 @@ public class ActorContextTest extends AbstractActorTest{
         testFindPrimaryExceptions(new NotInitializedException("not initialized"));
     }
 
-    private void testFindPrimaryExceptions(final Object expectedException) throws Exception {
+    private static void testFindPrimaryExceptions(final Object expectedException) throws Exception {
         TestActorRef<MessageCollectorActor> shardManager =
             TestActorRef.create(getSystem(), Props.create(MessageCollectorActor.class));
 
@@ -455,7 +454,7 @@ public class ActorContextTest extends AbstractActorTest{
             new ActorContext(getSystem(), shardManager, mock(ClusterWrapper.class),
                 mock(Configuration.class), dataStoreContext, new PrimaryShardInfoFutureCache()) {
                 @Override
-                protected Future<Object> doAsk(ActorRef actorRef, Object message, Timeout timeout) {
+                protected Future<Object> doAsk(final ActorRef actorRef, final Object message, final Timeout timeout) {
                     return Futures.successful(expectedException);
                 }
             };
@@ -498,12 +497,7 @@ public class ActorContextTest extends AbstractActorTest{
                     mock(ClusterWrapper.class), mockConfig,
                     DatastoreContext.newBuilder().shardInitializationTimeout(200, TimeUnit.MILLISECONDS).build(), new PrimaryShardInfoFutureCache());
 
-            actorContext.broadcast(new Function<Short, Object>() {
-                @Override
-                public Object apply(Short v) {
-                    return new TestMessage();
-                }
-            });
+            actorContext.broadcast(v -> new TestMessage());
 
             MessageCollectorActor.expectFirstMatching(shardActorRef1, TestMessage.class);
             MessageCollectorActor.expectFirstMatching(shardActorRef2, TestMessage.class);

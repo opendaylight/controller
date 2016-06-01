@@ -11,7 +11,6 @@ package org.opendaylight.controller.md.sal.binding.impl.test;
 import static org.junit.Assert.assertNotNull;
 import static org.opendaylight.controller.md.sal.binding.test.AssertCollections.assertContains;
 import static org.opendaylight.controller.md.sal.binding.test.AssertCollections.assertEmpty;
-
 import java.util.ArrayList;
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
@@ -35,10 +34,10 @@ public class Bug2562DeserializedUnkeyedListTest extends AbstractDataChangeListen
     private void writeRoot(final LogicalDatastoreType store) {
         final ReadWriteTransaction readWriteTransaction = getDataBroker().newReadWriteTransaction();
         final Barroot barRoot = new BarrootBuilder().setType(2).setValue(2).setKey(new BarrootKey(2)).build();
-        final ArrayList barRootList = new ArrayList();
+        final ArrayList<Barroot> barRootList = new ArrayList<>();
         barRootList.add(barRoot);
         final Fooroot fooRoot = new FoorootBuilder().setBarroot(barRootList).build();
-        final ArrayList fooRootList = new ArrayList();
+        final ArrayList<Fooroot> fooRootList = new ArrayList<>();
         fooRootList.add(fooRoot);
         final Root root = new RootBuilder().setFooroot(fooRootList).build();
 

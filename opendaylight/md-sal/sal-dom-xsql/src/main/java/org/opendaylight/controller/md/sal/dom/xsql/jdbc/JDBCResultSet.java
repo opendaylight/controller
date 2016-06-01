@@ -392,7 +392,7 @@ public class JDBCResultSet implements Serializable, ResultSet, ResultSetMetaData
         }
     }
 
-    private boolean beenHere(Set<String> beenHereElement, Object element) {
+    private static boolean beenHere(Set<String> beenHereElement, Object element) {
         if (beenHereElement == null) {
             beenHereElement = new HashSet<String>();
         }

@@ -15,7 +15,6 @@ import static org.opendaylight.controller.md.sal.test.model.util.ListsBindingUti
 import static org.opendaylight.controller.md.sal.test.model.util.ListsBindingUtils.TOP_FOO_KEY;
 import static org.opendaylight.controller.md.sal.test.model.util.ListsBindingUtils.top;
 import static org.opendaylight.controller.md.sal.test.model.util.ListsBindingUtils.topLevelList;
-
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
@@ -148,7 +147,7 @@ public class ListInsertionDataChangeListenerTest extends AbstractDataChangeListe
         verifyBarOnlyAdded(topListener,allListener,fooListener,barListener);
     }
 
-    private void verifyBarOnlyAdded(final TestListener top, final TestListener all, final TestListener foo,
+    private static void verifyBarOnlyAdded(final TestListener top, final TestListener all, final TestListener foo,
             final TestListener bar) {
 
         assertFalse(foo.hasEvent());
