@@ -76,27 +76,13 @@ public class DistributedDataStore implements DistributedDataStoreInterface, Sche
 
     private final TransactionContextFactory txContextFactory;
 
-    public DistributedDataStore(ActorSystem actorSystem, ClusterWrapper cluster,
-            Configuration configuration, DatastoreContextFactory datastoreContextFactory,
-            DatastoreSnapshot restoreFromSnapshot) {
+    public DistributedDataStore(final ActorSystem actorSystem, final ClusterWrapper cluster,
+            final Configuration configuration, final DatastoreContextFactory datastoreContextFactory,
+            final DatastoreSnapshot restoreFromSnapshot) {
         Preconditions.checkNotNull(actorSystem, "actorSystem should not be null");
         Preconditions.checkNotNull(cluster, "cluster should not be null");
         Preconditions.checkNotNull(configuration, "configuration should not be null");
         Preconditions.checkNotNull(datastoreContextFactory, "datastoreContextFactory should not be null");
-
-        final Props clientProps = DistributedDataStoreClientActor.props(cluster.getCurrentMemberName(),
-            datastoreContextFactory.getBaseDatastoreContext().getDataStoreName());
-        final ActorRef clientActor = actorSystem.actorOf(clientProps);
-        try {
-            client = DistributedDataStoreClientActor.getDistributedDataStoreClient(clientActor, 30, TimeUnit.SECONDS);
-        } catch (Exception e) {
-            LOG.error("Failed to get actor for {}", clientProps, e);
-            clientActor.tell(PoisonPill.getInstance(), ActorRef.noSender());
-            throw Throwables.propagate(e);
-        }
-
-        identifier = client.getIdentifier();
-        LOG.debug("Distributed data store client {} started", identifier);
 
         String shardManagerId = ShardManagerIdentifier.builder()
                 .type(datastoreContextFactory.getBaseDatastoreContext().getDataStoreName()).build().toString();
@@ -115,6 +101,20 @@ public class DistributedDataStore implements DistributedDataStoreInterface, Sche
         actorContext = new ActorContext(actorSystem, createShardManager(actorSystem, creator, shardDispatcher,
                 shardManagerId), cluster, configuration, datastoreContextFactory.getBaseDatastoreContext(), primaryShardInfoCache);
 
+        final Props clientProps = DistributedDataStoreClientActor.props(cluster.getCurrentMemberName(),
+            datastoreContextFactory.getBaseDatastoreContext().getDataStoreName(), actorContext);
+        final ActorRef clientActor = actorSystem.actorOf(clientProps);
+        try {
+            client = DistributedDataStoreClientActor.getDistributedDataStoreClient(clientActor, 30, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            LOG.error("Failed to get actor for {}", clientProps, e);
+            clientActor.tell(PoisonPill.getInstance(), ActorRef.noSender());
+            throw Throwables.propagate(e);
+        }
+
+        identifier = client.getIdentifier();
+        LOG.debug("Distributed data store client {} started", identifier);
+
         this.waitTillReadyTimeInMillis =
                 actorContext.getDatastoreContext().getShardLeaderElectionTimeout().duration().toMillis() * READY_WAIT_FACTOR;
 
@@ -131,7 +131,7 @@ public class DistributedDataStore implements DistributedDataStoreInterface, Sche
     }
 
     @VisibleForTesting
-    DistributedDataStore(ActorContext actorContext, ClientIdentifier identifier) {
+    DistributedDataStore(final ActorContext actorContext, final ClientIdentifier identifier) {
         this.actorContext = Preconditions.checkNotNull(actorContext, "actorContext should not be null");
         this.client = null;
         this.identifier = Preconditions.checkNotNull(identifier);
@@ -140,7 +140,7 @@ public class DistributedDataStore implements DistributedDataStoreInterface, Sche
                 actorContext.getDatastoreContext().getShardLeaderElectionTimeout().duration().toMillis() * READY_WAIT_FACTOR;
     }
 
-    public void setCloseable(AutoCloseable closeable) {
+    public void setCloseable(final AutoCloseable closeable) {
         this.closeable = closeable;
     }
 
@@ -148,8 +148,8 @@ public class DistributedDataStore implements DistributedDataStoreInterface, Sche
     @Override
     public <L extends AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>>
                                               ListenerRegistration<L> registerChangeListener(
-        final YangInstanceIdentifier path, L listener,
-        AsyncDataBroker.DataChangeScope scope) {
+        final YangInstanceIdentifier path, final L listener,
+        final AsyncDataBroker.DataChangeScope scope) {
 
         Preconditions.checkNotNull(path, "path should not be null");
         Preconditions.checkNotNull(listener, "listener should not be null");
@@ -166,7 +166,7 @@ public class DistributedDataStore implements DistributedDataStoreInterface, Sche
     }
 
     @Override
-    public <L extends DOMDataTreeChangeListener> ListenerRegistration<L> registerTreeChangeListener(YangInstanceIdentifier treeId, L listener) {
+    public <L extends DOMDataTreeChangeListener> ListenerRegistration<L> registerTreeChangeListener(final YangInstanceIdentifier treeId, final L listener) {
         Preconditions.checkNotNull(treeId, "treeId should not be null");
         Preconditions.checkNotNull(listener, "listener should not be null");
 
@@ -183,7 +183,7 @@ public class DistributedDataStore implements DistributedDataStoreInterface, Sche
 
     @Override
     public <C extends DOMDataTreeCommitCohort> DOMDataTreeCommitCohortRegistration<C> registerCommitCohort(
-            DOMDataTreeIdentifier subtree, C cohort) {
+            final DOMDataTreeIdentifier subtree, final C cohort) {
         YangInstanceIdentifier treeId =
                 Preconditions.checkNotNull(subtree, "subtree should not be null").getRootIdentifier();
         Preconditions.checkNotNull(cohort, "listener should not be null");
@@ -220,12 +220,12 @@ public class DistributedDataStore implements DistributedDataStoreInterface, Sche
     }
 
     @Override
-    public void onGlobalContextUpdated(SchemaContext schemaContext) {
+    public void onGlobalContextUpdated(final SchemaContext schemaContext) {
         actorContext.setSchemaContext(schemaContext);
     }
 
     @Override
-    public void onDatastoreContextUpdated(DatastoreContextFactory contextFactory) {
+    public void onDatastoreContextUpdated(final DatastoreContextFactory contextFactory) {
         LOG.info("DatastoreContext updated for data store {}", actorContext.getDataStoreName());
 
         actorContext.setDatastoreContext(contextFactory);
@@ -278,8 +278,8 @@ public class DistributedDataStore implements DistributedDataStoreInterface, Sche
         }
     }
 
-    private static ActorRef createShardManager(ActorSystem actorSystem, ShardManagerCreator creator,
-            String shardDispatcher, String shardManagerId) {
+    private static ActorRef createShardManager(final ActorSystem actorSystem, final ShardManagerCreator creator,
+            final String shardDispatcher, final String shardManagerId) {
         Exception lastException = null;
 
         for(int i=0;i<100;i++) {
