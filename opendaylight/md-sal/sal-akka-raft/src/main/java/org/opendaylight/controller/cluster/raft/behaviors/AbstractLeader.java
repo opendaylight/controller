@@ -251,19 +251,34 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         // If there exists an N such that N > commitIndex, a majority
         // of matchIndex[i] ≥ N, and log[N].term == currentTerm:
         // set commitIndex = N (§5.3, §5.4).
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("{}: handleAppendEntriesReply from {}: commitIndex: {}, lastAppliedIndex: {}, currentTerm: {}",
+                    logName(), followerId, context.getCommitIndex(), context.getLastApplied(), currentTerm());
+        }
+
         for (long N = context.getCommitIndex() + 1; ; N++) {
             int replicatedCount = 1;
 
+            LOG.debug("{}: checking Nth index {}", logName(), N);
             for (FollowerLogInformation info : followerToLog.values()) {
                 final PeerInfo peerInfo = context.getPeerInfo(info.getId());
                 if(info.getMatchIndex() >= N && (peerInfo != null && peerInfo.isVoting())) {
                     replicatedCount++;
+                } else if(LOG.isDebugEnabled()) {
+                    LOG.debug("{}: Not counting follower {} - matchIndex: {}, {}", logName(), info.getId(),
+                            info.getMatchIndex(), peerInfo);
                 }
+            }
+
+            if(LOG.isDebugEnabled()) {
+                LOG.debug("{}: replicatedCount {}, minReplicationCount: {}", logName(), replicatedCount, minReplicationCount);
             }
 
             if (replicatedCount >= minReplicationCount) {
                 ReplicatedLogEntry replicatedLogEntry = context.getReplicatedLog().get(N);
                 if (replicatedLogEntry == null) {
+                    LOG.debug("{}: ReplicatedLogEntry not found for index {} - snapshotIndex: {}, journal size: {}",
+                            logName(), N, context.getReplicatedLog().getSnapshotIndex(), context.getReplicatedLog().size());
                     break;
                 }
 
@@ -272,10 +287,13 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                 // However we keep looping so we can make progress when new entries in the current term
                 // reach consensus, as per §5.4.1: "once an entry from the current term is committed by
                 // counting replicas, then all prior entries are committed indirectly".
+                LOG.debug("{}: replicatedLogEntry term: {}", logName(), replicatedLogEntry.getTerm());
                 if (replicatedLogEntry.getTerm() == currentTerm()) {
+                    LOG.debug("{}: Setting commit index to {}", logName(), N);
                     context.setCommitIndex(N);
                 }
             } else {
+                LOG.debug("{}: minReplicationCount not reached - breaking", logName());
                 break;
             }
         }
