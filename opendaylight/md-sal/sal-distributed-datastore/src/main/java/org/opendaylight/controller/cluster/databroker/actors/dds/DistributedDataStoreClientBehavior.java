@@ -14,6 +14,7 @@ import java.util.concurrent.CompletionStage;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.datastore.actors.client.ClientActorBehavior;
 import org.opendaylight.controller.cluster.datastore.actors.client.ClientActorContext;
+import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,10 +47,12 @@ import org.slf4j.LoggerFactory;
 final class DistributedDataStoreClientBehavior extends ClientActorBehavior implements DistributedDataStoreClient {
     private static final Logger LOG = LoggerFactory.getLogger(DistributedDataStoreClientBehavior.class);
 
+    private final ModuleShardBackendResolver resolver;
     private long nextHistoryId;
 
-    DistributedDataStoreClientBehavior(final ClientActorContext context) {
+    DistributedDataStoreClientBehavior(final ClientActorContext context, final ActorContext ctx) {
         super(context);
+        resolver = new ModuleShardBackendResolver(ctx);
     }
 
     //
@@ -104,5 +107,10 @@ final class DistributedDataStoreClientBehavior extends ClientActorBehavior imple
     @Override
     public void close() {
         context().executeInActor(this::shutdown);
+    }
+
+    @Override
+    protected ModuleShardBackendResolver resolver() {
+        return resolver;
     }
 }
