@@ -74,4 +74,11 @@ public abstract class ClientActorBehavior extends RecoveredClientActorBehavior<C
      * @return Next behavior to use, null if this actor should shut down.
      */
     protected abstract @Nullable ClientActorBehavior onCommand(@Nonnull Object command);
+
+    /**
+     * Override this method to provide a backend resolver instance.
+     *
+     * @return
+     */
+    protected abstract @Nonnull BackendInfoResolver<?> resolver();
 }
