@@ -277,8 +277,8 @@ public class Follower extends AbstractRaftActorBehavior {
             // The follower's log is out of sync because the Leader's
             // prevLogIndex entry was not found in it's log
 
-            LOG.debug("{}: The log is not empty but the prevLogIndex {} was not found in it",
-                        logName(), appendEntries.getPrevLogIndex());
+            LOG.debug("{}: The log is not empty but the prevLogIndex {} was not found in it - lastIndex: {}, snapshotIndex: {}",
+                        logName(), appendEntries.getPrevLogIndex(), lastIndex, context.getReplicatedLog().getSnapshotIndex());
         } else if (lastIndex > -1 && prevEntryPresent && prevLogTerm != appendEntries.getPrevLogTerm()) {
 
             // The follower's log is out of sync because the Leader's
