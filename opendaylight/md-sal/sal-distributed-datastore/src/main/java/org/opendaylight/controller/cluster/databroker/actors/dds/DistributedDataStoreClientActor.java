@@ -11,6 +11,7 @@ import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.pattern.ExplicitAskSupport;
 import akka.util.Timeout;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nonnull;
@@ -18,8 +19,8 @@ import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendType;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.actors.client.AbstractClientActor;
-import org.opendaylight.controller.cluster.datastore.actors.client.ClientActorBehavior;
 import org.opendaylight.controller.cluster.datastore.actors.client.ClientActorContext;
+import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import scala.Function1;
 import scala.concurrent.Await;
 import scala.concurrent.duration.Duration;
@@ -42,19 +43,23 @@ public final class DistributedDataStoreClientActor extends AbstractClientActor {
         }
     };
 
-    private DistributedDataStoreClientActor(final FrontendIdentifier frontendId) {
+    private final ActorContext ctx;
+
+    private DistributedDataStoreClientActor(final FrontendIdentifier frontendId, final ActorContext ctx) {
         super(frontendId);
+        this.ctx = Preconditions.checkNotNull(ctx);
     }
 
     @Override
-    protected ClientActorBehavior initialBehavior(final ClientActorContext context) {
-        return new DistributedDataStoreClientBehavior(context);
+    protected DistributedDataStoreClientBehavior initialBehavior(final ClientActorContext context) {
+        return new DistributedDataStoreClientBehavior(context, ctx);
     }
 
-    public static Props props(final @Nonnull MemberName memberName, @Nonnull final String storeName) {
+    public static Props props(final @Nonnull MemberName memberName, @Nonnull final String storeName, final ActorContext ctx) {
         final String name = "DistributedDataStore:storeName='" + storeName + "'";
         final FrontendIdentifier frontendId = FrontendIdentifier.create(memberName, FrontendType.forName(name));
-        return Props.create(DistributedDataStoreClientActor.class, () -> new DistributedDataStoreClientActor(frontendId));
+        return Props.create(DistributedDataStoreClientActor.class,
+            () -> new DistributedDataStoreClientActor(frontendId, ctx));
     }
 
     public static DistributedDataStoreClient getDistributedDataStoreClient(final @Nonnull ActorRef actor,
