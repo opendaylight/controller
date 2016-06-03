@@ -72,7 +72,7 @@ public class Follower extends AbstractRaftActorBehavior {
     }
 
     private boolean isLogEntryPresent(long index){
-        if(index == context.getReplicatedLog().getSnapshotIndex()){
+        if(context.getReplicatedLog().isInSnapshot(index)) {
             return true;
         }
 
@@ -290,8 +290,7 @@ public class Follower extends AbstractRaftActorBehavior {
                     logName(), prevLogTerm, appendEntries.getPrevLogTerm());
         } else if(appendEntries.getPrevLogIndex() == -1 && appendEntries.getPrevLogTerm() == -1
                 && appendEntries.getReplicatedToAllIndex() != -1
-                && !isLogEntryPresent(appendEntries.getReplicatedToAllIndex())
-                && !context.getReplicatedLog().isInSnapshot(appendEntries.getReplicatedToAllIndex())) {
+                && !isLogEntryPresent(appendEntries.getReplicatedToAllIndex())) {
             // This append entry comes from a leader who has it's log aggressively trimmed and so does not have
             // the previous entry in it's in-memory journal
 
@@ -300,8 +299,7 @@ public class Follower extends AbstractRaftActorBehavior {
                     logName(), appendEntries.getReplicatedToAllIndex());
         } else if(appendEntries.getPrevLogIndex() == -1 && appendEntries.getPrevLogTerm() == -1
                 && appendEntries.getReplicatedToAllIndex() != -1 && numLogEntries > 0
-                && !isLogEntryPresent(appendEntries.getEntries().get(0).getIndex() - 1)
-                && !context.getReplicatedLog().isInSnapshot(appendEntries.getEntries().get(0).getIndex() - 1)) {
+                && !isLogEntryPresent(appendEntries.getEntries().get(0).getIndex() - 1)) {
             LOG.debug(
                     "{}: Cannot append entries because the calculated previousIndex {} was not found in the in-memory journal",
                     logName(), appendEntries.getEntries().get(0).getIndex() - 1);
