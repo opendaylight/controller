@@ -41,7 +41,6 @@ import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
 import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
 import org.opendaylight.controller.cluster.raft.base.messages.InitiateCaptureSnapshot;
-import org.opendaylight.controller.cluster.raft.base.messages.SnapshotComplete;
 import org.opendaylight.controller.cluster.raft.base.messages.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.behaviors.AbstractLeader;
 import org.opendaylight.controller.cluster.raft.behaviors.Follower;
@@ -1140,8 +1139,8 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
                         PERSISTENT, node2Collector).withDispatcher(Dispatchers.DefaultDispatcherId()), node2ID);
         CollectingMockRaftActor node2RaftActor = node2RaftActorRef.underlyingActor();
 
-        // Wait for snapshot after recovery
-        MessageCollectorActor.expectFirstMatching(node1Collector, SnapshotComplete.class);
+        node1RaftActor.waitForInitializeBehaviorComplete();
+        node2RaftActor.waitForInitializeBehaviorComplete();
 
         // Verify the intended server config was loaded and applied.
         verifyServerConfigurationPayloadEntry(node1RaftActor.getRaftActorContext().getReplicatedLog(),
@@ -1151,7 +1150,9 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         assertEquals("getRaftState", RaftState.Follower, node1RaftActor.getRaftState());
         assertEquals("getLeaderId", null, node1RaftActor.getLeaderId());
 
-        MessageCollectorActor.expectFirstMatching(node2Collector, SnapshotComplete.class);
+        verifyServerConfigurationPayloadEntry(node2RaftActor.getRaftActorContext().getReplicatedLog(),
+                nonVotingServer(node1ID), nonVotingServer(node2ID), votingServer("downNode1"),
+                votingServer("downNode2"));
         assertEquals("isVotingMember", false, node2RaftActor.getRaftActorContext().isVotingMember());
 
         // For the test, we send a ChangeServersVotingStatus message to node1 to flip the voting states for
@@ -1236,9 +1237,6 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
                         PERSISTENT, node2Collector).withDispatcher(Dispatchers.DefaultDispatcherId()), node2ID);
         CollectingMockRaftActor node2RaftActor = node2RaftActorRef.underlyingActor();
 
-        // Wait for snapshot after recovery
-        MessageCollectorActor.expectFirstMatching(node1Collector, SnapshotComplete.class);
-
         // Send a ChangeServersVotingStatus message to node1 to change mode1 to voting. This should cause
         // node1 to try to elect itself as leader in order to apply the new server config. But we'll drop
         // RequestVote messages in node2 which should cause node1 to time out and revert back to the previous
@@ -1300,9 +1298,6 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
                 CollectingMockRaftActor.props(node2ID, ImmutableMap.<String, String>of(), configParams,
                         PERSISTENT, node2Collector).withDispatcher(Dispatchers.DefaultDispatcherId()), node2ID);
         CollectingMockRaftActor node2RaftActor = node2RaftActorRef.underlyingActor();
-
-        // Wait for snapshot after recovery
-        MessageCollectorActor.expectFirstMatching(node1Collector, SnapshotComplete.class);
 
         // Send a ChangeServersVotingStatus message to node1 to change mode1 to voting. This should cause
         // node1 to try to elect itself as leader in order to apply the new server config. However node1's log
@@ -1367,9 +1362,6 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
                 CollectingMockRaftActor.props(node2ID, ImmutableMap.<String, String>of(), configParams,
                         PERSISTENT, node2Collector).withDispatcher(Dispatchers.DefaultDispatcherId()), node2ID);
         CollectingMockRaftActor node2RaftActor = node2RaftActorRef.underlyingActor();
-
-        // Wait for snapshot after recovery
-        MessageCollectorActor.expectFirstMatching(node1Collector, SnapshotComplete.class);
 
         // Send a ChangeServersVotingStatus message to node1 to change node1 to voting. This should cause
         // node1 to try to elect itself as leader in order to apply the new server config. But we'll drop
