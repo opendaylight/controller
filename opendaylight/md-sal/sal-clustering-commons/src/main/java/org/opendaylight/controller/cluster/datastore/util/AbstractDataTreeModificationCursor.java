@@ -5,68 +5,74 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.cluster.datastore.utils;
+package org.opendaylight.controller.cluster.datastore.util;
 
+import com.google.common.annotations.Beta;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import java.util.ArrayDeque;
-import java.util.Deque;
+import com.google.common.base.Verify;
 import javax.annotation.Nonnull;
+import javax.annotation.concurrent.NotThreadSafe;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModificationCursor;
 
 /**
- * Base class for a DataTreeModificationCursor.
+ * Abstract {@link DataTreeModificationCursor} which tracks the current path. Subclasses can get the current path
+ * via {@link #current()}.
  *
  * @author Thomas Pantelis
  */
+@Beta
+@NotThreadSafe
 public abstract class AbstractDataTreeModificationCursor implements DataTreeModificationCursor {
-    private final Deque<YangInstanceIdentifier> stack = new ArrayDeque<>();
+    private YangInstanceIdentifier current = YangInstanceIdentifier.EMPTY;
 
-    protected AbstractDataTreeModificationCursor() {
-        stack.push(YangInstanceIdentifier.EMPTY);
-    }
-
-    protected YangInstanceIdentifier next(@Nonnull final PathArgument child) {
-        return stack.peek().node(child);
+    protected final YangInstanceIdentifier current() {
+        return current;
     }
 
     @Override
-    public void enter(@Nonnull final PathArgument child) {
-        stack.push(stack.peek().node(child));
+    public final void enter(@Nonnull final PathArgument child) {
+        current = current.node(child);
     }
 
     @Override
-    public void enter(@Nonnull final PathArgument... path) {
+    public final void enter(@Nonnull final PathArgument... path) {
         for (PathArgument arg : path) {
             enter(arg);
         }
     }
 
     @Override
-    public void enter(@Nonnull final Iterable<PathArgument> path) {
+    public final void enter(@Nonnull final Iterable<PathArgument> path) {
         for (PathArgument arg : path) {
             enter(arg);
         }
     }
 
     @Override
-    public void exit() {
-        stack.pop();
+    public final void exit() {
+        Preconditions.checkState(!current.isEmpty());
+        current = Verify.verifyNotNull(current.getParent());
     }
 
     @Override
-    public void exit(final int depth) {
-        Preconditions.checkArgument(depth < stack.size(), "Stack holds only %s elements, cannot exit %s levels", stack.size(), depth);
+    public final void exit(final int depth) {
+        Preconditions.checkArgument(depth >= 0);
+
+        YangInstanceIdentifier next = current;
         for (int i = 0; i < depth; ++i) {
-            stack.pop();
+            next = next.getParent();
+            Preconditions.checkState(next != null);
         }
+
+        current = next;
     }
 
     @Override
-    public Optional<NormalizedNode<?, ?>> readNode(@Nonnull final PathArgument child) {
+    public final Optional<NormalizedNode<?, ?>> readNode(@Nonnull final PathArgument child) {
         throw new UnsupportedOperationException("Not implemented");
     }
 

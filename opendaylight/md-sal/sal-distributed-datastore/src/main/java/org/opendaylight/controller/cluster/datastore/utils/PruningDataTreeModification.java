@@ -12,6 +12,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import java.io.IOException;
 import org.opendaylight.controller.cluster.datastore.node.utils.transformer.NormalizedNodePruner;
+import org.opendaylight.controller.cluster.datastore.util.AbstractDataTreeModificationCursor;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -155,7 +156,7 @@ public class PruningDataTreeModification implements DataTreeModification {
 
         @Override
         public void write(PathArgument child, NormalizedNode<?, ?> data) {
-            YangInstanceIdentifier path = next(child);
+            YangInstanceIdentifier path = current().node(child);
             NormalizedNode<?, ?> prunedNode = pruningModification.pruneNormalizedNode(path, data);
             if(prunedNode != null) {
                 toModification.write(path, prunedNode);
@@ -164,7 +165,7 @@ public class PruningDataTreeModification implements DataTreeModification {
 
         @Override
         public void merge(PathArgument child, NormalizedNode<?, ?> data) {
-            YangInstanceIdentifier path = next(child);
+            YangInstanceIdentifier path = current().node(child);
             NormalizedNode<?, ?> prunedNode = pruningModification.pruneNormalizedNode(path, data);
             if(prunedNode != null) {
                 toModification.merge(path, prunedNode);
@@ -174,7 +175,7 @@ public class PruningDataTreeModification implements DataTreeModification {
         @Override
         public void delete(PathArgument child) {
             try {
-                toModification.delete(next(child));
+                toModification.delete(current().node(child));
             } catch(SchemaValidationFailedException e) {
                 // Ignoring since we would've already logged this in the call to the original modification.
             }

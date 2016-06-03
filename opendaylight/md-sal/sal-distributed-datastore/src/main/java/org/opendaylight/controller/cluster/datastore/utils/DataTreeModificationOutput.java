@@ -13,6 +13,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import javax.xml.stream.XMLStreamException;
+import org.opendaylight.controller.cluster.datastore.util.AbstractDataTreeModificationCursor;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
@@ -49,7 +50,7 @@ public final class DataTreeModificationOutput {
         public void delete(PathArgument child) {
             try {
                 output.write("\nDELETE -> ".getBytes());
-                output.write(next(child).toString().getBytes());
+                output.write(current().node(child).toString().getBytes());
                 output.writeByte('\n');
             } catch(IOException e) {
                 Throwables.propagate(e);
@@ -71,7 +72,7 @@ public final class DataTreeModificationOutput {
                 output.writeByte('\n');
                 output.write(name.getBytes());
                 output.write(" -> ".getBytes());
-                output.write(next(child).toString().getBytes());
+                output.write(current().node(child).toString().getBytes());
                 output.write(": \n".getBytes());
                 NormalizedNodeXMLOutput.toStream(output, data);
                 output.writeByte('\n');
