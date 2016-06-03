@@ -32,6 +32,7 @@ import org.opendaylight.controller.cluster.datastore.messages.CommitTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.ForwardedReadyTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.ReadyLocalTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.ReadyTransactionReply;
+import org.opendaylight.controller.cluster.datastore.modification.Modification;
 import org.opendaylight.controller.cluster.datastore.utils.AbstractBatchedModificationsCursor;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.yangtools.concepts.Identifier;
@@ -269,13 +270,13 @@ final class ShardCommitCoordinator {
         final LinkedList<BatchedModifications> newModifications = new LinkedList<>();
         cohortEntry.getTransaction().getSnapshot().applyToCursor(new AbstractBatchedModificationsCursor() {
             @Override
-            protected BatchedModifications getModifications() {
-                if(newModifications.isEmpty() ||
+            protected void addModification(Modification mod) {
+                if (newModifications.isEmpty() ||
                         newModifications.getLast().getModifications().size() >= maxModificationsPerBatch) {
                     newModifications.add(new BatchedModifications(from.getTransactionID(), from.getVersion()));
                 }
 
-                return newModifications.getLast();
+                newModifications.getLast().addModification(mod);
             }
         });
 
@@ -534,14 +535,14 @@ final class ShardCommitCoordinator {
             final LinkedList<BatchedModifications> newModifications = new LinkedList<>();
             cohortEntry.getDataTreeModification().applyToCursor(new AbstractBatchedModificationsCursor() {
                 @Override
-                protected BatchedModifications getModifications() {
-                    if(newModifications.isEmpty() ||
+                protected void addModification(Modification mod) {
+                    if (newModifications.isEmpty() ||
                             newModifications.getLast().getModifications().size() >= maxModificationsPerBatch) {
                         newModifications.add(new BatchedModifications(cohortEntry.getTransactionID(),
-                                cohortEntry.getClientVersion()));
-        }
+                            cohortEntry.getClientVersion()));
+                    }
 
-                    return newModifications.getLast();
+                    newModifications.getLast().addModification(mod);
                 }
             });
 
