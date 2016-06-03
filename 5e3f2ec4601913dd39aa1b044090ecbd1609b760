@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da5c1566_46c5255a",
+        "filename": "opendaylight/md-sal/samples/toaster/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-06-03T16:24:00Z",
+      "side": 0,
+      "message": "What\u0027s the purpose of removing this?",
+      "revId": "5e3f2ec4601913dd39aa1b044090ecbd1609b760",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
