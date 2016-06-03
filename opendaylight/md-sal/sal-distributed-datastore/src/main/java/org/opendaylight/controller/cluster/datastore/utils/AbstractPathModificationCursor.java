@@ -10,8 +10,7 @@ package org.opendaylight.controller.cluster.datastore.utils;
 import com.google.common.annotations.Beta;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import java.util.ArrayDeque;
-import java.util.Deque;
+import com.google.common.base.Verify;
 import javax.annotation.Nonnull;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
@@ -20,19 +19,15 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification
 
 @Beta
 public abstract class AbstractPathModificationCursor implements DataTreeModificationCursor {
-    private final Deque<YangInstanceIdentifier> stack = new ArrayDeque<>();
-
-    protected AbstractPathModificationCursor() {
-        stack.push(YangInstanceIdentifier.EMPTY);
-    }
+    private YangInstanceIdentifier current = YangInstanceIdentifier.EMPTY;
 
     protected final YangInstanceIdentifier current() {
-        return stack.peek();
+        return current;
     }
 
     @Override
     public final void enter(@Nonnull final PathArgument child) {
-        stack.push(current().node(child));
+        current = current.node(child);
     }
 
     @Override
@@ -51,15 +46,21 @@ public abstract class AbstractPathModificationCursor implements DataTreeModifica
 
     @Override
     public final void exit() {
-        stack.pop();
+        Preconditions.checkState(!current.isEmpty());
+        current = Verify.verifyNotNull(current.getParent());
     }
 
     @Override
     public final void exit(final int depth) {
-        Preconditions.checkArgument(depth < stack.size(), "Stack holds only %s elements, cannot exit %s levels", stack.size(), depth);
+        Preconditions.checkArgument(depth >= 0);
+
+        YangInstanceIdentifier next = current;
         for (int i = 0; i < depth; ++i) {
-            stack.pop();
+            next = next.getParent();
+            Preconditions.checkState(next != null);
         }
+
+        current = next;
     }
 
     @Override
