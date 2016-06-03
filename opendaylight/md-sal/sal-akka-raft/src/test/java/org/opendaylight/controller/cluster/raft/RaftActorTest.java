@@ -962,40 +962,6 @@ public class RaftActorTest extends AbstractActorTest {
     }
 
     @Test
-    public void testRaftActorOnRecoverySnapshot() throws Exception {
-        TEST_LOG.info("testRaftActorOnRecoverySnapshot");
-
-        new JavaTestKit(getSystem()) {{
-                String persistenceId = factory.generateActorId("follower-");
-
-                DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
-
-                // Set the heartbeat interval high to essentially disable election otherwise the test
-                // may fail if the actor is switched to Leader
-                config.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
-
-                ImmutableMap<String, String> peerAddresses = ImmutableMap.<String, String>builder().put("member1", "address").build();
-
-                // Create mock ReplicatedLogEntry
-                ReplicatedLogEntry replLogEntry = new MockRaftActorContext.MockReplicatedLogEntry(1,1,
-                        new MockRaftActorContext.MockPayload("F", 1));
-
-                InMemoryJournal.addEntry(persistenceId, 1, replLogEntry);
-
-                TestActorRef<MockRaftActor> ref = factory.createTestActor(
-                        MockRaftActor.props(persistenceId, peerAddresses, config));
-
-                MockRaftActor mockRaftActor = ref.underlyingActor();
-
-                mockRaftActor.waitForRecoveryComplete();
-
-                mockRaftActor.waitForInitializeBehaviorComplete();
-
-                verify(mockRaftActor.snapshotCohortDelegate, timeout(5000)).createSnapshot(any(ActorRef.class));
-            }};
-    }
-
-    @Test
     public void testSwitchBehavior(){
         String persistenceId = factory.generateActorId("leader-");
         DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
@@ -1131,9 +1097,6 @@ public class RaftActorTest extends AbstractActorTest {
         MockRaftActor mockRaftActor = raftActorRef.underlyingActor();
 
         mockRaftActor.waitForRecoveryComplete();
-
-        // Wait for snapshot after recovery
-        verify(mockRaftActor.snapshotCohortDelegate, timeout(5000)).createSnapshot(any(ActorRef.class));
 
         mockRaftActor.snapshotCohortDelegate = mock(RaftActorSnapshotCohort.class);
 

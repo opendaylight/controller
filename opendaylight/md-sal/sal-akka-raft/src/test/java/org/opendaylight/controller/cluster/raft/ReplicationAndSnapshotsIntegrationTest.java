@@ -188,9 +188,9 @@ public class ReplicationAndSnapshotsIntegrationTest extends AbstractRaftActorInt
         // Verify the persisted snapshot in the leader. This should reflect the advanced snapshot index as
         // the last applied log entry (2) even though the leader hasn't yet advanced its cached snapshot index.
         List<Snapshot> persistedSnapshots = InMemorySnapshotStore.getSnapshots(leaderId, Snapshot.class);
-        assertEquals("Persisted snapshots size", 2, persistedSnapshots.size());
-        verifySnapshot("Persisted", persistedSnapshots.get(1), initialTerm, 2, currentTerm, 3);
-        List<ReplicatedLogEntry> unAppliedEntry = persistedSnapshots.get(1).getUnAppliedEntries();
+        assertEquals("Persisted snapshots size", 1, persistedSnapshots.size());
+        verifySnapshot("Persisted", persistedSnapshots.get(0), initialTerm, 2, currentTerm, 3);
+        List<ReplicatedLogEntry> unAppliedEntry = persistedSnapshots.get(0).getUnAppliedEntries();
         assertEquals("Persisted Snapshot getUnAppliedEntries size", 1, unAppliedEntry.size());
         verifyReplicatedLogEntry(unAppliedEntry.get(0), currentTerm, 3, payload3);
 
