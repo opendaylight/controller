@@ -109,7 +109,9 @@ class ReplicatedLogImpl extends AbstractReplicatedLogImpl {
         }
 
         // FIXME : By adding the replicated log entry to the in-memory journal we are not truly ensuring durability of the logs
-        append(replicatedLogEntry);
+        if(!append(replicatedLogEntry)) {
+            return;
+        }
 
         // When persisting events with persist it is guaranteed that the
         // persistent actor will not receive further commands between the
@@ -131,5 +133,10 @@ class ReplicatedLogImpl extends AbstractReplicatedLogImpl {
                 }
             }
         );
+    }
+
+    @Override
+    protected String getLogContext() {
+        return context.getId();
     }
 }

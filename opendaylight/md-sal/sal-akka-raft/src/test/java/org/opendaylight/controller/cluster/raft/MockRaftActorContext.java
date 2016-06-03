@@ -163,6 +163,11 @@ public class MockRaftActorContext extends RaftActorContextImpl {
                 }
             }
         }
+
+        @Override
+        protected String getLogContext() {
+            return "test";
+        }
     }
 
     public static class MockPayload extends Payload implements Serializable {
