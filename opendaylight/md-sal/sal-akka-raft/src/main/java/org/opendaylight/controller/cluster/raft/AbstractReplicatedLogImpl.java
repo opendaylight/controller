@@ -12,12 +12,16 @@ import com.google.common.base.Preconditions;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import javax.annotation.Nonnull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Abstract class handling the mapping of
  * logical LogEntry Index and the physical list index.
  */
 public abstract class AbstractReplicatedLogImpl implements ReplicatedLog {
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractReplicatedLogImpl.class);
 
     // We define this as ArrayList so we can use ensureCapacity.
     private ArrayList<ReplicatedLogEntry> journal;
@@ -52,6 +56,9 @@ public abstract class AbstractReplicatedLogImpl implements ReplicatedLog {
         }
         return (int) (logEntryIndex - (snapshotIndex + 1));
     }
+
+    @Nonnull
+    protected abstract String getLogContext();
 
     @Override
     public ReplicatedLogEntry get(long logEntryIndex) {
@@ -112,9 +119,16 @@ public abstract class AbstractReplicatedLogImpl implements ReplicatedLog {
     }
 
     @Override
-    public void append(ReplicatedLogEntry replicatedLogEntry) {
-        journal.add(replicatedLogEntry);
-        dataSize += replicatedLogEntry.size();
+    public boolean append(ReplicatedLogEntry replicatedLogEntry) {
+        if(replicatedLogEntry.getIndex() > lastIndex()) {
+            journal.add(replicatedLogEntry);
+            dataSize += replicatedLogEntry.size();
+            return true;
+        } else {
+            LOG.warn("{}: Cannot append new entry - new index {} is not greater than the last index {}",
+                    getLogContext(), replicatedLogEntry.getIndex(), lastIndex(), new Exception("stack trace"));
+            return false;
+        }
     }
 
     @Override

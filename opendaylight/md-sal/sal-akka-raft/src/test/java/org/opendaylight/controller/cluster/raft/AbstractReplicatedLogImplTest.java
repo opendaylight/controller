@@ -333,6 +333,9 @@ public class AbstractReplicatedLogImplTest {
         public void captureSnapshotIfReady(ReplicatedLogEntry replicatedLogEntry) {
         }
 
-
+        @Override
+        protected String getLogContext() {
+            return "test";
+        }
     }
 }
