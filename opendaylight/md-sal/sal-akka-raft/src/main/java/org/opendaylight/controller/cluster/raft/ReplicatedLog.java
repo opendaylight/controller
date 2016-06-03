@@ -65,8 +65,10 @@ public interface ReplicatedLog {
      * Appends an entry to the log.
      *
      * @param replicatedLogEntry the entry to append
+     * @return true if the entry was successfully appended, false otherwise. An entry can fail to append if
+     *         the index is already included in the log.
      */
-    void append(ReplicatedLogEntry replicatedLogEntry);
+    boolean append(ReplicatedLogEntry replicatedLogEntry);
 
     /**
      * Optimization method to increase the capacity of the journal log prior to appending entries.

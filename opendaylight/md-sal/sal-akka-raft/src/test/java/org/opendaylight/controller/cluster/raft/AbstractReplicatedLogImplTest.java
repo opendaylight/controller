@@ -332,7 +332,5 @@ public class AbstractReplicatedLogImplTest {
         @Override
         public void captureSnapshotIfReady(ReplicatedLogEntry replicatedLogEntry) {
         }
-
-
     }
 }
