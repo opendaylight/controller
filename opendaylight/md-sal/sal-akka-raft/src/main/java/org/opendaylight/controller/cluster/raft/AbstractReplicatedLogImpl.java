@@ -39,10 +39,10 @@ public abstract class AbstractReplicatedLogImpl implements ReplicatedLog {
         long snapshotTerm, List<ReplicatedLogEntry> unAppliedEntries) {
         this.snapshotIndex = snapshotIndex;
         this.snapshotTerm = snapshotTerm;
-        this.journal = new ArrayList<>(unAppliedEntries);
 
-        for(ReplicatedLogEntry entry: journal) {
-            dataSize += entry.size();
+        this.journal = new ArrayList<>(unAppliedEntries.size());
+        for(ReplicatedLogEntry entry: unAppliedEntries) {
+            append(entry);
         }
     }
 
@@ -125,8 +125,8 @@ public abstract class AbstractReplicatedLogImpl implements ReplicatedLog {
             dataSize += replicatedLogEntry.size();
             return true;
         } else {
-            LOG.warn("{}: Cannot append new entry - new index {} is not greater than the last index {}",
-                    getLogContext(), replicatedLogEntry.getIndex(), lastIndex(), new Exception("stack trace"));
+            LOG.warn("Cannot append new entry - new index {} is not greater than the last index {}",
+                    replicatedLogEntry.getIndex(), lastIndex(), new Exception("stack trace"));
             return false;
         }
     }
