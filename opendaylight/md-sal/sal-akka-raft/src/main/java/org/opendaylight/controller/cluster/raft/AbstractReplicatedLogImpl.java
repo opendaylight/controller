@@ -12,12 +12,17 @@ import com.google.common.base.Preconditions;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Abstract class handling the mapping of
  * logical LogEntry Index and the physical list index.
  */
 public abstract class AbstractReplicatedLogImpl implements ReplicatedLog {
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractReplicatedLogImpl.class);
+
+    private final String logContext;
 
     // We define this as ArrayList so we can use ensureCapacity.
     private ArrayList<ReplicatedLogEntry> journal;
@@ -32,18 +37,19 @@ public abstract class AbstractReplicatedLogImpl implements ReplicatedLog {
     private int dataSize = 0;
 
     public AbstractReplicatedLogImpl(long snapshotIndex,
-        long snapshotTerm, List<ReplicatedLogEntry> unAppliedEntries) {
+        long snapshotTerm, List<ReplicatedLogEntry> unAppliedEntries, String logContext) {
         this.snapshotIndex = snapshotIndex;
         this.snapshotTerm = snapshotTerm;
-        this.journal = new ArrayList<>(unAppliedEntries);
+        this.logContext = logContext;
 
-        for(ReplicatedLogEntry entry: journal) {
-            dataSize += entry.size();
+        this.journal = new ArrayList<>(unAppliedEntries.size());
+        for(ReplicatedLogEntry entry: unAppliedEntries) {
+            append(entry);
         }
     }
 
     public AbstractReplicatedLogImpl() {
-        this(-1L, -1L, Collections.<ReplicatedLogEntry>emptyList());
+        this(-1L, -1L, Collections.<ReplicatedLogEntry>emptyList(), "");
     }
 
     protected int adjustedIndex(long logEntryIndex) {
@@ -112,9 +118,16 @@ public abstract class AbstractReplicatedLogImpl implements ReplicatedLog {
     }
 
     @Override
-    public void append(ReplicatedLogEntry replicatedLogEntry) {
-        journal.add(replicatedLogEntry);
-        dataSize += replicatedLogEntry.size();
+    public boolean append(ReplicatedLogEntry replicatedLogEntry) {
+        if(replicatedLogEntry.getIndex() > lastIndex()) {
+            journal.add(replicatedLogEntry);
+            dataSize += replicatedLogEntry.size();
+            return true;
+        } else {
+            LOG.warn("{}: Cannot append new entry - new index {} is not greater than the last index {}",
+                    logContext, replicatedLogEntry.getIndex(), lastIndex(), new Exception("stack trace"));
+            return false;
+        }
     }
 
     @Override
