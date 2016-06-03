@@ -78,24 +78,48 @@ public class ReplicatedLogImplTest {
     public void testAppendAndPersistExpectingNoCapture() throws Exception {
         ReplicatedLog log = ReplicatedLogImpl.newInstance(context, mockBehavior);
 
-        MockReplicatedLogEntry logEntry = new MockReplicatedLogEntry(1, 1, new MockPayload("1"));
+        MockReplicatedLogEntry logEntry1 = new MockReplicatedLogEntry(1, 1, new MockPayload("1"));
 
-        log.appendAndPersist(logEntry);
+        log.appendAndPersist(logEntry1);
 
-        verifyPersist(logEntry);
+        verifyPersist(logEntry1);
 
         assertEquals("size", 1, log.size());
 
         reset(mockPersistence);
 
+        MockReplicatedLogEntry logEntry2 = new MockReplicatedLogEntry(1, 2, new MockPayload("2"));
         Procedure<ReplicatedLogEntry> mockCallback = Mockito.mock(Procedure.class);
+        log.appendAndPersist(logEntry2, mockCallback);
+
+        verifyPersist(logEntry2);
+
+        verify(mockCallback).apply(same(logEntry2));
+
+        assertEquals("size", 2, log.size());
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testAppendAndPersisWithDuplicateEntry() throws Exception {
+        ReplicatedLog log = ReplicatedLogImpl.newInstance(context, mockBehavior);
+
+        Procedure<ReplicatedLogEntry> mockCallback = Mockito.mock(Procedure.class);
+        MockReplicatedLogEntry logEntry = new MockReplicatedLogEntry(1, 1, new MockPayload("1"));
+
         log.appendAndPersist(logEntry, mockCallback);
 
         verifyPersist(logEntry);
 
-        verify(mockCallback).apply(same(logEntry));
+        assertEquals("size", 1, log.size());
 
-        assertEquals("size", 2, log.size());
+        reset(mockPersistence, mockCallback);
+
+        log.appendAndPersist(logEntry, mockCallback);
+
+        verifyNoMoreInteractions(mockPersistence, mockCallback);
+
+        assertEquals("size", 1, log.size());
     }
 
     @Test

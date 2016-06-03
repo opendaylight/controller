@@ -43,7 +43,7 @@ class ReplicatedLogImpl extends AbstractReplicatedLogImpl {
 
     private ReplicatedLogImpl(final long snapshotIndex, final long snapshotTerm, final List<ReplicatedLogEntry> unAppliedEntries,
             final RaftActorContext context, final RaftActorBehavior currentBehavior) {
-        super(snapshotIndex, snapshotTerm, unAppliedEntries);
+        super(snapshotIndex, snapshotTerm, unAppliedEntries, context.getId());
         this.context = Preconditions.checkNotNull(context);
         this.currentBehavior = Preconditions.checkNotNull(currentBehavior);
     }
@@ -109,7 +109,9 @@ class ReplicatedLogImpl extends AbstractReplicatedLogImpl {
         }
 
         // FIXME : By adding the replicated log entry to the in-memory journal we are not truly ensuring durability of the logs
-        append(replicatedLogEntry);
+        if(!append(replicatedLogEntry)) {
+            return;
+        }
 
         // When persisting events with persist it is guaranteed that the
         // persistent actor will not receive further commands between the
