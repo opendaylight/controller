@@ -39,10 +39,10 @@ public abstract class AbstractReplicatedLogImpl implements ReplicatedLog {
         long snapshotTerm, List<ReplicatedLogEntry> unAppliedEntries) {
         this.snapshotIndex = snapshotIndex;
         this.snapshotTerm = snapshotTerm;
-        this.journal = new ArrayList<>(unAppliedEntries);
 
-        for(ReplicatedLogEntry entry: journal) {
-            dataSize += entry.size();
+        this.journal = new ArrayList<>(unAppliedEntries.size());
+        for(ReplicatedLogEntry entry: unAppliedEntries) {
+            append(entry);
         }
     }
 
