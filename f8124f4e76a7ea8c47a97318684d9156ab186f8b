@@ -107,6 +107,24 @@
     },
     {
       "key": {
+        "uuid": "da5c1566_355bf455",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/DistributedDataStoreClientBehavior.java",
+        "patchSetId": 50
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-06-06T14:51:33Z",
+      "side": 1,
+      "message": "yeah Shutdown could be in clustering-commons but I guess it doesn\u0027t really matter in this case since shut down is internal to this class and not exposed.",
+      "parentUuid": "da5c1566_158991ca",
+      "revId": "f8124f4e76a7ea8c47a97318684d9156ab186f8b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da5c1566_24d109fc",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/client/ClientActorBehavior.java",
         "patchSetId": 50
