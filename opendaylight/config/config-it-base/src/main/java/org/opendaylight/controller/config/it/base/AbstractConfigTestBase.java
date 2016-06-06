@@ -78,9 +78,15 @@ public abstract class AbstractConfigTestBase {
      */
     private static final int MODULE_TIMEOUT_MILLIS = 60000;
 
-    public abstract String getModuleName();
+    @Deprecated
+    public String getModuleName() {
+        return null;
+    }
 
-    public abstract String getInstanceName();
+    @Deprecated
+    public String getInstanceName() {
+        return null;
+    }
 
     public abstract MavenUrlReference getFeatureRepo();
 
@@ -156,17 +162,23 @@ public abstract class AbstractConfigTestBase {
 
     @Before
     public void setup() throws Exception {
+        String moduleName = getModuleName();
+        String instanceName = getInstanceName();
+        if(moduleName == null || instanceName == null) {
+            return;
+        }
+
         LOG.info("Module: {} Instance: {} attempting to configure.",
-                getModuleName(),getInstanceName());
+                moduleName, instanceName);
         Stopwatch stopWatch = Stopwatch.createStarted();
         ObjectName objectName = null;
         for(int i = 0;i<MODULE_TIMEOUT_MILLIS;i++) {
             try {
                 ConfigRegistry configRegistryClient = new ConfigRegistryJMXClient(ManagementFactory
                         .getPlatformMBeanServer());
-                objectName = configRegistryClient.lookupConfigBean(getModuleName(), getInstanceName());
+                objectName = configRegistryClient.lookupConfigBean(moduleName, instanceName);
                 LOG.info("Module: {} Instance: {} ObjectName: {}.",
-                        getModuleName(),getInstanceName(),objectName);
+                        moduleName,instanceName,objectName);
                 break;
             } catch (Exception e) {
                 if(i<MODULE_TIMEOUT_MILLIS) {
@@ -179,10 +191,10 @@ public abstract class AbstractConfigTestBase {
         }
         if(objectName != null) {
             LOG.info("Module: {} Instance: {} configured after {} ms",
-                getModuleName(),getInstanceName(),
+                moduleName,instanceName,
                 stopWatch.elapsed(TimeUnit.MILLISECONDS));
         } else {
-            throw new RuntimeException("NOT FOUND Module: " +getModuleName() + " Instance: " + getInstanceName() +
+            throw new RuntimeException("NOT FOUND Module: " +moduleName + " Instance: " + instanceName +
                     " configured after " + stopWatch.elapsed(TimeUnit.MILLISECONDS) + " ms");
         }
     }
