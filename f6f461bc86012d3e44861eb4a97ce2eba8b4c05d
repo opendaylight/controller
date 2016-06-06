@@ -2,6 +2,24 @@
   "comments": [
     {
       "key": {
+        "uuid": "da5c1566_98aaf517",
+        "filename": "opendaylight/config/config-it-base/src/main/java/org/opendaylight/controller/config/it/base/AbstractConfigTestBase.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-06-06T16:35:21Z",
+      "side": 0,
+      "message": "That sounds like a good idea long term.  We need to leave AbstractConfigTestBase as there\u0027s still users. We could move most of it into a AbstractKarafTestBase and derive AbstractConfigTestBase from it. But I\u0027d rather get the immediate issue fixed and do such refactoring in a separate patch. Would you have cycles to do it (I\u0027m overloaded right now)?",
+      "parentUuid": "da5c1566_5854dd53",
+      "revId": "f6f461bc86012d3e44861eb4a97ce2eba8b4c05d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da5c1566_180d4591",
         "filename": "opendaylight/md-sal/samples/toaster-it/src/test/java/org/opendaylight/controller/sample/toaster/it/ToasterTest.java",
         "patchSetId": 1
