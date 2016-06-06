@@ -28,10 +28,8 @@ import org.opendaylight.yangtools.yang.model.api.ListSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 import org.opendaylight.yangtools.yang.model.api.Status;
-import org.opendaylight.yangtools.yang.model.util.Uint16;
-import org.opendaylight.yangtools.yang.model.util.Uint32;
-import org.opendaylight.yangtools.yang.model.util.Uint64;
-import org.opendaylight.yangtools.yang.model.util.Uint8;
+import org.opendaylight.yangtools.yang.model.util.type.DerivedTypes;
+
 /**
  * @author Sharon Aicler(saichler@gmail.com)
  **/
@@ -269,16 +267,19 @@ public class XSQLODLUtils {
     }
 
     public static Class<?> getTypeForODLColumn(Object odlNode){
-        Object type = get(odlNode,"type");
-        if(type instanceof Uint32 || type instanceof Uint64){
-            return long.class;
-        }else
-        if(type instanceof Uint16){
-            return int.class;
-        }else
-        if(type instanceof Uint8){
-            return byte.class;
+        final Object o = get(odlNode,"type");
+        if (o instanceof TypeDefinition) {
+            final TypeDefinition<?> t = (TypeDefinition<?>)o;
+
+            if (DerivedTypes.isUint32(type) || DerivedTypes.isUint64(type))
+                return long.class;
+            } else if (DerivedTypes.isUint16(type)) {
+                return int.class;
+            } else if (DerivedTypes.isUint8(type)) {
+                return byte.class
+            }
         }
+
         return String.class;
     }
 
