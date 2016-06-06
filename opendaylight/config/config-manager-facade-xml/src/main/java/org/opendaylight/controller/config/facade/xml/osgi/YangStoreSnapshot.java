@@ -9,6 +9,7 @@
 package org.opendaylight.controller.config.facade.xml.osgi;
 
 import com.google.common.base.Charsets;
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.Maps;
@@ -150,10 +151,8 @@ final class YangStoreSnapshot implements YangStoreContext, EnumResolver {
     @Override
     public String getModuleSource(final org.opendaylight.yangtools.yang.model.api.ModuleIdentifier moduleIdentifier) {
         final CheckedFuture<? extends YangTextSchemaSource, SchemaSourceException> source = sourceProvider.getSource(
-            moduleIdentifier.getRevision() == null ?
-                new SourceIdentifier(moduleIdentifier.getName()) :
-                new SourceIdentifier(moduleIdentifier.getName(),
-                    QName.formattedRevision(moduleIdentifier.getRevision())));
+            SourceIdentifier.create(moduleIdentifier.getName(), Optional.fromNullable(
+                QName.formattedRevision(moduleIdentifier.getRevision()))));
 
         try {
             final YangTextSchemaSource yangTextSchemaSource = source.checkedGet();

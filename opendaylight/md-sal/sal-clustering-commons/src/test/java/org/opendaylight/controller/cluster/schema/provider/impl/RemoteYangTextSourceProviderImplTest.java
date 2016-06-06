@@ -12,6 +12,7 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import com.google.common.base.Optional;
 import com.google.common.io.ByteSource;
 import com.google.common.util.concurrent.Futures;
 import java.util.Collections;
@@ -29,7 +30,7 @@ import scala.concurrent.duration.Duration;
 
 public class RemoteYangTextSourceProviderImplTest {
 
-    private static final SourceIdentifier ID = new SourceIdentifier("Test", "2015-10-30");
+    private static final SourceIdentifier ID = SourceIdentifier.create("Test", Optional.of("2015-10-30"));
 
     private RemoteYangTextSourceProviderImpl remoteRepository;
     private SchemaRepository mockedLocalRepository;

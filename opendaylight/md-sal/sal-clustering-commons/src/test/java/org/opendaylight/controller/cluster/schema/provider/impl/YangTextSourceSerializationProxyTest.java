@@ -11,13 +11,14 @@ package org.opendaylight.controller.cluster.schema.provider.impl;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
-import com.google.common.base.Charsets;
+import com.google.common.base.Optional;
 import com.google.common.io.ByteSource;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.nio.charset.StandardCharsets;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.yangtools.yang.model.repo.api.SourceIdentifier;
@@ -31,7 +32,8 @@ public class YangTextSourceSerializationProxyTest {
     public void setUp() {
         String source = "Test source.";
         schemaSource = YangTextSchemaSource.delegateForByteSource(
-                new SourceIdentifier("test", "2015-10-30"), ByteSource.wrap(source.getBytes(Charsets.UTF_8)));
+                SourceIdentifier.create("test", Optional.of("2015-10-30")),
+                ByteSource.wrap(source.getBytes(StandardCharsets.UTF_8)));
     }
 
 

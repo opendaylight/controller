@@ -14,6 +14,7 @@ import static org.junit.Assert.assertTrue;
 
 import akka.dispatch.ExecutionContexts;
 import akka.dispatch.Futures;
+import com.google.common.base.Optional;
 import com.google.common.io.ByteSource;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.MoreExecutors;
@@ -28,7 +29,7 @@ import org.opendaylight.yangtools.yang.model.repo.api.YangTextSchemaSource;
 
 public class RemoteSchemaProviderTest {
 
-    private static final SourceIdentifier ID = new SourceIdentifier("Test", "2015-10-30");
+    private static final SourceIdentifier ID = SourceIdentifier.create("Test", Optional.of("2015-10-30"));
 
     private RemoteSchemaProvider remoteSchemaProvider;
     private RemoteYangTextSourceProvider mockedRemoteSchemaRepository;
