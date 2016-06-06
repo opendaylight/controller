@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da5c1566_04d845ee",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/AbstractTransactionContextFactory.java",
+        "patchSetId": 29
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-06-06T04:35:26Z",
+      "side": 1,
+      "message": "AtomicLongFieldUpdater  has its uses but it does reduce clarity/readability of code. The use of AtomicLongFieldUpdater is generally recommended for cases where you have many instances of a class and you want to save AtomicLong instances. In this case though, there\u0027s I think only maybe 4 instances of AbstractTransactionContextFactory created so we don\u0027t need to use AtomicLongFieldUpdater - I would prefer AtomicLong in this case.",
+      "revId": "e83ab4db20c9cf141390c77c542dd1752f029be6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_c4edad8d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionContextFactory.java",
+        "patchSetId": 29
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-06-06T04:35:26Z",
+      "side": 1,
+      "message": "Same comment wrt AtomicLongFieldUpdater as in the other class.",
+      "revId": "e83ab4db20c9cf141390c77c542dd1752f029be6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

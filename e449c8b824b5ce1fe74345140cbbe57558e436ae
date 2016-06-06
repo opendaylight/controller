@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da5c1566_44e23da0",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/AbstractTransactionContextFactory.java",
+        "patchSetId": 29
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-06-06T04:35:26Z",
+      "side": 0,
+      "message": "With more than 2 format args, the varargs method is called which causes an implicit Object[]. Since this code is on a fast path we should keep the isDebugEnabled check.",
+      "revId": "e449c8b824b5ce1fe74345140cbbe57558e436ae",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
