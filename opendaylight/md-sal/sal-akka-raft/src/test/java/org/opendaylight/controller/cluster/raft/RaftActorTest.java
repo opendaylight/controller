@@ -86,7 +86,6 @@ import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 import org.opendaylight.yangtools.concepts.Identifier;
-import org.opendaylight.yangtools.util.StringIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.duration.Duration;
@@ -440,7 +439,7 @@ public class RaftActorTest extends AbstractActorTest {
                 ReplicatedLogEntry entry = new MockRaftActorContext.MockReplicatedLogEntry(1, 5,
                         new MockRaftActorContext.MockPayload("F"));
 
-                final Identifier id = new StringIdentifier("apply-state");
+                final Identifier id = new MockIdentifier("apply-state");
                 mockRaftActor.onReceiveCommand(new ApplyState(mockActorRef, id, entry));
 
                 verify(mockRaftActor.actorDelegate).applyState(eq(mockActorRef), eq(id), anyObject());
@@ -947,7 +946,7 @@ public class RaftActorTest extends AbstractActorTest {
             assertEquals(RaftState.Leader, leaderActor.getCurrentBehavior().state());
 
             // Persist another entry (this will cause a CaptureSnapshot to be triggered
-            leaderActor.persistData(mockActorRef, new StringIdentifier("x"),
+            leaderActor.persistData(mockActorRef, new MockIdentifier("x"),
                 new MockRaftActorContext.MockPayload("duh"));
 
             // Now send a CaptureSnapshotReply

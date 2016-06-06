@@ -36,7 +36,7 @@ import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 import org.opendaylight.yangtools.concepts.Identifier;
-import org.opendaylight.yangtools.util.StringIdentifier;
+import org.opendaylight.yangtools.util.AbstractStringIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.duration.FiniteDuration;
@@ -47,6 +47,14 @@ import scala.concurrent.duration.FiniteDuration;
  * @author Thomas Pantelis
  */
 public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest {
+
+    private static final class MockIdentifier extends AbstractStringIdentifier<MockIdentifier> {
+        private static final long serialVersionUID = 1L;
+
+        protected MockIdentifier(String string) {
+            super(string);
+        }
+    }
 
     public static class SetPeerAddress {
         private final String peerId;
@@ -92,7 +100,7 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
         public void handleCommand(Object message) {
             if(message instanceof MockPayload) {
                 MockPayload payload = (MockPayload)message;
-                super.persistData(collectorActor, new StringIdentifier(payload.toString()), payload);
+                super.persistData(collectorActor, new MockIdentifier(payload.toString()), payload);
                 return;
             }
 
@@ -297,7 +305,7 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
             String expId, long expTerm, long expIndex, MockPayload payload) {
         assertEquals("ApplyState getClientActor", expClientActor, applyState.getClientActor());
 
-        final Identifier id = expId == null ? null : new StringIdentifier(expId);
+        final Identifier id = expId == null ? null : new MockIdentifier(expId);
         assertEquals("ApplyState getIdentifier", id, applyState.getIdentifier());
         ReplicatedLogEntry replicatedLogEntry = applyState.getReplicatedLogEntry();
         verifyReplicatedLogEntry(replicatedLogEntry, expTerm, expIndex, payload);
