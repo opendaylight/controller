@@ -33,6 +33,6 @@ public class YangTextSchemaSourceSerializationProxy implements Serializable {
     }
 
     public YangTextSchemaSource getRepresentation() {
-        return YangTextSchemaSource.delegateForByteSource(new SourceIdentifier(name, revision), ByteSource.wrap(schemaSource));
+        return YangTextSchemaSource.delegateForByteSource(SourceIdentifier.create(name, revision), ByteSource.wrap(schemaSource));
     }
 }
