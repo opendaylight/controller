@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da5c1566_180d4591",
+        "filename": "opendaylight/md-sal/samples/toaster-it/src/test/java/org/opendaylight/controller/sample/toaster/it/ToasterTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-06-06T16:03:39Z",
+      "side": 0,
+      "message": "this could have been done in the patch on top of this one, related to toaster, to be *really* accurate with commit message",
+      "revId": "f6f461bc86012d3e44861eb4a97ce2eba8b4c05d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

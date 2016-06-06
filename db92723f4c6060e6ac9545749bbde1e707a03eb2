@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da5c1566_b817f9a2",
+        "filename": "opendaylight/config/config-it-base/src/main/java/org/opendaylight/controller/config/it/base/AbstractConfigTestBase.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-06-06T16:03:39Z",
+      "side": 1,
+      "message": "Wondering if a comment should be added explaining the reason of the deprecation. Or maybe the patch message is enough.",
+      "revId": "db92723f4c6060e6ac9545749bbde1e707a03eb2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
