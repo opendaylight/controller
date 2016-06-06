@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da5c1566_04a0458f",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/ClientLocalHistory.java",
+        "patchSetId": 50
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-06-06T03:26:14Z",
+      "side": 1,
+      "message": "Can\u0027t this use PreCondition?",
+      "revId": "f8124f4e76a7ea8c47a97318684d9156ab186f8b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_a4b6b9da",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/DistributedDataStoreClient.java",
+        "patchSetId": 50
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-06-06T03:26:14Z",
+      "side": 1,
+      "message": "Fix what here?",
+      "revId": "f8124f4e76a7ea8c47a97318684d9156ab186f8b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_a4dd1917",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/DistributedDataStoreClientBehavior.java",
+        "patchSetId": 50
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-06-06T03:26:14Z",
+      "side": 1,
+      "message": "Why don\u0027t we use the Shutdown message class in sal-akka-raft?",
+      "revId": "f8124f4e76a7ea8c47a97318684d9156ab186f8b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_24d109fc",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/client/ClientActorBehavior.java",
+        "patchSetId": 50
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-06-06T03:26:14Z",
+      "side": 1,
+      "message": "Since this class is abstract, the name should be prepended with Abstract to be consistent with the other abstract classes. But this would be called AbstractClientActorBehavior and you already have an AbstractClientActorBehavior class. I\u0027m not clear on the difference between the 2 ...",
+      "revId": "f8124f4e76a7ea8c47a97318684d9156ab186f8b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
