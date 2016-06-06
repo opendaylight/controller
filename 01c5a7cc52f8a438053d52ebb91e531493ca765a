@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da5c1566_7be43b3b",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 281,
+      "author": {
+        "id": 3635
+      },
+      "writtenOn": "2016-06-06T17:17:34Z",
+      "side": 1,
+      "message": "Can this ever be null?",
+      "range": {
+        "startLine": 281,
+        "startChar": 87,
+        "endLine": 281,
+        "endChar": 105
+      },
+      "revId": "01c5a7cc52f8a438053d52ebb91e531493ca765a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
