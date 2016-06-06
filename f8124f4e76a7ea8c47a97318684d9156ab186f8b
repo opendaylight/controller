@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "da5c1566_95bc816e",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/ClientLocalHistory.java",
+        "patchSetId": 50
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-06-06T13:42:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "da5c1566_04a0458f",
+      "revId": "f8124f4e76a7ea8c47a97318684d9156ab186f8b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da5c1566_a4b6b9da",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/DistributedDataStoreClient.java",
         "patchSetId": 50
@@ -30,6 +48,24 @@
       "writtenOn": "2016-06-06T03:26:14Z",
       "side": 1,
       "message": "Fix what here?",
+      "revId": "f8124f4e76a7ea8c47a97318684d9156ab186f8b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_359015ec",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/DistributedDataStoreClient.java",
+        "patchSetId": 50
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-06-06T13:42:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "da5c1566_a4b6b9da",
       "revId": "f8124f4e76a7ea8c47a97318684d9156ab186f8b",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "da5c1566_158991ca",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/DistributedDataStoreClientBehavior.java",
+        "patchSetId": 50
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-06-06T13:42:43Z",
+      "side": 1,
+      "message": "Because this is frontend and it is completely unrelated to sal-akka-raft -- hence no inter-implementation dependencies.",
+      "parentUuid": "da5c1566_a4dd1917",
+      "revId": "f8124f4e76a7ea8c47a97318684d9156ab186f8b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da5c1566_24d109fc",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/client/ClientActorBehavior.java",
         "patchSetId": 50
@@ -64,6 +118,24 @@
       "writtenOn": "2016-06-06T03:26:14Z",
       "side": 1,
       "message": "Since this class is abstract, the name should be prepended with Abstract to be consistent with the other abstract classes. But this would be called AbstractClientActorBehavior and you already have an AbstractClientActorBehavior class. I\u0027m not clear on the difference between the 2 ...",
+      "revId": "f8124f4e76a7ea8c47a97318684d9156ab186f8b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_b57265e3",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/client/ClientActorBehavior.java",
+        "patchSetId": 50
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-06-06T13:42:43Z",
+      "side": 1,
+      "message": "It is a matter of conciseness: AbstractClientActor is a purely internal class, which is not exposed to impmenetations (see the class hierarchy to understand why).\n\nNaming this \u0027Abstract\u0027 will result in \u0027Abstract\u0027 being propagated in a *lot* of method signatures. Don\u0027t think of this as a class, but an interface with baseline implementation.",
+      "parentUuid": "da5c1566_24d109fc",
       "revId": "f8124f4e76a7ea8c47a97318684d9156ab186f8b",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
