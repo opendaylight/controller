@@ -36,7 +36,7 @@ import org.opendaylight.controller.cluster.raft.messages.ServerRemoved;
 import org.opendaylight.controller.cluster.raft.messages.UnInitializedFollowerSnapshotReply;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.opendaylight.yangtools.concepts.Identifier;
-import org.opendaylight.yangtools.util.UUIDIdentifier;
+import org.opendaylight.yangtools.util.AbstractUUIDIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.duration.FiniteDuration;
@@ -524,6 +524,14 @@ class RaftActorServerConfigurationSupport {
         }
     }
 
+    private static final class ServerOperationContextIdentifier extends AbstractUUIDIdentifier<ServerOperationContextIdentifier> {
+        private static final long serialVersionUID = 1L;
+
+        ServerOperationContextIdentifier() {
+            super(UUID.randomUUID());
+        }
+    }
+
     /**
      * Stores context information for a server operation.
      *
@@ -537,7 +545,7 @@ class RaftActorServerConfigurationSupport {
         ServerOperationContext(T operation, ActorRef clientRequestor){
             this.operation = operation;
             this.clientRequestor = clientRequestor;
-            contextId = new UUIDIdentifier(UUID.randomUUID());
+            contextId = new ServerOperationContextIdentifier();
         }
 
         Identifier getContextId() {

@@ -13,11 +13,19 @@ import akka.testkit.JavaTestKit;
 import org.apache.commons.io.FileUtils;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-
+import org.opendaylight.yangtools.util.AbstractStringIdentifier;
 import java.io.File;
 import java.io.IOException;
 
 public abstract class AbstractActorTest {
+    protected static final class MockIdentifier extends AbstractStringIdentifier<MockIdentifier> {
+        private static final long serialVersionUID = 1L;
+
+        public MockIdentifier(final String string) {
+            super(string);
+        }
+    }
+
     private static ActorSystem system;
 
     @BeforeClass

@@ -34,12 +34,19 @@ import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotRep
 import org.opendaylight.controller.cluster.raft.behaviors.Leader;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.opendaylight.yangtools.concepts.Identifier;
-import org.opendaylight.yangtools.util.StringIdentifier;
+import org.opendaylight.yangtools.util.AbstractStringIdentifier;
 
 /**
  * A sample actor showing how the RaftActor is to be extended
  */
 public class ExampleActor extends RaftActor implements RaftActorRecoveryCohort, RaftActorSnapshotCohort {
+    private static final class PayloadIdentifier extends AbstractStringIdentifier<PayloadIdentifier> {
+        private static final long serialVersionUID = 1L;
+
+        PayloadIdentifier(final long identifier) {
+            super(String.valueOf(identifier));
+        }
+    }
 
     private final Map<String, String> state = new HashMap<>();
 
@@ -63,7 +70,7 @@ public class ExampleActor extends RaftActor implements RaftActorRecoveryCohort, 
     protected void handleNonRaftCommand(Object message) {
         if(message instanceof KeyValue){
             if(isLeader()) {
-                persistData(getSender(), new StringIdentifier(String.valueOf(persistIdentifier++)), (Payload) message);
+                persistData(getSender(), new PayloadIdentifier(persistIdentifier++), (Payload) message);
             } else {
                 if(getLeader() != null) {
                     getLeader().forward(message, getContext());
