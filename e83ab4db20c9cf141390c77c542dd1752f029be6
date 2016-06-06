@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "da5c1566_9562c0d6",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/AbstractTransactionContextFactory.java",
+        "patchSetId": 29
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-06-06T13:55:13Z",
+      "side": 1,
+      "message": "AtomicLong costs a cacheline due to alignment, but I don\u0027t really care.",
+      "parentUuid": "da5c1566_04d845ee",
+      "revId": "e83ab4db20c9cf141390c77c542dd1752f029be6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da5c1566_c4edad8d",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionContextFactory.java",
         "patchSetId": 29

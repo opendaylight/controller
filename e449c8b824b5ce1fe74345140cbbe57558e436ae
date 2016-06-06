@@ -16,6 +16,24 @@
       "revId": "e449c8b824b5ce1fe74345140cbbe57558e436ae",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_d54d5874",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/AbstractTransactionContextFactory.java",
+        "patchSetId": 29
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-06-06T13:55:13Z",
+      "side": 0,
+      "message": "I don\u0027t think it matters really, as the interim array does not escape stack, hence it should end up being eliminated once we hit C2. JMH benchmark would be needed to indicate either way.",
+      "parentUuid": "da5c1566_44e23da0",
+      "revId": "e449c8b824b5ce1fe74345140cbbe57558e436ae",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
