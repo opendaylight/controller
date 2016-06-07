@@ -16,7 +16,7 @@
 #    limitations under the License.
 #
 
-DIRNAME=`dirname "$0"`
+DIRNAME=`realpath $0 | xargs dirname`
 PROGNAME=`basename "$0"`
 
 #
