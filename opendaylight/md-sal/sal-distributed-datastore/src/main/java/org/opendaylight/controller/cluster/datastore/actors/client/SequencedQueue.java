@@ -20,6 +20,7 @@ import javax.annotation.Nullable;
 import javax.annotation.concurrent.NotThreadSafe;
 import org.opendaylight.controller.cluster.access.concepts.Request;
 import org.opendaylight.controller.cluster.access.concepts.RequestException;
+import org.opendaylight.controller.cluster.access.concepts.RequestFailure;
 import org.opendaylight.controller.cluster.access.concepts.Response;
 import org.opendaylight.yangtools.concepts.Identifier;
 import org.opendaylight.yangtools.concepts.WritableIdentifier;
@@ -259,6 +260,42 @@ final class SequencedQueue {
     // FIXME: add a caller from ClientSingleTransaction
     void close() {
         notClosed = false;
+    }
+
+    private SequencedQueueEntry<?> findRequest(final long sequence) {
+        // TODO: consider a direct lookup by sequence, will require a different structure for entries
+        for (SequencedQueueEntry<?> e : entries) {
+            final int cmp = Long.compareUnsigned(sequence, e.getSequence());
+            if (cmp == 0) {
+                return e;
+            }
+            if (cmp < 0) {
+                return null;
+            }
+        }
+
+        return null;
+    }
+
+    // METHODS BELOW NEED AUDIT
+
+    void retryRequest(final RequestFailure<?, ?> failure) {
+        final SequencedQueueEntry<?> e = findRequest(failure.getSequence());
+        if (e == null) {
+            LOG.debug("No request for failure {}", failure);
+            return;
+        }
+
+        final long current = e.getCurrentTry();
+        final int cmp = Long.compareUnsigned(failure.getRetry(), current);
+        if (cmp == 0) {
+            // FIXME: retry the request
+            throw new UnsupportedOperationException("Unhandled request failure " + failure);
+        } else if (cmp < 0) {
+            LOG.debug("Current try is {}, ignoring previous failure {}", current, failure);
+        } else {
+            LOG.warn("Current try is {}, ignoring future failure {}", current, failure);
+        }
     }
 
 }
