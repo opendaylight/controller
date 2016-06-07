@@ -7,29 +7,31 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
+import akka.actor.ActorRef;
+import com.google.common.annotations.Beta;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 
 /**
- * Successful reply to a coordinated commit request initiated by a {@link ModifyTransactionRequest}
- * or {@link CommitLocalTransactionRequest}.
+ * A transaction request to perform the abort step of the three-phase commit protocol.
  *
  * @author Robert Varga
  */
-public final class TransactionCanCommitSuccess extends TransactionSuccess<TransactionCanCommitSuccess> {
+@Beta
+public final class TransactionAbortRequest extends TransactionRequest<TransactionAbortRequest> {
     private static final long serialVersionUID = 1L;
 
-    public TransactionCanCommitSuccess(final TransactionIdentifier identifier) {
-        super(identifier);
+    public TransactionAbortRequest(final TransactionIdentifier target, final ActorRef replyTo) {
+        super(target, replyTo);
     }
 
     @Override
-    protected AbstractTransactionSuccessProxy<TransactionCanCommitSuccess> externalizableProxy(final ABIVersion version) {
-        return new TransactionCanCommitSuccessProxyV1(this);
+    protected TransactionAbortRequestProxyV1 externalizableProxy(final ABIVersion version) {
+        return new TransactionAbortRequestProxyV1(this);
     }
 
     @Override
-    protected TransactionCanCommitSuccess cloneAsVersion(final ABIVersion version) {
+    protected TransactionAbortRequest cloneAsVersion(final ABIVersion version) {
         return this;
     }
 }
