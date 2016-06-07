@@ -28,9 +28,10 @@ public final class ModifyTransactionRequest extends TransactionRequest<ModifyTra
     private final List<TransactionModification> modifications;
     private final PersistenceProtocol protocol;
 
-    ModifyTransactionRequest(final TransactionIdentifier target, final ActorRef replyTo,
-        final List<TransactionModification> modifications, final PersistenceProtocol protocol) {
-        super(target, replyTo);
+    ModifyTransactionRequest(final TransactionIdentifier target, final long sequence, final long retry,
+        final ActorRef replyTo, final List<TransactionModification> modifications,
+        final PersistenceProtocol protocol) {
+        super(target, sequence, retry, replyTo);
         this.modifications = ImmutableList.copyOf(modifications);
         this.protocol = protocol;
     }
