@@ -20,6 +20,7 @@ import javax.annotation.concurrent.ThreadSafe;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.Request;
 import org.opendaylight.controller.cluster.access.concepts.RequestException;
+import org.opendaylight.controller.cluster.access.concepts.RequestFailure;
 import org.opendaylight.controller.cluster.access.concepts.Response;
 import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.concepts.Identifier;
@@ -110,6 +111,17 @@ public class ClientActorContext extends AbstractClientActorContext implements Id
         }
 
         queues.clear();
+    }
+
+    // TODO: this method is currently unused
+    void retryRequest(final RequestFailure<?, ?> failure) {
+        final SequencedQueue queue = queues.get(failure.getTarget());
+        if (queue == null) {
+            LOG.info("{}: Ignoring unknown response {}", persistenceId(), failure);
+            return;
+        }
+
+        queue.retryRequest(failure);
     }
 
 }
