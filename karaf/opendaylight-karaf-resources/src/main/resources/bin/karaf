@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 #    Licensed to the Apache Software Foundation (ASF) under one or more
 #    contributor license agreements.  See the NOTICE file distributed with
@@ -16,8 +16,12 @@
 #    limitations under the License.
 #
 
-DIRNAME=`dirname "$0"`
-PROGNAME=`basename "$0"`
+REALNAME=`readlink -e "$0"`
+if [ $? != 0 ]; then
+    REALNAME=$0
+fi
+DIRNAME=`dirname "$REALNAME"`
+PROGNAME=`basename "$REALNAME"`
 
 #
 # Sourcing environment settings for karaf similar to tomcats setenv
@@ -194,9 +198,9 @@ locateJava() {
         [ -n "$JAVA_HOME" ] && JAVA_HOME=`cygpath --unix "$JAVA_HOME"`
     fi
 
-	if [ "x$JAVA_HOME" = "x" ] && [ "$darwin" = "true" ]; then
-		JAVA_HOME="$(/usr/libexec/java_home -v 1.8)"
-	fi
+    if [ "x$JAVA_HOME" = "x" ] && [ "$darwin" = "true" ]; then
+        JAVA_HOME="$(/usr/libexec/java_home -v 1.8)"
+    fi
     if [ "x$JAVA" = "x" ] && [ -r /etc/gentoo-release ] ; then
         JAVA_HOME=`java-config --jre-home`
     fi
