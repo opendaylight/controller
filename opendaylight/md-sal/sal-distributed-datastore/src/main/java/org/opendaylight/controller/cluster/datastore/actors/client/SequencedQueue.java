@@ -20,9 +20,9 @@ import javax.annotation.Nullable;
 import javax.annotation.concurrent.NotThreadSafe;
 import org.opendaylight.controller.cluster.access.concepts.Request;
 import org.opendaylight.controller.cluster.access.concepts.RequestException;
+import org.opendaylight.controller.cluster.access.concepts.RequestFailure;
 import org.opendaylight.controller.cluster.access.concepts.Response;
 import org.opendaylight.yangtools.concepts.Identifier;
-import org.opendaylight.yangtools.concepts.WritableIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.duration.FiniteDuration;
@@ -49,7 +49,7 @@ final class SequencedQueue {
      *
      * TODO: this could benefit from a more relaxed MPSC queue than {@link ConcurrentLinkedDeque}.
      */
-    private final Deque<SequencedQueueEntry<?>> entries = new LinkedList<>();
+    private final Deque<SequencedQueueEntry> entries = new LinkedList<>();
     private final Ticker ticker;
 
     // Updated/consulted from actor context only
@@ -106,11 +106,10 @@ final class SequencedQueue {
      * @param callback Callback to be invoked
      * @return Optional duration with semantics described above.
      */
-    @Nullable <I extends WritableIdentifier, T extends Request<I, T>> Optional<FiniteDuration> enqueueRequest(
-            final T request, final RequestCallback<I> callback) {
+    @Nullable Optional<FiniteDuration> enqueueRequest(final Request<?, ?> request, final RequestCallback callback) {
         final long now = ticker.read();
-        final SequencedQueueEntry<I> e = new SequencedQueueEntry<>(request, callback, now);
-        final SequencedQueueEntry<?> last = entries.peekLast();
+        final SequencedQueueEntry e = new SequencedQueueEntry(request, callback, now);
+        final SequencedQueueEntry last = entries.peekLast();
         if (last != null) {
             Preconditions.checkArgument(Long.compareUnsigned(last.getSequence(), request.getSequence()) < 0,
                 "Mis-sequenced request %s, tail is %s", request, last);
@@ -135,7 +134,7 @@ final class SequencedQueue {
     }
 
     ClientActorBehavior complete(final ClientActorBehavior current, final Response<?, ?> response) {
-        final SequencedQueueEntry<?> head = entries.peekFirst();
+        final SequencedQueueEntry head = entries.peekFirst();
         if (head == null) {
             LOG.debug("No outstanding requests, ignoring response {}", response);
             return current;
@@ -152,7 +151,7 @@ final class SequencedQueue {
         // with a check if logging is enabled at all.
         if (LOG.isDebugEnabled()) {
             if (Long.compareUnsigned(sequence, head.getSequence()) > 0) {
-                final SequencedQueueEntry<?> tail = entries.peekLast();
+                final SequencedQueueEntry tail = entries.peekLast();
                 if (Long.compareUnsigned(sequence, tail.getSequence()) > 0) {
                     LOG.debug("Ignoring unknown response {}, last request is {}", response, tail);
                 } else {
@@ -183,7 +182,7 @@ final class SequencedQueue {
 
         LOG.debug("Resending requests to backend {}", backend);
         final long now = ticker.read();
-        for (SequencedQueueEntry<?> e : entries) {
+        for (SequencedQueueEntry e : entries) {
             e.retransmit(backend, now);
         }
 
@@ -236,7 +235,7 @@ final class SequencedQueue {
         }
 
         // We always schedule requests in sequence, hence any timeouts really just mean checking the head of the queue
-        final SequencedQueueEntry<?> head = entries.peek();
+        final SequencedQueueEntry head = entries.peek();
         if (head != null && head.isTimedOut(now, REQUEST_TIMEOUT_NANOS)) {
             backend = null;
             LOG.debug("Queue {} invalidated backend info", this);
@@ -249,7 +248,7 @@ final class SequencedQueue {
     void poison(final RequestException cause) {
         close();
 
-        SequencedQueueEntry<?> e = entries.poll();
+        SequencedQueueEntry e = entries.poll();
         while (e != null) {
             e.poison(cause);
             e = entries.poll();
@@ -259,6 +258,42 @@ final class SequencedQueue {
     // FIXME: add a caller from ClientSingleTransaction
     void close() {
         notClosed = false;
+    }
+
+    private SequencedQueueEntry findRequest(final long sequence) {
+        // TODO: consider a direct lookup by sequence, will require a different structure for entries
+        for (SequencedQueueEntry e : entries) {
+            final int cmp = Long.compareUnsigned(sequence, e.getSequence());
+            if (cmp == 0) {
+                return e;
+            }
+            if (cmp < 0) {
+                return null;
+            }
+        }
+
+        return null;
+    }
+
+    // METHODS BELOW NEED AUDIT
+
+    void retryRequest(final RequestFailure<?, ?> failure) {
+        final SequencedQueueEntry e = findRequest(failure.getSequence());
+        if (e == null) {
+            LOG.debug("No request for failure {}", failure);
+            return;
+        }
+
+        final long current = e.getCurrentTry();
+        final int cmp = Long.compareUnsigned(failure.getRetry(), current);
+        if (cmp == 0) {
+            // FIXME: retry the request
+            throw new UnsupportedOperationException("Unhandled request failure " + failure);
+        } else if (cmp < 0) {
+            LOG.debug("Current try is {}, ignoring previous failure {}", current, failure);
+        } else {
+            LOG.warn("Current try is {}, ignoring future failure {}", current, failure);
+        }
     }
 
 }
