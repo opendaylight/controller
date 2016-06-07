@@ -11,25 +11,24 @@ import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 
 /**
- * Successful reply to a coordinated commit request initiated by a {@link ModifyTransactionRequest}
- * or {@link CommitLocalTransactionRequest}.
+ * Successful reply to a {@link TransactionPreCommitRequest}.
  *
  * @author Robert Varga
  */
-public final class TransactionCanCommitSuccess extends TransactionSuccess<TransactionCanCommitSuccess> {
+public final class TransactionPreCommitSuccess extends TransactionSuccess<TransactionPreCommitSuccess> {
     private static final long serialVersionUID = 1L;
 
-    public TransactionCanCommitSuccess(final TransactionIdentifier identifier) {
+    public TransactionPreCommitSuccess(final TransactionIdentifier identifier) {
         super(identifier);
     }
 
     @Override
-    protected AbstractTransactionSuccessProxy<TransactionCanCommitSuccess> externalizableProxy(final ABIVersion version) {
-        return new TransactionCanCommitSuccessProxyV1(this);
+    protected AbstractTransactionSuccessProxy<TransactionPreCommitSuccess> externalizableProxy(final ABIVersion version) {
+        return new TransactionPreCommitSuccessProxyV1(this);
     }
 
     @Override
-    protected TransactionCanCommitSuccess cloneAsVersion(final ABIVersion version) {
+    protected TransactionPreCommitSuccess cloneAsVersion(final ABIVersion version) {
         return this;
     }
 }
