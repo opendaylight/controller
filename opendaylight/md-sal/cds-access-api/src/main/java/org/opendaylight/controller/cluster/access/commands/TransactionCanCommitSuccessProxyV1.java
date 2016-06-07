@@ -7,9 +7,6 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import akka.actor.ActorRef;
-import akka.serialization.JavaSerializer;
-import akka.serialization.Serialization;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
@@ -23,7 +20,6 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
  */
 final class TransactionCanCommitSuccessProxyV1 extends AbstractTransactionSuccessProxy<TransactionCanCommitSuccess> {
     private static final long serialVersionUID = 1L;
-    private ActorRef cohort;
 
     public TransactionCanCommitSuccessProxyV1() {
         // For Externalizable
@@ -31,23 +27,20 @@ final class TransactionCanCommitSuccessProxyV1 extends AbstractTransactionSucces
 
     TransactionCanCommitSuccessProxyV1(final TransactionCanCommitSuccess success) {
         super(success);
-        this.cohort = success.getCohort();
     }
 
     @Override
     public void writeExternal(final ObjectOutput out) throws IOException {
         super.writeExternal(out);
-        out.writeUTF(Serialization.serializedActorPath(cohort));
     }
 
     @Override
     public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
         super.readExternal(in);
-        cohort = JavaSerializer.currentSystem().value().provider().resolveActorRef(in.readUTF());
     }
 
     @Override
     protected TransactionCanCommitSuccess createSuccess(final TransactionIdentifier target) {
-        return new TransactionCanCommitSuccess(target, cohort);
+        return new TransactionCanCommitSuccess(target);
     }
 }
