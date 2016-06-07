@@ -7,13 +7,12 @@
  */
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
-import akka.actor.ActorRef;
 import com.google.common.annotations.Beta;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Verify;
-import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
-import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
+import java.util.concurrent.atomic.AtomicLongFieldUpdater;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
+import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 
 /**
  * Client-side view of a local history. This class tracks all state related to a particular history and routes
@@ -26,41 +25,42 @@ import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifie
  * @author Robert Varga
  */
 @Beta
-public final class ClientLocalHistory implements AutoCloseable {
-    private static final AtomicIntegerFieldUpdater<ClientLocalHistory> STATE_UPDATER =
-            AtomicIntegerFieldUpdater.newUpdater(ClientLocalHistory.class, "state");
-    private static final int IDLE_STATE = 0;
-    private static final int CLOSED_STATE = 1;
+public final class ClientLocalHistory extends AbstractClientHistory implements AutoCloseable {
 
-    private final ClientIdentifier clientId;
-    private final long historyId;
-    private final ActorRef backendActor;
-    private final ActorRef clientActor;
+    private static final AtomicLongFieldUpdater<ClientLocalHistory> NEXT_TX_UPDATER =
+            AtomicLongFieldUpdater.newUpdater(ClientLocalHistory.class, "nextTx");
 
-    private volatile int state = IDLE_STATE;
+    // Used via NEXT_TX_UPDATER
+    @SuppressWarnings("unused")
+    private volatile long nextTx = 0;
 
-    ClientLocalHistory(final DistributedDataStoreClientBehavior client, final long historyId,
-            final ActorRef backendActor) {
-        this.clientActor = client.self();
-        this.backendActor = Preconditions.checkNotNull(backendActor);
-        this.clientId = Verify.verifyNotNull(client.getIdentifier());
-        this.historyId = historyId;
+    ClientLocalHistory(final DistributedDataStoreClientBehavior client, final LocalHistoryIdentifier historyId) {
+        super(client, historyId);
     }
 
-    private void checkNotClosed() {
-        if (state == CLOSED_STATE) {
-            throw new IllegalStateException("Local history " + new LocalHistoryIdentifier(clientId, historyId) + " is closed");
-        }
+    public ClientTransaction createTransaction() {
+        final State local = state();
+        Preconditions.checkState(local == State.IDLE, "Local history %s state is %s", this, local);
+        updateState(local, State.TX_OPEN);
+
+        return new ClientTransaction(getClient(), this,
+            new TransactionIdentifier(getIdentifier(), NEXT_TX_UPDATER.getAndIncrement(this)));
     }
 
     @Override
     public void close() {
-        if (STATE_UPDATER.compareAndSet(this, IDLE_STATE, CLOSED_STATE)) {
-            // FIXME: signal close to both client actor and backend actor
-        } else if (state != CLOSED_STATE) {
-            throw new IllegalStateException("Cannot close history with an open transaction");
+        final State local = state();
+        if (local != State.CLOSED) {
+            Preconditions.checkState(local == State.IDLE, "Local history %s has an open transaction", this);
+            updateState(local, State.CLOSED);
         }
     }
 
-    // FIXME: add client requests related to a particular local history
+    @Override
+    void onTransactionReady(final ClientTransaction transaction) {
+        final State local = state();
+        Verify.verify(local == State.TX_OPEN, "Local history %s is in unexpected state %s", this, local);
+        updateState(local, State.IDLE);
+        super.onTransactionReady(transaction);
+    }
 }
