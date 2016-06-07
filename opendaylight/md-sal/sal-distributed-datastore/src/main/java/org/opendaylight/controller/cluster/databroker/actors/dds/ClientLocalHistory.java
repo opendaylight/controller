@@ -7,13 +7,13 @@
  */
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
-import akka.actor.ActorRef;
 import com.google.common.annotations.Beta;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Verify;
-import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
-import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
+import java.util.concurrent.atomic.AtomicLongFieldUpdater;
+import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
+import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 
 /**
  * Client-side view of a local history. This class tracks all state related to a particular history and routes
@@ -26,41 +26,55 @@ import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifie
  * @author Robert Varga
  */
 @Beta
-public final class ClientLocalHistory implements AutoCloseable {
-    private static final AtomicIntegerFieldUpdater<ClientLocalHistory> STATE_UPDATER =
-            AtomicIntegerFieldUpdater.newUpdater(ClientLocalHistory.class, "state");
-    private static final int IDLE_STATE = 0;
-    private static final int CLOSED_STATE = 1;
-
-    private final ClientIdentifier clientId;
-    private final long historyId;
-    private final ActorRef backendActor;
-    private final ActorRef clientActor;
-
-    private volatile int state = IDLE_STATE;
-
-    ClientLocalHistory(final DistributedDataStoreClientBehavior client, final long historyId,
-            final ActorRef backendActor) {
-        this.clientActor = client.self();
-        this.backendActor = Preconditions.checkNotNull(backendActor);
-        this.clientId = Verify.verifyNotNull(client.getIdentifier());
-        this.historyId = historyId;
+public final class ClientLocalHistory extends AbstractClientHistory implements AutoCloseable {
+    private static enum State {
+        IDLE,
+        TX_OPEN,
+        CLOSED,
     }
 
-    private void checkNotClosed() {
-        if (state == CLOSED_STATE) {
-            throw new IllegalStateException("Local history " + new LocalHistoryIdentifier(clientId, historyId) + " is closed");
-        }
+    private static final AtomicReferenceFieldUpdater<ClientLocalHistory, State> STATE_UPDATER =
+            AtomicReferenceFieldUpdater.newUpdater(ClientLocalHistory.class, State.class, "state");
+    private static final AtomicLongFieldUpdater<ClientLocalHistory> NEXT_TX_UPDATER =
+            AtomicLongFieldUpdater.newUpdater(ClientLocalHistory.class, "nextTx");
+
+    private volatile State state = State.IDLE;
+    // Used via NEXT_TX_UPDATER
+    @SuppressWarnings("unused")
+    private volatile long nextTx = 0;
+
+    ClientLocalHistory(final DistributedDataStoreClientBehavior client, final LocalHistoryIdentifier historyId) {
+        super(client, historyId);
+    }
+
+    private void updateState(final State expected, final State next) {
+        final boolean success = STATE_UPDATER.compareAndSet(this, expected, next);
+        Preconditions.checkState(success, "Race condition detected, state changed from %s to %s", expected, state);
+    }
+
+    public ClientSingleTransaction createTransaction() {
+        final State local = state;
+        Preconditions.checkState(local == State.IDLE, "Local history %s state is %s", this, local);
+        updateState(local, State.TX_OPEN);
+
+        return new ClientSingleTransaction(getClient(), this,
+            new TransactionIdentifier(getIdentifier(), NEXT_TX_UPDATER.getAndIncrement(this)));
     }
 
     @Override
     public void close() {
-        if (STATE_UPDATER.compareAndSet(this, IDLE_STATE, CLOSED_STATE)) {
-            // FIXME: signal close to both client actor and backend actor
-        } else if (state != CLOSED_STATE) {
-            throw new IllegalStateException("Cannot close history with an open transaction");
+        final State local = state;
+        if (local != State.CLOSED) {
+            Preconditions.checkState(local == State.IDLE, "Local history %s has an open transaction", this);
+            updateState(local, State.CLOSED);
         }
     }
 
-    // FIXME: add client requests related to a particular local history
+    @Override
+    void transactionComplete(final ClientSingleTransaction transaction) {
+        final State local = state;
+        Verify.verify(state == State.TX_OPEN, "Local history %s is in unexpected state %s", this, local);
+        updateState(local, State.IDLE);
+        super.transactionComplete(transaction);
+    }
 }

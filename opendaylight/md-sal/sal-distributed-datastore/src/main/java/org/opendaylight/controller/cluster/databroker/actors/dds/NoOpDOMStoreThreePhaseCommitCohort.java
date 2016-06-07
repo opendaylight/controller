@@ -5,18 +5,19 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.cluster.datastore;
+package org.opendaylight.controller.cluster.databroker.actors.dds;
 
-import com.google.common.collect.ImmutableList;
+import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
-import java.util.List;
-import scala.concurrent.Future;
+import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 
 /**
  * A {@link org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort}
  * instance given out for empty transactions.
  */
-final class NoOpDOMStoreThreePhaseCommitCohort extends AbstractThreePhaseCommitCohort<Object> {
+final class NoOpDOMStoreThreePhaseCommitCohort implements DOMStoreThreePhaseCommitCohort {
+    private static final ListenableFuture<Void> IMMEDIATE_VOID_SUCCESS = Futures.immediateFuture(null);
+    private static final ListenableFuture<Boolean> IMMEDIATE_BOOLEAN_SUCCESS = Futures.immediateFuture(Boolean.TRUE);
     static final NoOpDOMStoreThreePhaseCommitCohort INSTANCE = new NoOpDOMStoreThreePhaseCommitCohort();
 
     private NoOpDOMStoreThreePhaseCommitCohort() {
@@ -41,10 +42,5 @@ final class NoOpDOMStoreThreePhaseCommitCohort extends AbstractThreePhaseCommitC
     @Override
     public ListenableFuture<Void> commit() {
         return IMMEDIATE_VOID_SUCCESS;
-    }
-
-    @Override
-    protected List<Future<Object>> getCohortFutures() {
-        return ImmutableList.of();
     }
 }

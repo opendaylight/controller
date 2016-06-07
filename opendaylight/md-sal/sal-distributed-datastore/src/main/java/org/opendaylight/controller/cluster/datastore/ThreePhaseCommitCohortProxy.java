@@ -42,24 +42,24 @@ public class ThreePhaseCommitCohortProxy extends AbstractThreePhaseCommitCohort<
 
     private static final MessageSupplier COMMIT_MESSAGE_SUPPLIER = new MessageSupplier() {
         @Override
-        public Object newMessage(TransactionIdentifier transactionId, short version) {
+        public Object newMessage(final TransactionIdentifier transactionId, final short version) {
             return new CommitTransaction(transactionId, version).toSerializable();
         }
 
         @Override
-        public boolean isSerializedReplyType(Object reply) {
+        public boolean isSerializedReplyType(final Object reply) {
             return CommitTransactionReply.isSerializedType(reply);
         }
     };
 
     private static final MessageSupplier ABORT_MESSAGE_SUPPLIER = new MessageSupplier() {
         @Override
-        public Object newMessage(TransactionIdentifier transactionId, short version) {
+        public Object newMessage(final TransactionIdentifier transactionId, final short version) {
             return new AbortTransaction(transactionId, version).toSerializable();
         }
 
         @Override
-        public boolean isSerializedReplyType(Object reply) {
+        public boolean isSerializedReplyType(final Object reply) {
             return AbortTransactionReply.isSerializedType(reply);
         }
     };
@@ -70,8 +70,8 @@ public class ThreePhaseCommitCohortProxy extends AbstractThreePhaseCommitCohort<
     private final TransactionIdentifier transactionId;
     private volatile OperationCallback commitOperationCallback;
 
-    public ThreePhaseCommitCohortProxy(ActorContext actorContext, List<CohortInfo> cohorts,
-            TransactionIdentifier transactionId) {
+    public ThreePhaseCommitCohortProxy(final ActorContext actorContext, final List<CohortInfo> cohorts,
+            final TransactionIdentifier transactionId) {
         this.actorContext = actorContext;
         this.cohorts = cohorts;
         this.transactionId = Preconditions.checkNotNull(transactionId);
@@ -90,7 +90,7 @@ public class ThreePhaseCommitCohortProxy extends AbstractThreePhaseCommitCohort<
         for(final CohortInfo info: cohorts) {
             info.getActorFuture().onComplete(new OnComplete<ActorSelection>() {
                 @Override
-                public void onComplete(Throwable failure, ActorSelection actor)  {
+                public void onComplete(final Throwable failure, final ActorSelection actor)  {
                     synchronized(completed) {
                         boolean done = completed.decrementAndGet() == 0;
                         if(failure != null) {
@@ -127,12 +127,12 @@ public class ThreePhaseCommitCohortProxy extends AbstractThreePhaseCommitCohort<
 
         Futures.addCallback(resolveCohorts(), new FutureCallback<Void>() {
             @Override
-            public void onSuccess(Void notUsed) {
+            public void onSuccess(final Void notUsed) {
                 finishCanCommit(returnFuture);
             }
 
             @Override
-            public void onFailure(Throwable failure) {
+            public void onFailure(final Throwable failure) {
                 returnFuture.setException(failure);
             }
         });
@@ -157,7 +157,7 @@ public class ThreePhaseCommitCohortProxy extends AbstractThreePhaseCommitCohort<
 
         final OnComplete<Object> onComplete = new OnComplete<Object>() {
             @Override
-            public void onComplete(Throwable failure, Object response) {
+            public void onComplete(final Throwable failure, final Object response) {
                 if (failure != null) {
                     LOG.debug("Tx {}: a canCommit cohort Future failed", transactionId, failure);
 
@@ -199,7 +199,7 @@ public class ThreePhaseCommitCohortProxy extends AbstractThreePhaseCommitCohort<
         sendCanCommitTransaction(iterator.next(), onComplete);
     }
 
-    private void sendCanCommitTransaction(CohortInfo toCohortInfo, OnComplete<Object> onComplete) {
+    private void sendCanCommitTransaction(final CohortInfo toCohortInfo, final OnComplete<Object> onComplete) {
         CanCommitTransaction message = new CanCommitTransaction(transactionId, toCohortInfo.getActorVersion());
 
         if(LOG.isDebugEnabled()) {
@@ -211,7 +211,7 @@ public class ThreePhaseCommitCohortProxy extends AbstractThreePhaseCommitCohort<
         future.onComplete(onComplete, actorContext.getClientDispatcher());
     }
 
-    private Future<Iterable<Object>> invokeCohorts(MessageSupplier messageSupplier) {
+    private Future<Iterable<Object>> invokeCohorts(final MessageSupplier messageSupplier) {
         List<Future<Object>> futureList = Lists.newArrayListWithCapacity(cohorts.size());
         for(CohortInfo cohort : cohorts) {
             Object message = messageSupplier.newMessage(transactionId, cohort.getActorVersion());
@@ -255,7 +255,7 @@ public class ThreePhaseCommitCohortProxy extends AbstractThreePhaseCommitCohort<
                 CommitTransactionReply.class, true, operationCallback);
     }
 
-    private static boolean successfulFuture(ListenableFuture<Void> future) {
+    private static boolean successfulFuture(final ListenableFuture<Void> future) {
         if(!future.isDone()) {
             return false;
         }
@@ -285,13 +285,13 @@ public class ThreePhaseCommitCohortProxy extends AbstractThreePhaseCommitCohort<
         } else {
             Futures.addCallback(future, new FutureCallback<Void>() {
                 @Override
-                public void onSuccess(Void notUsed) {
+                public void onSuccess(final Void notUsed) {
                     finishVoidOperation(operationName, messageSupplier, expectedResponseClass,
                             propagateException, returnFuture, callback);
                 }
 
                 @Override
-                public void onFailure(Throwable failure) {
+                public void onFailure(final Throwable failure) {
                     LOG.debug("Tx {}: a {} cohort path Future failed: {}", transactionId, operationName, failure);
 
                     if(propagateException) {
@@ -306,7 +306,7 @@ public class ThreePhaseCommitCohortProxy extends AbstractThreePhaseCommitCohort<
         return returnFuture;
     }
 
-    private void finishVoidOperation(final String operationName, MessageSupplier messageSupplier,
+    private void finishVoidOperation(final String operationName, final MessageSupplier messageSupplier,
                                      final Class<?> expectedResponseClass, final boolean propagateException,
                                      final SettableFuture<Void> returnFuture, final OperationCallback callback) {
         LOG.debug("Tx {} finish {}", transactionId, operationName);
@@ -317,7 +317,7 @@ public class ThreePhaseCommitCohortProxy extends AbstractThreePhaseCommitCohort<
 
         combinedFuture.onComplete(new OnComplete<Iterable<Object>>() {
             @Override
-            public void onComplete(Throwable failure, Iterable<Object> responses) throws Throwable {
+            public void onComplete(final Throwable failure, final Iterable<Object> responses) throws Throwable {
                 Throwable exceptionToPropagate = failure;
                 if(exceptionToPropagate == null) {
                     for(Object response: responses) {
@@ -355,7 +355,7 @@ public class ThreePhaseCommitCohortProxy extends AbstractThreePhaseCommitCohort<
     }
 
     @Override
-    List<Future<ActorSelection>> getCohortFutures() {
+    protected List<Future<ActorSelection>> getCohortFutures() {
         List<Future<ActorSelection>> cohortFutures = new ArrayList<>(cohorts.size());
         for(CohortInfo info: cohorts) {
             cohortFutures.add(info.getActorFuture());
@@ -369,7 +369,7 @@ public class ThreePhaseCommitCohortProxy extends AbstractThreePhaseCommitCohort<
         private volatile ActorSelection resolvedActor;
         private final Supplier<Short> actorVersionSupplier;
 
-        CohortInfo(Future<ActorSelection> actorFuture, Supplier<Short> actorVersionSupplier) {
+        CohortInfo(final Future<ActorSelection> actorFuture, final Supplier<Short> actorVersionSupplier) {
             this.actorFuture = actorFuture;
             this.actorVersionSupplier = actorVersionSupplier;
         }
@@ -382,7 +382,7 @@ public class ThreePhaseCommitCohortProxy extends AbstractThreePhaseCommitCohort<
             return resolvedActor;
         }
 
-        void setResolvedActor(ActorSelection resolvedActor) {
+        void setResolvedActor(final ActorSelection resolvedActor) {
             this.resolvedActor = resolvedActor;
         }
 
