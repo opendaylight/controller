@@ -15,6 +15,7 @@ import java.util.List;
 import javax.annotation.concurrent.NotThreadSafe;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.yangtools.concepts.Builder;
+import org.opendaylight.yangtools.concepts.Identifiable;
 
 /**
  * A reusable {@link Builder} for creating {@link ModifyTransactionRequest} message instances. Its internal state is
@@ -24,7 +25,8 @@ import org.opendaylight.yangtools.concepts.Builder;
  */
 @Beta
 @NotThreadSafe
-public final class ModifyTransactionRequestBuilder implements Builder<ModifyTransactionRequest> {
+public final class ModifyTransactionRequestBuilder implements Builder<ModifyTransactionRequest>,
+        Identifiable<TransactionIdentifier> {
     private final List<TransactionModification> modifications = new ArrayList<>(1);
     private final TransactionIdentifier identifier;
     private final ActorRef replyTo;
@@ -34,6 +36,11 @@ public final class ModifyTransactionRequestBuilder implements Builder<ModifyTran
     public ModifyTransactionRequestBuilder(final TransactionIdentifier identifier, final ActorRef replyTo) {
         this.identifier = Preconditions.checkNotNull(identifier);
         this.replyTo = Preconditions.checkNotNull(replyTo);
+    }
+
+    @Override
+    public TransactionIdentifier getIdentifier() {
+        return identifier;
     }
 
     private void checkFinished() {
@@ -46,9 +53,9 @@ public final class ModifyTransactionRequestBuilder implements Builder<ModifyTran
         this.sequence = sequence;
     }
 
-    public void addModification(final TransactionModification operation) {
+    public void addModification(final TransactionModification modification) {
         checkFinished();
-        modifications.add(Preconditions.checkNotNull(operation));
+        modifications.add(Preconditions.checkNotNull(modification));
     }
 
     public void setAbort() {
@@ -76,4 +83,5 @@ public final class ModifyTransactionRequestBuilder implements Builder<ModifyTran
         sequence = 0;
         return ret;
     }
+
 }
