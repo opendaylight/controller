@@ -42,7 +42,6 @@ final class ModifyTransactionRequestProxyV1 extends AbstractTransactionRequestPr
         this.protocol = request.getPersistenceProtocol();
     }
 
-
     @Override
     public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
         super.readExternal(in);

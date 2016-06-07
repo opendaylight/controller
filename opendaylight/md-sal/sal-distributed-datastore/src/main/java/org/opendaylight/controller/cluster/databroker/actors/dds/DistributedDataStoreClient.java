@@ -8,7 +8,7 @@
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
 import com.google.common.annotations.Beta;
-import java.util.concurrent.CompletionStage;
+import javax.annotation.Nonnull;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.yangtools.concepts.Identifiable;
 
@@ -23,19 +23,22 @@ import org.opendaylight.yangtools.concepts.Identifiable;
 @Beta
 public interface DistributedDataStoreClient extends Identifiable<ClientIdentifier>, AutoCloseable {
     @Override
-    ClientIdentifier getIdentifier();
+    @Nonnull ClientIdentifier getIdentifier();
 
     @Override
     void close();
 
     /**
-     * Create a new local history. This method initiates an asynchronous instantiation of a local history on the back
-     * end. ClientLocalHistory represents the interface exposed to the client.
+     * Create a new local history. ClientLocalHistory represents the interface exposed to the client.
      *
-     * @return Future client history handle
+     * @return Client history handle
      */
-    CompletionStage<ClientLocalHistory> createLocalHistory();
+    @Nonnull ClientLocalHistory createLocalHistory();
 
-    // TODO: add methods required by DistributedDataStore
-
+    /**
+     * Create a new free-standing transaction.
+     *
+     * @return Client transaction handle
+     */
+    @Nonnull ClientTransaction createTransaction();
 }
