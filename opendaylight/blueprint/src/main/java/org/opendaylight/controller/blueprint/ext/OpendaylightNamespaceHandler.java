@@ -257,8 +257,6 @@ public class OpendaylightNamespaceHandler implements NamespaceHandler {
     }
 
     private Metadata parseRpcService(Element element, ParserContext context) {
-        registerRpcRegistryServiceRefBean(context);
-
         ComponentFactoryMetadata metadata = new RpcServiceMetadata(getId(context, element),
                 element.getAttribute(INTERFACE));
 

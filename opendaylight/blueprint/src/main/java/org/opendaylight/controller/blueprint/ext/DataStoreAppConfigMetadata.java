@@ -20,10 +20,6 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import org.apache.aries.blueprint.di.AbstractRecipe;
-import org.apache.aries.blueprint.di.ExecutionContext;
-import org.apache.aries.blueprint.di.Recipe;
-import org.apache.aries.blueprint.ext.DependentComponentFactoryMetadata;
 import org.apache.aries.blueprint.services.ExtendedBlueprintContainer;
 import org.opendaylight.controller.blueprint.BlueprintContainerRestartService;
 import org.opendaylight.controller.md.sal.binding.api.ClusteredDataTreeChangeListener;
@@ -68,29 +64,21 @@ import org.w3c.dom.Element;
  *
  * @author Thomas Pantelis
  */
-public class DataStoreAppConfigMetadata implements DependentComponentFactoryMetadata {
+public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactoryMetadata {
     private static final Logger LOG = LoggerFactory.getLogger(DataStoreAppConfigMetadata.class);
 
     static final String BINDING_CLASS = "binding-class";
     static final String DEFAULT_CONFIG = "default-config";
     static final String LIST_KEY_VALUE = "list-key-value";
 
-    private final String id;
     private final Element defaultAppConfigElement;
     private final String appConfigBindingClassName;
     private final String appConfigListKeyValue;
     private final AtomicBoolean readingInitialAppConfig = new AtomicBoolean(true);
-    private final AtomicBoolean started = new AtomicBoolean();
 
     private volatile BindingContext bindingContext;
-    private volatile ExtendedBlueprintContainer container;
-    private volatile StaticServiceReferenceRecipe dataBrokerServiceRecipe;
-    private volatile StaticServiceReferenceRecipe bindingCodecServiceRecipe;
     private volatile ListenerRegistration<?> appConfigChangeListenerReg;
     private volatile DataObject currentAppConfig;
-    private volatile SatisfactionCallback satisfactionCallback;
-    private volatile String failureMessage;
-    private volatile String dependendencyDesc;
 
     // Note: the BindingNormalizedNodeSerializer interface is annotated as deprecated because there's an
     // equivalent interface in the mdsal project but the corresponding binding classes in the controller
@@ -99,38 +87,16 @@ public class DataStoreAppConfigMetadata implements DependentComponentFactoryMeta
 
     public DataStoreAppConfigMetadata(@Nonnull String id, @Nonnull String appConfigBindingClassName,
             @Nullable String appConfigListKeyValue, @Nullable Element defaultAppConfigElement) {
-        this.id = Preconditions.checkNotNull(id);
+        super(id);
         this.defaultAppConfigElement = defaultAppConfigElement;
         this.appConfigBindingClassName = appConfigBindingClassName;
         this.appConfigListKeyValue = appConfigListKeyValue;
     }
 
     @Override
-    public String getId() {
-        return id;
-    }
-
-    @Override
-    public int getActivation() {
-        return ACTIVATION_EAGER;
-    }
-
-    @Override
-    public List<String> getDependsOn() {
-        return Collections.emptyList();
-    }
-
-    @Override
-    public boolean isSatisfied() {
-        return currentAppConfig != null;
-    }
-
-    @Override
     @SuppressWarnings("unchecked")
     public void init(ExtendedBlueprintContainer container) {
-        LOG.debug("{}: In init", id);
-
-        this.container = container;
+        super.init(container);
 
         Class<DataObject> appConfigBindingClass;
         try {
@@ -138,13 +104,13 @@ public class DataStoreAppConfigMetadata implements DependentComponentFactoryMeta
             if(!DataObject.class.isAssignableFrom(bindingClass)) {
                 throw new ComponentDefinitionException(String.format(
                         "%s: Specified app config binding class %s does not extend %s",
-                        id, appConfigBindingClassName, DataObject.class.getName()));
+                        logName(), appConfigBindingClassName, DataObject.class.getName()));
             }
 
             appConfigBindingClass = (Class<DataObject>) bindingClass;
         } catch(ClassNotFoundException e) {
             throw new ComponentDefinitionException(String.format("%s: Error loading app config binding class %s",
-                    id, appConfigBindingClassName), e);
+                    logName(), appConfigBindingClassName), e);
         }
 
         if(Identifiable.class.isAssignableFrom(appConfigBindingClass)) {
@@ -152,7 +118,7 @@ public class DataStoreAppConfigMetadata implements DependentComponentFactoryMeta
             if(Strings.isNullOrEmpty(appConfigListKeyValue)) {
                 throw new ComponentDefinitionException(String.format(
                         "%s: App config binding class %s represents a yang list therefore \"%s\" must be specified",
-                        id, appConfigBindingClassName, LIST_KEY_VALUE));
+                        logName(), appConfigBindingClassName, LIST_KEY_VALUE));
             }
 
             try {
@@ -160,7 +126,7 @@ public class DataStoreAppConfigMetadata implements DependentComponentFactoryMeta
             } catch(Exception e) {
                 throw new ComponentDefinitionException(String.format(
                         "%s: Error initializing for app config list binding class %s",
-                        id, appConfigBindingClassName), e);
+                        logName(), appConfigBindingClassName), e);
             }
 
         } else {
@@ -170,89 +136,36 @@ public class DataStoreAppConfigMetadata implements DependentComponentFactoryMeta
 
     @Override
     public Object create() throws ComponentDefinitionException {
-        LOG.debug("{}: In create - currentAppConfig: {}", id, currentAppConfig);
+        LOG.debug("{}: In create - currentAppConfig: {}", logName(), currentAppConfig);
 
-        if(failureMessage != null) {
-            throw new ComponentDefinitionException(failureMessage);
-        }
-
-        // The following code is a bit odd so requires some explanation. A little background... If a bean
-        // is a prototype then the corresponding Recipe create method does not register the bean as created
-        // with the BlueprintRepository and thus the destroy method isn't called on container destroy. We
-        // rely on destroy being called to close our DTCL registration. Unfortunately the default setting
-        // for the prototype flag in AbstractRecipe is true and the DependentComponentFactoryRecipe, which
-        // is created for DependentComponentFactoryMetadata types of which we are one, doesn't have a way for
-        // us to indicate the prototype state via our metadata.
-        //
-        // The ExecutionContext is actually backed by the BlueprintRepository so we access it here to call
-        // the removePartialObject method which removes any partially created instance, which does not apply
-        // in our case, and also has the side effect of registering our bean as created as if it wasn't a
-        // prototype. We also obtain our corresponding Recipe instance and clear the prototype flag. This
-        // doesn't look to be necessary but is done so for completeness. Better late than never. Note we have
-        // to do this here rather than in startTracking b/c the ExecutionContext is not available yet at that
-        // point.
-        //
-        // Now the stopTracking method is called on container destroy but startTracking/stopTracking can also
-        // be called multiple times during the container creation process for Satisfiable recipes as bean
-        // processors may modify the metadata which could affect how dependencies are satisfied. An example of
-        // this is with service references where the OSGi filter metadata can be modified by bean processors
-        // after the initial service dependency is satisfied. However we don't have any metadata that could
-        // be modified by a bean processor and we don't want to register/unregister our DTCL multiple times
-        // so we only process startTracking once and close the DTCL registration once on container destroy.
-        ExecutionContext executionContext = ExecutionContext.Holder.getContext();
-        executionContext.removePartialObject(id);
-
-        Recipe myRecipe = executionContext.getRecipe(id);
-        if(myRecipe instanceof AbstractRecipe) {
-            LOG.debug("{}: setPrototype to false", id);
-            ((AbstractRecipe)myRecipe).setPrototype(false);
-        } else {
-            LOG.warn("{}: Recipe is null or not an AbstractRecipe", id);
-        }
+        super.onCreate();
 
         return currentAppConfig;
     }
 
     @Override
-    public void startTracking(final SatisfactionCallback satisfactionCallback) {
-        if(!started.compareAndSet(false, true)) {
-            return;
-        }
-
-        LOG.debug("{}: In startTracking", id);
-
-        this.satisfactionCallback = satisfactionCallback;
-
+    protected void startTracking() {
         // First get the BindingNormalizedNodeSerializer OSGi service. This will be used to create a default
         // instance of the app config binding class, if necessary.
 
-        bindingCodecServiceRecipe = new StaticServiceReferenceRecipe(id + "-binding-codec", container,
-                BindingNormalizedNodeSerializer.class.getName());
-        dependendencyDesc = bindingCodecServiceRecipe.getOsgiFilter();
-
-        bindingCodecServiceRecipe.startTracking(service -> {
+        retrieveService("binding-codec", BindingNormalizedNodeSerializer.class, service -> {
             bindingSerializer = (BindingNormalizedNodeSerializer)service;
             retrieveDataBrokerService();
         });
     }
 
     private void retrieveDataBrokerService() {
-        LOG.debug("{}: In retrieveDataBrokerService", id);
+        LOG.debug("{}: In retrieveDataBrokerService", logName());
 
         // Get the binding DataBroker OSGi service.
 
-        dataBrokerServiceRecipe = new StaticServiceReferenceRecipe(id + "-data-broker", container,
-                DataBroker.class.getName());
-        dependendencyDesc = dataBrokerServiceRecipe.getOsgiFilter();
-
-        dataBrokerServiceRecipe.startTracking(service -> retrieveInitialAppConfig((DataBroker)service));
-
+        retrieveService("data-broker", DataBroker.class, service -> retrieveInitialAppConfig((DataBroker)service));
     }
 
     private void retrieveInitialAppConfig(DataBroker dataBroker) {
-        LOG.debug("{}: Got DataBroker instance - reading app config {}", id, bindingContext.appConfigPath);
+        LOG.debug("{}: Got DataBroker instance - reading app config {}", logName(), bindingContext.appConfigPath);
 
-        dependendencyDesc = "Initial app config " + bindingContext.appConfigBindingClass.getSimpleName();
+        setDependendencyDesc("Initial app config " + bindingContext.appConfigBindingClass.getSimpleName());
 
         // We register a DTCL to get updates and also read the app config data from the data store. If
         // the app config data is present then both the read and initial DTCN update will return it. If the
@@ -280,7 +193,7 @@ public class DataStoreAppConfigMetadata implements DependentComponentFactoryMeta
         Futures.addCallback(future, new FutureCallback<Optional<DataObject>>() {
             @Override
             public void onSuccess(Optional<DataObject> possibleAppConfig) {
-                LOG.debug("{}: Read of app config {} succeeded: {}", id, bindingContext.appConfigBindingClass.getName(),
+                LOG.debug("{}: Read of app config {} succeeded: {}", logName(), bindingContext.appConfigBindingClass.getName(),
                         possibleAppConfig);
 
                 readOnlyTx.close();
@@ -293,7 +206,7 @@ public class DataStoreAppConfigMetadata implements DependentComponentFactoryMeta
 
                 // We may have gotten the app config via the data tree change listener so only retry if not.
                 if(readingInitialAppConfig.get()) {
-                    LOG.warn("{}: Read of app config {} failed - retrying", id,
+                    LOG.warn("{}: Read of app config {} failed - retrying", logName(),
                             bindingContext.appConfigBindingClass.getName(), t);
 
                     readInitialAppConfig(dataBroker);
@@ -307,7 +220,7 @@ public class DataStoreAppConfigMetadata implements DependentComponentFactoryMeta
             DataObjectModification<DataObject> changeRoot = change.getRootNode();
             ModificationType type = changeRoot.getModificationType();
 
-            LOG.debug("{}: onAppConfigChanged: {}, {}", id, type, change.getRootPath());
+            LOG.debug("{}: onAppConfigChanged: {}, {}", logName(), type, change.getRootPath());
 
             if(type == ModificationType.SUBTREE_MODIFIED || type == ModificationType.WRITE) {
                 DataObject newAppConfig = changeRoot.getDataAfter();
@@ -340,12 +253,12 @@ public class DataStoreAppConfigMetadata implements DependentComponentFactoryMeta
                 localAppConfig = createDefaultInstance();
             }
 
-            LOG.debug("{}: Setting currentAppConfig instance: {}", id, localAppConfig);
+            LOG.debug("{}: Setting currentAppConfig instance: {}", logName(), localAppConfig);
 
             // Now publish the app config instance to the volatile field and notify the callback to let the
             // container know our dependency is now satisfied.
             currentAppConfig = localAppConfig;
-            satisfactionCallback.notifyChanged();
+            setSatisfied();
         }
 
         return result;
@@ -354,11 +267,11 @@ public class DataStoreAppConfigMetadata implements DependentComponentFactoryMeta
     private DataObject createDefaultInstance() {
         YangInstanceIdentifier yangPath = bindingSerializer.toYangInstanceIdentifier(bindingContext.appConfigPath);
 
-        LOG.debug("{}: Creating app config instance from path {}, Qname: {}", id, yangPath, bindingContext.bindingQName);
+        LOG.debug("{}: Creating app config instance from path {}, Qname: {}", logName(), yangPath, bindingContext.bindingQName);
 
         SchemaService schemaService = getOSGiService(SchemaService.class);
         if(schemaService == null) {
-            failureMessage = String.format("%s: Could not obtain the SchemaService OSGi service", id);
+            setFailureMessage(String.format("%s: Could not obtain the SchemaService OSGi service", logName()));
             return null;
         }
 
@@ -367,20 +280,20 @@ public class DataStoreAppConfigMetadata implements DependentComponentFactoryMeta
         Module module = schemaContext.findModuleByNamespaceAndRevision(bindingContext.bindingQName.getNamespace(),
                 bindingContext.bindingQName.getRevision());
         if(module == null) {
-            failureMessage = String.format("%s: Could not obtain the module schema for namespace %s, revision %s",
-                    id, bindingContext.bindingQName.getNamespace(), bindingContext.bindingQName.getRevision());
+            setFailureMessage(String.format("%s: Could not obtain the module schema for namespace %s, revision %s",
+                    logName(), bindingContext.bindingQName.getNamespace(), bindingContext.bindingQName.getRevision()));
             return null;
         }
 
         DataSchemaNode dataSchema = module.getDataChildByName(bindingContext.bindingQName);
         if(dataSchema == null) {
-            failureMessage = String.format("%s: Could not obtain the schema for %s", id, bindingContext.bindingQName);
+            setFailureMessage(String.format("%s: Could not obtain the schema for %s", logName(), bindingContext.bindingQName));
             return null;
         }
 
         if(!bindingContext.schemaType.isAssignableFrom(dataSchema.getClass())) {
-            failureMessage = String.format("%s: Expected schema type %s for %s but actual type is %s", id,
-                    bindingContext.schemaType, bindingContext.bindingQName, dataSchema.getClass());
+            setFailureMessage(String.format("%s: Expected schema type %s for %s but actual type is %s", logName(),
+                    bindingContext.schemaType, bindingContext.bindingQName, dataSchema.getClass()));
             return null;
         }
 
@@ -393,8 +306,8 @@ public class DataStoreAppConfigMetadata implements DependentComponentFactoryMeta
 
         if(appConfig == null) {
             // This shouldn't happen but need to handle it in case...
-            failureMessage = String.format("%s: Could not create instance for app config binding %s",
-                    id, bindingContext.appConfigBindingClass);
+            setFailureMessage(String.format("%s: Could not create instance for app config binding %s",
+                    logName(), bindingContext.appConfigBindingClass));
         }
 
         return appConfig;
@@ -407,18 +320,18 @@ public class DataStoreAppConfigMetadata implements DependentComponentFactoryMeta
             return null;
         }
 
-        LOG.debug("{}: parsePossibleDefaultAppConfigElement for {}", id, bindingContext.bindingQName);
+        LOG.debug("{}: parsePossibleDefaultAppConfigElement for {}", logName(), bindingContext.bindingQName);
 
         DomToNormalizedNodeParserFactory parserFactory = DomToNormalizedNodeParserFactory.getInstance(
                 XmlUtils.DEFAULT_XML_CODEC_PROVIDER, schemaContext);
 
 
-        LOG.debug("{}: Got app config schema: {}", id, dataSchema);
+        LOG.debug("{}: Got app config schema: {}", logName(), dataSchema);
 
         NormalizedNode<?, ?> dataNode = bindingContext.parseDataElement(defaultAppConfigElement, dataSchema,
                 parserFactory);
 
-        LOG.debug("{}: Parsed data node: {}", id, dataNode);
+        LOG.debug("{}: Parsed data node: {}", logName(), dataNode);
 
         return dataNode;
     }
@@ -426,7 +339,7 @@ public class DataStoreAppConfigMetadata implements DependentComponentFactoryMeta
     private void restartContainer() {
         BlueprintContainerRestartService restartService = getOSGiService(BlueprintContainerRestartService.class);
         if(restartService != null) {
-            restartService.restartContainerAndDependents(container.getBundleContext().getBundle());
+            restartService.restartContainerAndDependents(container().getBundleContext().getBundle());
         }
     }
 
@@ -435,63 +348,36 @@ public class DataStoreAppConfigMetadata implements DependentComponentFactoryMeta
     private <T> T getOSGiService(Class<T> serviceInterface) {
         try {
             ServiceReference<T> serviceReference =
-                    container.getBundleContext().getServiceReference(serviceInterface);
+                    container().getBundleContext().getServiceReference(serviceInterface);
             if(serviceReference == null) {
-                LOG.warn("{}: {} reference not found", id, serviceInterface.getSimpleName());
+                LOG.warn("{}: {} reference not found", logName(), serviceInterface.getSimpleName());
                 return null;
             }
 
-            T service = (T)container.getService(serviceReference);
+            T service = (T)container().getService(serviceReference);
             if(service == null) {
                 // This could happen on shutdown if the service was already unregistered so we log as debug.
-                LOG.debug("{}: {} was not found", id, serviceInterface.getSimpleName());
+                LOG.debug("{}: {} was not found", logName(), serviceInterface.getSimpleName());
             }
 
             return service;
         } catch(IllegalStateException e) {
             // This is thrown if the BundleContext is no longer valid which is possible on shutdown so we
             // log as debug.
-            LOG.debug("{}: Error obtaining {}", id, serviceInterface.getSimpleName(), e);
+            LOG.debug("{}: Error obtaining {}", logName(), serviceInterface.getSimpleName(), e);
         }
 
         return null;
     }
 
     @Override
-    public void stopTracking() {
-        LOG.debug("{}: In stopTracking", id);
-
-        stopServiceRecipes();
-    }
-
-    @Override
     public void destroy(Object instance) {
-        LOG.debug("{}: In destroy", id);
+        super.destroy(instance);
 
         if(appConfigChangeListenerReg != null) {
             appConfigChangeListenerReg.close();
             appConfigChangeListenerReg = null;
         }
-
-        stopServiceRecipes();
-    }
-
-    private void stopServiceRecipes() {
-        stopServiceRecipe(dataBrokerServiceRecipe);
-        stopServiceRecipe(bindingCodecServiceRecipe);
-        dataBrokerServiceRecipe = null;
-        bindingCodecServiceRecipe = null;
-    }
-
-    private void stopServiceRecipe(StaticServiceReferenceRecipe recipe) {
-        if(recipe != null) {
-            recipe.stop();
-        }
-    }
-
-    @Override
-    public String getDependencyDescriptor() {
-        return dependendencyDesc;
     }
 
     /**
