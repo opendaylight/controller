@@ -102,7 +102,7 @@ public class SequencedQueueEntryTest {
     @Mock
     private RequestException mockCause;
     @Mock
-    private RequestCallback<WritableIdentifier> mockCallback;
+    private RequestCallback mockCallback;
     @Mock
     private ClientActorBehavior mockBehavior;
 
@@ -114,7 +114,7 @@ public class SequencedQueueEntryTest {
     private static ActorSystem actorSystem;
     private TestProbe mockActor;
 
-    private SequencedQueueEntry<?> entry;
+    private SequencedQueueEntry entry;
 
     @BeforeClass
     public static void setupClass() {
@@ -140,7 +140,7 @@ public class SequencedQueueEntryTest {
         mockRequest = new MockRequest(mockIdentifier, ThreadLocalRandom.current().nextLong(), mockReplyTo);
         mockResponse = mockRequest.toRequestFailure(mockCause);
 
-        entry = new SequencedQueueEntry<>(mockRequest, mockCallback, ticker.read());
+        entry = new SequencedQueueEntry(mockRequest, mockCallback, ticker.read());
     }
 
     @After

@@ -107,7 +107,7 @@ public class SequencedQueueTest {
     @Mock
     private RequestException mockCause;
     @Mock
-    private RequestCallback<WritableIdentifier> mockCallback;
+    private RequestCallback mockCallback;
     @Mock
     private ClientActorBehavior mockBehavior;
 
