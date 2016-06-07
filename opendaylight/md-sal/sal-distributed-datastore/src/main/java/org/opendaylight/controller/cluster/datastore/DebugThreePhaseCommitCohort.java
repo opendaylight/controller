@@ -32,22 +32,22 @@ class DebugThreePhaseCommitCohort extends AbstractThreePhaseCommitCohort<Object>
     private final TransactionIdentifier transactionId;
     private Logger log = LOG;
 
-    DebugThreePhaseCommitCohort(TransactionIdentifier transactionId, AbstractThreePhaseCommitCohort<?> delegate,
-            Throwable debugContext) {
+    DebugThreePhaseCommitCohort(final TransactionIdentifier transactionId, final AbstractThreePhaseCommitCohort<?> delegate,
+            final Throwable debugContext) {
         this.delegate = Preconditions.checkNotNull(delegate);
         this.debugContext = Preconditions.checkNotNull(debugContext);
         this.transactionId = Preconditions.checkNotNull(transactionId);
     }
 
-    private <V> ListenableFuture<V> addFutureCallback(ListenableFuture<V> future) {
+    private <V> ListenableFuture<V> addFutureCallback(final ListenableFuture<V> future) {
         Futures.addCallback(future, new FutureCallback<V>() {
             @Override
-            public void onSuccess(V result) {
+            public void onSuccess(final V result) {
                 // no-op
             }
 
             @Override
-            public void onFailure(Throwable t) {
+            public void onFailure(final Throwable t) {
                 log.warn("Transaction {} failed with error \"{}\" - was allocated in the following context",
                         transactionId, t, debugContext);
             }
@@ -78,12 +78,12 @@ class DebugThreePhaseCommitCohort extends AbstractThreePhaseCommitCohort<Object>
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
-    List<Future<Object>> getCohortFutures() {
+    protected List<Future<Object>> getCohortFutures() {
         return ((AbstractThreePhaseCommitCohort)delegate).getCohortFutures();
     }
 
     @VisibleForTesting
-    void setLogger(Logger log) {
+    void setLogger(final Logger log) {
         this.log = log;
     }
 }

@@ -7,8 +7,8 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.ListenableFuture;
-import java.util.Collections;
 import java.util.List;
 import scala.concurrent.Future;
 
@@ -44,7 +44,7 @@ final class NoOpDOMStoreThreePhaseCommitCohort extends AbstractThreePhaseCommitC
     }
 
     @Override
-    List<Future<Object>> getCohortFutures() {
-        return Collections.emptyList();
+    protected List<Future<Object>> getCohortFutures() {
+        return ImmutableList.of();
     }
 }
