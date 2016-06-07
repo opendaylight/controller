@@ -13,19 +13,19 @@ import java.io.ObjectOutput;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 
 /**
- * Externalizable proxy for use with {@link TransactionCanCommitSuccess}. It implements the initial (Boron)
+ * Externalizable proxy for use with {@link TransactionAbortSuccess}. It implements the initial (Boron)
  * serialization format.
  *
  * @author Robert Varga
  */
-final class TransactionCanCommitSuccessProxyV1 extends AbstractTransactionSuccessProxy<TransactionCanCommitSuccess> {
+final class TransactionAbortSuccessProxyV1 extends AbstractTransactionSuccessProxy<TransactionAbortSuccess> {
     private static final long serialVersionUID = 1L;
 
-    public TransactionCanCommitSuccessProxyV1() {
+    public TransactionAbortSuccessProxyV1() {
         // For Externalizable
     }
 
-    TransactionCanCommitSuccessProxyV1(final TransactionCanCommitSuccess success) {
+    TransactionAbortSuccessProxyV1(final TransactionAbortSuccess success) {
         super(success);
     }
 
@@ -40,7 +40,8 @@ final class TransactionCanCommitSuccessProxyV1 extends AbstractTransactionSucces
     }
 
     @Override
-    protected TransactionCanCommitSuccess createSuccess(final TransactionIdentifier target) {
-        return new TransactionCanCommitSuccess(target);
+    protected TransactionAbortSuccess createSuccess(final TransactionIdentifier target, final long sequence,
+            final long retry) {
+        return new TransactionAbortSuccess(target, sequence, retry);
     }
 }
