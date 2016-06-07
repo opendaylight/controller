@@ -16,20 +16,20 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
  *
  * @author Robert Varga
  */
-public final class TransactionCanCommitSuccess extends TransactionSuccess<TransactionCanCommitSuccess> {
+public final class TransactionAbortSuccess extends TransactionSuccess<TransactionAbortSuccess> {
     private static final long serialVersionUID = 1L;
 
-    public TransactionCanCommitSuccess(final TransactionIdentifier identifier) {
+    public TransactionAbortSuccess(final TransactionIdentifier identifier) {
         super(identifier);
     }
 
     @Override
-    protected AbstractTransactionSuccessProxy<TransactionCanCommitSuccess> externalizableProxy(final ABIVersion version) {
-        return new TransactionCanCommitSuccessProxyV1(this);
+    protected AbstractTransactionSuccessProxy<TransactionAbortSuccess> externalizableProxy(final ABIVersion version) {
+        return new TransactionAbortSuccessProxyV1(this);
     }
 
     @Override
-    protected TransactionCanCommitSuccess cloneAsVersion(final ABIVersion version) {
+    protected TransactionAbortSuccess cloneAsVersion(final ABIVersion version) {
         return this;
     }
 }
