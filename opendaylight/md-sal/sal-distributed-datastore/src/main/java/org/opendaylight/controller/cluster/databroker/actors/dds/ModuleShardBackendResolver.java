@@ -11,16 +11,20 @@ import akka.util.Timeout;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
+import com.google.common.collect.ImmutableBiMap.Builder;
 import com.google.common.primitives.UnsignedLong;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.TimeUnit;
+import javax.annotation.concurrent.GuardedBy;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 import org.opendaylight.controller.cluster.datastore.actors.client.BackendInfo;
 import org.opendaylight.controller.cluster.datastore.actors.client.BackendInfoResolver;
 import org.opendaylight.controller.cluster.datastore.messages.PrimaryShardInfo;
+import org.opendaylight.controller.cluster.datastore.shardstrategy.DefaultShardStrategy;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.compat.java8.FutureConverters;
@@ -33,7 +37,9 @@ import scala.compat.java8.FutureConverters;
  * @author Robert Varga
  */
 final class ModuleShardBackendResolver extends BackendInfoResolver<ShardBackendInfo> {
+    private static final CompletionStage<ShardBackendInfo> NULL_STAGE = CompletableFuture.completedFuture(null);
     private static final Logger LOG = LoggerFactory.getLogger(ModuleShardBackendResolver.class);
+
     /**
      * Fall-over-dead timeout. If we do not make progress in this long, just fall over and propagate the failure.
      * All users are expected to fail, possibly attempting to recover by restarting. It is fair to remain
@@ -44,7 +50,10 @@ final class ModuleShardBackendResolver extends BackendInfoResolver<ShardBackendI
 
     private final ActorContext actorContext;
 
-    private volatile BiMap<String, Long> shards = ImmutableBiMap.of();
+    @GuardedBy("this")
+    private long nextShard = 1;
+
+    private volatile BiMap<String, Long> shards = ImmutableBiMap.of(DefaultShardStrategy.DEFAULT_SHARD, 0L);
 
     // FIXME: we really need just ActorContext.findPrimaryShardAsync()
     ModuleShardBackendResolver(final ActorContext actorContext) {
@@ -63,12 +72,32 @@ final class ModuleShardBackendResolver extends BackendInfoResolver<ShardBackendI
         actorContext.getPrimaryShardInfoCache().remove(((ShardBackendInfo)result).getShardName());
     }
 
+    Long resolveShardForPath(final YangInstanceIdentifier path) {
+        final String shardName = actorContext.getShardStrategyFactory().getStrategy(path).findShard(path);
+        Long cookie = shards.get(shardName);
+        if (cookie == null) {
+            synchronized (this) {
+                cookie = shards.get(shardName);
+                if (cookie == null) {
+                    cookie = nextShard++;
+
+                    Builder<String, Long> b = ImmutableBiMap.builder();
+                    b.putAll(shards);
+                    b.put(shardName, cookie);
+                    shards = b.build();
+                }
+            }
+        }
+
+        return cookie;
+    }
+
     @Override
     protected CompletionStage<ShardBackendInfo> resolveBackendInfo(final Long cookie) {
         final String shardName = shards.inverse().get(cookie);
         if (shardName == null) {
             LOG.warn("Failing request for non-existent cookie {}", cookie);
-            return CompletableFuture.completedFuture(null);
+            return NULL_STAGE;
         }
 
         LOG.debug("Resolving cookie {} to shard {}", cookie, shardName);
