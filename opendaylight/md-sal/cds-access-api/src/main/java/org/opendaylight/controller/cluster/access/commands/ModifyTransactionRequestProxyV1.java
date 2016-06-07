@@ -20,6 +20,7 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeDataInput;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeDataOutput;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeInputOutput;
+import org.opendaylight.yangtools.concepts.WritableObjects;
 
 /**
  * Externalizable proxy for use with {@link ExistsTransactionRequest}. It implements the initial (Boron) serialization
@@ -31,6 +32,7 @@ final class ModifyTransactionRequestProxyV1 extends AbstractTransactionRequestPr
     private static final long serialVersionUID = 1L;
     private List<TransactionModification> modifications;
     private Optional<PersistenceProtocol> protocol;
+    private long skipped;
 
     public ModifyTransactionRequestProxyV1() {
         // For Externalizable
@@ -40,8 +42,8 @@ final class ModifyTransactionRequestProxyV1 extends AbstractTransactionRequestPr
         super(request);
         this.modifications = Preconditions.checkNotNull(request.getModifications());
         this.protocol = request.getPersistenceProtocol();
+        this.skipped = request.getSkippedTransactions();
     }
-
 
     @Override
     public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
@@ -59,6 +61,8 @@ final class ModifyTransactionRequestProxyV1 extends AbstractTransactionRequestPr
         } else {
             modifications = ImmutableList.of();
         }
+
+        skipped = WritableObjects.readLong(in);
     }
 
     @Override
@@ -74,11 +78,14 @@ final class ModifyTransactionRequestProxyV1 extends AbstractTransactionRequestPr
                 }
             }
         }
+
+        WritableObjects.writeLong(out, skipped);
     }
 
     @Override
     protected ModifyTransactionRequest createRequest(final TransactionIdentifier target, final long sequence,
             final long retry, final ActorRef replyTo) {
-        return new ModifyTransactionRequest(target, sequence, retry, replyTo, modifications, protocol.orElse(null));
+        return new ModifyTransactionRequest(target, sequence, retry, skipped, replyTo, modifications,
+            protocol.orElse(null));
     }
 }

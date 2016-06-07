@@ -32,6 +32,7 @@ public final class ModifyTransactionRequestBuilder implements Builder<ModifyTran
     private final ActorRef replyTo;
     private PersistenceProtocol protocol = null;
     private long sequence;
+    private long skipped;
 
     public ModifyTransactionRequestBuilder(final TransactionIdentifier identifier, final ActorRef replyTo) {
         this.identifier = Preconditions.checkNotNull(identifier);
@@ -70,17 +71,23 @@ public final class ModifyTransactionRequestBuilder implements Builder<ModifyTran
         protocol = coordinated ? PersistenceProtocol.THREE_PHASE : PersistenceProtocol.SIMPLE;
     }
 
+    public void setSkippedIdentifiers(final long skipped) {
+        checkFinished();
+        this.skipped = skipped;
+    }
+
     public int size() {
         return modifications.size();
     }
 
     @Override
     public ModifyTransactionRequest build() {
-        final ModifyTransactionRequest ret = new ModifyTransactionRequest(identifier, sequence, 0, replyTo,
+        final ModifyTransactionRequest ret = new ModifyTransactionRequest(identifier, sequence, 0, skipped, replyTo,
             modifications, protocol);
         modifications.clear();
         protocol = null;
         sequence = 0;
+        skipped = 0;
         return ret;
     }
 

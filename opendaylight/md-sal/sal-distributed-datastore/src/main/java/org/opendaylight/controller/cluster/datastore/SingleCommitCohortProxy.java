@@ -36,8 +36,8 @@ class SingleCommitCohortProxy extends AbstractThreePhaseCommitCohort<Object> {
     private volatile DOMStoreThreePhaseCommitCohort delegateCohort = NoOpDOMStoreThreePhaseCommitCohort.INSTANCE;
     private final OperationCallback.Reference operationCallbackRef;
 
-    SingleCommitCohortProxy(ActorContext actorContext, Future<Object> cohortFuture, TransactionIdentifier transactionId,
-            OperationCallback.Reference operationCallbackRef) {
+    SingleCommitCohortProxy(final ActorContext actorContext, final Future<Object> cohortFuture, final TransactionIdentifier transactionId,
+            final OperationCallback.Reference operationCallbackRef) {
         this.actorContext = actorContext;
         this.cohortFuture = cohortFuture;
         this.transactionId = Preconditions.checkNotNull(transactionId);
@@ -52,7 +52,7 @@ class SingleCommitCohortProxy extends AbstractThreePhaseCommitCohort<Object> {
 
         cohortFuture.onComplete(new OnComplete<Object>() {
             @Override
-            public void onComplete(Throwable failure, Object cohortResponse) {
+            public void onComplete(final Throwable failure, final Object cohortResponse) {
                 if(failure != null) {
                     operationCallbackRef.get().failure();
                     returnFuture.setException(failure);
@@ -91,7 +91,7 @@ class SingleCommitCohortProxy extends AbstractThreePhaseCommitCohort<Object> {
     }
 
     @Override
-    List<Future<Object>> getCohortFutures() {
+    protected List<Future<Object>> getCohortFutures() {
         return Arrays.asList(cohortFuture);
     }
 }

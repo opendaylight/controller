@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.access.commands;
 import akka.actor.ActorRef;
 import com.google.common.annotations.Beta;
 import com.google.common.base.MoreObjects.ToStringHelper;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
 import java.util.Optional;
@@ -27,18 +28,29 @@ public final class ModifyTransactionRequest extends TransactionRequest<ModifyTra
     private static final long serialVersionUID = 1L;
     private final List<TransactionModification> modifications;
     private final PersistenceProtocol protocol;
+    private final long skipped;
 
     private ModifyTransactionRequest(final ModifyTransactionRequest request, final long retry) {
         super(request, retry);
         this.modifications = request.modifications;
         this.protocol = request.protocol;
+        this.skipped = request.skipped;
     }
 
     ModifyTransactionRequest(final TransactionIdentifier target, final long sequence, final long retry,
-        final ActorRef replyTo, final List<TransactionModification> modifications, final PersistenceProtocol protocol) {
+        final long skipped, final ActorRef replyTo, final List<TransactionModification> modifications,
+        final PersistenceProtocol protocol) {
         super(target, sequence, retry, replyTo);
         this.modifications = ImmutableList.copyOf(modifications);
         this.protocol = protocol;
+
+        Preconditions.checkArgument(skipped >= 0);
+        Preconditions.checkState(sequence == 0, "Skipped transactions can be indicated in the initial message");
+        this.skipped = skipped;
+    }
+
+    public long getSkippedTransactions() {
+        return skipped;
     }
 
     public Optional<PersistenceProtocol> getPersistenceProtocol() {
