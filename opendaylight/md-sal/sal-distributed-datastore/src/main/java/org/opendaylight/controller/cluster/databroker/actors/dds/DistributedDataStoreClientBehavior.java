@@ -9,9 +9,16 @@ package org.opendaylight.controller.cluster.databroker.actors.dds;
 
 import akka.actor.ActorRef;
 import akka.actor.Status;
+import com.google.common.base.Verify;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import java.util.function.Consumer;
+import org.opendaylight.controller.cluster.access.commands.TransactionRequest;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
+import org.opendaylight.controller.cluster.access.concepts.Response;
+import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.actors.client.ClientActorBehavior;
 import org.opendaylight.controller.cluster.datastore.actors.client.ClientActorContext;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
@@ -47,12 +54,17 @@ import org.slf4j.LoggerFactory;
 final class DistributedDataStoreClientBehavior extends ClientActorBehavior implements DistributedDataStoreClient {
     private static final Logger LOG = LoggerFactory.getLogger(DistributedDataStoreClientBehavior.class);
 
+    private final Map<TransactionIdentifier, ClientSingleTransaction> transactions = new HashMap<>();
+    private final Map<LocalHistoryIdentifier, ClientLocalHistory> histories = new HashMap<>();
     private final ModuleShardBackendResolver resolver;
-    private long nextHistoryId;
+    private final SingleClientHistory singleHistory;
+    private long nextHistoryId = 1;
+    private long nextTransactionId = 0;
 
     DistributedDataStoreClientBehavior(final ClientActorContext context, final ActorContext ctx) {
         super(context);
         resolver = new ModuleShardBackendResolver(ctx);
+        singleHistory = new SingleClientHistory(this, new LocalHistoryIdentifier(getIdentifier(), 0));
     }
 
     //
@@ -69,20 +81,32 @@ final class DistributedDataStoreClientBehavior extends ClientActorBehavior imple
     private ClientActorBehavior createLocalHistory(final ClientActorBehavior currentBehavior,
             final CompletableFuture<ClientLocalHistory> future) {
         final LocalHistoryIdentifier historyId = new LocalHistoryIdentifier(getIdentifier(), nextHistoryId++);
-        LOG.debug("{}: creating a new local history {} for {}", persistenceId(), historyId, future);
+        final ClientLocalHistory history = new ClientLocalHistory(this, historyId);
+        LOG.debug("{}: creating a new local history {}", persistenceId(), history);
 
-        // FIXME: initiate backend instantiation
-        future.completeExceptionally(new UnsupportedOperationException("Not implemented yet"));
+        Verify.verify(histories.put(historyId, history) == null);
+        future.complete(history);
+        return this;
+    }
+
+    private ClientActorBehavior createTransaction(final ClientActorBehavior currentBehavior,
+            final CompletableFuture<ClientSingleTransaction> future) {
+        final TransactionIdentifier txId = new TransactionIdentifier(singleHistory.getIdentifier(), nextTransactionId++);
+        final ClientSingleTransaction tx = new ClientSingleTransaction(this, singleHistory, txId);
+        LOG.debug("{}: creating a new transaction {}", persistenceId(), tx);
+
+        Verify.verify(transactions.put(txId, tx) == null);
+        future.complete(tx);
         return currentBehavior;
     }
 
-    private ClientActorBehavior shutdown(final ClientActorBehavior currentBehavior) {
+    private DistributedDataStoreClientBehavior shutdown(final ClientActorBehavior currentBehavior) {
         // FIXME: Add shutdown procedures here
         return null;
     }
 
     @Override
-    protected ClientActorBehavior onCommand(final Object command) {
+    protected DistributedDataStoreClientBehavior onCommand(final Object command) {
         if (command instanceof GetClientRequest) {
             ((GetClientRequest) command).getReplyTo().tell(new Status.Success(this), ActorRef.noSender());
         } else {
@@ -106,6 +130,13 @@ final class DistributedDataStoreClientBehavior extends ClientActorBehavior imple
     }
 
     @Override
+    public CompletionStage<ClientSingleTransaction> createTransaction() {
+        final CompletableFuture<ClientSingleTransaction> future = new CompletableFuture<>();
+        context().executeInActor(cb -> createTransaction(cb, future));
+        return future;
+    }
+
+    @Override
     public void close() {
         context().executeInActor(this::shutdown);
     }
@@ -113,5 +144,13 @@ final class DistributedDataStoreClientBehavior extends ClientActorBehavior imple
     @Override
     protected ModuleShardBackendResolver resolver() {
         return resolver;
+    }
+
+    <T extends TransactionRequest<T>> void sendRequest(final T request,
+            final Consumer<Response<TransactionIdentifier, ?>> completer) {
+        sendRequest(request, response -> {
+            completer.accept(response);
+            return this;
+        });
     }
 }
