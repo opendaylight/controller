@@ -22,5 +22,5 @@ public abstract class AbstractThreePhaseCommitCohort<T> implements DOMStoreThree
     protected static final ListenableFuture<Void> IMMEDIATE_VOID_SUCCESS = Futures.immediateFuture(null);
     protected static final ListenableFuture<Boolean> IMMEDIATE_BOOLEAN_SUCCESS = Futures.immediateFuture(Boolean.TRUE);
 
-    abstract List<Future<T>> getCohortFutures();
+    protected abstract List<Future<T>> getCohortFutures();
 }
