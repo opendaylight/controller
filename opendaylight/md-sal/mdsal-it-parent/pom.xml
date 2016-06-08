@@ -154,7 +154,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
            <configuration>
             <outputDirectory>${project.build.directory}/test-classes</outputDirectory>
             <groupId>org.opendaylight.controller</groupId>
-            <includeArtifactIds>config-it-base,mdsal-it-base</includeArtifactIds>
+            <includeArtifactIds>karaf-it-base,config-it-base,mdsal-it-base</includeArtifactIds>
             <excludes>META-INF\/**</excludes>
             <ignorePermissions>false</ignorePermissions>
            </configuration>

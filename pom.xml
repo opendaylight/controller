@@ -16,6 +16,8 @@
 
   <modules>
 
+    <module>opendaylight/karaf/karaf-it-base</module>
+
     <!-- md-sal -->
     <module>opendaylight/md-sal</module>
     <!-- config -->
