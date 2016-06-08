@@ -97,9 +97,11 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <!-- Aries Proxy 1.0.5 contains important bug fixes -->
     <!-- Once we upgrade to a version of Karaf which has at least 1.0.5, this can be removed -->
     <dependency>
-      <groupId>org.apache.aries.proxy</groupId>
-      <artifactId>org.apache.aries.proxy.impl</artifactId>
-      <version>1.0.5</version>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>opendaylight-karaf-features</artifactId>
+      <version>${project.version}</version>
+      <classifier>features</classifier>
+      <type>xml</type>
     </dependency>
   </dependencies>
   <build>
