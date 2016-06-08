@@ -45,7 +45,7 @@
            <configuration>
             <outputDirectory>${project.build.directory}/test-classes</outputDirectory>
             <groupId>org.opendaylight.controller</groupId>
-            <includeArtifactIds>mockito-all,config-it-base,mdsal-it-base</includeArtifactIds>
+            <includeArtifactIds>mockito-all,karaf-it-base,config-it-base,mdsal-it-base</includeArtifactIds>
             <excludes>META-INF\/**</excludes>
             <ignorePermissions>false</ignorePermissions>
            </configuration>

@@ -18,10 +18,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <artifactId>config-it-base</artifactId>
   <packaging>bundle</packaging>
 
-  <properties>
-    <opendaylight.karaf.version>1.7.0-SNAPSHOT</opendaylight.karaf.version>
-  </properties>
-
   <dependencyManagement>
     <dependencies>
       <dependency>
@@ -36,24 +32,16 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <dependencies>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
-      <artifactId>config-util</artifactId>
+      <artifactId>karaf-it-base</artifactId>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
-      <artifactId>opendaylight-karaf-empty</artifactId>
-      <version>${opendaylight.karaf.version}</version>
-      <type>zip</type>
+      <artifactId>config-util</artifactId>
     </dependency>
-
-    <!-- Dependencies for pax exam karaf container -->
     <dependency>
         <groupId>org.ops4j.pax.exam</groupId>
         <artifactId>pax-exam-container-karaf</artifactId>
-        <scope>compile</scope>
-    </dependency>
-    <dependency>
-        <groupId>org.ops4j.pax.exam</groupId>
-        <artifactId>pax-exam-junit4</artifactId>
         <scope>compile</scope>
     </dependency>
     <dependency>
@@ -62,39 +50,9 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
         <scope>compile</scope>
     </dependency>
     <dependency>
-        <groupId>org.ops4j.pax.url</groupId>
-        <artifactId>pax-url-aether</artifactId>
-        <scope>compile</scope>
-    </dependency>
-    <dependency>
-        <groupId>javax.inject</groupId>
-        <artifactId>javax.inject</artifactId>
-        <version>1</version>
-        <scope>compile</scope>
-    </dependency>
-    <dependency>
-        <groupId>org.apache.karaf.features</groupId>
-        <artifactId>org.apache.karaf.features.core</artifactId>
-        <version>${karaf.version}</version>
-        <scope>compile</scope>
-    </dependency>
-    <dependency>
-        <groupId>org.osgi</groupId>
-        <artifactId>org.osgi.core</artifactId>
-        <scope>compile</scope>
-    </dependency>
-    <dependency>
         <groupId>junit</groupId>
         <artifactId>junit</artifactId>
         <scope>compile</scope>
     </dependency>
   </dependencies>
-  <build>
-    <resources>
-      <resource>
-        <directory>src/main/resources</directory>
-        <filtering>true</filtering>
-      </resource>
-    </resources>
-  </build>
 </project>
