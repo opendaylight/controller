@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da5c1566_28ac2aed",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/RpcServiceMetadata.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-06-08T16:02:14Z",
+      "side": 1,
+      "message": "shouldn\u0027t we warn the user the RPC is not available? and call setFailureMessage",
+      "revId": "df0bea4924cd4826b818e8cda577f03f62ef5da9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
