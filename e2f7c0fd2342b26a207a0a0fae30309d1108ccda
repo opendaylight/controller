@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da5c1566_32ff7d36",
+        "filename": "opendaylight/md-sal/samples/clustering-test-app/provider/pom.xml",
+        "patchSetId": 7
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-06-08T12:03:36Z",
+      "side": 1,
+      "message": "I think the whole build section can go away",
+      "range": {
+        "startLine": 13,
+        "startChar": 0,
+        "endLine": 21,
+        "endChar": 12
+      },
+      "revId": "e2f7c0fd2342b26a207a0a0fae30309d1108ccda",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
