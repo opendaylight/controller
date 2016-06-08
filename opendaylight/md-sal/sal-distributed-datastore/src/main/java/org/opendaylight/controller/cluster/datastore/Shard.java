@@ -20,6 +20,7 @@ import com.google.common.base.Preconditions;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nonnull;
 import org.opendaylight.controller.cluster.common.actor.CommonConfig;
@@ -349,7 +350,11 @@ public class Shard extends RaftActor {
         try {
             try {
                 cohortEntry.commit();
-            } catch(IllegalStateException e) {
+            } catch(ExecutionException e) {
+                if(!(e.getCause() instanceof IllegalStateException)) {
+                    throw e;
+                }
+
                 // We may get a "store tree and candidate base differ" IllegalStateException from commit under
                 // certain edge case scenarios so we'll try to re-apply the candidate from scratch as a last
                 // resort. Eg, we're a follower and a tx payload is replicated but the leader goes down before
@@ -358,7 +363,7 @@ public class Shard extends RaftActor {
                 // candidate via applyState prior to the second tx. Since the second tx has already been
                 // pre-committed, when the it gets here to commit it will get an IllegalStateException.
 
-                LOG.debug("{}: commit failed for transaction {} - retrying as foreign candidate", persistenceId(),
+                LOG.warn("{}: commit failed for transaction {} - retrying as foreign candidate", persistenceId(),
                         transactionID, e);
 
                 store.applyForeignCandidate(transactionID, cohortEntry.getCandidate());
