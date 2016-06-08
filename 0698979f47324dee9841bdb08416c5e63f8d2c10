@@ -70,6 +70,30 @@
       "revId": "0698979f47324dee9841bdb08416c5e63f8d2c10",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_4d5ed046",
+        "filename": "karaf/karaf-parent/pom.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 387,
+      "author": {
+        "id": 2046
+      },
+      "writtenOn": "2016-06-08T15:32:17Z",
+      "side": 1,
+      "message": "\u003e \u003cversion\u003e1.7.0-SNAPSHOT\u003c/version\u003e\n\nMy \"con\" is having to scan the whole file when doing cherry-pick between branches (in this case, we may want this Change in stable/beryllium).\nWhat is your \"pro\"?\n\nProperties are usually troublesome because you cannot inherit both from an external parent and project aggregator (where most properties are usually defined). That is why everyone should be using {project}-artifacts pom.\nBut I do not see a downside for properties local to just one pom file.",
+      "parentUuid": "da5c1566_ad684cf6",
+      "range": {
+        "startLine": 387,
+        "startChar": 19,
+        "endLine": 387,
+        "endChar": 42
+      },
+      "revId": "0698979f47324dee9841bdb08416c5e63f8d2c10",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
