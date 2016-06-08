@@ -46,6 +46,30 @@
       "revId": "0698979f47324dee9841bdb08416c5e63f8d2c10",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_ad684cf6",
+        "filename": "karaf/karaf-parent/pom.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 387,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-06-08T15:26:28Z",
+      "side": 1,
+      "message": "I was talking about having this\n\n\u003cversion\u003e1.7.0-SNAPSHOT\u003c/version\u003e\n\nand no property defined. But I\u0027m still wondering if this is a best practice we want to enforce",
+      "parentUuid": "da5c1566_6d90f4ec",
+      "range": {
+        "startLine": 387,
+        "startChar": 19,
+        "endLine": 387,
+        "endChar": 42
+      },
+      "revId": "0698979f47324dee9841bdb08416c5e63f8d2c10",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
