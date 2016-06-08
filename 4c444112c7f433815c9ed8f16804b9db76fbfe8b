@@ -22,6 +22,30 @@
       "revId": "4c444112c7f433815c9ed8f16804b9db76fbfe8b",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_0dacd89f",
+        "filename": "karaf/opendaylight-karaf-resources/src/main/resources/bin/instance",
+        "patchSetId": 3
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-06-08T14:11:45Z",
+      "side": 1,
+      "message": "Thanks, I\u0027ll address this in a new patch set. I\u0027m going to wait for more input before submitting it though",
+      "parentUuid": "da5c1566_cdbae0e0",
+      "range": {
+        "startLine": 19,
+        "startChar": 0,
+        "endLine": 20,
+        "endChar": 24
+      },
+      "revId": "4c444112c7f433815c9ed8f16804b9db76fbfe8b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
