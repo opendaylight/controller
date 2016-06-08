@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "da5c1566_6d7e34b0",
+        "filename": "opendaylight/md-sal/samples/toaster-consumer/pom.xml",
+        "patchSetId": 6
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-06-08T15:32:08Z",
+      "side": 1,
+      "message": "I honestly don\u0027t know. I was confused because I thought this was using config-parent, as it\u0027s not, forget my previous comment.",
+      "parentUuid": "da5c1566_8d76283d",
+      "range": {
+        "startLine": 40,
+        "startChar": 0,
+        "endLine": 47,
+        "endChar": 10
+      },
+      "revId": "3391049d282a23d4ed5b4f92e3af28dfbfd774e9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da5c1566_b2654d47",
         "filename": "opendaylight/md-sal/samples/toaster-consumer/src/main/java/org/opendaylight/controller/sample/kitchen/api/KitchenServiceRuntimeMXBean.java",
         "patchSetId": 6
@@ -119,6 +143,30 @@
       "side": 1,
       "message": "We still need the yang code generator for the toaster app config yang.",
       "parentUuid": "da5c1566_125b5988",
+      "range": {
+        "startLine": 69,
+        "startChar": 0,
+        "endLine": 97,
+        "endChar": 10
+      },
+      "revId": "3391049d282a23d4ed5b4f92e3af28dfbfd774e9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_4d77f0d4",
+        "filename": "opendaylight/md-sal/samples/toaster-provider/pom.xml",
+        "patchSetId": 6
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-06-08T15:32:08Z",
+      "side": 1,
+      "message": "Oh right my bad, this is because of the parent its using. By using a more appropriate parent, this wouldn\u0027t be necessary.\n\nSo my bad. This will be taking care of later.",
+      "parentUuid": "da5c1566_adbb2cc3",
       "range": {
         "startLine": 69,
         "startChar": 0,
