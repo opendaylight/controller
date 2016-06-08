@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da5c1566_d2c72111",
+        "filename": "opendaylight/md-sal/samples/toaster-consumer/src/main/yang/kitchen-service-impl.yang",
+        "patchSetId": 6
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-06-08T12:02:21Z",
+      "side": 0,
+      "message": "shouldn\u0027t this be hold in a yang file? or the API defines in KitchenServiceRuntimeMXBean is enough",
+      "range": {
+        "startLine": 70,
+        "startChar": 0,
+        "endLine": 87,
+        "endChar": 5
+      },
+      "revId": "df0bea4924cd4826b818e8cda577f03f62ef5da9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_f2d6a5c4",
+        "filename": "opendaylight/md-sal/samples/toaster-provider/src/main/yang/toaster-provider-impl.yang",
+        "patchSetId": 6
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-06-08T12:02:21Z",
+      "side": 0,
+      "message": "is there any place where this can be configured now we\u0027re moving to blueprint?",
+      "range": {
+        "startLine": 68,
+        "startChar": 0,
+        "endLine": 70,
+        "endChar": 13
+      },
+      "revId": "df0bea4924cd4826b818e8cda577f03f62ef5da9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_32d81def",
+        "filename": "opendaylight/md-sal/samples/toaster-provider/src/main/yang/toaster-provider-impl.yang",
+        "patchSetId": 6
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-06-08T12:02:21Z",
+      "side": 0,
+      "message": "same as previous RPC definition, shouldn\u0027t it be define in some yang?",
+      "range": {
+        "startLine": 78,
+        "startChar": 0,
+        "endLine": 89,
+        "endChar": 5
+      },
+      "revId": "df0bea4924cd4826b818e8cda577f03f62ef5da9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

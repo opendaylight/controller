@@ -1,0 +1,84 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da5c1566_d260c137",
+        "filename": "opendaylight/md-sal/samples/toaster-consumer/pom.xml",
+        "patchSetId": 6
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-06-08T12:02:21Z",
+      "side": 1,
+      "message": "i think to whole build section can go away",
+      "range": {
+        "startLine": 40,
+        "startChar": 0,
+        "endLine": 47,
+        "endChar": 10
+      },
+      "revId": "3391049d282a23d4ed5b4f92e3af28dfbfd774e9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_b2654d47",
+        "filename": "opendaylight/md-sal/samples/toaster-consumer/src/main/java/org/opendaylight/controller/sample/kitchen/api/KitchenServiceRuntimeMXBean.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-06-08T12:02:21Z",
+      "side": 1,
+      "message": "javadoc would be nice, as this is an API",
+      "revId": "3391049d282a23d4ed5b4f92e3af28dfbfd774e9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_125b5988",
+        "filename": "opendaylight/md-sal/samples/toaster-provider/pom.xml",
+        "patchSetId": 6
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-06-08T12:02:21Z",
+      "side": 1,
+      "message": "I think the whole build section can go away",
+      "range": {
+        "startLine": 69,
+        "startChar": 0,
+        "endLine": 97,
+        "endChar": 10
+      },
+      "revId": "3391049d282a23d4ed5b4f92e3af28dfbfd774e9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_32513d63",
+        "filename": "opendaylight/md-sal/samples/toaster-provider/src/main/java/org/opendaylight/controller/sample/toaster/provider/ToasterProviderRuntimeMXBean.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-06-08T12:02:21Z",
+      "side": 1,
+      "message": "would be nice to have some javadoc",
+      "revId": "3391049d282a23d4ed5b4f92e3af28dfbfd774e9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
