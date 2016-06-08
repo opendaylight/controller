@@ -264,8 +264,8 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                 final PeerInfo peerInfo = context.getPeerInfo(info.getId());
                 if(info.getMatchIndex() >= N && (peerInfo != null && peerInfo.isVoting())) {
                     replicatedCount++;
-                } else if(LOG.isDebugEnabled()) {
-                    LOG.debug("{}: Not counting follower {} - matchIndex: {}, {}", logName(), info.getId(),
+                } else if(LOG.isTraceEnabled()) {
+                    LOG.trace("{}: Not counting follower {} - matchIndex: {}, {}", logName(), info.getId(),
                             info.getMatchIndex(), peerInfo);
                 }
             }
@@ -295,7 +295,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                             logName(), N, replicatedLogEntry.getIndex(), replicatedLogEntry.getTerm(), currentTerm());
                 }
             } else {
-                LOG.trace("{}: minReplicationCount not reached - breaking", logName());
+                LOG.trace("{}: minReplicationCount not reached, actual {} - breaking", logName(), replicatedCount);
                 break;
             }
         }
