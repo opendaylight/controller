@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "da5c1566_6daab471",
+        "filename": "opendaylight/md-sal/samples/toaster-consumer/src/main/yang/kitchen-service-impl.yang",
+        "patchSetId": 6
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-06-08T14:32:49Z",
+      "side": 0,
+      "message": "This yang is the way to publish RPCs via JMX with the CSS. It generates the KitchenServiceRuntimeMXBean which I copied under src/main/java. All the CSS does is register the mbean impl with JMX which is essentially the same thing that the AbstractMXBean does. Since we\u0027ve eliminated CSS from the toaster, the JMX yang goes away too.",
+      "parentUuid": "da5c1566_d2c72111",
+      "range": {
+        "startLine": 70,
+        "startChar": 0,
+        "endLine": 87,
+        "endChar": 5
+      },
+      "revId": "df0bea4924cd4826b818e8cda577f03f62ef5da9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da5c1566_f2d6a5c4",
         "filename": "opendaylight/md-sal/samples/toaster-provider/src/main/yang/toaster-provider-impl.yang",
         "patchSetId": 6
@@ -36,6 +60,30 @@
       "writtenOn": "2016-06-08T12:02:21Z",
       "side": 0,
       "message": "is there any place where this can be configured now we\u0027re moving to blueprint?",
+      "range": {
+        "startLine": 68,
+        "startChar": 0,
+        "endLine": 70,
+        "endChar": 13
+      },
+      "revId": "df0bea4924cd4826b818e8cda577f03f62ef5da9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_edb524ce",
+        "filename": "opendaylight/md-sal/samples/toaster-provider/src/main/yang/toaster-provider-impl.yang",
+        "patchSetId": 6
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-06-08T14:32:49Z",
+      "side": 0,
+      "message": "Not sure what you mean. This generates the getToastMade method in ToasterProviderRuntimeMXBean.",
+      "parentUuid": "da5c1566_f2d6a5c4",
       "range": {
         "startLine": 68,
         "startChar": 0,
