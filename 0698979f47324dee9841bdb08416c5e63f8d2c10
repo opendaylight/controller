@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da5c1566_cda140ab",
+        "filename": "karaf/karaf-parent/pom.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 387,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-06-08T14:10:32Z",
+      "side": 1,
+      "message": "I think we rather like inline version rather than properties.",
+      "range": {
+        "startLine": 387,
+        "startChar": 19,
+        "endLine": 387,
+        "endChar": 42
+      },
+      "revId": "0698979f47324dee9841bdb08416c5e63f8d2c10",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
