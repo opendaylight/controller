@@ -22,6 +22,30 @@
       "revId": "ef1be0db930debf4c7f9bd22458fc3ea84da88a4",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_cc55bd1e",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardRecoveryCoordinator.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-06-09T16:04:01Z",
+      "side": 1,
+      "message": "I can but I don\u0027t think it would add much value. This is not a public API. There is only one caller and it propagates unchecked exceptions back to akka anyway so it wouldn\u0027t benefit from the declaration. Plus there\u0027s other code paths that could raise unchecked exceptions (yang tools is littered with them) and we don\u0027t declare RuntimeException everywhere so we\u0027re being consistent by not doing so here.",
+      "parentUuid": "da5c1566_ac77a9d3",
+      "range": {
+        "startLine": 94,
+        "startChar": 22,
+        "endLine": 94,
+        "endChar": 38
+      },
+      "revId": "ef1be0db930debf4c7f9bd22458fc3ea84da88a4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
