@@ -22,6 +22,30 @@
       "revId": "92e7d6a4d7e09db78d2d7f44a368b8c498f790f0",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_37abe6d9",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 302,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-06-09T17:29:06Z",
+      "side": 1,
+      "message": "There\u0027s only 2 args - the log methods have specific methods with 1 and 2 args. However Robert recently pointed out to me that even if the Object[] method is invoked, JIT will do escape analysis to elide the object creation and put it on the stack. So in reality there is no object creation overhead.",
+      "parentUuid": "da5c1566_2c19d988",
+      "range": {
+        "startLine": 302,
+        "startChar": 16,
+        "endLine": 302,
+        "endChar": 115
+      },
+      "revId": "92e7d6a4d7e09db78d2d7f44a368b8c498f790f0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
