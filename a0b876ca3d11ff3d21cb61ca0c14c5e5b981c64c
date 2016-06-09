@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "da5c1566_292d4b47",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 37
+      },
+      "lineNbr": 345,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-06-09T11:19:00Z",
+      "side": 1,
+      "message": "there is nothing else we can do. This exception should never happen in practice and if it does we do have a major bug.",
+      "parentUuid": "da5c1566_e3fc1441",
+      "revId": "a0b876ca3d11ff3d21cb61ca0c14c5e5b981c64c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da5c1566_a3021c3c",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardRecoveryCoordinator.java",
         "patchSetId": 37
@@ -87,6 +105,24 @@
     },
     {
       "key": {
+        "uuid": "da5c1566_a9f95bca",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/persisted/CommitTransactionPayload.java",
+        "patchSetId": 37
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-06-09T11:19:00Z",
+      "side": 1,
+      "message": "I am not sure either, but since we have the data readily available I chose to just initialize it and prevent surprises. One use case would be traces in journal, where that decoded information would actually be useful. I think that outweighs the 24 bytes we pay for the object.",
+      "parentUuid": "da5c1566_c3e2b09e",
+      "revId": "a0b876ca3d11ff3d21cb61ca0c14c5e5b981c64c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da5c1566_23ef2c89",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/persisted/CommitTransactionPayloadTest.java",
         "patchSetId": 37
@@ -98,6 +134,24 @@
       "writtenOn": "2016-06-09T05:01:32Z",
       "side": 1,
       "message": "We don\u0027t have a unit test for ser/der (at least I don\u0027t see one). Can you add it?",
+      "revId": "a0b876ca3d11ff3d21cb61ca0c14c5e5b981c64c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_896f3792",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/persisted/CommitTransactionPayloadTest.java",
+        "patchSetId": 37
+      },
+      "lineNbr": 187,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-06-09T11:19:00Z",
+      "side": 1,
+      "message": "testPayloadSerDes() -- this class is a copy of the old pyaload test...",
+      "parentUuid": "da5c1566_23ef2c89",
       "revId": "a0b876ca3d11ff3d21cb61ca0c14c5e5b981c64c",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
