@@ -72,6 +72,24 @@
     },
     {
       "key": {
+        "uuid": "da5c1566_2cd1d957",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 37
+      },
+      "lineNbr": 345,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-06-09T14:01:34Z",
+      "side": 1,
+      "message": "yup. Can you remove the TODO then?",
+      "parentUuid": "da5c1566_292d4b47",
+      "revId": "a0b876ca3d11ff3d21cb61ca0c14c5e5b981c64c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da5c1566_a3021c3c",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardRecoveryCoordinator.java",
         "patchSetId": 37
@@ -177,6 +195,24 @@
     },
     {
       "key": {
+        "uuid": "da5c1566_4c47ed1f",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/persisted/CommitTransactionPayload.java",
+        "patchSetId": 37
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-06-09T14:01:34Z",
+      "side": 1,
+      "message": "But it\u0027s holding on to the DataTreeCandidate instance which can be large and we store the Payloads in the in-memory journal. That was the main reason we only keep the serialized byte[] in memory for the other Payload classes (current and obsoleted) - the journal used up a lot more memory with the full objects. Once the Payload is created by the Shard and passed to RaftActor, it goes into the journal and the un-serialized data is no longer accessed. The lazy conversion back to un-serialized is only used on recovery and it\u0027s just returned to the caller and we don\u0027t cache it in the Payload class. This is how DataTreeCandidatePayload is structured. So it\u0027s important that we don\u0027t cache the Decoded instance.",
+      "parentUuid": "da5c1566_a9f95bca",
+      "revId": "a0b876ca3d11ff3d21cb61ca0c14c5e5b981c64c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da5c1566_23ef2c89",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/persisted/CommitTransactionPayloadTest.java",
         "patchSetId": 37
@@ -206,6 +242,24 @@
       "side": 1,
       "message": "testPayloadSerDes() -- this class is a copy of the old pyaload test...",
       "parentUuid": "da5c1566_23ef2c89",
+      "revId": "a0b876ca3d11ff3d21cb61ca0c14c5e5b981c64c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_ac20494a",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/persisted/CommitTransactionPayloadTest.java",
+        "patchSetId": 37
+      },
+      "lineNbr": 187,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-06-09T14:01:34Z",
+      "side": 1,
+      "message": "missed that",
+      "parentUuid": "da5c1566_896f3792",
       "revId": "a0b876ca3d11ff3d21cb61ca0c14c5e5b981c64c",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
