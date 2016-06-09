@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da5c1566_83ff1834",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 37
+      },
+      "lineNbr": 334,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-06-09T05:01:32Z",
+      "side": 1,
+      "message": "extra space",
+      "revId": "a0b876ca3d11ff3d21cb61ca0c14c5e5b981c64c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_e3fc1441",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 37
+      },
+      "lineNbr": 345,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-06-09T05:01:32Z",
+      "side": 1,
+      "message": "The will get propagated back to the client - not sure what else we can do...",
+      "revId": "a0b876ca3d11ff3d21cb61ca0c14c5e5b981c64c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_a3021c3c",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardRecoveryCoordinator.java",
+        "patchSetId": 37
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-06-09T05:01:32Z",
+      "side": 1,
+      "message": "The message should be updated here since ModificationPayload is gone. How about just Payload?",
+      "revId": "a0b876ca3d11ff3d21cb61ca0c14c5e5b981c64c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_43eea089",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/persisted/AbortTransactionPayload.java",
+        "patchSetId": 37
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-06-09T05:01:32Z",
+      "side": 1,
+      "message": "Can you add ser/der unit tests for this class?",
+      "revId": "a0b876ca3d11ff3d21cb61ca0c14c5e5b981c64c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_c3e2b09e",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/persisted/CommitTransactionPayload.java",
+        "patchSetId": 37
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-06-09T05:01:32Z",
+      "side": 1,
+      "message": "Do we need to have the contractor that initializes decoded since you do it lazily via the getter? It\u0027s useful if a caller needs access to the candidate/id after serialization -not sure will we have that case.",
+      "revId": "a0b876ca3d11ff3d21cb61ca0c14c5e5b981c64c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_23ef2c89",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/persisted/CommitTransactionPayloadTest.java",
+        "patchSetId": 37
+      },
+      "lineNbr": 187,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-06-09T05:01:32Z",
+      "side": 1,
+      "message": "We don\u0027t have a unit test for ser/der (at least I don\u0027t see one). Can you add it?",
+      "revId": "a0b876ca3d11ff3d21cb61ca0c14c5e5b981c64c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
