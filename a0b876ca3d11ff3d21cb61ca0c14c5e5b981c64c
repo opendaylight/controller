@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "da5c1566_896a9718",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 37
+      },
+      "lineNbr": 334,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-06-09T12:18:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "da5c1566_83ff1834",
+      "revId": "a0b876ca3d11ff3d21cb61ca0c14c5e5b981c64c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da5c1566_e3fc1441",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
         "patchSetId": 37
@@ -71,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "da5c1566_49899fea",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardRecoveryCoordinator.java",
+        "patchSetId": 37
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-06-09T12:18:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "da5c1566_a3021c3c",
+      "revId": "a0b876ca3d11ff3d21cb61ca0c14c5e5b981c64c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da5c1566_43eea089",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/persisted/AbortTransactionPayload.java",
         "patchSetId": 37
@@ -82,6 +118,24 @@
       "writtenOn": "2016-06-09T05:01:32Z",
       "side": 1,
       "message": "Can you add ser/der unit tests for this class?",
+      "revId": "a0b876ca3d11ff3d21cb61ca0c14c5e5b981c64c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_49eebf89",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/persisted/AbortTransactionPayload.java",
+        "patchSetId": 37
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-06-09T12:18:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "da5c1566_43eea089",
       "revId": "a0b876ca3d11ff3d21cb61ca0c14c5e5b981c64c",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
