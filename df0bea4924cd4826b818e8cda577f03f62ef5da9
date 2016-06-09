@@ -16,6 +16,24 @@
       "revId": "df0bea4924cd4826b818e8cda577f03f62ef5da9",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_cc465dbf",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/RpcServiceMetadata.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-06-09T14:59:34Z",
+      "side": 1,
+      "message": "The intention here is to wait for the RPC to initially be registered so we can start the blueprint container. So we\u0027re not interested in RPCs that are unregistered (which likely wouldn\u0027t happen on startup anyway). I close the listener reg once we\u0027ve gotten the initial RPC. This could be extended to keep the listener reg open and restart the blueprint container if the RPC goes away. But I\u0027m not sure that\u0027s really needed here - something to consider for a follow-up.",
+      "parentUuid": "da5c1566_28ac2aed",
+      "revId": "df0bea4924cd4826b818e8cda577f03f62ef5da9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
