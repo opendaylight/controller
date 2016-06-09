@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "da5c1566_c98daf7d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardDataTree.java",
+        "patchSetId": 46
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-06-09T11:03:20Z",
+      "side": 1,
+      "message": "Well, it is not really a matter of \u0027defining\u0027 it. historyId \u003d\u003d 0 is reserved for free-standing transactions. In follow-up patch the corresponding txn class is called \u0027ClientSingleTransaction\u0027 -- not sure how to translate that to a an \u0027isXXX\u0027 name in LocalHistoryIdentifier.",
+      "parentUuid": "da5c1566_43606032",
+      "revId": "64ad842cc81088b82fcb17c5e5360cfe3f89578a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da5c1566_a354dc54",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/AbstractTransactionProxyTest.java",
         "patchSetId": 46
@@ -30,6 +48,24 @@
       "writtenOn": "2016-06-09T04:34:40Z",
       "side": 1,
       "message": "wow - that\u0027s a long chain of calls :) I\u0027m sure auto-complete came in handy...",
+      "revId": "64ad842cc81088b82fcb17c5e5360cfe3f89578a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_8993b7a2",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/AbstractTransactionProxyTest.java",
+        "patchSetId": 46
+      },
+      "lineNbr": 193,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-06-09T11:03:20Z",
+      "side": 1,
+      "message": "yeah ... luckily this is not what the production code will end up doing :)",
+      "parentUuid": "da5c1566_a354dc54",
       "revId": "64ad842cc81088b82fcb17c5e5360cfe3f89578a",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
