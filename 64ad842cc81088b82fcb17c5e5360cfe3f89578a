@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da5c1566_43606032",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardDataTree.java",
+        "patchSetId": 46
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-06-09T04:34:40Z",
+      "side": 1,
+      "message": "so the historyId \u003d\u003d 0 means undefined. Can we add a specific method for this, e.g. isDefined(), to improve clarity?",
+      "revId": "64ad842cc81088b82fcb17c5e5360cfe3f89578a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_a354dc54",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/AbstractTransactionProxyTest.java",
+        "patchSetId": 46
+      },
+      "lineNbr": 193,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-06-09T04:34:40Z",
+      "side": 1,
+      "message": "wow - that\u0027s a long chain of calls :) I\u0027m sure auto-complete came in handy...",
+      "revId": "64ad842cc81088b82fcb17c5e5360cfe3f89578a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
