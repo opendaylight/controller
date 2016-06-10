@@ -411,8 +411,8 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         Map<String, String> peerAddresses = new HashMap<>();
         Map<String, Boolean> peerVotingStates = new HashMap<>();
         for(PeerInfo info: context.getPeers()) {
-            peerVotingStates.put(info.getId(), info.getVotingState() != VotingState.NON_VOTING);
-            peerAddresses.put(info.getId(), info.getAddress());
+            peerVotingStates.put(info.getId(), info.isVoting());
+            peerAddresses.put(info.getId(), info.getAddress() != null ? info.getAddress() : "");
         }
 
         final RaftActorBehavior currentBehavior = context.getCurrentBehavior();
@@ -449,7 +449,8 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             for(String id: followerIds) {
                 final FollowerLogInformation info = leader.getFollower(id);
                 followerInfoList.add(new FollowerInfo(id, info.getNextIndex(), info.getMatchIndex(),
-                        info.isFollowerActive(), DurationFormatUtils.formatDurationHMS(info.timeSinceLastActivity())));
+                        info.isFollowerActive(), DurationFormatUtils.formatDurationHMS(info.timeSinceLastActivity()),
+                        context.getPeerInfo(info.getId()).isVoting()));
             }
 
             builder.followerInfoList(followerInfoList);
