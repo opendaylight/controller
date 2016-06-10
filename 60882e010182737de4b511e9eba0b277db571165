@@ -22,6 +22,30 @@
       "revId": "60882e010182737de4b511e9eba0b277db571165",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_6cce2c5c",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/AbstractReplicatedLogImpl.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-06-10T13:42:58Z",
+      "side": 1,
+      "message": "It does provide a stack trace. I saw this log message produced plus I\u0027ve done this for testing.",
+      "parentUuid": "da5c1566_ac5fa40d",
+      "range": {
+        "startLine": 128,
+        "startChar": 76,
+        "endLine": 128,
+        "endChar": 104
+      },
+      "revId": "60882e010182737de4b511e9eba0b277db571165",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
