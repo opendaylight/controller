@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da5c1566_ef7eaee3",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 386,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-06-10T20:17:35Z",
+      "side": 1,
+      "message": "wouldn\u0027t it be more convenient to have \n\n    public String getAddress() {\n        return address !\u003d null ? address : \"\";\n    }\n\nin the PeerInfo class ? So you won\u0027t have to repeat that pattern in some other places.",
+      "range": {
+        "startLine": 386,
+        "startChar": 44,
+        "endLine": 386,
+        "endChar": 94
+      },
+      "revId": "11f79d9367b19061cd79f4168a331f23dece5e27",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
