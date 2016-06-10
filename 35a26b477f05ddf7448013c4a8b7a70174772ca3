@@ -22,6 +22,30 @@
       "revId": "35a26b477f05ddf7448013c4a8b7a70174772ca3",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da5c1566_cf9f6a5e",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/resources/org/opendaylight/blueprint/clustered-datastore.xml",
+        "patchSetId": 13
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-06-10T18:45:07Z",
+      "side": 1,
+      "message": "it\u0027s a directory.",
+      "parentUuid": "da5c1566_4fb51aed",
+      "range": {
+        "startLine": 28,
+        "startChar": 4,
+        "endLine": 28,
+        "endChar": 53
+      },
+      "revId": "35a26b477f05ddf7448013c4a8b7a70174772ca3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
