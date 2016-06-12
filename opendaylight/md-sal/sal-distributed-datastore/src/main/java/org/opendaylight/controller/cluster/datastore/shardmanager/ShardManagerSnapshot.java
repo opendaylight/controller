@@ -16,8 +16,8 @@ import javax.annotation.Nonnull;
 /**
  * Persisted data of the ShardManager
  */
-// FIXME: make this package-protected once forShardList is removed.
-public final class ShardManagerSnapshot implements Serializable {
+
+final class ShardManagerSnapshot implements Serializable {
     private static final long serialVersionUID = 1L;
     private final List<String> shardList;
 
@@ -27,15 +27,6 @@ public final class ShardManagerSnapshot implements Serializable {
 
     List<String> getShardList() {
         return this.shardList;
-    }
-
-    /**
-     * @deprecated This method is for migration only and should me removed once
-     *             org.opendaylight.controller.cluster.datastore.ShardManagerSnapshot is removed.
-     */
-    @Deprecated
-    public static ShardManagerSnapshot forShardList(final @Nonnull List<String> shardList) {
-        return new ShardManagerSnapshot(shardList);
     }
 
     @Override
