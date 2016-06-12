@@ -249,7 +249,7 @@ public class RaftActorRecoverySupportTest {
         replicatedLog.append(new MockRaftActorContext.MockReplicatedLogEntry(1,
                 2, new MockRaftActorContext.MockPayload("2")));
 
-        sendMessageToSupport(new org.opendaylight.controller.cluster.raft.RaftActor.DeleteEntries(1));
+        sendMessageToSupport(new DeleteEntries(1));
 
         assertEquals("Journal log size", 1, context.getReplicatedLog().size());
         assertEquals("Last index", 0, context.getReplicatedLog().lastIndex());
@@ -283,7 +283,7 @@ public class RaftActorRecoverySupportTest {
     @Test
     public void testDeprecatedUpdateElectionTerm() {
 
-        sendMessageToSupport(new org.opendaylight.controller.cluster.raft.RaftActor.UpdateElectionTerm(5, "member2"));
+        sendMessageToSupport(new UpdateElectionTerm(5, "member2"));
 
         assertEquals("Current term", 5, context.getTermInformation().getCurrentTerm());
         assertEquals("Voted For", "member2", context.getTermInformation().getVotedFor());
@@ -311,7 +311,7 @@ public class RaftActorRecoverySupportTest {
 
         sendMessageToSupport(new DeleteEntries(5));
 
-        sendMessageToSupport(new org.opendaylight.controller.cluster.raft.RaftActor.DeleteEntries(5));
+        sendMessageToSupport(new DeleteEntries(5));
 
         assertEquals("Journal log size", 0, context.getReplicatedLog().size());
         assertEquals("Last index", -1, context.getReplicatedLog().lastIndex());
