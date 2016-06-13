@@ -42,4 +42,10 @@
     <xsd:attribute name="id" type="xsd:ID" use="required"/>
   </xsd:complexType>
   <xsd:element name="clustered-app-config" type="TclusteredAppConfig"/>
+
+  <xsd:complexType name="TspecificReferenceList">
+    <xsd:attribute name="interface" type="bp:Tclass" use="required"/>
+    <xsd:attribute name="id" type="xsd:ID"/>
+  </xsd:complexType>
+  <xsd:element name="specific-reference-list" type="TspecificReferenceList"/>
 </xsd:schema>

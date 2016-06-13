@@ -130,6 +130,8 @@ class RpcServiceMetadata extends AbstractDependentComponentFactoryMetadata {
     public Object create() throws ComponentDefinitionException {
         LOG.debug("{}: In create: interfaceName: {}", logName(), interfaceName);
 
+        super.onCreate();
+
         try {
             RpcService rpcService = rpcRegistry.getRpcService(rpcInterface);
 
