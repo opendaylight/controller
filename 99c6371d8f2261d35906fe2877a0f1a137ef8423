@@ -16,6 +16,24 @@
       "revId": "99c6371d8f2261d35906fe2877a0f1a137ef8423",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba51214e_e72bac92",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/persisted/CommitTransactionPayload.java",
+        "patchSetId": 41
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-06-13T21:39:43Z",
+      "side": 1,
+      "message": "Actually we need to cache them, or have a contrived API. The reason is that there are two pieces of data in the serialized form: the data tree candidate and the transaction identifier. Both are needed not only during recovery, but also when followers apply replicated state.",
+      "parentUuid": "ba51214e_07e7c041",
+      "revId": "99c6371d8f2261d35906fe2877a0f1a137ef8423",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
