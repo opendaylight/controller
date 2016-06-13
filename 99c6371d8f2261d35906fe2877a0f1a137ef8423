@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba51214e_07e7c041",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/persisted/CommitTransactionPayload.java",
+        "patchSetId": 41
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-06-13T17:17:48Z",
+      "side": 1,
+      "message": "This will get called on recovery. We really don\u0027t want to cache the decoded objects at all.",
+      "revId": "99c6371d8f2261d35906fe2877a0f1a137ef8423",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
