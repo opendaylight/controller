@@ -34,6 +34,24 @@
       "revId": "99c6371d8f2261d35906fe2877a0f1a137ef8423",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba51214e_3265e045",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/persisted/CommitTransactionPayload.java",
+        "patchSetId": 41
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-06-13T23:22:35Z",
+      "side": 1,
+      "message": "You\u0027re right - it\u0027s also decoded by followers as well. But only once as with recovery.",
+      "parentUuid": "ba51214e_e72bac92",
+      "revId": "99c6371d8f2261d35906fe2877a0f1a137ef8423",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
