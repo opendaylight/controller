@@ -34,6 +34,7 @@ abstract class AbstractDependentComponentFactoryMetadata implements DependentCom
     private volatile ExtendedBlueprintContainer container;
     private volatile SatisfactionCallback satisfactionCallback;
     private volatile String failureMessage;
+    private volatile Throwable failureCause;
     private volatile String dependendencyDesc;
 
     protected AbstractDependentComponentFactoryMetadata(String id) {
@@ -68,7 +69,12 @@ abstract class AbstractDependentComponentFactoryMetadata implements DependentCom
     protected abstract void startTracking();
 
     protected void setFailureMessage(String failureMessage) {
+        setFailure(failureMessage, null);
+    }
+
+    protected void setFailure(String failureMessage, Throwable failureCause) {
         this.failureMessage = failureMessage;
+        this.failureCause = failureCause;
     }
 
     protected void setDependendencyDesc(String dependendencyDesc) {
@@ -80,8 +86,9 @@ abstract class AbstractDependentComponentFactoryMetadata implements DependentCom
     }
 
     protected void setSatisfied() {
-        satisfied.set(true);
-        satisfactionCallback.notifyChanged();
+        if(satisfied.compareAndSet(false, true)) {
+            satisfactionCallback.notifyChanged();
+        }
     }
 
     protected void retrieveService(String name, Class<?> interfaceClass, Consumer<Object> onServiceRetrieved) {
@@ -107,7 +114,7 @@ abstract class AbstractDependentComponentFactoryMetadata implements DependentCom
 
     protected void onCreate() throws ComponentDefinitionException {
         if(failureMessage != null) {
-            throw new ComponentDefinitionException(failureMessage);
+            throw new ComponentDefinitionException(failureMessage, failureCause);
         }
 
         // The following code is a bit odd so requires some explanation. A little background... If a bean

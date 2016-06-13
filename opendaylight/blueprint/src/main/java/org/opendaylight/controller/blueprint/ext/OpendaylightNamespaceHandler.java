@@ -53,17 +53,18 @@ public class OpendaylightNamespaceHandler implements NamespaceHandler {
     static final String ROUTED_RPC_REG_CONVERTER_NAME = "org.opendaylight.blueprint.RoutedRpcRegConverter";
     static final String RPC_REGISTRY_NAME = "org.opendaylight.blueprint.RpcRegistry";
     static final String NOTIFICATION_SERVICE_NAME = "org.opendaylight.blueprint.NotificationService";
+    static final String TYPE_ATTR = "type";
 
     private static final Logger LOG = LoggerFactory.getLogger(OpendaylightNamespaceHandler.class);
     private static final String COMPONENT_PROCESSOR_NAME = ComponentProcessor.class.getName();
     private static final String RESTART_DEPENDENTS_ON_UPDATES = "restart-dependents-on-updates";
     private static final String USE_DEFAULT_FOR_REFERENCE_TYPES = "use-default-for-reference-types";
     private static final String CLUSTERED_APP_CONFIG = "clustered-app-config";
-    private static final String TYPE_ATTR = "type";
     private static final String INTERFACE = "interface";
     private static final String REF_ATTR = "ref";
     private static final String ID_ATTR = "id";
     private static final String RPC_SERVICE = "rpc-service";
+    private static final String SPECIFIC_SERVICE_REF_LIST = "specific-reference-list";
 
     @SuppressWarnings("rawtypes")
     @Override
@@ -96,6 +97,8 @@ public class OpendaylightNamespaceHandler implements NamespaceHandler {
             return parseNotificationListener(element, context);
         } else if (nodeNameEquals(element, CLUSTERED_APP_CONFIG)) {
             return parseClusteredAppConfig(element, context);
+        } else if (nodeNameEquals(element, SPECIFIC_SERVICE_REF_LIST)) {
+            return parseSpecificReferenceList(element, context);
         }
 
         throw new ComponentDefinitionException("Unsupported standalone element: " + element.getNodeName());
@@ -344,6 +347,15 @@ public class OpendaylightNamespaceHandler implements NamespaceHandler {
         return new DataStoreAppConfigMetadata(getId(context, element), element.getAttribute(
                 DataStoreAppConfigMetadata.BINDING_CLASS), element.getAttribute(
                         DataStoreAppConfigMetadata.LIST_KEY_VALUE), defaultAppConfigElement);
+    }
+
+    private Metadata parseSpecificReferenceList(Element element, ParserContext context) {
+        ComponentFactoryMetadata metadata = new SpecificReferenceListMetadata(getId(context, element),
+                element.getAttribute(INTERFACE));
+
+        LOG.debug("parseSpecificReferenceList returning {}", metadata);
+
+        return metadata;
     }
 
     private Element parseXML(String name, String xml) {
