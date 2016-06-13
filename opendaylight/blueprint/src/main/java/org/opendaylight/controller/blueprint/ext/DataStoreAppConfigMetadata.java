@@ -21,7 +21,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.apache.aries.blueprint.services.ExtendedBlueprintContainer;
-import org.opendaylight.controller.blueprint.BlueprintContainerRestartService;
 import org.opendaylight.controller.md.sal.binding.api.ClusteredDataTreeChangeListener;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
@@ -50,7 +49,6 @@ import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.ListSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-import org.osgi.framework.ServiceReference;
 import org.osgi.service.blueprint.container.ComponentDefinitionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -336,39 +334,6 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
         return dataNode;
     }
 
-    private void restartContainer() {
-        BlueprintContainerRestartService restartService = getOSGiService(BlueprintContainerRestartService.class);
-        if(restartService != null) {
-            restartService.restartContainerAndDependents(container().getBundleContext().getBundle());
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    @Nullable
-    private <T> T getOSGiService(Class<T> serviceInterface) {
-        try {
-            ServiceReference<T> serviceReference =
-                    container().getBundleContext().getServiceReference(serviceInterface);
-            if(serviceReference == null) {
-                LOG.warn("{}: {} reference not found", logName(), serviceInterface.getSimpleName());
-                return null;
-            }
-
-            T service = (T)container().getService(serviceReference);
-            if(service == null) {
-                // This could happen on shutdown if the service was already unregistered so we log as debug.
-                LOG.debug("{}: {} was not found", logName(), serviceInterface.getSimpleName());
-            }
-
-            return service;
-        } catch(IllegalStateException e) {
-            // This is thrown if the BundleContext is no longer valid which is possible on shutdown so we
-            // log as debug.
-            LOG.debug("{}: Error obtaining {}", logName(), serviceInterface.getSimpleName(), e);
-        }
-
-        return null;
-    }
 
     @Override
     public void destroy(Object instance) {

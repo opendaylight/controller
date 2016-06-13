@@ -13,11 +13,14 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
+import javax.annotation.Nullable;
 import org.apache.aries.blueprint.di.AbstractRecipe;
 import org.apache.aries.blueprint.di.ExecutionContext;
 import org.apache.aries.blueprint.di.Recipe;
 import org.apache.aries.blueprint.ext.DependentComponentFactoryMetadata;
 import org.apache.aries.blueprint.services.ExtendedBlueprintContainer;
+import org.opendaylight.controller.blueprint.BlueprintContainerRestartService;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.blueprint.container.ComponentDefinitionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,10 +33,12 @@ abstract class AbstractDependentComponentFactoryMetadata implements DependentCom
     private final String id;
     private final AtomicBoolean started = new AtomicBoolean();
     private final AtomicBoolean satisfied = new AtomicBoolean();
+    private final AtomicBoolean restarting = new AtomicBoolean();
     private final List<StaticServiceReferenceRecipe> serviceRecipes = new ArrayList<>();
     private volatile ExtendedBlueprintContainer container;
     private volatile SatisfactionCallback satisfactionCallback;
     private volatile String failureMessage;
+    private volatile Throwable failureCause;
     private volatile String dependendencyDesc;
 
     protected AbstractDependentComponentFactoryMetadata(String id) {
@@ -68,7 +73,12 @@ abstract class AbstractDependentComponentFactoryMetadata implements DependentCom
     protected abstract void startTracking();
 
     protected void setFailureMessage(String failureMessage) {
+        setFailure(failureMessage, null);
+    }
+
+    protected void setFailure(String failureMessage, Throwable failureCause) {
         this.failureMessage = failureMessage;
+        this.failureCause = failureCause;
     }
 
     protected void setDependendencyDesc(String dependendencyDesc) {
@@ -80,8 +90,9 @@ abstract class AbstractDependentComponentFactoryMetadata implements DependentCom
     }
 
     protected void setSatisfied() {
-        satisfied.set(true);
-        satisfactionCallback.notifyChanged();
+        if(satisfied.compareAndSet(false, true)) {
+            satisfactionCallback.notifyChanged();
+        }
     }
 
     protected void retrieveService(String name, Class<?> interfaceClass, Consumer<Object> onServiceRetrieved) {
@@ -107,7 +118,7 @@ abstract class AbstractDependentComponentFactoryMetadata implements DependentCom
 
     protected void onCreate() throws ComponentDefinitionException {
         if(failureMessage != null) {
-            throw new ComponentDefinitionException(failureMessage);
+            throw new ComponentDefinitionException(failureMessage, failureCause);
         }
 
         // The following code is a bit odd so requires some explanation. A little background... If a bean
@@ -178,5 +189,42 @@ abstract class AbstractDependentComponentFactoryMetadata implements DependentCom
         }
 
         serviceRecipes.clear();
+    }
+
+    protected void restartContainer() {
+        if(restarting.compareAndSet(false, true)) {
+            BlueprintContainerRestartService restartService = getOSGiService(BlueprintContainerRestartService.class);
+            if(restartService != null) {
+                log.debug("{}: Restarting container", logName());
+                restartService.restartContainerAndDependents(container().getBundleContext().getBundle());
+            }
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    @Nullable
+    protected <T> T getOSGiService(Class<T> serviceInterface) {
+        try {
+            ServiceReference<T> serviceReference =
+                    container().getBundleContext().getServiceReference(serviceInterface);
+            if(serviceReference == null) {
+                log.warn("{}: {} reference not found", logName(), serviceInterface.getSimpleName());
+                return null;
+            }
+
+            T service = (T)container().getService(serviceReference);
+            if(service == null) {
+                // This could happen on shutdown if the service was already unregistered so we log as debug.
+                log.debug("{}: {} was not found", logName(), serviceInterface.getSimpleName());
+            }
+
+            return service;
+        } catch(IllegalStateException e) {
+            // This is thrown if the BundleContext is no longer valid which is possible on shutdown so we
+            // log as debug.
+            log.debug("{}: Error obtaining {}", logName(), serviceInterface.getSimpleName(), e);
+        }
+
+        return null;
     }
 }
