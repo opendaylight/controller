@@ -16,6 +16,24 @@
       "revId": "d6b79e53ced8e884a52e0b2da8d363b262e419ea",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba51214e_3f8da832",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/main/java/org/opendaylight/controller/md/sal/binding/impl/LazyDataObjectModification.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 207,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-06-14T07:40:34Z",
+      "side": 1,
+      "message": "We\u0027ve found it very useful to have all the detail when debugging, and this has been on master for a while... But yes, I can imagine this causing issues.\n\nI\u0027m not sure what would make sense to include in toString() though — without at least domData.getIdentifier(), domData.getDataBefore() and domData.getDataAfter() it wouldn\u0027t be much use (at least in the cases I\u0027ve needed it).",
+      "parentUuid": "ba51214e_2df3c574",
+      "revId": "d6b79e53ced8e884a52e0b2da8d363b262e419ea",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
