@@ -8,6 +8,8 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.Props;
+import com.google.common.base.Stopwatch;
+import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActor;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 
@@ -18,16 +20,39 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
  * @author Thomas Pantelis
  */
 public class ShardDataTreeNotificationPublisherActor extends AbstractUntypedActor {
+    private final Stopwatch timer = Stopwatch.createUnstarted();
+    private final String name;
+
+    private ShardDataTreeNotificationPublisherActor(String name) {
+        this.name = name;
+    }
 
     @Override
     protected void handleReceive(Object message) {
         if(message instanceof PublishNotifications) {
-            ((PublishNotifications)message).publish();
+            PublishNotifications publisher = (PublishNotifications)message;
+            timer.start();
+
+            try {
+                publisher.publish();
+            } finally {
+                long elapsedTime = timer.elapsed(TimeUnit.MILLISECONDS);
+
+                if(elapsedTime >= ShardDataTreeNotificationPublisher.PUBLISH_DELAY_THRESHOLD_IN_MS) {
+                    LOG.warn("{}: Generation of change events for {} took longer than expected. Elapsed time: {}",
+                            publisher.logContext, name, timer);
+                } else {
+                    LOG.debug("{}: Elapsed time for generation of change events for {}: {}", publisher.logContext,
+                            name, timer);
+                }
+
+                timer.reset();
+            }
         }
     }
 
-    static Props props() {
-        return Props.create(ShardDataTreeNotificationPublisherActor.class);
+    static Props props(String notificationType) {
+        return Props.create(ShardDataTreeNotificationPublisherActor.class, notificationType);
     }
 
     static class PublishNotifications {
