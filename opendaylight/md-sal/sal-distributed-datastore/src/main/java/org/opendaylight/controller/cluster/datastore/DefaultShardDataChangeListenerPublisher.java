@@ -7,8 +7,6 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
-import com.google.common.base.Stopwatch;
-import java.util.concurrent.TimeUnit;
 import javax.annotation.concurrent.NotThreadSafe;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
@@ -35,7 +33,6 @@ final class DefaultShardDataChangeListenerPublisher implements ShardDataChangeLi
     private static final Logger LOG = LoggerFactory.getLogger(DefaultShardDataChangeListenerPublisher.class);
 
     private final ListenerTree dataChangeListenerTree = ListenerTree.create();
-    private final Stopwatch timer = Stopwatch.createUnstarted();
 
     @Override
     public void submitNotification(final DataChangeListenerRegistration<?> listener, final DOMImmutableDataChangeEvent notification) {
@@ -56,22 +53,7 @@ final class DefaultShardDataChangeListenerPublisher implements ShardDataChangeLi
 
     @Override
     public void publishChanges(DataTreeCandidate candidate, String logContext) {
-        timer.start();
-
-        try {
-            ResolveDataChangeEventsTask.create(candidate, dataChangeListenerTree).resolve(this);
-        } finally {
-            timer.stop();
-            long elapsedTime = timer.elapsed(TimeUnit.MILLISECONDS);
-            if(elapsedTime >= PUBLISH_DELAY_THRESHOLD_IN_MS) {
-                LOG.warn("{}: Generation of DataChange events took longer than expected. Elapsed time: {}",
-                        logContext, timer);
-            } else {
-                LOG.debug("{}: Elapsed time for generation of DataChange events: {}", logContext, timer);
-            }
-
-            timer.reset();
-        }
+        ResolveDataChangeEventsTask.create(candidate, dataChangeListenerTree).resolve(this);
     }
 
     @Override

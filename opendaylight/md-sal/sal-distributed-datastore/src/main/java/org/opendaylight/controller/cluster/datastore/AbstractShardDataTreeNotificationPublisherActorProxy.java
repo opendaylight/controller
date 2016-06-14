@@ -55,7 +55,7 @@ abstract class AbstractShardDataTreeNotificationPublisherActorProxy implements S
 
             String dispatcher = new Dispatchers(actorContext.system().dispatchers()).getDispatcherPath(
                     Dispatchers.DispatcherType.Notification);
-            notifierActor = actorContext.actorOf(ShardDataTreeNotificationPublisherActor.props()
+            notifierActor = actorContext.actorOf(ShardDataTreeNotificationPublisherActor.props(actorName)
                     .withDispatcher(dispatcher).withMailbox(
                             org.opendaylight.controller.cluster.datastore.utils.ActorContext.BOUNDED_MAILBOX), actorName);
         }
