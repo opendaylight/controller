@@ -16,6 +16,24 @@
       "revId": "5e3f2ec4601913dd39aa1b044090ecbd1609b760",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba51214e_6d5dbde9",
+        "filename": "opendaylight/md-sal/samples/toaster/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2016-06-14T00:51:53Z",
+      "side": 0,
+      "message": "I do not think these are needed anymore.  They get inherited, identically, from the parent pom.xml",
+      "parentUuid": "da5c1566_46c5255a",
+      "revId": "5e3f2ec4601913dd39aa1b044090ecbd1609b760",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

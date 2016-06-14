@@ -50,6 +50,24 @@
       "revId": "a50a8e1a5d50c2ffc436826e691991761081844e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba51214e_edba6d09",
+        "filename": "opendaylight/md-sal/samples/toaster-provider/src/main/java/org/opendaylight/controller/sample/toaster/provider/OpendaylightToaster.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2016-06-14T00:51:53Z",
+      "side": 1,
+      "message": "Done, BUT we REALLY need to merge https://git.opendaylight.org/gerrit/#/c/39809/ and then enable Checkstyle enforcement on the Toaster .. could you please +1 c/39809, chime in on dev list on thread \"Re: Import ordering: Going Wiki or Checkstyle way?\", and ping someone to get it merged? Thanks!",
+      "parentUuid": "da5c1566_46eec5ed",
+      "revId": "a50a8e1a5d50c2ffc436826e691991761081844e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
