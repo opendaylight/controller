@@ -16,28 +16,28 @@ public final class ConfigConstants {
     }
 
     private static final QName DUMMY_CONFIG_QNAME = QName.create(
-        "urn:opendaylight:params:xml:ns:yang:controller:config", "2013-04-05", "dummy");
+        "urn:opendaylight:params:xml:ns:yang:controller:config", "2013-04-05", "dummy").intern();
     private static final QName DUMM_RPC_QNAME = QName.create(
-        "urn:ietf:params:xml:ns:yang:rpc-context", "2013-06-17", "dummy");
-    private static final QNameModule CONFIG_MOD = QNameModule.cachedReference(DUMMY_CONFIG_QNAME.getModule());
-    private static final QNameModule RPC_MOD = QNameModule.cachedReference(DUMM_RPC_QNAME.getModule());
+        "urn:ietf:params:xml:ns:yang:rpc-context", "2013-06-17", "dummy").intern();
+    private static final QNameModule CONFIG_MOD = DUMMY_CONFIG_QNAME.getModule();
+    private static final QNameModule RPC_MOD = DUMM_RPC_QNAME.getModule();
 
     public static final String CONFIG_NAMESPACE = CONFIG_MOD.getNamespace().toString();
     public static final String CONFIG_MODULE = "config";
     public static final String CONFIG_THREADS_MODULE = "config-threads";
     public static final String IETF_INET_TYPES = "ietf-inet-types";
 
-    public static final QName SERVICE_TYPE_Q_NAME = createConfigQName("service-type");
-    public static final QName MODULE_TYPE_Q_NAME = createConfigQName("module-type");
-    public static final QName JAVA_CLASS_EXTENSION_QNAME = createConfigQName("java-class");
-    public static final QName DISABLE_OSGI_SERVICE_REG_QNAME = createConfigQName("disable-osgi-service-registration");
-    public static final QName REQUIRED_IDENTITY_EXTENSION_QNAME = createConfigQName("required-identity");
-    public static final QName INNER_STATE_BEAN_EXTENSION_QNAME = createConfigQName("inner-state-bean");
-    public static final QName PROVIDED_SERVICE_EXTENSION_QNAME = createConfigQName("provided-service");
-    public static final QName JAVA_NAME_PREFIX_EXTENSION_QNAME = createConfigQName("java-name-prefix");
-    public static final QName RPC_CONTEXT_REF_GROUPING_QNAME = createRpcXQName("rpc-context-ref");
-    public static final QName RPC_CONTEXT_REF_GROUPING_LEAF = createRpcXQName("context-instance");
-    public static final QName RPC_CONTEXT_INSTANCE_EXTENSION_QNAME = createRpcXQName("rpc-context-instance");
+    public static final QName SERVICE_TYPE_Q_NAME = createConfigQName("service-type").intern();
+    public static final QName MODULE_TYPE_Q_NAME = createConfigQName("module-type").intern();
+    public static final QName JAVA_CLASS_EXTENSION_QNAME = createConfigQName("java-class").intern();
+    public static final QName DISABLE_OSGI_SERVICE_REG_QNAME = createConfigQName("disable-osgi-service-registration").intern();
+    public static final QName REQUIRED_IDENTITY_EXTENSION_QNAME = createConfigQName("required-identity").intern();
+    public static final QName INNER_STATE_BEAN_EXTENSION_QNAME = createConfigQName("inner-state-bean").intern();
+    public static final QName PROVIDED_SERVICE_EXTENSION_QNAME = createConfigQName("provided-service").intern();
+    public static final QName JAVA_NAME_PREFIX_EXTENSION_QNAME = createConfigQName("java-name-prefix").intern();
+    public static final QName RPC_CONTEXT_REF_GROUPING_QNAME = createRpcXQName("rpc-context-ref").intern();
+    public static final QName RPC_CONTEXT_REF_GROUPING_LEAF = createRpcXQName("context-instance").intern();
+    public static final QName RPC_CONTEXT_INSTANCE_EXTENSION_QNAME = createRpcXQName("rpc-context-instance").intern();
 
     public static QName createConfigQName(final String localName) {
         return QName.create(CONFIG_MOD, localName);
