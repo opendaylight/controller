@@ -18,8 +18,8 @@ import org.opendaylight.yangtools.yang.model.api.UnknownSchemaNode;
 
 public abstract class RpcRoutingStrategy implements Identifiable<QName> {
 
-    private static final QName CONTEXT_REFERENCE = QName.cachedReference(QName.create("urn:opendaylight:yang:extension:yang-ext",
-            "2013-07-09", "context-reference"));
+    private static final QName CONTEXT_REFERENCE = QName.create("urn:opendaylight:yang:extension:yang-ext",
+            "2013-07-09", "context-reference").intern();
     private final QName identifier;
 
     private RpcRoutingStrategy(final QName identifier) {
