@@ -65,8 +65,6 @@ public final class BindingToNormalizedNodeCodec implements BindingCodecTreeFacto
     private static final Logger LOG = LoggerFactory.getLogger(BindingToNormalizedNodeCodec.class);
 
     private final BindingNormalizedNodeCodecRegistry codecRegistry;
-
-    private final ClassLoadingStrategy classLoadingStrategy;
     private final FutureSchema futureSchema;
     private final LoadingCache<InstanceIdentifier<?>, YangInstanceIdentifier> iiCache = CacheBuilder.newBuilder()
             .softValues().build(new CacheLoader<InstanceIdentifier<?>, YangInstanceIdentifier>() {
@@ -78,6 +76,7 @@ public final class BindingToNormalizedNodeCodec implements BindingCodecTreeFacto
 
             });
 
+    private ClassLoadingStrategy classLoadingStrategy;
     private DataNormalizer legacyToNormalized;
 
     public BindingToNormalizedNodeCodec(final ClassLoadingStrategy classLoadingStrategy,
@@ -91,6 +90,10 @@ public final class BindingToNormalizedNodeCodec implements BindingCodecTreeFacto
         this.classLoadingStrategy = Preconditions.checkNotNull(classLoadingStrategy,"classLoadingStrategy");
         this.codecRegistry = Preconditions.checkNotNull(codecRegistry,"codecRegistry");
         this.futureSchema = new FutureSchema(WAIT_DURATION_SEC, TimeUnit.SECONDS, waitForSchema);
+    }
+
+    void setClassLoadingStrategy(ClassLoadingStrategy classLoadingStrategy) {
+        this.classLoadingStrategy = Preconditions.checkNotNull(classLoadingStrategy, "classLoadingStrategy");
     }
 
     YangInstanceIdentifier toYangInstanceIdentifierBlocking(final InstanceIdentifier<? extends DataObject> binding) {
