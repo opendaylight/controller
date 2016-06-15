@@ -34,6 +34,7 @@ public class BindingToNormalizedNodeCodecFactory {
     public static BindingToNormalizedNodeCodec getOrCreateInstance(ClassLoadingStrategy classLoadingStrategy,
             SchemaService schemaService) {
         if(!INSTANCE_CREATED.compareAndSet(false, true)) {
+            instance.setClassLoadingStrategy(classLoadingStrategy);
             return instance;
         }
 

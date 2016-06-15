@@ -48,4 +48,10 @@
     <xsd:attribute name="id" type="xsd:ID"/>
   </xsd:complexType>
   <xsd:element name="specific-reference-list" type="TspecificReferenceList"/>
+
+  <xsd:complexType name="TstaticReference">
+    <xsd:attribute name="interface" type="bp:Tclass" use="required"/>
+    <xsd:attribute name="id" type="xsd:ID"/>
+  </xsd:complexType>
+  <xsd:element name="static-reference" type="TstaticReference"/>
 </xsd:schema>
