@@ -96,8 +96,12 @@ abstract class AbstractDependentComponentFactoryMetadata implements DependentCom
     }
 
     protected void retrieveService(String name, Class<?> interfaceClass, Consumer<Object> onServiceRetrieved) {
+        retrieveService(name, interfaceClass.getName(), onServiceRetrieved);
+    }
+
+    protected void retrieveService(String name, String interfaceName, Consumer<Object> onServiceRetrieved) {
         StaticServiceReferenceRecipe recipe = new StaticServiceReferenceRecipe(getId() + "-" + name,
-                container, interfaceClass.getName());
+                container, interfaceName);
         setDependendencyDesc(recipe.getOsgiFilter());
         serviceRecipes.add(recipe);
 
