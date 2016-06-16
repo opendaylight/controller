@@ -5,10 +5,9 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.sal.dom.broker;
+package org.opendaylight.controller.sal.schema.service.impl;
 
 import static com.google.common.base.Preconditions.checkState;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
@@ -19,7 +18,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 import javax.annotation.concurrent.GuardedBy;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.opendaylight.controller.sal.core.api.model.YangTextSourceProvider;
@@ -48,8 +46,6 @@ import org.slf4j.LoggerFactory;
 public class GlobalBundleScanningSchemaServiceImpl implements SchemaContextProvider, SchemaService, ServiceTrackerCustomizer<SchemaContextListener, SchemaContextListener>, YangTextSourceProvider, AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(GlobalBundleScanningSchemaServiceImpl.class);
 
-    private static AtomicReference<GlobalBundleScanningSchemaServiceImpl> globalInstance = new AtomicReference<>();
-
     @GuardedBy(value = "lock")
     private final ListenerRegistry<SchemaContextListener> listeners = new ListenerRegistry<>();
     private final YangTextSchemaContextResolver contextResolver = YangTextSchemaContextResolver.create("global-bundle");
@@ -68,23 +64,8 @@ public class GlobalBundleScanningSchemaServiceImpl implements SchemaContextProvi
 
     public static GlobalBundleScanningSchemaServiceImpl createInstance(final BundleContext ctx) {
         GlobalBundleScanningSchemaServiceImpl instance = new GlobalBundleScanningSchemaServiceImpl(ctx);
-        Preconditions.checkState(globalInstance.compareAndSet(null, instance));
         instance.start();
         return instance;
-    }
-
-    public static GlobalBundleScanningSchemaServiceImpl getInstance() {
-        GlobalBundleScanningSchemaServiceImpl instance = globalInstance.get();
-        Preconditions.checkState(instance != null, "Global Instance was not instantiated");
-        return instance;
-    }
-
-    @VisibleForTesting
-    public static void destroyInstance() {
-        GlobalBundleScanningSchemaServiceImpl instance = globalInstance.getAndSet(null);
-        if(instance != null) {
-            instance.close();
-        }
     }
 
     public BundleContext getContext() {
