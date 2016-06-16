@@ -93,6 +93,11 @@
                 <artifactId>md-sal-config</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>sal-schema-service</artifactId>
+                <version>${project.version}</version>
+            </dependency>
 
             <!-- Test support -->
             <dependency>
