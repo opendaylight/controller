@@ -8,10 +8,9 @@
 package org.opendaylight.controller.config.yang.md.sal.dom.impl;
 
 import com.google.common.util.concurrent.CheckedFuture;
+import org.opendaylight.controller.config.api.osgi.WaitingServiceTracker;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.opendaylight.controller.sal.core.api.model.YangTextSourceProvider;
-import org.opendaylight.controller.sal.dom.broker.GlobalBundleScanningSchemaServiceImpl;
-import org.opendaylight.yangtools.concepts.Delegator;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -64,57 +63,54 @@ org.opendaylight.controller.config.yang.md.sal.dom.impl.AbstractSchemaServiceImp
     }
 
     @Override
-    public java.lang.AutoCloseable createInstance() {
-        return new GlobalSchemaServiceProxy(GlobalBundleScanningSchemaServiceImpl.getInstance());
-    }
+    public AutoCloseable createInstance() {
+        final WaitingServiceTracker<SchemaService> schemaServiceTracker =
+                WaitingServiceTracker.create(SchemaService.class, bundleContext);
+        final SchemaService schemaService = schemaServiceTracker.waitForService(WaitingServiceTracker.FIVE_MINUTES);
 
-    private static class GlobalSchemaServiceProxy implements AutoCloseable, SchemaService, YangTextSourceProvider,
-            Delegator<SchemaService> {
-        private final GlobalBundleScanningSchemaServiceImpl delegate;
+        final WaitingServiceTracker<YangTextSourceProvider> sourceProviderTracker =
+                WaitingServiceTracker.create(YangTextSourceProvider.class, bundleContext);
+        final YangTextSourceProvider sourceProvider = sourceProviderTracker.waitForService(WaitingServiceTracker.FIVE_MINUTES);
 
-        public GlobalSchemaServiceProxy(GlobalBundleScanningSchemaServiceImpl service) {
-            this.delegate = service;
+        class GlobalSchemaServiceProxy implements AutoCloseable, SchemaService, YangTextSourceProvider {
+            @Override
+            public void close() {
+                schemaServiceTracker.close();
+                sourceProviderTracker.close();
+            }
+
+            @Override
+            public void addModule(final Module arg0) {
+                schemaService.addModule(arg0);
+            }
+
+            @Override
+            public SchemaContext getGlobalContext() {
+                return schemaService.getGlobalContext();
+            }
+
+            @Override
+            public SchemaContext getSessionContext() {
+                return schemaService.getSessionContext();
+            }
+
+            @Override
+            public ListenerRegistration<SchemaContextListener> registerSchemaContextListener(final SchemaContextListener arg0) {
+                return schemaService.registerSchemaContextListener(arg0);
+            }
+
+            @Override
+            public void removeModule(final Module arg0) {
+                schemaService.removeModule(arg0);
+            }
+
+            @Override
+            public CheckedFuture<? extends YangTextSchemaSource, SchemaSourceException> getSource(
+                    SourceIdentifier sourceIdentifier) {
+                return sourceProvider.getSource(sourceIdentifier);
+            }
         }
 
-        @Override
-        public void close() {
-            // Intentional noop as the life-cycle is controlled via blueprint.
-        }
-
-        @Override
-        public void addModule(final Module arg0) {
-            delegate.addModule(arg0);
-        }
-
-        @Override
-        public SchemaContext getGlobalContext() {
-            return delegate.getGlobalContext();
-        }
-
-        @Override
-        public SchemaContext getSessionContext() {
-            return delegate.getSessionContext();
-        }
-
-        @Override
-        public ListenerRegistration<SchemaContextListener> registerSchemaContextListener(final SchemaContextListener arg0) {
-            return delegate.registerSchemaContextListener(arg0);
-        }
-
-        @Override
-        public void removeModule(final Module arg0) {
-            delegate.removeModule(arg0);
-        }
-
-        @Override
-        public SchemaService getDelegate() {
-            return delegate;
-        }
-
-        @Override
-        public CheckedFuture<? extends YangTextSchemaSource, SchemaSourceException> getSource(
-                SourceIdentifier sourceIdentifier) {
-            return delegate.getSource(sourceIdentifier);
-        }
+        return new GlobalSchemaServiceProxy();
     }
 }

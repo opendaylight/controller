@@ -14,15 +14,7 @@
 
   <!-- Schema Service -->
 
-  <bean id="schemaServiceImpl" class="org.opendaylight.controller.sal.dom.broker.GlobalBundleScanningSchemaServiceImpl"
-          factory-method="getInstance" />
-
-  <service ref="schemaServiceImpl">
-    <interfaces>
-      <value>org.opendaylight.controller.sal.core.api.model.SchemaService</value>
-      <value>org.opendaylight.controller.sal.core.api.model.YangTextSourceProvider</value>
-    </interfaces>
-  </service>
+  <odl:static-reference id="schemaService" interface="org.opendaylight.controller.sal.core.api.model.SchemaService"/>
 
   <!-- DOM Notification Service -->
 
@@ -46,7 +38,7 @@
 
   <bean id="domRpcRouter" class="org.opendaylight.controller.md.sal.dom.broker.impl.DOMRpcRouter"
           factory-method="newInstance">
-    <argument ref="schemaServiceImpl"/>
+    <argument ref="schemaService"/>
   </bean>
 
   <service ref="domRpcRouter" odl:type="default">

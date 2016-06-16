@@ -22,7 +22,6 @@ import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
 import org.opendaylight.controller.sal.core.api.BrokerService;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.opendaylight.controller.sal.dom.broker.BrokerImpl;
-import org.opendaylight.controller.sal.dom.broker.GlobalBundleScanningSchemaServiceImpl;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,6 +71,9 @@ public final class DomBrokerImplModule extends org.opendaylight.controller.confi
         DOMMountPointService mountService = newTracker(DOMMountPointService.class, closeables).
                 waitForService(WaitingServiceTracker.FIVE_MINUTES);
 
+        SchemaService globalSchemaService = newTracker(SchemaService.class, closeables).
+                waitForService(WaitingServiceTracker.FIVE_MINUTES);
+
         final DOMDataBroker dataBroker = getAsyncDataBrokerDependency();
 
         final ClassToInstanceMap<BrokerService> services = MutableClassToInstanceMap.create();
@@ -79,7 +81,7 @@ public final class DomBrokerImplModule extends org.opendaylight.controller.confi
         services.putInstance(DOMNotificationService.class, domNotificationService);
         services.putInstance(DOMNotificationPublishService.class, domNotificationPublishService);
 
-        final SchemaService schemaService = getSchemaServiceImpl();
+        final SchemaService schemaService = getSchemaServiceImpl(globalSchemaService);
         services.putInstance(SchemaService.class, schemaService);
 
         services.putInstance(DOMDataBroker.class, dataBroker);
@@ -112,12 +114,12 @@ public final class DomBrokerImplModule extends org.opendaylight.controller.confi
         return tracker;
     }
 
-    private SchemaService getSchemaServiceImpl() {
+    private SchemaService getSchemaServiceImpl(SchemaService globalSchemaService) {
         final SchemaService schemaService;
         if(getRootSchemaService() != null) {
             schemaService = getRootSchemaServiceDependency();
         } else {
-            schemaService = GlobalBundleScanningSchemaServiceImpl.getInstance();
+            schemaService = globalSchemaService;
         }
         return schemaService;
     }
