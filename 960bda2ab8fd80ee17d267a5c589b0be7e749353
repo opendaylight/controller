@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba51214e_943c8795",
+        "filename": "opendaylight/commons/protocol-framework/src/main/java/org/opendaylight/protocol/framework/AbstractDispatcher.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 278,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-06-16T13:21:39Z",
+      "side": 1,
+      "message": "oops - I think this is not intended. Oh or maybe it is because blueprint will shutdown those EventLoopGroup for you?\n\nOr is this about the restart config modules patch bellow, that will take care of cleaning up those resources?",
+      "range": {
+        "startLine": 274,
+        "startChar": 0,
+        "endLine": 278,
+        "endChar": 11
+      },
+      "revId": "960bda2ab8fd80ee17d267a5c589b0be7e749353",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba51214e_b45eebe7",
+        "filename": "opendaylight/config/netty-threadgroup-config/src/main/resources/org/opendaylight/blueprint/netty-threadgroup.xml",
+        "patchSetId": 5
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-06-16T13:21:39Z",
+      "side": 1,
+      "message": "Now I\u0027m understanding better the scope of the restart config modules along with blueprint container. You\u0027ve done that mostly (only?) for those netty EventLoopGroup",
+      "range": {
+        "startLine": 21,
+        "startChar": 0,
+        "endLine": 25,
+        "endChar": 25
+      },
+      "revId": "960bda2ab8fd80ee17d267a5c589b0be7e749353",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
