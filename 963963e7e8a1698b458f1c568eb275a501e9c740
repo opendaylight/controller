@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba51214e_a487e00e",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/client/ClientActorBehavior.java",
+        "patchSetId": 44
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-06-16T05:30:43Z",
+      "side": 1,
+      "message": "Maybe \"hacf\" is a standard phrase/acronym that I\u0027m not aware of but can we name it haltAndCatchFire for clarity?",
+      "revId": "963963e7e8a1698b458f1c568eb275a501e9c740",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
