@@ -34,6 +34,24 @@
       "revId": "963963e7e8a1698b458f1c568eb275a501e9c740",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba51214e_c75db3eb",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/client/ClientActorBehavior.java",
+        "patchSetId": 44
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-06-16T15:29:04Z",
+      "side": 1,
+      "message": "We can - I like the term. But would be good to spell it out for clarity. We\u0027re not restricted to short mnemonics like assembly :)",
+      "parentUuid": "ba51214e_c7465323",
+      "revId": "963963e7e8a1698b458f1c568eb275a501e9c740",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
