@@ -16,6 +16,24 @@
       "revId": "963963e7e8a1698b458f1c568eb275a501e9c740",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba51214e_c7465323",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/client/ClientActorBehavior.java",
+        "patchSetId": 44
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-06-16T15:21:23Z",
+      "side": 1,
+      "message": "and here I was, thinking we could have a bit of fun... https://en.wikipedia.org/wiki/Halt_and_Catch_Fire",
+      "parentUuid": "ba51214e_a487e00e",
+      "revId": "963963e7e8a1698b458f1c568eb275a501e9c740",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
