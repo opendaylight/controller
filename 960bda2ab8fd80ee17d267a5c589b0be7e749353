@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "ba51214e_d42b9f2e",
+        "filename": "opendaylight/commons/protocol-framework/src/main/java/org/opendaylight/protocol/framework/AbstractDispatcher.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 278,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-06-16T13:30:02Z",
+      "side": 1,
+      "message": "Yes - this is intended although I meant to remove the code altogether - I can do that. The EventLoopGroups are passed in so this class shouldn\u0027t assume ownership and shut them down. This did cause an issue with restart b/c blueprint controls the lifecycle.",
+      "parentUuid": "ba51214e_943c8795",
+      "range": {
+        "startLine": 274,
+        "startChar": 0,
+        "endLine": 278,
+        "endChar": 11
+      },
+      "revId": "960bda2ab8fd80ee17d267a5c589b0be7e749353",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba51214e_b45eebe7",
         "filename": "opendaylight/config/netty-threadgroup-config/src/main/resources/org/opendaylight/blueprint/netty-threadgroup.xml",
         "patchSetId": 5
@@ -36,6 +60,30 @@
       "writtenOn": "2016-06-16T13:21:39Z",
       "side": 1,
       "message": "Now I\u0027m understanding better the scope of the restart config modules along with blueprint container. You\u0027ve done that mostly (only?) for those netty EventLoopGroup",
+      "range": {
+        "startLine": 21,
+        "startChar": 0,
+        "endLine": 25,
+        "endChar": 25
+      },
+      "revId": "960bda2ab8fd80ee17d267a5c589b0be7e749353",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba51214e_34201b49",
+        "filename": "opendaylight/config/netty-threadgroup-config/src/main/resources/org/opendaylight/blueprint/netty-threadgroup.xml",
+        "patchSetId": 5
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-06-16T13:30:02Z",
+      "side": 1,
+      "message": "Right now but I need it in bgpcep as well.",
+      "parentUuid": "ba51214e_b45eebe7",
       "range": {
         "startLine": 21,
         "startChar": 0,
