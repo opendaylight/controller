@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba51214e_54e4af3a",
+        "filename": "opendaylight/md-sal/sal-binding-config/src/main/yang/opendaylight-binding-broker-impl.yang",
+        "patchSetId": 5
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-06-16T13:15:17Z",
+      "side": 0,
+      "message": "you also seem to remove binding-rpc-broker",
+      "range": {
+        "startLine": 59,
+        "startChar": 0,
+        "endLine": 63,
+        "endChar": 5
+      },
+      "revId": "960bda2ab8fd80ee17d267a5c589b0be7e749353",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba51214e_94d5a745",
+        "filename": "opendaylight/md-sal/sal-binding-config/src/main/yang/opendaylight-binding-broker-impl.yang",
+        "patchSetId": 5
+      },
+      "lineNbr": 237,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-06-16T13:15:17Z",
+      "side": 0,
+      "message": "you also seem to remove binding-rpc-broker",
+      "range": {
+        "startLine": 231,
+        "startChar": 0,
+        "endLine": 237,
+        "endChar": 5
+      },
+      "revId": "960bda2ab8fd80ee17d267a5c589b0be7e749353",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
