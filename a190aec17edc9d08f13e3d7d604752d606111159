@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba51214e_14f4f0f0",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/SpecificReferenceListMetadata.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 195,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-06-17T12:24:08Z",
+      "side": 1,
+      "message": "do we need the synchronize block as we\u0027re using a Collections.synchronizedList? (I\u0027m not really familiar with this kind of list).",
+      "range": {
+        "startLine": 193,
+        "startChar": 0,
+        "endLine": 195,
+        "endChar": 9
+      },
+      "revId": "a190aec17edc9d08f13e3d7d604752d606111159",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
