@@ -110,6 +110,11 @@ public class AbsFactoryGeneratedObjectFactory {
         ));
 
         b.addToBody(format("\n"+
+                "public %s handleChangedClass(%s dependencyResolver, %s old, %s bundleContext) throws Exception {\n"+
+                    "return handleChangedClass(old);\n"+
+                "}\n", moduleFQN, DependencyResolver.class.getCanonicalName(), DynamicMBeanWithInstance.class.getCanonicalName(), BUNDLE_CONTEXT));
+
+        b.addToBody(format("\n@Deprecated\n"+
             "public %s handleChangedClass(%s old) throws Exception {\n"+
                 "throw new UnsupportedOperationException(\"Class reloading is not supported\");\n"+
             "}\n", moduleFQN, DynamicMBeanWithInstance.class.getCanonicalName()));
@@ -132,9 +137,9 @@ public class AbsFactoryGeneratedObjectFactory {
                                 DynamicMBeanWithInstance.class.getCanonicalName(), BUNDLE_CONTEXT)+
                 format("%s oldModule;\n",moduleFQN)+
                 "try {\n"+
-                    format("oldModule = (%s) old.getModule();\n",moduleFQN)+
+                    format("oldModule = (%s) old.getModule();\n", moduleFQN)+
                 "} catch(Exception e) {\n"+
-                    "return handleChangedClass(old);\n"+
+                    "return handleChangedClass(dependencyResolver, old, bundleContext);\n"+
                 "}\n"+
             format("%s module = instantiateModule(instanceName, dependencyResolver, oldModule, old.getInstance(), bundleContext);\n", moduleFQN);
 
