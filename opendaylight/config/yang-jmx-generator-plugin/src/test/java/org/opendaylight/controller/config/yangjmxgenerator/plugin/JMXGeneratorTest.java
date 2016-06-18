@@ -20,7 +20,6 @@ import static org.opendaylight.controller.config.yangjmxgenerator.PackageTransla
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ParseException;
 import com.github.javaparser.ast.CompilationUnit;
-import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.io.Files;
@@ -262,12 +261,7 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
             }
         }
 
-        verifyXmlFiles(Collections2.filter(files, new Predicate<File>() {
-            @Override
-            public boolean apply(final File input) {
-                return input.getName().endsWith("xml");
-            }
-        }));
+        verifyXmlFiles(Collections2.filter(files, input -> input.getName().endsWith("xml")));
 
         // verify ModuleFactory file
         File moduleFactoryFile = JMXGenerator.concatFolders(generatedResourcesDir, "META-INF", "services",
@@ -324,7 +318,7 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
         visitor.assertField(
                 "private static final java.util.Set<Class<? extends org.opendaylight.controller.config.api.annotations.AbstractServiceInterface>> serviceIfcs");
 
-        assertFactoryMethods(visitor.methods, 9);
+        assertFactoryMethods(visitor.methods, 10);
         visitor.assertMethodDescriptions(0);
         visitor.assertMethodJavadocs(0);
     }
@@ -371,7 +365,7 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
         args.add(new ArgumentAssertion("Class<? extends org.opendaylight.controller.config.api.annotations.AbstractServiceInterface>", "serviceInterface"));
         assertMethodPresent(methods, new MethodAssertion("boolean", "isModuleImplementingServiceInterface", args));
 
-        assertEquals(methods.size(), expectedSize);
+        assertEquals(expectedSize, methods.size());
     }
 
     private static void assertMethodPresent(final Set<String> methods, final MethodAssertion methodAssertion) {
