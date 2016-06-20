@@ -15,10 +15,11 @@ import org.opendaylight.controller.md.sal.common.impl.clustering.AbstractEntityO
  *
  * @author Thomas Pantelis
  */
+@Deprecated
 class DistributedEntityOwnershipCandidateRegistration extends AbstractEntityOwnershipCandidateRegistration {
     private final DistributedEntityOwnershipService service;
 
-    DistributedEntityOwnershipCandidateRegistration(Entity entity, DistributedEntityOwnershipService service) {
+    DistributedEntityOwnershipCandidateRegistration(final Entity entity, final DistributedEntityOwnershipService service) {
         super(entity);
         this.service = service;
     }

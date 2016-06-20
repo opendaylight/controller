@@ -13,11 +13,13 @@ import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
  * Message sent to the local EntityOwnershipShard to register a candidate.
  *
  * @author Thomas Pantelis
+ * @deprecated use instead {@link DOMRegisterCandidateLocal}
  */
+@Deprecated
 public class RegisterCandidateLocal {
     private final Entity entity;
 
-    public RegisterCandidateLocal(Entity entity) {
+    public RegisterCandidateLocal(final Entity entity) {
         this.entity = entity;
     }
 

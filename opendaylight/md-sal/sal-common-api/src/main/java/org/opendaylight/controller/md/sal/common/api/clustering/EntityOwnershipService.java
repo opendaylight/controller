@@ -21,7 +21,11 @@ import javax.annotation.Nonnull;
  * A component/application may also register interest in the ownership status of an Entity. The listener would be
  * notified whenever the ownership status changes.
  * </p>
+ * 
+ * @deprecated use insted org.opendaylight.mdsal.binding.api.clustering.EntityOwnershipService or
+ *             org.opendaylight.mdsal.dom.api.clustering.DOMEntityOwnershipService
  */
+@Deprecated
 public interface EntityOwnershipService {
 
     /**

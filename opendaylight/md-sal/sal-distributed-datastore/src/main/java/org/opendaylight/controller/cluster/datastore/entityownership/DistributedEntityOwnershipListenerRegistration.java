@@ -14,13 +14,16 @@ import org.opendaylight.controller.md.sal.common.impl.clustering.AbstractEntityO
  * Implementation of EntityOwnershipListenerRegistration.
  *
  * @author Thomas Pantelis
+ * @deprecated use instead
+ *             org.opendaylight.mdsal.common.api.clustering.AbstractGenericEntityOwnershipListenerRegistration
  */
+@Deprecated
 class DistributedEntityOwnershipListenerRegistration extends AbstractEntityOwnershipListenerRegistration {
 
     private final DistributedEntityOwnershipService service;
 
-    DistributedEntityOwnershipListenerRegistration(EntityOwnershipListener listener, String entityType,
-            DistributedEntityOwnershipService service) {
+    DistributedEntityOwnershipListenerRegistration(final EntityOwnershipListener listener, final String entityType,
+            final DistributedEntityOwnershipService service) {
         super(listener, entityType);
         this.service = service;
     }

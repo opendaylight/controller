@@ -13,11 +13,13 @@ import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
  * Message sent to the local EntityOwnershipShard to unregister a candidate.
  *
  * @author Thomas Pantelis
+ * @deprecated use instead {@link DOMUnregisterCandidateLocal}
  */
+@Deprecated
 public class UnregisterCandidateLocal {
     private final Entity entity;
 
-    public UnregisterCandidateLocal(Entity entity) {
+    public UnregisterCandidateLocal(final Entity entity) {
         this.entity = entity;
     }
 

@@ -14,13 +14,16 @@ import javax.annotation.Nonnull;
 /**
  * Thrown when a Candidate has already been registered for a given Entity. This could be due to a component doing a
  * duplicate registration or two different components within the same process trying to register a Candidate.
+ *
+ * @deprecated use instead {@link org.opendaylight.mdsal.common.api.clustering.CandidateAlreadyRegisteredException}
  */
+@Deprecated
 public class CandidateAlreadyRegisteredException extends Exception {
     private static final long serialVersionUID = 1L;
 
     private final Entity entity;
 
-    public CandidateAlreadyRegisteredException(@Nonnull Entity entity) {
+    public CandidateAlreadyRegisteredException(@Nonnull final Entity entity) {
         super(String.format("Candidate has already been registered for %s",
                 Preconditions.checkNotNull(entity, "entity should not be null")));
         this.entity = entity;
