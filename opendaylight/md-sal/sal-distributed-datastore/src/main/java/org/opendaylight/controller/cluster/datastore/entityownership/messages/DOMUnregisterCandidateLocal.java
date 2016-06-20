@@ -1,34 +1,33 @@
 /*
- * Copyright (c) 2015 Brocade Communications Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2016 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
+
 package org.opendaylight.controller.cluster.datastore.entityownership.messages;
 
-import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
+import org.opendaylight.mdsal.dom.api.clustering.DOMEntity;
 
 /**
  * Message sent to the local EntityOwnershipShard to unregister a candidate.
  *
- * @author Thomas Pantelis
- * @deprecated use instead {@link DOMUnregisterCandidateLocal}
  */
-@Deprecated
-public class UnregisterCandidateLocal {
-    private final Entity entity;
+public class DOMUnregisterCandidateLocal {
 
-    public UnregisterCandidateLocal(final Entity entity) {
+    private final DOMEntity entity;
+
+    public DOMUnregisterCandidateLocal(final DOMEntity entity) {
         this.entity = entity;
     }
 
-    public Entity getEntity() {
+    public DOMEntity getEntity() {
         return entity;
     }
 
     @Override
     public String toString() {
-        return "UnregisterCandidateLocal [entity=" + entity + "]";
+        return "DOMUnregisterCandidateLocal [DOMentity=" + entity + "]";
     }
 }

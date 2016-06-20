@@ -1,0 +1,59 @@
+// Contents of "distributed-mdsal-entity-ownership-service"
+module distributed-mdsal-entity-ownership-service {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:config:distributed-mdsal-entity-ownership-service";
+    prefix "distributed-mdsal-entity-ownership-service";
+
+    import config { prefix config; revision-date 2013-04-05; }
+    import opendaylight-operational-dom-datastore {prefix operational-dom-store-spi;}
+    import opendaylight-mdsal-entity-ownership-service { prefix mdsal-entity-ownership-service-spi; revision-date 2016-06-20; }
+
+    description
+        "This module contains the base YANG definitions for the DistributedEntityOwnershipService implementation";
+
+    revision 2016-06-21 {
+        description "Initial revision";
+    }
+
+    identity distributed-dom-mdsal-entity-ownership-service-provider {
+        base config:module-type;
+        config:provided-service mdsal-entity-ownership-service-spi:dom-entity-ownership-service;
+        config:java-name-prefix DOMDistributedEntityOwnershipServiceProvider;
+    }
+
+    identity distributed-mdsal-entity-ownership-service-provider {
+        base config:module-type;
+        config:provided-service mdsal-entity-ownership-service-spi:entity-ownership-service;
+        config:java-name-prefix DistributedEntityOwnershipServiceProvider;
+    }
+
+    //  Augments the 'configuration' choice node under modules/module.
+    augment "/config:modules/config:module/config:configuration" {
+        case distributed-dom-mdsal-entity-ownership-service-provider  {
+            when "/config:modules/config:module/config:type = 'distributed-dom-mdsal-entity-ownership-service-provider'";
+            container data-store {
+                uses config:service-ref {
+                    refine type {
+                        mandatory false;
+                        config:required-identity operational-dom-store-spi:operational-dom-datastore;
+                    }
+                }
+            }
+        }
+    }
+
+    // Augments the 'configuration' choice node under modules/module.
+    augment "/config:modules/config:module/config:configuration" {
+        case distributed-mdsal-entity-ownership-service-provider  {
+            when "/config:modules/config:module/config:type = 'distributed-mdsal-entity-ownership-service-provider'";
+            container data-store {
+                uses config:service-ref {
+                    refine type {
+                        mandatory false;
+                        config:required-identity operational-dom-store-spi:operational-dom-datastore;
+                    }
+                }
+            }
+        }
+    }
+}
