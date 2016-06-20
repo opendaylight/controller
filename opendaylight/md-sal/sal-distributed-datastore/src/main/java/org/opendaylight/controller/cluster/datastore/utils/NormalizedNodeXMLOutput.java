@@ -35,7 +35,7 @@ public final class NormalizedNodeXMLOutput {
 
     public static void toStream(OutputStream outStream, NormalizedNode<?, ?> node)
             throws XMLStreamException, IOException {
-        XMLOutputFactory xmlFactory = XMLOutputFactory.newFactory();
+        XMLOutputFactory xmlFactory = XMLOutputFactory.newInstance();
         xmlFactory.setProperty(XMLOutputFactory.IS_REPAIRING_NAMESPACES, true);
         XMLStreamWriter xmlWriter = xmlFactory.createXMLStreamWriter(outStream);
 

@@ -13,12 +13,14 @@ import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipL
  * Message sent to the local EntityOwnershipShard to unregister an EntityOwnershipListener.
  *
  * @author Thomas Pantelis
+ * @deprecated use instead {@link DOMUnregisterListenerLocal}
  */
+@Deprecated
 public class UnregisterListenerLocal {
     private final EntityOwnershipListener listener;
     private final String entityType;
 
-    public UnregisterListenerLocal(EntityOwnershipListener listener, String entityType) {
+    public UnregisterListenerLocal(final EntityOwnershipListener listener, final String entityType) {
         this.listener = listener;
         this.entityType = entityType;
     }
