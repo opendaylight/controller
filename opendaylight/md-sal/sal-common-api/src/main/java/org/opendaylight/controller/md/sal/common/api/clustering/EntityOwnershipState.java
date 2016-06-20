@@ -11,12 +11,14 @@ package org.opendaylight.controller.md.sal.common.api.clustering;
  * A DTO that encapsulates ownership state for an entity.
  *
  * @author Thomas Pantelis
+ * @deprecated use instead {@link org.opendaylight.mdsal.common.api.clustering.EntityOwnershipState}
  */
+@Deprecated
 public class EntityOwnershipState {
     private final boolean isOwner;
     private final boolean hasOwner;
 
-    public EntityOwnershipState(boolean isOwner, boolean hasOwner) {
+    public EntityOwnershipState(final boolean isOwner, final boolean hasOwner) {
         this.isOwner = isOwner;
         this.hasOwner = hasOwner;
     }

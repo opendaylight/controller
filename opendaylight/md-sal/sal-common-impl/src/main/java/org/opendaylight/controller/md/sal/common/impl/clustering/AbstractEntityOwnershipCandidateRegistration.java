@@ -17,11 +17,14 @@ import org.opendaylight.yangtools.concepts.AbstractObjectRegistration;
  * Abstract base class for an EntityOwnershipCandidateRegistration.
  *
  * @author Thomas Pantelis
+ * @deprecated use insted
+ *             org.opendaylight.mdsal.common.api.clustering.AbstractGenericEntityOwnershipCandidateRegistration
  */
+@Deprecated
 public abstract class AbstractEntityOwnershipCandidateRegistration extends AbstractObjectRegistration<Entity>
         implements EntityOwnershipCandidateRegistration {
 
-    protected AbstractEntityOwnershipCandidateRegistration(@Nonnull Entity entity) {
+    protected AbstractEntityOwnershipCandidateRegistration(@Nonnull final Entity entity) {
         super(Preconditions.checkNotNull(entity, "entity cannot be null"));
     }
 }

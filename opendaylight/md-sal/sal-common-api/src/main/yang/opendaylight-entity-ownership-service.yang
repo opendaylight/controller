@@ -16,4 +16,5 @@ module opendaylight-entity-ownership-service {
         config:java-class  "org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipService";
         config:disable-osgi-service-registration;
     }
+
 }

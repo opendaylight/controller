@@ -13,12 +13,14 @@ import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipL
  * Message sent to the local EntityOwnershipShard to register an EntityOwnershipListener.
  *
  * @author Thomas Pantelis
+ * @deprecated use instead {@link DOMRegisterListenerLocal}
  */
+@Deprecated
 public class RegisterListenerLocal {
     private final EntityOwnershipListener listener;
     private final String entityType;
 
-    public RegisterListenerLocal(EntityOwnershipListener listener, String entityType) {
+    public RegisterListenerLocal(final EntityOwnershipListener listener, final String entityType) {
         this.listener = listener;
         this.entityType = entityType;
     }
