@@ -13,6 +13,7 @@ import org.opendaylight.mdsal.dom.api.clustering.DOMEntity;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.entity.owners.rev150804.EntityOwners;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.entity.owners.rev150804.entity.owners.EntityType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.entity.owners.rev150804.entity.owners.entity.type.entity.Candidate;
+import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
@@ -81,6 +82,12 @@ public final class EntityOwnersModel {
                 entityEntryWithCandidateEntry(entityId, candidateName)));
     }
 
+    static NormalizedNode<?, ?> entityOwnersWithCandidate(final String entityType, final InstanceIdentifier<?> entityId,
+            final String candidateName) {
+        return entityOwnersWithEntityTypeEntry(
+                entityTypeEntryWithEntityEntry(entityType, entityEntryWithCandidateEntry(entityId, candidateName)));
+    }
+
     static ContainerNode entityOwnersWithEntityTypeEntry(final MapEntryNode entityTypeNode) {
         return ImmutableContainerNodeBuilder.create().withNodeIdentifier(
                 ENTITY_OWNERS_NODE_ID).addChild(ImmutableNodes.mapNodeBuilder(EntityType.QNAME).
@@ -96,6 +103,12 @@ public final class EntityOwnersModel {
     static MapEntryNode entityEntryWithCandidateEntry(final YangInstanceIdentifier entityId, final String candidateName) {
         return ImmutableNodes.mapEntryBuilder(ENTITY_QNAME, ENTITY_ID_QNAME, entityId).addChild(
                 candidateEntry(candidateName)).build();
+    }
+
+    static MapEntryNode entityEntryWithCandidateEntry(final InstanceIdentifier<?> entityId,
+            final String candidateName) {
+        return ImmutableNodes.mapEntryBuilder(ENTITY_QNAME, ENTITY_ID_QNAME, entityId)
+                .addChild(candidateEntry(candidateName)).build();
     }
 
     static MapNode candidateEntry(final String candidateName) {

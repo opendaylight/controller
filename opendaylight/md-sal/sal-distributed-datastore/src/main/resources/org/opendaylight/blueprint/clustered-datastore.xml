@@ -138,4 +138,14 @@
 
   <service ref="domDistributedEntityOwnershipServiceMdsal" interface="org.opendaylight.mdsal.dom.api.clustering.DOMEntityOwnershipService" odl:type="default"/>
 
+  <!-- MD-SAL Distributed EntityOwnershipService -->
+  <bean id="distributedEntityOwnershipServiceMdsal" class="org.opendaylight.controller.cluster.datastore.entityownership.DistributedEntityOwnershipServiceMdsal"
+          factory-method="start" destroy-method="close">
+          
+    <argument ref="domDistributedEntityOwnershipServiceMdsal"/>
+    <argument ref="schemaService"/>
+  </bean>
+
+  <service ref="distributedEntityOwnershipServiceMdsal" interface="org.opendaylight.mdsal.dom.api.clustering.DOMEntityOwnershipService" odl:type="default"/>
+
 </blueprint>
