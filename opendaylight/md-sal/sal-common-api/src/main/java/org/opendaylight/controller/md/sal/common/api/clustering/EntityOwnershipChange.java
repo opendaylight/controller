@@ -14,7 +14,10 @@ import javax.annotation.Nonnull;
  * A DTO that encapsulates an ownership change for an entity.
  *
  * @author Thomas Pantelis
+ * @deprecated use instead {@link org.opendaylight.mdsal.binding.api.clustering.EntityOwnershipChange} or
+ *             {@link org.opendaylight.mdsal.dom.api.clustering.DOMEntityOwnershipChange}
  */
+@Deprecated
 public class EntityOwnershipChange {
     private final Entity entity;
     private final boolean wasOwner;
@@ -22,12 +25,12 @@ public class EntityOwnershipChange {
     private final boolean hasOwner;
     private final boolean inJeopardy;
 
-    public EntityOwnershipChange(@Nonnull Entity entity, boolean wasOwner, boolean isOwner, boolean hasOwner) {
+    public EntityOwnershipChange(@Nonnull final Entity entity, final boolean wasOwner, final boolean isOwner, final boolean hasOwner) {
         this(entity, wasOwner, isOwner, hasOwner, false);
     }
 
-    public EntityOwnershipChange(@Nonnull Entity entity, boolean wasOwner, boolean isOwner, boolean hasOwner,
-            boolean inJeopardy) {
+    public EntityOwnershipChange(@Nonnull final Entity entity, final boolean wasOwner, final boolean isOwner, final boolean hasOwner,
+            final boolean inJeopardy) {
         this.entity = Preconditions.checkNotNull(entity, "entity can't be null");
         this.wasOwner = wasOwner;
         this.isOwner = isOwner;

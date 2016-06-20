@@ -11,11 +11,13 @@ package org.opendaylight.controller.md.sal.common.api.clustering;
 import com.google.common.base.Preconditions;
 import java.io.Serializable;
 import javax.annotation.Nonnull;
+import org.opendaylight.mdsal.dom.api.clustering.DOMEntity;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 /**
- * <p></p>
+ * <p>
+ * </p>
  * A clustered Entity is something which is shared by multiple applications across a cluster. An Entity has a type
  * and an identifier.
  * </p>
@@ -36,7 +38,10 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
  * represent an entity, the general-entity yang model can be used.
  * <p>
  * </p>
+ * 
+ * @deprecated use instead {@link org.opendaylight.mdsal.binding.api.clustering.Entity} or {@link DOMEntity}
  */
+@Deprecated
 public final class Entity implements Serializable {
     private static final long serialVersionUID = 1L;
 
@@ -53,7 +58,7 @@ public final class Entity implements Serializable {
      * @param type the type of the entity
      * @param id the identifier of the entity
      */
-    public Entity(@Nonnull String type, @Nonnull YangInstanceIdentifier id) {
+    public Entity(@Nonnull final String type, @Nonnull final YangInstanceIdentifier id) {
         this.type = Preconditions.checkNotNull(type, "type should not be null");
         this.id = Preconditions.checkNotNull(id, "id should not be null");
     }
@@ -65,7 +70,7 @@ public final class Entity implements Serializable {
      * @param type the type of the entity
      * @param entityName the name of the entity used to construct a general-entity YangInstanceIdentifier
      */
-    public Entity(@Nonnull String type, @Nonnull String entityName) {
+    public Entity(@Nonnull final String type, @Nonnull final String entityName) {
         this.type = Preconditions.checkNotNull(type, "type should not be null");
         this.id = YangInstanceIdentifier.builder().node(ENTITY_QNAME).nodeWithKey(ENTITY_QNAME, ENTITY_NAME,
                         Preconditions.checkNotNull(entityName, "entityName should not be null")).build();
@@ -90,7 +95,7 @@ public final class Entity implements Serializable {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) {
             return true;
         }
@@ -99,7 +104,7 @@ public final class Entity implements Serializable {
             return false;
         }
 
-        Entity entity = (Entity) o;
+        final Entity entity = (Entity) o;
 
         if (!id.equals(entity.id)) {
             return false;

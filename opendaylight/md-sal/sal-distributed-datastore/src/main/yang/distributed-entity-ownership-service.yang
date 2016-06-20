@@ -16,6 +16,7 @@ module distributed-entity-ownership-service {
 
     // This is the definition of the service implementation as a module identity.
     identity distributed-entity-ownership-service-provider {
+        status "deprecated";
         base config:module-type;
         config:provided-service entity-ownership-service-spi:entity-ownership-service;
         config:java-name-prefix DistributedEntityOwnershipServiceProvider;
@@ -25,6 +26,7 @@ module distributed-entity-ownership-service {
     augment "/config:modules/config:module/config:configuration" {
         case distributed-entity-ownership-service-provider {
             when "/config:modules/config:module/config:type = 'distributed-entity-ownership-service-provider'";
+            status "deprecated";
                 container data-store {
                     uses config:service-ref {
                         refine type {
