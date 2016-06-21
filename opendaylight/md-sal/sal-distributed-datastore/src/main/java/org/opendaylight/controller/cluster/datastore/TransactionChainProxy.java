@@ -182,7 +182,7 @@ final class TransactionChainProxy extends AbstractTransactionContextFactory<Loca
             public Object apply(Short version) {
                 return new CloseTransactionChain(getHistoryId(), version).toSerializable();
             }
-        });
+        }, CloseTransactionChain.class);
     }
 
     private TransactionProxy allocateWriteTransaction(final TransactionType type) {
