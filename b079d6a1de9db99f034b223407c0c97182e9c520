@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "ba51214e_fbe7a4e2",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/client/ClientActorContext.java",
+        "patchSetId": 22
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-06-21T08:53:43Z",
+      "side": 1,
+      "message": "It will be used as the next behavior -- see ClientActorBehavior.onCommand().",
+      "parentUuid": "da5c1566_38475321",
+      "revId": "b079d6a1de9db99f034b223407c0c97182e9c520",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da5c1566_f83cbb95",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/client/InternalCommand.java",
         "patchSetId": 22
@@ -30,6 +48,24 @@
       "writtenOn": "2016-06-10T10:29:16Z",
       "side": 1,
       "message": "Why does this return ClientActorBehavior?",
+      "revId": "b079d6a1de9db99f034b223407c0c97182e9c520",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba51214e_7bdb941b",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/client/InternalCommand.java",
+        "patchSetId": 22
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-06-21T08:53:43Z",
+      "side": 1,
+      "message": "This is a deferred action, hence it needs the ability to change behavior -- for example to shut the actor down once all processing is done.",
+      "parentUuid": "da5c1566_f83cbb95",
       "revId": "b079d6a1de9db99f034b223407c0c97182e9c520",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
