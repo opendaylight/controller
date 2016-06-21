@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba51214e_d4ed4d8d",
+        "filename": "opendaylight/md-sal/cds-access-api/src/main/java/org/opendaylight/controller/cluster/access/commands/ReadTransactionSuccessV1.java",
+        "patchSetId": 57
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-06-21T18:54:09Z",
+      "side": 1,
+      "message": "We should be using the NormalizedNode output streaming here as ReadDataReply does.",
+      "revId": "fa9a9b0bd718d43fc3050df4ae917b6e85ceb649",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
