@@ -503,7 +503,7 @@ public class ActorContextTest extends AbstractActorTest{
                 public Object apply(Short v) {
                     return new TestMessage();
                 }
-            });
+            }, TestMessage.class);
 
             MessageCollectorActor.expectFirstMatching(shardActorRef1, TestMessage.class);
             MessageCollectorActor.expectFirstMatching(shardActorRef2, TestMessage.class);

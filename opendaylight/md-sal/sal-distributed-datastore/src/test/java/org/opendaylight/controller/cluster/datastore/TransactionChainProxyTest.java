@@ -79,7 +79,7 @@ public class TransactionChainProxyTest extends AbstractTransactionProxyTest {
     public void testClose() {
         new TransactionChainProxy(mockComponentFactory, historyId).close();
 
-        verify(mockActorContext, times(1)).broadcast(any(Function.class));
+        verify(mockActorContext, times(1)).broadcast(any(Function.class), any(Class.class));
     }
 
     @Test
