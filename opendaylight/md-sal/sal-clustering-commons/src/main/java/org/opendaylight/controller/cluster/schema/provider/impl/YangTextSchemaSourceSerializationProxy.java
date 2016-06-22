@@ -13,7 +13,7 @@ import com.google.common.base.Optional;
 import com.google.common.io.ByteSource;
 import java.io.IOException;
 import java.io.Serializable;
-import org.opendaylight.yangtools.yang.model.repo.api.SourceIdentifier;
+import org.opendaylight.yangtools.yang.model.repo.api.RevisionSourceIdentifier;
 import org.opendaylight.yangtools.yang.model.repo.api.YangTextSchemaSource;
 
 /**
@@ -21,7 +21,7 @@ import org.opendaylight.yangtools.yang.model.repo.api.YangTextSchemaSource;
  */
 @Beta
 public class YangTextSchemaSourceSerializationProxy implements Serializable {
-    private static long serialVersionUID = 1L;
+    private static final long serialVersionUID = -6361268518176019477L;
 
     private final byte[] schemaSource;
     private final String revision;
@@ -34,7 +34,7 @@ public class YangTextSchemaSourceSerializationProxy implements Serializable {
     }
 
     public YangTextSchemaSource getRepresentation() {
-        return YangTextSchemaSource.delegateForByteSource(SourceIdentifier.create(name, Optional.of(revision)),
+        return YangTextSchemaSource.delegateForByteSource(RevisionSourceIdentifier.create(name, Optional.of(revision)),
             ByteSource.wrap(schemaSource));
     }
 }
