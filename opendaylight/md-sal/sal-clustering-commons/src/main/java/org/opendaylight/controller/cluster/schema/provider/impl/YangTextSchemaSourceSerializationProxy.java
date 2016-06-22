@@ -21,7 +21,7 @@ import org.opendaylight.yangtools.yang.model.repo.api.YangTextSchemaSource;
  */
 @Beta
 public class YangTextSchemaSourceSerializationProxy implements Serializable {
-    private static long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
     private final byte[] schemaSource;
     private final String revision;
