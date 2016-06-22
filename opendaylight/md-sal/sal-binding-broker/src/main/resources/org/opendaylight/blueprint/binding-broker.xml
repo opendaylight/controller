@@ -8,8 +8,13 @@
   <reference id="schemaService" interface="org.opendaylight.controller.sal.core.api.model.SchemaService" />
 
   <bean id="mappingCodec" class="org.opendaylight.controller.md.sal.binding.impl.BindingToNormalizedNodeCodecFactory"
-         factory-method="getOrCreateInstance">
+         factory-method="newInstance">
     <argument ref="classLoadingStrategy"/>
+  </bean>
+
+  <bean id="mappingCodecReg" class="org.opendaylight.controller.md.sal.binding.impl.BindingToNormalizedNodeCodecFactory"
+         factory-method="registerInstance" destroy-method="close">
+    <argument ref="mappingCodec"/>
     <argument ref="schemaService"/>
   </bean>
 
@@ -19,6 +24,11 @@
       <value>org.opendaylight.yangtools.binding.data.codec.api.BindingNormalizedNodeSerializer</value>
     </interfaces>
   </service>
+
+  <!-- We also register the BindingToNormalizedNodeCodec with its actual class name for
+       backwards compatibility for CSS users that inject the binding-dom-mapping-service -->
+  <service ref="mappingCodec" interface="org.opendaylight.controller.md.sal.binding.impl.BindingToNormalizedNodeCodec"
+        odl:type="default"/>
 
   <!-- Binding RPC Registry Service -->
 
