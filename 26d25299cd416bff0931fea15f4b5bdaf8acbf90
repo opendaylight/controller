@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "ba51214e_861d6812",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/DistributedDataStoreClientActor.java",
+        "patchSetId": 40
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-06-22T14:04:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba51214e_54901dec",
+      "revId": "26d25299cd416bff0931fea15f4b5bdaf8acbf90",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba51214e_f4b69189",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/ModuleShardBackendResolver.java",
         "patchSetId": 40
@@ -30,6 +48,24 @@
       "writtenOn": "2016-06-22T04:36:28Z",
       "side": 1,
       "message": "Can we make the name \"ctx\" more meaningful, i.e. \"actorContext\"?",
+      "revId": "26d25299cd416bff0931fea15f4b5bdaf8acbf90",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba51214e_060b18d7",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/ModuleShardBackendResolver.java",
+        "patchSetId": 40
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-06-22T14:04:20Z",
+      "side": 1,
+      "message": "I have renamed it, though it will go away in a follow-up. The reason for that is that we really just need findPrimaryShardAsync(), and even that needs to be improved.\n\nThe reason for improvement is that findPrimaryShardAsync() locates just ActorRef and the PayloadVersion -- which is not enough, as we actually need ABIVersion range supported by that actor.\n\nThis information is frontend API specific, hence should not be propagated via RAFT messages. Hence when we get an ActorRef (as we do today), we need to perform one more step and ask that actor for those ranges.",
+      "parentUuid": "ba51214e_f4b69189",
       "revId": "26d25299cd416bff0931fea15f4b5bdaf8acbf90",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "ba51214e_a696ac92",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/client/BackendInfoResolver.java",
+        "patchSetId": 40
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-06-22T14:04:20Z",
+      "side": 1,
+      "message": "comes from cache coherency (TLB shootdown). Reworded as invalidation",
+      "parentUuid": "ba51214e_74aa811a",
+      "revId": "26d25299cd416bff0931fea15f4b5bdaf8acbf90",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba51214e_0a6fa0c6",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/client/BackendInfoResolver.java",
         "patchSetId": 40
@@ -64,6 +118,24 @@
       "writtenOn": "2016-06-22T04:36:28Z",
       "side": 1,
       "message": "Since this class is parameterized with \u003cT extends BackendInfo\u003e, shouldn\u0027t \u0027info\u0027  be declared CompletionStage\u003cT\u003e?",
+      "revId": "26d25299cd416bff0931fea15f4b5bdaf8acbf90",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba51214e_46823050",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/client/BackendInfoResolver.java",
+        "patchSetId": 40
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-06-22T14:04:20Z",
+      "side": 1,
+      "message": "Trouble with type captures and erasure. This is called from a place where we only have BackendInfoResolver\u003c?\u003e and hence CompletionStage\u003c? extends BackendInfo\u003e.",
+      "parentUuid": "ba51214e_0a6fa0c6",
       "revId": "26d25299cd416bff0931fea15f4b5bdaf8acbf90",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
