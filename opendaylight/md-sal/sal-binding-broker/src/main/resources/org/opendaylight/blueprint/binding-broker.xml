@@ -8,8 +8,14 @@
   <reference id="schemaService" interface="org.opendaylight.controller.sal.core.api.model.SchemaService" />
 
   <bean id="mappingCodec" class="org.opendaylight.controller.md.sal.binding.impl.BindingToNormalizedNodeCodecFactory"
-         factory-method="getOrCreateInstance">
+         factory-method="newInstance">
     <argument ref="classLoadingStrategy"/>
+  </bean>
+
+  <!-- Register the BindingToNormalizedNodeCodec with the SchemaService as a SchemaContextListener -->
+  <bean id="mappingCodecReg" class="org.opendaylight.controller.md.sal.binding.impl.BindingToNormalizedNodeCodecFactory"
+         factory-method="registerInstance" destroy-method="close">
+    <argument ref="mappingCodec"/>
     <argument ref="schemaService"/>
   </bean>
 
@@ -20,6 +26,19 @@
       <value>org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer</value>
       <value>org.opendaylight.mdsal.binding.dom.codec.api.BindingCodecTreeFactory</value>
     </interfaces>
+  </service>
+
+  <!-- We also register the BindingToNormalizedNodeCodec with its actual class name for
+       backwards compatibility for CSS users that inject the binding-dom-mapping-service -->
+  <service ref="mappingCodec" interface="org.opendaylight.controller.md.sal.binding.impl.BindingToNormalizedNodeCodec"
+        odl:type="default">
+    <!-- Set the appropriate service properties so the corresponding CSS module is restarted if this
+         blueprint container is restarted -->
+    <service-properties>
+      <entry key="config-module-namespace" value="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl"/>
+      <entry key="config-module-name" value="runtime-generated-mapping"/>
+      <entry key="config-instance-name" value="runtime-mapping-singleton"/>
+    </service-properties>
   </service>
 
   <!-- Binding RPC Registry Service -->
