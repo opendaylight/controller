@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "ba51214e_203c432f",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/SpecificReferenceListMetadata.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 3635
+      },
+      "writtenOn": "2016-06-22T13:27:43Z",
+      "side": 1,
+      "message": "Should use File.SEPARATOR.  Also, this should be a constant for visibility sake.",
+      "range": {
+        "startLine": 58,
+        "startChar": 30,
+        "endLine": 58,
+        "endChar": 50
+      },
+      "revId": "a190aec17edc9d08f13e3d7d604752d606111159",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba51214e_14f4f0f0",
         "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/SpecificReferenceListMetadata.java",
         "patchSetId": 3
@@ -42,6 +65,29 @@
         "startChar": 0,
         "endLine": 195,
         "endChar": 9
+      },
+      "revId": "a190aec17edc9d08f13e3d7d604752d606111159",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba51214e_804eefbf",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/SpecificReferenceListMetadata.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 215,
+      "author": {
+        "id": 3635
+      },
+      "writtenOn": "2016-06-22T13:27:43Z",
+      "side": 1,
+      "message": "Why not just use string concatenation here?",
+      "range": {
+        "startLine": 215,
+        "startChar": 8,
+        "endLine": 215,
+        "endChar": 52
       },
       "revId": "a190aec17edc9d08f13e3d7d604752d606111159",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
