@@ -16,6 +16,24 @@
       "revId": "95c421c7b7b26fa25df8027151a47fc19c08b094",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba51214e_a6418c3b",
+        "filename": "opendaylight/md-sal/cds-access-api/src/main/java/org/opendaylight/controller/cluster/access/concepts/LocalHistoryIdentifier.java",
+        "patchSetId": 42
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-06-22T13:44:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba51214e_d4a42d59",
+      "revId": "95c421c7b7b26fa25df8027151a47fc19c08b094",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
