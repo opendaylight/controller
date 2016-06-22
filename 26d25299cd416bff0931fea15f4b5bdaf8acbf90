@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba51214e_54901dec",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/DistributedDataStoreClientActor.java",
+        "patchSetId": 40
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-06-22T04:36:28Z",
+      "side": 1,
+      "message": "Can we make the name \"ctx\" more meaningful, i.e. \"actorContext\"?",
+      "revId": "26d25299cd416bff0931fea15f4b5bdaf8acbf90",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba51214e_f4b69189",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/ModuleShardBackendResolver.java",
+        "patchSetId": 40
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-06-22T04:36:28Z",
+      "side": 1,
+      "message": "Can we make the name \"ctx\" more meaningful, i.e. \"actorContext\"?",
+      "revId": "26d25299cd416bff0931fea15f4b5bdaf8acbf90",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba51214e_74aa811a",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/client/BackendInfoResolver.java",
+        "patchSetId": 40
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-06-22T04:36:28Z",
+      "side": 1,
+      "message": "shootdown (sic)? -\u003e shutdown",
+      "revId": "26d25299cd416bff0931fea15f4b5bdaf8acbf90",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba51214e_0a6fa0c6",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/client/BackendInfoResolver.java",
+        "patchSetId": 40
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-06-22T04:36:28Z",
+      "side": 1,
+      "message": "Since this class is parameterized with \u003cT extends BackendInfo\u003e, shouldn\u0027t \u0027info\u0027  be declared CompletionStage\u003cT\u003e?",
+      "revId": "26d25299cd416bff0931fea15f4b5bdaf8acbf90",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba51214e_ea734caf",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/client/BackendInfoResolver.java",
+        "patchSetId": 40
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-06-22T04:36:28Z",
+      "side": 1,
+      "message": "Same as above comment wrt CompletionStage\u003cT\u003e...",
+      "revId": "26d25299cd416bff0931fea15f4b5bdaf8acbf90",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
