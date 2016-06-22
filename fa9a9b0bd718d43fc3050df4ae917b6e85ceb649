@@ -16,6 +16,24 @@
       "revId": "fa9a9b0bd718d43fc3050df4ae917b6e85ceb649",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba51214e_0013ff66",
+        "filename": "opendaylight/md-sal/cds-access-api/src/main/java/org/opendaylight/controller/cluster/access/commands/ReadTransactionSuccessV1.java",
+        "patchSetId": 57
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-06-22T13:43:41Z",
+      "side": 1,
+      "message": "Nice catch, this was a leftover from a quick prototype",
+      "parentUuid": "ba51214e_d4ed4d8d",
+      "revId": "fa9a9b0bd718d43fc3050df4ae917b6e85ceb649",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
