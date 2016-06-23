@@ -32,7 +32,10 @@ public final class DataTreeChangeListenerRegistrationActor extends AbstractUntyp
     protected void handleReceive(Object message) throws Exception {
         if (message instanceof CloseDataTreeChangeListenerRegistration) {
             registration.close();
-            getSender().tell(CloseDataTreeChangeListenerRegistrationReply.getInstance(), getSelf());
+            if(isValidSender(getSender())) {
+                getSender().tell(CloseDataTreeChangeListenerRegistrationReply.getInstance(), getSelf());
+            }
+
             getSelf().tell(PoisonPill.getInstance(), getSelf());
         } else {
             unknownMessage(message);

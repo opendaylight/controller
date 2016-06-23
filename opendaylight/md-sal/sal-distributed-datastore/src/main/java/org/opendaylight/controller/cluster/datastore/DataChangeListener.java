@@ -15,6 +15,7 @@ import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActor;
 import org.opendaylight.controller.cluster.datastore.messages.DataChanged;
 import org.opendaylight.controller.cluster.datastore.messages.DataChangedReply;
 import org.opendaylight.controller.cluster.datastore.messages.EnableNotification;
+import org.opendaylight.controller.md.sal.binding.api.DataTreeChangeListener;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -72,9 +73,7 @@ public class DataChangeListener extends AbstractUntypedActor {
             LOG.error( String.format( "Error notifying listener %s", this.listener ), e );
         }
 
-        // It seems the sender is never null but it doesn't hurt to check. If the caller passes in
-        // a null sender (ActorRef.noSender()), akka translates that to the deadLetters actor.
-        if(getSender() != null && !getContext().system().deadLetters().equals(getSender())) {
+        if(isValidSender(getSender())) {
             getSender().tell(DataChangedReply.INSTANCE, getSelf());
         }
     }
