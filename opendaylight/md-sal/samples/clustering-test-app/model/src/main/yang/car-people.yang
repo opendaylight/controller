@@ -6,7 +6,7 @@ module car-people {
 
     prefix car;
 
-	  import ietf-inet-types { prefix "inet"; revision-date 2010-09-24; }
+	  import ietf-inet-types { prefix "inet"; revision-date 2013-07-15; }
 	  import car { prefix "c"; revision-date 2014-08-18; }
 	  import people { prefix "people"; revision-date 2014-08-18; }
 
