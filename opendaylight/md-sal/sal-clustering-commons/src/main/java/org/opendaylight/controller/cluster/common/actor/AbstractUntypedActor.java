@@ -8,6 +8,7 @@
 
 package org.opendaylight.controller.cluster.common.actor;
 
+import akka.actor.ActorRef;
 import akka.actor.UntypedActor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,5 +42,11 @@ public abstract class AbstractUntypedActor extends UntypedActor {
     protected final void unknownMessage(Object message) {
         LOG.debug("Received unhandled message {}", message);
         unhandled(message);
+    }
+
+    protected boolean isValidSender(ActorRef sender) {
+        // If the caller passes in a null sender (ActorRef.noSender()), akka translates that to the
+        // deadLetters actor.
+        return sender != null && !getContext().system().deadLetters().equals(sender);
     }
 }

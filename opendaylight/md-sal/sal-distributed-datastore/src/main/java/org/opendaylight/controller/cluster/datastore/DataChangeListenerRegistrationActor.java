@@ -45,7 +45,11 @@ public class DataChangeListenerRegistrationActor extends AbstractUntypedActor {
 
     private void closeListenerRegistration() {
         registration.close();
-        getSender().tell(CloseDataChangeListenerRegistrationReply.INSTANCE, getSelf());
+
+        if(isValidSender(getSender())) {
+            getSender().tell(CloseDataChangeListenerRegistrationReply.INSTANCE, getSelf());
+        }
+
         getSelf().tell(PoisonPill.getInstance(), getSelf());
     }
 
