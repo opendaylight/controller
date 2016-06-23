@@ -6,7 +6,7 @@ module config-test-duplicate-attribute-runtime-bean {
 
     import config { prefix config; revision-date 2013-04-05; }
     import rpc-context { prefix rpcx; revision-date 2013-06-17; }
-    import ietf-inet-types { prefix inet; revision-date 2010-09-24;}
+    import ietf-inet-types { prefix inet; revision-date 2013-07-15;}
 
 
     description
