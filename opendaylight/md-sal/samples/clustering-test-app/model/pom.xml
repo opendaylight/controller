@@ -99,12 +99,12 @@
         </dependency>
         <dependency>
        <groupId>org.opendaylight.mdsal.model</groupId>
-       <artifactId>ietf-inet-types</artifactId>
+       <artifactId>ietf-inet-types-2013-07-15</artifactId>
        <version>${ietf-inet-types.version}</version>
       </dependency>
       <dependency>
        <groupId>org.opendaylight.mdsal.model</groupId>
-       <artifactId>ietf-yang-types</artifactId>
+       <artifactId>ietf-yang-types-20130715</artifactId>
        <version>${ietf-yang-types.version}</version>
       </dependency>
         <dependency>

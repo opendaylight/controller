@@ -5,7 +5,7 @@ module config-test-impl {
 
     import config-test { prefix test; revision-date 2013-06-13;}
     import config { prefix config; revision-date 2013-04-05; }
-    import ietf-inet-types { prefix inet; revision-date 2010-09-24;}
+    import ietf-inet-types { prefix inet; revision-date 2013-07-15;}
     import rpc-context { prefix rpcx; revision-date 2013-06-17; }
     import test-types { prefix tt; revision-date 2013-11-27; }
     import test-groups { prefix tg; revision-date 2014-12-08; }
