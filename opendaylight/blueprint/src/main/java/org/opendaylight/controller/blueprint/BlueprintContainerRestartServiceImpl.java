@@ -77,6 +77,10 @@ class BlueprintContainerRestartServiceImpl implements AutoCloseable, BlueprintCo
 
     @Override
     public void restartContainerAndDependents(final Bundle bundle) {
+        if(restartExecutor.isShutdown()) {
+            return;
+        }
+
         LOG.debug("restartContainerAndDependents for bundle {}", bundle);
 
         restartExecutor.execute(new Runnable() {
