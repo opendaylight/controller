@@ -22,7 +22,6 @@ import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.karaf.options.LogLevelOption.LogLevel;
 import org.ops4j.pax.exam.util.Filter;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,6 +31,8 @@ public abstract class AbstractMdsalTestBase extends AbstractConfigTestBase imple
     private static final int REGISTRATION_TIMEOUT = 70000;
     @Inject @Filter(timeout=60000)
     private BundleContext context;
+    @Inject @Filter(timeout=60000)
+    private BindingAwareBroker broker;
     private ProviderContext session = null;
 
     public ProviderContext getSession() {
@@ -49,11 +50,6 @@ public abstract class AbstractMdsalTestBase extends AbstractConfigTestBase imple
     public void setup() throws Exception {
         super.setup();
         long start = System.nanoTime();
-        ServiceReference<BindingAwareBroker> serviceReference = context.getServiceReference(BindingAwareBroker.class);
-        if(serviceReference == null) {
-            throw new RuntimeException("BindingAwareBroker not found");
-        }
-        BindingAwareBroker broker = context.getService(serviceReference);
         broker.registerProvider(this);
         for(int i=0;i<REGISTRATION_TIMEOUT;i++) {
             if(session !=null) {
