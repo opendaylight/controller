@@ -5,7 +5,7 @@ module config-test-runtime-bean-name-conflict2 {
         prefix "th-java";
 
         import config { prefix config; revision-date 2013-04-05; }
-        import ietf-inet-types { prefix inet; revision-date 2010-09-24;}
+        import ietf-inet-types { prefix inet; revision-date 2013-07-15;}
 
 
         description

@@ -32,7 +32,7 @@
     </dependency>
     <dependency>
       <groupId>org.opendaylight.mdsal.model</groupId>
-      <artifactId>ietf-yang-types</artifactId>
+      <artifactId>ietf-yang-types-20130715</artifactId>
     </dependency>
   </dependencies>
 
