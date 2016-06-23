@@ -80,10 +80,10 @@
     <hosttracker_new.api.version>0.7.0-SNAPSHOT</hosttracker_new.api.version>
     <hosttracker_new.implementation.version>0.7.0-SNAPSHOT</hosttracker_new.implementation.version>
     <httpservice-bridge.northbound.version>0.3.0-SNAPSHOT</httpservice-bridge.northbound.version>
-    <ietf-inet-types.version>2010.09.24.9-SNAPSHOT</ietf-inet-types.version>
+    <ietf-inet-types.version>1.1.0-SNAPSHOT</ietf-inet-types.version>
     <ietf-restconf.version>2013.10.19.9-SNAPSHOT</ietf-restconf.version>
     <ietf-topology.version>2013.10.21.9-SNAPSHOT</ietf-topology.version>
-    <ietf-yang-types.version>2010.09.24.9-SNAPSHOT</ietf-yang-types.version>
+    <ietf-yang-types.version>2013.07.15.9-SNAPSHOT</ietf-yang-types.version>
     <jdepend.maven.plugin.version>2.0-beta-2</jdepend.maven.plugin.version>
     <jmxGeneratorPath>target/generated-sources/config-binding</jmxGeneratorPath>
     <jolokia-bridge.version>0.3.0-SNAPSHOT</jolokia-bridge.version>
