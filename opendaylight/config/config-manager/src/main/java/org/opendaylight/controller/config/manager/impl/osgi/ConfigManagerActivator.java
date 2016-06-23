@@ -15,6 +15,7 @@ import java.util.Collection;
 import java.util.List;
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.MBeanServer;
+import org.opendaylight.controller.config.api.ConfigSystemService;
 import org.opendaylight.controller.config.api.ConfigRegistry;
 import org.opendaylight.controller.config.manager.impl.ConfigRegistryImpl;
 import org.opendaylight.controller.config.manager.impl.jmx.ConfigRegistryJMXRegistrator;
@@ -38,7 +39,7 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ConfigManagerActivator implements BundleActivator, SynchronousBundleListener {
+public class ConfigManagerActivator implements BundleActivator, SynchronousBundleListener, ConfigSystemService {
 
     private static final Logger LOG = LoggerFactory.getLogger(ConfigManagerActivator.class);
 
@@ -123,9 +124,12 @@ public class ConfigManagerActivator implements BundleActivator, SynchronousBundl
                     blankTransactionServiceTracker);
             serviceTracker.open();
 
+            AutoCloseable configMgrReg = registerService(context, this, ConfigSystemService.class);
+
             List<AutoCloseable> list = Arrays.asList(bindingContextProvider, clsReg,
                     wrap(moduleFactoryBundleTracker), moduleInfoBundleTracker,
-                    configRegReg, configRegistryJMXRegistrator, configRegistryJMXRegistratorWithNotifications, wrap(serviceTracker), moduleInfoRegistryWrapper, notifyingConfigRegistry);
+                    configRegReg, configRegistryJMXRegistrator, configRegistryJMXRegistratorWithNotifications,
+                    wrap(serviceTracker), moduleInfoRegistryWrapper, notifyingConfigRegistry, configMgrReg);
             autoCloseable = OsgiRegistrationUtil.aggregate(list);
 
             context.addBundleListener(this);
@@ -154,6 +158,13 @@ public class ConfigManagerActivator implements BundleActivator, SynchronousBundl
         // If the system bundle (id 0) is stopping close the ConfigRegistry so it destroys all modules. On
         // shutdown the system bundle is stopped first.
         if(event.getBundle().getBundleId() == SYSTEM_BUNDLE_ID && event.getType() == BundleEvent.STOPPING) {
+            configRegistry.close();
+        }
+    }
+
+    @Override
+    public void closeAllConfigModules() {
+        if(configRegistry != null) {
             configRegistry.close();
         }
     }
