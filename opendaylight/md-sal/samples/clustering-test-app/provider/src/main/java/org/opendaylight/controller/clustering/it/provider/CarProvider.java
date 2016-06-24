@@ -15,12 +15,15 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.binding.api.DataChangeListener;
+import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.clustering.CandidateAlreadyRegisteredException;
 import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipChange;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipListener;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipService;
+import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.CarId;
@@ -32,6 +35,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.UnregisterOwnershipInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.cars.CarEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.cars.CarEntryBuilder;
+import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcError.ErrorType;
 import org.opendaylight.yangtools.yang.common.RpcResult;
@@ -56,6 +60,13 @@ public class CarProvider implements CarService {
 
     private volatile Thread testThread;
     private volatile boolean stopThread;
+
+    private static final InstanceIdentifier CARS_IID = InstanceIdentifier.builder(Cars.class).build();
+    private static final DataTreeIdentifier<Cars> CARS_DTID = new DataTreeIdentifier<>(
+            LogicalDatastoreType.CONFIGURATION, CARS_IID);
+
+    private volatile ListenerRegistration<DataChangeListener> carsDclRegistration;
+    private volatile ListenerRegistration<CarDataTreeChangeListener> carsDtclRegistration;
 
     public CarProvider(DataBroker dataProvider, EntityOwnershipService ownershipService) {
         this.dataProvider = dataProvider;
@@ -181,5 +192,43 @@ public class CarProvider implements CarService {
         public void ownershipChanged(EntityOwnershipChange ownershipChange) {
             LOG.info("ownershipChanged: {}", ownershipChange);
         }
+    }
+
+    @java.lang.Override
+    public Future<RpcResult<java.lang.Void>> registerLoggingDcl() {
+        carsDclRegistration = dataProvider.registerDataChangeListener(LogicalDatastoreType.CONFIGURATION,
+                CARS_IID, new CarDataChangeListener(), AsyncDataBroker.DataChangeScope.SUBTREE);
+        if (carsDclRegistration != null) {
+            return RpcResultBuilder.<Void>success().buildFuture();
+        }
+        return RpcResultBuilder.<Void>failed().buildFuture();
+    }
+
+    @java.lang.Override
+    public Future<RpcResult<java.lang.Void>> registerLoggingDtcl() {
+        carsDtclRegistration = dataProvider.registerDataTreeChangeListener(
+                CARS_DTID, new CarDataTreeChangeListener());
+        if (carsDtclRegistration != null) {
+            return RpcResultBuilder.<Void>success().buildFuture();
+        }
+        return RpcResultBuilder.<Void>failed().buildFuture();
+    }
+
+    @java.lang.Override
+    public Future<RpcResult<java.lang.Void>> unregisterLoggingDcl() {
+        if (carsDclRegistration != null) {
+            carsDclRegistration.close();
+            carsDclRegistration = null;
+        }
+        return RpcResultBuilder.<Void>success().buildFuture();
+    }
+
+    @java.lang.Override
+    public Future<RpcResult<java.lang.Void>> unregisterLoggingDtcl() {
+        if (carsDtclRegistration != null) {
+            carsDtclRegistration.close();
+            carsDtclRegistration = null;
+        }
+        return RpcResultBuilder.<Void>success().buildFuture();
     }
 }

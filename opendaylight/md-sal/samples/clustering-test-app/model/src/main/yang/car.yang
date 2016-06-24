@@ -94,4 +94,22 @@ module car {
               }
         }
     }
+
+    rpc register-logging-dcl {
+        description "Registers a basic logging DCL on the cars container.  This is useful
+                    for analyzing effects of DCL on a long, flat list.";
+    }
+
+    rpc unregister-logging-dcl {
+        description "Unregisters the logging DCL for the cars container, if it exists.";
+    }
+
+    rpc register-logging-dtcl {
+        description "Registers a basic logging DTCL on the cars container.  This is useful
+                            for analyzing the effects of DTCL on a long, flat list.";
+    }
+
+    rpc unregister-logging-dtcl {
+        description "Unregisters the logging DTCL for the cars container, if it exists.";
+    }
 }
