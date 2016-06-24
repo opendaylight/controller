@@ -64,6 +64,10 @@ module car {
         input {
             leaf rate {
               type uint16;
+              description "The rate is a measure of the number of car-entry(s) added per second.
+                           Thus the rate is measured in terms of transactions per second.  The
+                           rate is not necessary achievable;  the controller may not keep up with
+                           the specified value.  In this instance, rate is considered maximum rate.";
             }
 
             leaf count {
