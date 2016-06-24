@@ -1,0 +1,8 @@
+Verified+1: jenkins-releng <jenkins-releng@opendaylight.org>
+Code-Review+1: Miguel Ángel Muñoz González <miguel.angel.munoz.gonzalez@ericsson.com>
+Code-Review+2: Tom Pantelis <tpanteli@brocade.com>
+Submitted-by: Tom Pantelis <tpanteli@brocade.com>
+Submitted-at: Fri, 24 Jun 2016 11:39:43 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/40775
+Project: controller
+Branch: refs/heads/master
