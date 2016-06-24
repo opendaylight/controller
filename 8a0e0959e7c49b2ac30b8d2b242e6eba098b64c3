@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba51214e_f0632faf",
+        "filename": "karaf/opendaylight-karaf-resources/src/main/resources/bin/karaf",
+        "patchSetId": 2
+      },
+      "lineNbr": 417,
+      "author": {
+        "id": 5849
+      },
+      "writtenOn": "2016-06-24T08:35:53Z",
+      "side": 1,
+      "message": "Isn\u0027t it missing a \"$\"?",
+      "range": {
+        "startLine": 417,
+        "startChar": 17,
+        "endLine": 417,
+        "endChar": 18
+      },
+      "revId": "8a0e0959e7c49b2ac30b8d2b242e6eba098b64c3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
