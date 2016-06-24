@@ -71,7 +71,7 @@ module car {
             }
 
             leaf count {
-              type uint16;
+              type uint32;
               default 0;
               description "Number of cars to create. Zero implies unlimited cars; use
                            stop-stress-test rpc to stop the test.";

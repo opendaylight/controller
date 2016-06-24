@@ -75,7 +75,8 @@ public class CarProvider implements CarService {
 
     @Override
     public Future<RpcResult<Void>> stressTest(StressTestInput input) {
-        final int inputRate, inputCount;
+        final int inputRate;
+        final long inputCount;
 
         // If rate is not provided, or given as zero, then just return.
         if ((input.getRate() == null) || (input.getRate() == 0)) {
