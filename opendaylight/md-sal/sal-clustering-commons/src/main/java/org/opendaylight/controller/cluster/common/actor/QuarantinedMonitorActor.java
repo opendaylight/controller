@@ -33,6 +33,7 @@ public class QuarantinedMonitorActor extends UntypedActor {
     public static final String ADDRESS = "quarantined-monitor";
 
     private final Effect callback;
+    private boolean quarantined;
 
     protected QuarantinedMonitorActor(Effect callback) {
         this.callback = callback;
@@ -54,6 +55,10 @@ public class QuarantinedMonitorActor extends UntypedActor {
 
         // check to see if we got quarantined by another node
 
+        if(quarantined) {
+            return;
+        }
+
         // TODO: follow https://github.com/akka/akka/issues/18758 to see if Akka adds a named
         // exception for quarantine detection
         if (message instanceof AssociationErrorEvent) {
@@ -62,6 +67,8 @@ public class QuarantinedMonitorActor extends UntypedActor {
             if (cause instanceof InvalidAssociation) {
                 Throwable cause2 = ((InvalidAssociation) cause).getCause();
                 if (cause2.getMessage().contains("quarantined this system")) {
+                    quarantined = true;
+
                     LOG.warn("Got quarantined by {}", event.getRemoteAddress());
 
                     // execute the callback
