@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a561d44_6014a8f5",
+        "filename": "opendaylight/md-sal/samples/clustering-test-app/provider/src/main/java/org/opendaylight/controller/clustering/it/provider/CarDataChangeListener.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-06-27T13:34:46Z",
+      "side": 1,
+      "message": "Can you log the change as well?",
+      "revId": "ebc29dbdf0b95247f59984919d34ae5c0ed1296c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_00032cb9",
+        "filename": "opendaylight/md-sal/samples/clustering-test-app/provider/src/main/java/org/opendaylight/controller/clustering/it/provider/CarDataTreeChangeListener.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-06-27T13:34:46Z",
+      "side": 1,
+      "message": "Can you log the changes? I think loop the list and log each one.",
+      "revId": "ebc29dbdf0b95247f59984919d34ae5c0ed1296c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
