@@ -386,11 +386,18 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
                            value="# BUG-5917: javax.xml.transform.TransformerFactory=">
                     <include name="system.properties"/>
                   </replace>
+                  <!-- Karaf 3.0.6 ships the Xalan 2.7.2_2 ServiceMix bundle -->
                   <jar destfile="${project.build.directory}/assembly/lib/endorsed/odl-org.apache.servicemix.bundles.xalan-2.7.2_2_odl.jar">
                     <zipfileset src="${project.build.directory}/assembly/lib/endorsed/org.apache.servicemix.bundles.xalan-2.7.2_2.jar"
                                 excludes="META-INF/services/javax.xml.*" erroronmissingarchive="false"/>
                   </jar>
                   <delete file="${project.build.directory}/assembly/lib/endorsed/org.apache.servicemix.bundles.xalan-2.7.2_2.jar" />
+                  <!-- Karaf 3.0.7 ships the Xalan 2.7.2_3 ServiceMix bundle -->
+                  <jar destfile="${project.build.directory}/assembly/lib/endorsed/odl-org.apache.servicemix.bundles.xalan-2.7.2_3_odl.jar">
+                    <zipfileset src="${project.build.directory}/assembly/lib/endorsed/org.apache.servicemix.bundles.xalan-2.7.2_3.jar"
+                                excludes="META-INF/services/javax.xml.*" erroronmissingarchive="false"/>
+                  </jar>
+                  <delete file="${project.build.directory}/assembly/lib/endorsed/org.apache.servicemix.bundles.xalan-2.7.2_3.jar" />
 
                 </tasks>
               </configuration>
