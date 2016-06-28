@@ -26,6 +26,8 @@ public class JavaFileInputBuilder {
 
     private final List<String> classAnnotations = new ArrayList<>();
 
+    private final List<FullyQualifiedName> importFQNs = new ArrayList<>();
+
     private final List<FullyQualifiedName> extendsFQNs = new ArrayList<>();
 
     private final List<FullyQualifiedName> implementsFQNs = new ArrayList<>();
@@ -42,6 +44,10 @@ public class JavaFileInputBuilder {
 
     public void addClassAnnotation(String annotation) {
         classAnnotations.add(checkNotNull(annotation));
+    }
+
+    public void addImportFQN(FullyQualifiedName fqn) {
+        importFQNs.add(fqn);
     }
 
     public void addExtendsFQN(FullyQualifiedName fqn) {
@@ -130,6 +136,11 @@ public class JavaFileInputBuilder {
             }
 
             @Override
+            public List<FullyQualifiedName> getImports() {
+                return Collections.unmodifiableList(importFQNs);
+            }
+
+            @Override
             public Optional<String> getClassJavaDoc() {
                 return classJavaDoc;
             }
@@ -158,6 +169,7 @@ public class JavaFileInputBuilder {
             public List<String> getBodyElements() {
                 return Collections.unmodifiableList(bodyElements);
             }
+
         };
     }
 }
