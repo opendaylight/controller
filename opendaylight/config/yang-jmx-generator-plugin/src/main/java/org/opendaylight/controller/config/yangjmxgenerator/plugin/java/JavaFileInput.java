@@ -19,6 +19,8 @@ public interface JavaFileInput {
 
     Optional<String> getHeader();
 
+    List<FullyQualifiedName> getImports();
+
     TypeName getType();
 
     Optional<String> getClassJavaDoc();
