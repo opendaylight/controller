@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a561d44_23e595a8",
+        "filename": "opendaylight/config/config-parent/pom.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 205,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2016-06-28T12:32:36Z",
+      "side": 1,
+      "message": "You changed config.file to generated.config.file,\nsince this is public parent downstream users may modified\nconfig.file property which is not used anymore and this could break them (not copying their modified configuration).\n\nPlease test this change to not break downstream users or make it backwards compatible.",
+      "range": {
+        "startLine": 205,
+        "startChar": 24,
+        "endLine": 205,
+        "endChar": 61
+      },
+      "revId": "9247498d9ba850bcdb58735efce3aff00740391e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
