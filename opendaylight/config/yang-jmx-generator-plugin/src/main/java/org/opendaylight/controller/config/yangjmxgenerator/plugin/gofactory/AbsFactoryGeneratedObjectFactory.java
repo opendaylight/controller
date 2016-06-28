@@ -63,6 +63,10 @@ public class AbsFactoryGeneratedObjectFactory {
                                              FullyQualifiedName moduleFQN,
                                              List<Field> moduleFields) {
         JavaFileInputBuilder b = new JavaFileInputBuilder();
+
+        b.addImportFQN(new FullyQualifiedName(Module.class));
+        b.addImportFQN(new FullyQualifiedName(ModuleIdentifier.class));
+
         Annotation moduleQNameAnnotation = Annotation.createModuleQNameANnotation(yangModuleQName);
         b.addClassAnnotation(moduleQNameAnnotation);
 
@@ -110,8 +114,14 @@ public class AbsFactoryGeneratedObjectFactory {
         ));
 
         b.addToBody(format("\n"+
-                "public %s handleChangedClass(%s dependencyResolver, %s old, %s bundleContext) throws Exception {\n"+
-                    "return handleChangedClass(old);\n"+
+                "public %s handleChangedClass(%s dependencyResolver, %s old, %s bundleContext) throws Exception {\n" +
+                    // "// @Deprecated return handleChangedClass(old);\n" +
+                    "String instanceName = old.getModule().getIdentifier().getInstanceName();\n" +
+                    "%1$s newModule = new %1$s(new ModuleIdentifier(NAME, instanceName), dependencyResolver);\n" +
+                    "Module oldModule = old.getModule();\n" +
+                    "Class<? extends Module> oldModuleClass = oldModule.getClass();\n" +
+                    genCodeToCopyAttributes(moduleFields) +
+                    "return newModule;\n" +
                 "}\n", moduleFQN, DependencyResolver.class.getCanonicalName(), DynamicMBeanWithInstance.class.getCanonicalName(), BUNDLE_CONTEXT));
 
         b.addToBody(format("\n@Deprecated\n"+
@@ -128,6 +138,15 @@ public class AbsFactoryGeneratedObjectFactory {
 
         return new GeneratedObjectBuilder(b.build()).toGeneratedObject();
     }
+
+	private String genCodeToCopyAttributes(List<Field> moduleFields) {
+		StringBuilder sb = new StringBuilder("\n");
+		for (Field field : moduleFields) {
+			sb.append(format("newModule.set%1$s( (%2$s) oldModuleClass.getMethod(\"get%1$s\").invoke(oldModule));\n", field.getName(), field.getType()));
+		}
+		sb.append('\n');
+		return sb.toString();
+	}
 
     private static String getCreateModule(FullyQualifiedName moduleFQN, List<Field> moduleFields) {
         String result = "\n"+

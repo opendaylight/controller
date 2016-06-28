@@ -34,6 +34,17 @@ public class GeneratedObjectBuilder {
             content.append(input.getFQN().getPackageName());
             content.append(";\n");
         }
+
+        if (!input.getImports().isEmpty())
+        	content.append('\n');
+        for (FullyQualifiedName importedType : input.getImports()) {
+        	content.append("import ");
+        	content.append(importedType.toString());
+        	content.append(";\n");
+        }
+        if (!input.getImports().isEmpty())
+        	content.append('\n');
+
         content.append(maybeAddComment(input.getClassJavaDoc(), true));
 
         for (String classAnnotation : input.getClassAnnotations()) {
@@ -64,7 +75,6 @@ public class GeneratedObjectBuilder {
     }
 
     private static String maybeAddComment(Optional<String> comment, boolean isJavadoc) {
-
         if (comment.isPresent()) {
             String input = comment.get();
             return StringUtil.writeComment(input, isJavadoc);
