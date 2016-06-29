@@ -7,8 +7,14 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
+
 abstract class ShardDataTreeTransactionParent {
+
     abstract void abortTransaction(AbstractShardDataTreeTransaction<?> transaction);
 
     abstract ShardDataTreeCohort finishTransaction(ReadWriteShardDataTreeTransaction transaction);
+
+    abstract ShardDataTreeCohort createReadyCohort(TransactionIdentifier id, DataTreeModification mod);
 }
