@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+           xmlns:odl="http://opendaylight.org/xmlns/blueprint/v1.0.0"
+           xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0"
+           odl:restart-dependents-on-updates="true">
+
+  <cm:property-placeholder persistent-id="org.opendaylight.controller.root.inmemory.shard.cfg" update-strategy="none">
+    <cm:default-properties>
+      <cm:property name="cfg-dcl-executor-max-pool-size" value="20"/>
+      <cm:property name="cfg-dcl-executor-max-queue-size" value="1000"/>
+      <cm:property name="cfg-notification-max-queue-size" value="1000"/>
+      <cm:property name="cfg-max-commit-queue-size" value="1000"/>
+      <cm:property name="oper-dcl-executor-max-pool-size" value="20"/>
+      <cm:property name="oper-dcl-executor-max-queue-size" value="1000"/>
+      <cm:property name="oper-notification-max-queue-size" value="1000"/>
+      <cm:property name="oper-max-commit-queue-size" value="1000"/>
+    </cm:default-properties>
+  </cm:property-placeholder>
+
+  <reference id="schemaService" interface="org.opendaylight.controller.sal.core.api.model.SchemaService"/>
+
+  <reference id="domDataTreeShardingService" interface="org.opendaylight.mdsal.dom.api.DOMDataTreeShardingService"
+             odl:type="default"/>
+
+  <reference id="domDataTreeService" interface="org.opendaylight.mdsal.dom.api.DOMDataTreeService"
+             odl:type="default"/>
+
+  <bean id="RootOperDOMDataTreeShard" class="org.opendaylight.controller.md.sal.sharded.dom.data.tree.RootInMemoryShardActivator"
+        destroy-method="close">
+    <argument ref="domDataTreeShardingService"/>
+    <argument ref="domDataTreeService"/>
+    <argument ref="schemaService"/>
+    <argument value="OPERATIONAL"/>
+    <argument value="${oper-dcl-executor-max-pool-size}"/>
+    <argument value="${oper-dcl-executor-max-queue-size}"/>
+    <argument value="${oper-notification-max-queue-size}"/>
+    <argument value="${oper-max-commit-queue-size}"/>
+  </bean>
+
+  <bean id="RootConfigDOMDataTreeShard" class="org.opendaylight.controller.md.sal.sharded.dom.data.tree.RootInMemoryShardActivator"
+        destroy-method="close">
+    <argument ref="domDataTreeShardingService"/>
+    <argument ref="domDataTreeService"/>
+    <argument ref="schemaService"/>
+    <argument value="CONFIGURATION"/>
+    <argument value="${cfg-dcl-executor-max-pool-size}"/>
+    <argument value="${cfg-dcl-executor-max-queue-size}"/>
+    <argument value="${cfg-notification-max-queue-size}"/>
+    <argument value="${cfg-max-commit-queue-size}"/>
+  </bean>
+
+</blueprint>

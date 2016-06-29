@@ -346,6 +346,11 @@
       <artifactId>sample-toaster-provider</artifactId>
     </dependency>
 
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>sal-sharded-inmemory-datastore</artifactId>
+    </dependency>
+
   </dependencies>
 
   <scm>

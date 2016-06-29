@@ -55,6 +55,8 @@
     <!--InMemory DOM DataStore-->
     <module>sal-inmemory-datastore</module>
 
+    <module>sal-sharded-inmemory-datastore</module>
+
     <module>sal-clustering-commons</module>
     <module>cds-access-api</module>
 
@@ -109,7 +111,6 @@
             <instructions>
               <Bundle-Name>${project.groupId}.${project.artifactId}</Bundle-Name>
             </instructions>
-            <manifestLocation>${project.basedir}/META-INF</manifestLocation>
           </configuration>
         </plugin>
         <!--This plugin's configuration is used to store Eclipse

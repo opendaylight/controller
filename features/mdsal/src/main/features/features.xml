@@ -121,4 +121,10 @@
         <bundle>mvn:org.opendaylight.controller/messagebus-impl/{{VERSION}}</bundle>
         <configfile finalname="${config.configfile.directory}/05-message-bus.xml">mvn:org.opendaylight.controller/messagebus-config/{{VERSION}}/xml/config</configfile>
     </feature>
+
+  <feature name='odl-mdsal-sharded-inmemory-datastore' version='${project.version}'>
+    <feature version='${mdsal.version}'>odl-mdsal-dom-broker</feature>
+    <feature version='${project.version}'>odl-mdsal-broker-local</feature>
+    <bundle>mvn:org.opendaylight.controller/sal-sharded-inmemory-datastore/{{VERSION}}</bundle>
+  </feature>
 </features>
