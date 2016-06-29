@@ -61,6 +61,10 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
      */
     protected String leaderId = null;
 
+    protected void setLeaderId(String leaderId) {
+        this.leaderId = leaderId;
+    }
+
     private short leaderPayloadVersion = -1;
 
     private long replicatedToAllIndex = -1;
@@ -263,12 +267,9 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
      */
     protected void scheduleElection(FiniteDuration interval) {
         stopElection();
-
-        if(canStartElection()) {
-            // Schedule an election. When the scheduler triggers an ElectionTimeout message is sent to itself
-            electionCancel = context.getActorSystem().scheduler().scheduleOnce(interval, context.getActor(),
-                    ELECTION_TIMEOUT,context.getActorSystem().dispatcher(), context.getActor());
-        }
+        // Schedule an election. When the scheduler triggers an ElectionTimeout message is sent to itself
+        electionCancel = context.getActorSystem().scheduler().scheduleOnce(interval, context.getActor(),
+                ELECTION_TIMEOUT,context.getActorSystem().dispatcher(), context.getActor());
     }
 
     /**
