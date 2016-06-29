@@ -112,5 +112,10 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
       <artifactId>${artifactId}-api</artifactId>
       <version>${symbol_dollar}{project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>${symbol_dollar}{project.groupId}</groupId>
+      <artifactId>${artifactId}-cli</artifactId>
+      <version>${symbol_dollar}{project.version}</version>
+    </dependency>
   </dependencies>
 </project>
