@@ -270,11 +270,9 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
     protected void scheduleElection(FiniteDuration interval) {
         stopElection();
 
-        if(canStartElection()) {
-            // Schedule an election. When the scheduler triggers an ElectionTimeout message is sent to itself
-            electionCancel = context.getActorSystem().scheduler().scheduleOnce(interval, context.getActor(),
-                    ElectionTimeout.INSTANCE, context.getActorSystem().dispatcher(), context.getActor());
-        }
+        // Schedule an election. When the scheduler triggers an ElectionTimeout message is sent to itself
+        electionCancel = context.getActorSystem().scheduler().scheduleOnce(interval, context.getActor(),
+                ElectionTimeout.INSTANCE, context.getActorSystem().dispatcher(), context.getActor());
     }
 
     /**

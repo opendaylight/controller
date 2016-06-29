@@ -1105,6 +1105,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
         configParams.setHeartBeatInterval(new FiniteDuration(100, TimeUnit.MILLISECONDS));
+        configParams.setElectionTimeoutFactor(5);
 
         final String node1ID = "node1";
         final String node2ID = "node2";
@@ -1120,8 +1121,10 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
         InMemoryJournal.addEntry(node1ID, 1, new UpdateElectionTerm(1, "downNode1"));
         InMemoryJournal.addEntry(node1ID, 2, persistedServerConfigEntry);
+        InMemoryJournal.addEntry(node1ID, 3, new ApplyJournalEntries(0));
         InMemoryJournal.addEntry(node2ID, 1, new UpdateElectionTerm(1, "downNode2"));
         InMemoryJournal.addEntry(node2ID, 2, persistedServerConfigEntry);
+        InMemoryJournal.addEntry(node2ID, 3, new ApplyJournalEntries(0));
 
         TestActorRef<MessageCollectorActor> node1Collector = actorFactory.createTestActor(
                 MessageCollectorActor.props().withDispatcher(Dispatchers.DefaultDispatcherId()),
@@ -1167,6 +1170,19 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         node1RaftActorRef.tell(changeServers, testKit.getRef());
         ServerChangeReply reply = testKit.expectMsgClass(JavaTestKit.duration("5 seconds"), ServerChangeReply.class);
         assertEquals("getStatus", ServerChangeStatus.NO_LEADER, reply.getStatus());
+
+        // Send an AppendEntries so node1 has a leaderId
+
+        MessageCollectorActor.clearMessages(node1Collector);
+
+        long term = node1RaftActor.getRaftActorContext().getTermInformation().getCurrentTerm();
+        node1RaftActorRef.tell(new AppendEntries(term, "downNode1", -1L, -1L,
+                Collections.<ReplicatedLogEntry>emptyList(), 0, -1, (short)1), ActorRef.noSender());
+
+        // Wait for the ElectionTimeout to clear the leaderId. he leaderId must be null so on the
+        // ChangeServersVotingStatus message, it will try to elect a leader.
+
+        MessageCollectorActor.expectFirstMatching(node1Collector, ElectionTimeout.class);
 
         // Update node2's peer address and send the message again
 
