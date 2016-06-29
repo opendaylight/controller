@@ -10,7 +10,6 @@ package org.opendaylight.controller.cluster.datastore;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.primitives.UnsignedLong;
 import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.ListenableFuture;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
@@ -49,7 +48,7 @@ public abstract class ShardDataTreeCohort implements Identifiable<TransactionIde
     public abstract void preCommit(FutureCallback<DataTreeCandidate> callback);
 
     @VisibleForTesting
-    public abstract ListenableFuture<Void> abort();
+    public abstract void abort(FutureCallback<Void> callback);
 
     @VisibleForTesting
     public abstract void commit(FutureCallback<UnsignedLong> callback);

@@ -19,9 +19,10 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import com.google.common.primitives.UnsignedLong;
 import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.ListenableFuture;
 import java.util.Collections;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -210,12 +211,28 @@ public class SimpleShardDataTreeCohortTest extends AbstractTest {
         verify(mockUserCohorts).abort();
     }
 
+    private static Future<?> abort(final ShardDataTreeCohort cohort) {
+        final CompletableFuture<Void> f = new CompletableFuture<>();
+        cohort.abort(new FutureCallback<Void>() {
+            @Override
+            public void onSuccess(final Void result) {
+                f.complete(null);
+            }
+
+            @Override
+            public void onFailure(final Throwable failure) {
+                f.completeExceptionally(failure);
+            }
+        });
+
+        return f;
+    }
+
     @Test
     public void testAbort() throws Exception {
         doNothing().when(mockShardDataTree).startAbort(cohort);
 
-        cohort.abort().get();
-
+        abort(cohort).get();
         verify(mockShardDataTree).startAbort(cohort);
     }
 
@@ -226,7 +243,7 @@ public class SimpleShardDataTreeCohortTest extends AbstractTest {
         final Promise<Iterable<Object>> cohortFuture = akka.dispatch.Futures.promise();
         doReturn(Optional.of(cohortFuture.future())).when(mockUserCohorts).abort();
 
-        final ListenableFuture<Void> abortFuture = cohort.abort();
+        final Future<?> abortFuture = abort(cohort);
 
         cohortFuture.success(Collections.emptyList());
 
