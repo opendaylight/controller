@@ -791,6 +791,10 @@ class RaftActorServerConfigurationSupport {
 
         @Override
         void onNewLeader(String newLeader) {
+            if(newLeader == null) {
+                return;
+            }
+
             LOG.debug("{}: New leader {} elected", raftContext.getId(), newLeader);
 
             timer.cancel();

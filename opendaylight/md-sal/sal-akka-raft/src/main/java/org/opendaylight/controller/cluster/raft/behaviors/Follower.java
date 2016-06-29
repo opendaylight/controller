@@ -11,8 +11,8 @@ package org.opendaylight.controller.cluster.raft.behaviors;
 import akka.actor.ActorRef;
 import akka.japi.Procedure;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Preconditions;
 import java.util.ArrayList;
+import javax.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
@@ -65,12 +65,10 @@ public class Follower extends AbstractRaftActorBehavior {
 
         initialSyncStatusTracker = new SyncStatusTracker(context.getActor(), getId(), SYNC_THRESHOLD);
 
-        if(canStartElection()) {
-            if (context.getPeerIds().isEmpty() && getLeaderId() == null) {
-                actor().tell(ElectionTimeout.INSTANCE, actor());
-            } else {
-                scheduleElection(electionDuration());
-            }
+        if (context.getPeerIds().isEmpty() && getLeaderId() == null) {
+            actor().tell(ElectionTimeout.INSTANCE, actor());
+        } else {
+            scheduleElection(electionDuration());
         }
     }
 
@@ -80,8 +78,8 @@ public class Follower extends AbstractRaftActorBehavior {
     }
 
     @VisibleForTesting
-    protected final void setLeaderId(final String leaderId) {
-        this.leaderId = Preconditions.checkNotNull(leaderId);
+    protected final void setLeaderId(@Nullable final String leaderId) {
+        this.leaderId = leaderId;
     }
 
     @Override
@@ -350,6 +348,8 @@ public class Follower extends AbstractRaftActorBehavior {
                 LOG.debug("{}: Received ElectionTimeout - switching to Candidate", logName());
                 return internalSwitchBehavior(RaftState.Candidate);
             } else {
+                setLeaderId(null);
+                scheduleElection(electionDuration());
                 return this;
             }
         }

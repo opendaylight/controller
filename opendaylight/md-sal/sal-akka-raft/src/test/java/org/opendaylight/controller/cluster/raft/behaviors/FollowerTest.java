@@ -12,6 +12,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doReturn;
@@ -36,6 +37,8 @@ import org.opendaylight.controller.cluster.raft.DefaultConfigParamsImpl;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
+import org.opendaylight.controller.cluster.raft.ServerConfigurationPayload;
+import org.opendaylight.controller.cluster.raft.ServerConfigurationPayload.ServerInfo;
 import org.opendaylight.controller.cluster.raft.Snapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
@@ -933,15 +936,19 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
 
         follower = createBehavior(context);
 
-        MessageCollectorActor.expectFirstMatching(followerActor, ElectionTimeout.class);
+        ElectionTimeout electionTimeout = MessageCollectorActor.expectFirstMatching(followerActor,
+                ElectionTimeout.class);
 
         long elapsed = stopwatch.elapsed(TimeUnit.MILLISECONDS);
 
         assertTrue(elapsed < context.getConfigParams().getElectionTimeOutInterval().toMillis());
+
+        RaftActorBehavior newBehavior = follower.handleMessage(ActorRef.noSender(), electionTimeout);
+        assertTrue("Expected Candidate", newBehavior instanceof Candidate);
     }
 
     @Test
-    public void testFollowerDoesNotScheduleAnElectionIfAutomaticElectionsAreDisabled(){
+    public void testFollowerSchedulesElectionIfAutomaticElectionsAreDisabled(){
         MockRaftActorContext context = createActorContext();
         context.setConfigParams(new DefaultConfigParamsImpl(){
             @Override
@@ -954,7 +961,27 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
 
         follower = createBehavior(context);
 
-        MessageCollectorActor.assertNoneMatching(followerActor, ElectionTimeout.class, 500);
+        ElectionTimeout electionTimeout = MessageCollectorActor.expectFirstMatching(followerActor,
+                ElectionTimeout.class);
+        RaftActorBehavior newBehavior = follower.handleMessage(ActorRef.noSender(), electionTimeout);
+        assertSame("handleMessage result", follower, newBehavior);
+    }
+
+    @Test
+    public void testFollowerSchedulesElectionIfNonVoting(){
+        MockRaftActorContext context = createActorContext();
+        context.updatePeerIds(new ServerConfigurationPayload(Arrays.asList(new ServerInfo(context.getId(), false))));
+        ((DefaultConfigParamsImpl)context.getConfigParams()).setHeartBeatInterval(
+                FiniteDuration.apply(100, TimeUnit.MILLISECONDS));
+        ((DefaultConfigParamsImpl)context.getConfigParams()).setElectionTimeoutFactor(1);
+
+        follower = new Follower(context, "leader", (short)1);
+
+        ElectionTimeout electionTimeout = MessageCollectorActor.expectFirstMatching(followerActor,
+                ElectionTimeout.class);
+        RaftActorBehavior newBehavior = follower.handleMessage(ActorRef.noSender(), electionTimeout);
+        assertSame("handleMessage result", follower, newBehavior);
+        assertNull("Expected null leaderId", follower.getLeaderId());
     }
 
     @Test
