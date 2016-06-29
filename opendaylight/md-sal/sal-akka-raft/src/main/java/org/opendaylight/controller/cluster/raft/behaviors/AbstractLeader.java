@@ -34,6 +34,7 @@ import org.opendaylight.controller.cluster.raft.PeerInfo;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
+import org.opendaylight.controller.cluster.raft.ServerConfigurationPayload;
 import org.opendaylight.controller.cluster.raft.Snapshot;
 import org.opendaylight.controller.cluster.raft.VotingState;
 import org.opendaylight.controller.cluster.raft.base.messages.Replicate;
@@ -717,14 +718,21 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                 // followerId to the followerToSnapshot map.
                 FollowerToSnapshot followerToSnapshot = mapFollowerToSnapshot.get(followerId);
 
+                int nextChunkIndex = followerToSnapshot.incrementChunkIndex();
+                Optional<ServerConfigurationPayload> serverConfig = Optional.absent();
+                if(followerToSnapshot.isLastChunk(nextChunkIndex)) {
+                    serverConfig = Optional.fromNullable(context.getPeerServerInfo(true));
+                }
+
                 followerActor.tell(
                     new InstallSnapshot(currentTerm(), context.getId(),
                         snapshot.get().getLastIncludedIndex(),
                         snapshot.get().getLastIncludedTerm(),
                         nextSnapshotChunk,
-                        followerToSnapshot.incrementChunkIndex(),
+                        nextChunkIndex,
                         followerToSnapshot.getTotalChunks(),
-                        Optional.of(followerToSnapshot.getLastChunkHashCode())
+                        Optional.of(followerToSnapshot.getLastChunkHashCode()),
+                        serverConfig
                     ).toSerializable(followerToLog.get(followerId).getRaftVersion()),
                     actor()
                 );
