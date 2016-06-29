@@ -1,0 +1,12 @@
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
+    <reference id="${classPrefix}Provider" availability="mandatory"
+        activation="eager" interface="${package}.api.${classPrefix}Commands">
+    </reference>
+    <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.0.0">
+        <command name="test-command">
+            <action class="${package}.api.${classPrefix}TestCommand">
+                <argument ref="${classPrefix}Provider"/>
+            </action>
+        </command>
+    </command-bundle>
+</blueprint>
