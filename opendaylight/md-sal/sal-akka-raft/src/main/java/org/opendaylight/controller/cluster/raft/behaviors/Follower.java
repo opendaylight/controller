@@ -67,8 +67,9 @@ public class Follower extends AbstractRaftActorBehavior {
             } else {
                 scheduleElection(electionDuration());
             }
+        } else {
+            scheduleElection(electionDuration());
         }
-
     }
 
     private boolean isLogEntryPresent(long index){
@@ -341,6 +342,7 @@ public class Follower extends AbstractRaftActorBehavior {
                 LOG.debug("{}: Received ElectionTimeout - switching to Candidate", logName());
                 return internalSwitchBehavior(RaftState.Candidate);
             } else {
+                setLeaderId(null);
                 return this;
             }
 
