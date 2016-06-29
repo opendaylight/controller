@@ -46,7 +46,7 @@ final class CohortEntry {
 
     private CohortEntry(final ReadWriteShardDataTreeTransaction transaction, final short clientVersion) {
         this.transaction = Preconditions.checkNotNull(transaction);
-        this.transactionID = transaction.getId();
+        this.transactionID = transaction.getIdentifier();
         this.clientVersion = clientVersion;
     }
 
