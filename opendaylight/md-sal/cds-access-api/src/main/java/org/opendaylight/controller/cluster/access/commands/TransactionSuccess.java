@@ -28,6 +28,10 @@ public abstract class TransactionSuccess<T extends TransactionSuccess<T>> extend
         super(identifier, sequence);
     }
 
+    TransactionSuccess(final T success, final ABIVersion version) {
+        super(success, version);
+    }
+
     @Override
     protected abstract AbstractTransactionSuccessProxy<T> externalizableProxy(ABIVersion version);
 }

@@ -350,7 +350,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         }
     }
 
-    private ShardDataTreeTransactionChain ensureTransactionChain(final LocalHistoryIdentifier localHistoryIdentifier) {
+    ShardDataTreeTransactionChain ensureTransactionChain(final LocalHistoryIdentifier localHistoryIdentifier) {
         ShardDataTreeTransactionChain chain = transactionChains.get(localHistoryIdentifier);
         if (chain == null) {
             chain = new ShardDataTreeTransactionChain(localHistoryIdentifier, this);
@@ -456,7 +456,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         final DataTreeModification snapshot = transaction.getSnapshot();
         snapshot.ready();
 
-        return createReadyCohort(transaction.getId(), snapshot);
+        return createReadyCohort(transaction.getIdentifier(), snapshot);
     }
 
     public Optional<NormalizedNode<?, ?>> readNode(final YangInstanceIdentifier path) {
@@ -642,6 +642,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         cohortRegistry.process(sender, message);
     }
 
+    @Override
     ShardDataTreeCohort createReadyCohort(final TransactionIdentifier txId,
             final DataTreeModification modification) {
         SimpleShardDataTreeCohort cohort = new SimpleShardDataTreeCohort(this, modification, txId,
