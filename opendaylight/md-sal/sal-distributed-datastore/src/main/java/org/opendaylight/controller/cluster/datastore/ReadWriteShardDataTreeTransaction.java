@@ -14,7 +14,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification
 public final class ReadWriteShardDataTreeTransaction extends AbstractShardDataTreeTransaction<DataTreeModification> {
     private final ShardDataTreeTransactionParent parent;
 
-    protected ReadWriteShardDataTreeTransaction(final ShardDataTreeTransactionParent parent,
+    ReadWriteShardDataTreeTransaction(final ShardDataTreeTransactionParent parent,
             final TransactionIdentifier id, final DataTreeModification modification) {
         super(id, modification);
         this.parent = Preconditions.checkNotNull(parent);
