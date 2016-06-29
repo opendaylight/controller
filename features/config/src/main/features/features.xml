@@ -21,7 +21,7 @@
 
   <feature name='odl-config-netty-config-api' version='${project.version}' description="OpenDaylight :: Config :: Netty Config API">
     <feature version='${project.version}'>odl-config-api</feature>
-    <feature version="${odlparent.version}">odl-netty-4</feature>
+    <feature version='[4.0.30,5.0.0)'>odl-netty-4</feature>
     <bundle>mvn:org.opendaylight.controller/netty-config-api/{{VERSION}}</bundle>
   </feature>
 
