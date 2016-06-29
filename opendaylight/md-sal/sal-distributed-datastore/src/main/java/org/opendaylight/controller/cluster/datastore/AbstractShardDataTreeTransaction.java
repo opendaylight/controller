@@ -11,6 +11,7 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
 import javax.annotation.concurrent.NotThreadSafe;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
+import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
 
 /**
@@ -19,17 +20,19 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
  * @param <T> Backing transaction type.
  */
 @NotThreadSafe
-abstract class AbstractShardDataTreeTransaction<T extends DataTreeSnapshot> {
-    private final T snapshot;
+abstract class AbstractShardDataTreeTransaction<T extends DataTreeSnapshot> implements Identifiable<TransactionIdentifier> {
     private final TransactionIdentifier id;
+    private final T snapshot;
+
     private boolean closed;
 
-    protected AbstractShardDataTreeTransaction(final TransactionIdentifier id, final T snapshot) {
+    AbstractShardDataTreeTransaction(final TransactionIdentifier id, final T snapshot) {
         this.snapshot = Preconditions.checkNotNull(snapshot);
         this.id = Preconditions.checkNotNull(id);
     }
 
-    final TransactionIdentifier getId() {
+    @Override
+    public final TransactionIdentifier getIdentifier() {
         return id;
     }
 
