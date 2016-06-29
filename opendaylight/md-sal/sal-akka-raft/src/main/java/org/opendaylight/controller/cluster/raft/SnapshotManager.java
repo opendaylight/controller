@@ -394,6 +394,10 @@ public class SnapshotManager implements SnapshotState {
                     context.setCommitIndex(snapshot.getLastAppliedIndex());
                     context.getTermInformation().update(snapshot.getElectionTerm(), snapshot.getElectionVotedFor());
 
+                    if(snapshot.getServerConfiguration() != null) {
+                        context.updatePeerIds(snapshot.getServerConfiguration());
+                    }
+
                     if(snapshot.getState().length > 0 ) {
                         applySnapshotProcedure.apply(snapshot.getState());
                     }
