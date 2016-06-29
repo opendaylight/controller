@@ -225,6 +225,8 @@ public class RaftActorContextImpl implements RaftActorContext {
             votingMember = false;
         }
 
+        LOG.debug("{}: Updated server config: isVoting: {}, peers: {}", id, votingMember, peerInfoMap.values());
+
         setDynamicServerConfigurationInUse();
     }
 
