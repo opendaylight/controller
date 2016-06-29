@@ -9,24 +9,25 @@ package org.opendaylight.controller.cluster.access.concepts;
 
 import com.google.common.annotations.Beta;
 import com.google.common.base.Preconditions;
-import javax.annotation.Nonnull;
+import com.google.common.base.Strings;
 
 /**
- * A failure cause behind a {@link RequestFailure} to process a {@link Request}.
+ * General error raised when the recipient of a {@link Request} fails to process a request.
  *
  * @author Robert Varga
  */
 @Beta
-public abstract class RequestException extends Exception {
+public final class RuntimeRequestException extends RequestException {
     private static final long serialVersionUID = 1L;
 
-    protected RequestException(final @Nonnull String message) {
-        super(Preconditions.checkNotNull(message));
+    public RuntimeRequestException(final String message, final Throwable cause) {
+        super(message, cause);
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(message), "Exception message is mandatory");
+        Preconditions.checkNotNull(cause);
     }
 
-    protected RequestException(final @Nonnull String message, final @Nonnull Throwable cause) {
-        super(Preconditions.checkNotNull(message), Preconditions.checkNotNull(cause));
+    @Override
+    public boolean isRetriable() {
+        return false;
     }
-
-    public abstract boolean isRetriable();
 }
