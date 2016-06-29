@@ -9,29 +9,32 @@ package org.opendaylight.controller.cluster.access.commands;
 
 import com.google.common.annotations.Beta;
 import org.opendaylight.controller.cluster.access.ABIVersion;
-import org.opendaylight.controller.cluster.access.concepts.RequestSuccess;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 
 /**
- * Abstract base class for {@link RequestSuccess}es involving specific transaction. This class is visible outside of
- * this package solely for the ability to perform a unified instanceof check.
+ * Response to a {@link ModifyTransactionRequest} which does not have a {@link PersistenceProtocol}.
  *
  * @author Robert Varga
- *
- * @param <T> Message type
  */
 @Beta
-public abstract class TransactionSuccess<T extends TransactionSuccess<T>> extends RequestSuccess<TransactionIdentifier, T> {
+public final class ModifyTransactionSuccess extends TransactionSuccess<ModifyTransactionSuccess> {
     private static final long serialVersionUID = 1L;
 
-    TransactionSuccess(final TransactionIdentifier identifier, final long sequence) {
+    public ModifyTransactionSuccess(final TransactionIdentifier identifier, final long sequence) {
         super(identifier, sequence);
     }
 
-    TransactionSuccess(final T success, final ABIVersion version) {
+    private ModifyTransactionSuccess(final ModifyTransactionSuccess success, final ABIVersion version) {
         super(success, version);
     }
 
     @Override
-    protected abstract AbstractTransactionSuccessProxy<T> externalizableProxy(ABIVersion version);
+    protected AbstractTransactionSuccessProxy<ModifyTransactionSuccess> externalizableProxy(final ABIVersion version) {
+        return new ModifyTransactionSuccessProxyV1(this);
+    }
+
+    @Override
+    protected ModifyTransactionSuccess cloneAsVersion(final ABIVersion version) {
+        return new ModifyTransactionSuccess(this, version);
+    }
 }
