@@ -199,12 +199,29 @@ public class AbstractLeaderElectionScenarioTest {
 
     void initializeLeaderBehavior(MemberActor actor, RaftActorContext context, int numActiveFollowers) throws Exception {
         // Leader sends immediate heartbeats - we don't care about it so ignore it.
+        // Sometimes the initial AppendEntries messages go to dead letters, probably b/c the follower actors
+        // haven't been fully created/initialized by akka. So we try up to 3 times to create the Leader as
+        // a workaround.
 
-        actor.expectMessageClass(AppendEntriesReply.class, numActiveFollowers);
+        Leader leader = null;
+        AssertionError lastAssertError = null;
+        for(int i = 1; i <= 3; i++) {
+            actor.expectMessageClass(AppendEntriesReply.class, numActiveFollowers);
 
-        @SuppressWarnings("resource")
-        Leader leader = new Leader(context);
-        actor.waitForExpectedMessages(AppendEntriesReply.class);
+            leader = new Leader(context);
+            try {
+                actor.waitForExpectedMessages(AppendEntriesReply.class);
+                lastAssertError = null;
+                break;
+            } catch (AssertionError e) {
+                lastAssertError = e;
+            }
+        }
+
+        if(lastAssertError != null) {
+            throw lastAssertError;
+        }
+
         // Delay assignment here so the AppendEntriesReply isn't forwarded to the behavior.
         actor.behavior = leader;
 
