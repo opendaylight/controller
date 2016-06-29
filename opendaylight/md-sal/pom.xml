@@ -51,6 +51,8 @@
 
     <module>sal-akka-raft</module>
     <module>sal-akka-raft-example</module>
+    <module>sal-akka-raft-example-new</module>
+    <module>sal-akka-raft-new</module>
 
     <!--InMemory DOM DataStore-->
     <module>sal-inmemory-datastore</module>
