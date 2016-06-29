@@ -116,6 +116,7 @@ public class SequencedQueueTest {
     private MockRequest mockRequest;
     private MockRequest mockRequest2;
     private Response<WritableIdentifier, ?> mockResponse;
+    private Long mockCookie;
 
     private static ActorSystem actorSystem;
     private TestProbe mockActor;
@@ -146,8 +147,9 @@ public class SequencedQueueTest {
         mockRequest = new MockRequest(mockIdentifier, ThreadLocalRandom.current().nextLong(), mockReplyTo);
         mockRequest2 = new MockRequest(mockIdentifier, mockRequest.getSequence() + 1, mockReplyTo);
         mockResponse = mockRequest.toRequestFailure(mockCause);
+        mockCookie = ThreadLocalRandom.current().nextLong();
 
-        queue = new SequencedQueue(mockIdentifier, ticker);
+        queue = new SequencedQueue(mockCookie, ticker);
     }
 
     @After
@@ -156,8 +158,8 @@ public class SequencedQueueTest {
     }
 
     @Test
-    public void testGetTarget() {
-        assertSame(mockIdentifier, queue.getTarget());
+    public void testGetCookie() {
+        assertSame(mockCookie, queue.getCookie());
     }
 
     @Test
