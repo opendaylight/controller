@@ -110,8 +110,7 @@ class RaftActorSnapshotMessageSupport {
     }
 
     private void onApplySnapshot(ApplySnapshot message) {
-        log.info("{}: Applying snapshot on follower with snapshotIndex: {}, snapshotTerm: {}", context.getId(),
-                message.getSnapshot().getLastAppliedIndex(), message.getSnapshot().getLastAppliedTerm());
+        log.info("{}: Applying snapshot on follower:  {}", context.getId(), message.getSnapshot());
 
         context.getSnapshotManager().apply(message);
     }
