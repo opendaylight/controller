@@ -20,10 +20,16 @@ import com.google.common.base.Throwables;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nonnull;
+import org.opendaylight.controller.cluster.access.commands.NotLeaderException;
+import org.opendaylight.controller.cluster.access.commands.TransactionRequest;
+import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
+import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
+import org.opendaylight.controller.cluster.access.concepts.RetiredGenerationException;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.common.actor.CommonConfig;
 import org.opendaylight.controller.cluster.common.actor.MessageTracker;
@@ -55,6 +61,7 @@ import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContex
 import org.opendaylight.controller.cluster.datastore.persisted.CommitTransactionPayload;
 import org.opendaylight.controller.cluster.datastore.persisted.DataTreeCandidateSupplier;
 import org.opendaylight.controller.cluster.datastore.utils.Dispatchers;
+import org.opendaylight.controller.cluster.datastore.utils.RequestUtil;
 import org.opendaylight.controller.cluster.notifications.LeaderStateChanged;
 import org.opendaylight.controller.cluster.notifications.RegisterRoleChangeListener;
 import org.opendaylight.controller.cluster.notifications.RoleChangeNotifier;
@@ -133,6 +140,8 @@ public class Shard extends RaftActor {
     private ShardSnapshot restoreFromSnapshot;
 
     private final ShardTransactionMessageRetrySupport messageRetrySupport;
+    
+    private final Map<FrontendIdentifier, FrontendState> knownFrontends = new HashMap<>();
 
     protected Shard(AbstractBuilder<?, ?> builder) {
         super(builder.getId().toString(), builder.getPeerAddresses(),
@@ -228,7 +237,9 @@ public class Shard extends RaftActor {
                     maybeError.get());
             }
 
-            if (CreateTransaction.isSerializedType(message)) {
+            if (message instanceof TransactionRequest) {
+                handleTransactionRequest((TransactionRequest<?>)message);
+            } else if (CreateTransaction.isSerializedType(message)) {
                 handleCreateTransaction(message);
             } else if (message instanceof BatchedModifications) {
                 handleBatchedModifications((BatchedModifications)message);
@@ -278,6 +289,51 @@ public class Shard extends RaftActor {
                 super.handleNonRaftCommand(message);
             }
         }
+    }
+
+    private FrontendState getFrontend(final TransactionRequest<?> request) {
+        final ClientIdentifier clientId = request.getTarget().getHistoryId().getClientId();
+        final FrontendState existing = knownFrontends.get(clientId.getFrontendId());
+        if (existing != null) {
+            final int cmp = Long.compareUnsigned(existing.getGeneration(), clientId.getGeneration());
+            if (cmp == 0) {
+                return existing;
+            }
+            if (cmp > 0) {
+                LOG.debug("{}: rejecting request from outdated client {}", persistenceId(), clientId);
+                RequestUtil.sendFailure(request, new RetiredGenerationException(existing.getGeneration()));
+                return null;
+            }
+
+            LOG.info("{}: retiring state {}, outdated by request from client {}", persistenceId(), existing, clientId);
+            existing.retire();
+            knownFrontends.remove(clientId.getFrontendId());
+        } else {
+            LOG.debug("{}: client {} is not yet known", persistenceId(), clientId);
+        }
+        
+        final FrontendState ret = new FrontendState(persistenceId(), clientId);
+        knownFrontends.put(clientId.getFrontendId(), ret);
+        LOG.debug("{}: created state {} for client {}", persistenceId(), ret, clientId);
+        return ret;
+    }
+    
+    private void handleTransactionRequest(final TransactionRequest<?> request) {
+        // We are not the leader, hence we want to fail-fast.
+        if (!isLeader() || !isLeaderActive()) {
+            LOG.debug("{}: not currently leader, rejecting request {}", persistenceId(), request);
+            RequestUtil.sendFailure(request, new NotLeaderException(getSelf()));
+            return;
+        }
+
+        // Acquire our frontend tracking handle and verify generation matches
+        final FrontendState feState = getFrontend(request);
+        if (feState == null) {
+            // Error response has already been sent
+            return;
+        }
+        
+        feState.handleTransactionRequest(request);
     }
 
     private boolean hasLeader() {
