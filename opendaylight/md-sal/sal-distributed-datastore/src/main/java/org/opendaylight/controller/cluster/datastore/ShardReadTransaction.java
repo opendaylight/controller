@@ -24,7 +24,7 @@ public class ShardReadTransaction extends ShardTransaction {
 
     public ShardReadTransaction(AbstractShardDataTreeTransaction<?> transaction, ActorRef shardActor,
             ShardStats shardStats) {
-        super(shardActor, shardStats, transaction.getId());
+        super(shardActor, shardStats, transaction.getIdentifier());
         this.transaction = Preconditions.checkNotNull(transaction);
     }
 

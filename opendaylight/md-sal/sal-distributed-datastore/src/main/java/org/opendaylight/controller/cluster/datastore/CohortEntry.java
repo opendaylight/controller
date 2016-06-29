@@ -11,8 +11,6 @@ import akka.actor.ActorRef;
 import com.google.common.base.Preconditions;
 import com.google.common.primitives.UnsignedLong;
 import com.google.common.util.concurrent.FutureCallback;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.ShardCommitCoordinator.CohortDecorator;
 import org.opendaylight.controller.cluster.datastore.modification.Modification;
@@ -33,7 +31,7 @@ final class CohortEntry {
 
     private CohortEntry(final ReadWriteShardDataTreeTransaction transaction, final short clientVersion) {
         this.transaction = Preconditions.checkNotNull(transaction);
-        this.transactionID = transaction.getId();
+        this.transactionID = transaction.getIdentifier();
         this.clientVersion = clientVersion;
     }
 
@@ -107,8 +105,8 @@ final class CohortEntry {
         cohort.commit(callback);
     }
 
-    void abort() throws InterruptedException, ExecutionException, TimeoutException {
-        cohort.abort().get();
+    void abort(final FutureCallback<Void> callback) {
+        cohort.abort(callback);
     }
 
     void ready(final CohortDecorator cohortDecorator) {
