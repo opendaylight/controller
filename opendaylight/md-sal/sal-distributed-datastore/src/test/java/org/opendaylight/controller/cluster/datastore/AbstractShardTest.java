@@ -31,7 +31,6 @@ import akka.util.Timeout;
 import com.google.common.base.Optional;
 import com.google.common.primitives.UnsignedLong;
 import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.io.IOException;
 import java.util.Collections;
@@ -437,7 +436,7 @@ public abstract class AbstractShardTest extends AbstractActorTest {
         private FutureCallback<DataTreeCandidate> preCommit;
         private FutureCallback<UnsignedLong> commit;
 
-        public void setDelegate(ShardDataTreeCohort delegate) {
+        public void setDelegate(final ShardDataTreeCohort delegate) {
             this.delegate = delegate;
         }
 
@@ -472,19 +471,19 @@ public abstract class AbstractShardTest extends AbstractActorTest {
         }
 
         @Override
-        public void canCommit(FutureCallback<Void> callback) {
+        public void canCommit(final FutureCallback<Void> callback) {
             canCommit = mockFutureCallback(callback);
             delegate.canCommit(canCommit);
         }
 
         @Override
-        public void preCommit(FutureCallback<DataTreeCandidate> callback) {
+        public void preCommit(final FutureCallback<DataTreeCandidate> callback) {
             preCommit = mockFutureCallback(callback);
             delegate.preCommit(preCommit);
         }
 
         @Override
-        public void commit(FutureCallback<UnsignedLong> callback) {
+        public void commit(final FutureCallback<UnsignedLong> callback) {
             commit = mockFutureCallback(callback);
             delegate.commit(commit);
         }
@@ -506,8 +505,8 @@ public abstract class AbstractShardTest extends AbstractActorTest {
         }
 
         @Override
-        public ListenableFuture<Void> abort() {
-            return delegate.abort();
+        public void abort(final FutureCallback<Void> callback) {
+            delegate.abort(callback);
         }
 
         @Override
