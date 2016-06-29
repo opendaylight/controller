@@ -15,7 +15,6 @@ import com.google.common.primitives.UnsignedLong;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.SettableFuture;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
@@ -94,34 +93,34 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort implements Ide
         }
     }
 
+
     @Override
-    public ListenableFuture<Void> abort() {
+    public void abort(final FutureCallback<Void> callback) {
         dataTree.startAbort(this);
         state = State.ABORTED;
 
         final Optional<Future<Iterable<Object>>> maybeAborts = userCohorts.abort();
         if (!maybeAborts.isPresent()) {
-            return VOID_FUTURE;
+            callback.onSuccess(null);
+            return;
         }
 
         final Future<Iterable<Object>> aborts = maybeAborts.get();
         if (aborts.isCompleted()) {
-            return VOID_FUTURE;
+            callback.onSuccess(null);
+            return;
         }
 
-        final SettableFuture<Void> ret = SettableFuture.create();
         aborts.onComplete(new OnComplete<Iterable<Object>>() {
             @Override
             public void onComplete(final Throwable failure, final Iterable<Object> objs) {
                 if (failure != null) {
-                    ret.setException(failure);
+                    callback.onFailure(failure);
                 } else {
-                    ret.set(null);
+                    callback.onSuccess(null);
                 }
             }
         }, ExecutionContexts.global());
-
-        return ret;
     }
 
     @Override
