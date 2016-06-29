@@ -543,6 +543,7 @@ public class ClusterAdminRpcServiceTest {
                 moduleShardsConfig(moduleShardsConfig).build();
 
         leaderNode1.configDataStore().waitTillReady();
+        replicaNode3.configDataStore().waitTillReady();
         verifyRaftPeersPresent(leaderNode1.configDataStore(), "cars", "member-2", "member-3");
         verifyRaftPeersPresent(replicaNode2.configDataStore(), "cars", "member-1", "member-3");
         verifyRaftPeersPresent(replicaNode3.configDataStore(), "cars", "member-1", "member-2");
@@ -609,6 +610,8 @@ public class ClusterAdminRpcServiceTest {
 
         leaderNode1.configDataStore().waitTillReady();
         leaderNode1.operDataStore().waitTillReady();
+        replicaNode3.configDataStore().waitTillReady();
+        replicaNode3.operDataStore().waitTillReady();
         verifyRaftPeersPresent(leaderNode1.configDataStore(), "cars", "member-2", "member-3");
         verifyRaftPeersPresent(replicaNode2.configDataStore(), "cars", "member-1", "member-3");
         verifyRaftPeersPresent(replicaNode3.configDataStore(), "cars", "member-1", "member-2");
@@ -661,6 +664,8 @@ public class ClusterAdminRpcServiceTest {
 
         leaderNode1.configDataStore().waitTillReady();
         leaderNode1.operDataStore().waitTillReady();
+        replicaNode3.configDataStore().waitTillReady();
+        replicaNode3.operDataStore().waitTillReady();
         verifyVotingStates(leaderNode1.configDataStore(), "cars", new SimpleEntry<>("member-1", true),
                 new SimpleEntry<>("member-2", true), new SimpleEntry<>("member-3", false));
 

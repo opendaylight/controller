@@ -238,7 +238,8 @@ public class ShardManagerTest extends AbstractActorTest {
 
 
     private Props newPropsShardMgrWithMockShardActor() {
-        return newTestShardMgrBuilderWithMockShardActor().props();
+        return newTestShardMgrBuilderWithMockShardActor().props().withDispatcher(
+                Dispatchers.DefaultDispatcherId());
     }
 
     private Props newPropsShardMgrWithMockShardActor(ActorRef shardActor) {
