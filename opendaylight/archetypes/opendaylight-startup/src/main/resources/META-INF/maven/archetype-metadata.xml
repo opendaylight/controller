@@ -111,6 +111,26 @@
        </includes>
      </fileSet>
 
+     <!-- cli -->
+     <fileSet filtered="true" encoding="UTF-8">
+        <directory>cli</directory>
+        <includes>
+            <include>pom.xml</include>
+        </includes>
+    </fileSet>
+    <fileSet filtered="true" encoding="UTF-8">
+        <directory>cli/src/main/java</directory>
+        <includes>
+            <include>**/*.java</include>
+         </includes>
+    </fileSet>
+    <fileSet filtered="true" encoding="UTF-8">
+        <directory>cli/src/main/resources/org/opendaylight/blueprint</directory>
+        <includes>
+            <include>**/*.xml</include>
+         </includes>
+    </fileSet>
+
      <!-- it -->
      <fileSet filtered="true" encoding="UTF-8">
         <directory>it</directory>
