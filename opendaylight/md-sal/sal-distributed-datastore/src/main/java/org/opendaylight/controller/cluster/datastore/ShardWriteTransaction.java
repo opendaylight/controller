@@ -32,7 +32,7 @@ public class ShardWriteTransaction extends ShardTransaction {
 
     public ShardWriteTransaction(ReadWriteShardDataTreeTransaction transaction, ActorRef shardActor,
             ShardStats shardStats) {
-        super(shardActor, shardStats, transaction.getId());
+        super(shardActor, shardStats, transaction.getIdentifier());
         this.transaction = transaction;
     }
 
