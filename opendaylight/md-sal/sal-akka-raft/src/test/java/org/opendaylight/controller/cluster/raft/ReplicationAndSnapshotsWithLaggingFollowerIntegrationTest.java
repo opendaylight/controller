@@ -8,19 +8,26 @@
 package org.opendaylight.controller.cluster.raft;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import akka.actor.ActorRef;
 import akka.persistence.SaveSnapshotSuccess;
 import com.google.common.collect.ImmutableMap;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import javax.annotation.Nullable;
 import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;
+import org.opendaylight.controller.cluster.raft.ServerConfigurationPayload.ServerInfo;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.UpdateElectionTerm;
+import org.opendaylight.controller.cluster.raft.behaviors.AbstractLeader;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.messages.InstallSnapshot;
@@ -331,6 +338,25 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         expSnapshotState.add(payload5);
         expSnapshotState.add(payload6);
 
+        MessageCollectorActor.clearMessages(leaderCollectorActor);
+        MessageCollectorActor.clearMessages(follower1CollectorActor);
+
+        // Send a server config change to test that the install snapshot includes the server config.
+
+        ServerConfigurationPayload serverConfig = new ServerConfigurationPayload(Arrays.asList(
+                new ServerInfo(leaderId, true),
+                new ServerInfo(follower1Id, false),
+                new ServerInfo(follower2Id, false)));
+        leaderContext.updatePeerIds(serverConfig);
+        ((AbstractLeader)leader).updateMinReplicaCount();
+        leaderActor.tell(serverConfig, ActorRef.noSender());
+
+        applyState = MessageCollectorActor.expectFirstMatching(leaderCollectorActor, ApplyState.class);
+        verifyApplyState(applyState, leaderCollectorActor, "serverConfig", currentTerm, 8, serverConfig);
+
+        applyState = MessageCollectorActor.expectFirstMatching(follower1CollectorActor, ApplyState.class);
+        verifyApplyState(applyState, null, null, currentTerm, 8, serverConfig);
+
         // Verify the leader's persisted snapshot.
         List<Snapshot> persistedSnapshots = InMemorySnapshotStore.getSnapshots(leaderId, Snapshot.class);
         assertEquals("Persisted snapshots size", 1, persistedSnapshots.size());
@@ -341,7 +367,7 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
 
         expSnapshotState.add(payload7);
 
-        verifyInstallSnapshotToLaggingFollower(7);
+        verifyInstallSnapshotToLaggingFollower(8, serverConfig);
 
         testLog.info("testLeaderSnapshotWithLaggingFollowerCaughtUpViaInstallSnapshot complete");
     }
@@ -419,7 +445,7 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
 
         expSnapshotState.add(payload2);
 
-        verifyInstallSnapshotToLaggingFollower(2L);
+        verifyInstallSnapshotToLaggingFollower(2L, null);
 
         // Sends a payload with index 3.
         verifyNoSubsequentSnapshotAfterMemoryThresholdExceededSnapshot();
@@ -493,7 +519,8 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
      *
      * @throws Exception
      */
-    private void verifyInstallSnapshotToLaggingFollower(long lastAppliedIndex) throws Exception {
+    private void verifyInstallSnapshotToLaggingFollower(long lastAppliedIndex,
+            @Nullable ServerConfigurationPayload expServerConfig) throws Exception {
         List<Snapshot> persistedSnapshots;
         List<ReplicatedLogEntry> unAppliedEntry;
         ApplySnapshot applySnapshot;
@@ -560,6 +587,21 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         // The leader should now have performed fake snapshots to advance the snapshot index and to trim
         // the log. In addition replicatedToAllIndex should've advanced.
         verifyLeadersTrimmedLog(lastAppliedIndex);
+
+        if(expServerConfig != null) {
+            Set<ServerInfo> expServerInfo = new HashSet<>(expServerConfig.getServerConfig());
+            assertEquals("Leader snapshot server config", expServerInfo,
+                    new HashSet<>(persistedSnapshot.getServerConfiguration().getServerConfig()));
+
+            assertEquals("Follower 2 snapshot server config", expServerInfo,
+                    new HashSet<>(applySnapshot.getSnapshot().getServerConfiguration().getServerConfig()));
+
+            ServerConfigurationPayload follower2ServerConfig = follower2Context.getPeerServerInfo(true);
+            assertNotNull("Follower 2 server config is null", follower2ServerConfig);
+
+            assertEquals("Follower 2 server config", expServerInfo,
+                    new HashSet<>(follower2ServerConfig.getServerConfig()));
+        }
 
         MessageCollectorActor.clearMessages(leaderCollectorActor);
         MessageCollectorActor.clearMessages(follower1CollectorActor);

@@ -104,6 +104,11 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
                 return;
             }
 
+            if(message instanceof ServerConfigurationPayload) {
+                super.persistData(collectorActor, new MockIdentifier("serverConfig"), (Payload)message);
+                return;
+            }
+
             if(message instanceof SetPeerAddress) {
                 setPeerAddress(((SetPeerAddress) message).getPeerId().toString(),
                         ((SetPeerAddress) message).getPeerAddress());
@@ -302,7 +307,7 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
     }
 
     protected void verifyApplyState(ApplyState applyState, ActorRef expClientActor,
-            String expId, long expTerm, long expIndex, MockPayload payload) {
+            String expId, long expTerm, long expIndex, Payload payload) {
         assertEquals("ApplyState getClientActor", expClientActor, applyState.getClientActor());
 
         final Identifier id = expId == null ? null : new MockIdentifier(expId);
