@@ -133,7 +133,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         return new LegacyShardDataTreeSnapshot(dataTree.takeSnapshot().readNode(YangInstanceIdentifier.EMPTY).get());
     }
 
-    private ShardDataTreeTransactionChain ensureTransactionChain(final LocalHistoryIdentifier localHistoryIdentifier) {
+    ShardDataTreeTransactionChain ensureTransactionChain(final LocalHistoryIdentifier localHistoryIdentifier) {
         ShardDataTreeTransactionChain chain = transactionChains.get(localHistoryIdentifier);
         if (chain == null) {
             chain = new ShardDataTreeTransactionChain(localHistoryIdentifier, this);
@@ -253,7 +253,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         final DataTreeModification snapshot = transaction.getSnapshot();
         snapshot.ready();
 
-        return createReadyCohort(transaction.getId(), snapshot);
+        return createReadyCohort(transaction.getIdentifier(), snapshot);
     }
 
     public Optional<NormalizedNode<?, ?>> readNode(final YangInstanceIdentifier path) {
@@ -467,10 +467,11 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         cohortRegistry.process(sender, message);
     }
 
+    @Override
     ShardDataTreeCohort createReadyCohort(final TransactionIdentifier txId,
             final DataTreeModification modification) {
-        return new SimpleShardDataTreeCohort(this, modification, txId,
-            cohortRegistry.createCohort(schemaContext, txId, COMMIT_STEP_TIMEOUT));
+        return new SimpleShardDataTreeCohort(this, modification, txId, cohortRegistry.createCohort(schemaContext, txId,
+            COMMIT_STEP_TIMEOUT));
     }
 
     void applyStateFromLeader(final Identifier identifier, final DataTreeCandidateSupplier payload)
