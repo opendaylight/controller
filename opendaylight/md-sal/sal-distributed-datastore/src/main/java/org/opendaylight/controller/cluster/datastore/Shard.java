@@ -12,18 +12,39 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.Cancellable;
 import akka.actor.Props;
+import akka.actor.Status.Failure;
 import akka.serialization.Serialization;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Ticker;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Range;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import org.opendaylight.controller.cluster.access.ABIVersion;
+import org.opendaylight.controller.cluster.access.commands.ConnectClientRequest;
+import org.opendaylight.controller.cluster.access.commands.ConnectClientSuccess;
+import org.opendaylight.controller.cluster.access.commands.LocalHistoryRequest;
+import org.opendaylight.controller.cluster.access.commands.NotLeaderException;
+import org.opendaylight.controller.cluster.access.commands.TransactionRequest;
+import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
+import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
+import org.opendaylight.controller.cluster.access.concepts.Request;
+import org.opendaylight.controller.cluster.access.concepts.RequestEnvelope;
+import org.opendaylight.controller.cluster.access.concepts.RequestException;
+import org.opendaylight.controller.cluster.access.concepts.RequestSuccess;
+import org.opendaylight.controller.cluster.access.concepts.RetiredGenerationException;
+import org.opendaylight.controller.cluster.access.concepts.RuntimeRequestException;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
+import org.opendaylight.controller.cluster.access.concepts.UnsupportedRequestException;
 import org.opendaylight.controller.cluster.common.actor.CommonConfig;
 import org.opendaylight.controller.cluster.common.actor.MessageTracker;
 import org.opendaylight.controller.cluster.common.actor.MessageTracker.Error;
@@ -97,6 +118,16 @@ public class Shard extends RaftActor {
     // FIXME: shard names should be encapsulated in their own class and this should be exposed as a constant.
     public static final String DEFAULT_NAME = "default";
 
+    private static final Collection<ABIVersion> SUPPORTED_ABIVERSIONS;
+    static {
+        final ABIVersion[] values = ABIVersion.values();
+        final ABIVersion[] real = Arrays.copyOfRange(values, 1, values.length - 1);
+        SUPPORTED_ABIVERSIONS = ImmutableList.copyOf(real).reverse();
+    }
+
+    // FIXME: make this a dynamic property based on mailbox size and maximum number of clients
+    private static final int CLIENT_MAX_MESSAGES = 1000;
+
     // The state of this Shard
     private final ShardDataTree store;
 
@@ -130,6 +161,7 @@ public class Shard extends RaftActor {
     private final ShardTransactionMessageRetrySupport messageRetrySupport;
 
     private final FrontendMetadata frontendMetadata = new FrontendMetadata();
+    private final Map<FrontendIdentifier, LeaderFrontendState> knownFrontends = new HashMap<>();
 
     protected Shard(final AbstractBuilder<?, ?> builder) {
         super(builder.getId().toString(), builder.getPeerAddresses(),
@@ -231,7 +263,23 @@ public class Shard extends RaftActor {
                     maybeError.get());
             }
 
-            if (CreateTransaction.isSerializedType(message)) {
+            if (message instanceof RequestEnvelope) {
+                final RequestEnvelope envelope = (RequestEnvelope)message;
+                try {
+                    final RequestSuccess<?, ?> success = handleRequest(envelope);
+                    if (success != null) {
+                        envelope.sendSuccess(success);
+                    }
+                } catch (RequestException e) {
+                    LOG.debug("{}: request {} failed", persistenceId(), envelope, e);
+                    envelope.sendFailure(e);
+                } catch (Exception e) {
+                    LOG.debug("{}: request {} caused failure", persistenceId(), envelope, e);
+                    envelope.sendFailure(new RuntimeRequestException("Request failed to process", e));
+                }
+            } else if (message instanceof ConnectClientRequest) {
+                handleConnectClient((ConnectClientRequest)message);
+            } else if (CreateTransaction.isSerializedType(message)) {
                 handleCreateTransaction(message);
             } else if (message instanceof BatchedModifications) {
                 handleBatchedModifications((BatchedModifications)message);
@@ -281,6 +329,84 @@ public class Shard extends RaftActor {
             } else {
                 super.handleNonRaftCommand(message);
             }
+        }
+    }
+
+    // Acquire our frontend tracking handle and verify generation matches
+    private LeaderFrontendState getFrontend(final ClientIdentifier clientId) throws RequestException {
+        final LeaderFrontendState existing = knownFrontends.get(clientId.getFrontendId());
+        if (existing != null) {
+            final int cmp = Long.compareUnsigned(existing.getIdentifier().getGeneration(), clientId.getGeneration());
+            if (cmp == 0) {
+                return existing;
+            }
+            if (cmp > 0) {
+                LOG.debug("{}: rejecting request from outdated client {}", persistenceId(), clientId);
+                throw new RetiredGenerationException(existing.getIdentifier().getGeneration());
+            }
+
+            LOG.info("{}: retiring state {}, outdated by request from client {}", persistenceId(), existing, clientId);
+            existing.retire();
+            knownFrontends.remove(clientId.getFrontendId());
+        } else {
+            LOG.debug("{}: client {} is not yet known", persistenceId(), clientId);
+        }
+
+        final LeaderFrontendState ret = new LeaderFrontendState(persistenceId(), clientId, store);
+        knownFrontends.put(clientId.getFrontendId(), ret);
+        LOG.debug("{}: created state {} for client {}", persistenceId(), ret, clientId);
+        return ret;
+    }
+
+    private void handleConnectClient(final ConnectClientRequest message) {
+        try {
+            if (!isLeader() || !isLeaderActive()) {
+                LOG.debug("{}: not currently leader, rejecting request {}", persistenceId(), message);
+                throw new NotLeaderException(getSelf());
+            }
+
+            final Range<ABIVersion> clientRange = Range.closed(message.getMinVersion(), message.getMaxVersion());
+            ABIVersion selectedVersion = null;
+            for (ABIVersion v : SUPPORTED_ABIVERSIONS) {
+                if (clientRange.contains(v)) {
+                    selectedVersion = v;
+                    break;
+                }
+            }
+
+            Preconditions.checkArgument(selectedVersion != null,
+                    "No common version between backend versions %s and client versions %s", SUPPORTED_ABIVERSIONS,
+                    clientRange);
+
+            final LeaderFrontendState frontend = getFrontend(message.getTarget());
+            frontend.reconnect();
+            message.getReplyTo().tell(new ConnectClientSuccess(message.getTarget(), message.getSequence(), getSelf(),
+                ImmutableList.of(), store.getDataTree(), CLIENT_MAX_MESSAGES).toVersion(selectedVersion),
+                ActorRef.noSender());
+        } catch (Exception e) {
+            message.getReplyTo().tell(new Failure(e), ActorRef.noSender());
+        }
+    }
+
+    private @Nullable RequestSuccess<?, ?> handleRequest(final RequestEnvelope envelope) throws RequestException {
+        // We are not the leader, hence we want to fail-fast.
+        if (!isLeader() || !isLeaderActive()) {
+            LOG.debug("{}: not currently leader, rejecting request {}", persistenceId(), envelope);
+            throw new NotLeaderException(getSelf());
+        }
+
+        final Request<?, ?> request = envelope.getMessage();
+        if (request instanceof TransactionRequest) {
+            final TransactionRequest<?> txReq = (TransactionRequest<?>)request;
+            final ClientIdentifier clientId = txReq.getTarget().getHistoryId().getClientId();
+            return getFrontend(clientId).handleTransactionRequest(txReq, envelope);
+        } else if (request instanceof LocalHistoryRequest) {
+            final LocalHistoryRequest<?> lhReq = (LocalHistoryRequest<?>)request;
+            final ClientIdentifier clientId = lhReq.getTarget().getClientId();
+            return getFrontend(clientId).handleLocalHistoryRequest(lhReq, envelope);
+        } else {
+            LOG.debug("{}: rejecting unsupported request {}", persistenceId(), request);
+            throw new UnsupportedRequestException(request);
         }
     }
 
@@ -371,7 +497,7 @@ public class Shard extends RaftActor {
         } catch (Exception e) {
             LOG.error("{}: Error handling BatchedModifications for Tx {}", persistenceId(),
                     batched.getTransactionID(), e);
-            sender.tell(new akka.actor.Status.Failure(e), getSelf());
+            sender.tell(new Failure(e), getSelf());
         }
     }
 
@@ -416,7 +542,7 @@ public class Shard extends RaftActor {
 
     private boolean failIfIsolatedLeader(final ActorRef sender) {
         if (isIsolatedLeader()) {
-            sender.tell(new akka.actor.Status.Failure(new NoShardLeaderException(String.format(
+            sender.tell(new Failure(new NoShardLeaderException(String.format(
                     "Shard %s was the leader but has lost contact with all of its followers. Either all" +
                     " other follower nodes are down or this node is isolated by a network partition.",
                     persistenceId()))), getSelf());
@@ -440,7 +566,7 @@ public class Shard extends RaftActor {
             } catch (Exception e) {
                 LOG.error("{}: Error handling ReadyLocalTransaction for Tx {}", persistenceId(),
                         message.getTransactionID(), e);
-                getSender().tell(new akka.actor.Status.Failure(e), getSelf());
+                getSender().tell(new Failure(e), getSelf());
             }
         } else {
             ActorSelection leader = getLeader();
@@ -491,7 +617,7 @@ public class Shard extends RaftActor {
         } else if (getLeader() != null) {
             getLeader().forward(message, getContext());
         } else {
-            getSender().tell(new akka.actor.Status.Failure(new NoShardLeaderException(
+            getSender().tell(new Failure(new NoShardLeaderException(
                     "Could not create a shard transaction", persistenceId())), getSelf());
         }
     }
@@ -513,7 +639,7 @@ public class Shard extends RaftActor {
             getSender().tell(new CreateTransactionReply(Serialization.serializedActorPath(transactionActor),
                     createTransaction.getTransactionId(), createTransaction.getVersion()).toSerializable(), getSelf());
         } catch (Exception e) {
-            getSender().tell(new akka.actor.Status.Failure(e), getSelf());
+            getSender().tell(new Failure(e), getSelf());
         }
     }
 

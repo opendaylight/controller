@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.access.commands;
 
 import akka.actor.ActorRef;
 import com.google.common.annotations.Beta;
+import com.google.common.base.Preconditions;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.Request;
@@ -28,6 +29,7 @@ public abstract class LocalHistoryRequest<T extends LocalHistoryRequest<T>> exte
 
     LocalHistoryRequest(final LocalHistoryIdentifier target, final long sequence, final ActorRef replyTo) {
         super(target, sequence, replyTo);
+        Preconditions.checkArgument(target.getHistoryId() != 0, "History identifier must be non-zero");
     }
 
     LocalHistoryRequest(final T request, final ABIVersion version) {
