@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import org.opendaylight.controller.cluster.raft.RaftVersions;
+import org.opendaylight.controller.cluster.raft.ServerConfigurationPayload;
 import org.opendaylight.controller.protobuff.messages.cluster.raft.InstallSnapshotMessages;
 
 public class InstallSnapshot extends AbstractRaftRPC implements Externalizable {
@@ -28,6 +29,7 @@ public class InstallSnapshot extends AbstractRaftRPC implements Externalizable {
     private int chunkIndex;
     private int totalChunks;
     private Optional<Integer> lastChunkHashCode;
+    private Optional<ServerConfigurationPayload> serverConfig;
 
     /**
      * Empty constructor to satisfy Externalizable.
@@ -35,8 +37,8 @@ public class InstallSnapshot extends AbstractRaftRPC implements Externalizable {
     public InstallSnapshot() {
     }
 
-    public InstallSnapshot(long term, String leaderId, long lastIncludedIndex,
-        long lastIncludedTerm, byte[] data, int chunkIndex, int totalChunks, Optional<Integer> lastChunkHashCode) {
+    public InstallSnapshot(long term, String leaderId, long lastIncludedIndex, long lastIncludedTerm, byte[] data,
+            int chunkIndex, int totalChunks, Optional<Integer> lastChunkHashCode, Optional<ServerConfigurationPayload> serverConfig) {
         super(term);
         this.leaderId = leaderId;
         this.lastIncludedIndex = lastIncludedIndex;
@@ -45,11 +47,13 @@ public class InstallSnapshot extends AbstractRaftRPC implements Externalizable {
         this.chunkIndex = chunkIndex;
         this.totalChunks = totalChunks;
         this.lastChunkHashCode = lastChunkHashCode;
+        this.serverConfig = serverConfig;
     }
 
     public InstallSnapshot(long term, String leaderId, long lastIncludedIndex,
                            long lastIncludedTerm, byte[] data, int chunkIndex, int totalChunks) {
-        this(term, leaderId, lastIncludedIndex, lastIncludedTerm, data, chunkIndex, totalChunks, Optional.<Integer>absent());
+        this(term, leaderId, lastIncludedIndex, lastIncludedTerm, data, chunkIndex, totalChunks,
+                Optional.<Integer>absent(), Optional.<ServerConfigurationPayload>absent());
     }
 
     public String getLeaderId() {
@@ -80,6 +84,14 @@ public class InstallSnapshot extends AbstractRaftRPC implements Externalizable {
         return lastChunkHashCode;
     }
 
+    public Optional<ServerConfigurationPayload> getServerConfig() {
+        return serverConfig;
+    }
+
+    public void setServerConfig(Optional<ServerConfigurationPayload> serverConfig) {
+        this.serverConfig = serverConfig;
+    }
+
     @Override
     public void writeExternal(ObjectOutput out) throws IOException {
         out.writeShort(RaftVersions.CURRENT_VERSION);
@@ -93,6 +105,11 @@ public class InstallSnapshot extends AbstractRaftRPC implements Externalizable {
         out.writeByte(lastChunkHashCode.isPresent() ? 1 : 0);
         if(lastChunkHashCode.isPresent()) {
             out.writeInt(lastChunkHashCode.get().intValue());
+        }
+
+        out.writeByte(serverConfig.isPresent() ? 1 : 0);
+        if(serverConfig.isPresent()) {
+            out.writeObject(serverConfig.get());
         }
 
         out.writeObject(data);
@@ -112,6 +129,12 @@ public class InstallSnapshot extends AbstractRaftRPC implements Externalizable {
         boolean chunkHashCodePresent = in.readByte() == 1;
         if(chunkHashCodePresent) {
             lastChunkHashCode = Optional.of(in.readInt());
+        }
+
+        serverConfig = Optional.absent();
+        boolean serverConfigPresent = in.readByte() == 1;
+        if(serverConfigPresent) {
+            serverConfig = Optional.of((ServerConfigurationPayload)in.readObject());
         }
 
         data = (byte[])in.readObject();
@@ -141,7 +164,8 @@ public class InstallSnapshot extends AbstractRaftRPC implements Externalizable {
     public String toString() {
         return "InstallSnapshot [term=" + getTerm() + ", leaderId=" + leaderId + ", lastIncludedIndex="
                 + lastIncludedIndex + ", lastIncludedTerm=" + lastIncludedTerm + ", datasize=" + data.length
-                + ", Chunk=" + chunkIndex + "/" + totalChunks + ", lastChunkHashCode=" + lastChunkHashCode + "]";
+                + ", Chunk=" + chunkIndex + "/" + totalChunks + ", lastChunkHashCode=" + lastChunkHashCode
+                + ", serverConfig=" + serverConfig.orNull() + "]";
     }
 
     public static InstallSnapshot fromSerializable (Object o) {
@@ -159,7 +183,8 @@ public class InstallSnapshot extends AbstractRaftRPC implements Externalizable {
             InstallSnapshot installSnapshot = new InstallSnapshot(from.getTerm(),
                     from.getLeaderId(), from.getLastIncludedIndex(),
                     from.getLastIncludedTerm(), from.getData().toByteArray(),
-                    from.getChunkIndex(), from.getTotalChunks(), lastChunkHashCode);
+                    from.getChunkIndex(), from.getTotalChunks(), lastChunkHashCode,
+                    Optional.<ServerConfigurationPayload>absent());
 
             return installSnapshot;
         }
