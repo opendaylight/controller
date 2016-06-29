@@ -14,14 +14,11 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.commands.TransactionRequest;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
-import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.RequestException;
 import org.opendaylight.controller.cluster.access.concepts.RequestFailure;
 import org.opendaylight.controller.cluster.access.concepts.RequestSuccess;
 import org.opendaylight.controller.cluster.access.concepts.RetiredGenerationException;
-import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.yangtools.concepts.Identifiable;
-import org.opendaylight.yangtools.concepts.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.duration.FiniteDuration;
@@ -88,7 +85,7 @@ public abstract class ClientActorBehavior extends RecoveredClientActorBehavior<C
     // This method is executing in the actor context, hence we can safely interact with the queue
     private ClientActorBehavior doSendRequest(final TransactionRequest<?> request, final RequestCallback callback) {
         // Get or allocate queue for the request
-        final SequencedQueue queue = context().queueFor(request);
+        final SequencedQueue queue = context().queueFor(request.getTarget().getHistoryId().getCookie());
 
         // Note this is a tri-state return and can be null
         final Optional<FiniteDuration> result = queue.enqueueRequest(request, callback);
@@ -153,21 +150,10 @@ public abstract class ClientActorBehavior extends RecoveredClientActorBehavior<C
         }
 
         if (needBackend) {
-            startResolve(queue, cookieForTarget(queue.getTarget()));
+            startResolve(queue, queue.getCookie());
         }
 
         return this;
-    }
-
-    private static long cookieForTarget(final Identifier target) {
-        if (target instanceof TransactionIdentifier) {
-            return ((TransactionIdentifier) target).getHistoryId().getCookie();
-        }
-        if (target instanceof LocalHistoryIdentifier) {
-            return ((LocalHistoryIdentifier) target).getCookie();
-        }
-
-        throw new IllegalArgumentException("Unsupported target " + target);
     }
 
     /**

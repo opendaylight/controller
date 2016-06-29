@@ -11,17 +11,16 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Ticker;
 import java.util.Deque;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Optional;
 import java.util.concurrent.CompletionStage;
-import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.NotThreadSafe;
 import org.opendaylight.controller.cluster.access.concepts.Request;
 import org.opendaylight.controller.cluster.access.concepts.RequestException;
 import org.opendaylight.controller.cluster.access.concepts.Response;
-import org.opendaylight.yangtools.concepts.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.duration.FiniteDuration;
@@ -43,13 +42,16 @@ final class SequencedQueue {
         TimeUnit.NANOSECONDS);
 
     /**
-     * We allow request completion strictly in sequence order, but need access to the last sequence for diagnostic
-     * purposes.
+     * We need to keep the sequence of operations towards the backend, hence we use a queue. Since targets can
+     * progress at different speeds, these may be completed out of order.
      *
-     * TODO: this could benefit from a more relaxed MPSC queue than {@link ConcurrentLinkedDeque}.
+     * TODO: The combination of target and sequence uniquely identifies a particular request, we will need to
+     *       figure out a more efficient lookup mechanism to deal with responses which do not match the queue
+     *       order.
      */
-    private final Deque<SequencedQueueEntry> entries = new LinkedList<>();
+    private final Deque<SequencedQueueEntry> queue = new LinkedList<>();
     private final Ticker ticker;
+    private final Long cookie;
 
     // Updated/consulted from actor context only
     /**
@@ -70,16 +72,14 @@ final class SequencedQueue {
     // Updated from application thread
     private volatile boolean notClosed = true;
 
-    private final Identifier target;
-
-    SequencedQueue(final Identifier target, final Ticker ticker) {
-        this.target = Preconditions.checkNotNull(target);
+    SequencedQueue(final Long cookie, final Ticker ticker) {
+        this.cookie = Preconditions.checkNotNull(cookie);
         this.ticker = Preconditions.checkNotNull(ticker);
         lastProgress = ticker.read();
     }
 
-    Identifier getTarget() {
-        return target;
+    Long getCookie() {
+        return cookie;
     }
 
     private void checkNotClosed() {
@@ -108,15 +108,10 @@ final class SequencedQueue {
     @Nullable Optional<FiniteDuration> enqueueRequest(final Request<?, ?> request, final RequestCallback callback) {
         final long now = ticker.read();
         final SequencedQueueEntry e = new SequencedQueueEntry(request, callback, now);
-        final SequencedQueueEntry last = entries.peekLast();
-        if (last != null) {
-            Preconditions.checkArgument(Long.compareUnsigned(last.getSequence(), request.getSequence()) < 0,
-                "Mis-sequenced request %s, tail is %s", request, last);
-        }
 
         // We could have check first, but argument checking needs to happen first
         checkNotClosed();
-        entries.add(e);
+        queue.add(e);
         LOG.debug("Enqueued request {} to queue {}", request, this);
 
         if (backend == null) {
@@ -133,34 +128,19 @@ final class SequencedQueue {
     }
 
     ClientActorBehavior complete(final ClientActorBehavior current, final Response<?, ?> response) {
-        final SequencedQueueEntry head = entries.peekFirst();
-        if (head == null) {
-            LOG.debug("No outstanding requests, ignoring response {}", response);
-            return current;
-        }
-
-        // Happy path
-        final long sequence = response.getSequence();
-        if (sequence == head.getSequence()) {
-            lastProgress = ticker.read();
-            return entries.pollFirst().complete(response);
-        }
-
-        // No forward progress, this is just detailed logging. It involves some CPU cycles, hence we guard it
-        // with a check if logging is enabled at all.
-        if (LOG.isDebugEnabled()) {
-            if (Long.compareUnsigned(sequence, head.getSequence()) > 0) {
-                final SequencedQueueEntry tail = entries.peekLast();
-                if (Long.compareUnsigned(sequence, tail.getSequence()) > 0) {
-                    LOG.debug("Ignoring unknown response {}, last request is {}", response, tail);
-                } else {
-                    LOG.debug("Ignoring out-of-sequence response {}, next expected is {}", response, head);
-                }
-            } else {
-                LOG.debug("Ignoring duplicate response {}", response);
+        // Responses to different targets may arrive out of order, hence we use an iterator
+        final Iterator<SequencedQueueEntry> it = queue.iterator();
+        while (it.hasNext()) {
+            final SequencedQueueEntry e = it.next();
+            if (e.acceptsResponse(response)) {
+                lastProgress = ticker.read();
+                it.remove();
+                LOG.debug("Completing request {} with {}", e, response);
+                return e.complete(response);
             }
         }
 
+        LOG.debug("No request matching {} found", response);
         return current;
     }
 
@@ -174,14 +154,14 @@ final class SequencedQueue {
         backendProof = null;
         LOG.debug("Resolved backend {}",  backend);
 
-        if (entries.isEmpty()) {
+        if (queue.isEmpty()) {
             // No pending requests, hence no need for a timer
             return Optional.empty();
         }
 
         LOG.debug("Resending requests to backend {}", backend);
         final long now = ticker.read();
-        for (SequencedQueueEntry e : entries) {
+        for (SequencedQueueEntry e : queue) {
             e.retransmit(backend, now);
         }
 
@@ -208,20 +188,21 @@ final class SequencedQueue {
     }
 
     boolean hasCompleted() {
-        return !notClosed && entries.isEmpty();
+        return !notClosed && queue.isEmpty();
     }
 
     /**
      * Check queue timeouts and return true if a timeout has occured.
      *
-     * @return
-     * @throws NoProgressException
+     * @return True if a timeout occured
+     * @throws NoProgressException if the queue failed to make progress for an extended
+     *                             time.
      */
     boolean runTimeout() throws NoProgressException {
         expectingTimer = null;
         final long now = ticker.read();
 
-        if (!entries.isEmpty()) {
+        if (!queue.isEmpty()) {
             final long ticksSinceProgress = now - lastProgress;
             if (ticksSinceProgress >= NO_PROGRESS_TIMEOUT_NANOS) {
                 LOG.error("Queue {} has not seen progress in {} seconds, failing all requests", this,
@@ -234,7 +215,7 @@ final class SequencedQueue {
         }
 
         // We always schedule requests in sequence, hence any timeouts really just mean checking the head of the queue
-        final SequencedQueueEntry head = entries.peek();
+        final SequencedQueueEntry head = queue.peek();
         if (head != null && head.isTimedOut(now, REQUEST_TIMEOUT_NANOS)) {
             backend = null;
             LOG.debug("Queue {} invalidated backend info", this);
@@ -247,10 +228,10 @@ final class SequencedQueue {
     void poison(final RequestException cause) {
         close();
 
-        SequencedQueueEntry e = entries.poll();
+        SequencedQueueEntry e = queue.poll();
         while (e != null) {
             e.poison(cause);
-            e = entries.poll();
+            e = queue.poll();
         }
     }
 

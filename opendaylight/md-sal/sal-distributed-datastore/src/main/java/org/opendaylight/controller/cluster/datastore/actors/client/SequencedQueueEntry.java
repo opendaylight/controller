@@ -53,6 +53,10 @@ final class SequencedQueueEntry {
         return request.getSequence();
     }
 
+    boolean acceptsResponse(final Response<?, ?> response) {
+        return getSequence() == response.getSequence() && request.getTarget().equals(response.getTarget());
+    }
+
     long getCurrentTry() {
         final Request<?, ?> req = lastTry.isPresent() ? lastTry.get().request : request;
         return req.getRetry();
