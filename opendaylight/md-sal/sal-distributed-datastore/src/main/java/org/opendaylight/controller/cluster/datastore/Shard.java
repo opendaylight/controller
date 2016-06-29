@@ -21,10 +21,23 @@ import com.google.common.util.concurrent.FutureCallback;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nonnull;
+import org.opendaylight.controller.cluster.access.commands.LocalHistoryRequest;
+import org.opendaylight.controller.cluster.access.commands.NotLeaderException;
+import org.opendaylight.controller.cluster.access.commands.TransactionRequest;
+import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
+import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
+import org.opendaylight.controller.cluster.access.concepts.Request;
+import org.opendaylight.controller.cluster.access.concepts.RequestEnvelope;
+import org.opendaylight.controller.cluster.access.concepts.RequestException;
+import org.opendaylight.controller.cluster.access.concepts.RequestSuccess;
+import org.opendaylight.controller.cluster.access.concepts.RetiredGenerationException;
+import org.opendaylight.controller.cluster.access.concepts.RuntimeRequestException;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
+import org.opendaylight.controller.cluster.access.concepts.UnsupportedRequestException;
 import org.opendaylight.controller.cluster.common.actor.CommonConfig;
 import org.opendaylight.controller.cluster.common.actor.MessageTracker;
 import org.opendaylight.controller.cluster.common.actor.MessageTracker.Error;
@@ -131,6 +144,8 @@ public class Shard extends RaftActor {
 
     private final ShardTransactionMessageRetrySupport messageRetrySupport;
 
+    private final Map<FrontendIdentifier, FrontendState> knownFrontends = new HashMap<>();
+
     protected Shard(final AbstractBuilder<?, ?> builder) {
         super(builder.getId().toString(), builder.getPeerAddresses(),
                 Optional.of(builder.getDatastoreContext().getShardRaftConfig()), DataStoreVersions.CURRENT_VERSION);
@@ -225,7 +240,21 @@ public class Shard extends RaftActor {
                     maybeError.get());
             }
 
-            if (CreateTransaction.isSerializedType(message)) {
+            if (message instanceof RequestEnvelope) {
+                final RequestEnvelope envelope = (RequestEnvelope)message;
+                try {
+                    final RequestSuccess<?, ?> success = handleRequest(envelope);
+                    if (success != null) {
+                        envelope.sendSuccess(success);
+                    }
+                } catch (RequestException e) {
+                    LOG.debug("{}: request {} failed", persistenceId(), envelope, e);
+                    envelope.sendFailure(e);
+                } catch (Exception e) {
+                    LOG.debug("{}: request {} caused failure", persistenceId(), envelope, e);
+                    envelope.sendFailure(new RuntimeRequestException("Request failed to process", e));
+                }
+            } else if (CreateTransaction.isSerializedType(message)) {
                 handleCreateTransaction(message);
             } else if (message instanceof BatchedModifications) {
                 handleBatchedModifications((BatchedModifications)message);
@@ -274,6 +303,54 @@ public class Shard extends RaftActor {
             } else {
                 super.handleNonRaftCommand(message);
             }
+        }
+    }
+
+    // Acquire our frontend tracking handle and verify generation matches
+    private FrontendState getFrontend(final ClientIdentifier clientId) throws RequestException {
+        final FrontendState existing = knownFrontends.get(clientId.getFrontendId());
+        if (existing != null) {
+            final int cmp = Long.compareUnsigned(existing.getGeneration(), clientId.getGeneration());
+            if (cmp == 0) {
+                return existing;
+            }
+            if (cmp > 0) {
+                LOG.debug("{}: rejecting request from outdated client {}", persistenceId(), clientId);
+                throw new RetiredGenerationException(existing.getGeneration());
+            }
+
+            LOG.info("{}: retiring state {}, outdated by request from client {}", persistenceId(), existing, clientId);
+            existing.retire();
+            knownFrontends.remove(clientId.getFrontendId());
+        } else {
+            LOG.debug("{}: client {} is not yet known", persistenceId(), clientId);
+        }
+
+        final FrontendState ret = new FrontendState(persistenceId(), clientId, store);
+        knownFrontends.put(clientId.getFrontendId(), ret);
+        LOG.debug("{}: created state {} for client {}", persistenceId(), ret, clientId);
+        return ret;
+    }
+
+    private RequestSuccess<?, ?> handleRequest(final RequestEnvelope envelope) throws RequestException {
+        // We are not the leader, hence we want to fail-fast.
+        if (!isLeader() || !isLeaderActive()) {
+            LOG.debug("{}: not currently leader, rejecting request {}", persistenceId(), envelope);
+            throw new NotLeaderException(getSelf());
+        }
+
+        final Request<?, ?> request = envelope.getMessage();
+        if (request instanceof TransactionRequest) {
+            final TransactionRequest<?> txReq = (TransactionRequest<?>)request;
+            final ClientIdentifier clientId = txReq.getTarget().getHistoryId().getClientId();
+            return getFrontend(clientId).handleTransactionRequest(txReq, envelope.getSequence());
+        } else if (request instanceof LocalHistoryRequest) {
+            final LocalHistoryRequest<?> lhReq = (LocalHistoryRequest<?>)request;
+            final ClientIdentifier clientId = lhReq.getTarget().getClientId();
+            return getFrontend(clientId).handleLocalHistoryRequest(lhReq, envelope.getSequence());
+        } else {
+            LOG.debug("{}: rejecting unsupported request {}", persistenceId(), request);
+            throw new UnsupportedRequestException(request);
         }
     }
 

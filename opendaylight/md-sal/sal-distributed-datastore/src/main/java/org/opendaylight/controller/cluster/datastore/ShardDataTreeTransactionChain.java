@@ -12,6 +12,7 @@ import com.google.common.base.Preconditions;
 import javax.annotation.concurrent.NotThreadSafe;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
+import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,18 +21,19 @@ import org.slf4j.LoggerFactory;
  * A transaction chain attached to a Shard.
  */
 @NotThreadSafe
-final class ShardDataTreeTransactionChain extends ShardDataTreeTransactionParent {
+final class ShardDataTreeTransactionChain extends ShardDataTreeTransactionParent
+        implements Identifiable<LocalHistoryIdentifier> {
     private static final Logger LOG = LoggerFactory.getLogger(ShardDataTreeTransactionChain.class);
-    private final ShardDataTree dataTree;
     private final LocalHistoryIdentifier chainId;
+    private final ShardDataTree dataTree;
 
     private ReadWriteShardDataTreeTransaction previousTx;
     private ReadWriteShardDataTreeTransaction openTransaction;
     private boolean closed;
 
     ShardDataTreeTransactionChain(final LocalHistoryIdentifier localHistoryIdentifier, final ShardDataTree dataTree) {
-        this.dataTree = Preconditions.checkNotNull(dataTree);
         this.chainId = Preconditions.checkNotNull(localHistoryIdentifier);
+        this.dataTree = Preconditions.checkNotNull(dataTree);
     }
 
     private DataTreeSnapshot getSnapshot() {
@@ -92,9 +94,14 @@ final class ShardDataTreeTransactionChain extends ShardDataTreeTransactionParent
         return MoreObjects.toStringHelper(this).add("id", chainId).toString();
     }
 
-    void clearTransaction(ReadWriteShardDataTreeTransaction transaction) {
+    void clearTransaction(final ReadWriteShardDataTreeTransaction transaction) {
         if (transaction.equals(previousTx)) {
             previousTx = null;
         }
+    }
+
+    @Override
+    public LocalHistoryIdentifier getIdentifier() {
+        return chainId;
     }
 }
