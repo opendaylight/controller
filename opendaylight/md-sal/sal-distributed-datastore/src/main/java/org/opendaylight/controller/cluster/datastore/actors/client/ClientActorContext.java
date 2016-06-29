@@ -18,11 +18,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.ThreadSafe;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
-import org.opendaylight.controller.cluster.access.concepts.Request;
 import org.opendaylight.controller.cluster.access.concepts.RequestException;
 import org.opendaylight.controller.cluster.access.concepts.Response;
+import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.yangtools.concepts.Identifiable;
-import org.opendaylight.yangtools.concepts.Identifier;
+import org.opendaylight.yangtools.concepts.WritableIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.ExecutionContext;
@@ -42,7 +42,7 @@ import scala.concurrent.duration.FiniteDuration;
 public class ClientActorContext extends AbstractClientActorContext implements Identifiable<ClientIdentifier> {
     private static final Logger LOG = LoggerFactory.getLogger(ClientActorContext.class);
 
-    private final Map<Identifier, SequencedQueue> queues = new ConcurrentHashMap<>();
+    private final Map<Long, SequencedQueue> queues = new ConcurrentHashMap<>();
     private final ClientIdentifier identifier;
     private final ExecutionContext executionContext;
     private final Scheduler scheduler;
@@ -86,16 +86,22 @@ public class ClientActorContext extends AbstractClientActorContext implements Id
             executionContext, ActorRef.noSender());
     }
 
-    SequencedQueue queueFor(final Request<?, ?> request) {
-        return queues.computeIfAbsent(request.getTarget(), t -> new SequencedQueue(t, ticker()));
+    SequencedQueue queueFor(final Long cookie) {
+        return queues.computeIfAbsent(cookie, t -> new SequencedQueue(t, ticker()));
     }
 
     void removeQueue(final SequencedQueue queue) {
-        queues.remove(queue.getTarget(), queue);
+        queues.remove(queue.getCookie(), queue);
     }
 
     ClientActorBehavior completeRequest(final ClientActorBehavior current, final Response<?, ?> response) {
-        final SequencedQueue queue = queues.get(response.getTarget());
+        final WritableIdentifier id = response.getTarget();
+
+        // FIXME: this will need to be updated for other Request/Response types to extract cookie
+        Preconditions.checkArgument(id instanceof TransactionIdentifier);
+        final TransactionIdentifier txId = (TransactionIdentifier) id;
+
+        final SequencedQueue queue = queues.get(txId.getHistoryId().getCookie());
         if (queue == null) {
             LOG.info("{}: Ignoring unknown response {}", persistenceId(), response);
             return current;
