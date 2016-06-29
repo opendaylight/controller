@@ -37,5 +37,9 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <feature version="${symbol_dollar}{mdsal.version}">odl-mdsal-xsql</feature>
     <feature version="${symbol_dollar}{dlux.version}">odl-dlux-yangui</feature>
   </feature>
+  <feature name='odl-${artifactId}-cli' version='${symbol_dollar}{project.version}' description='OpenDaylight :: ${artifactId} :: CLI'>
+    <feature version="${symbol_dollar}{project.version}">odl-${artifactId}</feature>
+    <bundle>mvn:${groupId}/${artifactId}-cli/{{VERSION}}</bundle>
+  </feature>
 
 </features>
