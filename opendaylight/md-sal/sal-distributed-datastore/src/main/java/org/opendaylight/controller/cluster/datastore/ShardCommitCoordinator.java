@@ -23,8 +23,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
 import javax.annotation.Nonnull;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.AbortTransactionReply;
@@ -370,21 +368,25 @@ final class ShardCommitCoordinator {
         log.debug("{}: Aborting transaction {}", name, transactionID);
 
         final ActorRef self = shard.getSelf();
-        try {
-            cohortEntry.abort();
-
-            shard.getShardMBean().incrementAbortTransactionsCount();
-
-            if (sender != null) {
-                sender.tell(AbortTransactionReply.instance(cohortEntry.getClientVersion()).toSerializable(), self);
+        cohortEntry.abort(new FutureCallback<Void>() {
+            @Override
+            public void onSuccess(final Void result) {
+                if (sender != null) {
+                    sender.tell(AbortTransactionReply.instance(cohortEntry.getClientVersion()).toSerializable(), self);
+                }
             }
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            log.error("{}: An exception happened during abort", name, e);
 
-            if (sender != null) {
-                sender.tell(new Failure(e), self);
+            @Override
+            public void onFailure(final Throwable failure) {
+                log.error("{}: An exception happened during abort", name, failure);
+
+                if (sender != null) {
+                    sender.tell(new Failure(failure), self);
+                }
             }
-        }
+        });
+
+        shard.getShardMBean().incrementAbortTransactionsCount();
     }
 
     void checkForExpiredTransactions(final long timeout, final Shard shard) {
