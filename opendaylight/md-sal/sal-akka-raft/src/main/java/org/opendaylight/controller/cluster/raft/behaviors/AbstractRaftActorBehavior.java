@@ -8,8 +8,6 @@
 
 package org.opendaylight.controller.cluster.raft.behaviors;
 
-import akka.actor.ActorRef;
-import akka.actor.Cancellable;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.raft.ClientRequestTracker;
@@ -24,7 +22,10 @@ import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
+import org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages;
 import org.slf4j.Logger;
+import akka.actor.ActorRef;
+import akka.actor.Cancellable;
 import scala.concurrent.duration.FiniteDuration;
 
 /**
@@ -263,12 +264,10 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
      */
     protected void scheduleElection(FiniteDuration interval) {
         stopElection();
-
-        if(canStartElection()) {
-            // Schedule an election. When the scheduler triggers an ElectionTimeout message is sent to itself
-            electionCancel = context.getActorSystem().scheduler().scheduleOnce(interval, context.getActor(),
-                    ELECTION_TIMEOUT,context.getActorSystem().dispatcher(), context.getActor());
-        }
+        
+        // Schedule an election. When the scheduler triggers an ElectionTimeout message is sent to itself
+        electionCancel = context.getActorSystem().scheduler().scheduleOnce(interval, context.getActor(),
+                ELECTION_TIMEOUT,context.getActorSystem().dispatcher(), context.getActor());
     }
 
     /**
@@ -403,6 +402,10 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
 
     @Override
     public RaftActorBehavior handleMessage(ActorRef sender, Object message) {
+        if (!canStartElection()) {
+            AppendEntriesMessages.AppendEntries.Builder to = AppendEntriesMessages.AppendEntries.newBuilder();
+            to.clearLeaderId();
+        }
         if (message instanceof AppendEntries) {
             return appendEntries(sender, (AppendEntries) message);
         } else if (message instanceof AppendEntriesReply) {

@@ -8,8 +8,6 @@
 
 package org.opendaylight.controller.cluster.raft.behaviors;
 
-import akka.actor.ActorRef;
-import akka.japi.Procedure;
 import com.google.common.annotations.VisibleForTesting;
 import java.util.ArrayList;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
@@ -26,6 +24,8 @@ import org.opendaylight.controller.cluster.raft.messages.InstallSnapshotReply;
 import org.opendaylight.controller.cluster.raft.messages.RaftRPC;
 import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
+import akka.actor.ActorRef;
+import akka.japi.Procedure;
 
 /**
  * The behavior of a RaftActor in the Follower state
@@ -67,6 +67,8 @@ public class Follower extends AbstractRaftActorBehavior {
             } else {
                 scheduleElection(electionDuration());
             }
+        } else if (!canStartElection()) {
+            scheduleElection(electionDuration());
         }
 
     }
