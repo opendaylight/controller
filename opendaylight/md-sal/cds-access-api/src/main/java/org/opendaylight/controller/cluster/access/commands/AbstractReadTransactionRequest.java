@@ -32,19 +32,14 @@ public abstract class AbstractReadTransactionRequest<T extends AbstractReadTrans
     private static final long serialVersionUID = 1L;
     private final YangInstanceIdentifier path;
 
-    AbstractReadTransactionRequest(final TransactionIdentifier identifier, final long sequence, final long retry,
-        final ActorRef replyTo, final YangInstanceIdentifier path) {
-        super(identifier, sequence, retry, replyTo);
+    AbstractReadTransactionRequest(final TransactionIdentifier identifier, final ActorRef replyTo,
+        final YangInstanceIdentifier path) {
+        super(identifier, replyTo);
         this.path = Preconditions.checkNotNull(path);
     }
 
     AbstractReadTransactionRequest(final T request, final ABIVersion version) {
         super(request, version);
-        this.path = request.getPath();
-    }
-
-    AbstractReadTransactionRequest(final T request, final long retry) {
-        super(request, retry);
         this.path = request.getPath();
     }
 
