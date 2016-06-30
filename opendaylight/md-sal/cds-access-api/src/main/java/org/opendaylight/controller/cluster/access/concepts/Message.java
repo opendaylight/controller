@@ -51,27 +51,19 @@ public abstract class Message<T extends WritableIdentifier, C extends Message<T,
         Serializable {
     private static final long serialVersionUID = 1L;
     private final T target;
-    private final long sequence;
     private final ABIVersion version;
-    private final long retry;
 
-    private Message(final ABIVersion version, final T target, final long sequence, final long retry) {
+    private Message(final ABIVersion version, final T target) {
         this.target = Preconditions.checkNotNull(target);
         this.version = Preconditions.checkNotNull(version);
-        this.sequence = sequence;
-        this.retry = retry;
     }
 
-    Message(final T target, final long sequence, final long retry) {
-        this(ABIVersion.current(), target, sequence, retry);
+    Message(final T target) {
+        this(ABIVersion.current(), target);
     }
 
     Message(final C msg, final ABIVersion version) {
-        this(version, msg.getTarget(), msg.getSequence(), msg.getRetry());
-    }
-
-    Message(final C msg, final long retry) {
-        this(msg.getVersion(), msg.getTarget(), msg.getSequence(), retry);
+        this(version, msg.getTarget());
     }
 
     /**
@@ -83,27 +75,9 @@ public abstract class Message<T extends WritableIdentifier, C extends Message<T,
         return target;
     }
 
-    /**
-     * Get the message sequence of this message.
-     *
-     * @return Message sequence
-     */
-    public final long getSequence() {
-        return sequence;
-    }
-
     @VisibleForTesting
     public final ABIVersion getVersion() {
         return version;
-    }
-
-    /**
-     * Get the message retry counter.
-     *
-     * @return Retry counter
-     */
-    public final long getRetry() {
-        return retry;
     }
 
     /**
@@ -141,24 +115,6 @@ public abstract class Message<T extends WritableIdentifier, C extends Message<T,
      */
     protected abstract @Nonnull C cloneAsVersion(@Nonnull ABIVersion version);
 
-    /**
-     * Return a message which will have the retry counter incremented by one.
-     *
-     * @return A message with the specified retry counter
-     */
-    public final @Nonnull C incrementRetry() {
-        return Verify.verifyNotNull(cloneAsRetry(retry +1));
-    }
-
-    /**
-     * Create a copy of this message which will have its retry count bumped. This method should be implemented by
-     * the concrete final message class and should invoked the equivalent of {@link #Message(Message, long)}.
-     *
-     * @param retry new retry count
-     * @return A message with the specified retry counter
-     */
-    protected abstract @Nonnull C cloneAsRetry(long retry);
-
     @Override
     public final String toString() {
         return addToStringAttributes(MoreObjects.toStringHelper(this).omitNullValues()).toString();
@@ -173,7 +129,7 @@ public abstract class Message<T extends WritableIdentifier, C extends Message<T,
      * @throws NullPointerException if toStringHelper is null
      */
     protected @Nonnull ToStringHelper addToStringAttributes(final @Nonnull ToStringHelper toStringHelper) {
-        return toStringHelper.add("target", target).add("sequence", Long.toUnsignedString(sequence, 16));
+        return toStringHelper.add("target", target);
     }
 
     /**

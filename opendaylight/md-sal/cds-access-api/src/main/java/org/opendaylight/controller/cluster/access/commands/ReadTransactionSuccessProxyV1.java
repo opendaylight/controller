@@ -63,8 +63,7 @@ final class ReadTransactionSuccessProxyV1 extends AbstractTransactionSuccessProx
     }
 
     @Override
-    protected ReadTransactionSuccess createSuccess(final TransactionIdentifier target, final long sequence,
-            final long retry) {
-        return new ReadTransactionSuccess(target, sequence, retry, data);
+    protected ReadTransactionSuccess createSuccess(final TransactionIdentifier target) {
+        return new ReadTransactionSuccess(target, data);
     }
 }
