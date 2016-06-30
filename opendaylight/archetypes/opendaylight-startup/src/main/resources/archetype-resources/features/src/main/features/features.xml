@@ -26,7 +26,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <feature version='${symbol_dollar}{mdsal.version}'>odl-mdsal-broker</feature>
     <feature version='${symbol_dollar}{project.version}'>odl-${artifactId}-api</feature>
     <bundle>mvn:${groupId}/${artifactId}-impl/{{VERSION}}</bundle>
-    <configfile finalname="${configfile.directory}/${artifactId}.xml">mvn:${groupId}/${artifactId}-impl/{{VERSION}}/xml/config</configfile>
   </feature>
   <feature name='odl-${artifactId}-rest' version='${symbol_dollar}{project.version}' description='OpenDaylight :: ${artifactId} :: REST'>
     <feature version="${symbol_dollar}{project.version}">odl-${artifactId}</feature>

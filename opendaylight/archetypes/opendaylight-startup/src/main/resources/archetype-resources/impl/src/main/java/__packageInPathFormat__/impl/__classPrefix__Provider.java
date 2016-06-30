@@ -10,23 +10,31 @@
  */
 package ${package}.impl;
 
-import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
-import org.opendaylight.controller.sal.binding.api.BindingAwareProvider;
+import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ${classPrefix}Provider implements BindingAwareProvider, AutoCloseable {
+public class ${classPrefix}Provider {
 
     private static final Logger LOG = LoggerFactory.getLogger(${classPrefix}Provider.class);
 
-    @Override
-    public void onSessionInitiated(ProviderContext session) {
+    private final DataBroker dataBroker;
+
+    public ${classPrefix}Provider(final DataBroker dataBroker) {
+        this.dataBroker = dataBroker;
+    }
+
+    /**
+     * Method called when the blueprint container is created.
+     */
+    public void init() {
         LOG.info("${classPrefix}Provider Session Initiated");
     }
 
-    @Override
-    public void close() throws Exception {
+    /**
+     * Method called when the blueprint container is destroyed.
+     */
+    public void close() {
         LOG.info("${classPrefix}Provider Closed");
     }
-
 }
