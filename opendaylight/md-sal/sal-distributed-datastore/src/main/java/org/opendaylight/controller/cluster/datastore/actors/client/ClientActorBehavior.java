@@ -14,10 +14,11 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.commands.TransactionRequest;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
+import org.opendaylight.controller.cluster.access.concepts.FailureEnvelope;
 import org.opendaylight.controller.cluster.access.concepts.RequestException;
 import org.opendaylight.controller.cluster.access.concepts.RequestFailure;
-import org.opendaylight.controller.cluster.access.concepts.RequestSuccess;
 import org.opendaylight.controller.cluster.access.concepts.RetiredGenerationException;
+import org.opendaylight.controller.cluster.access.concepts.SuccessEnvelope;
 import org.opendaylight.yangtools.concepts.Identifiable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,21 +50,22 @@ public abstract class ClientActorBehavior extends RecoveredClientActorBehavior<C
         if (command instanceof InternalCommand) {
             return ((InternalCommand) command).execute(this);
         }
-        if (command instanceof RequestSuccess) {
-            return onRequestSuccess((RequestSuccess<?, ?>) command);
+        if (command instanceof SuccessEnvelope) {
+            return onRequestSuccess((SuccessEnvelope<?>) command);
         }
-        if (command instanceof RequestFailure) {
-            return onRequestFailure((RequestFailure<?, ?>) command);
+        if (command instanceof FailureEnvelope) {
+            return onRequestFailure((FailureEnvelope<?>) command);
         }
 
         return onCommand(command);
     }
 
-    private ClientActorBehavior onRequestSuccess(final RequestSuccess<?, ?> success) {
-        return context().completeRequest(this, success);
+    private ClientActorBehavior onRequestSuccess(final SuccessEnvelope<?> command) {
+        return context().completeRequest(this, command);
     }
 
-    private ClientActorBehavior onRequestFailure(final RequestFailure<?, ?> failure) {
+    private ClientActorBehavior onRequestFailure(final FailureEnvelope<?> command) {
+        final RequestFailure<?, ?> failure = command.getMessage();
         final RequestException cause = failure.getCause();
         if (cause instanceof RetiredGenerationException) {
             LOG.error("{}: current generation {} has been superseded", persistenceId(), getIdentifier(), cause);
@@ -73,13 +75,13 @@ public abstract class ClientActorBehavior extends RecoveredClientActorBehavior<C
         }
 
         if (failure.isHardFailure()) {
-            return context().completeRequest(this, failure);
+            return context().completeRequest(this, command);
         }
 
         // TODO: add instanceof checks on cause to detect more problems
 
-        LOG.warn("{}: Unhandled retriable failure {}, promoting to hard failure", persistenceId(), failure);
-        return context().completeRequest(this, failure);
+        LOG.warn("{}: Unhandled retriable failure {}, promoting to hard failure", persistenceId(), command);
+        return context().completeRequest(this, command);
     }
 
     // This method is executing in the actor context, hence we can safely interact with the queue

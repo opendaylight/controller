@@ -24,14 +24,8 @@ public final class ReadTransactionSuccess extends TransactionSuccess<ReadTransac
     private static final long serialVersionUID = 1L;
     private final Optional<NormalizedNode<?, ?>> data;
 
-    public ReadTransactionSuccess(final TransactionIdentifier identifier, final long sequence,
-            final Optional<NormalizedNode<?, ?>> data) {
-        this(identifier, sequence, 0, data);
-    }
-
-    ReadTransactionSuccess(final TransactionIdentifier identifier, final long sequence, final long retry,
-            final Optional<NormalizedNode<?, ?>> data) {
-        super(identifier, sequence, retry);
+    public ReadTransactionSuccess(final TransactionIdentifier identifier, final Optional<NormalizedNode<?, ?>> data) {
+        super(identifier);
         this.data = Preconditions.checkNotNull(data);
     }
 

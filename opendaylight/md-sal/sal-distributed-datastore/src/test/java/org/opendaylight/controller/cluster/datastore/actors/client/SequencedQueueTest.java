@@ -52,8 +52,8 @@ public class SequencedQueueTest {
     private static class MockFailure extends RequestFailure<WritableIdentifier, MockFailure> {
         private static final long serialVersionUID = 1L;
 
-        MockFailure(final WritableIdentifier target, final long sequence, final long retry, final RequestException cause) {
-            super(target, sequence, retry, cause);
+        MockFailure(final WritableIdentifier target, final RequestException cause) {
+            super(target, cause);
         }
 
         @Override
@@ -71,17 +71,12 @@ public class SequencedQueueTest {
         private static final long serialVersionUID = 1L;
 
         MockRequest(final WritableIdentifier target, final long sequence, final ActorRef replyTo) {
-            super(target, sequence, 0, replyTo);
-        }
-
-
-        MockRequest(final MockRequest request, final long retry) {
-            super(request, retry);
+            super(target, replyTo);
         }
 
         @Override
         public RequestFailure<WritableIdentifier, ?> toRequestFailure(final RequestException cause) {
-            return new MockFailure(getTarget(), getSequence(), getRetry(), cause);
+            return new MockFailure(getTarget(), cause);
         }
 
         @Override
@@ -92,11 +87,6 @@ public class SequencedQueueTest {
         @Override
         protected MockRequest cloneAsVersion(final ABIVersion version) {
             return this;
-        }
-
-        @Override
-        protected MockRequest cloneAsRetry(final long retry) {
-            return new MockRequest(this, retry);
         }
     };
 

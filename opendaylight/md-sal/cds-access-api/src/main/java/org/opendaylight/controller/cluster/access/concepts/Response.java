@@ -26,17 +26,12 @@ import org.opendaylight.yangtools.concepts.WritableIdentifier;
 public abstract class Response<T extends WritableIdentifier, C extends Response<T, C>> extends Message<T, C> {
     private static final long serialVersionUID = 1L;
 
+    Response(final @Nonnull T target) {
+        super(target);
+    }
+
     Response(final @Nonnull C response, final @Nonnull ABIVersion version) {
         super(response, version);
-    }
-
-    Response(final @Nonnull T target, final long sequence, final long retry) {
-        super(target, sequence, retry);
-    }
-
-    @Override
-    protected final C cloneAsRetry(final long retry) {
-        throw new UnsupportedOperationException("Responses do not support retries");
     }
 
     @Override
