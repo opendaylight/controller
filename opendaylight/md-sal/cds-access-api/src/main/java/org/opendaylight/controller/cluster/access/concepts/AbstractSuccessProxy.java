@@ -33,9 +33,9 @@ public abstract class AbstractSuccessProxy<T extends WritableIdentifier, C exten
     }
 
     @Override
-    final C createResponse(final T target, final long sequence, final long retry) {
-        return createSuccess(target, sequence, retry);
+    final C createResponse(final T target) {
+        return createSuccess(target);
     }
 
-    protected abstract @Nonnull C createSuccess(@Nonnull T target, long sequence, long retry);
+    protected abstract @Nonnull C createSuccess(@Nonnull T target);
 }
