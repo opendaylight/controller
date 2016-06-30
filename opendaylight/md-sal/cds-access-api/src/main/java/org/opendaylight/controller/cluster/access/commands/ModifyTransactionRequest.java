@@ -28,15 +28,9 @@ public final class ModifyTransactionRequest extends TransactionRequest<ModifyTra
     private final List<TransactionModification> modifications;
     private final PersistenceProtocol protocol;
 
-    private ModifyTransactionRequest(final ModifyTransactionRequest request, final long retry) {
-        super(request, retry);
-        this.modifications = request.modifications;
-        this.protocol = request.protocol;
-    }
-
-    ModifyTransactionRequest(final TransactionIdentifier target, final long sequence, final long retry,
-        final ActorRef replyTo, final List<TransactionModification> modifications, final PersistenceProtocol protocol) {
-        super(target, sequence, retry, replyTo);
+    ModifyTransactionRequest(final TransactionIdentifier target, final ActorRef replyTo,
+        final List<TransactionModification> modifications, final PersistenceProtocol protocol) {
+        super(target, replyTo);
         this.modifications = ImmutableList.copyOf(modifications);
         this.protocol = protocol;
     }
@@ -60,13 +54,7 @@ public final class ModifyTransactionRequest extends TransactionRequest<ModifyTra
     }
 
     @Override
-    protected ModifyTransactionRequest cloneAsRetry(final long retry) {
-        return new ModifyTransactionRequest(this, retry);
-    }
-
-    @Override
     protected ModifyTransactionRequest cloneAsVersion(final ABIVersion version) {
         return this;
     }
-
 }

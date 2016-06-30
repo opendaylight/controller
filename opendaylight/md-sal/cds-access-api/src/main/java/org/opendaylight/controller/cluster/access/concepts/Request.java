@@ -29,18 +29,13 @@ public abstract class Request<T extends WritableIdentifier, C extends Request<T,
     private static final long serialVersionUID = 1L;
     private final ActorRef replyTo;
 
-    protected Request(final @Nonnull T target, final long sequence, final long retry, final @Nonnull ActorRef replyTo) {
-        super(target, sequence, retry);
+    protected Request(final @Nonnull T target, final @Nonnull ActorRef replyTo) {
+        super(target);
         this.replyTo = Preconditions.checkNotNull(replyTo);
     }
 
     protected Request(final @Nonnull C request, final @Nonnull ABIVersion version) {
         super(request, version);
-        this.replyTo = Preconditions.checkNotNull(request.getReplyTo());
-    }
-
-    protected Request(final C request, final long retry) {
-        super(request, retry);
         this.replyTo = Preconditions.checkNotNull(request.getReplyTo());
     }
 
