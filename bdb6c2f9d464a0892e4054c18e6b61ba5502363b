@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a561d44_a81210b2",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-06-30T16:04:49Z",
+      "side": 1,
+      "message": "If we hit line 65 we don\u0027t want to also scheduleElection. As I mentioned, we don;t need canStartElection check at all here, i.e. just:\n\n           if (context.getPeerIds().isEmpty() \u0026\u0026 getLeaderId() \u003d\u003d null) {\n                actor().tell(ELECTION_TIMEOUT, actor());\n            } else {\n                scheduleElection(electionDuration());\n            }",
+      "revId": "bdb6c2f9d464a0892e4054c18e6b61ba5502363b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
