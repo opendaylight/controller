@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a561d44_8388d423",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-06-30T01:00:45Z",
+      "side": 1,
+      "message": "Clear leaderId when election timeout occurs in non-voting follower",
+      "revId": "9cbac2ac54a4b32841018d3de5526ea5f99247d7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_e391d053",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractRaftActorBehavior.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-06-30T01:00:45Z",
+      "side": 1,
+      "message": "Keep imports in alphabetical order.",
+      "revId": "9cbac2ac54a4b32841018d3de5526ea5f99247d7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_439fdc5f",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractRaftActorBehavior.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 267,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-06-30T01:00:45Z",
+      "side": 1,
+      "message": "Please remove extra spaces. You should setup save action in our IDE to do this.",
+      "revId": "9cbac2ac54a4b32841018d3de5526ea5f99247d7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_239c6869",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractRaftActorBehavior.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 408,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-06-30T01:00:45Z",
+      "side": 1,
+      "message": "I\u0027m not sure what you\u0027re doing here. We want to set the leaderId in this instance to null. But since this is specific to Follower, it should be done in Follower#handleMessage on receipt of the ElectionTimeout message. So when the scheduled timer is triggered and the ElectionTimeout message, we want to set leaderId to null if !canStartElection.",
+      "revId": "9cbac2ac54a4b32841018d3de5526ea5f99247d7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_a3b078f5",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-06-30T01:00:45Z",
+      "side": 1,
+      "message": "Keep imports in alphabetical order.",
+      "revId": "9cbac2ac54a4b32841018d3de5526ea5f99247d7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_0395e43f",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-06-30T01:00:45Z",
+      "side": 1,
+      "message": "You can just eliminate the canStartElection checks here.",
+      "revId": "9cbac2ac54a4b32841018d3de5526ea5f99247d7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
