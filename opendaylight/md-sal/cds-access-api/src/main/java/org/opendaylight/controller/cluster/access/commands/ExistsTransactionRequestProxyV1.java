@@ -29,8 +29,8 @@ final class ExistsTransactionRequestProxyV1 extends AbstractReadTransactionReque
     }
 
     @Override
-    ExistsTransactionRequest createReadRequest(final TransactionIdentifier target, final long sequence,
-            final long retry, final ActorRef replyTo, final YangInstanceIdentifier path) {
-        return new ExistsTransactionRequest(target, sequence, retry, replyTo, path);
+    ExistsTransactionRequest createReadRequest(final TransactionIdentifier target, final ActorRef replyTo,
+            final YangInstanceIdentifier path) {
+        return new ExistsTransactionRequest(target, replyTo, path);
     }
 }

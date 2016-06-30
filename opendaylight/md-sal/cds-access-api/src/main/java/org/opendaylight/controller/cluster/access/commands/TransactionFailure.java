@@ -22,9 +22,8 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
 public final class TransactionFailure extends RequestFailure<TransactionIdentifier, TransactionFailure> {
     private static final long serialVersionUID = 1L;
 
-    TransactionFailure(final TransactionIdentifier target, final long sequence, final long retry,
-        final RequestException cause) {
-        super(target, sequence, retry, cause);
+    TransactionFailure(final TransactionIdentifier target, final RequestException cause) {
+        super(target, cause);
     }
 
     @Override

@@ -23,22 +23,13 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 public final class ExistsTransactionRequest extends AbstractReadTransactionRequest<ExistsTransactionRequest> {
     private static final long serialVersionUID = 1L;
 
-    public ExistsTransactionRequest(final @Nonnull TransactionIdentifier identifier, final long sequence,
-            final @Nonnull ActorRef replyTo, final @Nonnull YangInstanceIdentifier path) {
-        this(identifier, sequence, 0, replyTo, path);
-    }
-
-    ExistsTransactionRequest(final @Nonnull TransactionIdentifier identifier, final long sequence,
-            final long retry, final @Nonnull ActorRef replyTo, final @Nonnull YangInstanceIdentifier path) {
-        super(identifier, sequence, retry, replyTo, path);
+    public ExistsTransactionRequest(final @Nonnull TransactionIdentifier identifier, final @Nonnull ActorRef replyTo,
+        final @Nonnull YangInstanceIdentifier path) {
+        super(identifier, replyTo, path);
     }
 
     private ExistsTransactionRequest(final ExistsTransactionRequest request, final ABIVersion version) {
         super(request, version);
-    }
-
-    private ExistsTransactionRequest(final ExistsTransactionRequest request, final long retry) {
-        super(request, retry);
     }
 
     @Override
@@ -49,10 +40,5 @@ public final class ExistsTransactionRequest extends AbstractReadTransactionReque
     @Override
     protected ExistsTransactionRequestProxyV1 externalizableProxy(final ABIVersion version) {
         return new ExistsTransactionRequestProxyV1(this);
-    }
-
-    @Override
-    protected ExistsTransactionRequest cloneAsRetry(final long retry) {
-        return new ExistsTransactionRequest(this, retry);
     }
 }

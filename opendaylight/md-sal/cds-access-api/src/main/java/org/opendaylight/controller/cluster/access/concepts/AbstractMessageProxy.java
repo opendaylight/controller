@@ -15,7 +15,6 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import javax.annotation.Nonnull;
 import org.opendaylight.yangtools.concepts.WritableIdentifier;
-import org.opendaylight.yangtools.concepts.WritableObjects;
 
 /**
  * Abstract Externalizable proxy for use with {@link Message} subclasses.
@@ -28,8 +27,6 @@ import org.opendaylight.yangtools.concepts.WritableObjects;
 abstract class AbstractMessageProxy<T extends WritableIdentifier, C extends Message<T, C>> implements Externalizable {
     private static final long serialVersionUID = 1L;
     private T target;
-    private long sequence;
-    private long retry;
 
     protected AbstractMessageProxy() {
         // For Externalizable
@@ -37,29 +34,22 @@ abstract class AbstractMessageProxy<T extends WritableIdentifier, C extends Mess
 
     AbstractMessageProxy(final @Nonnull C message) {
         this.target = message.getTarget();
-        this.sequence = message.getSequence();
-        this.retry = message.getRetry();
     }
 
     @Override
     public void writeExternal(final ObjectOutput out) throws IOException {
         target.writeTo(out);
-        WritableObjects.writeLongs(out, sequence, retry);
     }
 
     @Override
     public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
         target = Verify.verifyNotNull(readTarget(in));
-
-        final byte header = WritableObjects.readLongHeader(in);
-        sequence = WritableObjects.readFirstLong(in, header);
-        retry = WritableObjects.readSecondLong(in, header);
     }
 
     protected final Object readResolve() {
-        return Verify.verifyNotNull(createMessage(target, sequence, retry));
+        return Verify.verifyNotNull(createMessage(target));
     }
 
     protected abstract @Nonnull T readTarget(@Nonnull DataInput in) throws IOException;
-    abstract @Nonnull C createMessage(@Nonnull T target, long sequence, long retry);
+    abstract @Nonnull C createMessage(@Nonnull T target);
 }

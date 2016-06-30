@@ -52,9 +52,9 @@ public abstract class AbstractRequestProxy<T extends WritableIdentifier, C exten
     }
 
     @Override
-    protected final C createMessage(final T target, final long sequence, final long retry) {
-        return createRequest(target, sequence, retry, replyTo);
+    final @Nonnull C createMessage(@Nonnull final T target) {
+        return createRequest(target, replyTo);
     }
 
-    protected abstract @Nonnull C createRequest(@Nonnull T target, long sequence, long retry, @Nonnull ActorRef replyTo);
+    protected abstract @Nonnull C createRequest(@Nonnull T target, @Nonnull ActorRef replyTo);
 }
