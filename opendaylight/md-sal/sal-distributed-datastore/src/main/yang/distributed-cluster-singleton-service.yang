@@ -1,0 +1,59 @@
+// Contents of "distributed-cluster-singleton-service"
+module distributed-cluster-singleton-service {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:config:distributed-cluster-singleton-service";
+    prefix "distributed-cluster-singleton-service";
+
+    import config { prefix config; revision-date 2013-04-05; }
+    import opendaylight-cluster-singleton-service { prefix cluster-singleton-service-spi; revision-date 2016-06-30; }
+    import opendaylight-mdsal-entity-ownership-service { prefix mdsal-entity-ownership-service-spi; revision-date 2016-06-20; }
+
+    description
+        "This module contains the base YANG definitions for the DistributedEntityOwnershipService implementation";
+
+    revision 2016-06-30 {
+        description "Initial revision";
+    }
+
+    identity distributed-dom-cluster-singleton-service-provider {
+        base config:module-type;
+        config:provided-service cluster-singleton-service-spi:dom-cluster-singleton-service;
+        config:java-name-prefix DOMDistributedClusterSingletonServiceProvider;
+    }
+
+    identity distributed-cluster-singleton-service-provider {
+        base config:module-type;
+        config:provided-service cluster-singleton-service-spi:cluster-singleton-service;
+        config:java-name-prefix DistributedClusterSingletonServiceProvider;
+    }
+
+    //  Augments the 'configuration' choice node under modules/module.
+    augment "/config:modules/config:module/config:configuration" {
+        case distributed-dom-cluster-singleton-service-provider  {
+            when "/config:modules/config:module/config:type = 'distributed-dom-cluster-singleton-service-provider'";
+            container data-store {
+                uses config:service-ref {
+                    refine type {
+                        mandatory false;
+                        config:required-identity mdsal-entity-ownership-service-spi:dom-entity-ownership-service;
+                    }
+                }
+            }
+        }
+    }
+
+    // Augments the 'configuration' choice node under modules/module.
+    augment "/config:modules/config:module/config:configuration" {
+        case distributed-cluster-singleton-service-provider  {
+            when "/config:modules/config:module/config:type = 'distributed-cluster-singleton-service-provider'";
+            container data-store {
+                uses config:service-ref {
+                    refine type {
+                        mandatory false;
+                        config:required-identity mdsal-entity-ownership-service-spi:entity-ownership-service;
+                    }
+                }
+            }
+        }
+    }
+}

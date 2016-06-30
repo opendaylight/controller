@@ -148,4 +148,21 @@
 
   <service ref="distributedEntityOwnershipServiceMdsal" interface="org.opendaylight.mdsal.dom.api.clustering.DOMEntityOwnershipService" odl:type="default"/>
 
+  <!-- MD-SAL Distributed DOMClusterSingletonProvider -->
+  <bean id="distributedDOMClusterSingletonProvider" class="org.opendaylight.controller.cluster.datastore.entityownership.DistributedDOMClusterSingletonProvider"
+          factory-method="start" destroy-method="close">
+
+    <argument ref="domDistributedEntityOwnershipServiceMdsal"/>
+  </bean>
+
+  <service ref="distributedDOMClusterSingletonProvider" interface="org.opendaylight.mdsal.dom.api.clustering.DOMClusterSingletonServiceProvider" odl:type="default"/>
+
+  <!-- MD-SAL Distributed ClusterSingletonProvider -->
+  <bean id="distributedClusterSingletonProvider" class="org.opendaylight.controller.cluster.datastore.entityownership.DistributedClusterSingletonProvider"
+          factory-method="start" destroy-method="close">
+
+    <argument ref="distributedEntityOwnershipServiceMdsal"/>
+  </bean>
+
+  <service ref="distributedClusterSingletonProvider" interface="org.opendaylight.mdsal.binding.api.clustering.ClusterSingletonServiceProvider" odl:type="default"/>
 </blueprint>
