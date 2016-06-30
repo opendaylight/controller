@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "9a561d44_08e4dc0b",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1602
+      },
+      "writtenOn": "2016-06-30T15:24:56Z",
+      "side": 1,
+      "message": "If we remove else here, In case of canStartElection \u0026 context.getPeerIds().isEmpty() \u0026\u0026 getLeaderId() \u003d\u003d null , we will be scheduling election. Is this intended ?",
+      "parentUuid": "9a561d44_155b5555",
+      "revId": "23df2cd5e05c56d1bb1bd50d3f71b74fdda61370",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a561d44_b531c90d",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2016-06-30T14:39:11Z",
       "side": 1,
       "message": "We also need to rescheduled the timer so we also need to call scheduleElection(electionDuration()).",
+      "revId": "23df2cd5e05c56d1bb1bd50d3f71b74fdda61370",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_a8ba10df",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 346,
+      "author": {
+        "id": 1602
+      },
+      "writtenOn": "2016-06-30T15:24:56Z",
+      "side": 1,
+      "message": "Agreed. Will do.",
+      "parentUuid": "9a561d44_b531c90d",
       "revId": "23df2cd5e05c56d1bb1bd50d3f71b74fdda61370",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
