@@ -31,6 +31,7 @@ import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.AbstractRequestFailureProxy;
 import org.opendaylight.controller.cluster.access.concepts.AbstractRequestProxy;
 import org.opendaylight.controller.cluster.access.concepts.Request;
+import org.opendaylight.controller.cluster.access.concepts.RequestEnvelope;
 import org.opendaylight.controller.cluster.access.concepts.RequestException;
 import org.opendaylight.controller.cluster.access.concepts.RequestFailure;
 import org.opendaylight.controller.cluster.access.concepts.Response;
@@ -47,8 +48,8 @@ public class SequencedQueueEntryTest {
     private static class MockFailure extends RequestFailure<WritableIdentifier, MockFailure> {
         private static final long serialVersionUID = 1L;
 
-        MockFailure(final WritableIdentifier target, final long sequence, final long retry, final RequestException cause) {
-            super(target, sequence, retry, cause);
+        MockFailure(final WritableIdentifier target, final RequestException cause) {
+            super(target, cause);
         }
 
         @Override
@@ -65,18 +66,13 @@ public class SequencedQueueEntryTest {
     private static class MockRequest extends Request<WritableIdentifier, MockRequest> {
         private static final long serialVersionUID = 1L;
 
-        MockRequest(final WritableIdentifier target, final long sequence, final ActorRef replyTo) {
-            super(target, sequence, 0, replyTo);
-        }
-
-
-        MockRequest(final MockRequest request, final long retry) {
-            super(request, retry);
+        MockRequest(final WritableIdentifier target, final ActorRef replyTo) {
+            super(target, replyTo);
         }
 
         @Override
         public RequestFailure<WritableIdentifier, ?> toRequestFailure(final RequestException cause) {
-            return new MockFailure(getTarget(), getSequence(), getRetry(), cause);
+            return new MockFailure(getTarget(), cause);
         }
 
         @Override
@@ -87,11 +83,6 @@ public class SequencedQueueEntryTest {
         @Override
         protected MockRequest cloneAsVersion(final ABIVersion version) {
             return this;
-        }
-
-        @Override
-        protected MockRequest cloneAsRetry(final long retry) {
-            return new MockRequest(this, retry);
         }
     };
 
@@ -137,10 +128,10 @@ public class SequencedQueueEntryTest {
 
         mockActor = TestProbe.apply(actorSystem);
         mockBackendInfo = new BackendInfo(mockActor.ref(), ABIVersion.current());
-        mockRequest = new MockRequest(mockIdentifier, ThreadLocalRandom.current().nextLong(), mockReplyTo);
+        mockRequest = new MockRequest(mockIdentifier, mockReplyTo);
         mockResponse = mockRequest.toRequestFailure(mockCause);
 
-        entry = new SequencedQueueEntry(mockRequest, mockCallback, ticker.read());
+        entry = new SequencedQueueEntry(mockRequest, 0, mockCallback, ticker.read());
     }
 
     @After
@@ -150,7 +141,7 @@ public class SequencedQueueEntryTest {
 
     @Test
     public void testGetSequence() {
-        assertEquals(mockRequest.getSequence(), entry.getSequence());
+        assertEquals(0, entry.getSequence());
     }
 
     @Test
@@ -207,9 +198,11 @@ public class SequencedQueueEntryTest {
     }
 
      private static void assertRequestEquals(final Request<?, ?> expected, final Object o) {
-         final Request<?, ?> actual = (Request<?, ?>) o;
-         assertEquals(expected.getRetry(), actual.getRetry());
-         assertEquals(expected.getSequence(), actual.getSequence());
-         assertEquals(expected.getTarget(), actual.getTarget());
+         assertTrue(o instanceof RequestEnvelope);
+
+         final RequestEnvelope actual = (RequestEnvelope) o;
+         assertEquals(0, actual.getRetry());
+         assertEquals(0, actual.getSequence());
+         assertEquals(expected.getTarget(), actual.getMessage().getTarget());
     }
 }

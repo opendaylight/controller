@@ -27,24 +27,11 @@ public final class CommitLocalTransactionRequest extends AbstractLocalTransactio
     private final DataTreeModification mod;
     private final boolean coordinated;
 
-    public CommitLocalTransactionRequest(final @Nonnull TransactionIdentifier identifier, final long sequence,
+    public CommitLocalTransactionRequest(final @Nonnull TransactionIdentifier identifier,
             final @Nonnull ActorRef replyTo, final @Nonnull DataTreeModification mod, final boolean coordinated) {
-        this(identifier, sequence, 0, replyTo, mod, coordinated);
-    }
-
-    CommitLocalTransactionRequest(final @Nonnull TransactionIdentifier identifier, final long sequence,
-            final long retry, final @Nonnull ActorRef replyTo, final @Nonnull DataTreeModification mod,
-            final boolean coordinated) {
-        super(identifier, sequence, retry, replyTo);
+        super(identifier, replyTo);
         this.mod = Preconditions.checkNotNull(mod);
         this.coordinated = coordinated;
-    }
-
-
-    private CommitLocalTransactionRequest(final CommitLocalTransactionRequest request, final long retry) {
-        super(request, retry);
-        this.mod = request.mod;
-        this.coordinated = request.coordinated;
     }
 
     public DataTreeModification getModification() {
@@ -66,10 +53,5 @@ public final class CommitLocalTransactionRequest extends AbstractLocalTransactio
     @Override
     protected ToStringHelper addToStringAttributes(final ToStringHelper toStringHelper) {
         return super.addToStringAttributes(toStringHelper).add("coordinated", coordinated);
-    }
-
-    @Override
-    protected CommitLocalTransactionRequest cloneAsRetry(final long retry) {
-        return new CommitLocalTransactionRequest(this, retry);
     }
 }
