@@ -22,9 +22,8 @@ public final class TransactionCanCommitSuccess extends TransactionSuccess<Transa
     private static final long serialVersionUID = 1L;
     private final ActorRef cohort;
 
-    public TransactionCanCommitSuccess(final TransactionIdentifier identifier, final long sequence, final long retry,
-            final ActorRef cohort) {
-        super(identifier, sequence, retry);
+    public TransactionCanCommitSuccess(final TransactionIdentifier identifier, final ActorRef cohort) {
+        super(identifier);
         this.cohort = Preconditions.checkNotNull(cohort);
     }
 

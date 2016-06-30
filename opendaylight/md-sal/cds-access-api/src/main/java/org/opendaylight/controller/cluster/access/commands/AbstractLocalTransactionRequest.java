@@ -23,13 +23,8 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
 abstract class AbstractLocalTransactionRequest<T extends AbstractLocalTransactionRequest<T>> extends TransactionRequest<T> {
     private static final long serialVersionUID = 1L;
 
-    AbstractLocalTransactionRequest(final TransactionIdentifier identifier, final long sequence, final long retry,
-        final ActorRef replyTo) {
-        super(identifier, sequence, retry, replyTo);
-    }
-
-    AbstractLocalTransactionRequest(final T request, final long retry) {
-        super(request, retry);
+    AbstractLocalTransactionRequest(final TransactionIdentifier identifier, final ActorRef replyTo) {
+        super(identifier, replyTo);
     }
 
     @Override

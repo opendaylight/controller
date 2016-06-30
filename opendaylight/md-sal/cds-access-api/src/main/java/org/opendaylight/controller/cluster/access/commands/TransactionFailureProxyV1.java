@@ -31,9 +31,8 @@ final class TransactionFailureProxyV1 extends AbstractRequestFailureProxy<Transa
     }
 
     @Override
-    protected TransactionFailure createFailure(final TransactionIdentifier target, final long sequence,
-            final long retry,  final RequestException cause) {
-        return new TransactionFailure(target, sequence, retry, cause);
+    protected TransactionFailure createFailure(final TransactionIdentifier target, final RequestException cause) {
+        return new TransactionFailure(target, cause);
     }
 
     @Override

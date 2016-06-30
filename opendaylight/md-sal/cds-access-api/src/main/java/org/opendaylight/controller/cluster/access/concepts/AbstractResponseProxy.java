@@ -31,9 +31,9 @@ abstract class AbstractResponseProxy<T extends WritableIdentifier, C extends Res
     }
 
     @Override
-    final C createMessage(final T target, final long sequence, final long retry) {
-        return createResponse(target, sequence, retry);
+    final C createMessage(final T target) {
+        return createResponse(target);
     }
 
-    abstract @Nonnull C createResponse(@Nonnull T target, long sequence, long retry);
+    abstract @Nonnull C createResponse(@Nonnull T target);
 }

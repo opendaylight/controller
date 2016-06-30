@@ -23,13 +23,8 @@ public final class ExistsTransactionSuccess extends TransactionSuccess<ExistsTra
     private static final long serialVersionUID = 1L;
     private final boolean exists;
 
-    public ExistsTransactionSuccess(final TransactionIdentifier target, final long sequence, final boolean exists) {
-        this(target, sequence, 0, exists);
-    }
-
-    ExistsTransactionSuccess(final TransactionIdentifier target, final long sequence, final long retry,
-            final boolean exists) {
-        super(target, sequence, retry);
+    public ExistsTransactionSuccess(final TransactionIdentifier target, final boolean exists) {
+        super(target);
         this.exists = exists;
     }
 

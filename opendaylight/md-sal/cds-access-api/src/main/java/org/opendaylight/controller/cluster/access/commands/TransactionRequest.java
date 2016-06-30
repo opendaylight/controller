@@ -26,22 +26,17 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
 public abstract class TransactionRequest<T extends TransactionRequest<T>> extends Request<TransactionIdentifier, T> {
     private static final long serialVersionUID = 1L;
 
-    TransactionRequest(final TransactionIdentifier identifier, final long sequence, final long retry,
-        final ActorRef replyTo) {
-        super(identifier, sequence, retry, replyTo);
+    TransactionRequest(final TransactionIdentifier identifier, final ActorRef replyTo) {
+        super(identifier, replyTo);
     }
 
     TransactionRequest(final T request, final ABIVersion version) {
         super(request, version);
     }
 
-    TransactionRequest(final T request, final long retry) {
-        super(request, retry);
-    }
-
     @Override
     public final TransactionFailure toRequestFailure(final RequestException cause) {
-        return new TransactionFailure(getTarget(), getSequence(), getRetry(), cause);
+        return new TransactionFailure(getTarget(), cause);
     }
 
     @Override
