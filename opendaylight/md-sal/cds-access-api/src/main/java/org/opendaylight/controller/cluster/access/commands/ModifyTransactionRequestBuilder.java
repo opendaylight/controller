@@ -31,7 +31,6 @@ public final class ModifyTransactionRequestBuilder implements Builder<ModifyTran
     private final TransactionIdentifier identifier;
     private final ActorRef replyTo;
     private PersistenceProtocol protocol = null;
-    private long sequence;
 
     public ModifyTransactionRequestBuilder(final TransactionIdentifier identifier, final ActorRef replyTo) {
         this.identifier = Preconditions.checkNotNull(identifier);
@@ -45,12 +44,6 @@ public final class ModifyTransactionRequestBuilder implements Builder<ModifyTran
 
     private void checkFinished() {
         Preconditions.checkState(protocol != null, "Batch has already been finished");
-    }
-
-    public void setSequence(final long sequence) {
-        checkFinished();
-        Preconditions.checkState(modifications.isEmpty(), "Sequence must be set first");
-        this.sequence = sequence;
     }
 
     public void addModification(final TransactionModification modification) {
@@ -76,12 +69,9 @@ public final class ModifyTransactionRequestBuilder implements Builder<ModifyTran
 
     @Override
     public ModifyTransactionRequest build() {
-        final ModifyTransactionRequest ret = new ModifyTransactionRequest(identifier, sequence, 0, replyTo,
-            modifications, protocol);
+        final ModifyTransactionRequest ret = new ModifyTransactionRequest(identifier, replyTo, modifications, protocol);
         modifications.clear();
         protocol = null;
-        sequence = 0;
         return ret;
     }
-
 }

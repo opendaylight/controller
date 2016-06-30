@@ -19,7 +19,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.concurrent.ThreadSafe;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.RequestException;
-import org.opendaylight.controller.cluster.access.concepts.Response;
+import org.opendaylight.controller.cluster.access.concepts.ResponseEnvelope;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.concepts.WritableIdentifier;
@@ -94,8 +94,8 @@ public class ClientActorContext extends AbstractClientActorContext implements Id
         queues.remove(queue.getCookie(), queue);
     }
 
-    ClientActorBehavior completeRequest(final ClientActorBehavior current, final Response<?, ?> response) {
-        final WritableIdentifier id = response.getTarget();
+    ClientActorBehavior completeRequest(final ClientActorBehavior current, final ResponseEnvelope<?> response) {
+        final WritableIdentifier id = response.getMessage().getTarget();
 
         // FIXME: this will need to be updated for other Request/Response types to extract cookie
         Preconditions.checkArgument(id instanceof TransactionIdentifier);
