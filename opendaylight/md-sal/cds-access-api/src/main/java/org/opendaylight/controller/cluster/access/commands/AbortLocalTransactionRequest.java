@@ -23,22 +23,8 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
 public final class AbortLocalTransactionRequest extends AbstractLocalTransactionRequest<AbortLocalTransactionRequest> {
     private static final long serialVersionUID = 1L;
 
-    public AbortLocalTransactionRequest(final @Nonnull TransactionIdentifier identifier, final long sequence,
+    public AbortLocalTransactionRequest(final @Nonnull TransactionIdentifier identifier,
             final @Nonnull ActorRef replyTo) {
-        this(identifier, sequence, 0, replyTo);
-    }
-
-    AbortLocalTransactionRequest(final @Nonnull TransactionIdentifier identifier, final long sequence,
-            final long retry, final @Nonnull ActorRef replyTo) {
-        super(identifier, sequence, retry, replyTo);
-    }
-
-    private AbortLocalTransactionRequest(final @Nonnull AbortLocalTransactionRequest request, final long retry) {
-        super(request, retry);
-    }
-
-    @Override
-    protected AbortLocalTransactionRequest cloneAsRetry(final long retry) {
-        return new AbortLocalTransactionRequest(this, retry);
+        super(identifier, replyTo);
     }
 }

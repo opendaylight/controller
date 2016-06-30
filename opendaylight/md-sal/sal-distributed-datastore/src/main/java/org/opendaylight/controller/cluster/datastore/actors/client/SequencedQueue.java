@@ -20,7 +20,7 @@ import javax.annotation.Nullable;
 import javax.annotation.concurrent.NotThreadSafe;
 import org.opendaylight.controller.cluster.access.concepts.Request;
 import org.opendaylight.controller.cluster.access.concepts.RequestException;
-import org.opendaylight.controller.cluster.access.concepts.Response;
+import org.opendaylight.controller.cluster.access.concepts.ResponseEnvelope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.duration.FiniteDuration;
@@ -50,8 +50,6 @@ final class SequencedQueue {
      *        a synchronized block.
      */
     private final Deque<SequencedQueueEntry> queue = new LinkedList<>();
-
-//    private final Deque<SequencedQueueEntry> entries = new LinkedList<>();
     private final Ticker ticker;
     private final Long cookie;
 
@@ -70,6 +68,7 @@ final class SequencedQueue {
     private Object expectingTimer;
 
     private long lastProgress;
+    private long sequence;
 
     // Updated from application thread
     private volatile boolean notClosed = true;
@@ -108,9 +107,6 @@ final class SequencedQueue {
      * @return Optional duration with semantics described above.
      */
     @Nullable Optional<FiniteDuration> enqueueRequest(final Request<?, ?> request, final RequestCallback callback) {
-        final long now = ticker.read();
-        final SequencedQueueEntry e = new SequencedQueueEntry(request, callback, now);
-
         // FIXME: enable this once we are the ones assigning the sequence number
         //final SequencedQueueEntry last = entries.peekLast();
         //if (last != null) {
@@ -120,6 +116,10 @@ final class SequencedQueue {
 
         // We could have check first, but argument checking needs to happen first
         checkNotClosed();
+
+        final long now = ticker.read();
+        final SequencedQueueEntry e = new SequencedQueueEntry(request, callback, sequence++, now);
+
         queue.add(e);
         LOG.debug("Enqueued request {} to queue {}", request, this);
 
@@ -136,7 +136,7 @@ final class SequencedQueue {
         }
     }
 
-    ClientActorBehavior complete(final ClientActorBehavior current, final Response<?, ?> response) {
+    ClientActorBehavior complete(final ClientActorBehavior current, final ResponseEnvelope<?> response) {
         // Responses to different targets may arrive out of order, hence we use an iterator
         final Iterator<SequencedQueueEntry> it = queue.iterator();
         while (it.hasNext()) {
@@ -145,7 +145,7 @@ final class SequencedQueue {
                 lastProgress = ticker.read();
                 it.remove();
                 LOG.debug("Completing request {} with {}", e, response);
-                return e.complete(response);
+                return e.complete(response.getMessage());
             }
         }
 
