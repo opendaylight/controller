@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "9a561d44_68763840",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-06-30T15:45:00Z",
+      "side": 1,
+      "message": "if context.getPeerIds().isEmpty() \u0026\u0026 getLeaderId() \u003d\u003d null, we will do immediate election timeout. This is done for single node case where we want to go to leader. We didn\u0027t want to special case elsewhere so we let it naturally flow from Follower -\u003e Candidate -\u003e Leader. There\u0027s a bit of history with the canStartElection check here. It was originally put in for a node that has automatic elections disabled (this was done for a special 2-node master-slave solution). However the check was only done here and not in handleMessage for ElectionTimeout  and scheduleElection. I added those checks as further protection when I added the non-voting stuff. So really the check here isn\u0027t needed due to the other checks in place but was kept as a slight optimization to not even start the timer. But now we realize we do need the timer regardless. So whether or not canStartElection is true, it is handled appropriately when the ElectionTimeout message is received.",
+      "parentUuid": "9a561d44_08e4dc0b",
+      "revId": "23df2cd5e05c56d1bb1bd50d3f71b74fdda61370",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a561d44_b531c90d",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
         "patchSetId": 3
