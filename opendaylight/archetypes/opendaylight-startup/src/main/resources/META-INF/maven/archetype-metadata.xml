@@ -82,7 +82,7 @@
          </includes>
     </fileSet>
     <fileSet filtered="true" encoding="UTF-8">
-        <directory>impl/src/main/config</directory>
+        <directory>impl/src/main/resources/org/opendaylight/blueprint</directory>
         <includes>
             <include>**/*.xml</include>
          </includes>
