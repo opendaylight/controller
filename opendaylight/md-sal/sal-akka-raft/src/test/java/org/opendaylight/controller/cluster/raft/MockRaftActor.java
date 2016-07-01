@@ -47,7 +47,8 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
     private final Function<Runnable, Void> pauseLeaderFunction;
 
     protected MockRaftActor(AbstractBuilder<?, ?> builder) {
-        super(builder.id, builder.peerAddresses, Optional.fromNullable(builder.config), PAYLOAD_VERSION);
+        super(builder.id, builder.peerAddresses != null ? builder.peerAddresses :
+            Collections.<String, String>emptyMap(), Optional.fromNullable(builder.config), PAYLOAD_VERSION);
         state = new ArrayList<>();
         this.actorDelegate = mock(RaftActor.class);
         this.recoveryCohortDelegate = mock(RaftActorRecoveryCohort.class);
@@ -114,7 +115,6 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
         return state;
     }
 
-
     @Override
     protected void applyState(ActorRef clientActor, Identifier identifier, Object data) {
         actorDelegate.applyState(clientActor, identifier, data);
@@ -169,6 +169,7 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
         try {
             Object data = toObject(bytes);
             if (data instanceof List) {
+                state.clear();
                 state.addAll((List<?>) data);
             }
         } catch (Exception e) {

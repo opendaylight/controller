@@ -94,6 +94,7 @@ class RaftActorRecoverySupport {
                         context.getTermInformation().getVotedFor());
             }
 
+            onRecoveryCompletedMessage();
             possiblyRestoreFromSnapshot();
         } else {
             boolean isServerConfigPayload = false;
