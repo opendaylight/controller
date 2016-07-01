@@ -97,26 +97,9 @@ public class Follower extends AbstractRaftActorBehavior {
             return true;
         }
 
-        ReplicatedLogEntry previousEntry = context.getReplicatedLog()
-                .get(index);
+        ReplicatedLogEntry entry = context.getReplicatedLog().get(index);
+        return entry != null;
 
-        return previousEntry != null;
-
-    }
-
-    private long getLogEntryTerm(long index){
-        if(index == context.getReplicatedLog().getSnapshotIndex()){
-            return context.getReplicatedLog().getSnapshotTerm();
-        }
-
-        ReplicatedLogEntry previousEntry = context.getReplicatedLog()
-                .get(index);
-
-        if(previousEntry != null){
-            return previousEntry.getTerm();
-        }
-
-        return -1;
     }
 
     private void updateInitialSyncStatus(long currentLeaderCommit, String leaderId){
@@ -184,14 +167,20 @@ public class Follower extends AbstractRaftActorBehavior {
                 // Find the entry up until the one that is not in the follower's log
                 for (int i = 0;i < appendEntries.getEntries().size(); i++, addEntriesFrom++) {
                     ReplicatedLogEntry matchEntry = appendEntries.getEntries().get(i);
-                    ReplicatedLogEntry newEntry = context.getReplicatedLog().get(matchEntry.getIndex());
 
-                    if (newEntry == null) {
-                        //newEntry not found in the log
+                    if(!isLogEntryPresent(matchEntry.getIndex())) {
+                        // newEntry not found in the log
                         break;
                     }
 
-                    if (newEntry.getTerm() == matchEntry.getTerm()) {
+                    long existingEntryTerm = getLogEntryTerm(matchEntry.getIndex());
+
+                    LOG.debug("{}: matchEntry {} is present: existingEntryTerm: {}", logName(), matchEntry,
+                            existingEntryTerm);
+
+                    // existingEntryTerm == -1 means it's in the snapshot and not in the log. We don't know
+                    // what the term was so we'll assume it matches.
+                    if(existingEntryTerm == -1 || existingEntryTerm == matchEntry.getTerm()) {
                         continue;
                     }
 
@@ -201,7 +190,18 @@ public class Follower extends AbstractRaftActorBehavior {
                                 matchEntry.getIndex());
 
                         // Entries do not match so remove all subsequent entries
-                        context.getReplicatedLog().removeFromAndPersist(matchEntry.getIndex());
+                        if(!context.getReplicatedLog().removeFromAndPersist(matchEntry.getIndex())) {
+                            // Could not remove the entries - this means the matchEntry index must be in the
+                            // snapshot and not the log. In this case the prior entries are part of the state
+                            // so we must send back a reply to force a snapshot to completely re-sync the
+                            // follower's log and state.
+
+                            LOG.debug("{}: Could not remove entries - sending reply to force snapshot", logName());
+                            sender.tell(new AppendEntriesReply(context.getId(), currentTerm(), false, lastIndex,
+                                    lastTerm(), context.getPayloadVersion(), true), actor());
+                            return this;
+                        }
+
                         break;
                     } else {
                         sender.tell(new AppendEntriesReply(context.getId(), currentTerm(), false, lastIndex,
@@ -212,8 +212,8 @@ public class Follower extends AbstractRaftActorBehavior {
             }
 
             lastIndex = lastIndex();
-            LOG.debug("{}: After cleanup entries to be added from = {}", logName(),
-                        (addEntriesFrom + lastIndex));
+            LOG.debug("{}: After cleanup, lastIndex: {}, entries to be added from: {}", logName(),
+                    lastIndex, addEntriesFrom);
 
             // 4. Append any new entries not already in the log
             for (int i = addEntriesFrom; i < appendEntries.getEntries().size(); i++) {

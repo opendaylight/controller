@@ -322,7 +322,8 @@ public class AbstractReplicatedLogImplTest {
         }
 
         @Override
-        public void removeFromAndPersist(final long index) {
+        public boolean removeFromAndPersist(final long index) {
+            return true;
         }
 
         @Override

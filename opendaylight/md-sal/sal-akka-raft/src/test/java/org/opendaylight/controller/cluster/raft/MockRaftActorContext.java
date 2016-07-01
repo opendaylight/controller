@@ -145,8 +145,9 @@ public class MockRaftActorContext extends RaftActorContextImpl {
         public void captureSnapshotIfReady(ReplicatedLogEntry replicatedLogEntry) {
         }
 
-        @Override public void removeFromAndPersist(long index) {
-            removeFrom(index);
+        @Override
+        public boolean removeFromAndPersist(long index) {
+            return removeFrom(index) >= 0;
         }
 
         @Override

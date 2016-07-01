@@ -215,12 +215,6 @@ public abstract class AbstractReplicatedLogImpl implements ReplicatedLog {
     }
 
     @Override
-    public abstract void appendAndPersist(ReplicatedLogEntry replicatedLogEntry);
-
-    @Override
-    public abstract void removeFromAndPersist(long index);
-
-    @Override
     public void setSnapshotIndex(long snapshotIndex) {
         this.snapshotIndex = snapshotIndex;
     }

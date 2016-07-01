@@ -218,13 +218,36 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         followerLogInformation.setRaftVersion(appendEntriesReply.getRaftVersion());
 
         boolean updated = false;
-        if (appendEntriesReply.isSuccess()) {
+        if(appendEntriesReply.getLogLastIndex() > context.getReplicatedLog().lastIndex()) {
+            // The follower's log is actually ahead of the leader's log. Normally this doesn't happen
+            // in raft as a node cannot become leader if it's log is behind another's. However, the
+            // non-voting semantics deviate a bit from raft. Only voting members participate in
+            // elections and can become leader so it's possible for a non-voting follower to be ahead
+            // of the leader. This can happen if persistence is disabled and all voting members are
+            // restarted. In this case, the voting leader will start out with an empty log however
+            // the non-voting followers still retain the previous data in memory. On the first
+            // AppendEntries, the non-voting follower returns a successful reply b/c the prevLogIndex
+            // sent by the leader is -1 and thus the integrity checks pass. However the follower's returned
+            // lastLogIndex may be higher in which case we want to reset the follower by installing a
+            // snapshot. It's also possible that the follower's last log index is behind the leader's.
+            // However in this case the log terms won't match and the logs will conflict - this is handled
+            // elsewhere.
+            LOG.debug("{}: handleAppendEntriesReply: follower {} lastIndex {} is ahead of our lastIndex {} - forcing install snaphot",
+                    logName(), followerLogInformation.getId(), appendEntriesReply.getLogLastIndex(),
+                    context.getReplicatedLog().lastIndex());
+
+            followerLogInformation.setMatchIndex(-1);
+            followerLogInformation.setNextIndex(-1);
+
+            initiateCaptureSnapshot(followerId);
+            updated = true;
+        } else if (appendEntriesReply.isSuccess()) {
             updated = updateFollowerLogInformation(followerLogInformation, appendEntriesReply);
         } else {
             LOG.debug("{}: handleAppendEntriesReply: received unsuccessful reply: {}", logName(), appendEntriesReply);
 
             long followerLastLogIndex = appendEntriesReply.getLogLastIndex();
-            ReplicatedLogEntry followersLastLogEntry = context.getReplicatedLog().get(followerLastLogIndex);
+            long followersLastLogTerm = getLogEntryTerm(followerLastLogIndex);
             if(appendEntriesReply.isForceInstallSnapshot()) {
                 // Reset the followers match and next index. This is to signal that this follower has nothing
                 // in common with this Leader and so would require a snapshot to be installed
@@ -233,8 +256,8 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
 
                 // Force initiate a snapshot capture
                 initiateCaptureSnapshot(followerId);
-            } else if(followerLastLogIndex < 0 || (followersLastLogEntry != null &&
-                    followersLastLogEntry.getTerm() == appendEntriesReply.getLogLastTerm())) {
+            } else if(followerLastLogIndex < 0 || (followersLastLogTerm >= 0 &&
+                    followersLastLogTerm == appendEntriesReply.getLogLastTerm())) {
                 // The follower's log is empty or the last entry is present in the leader's journal
                 // and the terms match so the follower is just behind the leader's journal from
                 // the last snapshot, if any. We'll catch up the follower quickly by starting at the
@@ -242,11 +265,11 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
 
                 updated = updateFollowerLogInformation(followerLogInformation, appendEntriesReply);
             } else {
-                // TODO: When we find that the follower is out of sync with the
-                // Leader we simply decrement that followers next index by 1.
-                // Would it be possible to do better than this? The RAFT spec
-                // does not explicitly deal with it but may be something for us to
-                // think about.
+                // The follower's log conflicts with leader's log so decrement follower's next index by 1
+                // in an attempt to find where the logs match.
+
+                LOG.debug("{}: follower's last log term {} conflicts with the leader's {} - dec next index",
+                        logName(), appendEntriesReply.getLogLastTerm(), followersLastLogTerm);
 
                 followerLogInformation.decrNextIndex();
             }
@@ -321,6 +344,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
 
         //Send the next log entry immediately, if possible, no need to wait for heartbeat to trigger that event
         sendUpdatesToFollower(followerId, followerLogInformation, false, !updated);
+
         return this;
     }
 
@@ -516,7 +540,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                 logIndex)
         );
 
-        boolean applyModificationToState = followerToLog.isEmpty()
+        boolean applyModificationToState = !context.anyVotingPeers()
                 || context.getRaftPolicy().applyModificationToStateBeforeConsensus();
 
         if(applyModificationToState){
@@ -596,7 +620,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                     // then snapshot should be sent
 
                     if (LOG.isDebugEnabled()) {
-                        LOG.debug(String.format("%s: InitiateInstallSnapshot to follower: %s," +
+                        LOG.debug(String.format("%s: InitiateInstallSnapshot to follower: %s, " +
                                     "follower-nextIndex: %d, leader-snapshot-index: %d,  " +
                                     "leader-last-index: %d", logName(), followerId,
                                     followerNextIndex, leaderSnapShotIndex, leaderLastIndex));
@@ -626,8 +650,8 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
     private void sendAppendEntriesToFollower(ActorSelection followerActor, long followerNextIndex,
         List<ReplicatedLogEntry> entries, String followerId) {
         AppendEntries appendEntries = new AppendEntries(currentTerm(), context.getId(),
-            prevLogIndex(followerNextIndex),
-            prevLogTerm(followerNextIndex), entries,
+            getLogEntryIndex(followerNextIndex - 1),
+            getLogEntryTerm(followerNextIndex - 1), entries,
             context.getCommitIndex(), super.getReplicatedToAllIndex(), context.getPayloadVersion());
 
         if(!entries.isEmpty() || LOG.isTraceEnabled()) {

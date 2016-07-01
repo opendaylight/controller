@@ -244,6 +244,11 @@ public interface RaftActorContext {
     boolean isVotingMember();
 
     /**
+     * @return true if there are any voting peers, false otherwise.
+     */
+    boolean anyVotingPeers();
+
+    /**
      * @return current behavior attached to the raft actor.
      */
     RaftActorBehavior getCurrentBehavior();

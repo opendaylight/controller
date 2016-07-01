@@ -58,8 +58,9 @@ public interface ReplicatedLog {
      * reconstruct the state of the in-memory replicated log
      *
      * @param index the index of the first log entry to remove
+     * @return
      */
-    void removeFromAndPersist(long index);
+    boolean removeFromAndPersist(long index);
 
     /**
      * Appends an entry to the log.
