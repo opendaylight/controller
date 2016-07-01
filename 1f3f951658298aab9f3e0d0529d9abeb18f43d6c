@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a561d44_167d166f",
+        "filename": "opendaylight/md-sal/sal-dom-broker-config/src/main/java/org/opendaylight/controller/config/yang/md/sal/dom/impl/SchemaServiceImplSingletonModule.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-07-01T11:48:44Z",
+      "side": 1,
+      "message": "Not sure if this is necessary, be we could use a null check for those two to avoid NPE",
+      "range": {
+        "startLine": 78,
+        "startChar": 16,
+        "endLine": 79,
+        "endChar": 46
+      },
+      "revId": "1f3f951658298aab9f3e0d0529d9abeb18f43d6c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_9655a6c8",
+        "filename": "opendaylight/md-sal/sal-schema-service/src/main/java/org/opendaylight/controller/sal/schema/service/impl/SchemaServiceActivator.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-07-01T11:48:44Z",
+      "side": 1,
+      "message": "Is there any reason why we wouldn\u0027t move this SchemaServiceActivator to blueprint? It seems not to be this patch\u0027s scope though, but just wondering.",
+      "range": {
+        "startLine": 17,
+        "startChar": 13,
+        "endLine": 17,
+        "endChar": 35
+      },
+      "revId": "1f3f951658298aab9f3e0d0529d9abeb18f43d6c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
