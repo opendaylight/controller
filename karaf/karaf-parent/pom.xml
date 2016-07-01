@@ -30,6 +30,8 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
           is not.
      -->
     <karaf.maven.version>3.0.1</karaf.maven.version>
+    <karaf.archiveTarGz>true</karaf.archiveTarGz>
+    <karaf.archiveZip>true</karaf.archiveZip>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -259,6 +261,10 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
               <goals>
                 <goal>instance-create-archive</goal>
               </goals>
+              <configuration>
+                <archiveTarGz>${karaf.archiveTarGz}</archiveTarGz>
+                <archiveZip>${karaf.archiveZip}</archiveZip>
+              </configuration>
             </execution>
           </executions>
         </plugin>
