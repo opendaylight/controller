@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a561d44_93f2d898",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/DistributedEntityOwnershipServiceMdsal.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-07-01T10:31:30Z",
+      "side": 1,
+      "message": "The MD-SAL BindingToNormalizedNodeCodec class isn\u0027t ready for production use at this point, it doesn\u0027t yet have the fixes/changes that the controller BindingToNormalizedNodeCodec class has.\n\nI think we should modify the BindingDOMEntityOwnershipServiceAdapter so it references the interface, BindingNormalizeNodeSerializer, that BindingToNormalizedNodeCodec implements. Then we can inject the singleton controller BindingToNormalizedNodeCodec instance that is already provided into\nthe BindingDOMEntityOwnershipServiceAdapter",
+      "revId": "c444f4a0fddef45bed85b4a6a44ba39e27c1ec56",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
