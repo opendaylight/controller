@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "9a561d44_764612c1",
+        "filename": "opendaylight/md-sal/sal-dom-broker-config/src/main/java/org/opendaylight/controller/config/yang/md/sal/dom/impl/SchemaServiceImplSingletonModule.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-07-01T12:34:17Z",
+      "side": 1,
+      "message": "they can\u0027t be null",
+      "parentUuid": "9a561d44_167d166f",
+      "range": {
+        "startLine": 78,
+        "startChar": 16,
+        "endLine": 79,
+        "endChar": 46
+      },
+      "revId": "1f3f951658298aab9f3e0d0529d9abeb18f43d6c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a561d44_9655a6c8",
         "filename": "opendaylight/md-sal/sal-schema-service/src/main/java/org/opendaylight/controller/sal/schema/service/impl/SchemaServiceActivator.java",
         "patchSetId": 3
@@ -36,6 +60,30 @@
       "writtenOn": "2016-07-01T11:48:44Z",
       "side": 1,
       "message": "Is there any reason why we wouldn\u0027t move this SchemaServiceActivator to blueprint? It seems not to be this patch\u0027s scope though, but just wondering.",
+      "range": {
+        "startLine": 17,
+        "startChar": 13,
+        "endLine": 17,
+        "endChar": 35
+      },
+      "revId": "1f3f951658298aab9f3e0d0529d9abeb18f43d6c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_764bb2b0",
+        "filename": "opendaylight/md-sal/sal-schema-service/src/main/java/org/opendaylight/controller/sal/schema/service/impl/SchemaServiceActivator.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-07-01T12:34:17Z",
+      "side": 1,
+      "message": "There is a reason. The GlobalBundleScanningSchemaServiceImpl scans yang models out of RESOLVED bundles for parsing so it has to be activated before any ODL bundle that uses yang. This bundle has a lower start-level than normal so the GlobalBundleScanningSchemaServiceImpl is created first and its startup blocks the OSGi activator thread while processing the RESOLVED bundles. In this way, we guarantee all yang models are loaded prior to the rest of ODL starting up. This avoids timing issues where an app starts up and tries to reference/use a yang model but it fails b/c it hasn\u0027t loaded yet.",
+      "parentUuid": "9a561d44_9655a6c8",
       "range": {
         "startLine": 17,
         "startChar": 13,
