@@ -64,6 +64,8 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     private boolean votingMember = true;
 
+    private int numVotingPeers = -1;
+
     public RaftActorContextImpl(ActorRef actor, ActorContext context, String id,
             ElectionTerm termInformation, long commitIndex, long lastApplied, Map<String, String> peerAddresses,
             ConfigParams configParams, DataPersistenceProvider persistenceProvider, Logger logger) {
@@ -231,6 +233,7 @@ public class RaftActorContextImpl implements RaftActorContext {
     @Override
     public void addToPeers(String id, String address, VotingState votingState) {
         peerInfoMap.put(id, new PeerInfo(id, address, votingState));
+        numVotingPeers = -1;
     }
 
     @Override
@@ -239,6 +242,7 @@ public class RaftActorContextImpl implements RaftActorContext {
             votingMember = false;
         } else {
             peerInfoMap.remove(name);
+            numVotingPeers = -1;
         }
     }
 
@@ -324,5 +328,19 @@ public class RaftActorContextImpl implements RaftActorContext {
     @Override
     public boolean isVotingMember() {
         return votingMember;
+    }
+
+    @Override
+    public boolean anyVotingPeers() {
+        if(numVotingPeers < 0) {
+            numVotingPeers = 0;
+            for(PeerInfo info: getPeers()) {
+                if(info.isVoting()) {
+                    numVotingPeers++;
+                }
+            }
+        }
+
+        return numVotingPeers > 0;
     }
 }

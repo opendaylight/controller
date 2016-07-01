@@ -1407,7 +1407,7 @@ public class LeaderTest extends AbstractLeaderTest {
         appendEntries = MessageCollectorActor.expectFirstMatching(followerActor, AppendEntries.class);
 
         assertEquals("getLeaderCommit", leaderCommitIndex, appendEntries.getLeaderCommit());
-        assertEquals("getPrevLogIndex", -1, appendEntries.getPrevLogIndex());
+        assertEquals("getPrevLogIndex", 0, appendEntries.getPrevLogIndex());
         assertEquals("Log entries size", 2, appendEntries.getEntries().size());
 
         assertEquals("First entry index", 1, appendEntries.getEntries().get(0).getIndex());
@@ -1774,7 +1774,7 @@ public class LeaderTest extends AbstractLeaderTest {
 
         appendEntries = appendEntriesList.get(1);
         assertEquals("getLeaderCommit", leaderCommitIndex, appendEntries.getLeaderCommit());
-        assertEquals("getPrevLogIndex", -1, appendEntries.getPrevLogIndex());
+        assertEquals("getPrevLogIndex", 1, appendEntries.getPrevLogIndex());
         assertEquals("Log entries size", 2, appendEntries.getEntries().size());
 
         assertEquals("First entry index", 2, appendEntries.getEntries().get(0).getIndex());

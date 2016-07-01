@@ -241,4 +241,9 @@ public interface RaftActorContext {
      * @return true if this RaftActor is a voting member of the cluster, false otherwise.
      */
     boolean isVotingMember();
+
+    /**
+     * @return true if there are any voting peers, false otherwise.
+     */
+    boolean anyVotingPeers();
 }

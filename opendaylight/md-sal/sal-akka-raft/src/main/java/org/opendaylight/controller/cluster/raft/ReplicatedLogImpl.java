@@ -49,12 +49,15 @@ class ReplicatedLogImpl extends AbstractReplicatedLogImpl {
     }
 
     @Override
-    public void removeFromAndPersist(final long logEntryIndex) {
+    public boolean removeFromAndPersist(final long logEntryIndex) {
         // FIXME: Maybe this should be done after the command is saved
         long adjustedIndex = removeFrom(logEntryIndex);
         if(adjustedIndex >= 0) {
             context.getPersistenceProvider().persist(new DeleteEntries(adjustedIndex), deleteProcedure);
+            return true;
         }
+
+        return false;
     }
 
     @Override
