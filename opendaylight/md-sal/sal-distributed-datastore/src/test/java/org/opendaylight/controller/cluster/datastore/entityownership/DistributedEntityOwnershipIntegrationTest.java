@@ -471,10 +471,10 @@ public class DistributedEntityOwnershipIntegrationTest {
         follower2EntityOwnershipService.registerListener(ENTITY_TYPE1, follower2MockListener);
 
         final EntityOwnershipCandidateRegistration candidate1 = leaderEntityOwnershipService.registerCandidate(ENTITY1);
+        verify(leaderMockListener, timeout(5000)).ownershipChanged(ownershipChange(ENTITY1, false, true, true));
+
         final EntityOwnershipCandidateRegistration candidate2 = follower1EntityOwnershipService.registerCandidate(ENTITY1);
         final EntityOwnershipCandidateRegistration candidate3 = follower2EntityOwnershipService.registerCandidate(ENTITY1);
-
-        verify(leaderMockListener, timeout(5000)).ownershipChanged(ownershipChange(ENTITY1, false, true, true));
 
         Mockito.reset(leaderMockListener);
 
