@@ -394,7 +394,7 @@ public class ClusterAdminRpcServiceTest {
         verifyRaftPeersPresent(replicaNode3.configDataStore(), "cars", "member-1", "member-2");
 
         replicaNode2.waitForMembersUp("member-1", "member-3");
-        replicaNode2.waitForMembersUp("member-1", "member-2");
+        replicaNode3.waitForMembersUp("member-1", "member-2");
 
         // Invoke RPC service on leader member-1 to remove it's local shard
 
