@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a561d44_f299856f",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/client/SequencedQueue.java",
+        "patchSetId": 73
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-07-04T13:42:17Z",
+      "side": 1,
+      "message": "Any reason why this isn\u0027t typed (looks like Long)?",
+      "revId": "c666891fbd8bc70c3fd2080496fc6cc532594158",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_b288ad23",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/client/SequencedQueue.java",
+        "patchSetId": 73
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-07-04T13:42:17Z",
+      "side": 1,
+      "message": "Is this right to compare a CompletionStage instance with a BackendInfo instance?",
+      "revId": "c666891fbd8bc70c3fd2080496fc6cc532594158",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_32f81d7c",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/client/SequencedQueueEntry.java",
+        "patchSetId": 73
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-07-04T13:42:17Z",
+      "side": 1,
+      "message": "Should we output enqueuedTicks and lastTry?\n\nDo you have an eclipse template or something that generates toString code using MoreObjects or do you hand-code it? If the latter, why bother with MoreObjects and just let eclipse generate the simple concatenation code for you?",
+      "revId": "c666891fbd8bc70c3fd2080496fc6cc532594158",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
