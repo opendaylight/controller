@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "9a561d44_d5254bac",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/client/SequencedQueue.java",
+        "patchSetId": 73
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-07-04T14:34:45Z",
+      "side": 1,
+      "message": "This will be evolved when we get to making the class threadsafe, as then we will need to handle the race between timer executing and a new request being added to the queue. In order to do that we cannot use a simple Long, but rather an identity object. I can change it to a Long for now, if you prefer it that way.",
+      "parentUuid": "9a561d44_f299856f",
+      "revId": "c666891fbd8bc70c3fd2080496fc6cc532594158",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a561d44_b288ad23",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/client/SequencedQueue.java",
         "patchSetId": 73
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "9a561d44_b5fff700",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/client/SequencedQueue.java",
+        "patchSetId": 73
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-07-04T14:34:45Z",
+      "side": 1,
+      "message": "both are are CompletionStages (proof \u003d\u003d provided, backendProof \u003d\u003d set via expectProof)",
+      "parentUuid": "9a561d44_b288ad23",
+      "revId": "c666891fbd8bc70c3fd2080496fc6cc532594158",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a561d44_32f81d7c",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/client/SequencedQueueEntry.java",
         "patchSetId": 73
@@ -47,6 +83,24 @@
       "writtenOn": "2016-07-04T13:42:17Z",
       "side": 1,
       "message": "Should we output enqueuedTicks and lastTry?\n\nDo you have an eclipse template or something that generates toString code using MoreObjects or do you hand-code it? If the latter, why bother with MoreObjects and just let eclipse generate the simple concatenation code for you?",
+      "revId": "c666891fbd8bc70c3fd2080496fc6cc532594158",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_b54d3775",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/client/SequencedQueueEntry.java",
+        "patchSetId": 73
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-07-04T14:34:45Z",
+      "side": 1,
+      "message": "I tend to hand-write it and the reason I use MoreObjects is that it is reusable with class hierarchies.\n\nLastTry could make sense, but enqueuedTicks has no meaning without also logging current time.",
+      "parentUuid": "9a561d44_32f81d7c",
       "revId": "c666891fbd8bc70c3fd2080496fc6cc532594158",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
