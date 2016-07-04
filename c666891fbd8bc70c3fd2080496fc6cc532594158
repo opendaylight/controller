@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "9a561d44_d5aa6bd3",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/client/SequencedQueue.java",
+        "patchSetId": 73
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-07-04T14:52:30Z",
+      "side": 1,
+      "message": "no - it\u0027s fine.",
+      "parentUuid": "9a561d44_d5254bac",
+      "revId": "c666891fbd8bc70c3fd2080496fc6cc532594158",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a561d44_b288ad23",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/client/SequencedQueue.java",
         "patchSetId": 73
@@ -66,6 +84,24 @@
       "side": 1,
       "message": "both are are CompletionStages (proof \u003d\u003d provided, backendProof \u003d\u003d set via expectProof)",
       "parentUuid": "9a561d44_b288ad23",
+      "revId": "c666891fbd8bc70c3fd2080496fc6cc532594158",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_b5825750",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/client/SequencedQueue.java",
+        "patchSetId": 73
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-07-04T14:52:30Z",
+      "side": 1,
+      "message": "right - didn\u0027t read it right - I initially thought proof was being compared to backend.",
+      "parentUuid": "9a561d44_b5fff700",
       "revId": "c666891fbd8bc70c3fd2080496fc6cc532594158",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
