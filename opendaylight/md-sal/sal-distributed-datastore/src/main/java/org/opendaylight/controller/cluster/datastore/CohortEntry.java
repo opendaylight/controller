@@ -47,7 +47,7 @@ final class CohortEntry {
     private ActorRef replySender;
     private Shard shard;
 
-    CohortEntry(TransactionIdentifier transactionID, ReadWriteShardDataTreeTransaction transaction,
+    private CohortEntry(TransactionIdentifier transactionID, ReadWriteShardDataTreeTransaction transaction,
             DataTreeCohortActorRegistry cohortRegistry, SchemaContext schema, short clientVersion) {
         this.transaction = Preconditions.checkNotNull(transaction);
         this.transactionID = Preconditions.checkNotNull(transactionID);
@@ -55,13 +55,23 @@ final class CohortEntry {
         this.userCohorts = new CompositeDataTreeCohort(cohortRegistry, transactionID, schema, COMMIT_STEP_TIMEOUT);
     }
 
-    CohortEntry(TransactionIdentifier transactionID, ShardDataTreeCohort cohort, DataTreeCohortActorRegistry cohortRegistry,
+    private CohortEntry(TransactionIdentifier transactionID, ShardDataTreeCohort cohort, DataTreeCohortActorRegistry cohortRegistry,
             SchemaContext schema, short clientVersion) {
         this.transactionID = Preconditions.checkNotNull(transactionID);
         this.cohort = cohort;
         this.transaction = null;
         this.clientVersion = clientVersion;
         this.userCohorts = new CompositeDataTreeCohort(cohortRegistry, transactionID, schema, COMMIT_STEP_TIMEOUT);
+    }
+
+    static CohortEntry createOpen(TransactionIdentifier transactionID, ReadWriteShardDataTreeTransaction transaction,
+            DataTreeCohortActorRegistry cohortRegistry, SchemaContext schema, short clientVersion) {
+        return new CohortEntry(transactionID, transaction, cohortRegistry, schema, clientVersion);
+    }
+
+    static CohortEntry createReady(TransactionIdentifier transactionID, ShardDataTreeCohort cohort,
+            DataTreeCohortActorRegistry cohortRegistry, SchemaContext schema, short clientVersion) {
+        return new CohortEntry(transactionID, cohort, cohortRegistry, schema, clientVersion);
     }
 
     void updateLastAccessTime() {
