@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a561d44_8e6f3d92",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/ClientTransaction.java",
+        "patchSetId": 48
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-07-06T17:01:17Z",
+      "side": 1,
+      "message": "Shouldn\u0027t we create a DirectTransactionCommitCohort if proxies size \u003d\u003d 1?",
+      "revId": "e538cf0255a16aa5bb0e5673a894bc75c6d13b0b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_ae6841bb",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/DistributedDataStoreClientBehavior.java",
+        "patchSetId": 48
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-07-06T17:01:17Z",
+      "side": 1,
+      "message": "Do these need to be thread safe?",
+      "revId": "e538cf0255a16aa5bb0e5673a894bc75c6d13b0b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_ee907997",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/RemoteProxyTransaction.java",
+        "patchSetId": 48
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-07-06T17:01:17Z",
+      "side": 1,
+      "message": "This already is tunable via the DatastoreContext.",
+      "revId": "e538cf0255a16aa5bb0e5673a894bc75c6d13b0b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_6e7d896e",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/RemoteProxyTransaction.java",
+        "patchSetId": 48
+      },
+      "lineNbr": 203,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-07-06T17:01:17Z",
+      "side": 1,
+      "message": "Should this use \u0027coordinated\u0027?",
+      "revId": "e538cf0255a16aa5bb0e5673a894bc75c6d13b0b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
