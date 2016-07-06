@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "9a561d44_d9557dc7",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/ClientTransaction.java",
+        "patchSetId": 48
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-07-06T20:25:08Z",
+      "side": 1,
+      "message": "It should, will fix it in a bit.",
+      "parentUuid": "9a561d44_8e6f3d92",
+      "revId": "e538cf0255a16aa5bb0e5673a894bc75c6d13b0b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a561d44_ae6841bb",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/DistributedDataStoreClientBehavior.java",
         "patchSetId": 48
@@ -30,6 +48,24 @@
       "writtenOn": "2016-07-06T17:01:17Z",
       "side": 1,
       "message": "Do these need to be thread safe?",
+      "revId": "e538cf0255a16aa5bb0e5673a894bc75c6d13b0b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_195ff5e6",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/DistributedDataStoreClientBehavior.java",
+        "patchSetId": 48
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-07-06T20:25:08Z",
+      "side": 1,
+      "message": "good catch, they should. I missed them when converting to to concurrent.",
+      "parentUuid": "9a561d44_ae6841bb",
       "revId": "e538cf0255a16aa5bb0e5673a894bc75c6d13b0b",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -64,6 +100,24 @@
       "writtenOn": "2016-07-06T17:01:17Z",
       "side": 1,
       "message": "Should this use \u0027coordinated\u0027?",
+      "revId": "e538cf0255a16aa5bb0e5673a894bc75c6d13b0b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_59596dfd",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/RemoteProxyTransaction.java",
+        "patchSetId": 48
+      },
+      "lineNbr": 203,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-07-06T20:25:08Z",
+      "side": 1,
+      "message": "yup",
+      "parentUuid": "9a561d44_6e7d896e",
       "revId": "e538cf0255a16aa5bb0e5673a894bc75c6d13b0b",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
