@@ -143,7 +143,8 @@ final class ShardCommitCoordinator {
                 ready.getTransactionID(), ready.getTxnClientVersion());
 
         final ShardDataTreeCohort cohort = ready.getTransaction().ready();
-        final CohortEntry cohortEntry = new CohortEntry(ready.getTransactionID(), cohort, cohortRegistry, schema, ready.getTxnClientVersion());
+        final CohortEntry cohortEntry = CohortEntry.createReady(ready.getTransactionID(), cohort, cohortRegistry,
+            schema, ready.getTxnClientVersion());
         cohortCache.put(cohortEntry.getTransactionID(), cohortEntry);
 
         if(!queueCohortEntry(cohortEntry, sender, shard)) {
@@ -174,7 +175,7 @@ final class ShardCommitCoordinator {
     void handleBatchedModifications(BatchedModifications batched, ActorRef sender, Shard shard) {
         CohortEntry cohortEntry = cohortCache.get(batched.getTransactionID());
         if(cohortEntry == null) {
-            cohortEntry = new CohortEntry(batched.getTransactionID(),
+            cohortEntry = CohortEntry.createOpen(batched.getTransactionID(),
                     dataTree.newReadWriteTransaction(batched.getTransactionID()),
                     cohortRegistry, dataTree.getSchemaContext(), batched.getVersion());
             cohortCache.put(cohortEntry.getTransactionID(), cohortEntry);
@@ -235,7 +236,7 @@ final class ShardCommitCoordinator {
     void handleReadyLocalTransaction(ReadyLocalTransaction message, ActorRef sender, Shard shard) {
         final ShardDataTreeCohort cohort = new SimpleShardDataTreeCohort(dataTree, message.getModification(),
                 message.getTransactionID());
-        final CohortEntry cohortEntry = new CohortEntry(message.getTransactionID(), cohort, cohortRegistry,
+        final CohortEntry cohortEntry = CohortEntry.createReady(message.getTransactionID(), cohort, cohortRegistry,
             dataTree.getSchemaContext(), DataStoreVersions.CURRENT_VERSION);
         cohortCache.put(cohortEntry.getTransactionID(), cohortEntry);
         cohortEntry.setDoImmediateCommit(message.isDoCommitOnReady());
