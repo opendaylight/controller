@@ -170,14 +170,13 @@ final class ShardCommitCoordinator {
      *
      * @param batched the BatchedModifications message to process
      * @param sender the sender of the message
-     * @param shard the transaction's shard actor
      */
-    void handleBatchedModifications(BatchedModifications batched, ActorRef sender, Shard shard, SchemaContext schema) {
+    void handleBatchedModifications(BatchedModifications batched, ActorRef sender, Shard shard) {
         CohortEntry cohortEntry = cohortCache.get(batched.getTransactionID());
         if(cohortEntry == null) {
             cohortEntry = new CohortEntry(batched.getTransactionID(),
                     dataTree.newReadWriteTransaction(batched.getTransactionID()),
-                    cohortRegistry, schema,  batched.getVersion());
+                    cohortRegistry, dataTree.getSchemaContext(), batched.getVersion());
             cohortCache.put(cohortEntry.getTransactionID(), cohortEntry);
         }
 
@@ -233,12 +232,11 @@ final class ShardCommitCoordinator {
      * @param sender the sender of the message
      * @param shard the transaction's shard actor
      */
-    void handleReadyLocalTransaction(ReadyLocalTransaction message, ActorRef sender, Shard shard,
-            SchemaContext schema) {
+    void handleReadyLocalTransaction(ReadyLocalTransaction message, ActorRef sender, Shard shard) {
         final ShardDataTreeCohort cohort = new SimpleShardDataTreeCohort(dataTree, message.getModification(),
                 message.getTransactionID());
-        final CohortEntry cohortEntry = new CohortEntry(message.getTransactionID(), cohort, cohortRegistry, schema,
-                DataStoreVersions.CURRENT_VERSION);
+        final CohortEntry cohortEntry = new CohortEntry(message.getTransactionID(), cohort, cohortRegistry,
+            dataTree.getSchemaContext(), DataStoreVersions.CURRENT_VERSION);
         cohortCache.put(cohortEntry.getTransactionID(), cohortEntry);
         cohortEntry.setDoImmediateCommit(message.isDoCommitOnReady());
 
