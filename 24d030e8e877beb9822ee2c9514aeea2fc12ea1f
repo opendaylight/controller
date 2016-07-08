@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a561d44_53d821ef",
+        "filename": "opendaylight/model/pom.xml",
+        "patchSetId": 5
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-07-08T21:21:31Z",
+      "side": 1,
+      "message": "Why doesn\u0027t this one have dashes in the date?",
+      "revId": "24d030e8e877beb9822ee2c9514aeea2fc12ea1f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
