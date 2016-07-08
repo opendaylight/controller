@@ -1,0 +1,225 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a561d44_e72b7780",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/AbstractClientHistory.java",
+        "patchSetId": 49
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-07-08T07:45:43Z",
+      "side": 1,
+      "message": "Should this map be concurrent?",
+      "revId": "25ea49f2aa02f310e00bf55a9b482eb825601071",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_c7e7533f",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/AbstractProxyTransaction.java",
+        "patchSetId": 49
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-07-08T07:45:43Z",
+      "side": 1,
+      "message": "So we don\u0027t have an explicit TransactionCanCommitRequest - the CommitLocalTransactionRequest or final ModifyTransactionRequest for remote doubles as the \"ready\" and \"canCommit\".",
+      "revId": "25ea49f2aa02f310e00bf55a9b482eb825601071",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_c762b3d7",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/AbstractProxyTransaction.java",
+        "patchSetId": 49
+      },
+      "lineNbr": 195,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-07-08T07:45:43Z",
+      "side": 1,
+      "message": "In the current implementation we don\u0027t actually send a preCommit message to the backend - the Shard does preCommit and commit together. This was done to eliminate a message.",
+      "revId": "25ea49f2aa02f310e00bf55a9b482eb825601071",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_2418cd80",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/ClientLocalHistory.java",
+        "patchSetId": 49
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-07-08T07:45:43Z",
+      "side": 1,
+      "message": "FIXME.  What is skippedTransactions?",
+      "revId": "25ea49f2aa02f310e00bf55a9b482eb825601071",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_c4063120",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/ClientLocalHistory.java",
+        "patchSetId": 49
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-07-08T07:45:43Z",
+      "side": 1,
+      "message": "So it\u0027s illegal to close a tx chain with an open tx?",
+      "revId": "25ea49f2aa02f310e00bf55a9b482eb825601071",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_c74bd357",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/ClientTransaction.java",
+        "patchSetId": 49
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-07-08T07:45:43Z",
+      "side": 1,
+      "message": "\"tu\" -\u003e \"to\"",
+      "revId": "25ea49f2aa02f310e00bf55a9b482eb825601071",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_a7469fbd",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/ClientTransactionCommitCohort.java",
+        "patchSetId": 49
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-07-08T07:45:43Z",
+      "side": 1,
+      "message": "This class is missing the transaction rate limiting feedback to the front end.",
+      "revId": "25ea49f2aa02f310e00bf55a9b482eb825601071",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_e717f7a1",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/DirectTransactionCommitCohort.java",
+        "patchSetId": 49
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-07-08T07:45:43Z",
+      "side": 1,
+      "message": "This class is missing the transaction rate limiting feedback to the front end.",
+      "revId": "25ea49f2aa02f310e00bf55a9b482eb825601071",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_c7dbd319",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/RemoteProxyTransaction.java",
+        "patchSetId": 49
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-07-08T07:45:43Z",
+      "side": 1,
+      "message": "This class is missing the OperationLimiter that is used in RemoteTransactionContext.",
+      "revId": "25ea49f2aa02f310e00bf55a9b482eb825601071",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_07830b57",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/RemoteProxyTransaction.java",
+        "patchSetId": 49
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-07-08T07:45:43Z",
+      "side": 1,
+      "message": "This should be a ReadTransactionRequest, not ExistsTransactionRequest.",
+      "revId": "25ea49f2aa02f310e00bf55a9b482eb825601071",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_27828f4f",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/RemoteProxyTransaction.java",
+        "patchSetId": 49
+      },
+      "lineNbr": 193,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-07-08T07:45:43Z",
+      "side": 1,
+      "message": "This should probably be debug to be consistent with completeExists.",
+      "revId": "25ea49f2aa02f310e00bf55a9b482eb825601071",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_c71ab316",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/client/BackendInfoResolver.java",
+        "patchSetId": 49
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-07-08T07:45:43Z",
+      "side": 1,
+      "message": "Should we check if the Future was successful as an optimization rather then using the exception path for a failed Future?",
+      "revId": "25ea49f2aa02f310e00bf55a9b482eb825601071",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_e731b7a3",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/client/BackendInfoResolver.java",
+        "patchSetId": 49
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-07-08T07:45:43Z",
+      "side": 1,
+      "message": "Should we cache the Futures here? The current implementation (i.e. AbstractTransactionContextFactory) always calls ActorContext.findPrimaryShardAsync which already caches the PrimaryShardInfo Futures. This cache is cleared by ShardManager when it gets a MemberDown or MemberUnreachable event from akka. The AbstractTransactionContextFactory does keep a knownLocal map but clears based on the Future returned from ActorContext.findPrimaryShardAsync. It seems your approach here is to let a transaction timeout and invalidate the backends cache then retry the transaction, attempting to obtain a new BackendInfo. Is that correct?",
+      "revId": "25ea49f2aa02f310e00bf55a9b482eb825601071",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
