@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a561d44_446ea102",
+        "filename": "opendaylight/config/yang-jmx-generator-plugin/src/main/java/org/opendaylight/controller/config/yangjmxgenerator/plugin/gofactory/AbsFactoryGeneratedObjectFactory.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 149,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-07-08T04:16:59Z",
+      "side": 1,
+      "message": "Please remove tabs.",
+      "revId": "ff956ad1a6d16a7708c18fe4c84c1367c2a24b57",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_a47e9dac",
+        "filename": "opendaylight/config/yang-jmx-generator-plugin/src/main/java/org/opendaylight/controller/config/yangjmxgenerator/plugin/java/GeneratedObjectBuilder.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-07-08T04:16:59Z",
+      "side": 1,
+      "message": "Please remove tabs.",
+      "revId": "ff956ad1a6d16a7708c18fe4c84c1367c2a24b57",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_044b0988",
+        "filename": "opendaylight/config/yang-jmx-generator-plugin/src/main/java/org/opendaylight/controller/config/yangjmxgenerator/plugin/java/JavaFileInputBuilder.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-07-08T04:16:59Z",
+      "side": 1,
+      "message": "Please remove tabs.",
+      "revId": "ff956ad1a6d16a7708c18fe4c84c1367c2a24b57",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
