@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "9a561d44_c8b75b85",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/AbstractProxyTransaction.java",
+        "patchSetId": 49
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-07-11T11:36:32Z",
+      "side": 1,
+      "message": "Correct.",
+      "parentUuid": "9a561d44_c7e7533f",
+      "revId": "25ea49f2aa02f310e00bf55a9b482eb825601071",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a561d44_c762b3d7",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/AbstractProxyTransaction.java",
         "patchSetId": 49
@@ -47,6 +65,24 @@
       "writtenOn": "2016-07-08T07:45:43Z",
       "side": 1,
       "message": "In the current implementation we don\u0027t actually send a preCommit message to the backend - the Shard does preCommit and commit together. This was done to eliminate a message.",
+      "revId": "25ea49f2aa02f310e00bf55a9b482eb825601071",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_08b1538f",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/AbstractProxyTransaction.java",
+        "patchSetId": 49
+      },
+      "lineNbr": 195,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-07-11T11:36:32Z",
+      "side": 1,
+      "message": "Right, but this is not completely correct from 3PC point of viee. After receiving preCommit, the cohort (e.g. backend shard) should start a timer and roll forward lest it receives an abort.",
+      "parentUuid": "9a561d44_c762b3d7",
       "revId": "25ea49f2aa02f310e00bf55a9b482eb825601071",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -70,6 +106,24 @@
     },
     {
       "key": {
+        "uuid": "9a561d44_88644323",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/ClientLocalHistory.java",
+        "patchSetId": 49
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-07-11T11:36:32Z",
+      "side": 1,
+      "message": "artefact from a previous revision",
+      "parentUuid": "9a561d44_2418cd80",
+      "revId": "25ea49f2aa02f310e00bf55a9b482eb825601071",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a561d44_c4063120",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/ClientLocalHistory.java",
         "patchSetId": 49
@@ -81,6 +135,24 @@
       "writtenOn": "2016-07-08T07:45:43Z",
       "side": 1,
       "message": "So it\u0027s illegal to close a tx chain with an open tx?",
+      "revId": "25ea49f2aa02f310e00bf55a9b482eb825601071",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_c86e3b01",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/ClientLocalHistory.java",
+        "patchSetId": 49
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-07-11T11:36:32Z",
+      "side": 1,
+      "message": "Correct, as it is unknown what to do with the transaction and the operations should be sequenced -- I think this is inline with current behavior.",
+      "parentUuid": "9a561d44_c4063120",
       "revId": "25ea49f2aa02f310e00bf55a9b482eb825601071",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -104,6 +176,24 @@
     },
     {
       "key": {
+        "uuid": "9a561d44_a87147e2",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/ClientTransaction.java",
+        "patchSetId": 49
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-07-11T11:36:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a561d44_c74bd357",
+      "revId": "25ea49f2aa02f310e00bf55a9b482eb825601071",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a561d44_a7469fbd",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/ClientTransactionCommitCohort.java",
         "patchSetId": 49
@@ -115,6 +205,24 @@
       "writtenOn": "2016-07-08T07:45:43Z",
       "side": 1,
       "message": "This class is missing the transaction rate limiting feedback to the front end.",
+      "revId": "25ea49f2aa02f310e00bf55a9b482eb825601071",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_684e0f98",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/ClientTransactionCommitCohort.java",
+        "patchSetId": 49
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-07-11T11:36:32Z",
+      "side": 1,
+      "message": "Message limiting will be implemented in baseline queueing -- there we actually can limit on proper scope (e.g. per-backend-instance).",
+      "parentUuid": "9a561d44_a7469fbd",
       "revId": "25ea49f2aa02f310e00bf55a9b482eb825601071",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -172,6 +280,24 @@
     },
     {
       "key": {
+        "uuid": "9a561d44_e8597f5c",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/RemoteProxyTransaction.java",
+        "patchSetId": 49
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-07-11T11:36:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a561d44_07830b57",
+      "revId": "25ea49f2aa02f310e00bf55a9b482eb825601071",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a561d44_27828f4f",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/RemoteProxyTransaction.java",
         "patchSetId": 49
@@ -183,6 +309,24 @@
       "writtenOn": "2016-07-08T07:45:43Z",
       "side": 1,
       "message": "This should probably be debug to be consistent with completeExists.",
+      "revId": "25ea49f2aa02f310e00bf55a9b482eb825601071",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_8832830e",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/RemoteProxyTransaction.java",
+        "patchSetId": 49
+      },
+      "lineNbr": 193,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-07-11T11:36:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a561d44_27828f4f",
       "revId": "25ea49f2aa02f310e00bf55a9b482eb825601071",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -206,6 +350,24 @@
     },
     {
       "key": {
+        "uuid": "9a561d44_9375949a",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/client/BackendInfoResolver.java",
+        "patchSetId": 49
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-07-11T11:36:32Z",
+      "side": 1,
+      "message": "This is java.util.Future, hence isDone()+get() is all we can do, as far as I can tell.",
+      "parentUuid": "9a561d44_c71ab316",
+      "revId": "25ea49f2aa02f310e00bf55a9b482eb825601071",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a561d44_e731b7a3",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/client/BackendInfoResolver.java",
         "patchSetId": 49
@@ -217,6 +379,24 @@
       "writtenOn": "2016-07-08T07:45:43Z",
       "side": 1,
       "message": "Should we cache the Futures here? The current implementation (i.e. AbstractTransactionContextFactory) always calls ActorContext.findPrimaryShardAsync which already caches the PrimaryShardInfo Futures. This cache is cleared by ShardManager when it gets a MemberDown or MemberUnreachable event from akka. The AbstractTransactionContextFactory does keep a knownLocal map but clears based on the Future returned from ActorContext.findPrimaryShardAsync. It seems your approach here is to let a transaction timeout and invalidate the backends cache then retry the transaction, attempting to obtain a new BackendInfo. Is that correct?",
+      "revId": "25ea49f2aa02f310e00bf55a9b482eb825601071",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_136984be",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/client/BackendInfoResolver.java",
+        "patchSetId": 49
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-07-11T11:36:32Z",
+      "side": 1,
+      "message": "Correct, this is driven by the queue, but can be explicitly invalidated -- once we can route the ActorContext thing properly. Unfortunately its current structure does not allow an explicit hook to propagate cache invalidation.",
+      "parentUuid": "9a561d44_e731b7a3",
       "revId": "25ea49f2aa02f310e00bf55a9b482eb825601071",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
