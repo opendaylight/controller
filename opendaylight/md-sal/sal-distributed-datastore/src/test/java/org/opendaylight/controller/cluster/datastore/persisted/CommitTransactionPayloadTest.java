@@ -113,7 +113,14 @@ public class CommitTransactionPayloadTest extends AbstractTest {
     @Test
     public void testCandidateSerialization() throws IOException {
         final CommitTransactionPayload payload = CommitTransactionPayload.create(nextTransactionId(), candidate);
-        assertEquals("payload size", 181, payload.size());
+        // Depending on running status, historic id, cookie and
+        // transaction id can be different.
+        // WritableObjects#writeLongs() and WritableObjects#writeLong()
+        // can result in different payload size.
+        // ClinetLocalHistory: writeLongs(): 1 <= <= 1 + 8 * 2
+        // transaction Id: writeLong(): 1 <= <= 1 + 8
+        assertTrue("payload size",
+                   180 <= payload.size() && payload.size() <= 180 + 8 * 3);
     }
 
     @Test
