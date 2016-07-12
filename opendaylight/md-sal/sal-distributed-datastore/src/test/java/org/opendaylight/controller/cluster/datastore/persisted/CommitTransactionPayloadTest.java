@@ -103,6 +103,7 @@ public class CommitTransactionPayloadTest extends AbstractTest {
 
     @Before
     public void setUp() {
+        setUpStatic();
         final YangInstanceIdentifier writePath = TestModel.TEST_PATH;
         final NormalizedNode<?, ?> writeData = ImmutableContainerNodeBuilder.create().withNodeIdentifier(
                 new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME)).

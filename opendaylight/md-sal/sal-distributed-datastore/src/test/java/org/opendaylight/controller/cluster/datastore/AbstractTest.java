@@ -26,6 +26,11 @@ public abstract class AbstractTest {
     private static final AtomicLong HISTORY_COUNTER = new AtomicLong();
     private static final AtomicLong TX_COUNTER = new AtomicLong();
 
+    protected static void setUpStatic() {
+        HISTORY_COUNTER.set(1L);
+        TX_COUNTER.set(1L);
+    }
+
     protected static TransactionIdentifier nextTransactionId() {
         return new TransactionIdentifier(HISTORY_ID, TX_COUNTER.getAndIncrement());
     }
