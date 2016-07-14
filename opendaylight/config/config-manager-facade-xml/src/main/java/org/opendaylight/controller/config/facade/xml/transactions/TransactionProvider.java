@@ -149,7 +149,7 @@ public class TransactionProvider implements AutoCloseable {
             LOG.warn("Transaction {} failed on {}", taON, validationException.toString());
             throw validationException;
         } catch (ConflictingVersionException e) {
-            LOG.error("Exception while commit of {}, aborting transaction", taON, e);
+            LOG.debug("Exception while commit of {}, aborting transaction", taON, e);
             // clean up
             abortTransaction();
             throw e;
