@@ -1,0 +1,27 @@
+module opendaylight-md-sal-binding-v1-codec {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:v1:codec";
+    prefix "md-sal-binding";
+
+    import config { prefix config; revision-date 2013-04-05; }
+
+    description
+        "Service definition for Binding Aware MD-SAL.";
+
+    revision "2016-07-14" {
+        description
+            "Initial revision";
+    }
+    identity binding-v1-codec-tree-factory {
+        base "config:service-type";
+        config:java-class "org.opendaylight.mdsal.binding.dom.codec.api.BindingCodecTreeFactory";
+        config:disable-osgi-service-registration;
+    }
+
+    identity binding-v1-normalized-node-serializer {
+        base "config:service-type";
+        config:java-class "org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer";
+        config:disable-osgi-service-registration;
+    }
+
+}

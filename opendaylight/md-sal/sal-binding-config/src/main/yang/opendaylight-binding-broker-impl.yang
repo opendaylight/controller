@@ -5,6 +5,7 @@ module opendaylight-sal-binding-broker-impl {
 
     import config { prefix config; revision-date 2013-04-05; }
     import opendaylight-md-sal-binding {prefix sal;}
+    import opendaylight-md-sal-binding-v1-codec {prefix v1codec;}
     import opendaylight-md-sal-dom {prefix dom;}
     import opendaylight-md-sal-common {prefix common;}
 
@@ -75,6 +76,8 @@ module opendaylight-sal-binding-broker-impl {
         config:provided-service binding-dom-mapping-service;
         config:provided-service sal:binding-codec-tree-factory;
         config:provided-service sal:binding-normalized-node-serializer;
+        config:provided-service v1codec:binding-v1-codec-tree-factory;
+        config:provided-service v1codec:binding-v1-normalized-node-serializer;
         config:java-name-prefix RuntimeMapping;
     }
 
