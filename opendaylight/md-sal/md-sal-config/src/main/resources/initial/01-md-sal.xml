@@ -257,6 +257,20 @@
                         </instance>
                     </service>
                     <service>
+                        <type xmlns:binding="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:v1:codec">binding:binding-v1-codec-tree-factory</type>
+                        <instance>
+                            <name>runtime-mapping-singleton</name>
+                            <provider>/modules/module[type='runtime-generated-mapping'][name='runtime-mapping-singleton']</provider>
+                        </instance>
+                    </service>
+                    <service>
+                        <type xmlns:binding="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:v1:codec">binding:binding-v1-normalized-node-serializer</type>
+                        <instance>
+                            <name>runtime-mapping-singleton</name>
+                            <provider>/modules/module[type='runtime-generated-mapping'][name='runtime-mapping-singleton']</provider>
+                        </instance>
+                    </service>
+                    <service>
                         <type xmlns:binding-impl="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">binding-impl:binding-new-notification-service</type>
                         <instance>
                             <name>binding-notification-adapter</name>
