@@ -16,6 +16,24 @@
       "revId": "ecbb4273bbd6dd3aa6e41d690412a5cc51a86aea",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_1d47bc4c",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-07-14T18:49:46Z",
+      "side": 1,
+      "message": "I understand the changes  - the new interfaces with mdsal in the package name extend and will replace the deprecated interfaces with yangtools in the package name.",
+      "parentUuid": "9a561d44_5af2da6f",
+      "revId": "ecbb4273bbd6dd3aa6e41d690412a5cc51a86aea",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
