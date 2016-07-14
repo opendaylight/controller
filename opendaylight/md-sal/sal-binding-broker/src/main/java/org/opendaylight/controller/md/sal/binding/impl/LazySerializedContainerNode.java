@@ -11,7 +11,7 @@ package org.opendaylight.controller.md.sal.binding.impl;
 import com.google.common.base.Optional;
 import java.util.Collection;
 import java.util.Map;
-import org.opendaylight.yangtools.binding.data.codec.impl.BindingNormalizedNodeCodecRegistry;
+import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
@@ -32,11 +32,11 @@ class LazySerializedContainerNode implements ContainerNode {
     private final NodeIdentifier identifier;
     private final DataObject bindingData;
 
-    private BindingNormalizedNodeCodecRegistry registry;
+    private BindingNormalizedNodeSerializer registry;
     private ContainerNode domData;
 
     private LazySerializedContainerNode(final QName identifier, final DataObject binding,
-            final BindingNormalizedNodeCodecRegistry registry) {
+            final BindingNormalizedNodeSerializer registry) {
         this.identifier = new NodeIdentifier(identifier);
         this.bindingData = binding;
         this.registry = registry;
@@ -44,12 +44,12 @@ class LazySerializedContainerNode implements ContainerNode {
     }
 
     static NormalizedNode<?, ?> create(final SchemaPath rpcName, final DataObject data,
-            final BindingNormalizedNodeCodecRegistry codec) {
+            final BindingNormalizedNodeSerializer codec) {
         return new LazySerializedContainerNode(rpcName.getLastComponent(), data, codec);
     }
 
     static NormalizedNode<?, ?> withContextRef(final SchemaPath rpcName, final DataObject data,
-            final LeafNode<?> contextRef, final BindingNormalizedNodeCodecRegistry codec) {
+            final LeafNode<?> contextRef, final BindingNormalizedNodeSerializer codec) {
         return new WithContextRef(rpcName.getLastComponent(), data, contextRef, codec);
     }
 
@@ -104,7 +104,7 @@ class LazySerializedContainerNode implements ContainerNode {
         private final LeafNode<?> contextRef;
 
         protected WithContextRef(final QName identifier, final DataObject binding, final LeafNode<?> contextRef,
-                final BindingNormalizedNodeCodecRegistry registry) {
+                final BindingNormalizedNodeSerializer registry) {
             super(identifier, binding, registry);
             this.contextRef = contextRef;
         }
