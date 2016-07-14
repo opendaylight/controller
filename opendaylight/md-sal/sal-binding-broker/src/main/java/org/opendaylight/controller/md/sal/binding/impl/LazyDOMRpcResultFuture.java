@@ -19,7 +19,7 @@ import java.util.concurrent.TimeoutException;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcException;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcResult;
 import org.opendaylight.controller.md.sal.dom.spi.DefaultDOMRpcResult;
-import org.opendaylight.yangtools.binding.data.codec.impl.BindingNormalizedNodeCodecRegistry;
+import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.yangtools.yang.binding.DataContainer;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -27,16 +27,16 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 final class LazyDOMRpcResultFuture implements CheckedFuture<DOMRpcResult, DOMRpcException> {
 
     private final ListenableFuture<RpcResult<?>> bindingFuture;
-    private final BindingNormalizedNodeCodecRegistry codec;
+    private final BindingNormalizedNodeSerializer codec;
     private volatile DOMRpcResult result;
 
     private LazyDOMRpcResultFuture(final ListenableFuture<RpcResult<?>> delegate,
-            final BindingNormalizedNodeCodecRegistry codec) {
+            final BindingNormalizedNodeSerializer codec) {
         this.bindingFuture = Preconditions.checkNotNull(delegate, "delegate");
         this.codec = Preconditions.checkNotNull(codec, "codec");
     }
 
-    static CheckedFuture<DOMRpcResult, DOMRpcException> create(final BindingNormalizedNodeCodecRegistry codec,
+    static CheckedFuture<DOMRpcResult, DOMRpcException> create(final BindingNormalizedNodeSerializer codec,
             final ListenableFuture<RpcResult<?>> bindingResult) {
         return new LazyDOMRpcResultFuture(bindingResult, codec);
     }

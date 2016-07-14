@@ -22,7 +22,7 @@ import org.opendaylight.controller.md.sal.dom.api.DOMRpcException;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcResult;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
 import org.opendaylight.controller.md.sal.dom.broker.spi.rpc.RpcRoutingStrategy;
-import org.opendaylight.yangtools.binding.data.codec.impl.BindingNormalizedNodeCodecRegistry;
+import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.yangtools.yang.binding.DataContainer;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -130,7 +130,7 @@ class RpcServiceAdapter implements InvocationHandler {
     }
 
     private static ListenableFuture<RpcResult<?>> transformFuture(final SchemaPath rpc,
-            final ListenableFuture<DOMRpcResult> domFuture, final BindingNormalizedNodeCodecRegistry codec) {
+            final ListenableFuture<DOMRpcResult> domFuture, final BindingNormalizedNodeSerializer codec) {
         return Futures.transform(domFuture, new Function<DOMRpcResult, RpcResult<?>>() {
             @Override
             public RpcResult<?> apply(final DOMRpcResult input) {

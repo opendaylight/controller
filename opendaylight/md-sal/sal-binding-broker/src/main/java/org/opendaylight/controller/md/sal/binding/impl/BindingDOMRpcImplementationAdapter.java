@@ -23,7 +23,7 @@ import org.opendaylight.controller.md.sal.dom.api.DOMRpcException;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcIdentifier;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcImplementation;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcResult;
-import org.opendaylight.yangtools.binding.data.codec.impl.BindingNormalizedNodeCodecRegistry;
+import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.RpcService;
 import org.opendaylight.yangtools.yang.binding.util.BindingReflections;
@@ -38,12 +38,12 @@ public class BindingDOMRpcImplementationAdapter implements DOMRpcImplementation 
 
     private static final Cache<Class<?>, RpcServiceInvoker> SERVICE_INVOKERS = CacheBuilder.newBuilder().weakKeys().build();
 
-    private final BindingNormalizedNodeCodecRegistry codec;
+    private final BindingNormalizedNodeSerializer codec;
     private final RpcServiceInvoker invoker;
     private final RpcService delegate;
     private final QName inputQname;
 
-    public <T extends RpcService> BindingDOMRpcImplementationAdapter(final BindingNormalizedNodeCodecRegistry codec, final Class<T> type, final Map<SchemaPath, Method> localNameToMethod, final T delegate) {
+    public <T extends RpcService> BindingDOMRpcImplementationAdapter(final BindingNormalizedNodeSerializer codec, final Class<T> type, final Map<SchemaPath, Method> localNameToMethod, final T delegate) {
         try {
             this.invoker = SERVICE_INVOKERS.get(type, new Callable<RpcServiceInvoker>() {
                 @Override
