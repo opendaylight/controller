@@ -44,6 +44,10 @@ public class ShardStrategyFactory {
     }
 
     private String getModuleName(final YangInstanceIdentifier path) {
+        if (path.isEmpty()) {
+            return UNKNOWN_MODULE_NAME;
+        }
+
         String namespace = path.getPathArguments().iterator().next().getNodeType().getNamespace().toASCIIString();
         String moduleName = configuration.getModuleNameFromNameSpace(namespace);
         return moduleName != null ? moduleName : UNKNOWN_MODULE_NAME;
