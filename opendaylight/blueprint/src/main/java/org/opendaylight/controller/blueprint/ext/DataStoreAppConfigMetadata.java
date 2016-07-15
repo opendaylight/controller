@@ -13,6 +13,8 @@ import com.google.common.base.Strings;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
+import java.io.File;
+import java.io.FileInputStream;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -20,6 +22,7 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.xml.parsers.DocumentBuilderFactory;
 import org.apache.aries.blueprint.services.ExtendedBlueprintContainer;
 import org.opendaylight.controller.md.sal.binding.api.ClusteredDataTreeChangeListener;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
@@ -52,6 +55,7 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.osgi.service.blueprint.container.ComponentDefinitionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 /**
@@ -67,9 +71,26 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
 
     static final String BINDING_CLASS = "binding-class";
     static final String DEFAULT_CONFIG = "default-config";
+    static final String DEFAULT_CONFIG_FILE_NAME = "default-config-file-name";
     static final String LIST_KEY_VALUE = "list-key-value";
 
+    private static final String DEFAULT_APP_CONFIG_FILE_PATH = "etc" + File.separator +
+            "opendaylight" + File.separator + "datastore" + File.separator + "initial" +
+            File.separator + "config";
+
+    private static final DocumentBuilderFactory DOC_BUILDER_FACTORY;
+
+    static {
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        factory.setNamespaceAware(true);
+        factory.setCoalescing(true);
+        factory.setIgnoringElementContentWhitespace(true);
+        factory.setIgnoringComments(true);
+        DOC_BUILDER_FACTORY = factory;
+    }
+
     private final Element defaultAppConfigElement;
+    private final String defaultAppConfigFileName;
     private final String appConfigBindingClassName;
     private final String appConfigListKeyValue;
     private final AtomicBoolean readingInitialAppConfig = new AtomicBoolean(true);
@@ -84,9 +105,11 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
     private volatile BindingNormalizedNodeSerializer bindingSerializer;
 
     public DataStoreAppConfigMetadata(@Nonnull String id, @Nonnull String appConfigBindingClassName,
-            @Nullable String appConfigListKeyValue, @Nullable Element defaultAppConfigElement) {
+            @Nullable String appConfigListKeyValue, @Nullable String defaultAppConfigFileName,
+            @Nullable Element defaultAppConfigElement) {
         super(id);
         this.defaultAppConfigElement = defaultAppConfigElement;
+        this.defaultAppConfigFileName = defaultAppConfigFileName;
         this.appConfigBindingClassName = appConfigBindingClassName;
         this.appConfigListKeyValue = appConfigListKeyValue;
     }
@@ -295,7 +318,11 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
             return null;
         }
 
-        NormalizedNode<?, ?> dataNode = parsePossibleDefaultAppConfigElement(schemaContext, dataSchema);
+        NormalizedNode<?, ?> dataNode = parsePossibleDefaultAppConfigXMLFile(schemaContext, dataSchema);
+        if(dataNode == null) {
+            dataNode = parsePossibleDefaultAppConfigElement(schemaContext, dataSchema);
+        }
+
         if(dataNode == null) {
             dataNode = bindingContext.newDefaultNode(dataSchema);
         }
@@ -309,6 +336,59 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
         }
 
         return appConfig;
+    }
+
+    private NormalizedNode<?, ?> parsePossibleDefaultAppConfigXMLFile(SchemaContext schemaContext,
+            DataSchemaNode dataSchema) {
+
+        String appConfigFileName = defaultAppConfigFileName;
+        if(Strings.isNullOrEmpty(appConfigFileName)) {
+            String moduleName = findYangModuleName(bindingContext.bindingQName, schemaContext);
+            if(moduleName == null) {
+                return null;
+            }
+
+            appConfigFileName = moduleName + "_" + bindingContext.bindingQName.getLocalName() + ".xml";
+        }
+
+        File appConfigFile = new File(DEFAULT_APP_CONFIG_FILE_PATH, appConfigFileName);
+
+        LOG.debug("{}: parsePossibleDefaultAppConfigXMLFile looking for file {}", logName(),
+                appConfigFile.getAbsolutePath());
+
+        if(!appConfigFile.exists()) {
+            return null;
+        }
+
+        LOG.debug("{}: Found file {}", logName(), appConfigFile.getAbsolutePath());
+
+        DomToNormalizedNodeParserFactory parserFactory = DomToNormalizedNodeParserFactory.getInstance(
+                XmlUtils.DEFAULT_XML_CODEC_PROVIDER, schemaContext);
+
+        try(FileInputStream fis = new FileInputStream(appConfigFile)) {
+            Document root = DOC_BUILDER_FACTORY.newDocumentBuilder().parse(fis);
+            NormalizedNode<?, ?> dataNode = bindingContext.parseDataElement(root.getDocumentElement(), dataSchema,
+                    parserFactory);
+
+            LOG.debug("{}: Parsed data node: {}", logName(), dataNode);
+
+            return dataNode;
+        } catch (Exception e) {
+            setFailureMessage(String.format("%s: Could not read/parse app config file %s", logName(), appConfigFile));
+        }
+
+        return null;
+    }
+
+    private String findYangModuleName(QName qname, SchemaContext schemaContext) {
+        for(Module m: schemaContext.getModules()) {
+            if(qname.getModule().equals(m.getQNameModule())) {
+                return m.getName();
+            }
+        }
+
+        setFailureMessage(String.format("%s: Could not find yang module for QName %s", logName(), qname));
+        return null;
     }
 
     @Nullable
