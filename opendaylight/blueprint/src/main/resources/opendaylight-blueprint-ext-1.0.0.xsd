@@ -39,6 +39,7 @@
     </xsd:sequence>
     <xsd:attribute name="binding-class" type="bp:Tclass" use="required"/>
     <xsd:attribute name="list-key-value" type="xsd:string" use="optional"/>
+    <xsd:attribute name="default-config-file-name" type="xsd:string" use="optional"/>
     <xsd:attribute name="id" type="xsd:ID" use="required"/>
   </xsd:complexType>
   <xsd:element name="clustered-app-config" type="TclusteredAppConfig"/>
