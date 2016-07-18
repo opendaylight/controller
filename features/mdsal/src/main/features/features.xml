@@ -41,6 +41,7 @@
         <!-- FIXME: Bug 4202: Add MD-SAL provided odl-mdsal-binding-adapter -->
         <!-- FIXME: Bug 4202: Add MD-SAL provided odl-mdsal-dom-broker -->
         <feature version='${mdsal.version}'>odl-mdsal-eos-dom</feature>
+        <feature version='${mdsal.version}'>odl-mdsal-singleton-dom</feature>
         <bundle>mvn:org.opendaylight.controller/sal-core-api/{{VERSION}}</bundle>
         <bundle>mvn:org.opendaylight.controller/sal-core-spi/{{VERSION}}</bundle>
         <bundle start-level="70">mvn:org.opendaylight.controller/sal-schema-service/{{VERSION}}</bundle>
@@ -53,6 +54,7 @@
         <bundle>mvn:org.opendaylight.controller/sal-binding-config/{{VERSION}}</bundle>
         <bundle>mvn:org.opendaylight.controller/sal-inmemory-datastore/{{VERSION}}</bundle>
         <bundle>mvn:org.opendaylight.controller/sal-dom-broker-config/{{VERSION}}</bundle>
+        <bundle>mvn:org.opendaylight.controller/sal-singleton-service/{{VERSION}}</bundle>
         <bundle start-level="40">mvn:org.opendaylight.controller/blueprint/{{VERSION}}</bundle>
         <configfile finalname="${config.configfile.directory}/${config.mdsal.configfile}">mvn:org.opendaylight.controller/md-sal-config/{{VERSION}}/xml/config</configfile>
     </feature>

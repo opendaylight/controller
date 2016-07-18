@@ -98,6 +98,11 @@
                 <artifactId>sal-schema-service</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>sal-singleton-service</artifactId>
+                <version>${project.version}</version>
+            </dependency>
 
             <!-- Test support -->
             <dependency>

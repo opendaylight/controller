@@ -26,6 +26,7 @@
     <module>sal-dom-broker</module>
     <module>sal-dom-spi</module>
     <module>sal-schema-service</module>
+    <module>sal-singleton-service</module>
 
     <!-- Binding Aware -->
     <module>sal-binding-api</module>
