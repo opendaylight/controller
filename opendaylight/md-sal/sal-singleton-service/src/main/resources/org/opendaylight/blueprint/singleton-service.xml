@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+           xmlns:odl="http://opendaylight.org/xmlns/blueprint/v1.0.0">
+
+  <!-- DOMClusterSingletonServiceProvider -->
+
+  <reference id="domEntityOwnershipService" interface="org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipService"/>
+
+  <bean id="domClusterSingletonService" class="org.opendaylight.mdsal.singleton.dom.impl.DOMClusterSingletonServiceProviderImpl"
+          init-method="initializeProvider" destroy-method="close">
+    <argument ref="domEntityOwnershipService"/>
+  </bean>
+
+  <service ref="domClusterSingletonService" interface="org.opendaylight.mdsal.singleton.dom.api.DOMClusterSingletonServiceProvider"
+        odl:type="default"/>
+</blueprint>
