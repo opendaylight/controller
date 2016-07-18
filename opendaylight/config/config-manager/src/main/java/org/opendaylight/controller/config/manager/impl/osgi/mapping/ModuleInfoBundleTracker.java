@@ -8,13 +8,13 @@
 package org.opendaylight.controller.config.manager.impl.osgi.mapping;
 
 import static java.lang.String.format;
-import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.charset.StandardCharsets;
 import org.opendaylight.yangtools.concepts.ObjectRegistration;
 import org.opendaylight.yangtools.yang.binding.YangModelBindingProvider;
 import org.opendaylight.yangtools.yang.binding.YangModuleInfo;
@@ -79,7 +79,7 @@ public final class ModuleInfoBundleTracker implements AutoCloseable,
         List<ObjectRegistration<YangModuleInfo>> registrations = new LinkedList<>();
 
         try {
-            for (String moduleInfoName : Resources.readLines(resource, Charsets.UTF_8)) {
+            for (String moduleInfoName : Resources.readLines(resource, StandardCharsets.UTF_8)) {
                 LOG.trace("Retrieve ModuleInfo({}, {})", moduleInfoName, bundle);
                 YangModuleInfo moduleInfo = retrieveModuleInfo(moduleInfoName, bundle);
                 registrations.add(moduleInfoRegistry.registerModuleInfo(moduleInfo));

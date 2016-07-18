@@ -8,7 +8,6 @@
 
 package org.opendaylight.controller.config.util.xml;
 
-import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -16,6 +15,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
+import java.util.charset.StandardCharsets;
 import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
@@ -98,7 +98,7 @@ public final class XmlUtil {
     }
 
     public static Document readXmlToDocument(final String xmlContent) throws SAXException, IOException {
-        return readXmlToDocument(new ByteArrayInputStream(xmlContent.getBytes(Charsets.UTF_8)));
+        return readXmlToDocument(new ByteArrayInputStream(xmlContent.getBytes(StandardCharsets.UTF_8)));
     }
 
     // TODO improve exceptions throwing

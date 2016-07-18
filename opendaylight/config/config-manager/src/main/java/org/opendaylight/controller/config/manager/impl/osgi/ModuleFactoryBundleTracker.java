@@ -9,10 +9,10 @@ package org.opendaylight.controller.config.manager.impl.osgi;
 
 import static java.lang.String.format;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import java.io.IOException;
 import java.net.URL;
+import java.util.charset.StandardCharsets;
 import org.opendaylight.controller.config.spi.ModuleFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleEvent;
@@ -45,7 +45,7 @@ public class ModuleFactoryBundleTracker implements BundleTrackerCustomizer<Boole
                 bundle, resource, event);
         if (resource != null) {
             try {
-                for (String factoryClassName : Resources.readLines(resource, Charsets.UTF_8)) {
+                for (String factoryClassName : Resources.readLines(resource, StandardCharsets.UTF_8)) {
                     registerFactory(factoryClassName, bundle);
                 }
 

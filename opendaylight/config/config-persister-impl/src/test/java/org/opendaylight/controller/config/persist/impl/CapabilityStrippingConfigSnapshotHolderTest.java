@@ -9,12 +9,12 @@ package org.opendaylight.controller.config.persist.impl;
 
 import static org.junit.Assert.assertEquals;
 
-import com.google.common.base.Charsets;
 import com.google.common.collect.Sets;
 import com.google.common.io.Resources;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.charset.StandardCharsets;
 import org.junit.Test;
 import org.opendaylight.controller.config.util.xml.XmlUtil;
 import org.w3c.dom.Element;
@@ -37,11 +37,11 @@ public class CapabilityStrippingConfigSnapshotHolderTest {
     }
 
     private Set<String> readLines(String fileName) throws IOException {
-        return new HashSet<>(Resources.readLines(getClass().getResource(fileName), Charsets.UTF_8));
+        return new HashSet<>(Resources.readLines(getClass().getResource(fileName), StandardCharsets.UTF_8));
     }
 
     private String readToString(String fileName) throws IOException {
-        return Resources.toString(getClass().getResource(fileName), Charsets.UTF_8);
+        return Resources.toString(getClass().getResource(fileName), StandardCharsets.UTF_8);
     }
 
 }
