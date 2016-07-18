@@ -7,11 +7,11 @@
  */
 package org.opendaylight.controller.blueprint.ext;
 
-import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.Resources;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -118,7 +118,7 @@ class SpecificReferenceListMetadata extends AbstractDependentComponentFactoryMet
         LOG.debug("{}: Found {} resource in bundle {}", logName(), resource, bundle.getSymbolicName());
 
         try {
-            for(String line : Resources.readLines(resource, Charsets.UTF_8)) {
+            for(String line : Resources.readLines(resource, StandardCharsets.UTF_8)) {
                 int ci = line.indexOf('#');
                 if(ci >= 0) {
                     line = line.substring(0, ci);

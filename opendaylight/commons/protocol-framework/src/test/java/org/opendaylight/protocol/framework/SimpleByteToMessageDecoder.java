@@ -10,10 +10,8 @@ package org.opendaylight.protocol.framework;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
-
+import java.nio.charset.StandardCharsets;
 import java.util.List;
-
-import com.google.common.base.Charsets;
 
 /**
  *
@@ -21,6 +19,6 @@ import com.google.common.base.Charsets;
 public class SimpleByteToMessageDecoder extends ByteToMessageDecoder {
     @Override
     protected void decode(final ChannelHandlerContext ctx, final ByteBuf in, final List<Object> out) {
-        out.add(new SimpleMessage(Charsets.UTF_8.decode(in.nioBuffer()).toString()));
+        out.add(new SimpleMessage(StandardCharsets.UTF_8.decode(in.nioBuffer()).toString()));
     }
 }

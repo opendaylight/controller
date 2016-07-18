@@ -8,7 +8,6 @@
 
 package org.opendaylight.controller.config.facade.xml.osgi;
 
-import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.BiMap;
@@ -19,6 +18,7 @@ import com.google.common.util.concurrent.CheckedFuture;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.ref.SoftReference;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -157,7 +157,7 @@ final class YangStoreSnapshot implements YangStoreContext, EnumResolver {
         try {
             final YangTextSchemaSource yangTextSchemaSource = source.checkedGet();
             try(InputStream inStream = yangTextSchemaSource.openStream()) {
-                return new String(ByteStreams.toByteArray(inStream), Charsets.UTF_8);
+                return new String(ByteStreams.toByteArray(inStream), StandardCharsets.UTF_8);
             }
         } catch (SchemaSourceException | IOException e) {
             LOG.warn("Unable to provide source for {}", moduleIdentifier, e);

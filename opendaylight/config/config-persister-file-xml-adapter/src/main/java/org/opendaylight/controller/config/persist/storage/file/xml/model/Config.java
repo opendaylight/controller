@@ -7,13 +7,13 @@
  */
 package org.opendaylight.controller.config.persist.storage.file.xml.model;
 
-import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -92,7 +92,7 @@ public final class Config {
 
     private static boolean isBlank(File from) {
         try {
-            return StringUtils.isBlank(Files.toString(from, Charsets.UTF_8));
+            return StringUtils.isBlank(Files.toString(from, StandardCharsets.UTF_8));
         } catch (IOException e) {
             throw new IllegalStateException("Unexpected error reading file" + from, e);
         }

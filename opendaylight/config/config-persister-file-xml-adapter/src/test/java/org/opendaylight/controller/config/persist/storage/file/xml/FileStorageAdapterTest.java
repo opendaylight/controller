@@ -17,12 +17,12 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
-import com.google.common.base.Charsets;
 import com.google.common.collect.Sets;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -47,7 +47,7 @@ public class FileStorageAdapterTest {
         if (!file.exists()) {
             return;
         }
-        com.google.common.io.Files.write("", file, Charsets.UTF_8);
+        com.google.common.io.Files.write("", file, StandardCharsets.UTF_8);
         i = 1;
         storage = new XmlFileStorageAdapter();
     }
@@ -105,7 +105,7 @@ public class FileStorageAdapterTest {
 
         storage.persistConfig(holder);
 
-        assertEquals(29, com.google.common.io.Files.readLines(file, Charsets.UTF_8).size());
+        assertEquals(29, com.google.common.io.Files.readLines(file, StandardCharsets.UTF_8).size());
         List<ConfigSnapshotHolder> lastConf = storage.loadLastConfigs();
         assertEquals(1, lastConf.size());
         ConfigSnapshotHolder configSnapshotHolder = lastConf.get(0);
@@ -152,7 +152,7 @@ public class FileStorageAdapterTest {
 
         storage.persistConfig(holder);
 
-        assertEquals(29, com.google.common.io.Files.readLines(file, Charsets.UTF_8).size());
+        assertEquals(29, com.google.common.io.Files.readLines(file, StandardCharsets.UTF_8).size());
 
         List<ConfigSnapshotHolder> lastConf = storage.loadLastConfigs();
         assertEquals(1, lastConf.size());
@@ -184,7 +184,7 @@ public class FileStorageAdapterTest {
         storage.setFeaturesService(mock);
         storage.persistConfig(holder);
 
-        assertEquals(20, com.google.common.io.Files.readLines(file, Charsets.UTF_8).size());
+        assertEquals(20, com.google.common.io.Files.readLines(file, StandardCharsets.UTF_8).size());
 
         List<ConfigSnapshotHolder> lastConf = storage.loadLastConfigs();
         assertEquals(1, lastConf.size());
@@ -212,7 +212,7 @@ public class FileStorageAdapterTest {
                 "         </configuration>\n" +
                 "      </snapshot>\n" +
                 "   </snapshots>\n" +
-                "</persisted-snapshots>", file, Charsets.UTF_8);
+                "</persisted-snapshots>", file, StandardCharsets.UTF_8);
 
         List<ConfigSnapshotHolder> lastConf = storage.loadLastConfigs();
         assertEquals(1, lastConf.size());
@@ -241,7 +241,7 @@ public class FileStorageAdapterTest {
         storage.persistConfig(holder);
         storage.persistConfig(holder);
 
-        List<String> readLines = com.google.common.io.Files.readLines(file, Charsets.UTF_8);
+        List<String> readLines = com.google.common.io.Files.readLines(file, StandardCharsets.UTF_8);
         assertEquals(29, readLines.size());
 
         List<ConfigSnapshotHolder> lastConf = storage.loadLastConfigs();
