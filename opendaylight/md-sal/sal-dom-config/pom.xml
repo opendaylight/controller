@@ -26,6 +26,10 @@
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal-core-spi</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.opendaylight.mdsal</groupId>
+      <artifactId>mdsal-singleton-dom-api</artifactId>
+    </dependency>
   </dependencies>
 
   <build>
@@ -36,7 +40,13 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Import-Package>*,com.google.common.base</Import-Package>
+            <Import-Package>
+              com.google.common.base,
+              org.opendaylight.mdsal.eos.common.api,
+              org.opendaylight.mdsal.eos.dom.api,
+              org.opendaylight.mdsal.singleton.common.api,
+              *
+            </Import-Package>
           </instructions>
         </configuration>
       </plugin>
