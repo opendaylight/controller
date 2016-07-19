@@ -9,6 +9,8 @@ package org.opendaylight.controller.clustering.it.provider;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Sets;
+import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import java.util.Collection;
 import java.util.concurrent.Future;
@@ -33,6 +35,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.Cars;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.CarsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.RegisterOwnershipInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.StopStressTestOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.StopStressTestOutputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.StressTestInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.UnregisterOwnershipInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.cars.CarEntry;
@@ -56,6 +60,9 @@ public class CarProvider implements CarService {
     private static final Logger LOG = LoggerFactory.getLogger(CarProvider.class);
 
     private static final String ENTITY_TYPE = "cars";
+
+    private AtomicLong succcessCounter = new AtomicLong();
+    private AtomicLong failureCounter = new AtomicLong();
 
     private final CarEntityOwnershipListener ownershipListener = new CarEntityOwnershipListener();
     private final AtomicBoolean registeredListener = new AtomicBoolean();
@@ -97,8 +104,8 @@ public class CarProvider implements CarService {
         if ((input.getRate() == null) || (input.getRate() == 0)) {
             log.info("Exiting stress test as no rate is given.");
             return Futures.immediateFuture(RpcResultBuilder.<Void>failed()
-                                           .withError(ErrorType.PROTOCOL, "invalid rate")
-                                           .build());
+                    .withError(ErrorType.PROTOCOL, "invalid rate")
+                    .build());
         } else {
             inputRate = input.getRate();
         }
@@ -138,7 +145,22 @@ public class CarProvider implements CarService {
                     tx.put(LogicalDatastoreType.CONFIGURATION,
                             InstanceIdentifier.<Cars>builder(Cars.class).child(CarEntry.class, car.getKey()).build(),
                             car);
-                    tx.submit();
+                    CheckedFuture<Void, TransactionCommitFailedException> future =  tx.submit();
+                    Futures.addCallback(future, new FutureCallback<Void>() {
+
+                        @Override
+                        public void onSuccess(final Void result) {
+                            // Transaction succeeded
+                            succcessCounter.getAndIncrement();
+                        }
+
+                        @Override
+                        public void onFailure(final Throwable t) {
+                            // Transaction failed
+                            failureCounter.getAndIncrement();
+                            LOG.error("Put Cars failed", t);
+                        }
+                    });
                     try {
                         TimeUnit.NANOSECONDS.sleep(sleep);
                     } catch (InterruptedException e) {
@@ -164,9 +186,17 @@ public class CarProvider implements CarService {
     }
 
     @Override
-    public Future<RpcResult<Void>> stopStressTest() {
+    public Future<RpcResult<StopStressTestOutput>> stopStressTest() {
         stopThread();
-        return Futures.immediateFuture(RpcResultBuilder.<Void>success().build());
+        StopStressTestOutputBuilder stopStressTestOutput;
+        stopStressTestOutput = new StopStressTestOutputBuilder()
+                .setSuccessCount(succcessCounter.longValue())
+                .setFailureCount(failureCounter.longValue());
+
+        StopStressTestOutput result = stopStressTestOutput.build();
+        log.info(" Executed Stop Stress test; No. of cars created {} ;" +
+                " No. of cars failed {} ", succcessCounter, failureCounter);
+        return Futures.immediateFuture(RpcResultBuilder.<StopStressTestOutput>success(result).build());
     }
 
 
