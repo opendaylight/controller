@@ -76,7 +76,13 @@ module car {
     }
     
     rpc stop-stress-test {
-
+        output {
+            leaf count {
+              type uint32;
+              default 0;
+              description "Number of cars created after stopping the stress test.";
+            }
+        }
     }
 
     rpc register-ownership {
