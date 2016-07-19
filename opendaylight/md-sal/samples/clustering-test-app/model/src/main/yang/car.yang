@@ -76,7 +76,19 @@ module car {
     }
     
     rpc stop-stress-test {
+        output {
+            leaf success-count {
+              type uint32;
+              default 0;
+              description "Total number of cars created when running stess-test rpc";
+            }
 
+            leaf failure-count {
+              type uint32;
+              default 0;
+              description "Total number of cars failed when running stess-test rpc";
+            }
+        }
     }
 
     rpc register-ownership {
