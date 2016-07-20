@@ -130,7 +130,9 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
             @Override
             public Optional<NormalizedNode<?, ?>> apply(final List<Optional<NormalizedNode<?, ?>>> input) {
                 try {
-                    return NormalizedNodeAggregator.aggregate(YangInstanceIdentifier.EMPTY, input, txContextFactory.getActorContext().getSchemaContext());
+                    return NormalizedNodeAggregator.aggregate(YangInstanceIdentifier.EMPTY, input,
+                            txContextFactory.getActorContext().getSchemaContext(),
+                            txContextFactory.getActorContext().getDatastoreContext().getLogicalStoreType());
                 } catch (DataValidationFailedException e) {
                     throw new IllegalArgumentException("Failed to aggregate", e);
                 }

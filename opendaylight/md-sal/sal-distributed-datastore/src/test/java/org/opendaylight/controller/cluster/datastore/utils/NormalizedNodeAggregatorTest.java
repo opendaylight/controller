@@ -20,6 +20,7 @@ import org.junit.Test;
 import org.opendaylight.controller.md.cluster.datastore.model.CarsModel;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
@@ -45,7 +46,7 @@ public class NormalizedNodeAggregatorTest {
                 ImmutableList.of(
                         Optional.<NormalizedNode<?, ?>>of(getRootNode(expectedNode1, schemaContext)),
                         Optional.<NormalizedNode<?, ?>>of(getRootNode(expectedNode2, schemaContext))),
-                schemaContext);
+                schemaContext, LogicalDatastoreType.CONFIGURATION);
 
 
         NormalizedNode<?,?> normalizedNode = optional.get();

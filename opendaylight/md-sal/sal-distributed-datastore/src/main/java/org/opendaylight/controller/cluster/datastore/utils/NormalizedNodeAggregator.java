@@ -9,12 +9,14 @@ package org.opendaylight.controller.cluster.datastore.utils;
 
 import com.google.common.base.Optional;
 import java.util.List;
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataValidationFailedException;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.TreeType;
 import org.opendaylight.yangtools.yang.data.impl.schema.tree.InMemoryDataTreeFactory;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
@@ -24,11 +26,12 @@ public class NormalizedNodeAggregator {
     private final DataTree dataTree;
 
     private NormalizedNodeAggregator(final YangInstanceIdentifier rootIdentifier, final List<Optional<NormalizedNode<?, ?>>> nodes,
-                             final SchemaContext schemaContext) {
+                             final SchemaContext schemaContext, LogicalDatastoreType logicalDatastoreType) {
         this.rootIdentifier = rootIdentifier;
         this.nodes = nodes;
-        // FIXME: BUG-1014: pass down proper DataTree
-        this.dataTree = InMemoryDataTreeFactory.getInstance().create();
+        this.dataTree = InMemoryDataTreeFactory.getInstance().create(
+                logicalDatastoreType == LogicalDatastoreType.CONFIGURATION ? TreeType.CONFIGURATION :
+                    TreeType.OPERATIONAL);
         this.dataTree.setSchemaContext(schemaContext);
     }
 
@@ -37,13 +40,15 @@ public class NormalizedNodeAggregator {
      *
      * @param nodes
      * @param schemaContext
+     * @param logicalDatastoreType
      * @return
      * @throws DataValidationFailedException
      */
     public static Optional<NormalizedNode<?,?>> aggregate(final YangInstanceIdentifier rootIdentifier,
                                                           final List<Optional<NormalizedNode<?, ?>>> nodes,
-                                                          final SchemaContext schemaContext) throws DataValidationFailedException {
-        return new NormalizedNodeAggregator(rootIdentifier, nodes, schemaContext).aggregate();
+                                                          final SchemaContext schemaContext,
+                                                          LogicalDatastoreType logicalDatastoreType) throws DataValidationFailedException {
+        return new NormalizedNodeAggregator(rootIdentifier, nodes, schemaContext, logicalDatastoreType).aggregate();
     }
 
     private Optional<NormalizedNode<?,?>> aggregate() throws DataValidationFailedException {
