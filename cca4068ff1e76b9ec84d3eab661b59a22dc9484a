@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a561d44_bc62f7aa",
+        "filename": "opendaylight/md-sal/sal-binding-config/src/main/java/org/opendaylight/controller/config/yang/md/sal/binding/impl/RuntimeMappingModule.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 3635
+      },
+      "writtenOn": "2016-07-20T13:47:59Z",
+      "side": 1,
+      "message": "Please remove this as it appears to no longer be used.",
+      "range": {
+        "startLine": 20,
+        "startChar": 4,
+        "endLine": 20,
+        "endChar": 50
+      },
+      "revId": "cca4068ff1e76b9ec84d3eab661b59a22dc9484a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_9c0453c1",
+        "filename": "opendaylight/md-sal/sal-binding-config/src/main/java/org/opendaylight/controller/config/yang/md/sal/binding/impl/RuntimeMappingModule.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 3635
+      },
+      "writtenOn": "2016-07-20T13:47:59Z",
+      "side": 1,
+      "message": "This could technically be null if we time out waiting for the service.  This would render cause NPE on the returned AutoCloseable when \"close()\" method is called.  Should there be an added null check on service and return a no-op AutoCloseable to avoid NPE instead?",
+      "range": {
+        "startLine": 59,
+        "startChar": 8,
+        "endLine": 59,
+        "endChar": 23
+      },
+      "revId": "cca4068ff1e76b9ec84d3eab661b59a22dc9484a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
