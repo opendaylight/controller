@@ -41,6 +41,7 @@
         <!-- FIXME: Bug 4202: Add MD-SAL provided odl-mdsal-binding-adapter -->
         <!-- FIXME: Bug 4202: Add MD-SAL provided odl-mdsal-dom-broker -->
         <feature version='${mdsal.version}'>odl-mdsal-eos-dom</feature>
+        <feature version='${mdsal.version}'>odl-mdsal-eos-binding</feature>
         <feature version='${mdsal.version}'>odl-mdsal-singleton-dom</feature>
         <bundle>mvn:org.opendaylight.controller/sal-core-api/{{VERSION}}</bundle>
         <bundle>mvn:org.opendaylight.controller/sal-core-spi/{{VERSION}}</bundle>
