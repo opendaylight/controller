@@ -261,7 +261,7 @@ public class NormalizedNodeSerializer {
             m.put(LEAF_SET_ENTRY_NODE_TYPE, new DeSerializationFunction() {
                 @Override
                 public NormalizedNode<?, ?> apply(final DeSerializer deSerializer, final NormalizedNodeMessages.Node node) {
-                    NormalizedNodeAttrBuilder<NodeWithValue, Object, LeafSetEntryNode<Object>> builder =
+                    NormalizedNodeAttrBuilder<NodeWithValue<Object>, Object, LeafSetEntryNode<Object>> builder =
                             Builders.leafSetEntryBuilder().withNodeIdentifier(deSerializer.toNodeWithValue(
                                 node.getPathArgument()));
 

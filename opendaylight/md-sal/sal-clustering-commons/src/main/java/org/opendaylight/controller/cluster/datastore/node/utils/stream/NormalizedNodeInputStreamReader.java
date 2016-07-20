@@ -61,7 +61,7 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput 
     private NormalizedNodeAttrBuilder<YangInstanceIdentifier.NodeIdentifier,
                                       Object, LeafNode<Object>> leafBuilder;
 
-    private NormalizedNodeAttrBuilder<NodeWithValue, Object, LeafSetEntryNode<Object>> leafSetEntryBuilder;
+    private NormalizedNodeAttrBuilder<NodeWithValue<Object>, Object, LeafSetEntryNode<Object>> leafSetEntryBuilder;
 
     private final StringBuilder reusableStringBuilder = new StringBuilder(50);
 
@@ -158,9 +158,9 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput 
         return leafBuilder;
     }
 
-    private NormalizedNodeAttrBuilder<NodeWithValue, Object,
+    private NormalizedNodeAttrBuilder<NodeWithValue<Object>, Object,
                                       LeafSetEntryNode<Object>> leafSetEntryBuilder() {
-        if(leafSetEntryBuilder == null) {
+        if (leafSetEntryBuilder == null) {
             leafSetEntryBuilder = Builders.leafSetEntryBuilder();
         }
 
