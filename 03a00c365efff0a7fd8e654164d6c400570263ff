@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a561d44_02b9fee8",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/DataStoreAppConfigMetadata.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 3635
+      },
+      "writtenOn": "2016-07-20T18:36:42Z",
+      "side": 1,
+      "message": "Use File.SEPARATOR instead.",
+      "range": {
+        "startLine": 77,
+        "startChar": 65,
+        "endLine": 77,
+        "endChar": 66
+      },
+      "revId": "03a00c365efff0a7fd8e654164d6c400570263ff",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_627d5a1c",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/DataStoreAppConfigMetadata.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 344,
+      "author": {
+        "id": 3635
+      },
+      "writtenOn": "2016-07-20T18:36:42Z",
+      "side": 1,
+      "message": "Feels wrong to not use an accessor but I guess the class is private to this class.",
+      "range": {
+        "startLine": 344,
+        "startChar": 66,
+        "endLine": 344,
+        "endChar": 78
+      },
+      "revId": "03a00c365efff0a7fd8e654164d6c400570263ff",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
