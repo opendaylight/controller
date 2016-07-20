@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a561d44_02145ef3",
+        "filename": "opendaylight/md-sal/sal-clustering-config/src/main/resources/initial/factory-akka.conf",
+        "patchSetId": 1
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-07-20T18:03:47Z",
+      "side": 1,
+      "message": "Should add a comment as to why this is commented out. You can take an excerpt from the akka documentation.",
+      "revId": "257d389fdbc8b5285fd0ac55b8171fbb7284640d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
