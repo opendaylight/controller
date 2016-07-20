@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "9a561d44_4273f6e6",
+        "filename": "karaf/opendaylight-karaf-resources/src/main/resources/etc/custom.properties",
+        "patchSetId": 2
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-07-20T20:32:04Z",
+      "side": 1,
+      "message": "We should care :) I assume you\u0027re referring to the missing space in \"andservices\"",
+      "parentUuid": "9a561d44_3cd707c1",
+      "revId": "d36db6962cc48779adc6a6ac96a48674bd6c4e4f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a561d44_226fe2fe",
         "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/BlueprintBundleTracker.java",
         "patchSetId": 2
@@ -42,6 +60,30 @@
     },
     {
       "key": {
+        "uuid": "9a561d44_425ad650",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/BlueprintBundleTracker.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 222,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-07-20T20:32:04Z",
+      "side": 1,
+      "message": "I didn\u0027t add that logging here b/c there\u0027s already logging in the ConfigRegistryImpl.",
+      "parentUuid": "9a561d44_226fe2fe",
+      "range": {
+        "startLine": 220,
+        "startChar": 0,
+        "endLine": 222,
+        "endChar": 9
+      },
+      "revId": "d36db6962cc48779adc6a6ac96a48674bd6c4e4f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a561d44_e2968aef",
         "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/BlueprintBundleTracker.java",
         "patchSetId": 2
@@ -53,6 +95,30 @@
       "writtenOn": "2016-07-20T19:57:27Z",
       "side": 1,
       "message": "It took me time to follow, but you\u0027re recursively looking for bundle to destroy, each time a bundle is removed from the list, to avoid missing any unused bundle.\nCould be a lack of experience from me (reading java code), but I guess it worth a comment :)",
+      "range": {
+        "startLine": 227,
+        "startChar": 0,
+        "endLine": 228,
+        "endChar": 72
+      },
+      "revId": "d36db6962cc48779adc6a6ac96a48674bd6c4e4f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_c23546f8",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/BlueprintBundleTracker.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 228,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-07-20T20:32:04Z",
+      "side": 1,
+      "message": "yeah b/c as containers are destroyed, other containers become eligible for destroy.",
+      "parentUuid": "9a561d44_e2968aef",
       "range": {
         "startLine": 227,
         "startChar": 0,
@@ -111,6 +177,30 @@
     },
     {
       "key": {
+        "uuid": "9a561d44_6226facf",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/BlueprintBundleTracker.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 269,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-07-20T20:32:04Z",
+      "side": 1,
+      "message": "yeah wouldn\u0027t hurt",
+      "parentUuid": "9a561d44_628a7ac0",
+      "range": {
+        "startLine": 269,
+        "startChar": 38,
+        "endLine": 269,
+        "endChar": 48
+      },
+      "revId": "d36db6962cc48779adc6a6ac96a48674bd6c4e4f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a561d44_828fcecb",
         "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/BlueprintBundleTracker.java",
         "patchSetId": 2
@@ -122,6 +212,30 @@
       "writtenOn": "2016-07-20T19:57:27Z",
       "side": 1,
       "message": "If I understand correctly, this cannot happen because if it is the case, bundlesToDestroy wouldn\u0027t be empty so we wouldn\u0027t end up in the else case (l 266)",
+      "range": {
+        "startLine": 271,
+        "startChar": 0,
+        "endLine": 273,
+        "endChar": 21
+      },
+      "revId": "d36db6962cc48779adc6a6ac96a48674bd6c4e4f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_96354fdc",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/BlueprintBundleTracker.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 273,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-07-20T20:32:04Z",
+      "side": 1,
+      "message": "It appears that way but it\u0027s possible that service usage may have gone to 0 when we hit here. So being paranoid.",
+      "parentUuid": "9a561d44_828fcecb",
       "range": {
         "startLine": 271,
         "startChar": 0,
@@ -157,6 +271,30 @@
     },
     {
       "key": {
+        "uuid": "9a561d44_f6248bb0",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/BlueprintBundleTracker.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 284,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-07-20T20:32:04Z",
+      "side": 1,
+      "message": "I have to admit I \"borrowed\" this code (the whole method) from Aries code. It took me a little time to understand what they\u0027re doing here. Basically if we get in this else block, there\u0027s either no more container bundles or they all have services being used. For the latter it means there\u0027s either circular service usage or a service is being used by a non-container bundle. But we need to make progress so it picks the bundle with a used service with the highest service ID. Each service  is assigned a monotonically increasing ID as they are registered. By picking the bundle with the highest service ID, we\u0027re picking the bundle that was (likely) started after all the others. I can add comments about this.",
+      "parentUuid": "9a561d44_c2c0a6e2",
+      "range": {
+        "startLine": 280,
+        "startChar": 0,
+        "endLine": 284,
+        "endChar": 99
+      },
+      "revId": "d36db6962cc48779adc6a6ac96a48674bd6c4e4f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a561d44_67b0cc43",
         "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/BlueprintBundleTracker.java",
         "patchSetId": 2
@@ -168,6 +306,30 @@
       "writtenOn": "2016-07-20T14:45:16Z",
       "side": 1,
       "message": "warn?",
+      "range": {
+        "startLine": 305,
+        "startChar": 102,
+        "endLine": 305,
+        "endChar": 108
+      },
+      "revId": "d36db6962cc48779adc6a6ac96a48674bd6c4e4f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_d64ea76e",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/BlueprintBundleTracker.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 305,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-07-20T20:32:04Z",
+      "side": 1,
+      "message": "yeah seems it should be debug",
+      "parentUuid": "9a561d44_67b0cc43",
       "range": {
         "startLine": 305,
         "startChar": 102,
