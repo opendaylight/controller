@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a561d44_07b590cc",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/NormalizedNodeAggregator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 3635
+      },
+      "writtenOn": "2016-07-20T15:35:39Z",
+      "side": 1,
+      "message": "The rest of the signature uses \"final\" method parameters.  I don\u0027t have an opinion, but it would be nice to keep it consistent.",
+      "revId": "bdaf6bbf2576f28e77c19251dc462c394303aced",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
