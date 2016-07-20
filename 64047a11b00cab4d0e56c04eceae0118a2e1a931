@@ -16,6 +16,24 @@
       "revId": "64047a11b00cab4d0e56c04eceae0118a2e1a931",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_42693624",
+        "filename": "opendaylight/md-sal/sal-clustering-config/src/main/resources/initial/factory-akka.conf",
+        "patchSetId": 2
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1602
+      },
+      "writtenOn": "2016-07-20T19:16:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a561d44_300e108e",
+      "revId": "64047a11b00cab4d0e56c04eceae0118a2e1a931",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
