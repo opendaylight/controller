@@ -1,0 +1,67 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a561d44_3cd707c1",
+        "filename": "karaf/opendaylight-karaf-resources/src/main/resources/etc/custom.properties",
+        "patchSetId": 2
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 3635
+      },
+      "writtenOn": "2016-07-20T14:45:16Z",
+      "side": 1,
+      "message": "typo... but who cares.",
+      "revId": "d36db6962cc48779adc6a6ac96a48674bd6c4e4f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_67b0cc43",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/BlueprintBundleTracker.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 305,
+      "author": {
+        "id": 3635
+      },
+      "writtenOn": "2016-07-20T14:45:16Z",
+      "side": 1,
+      "message": "warn?",
+      "range": {
+        "startLine": 305,
+        "startChar": 102,
+        "endLine": 305,
+        "endChar": 108
+      },
+      "revId": "d36db6962cc48779adc6a6ac96a48674bd6c4e4f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_47ab08d6",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/BlueprintBundleTracker.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 313,
+      "author": {
+        "id": 3635
+      },
+      "writtenOn": "2016-07-20T14:45:16Z",
+      "side": 1,
+      "message": "Should this be consistent with above in terms of logging level?",
+      "range": {
+        "startLine": 313,
+        "startChar": 16,
+        "endLine": 313,
+        "endChar": 21
+      },
+      "revId": "d36db6962cc48779adc6a6ac96a48674bd6c4e4f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
