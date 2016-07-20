@@ -19,6 +19,144 @@
     },
     {
       "key": {
+        "uuid": "9a561d44_226fe2fe",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/BlueprintBundleTracker.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 222,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-07-20T19:57:27Z",
+      "side": 1,
+      "message": "whether or not we enter this condition, we could add a log saying closing config modules or config modules already closed. It might be more meaningful than logs at l 299 and l 306",
+      "range": {
+        "startLine": 220,
+        "startChar": 0,
+        "endLine": 222,
+        "endChar": 9
+      },
+      "revId": "d36db6962cc48779adc6a6ac96a48674bd6c4e4f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_e2968aef",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/BlueprintBundleTracker.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 228,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-07-20T19:57:27Z",
+      "side": 1,
+      "message": "It took me time to follow, but you\u0027re recursively looking for bundle to destroy, each time a bundle is removed from the list, to avoid missing any unused bundle.\nCould be a lack of experience from me (reading java code), but I guess it worth a comment :)",
+      "range": {
+        "startLine": 227,
+        "startChar": 0,
+        "endLine": 228,
+        "endChar": 72
+      },
+      "revId": "d36db6962cc48779adc6a6ac96a48674bd6c4e4f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_e2efaa85",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/BlueprintBundleTracker.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 251,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-07-20T19:57:27Z",
+      "side": 1,
+      "message": "unrelevant side note: this is pretty neat, it would allow us to rank bundles importance :)",
+      "range": {
+        "startLine": 243,
+        "startChar": 0,
+        "endLine": 251,
+        "endChar": 66
+      },
+      "revId": "d36db6962cc48779adc6a6ac96a48674bd6c4e4f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_628a7ac0",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/BlueprintBundleTracker.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 269,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-07-20T19:57:27Z",
+      "side": 1,
+      "message": "is a null check needed as done line 245?",
+      "range": {
+        "startLine": 269,
+        "startChar": 38,
+        "endLine": 269,
+        "endChar": 48
+      },
+      "revId": "d36db6962cc48779adc6a6ac96a48674bd6c4e4f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_828fcecb",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/BlueprintBundleTracker.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 273,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-07-20T19:57:27Z",
+      "side": 1,
+      "message": "If I understand correctly, this cannot happen because if it is the case, bundlesToDestroy wouldn\u0027t be empty so we wouldn\u0027t end up in the else case (l 266)",
+      "range": {
+        "startLine": 271,
+        "startChar": 0,
+        "endLine": 273,
+        "endChar": 21
+      },
+      "revId": "d36db6962cc48779adc6a6ac96a48674bd6c4e4f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_c2c0a6e2",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/BlueprintBundleTracker.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 284,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-07-20T19:57:27Z",
+      "side": 1,
+      "message": "why would you destroy the bundle for the ServiceReference with the lowest ranking? I must be missing something, but I would love if you could shed some light.",
+      "range": {
+        "startLine": 280,
+        "startChar": 0,
+        "endLine": 284,
+        "endChar": 99
+      },
+      "revId": "d36db6962cc48779adc6a6ac96a48674bd6c4e4f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a561d44_67b0cc43",
         "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/BlueprintBundleTracker.java",
         "patchSetId": 2
