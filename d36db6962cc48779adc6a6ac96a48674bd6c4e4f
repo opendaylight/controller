@@ -84,6 +84,30 @@
     },
     {
       "key": {
+        "uuid": "9a561d44_d6834754",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/BlueprintBundleTracker.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 222,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-07-20T20:51:56Z",
+      "side": 1,
+      "message": "ok",
+      "parentUuid": "9a561d44_425ad650",
+      "range": {
+        "startLine": 220,
+        "startChar": 0,
+        "endLine": 222,
+        "endChar": 9
+      },
+      "revId": "d36db6962cc48779adc6a6ac96a48674bd6c4e4f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a561d44_e2968aef",
         "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/BlueprintBundleTracker.java",
         "patchSetId": 2
@@ -119,6 +143,30 @@
       "side": 1,
       "message": "yeah b/c as containers are destroyed, other containers become eligible for destroy.",
       "parentUuid": "9a561d44_e2968aef",
+      "range": {
+        "startLine": 227,
+        "startChar": 0,
+        "endLine": 228,
+        "endChar": 72
+      },
+      "revId": "d36db6962cc48779adc6a6ac96a48674bd6c4e4f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_b6869363",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/BlueprintBundleTracker.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 228,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-07-20T20:51:56Z",
+      "side": 1,
+      "message": "Right, nice sum up",
+      "parentUuid": "9a561d44_c23546f8",
       "range": {
         "startLine": 227,
         "startChar": 0,
@@ -248,6 +296,30 @@
     },
     {
       "key": {
+        "uuid": "9a561d44_167e5f6b",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/BlueprintBundleTracker.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 273,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-07-20T20:51:56Z",
+      "side": 1,
+      "message": "ack",
+      "parentUuid": "9a561d44_96354fdc",
+      "range": {
+        "startLine": 271,
+        "startChar": 0,
+        "endLine": 273,
+        "endChar": 21
+      },
+      "revId": "d36db6962cc48779adc6a6ac96a48674bd6c4e4f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a561d44_c2c0a6e2",
         "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/BlueprintBundleTracker.java",
         "patchSetId": 2
@@ -283,6 +355,30 @@
       "side": 1,
       "message": "I have to admit I \"borrowed\" this code (the whole method) from Aries code. It took me a little time to understand what they\u0027re doing here. Basically if we get in this else block, there\u0027s either no more container bundles or they all have services being used. For the latter it means there\u0027s either circular service usage or a service is being used by a non-container bundle. But we need to make progress so it picks the bundle with a used service with the highest service ID. Each service  is assigned a monotonically increasing ID as they are registered. By picking the bundle with the highest service ID, we\u0027re picking the bundle that was (likely) started after all the others. I can add comments about this.",
       "parentUuid": "9a561d44_c2c0a6e2",
+      "range": {
+        "startLine": 280,
+        "startChar": 0,
+        "endLine": 284,
+        "endChar": 99
+      },
+      "revId": "d36db6962cc48779adc6a6ac96a48674bd6c4e4f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_f6ce4bb3",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/BlueprintBundleTracker.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 284,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-07-20T20:51:56Z",
+      "side": 1,
+      "message": "alright, understood. Mostly with the \"we need to make progress\"",
+      "parentUuid": "9a561d44_f6248bb0",
       "range": {
         "startLine": 280,
         "startChar": 0,
