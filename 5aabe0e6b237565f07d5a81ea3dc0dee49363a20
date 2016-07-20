@@ -34,6 +34,24 @@
       "revId": "5aabe0e6b237565f07d5a81ea3dc0dee49363a20",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_1643ff14",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/DataStoreAppConfigMetadata.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 374,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-07-20T21:01:21Z",
+      "side": 1,
+      "message": "Ok, cool. Didn\u0027t know that. Thanks for teaching me :)",
+      "parentUuid": "9a561d44_76ba3b0b",
+      "revId": "5aabe0e6b237565f07d5a81ea3dc0dee49363a20",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
