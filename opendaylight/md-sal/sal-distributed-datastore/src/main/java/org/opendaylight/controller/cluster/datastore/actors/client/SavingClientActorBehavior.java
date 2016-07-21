@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.datastore.actors.client;
 
 import akka.persistence.SaveSnapshotFailure;
 import akka.persistence.SaveSnapshotSuccess;
+import akka.persistence.SnapshotSelectionCriteria;
 import com.google.common.base.Preconditions;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.slf4j.Logger;
@@ -33,6 +34,11 @@ final class SavingClientActorBehavior extends RecoveredClientActorBehavior<Initi
             return null;
         } else if (command instanceof SaveSnapshotSuccess) {
             context().unstash();
+
+            SaveSnapshotSuccess saved = (SaveSnapshotSuccess)command;
+            context().deleteSnapshots(new SnapshotSelectionCriteria(saved.metadata().sequenceNr(),
+                    saved.metadata().timestamp() - 1, 0L, 0L));
+
             return context().createBehavior(myId);
         } else {
             LOG.debug("{}: stashing command {}", persistenceId(), command);
