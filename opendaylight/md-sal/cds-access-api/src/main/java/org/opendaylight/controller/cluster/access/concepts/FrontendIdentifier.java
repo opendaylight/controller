@@ -8,7 +8,6 @@
 package org.opendaylight.controller.cluster.access.concepts;
 
 import com.google.common.annotations.Beta;
-import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -108,10 +107,13 @@ public final class FrontendIdentifier implements WritableIdentifier {
         return memberName.equals(other.memberName) && clientType.equals(other.clientType);
     }
 
+    public String toPersistentId() {
+        return memberName.getName() + "-frontend-" + clientType.getName();
+    }
+
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(FrontendIdentifier.class).add("member", memberName)
-                .add("clientType", clientType).toString();
+        return toPersistentId();
     }
 
     private Object writeReplace() {
