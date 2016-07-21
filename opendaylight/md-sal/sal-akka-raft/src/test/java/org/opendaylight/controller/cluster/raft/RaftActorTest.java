@@ -659,7 +659,7 @@ public class RaftActorTest extends AbstractActorTest {
                 assertTrue(leaderActor.getRaftActorContext().getSnapshotManager().isCapturing());
 
                 // The commit is needed to complete the snapshot creation process
-                leaderActor.getRaftActorContext().getSnapshotManager().commit(-1);
+                leaderActor.getRaftActorContext().getSnapshotManager().commit(-1, -1);
 
                 // capture snapshot reply should remove the snapshotted entries only
                 assertEquals(3, leaderActor.getReplicatedLog().size());
@@ -762,7 +762,7 @@ public class RaftActorTest extends AbstractActorTest {
                 assertTrue(followerActor.getRaftActorContext().getSnapshotManager().isCapturing());
 
                 // The commit is needed to complete the snapshot creation process
-                followerActor.getRaftActorContext().getSnapshotManager().commit(-1);
+                followerActor.getRaftActorContext().getSnapshotManager().commit(-1, -1);
 
                 // capture snapshot reply should remove the snapshotted entries only till replicatedToAllIndex
                 assertEquals(3, followerActor.getReplicatedLog().size()); //indexes 5,6,7 left in the log

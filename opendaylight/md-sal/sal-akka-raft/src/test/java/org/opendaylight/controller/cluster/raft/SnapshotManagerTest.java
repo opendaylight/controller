@@ -413,7 +413,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
         assertEquals(true, snapshotManager.isCapturing());
 
-        snapshotManager.commit(100L);
+        snapshotManager.commit(100L, 1234L);
 
         assertEquals(false, snapshotManager.isCapturing());
 
@@ -425,9 +425,8 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
         verify(mockDataPersistenceProvider).deleteSnapshots(criteriaCaptor.capture());
 
-        assertEquals(90, criteriaCaptor.getValue().maxSequenceNr()); // sequenceNumber = 100
-                                                                     // config snapShotBatchCount = 10
-                                                                     // therefore maxSequenceNumber = 90
+        assertEquals(100L, criteriaCaptor.getValue().maxSequenceNr());
+        assertEquals(1233L, criteriaCaptor.getValue().maxTimestamp());
 
         MessageCollectorActor.expectFirstMatching(actorRef, SnapshotComplete.class);
     }
@@ -438,7 +437,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
         snapshotManager.captureToInstall(new MockRaftActorContext.MockReplicatedLogEntry(6, 9,
                 new MockRaftActorContext.MockPayload()), -1, "follower-1");
 
-        snapshotManager.commit(100L);
+        snapshotManager.commit(100L, 0);
 
         verify(mockReplicatedLog, never()).snapshotCommit();
 
@@ -450,7 +449,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
     @Test
     public void testCommitBeforeCapture(){
-        snapshotManager.commit(100L);
+        snapshotManager.commit(100L, 0);
 
         verify(mockReplicatedLog, never()).snapshotCommit();
 
@@ -470,9 +469,9 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
         snapshotManager.persist(new byte[]{}, Runtime.getRuntime().totalMemory());
 
-        snapshotManager.commit(100L);
+        snapshotManager.commit(100L, 0);
 
-        snapshotManager.commit(100L);
+        snapshotManager.commit(100L, 0);
 
         verify(mockReplicatedLog, times(1)).snapshotCommit();
 

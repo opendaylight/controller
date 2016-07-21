@@ -60,7 +60,7 @@ class RaftActorSnapshotMessageSupport {
         } else if (message instanceof CaptureSnapshotReply) {
             onCaptureSnapshotReply(((CaptureSnapshotReply) message).getSnapshot());
         } else if (COMMIT_SNAPSHOT.equals(message)) {
-            context.getSnapshotManager().commit(-1);
+            context.getSnapshotManager().commit(-1, -1);
         } else if (message instanceof GetSnapshot) {
             onGetSnapshot(sender);
         } else {
@@ -84,11 +84,11 @@ class RaftActorSnapshotMessageSupport {
     }
 
     private void onSaveSnapshotSuccess(SaveSnapshotSuccess success) {
-        log.info("{}: SaveSnapshotSuccess received for snapshot", context.getId());
-
         long sequenceNumber = success.metadata().sequenceNr();
 
-        context.getSnapshotManager().commit(sequenceNumber);
+        log.info("{}: SaveSnapshotSuccess received for snapshot, sequenceNr: {}", context.getId(), sequenceNumber);
+
+        context.getSnapshotManager().commit(sequenceNumber, success.metadata().timestamp());
     }
 
     private void onApplySnapshot(ApplySnapshot message) {

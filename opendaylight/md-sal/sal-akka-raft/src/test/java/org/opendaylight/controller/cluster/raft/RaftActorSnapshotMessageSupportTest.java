@@ -116,9 +116,10 @@ public class RaftActorSnapshotMessageSupportTest {
     public void testOnSaveSnapshotSuccess() {
 
         long sequenceNumber = 100;
-        sendMessageToSupport(new SaveSnapshotSuccess(new SnapshotMetadata("foo", sequenceNumber, 1234L)));
+        long timeStamp = 1234L;
+        sendMessageToSupport(new SaveSnapshotSuccess(new SnapshotMetadata("foo", sequenceNumber, timeStamp)));
 
-        verify(mockSnapshotManager).commit(eq(sequenceNumber));
+        verify(mockSnapshotManager).commit(eq(sequenceNumber), eq(timeStamp));
     }
 
     @Test
@@ -135,7 +136,7 @@ public class RaftActorSnapshotMessageSupportTest {
 
         sendMessageToSupport(RaftActorSnapshotMessageSupport.COMMIT_SNAPSHOT);
 
-        verify(mockSnapshotManager).commit(eq(-1L));
+        verify(mockSnapshotManager).commit(eq(-1L), eq(-1L));
     }
 
     @Test
