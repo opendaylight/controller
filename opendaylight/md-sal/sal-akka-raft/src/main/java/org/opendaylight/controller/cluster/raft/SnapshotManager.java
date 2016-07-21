@@ -77,8 +77,8 @@ public class SnapshotManager implements SnapshotState {
     }
 
     @Override
-    public void commit(final long sequenceNumber) {
-        currentState.commit(sequenceNumber);
+    public void commit(final long sequenceNumber, long timeStamp) {
+        currentState.commit(sequenceNumber, timeStamp);
     }
 
     @Override
@@ -177,7 +177,7 @@ public class SnapshotManager implements SnapshotState {
         }
 
         @Override
-        public void commit(final long sequenceNumber) {
+        public void commit(final long sequenceNumber, long timeStamp) {
             LOG.debug("commit should not be called in state {}", this);
         }
 
@@ -385,7 +385,7 @@ public class SnapshotManager implements SnapshotState {
     private class Persisting extends AbstractSnapshotState {
 
         @Override
-        public void commit(final long sequenceNumber) {
+        public void commit(final long sequenceNumber, long timeStamp) {
             LOG.debug("{}: Snapshot success -  sequence number: {}", persistenceId(), sequenceNumber);
 
             if(applySnapshot != null) {
@@ -414,8 +414,8 @@ public class SnapshotManager implements SnapshotState {
                 context.getReplicatedLog().snapshotCommit();
             }
 
-            context.getPersistenceProvider().deleteSnapshots(new SnapshotSelectionCriteria(
-                    sequenceNumber - context.getConfigParams().getSnapshotBatchCount(), Long.MAX_VALUE, 0L, 0L));
+            context.getPersistenceProvider().deleteSnapshots(new SnapshotSelectionCriteria(sequenceNumber,
+                    timeStamp - 1, 0L, 0L));
 
             context.getPersistenceProvider().deleteMessages(lastSequenceNumber);
 

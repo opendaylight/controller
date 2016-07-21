@@ -57,8 +57,9 @@ public interface SnapshotState {
      * Commit the snapshot by trimming the log
      *
      * @param sequenceNumber
+     * @param timeStamp
      */
-    void commit(long sequenceNumber);
+    void commit(long sequenceNumber, long timeStamp);
 
     /**
      * Rollback the snapshot
