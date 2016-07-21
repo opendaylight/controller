@@ -56,7 +56,7 @@ public final class DistributedDataStoreClientActor extends AbstractClientActor {
     }
 
     public static Props props(final @Nonnull MemberName memberName, @Nonnull final String storeName, final ActorContext ctx) {
-        final String name = "DistributedDataStore:storeName='" + storeName + "'";
+        final String name = "datastore-" + storeName;
         final FrontendIdentifier frontendId = FrontendIdentifier.create(memberName, FrontendType.forName(name));
         return Props.create(DistributedDataStoreClientActor.class,
             () -> new DistributedDataStoreClientActor(frontendId, ctx));

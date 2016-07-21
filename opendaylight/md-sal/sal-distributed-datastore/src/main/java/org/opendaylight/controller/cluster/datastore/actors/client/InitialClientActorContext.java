@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.datastore.actors.client;
 
 import akka.actor.ActorSystem;
+import akka.persistence.SnapshotSelectionCriteria;
 import com.google.common.base.Preconditions;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 
@@ -25,6 +26,10 @@ final class InitialClientActorContext extends AbstractClientActorContext {
 
     void saveSnapshot(final ClientIdentifier snapshot) {
         actor.saveSnapshot(snapshot);
+    }
+
+    void deleteSnapshots(SnapshotSelectionCriteria criteria) {
+        actor.deleteSnapshots(criteria);
     }
 
     ClientActorBehavior createBehavior(final ClientIdentifier clientId) {

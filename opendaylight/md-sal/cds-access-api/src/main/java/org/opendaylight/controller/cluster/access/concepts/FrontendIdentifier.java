@@ -108,6 +108,10 @@ public final class FrontendIdentifier implements WritableIdentifier {
         return memberName.equals(other.memberName) && clientType.equals(other.clientType);
     }
 
+    public String toPersistentId() {
+        return memberName.getName() + "-frontend-" + clientType.getName();
+    }
+
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(FrontendIdentifier.class).add("member", memberName)
