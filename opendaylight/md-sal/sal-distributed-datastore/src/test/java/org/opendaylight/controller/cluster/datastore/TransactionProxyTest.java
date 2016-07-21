@@ -755,7 +755,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
 
         Object id = transactionProxy.getIdentifier();
         assertNotNull("getIdentifier returned null", id);
-        assertTrue("Invalid identifier: " + id, id.toString().contains(MemberName.forName(memberName).toString()));
+        assertTrue("Invalid identifier: " + id, id.toString().contains(memberName));
     }
 
     @Test
