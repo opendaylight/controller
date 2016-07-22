@@ -20,10 +20,8 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <version>1.3.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <modules>
-    <module>karaf-branding</module>
     <module>karaf-parent</module>
     <module>opendaylight-karaf</module>
     <module>opendaylight-karaf-empty</module>
-    <module>opendaylight-karaf-resources</module>
   </modules>
 </project>
