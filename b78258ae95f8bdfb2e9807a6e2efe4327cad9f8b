@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a561d44_d6eb3a76",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-07-22T21:10:52Z",
+      "side": 1,
+      "message": "it could take more than 5 minutes for the data store to be ready, thus for the clustered-app-config to be injected in a blueprint container? This doesn\u0027t seem right. Curious to know what kind of use case is hitting this scenario.",
+      "range": {
+        "startLine": 12,
+        "startChar": 16,
+        "endLine": 13,
+        "endChar": 27
+      },
+      "revId": "b78258ae95f8bdfb2e9807a6e2efe4327cad9f8b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_16dad2e7",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/BlueprintBundleTracker.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 212,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-07-22T21:10:52Z",
+      "side": 1,
+      "message": "so I believe this log will provide similar information than bundle:diag, minus any stacktrace\n\nShouldn\u0027t this be set to WARN level so user is able identify easily those event in the logs?",
+      "range": {
+        "startLine": 211,
+        "startChar": 0,
+        "endLine": 212,
+        "endChar": 70
+      },
+      "revId": "b78258ae95f8bdfb2e9807a6e2efe4327cad9f8b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_76e34ea4",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/BlueprintBundleTracker.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 214,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-07-22T21:10:52Z",
+      "side": 1,
+      "message": "by doing so, I believe we could end up in a undesirable restart loop, where the container is never able to retrieve a dependency, thus will keep restarting every 5 minutes.",
+      "range": {
+        "startLine": 214,
+        "startChar": 20,
+        "endLine": 214,
+        "endChar": 67
+      },
+      "revId": "b78258ae95f8bdfb2e9807a6e2efe4327cad9f8b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
