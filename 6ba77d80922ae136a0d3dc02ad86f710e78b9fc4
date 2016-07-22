@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a561d44_6ae367a4",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/PingPongTransactionChain.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 267,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-07-22T09:00:53Z",
+      "side": 1,
+      "message": "violation of @GuardedBy",
+      "range": {
+        "startLine": 267,
+        "startChar": 8,
+        "endLine": 267,
+        "endChar": 40
+      },
+      "revId": "6ba77d80922ae136a0d3dc02ad86f710e78b9fc4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_aaf0df67",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/PingPongTransactionChain.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 377,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-07-22T09:00:53Z",
+      "side": 1,
+      "message": "violation of @GuardedBy",
+      "range": {
+        "startLine": 377,
+        "startChar": 16,
+        "endLine": 377,
+        "endChar": 30
+      },
+      "revId": "6ba77d80922ae136a0d3dc02ad86f710e78b9fc4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_2a04cf48",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/PingPongTransactionChain.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 379,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-07-22T09:00:53Z",
+      "side": 1,
+      "message": "as noted in the mailing list thread, this is not sufficient. Transaction which is being currently batched needs to be marked as failed and any frontend transactions packed onto it have to marked as failed-to-commit so that their listeners are notified.",
+      "range": {
+        "startLine": 378,
+        "startChar": 0,
+        "endLine": 379,
+        "endChar": 28
+      },
+      "revId": "6ba77d80922ae136a0d3dc02ad86f710e78b9fc4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
