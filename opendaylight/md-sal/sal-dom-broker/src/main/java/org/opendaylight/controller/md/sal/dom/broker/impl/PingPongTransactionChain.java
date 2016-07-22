@@ -50,6 +50,12 @@ import org.slf4j.LoggerFactory;
  * It furthermore means that the transactions returned by {@link #newReadOnlyTransaction()}
  * counts as an outstanding transaction and the user may not allocate multiple
  * read-only transactions at the same time.
+ *
+ * If a {@link #newReadWriteTransaction()} is failing and it need to be cancelled,
+ * cancel() method in {@link #newReadWriteTransaction()} should be invoked. However,
+ * this transaction chain will become unusable and close() method should be invoked
+ * the next. To continue using PingPongTransactionChain, you must create a new chain
+ * instance.
  */
 public final class PingPongTransactionChain implements DOMTransactionChain {
     private static final Logger LOG = LoggerFactory.getLogger(PingPongTransactionChain.class);
@@ -126,6 +132,7 @@ public final class PingPongTransactionChain implements DOMTransactionChain {
     }
 
     private synchronized PingPongTransaction slowAllocateTransaction() {
+        Preconditions.checkState(!failed, "Transaction chain is in failure state", this);
         Preconditions.checkState(shutdownTx == null, "Transaction chain %s has been shut down", this);
 
         final DOMDataReadWriteTransaction delegateTx = delegate.newReadWriteTransaction();
@@ -257,6 +264,7 @@ public final class PingPongTransactionChain implements DOMTransactionChain {
     }
 
     private void readyTransaction(@Nonnull final PingPongTransaction tx) {
+        Preconditions.checkState(!failed, "Unable to ready transaction %s as transaction chain %s is in failure state.", tx, this);
         // First mark the transaction as not locked.
         final boolean lockedMatch = LOCKED_UPDATER.compareAndSet(this, tx, null);
         Preconditions.checkState(lockedMatch, "Attempted to submit transaction %s while we have %s", tx, lockedTx);
@@ -285,8 +293,9 @@ public final class PingPongTransactionChain implements DOMTransactionChain {
 
     @Override
     public synchronized void close() {
+        LOG.debug("Closing transaction chain {}", this);
         final PingPongTransaction notLocked = lockedTx;
-        Preconditions.checkState(notLocked == null, "Attempted to close chain with outstanding transaction %s", notLocked);
+        Preconditions.checkState(failed || notLocked == null, "Attempted to close chain with outstanding transaction %s", notLocked);
 
         // This is not reliable, but if we observe it to be null and the process has already completed,
         // the backend transaction chain will throw the appropriate error.
@@ -365,7 +374,9 @@ public final class PingPongTransactionChain implements DOMTransactionChain {
 
             @Override
             public boolean cancel() {
-                throw new UnsupportedOperationException("Transaction cancellation is not supported");
+                failed = true;
+                LOG.debug("Transaction {} cancelled. Transaction chain {} marked as fail", tx, this);
+                return true;
             }
         };
 
