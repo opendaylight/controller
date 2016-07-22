@@ -12,15 +12,15 @@ module cluster-singleton-service-impl {
         description "Initial revision";
     }
 
-    identity dom-cluster-singleton-service-impl {
-        base config:module-type;
-        config:provided-service spi:dom-cluster-singleton-service;
-        config:java-name-prefix DOMClusterSingletonServiceProvider;
-    }
-
-    augment "/config:modules/config:module/config:configuration" {
-        case dom-cluster-singleton-service-impl {
-            when "/config:modules/config:module/config:type = 'dom-cluster-singleton-service-impl'";
-        }
-    }
+//    identity dom-cluster-singleton-service-impl {
+//        base config:module-type;
+//        config:provided-service spi:dom-cluster-singleton-service;
+//        config:java-name-prefix DOMClusterSingletonServiceProvider;
+//    }
+//
+//    augment "/config:modules/config:module/config:configuration" {
+//        case dom-cluster-singleton-service-impl {
+//            when "/config:modules/config:module/config:type = 'dom-cluster-singleton-service-impl'";
+//        }
+//    }
 }
