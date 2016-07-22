@@ -28,7 +28,7 @@
     </dependency>
     <dependency>
       <groupId>org.opendaylight.mdsal</groupId>
-      <artifactId>mdsal-singleton-common-api</artifactId>
+      <artifactId>mdsal-singleton-dom-impl</artifactId>
     </dependency>
   </dependencies>
 

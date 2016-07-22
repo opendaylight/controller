@@ -11,9 +11,9 @@ module cluster-singleton-service-spi {
         description "Initial revision";
     }
 
-//    identity dom-cluster-singleton-service {
-//        base "config:service-type";
-//        config:java-class "org.opendaylight.mdsal.singleton.dom.api.DOMClusterSingletonServiceProvider";
-//        config:disable-osgi-service-registration;
-//    }
+    identity cluster-singleton-service {
+        base "config:service-type";
+        config:java-class "org.opendaylight.mdsal.singleton.common.api.ClusterSingletonServiceProvider";
+        config:disable-osgi-service-registration;
+    }
 }
