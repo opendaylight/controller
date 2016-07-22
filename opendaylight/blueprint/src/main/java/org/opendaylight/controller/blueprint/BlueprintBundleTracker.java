@@ -121,7 +121,8 @@ public class BlueprintBundleTracker implements BundleActivator, BundleTrackerCus
 
     private void registerBlueprintEventHandler(BundleContext context) {
         Dictionary<String, Object> props = new Hashtable<>();
-        props.put(org.osgi.service.event.EventConstants.EVENT_TOPIC, EventConstants.TOPIC_CREATED);
+        props.put(org.osgi.service.event.EventConstants.EVENT_TOPIC,
+                new String[]{EventConstants.TOPIC_CREATED, EventConstants.TOPIC_FAILURE});
         eventHandlerReg = context.registerService(EventHandler.class.getName(), this, props);
     }
 
@@ -197,6 +198,22 @@ public class BlueprintBundleTracker implements BundleActivator, BundleTrackerCus
         if(EventConstants.TOPIC_CREATED.equals(event.getTopic())) {
             LOG.info("Blueprint container for bundle {} was successfully created",
                     event.getProperty(EventConstants.BUNDLE));
+        } else if(EventConstants.TOPIC_FAILURE.equals(event.getTopic())) {
+            // If the container timed out waiting for dependencies, we'll destroy it and start it again. This
+            // is indicated via a non-null DEPENDENCIES property containing the missing dependencies. The
+            // default timeout is 5 min and ideally we would set this to infinite but the timeout can only
+            // be set at the bundle level in the manifest - there's no way to set it globally.
+            if(event.getProperty(EventConstants.DEPENDENCIES) != null) {
+                Bundle bundle = (Bundle) event.getProperty(EventConstants.BUNDLE);
+
+                List<Object> paths = findBlueprintPaths(bundle);
+                if(!paths.isEmpty()) {
+                    LOG.warn("Blueprint container for bundle {} timed out waiting for dependencies - restarting it",
+                            event.getProperty(EventConstants.BUNDLE));
+
+                    restartService.restartContainer(bundle, paths);
+                }
+            }
         }
     }
 
