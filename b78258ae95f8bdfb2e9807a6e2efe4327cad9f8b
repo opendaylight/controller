@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "9a561d44_966a62ec",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-07-22T21:52:32Z",
+      "side": 1,
+      "message": "Yes. The clustered-app-config does a read to get the config data and doesn\u0027t consider itself satisfied as a dependency until it gets a successful read reply. The data store could be unavailable on startup for any amour of time.",
+      "parentUuid": "9a561d44_56f72a59",
+      "range": {
+        "startLine": 12,
+        "startChar": 16,
+        "endLine": 13,
+        "endChar": 27
+      },
+      "revId": "b78258ae95f8bdfb2e9807a6e2efe4327cad9f8b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a561d44_16dad2e7",
         "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/BlueprintBundleTracker.java",
         "patchSetId": 1
@@ -60,6 +84,30 @@
       "writtenOn": "2016-07-22T21:10:52Z",
       "side": 1,
       "message": "so I believe this log will provide similar information than bundle:diag, minus any stacktrace\n\nShouldn\u0027t this be set to WARN level so user is able identify easily those event in the logs?",
+      "range": {
+        "startLine": 211,
+        "startChar": 0,
+        "endLine": 212,
+        "endChar": 70
+      },
+      "revId": "b78258ae95f8bdfb2e9807a6e2efe4327cad9f8b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_f66bdeee",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/BlueprintBundleTracker.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 212,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-07-22T21:52:32Z",
+      "side": 1,
+      "message": "I could make it WARN",
+      "parentUuid": "9a561d44_16dad2e7",
       "range": {
         "startLine": 211,
         "startChar": 0,
@@ -107,6 +155,30 @@
       "side": 1,
       "message": "This is not super high cost, so I see no issue with trying a restart. Its not like we are unloading a usable service anyway.  The service is dead, so we might as well try restarting it.",
       "parentUuid": "9a561d44_76e34ea4",
+      "range": {
+        "startLine": 214,
+        "startChar": 20,
+        "endLine": 214,
+        "endChar": 67
+      },
+      "revId": "b78258ae95f8bdfb2e9807a6e2efe4327cad9f8b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_767fceab",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/BlueprintBundleTracker.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 214,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-07-22T21:52:32Z",
+      "side": 1,
+      "message": "Exactly. Until all dependencies are satisfied the container doesn\u0027t startup, i.e. no business logic beans are created. We might as well keep trying it over and over. Missing OSGi services should only occur during development - in a production system, bundles should never time out for a missing OSGi service - that means a broken distro/features and ODL should *never* ship in that state. However in production you could see bundles time out b/c the data store is unavailable, in which case we want to keep retrying.",
+      "parentUuid": "9a561d44_b697a6eb",
       "range": {
         "startLine": 214,
         "startChar": 20,
