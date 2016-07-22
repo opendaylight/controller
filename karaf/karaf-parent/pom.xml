@@ -21,7 +21,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <packaging>pom</packaging>
 
   <properties>
-    <branding.version>1.3.0-SNAPSHOT</branding.version>
+    <branding.version>1.7.0-SNAPSHOT</branding.version>
     <karaf.resources.version>1.7.0-SNAPSHOT</karaf.resources.version>
     <karaf.localFeature>standard</karaf.localFeature>
     <!--  Karaf Maven plugin 3.0.3 reinstalls already installed
@@ -82,7 +82,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     </dependency>
     <!-- ODL Branding -->
     <dependency>
-      <groupId>org.opendaylight.controller</groupId>
+      <groupId>org.opendaylight.odlparent</groupId>
       <artifactId>karaf.branding</artifactId>
       <version>${branding.version}</version>
       <scope>compile</scope>
@@ -90,7 +90,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
 
     <!-- Resources needed -->
     <dependency>
-      <groupId>org.opendaylight.controller</groupId>
+      <groupId>org.opendaylight.odlparent</groupId>
       <artifactId>opendaylight-karaf-resources</artifactId>
       <version>${karaf.resources.version}</version>
     </dependency>
@@ -290,7 +290,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
               <configuration>
                 <artifactItems>
                   <artifactItem>
-                    <groupId>org.opendaylight.controller</groupId>
+                    <groupId>org.opendaylight.odlparent</groupId>
                     <artifactId>karaf.branding</artifactId>
                     <version>${karaf.branding.version}</version>
                     <outputDirectory>target/assembly/lib</outputDirectory>
@@ -307,7 +307,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
               <phase>prepare-package</phase>
               <configuration>
                 <outputDirectory>${project.build.directory}/assembly</outputDirectory>
-                <groupId>org.opendaylight.controller</groupId>
+                <groupId>org.opendaylight.odlparent</groupId>
                 <includeArtifactIds>opendaylight-karaf-resources</includeArtifactIds>
                 <excludes>META-INF\/**</excludes>
                 <excludeTransitive>true</excludeTransitive>
@@ -323,7 +323,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
               <configuration>
                 <artifactItems>
                   <artifactItem>
-                    <groupId>org.opendaylight.controller</groupId>
+                    <groupId>org.opendaylight.odlparent</groupId>
                     <artifactId>opendaylight-karaf-resources</artifactId>
                     <type>properties</type>
                     <classifier>config</classifier>
