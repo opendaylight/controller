@@ -8,7 +8,6 @@
 package org.opendaylight.controller.cluster.access.concepts;
 
 import com.google.common.annotations.Beta;
-import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -61,6 +60,7 @@ public final class TransactionIdentifier implements WritableIdentifier {
     private static final long serialVersionUID = 1L;
     private final LocalHistoryIdentifier historyId;
     private final long transactionId;
+    private transient String shortString;
 
     public TransactionIdentifier(final @Nonnull LocalHistoryIdentifier historyId, final long transactionId) {
         this.historyId = Preconditions.checkNotNull(historyId);
@@ -104,10 +104,20 @@ public final class TransactionIdentifier implements WritableIdentifier {
         return transactionId == other.transactionId && historyId.equals(other.historyId);
     }
 
+    public String toShortString() {
+        if(shortString == null) {
+            String histStr = historyId.getHistoryId() == 0 ? "" : "-chn-" + historyId.getHistoryId();
+            shortString = historyId.getClientId().getFrontendId().getMemberName().getName() + "-" +
+                    historyId.getClientId().getFrontendId().getClientType().getName() + "-fe-" +
+                    historyId.getClientId().getGeneration() + histStr + "-txn-" + transactionId;
+        }
+
+        return shortString;
+    }
+
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(TransactionIdentifier.class).add("history", historyId)
-                .add("transaction", transactionId).toString();
+        return toShortString();
     }
 
     private Object writeReplace() {
