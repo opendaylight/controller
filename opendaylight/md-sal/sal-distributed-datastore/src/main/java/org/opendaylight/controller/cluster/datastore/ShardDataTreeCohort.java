@@ -8,7 +8,6 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.util.concurrent.ListenableFuture;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidateTip;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 
@@ -24,11 +23,11 @@ public abstract class ShardDataTreeCohort {
 
     // FIXME: Should return rebased DataTreeCandidateTip
     @VisibleForTesting
-    public abstract ListenableFuture<Boolean> canCommit();
+    public abstract boolean canCommit() throws Exception;
     @VisibleForTesting
-    public abstract ListenableFuture<Void> preCommit();
+    public abstract void preCommit() throws Exception;
     @VisibleForTesting
-    public abstract ListenableFuture<Void> abort();
+    public abstract void abort() throws Exception;
     @VisibleForTesting
-    public abstract ListenableFuture<Void> commit();
+    public abstract void commit() throws Exception;
 }

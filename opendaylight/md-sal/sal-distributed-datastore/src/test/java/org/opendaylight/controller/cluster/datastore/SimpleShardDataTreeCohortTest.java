@@ -8,16 +8,12 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import com.google.common.util.concurrent.ListenableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -59,42 +55,28 @@ public class SimpleShardDataTreeCohortTest extends AbstractTest {
 
     @Test
     public void testCanCommitSuccess() throws Exception {
-        ListenableFuture<Boolean> future = cohort.canCommit();
-        assertNotNull("Future is null", future);
-        assertEquals("Future", true, future.get(3, TimeUnit.SECONDS));
+        assertEquals("Future", true, cohort.canCommit());
         verify(mockDataTree).validate(mockModification);
     }
 
     @Test(expected=OptimisticLockFailedException.class)
-    public void testCanCommitWithConflictingModEx() throws Throwable {
+    public void testCanCommitWithConflictingModEx() throws Exception {
         doThrow(new ConflictingModificationAppliedException(YangInstanceIdentifier.EMPTY, "mock")).
                 when(mockDataTree).validate(mockModification);
-        try {
-            cohort.canCommit().get();
-        } catch (ExecutionException e) {
-            throw e.getCause();
-        }
+        cohort.canCommit();
     }
 
     @Test(expected=TransactionCommitFailedException.class)
-    public void testCanCommitWithDataValidationEx() throws Throwable {
+    public void testCanCommitWithDataValidationEx() throws Exception {
         doThrow(new DataValidationFailedException(YangInstanceIdentifier.EMPTY, "mock")).
                 when(mockDataTree).validate(mockModification);
-        try {
-            cohort.canCommit().get();
-        } catch (ExecutionException e) {
-            throw e.getCause();
-        }
+        cohort.canCommit();
     }
 
     @Test(expected=IllegalArgumentException.class)
-    public void testCanCommitWithIllegalArgumentEx() throws Throwable {
+    public void testCanCommitWithIllegalArgumentEx() throws Exception {
         doThrow(new IllegalArgumentException("mock")).when(mockDataTree).validate(mockModification);
-        try {
-            cohort.canCommit().get();
-        } catch (ExecutionException e) {
-            throw e.getCause();
-        }
+        cohort.canCommit();
     }
 
     @Test
@@ -102,41 +84,29 @@ public class SimpleShardDataTreeCohortTest extends AbstractTest {
         DataTreeCandidateTip mockCandidate = mock(DataTreeCandidateTip.class);
         doReturn(mockCandidate ).when(mockDataTree).prepare(mockModification);
 
-        ListenableFuture<Void> future = cohort.preCommit();
-        assertNotNull("Future is null", future);
-        future.get();
+        cohort.preCommit();
         verify(mockDataTree).prepare(mockModification);
 
         assertSame("getCandidate", mockCandidate, cohort.getCandidate());
 
-        future = cohort.commit();
-        assertNotNull("Future is null", future);
-        future.get();
+        cohort.commit();
         verify(mockDataTree).commit(mockCandidate);
     }
 
     @Test(expected=IllegalArgumentException.class)
-    public void testPreCommitWithIllegalArgumentEx() throws Throwable {
+    public void testPreCommitWithIllegalArgumentEx() throws Exception {
         doThrow(new IllegalArgumentException("mock")).when(mockDataTree).prepare(mockModification);
-        try {
-            cohort.preCommit().get();
-        } catch (ExecutionException e) {
-            throw e.getCause();
-        }
+        cohort.preCommit();
     }
 
     @Test(expected=IllegalArgumentException.class)
-    public void testCommitWithIllegalArgumentEx() throws Throwable {
+    public void testCommitWithIllegalArgumentEx() throws Exception {
         doThrow(new IllegalArgumentException("mock")).when(mockDataTree).commit(any(DataTreeCandidateTip.class));
-        try {
-            cohort.commit().get();
-        } catch (ExecutionException e) {
-            throw e.getCause();
-        }
+        cohort.commit();
     }
 
     @Test
     public void testAbort() throws Exception {
-        cohort.abort().get();
+        cohort.abort();
     }
 }

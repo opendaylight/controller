@@ -23,7 +23,6 @@ import org.slf4j.LoggerFactory;
 
 final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
     private static final Logger LOG = LoggerFactory.getLogger(SimpleShardDataTreeCohort.class);
-    private static final ListenableFuture<Boolean> TRUE_FUTURE = Futures.immediateFuture(Boolean.TRUE);
     private static final ListenableFuture<Void> VOID_FUTURE = Futures.immediateFuture(null);
     private final DataTreeModification transaction;
     private final ShardDataTree dataTree;
@@ -43,16 +42,16 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
     }
 
     @Override
-    public ListenableFuture<Boolean> canCommit() {
+    public boolean canCommit() throws Exception {
         DataTreeModification modification = getDataTreeModification();
         try {
             dataTree.getDataTree().validate(modification);
             LOG.trace("Transaction {} validated", transaction);
-            return TRUE_FUTURE;
+            return true;
         }
         catch (ConflictingModificationAppliedException e) {
             LOG.warn("Store Tx {}: Conflicting modification for path {}.", transactionId, e.getPath());
-            return Futures.immediateFailedFuture(new OptimisticLockFailedException("Optimistic lock failed.", e));
+            throw new OptimisticLockFailedException("Optimistic lock failed.", e);
         } catch (DataValidationFailedException e) {
             LOG.warn("Store Tx {}: Data validation failed for path {}.", transactionId, e.getPath(), e);
 
@@ -60,31 +59,31 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
             // precondition log, it should allow us to understand what went on.
             LOG.debug("Store Tx {}: modifications: {} tree: {}", transactionId, modification, dataTree.getDataTree());
 
-            return Futures.immediateFailedFuture(new TransactionCommitFailedException("Data did not pass validation.", e));
+            throw new TransactionCommitFailedException("Data did not pass validation.", e);
         } catch (Exception e) {
             LOG.warn("Unexpected failure in validation phase", e);
-            return Futures.immediateFailedFuture(e);
+            throw e;
         }
     }
 
     @Override
-    public ListenableFuture<Void> preCommit() {
+    public void preCommit() throws Exception {
         try {
             candidate = dataTree.getDataTree().prepare(getDataTreeModification());
             /*
              * FIXME: this is the place where we should be interacting with persistence, specifically by invoking
              *        persist on the candidate (which gives us a Future).
              */
-            LOG.trace("Transaction {} prepared candidate {}", transaction, candidate);
-            return VOID_FUTURE;
         } catch (Exception e) {
             if(LOG.isTraceEnabled()) {
                 LOG.trace("Transaction {} failed to prepare", transaction, e);
             } else {
                 LOG.error("Transaction failed to prepare", e);
             }
-            return Futures.immediateFailedFuture(e);
+            throw e;
         }
+
+        LOG.trace("Transaction {} prepared candidate {}", transaction, candidate);
     }
 
     @Override
@@ -97,13 +96,12 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
     }
 
     @Override
-    public ListenableFuture<Void> abort() {
+    public void abort() {
         // No-op, really
-        return VOID_FUTURE;
     }
 
     @Override
-    public ListenableFuture<Void> commit() {
+    public void commit() throws Exception {
         try {
             dataTree.getDataTree().commit(candidate);
         } catch (Exception e) {
@@ -112,11 +110,10 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
             } else {
                 LOG.error("Transaction failed to commit", e);
             }
-            return Futures.immediateFailedFuture(e);
+            throw e;
         }
 
         LOG.trace("Transaction {} committed, proceeding to notify", transaction);
         dataTree.notifyListeners(candidate);
-        return VOID_FUTURE;
     }
 }

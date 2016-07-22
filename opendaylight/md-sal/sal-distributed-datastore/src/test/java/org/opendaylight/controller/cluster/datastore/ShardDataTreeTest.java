@@ -14,7 +14,6 @@ import com.google.common.base.Optional;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.md.cluster.datastore.model.CarsModel;
@@ -38,17 +37,17 @@ public class ShardDataTreeTest extends AbstractTest {
     }
 
     @Test
-    public void testWrite() throws ExecutionException, InterruptedException {
+    public void testWrite() throws Exception {
         modify(new ShardDataTree(fullSchema, TreeType.OPERATIONAL), false, true, true);
     }
 
     @Test
-    public void testMerge() throws ExecutionException, InterruptedException {
+    public void testMerge() throws Exception {
         modify(new ShardDataTree(fullSchema, TreeType.OPERATIONAL), true, true, true);
     }
 
-
-    private void modify(ShardDataTree shardDataTree, boolean merge, boolean expectedCarsPresent, boolean expectedPeoplePresent) throws ExecutionException, InterruptedException {
+    private void modify(final ShardDataTree shardDataTree, final boolean merge, final boolean expectedCarsPresent,
+            final boolean expectedPeoplePresent) throws Exception {
 
         assertEquals(fullSchema, shardDataTree.getSchemaContext());
 
@@ -68,8 +67,8 @@ public class ShardDataTreeTest extends AbstractTest {
 
         ShardDataTreeCohort cohort = shardDataTree.finishTransaction(transaction);
 
-        cohort.preCommit().get();
-        cohort.commit().get();
+        cohort.preCommit();
+        cohort.commit();
 
 
         ReadOnlyShardDataTreeTransaction readOnlyShardDataTreeTransaction = shardDataTree.newReadOnlyTransaction(nextTransactionId());
@@ -87,7 +86,7 @@ public class ShardDataTreeTest extends AbstractTest {
     }
 
     @Test
-    public void bug4359AddRemoveCarOnce() throws ExecutionException, InterruptedException {
+    public void bug4359AddRemoveCarOnce() throws Exception {
         ShardDataTree shardDataTree = new ShardDataTree(fullSchema, TreeType.OPERATIONAL);
 
         List<DataTreeCandidateTip> candidates = new ArrayList<>();
@@ -104,7 +103,7 @@ public class ShardDataTreeTest extends AbstractTest {
     }
 
     @Test
-    public void bug4359AddRemoveCarTwice() throws ExecutionException, InterruptedException {
+    public void bug4359AddRemoveCarTwice() throws Exception {
         ShardDataTree shardDataTree = new ShardDataTree(fullSchema, TreeType.OPERATIONAL);
 
         List<DataTreeCandidateTip> candidates = new ArrayList<>();
@@ -122,7 +121,7 @@ public class ShardDataTreeTest extends AbstractTest {
         assertEquals(expected, actual);
     }
 
-    private static NormalizedNode<?, ?> getCars(ShardDataTree shardDataTree) {
+    private static NormalizedNode<?, ?> getCars(final ShardDataTree shardDataTree) {
         ReadOnlyShardDataTreeTransaction readOnlyShardDataTreeTransaction = shardDataTree.newReadOnlyTransaction(nextTransactionId());
         DataTreeSnapshot snapshot1 = readOnlyShardDataTreeTransaction.getSnapshot();
 
@@ -133,7 +132,7 @@ public class ShardDataTreeTest extends AbstractTest {
         return optional.get();
     }
 
-    private static DataTreeCandidateTip addCar(ShardDataTree shardDataTree) throws ExecutionException, InterruptedException {
+    private static DataTreeCandidateTip addCar(final ShardDataTree shardDataTree) throws Exception {
         return doTransaction(shardDataTree, snapshot -> {
                 snapshot.merge(CarsModel.BASE_PATH, CarsModel.emptyContainer());
                 snapshot.merge(CarsModel.CAR_LIST_PATH, CarsModel.newCarMapNode());
@@ -141,7 +140,7 @@ public class ShardDataTreeTest extends AbstractTest {
             });
     }
 
-    private static DataTreeCandidateTip removeCar(ShardDataTree shardDataTree) throws ExecutionException, InterruptedException {
+    private static DataTreeCandidateTip removeCar(final ShardDataTree shardDataTree) throws Exception {
         return doTransaction(shardDataTree, snapshot -> snapshot.delete(CarsModel.newCarPath("altima")));
     }
 
@@ -150,23 +149,23 @@ public class ShardDataTreeTest extends AbstractTest {
         void execute(DataTreeModification snapshot);
     }
 
-    private static DataTreeCandidateTip doTransaction(ShardDataTree shardDataTree, DataTreeOperation operation)
-            throws ExecutionException, InterruptedException {
+    private static DataTreeCandidateTip doTransaction(final ShardDataTree shardDataTree, final DataTreeOperation operation)
+            throws Exception {
         ReadWriteShardDataTreeTransaction transaction = shardDataTree.newReadWriteTransaction(nextTransactionId());
         DataTreeModification snapshot = transaction.getSnapshot();
         operation.execute(snapshot);
         ShardDataTreeCohort cohort = shardDataTree.finishTransaction(transaction);
 
-        cohort.canCommit().get();
-        cohort.preCommit().get();
+        cohort.canCommit();
+        cohort.preCommit();
         DataTreeCandidateTip candidate = cohort.getCandidate();
-        cohort.commit().get();
+        cohort.commit();
 
         return candidate;
     }
 
-    private static DataTreeCandidateTip applyCandidates(ShardDataTree shardDataTree, List<DataTreeCandidateTip> candidates)
-            throws ExecutionException, InterruptedException {
+    private static DataTreeCandidateTip applyCandidates(final ShardDataTree shardDataTree, final List<DataTreeCandidateTip> candidates)
+            throws Exception {
         ReadWriteShardDataTreeTransaction transaction = shardDataTree.newReadWriteTransaction(nextTransactionId());
         DataTreeModification snapshot = transaction.getSnapshot();
         for(DataTreeCandidateTip candidateTip : candidates){
@@ -174,10 +173,10 @@ public class ShardDataTreeTest extends AbstractTest {
         }
         ShardDataTreeCohort cohort = shardDataTree.finishTransaction(transaction);
 
-        cohort.canCommit().get();
-        cohort.preCommit().get();
+        cohort.canCommit();
+        cohort.preCommit();
         DataTreeCandidateTip candidate = cohort.getCandidate();
-        cohort.commit().get();
+        cohort.commit();
 
         return candidate;
     }

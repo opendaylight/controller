@@ -25,10 +25,8 @@ import akka.japi.Creator;
 import akka.pattern.Patterns;
 import akka.testkit.TestActorRef;
 import akka.util.Timeout;
-import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.io.IOException;
 import java.util.Collections;
@@ -38,6 +36,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -202,14 +201,14 @@ public abstract class AbstractShardTest extends AbstractActorTest{
 
     protected ShardDataTreeCohort setupMockWriteTransaction(final String cohortName,
             final ShardDataTree dataStore, final YangInstanceIdentifier path, final NormalizedNode<?, ?> data,
-            final MutableCompositeModification modification) {
+            final MutableCompositeModification modification) throws Exception {
         return setupMockWriteTransaction(cohortName, dataStore, path, data, modification, null);
     }
 
     protected ShardDataTreeCohort setupMockWriteTransaction(final String cohortName,
             final ShardDataTree dataStore, final YangInstanceIdentifier path, final NormalizedNode<?, ?> data,
             final MutableCompositeModification modification,
-            final Function<ShardDataTreeCohort, ListenableFuture<Void>> preCommit) {
+            final Consumer<ShardDataTreeCohort> preCommit) throws Exception {
 
         final ReadWriteShardDataTreeTransaction tx = dataStore.newReadWriteTransaction(nextTransactionId());
         tx.getSnapshot().write(path, data);
@@ -221,44 +220,45 @@ public abstract class AbstractShardTest extends AbstractActorTest{
     }
 
     protected ShardDataTreeCohort createDelegatingMockCohort(final String cohortName,
-            final ShardDataTreeCohort actual) {
+            final ShardDataTreeCohort actual) throws Exception {
         return createDelegatingMockCohort(cohortName, actual, null);
     }
 
     protected ShardDataTreeCohort createDelegatingMockCohort(final String cohortName,
             final ShardDataTreeCohort actual,
-            final Function<ShardDataTreeCohort, ListenableFuture<Void>> preCommit) {
+            final Consumer<ShardDataTreeCohort> preCommit) throws Exception {
         final ShardDataTreeCohort cohort = mock(ShardDataTreeCohort.class, cohortName);
 
-        doAnswer(new Answer<ListenableFuture<Boolean>>() {
+        doAnswer(new Answer<Object>() {
             @Override
-            public ListenableFuture<Boolean> answer(final InvocationOnMock invocation) {
+            public Object answer(final InvocationOnMock invocation) throws Exception {
                 return actual.canCommit();
             }
         }).when(cohort).canCommit();
 
-        doAnswer(new Answer<ListenableFuture<Void>>() {
+        doAnswer(new Answer<Void>() {
             @Override
-            public ListenableFuture<Void> answer(final InvocationOnMock invocation) throws Throwable {
-                if(preCommit != null) {
-                    return preCommit.apply(actual);
-                } else {
-                    return actual.preCommit();
+            public Void answer(final InvocationOnMock invocation) throws Throwable {
+                if (preCommit != null) {
+                   preCommit.accept(actual);
                 }
+                return null;
             }
         }).when(cohort).preCommit();
 
-        doAnswer(new Answer<ListenableFuture<Void>>() {
+        doAnswer(new Answer<Void>() {
             @Override
-            public ListenableFuture<Void> answer(final InvocationOnMock invocation) throws Throwable {
-                return actual.commit();
+            public Void answer(final InvocationOnMock invocation) throws Throwable {
+                actual.commit();
+                return null;
             }
         }).when(cohort).commit();
 
-        doAnswer(new Answer<ListenableFuture<Void>>() {
+        doAnswer(new Answer<Void>() {
             @Override
-            public ListenableFuture<Void> answer(final InvocationOnMock invocation) throws Throwable {
-                return actual.abort();
+            public Void answer(final InvocationOnMock invocation) throws Throwable {
+                actual.abort();
+                return null;
             }
         }).when(cohort).abort();
 
@@ -272,9 +272,9 @@ public abstract class AbstractShardTest extends AbstractActorTest{
         return cohort;
     }
 
-    protected Object prepareReadyTransactionMessage(boolean remoteReadWriteTransaction, Shard shard, ShardDataTreeCohort cohort,
-            TransactionIdentifier transactionID, MutableCompositeModification modification,
-            boolean doCommitOnReady) {
+    protected Object prepareReadyTransactionMessage(final boolean remoteReadWriteTransaction, final Shard shard, final ShardDataTreeCohort cohort,
+            final TransactionIdentifier transactionID, final MutableCompositeModification modification,
+            final boolean doCommitOnReady) {
         if(remoteReadWriteTransaction){
             return prepareForwardedReadyTransaction(cohort, transactionID, CURRENT_VERSION,
                     doCommitOnReady);
@@ -284,7 +284,7 @@ public abstract class AbstractShardTest extends AbstractActorTest{
         }
     }
 
-    protected ShardDataTreeCohort mockShardDataTreeCohort() {
+    protected ShardDataTreeCohort mockShardDataTreeCohort() throws Exception {
         ShardDataTreeCohort cohort = mock(ShardDataTreeCohort.class);
         doReturn(Futures.immediateFuture(Boolean.TRUE)).when(cohort).canCommit();
         doReturn(Futures.immediateFuture(null)).when(cohort).preCommit();
@@ -293,42 +293,42 @@ public abstract class AbstractShardTest extends AbstractActorTest{
         return cohort;
     }
 
-    static ShardDataTreeTransactionParent newShardDataTreeTransactionParent(ShardDataTreeCohort cohort) {
+    static ShardDataTreeTransactionParent newShardDataTreeTransactionParent(final ShardDataTreeCohort cohort) {
         ShardDataTreeTransactionParent mockParent = mock(ShardDataTreeTransactionParent.class);
         doReturn(cohort).when(mockParent).finishTransaction(any(ReadWriteShardDataTreeTransaction.class));
         doNothing().when(mockParent).abortTransaction(any(AbstractShardDataTreeTransaction.class));
         return mockParent;
     }
 
-    protected ForwardedReadyTransaction prepareForwardedReadyTransaction(ShardDataTreeCohort cohort,
-            TransactionIdentifier transactionID, short version, boolean doCommitOnReady) {
+    protected ForwardedReadyTransaction prepareForwardedReadyTransaction(final ShardDataTreeCohort cohort,
+            final TransactionIdentifier transactionID, final short version, final boolean doCommitOnReady) {
         return new ForwardedReadyTransaction(transactionID, version,
                 new ReadWriteShardDataTreeTransaction(newShardDataTreeTransactionParent(cohort), transactionID,
                         mock(DataTreeModification.class)), doCommitOnReady);
     }
 
-    protected Object prepareReadyTransactionMessage(boolean remoteReadWriteTransaction, Shard shard, ShardDataTreeCohort cohort,
-            TransactionIdentifier transactionID, MutableCompositeModification modification) {
+    protected Object prepareReadyTransactionMessage(final boolean remoteReadWriteTransaction, final Shard shard, final ShardDataTreeCohort cohort,
+            final TransactionIdentifier transactionID, final MutableCompositeModification modification) {
         return prepareReadyTransactionMessage(remoteReadWriteTransaction, shard, cohort, transactionID, modification, false);
     }
 
-    protected void setupCohortDecorator(Shard shard, final ShardDataTreeCohort cohort) {
+    protected void setupCohortDecorator(final Shard shard, final ShardDataTreeCohort cohort) {
         shard.getCommitCoordinator().setCohortDecorator(new ShardCommitCoordinator.CohortDecorator() {
             @Override
-            public ShardDataTreeCohort decorate(Identifier transactionID, ShardDataTreeCohort actual) {
+            public ShardDataTreeCohort decorate(final Identifier transactionID, final ShardDataTreeCohort actual) {
                 return cohort;
             }
         });
     }
 
-    protected BatchedModifications prepareBatchedModifications(TransactionIdentifier transactionID,
-                                                               MutableCompositeModification modification) {
+    protected BatchedModifications prepareBatchedModifications(final TransactionIdentifier transactionID,
+                                                               final MutableCompositeModification modification) {
         return prepareBatchedModifications(transactionID, modification, false);
     }
 
-    private static BatchedModifications prepareBatchedModifications(TransactionIdentifier transactionID,
-                                                             MutableCompositeModification modification,
-                                                             boolean doCommitOnReady) {
+    private static BatchedModifications prepareBatchedModifications(final TransactionIdentifier transactionID,
+                                                             final MutableCompositeModification modification,
+                                                             final boolean doCommitOnReady) {
         final BatchedModifications batchedModifications = new BatchedModifications(transactionID, CURRENT_VERSION);
         batchedModifications.addModification(modification);
         batchedModifications.setReady(true);
@@ -359,24 +359,24 @@ public abstract class AbstractShardTest extends AbstractActorTest{
     }
 
     public static void writeToStore(final ShardDataTree store, final YangInstanceIdentifier id,
-            final NormalizedNode<?,?> node) throws InterruptedException, ExecutionException {
+            final NormalizedNode<?,?> node) throws Exception {
         final ReadWriteShardDataTreeTransaction transaction = store.newReadWriteTransaction(nextTransactionId());
 
         transaction.getSnapshot().write(id, node);
         final ShardDataTreeCohort cohort = transaction.ready();
-        cohort.canCommit().get();
-        cohort.preCommit().get();
+        cohort.canCommit();
+        cohort.preCommit();
         cohort.commit();
     }
 
     public void mergeToStore(final ShardDataTree store, final YangInstanceIdentifier id,
-            final NormalizedNode<?,?> node) throws InterruptedException, ExecutionException {
+            final NormalizedNode<?,?> node) throws Exception {
         final ReadWriteShardDataTreeTransaction transaction = store.newReadWriteTransaction(nextTransactionId());
 
         transaction.getSnapshot().merge(id, node);
         final ShardDataTreeCohort cohort = transaction.ready();
-        cohort.canCommit().get();
-        cohort.preCommit().get();
+        cohort.canCommit();
+        cohort.preCommit();
         cohort.commit();
     }
 

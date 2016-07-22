@@ -31,10 +31,9 @@ import akka.pattern.Patterns;
 import akka.persistence.SaveSnapshotSuccess;
 import akka.testkit.TestActorRef;
 import akka.util.Timeout;
-import com.google.common.base.Function;
 import com.google.common.base.Stopwatch;
+import com.google.common.base.Throwables;
 import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.Collections;
 import java.util.HashSet;
@@ -43,6 +42,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 import org.junit.Test;
 import org.mockito.InOrder;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
@@ -685,7 +685,11 @@ public class ShardTest extends AbstractShardTest {
             final AtomicReference<ShardDataTreeCohort> mockCohort = new AtomicReference<>();
             final ShardCommitCoordinator.CohortDecorator cohortDecorator = (txID, actual) -> {
                 if(mockCohort.get() == null) {
-                    mockCohort.set(createDelegatingMockCohort("cohort", actual));
+                    try {
+                        mockCohort.set(createDelegatingMockCohort("cohort", actual));
+                    } catch (Exception e) {
+                        Throwables.propagate(e);
+                    }
                 }
 
                 return mockCohort.get();
@@ -748,7 +752,11 @@ public class ShardTest extends AbstractShardTest {
             final AtomicReference<ShardDataTreeCohort> mockCohort = new AtomicReference<>();
             final ShardCommitCoordinator.CohortDecorator cohortDecorator = (txID, actual) -> {
                 if(mockCohort.get() == null) {
-                    mockCohort.set(createDelegatingMockCohort("cohort", actual));
+                    try {
+                        mockCohort.set(createDelegatingMockCohort("cohort", actual));
+                    } catch (Exception e) {
+                        Throwables.propagate(e);
+                    }
                 }
 
                 return mockCohort.get();
@@ -1135,16 +1143,16 @@ public class ShardTest extends AbstractShardTest {
     }
 
     @Test
-    public void testReadWriteCommitWhenTransactionHasNoModifications() {
+    public void testReadWriteCommitWhenTransactionHasNoModifications() throws Exception {
         testCommitWhenTransactionHasNoModifications(true);
     }
 
     @Test
-    public void testWriteOnlyCommitWhenTransactionHasNoModifications() {
+    public void testWriteOnlyCommitWhenTransactionHasNoModifications() throws Exception {
         testCommitWhenTransactionHasNoModifications(false);
     }
 
-    private void testCommitWhenTransactionHasNoModifications(final boolean readWrite){
+    private void testCommitWhenTransactionHasNoModifications(final boolean readWrite) throws Exception {
         // Note that persistence is enabled which would normally result in the entry getting written to the journal
         // but here that need not happen
         new ShardTestKit(getSystem()) {
@@ -1197,16 +1205,16 @@ public class ShardTest extends AbstractShardTest {
     }
 
     @Test
-    public void testReadWriteCommitWhenTransactionHasModifications() {
+    public void testReadWriteCommitWhenTransactionHasModifications() throws Exception {
         testCommitWhenTransactionHasModifications(true);
     }
 
     @Test
-    public void testWriteOnlyCommitWhenTransactionHasModifications() {
+    public void testWriteOnlyCommitWhenTransactionHasModifications() throws Exception {
         testCommitWhenTransactionHasModifications(false);
     }
 
-    private void testCommitWhenTransactionHasModifications(final boolean readWrite){
+    private void testCommitWhenTransactionHasModifications(final boolean readWrite) throws Exception {
         new ShardTestKit(getSystem()) {
             {
                 final TestActorRef<Shard> shard = actorFactory.createTestActor(
@@ -1611,9 +1619,12 @@ public class ShardTest extends AbstractShardTest {
             final ShardDataTree dataStore = shard.underlyingActor().getDataStore();
 
             final TransactionIdentifier transactionID = nextTransactionId();
-            final Function<ShardDataTreeCohort, ListenableFuture<Void>> preCommit =
-                          cohort -> {
-                final ListenableFuture<Void> preCommitFuture = cohort.preCommit();
+            final Consumer<ShardDataTreeCohort> preCommit = cohort -> {
+                try {
+                    cohort.preCommit();
+                } catch (Exception e) {
+                    Throwables.propagate(e);
+                }
 
                 // Simulate an AbortTransaction message occurring during replication, after
                 // persisting and before finishing the commit to the in-memory store.
@@ -1624,8 +1635,6 @@ public class ShardTest extends AbstractShardTest {
                 // the shard directly.
                 //
                 shard.underlyingActor().doAbortTransaction(transactionID, null);
-
-                return preCommitFuture;
             };
 
             final MutableCompositeModification modification = new MutableCompositeModification();
@@ -2080,7 +2089,7 @@ public class ShardTest extends AbstractShardTest {
         new ShardTestKit(getSystem()) {{
             class TestShard extends Shard {
 
-                protected TestShard(AbstractBuilder<?, ?> builder) {
+                protected TestShard(final AbstractBuilder<?, ?> builder) {
                     super(builder);
                     setPersistence(new TestPersistentDataProvider(super.persistence()));
                 }
@@ -2120,7 +2129,7 @@ public class ShardTest extends AbstractShardTest {
             awaitAndValidateSnapshot(expectedRoot);
         }
 
-        private void awaitAndValidateSnapshot(NormalizedNode<?,?> expectedRoot) throws InterruptedException {
+        private void awaitAndValidateSnapshot(final NormalizedNode<?,?> expectedRoot) throws InterruptedException {
             assertEquals("Snapshot saved", true, latch.get().await(5, TimeUnit.SECONDS));
 
             assertTrue("Invalid saved snapshot " + savedSnapshot.get(),

@@ -8,9 +8,6 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import com.google.common.base.Preconditions;
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidateTip;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 import org.slf4j.Logger;
@@ -29,38 +26,30 @@ final class ChainedCommitCohort extends ShardDataTreeCohort {
     }
 
     @Override
-    public ListenableFuture<Void> commit() {
-        final ListenableFuture<Void> ret = delegate.commit();
-
-        Futures.addCallback(ret, new FutureCallback<Void>() {
-            @Override
-            public void onSuccess(Void result) {
-                chain.clearTransaction(transaction);
-                LOG.debug("Committed transaction {}", transaction);
-            }
-
-            @Override
-            public void onFailure(Throwable t) {
-                LOG.error("Transaction {} commit failed, cannot recover", transaction, t);
-            }
-        });
-
-        return ret;
+    public void commit() throws Exception {
+        try {
+            delegate.commit();
+        } catch (Exception  e) {
+            LOG.error("Transaction {} commit failed, cannot recover", transaction, e);
+            throw e;
+        }
+        chain.clearTransaction(transaction);
+        LOG.debug("Committed transaction {}", transaction);
     }
 
     @Override
-    public ListenableFuture<Boolean> canCommit() {
+    public boolean canCommit() throws Exception {
         return delegate.canCommit();
     }
 
     @Override
-    public ListenableFuture<Void> preCommit() {
-        return delegate.preCommit();
+    public void preCommit() throws Exception {
+        delegate.preCommit();
     }
 
     @Override
-    public ListenableFuture<Void> abort() {
-        return delegate.abort();
+    public void abort() throws Exception {
+        delegate.abort();
     }
 
     @Override
