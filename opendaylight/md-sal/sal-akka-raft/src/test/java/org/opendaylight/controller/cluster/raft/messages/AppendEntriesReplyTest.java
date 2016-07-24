@@ -28,5 +28,6 @@ public class AppendEntriesReplyTest {
         assertEquals("getLogLastTerm", expected.getLogLastTerm(), cloned.getLogLastTerm());
         assertEquals("getLogLastIndex", expected.getLogLastIndex(), cloned.getLogLastIndex());
         assertEquals("getPayloadVersion", expected.getPayloadVersion(), cloned.getPayloadVersion());
+        assertEquals("getRaftVersion", expected.getRaftVersion(), cloned.getRaftVersion());
     }
 }
