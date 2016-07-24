@@ -60,9 +60,10 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
             final ShardDataChangeListenerPublisher dataChangeListenerPublisher, final String logContext) {
         dataTree = InMemoryDataTreeFactory.getInstance().create(treeType);
         updateSchemaContext(schemaContext);
-        this.treeChangeListenerPublisher = treeChangeListenerPublisher;
-        this.dataChangeListenerPublisher = dataChangeListenerPublisher;
-        this.logContext = logContext;
+
+        this.treeChangeListenerPublisher = Preconditions.checkNotNull(treeChangeListenerPublisher);
+        this.dataChangeListenerPublisher = Preconditions.checkNotNull(dataChangeListenerPublisher);
+        this.logContext = Preconditions.checkNotNull(logContext);
     }
 
     public ShardDataTree(final SchemaContext schemaContext, final TreeType treeType) {
@@ -79,9 +80,8 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     }
 
     void updateSchemaContext(final SchemaContext schemaContext) {
-        Preconditions.checkNotNull(schemaContext);
-        this.schemaContext = schemaContext;
         dataTree.setSchemaContext(schemaContext);
+        this.schemaContext = Preconditions.checkNotNull(schemaContext);
     }
 
     private ShardDataTreeTransactionChain ensureTransactionChain(final LocalHistoryIdentifier localHistoryIdentifier) {
@@ -116,10 +116,9 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         dataChangeListenerPublisher.publishChanges(candidate, logContext);
     }
 
-    void notifyOfInitialData(DataChangeListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier,
-            NormalizedNode<?, ?>>> listenerReg, Optional<DataTreeCandidate> currentState) {
-
-        if(currentState.isPresent()) {
+    void notifyOfInitialData(final DataChangeListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier,
+            NormalizedNode<?, ?>>> listenerReg, final Optional<DataTreeCandidate> currentState) {
+        if (currentState.isPresent()) {
             ShardDataChangeListenerPublisher localPublisher = dataChangeListenerPublisher.newInstance();
             localPublisher.registerDataChangeListener(listenerReg.getPath(), listenerReg.getInstance(),
                     listenerReg.getScope());
@@ -129,7 +128,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
 
     void notifyOfInitialData(final YangInstanceIdentifier path, final DOMDataTreeChangeListener listener,
             final Optional<DataTreeCandidate> currentState) {
-        if(currentState.isPresent()) {
+        if (currentState.isPresent()) {
             ShardDataTreeChangeListenerPublisher localPublisher = treeChangeListenerPublisher.newInstance();
             localPublisher.registerTreeChangeListener(path, listener);
             localPublisher.publishChanges(currentState.get(), logContext);
@@ -203,7 +202,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         return new SimpleShardDataTreeCohort(this, snapshot, transaction.getId());
     }
 
-    public Optional<NormalizedNode<?, ?>> readNode(YangInstanceIdentifier path) {
+    public Optional<NormalizedNode<?, ?>> readNode(final YangInstanceIdentifier path) {
         return dataTree.takeSnapshot().readNode(path);
     }
 
@@ -216,7 +215,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     }
 
     // FIXME: This should be removed, it violates encapsulation
-    public DataTreeCandidate commit(DataTreeModification modification) throws DataValidationFailedException {
+    public DataTreeCandidate commit(final DataTreeModification modification) throws DataValidationFailedException {
         modification.ready();
         dataTree.validate(modification);
         DataTreeCandidateTip candidate = dataTree.prepare(modification);
