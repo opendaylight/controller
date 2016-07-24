@@ -188,6 +188,30 @@
       "revId": "b78258ae95f8bdfb2e9807a6e2efe4327cad9f8b",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_13813ffb",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/BlueprintBundleTracker.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 214,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-07-24T23:13:23Z",
+      "side": 1,
+      "message": "\u003e Missing OSGi services should only occur during development - in a production system, bundles should never time out for a missing OSGi service \n\nI agree. I\u0027m wondering whether this will affect verify jobs within the infra. SFT has a time out so I believe we\u0027re safe regardless.",
+      "parentUuid": "9a561d44_767fceab",
+      "range": {
+        "startLine": 214,
+        "startChar": 20,
+        "endLine": 214,
+        "endChar": 67
+      },
+      "revId": "b78258ae95f8bdfb2e9807a6e2efe4327cad9f8b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
