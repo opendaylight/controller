@@ -8,13 +8,15 @@
 
 package org.opendaylight.controller.cluster.raft.messages;
 
+import java.io.Externalizable;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.util.ArrayList;
 import java.util.List;
-import org.opendaylight.controller.cluster.raft.RaftVersions;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
+import org.opendaylight.controller.cluster.raft.ReplicatedLogImplEntry;
+import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 
 /**
  * Invoked by leader to replicate log entries (§5.3); also used as
@@ -22,8 +24,6 @@ import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
  */
 public class AppendEntries extends AbstractRaftRPC {
     private static final long serialVersionUID = 1L;
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AppendEntries.class);
 
     // So that follower can redirect clients
     private final String leaderId;
@@ -56,28 +56,6 @@ public class AppendEntries extends AbstractRaftRPC {
         this.leaderCommit = leaderCommit;
         this.replicatedToAllIndex = replicatedToAllIndex;
         this.payloadVersion = payloadVersion;
-    }
-
-    private void writeObject(ObjectOutputStream out) throws IOException {
-        out.writeShort(RaftVersions.CURRENT_VERSION);
-        out.defaultWriteObject();
-
-        out.writeInt(entries.size());
-        for(ReplicatedLogEntry e: entries) {
-            out.writeObject(e);
-        }
-    }
-
-    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-        in.readShort(); // raft version
-
-        in.defaultReadObject();
-
-        int size = in.readInt();
-        entries = new ArrayList<>(size);
-        for(int i = 0; i < size; i++) {
-            entries.add((ReplicatedLogEntry) in.readObject());
-        }
     }
 
     public String getLeaderId() {
@@ -116,5 +94,64 @@ public class AppendEntries extends AbstractRaftRPC {
                 .append(", replicatedToAllIndex=").append(replicatedToAllIndex).append(", payloadVersion=")
                 .append(payloadVersion).append(", entries=").append(entries).append("]");
         return builder.toString();
+    }
+
+    private Object writeReplace() {
+        return new Proxy(this);
+    }
+
+    private static class Proxy implements Externalizable {
+        private static final long serialVersionUID = 1L;
+
+        private AppendEntries appendEntries;
+
+        public Proxy() {
+        }
+
+        Proxy(AppendEntries appendEntries) {
+            this.appendEntries = appendEntries;
+        }
+
+        @Override
+        public void writeExternal(ObjectOutput out) throws IOException {
+            out.writeLong(appendEntries.getTerm());
+            out.writeObject(appendEntries.leaderId);
+            out.writeLong(appendEntries.prevLogTerm);
+            out.writeLong(appendEntries.prevLogIndex);
+            out.writeLong(appendEntries.leaderCommit);
+            out.writeLong(appendEntries.replicatedToAllIndex);
+            out.writeShort(appendEntries.payloadVersion);
+
+            out.writeInt(appendEntries.entries.size());
+            for(ReplicatedLogEntry e: appendEntries.entries) {
+                out.writeLong(e.getIndex());
+                out.writeLong(e.getTerm());
+                out.writeObject(e.getData());
+            }
+        }
+
+        @Override
+        public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+            long term = in.readLong();
+            String leaderId = (String) in.readObject();
+            long prevLogTerm = in.readLong();
+            long prevLogIndex = in.readLong();
+            long leaderCommit = in.readLong();
+            long replicatedToAllIndex = in.readLong();
+            short payloadVersion = in.readShort();
+
+            int size = in.readInt();
+            List<ReplicatedLogEntry> entries = new ArrayList<>(size);
+            for(int i = 0; i < size; i++) {
+                entries.add(new ReplicatedLogImplEntry(in.readLong(), in.readLong(), (Payload) in.readObject()));
+            }
+
+            appendEntries = new AppendEntries(term, leaderId, prevLogIndex, prevLogTerm, entries, leaderCommit,
+                    replicatedToAllIndex, payloadVersion);
+        }
+
+        private Object readResolve() {
+            return appendEntries;
+        }
     }
 }
