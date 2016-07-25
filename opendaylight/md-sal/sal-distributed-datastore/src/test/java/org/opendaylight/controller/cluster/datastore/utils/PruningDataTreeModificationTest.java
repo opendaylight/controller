@@ -30,7 +30,9 @@ import java.lang.reflect.Method;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.opendaylight.controller.cluster.datastore.Shard;
 import org.opendaylight.controller.cluster.datastore.ShardDataTree;
 import org.opendaylight.controller.md.cluster.datastore.model.CarsModel;
 import org.opendaylight.controller.md.cluster.datastore.model.PeopleModel;
@@ -80,7 +82,7 @@ public class PruningDataTreeModificationTest {
         realModification = dataTree.takeSnapshot().newModification();
         proxyModification = Reflection.newProxy(DataTreeModification.class, new InvocationHandler() {
             @Override
-            public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+            public Object invoke(final Object proxy, final Method method, final Object[] args) throws Throwable {
                 try {
                     method.invoke(mockModification, args);
                     return method.invoke(realModification, args);
@@ -201,8 +203,10 @@ public class PruningDataTreeModificationTest {
     }
 
     @Test
-    public void testWriteRootNodeWithInvalidChild() throws Exception{
-        ShardDataTree shardDataTree = new ShardDataTree(SCHEMA_CONTEXT, TreeType.CONFIGURATION);
+    public void testWriteRootNodeWithInvalidChild() throws Exception {
+        final Shard mockShard = Mockito.mock(Shard.class);
+
+        ShardDataTree shardDataTree = new ShardDataTree(mockShard, SCHEMA_CONTEXT, TreeType.CONFIGURATION);
         NormalizedNode<?, ?> root = shardDataTree.readNode(YangInstanceIdentifier.EMPTY).get();
 
         NormalizedNode<?, ?> normalizedNode = ImmutableContainerNodeBuilder.create().withNodeIdentifier(
