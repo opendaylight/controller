@@ -8,9 +8,11 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import com.google.common.base.Preconditions;
+import com.google.common.primitives.UnsignedLong;
 import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidateTip;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 import org.slf4j.Logger;
@@ -29,33 +31,36 @@ final class ChainedCommitCohort extends ShardDataTreeCohort {
     }
 
     @Override
-    public ListenableFuture<Void> commit() {
-        final ListenableFuture<Void> ret = delegate.commit();
-
-        Futures.addCallback(ret, new FutureCallback<Void>() {
+    public void commit(final FutureCallback<UnsignedLong> callback) {
+        delegate.commit(new FutureCallback<UnsignedLong>() {
             @Override
-            public void onSuccess(Void result) {
+            public void onSuccess(final UnsignedLong result) {
                 chain.clearTransaction(transaction);
                 LOG.debug("Committed transaction {}", transaction);
+                callback.onSuccess(result);
             }
 
             @Override
-            public void onFailure(Throwable t) {
+            public void onFailure(final Throwable t) {
                 LOG.error("Transaction {} commit failed, cannot recover", transaction, t);
+                callback.onFailure(t);
             }
         });
-
-        return ret;
     }
 
     @Override
-    public ListenableFuture<Boolean> canCommit() {
-        return delegate.canCommit();
+    public TransactionIdentifier getIdentifier() {
+        return delegate.getIdentifier();
     }
 
     @Override
-    public ListenableFuture<Void> preCommit() {
-        return delegate.preCommit();
+    public void canCommit(final FutureCallback<Void> callback) {
+        delegate.canCommit(callback);
+    }
+
+    @Override
+    public void preCommit(final FutureCallback<DataTreeCandidate> callback) {
+        delegate.preCommit(callback);
     }
 
     @Override
