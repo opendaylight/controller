@@ -9,7 +9,6 @@ package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorRef;
 import com.google.common.base.Preconditions;
-import java.util.concurrent.ExecutionException;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendType;
@@ -42,8 +41,8 @@ class ShardSnapshotCohort implements RaftActorSnapshotCohort {
     private long applyCounter;
     private long readCounter;
 
-    ShardSnapshotCohort(MemberName memberName, ShardTransactionActorFactory transactionActorFactory, ShardDataTree store,
-            Logger log, String logId) {
+    ShardSnapshotCohort(final MemberName memberName, final ShardTransactionActorFactory transactionActorFactory, final ShardDataTree store,
+            final Logger log, final String logId) {
         this.transactionActorFactory = Preconditions.checkNotNull(transactionActorFactory);
         this.store = Preconditions.checkNotNull(store);
         this.log = log;
@@ -56,7 +55,7 @@ class ShardSnapshotCohort implements RaftActorSnapshotCohort {
     }
 
     @Override
-    public void createSnapshot(ActorRef actorRef) {
+    public void createSnapshot(final ActorRef actorRef) {
         // Create a transaction actor. We are really going to treat the transaction as a worker
         // so that this actor does not get block building the snapshot. THe transaction actor will
         // after processing the CreateSnapshot message.
@@ -68,7 +67,7 @@ class ShardSnapshotCohort implements RaftActorSnapshotCohort {
     }
 
     @Override
-    public void applySnapshot(byte[] snapshotBytes) {
+    public void applySnapshot(final byte[] snapshotBytes) {
         // Since this will be done only on Recovery or when this actor is a Follower
         // we can safely commit everything in here. We not need to worry about event notifications
         // as they would have already been disabled on the follower
@@ -86,19 +85,11 @@ class ShardSnapshotCohort implements RaftActorSnapshotCohort {
 
             // Add everything from the remote node back
             transaction.getSnapshot().write(YangInstanceIdentifier.EMPTY, node);
-            syncCommitTransaction(transaction);
-        } catch (InterruptedException | ExecutionException e) {
+            store.applyRecoveryTransaction(transaction);
+        } catch (Exception e) {
             log.error("{}: An exception occurred when applying snapshot", logId, e);
         } finally {
             log.info("{}: Done applying snapshot", logId);
         }
-
-    }
-
-    void syncCommitTransaction(final ReadWriteShardDataTreeTransaction transaction)
-            throws ExecutionException, InterruptedException {
-        ShardDataTreeCohort commitCohort = store.finishTransaction(transaction);
-        commitCohort.preCommit().get();
-        commitCohort.commit().get();
     }
 }
