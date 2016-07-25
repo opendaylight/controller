@@ -47,7 +47,7 @@ public class DataChangeListenerSupportTest extends AbstractShardTest {
     private DataChangeListenerSupport support;
 
     @Before
-    public void setup() {
+    public void setup() throws InterruptedException {
         shard = createShard();
         support = new DataChangeListenerSupport(shard);
     }
@@ -151,8 +151,8 @@ public class DataChangeListenerSupportTest extends AbstractShardTest {
         listener.verifyCreatedData(0, innerEntryPath(2, "four"));
     }
 
-    private MockDataChangeListener registerChangeListener(YangInstanceIdentifier path, DataChangeScope scope,
-            int expectedEvents, boolean isLeader) {
+    private MockDataChangeListener registerChangeListener(final YangInstanceIdentifier path, final DataChangeScope scope,
+            final int expectedEvents, final boolean isLeader) {
         MockDataChangeListener listener = new MockDataChangeListener(expectedEvents);
         ActorRef dclActor = actorFactory.createActor(DataChangeListener.props(listener));
 
@@ -162,6 +162,8 @@ public class DataChangeListenerSupportTest extends AbstractShardTest {
 
     private Shard createShard() {
         TestActorRef<Shard> actor = actorFactory.createTestActor(newShardProps());
+        ShardTestKit.waitUntilLeader(actor);
+
         return actor.underlyingActor();
     }
 }
