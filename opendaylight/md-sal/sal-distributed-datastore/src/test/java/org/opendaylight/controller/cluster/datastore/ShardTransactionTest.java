@@ -66,7 +66,9 @@ public class ShardTransactionTest extends AbstractActorTest {
 
     private final ShardStats shardStats = new ShardStats(SHARD_IDENTIFIER.toString(), "DataStore");
 
-    private final ShardDataTree store = new ShardDataTree(testSchemaContext, TreeType.OPERATIONAL);
+    private final Shard mockShard = Mockito.mock(Shard.class);
+
+    private final ShardDataTree store = new ShardDataTree(mockShard, testSchemaContext, TreeType.OPERATIONAL);
 
     private ActorRef createShard() {
         ActorRef shard = getSystem().actorOf(Shard.builder().id(SHARD_IDENTIFIER).datastoreContext(datastoreContext).
@@ -75,11 +77,11 @@ public class ShardTransactionTest extends AbstractActorTest {
         return shard;
     }
 
-    private ActorRef newTransactionActor(TransactionType type, AbstractShardDataTreeTransaction<?> transaction, String name) {
+    private ActorRef newTransactionActor(final TransactionType type, final AbstractShardDataTreeTransaction<?> transaction, final String name) {
         return newTransactionActor(type, transaction, null, name);
     }
 
-    private ActorRef newTransactionActor(TransactionType type, AbstractShardDataTreeTransaction<?> transaction, ActorRef shard, String name) {
+    private ActorRef newTransactionActor(final TransactionType type, final AbstractShardDataTreeTransaction<?> transaction, final ActorRef shard, final String name) {
         Props props = ShardTransaction.props(type, transaction, shard != null ? shard : createShard(),
                 datastoreContext, shardStats);
         return getSystem().actorOf(props, name);
