@@ -10,13 +10,20 @@ package org.opendaylight.controller.cluster.datastore;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.doReturn;
+import static org.opendaylight.controller.cluster.datastore.ShardDataTreeMocking.immediateCanCommit;
+import static org.opendaylight.controller.cluster.datastore.ShardDataTreeMocking.immediateCommit;
+import static org.opendaylight.controller.cluster.datastore.ShardDataTreeMocking.immediatePreCommit;
 import com.google.common.base.Optional;
+import com.google.common.base.Ticker;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
+import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStats;
 import org.opendaylight.controller.md.cluster.datastore.model.CarsModel;
 import org.opendaylight.controller.md.cluster.datastore.model.PeopleModel;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
@@ -30,31 +37,38 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 public class ShardDataTreeTest extends AbstractTest {
 
-    SchemaContext fullSchema;
+    private final Shard mockShard = Mockito.mock(Shard.class);
+
+
+    private SchemaContext fullSchema;
 
     @Before
-    public void setUp(){
+    public void setUp() {
+        doReturn(true).when(mockShard).canSkipPayload();
+        doReturn(Ticker.systemTicker()).when(mockShard).ticker();
+        doReturn(Mockito.mock(ShardStats.class)).when(mockShard).getShardMBean();
+
         fullSchema = SchemaContextHelper.full();
     }
 
     @Test
     public void testWrite() throws ExecutionException, InterruptedException {
-        modify(new ShardDataTree(fullSchema, TreeType.OPERATIONAL), false, true, true);
+        modify(new ShardDataTree(mockShard, fullSchema, TreeType.OPERATIONAL), false, true, true);
     }
 
     @Test
     public void testMerge() throws ExecutionException, InterruptedException {
-        modify(new ShardDataTree(fullSchema, TreeType.OPERATIONAL), true, true, true);
+        modify(new ShardDataTree(mockShard, fullSchema, TreeType.OPERATIONAL), true, true, true);
     }
 
 
-    private void modify(ShardDataTree shardDataTree, boolean merge, boolean expectedCarsPresent, boolean expectedPeoplePresent) throws ExecutionException, InterruptedException {
+    private void modify(final ShardDataTree shardDataTree, final boolean merge, final boolean expectedCarsPresent, final boolean expectedPeoplePresent) throws ExecutionException, InterruptedException {
 
         assertEquals(fullSchema, shardDataTree.getSchemaContext());
 
-        ReadWriteShardDataTreeTransaction transaction = shardDataTree.newReadWriteTransaction(nextTransactionId());
+        final ReadWriteShardDataTreeTransaction transaction = shardDataTree.newReadWriteTransaction(nextTransactionId());
 
-        DataTreeModification snapshot = transaction.getSnapshot();
+        final DataTreeModification snapshot = transaction.getSnapshot();
 
         assertNotNull(snapshot);
 
@@ -66,21 +80,21 @@ public class ShardDataTreeTest extends AbstractTest {
             snapshot.write(PeopleModel.BASE_PATH, PeopleModel.create());
         }
 
-        ShardDataTreeCohort cohort = shardDataTree.finishTransaction(transaction);
+        final ShardDataTreeCohort cohort = shardDataTree.finishTransaction(transaction);
 
-        cohort.preCommit().get();
-        cohort.commit().get();
+        immediateCanCommit(cohort);
+        immediatePreCommit(cohort);
+        immediateCommit(cohort);
 
+        final ReadOnlyShardDataTreeTransaction readOnlyShardDataTreeTransaction = shardDataTree.newReadOnlyTransaction(nextTransactionId());
 
-        ReadOnlyShardDataTreeTransaction readOnlyShardDataTreeTransaction = shardDataTree.newReadOnlyTransaction(nextTransactionId());
+        final DataTreeSnapshot snapshot1 = readOnlyShardDataTreeTransaction.getSnapshot();
 
-        DataTreeSnapshot snapshot1 = readOnlyShardDataTreeTransaction.getSnapshot();
-
-        Optional<NormalizedNode<?, ?>> optional = snapshot1.readNode(CarsModel.BASE_PATH);
+        final Optional<NormalizedNode<?, ?>> optional = snapshot1.readNode(CarsModel.BASE_PATH);
 
         assertEquals(expectedCarsPresent, optional.isPresent());
 
-        Optional<NormalizedNode<?, ?>> optional1 = snapshot1.readNode(PeopleModel.BASE_PATH);
+        final Optional<NormalizedNode<?, ?>> optional1 = snapshot1.readNode(PeopleModel.BASE_PATH);
 
         assertEquals(expectedPeoplePresent, optional1.isPresent());
 
@@ -88,52 +102,52 @@ public class ShardDataTreeTest extends AbstractTest {
 
     @Test
     public void bug4359AddRemoveCarOnce() throws ExecutionException, InterruptedException {
-        ShardDataTree shardDataTree = new ShardDataTree(fullSchema, TreeType.OPERATIONAL);
+        final ShardDataTree shardDataTree = new ShardDataTree(mockShard, fullSchema, TreeType.OPERATIONAL);
 
-        List<DataTreeCandidateTip> candidates = new ArrayList<>();
+        final List<DataTreeCandidateTip> candidates = new ArrayList<>();
         candidates.add(addCar(shardDataTree));
         candidates.add(removeCar(shardDataTree));
 
-        NormalizedNode<?, ?> expected = getCars(shardDataTree);
+        final NormalizedNode<?, ?> expected = getCars(shardDataTree);
 
         applyCandidates(shardDataTree, candidates);
 
-        NormalizedNode<?, ?> actual = getCars(shardDataTree);
+        final NormalizedNode<?, ?> actual = getCars(shardDataTree);
 
         assertEquals(expected, actual);
     }
 
     @Test
     public void bug4359AddRemoveCarTwice() throws ExecutionException, InterruptedException {
-        ShardDataTree shardDataTree = new ShardDataTree(fullSchema, TreeType.OPERATIONAL);
+        final ShardDataTree shardDataTree = new ShardDataTree(mockShard, fullSchema, TreeType.OPERATIONAL);
 
-        List<DataTreeCandidateTip> candidates = new ArrayList<>();
+        final List<DataTreeCandidateTip> candidates = new ArrayList<>();
         candidates.add(addCar(shardDataTree));
         candidates.add(removeCar(shardDataTree));
         candidates.add(addCar(shardDataTree));
         candidates.add(removeCar(shardDataTree));
 
-        NormalizedNode<?, ?> expected = getCars(shardDataTree);
+        final NormalizedNode<?, ?> expected = getCars(shardDataTree);
 
         applyCandidates(shardDataTree, candidates);
 
-        NormalizedNode<?, ?> actual = getCars(shardDataTree);
+        final NormalizedNode<?, ?> actual = getCars(shardDataTree);
 
         assertEquals(expected, actual);
     }
 
-    private static NormalizedNode<?, ?> getCars(ShardDataTree shardDataTree) {
-        ReadOnlyShardDataTreeTransaction readOnlyShardDataTreeTransaction = shardDataTree.newReadOnlyTransaction(nextTransactionId());
-        DataTreeSnapshot snapshot1 = readOnlyShardDataTreeTransaction.getSnapshot();
+    private static NormalizedNode<?, ?> getCars(final ShardDataTree shardDataTree) {
+        final ReadOnlyShardDataTreeTransaction readOnlyShardDataTreeTransaction = shardDataTree.newReadOnlyTransaction(nextTransactionId());
+        final DataTreeSnapshot snapshot1 = readOnlyShardDataTreeTransaction.getSnapshot();
 
-        Optional<NormalizedNode<?, ?>> optional = snapshot1.readNode(CarsModel.BASE_PATH);
+        final Optional<NormalizedNode<?, ?>> optional = snapshot1.readNode(CarsModel.BASE_PATH);
 
         assertEquals(true, optional.isPresent());
 
         return optional.get();
     }
 
-    private static DataTreeCandidateTip addCar(ShardDataTree shardDataTree) throws ExecutionException, InterruptedException {
+    private static DataTreeCandidateTip addCar(final ShardDataTree shardDataTree) throws ExecutionException, InterruptedException {
         return doTransaction(shardDataTree, snapshot -> {
                 snapshot.merge(CarsModel.BASE_PATH, CarsModel.emptyContainer());
                 snapshot.merge(CarsModel.CAR_LIST_PATH, CarsModel.newCarMapNode());
@@ -141,7 +155,7 @@ public class ShardDataTreeTest extends AbstractTest {
             });
     }
 
-    private static DataTreeCandidateTip removeCar(ShardDataTree shardDataTree) throws ExecutionException, InterruptedException {
+    private static DataTreeCandidateTip removeCar(final ShardDataTree shardDataTree) throws ExecutionException, InterruptedException {
         return doTransaction(shardDataTree, snapshot -> snapshot.delete(CarsModel.newCarPath("altima")));
     }
 
@@ -150,34 +164,34 @@ public class ShardDataTreeTest extends AbstractTest {
         void execute(DataTreeModification snapshot);
     }
 
-    private static DataTreeCandidateTip doTransaction(ShardDataTree shardDataTree, DataTreeOperation operation)
+    private static DataTreeCandidateTip doTransaction(final ShardDataTree shardDataTree, final DataTreeOperation operation)
             throws ExecutionException, InterruptedException {
-        ReadWriteShardDataTreeTransaction transaction = shardDataTree.newReadWriteTransaction(nextTransactionId());
-        DataTreeModification snapshot = transaction.getSnapshot();
+        final ReadWriteShardDataTreeTransaction transaction = shardDataTree.newReadWriteTransaction(nextTransactionId());
+        final DataTreeModification snapshot = transaction.getSnapshot();
         operation.execute(snapshot);
-        ShardDataTreeCohort cohort = shardDataTree.finishTransaction(transaction);
+        final ShardDataTreeCohort cohort = shardDataTree.finishTransaction(transaction);
 
-        cohort.canCommit().get();
-        cohort.preCommit().get();
-        DataTreeCandidateTip candidate = cohort.getCandidate();
-        cohort.commit().get();
+        immediateCanCommit(cohort);
+        immediatePreCommit(cohort);
+        final DataTreeCandidateTip candidate = cohort.getCandidate();
+        immediateCommit(cohort);
 
         return candidate;
     }
 
-    private static DataTreeCandidateTip applyCandidates(ShardDataTree shardDataTree, List<DataTreeCandidateTip> candidates)
+    private static DataTreeCandidateTip applyCandidates(final ShardDataTree shardDataTree, final List<DataTreeCandidateTip> candidates)
             throws ExecutionException, InterruptedException {
-        ReadWriteShardDataTreeTransaction transaction = shardDataTree.newReadWriteTransaction(nextTransactionId());
-        DataTreeModification snapshot = transaction.getSnapshot();
-        for(DataTreeCandidateTip candidateTip : candidates){
+        final ReadWriteShardDataTreeTransaction transaction = shardDataTree.newReadWriteTransaction(nextTransactionId());
+        final DataTreeModification snapshot = transaction.getSnapshot();
+        for(final DataTreeCandidateTip candidateTip : candidates){
             DataTreeCandidates.applyToModification(snapshot, candidateTip);
         }
-        ShardDataTreeCohort cohort = shardDataTree.finishTransaction(transaction);
+        final ShardDataTreeCohort cohort = shardDataTree.finishTransaction(transaction);
 
-        cohort.canCommit().get();
-        cohort.preCommit().get();
-        DataTreeCandidateTip candidate = cohort.getCandidate();
-        cohort.commit().get();
+        immediateCanCommit(cohort);
+        immediatePreCommit(cohort);
+        final DataTreeCandidateTip candidate = cohort.getCandidate();
+        immediateCommit(cohort);
 
         return candidate;
     }

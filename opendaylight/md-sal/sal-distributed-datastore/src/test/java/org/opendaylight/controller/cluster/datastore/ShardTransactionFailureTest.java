@@ -13,6 +13,7 @@ import akka.actor.Props;
 import akka.testkit.TestActorRef;
 import java.util.concurrent.TimeUnit;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStats;
@@ -39,7 +40,9 @@ public class ShardTransactionFailureTest extends AbstractActorTest {
     private static final TransactionType RW = TransactionType.READ_WRITE;
     private static final TransactionType WO = TransactionType.WRITE_ONLY;
 
-    private static final ShardDataTree store = new ShardDataTree(testSchemaContext, TreeType.OPERATIONAL);
+    private static final Shard mockShard = Mockito.mock(Shard.class);
+
+    private static final ShardDataTree store = new ShardDataTree(mockShard, testSchemaContext, TreeType.OPERATIONAL);
 
     private static final ShardIdentifier SHARD_IDENTIFIER =
         ShardIdentifier.create("inventory", MemberName.forName("member-1"), "operational");

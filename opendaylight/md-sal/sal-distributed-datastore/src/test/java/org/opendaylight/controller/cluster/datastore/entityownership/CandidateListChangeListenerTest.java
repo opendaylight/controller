@@ -15,8 +15,12 @@ import static org.opendaylight.controller.cluster.datastore.entityownership.Enti
 import akka.testkit.JavaTestKit;
 import com.google.common.collect.ImmutableSet;
 import java.util.concurrent.TimeUnit;
+import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.opendaylight.controller.cluster.datastore.AbstractActorTest;
+import org.opendaylight.controller.cluster.datastore.Shard;
 import org.opendaylight.controller.cluster.datastore.ShardDataTree;
 import org.opendaylight.controller.cluster.datastore.entityownership.messages.CandidateAdded;
 import org.opendaylight.controller.cluster.datastore.entityownership.messages.CandidateRemoved;
@@ -40,8 +44,16 @@ public class CandidateListChangeListenerTest extends AbstractActorTest {
     private static final YangInstanceIdentifier ENTITY_ID2 =
             YangInstanceIdentifier.of(QName.create("test", "2015-08-14", "entity2"));
 
-    private final ShardDataTree shardDataTree = new ShardDataTree(SchemaContextHelper.entityOwners(),
-        TreeType.OPERATIONAL);
+    private ShardDataTree shardDataTree;
+
+    @Mock
+    private Shard mockShard;
+
+    @Before
+    public void setup() {
+        MockitoAnnotations.initMocks(this);
+        shardDataTree = new ShardDataTree(mockShard, SchemaContextHelper.entityOwners(), TreeType.OPERATIONAL);
+    }
 
     @Test
     public void testOnDataTreeChanged() throws Exception {
@@ -95,11 +107,11 @@ public class CandidateListChangeListenerTest extends AbstractActorTest {
                 ImmutableSet.copyOf(candidateRemoved.getRemainingCandidates()));
     }
 
-    private void writeNode(YangInstanceIdentifier path, NormalizedNode<?, ?> node) throws DataValidationFailedException {
+    private void writeNode(final YangInstanceIdentifier path, final NormalizedNode<?, ?> node) throws DataValidationFailedException {
         AbstractEntityOwnershipTest.writeNode(path, node, shardDataTree);
     }
 
-    private void deleteNode(YangInstanceIdentifier path) throws DataValidationFailedException {
+    private void deleteNode(final YangInstanceIdentifier path) throws DataValidationFailedException {
         AbstractEntityOwnershipTest.deleteNode(path, shardDataTree);
     }
 }
