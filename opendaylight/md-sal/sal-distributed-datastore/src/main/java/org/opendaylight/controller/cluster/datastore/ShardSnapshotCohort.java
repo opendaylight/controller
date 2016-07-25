@@ -12,7 +12,6 @@ import akka.actor.ActorRef;
 import com.google.common.base.Preconditions;
 import java.io.IOException;
 import java.util.Optional;
-import java.util.concurrent.ExecutionException;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendType;
@@ -97,13 +96,6 @@ class ShardSnapshotCohort implements RaftActorSnapshotCohort {
             log.error("{}: An exception occurred when applying snapshot", logId, e);
         }
 
-    }
-
-    void syncCommitTransaction(final ReadWriteShardDataTreeTransaction transaction)
-            throws ExecutionException, InterruptedException {
-        ShardDataTreeCohort commitCohort = store.finishTransaction(transaction);
-        commitCohort.preCommit().get();
-        commitCohort.commit().get();
     }
 
     @Override
