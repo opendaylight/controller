@@ -16,7 +16,9 @@ import static org.opendaylight.controller.cluster.datastore.entityownership.Enti
 import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.opendaylight.controller.cluster.datastore.AbstractActorTest;
+import org.opendaylight.controller.cluster.datastore.Shard;
 import org.opendaylight.controller.cluster.datastore.ShardDataTree;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
 import org.opendaylight.yangtools.yang.common.QName;
@@ -35,7 +37,9 @@ public class EntityOwnershipStatisticsTest extends AbstractActorTest {
     private static final YangInstanceIdentifier ENTITY_ID2 =
             YangInstanceIdentifier.of(QName.create("test", "2015-08-14", "entity2"));
 
-    private final ShardDataTree shardDataTree = new ShardDataTree(SchemaContextHelper.entityOwners(),
+    private final Shard mockShard = Mockito.mock(Shard.class);
+
+    private final ShardDataTree shardDataTree = new ShardDataTree(mockShard, SchemaContextHelper.entityOwners(),
         TreeType.OPERATIONAL);
     private EntityOwnershipStatistics ownershipStatistics;
 
@@ -132,11 +136,11 @@ public class EntityOwnershipStatisticsTest extends AbstractActorTest {
 
     }
 
-    private static void assertStatistics(Map<String, Map<String, Long>> statistics, String memberName, long val) {
+    private static void assertStatistics(final Map<String, Map<String, Long>> statistics, final String memberName, final long val) {
         assertEquals(val, statistics.get(ENTITY_TYPE).get(memberName).longValue());
     }
 
-    private void writeNode(YangInstanceIdentifier path, NormalizedNode<?, ?> node) throws DataValidationFailedException {
+    private void writeNode(final YangInstanceIdentifier path, final NormalizedNode<?, ?> node) throws DataValidationFailedException {
         AbstractEntityOwnershipTest.writeNode(path, node, shardDataTree);
     }
 }
