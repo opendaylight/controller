@@ -14,6 +14,7 @@ import com.google.common.base.Optional;
 import java.io.IOException;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.opendaylight.controller.cluster.datastore.persisted.CommitTransactionPayload;
 import org.opendaylight.controller.cluster.datastore.persisted.LegacyShardDataTreeSnapshot;
 import org.opendaylight.controller.md.cluster.datastore.model.CarsModel;
@@ -42,7 +43,9 @@ public class ShardRecoveryCoordinatorTest extends AbstractTest {
         peopleSchemaContext = SchemaContextHelper.select(SchemaContextHelper.PEOPLE_YANG);
         carsSchemaContext = SchemaContextHelper.select(SchemaContextHelper.CARS_YANG);
 
-        peopleDataTree = new ShardDataTree(peopleSchemaContext, TreeType.OPERATIONAL);
+        final Shard mockShard = Mockito.mock(Shard.class);
+
+        peopleDataTree = new ShardDataTree(mockShard, peopleSchemaContext, TreeType.OPERATIONAL);
     }
 
     @Deprecated

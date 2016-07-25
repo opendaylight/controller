@@ -14,6 +14,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 import akka.actor.ActorSystem;
@@ -22,6 +23,7 @@ import akka.actor.AddressFromURIString;
 import akka.cluster.Cluster;
 import akka.testkit.JavaTestKit;
 import com.google.common.base.Optional;
+import com.google.common.base.Ticker;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -1158,7 +1160,11 @@ public class DistributedDataStoreIntegrationTest {
     }
 
     @Test
-    public void testRestoreFromDatastoreSnapshot() throws Exception{
+    public void testRestoreFromDatastoreSnapshot() throws Exception {
+        final Shard mockShard = Mockito.mock(Shard.class);
+        doReturn(true).when(mockShard).canSkipPayload();
+        doReturn(Ticker.systemTicker()).when(mockShard).ticker();
+
         new IntegrationTestKit(getSystem(), datastoreContextBuilder) {{
             String name = "transactionIntegrationTest";
 
@@ -1166,7 +1172,7 @@ public class DistributedDataStoreIntegrationTest {
                     CarsModel.newCarEntry("optima", BigInteger.valueOf(20000L)),
                     CarsModel.newCarEntry("sportage", BigInteger.valueOf(30000L))));
 
-            ShardDataTree dataTree = new ShardDataTree(SchemaContextHelper.full(), TreeType.OPERATIONAL);
+            ShardDataTree dataTree = new ShardDataTree(mockShard, SchemaContextHelper.full(), TreeType.OPERATIONAL);
             AbstractShardTest.writeToStore(dataTree, CarsModel.BASE_PATH, carsNode);
             NormalizedNode<?, ?> root = AbstractShardTest.readStore(dataTree.getDataTree(),
                     YangInstanceIdentifier.EMPTY);
@@ -1175,7 +1181,7 @@ public class DistributedDataStoreIntegrationTest {
                     Collections.<ReplicatedLogEntry>emptyList(), 2, 1, 2, 1, 1, "member-1");
 
             NormalizedNode<?, ?> peopleNode = PeopleModel.create();
-            dataTree = new ShardDataTree(SchemaContextHelper.full(), TreeType.OPERATIONAL);
+            dataTree = new ShardDataTree(mockShard, SchemaContextHelper.full(), TreeType.OPERATIONAL);
             AbstractShardTest.writeToStore(dataTree, PeopleModel.BASE_PATH, peopleNode);
             root = AbstractShardTest.readStore(dataTree.getDataTree(), YangInstanceIdentifier.EMPTY);
 
