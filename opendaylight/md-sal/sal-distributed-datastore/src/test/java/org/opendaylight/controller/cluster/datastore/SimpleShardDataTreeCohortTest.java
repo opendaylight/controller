@@ -15,6 +15,8 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import com.google.common.primitives.UnsignedLong;
+import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.ListenableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -26,6 +28,7 @@ import org.opendaylight.controller.md.sal.common.api.data.OptimisticLockFailedEx
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.ConflictingModificationAppliedException;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidateTip;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataValidationFailedException;
@@ -46,6 +49,15 @@ public class SimpleShardDataTreeCohortTest extends AbstractTest {
     @Mock
     private DataTreeModification mockModification;
 
+    @Mock
+    private CompositeDataTreeCohort mockUserCohorts;
+
+    @Mock
+    private FutureCallback<DataTreeCandidate> mockPreCallback;
+
+    @Mock
+    private FutureCallback<UnsignedLong> mockCommitCallback;
+
     private SimpleShardDataTreeCohort cohort;
 
     @Before
@@ -54,7 +66,8 @@ public class SimpleShardDataTreeCohortTest extends AbstractTest {
 
         doReturn(mockDataTree).when(mockShardDataTree).getDataTree();
 
-        cohort = new SimpleShardDataTreeCohort(mockShardDataTree, mockModification, nextTransactionId());
+        cohort = new SimpleShardDataTreeCohort(mockShardDataTree, mockModification, nextTransactionId(),
+            mockUserCohorts);
     }
 
     @Test
@@ -102,16 +115,12 @@ public class SimpleShardDataTreeCohortTest extends AbstractTest {
         DataTreeCandidateTip mockCandidate = mock(DataTreeCandidateTip.class);
         doReturn(mockCandidate ).when(mockDataTree).prepare(mockModification);
 
-        ListenableFuture<Void> future = cohort.preCommit();
-        assertNotNull("Future is null", future);
-        future.get();
+        cohort.preCommit(mockPreCallback);
         verify(mockDataTree).prepare(mockModification);
 
         assertSame("getCandidate", mockCandidate, cohort.getCandidate());
 
-        future = cohort.commit();
-        assertNotNull("Future is null", future);
-        future.get();
+        cohort.commit(mockCommitCallback);
         verify(mockDataTree).commit(mockCandidate);
     }
 

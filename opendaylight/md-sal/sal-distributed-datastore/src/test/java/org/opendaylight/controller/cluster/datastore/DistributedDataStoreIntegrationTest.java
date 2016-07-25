@@ -1158,7 +1158,9 @@ public class DistributedDataStoreIntegrationTest {
     }
 
     @Test
-    public void testRestoreFromDatastoreSnapshot() throws Exception{
+    public void testRestoreFromDatastoreSnapshot() throws Exception {
+        final Shard mockShard = Mockito.mock(Shard.class);
+
         new IntegrationTestKit(getSystem(), datastoreContextBuilder) {{
             String name = "transactionIntegrationTest";
 
@@ -1166,7 +1168,7 @@ public class DistributedDataStoreIntegrationTest {
                     CarsModel.newCarEntry("optima", BigInteger.valueOf(20000L)),
                     CarsModel.newCarEntry("sportage", BigInteger.valueOf(30000L))));
 
-            ShardDataTree dataTree = new ShardDataTree(SchemaContextHelper.full(), TreeType.OPERATIONAL);
+            ShardDataTree dataTree = new ShardDataTree(mockShard, SchemaContextHelper.full(), TreeType.OPERATIONAL);
             AbstractShardTest.writeToStore(dataTree, CarsModel.BASE_PATH, carsNode);
             NormalizedNode<?, ?> root = AbstractShardTest.readStore(dataTree.getDataTree(),
                     YangInstanceIdentifier.EMPTY);
@@ -1175,7 +1177,7 @@ public class DistributedDataStoreIntegrationTest {
                     Collections.<ReplicatedLogEntry>emptyList(), 2, 1, 2, 1, 1, "member-1");
 
             NormalizedNode<?, ?> peopleNode = PeopleModel.create();
-            dataTree = new ShardDataTree(SchemaContextHelper.full(), TreeType.OPERATIONAL);
+            dataTree = new ShardDataTree(mockShard, SchemaContextHelper.full(), TreeType.OPERATIONAL);
             AbstractShardTest.writeToStore(dataTree, PeopleModel.BASE_PATH, peopleNode);
             root = AbstractShardTest.readStore(dataTree.getDataTree(), YangInstanceIdentifier.EMPTY);
 
