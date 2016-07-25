@@ -7,25 +7,25 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import com.google.common.util.concurrent.ListenableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.opendaylight.controller.cluster.datastore.ShardDataTreeMocking.immediateCanCommit;
+import static org.opendaylight.controller.cluster.datastore.ShardDataTreeMocking.immediatePreCommit;
+import com.google.common.primitives.UnsignedLong;
+import com.google.common.util.concurrent.FutureCallback;
+import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.opendaylight.controller.md.sal.common.api.data.OptimisticLockFailedException;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.ConflictingModificationAppliedException;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidateTip;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataValidationFailedException;
@@ -46,6 +46,15 @@ public class SimpleShardDataTreeCohortTest extends AbstractTest {
     @Mock
     private DataTreeModification mockModification;
 
+    @Mock
+    private CompositeDataTreeCohort mockUserCohorts;
+
+    @Mock
+    private FutureCallback<DataTreeCandidate> mockPreCallback;
+
+    @Mock
+    private FutureCallback<UnsignedLong> mockCommitCallback;
+
     private SimpleShardDataTreeCohort cohort;
 
     @Before
@@ -53,86 +62,88 @@ public class SimpleShardDataTreeCohortTest extends AbstractTest {
         MockitoAnnotations.initMocks(this);
 
         doReturn(mockDataTree).when(mockShardDataTree).getDataTree();
+        doReturn(Optional.empty()).when(mockUserCohorts).abort();
 
-        cohort = new SimpleShardDataTreeCohort(mockShardDataTree, mockModification, nextTransactionId());
+        cohort = new SimpleShardDataTreeCohort(mockShardDataTree, mockModification, nextTransactionId(),
+            mockUserCohorts);
     }
 
     @Test
     public void testCanCommitSuccess() throws Exception {
-        ListenableFuture<Boolean> future = cohort.canCommit();
-        assertNotNull("Future is null", future);
-        assertEquals("Future", true, future.get(3, TimeUnit.SECONDS));
+        immediateCanCommit(cohort);
         verify(mockDataTree).validate(mockModification);
     }
 
-    @Test(expected=OptimisticLockFailedException.class)
-    public void testCanCommitWithConflictingModEx() throws Throwable {
-        doThrow(new ConflictingModificationAppliedException(YangInstanceIdentifier.EMPTY, "mock")).
-                when(mockDataTree).validate(mockModification);
-        try {
-            cohort.canCommit().get();
-        } catch (ExecutionException e) {
-            throw e.getCause();
-        }
-    }
+    private void testValidatationPropagates(final Exception cause) throws DataValidationFailedException {
+        doThrow(cause).when(mockDataTree).validate(mockModification);
 
-    @Test(expected=TransactionCommitFailedException.class)
-    public void testCanCommitWithDataValidationEx() throws Throwable {
-        doThrow(new DataValidationFailedException(YangInstanceIdentifier.EMPTY, "mock")).
-                when(mockDataTree).validate(mockModification);
-        try {
-            cohort.canCommit().get();
-        } catch (ExecutionException e) {
-            throw e.getCause();
-        }
-    }
+        @SuppressWarnings("unchecked")
+        final FutureCallback<Void> callback = mock(FutureCallback.class);
+        cohort.canCommit(callback);
 
-    @Test(expected=IllegalArgumentException.class)
-    public void testCanCommitWithIllegalArgumentEx() throws Throwable {
-        doThrow(new IllegalArgumentException("mock")).when(mockDataTree).validate(mockModification);
-        try {
-            cohort.canCommit().get();
-        } catch (ExecutionException e) {
-            throw e.getCause();
-        }
+        verify(callback).onFailure(cause);
+        verifyNoMoreInteractions(callback);
     }
 
     @Test
-    public void testPreCommitAndCommitSuccess() throws Exception {
-        DataTreeCandidateTip mockCandidate = mock(DataTreeCandidateTip.class);
-        doReturn(mockCandidate ).when(mockDataTree).prepare(mockModification);
+    public void testCanCommitWithConflictingModEx() throws DataValidationFailedException {
+        testValidatationPropagates(new ConflictingModificationAppliedException(YangInstanceIdentifier.EMPTY, "mock"));
+    }
 
-        ListenableFuture<Void> future = cohort.preCommit();
-        assertNotNull("Future is null", future);
-        future.get();
+    @Test
+    public void testCanCommitWithDataValidationEx() throws DataValidationFailedException {
+        testValidatationPropagates(new DataValidationFailedException(YangInstanceIdentifier.EMPTY, "mock"));
+    }
+
+    @Test
+    public void testCanCommitWithIllegalArgumentEx() throws DataValidationFailedException {
+        testValidatationPropagates(new IllegalArgumentException("mock"));
+    }
+
+    @Test
+    public void testPreCommitAndCommitSuccess() {
+        DataTreeCandidateTip mockCandidate = mock(DataTreeCandidateTip.class);
+        doReturn(mockCandidate).when(mockDataTree).prepare(mockModification);
+
+        immediateCanCommit(cohort);
+        cohort.preCommit(mockPreCallback);
         verify(mockDataTree).prepare(mockModification);
 
         assertSame("getCandidate", mockCandidate, cohort.getCandidate());
 
-        future = cohort.commit();
-        assertNotNull("Future is null", future);
-        future.get();
+        cohort.commit(mockCommitCallback);
         verify(mockDataTree).commit(mockCandidate);
     }
 
     @Test(expected=IllegalArgumentException.class)
     public void testPreCommitWithIllegalArgumentEx() throws Throwable {
-        doThrow(new IllegalArgumentException("mock")).when(mockDataTree).prepare(mockModification);
-        try {
-            cohort.preCommit().get();
-        } catch (ExecutionException e) {
-            throw e.getCause();
-        }
+        final Exception ex = new IllegalArgumentException("mock");
+        doThrow(ex).when(mockDataTree).prepare(mockModification);
+
+        immediateCanCommit(cohort);
+
+        @SuppressWarnings("unchecked")
+        final FutureCallback<DataTreeCandidate> callback = mock(FutureCallback.class);
+        cohort.preCommit(callback);
+
+        verify(callback).onFailure(ex);
+        verifyNoMoreInteractions(callback);
     }
 
-    @Test(expected=IllegalArgumentException.class)
-    public void testCommitWithIllegalArgumentEx() throws Throwable {
-        doThrow(new IllegalArgumentException("mock")).when(mockDataTree).commit(any(DataTreeCandidateTip.class));
-        try {
-            cohort.commit().get();
-        } catch (ExecutionException e) {
-            throw e.getCause();
-        }
+    @Test
+    public void testCommitWithIllegalArgumentEx() {
+        final Exception ex = new IllegalArgumentException("mock");
+        doThrow(ex).when(mockDataTree).commit(any(DataTreeCandidateTip.class));
+
+        immediateCanCommit(cohort);
+        immediatePreCommit(cohort);
+
+        @SuppressWarnings("unchecked")
+        final FutureCallback<UnsignedLong> callback = mock(FutureCallback.class);
+        cohort.commit(callback);
+
+        verify(callback).onFailure(ex);
+        verifyNoMoreInteractions(callback);
     }
 
     @Test
