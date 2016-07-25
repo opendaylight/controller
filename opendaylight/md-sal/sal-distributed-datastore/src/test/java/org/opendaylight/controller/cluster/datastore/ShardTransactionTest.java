@@ -17,17 +17,16 @@ import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.actor.Status.Failure;
 import akka.actor.Terminated;
+import akka.dispatch.Dispatchers;
 import akka.testkit.JavaTestKit;
 import akka.testkit.TestActorRef;
 import java.util.concurrent.TimeUnit;
-import org.junit.Ignore;
+import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InOrder;
 import org.mockito.Mockito;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
-import org.opendaylight.controller.cluster.datastore.exceptions.UnknownMessageException;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
-import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStats;
 import org.opendaylight.controller.cluster.datastore.messages.BatchedModifications;
 import org.opendaylight.controller.cluster.datastore.messages.BatchedModificationsReply;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransaction;
@@ -41,19 +40,17 @@ import org.opendaylight.controller.cluster.datastore.messages.ReadyTransactionRe
 import org.opendaylight.controller.cluster.datastore.modification.DeleteModification;
 import org.opendaylight.controller.cluster.datastore.modification.MergeModification;
 import org.opendaylight.controller.cluster.datastore.modification.WriteModification;
+import org.opendaylight.controller.cluster.raft.TestActorFactory;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.TreeType;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
-import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 public class ShardTransactionTest extends AbstractActorTest {
 
-    private static final SchemaContext testSchemaContext = TestModel.createTestContext();
     private static final TransactionType RO = TransactionType.READ_ONLY;
     private static final TransactionType RW = TransactionType.READ_WRITE;
     private static final TransactionType WO = TransactionType.WRITE_ONLY;
@@ -61,28 +58,24 @@ public class ShardTransactionTest extends AbstractActorTest {
     private static final ShardIdentifier SHARD_IDENTIFIER =
         ShardIdentifier.create("inventory", MEMBER_NAME, "config");
 
+    private DatastoreContext datastoreContext = DatastoreContext.newBuilder().persistent(false).build();
 
-    private DatastoreContext datastoreContext = DatastoreContext.newBuilder().build();
+    private final TestActorFactory actorFactory = new TestActorFactory(getSystem());
 
-    private final ShardStats shardStats = new ShardStats(SHARD_IDENTIFIER.toString(), "DataStore");
+    private TestActorRef<Shard> shard;
+    private ShardDataTree store;
 
-    private final ShardDataTree store = new ShardDataTree(testSchemaContext, TreeType.OPERATIONAL);
-
-    private ActorRef createShard() {
-        ActorRef shard = getSystem().actorOf(Shard.builder().id(SHARD_IDENTIFIER).datastoreContext(datastoreContext).
-                schemaContext(TestModel.createTestContext()).props());
+    @Before
+    public void setUp() {
+        shard = actorFactory.createTestActor(Shard.builder().id(SHARD_IDENTIFIER).datastoreContext(datastoreContext).
+                schemaContext(TestModel.createTestContext()).props().withDispatcher(Dispatchers.DefaultDispatcherId()));
         ShardTestKit.waitUntilLeader(shard);
-        return shard;
+        store = shard.underlyingActor().getDataStore();
     }
 
-    private ActorRef newTransactionActor(TransactionType type, AbstractShardDataTreeTransaction<?> transaction, String name) {
-        return newTransactionActor(type, transaction, null, name);
-    }
-
-    private ActorRef newTransactionActor(TransactionType type, AbstractShardDataTreeTransaction<?> transaction, ActorRef shard, String name) {
-        Props props = ShardTransaction.props(type, transaction, shard != null ? shard : createShard(),
-                datastoreContext, shardStats);
-        return getSystem().actorOf(props, name);
+    private ActorRef newTransactionActor(final TransactionType type, final AbstractShardDataTreeTransaction<?> transaction, final String name) {
+        Props props = ShardTransaction.props(type, transaction, shard, datastoreContext, shard.underlyingActor().getShardMBean());
+        return actorFactory.createActor(props, name);
     }
 
     private ReadOnlyShardDataTreeTransaction readOnlyTransaction() {
@@ -96,11 +89,9 @@ public class ShardTransactionTest extends AbstractActorTest {
     @Test
     public void testOnReceiveReadData() throws Exception {
         new JavaTestKit(getSystem()) {{
-            final ActorRef shard = createShard();
+            testOnReceiveReadData(newTransactionActor(RO, readOnlyTransaction(), "testReadDataRO"));
 
-            testOnReceiveReadData(newTransactionActor(RO, readOnlyTransaction(), shard, "testReadDataRO"));
-
-            testOnReceiveReadData(newTransactionActor(RW, readWriteTransaction(), shard, "testReadDataRW"));
+            testOnReceiveReadData(newTransactionActor(RW, readWriteTransaction(), "testReadDataRW"));
         }
 
         private void testOnReceiveReadData(final ActorRef transaction) {
@@ -116,13 +107,11 @@ public class ShardTransactionTest extends AbstractActorTest {
     @Test
     public void testOnReceiveReadDataWhenDataNotFound() throws Exception {
         new JavaTestKit(getSystem()) {{
-            final ActorRef shard = createShard();
+            testOnReceiveReadDataWhenDataNotFound(newTransactionActor(
+                    RO, readOnlyTransaction(), "testReadDataWhenDataNotFoundRO"));
 
             testOnReceiveReadDataWhenDataNotFound(newTransactionActor(
-                    RO, readOnlyTransaction(), shard, "testReadDataWhenDataNotFoundRO"));
-
-            testOnReceiveReadDataWhenDataNotFound(newTransactionActor(
-                    RW, readWriteTransaction(), shard, "testReadDataWhenDataNotFoundRW"));
+                    RW, readWriteTransaction(), "testReadDataWhenDataNotFoundRW"));
         }
 
         private void testOnReceiveReadDataWhenDataNotFound(final ActorRef transaction) {
@@ -137,12 +126,10 @@ public class ShardTransactionTest extends AbstractActorTest {
     @Test
     public void testOnReceiveDataExistsPositive() throws Exception {
         new JavaTestKit(getSystem()) {{
-            final ActorRef shard = createShard();
-
-            testOnReceiveDataExistsPositive(newTransactionActor(RO, readOnlyTransaction(), shard,
+            testOnReceiveDataExistsPositive(newTransactionActor(RO, readOnlyTransaction(),
                     "testDataExistsPositiveRO"));
 
-            testOnReceiveDataExistsPositive(newTransactionActor(RW, readWriteTransaction(), shard,
+            testOnReceiveDataExistsPositive(newTransactionActor(RW, readWriteTransaction(),
                     "testDataExistsPositiveRW"));
         }
 
@@ -159,12 +146,10 @@ public class ShardTransactionTest extends AbstractActorTest {
     @Test
     public void testOnReceiveDataExistsNegative() throws Exception {
         new JavaTestKit(getSystem()) {{
-            final ActorRef shard = createShard();
-
-            testOnReceiveDataExistsNegative(newTransactionActor(RO, readOnlyTransaction(), shard,
+            testOnReceiveDataExistsNegative(newTransactionActor(RO, readOnlyTransaction(),
                     "testDataExistsNegativeRO"));
 
-            testOnReceiveDataExistsNegative(newTransactionActor(RW, readWriteTransaction(), shard,
+            testOnReceiveDataExistsNegative(newTransactionActor(RW, readWriteTransaction(),
                     "testDataExistsNegativeRW"));
         }
 
@@ -382,19 +367,6 @@ public class ShardTransactionTest extends AbstractActorTest {
 
             expectMsgClass(duration("3 seconds"), Terminated.class);
         }};
-    }
-
-    // Unknown operations are being logged
-    @Ignore
-    @Test(expected=UnknownMessageException.class)
-    public void testNegativePerformingWriteOperationOnReadTransaction() throws Exception {
-        final ActorRef shard = createShard();
-        final Props props = ShardTransaction.props(TransactionType.READ_ONLY, readOnlyTransaction(), shard,
-                datastoreContext, shardStats);
-        final TestActorRef<ShardTransaction> transaction = TestActorRef.apply(props,getSystem());
-
-        transaction.receive(new BatchedModifications(nextTransactionId(), DataStoreVersions.CURRENT_VERSION),
-                ActorRef.noSender());
     }
 
     @Test

@@ -49,7 +49,7 @@ import org.opendaylight.controller.cluster.datastore.exceptions.NotInitializedEx
 import org.opendaylight.controller.cluster.datastore.messages.DatastoreSnapshot;
 import org.opendaylight.controller.cluster.datastore.messages.FindLocalShard;
 import org.opendaylight.controller.cluster.datastore.messages.LocalShardFound;
-import org.opendaylight.controller.cluster.datastore.persisted.PreBoronShardDataTreeSnapshot;
+import org.opendaylight.controller.cluster.datastore.persisted.MetadataShardDataTreeSnapshot;
 import org.opendaylight.controller.cluster.datastore.utils.MockDataChangeListener;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.Snapshot;
@@ -79,9 +79,11 @@ import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.TreeType;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
+import org.opendaylight.yangtools.yang.data.impl.schema.tree.InMemoryDataTreeFactory;
 
 public class DistributedDataStoreIntegrationTest {
 
@@ -1158,7 +1160,7 @@ public class DistributedDataStoreIntegrationTest {
     }
 
     @Test
-    public void testRestoreFromDatastoreSnapshot() throws Exception{
+    public void testRestoreFromDatastoreSnapshot() throws Exception {
         new IntegrationTestKit(getSystem(), datastoreContextBuilder) {{
             String name = "transactionIntegrationTest";
 
@@ -1166,20 +1168,21 @@ public class DistributedDataStoreIntegrationTest {
                     CarsModel.newCarEntry("optima", BigInteger.valueOf(20000L)),
                     CarsModel.newCarEntry("sportage", BigInteger.valueOf(30000L))));
 
-            ShardDataTree dataTree = new ShardDataTree(SchemaContextHelper.full(), TreeType.OPERATIONAL);
+            DataTree dataTree = InMemoryDataTreeFactory.getInstance().create(TreeType.OPERATIONAL);
+            dataTree.setSchemaContext(SchemaContextHelper.full());
             AbstractShardTest.writeToStore(dataTree, CarsModel.BASE_PATH, carsNode);
-            NormalizedNode<?, ?> root = AbstractShardTest.readStore(dataTree.getDataTree(),
-                    YangInstanceIdentifier.EMPTY);
+            NormalizedNode<?, ?> root = AbstractShardTest.readStore(dataTree, YangInstanceIdentifier.EMPTY);
 
-            Snapshot carsSnapshot = Snapshot.create(new PreBoronShardDataTreeSnapshot(root).serialize(),
+            Snapshot carsSnapshot = Snapshot.create(new MetadataShardDataTreeSnapshot(root).serialize(),
                     Collections.<ReplicatedLogEntry>emptyList(), 2, 1, 2, 1, 1, "member-1");
 
             NormalizedNode<?, ?> peopleNode = PeopleModel.create();
-            dataTree = new ShardDataTree(SchemaContextHelper.full(), TreeType.OPERATIONAL);
+            dataTree = InMemoryDataTreeFactory.getInstance().create(TreeType.OPERATIONAL);
+            dataTree.setSchemaContext(SchemaContextHelper.full());
             AbstractShardTest.writeToStore(dataTree, PeopleModel.BASE_PATH, peopleNode);
-            root = AbstractShardTest.readStore(dataTree.getDataTree(), YangInstanceIdentifier.EMPTY);
+            root = AbstractShardTest.readStore(dataTree, YangInstanceIdentifier.EMPTY);
 
-            Snapshot peopleSnapshot = Snapshot.create(new PreBoronShardDataTreeSnapshot(root).serialize(),
+            Snapshot peopleSnapshot = Snapshot.create(new MetadataShardDataTreeSnapshot(root).serialize(),
                     Collections.<ReplicatedLogEntry>emptyList(), 2, 1, 2, 1, 1, "member-1");
 
             restoreFromSnapshot = new DatastoreSnapshot(name, null, Arrays.asList(
