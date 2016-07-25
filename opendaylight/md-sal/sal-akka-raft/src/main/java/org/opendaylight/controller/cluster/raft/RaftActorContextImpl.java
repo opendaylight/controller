@@ -17,10 +17,12 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.LongSupplier;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
@@ -46,7 +48,7 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     private ReplicatedLog replicatedLog;
 
-    private final Map<String, PeerInfo> peerInfoMap = new HashMap<>();
+    private final WriteablePeerInfoCache peerInfoCache;
 
     private final Logger LOG;
 
@@ -84,9 +86,12 @@ public class RaftActorContextImpl implements RaftActorContext {
         this.persistenceProvider = persistenceProvider;
         this.LOG = logger;
 
-        for(Map.Entry<String, String> e: peerAddresses.entrySet()) {
-            peerInfoMap.put(e.getKey(), new PeerInfo(e.getKey(), e.getValue(), VotingState.VOTING));
-        }
+        peerInfoCache = new WriteablePeerInfoCache(peerAddresses, new PeerAddressResolver() {
+            @Override
+            public String resolve(String peerId) {
+                return configParams.getPeerAddressResolver().resolve(peerId);
+            }
+        });
     }
 
     @VisibleForTesting
@@ -166,68 +171,35 @@ public class RaftActorContextImpl implements RaftActorContext {
     }
 
     @Override
+    public PeerInfoCache getPeerInfoCache() {
+        return peerInfoCache;
+    }
+
+    @Override
     public Collection<String> getPeerIds() {
-        return peerInfoMap.keySet();
+        return peerInfoCache.getPeerIds();
     }
 
     @Override
     public Collection<PeerInfo> getPeers() {
-        return peerInfoMap.values();
+        return peerInfoCache.getPeers();
     }
 
     @Override
     public PeerInfo getPeerInfo(String peerId) {
-        return peerInfoMap.get(peerId);
+        return peerInfoCache.getPeerInfo(peerId);
     }
 
     @Override
     public String getPeerAddress(String peerId) {
-        String peerAddress = null;
-        PeerInfo peerInfo = peerInfoMap.get(peerId);
-        if(peerInfo != null) {
-            peerAddress = peerInfo.getAddress();
-            if(peerAddress == null) {
-                peerAddress = configParams.getPeerAddressResolver().resolve(peerId);
-                peerInfo.setAddress(peerAddress);
-            }
-        } else {
-            peerAddress = configParams.getPeerAddressResolver().resolve(peerId);
-        }
-
-        return peerAddress;
+        return peerInfoCache.getPeerAddress(peerId);
     }
 
     @Override
     public void updatePeerIds(ServerConfigurationPayload serverConfig){
-        votingMember = true;
-        boolean foundSelf = false;
-        Set<String> currentPeers = new HashSet<>(this.getPeerIds());
-        for(ServerInfo server: serverConfig.getServerConfig()) {
-            if(getId().equals(server.getId())) {
-                foundSelf = true;
-                if(!server.isVoting()) {
-                    votingMember = false;
-                }
-            } else {
-                VotingState votingState = server.isVoting() ? VotingState.VOTING: VotingState.NON_VOTING;
-                if(!currentPeers.contains(server.getId())) {
-                    this.addToPeers(server.getId(), null, votingState);
-                } else {
-                    this.getPeerInfo(server.getId()).setVotingState(votingState);
-                    currentPeers.remove(server.getId());
-                }
-            }
-        }
+        votingMember = peerInfoCache.update(serverConfig, getId());
 
-        for(String peerIdToRemove: currentPeers) {
-            this.removePeer(peerIdToRemove);
-        }
-
-        if(!foundSelf) {
-            votingMember = false;
-        }
-
-        LOG.debug("{}: Updated server config: isVoting: {}, peers: {}", id, votingMember, peerInfoMap.values());
+        LOG.debug("{}: Updated server config: isVoting: {}, peers: {}", id, votingMember, peerInfoCache.getPeers());
 
         setDynamicServerConfigurationInUse();
     }
@@ -238,7 +210,7 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     @Override
     public void addToPeers(String id, String address, VotingState votingState) {
-        peerInfoMap.put(id, new PeerInfo(id, address, votingState));
+        peerInfoCache.add(id, address, votingState);
         numVotingPeers = -1;
     }
 
@@ -247,7 +219,7 @@ public class RaftActorContextImpl implements RaftActorContext {
         if(getId().equals(name)) {
             votingMember = false;
         } else {
-            peerInfoMap.remove(name);
+            peerInfoCache.remove(name);
             numVotingPeers = -1;
         }
     }
@@ -262,10 +234,8 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     @Override
     public void setPeerAddress(String peerId, String peerAddress) {
-        PeerInfo peerInfo = peerInfoMap.get(peerId);
-        if(peerInfo != null) {
+        if(peerInfoCache.setPeerAddress(peerId, peerAddress)) {
             LOG.info("Peer address for peer {} set to {}", peerId, peerAddress);
-            peerInfo.setAddress(peerAddress);
         }
     }
 
@@ -366,6 +336,133 @@ public class RaftActorContextImpl implements RaftActorContext {
             } catch (Exception e) {
                 LOG.debug("{}: Error closing behavior {}", getId(), currentBehavior.state());
             }
+        }
+    }
+
+    /**
+     * The writeable version of PeerInfoCache. It utilizes copy-on-write semantics when updating the internal
+     * peerInfoMap. Updates are not synchronized as write access is only allowed via the RaftActorContext
+     * interface which is owned by the RaftActor.
+     *
+     * @author Thomas Pantelis
+     */
+    private static class WriteablePeerInfoCache extends PeerInfoCache {
+        private final PeerAddressResolver peerAddressResolver;
+        private volatile Map<String, PeerInfo> peerInfoMap;
+
+        WriteablePeerInfoCache(Map<String, String> peerAddresses, PeerAddressResolver peerAddressResolver) {
+            this.peerAddressResolver = peerAddressResolver;
+
+            Map<String, PeerInfo> newMap = new HashMap<>();
+            for(Map.Entry<String, String> e: peerAddresses.entrySet()) {
+                newMap.put(e.getKey(), new PeerInfo(e.getKey(), e.getValue(), VotingState.VOTING));
+            }
+
+            setPeerInfoMap(newMap);
+        }
+
+        @Override
+        protected Collection<PeerInfo> getPeers() {
+            return peerInfoMap().values();
+        }
+
+        @Override
+        protected PeerAddressResolver peerAddressResolver() {
+            return peerAddressResolver;
+        }
+
+        private Map<String, PeerInfo> peerInfoMap() {
+            return peerInfoMap;
+        }
+
+        private void setPeerInfoMap(Map<String, PeerInfo> newMap) {
+            peerInfoMap = Collections.unmodifiableMap(newMap);
+        }
+
+        void add(String id, String address, VotingState votingState) {
+            Map<String, PeerInfo> newMap = new HashMap<>(peerInfoMap());
+            newMap.put(id, new PeerInfo(id, address, votingState));
+            setPeerInfoMap(newMap);
+        }
+
+        void remove(String id) {
+            Map<String, PeerInfo> newMap = new HashMap<>(peerInfoMap());
+            newMap.remove(id);
+            setPeerInfoMap(newMap);
+        }
+
+        public boolean update(ServerConfigurationPayload serverConfig, String selfId) {
+            boolean isSelfVoting = true;
+            boolean foundSelf = false;
+            Map<String, PeerInfo> newMap = new HashMap<>(peerInfoMap());
+            Set<String> currentPeers = new HashSet<>(newMap.keySet());
+            for(ServerInfo server: serverConfig.getServerConfig()) {
+                if(selfId.equals(server.getId())) {
+                    foundSelf = true;
+                    if(!server.isVoting()) {
+                        isSelfVoting = false;
+                    }
+                } else {
+                    VotingState votingState = server.isVoting() ? VotingState.VOTING: VotingState.NON_VOTING;
+                    if(!currentPeers.contains(server.getId())) {
+                        newMap.put(server.getId(), new PeerInfo(server.getId(), null, votingState));
+                    } else {
+                        newMap.get(server.getId()).setVotingState(votingState);
+                        currentPeers.remove(server.getId());
+                    }
+                }
+            }
+
+            for(String peerIdToRemove: currentPeers) {
+                newMap.remove(peerIdToRemove);
+            }
+
+            setPeerInfoMap(newMap);
+
+            if(!foundSelf) {
+                isSelfVoting = false;
+            }
+
+            return isSelfVoting;
+        }
+
+        boolean setPeerAddress(String peerId, String peerAddress) {
+            Map<String, PeerInfo> localPeerInfoMap = peerInfoMap();
+            PeerInfo peerInfo = localPeerInfoMap.get(peerId);
+            if(peerInfo != null && !Objects.equals(peerAddress, peerInfo.getAddress())) {
+                Map<String, PeerInfo> newMap = new HashMap<>(localPeerInfoMap);
+                newMap.get(peerId).setAddress(peerAddress);
+                setPeerInfoMap(newMap);
+                return true;
+            }
+
+            return false;
+        }
+
+        String getPeerAddress(String peerId) {
+            String peerAddress = null;
+            PeerInfo peerInfo = peerInfoMap().get(peerId);
+            if(peerInfo != null) {
+                peerAddress = peerInfo.getAddress();
+                if(peerAddress == null) {
+                    peerAddress = peerAddressResolver.resolve(peerId);
+                    if(peerAddress != null) {
+                        setPeerAddress(peerId, peerAddress);
+                    }
+                }
+            } else {
+                peerAddress = peerAddressResolver.resolve(peerId);
+            }
+
+            return peerAddress;
+        }
+
+        Collection<String> getPeerIds() {
+            return peerInfoMap().keySet();
+        }
+
+        PeerInfo getPeerInfo(String peerId) {
+            return peerInfoMap().get(peerId);
         }
     }
 }

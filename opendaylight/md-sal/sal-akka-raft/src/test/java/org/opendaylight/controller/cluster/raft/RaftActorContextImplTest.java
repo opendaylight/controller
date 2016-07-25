@@ -92,6 +92,33 @@ public class RaftActorContextImplTest extends AbstractActorTest {
     }
 
     @Test
+    public void testAddToPeers() {
+        DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
+        RaftActorContextImpl context = new RaftActorContextImpl(actor, actor.underlyingActor().getContext(),
+                "test", new ElectionTermImpl(new NonPersistentDataProvider(), "test", log), -1, -1,
+                Maps.newHashMap(ImmutableMap.<String, String>of("peer1", "peerAddress1")), configParams,
+                new NonPersistentDataProvider(), log);
+
+        context.addToPeers("peer2", "peerAddress2", VotingState.NON_VOTING);
+        verifyPeerInfo(context, "peer1", true);
+        verifyPeerInfo(context, "peer2", false);
+        assertEquals("getPeerAddress", "peerAddress2", context.getPeerAddress("peer2"));
+    }
+
+    @Test
+    public void testRemovePeer() {
+        DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
+        RaftActorContextImpl context = new RaftActorContextImpl(actor, actor.underlyingActor().getContext(),
+                "test", new ElectionTermImpl(new NonPersistentDataProvider(), "test", log), -1, -1,
+                Maps.newHashMap(ImmutableMap.<String, String>of("peer1", "peerAddress1", "peer2", "peerAddress2")),
+                configParams, new NonPersistentDataProvider(), log);
+
+        context.removePeer("peer2");
+        verifyPeerInfo(context, "peer1", true);
+        verifyPeerInfo(context, "peer2", null);
+    }
+
+    @Test
     public void testUpdatePeerIds() {
         RaftActorContextImpl context = new RaftActorContextImpl(actor, actor.underlyingActor().getContext(),
                 "self", new ElectionTermImpl(new NonPersistentDataProvider(), "test", log), -1, -1,
