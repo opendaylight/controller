@@ -12,30 +12,35 @@ import akka.actor.Status.Failure;
 import akka.serialization.Serialization;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
+import com.google.common.primitives.UnsignedLong;
+import com.google.common.util.concurrent.FutureCallback;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Queue;
-import java.util.concurrent.ExecutionException;
-import org.opendaylight.controller.cluster.datastore.DataTreeCohortActorRegistry.CohortRegistryCommand;
+import javax.annotation.Nonnull;
+import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.AbortTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.BatchedModifications;
 import org.opendaylight.controller.cluster.datastore.messages.BatchedModificationsReply;
 import org.opendaylight.controller.cluster.datastore.messages.CanCommitTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CanCommitTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.CommitTransaction;
+import org.opendaylight.controller.cluster.datastore.messages.CommitTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.ForwardedReadyTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.ReadyLocalTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.ReadyTransactionReply;
+import org.opendaylight.controller.cluster.datastore.messages.VersionedExternalizableMessage;
 import org.opendaylight.controller.cluster.datastore.utils.AbstractBatchedModificationsCursor;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.yangtools.concepts.Identifier;
-import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 import org.slf4j.Logger;
 
 /**
@@ -52,16 +57,9 @@ final class ShardCommitCoordinator {
 
     private final Map<Identifier, CohortEntry> cohortCache = new HashMap<>();
 
-    private CohortEntry currentCohortEntry;
-
     private final ShardDataTree dataTree;
 
-    private final DataTreeCohortActorRegistry cohortRegistry = new DataTreeCohortActorRegistry();
-
-    // We use a LinkedList here to avoid synchronization overhead with concurrent queue impls
-    // since this should only be accessed on the shard's dispatcher.
-    private final Queue<CohortEntry> queuedCohortEntries = new LinkedList<>();
-
+    private final Queue<CohortEntry> readyEntries = new ArrayDeque<>();
     private int queueCapacity;
 
     private final Logger log;
@@ -77,8 +75,8 @@ final class ShardCommitCoordinator {
 
     private Runnable runOnPendingTransactionsComplete;
 
-    ShardCommitCoordinator(ShardDataTree dataTree, long cacheExpiryTimeoutInMillis, int queueCapacity, Logger log,
-            String name) {
+    ShardCommitCoordinator(final ShardDataTree dataTree, final long cacheExpiryTimeoutInMillis, final int queueCapacity, final Logger log,
+            final String name) {
 
         this.queueCapacity = queueCapacity;
         this.log = log;
@@ -87,45 +85,43 @@ final class ShardCommitCoordinator {
         this.cacheExpiryTimeoutInMillis = cacheExpiryTimeoutInMillis;
     }
 
-    int getQueueSize() {
-        return queuedCohortEntries.size();
-    }
-
     int getCohortCacheSize() {
         return cohortCache.size();
     }
 
-    void setQueueCapacity(int queueCapacity) {
+    void setQueueCapacity(final int queueCapacity) {
         this.queueCapacity = queueCapacity;
     }
 
-    private ReadyTransactionReply readyTransactionReply(Shard shard) {
-        if(readyTransactionReply == null) {
-            readyTransactionReply = new ReadyTransactionReply(Serialization.serializedActorPath(shard.self()));
+    private String persistenceId() {
+        return dataTree.logContext();
+    }
+
+    private ReadyTransactionReply readyTransactionReply(final ActorRef cohort) {
+        if (readyTransactionReply == null) {
+            readyTransactionReply = new ReadyTransactionReply(Serialization.serializedActorPath(cohort));
         }
 
         return readyTransactionReply;
     }
 
-    private boolean queueCohortEntry(CohortEntry cohortEntry, ActorRef sender, Shard shard) {
-        if(queuedCohortEntries.size() < queueCapacity) {
-            queuedCohortEntries.offer(cohortEntry);
-
-            log.debug("{}: Enqueued transaction {}, queue size {}", name, cohortEntry.getTransactionID(),
-                    queuedCohortEntries.size());
-
+    private boolean queueCohortEntry(final CohortEntry cohortEntry, final ActorRef sender, final Shard shard) {
+        final int readySize = readyEntries.size();
+        if (readySize < queueCapacity) {
+            readyEntries.offer(cohortEntry);
+            log.debug("{}: Enqueued transaction {}, queue size {}", name, cohortEntry.getTransactionID(), readySize);
             return true;
-        } else {
-            cohortCache.remove(cohortEntry.getTransactionID());
-
-            final RuntimeException ex = new RuntimeException(
-                    String.format("%s: Could not enqueue transaction %s - the maximum commit queue"+
-                                  " capacity %d has been reached.",
-                                  name, cohortEntry.getTransactionID(), queueCapacity));
-            log.error(ex.getMessage());
-            sender.tell(new Failure(ex), shard.self());
-            return false;
         }
+
+        // Slow path
+        log.error("{}: Maximum commit queue capacity {} reached, cannot enqueue transaction {}", name, queueCapacity,
+            cohortEntry.getTransactionID());
+
+        cohortCache.remove(cohortEntry.getTransactionID());
+        sender.tell(new Failure(new RuntimeException(String.format(
+            "%s: Could not enqueue transaction %s - the maximum commit queue capacity %s has been reached.", name,
+            cohortEntry.getTransactionID(), queueCapacity))), shard.self());
+        return false;
     }
 
     /**
@@ -137,21 +133,20 @@ final class ShardCommitCoordinator {
      * @param shard the transaction's shard actor
      * @param schema
      */
-    void handleForwardedReadyTransaction(ForwardedReadyTransaction ready, ActorRef sender, Shard shard,
-            SchemaContext schema) {
+    void handleForwardedReadyTransaction(final ForwardedReadyTransaction ready, final ActorRef sender,
+            final Shard shard) {
         log.debug("{}: Readying transaction {}, client version {}", name,
                 ready.getTransactionID(), ready.getTxnClientVersion());
 
         final ShardDataTreeCohort cohort = ready.getTransaction().ready();
-        final CohortEntry cohortEntry = CohortEntry.createReady(ready.getTransactionID(), cohort, cohortRegistry,
-            schema, ready.getTxnClientVersion());
+        final CohortEntry cohortEntry = CohortEntry.createReady(cohort, ready.getTxnClientVersion());
         cohortCache.put(cohortEntry.getTransactionID(), cohortEntry);
 
-        if(!queueCohortEntry(cohortEntry, sender, shard)) {
+        if (!queueCohortEntry(cohortEntry, sender, shard)) {
             return;
         }
 
-        if(ready.isDoImmediateCommit()) {
+        if (ready.isDoImmediateCommit()) {
             cohortEntry.setDoImmediateCommit(true);
             cohortEntry.setReplySender(sender);
             cohortEntry.setShard(shard);
@@ -159,7 +154,7 @@ final class ShardCommitCoordinator {
         } else {
             // The caller does not want immediate commit - the 3-phase commit will be coordinated by the
             // front-end so send back a ReadyTransactionReply with our actor path.
-            sender.tell(readyTransactionReply(shard), shard.self());
+            sender.tell(readyTransactionReply(shard.self()), shard.self());
         }
     }
 
@@ -172,52 +167,51 @@ final class ShardCommitCoordinator {
      * @param batched the BatchedModifications message to process
      * @param sender the sender of the message
      */
-    void handleBatchedModifications(BatchedModifications batched, ActorRef sender, Shard shard) {
+    void handleBatchedModifications(final BatchedModifications batched, final ActorRef sender, final Shard shard) {
         CohortEntry cohortEntry = cohortCache.get(batched.getTransactionID());
-        if(cohortEntry == null) {
-            cohortEntry = CohortEntry.createOpen(batched.getTransactionID(),
-                    dataTree.newReadWriteTransaction(batched.getTransactionID()),
-                    cohortRegistry, dataTree.getSchemaContext(), batched.getVersion());
+        if (cohortEntry == null) {
+            cohortEntry = CohortEntry.createOpen(dataTree.newReadWriteTransaction(batched.getTransactionID()),
+                batched.getVersion());
             cohortCache.put(cohortEntry.getTransactionID(), cohortEntry);
         }
 
-        if(log.isDebugEnabled()) {
+        if (log.isDebugEnabled()) {
             log.debug("{}: Applying {} batched modifications for Tx {}", name,
                     batched.getModifications().size(), batched.getTransactionID());
         }
 
         cohortEntry.applyModifications(batched.getModifications());
 
-        if(batched.isReady()) {
-            if(cohortEntry.getLastBatchedModificationsException() != null) {
+        if (batched.isReady()) {
+            if (cohortEntry.getLastBatchedModificationsException() != null) {
                 cohortCache.remove(cohortEntry.getTransactionID());
                 throw cohortEntry.getLastBatchedModificationsException();
             }
 
-            if(cohortEntry.getTotalBatchedModificationsReceived() != batched.getTotalMessagesSent()) {
+            if (cohortEntry.getTotalBatchedModificationsReceived() != batched.getTotalMessagesSent()) {
                 cohortCache.remove(cohortEntry.getTransactionID());
                 throw new IllegalStateException(String.format(
                         "The total number of batched messages received %d does not match the number sent %d",
                         cohortEntry.getTotalBatchedModificationsReceived(), batched.getTotalMessagesSent()));
             }
 
-            if(!queueCohortEntry(cohortEntry, sender, shard)) {
+            if (!queueCohortEntry(cohortEntry, sender, shard)) {
                 return;
             }
 
-            if(log.isDebugEnabled()) {
+            if (log.isDebugEnabled()) {
                 log.debug("{}: Readying Tx {}, client version {}", name,
                         batched.getTransactionID(), batched.getVersion());
             }
 
             cohortEntry.ready(cohortDecorator, batched.isDoCommitOnReady());
 
-            if(batched.isDoCommitOnReady()) {
+            if (batched.isDoCommitOnReady()) {
                 cohortEntry.setReplySender(sender);
                 cohortEntry.setShard(shard);
                 handleCanCommit(cohortEntry);
             } else {
-                sender.tell(readyTransactionReply(shard), shard.self());
+                sender.tell(readyTransactionReply(shard.self()), shard.self());
             }
         } else {
             sender.tell(new BatchedModificationsReply(batched.getModifications().size()), shard.self());
@@ -233,15 +227,14 @@ final class ShardCommitCoordinator {
      * @param sender the sender of the message
      * @param shard the transaction's shard actor
      */
-    void handleReadyLocalTransaction(ReadyLocalTransaction message, ActorRef sender, Shard shard) {
-        final ShardDataTreeCohort cohort = new SimpleShardDataTreeCohort(dataTree, message.getModification(),
-                message.getTransactionID());
-        final CohortEntry cohortEntry = CohortEntry.createReady(message.getTransactionID(), cohort, cohortRegistry,
-            dataTree.getSchemaContext(), DataStoreVersions.CURRENT_VERSION);
+    void handleReadyLocalTransaction(final ReadyLocalTransaction message, final ActorRef sender, final Shard shard) {
+        final ShardDataTreeCohort cohort = dataTree.createReadyCohort(message.getTransactionID(),
+            message.getModification());
+        final CohortEntry cohortEntry = CohortEntry.createReady(cohort, DataStoreVersions.CURRENT_VERSION);
         cohortCache.put(cohortEntry.getTransactionID(), cohortEntry);
         cohortEntry.setDoImmediateCommit(message.isDoCommitOnReady());
 
-        if(!queueCohortEntry(cohortEntry, sender, shard)) {
+        if (!queueCohortEntry(cohortEntry, sender, shard)) {
             return;
         }
 
@@ -252,14 +245,14 @@ final class ShardCommitCoordinator {
             cohortEntry.setShard(shard);
             handleCanCommit(cohortEntry);
         } else {
-            sender.tell(readyTransactionReply(shard), shard.self());
+            sender.tell(readyTransactionReply(shard.self()), shard.self());
         }
     }
 
     Collection<BatchedModifications> createForwardedBatchedModifications(final BatchedModifications from,
             final int maxModificationsPerBatch) {
         CohortEntry cohortEntry = getAndRemoveCohortEntry(from.getTransactionID());
-        if(cohortEntry == null || cohortEntry.getTransaction() == null) {
+        if (cohortEntry == null || cohortEntry.getTransaction() == null) {
             return Collections.singletonList(from);
         }
 
@@ -269,7 +262,7 @@ final class ShardCommitCoordinator {
         cohortEntry.getTransaction().getSnapshot().applyToCursor(new AbstractBatchedModificationsCursor() {
             @Override
             protected BatchedModifications getModifications() {
-                if(newModifications.isEmpty() ||
+                if (newModifications.isEmpty() ||
                         newModifications.getLast().getModifications().size() >= maxModificationsPerBatch) {
                     newModifications.add(new BatchedModifications(from.getTransactionID(), from.getVersion()));
                 }
@@ -285,34 +278,28 @@ final class ShardCommitCoordinator {
         return newModifications;
     }
 
-    private void handleCanCommit(CohortEntry cohortEntry) {
-        cohortEntry.updateLastAccessTime();
+    private void handleCanCommit(final CohortEntry cohortEntry) {
+        cohortEntry.canCommit(new FutureCallback<Void>() {
+            @Override
+            public void onSuccess(final Void result) {
+                log.debug("{}: canCommit for {}: success", name, cohortEntry.getTransactionID());
 
-        if(currentCohortEntry != null) {
-            // There's already a Tx commit in progress so we can't process this entry yet - but it's in the
-            // queue and will get processed after all prior entries complete.
-
-            if(log.isDebugEnabled()) {
-                log.debug("{}: Commit for Tx {} already in progress - skipping canCommit for {} for now",
-                        name, currentCohortEntry.getTransactionID(), cohortEntry.getTransactionID());
+                if (cohortEntry.isDoImmediateCommit()) {
+                    doCommit(cohortEntry);
+                } else {
+                    cohortEntry.getReplySender().tell(
+                        CanCommitTransactionReply.yes(cohortEntry.getClientVersion()).toSerializable(),
+                        cohortEntry.getShard().self());
+                }
             }
 
-            return;
-        }
-
-        // No Tx commit currently in progress - check if this entry is the next one in the queue, If so make
-        // it the current entry and proceed with canCommit.
-        // Purposely checking reference equality here.
-        if(queuedCohortEntries.peek() == cohortEntry) {
-            currentCohortEntry = queuedCohortEntries.poll();
-            doCanCommit(currentCohortEntry);
-        } else {
-            if(log.isDebugEnabled()) {
-                log.debug("{}: Tx {} is the next pending canCommit - skipping {} for now", name,
-                        queuedCohortEntries.peek() != null ? queuedCohortEntries.peek().getTransactionID() : "???",
-                                cohortEntry.getTransactionID());
+            @Override
+            public void onFailure(final Throwable t) {
+                log.debug("{}: An exception occurred during canCommit", name, t);
+                currentTransactionComplete(cohortEntry.getTransactionID(), true);
+                cohortEntry.getReplySender().tell(new Failure(t), cohortEntry.getShard().self());
             }
-        }
+        });
     }
 
     /**
@@ -322,11 +309,11 @@ final class ShardCommitCoordinator {
      * @param sender the actor to which to send the response
      * @param shard the transaction's shard actor
      */
-    void handleCanCommit(Identifier transactionID, final ActorRef sender, final Shard shard) {
+    void handleCanCommit(final Identifier transactionID, final ActorRef sender, final Shard shard) {
         // Lookup the cohort entry that was cached previously (or should have been) by
         // transactionReady (via the ForwardedReadyTransaction message).
         final CohortEntry cohortEntry = cohortCache.get(transactionID);
-        if(cohortEntry == null) {
+        if (cohortEntry == null) {
             // Either canCommit was invoked before ready(shouldn't happen)  or a long time passed
             // between canCommit and ready and the entry was expired from the cache.
             IllegalStateException ex = new IllegalStateException(
@@ -342,70 +329,54 @@ final class ShardCommitCoordinator {
         handleCanCommit(cohortEntry);
     }
 
-    private void doCanCommit(final CohortEntry cohortEntry) {
-        boolean canCommit = false;
-        try {
-            canCommit = cohortEntry.canCommit();
-
-            log.debug("{}: canCommit for {}: {}", name, cohortEntry.getTransactionID(), canCommit);
-
-            if(cohortEntry.isDoImmediateCommit()) {
-                if(canCommit) {
-                    doCommit(cohortEntry);
-                } else {
-                    cohortEntry.getReplySender().tell(new Failure(new TransactionCommitFailedException(
-                                "Can Commit failed, no detailed cause available.")), cohortEntry.getShard().self());
-                }
-            } else {
-                cohortEntry.getReplySender().tell(
-                        canCommit ? CanCommitTransactionReply.yes(cohortEntry.getClientVersion()).toSerializable() :
-                            CanCommitTransactionReply.no(cohortEntry.getClientVersion()).toSerializable(),
-                        cohortEntry.getShard().self());
-            }
-        } catch (Exception e) {
-            log.debug("{}: An exception occurred during canCommit", name, e);
-
-            Throwable failure = e;
-            if(e instanceof ExecutionException) {
-                failure = e.getCause();
-            }
-
-            cohortEntry.getReplySender().tell(new Failure(failure), cohortEntry.getShard().self());
-        } finally {
-            if(!canCommit) {
-                // Remove the entry from the cache now.
-                currentTransactionComplete(cohortEntry.getTransactionID(), true);
-            }
-        }
-    }
-
-    private boolean doCommit(CohortEntry cohortEntry) {
+    private void doCommit(final CohortEntry cohortEntry) {
         log.debug("{}: Committing transaction {}", name, cohortEntry.getTransactionID());
-
-        boolean success = false;
 
         // We perform the preCommit phase here atomically with the commit phase. This is an
         // optimization to eliminate the overhead of an extra preCommit message. We lose front-end
         // coordination of preCommit across shards in case of failure but preCommit should not
         // normally fail since we ensure only one concurrent 3-phase commit.
+        cohortEntry.preCommit(new FutureCallback<DataTreeCandidate>() {
+            @Override
+            public void onSuccess(final DataTreeCandidate candidate) {
+                finishCommit(cohortEntry.getReplySender(), cohortEntry);
+                cohortEntry.updateLastAccessTime();
+            }
 
-        try {
-            cohortEntry.preCommit();
+            @Override
+            public void onFailure(final Throwable t) {
+                log.error("{} An exception occurred while preCommitting transaction {}", name,
+                    cohortEntry.getTransactionID(), t);
+                cohortEntry.getShard().getShardMBean().incrementFailedTransactionsCount();
+                cohortEntry.getReplySender().tell(new Failure(t), cohortEntry.getShard().self());
+                currentTransactionComplete(cohortEntry.getTransactionID(), true);
+            }
+        });
+    }
 
-            cohortEntry.getShard().continueCommit(cohortEntry);
+    private void finishCommit(@Nonnull final ActorRef sender, @Nonnull final CohortEntry cohortEntry) {
+        log.debug("{}: Finishing commit for transaction {}", persistenceId(), cohortEntry.getTransactionID());
 
-            cohortEntry.updateLastAccessTime();
+        cohortEntry.commit(new FutureCallback<UnsignedLong>() {
+            @Override
+            public void onSuccess(final UnsignedLong result) {
+                final TransactionIdentifier txId = cohortEntry.getTransactionID();
+                log.debug("{}: Transaction {} committed as {}, sending response to {}", persistenceId(), txId, result,
+                    sender);
 
-            success = true;
-        } catch (Exception e) {
-            log.error("{} An exception occurred while preCommitting transaction {}",
-                    name, cohortEntry.getTransactionID(), e);
-            cohortEntry.getReplySender().tell(new Failure(e), cohortEntry.getShard().self());
+                sender.tell(CommitTransactionReply.instance(cohortEntry.getClientVersion()).toSerializable(),
+                    cohortEntry.self());
+                currentTransactionComplete(txId, true);
+            }
 
-            currentTransactionComplete(cohortEntry.getTransactionID(), true);
-        }
-
-        return success;
+            @Override
+            public void onFailure(final Throwable t) {
+                final TransactionIdentifier txId = cohortEntry.getTransactionID();
+                log.error("{}, An exception occurred while committing transaction {}", persistenceId(), txId, t);
+                sender.tell(new Failure(t), cohortEntry.self());
+                currentTransactionComplete(txId, true);
+            }
+        });
     }
 
     /**
@@ -414,13 +385,12 @@ final class ShardCommitCoordinator {
      * @param transactionID the ID of the transaction to commit
      * @param sender the actor to which to send the response
      * @param shard the transaction's shard actor
-     * @return true if the transaction was successfully prepared, false otherwise.
      */
-    boolean handleCommit(final Identifier transactionID, final ActorRef sender, final Shard shard) {
+    void handleCommit(final Identifier transactionID, final ActorRef sender, final Shard shard) {
         // Get the current in-progress cohort entry in the commitCoordinator if it corresponds to
         // this transaction.
         final CohortEntry cohortEntry = getCohortEntryIfCurrent(transactionID);
-        if(cohortEntry == null) {
+        if (cohortEntry == null) {
             // We're not the current Tx - the Tx was likely expired b/c it took too long in
             // between the canCommit and commit messages.
             IllegalStateException ex = new IllegalStateException(
@@ -428,16 +398,16 @@ final class ShardCommitCoordinator {
                             name, transactionID));
             log.error(ex.getMessage());
             sender.tell(new Failure(ex), shard.self());
-            return false;
+            shard.getShardMBean().incrementFailedTransactionsCount();
+        } else {
+            cohortEntry.setReplySender(sender);
+            doCommit(cohortEntry);
         }
-
-        cohortEntry.setReplySender(sender);
-        return doCommit(cohortEntry);
     }
 
     void handleAbort(final Identifier transactionID, final ActorRef sender, final Shard shard) {
         CohortEntry cohortEntry = getCohortEntryIfCurrent(transactionID);
-        if(cohortEntry != null) {
+        if (cohortEntry != null) {
             // We don't remove the cached cohort entry here (ie pass false) in case the Tx was
             // aborted during replication in which case we may still commit locally if replication
             // succeeds.
@@ -446,7 +416,7 @@ final class ShardCommitCoordinator {
             cohortEntry = getAndRemoveCohortEntry(transactionID);
         }
 
-        if(cohortEntry == null) {
+        if (cohortEntry == null) {
             return;
         }
 
@@ -458,13 +428,13 @@ final class ShardCommitCoordinator {
 
             shard.getShardMBean().incrementAbortTransactionsCount();
 
-            if(sender != null) {
+            if (sender != null) {
                 sender.tell(AbortTransactionReply.instance(cohortEntry.getClientVersion()).toSerializable(), self);
             }
         } catch (Exception e) {
             log.error("{}: An exception happened during abort", name, e);
 
-            if(sender != null) {
+            if (sender != null) {
                 sender.tell(new Failure(e), self);
             }
         }
@@ -472,8 +442,8 @@ final class ShardCommitCoordinator {
 
     void checkForExpiredTransactions(final long timeout, final Shard shard) {
         CohortEntry cohortEntry = getCurrentCohortEntry();
-        if(cohortEntry != null) {
-            if(cohortEntry.isExpired(timeout)) {
+        if (cohortEntry != null) {
+            if (cohortEntry.isExpired(timeout)) {
                 log.warn("{}: Current transaction {} has timed out after {} ms - aborting",
                         name, cohortEntry.getTransactionID(), timeout);
 
@@ -485,80 +455,75 @@ final class ShardCommitCoordinator {
     }
 
     void abortPendingTransactions(final String reason, final Shard shard) {
-        if(currentCohortEntry == null && queuedCohortEntries.isEmpty()) {
-            return;
-        }
-
-        List<CohortEntry> cohortEntries = getAndClearPendingCohortEntries();
+        final Collection<CohortEntry> cohortEntries = getAndClearPendingCohortEntries();
 
         log.debug("{}: Aborting {} pending queued transactions", name, cohortEntries.size());
 
-        for(CohortEntry cohortEntry: cohortEntries) {
-            if(cohortEntry.getReplySender() != null) {
-                cohortEntry.getReplySender().tell(new Failure(new RuntimeException(reason)), shard.self());
+        final Failure failure = new Failure(new RuntimeException(reason));
+        for (CohortEntry cohortEntry: cohortEntries) {
+            if (cohortEntry.getReplySender() != null) {
+                cohortEntry.getReplySender().tell(failure, shard.self());
             }
         }
     }
 
-    private List<CohortEntry> getAndClearPendingCohortEntries() {
-        List<CohortEntry> cohortEntries = new ArrayList<>();
-
-        if(currentCohortEntry != null) {
-            cohortEntries.add(currentCohortEntry);
-            cohortCache.remove(currentCohortEntry.getTransactionID());
-            currentCohortEntry = null;
-        }
-
-        for(CohortEntry cohortEntry: queuedCohortEntries) {
-            cohortEntries.add(cohortEntry);
+    private Collection<CohortEntry> getAndClearPendingCohortEntries() {
+        for (CohortEntry cohortEntry : readyEntries) {
             cohortCache.remove(cohortEntry.getTransactionID());
         }
 
-        queuedCohortEntries.clear();
-        return cohortEntries;
+        final Collection<CohortEntry> ret = ImmutableList.copyOf(readyEntries);
+        readyEntries.clear();
+        return ret;
     }
 
-    Collection<Object> convertPendingTransactionsToMessages(final int maxModificationsPerBatch) {
-        if(currentCohortEntry == null && queuedCohortEntries.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        Collection<Object> messages = new ArrayList<>();
-        List<CohortEntry> cohortEntries = getAndClearPendingCohortEntries();
-        for(CohortEntry cohortEntry: cohortEntries) {
-            if(cohortEntry.isExpired(cacheExpiryTimeoutInMillis) || cohortEntry.isAborted()) {
+    Collection<?> convertPendingTransactionsToMessages(final int maxModificationsPerBatch) {
+        final Collection<VersionedExternalizableMessage> messages = new ArrayList<>();
+        for (CohortEntry cohortEntry : getAndClearPendingCohortEntries()) {
+            if (cohortEntry.isExpired(cacheExpiryTimeoutInMillis) || cohortEntry.isAborted()) {
                 continue;
             }
 
-            final LinkedList<BatchedModifications> newModifications = new LinkedList<>();
+            final Deque<BatchedModifications> newMessages = new ArrayDeque<>();
             cohortEntry.getDataTreeModification().applyToCursor(new AbstractBatchedModificationsCursor() {
                 @Override
                 protected BatchedModifications getModifications() {
-                    if(newModifications.isEmpty() ||
-                            newModifications.getLast().getModifications().size() >= maxModificationsPerBatch) {
-                        newModifications.add(new BatchedModifications(cohortEntry.getTransactionID(),
-                                cohortEntry.getClientVersion()));
-        }
+                    final BatchedModifications lastBatch = newMessages.peekLast();
 
-                    return newModifications.getLast();
+                    if (lastBatch != null && lastBatch.getModifications().size() >= maxModificationsPerBatch) {
+                        return lastBatch;
+                    }
+
+                    // Allocate a new message
+                    final BatchedModifications ret = new BatchedModifications(cohortEntry.getTransactionID(),
+                        cohortEntry.getClientVersion());
+                    newMessages.add(ret);
+                    return ret;
                 }
             });
 
-            if(!newModifications.isEmpty()) {
-                BatchedModifications last = newModifications.getLast();
-                last.setDoCommitOnReady(cohortEntry.isDoImmediateCommit());
+            final BatchedModifications last = newMessages.peekLast();
+            if (last != null) {
+                final boolean immediate = cohortEntry.isDoImmediateCommit();
+                last.setDoCommitOnReady(immediate);
                 last.setReady(true);
-                last.setTotalMessagesSent(newModifications.size());
-                messages.addAll(newModifications);
+                last.setTotalMessagesSent(newMessages.size());
 
-                if(!cohortEntry.isDoImmediateCommit() && cohortEntry.getState() == CohortEntry.State.CAN_COMMITTED) {
-                    messages.add(new CanCommitTransaction(cohortEntry.getTransactionID(),
-                            cohortEntry.getClientVersion()));
-                }
+                messages.addAll(newMessages);
 
-                if(!cohortEntry.isDoImmediateCommit() && cohortEntry.getState() == CohortEntry.State.PRE_COMMITTED) {
-                    messages.add(new CommitTransaction(cohortEntry.getTransactionID(),
-                            cohortEntry.getClientVersion()));
+                if (!immediate) {
+                    switch (cohortEntry.getState()) {
+                        case CAN_COMMITTED:
+                            messages.add(new CanCommitTransaction(cohortEntry.getTransactionID(),
+                                cohortEntry.getClientVersion()));
+                            break;
+                        case PRE_COMMITTED:
+                            messages.add(new CommitTransaction(cohortEntry.getTransactionID(),
+                                cohortEntry.getClientVersion()));
+                            break;
+                        default:
+                            break;
+                    }
                 }
             }
         }
@@ -574,8 +539,9 @@ final class ShardCommitCoordinator {
      * @return the current CohortEntry or null if the given transaction ID does not match the
      *         current entry.
      */
-    CohortEntry getCohortEntryIfCurrent(Identifier transactionID) {
-        if(isCurrentTransaction(transactionID)) {
+    CohortEntry getCohortEntryIfCurrent(final Identifier transactionID) {
+        final CohortEntry currentCohortEntry = readyEntries.peek();
+        if (isCurrentTransaction(transactionID)) {
             return currentCohortEntry;
         }
 
@@ -583,16 +549,16 @@ final class ShardCommitCoordinator {
     }
 
     CohortEntry getCurrentCohortEntry() {
-        return currentCohortEntry;
+        return readyEntries.peek();
     }
 
-    CohortEntry getAndRemoveCohortEntry(Identifier transactionID) {
+    CohortEntry getAndRemoveCohortEntry(final Identifier transactionID) {
         return cohortCache.remove(transactionID);
     }
 
-    boolean isCurrentTransaction(Identifier transactionID) {
-        return currentCohortEntry != null &&
-                currentCohortEntry.getTransactionID().equals(transactionID);
+    boolean isCurrentTransaction(final Identifier transactionID) {
+        final CohortEntry currentCohortEntry = readyEntries.peek();
+        return currentCohortEntry != null && currentCohortEntry.getTransactionID().equals(transactionID);
     }
 
     /**
@@ -604,13 +570,13 @@ final class ShardCommitCoordinator {
      * @param removeCohortEntry if true the CohortEntry for the transaction is also removed from
      *        the cache.
      */
-    void currentTransactionComplete(Identifier transactionID, boolean removeCohortEntry) {
-        if(removeCohortEntry) {
+    void currentTransactionComplete(final Identifier transactionID, final boolean removeCohortEntry) {
+        if (removeCohortEntry) {
             cohortCache.remove(transactionID);
         }
 
-        if(isCurrentTransaction(transactionID)) {
-            currentCohortEntry = null;
+        if (isCurrentTransaction(transactionID)) {
+            readyEntries.poll();
 
             log.debug("{}: currentTransactionComplete: {}", name, transactionID);
 
@@ -621,26 +587,19 @@ final class ShardCommitCoordinator {
     private void maybeProcessNextCohortEntry() {
         // Check if there's a next cohort entry waiting in the queue and if it is ready to commit. Also
         // clean out expired entries.
-        final Iterator<CohortEntry> iter = queuedCohortEntries.iterator();
-        while(iter.hasNext()) {
+        final Iterator<CohortEntry> iter = readyEntries.iterator();
+        while (iter.hasNext()) {
             final CohortEntry next = iter.next();
-            if(next.isReadyToCommit()) {
-                if(currentCohortEntry == null) {
-                    if(log.isDebugEnabled()) {
-                        log.debug("{}: Next entry to canCommit {}", name, next);
-                    }
+            if (next.isReadyToCommit()) {
+                log.debug("{}: Next entry to canCommit {}", name, next);
 
-                    iter.remove();
-                    currentCohortEntry = next;
-                    currentCohortEntry.updateLastAccessTime();
-                    doCanCommit(currentCohortEntry);
-                }
-
+                next.updateLastAccessTime();
+                handleCanCommit(next);
                 break;
-            } else if(next.isExpired(cacheExpiryTimeoutInMillis)) {
+            } else if (next.isExpired(cacheExpiryTimeoutInMillis)) {
                 log.warn("{}: canCommit for transaction {} was not received within {} ms - entry removed from cache",
                         name, next.getTransactionID(), cacheExpiryTimeoutInMillis);
-            } else if(!next.isAborted()) {
+            } else if (!next.isAborted()) {
                 break;
             }
 
@@ -655,13 +614,13 @@ final class ShardCommitCoordinator {
         maybeProcessNextCohortEntry();
     }
 
-    void setRunOnPendingTransactionsComplete(Runnable operation) {
+    void setRunOnPendingTransactionsComplete(final Runnable operation) {
         runOnPendingTransactionsComplete = operation;
         maybeRunOperationOnPendingTransactionsComplete();
     }
 
     private void maybeRunOperationOnPendingTransactionsComplete() {
-        if(runOnPendingTransactionsComplete != null && currentCohortEntry == null && queuedCohortEntries.isEmpty()) {
+        if (runOnPendingTransactionsComplete != null && readyEntries.isEmpty()) {
             log.debug("{}: Pending transactions complete - running operation {}", name, runOnPendingTransactionsComplete);
 
             runOnPendingTransactionsComplete.run();
@@ -670,11 +629,7 @@ final class ShardCommitCoordinator {
     }
 
     @VisibleForTesting
-    void setCohortDecorator(CohortDecorator cohortDecorator) {
+    void setCohortDecorator(final CohortDecorator cohortDecorator) {
         this.cohortDecorator = cohortDecorator;
-    }
-
-   void processCohortRegistryCommand(ActorRef sender, CohortRegistryCommand message) {
-        cohortRegistry.process(sender, message);
     }
 }
