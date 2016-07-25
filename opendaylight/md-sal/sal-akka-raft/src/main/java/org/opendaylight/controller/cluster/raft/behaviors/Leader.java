@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.raft.behaviors;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
+import akka.actor.PoisonPill;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Stopwatch;
@@ -52,11 +53,15 @@ public class Leader extends AbstractLeader {
     @VisibleForTesting
     static final Object ISOLATED_LEADER_CHECK = new Object();
 
+    private final ActorRef keepAliveActor;
     private final Stopwatch isolatedLeaderCheck = Stopwatch.createStarted();
     private @Nullable LeadershipTransferContext leadershipTransferContext;
 
     public Leader(RaftActorContext context) {
         super(context, RaftState.Leader);
+
+        keepAliveActor = context.actorOf(KeepAliveActor.props(getLeaderId(),
+                context.getPeerInfoCache(), () -> context.getConfigParams()));
     }
 
     @Override
@@ -160,6 +165,8 @@ public class Leader extends AbstractLeader {
 
     @Override
     public void close() {
+        keepAliveActor.tell(PoisonPill.getInstance(), ActorRef.noSender());
+
         if(leadershipTransferContext != null) {
             LeadershipTransferContext localLeadershipTransferContext = leadershipTransferContext;
             leadershipTransferContext = null;
