@@ -11,6 +11,7 @@ package org.opendaylight.controller.cluster.datastore;
 import akka.actor.ActorRef;
 import akka.actor.PoisonPill;
 import akka.actor.Status;
+import akka.util.Timeout;
 import com.google.common.base.Preconditions;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -48,7 +49,7 @@ class DataTreeCohortActorRegistry extends AbstractRegistrationTree<ActorRef> {
     private final Map<ActorRef, RegistrationTreeNode<ActorRef>> cohortToNode = new HashMap<>();
 
 
-    void registerCohort(ActorRef sender, RegisterCohort cohort) {
+    void registerCohort(final ActorRef sender, final RegisterCohort cohort) {
         takeLock();
         try {
             final ActorRef cohortRef = cohort.getCohort();
@@ -65,7 +66,7 @@ class DataTreeCohortActorRegistry extends AbstractRegistrationTree<ActorRef> {
         sender.tell(new Status.Success(null), ActorRef.noSender());
     }
 
-    void removeCommitCohort(ActorRef sender, RemoveCohort message) {
+    void removeCommitCohort(final ActorRef sender, final RemoveCohort message) {
         final ActorRef cohort = message.getCohort();
         final RegistrationTreeNode<ActorRef> node = cohortToNode.get(cohort);
         if (node != null) {
@@ -76,14 +77,14 @@ class DataTreeCohortActorRegistry extends AbstractRegistrationTree<ActorRef> {
         cohort.tell(PoisonPill.getInstance(), cohort);
     }
 
-    Collection<DataTreeCohortActor.CanCommit> createCanCommitMessages(TransactionIdentifier txId,
-            DataTreeCandidate candidate, SchemaContext schema) {
+    Collection<DataTreeCohortActor.CanCommit> createCanCommitMessages(final TransactionIdentifier txId,
+            final DataTreeCandidate candidate, final SchemaContext schema) {
         try (RegistrationTreeSnapshot<ActorRef> cohorts = takeSnapshot()) {
             return new CanCommitMessageBuilder(txId, candidate, schema).perform(cohorts.getRootNode());
         }
     }
 
-    void process(ActorRef sender, CohortRegistryCommand message) {
+    void process(final ActorRef sender, final CohortRegistryCommand message) {
         if (message instanceof RegisterCohort) {
             registerCohort(sender, (RegisterCohort) message);
         } else if (message instanceof RemoveCohort) {
@@ -95,7 +96,7 @@ class DataTreeCohortActorRegistry extends AbstractRegistrationTree<ActorRef> {
 
         private final ActorRef cohort;
 
-        CohortRegistryCommand(ActorRef cohort) {
+        CohortRegistryCommand(final ActorRef cohort) {
             this.cohort = Preconditions.checkNotNull(cohort);
         }
 
@@ -108,7 +109,7 @@ class DataTreeCohortActorRegistry extends AbstractRegistrationTree<ActorRef> {
 
         private final DOMDataTreeIdentifier path;
 
-        RegisterCohort(DOMDataTreeIdentifier path, ActorRef cohort) {
+        RegisterCohort(final DOMDataTreeIdentifier path, final ActorRef cohort) {
             super(cohort);
             this.path = path;
 
@@ -122,7 +123,7 @@ class DataTreeCohortActorRegistry extends AbstractRegistrationTree<ActorRef> {
 
     static class RemoveCohort extends CohortRegistryCommand {
 
-        RemoveCohort(ActorRef cohort) {
+        RemoveCohort(final ActorRef cohort) {
             super(cohort);
         }
 
@@ -136,14 +137,14 @@ class DataTreeCohortActorRegistry extends AbstractRegistrationTree<ActorRef> {
         private final Collection<DataTreeCohortActor.CanCommit> messages =
                 new ArrayList<>();
 
-        CanCommitMessageBuilder(TransactionIdentifier txId, DataTreeCandidate candidate, SchemaContext schema) {
+        CanCommitMessageBuilder(final TransactionIdentifier txId, final DataTreeCandidate candidate, final SchemaContext schema) {
             this.txId = Preconditions.checkNotNull(txId);
             this.candidate = Preconditions.checkNotNull(candidate);
             this.schema = schema;
         }
 
-        private void lookupAndCreateCanCommits(List<PathArgument> args, int offset,
-                RegistrationTreeNode<ActorRef> node) {
+        private void lookupAndCreateCanCommits(final List<PathArgument> args, final int offset,
+                final RegistrationTreeNode<ActorRef> node) {
 
             if (args.size() != offset) {
                 final PathArgument arg = args.get(offset);
@@ -159,8 +160,8 @@ class DataTreeCohortActorRegistry extends AbstractRegistrationTree<ActorRef> {
             }
         }
 
-        private void lookupAndCreateCanCommits(YangInstanceIdentifier path, RegistrationTreeNode<ActorRef> regNode,
-                DataTreeCandidateNode candNode) {
+        private void lookupAndCreateCanCommits(final YangInstanceIdentifier path, final RegistrationTreeNode<ActorRef> regNode,
+                final DataTreeCandidateNode candNode) {
             if (candNode.getModificationType() == ModificationType.UNMODIFIED) {
                 LOG.debug("Skipping unmodified candidate {}", path);
                 return;
@@ -186,8 +187,8 @@ class DataTreeCohortActorRegistry extends AbstractRegistrationTree<ActorRef> {
             }
         }
 
-        private void createCanCommits(Collection<ActorRef> regs, YangInstanceIdentifier path,
-                DataTreeCandidateNode node) {
+        private void createCanCommits(final Collection<ActorRef> regs, final YangInstanceIdentifier path,
+                final DataTreeCandidateNode node) {
             final DOMDataTreeCandidate candidate = DOMDataTreeCandidateTO.create(treeIdentifier(path), node);
             for (final ActorRef reg : regs) {
                 final CanCommit message = new DataTreeCohortActor.CanCommit(txId, candidate, schema, reg);
@@ -195,15 +196,19 @@ class DataTreeCohortActorRegistry extends AbstractRegistrationTree<ActorRef> {
             }
         }
 
-        private static DOMDataTreeIdentifier treeIdentifier(YangInstanceIdentifier path) {
+        private static DOMDataTreeIdentifier treeIdentifier(final YangInstanceIdentifier path) {
             return new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, path);
         }
 
-        private Collection<DataTreeCohortActor.CanCommit> perform(RegistrationTreeNode<ActorRef> rootNode) {
+        private Collection<DataTreeCohortActor.CanCommit> perform(final RegistrationTreeNode<ActorRef> rootNode) {
             final List<PathArgument> toLookup = candidate.getRootPath().getPathArguments();
             lookupAndCreateCanCommits(toLookup, 0, rootNode);
             return messages;
         }
     }
 
+    CompositeDataTreeCohort createCohort(final SchemaContext schemaContext, final TransactionIdentifier txId,
+            final Timeout commitStepTimeout) {
+        return new CompositeDataTreeCohort(this, txId, schemaContext, commitStepTimeout);
+    }
 }

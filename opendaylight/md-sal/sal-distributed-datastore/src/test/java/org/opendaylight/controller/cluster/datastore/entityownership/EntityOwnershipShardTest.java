@@ -592,7 +592,8 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
 
         TestActorRef<EntityOwnershipShard> leader = actorFactory.createTestActor(newShardProps(leaderId,
                 ImmutableMap.<String, String>builder().put(localId.toString(), shard.path().toString()).build(),
-                    LOCAL_MEMBER_NAME, EntityOwnerSelectionStrategyConfig.newBuilder().build()).withDispatcher(Dispatchers.DefaultDispatcherId()), leaderId.toString());
+                    leaderId.getMemberName().getName(), EntityOwnerSelectionStrategyConfig.newBuilder().build())
+                .withDispatcher(Dispatchers.DefaultDispatcherId()), leaderId.toString());
         leader.tell(TimeoutNow.INSTANCE, leader);
 
         ShardTestKit.waitUntilLeader(leader);
@@ -833,7 +834,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
         TestEntityOwnershipShard(ShardIdentifier name, Map<String, String> peerAddresses,
                 DatastoreContext datastoreContext) {
             super(newBuilder().id(name).peerAddresses(peerAddresses).datastoreContext(datastoreContext).
-                    schemaContext(SCHEMA_CONTEXT).localMemberName(MemberName.forName(LOCAL_MEMBER_NAME)));
+                    schemaContext(SCHEMA_CONTEXT).localMemberName(name.getMemberName()));
         }
 
         @Override
