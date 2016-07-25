@@ -9,21 +9,27 @@ package org.opendaylight.controller.cluster.datastore;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Verify;
 import java.util.AbstractMap.SimpleEntry;
+import java.util.ArrayDeque;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Queue;
 import javax.annotation.concurrent.NotThreadSafe;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
+import org.opendaylight.controller.md.sal.common.api.data.OptimisticLockFailedException;
+import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeListener;
 import org.opendaylight.controller.md.sal.dom.store.impl.DataChangeListenerRegistration;
 import org.opendaylight.yangtools.concepts.Identifier;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.ConflictingModificationAppliedException;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidateTip;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidates;
@@ -53,6 +59,9 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     private final ShardDataChangeListenerPublisher dataChangeListenerPublisher;
     private final TipProducingDataTree dataTree;
     private final String logContext;
+
+    private final Queue<SimpleShardDataTreeCohort> pendingTransactions = new ArrayDeque<>();
+
     private SchemaContext schemaContext;
 
     public ShardDataTree(final SchemaContext schemaContext, final TreeType treeType,
@@ -222,5 +231,78 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         DataTreeCandidateTip candidate = dataTree.prepare(modification);
         dataTree.commit(candidate);
         return candidate;
+    }
+
+    private void processNextTransaction() {
+        while (!pendingTransactions.isEmpty()) {
+            final SimpleShardDataTreeCohort cohort = pendingTransactions.peek();
+            final DataTreeModification modification = cohort.getDataTreeModification();
+
+            LOG.debug("Validating transaction {}", cohort.getIdentifier());
+            Exception cause;
+            try {
+                dataTree.validate(modification);
+                LOG.debug("Transaction {} validated", cohort.getIdentifier());
+                cohort.successfulCanCommit();
+                return;
+            } catch (ConflictingModificationAppliedException e) {
+                LOG.warn("Store Tx {}: Conflicting modification for path {}.", cohort.getIdentifier(), e.getPath());
+                cause = new OptimisticLockFailedException("Optimistic lock failed.", e);
+            } catch (DataValidationFailedException e) {
+                LOG.warn("Store Tx {}: Data validation failed for path {}.", cohort.getIdentifier(), e.getPath(), e);
+
+                // For debugging purposes, allow dumping of the modification. Coupled with the above
+                // precondition log, it should allow us to understand what went on.
+                LOG.debug("Store Tx {}: modifications: {} tree: {}", cohort.getIdentifier(), modification, dataTree);
+                cause = new TransactionCommitFailedException("Data did not pass validation.", e);
+            } catch (Exception e) {
+                LOG.warn("Unexpected failure in validation phase", e);
+                cause = e;
+            }
+
+            // Failure path: propagate the failure, remove the transaction from the queue and loop to the next one
+            pendingTransactions.poll().failedCanCommit(cause);
+        };
+    }
+
+    void startCanCommit(final SimpleShardDataTreeCohort cohort) {
+        pendingTransactions.add(cohort);
+
+        final SimpleShardDataTreeCohort current = pendingTransactions.peek();
+        if (!cohort.equals(current)) {
+            LOG.debug("Transaction {} scheduled for canCommit step", cohort.getIdentifier());
+            return;
+        }
+
+        processNextTransaction();
+    }
+
+    void startPreCommit(final SimpleShardDataTreeCohort cohort) {
+        final SimpleShardDataTreeCohort current = pendingTransactions.peek();
+        Verify.verify(cohort.equals(current), "Attempted to pre-commit %s while %s is pending", cohort, current);
+
+        final DataTreeCandidateTip candidate;
+        try {
+            candidate = dataTree.prepare(cohort.getDataTreeModification());
+        } catch (Exception e) {
+            pendingTransactions.poll().failedPreCommit(e);
+            return;
+        }
+
+        /*
+         * FIXME: this is the place where we should be interacting with persistence, specifically by invoking
+         *        persist on the candidate (which gives us a Future).
+         */
+        cohort.successfulPreCommit(candidate);
+    }
+
+    void applyRecoveryTransaction(final ReadWriteShardDataTreeTransaction transaction) throws DataValidationFailedException {
+        // FIXME: purge any outstanding transactions
+
+        final DataTreeModification snapshot = transaction.getSnapshot();
+        snapshot.ready();
+
+        dataTree.validate(snapshot);
+        dataTree.commit(dataTree.prepare(snapshot));
     }
 }

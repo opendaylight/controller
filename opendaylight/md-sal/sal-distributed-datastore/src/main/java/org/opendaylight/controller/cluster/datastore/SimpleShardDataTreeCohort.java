@@ -8,27 +8,40 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import com.google.common.base.Preconditions;
+import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.utils.PruningDataTreeModification;
-import org.opendaylight.controller.md.sal.common.api.data.OptimisticLockFailedException;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.ConflictingModificationAppliedException;
+import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidateTip;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.DataValidationFailedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
+final class SimpleShardDataTreeCohort extends ShardDataTreeCohort implements Identifiable<TransactionIdentifier> {
+    private enum State {
+        READY,
+        CAN_COMMIT_PENDING,
+        CAN_COMMIT_COMPLETE,
+        PRE_COMMIT_PENDING,
+        PRE_COMMIT_COMPLETE,
+        COMMIT_PENDING,
+
+        ABORTED,
+        COMMITTED,
+        FAILED,
+    }
+
     private static final Logger LOG = LoggerFactory.getLogger(SimpleShardDataTreeCohort.class);
-    private static final ListenableFuture<Boolean> TRUE_FUTURE = Futures.immediateFuture(Boolean.TRUE);
     private static final ListenableFuture<Void> VOID_FUTURE = Futures.immediateFuture(null);
     private final DataTreeModification transaction;
     private final ShardDataTree dataTree;
     private final TransactionIdentifier transactionId;
+
+    private State state = State.READY;
     private DataTreeCandidateTip candidate;
+    private FutureCallback<?> callback;
 
     SimpleShardDataTreeCohort(final ShardDataTree dataTree, final DataTreeModification transaction,
             final TransactionIdentifier transactionId) {
@@ -38,53 +51,29 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
     }
 
     @Override
+    public TransactionIdentifier getIdentifier() {
+        return transactionId;
+    }
+
+    @Override
     DataTreeCandidateTip getCandidate() {
         return candidate;
     }
 
     @Override
-    public ListenableFuture<Boolean> canCommit() {
-        DataTreeModification modification = getDataTreeModification();
-        try {
-            dataTree.getDataTree().validate(modification);
-            LOG.trace("Transaction {} validated", transaction);
-            return TRUE_FUTURE;
-        }
-        catch (ConflictingModificationAppliedException e) {
-            LOG.warn("Store Tx {}: Conflicting modification for path {}.", transactionId, e.getPath());
-            return Futures.immediateFailedFuture(new OptimisticLockFailedException("Optimistic lock failed.", e));
-        } catch (DataValidationFailedException e) {
-            LOG.warn("Store Tx {}: Data validation failed for path {}.", transactionId, e.getPath(), e);
-
-            // For debugging purposes, allow dumping of the modification. Coupled with the above
-            // precondition log, it should allow us to understand what went on.
-            LOG.debug("Store Tx {}: modifications: {} tree: {}", transactionId, modification, dataTree.getDataTree());
-
-            return Futures.immediateFailedFuture(new TransactionCommitFailedException("Data did not pass validation.", e));
-        } catch (Exception e) {
-            LOG.warn("Unexpected failure in validation phase", e);
-            return Futures.immediateFailedFuture(e);
-        }
+    public void canCommit(final FutureCallback<Void> callback) {
+        Preconditions.checkState(state == State.READY);
+        this.callback = Preconditions.checkNotNull(callback);
+        state = State.CAN_COMMIT_PENDING;
+        dataTree.startCanCommit(this);
     }
 
     @Override
-    public ListenableFuture<Void> preCommit() {
-        try {
-            candidate = dataTree.getDataTree().prepare(getDataTreeModification());
-            /*
-             * FIXME: this is the place where we should be interacting with persistence, specifically by invoking
-             *        persist on the candidate (which gives us a Future).
-             */
-            LOG.trace("Transaction {} prepared candidate {}", transaction, candidate);
-            return VOID_FUTURE;
-        } catch (Exception e) {
-            if(LOG.isTraceEnabled()) {
-                LOG.trace("Transaction {} failed to prepare", transaction, e);
-            } else {
-                LOG.error("Transaction failed to prepare", e);
-            }
-            return Futures.immediateFailedFuture(e);
-        }
+    public void preCommit(final FutureCallback<DataTreeCandidateTip> callback) {
+        Preconditions.checkState(state == State.CAN_COMMIT_COMPLETE);
+        this.callback = Preconditions.checkNotNull(callback);
+        state = State.PRE_COMMIT_PENDING;
+        dataTree.startPreCommit(this);
     }
 
     @Override
@@ -118,5 +107,38 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
         LOG.trace("Transaction {} committed, proceeding to notify", transaction);
         dataTree.notifyListeners(candidate);
         return VOID_FUTURE;
+    }
+
+    private <T> FutureCallback<T> switchState(final State newState) {
+        @SuppressWarnings("unchecked")
+        final FutureCallback<T> ret = (FutureCallback<T>) this.callback;
+        this.callback = null;
+        LOG.debug("Transaction {} changing state from {} to {}", state, newState);
+        this.state = newState;
+        return ret;
+    }
+
+    void successfulCanCommit() {
+        switchState(State.CAN_COMMIT_COMPLETE).onSuccess(null);
+    }
+
+    void failedCanCommit(final Exception cause) {
+        switchState(State.FAILED).onFailure(cause);
+    }
+
+    void successfulPreCommit(final DataTreeCandidateTip candidate) {
+        LOG.trace("Transaction {} prepared candidate {}", transaction, candidate);
+
+        switchState(State.PRE_COMMIT_COMPLETE).onSuccess(candidate);
+    }
+
+    void failedPreCommit(final Exception cause) {
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("Transaction {} failed to prepare", transaction, cause);
+        } else {
+            LOG.error("Transaction failed to prepare", cause);
+        }
+
+        switchState(State.FAILED).onFailure(cause);
     }
 }

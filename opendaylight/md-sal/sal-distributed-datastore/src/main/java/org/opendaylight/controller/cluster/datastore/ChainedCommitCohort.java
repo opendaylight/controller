@@ -34,13 +34,13 @@ final class ChainedCommitCohort extends ShardDataTreeCohort {
 
         Futures.addCallback(ret, new FutureCallback<Void>() {
             @Override
-            public void onSuccess(Void result) {
+            public void onSuccess(final Void result) {
                 chain.clearTransaction(transaction);
                 LOG.debug("Committed transaction {}", transaction);
             }
 
             @Override
-            public void onFailure(Throwable t) {
+            public void onFailure(final Throwable t) {
                 LOG.error("Transaction {} commit failed, cannot recover", transaction, t);
             }
         });
@@ -49,13 +49,13 @@ final class ChainedCommitCohort extends ShardDataTreeCohort {
     }
 
     @Override
-    public ListenableFuture<Boolean> canCommit() {
-        return delegate.canCommit();
+    public void canCommit(final FutureCallback<Void> callback) {
+        delegate.canCommit(callback);
     }
 
     @Override
-    public ListenableFuture<Void> preCommit() {
-        return delegate.preCommit();
+    public void preCommit(final FutureCallback<DataTreeCandidateTip> callback) {
+        delegate.preCommit(callback);
     }
 
     @Override
