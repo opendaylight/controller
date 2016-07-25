@@ -50,6 +50,8 @@ public class DefaultConfigParamsImpl implements ConfigParams {
     public static final FiniteDuration HEART_BEAT_INTERVAL =
         new FiniteDuration(100, TimeUnit.MILLISECONDS);
 
+    private static final long KEEP_ALIVE_FACTOR = 5;
+
     private FiniteDuration heartBeatInterval = HEART_BEAT_INTERVAL;
     private long snapshotBatchCount = SNAPSHOT_BATCH_COUNT;
     private int journalRecoveryLogBatchSize = JOURNAL_RECOVERY_LOG_BATCH_SIZE;
@@ -122,6 +124,12 @@ public class DefaultConfigParamsImpl implements ConfigParams {
     @Override
     public FiniteDuration getHeartBeatInterval() {
         return heartBeatInterval;
+    }
+
+    @Override
+    public FiniteDuration getKeepAliveInterval() {
+        long interval = getElectionTimeOutInterval().toMillis() / KEEP_ALIVE_FACTOR;
+        return FiniteDuration.apply(Math.max(interval, getHeartBeatInterval().toMillis()), TimeUnit.MILLISECONDS);
     }
 
     @Override
