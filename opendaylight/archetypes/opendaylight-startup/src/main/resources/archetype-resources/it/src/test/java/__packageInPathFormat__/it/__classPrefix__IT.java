@@ -33,16 +33,6 @@ public class ${classPrefix}IT extends AbstractMdsalTestBase {
     private static final Logger LOG = LoggerFactory.getLogger(${classPrefix}IT.class);
 
     @Override
-    public String getModuleName() {
-        return "${artifactId}";
-    }
-
-    @Override
-    public String getInstanceName() {
-        return "${artifactId}-default";
-    }
-
-    @Override
     public MavenUrlReference getFeatureRepo() {
         return maven()
                 .groupId("${groupId}")
