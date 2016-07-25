@@ -41,6 +41,7 @@ import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.DatastoreContextFactory;
 import org.opendaylight.controller.cluster.datastore.DistributedDataStore;
+import org.opendaylight.controller.cluster.datastore.Shard;
 import org.opendaylight.controller.cluster.datastore.ShardDataTree;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.config.ConfigurationImpl;
@@ -220,7 +221,9 @@ public class DistributedEntityOwnershipServiceTest extends AbstractEntityOwnersh
         DistributedEntityOwnershipService service = spy(DistributedEntityOwnershipService.start(
             dataStore.getActorContext(), EntityOwnerSelectionStrategyConfig.newBuilder().build()));
 
-        ShardDataTree shardDataTree = new ShardDataTree(SchemaContextHelper.entityOwners(), TreeType.OPERATIONAL);
+        final Shard mockShard = Mockito.mock(Shard.class);
+        ShardDataTree shardDataTree = new ShardDataTree(mockShard, SchemaContextHelper.entityOwners(),
+            TreeType.OPERATIONAL);
 
         when(service.getLocalEntityOwnershipShardDataTree()).thenReturn(shardDataTree.getDataTree());
 
