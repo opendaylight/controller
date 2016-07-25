@@ -8,10 +8,12 @@
 package org.opendaylight.controller.cluster.raft;
 
 import static org.junit.Assert.assertEquals;
+import java.util.concurrent.TimeUnit;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.policy.DefaultRaftPolicy;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
 import org.opendaylight.controller.cluster.raft.policy.TestRaftPolicy;
+import scala.concurrent.duration.FiniteDuration;
 
 public class DefaultConfigParamsImplTest {
 
@@ -56,5 +58,14 @@ public class DefaultConfigParamsImplTest {
 
     }
 
+    @Test
+    public void testGetKeepAliveInterval() {
+        DefaultConfigParamsImpl params = new DefaultConfigParamsImpl();
+        params.setHeartBeatInterval(FiniteDuration.apply(500, TimeUnit.MILLISECONDS));
+        params.setElectionTimeoutFactor(20);
+        assertEquals("getKeepAliveInterval", 2000L, params.getKeepAliveInterval().toMillis());
 
+        params.setElectionTimeoutFactor(2);
+        assertEquals("getKeepAliveInterval", 500L, params.getKeepAliveInterval().toMillis());
+    }
 }

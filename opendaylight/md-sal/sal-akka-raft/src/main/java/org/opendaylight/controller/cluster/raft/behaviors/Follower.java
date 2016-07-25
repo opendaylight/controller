@@ -20,6 +20,7 @@ import org.opendaylight.controller.cluster.raft.ServerConfigurationPayload;
 import org.opendaylight.controller.cluster.raft.Snapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
+import org.opendaylight.controller.cluster.raft.base.messages.KeepAlive;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.messages.InstallSnapshot;
@@ -352,6 +353,14 @@ public class Follower extends AbstractRaftActorBehavior {
                 scheduleElection(electionDuration());
                 return this;
             }
+        }
+
+        if (originalMessage instanceof KeepAlive) {
+            if(leaderId == null || leaderId.equals(((KeepAlive)originalMessage).getLeaderId())) {
+                scheduleElection(electionDuration());
+            }
+
+            return this;
         }
 
         final Object message = fromSerializableMessage(originalMessage);
