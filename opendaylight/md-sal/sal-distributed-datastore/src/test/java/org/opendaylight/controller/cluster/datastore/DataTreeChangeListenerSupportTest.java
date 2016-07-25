@@ -113,8 +113,8 @@ public class DataTreeChangeListenerSupportTest extends AbstractShardTest {
         listener2.verifyNoNotifiedData(innerEntryPath(2, "three"), innerEntryPath(2, "four"));
     }
 
-    private MockDataTreeChangeListener registerChangeListener(YangInstanceIdentifier path,
-            int expectedEvents, boolean isLeader) {
+    private MockDataTreeChangeListener registerChangeListener(final YangInstanceIdentifier path,
+            final int expectedEvents, final boolean isLeader) {
         MockDataTreeChangeListener listener = new MockDataTreeChangeListener(expectedEvents);
         ActorRef dclActor = actorFactory.createActor(DataTreeChangeListenerActor.props(listener));
         support.onMessage(new RegisterDataTreeChangeListener(path, dclActor, false), isLeader, true);
@@ -123,6 +123,7 @@ public class DataTreeChangeListenerSupportTest extends AbstractShardTest {
 
     private Shard createShard() {
         TestActorRef<Shard> actor = actorFactory.createTestActor(newShardProps());
+        ShardTestKit.waitUntilLeader(actor);
         return actor.underlyingActor();
     }
 }

@@ -19,7 +19,9 @@ import static org.opendaylight.controller.cluster.datastore.entityownership.Enti
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.entityPath;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
+import org.opendaylight.controller.cluster.datastore.Shard;
 import org.opendaylight.controller.cluster.datastore.ShardDataTree;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntity;
@@ -47,7 +49,9 @@ public class EntityOwnerChangeListenerTest {
     private static final DOMEntity ENTITY1 = new DOMEntity(ENTITY_TYPE, ENTITY_ID1);
     private static final DOMEntity ENTITY2 = new DOMEntity(ENTITY_TYPE, ENTITY_ID2);
 
-    private final ShardDataTree shardDataTree = new ShardDataTree(SchemaContextHelper.entityOwners(),
+    private final Shard mockShard = Mockito.mock(Shard.class);
+
+    private final ShardDataTree shardDataTree = new ShardDataTree(mockShard, SchemaContextHelper.entityOwners(),
         TreeType.OPERATIONAL);
     private final EntityOwnershipListenerSupport mockListenerSupport = mock(EntityOwnershipListenerSupport.class);
     private EntityOwnerChangeListener listener;
@@ -133,7 +137,7 @@ public class EntityOwnerChangeListenerTest {
                 anyBoolean(), anyBoolean());
     }
 
-    private void writeNode(YangInstanceIdentifier path, NormalizedNode<?, ?> node) throws DataValidationFailedException {
+    private void writeNode(final YangInstanceIdentifier path, final NormalizedNode<?, ?> node) throws DataValidationFailedException {
         AbstractEntityOwnershipTest.writeNode(path, node, shardDataTree);
     }
 }
