@@ -252,4 +252,9 @@ public interface RaftActorContext {
      * @return current behavior attached to the raft actor.
      */
     RaftActorBehavior getCurrentBehavior();
+
+    /**
+     * @return PeerInfoCache
+     */
+    PeerInfoCache getPeerInfoCache();
 }
