@@ -49,6 +49,7 @@ import org.opendaylight.controller.cluster.raft.base.messages.ApplyJournalEntrie
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
+import org.opendaylight.controller.cluster.raft.base.messages.KeepAlive;
 import org.opendaylight.controller.cluster.raft.base.messages.Replicate;
 import org.opendaylight.controller.cluster.raft.base.messages.SendHeartBeat;
 import org.opendaylight.controller.cluster.raft.base.messages.SendInstallSnapshot;
@@ -2189,6 +2190,30 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         verify(mockTransferCohort).abortTransfer();
         verify(mockTransferCohort, never()).transferComplete();
         MessageCollectorActor.assertNoneMatching(followerActor, ElectionTimeout.class, 100);
+    }
+
+    @Test
+    public void testKeepAlive() {
+        logStart("testKeepAlive");
+
+        MockRaftActorContext leaderActorContext = createActorContext();
+        ((DefaultConfigParamsImpl)leaderActorContext.getConfigParams()).setHeartBeatInterval(
+                new FiniteDuration(50, TimeUnit.MILLISECONDS));
+        ((DefaultConfigParamsImpl)leaderActorContext.getConfigParams()).setElectionTimeoutFactor(10);
+
+        String followerId2 = "follower2";
+        TestActorRef<ForwardMessageToBehaviorActor> followerActor2 = actorFactory.createTestActor(
+                Props.create(ForwardMessageToBehaviorActor.class), actorFactory.generateActorId(followerId2));
+        leaderActorContext.setPeerAddresses(ImmutableMap.<String, String>builder().put(FOLLOWER_ID,
+                followerActor.path().toString()).put(followerId2, followerActor2.path().toString()).build());
+
+        leader = new Leader(leaderActorContext);
+        leaderActorContext.setCurrentBehavior(leader);
+
+        List<KeepAlive> matching = MessageCollectorActor.expectMatching(followerActor, KeepAlive.class, 5);
+        assertEquals("getLeaderId", LEADER_ID, matching.get(0).getLeaderId());
+
+        MessageCollectorActor.expectMatching(followerActor2, KeepAlive.class, 5);
     }
 
     @Override

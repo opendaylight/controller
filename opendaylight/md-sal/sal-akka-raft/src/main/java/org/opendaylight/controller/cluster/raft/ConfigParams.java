@@ -47,6 +47,13 @@ public interface ConfigParams {
     FiniteDuration getHeartBeatInterval();
 
     /**
+     * The interval at which a keep-alive message will be sent by a leader to its followers
+     *
+     * @return FiniteDuration
+     */
+    FiniteDuration getKeepAliveInterval();
+
+    /**
      * The interval in which a new election would get triggered if no leader is found
      *
      * Normally its set to atleast twice the heart beat interval
