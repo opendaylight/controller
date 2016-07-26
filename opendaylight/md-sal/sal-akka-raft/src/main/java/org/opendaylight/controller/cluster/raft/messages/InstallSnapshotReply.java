@@ -8,6 +8,11 @@
 
 package org.opendaylight.controller.cluster.raft.messages;
 
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+
 public class InstallSnapshotReply extends AbstractRaftRPC {
     private static final long serialVersionUID = 642227896390779503L;
 
@@ -17,8 +22,7 @@ public class InstallSnapshotReply extends AbstractRaftRPC {
     private final int chunkIndex;
     private final boolean success;
 
-    public InstallSnapshotReply(long term, String followerId, int chunkIndex,
-        boolean success) {
+    public InstallSnapshotReply(long term, String followerId, int chunkIndex, boolean success) {
         super(term);
         this.followerId = followerId;
         this.chunkIndex = chunkIndex;
@@ -43,5 +47,44 @@ public class InstallSnapshotReply extends AbstractRaftRPC {
         builder.append("InstallSnapshotReply [term=").append(getTerm()).append(", followerId=").append(followerId)
                 .append(", chunkIndex=").append(chunkIndex).append(", success=").append(success).append("]");
         return builder.toString();
+    }
+
+    private Object writeReplace() {
+        return new Proxy(this);
+    }
+
+    private static class Proxy implements Externalizable {
+        private static final long serialVersionUID = 1L;
+
+        private InstallSnapshotReply installSnapshotReply;
+
+        public Proxy() {
+        }
+
+        Proxy(InstallSnapshotReply installSnapshotReply) {
+            this.installSnapshotReply = installSnapshotReply;
+        }
+
+        @Override
+        public void writeExternal(ObjectOutput out) throws IOException {
+            out.writeLong(installSnapshotReply.getTerm());
+            out.writeObject(installSnapshotReply.followerId);
+            out.writeInt(installSnapshotReply.chunkIndex);
+            out.writeBoolean(installSnapshotReply.success);
+        }
+
+        @Override
+        public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+            long term = in.readLong();
+            String followerId = (String) in.readObject();
+            int chunkIndex = in.readInt();
+            boolean success = in.readBoolean();
+
+            installSnapshotReply = new InstallSnapshotReply(term, followerId, chunkIndex, success);
+        }
+
+        private Object readResolve() {
+            return installSnapshotReply;
+        }
     }
 }

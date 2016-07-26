@@ -373,7 +373,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         followerActor.underlyingActor().setBehavior(newFollower2);
 
         MockNewFollowerRaftActor newFollowerRaftActorInstance = newFollowerRaftActor.underlyingActor();
-        newFollowerRaftActorInstance.setDropMessageOfType(InstallSnapshot.SERIALIZABLE_CLASS);
+        newFollowerRaftActorInstance.setDropMessageOfType(InstallSnapshot.class);
 
         leaderActor.tell(new AddServer(NEW_SERVER_ID, newFollowerRaftActor.path().toString(), true), testKit.getRef());
 
@@ -604,7 +604,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         ((DefaultConfigParamsImpl)leaderActorContext.getConfigParams()).setElectionTimeoutFactor(1);
 
         // Drop the InstallSnapshot message so it times out
-        newFollowerRaftActor.underlyingActor().setDropMessageOfType(InstallSnapshot.SERIALIZABLE_CLASS);
+        newFollowerRaftActor.underlyingActor().setDropMessageOfType(InstallSnapshot.class);
 
         leaderActor.tell(new AddServer(NEW_SERVER_ID, newFollowerRaftActor.path().toString(), true), testKit.getRef());
 

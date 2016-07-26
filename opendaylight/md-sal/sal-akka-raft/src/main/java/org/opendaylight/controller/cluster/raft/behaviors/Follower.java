@@ -342,8 +342,8 @@ public class Follower extends AbstractRaftActorBehavior {
     }
 
     @Override
-    public RaftActorBehavior handleMessage(ActorRef sender, Object originalMessage) {
-        if (originalMessage instanceof ElectionTimeout) {
+    public RaftActorBehavior handleMessage(ActorRef sender, Object message) {
+        if (message instanceof ElectionTimeout) {
             if (canStartElection()) {
                 LOG.debug("{}: Received ElectionTimeout - switching to Candidate", logName());
                 return internalSwitchBehavior(RaftState.Candidate);
@@ -354,7 +354,6 @@ public class Follower extends AbstractRaftActorBehavior {
             }
         }
 
-        final Object message = fromSerializableMessage(originalMessage);
         if (!(message instanceof RaftRPC)) {
             // The rest of the processing requires the message to be a RaftRPC
             return null;
