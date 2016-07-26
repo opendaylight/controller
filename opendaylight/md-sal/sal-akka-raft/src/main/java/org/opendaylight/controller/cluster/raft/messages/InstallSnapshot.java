@@ -9,33 +9,23 @@
 package org.opendaylight.controller.cluster.raft.messages;
 
 import com.google.common.base.Optional;
-import com.google.protobuf.ByteString;
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
-import org.opendaylight.controller.cluster.raft.RaftVersions;
 import org.opendaylight.controller.cluster.raft.ServerConfigurationPayload;
-import org.opendaylight.controller.protobuff.messages.cluster.raft.InstallSnapshotMessages;
 
-public class InstallSnapshot extends AbstractRaftRPC implements Externalizable {
+public class InstallSnapshot extends AbstractRaftRPC {
     private static final long serialVersionUID = 1L;
-    public static final Class<InstallSnapshotMessages.InstallSnapshot> SERIALIZABLE_CLASS = InstallSnapshotMessages.InstallSnapshot.class;
 
-    private String leaderId;
-    private long lastIncludedIndex;
-    private long lastIncludedTerm;
-    private byte[] data;
-    private int chunkIndex;
-    private int totalChunks;
-    private Optional<Integer> lastChunkHashCode;
-    private Optional<ServerConfigurationPayload> serverConfig;
-
-    /**
-     * Empty constructor to satisfy Externalizable.
-     */
-    public InstallSnapshot() {
-    }
+    private final String leaderId;
+    private final long lastIncludedIndex;
+    private final long lastIncludedTerm;
+    private final byte[] data;
+    private final int chunkIndex;
+    private final int totalChunks;
+    private final Optional<Integer> lastChunkHashCode;
+    private final Optional<ServerConfigurationPayload> serverConfig;
 
     public InstallSnapshot(long term, String leaderId, long lastIncludedIndex, long lastIncludedTerm, byte[] data,
             int chunkIndex, int totalChunks, Optional<Integer> lastChunkHashCode, Optional<ServerConfigurationPayload> serverConfig) {
@@ -88,72 +78,9 @@ public class InstallSnapshot extends AbstractRaftRPC implements Externalizable {
         return serverConfig;
     }
 
-    @Override
-    public void writeExternal(ObjectOutput out) throws IOException {
-        out.writeShort(RaftVersions.CURRENT_VERSION);
-        out.writeLong(getTerm());
-        out.writeUTF(leaderId);
-        out.writeLong(lastIncludedIndex);
-        out.writeLong(lastIncludedTerm);
-        out.writeInt(chunkIndex);
-        out.writeInt(totalChunks);
-
-        out.writeByte(lastChunkHashCode.isPresent() ? 1 : 0);
-        if(lastChunkHashCode.isPresent()) {
-            out.writeInt(lastChunkHashCode.get().intValue());
-        }
-
-        out.writeByte(serverConfig.isPresent() ? 1 : 0);
-        if(serverConfig.isPresent()) {
-            out.writeObject(serverConfig.get());
-        }
-
-        out.writeObject(data);
-    }
-
-    @Override
-    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-        in.readShort(); // raft version - not currently used
-        setTerm(in.readLong());
-        leaderId = in.readUTF();
-        lastIncludedIndex = in.readLong();
-        lastIncludedTerm = in.readLong();
-        chunkIndex = in.readInt();
-        totalChunks = in.readInt();
-
-        lastChunkHashCode = Optional.absent();
-        boolean chunkHashCodePresent = in.readByte() == 1;
-        if(chunkHashCodePresent) {
-            lastChunkHashCode = Optional.of(in.readInt());
-        }
-
-        serverConfig = Optional.absent();
-        boolean serverConfigPresent = in.readByte() == 1;
-        if(serverConfigPresent) {
-            serverConfig = Optional.of((ServerConfigurationPayload)in.readObject());
-        }
-
-        data = (byte[])in.readObject();
-    }
 
     public <T extends Object> Object toSerializable(short version) {
-        if(version >= RaftVersions.BORON_VERSION) {
-            return this;
-        } else {
-            InstallSnapshotMessages.InstallSnapshot.Builder builder = InstallSnapshotMessages.InstallSnapshot.newBuilder()
-                    .setTerm(this.getTerm())
-                    .setLeaderId(this.getLeaderId())
-                    .setChunkIndex(this.getChunkIndex())
-                    .setData(ByteString.copyFrom(getData()))
-                    .setLastIncludedIndex(this.getLastIncludedIndex())
-                    .setLastIncludedTerm(this.getLastIncludedTerm())
-                    .setTotalChunks(this.getTotalChunks());
-
-            if(lastChunkHashCode.isPresent()){
-                builder.setLastChunkHashCode(lastChunkHashCode.get());
-            }
-            return builder.build();
-        }
+        return this;
     }
 
     @Override
@@ -164,29 +91,73 @@ public class InstallSnapshot extends AbstractRaftRPC implements Externalizable {
                 + ", serverConfig=" + serverConfig.orNull() + "]";
     }
 
-    public static InstallSnapshot fromSerializable (Object o) {
-        if(o instanceof InstallSnapshot) {
-            return (InstallSnapshot)o;
-        } else {
-            InstallSnapshotMessages.InstallSnapshot from =
-                    (InstallSnapshotMessages.InstallSnapshot) o;
-
-            Optional<Integer> lastChunkHashCode = Optional.absent();
-            if(from.hasLastChunkHashCode()){
-                lastChunkHashCode = Optional.of(from.getLastChunkHashCode());
-            }
-
-            InstallSnapshot installSnapshot = new InstallSnapshot(from.getTerm(),
-                    from.getLeaderId(), from.getLastIncludedIndex(),
-                    from.getLastIncludedTerm(), from.getData().toByteArray(),
-                    from.getChunkIndex(), from.getTotalChunks(), lastChunkHashCode,
-                    Optional.<ServerConfigurationPayload>absent());
-
-            return installSnapshot;
-        }
+    private Object writeReplace() {
+        return new Proxy(this);
     }
 
-    public static boolean isSerializedType(Object message) {
-        return message instanceof InstallSnapshot || message instanceof InstallSnapshotMessages.InstallSnapshot;
+    private static class Proxy implements Externalizable {
+        private static final long serialVersionUID = 1L;
+
+        private InstallSnapshot installSnapshot;
+
+        public Proxy() {
+        }
+
+        Proxy(InstallSnapshot installSnapshot) {
+            this.installSnapshot = installSnapshot;
+        }
+
+        @Override
+        public void writeExternal(ObjectOutput out) throws IOException {
+            out.writeLong(installSnapshot.getTerm());
+            out.writeObject(installSnapshot.leaderId);
+            out.writeLong(installSnapshot.lastIncludedIndex);
+            out.writeLong(installSnapshot.lastIncludedTerm);
+            out.writeInt(installSnapshot.chunkIndex);
+            out.writeInt(installSnapshot.totalChunks);
+
+            out.writeByte(installSnapshot.lastChunkHashCode.isPresent() ? 1 : 0);
+            if(installSnapshot.lastChunkHashCode.isPresent()) {
+                out.writeInt(installSnapshot.lastChunkHashCode.get().intValue());
+            }
+
+            out.writeByte(installSnapshot.serverConfig.isPresent() ? 1 : 0);
+            if(installSnapshot.serverConfig.isPresent()) {
+                out.writeObject(installSnapshot.serverConfig.get());
+            }
+
+            out.writeObject(installSnapshot.data);
+        }
+
+        @Override
+        public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+            long term = in.readLong();
+            String leaderId = (String) in.readObject();
+            long lastIncludedIndex = in.readLong();
+            long lastIncludedTerm = in.readLong();
+            int chunkIndex = in.readInt();
+            int totalChunks = in.readInt();
+
+            Optional<Integer> lastChunkHashCode = Optional.absent();
+            boolean chunkHashCodePresent = in.readByte() == 1;
+            if(chunkHashCodePresent) {
+                lastChunkHashCode = Optional.of(in.readInt());
+            }
+
+            Optional<ServerConfigurationPayload> serverConfig = Optional.absent();
+            boolean serverConfigPresent = in.readByte() == 1;
+            if(serverConfigPresent) {
+                serverConfig = Optional.of((ServerConfigurationPayload)in.readObject());
+            }
+
+            byte[] data = (byte[])in.readObject();
+
+            installSnapshot = new InstallSnapshot(term, leaderId, lastIncludedIndex, lastIncludedTerm, data,
+                    chunkIndex, totalChunks, lastChunkHashCode, serverConfig);
+        }
+
+        private Object readResolve() {
+            return installSnapshot;
+        }
     }
 }
