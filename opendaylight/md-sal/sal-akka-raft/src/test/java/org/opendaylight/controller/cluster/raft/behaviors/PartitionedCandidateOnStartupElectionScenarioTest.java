@@ -17,6 +17,7 @@ import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockReplica
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext.SimpleReplicatedLog;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
+import org.opendaylight.controller.cluster.raft.base.messages.TimeoutNow;
 import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 
@@ -61,7 +62,7 @@ public class PartitionedCandidateOnStartupElectionScenarioTest extends AbstractL
         member3Actor.expectMessageClass(RequestVote.class, 1);
         member3Actor.expectBehaviorStateChange();
 
-        member1ActorRef.tell(ElectionTimeout.INSTANCE, ActorRef.noSender());
+        member1ActorRef.tell(TimeoutNow.INSTANCE, ActorRef.noSender());
 
         member2Actor.waitForExpectedMessages(RequestVote.class);
         member3Actor.waitForExpectedMessages(RequestVote.class);
