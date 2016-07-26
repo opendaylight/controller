@@ -129,7 +129,7 @@ public class ShardTest extends AbstractShardTest {
     public void testRegisterChangeListener() throws Exception {
         new ShardTestKit(getSystem()) {{
             final TestActorRef<Shard> shard = actorFactory.createTestActor(
-                    newShardProps(),  "testRegisterChangeListener");
+                    newShardProps().withDispatcher(Dispatchers.DefaultDispatcherId()), "testRegisterChangeListener");
 
             waitUntilLeader(shard);
 
@@ -255,7 +255,7 @@ public class ShardTest extends AbstractShardTest {
     public void testRegisterDataTreeChangeListener() throws Exception {
         new ShardTestKit(getSystem()) {{
             final TestActorRef<Shard> shard = actorFactory.createTestActor(
-                    newShardProps(), "testRegisterDataTreeChangeListener");
+                    newShardProps().withDispatcher(Dispatchers.DefaultDispatcherId()), "testRegisterDataTreeChangeListener");
 
             waitUntilLeader(shard);
 
@@ -437,7 +437,8 @@ public class ShardTest extends AbstractShardTest {
 
     @Test
     public void testApplyState() throws Exception {
-        final TestActorRef<Shard> shard = actorFactory.createTestActor(newShardProps(), "testApplyState");
+        final TestActorRef<Shard> shard = actorFactory.createTestActor(
+                newShardProps().withDispatcher(Dispatchers.DefaultDispatcherId()), "testApplyState");
 
         ShardTestKit.waitUntilLeader(shard);
 
@@ -921,7 +922,8 @@ public class ShardTest extends AbstractShardTest {
             };
 
             final TestActorRef<Shard> shard = actorFactory.createTestActor(
-                    Props.create(new DelegatingShardCreator(creator)), "testOnBatchedModificationsWhenNotLeader");
+                    Props.create(new DelegatingShardCreator(creator)).
+                        withDispatcher(Dispatchers.DefaultDispatcherId()), "testOnBatchedModificationsWhenNotLeader");
 
             waitUntilLeader(shard);
 
@@ -2057,7 +2059,6 @@ public class ShardTest extends AbstractShardTest {
         testCreateSnapshot(false, "testCreateSnapshotWithNonPersistentData");
     }
 
-    @SuppressWarnings("serial")
     private void testCreateSnapshot(final boolean persistent, final String shardActorName) throws Exception{
 
         final AtomicReference<CountDownLatch> latch = new AtomicReference<>(new CountDownLatch(1));
@@ -2104,7 +2105,8 @@ public class ShardTest extends AbstractShardTest {
             final Creator<Shard> creator = () -> new TestShard(newShardBuilder());
 
             final TestActorRef<Shard> shard = actorFactory.createTestActor(
-                    Props.create(new DelegatingShardCreator(creator)), shardActorName);
+                    Props.create(new DelegatingShardCreator(creator)).
+                        withDispatcher(Dispatchers.DefaultDispatcherId()), shardActorName);
 
             waitUntilLeader(shard);
             writeToStore(shard, TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
