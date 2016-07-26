@@ -430,12 +430,13 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             onStateChanged();
         }
 
+        String lastLeaderId = oldBehavior == null ? null : oldBehaviorState.getLastLeaderId();
         String lastValidLeaderId = oldBehavior == null ? null : oldBehaviorState.getLastValidLeaderId();
         String oldBehaviorStateName = oldBehavior == null ? null : oldBehavior.state().name();
 
         // it can happen that the state has not changed but the leader has changed.
         Optional<ActorRef> roleChangeNotifier = getRoleChangeNotifier();
-        if(!Objects.equal(lastValidLeaderId, currentBehavior.getLeaderId()) ||
+        if(!Objects.equal(lastLeaderId, currentBehavior.getLeaderId()) ||
            oldBehaviorState.getLeaderPayloadVersion() != currentBehavior.getLeaderPayloadVersion()) {
             if(roleChangeNotifier.isPresent()) {
                 roleChangeNotifier.get().tell(newLeaderStateChanged(getId(), currentBehavior.getLeaderId(),
@@ -832,15 +833,16 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     private static class BehaviorStateHolder {
         private RaftActorBehavior behavior;
         private String lastValidLeaderId;
+        private String lastLeaderId;
         private short leaderPayloadVersion;
 
         void init(RaftActorBehavior behavior) {
             this.behavior = behavior;
             this.leaderPayloadVersion = behavior != null ? behavior.getLeaderPayloadVersion() : -1;
 
-            String behaviorLeaderId = behavior != null ? behavior.getLeaderId() : null;
-            if(behaviorLeaderId != null) {
-                this.lastValidLeaderId = behaviorLeaderId;
+            lastLeaderId = behavior != null ? behavior.getLeaderId() : null;
+            if(lastLeaderId != null) {
+                this.lastValidLeaderId = lastLeaderId;
             }
         }
 
@@ -850,6 +852,10 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
         String getLastValidLeaderId() {
             return lastValidLeaderId;
+        }
+
+        String getLastLeaderId() {
+            return lastLeaderId;
         }
 
         short getLeaderPayloadVersion() {
