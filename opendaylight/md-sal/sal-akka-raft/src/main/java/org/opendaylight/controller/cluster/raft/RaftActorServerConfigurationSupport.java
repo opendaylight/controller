@@ -22,8 +22,8 @@ import java.util.UUID;
 import javax.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.ServerConfigurationPayload.ServerInfo;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
-import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
 import org.opendaylight.controller.cluster.raft.base.messages.SnapshotComplete;
+import org.opendaylight.controller.cluster.raft.base.messages.TimeoutNow;
 import org.opendaylight.controller.cluster.raft.behaviors.AbstractLeader;
 import org.opendaylight.controller.cluster.raft.messages.AddServer;
 import org.opendaylight.controller.cluster.raft.messages.AddServerReply;
@@ -729,7 +729,7 @@ class RaftActorServerConfigurationSupport {
                 return;
             }
 
-            raftContext.getActor().tell(ElectionTimeout.INSTANCE, raftContext.getActor());
+            raftContext.getActor().tell(TimeoutNow.INSTANCE, raftContext.getActor());
 
             currentOperationState = new WaitingForLeaderElected(changeVotingStatusContext, previousServerConfig);
         }
