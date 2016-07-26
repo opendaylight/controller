@@ -8,19 +8,26 @@
 package org.opendaylight.controller.cluster.raft;
 
 import static org.junit.Assert.assertEquals;
+import akka.actor.ActorRef;
+import akka.dispatch.Dispatchers;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
 import org.junit.Test;
+import org.opendaylight.controller.cluster.notifications.LeaderStateChanged;
+import org.opendaylight.controller.cluster.raft.AbstractRaftActorIntegrationTest.TestRaftActor.Builder;
 import org.opendaylight.controller.cluster.raft.ServerConfigurationPayload.ServerInfo;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
+import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
 import org.opendaylight.controller.cluster.raft.base.messages.SnapshotComplete;
 import org.opendaylight.controller.cluster.raft.base.messages.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
+import scala.concurrent.duration.FiniteDuration;
 
 /**
  * Integration test for various scenarios involving non-voting followers.
@@ -30,6 +37,7 @@ import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 public class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrationTest {
     private TestRaftActor followerInstance;
     private TestRaftActor leaderInstance;
+    private final Builder follower1Builder = TestRaftActor.newBuilder();
 
     /**
      * Tests non-voting follower re-sync after the non-persistent leader restarts with an empty log. In this
@@ -343,6 +351,37 @@ public class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrati
         testLog.info("testFollowerResyncWithMoreLeaderLogEntriesAndDownPeerAfterNonPersistentLeaderRestart ending");
     }
 
+    @Test
+    public void testFollowerLeaderStateChanges() {
+        testLog.info("testFollowerLeaderStateChanges");
+
+        ActorRef roleChangeNotifier = factory.<MessageCollectorActor>createTestActor(
+                MessageCollectorActor.props().withDispatcher(Dispatchers.DefaultDispatcherId()),
+                factory.generateActorId("roleChangeNotifier"));
+        follower1Builder.roleChangeNotifier(roleChangeNotifier);
+
+        setupLeaderAndNonVotingFollower();
+
+        ((DefaultConfigParamsImpl)follower1Context.getConfigParams()).setElectionTimeoutFactor(2);
+        ((DefaultConfigParamsImpl)follower1Context.getConfigParams()).
+                setHeartBeatInterval(FiniteDuration.apply(100, TimeUnit.MILLISECONDS));
+
+        MessageCollectorActor.clearMessages(roleChangeNotifier);
+        follower1Actor.tell(new ElectionTimeout(), ActorRef.noSender());
+        followerInstance.startDropMessages(AppendEntries.class);
+
+        LeaderStateChanged leaderStateChanged = MessageCollectorActor.expectFirstMatching(roleChangeNotifier,
+                LeaderStateChanged.class);
+        assertEquals("getLeaderId", null, leaderStateChanged.getLeaderId());
+
+        MessageCollectorActor.clearMessages(roleChangeNotifier);
+        followerInstance.stopDropMessages(AppendEntries.class);
+
+        leaderStateChanged = MessageCollectorActor.expectFirstMatching(roleChangeNotifier,
+                LeaderStateChanged.class);
+        assertEquals("getLeaderId", leaderId, leaderStateChanged.getLeaderId());
+    }
+
     private void createNewLeaderActor() {
         expSnapshotState.clear();
         leaderActor = newTestRaftActor(leaderId, TestRaftActor.newBuilder().peerAddresses(peerAddresses).
@@ -370,7 +409,7 @@ public class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrati
         InMemoryJournal.addEntry(follower1Id, 2, persistedServerConfigEntry);
 
         DefaultConfigParamsImpl followerConfigParams = newFollowerConfigParams();
-        follower1Actor = newTestRaftActor(follower1Id, TestRaftActor.newBuilder().peerAddresses(
+        follower1Actor = newTestRaftActor(follower1Id, follower1Builder.peerAddresses(
                 ImmutableMap.of(leaderId, testActorPath(leaderId))).config(followerConfigParams).
                     persistent(Optional.of(false)));
 
