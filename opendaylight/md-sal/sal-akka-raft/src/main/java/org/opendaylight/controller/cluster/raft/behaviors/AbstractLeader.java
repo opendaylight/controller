@@ -406,10 +406,8 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
     protected void beforeSendHeartbeat(){}
 
     @Override
-    public RaftActorBehavior handleMessage(ActorRef sender, Object originalMessage) {
+    public RaftActorBehavior handleMessage(ActorRef sender, Object message) {
         Preconditions.checkNotNull(sender, "sender should not be null");
-
-        Object message = fromSerializableMessage(originalMessage);
 
         if (message instanceof RaftRPC) {
             RaftRPC rpc = (RaftRPC) message;
