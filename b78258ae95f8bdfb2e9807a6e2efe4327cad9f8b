@@ -212,6 +212,30 @@
       "revId": "b78258ae95f8bdfb2e9807a6e2efe4327cad9f8b",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_3301e338",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/BlueprintBundleTracker.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 214,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-07-26T01:35:24Z",
+      "side": 1,
+      "message": "This wouldn\u0027t affect SFT tests anyway b/c it tests feature install, not whether or not app components actually wire and startup correctly.",
+      "parentUuid": "9a561d44_13813ffb",
+      "range": {
+        "startLine": 214,
+        "startChar": 20,
+        "endLine": 214,
+        "endChar": 67
+      },
+      "revId": "b78258ae95f8bdfb2e9807a6e2efe4327cad9f8b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
