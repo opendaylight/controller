@@ -22,6 +22,30 @@
       "revId": "0d26e92408feb09e9873ccb03a234bc7b343f1de",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_736fce2b",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/messages/AppendEntries.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-07-26T21:35:40Z",
+      "side": 1,
+      "message": "Yeah I was thinking of that but there\u0027s 5 longs and writeLongs handles 2 and would complicate the code. Plus I didn\u0027t think writeLongs would make much difference.",
+      "parentUuid": "9a561d44_13393241",
+      "range": {
+        "startLine": 121,
+        "startChar": 0,
+        "endLine": 122,
+        "endChar": 62
+      },
+      "revId": "0d26e92408feb09e9873ccb03a234bc7b343f1de",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
