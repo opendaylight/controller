@@ -17,6 +17,7 @@ public class Dispatchers {
     public static final String TXN_DISPATCHER_PATH = "txn-dispatcher";
     public static final String SHARD_DISPATCHER_PATH = "shard-dispatcher";
     public static final String NOTIFICATION_DISPATCHER_PATH = "notification-dispatcher";
+    public static final String KEEPALIVE_DISPATCHER_PATH = "keepalive-dispatcher";
 
     private final akka.dispatch.Dispatchers dispatchers;
 
@@ -24,7 +25,8 @@ public class Dispatchers {
         Client(CLIENT_DISPATCHER_PATH),
         Transaction(TXN_DISPATCHER_PATH),
         Shard(SHARD_DISPATCHER_PATH),
-        Notification(NOTIFICATION_DISPATCHER_PATH);
+        Notification(NOTIFICATION_DISPATCHER_PATH),
+        KeepAlive(KEEPALIVE_DISPATCHER_PATH);
 
         private final String path;
         private DispatcherType(String path){
