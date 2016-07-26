@@ -14,6 +14,7 @@ import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.DefaultConfigParamsImpl;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
+import org.opendaylight.controller.cluster.raft.base.messages.TimeoutNow;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.messages.RequestVote;
@@ -207,7 +208,7 @@ public class PartitionedLeadersElectionScenarioTest extends AbstractLeaderElecti
         member3Actor.expectMessageClass(RequestVoteReply.class, 1);
         member3Actor.expectMessageClass(AppendEntriesReply.class, 1);
 
-        member3ActorRef.tell(ElectionTimeout.INSTANCE, ActorRef.noSender());
+        member3ActorRef.tell(TimeoutNow.INSTANCE, ActorRef.noSender());
 
         member1Actor.waitForExpectedMessages(RequestVote.class);
         member2Actor.waitForExpectedMessages(RequestVote.class);
@@ -251,7 +252,7 @@ public class PartitionedLeadersElectionScenarioTest extends AbstractLeaderElecti
 
         member3Actor.dropMessagesToBehavior(RequestVote.class);
 
-        member2ActorRef.tell(ElectionTimeout.INSTANCE, ActorRef.noSender());
+        member2ActorRef.tell(TimeoutNow.INSTANCE, ActorRef.noSender());
 
         member1Actor.waitForExpectedMessages(RequestVote.class);
         member3Actor.waitForExpectedMessages(RequestVote.class);

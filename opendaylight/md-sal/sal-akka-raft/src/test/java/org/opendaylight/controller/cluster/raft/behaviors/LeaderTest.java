@@ -53,6 +53,7 @@ import org.opendaylight.controller.cluster.raft.base.messages.KeepAlive;
 import org.opendaylight.controller.cluster.raft.base.messages.Replicate;
 import org.opendaylight.controller.cluster.raft.base.messages.SendHeartBeat;
 import org.opendaylight.controller.cluster.raft.base.messages.SendInstallSnapshot;
+import org.opendaylight.controller.cluster.raft.base.messages.TimeoutNow;
 import org.opendaylight.controller.cluster.raft.behaviors.AbstractLeader.FollowerToSnapshot;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
@@ -2077,7 +2078,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         MessageCollectorActor.expectMatching(followerActor, AppendEntries.class, 2);
 
         // Leader should force an election timeout
-        MessageCollectorActor.expectFirstMatching(followerActor, ElectionTimeout.class);
+        MessageCollectorActor.expectFirstMatching(followerActor, TimeoutNow.class);
 
         verify(mockTransferCohort).transferComplete();
     }
@@ -2110,7 +2111,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         MessageCollectorActor.expectFirstMatching(followerActor, AppendEntries.class);
 
         // Leader should force an election timeout
-        MessageCollectorActor.expectFirstMatching(followerActor, ElectionTimeout.class);
+        MessageCollectorActor.expectFirstMatching(followerActor, TimeoutNow.class);
 
         verify(mockTransferCohort).transferComplete();
     }
@@ -2147,7 +2148,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         leader.handleMessage(leaderActor, new AppendEntriesReply(FOLLOWER_ID, 1, true, 1, 1, (short)0));
 
         // Leader should force an election timeout
-        MessageCollectorActor.expectFirstMatching(followerActor, ElectionTimeout.class);
+        MessageCollectorActor.expectFirstMatching(followerActor, TimeoutNow.class);
 
         verify(mockTransferCohort).transferComplete();
     }
