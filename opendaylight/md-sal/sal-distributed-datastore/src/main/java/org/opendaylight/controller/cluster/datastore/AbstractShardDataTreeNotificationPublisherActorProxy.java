@@ -10,7 +10,7 @@ package org.opendaylight.controller.cluster.datastore;
 import akka.actor.ActorContext;
 import akka.actor.ActorRef;
 import javax.annotation.concurrent.NotThreadSafe;
-import org.opendaylight.controller.cluster.datastore.utils.Dispatchers;
+import org.opendaylight.controller.cluster.common.actor.Dispatchers;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
