@@ -20,7 +20,7 @@ import org.opendaylight.controller.cluster.raft.FollowerLogInformation;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftActorLeadershipTransferCohort;
 import org.opendaylight.controller.cluster.raft.RaftState;
-import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
+import org.opendaylight.controller.cluster.raft.base.messages.TimeoutNow;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 
 /**
@@ -154,7 +154,7 @@ public class Leader extends AbstractLeader {
 
             // Now send an ElectionTimeout to the matching follower to immediately start an election.
             ActorSelection followerActor = context.getPeerActorSelection(followerId);
-            followerActor.tell(ElectionTimeout.INSTANCE, context.getActor());
+            followerActor.tell(TimeoutNow.INSTANCE, context.getActor());
 
             LOG.debug("{}: Leader transfer complete", logName());
 

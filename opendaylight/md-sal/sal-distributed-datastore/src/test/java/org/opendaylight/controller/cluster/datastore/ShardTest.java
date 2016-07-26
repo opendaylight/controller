@@ -91,6 +91,7 @@ import org.opendaylight.controller.cluster.raft.base.messages.ApplyJournalEntrie
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
 import org.opendaylight.controller.cluster.raft.base.messages.FollowerInitialSyncUpStatus;
+import org.opendaylight.controller.cluster.raft.base.messages.TimeoutNow;
 import org.opendaylight.controller.cluster.raft.client.messages.FindLeader;
 import org.opendaylight.controller.cluster.raft.client.messages.FindLeaderReply;
 import org.opendaylight.controller.cluster.raft.client.messages.GetOnDemandRaftState;
@@ -2329,7 +2330,7 @@ public class ShardTest extends AbstractShardTest {
                             "akka://test/user/" + followerShardID.toString())).schemaContext(SCHEMA_CONTEXT).props().
                     withDispatcher(Dispatchers.DefaultDispatcherId()), leaderShardID.toString());
 
-            leaderShard.tell(ElectionTimeout.INSTANCE, ActorRef.noSender());
+            leaderShard.tell(TimeoutNow.INSTANCE, ActorRef.noSender());
             String leaderPath = waitUntilLeader(followerShard);
             assertEquals("Shard leader path", leaderShard.path().toString(), leaderPath);
 
@@ -2405,7 +2406,7 @@ public class ShardTest extends AbstractShardTest {
                             "akka://test/user/" + followerShardID.toString())).schemaContext(SCHEMA_CONTEXT).props().
                     withDispatcher(Dispatchers.DefaultDispatcherId()), leaderShardID.toString());
 
-            leaderShard.tell(ElectionTimeout.INSTANCE, ActorRef.noSender());
+            leaderShard.tell(TimeoutNow.INSTANCE, ActorRef.noSender());
             String leaderPath = waitUntilLeader(followerShard);
             assertEquals("Shard leader path", leaderShard.path().toString(), leaderPath);
 

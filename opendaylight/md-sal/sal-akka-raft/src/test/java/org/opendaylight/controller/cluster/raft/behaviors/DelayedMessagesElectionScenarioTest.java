@@ -13,7 +13,7 @@ import com.google.common.collect.ImmutableMap;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.DefaultConfigParamsImpl;
 import org.opendaylight.controller.cluster.raft.RaftState;
-import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
+import org.opendaylight.controller.cluster.raft.base.messages.TimeoutNow;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
@@ -76,7 +76,7 @@ public class DelayedMessagesElectionScenarioTest extends AbstractLeaderElectionS
         member3Actor.expectMessageClass(RequestVoteReply.class, 1);
         member3Actor.expectMessageClass(AppendEntriesReply.class, 2);
 
-        member3ActorRef.tell(ElectionTimeout.INSTANCE, ActorRef.noSender());
+        member3ActorRef.tell(TimeoutNow.INSTANCE, ActorRef.noSender());
 
         member3Actor.waitForExpectedMessages(RequestVoteReply.class);
 
@@ -154,7 +154,7 @@ public class DelayedMessagesElectionScenarioTest extends AbstractLeaderElectionS
 
         member3Actor.dropMessagesToBehavior(RequestVote.class);
 
-        member2ActorRef.tell(ElectionTimeout.INSTANCE, ActorRef.noSender());
+        member2ActorRef.tell(TimeoutNow.INSTANCE, ActorRef.noSender());
 
         member1Actor.waitForExpectedMessages(RequestVote.class);
         member3Actor.waitForExpectedMessages(RequestVote.class);

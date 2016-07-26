@@ -41,6 +41,7 @@ import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
 import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
 import org.opendaylight.controller.cluster.raft.base.messages.InitiateCaptureSnapshot;
+import org.opendaylight.controller.cluster.raft.base.messages.TimeoutNow;
 import org.opendaylight.controller.cluster.raft.base.messages.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.behaviors.AbstractLeader;
 import org.opendaylight.controller.cluster.raft.behaviors.Follower;
@@ -1392,7 +1393,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
         MessageCollectorActor.expectFirstMatching(node2Collector, RequestVote.class);
 
-        node2RaftActorRef.tell(ElectionTimeout.INSTANCE, ActorRef.noSender());
+        node2RaftActorRef.tell(TimeoutNow.INSTANCE, ActorRef.noSender());
 
         ServerChangeReply reply = testKit.expectMsgClass(JavaTestKit.duration("5 seconds"), ServerChangeReply.class);
         assertEquals("getStatus", ServerChangeStatus.OK, reply.getStatus());
