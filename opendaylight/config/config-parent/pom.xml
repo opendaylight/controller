@@ -143,7 +143,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
               </goals>
               <configuration>
                 <sources>
-                  <source>src/main/yang</source>
                   <source>${jmxGeneratorPath}</source>
                   <source>${salGeneratorPath}</source>
                 </sources>
