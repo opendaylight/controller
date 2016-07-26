@@ -16,6 +16,7 @@ import com.google.common.base.Stopwatch;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import org.opendaylight.controller.cluster.common.actor.Dispatchers;
 import org.opendaylight.controller.cluster.raft.FollowerLogInformation;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftActorLeadershipTransferCohort;
@@ -60,8 +61,10 @@ public class Leader extends AbstractLeader {
     public Leader(RaftActorContext context) {
         super(context, RaftState.Leader);
 
+        String dispatcher = new Dispatchers(context.getActorSystem().dispatchers()).getDispatcherPath(
+                Dispatchers.DispatcherType.KeepAlive);
         keepAliveActor = context.actorOf(KeepAliveActor.props(getLeaderId(),
-                context.getPeerInfoCache(), () -> context.getConfigParams()));
+                context.getPeerInfoCache(), () -> context.getConfigParams()).withDispatcher(dispatcher));
     }
 
     @Override
