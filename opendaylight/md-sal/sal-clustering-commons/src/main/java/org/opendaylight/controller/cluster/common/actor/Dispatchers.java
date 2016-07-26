@@ -6,7 +6,7 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.opendaylight.controller.cluster.datastore.utils;
+package org.opendaylight.controller.cluster.common.actor;
 
 import com.google.common.base.Preconditions;
 import scala.concurrent.ExecutionContext;
