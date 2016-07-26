@@ -128,8 +128,8 @@ public class Candidate extends AbstractRaftActorBehavior {
     }
 
     @Override
-    public RaftActorBehavior handleMessage(ActorRef sender, Object originalMessage) {
-        if (originalMessage instanceof ElectionTimeout) {
+    public RaftActorBehavior handleMessage(ActorRef sender, Object message) {
+        if (message instanceof ElectionTimeout) {
             LOG.debug("{}: Received ElectionTimeout", logName());
 
             if (votesRequired == 0) {
@@ -147,7 +147,6 @@ public class Candidate extends AbstractRaftActorBehavior {
             return this;
         }
 
-        final Object message = fromSerializableMessage(originalMessage);
         if (message instanceof RaftRPC) {
 
             RaftRPC rpc = (RaftRPC) message;

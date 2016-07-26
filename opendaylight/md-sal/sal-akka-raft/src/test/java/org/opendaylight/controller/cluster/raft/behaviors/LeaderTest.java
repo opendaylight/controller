@@ -42,7 +42,6 @@ import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.RaftVersions;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogImplEntry;
-import org.opendaylight.controller.cluster.raft.SerializationUtils;
 import org.opendaylight.controller.cluster.raft.Snapshot;
 import org.opendaylight.controller.cluster.raft.VotingState;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyJournalEntries;
@@ -598,9 +597,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         leader.handleMessage(leaderActor, SendHeartBeat.INSTANCE);
 
-        AppendEntries aeproto = MessageCollectorActor.expectFirstMatching(followerActor, AppendEntries.class);
-
-        AppendEntries ae = (AppendEntries) SerializationUtils.fromSerializable(aeproto);
+        AppendEntries ae = MessageCollectorActor.expectFirstMatching(followerActor, AppendEntries.class);
 
         assertTrue("AppendEntries should be sent with empty entries", ae.getEntries().isEmpty());
 
