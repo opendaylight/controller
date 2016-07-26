@@ -460,12 +460,13 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             onStateChanged();
         }
 
+        String lastLeaderId = oldBehavior == null ? null : oldBehaviorState.getLastLeaderId();
         String lastValidLeaderId = oldBehavior == null ? null : oldBehaviorState.getLastValidLeaderId();
         String oldBehaviorStateName = oldBehavior == null ? null : oldBehavior.state().name();
 
         // it can happen that the state has not changed but the leader has changed.
         Optional<ActorRef> roleChangeNotifier = getRoleChangeNotifier();
-        if(!Objects.equals(lastValidLeaderId, currentBehavior.getLeaderId()) ||
+        if(!Objects.equals(lastLeaderId, currentBehavior.getLeaderId()) ||
            oldBehaviorState.getLeaderPayloadVersion() != currentBehavior.getLeaderPayloadVersion()) {
             if(roleChangeNotifier.isPresent()) {
                 roleChangeNotifier.get().tell(newLeaderStateChanged(getId(), currentBehavior.getLeaderId(),
@@ -883,6 +884,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     private static abstract class BehaviorState implements Immutable {
         @Nullable abstract RaftActorBehavior getBehavior();
         @Nullable abstract String getLastValidLeaderId();
+        @Nullable abstract String getLastLeaderId();
         @Nullable abstract short getLeaderPayloadVersion();
     }
 
@@ -892,10 +894,13 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     private static final class SimpleBehaviorState extends BehaviorState {
         private final RaftActorBehavior behavior;
         private final String lastValidLeaderId;
+        private final String lastLeaderId;
         private final short leaderPayloadVersion;
 
-        SimpleBehaviorState(final String lastValidLeaderId, final RaftActorBehavior behavior) {
+        SimpleBehaviorState(final String lastValidLeaderId, final String lastLeaderId,
+                final RaftActorBehavior behavior) {
             this.lastValidLeaderId = lastValidLeaderId;
+            this.lastLeaderId = lastLeaderId;
             this.behavior = Preconditions.checkNotNull(behavior);
             this.leaderPayloadVersion = behavior.getLeaderPayloadVersion();
         }
@@ -913,6 +918,11 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         @Override
         short getLeaderPayloadVersion() {
             return leaderPayloadVersion;
+        }
+
+        @Override
+        String getLastLeaderId() {
+            return lastLeaderId;
         }
     }
 
@@ -942,9 +952,15 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             short getLeaderPayloadVersion() {
                 return -1;
             }
+
+            @Override
+            String getLastLeaderId() {
+                return null;
+            }
         };
 
         private String lastValidLeaderId;
+        private String lastLeaderId;
 
         BehaviorState capture(final RaftActorBehavior behavior) {
             if (behavior == null) {
@@ -952,12 +968,12 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
                 return NULL_BEHAVIOR_STATE;
             }
 
-            final String leaderId = behavior.getLeaderId();
-            if (leaderId != null) {
-                lastValidLeaderId = leaderId;
+            lastLeaderId = behavior.getLeaderId();
+            if (lastLeaderId != null) {
+                lastValidLeaderId = lastLeaderId;
             }
 
-            return new SimpleBehaviorState(lastValidLeaderId, behavior);
+            return new SimpleBehaviorState(lastValidLeaderId, lastLeaderId, behavior);
         }
     }
 
