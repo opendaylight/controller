@@ -29,7 +29,6 @@ import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
-import org.opendaylight.controller.cluster.raft.SerializationUtils;
 import org.opendaylight.controller.cluster.raft.TestActorFactory;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
@@ -340,10 +339,6 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
 
     protected RequestVoteReply createRequestVoteReplyWithNewerTerm() {
         return new RequestVoteReply(100, false);
-    }
-
-    protected Object fromSerializableMessage(Object serializable){
-        return SerializationUtils.fromSerializable(serializable);
     }
 
     protected ByteString toByteString(Map<String, String> state) {

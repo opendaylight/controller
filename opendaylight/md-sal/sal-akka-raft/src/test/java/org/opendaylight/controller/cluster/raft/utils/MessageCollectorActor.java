@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import org.junit.Assert;
-import org.opendaylight.controller.cluster.raft.SerializationUtils;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
@@ -47,7 +46,7 @@ public class MessageCollectorActor extends UntypedActor {
         } else if(CLEAR_MESSAGES.equals(message)) {
             clear();
         } else if(message != null) {
-            messages.add(SerializationUtils.fromSerializable(message));
+            messages.add(message);
         }
     }
 

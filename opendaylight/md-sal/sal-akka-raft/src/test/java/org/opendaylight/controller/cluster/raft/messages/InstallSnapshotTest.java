@@ -17,7 +17,6 @@ import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.RaftVersions;
 import org.opendaylight.controller.cluster.raft.ServerConfigurationPayload;
 import org.opendaylight.controller.cluster.raft.ServerConfigurationPayload.ServerInfo;
-import org.opendaylight.controller.protobuff.messages.cluster.raft.InstallSnapshotMessages;
 
 /**
  * Unit tests for InstallSnapshot.
@@ -45,34 +44,12 @@ public class InstallSnapshotTest {
         Object serialized = expected.toSerializable(RaftVersions.CURRENT_VERSION);
         assertEquals("Serialized type", InstallSnapshot.class, serialized.getClass());
 
-        InstallSnapshot actual = InstallSnapshot.fromSerializable(SerializationUtils.clone((Serializable) serialized));
+        InstallSnapshot actual = (InstallSnapshot) SerializationUtils.clone((Serializable) serialized);
         verifyInstallSnapshot(expected, actual);
 
         expected = new InstallSnapshot(3L, "leaderId", 11L, 2L, data, 5, 6);
-        actual = InstallSnapshot.fromSerializable(SerializationUtils.clone(
-                (Serializable) expected.toSerializable(RaftVersions.CURRENT_VERSION)));
+        actual = (InstallSnapshot) SerializationUtils.clone((Serializable) expected.toSerializable(RaftVersions.CURRENT_VERSION));
         verifyInstallSnapshot(expected, actual);
-    }
-
-    @Test
-    public void testSerializationWithPreBoronVersion() {
-        byte[] data = {0,1,2,3,4,5,7,8,9};
-        InstallSnapshot expected = new InstallSnapshot(3L, "leaderId", 11L, 2L, data, 5, 6, Optional.<Integer>of(54321),
-                Optional.<ServerConfigurationPayload>absent());
-
-        Object serialized = expected.toSerializable(RaftVersions.LITHIUM_VERSION);
-        assertEquals("Serialized type", InstallSnapshot.SERIALIZABLE_CLASS, serialized.getClass());
-
-        InstallSnapshot actual = InstallSnapshot.fromSerializable(SerializationUtils.clone((Serializable) serialized));
-        verifyInstallSnapshot(expected, actual);
-    }
-
-    @Test
-    public void testIsSerializedType() {
-        assertEquals("isSerializedType", true, InstallSnapshot.isSerializedType(
-                InstallSnapshotMessages.InstallSnapshot.newBuilder().build()));
-        assertEquals("isSerializedType", true, InstallSnapshot.isSerializedType(new InstallSnapshot()));
-        assertEquals("isSerializedType", false, InstallSnapshot.isSerializedType(new Object()));
     }
 
     private static void verifyInstallSnapshot(InstallSnapshot expected, InstallSnapshot actual) {

@@ -354,12 +354,11 @@ public class Follower extends AbstractRaftActorBehavior {
     }
 
     @Override
-    public RaftActorBehavior handleMessage(ActorRef sender, Object originalMessage) {
-        if (originalMessage instanceof ElectionTimeout || originalMessage instanceof TimeoutNow) {
-            return handleElectionTimeout(originalMessage);
+    public RaftActorBehavior handleMessage(ActorRef sender, Object message) {
+        if (message instanceof ElectionTimeout || message instanceof TimeoutNow) {
+            return handleElectionTimeout(message);
         }
 
-        final Object message = fromSerializableMessage(originalMessage);
         if (!(message instanceof RaftRPC)) {
             // The rest of the processing requires the message to be a RaftRPC
             return null;
