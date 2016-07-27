@@ -27,11 +27,13 @@ import akka.pattern.Patterns;
 import akka.testkit.JavaTestKit;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.Uninterruptibles;
 import com.typesafe.config.ConfigFactory;
 import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import org.junit.After;
@@ -685,7 +687,46 @@ public class DistributedDataStoreRemotingIntegrationTest {
             }
         });
 
-        // Create and prepare wo and rw tx's.
+        MemberNode.verifyRaftState(followerDistributedDataStore, "people", new RaftStateVerifier() {
+            @Override
+            public void verify(OnDemandRaftState raftState) {
+                assertEquals("getLastApplied", 0, raftState.getLastApplied());
+            }
+        });
+
+        // Prepare, ready and canCommit a WO tx that writes to 2 shards. This will become the current tx in
+        // the leader shard.
+
+        DOMStoreWriteTransaction writeTx1 = followerDistributedDataStore.newWriteOnlyTransaction();
+        writeTx1.write(CarsModel.CAR_LIST_PATH, CarsModel.newCarMapNode());
+        writeTx1.write(PeopleModel.BASE_PATH, PeopleModel.emptyContainer());
+        DOMStoreThreePhaseCommitCohort writeTx1Cohort = writeTx1.ready();
+        ListenableFuture<Boolean> writeTx1CanCommit = writeTx1Cohort.canCommit();
+        writeTx1CanCommit.get(5, TimeUnit.SECONDS);
+
+        // Prepare and ready another WO tx that writes to 2 shards but don't canCommit yet. This will be queued
+        // in the leader shard.
+
+        DOMStoreWriteTransaction writeTx2 = followerDistributedDataStore.newWriteOnlyTransaction();
+        LinkedList<MapEntryNode> cars = new LinkedList<>();
+        int carIndex = 1;
+        cars.add(CarsModel.newCarEntry("car" + carIndex, BigInteger.valueOf(carIndex)));
+        writeTx2.write(CarsModel.newCarPath("car" + carIndex), cars.getLast());
+        carIndex++;
+        NormalizedNode<?, ?> people = PeopleModel.newPersonMapNode();
+        writeTx2.write(PeopleModel.PERSON_LIST_PATH, people);
+        DOMStoreThreePhaseCommitCohort writeTx2Cohort = writeTx2.ready();
+
+        // Prepare another WO that writes to a single shard and thus will be directly committed on ready. This
+        // tx writes 5 cars so 2 BatchedModidifications messages will be sent initially and cached in the
+        // leader shard (with shardBatchedModificationCount set to 2). The 3rd BatchedModidifications will be
+        // sent on ready.
+
+        DOMStoreWriteTransaction writeTx3 = followerDistributedDataStore.newWriteOnlyTransaction();
+        for(int i = 1; i <= 5; i++, carIndex++) {
+            cars.add(CarsModel.newCarEntry("car" + carIndex, BigInteger.valueOf(carIndex)));
+            writeTx3.write(CarsModel.newCarPath("car" + carIndex), cars.getLast());
+        }
 
         writeTx = followerDistributedDataStore.newWriteOnlyTransaction();
         MapEntryNode car1 = CarsModel.newCarEntry("optima", BigInteger.valueOf(20000));

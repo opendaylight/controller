@@ -81,6 +81,23 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
         logName = String.format("%s (%s)", context.getId(), state);
     }
 
+    public static RaftActorBehavior createBehavior(final RaftActorContext context, final RaftState state) {
+        switch (state) {
+            case Candidate:
+                return new Candidate(context);
+            case Follower:
+                return new Follower(context);
+            case IsolatedLeader:
+                return new IsolatedLeader(context);
+            case Leader:
+                return new Leader(context);
+            case PreLeader:
+                return new PreLeader(context);
+            default:
+                throw new IllegalArgumentException("Unhandled state " + state);
+        }
+    }
+
     @Override
     public RaftState state() {
         return state;
@@ -444,12 +461,12 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
 
     protected RaftActorBehavior internalSwitchBehavior(RaftState newState) {
         if(context.getRaftPolicy().automaticElectionsEnabled()){
-            return internalSwitchBehavior(newState.createBehavior(context));
+            return internalSwitchBehavior(createBehavior(context, newState));
         }
         return this;
     }
 
-    private RaftActorBehavior internalSwitchBehavior(RaftActorBehavior newBehavior) {
+    protected RaftActorBehavior internalSwitchBehavior(RaftActorBehavior newBehavior) {
         LOG.info("{} :- Switching from behavior {} to {}", logName(), this.state(), newBehavior.state());
         try {
             close();

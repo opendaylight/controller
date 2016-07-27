@@ -76,11 +76,11 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
             this.collectorActor = builder.collectorActor;
         }
 
-        void startDropMessages(Class<?> msgClass) {
+        public void startDropMessages(Class<?> msgClass) {
             dropMessages.put(msgClass, Boolean.TRUE);
         }
 
-        void stopDropMessages(Class<?> msgClass) {
+        public void stopDropMessages(Class<?> msgClass) {
             dropMessages.remove(msgClass);
         }
 

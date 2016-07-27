@@ -1306,6 +1306,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         InMemoryJournal.addEntry(node2ID, 2, persistedServerConfigEntry);
         InMemoryJournal.addEntry(node2ID, 3, new ReplicatedLogImplEntry(1, 1,
                 new MockRaftActorContext.MockPayload("2")));
+        InMemoryJournal.addEntry(node2ID, 4, new ApplyJournalEntries(1));
 
         TestActorRef<MessageCollectorActor> node1Collector = actorFactory.createTestActor(
                 MessageCollectorActor.props().withDispatcher(Dispatchers.DefaultDispatcherId()),

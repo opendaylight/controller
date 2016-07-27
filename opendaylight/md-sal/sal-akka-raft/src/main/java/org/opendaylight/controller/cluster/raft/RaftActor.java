@@ -40,6 +40,7 @@ import org.opendaylight.controller.cluster.raft.base.messages.LeaderTransitionin
 import org.opendaylight.controller.cluster.raft.base.messages.Replicate;
 import org.opendaylight.controller.cluster.raft.base.messages.SwitchBehavior;
 import org.opendaylight.controller.cluster.raft.behaviors.AbstractLeader;
+import org.opendaylight.controller.cluster.raft.behaviors.AbstractRaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.behaviors.DelegatingRaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.behaviors.Follower;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
@@ -49,6 +50,7 @@ import org.opendaylight.controller.cluster.raft.client.messages.FollowerInfo;
 import org.opendaylight.controller.cluster.raft.client.messages.GetOnDemandRaftState;
 import org.opendaylight.controller.cluster.raft.client.messages.OnDemandRaftState;
 import org.opendaylight.controller.cluster.raft.client.messages.Shutdown;
+import org.opendaylight.controller.cluster.raft.persisted.NoopPayload;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -222,8 +224,10 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
                     applyState.getReplicatedLogEntry().getData());
             }
 
-            applyState(applyState.getClientActor(), applyState.getIdentifier(),
-                applyState.getReplicatedLogEntry().getData());
+            if (!(applyState.getReplicatedLogEntry().getData() instanceof NoopPayload)) {
+                applyState(applyState.getClientActor(), applyState.getIdentifier(),
+                    applyState.getReplicatedLogEntry().getData());
+            }
 
             long elapsedTime = System.nanoTime() - startTime;
             if(elapsedTime >= APPLY_STATE_DELAY_THRESHOLD_IN_NANOS){
@@ -268,6 +272,8 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             ((Runnable)message).run();
         } else if(!snapshotSupport.handleSnapshotMessage(message, getSender())) {
             switchBehavior(reusableSwitchBehaviorSupplier.handleMessage(getSender(), message));
+        } else if(message instanceof NoopPayload) {
+            persistData(null, null, (NoopPayload)message);
         }
     }
 
@@ -295,6 +301,11 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             leadershipTransferInProgress.addOnComplete(onComplete);
         }
     }
+
+//    private void switchBehavior(final BehaviorState oldBehaviorState, final RaftActorBehavior nextBehavior) {
+//        setCurrentBehavior(nextBehavior);
+//        handleBehaviorChange(oldBehaviorState, nextBehavior);
+//    }
 
     private void onShutDown() {
         LOG.debug("{}: onShutDown", persistenceId());
@@ -547,9 +558,9 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         return context.getId().equals(currentBehavior.getLeaderId());
     }
 
-    protected boolean isLeaderActive() {
-        return currentBehavior.state() != RaftState.IsolatedLeader && !shuttingDown &&
-                !isLeadershipTransferInProgress();
+    protected final boolean isLeaderActive() {
+        return getRaftState() != RaftState.IsolatedLeader && getRaftState() != RaftState.PreLeader &&
+                !shuttingDown && !isLeadershipTransferInProgress();
     }
 
     private boolean isLeadershipTransferInProgress() {
@@ -876,7 +887,8 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         @Override
         public RaftActorBehavior get() {
             if(this.message instanceof SwitchBehavior){
-                return ((SwitchBehavior) message).getNewState().createBehavior(getRaftActorContext());
+                return AbstractRaftActorBehavior.createBehavior(
+                        getRaftActorContext(), ((SwitchBehavior) message).getNewState());
             }
             return currentBehavior.handleMessage(sender, message);
         }
