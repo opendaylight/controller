@@ -712,6 +712,13 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
             }
         });
 
+        MemberNode.verifyRaftState(followerDistributedDataStore, "people", new RaftStateVerifier() {
+            @Override
+            public void verify(OnDemandRaftState raftState) {
+                assertEquals("getLastApplied", 0, raftState.getLastApplied());
+            }
+        });
+
         // Prepare, ready and canCommit a WO tx that writes to 2 shards. This will become the current tx in
         // the leader shard.
 
