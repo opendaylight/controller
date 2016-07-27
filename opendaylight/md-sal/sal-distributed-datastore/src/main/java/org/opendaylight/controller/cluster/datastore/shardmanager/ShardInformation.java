@@ -148,7 +148,8 @@ final class ShardInformation {
 
     boolean isShardReadyWithLeaderId() {
         return leaderAvailable && isShardReady() && !RaftState.IsolatedLeader.name().equals(role) &&
-                (isLeader() || addressResolver.resolve(leaderId) != null);
+                !RaftState.PreLeader.name().equals(role) &&
+                    (isLeader() || addressResolver.resolve(leaderId) != null);
     }
 
     boolean isShardInitialized() {

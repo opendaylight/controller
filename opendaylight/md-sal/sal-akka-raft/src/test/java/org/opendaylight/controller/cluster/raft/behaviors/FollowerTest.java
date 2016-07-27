@@ -893,6 +893,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         logStart("testInitialSyncUpWithHandleInstallSnapshot");
 
         MockRaftActorContext context = createActorContext();
+        context.setCommitIndex(-1);
 
         follower = createBehavior(context);
 

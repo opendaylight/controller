@@ -260,6 +260,7 @@ class EntityOwnershipShard extends Shard {
             case Candidate:
             case Follower:
             case Leader:
+            case PreLeader:
                 return false;
             case IsolatedLeader:
                 return true;
