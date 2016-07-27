@@ -22,6 +22,30 @@
       "revId": "4a713978d5a00093e375c7d716a502165b05bd84",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_6cc9a858",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/client/SavingClientActorBehavior.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-07-27T21:58:25Z",
+      "side": 1,
+      "message": "I assume you mean does deleteSnapshots send a response message - no.",
+      "parentUuid": "9a561d44_0c3aac98",
+      "range": {
+        "startLine": 39,
+        "startChar": 12,
+        "endLine": 40,
+        "endChar": 63
+      },
+      "revId": "4a713978d5a00093e375c7d716a502165b05bd84",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
