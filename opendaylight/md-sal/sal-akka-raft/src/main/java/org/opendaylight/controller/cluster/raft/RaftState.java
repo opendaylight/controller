@@ -12,5 +12,6 @@ public enum RaftState {
     Candidate,
     Follower,
     Leader,
-    IsolatedLeader;
+    IsolatedLeader,
+    PreLeader;
 }

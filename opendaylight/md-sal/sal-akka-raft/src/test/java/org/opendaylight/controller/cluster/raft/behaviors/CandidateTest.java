@@ -126,6 +126,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
         raftActorContext.getTermInformation().update(2L, "other");
         raftActorContext.setReplicatedLog(new MockRaftActorContext.MockReplicatedLogBuilder().
                 createEntries(0, 5, 1).build());
+        raftActorContext.setCommitIndex(raftActorContext.getReplicatedLog().lastIndex());
         raftActorContext.setPeerAddresses(setupPeers(4));
         candidate = new Candidate(raftActorContext);
 

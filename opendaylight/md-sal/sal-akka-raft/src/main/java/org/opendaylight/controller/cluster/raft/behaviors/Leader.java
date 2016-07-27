@@ -58,13 +58,17 @@ public class Leader extends AbstractLeader {
     private final Stopwatch isolatedLeaderCheck = Stopwatch.createStarted();
     private @Nullable LeadershipTransferContext leadershipTransferContext;
 
-    public Leader(RaftActorContext context) {
-        super(context, RaftState.Leader);
+    Leader(RaftActorContext context, @Nullable AbstractLeader initializeFromLeader) {
+        super(context, RaftState.Leader, initializeFromLeader);
 
         String dispatcher = new Dispatchers(context.getActorSystem().dispatchers()).getDispatcherPath(
                 Dispatchers.DispatcherType.KeepAlive);
         keepAliveActor = context.actorOf(KeepAliveActor.props(getLeaderId(),
                 context.getPeerInfoCache(), () -> context.getConfigParams()).withDispatcher(dispatcher));
+    }
+
+    public Leader(RaftActorContext context) {
+        this(context, null);
     }
 
     @Override

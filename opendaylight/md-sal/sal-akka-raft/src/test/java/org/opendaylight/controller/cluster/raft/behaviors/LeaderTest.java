@@ -107,6 +107,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         logStart("testThatLeaderSendsAHeartbeatMessageToAllFollowers");
 
         MockRaftActorContext actorContext = createActorContextWithFollower();
+        actorContext.setCommitIndex(-1);
         short payloadVersion = (short)5;
         actorContext.setPayloadVersion(payloadVersion);
 
@@ -202,6 +203,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         logStart("testHandleReplicateMessageWithHigherTermThanPreviousEntry");
 
         MockRaftActorContext actorContext = createActorContextWithFollower();
+        actorContext.setCommitIndex(-1);
 
         // The raft context is initialized with a couple log entries. However the commitIndex
         // is -1, simulating that the leader previously didn't get consensus and thus the log entries weren't
@@ -1988,6 +1990,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
                 new FiniteDuration(1000, TimeUnit.SECONDS));
 
         leaderActorContext.setReplicatedLog(new MockRaftActorContext.MockReplicatedLogBuilder().build());
+        leaderActorContext.setCommitIndex(-1);
 
         String nonVotingFollowerId = "nonvoting-follower";
         TestActorRef<ForwardMessageToBehaviorActor> nonVotingFollowerActor = actorFactory.createTestActor(
