@@ -99,12 +99,17 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
     private Optional<SnapshotHolder> snapshot;
     private int minReplicationCount;
 
-    protected AbstractLeader(RaftActorContext context, RaftState state) {
+    protected AbstractLeader(RaftActorContext context, RaftState state,
+            @Nullable AbstractLeader initializeFromLeader) {
         super(context, state);
 
-        for(PeerInfo peerInfo: context.getPeers()) {
-            FollowerLogInformation followerLogInformation = new FollowerLogInformationImpl(peerInfo, -1, context);
-            followerToLog.put(peerInfo.getId(), followerLogInformation);
+        if(initializeFromLeader != null) {
+            followerToLog.putAll(initializeFromLeader.followerToLog);
+        } else {
+            for(PeerInfo peerInfo: context.getPeers()) {
+                FollowerLogInformation followerLogInformation = new FollowerLogInformationImpl(peerInfo, -1, context);
+                followerToLog.put(peerInfo.getId(), followerLogInformation);
+            }
         }
 
         LOG.debug("{}: Election: Leader has following peers: {}", logName(), getFollowerIds());
@@ -121,6 +126,10 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
 
         // It is important to schedule this heartbeat here
         scheduleHeartBeat(context.getConfigParams().getHeartBeatInterval());
+    }
+
+    protected AbstractLeader(RaftActorContext context, RaftState state) {
+        this(context, state, null);
     }
 
     /**
@@ -529,16 +538,15 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
     private void replicate(Replicate replicate) {
         long logIndex = replicate.getReplicatedLogEntry().getIndex();
 
-        LOG.debug("{}: Replicate message: identifier: {}, logIndex: {}", logName(),
-                replicate.getIdentifier(), logIndex);
+        LOG.debug("{}: Replicate message: identifier: {}, logIndex: {}, payload: {}", logName(),
+                replicate.getIdentifier(), logIndex, replicate.getReplicatedLogEntry().getData().getClass());
 
         // Create a tracker entry we will use this later to notify the
         // client actor
-        trackers.add(
-            new ClientRequestTrackerImpl(replicate.getClientActor(),
-                replicate.getIdentifier(),
-                logIndex)
-        );
+        if(replicate.getClientActor() != null) {
+            trackers.add(new ClientRequestTrackerImpl(replicate.getClientActor(), replicate.getIdentifier(),
+                    logIndex));
+        }
 
         boolean applyModificationToState = !context.anyVotingPeers()
                 || context.getRaftPolicy().applyModificationToStateBeforeConsensus();

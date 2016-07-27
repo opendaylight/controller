@@ -50,6 +50,7 @@ import org.opendaylight.controller.cluster.raft.client.messages.FollowerInfo;
 import org.opendaylight.controller.cluster.raft.client.messages.GetOnDemandRaftState;
 import org.opendaylight.controller.cluster.raft.client.messages.OnDemandRaftState;
 import org.opendaylight.controller.cluster.raft.client.messages.Shutdown;
+import org.opendaylight.controller.cluster.raft.persisted.NoopPayload;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.opendaylight.yangtools.concepts.Identifier;
 import org.opendaylight.yangtools.concepts.Immutable;
@@ -235,8 +236,10 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
                     applyState.getReplicatedLogEntry().getData());
             }
 
-            applyState(applyState.getClientActor(), applyState.getIdentifier(),
-                applyState.getReplicatedLogEntry().getData());
+            if (!(applyState.getReplicatedLogEntry().getData() instanceof NoopPayload)) {
+                applyState(applyState.getClientActor(), applyState.getIdentifier(),
+                    applyState.getReplicatedLogEntry().getData());
+            }
 
             long elapsedTime = System.nanoTime() - startTime;
             if(elapsedTime >= APPLY_STATE_DELAY_THRESHOLD_IN_NANOS){
@@ -279,6 +282,8 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             onShutDown();
         } else if(message instanceof Runnable) {
             ((Runnable)message).run();
+        } else if(message instanceof NoopPayload) {
+            persistData(null, null, (NoopPayload)message);
         } else {
             // Processing the message may affect the state, hence we need to capture it
             final RaftActorBehavior currentBehavior = getCurrentBehavior();
@@ -536,7 +541,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
                 // the state to durable storage
                 self().tell(new ApplyJournalEntries(replicatedLogEntry1.getIndex()), self());
 
-            } else if (clientActor != null) {
+            } else {
                 context.getReplicatedLog().captureSnapshotIfReady(replicatedLogEntry1);
 
                 // Send message for replication
@@ -574,8 +579,8 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     }
 
     protected final boolean isLeaderActive() {
-        return getRaftState() != RaftState.IsolatedLeader && !shuttingDown &&
-                !isLeadershipTransferInProgress();
+        return getRaftState() != RaftState.IsolatedLeader && getRaftState() != RaftState.PreLeader &&
+                !shuttingDown && !isLeadershipTransferInProgress();
     }
 
     private boolean isLeadershipTransferInProgress() {

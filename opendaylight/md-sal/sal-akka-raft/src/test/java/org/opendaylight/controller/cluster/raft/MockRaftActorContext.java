@@ -81,6 +81,7 @@ public class MockRaftActorContext extends RaftActorContextImpl {
         replicatedLog.append(new MockReplicatedLogEntry(term, 0, new MockPayload("1")));
         replicatedLog.append(new MockReplicatedLogEntry(term, 1, new MockPayload("2")));
         setReplicatedLog(replicatedLog);
+        setCommitIndex(replicatedLog.lastIndex());
     }
 
     @Override public ActorRef actorOf(Props props) {
