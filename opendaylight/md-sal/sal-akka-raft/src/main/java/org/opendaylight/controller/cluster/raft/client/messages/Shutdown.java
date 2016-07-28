@@ -24,8 +24,7 @@ public final class Shutdown implements Serializable {
         // Hidden on purpose
     }
 
-    @SuppressWarnings({ "static-method", "unused" })
-    private Shutdown readResolve() {
+    private Object readResolve() {
         return INSTANCE;
     }
 }
