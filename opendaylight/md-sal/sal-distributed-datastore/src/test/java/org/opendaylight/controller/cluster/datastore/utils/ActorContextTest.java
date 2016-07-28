@@ -79,13 +79,13 @@ public class ActorContextTest extends AbstractActorTest{
         private final ActorRef actorRef;
         private final Map<String,Object> findPrimaryResponses = Maps.newHashMap();
 
-        private MockShardManager(boolean found, ActorRef actorRef){
+        private MockShardManager(final boolean found, final ActorRef actorRef){
 
             this.found = found;
             this.actorRef = actorRef;
         }
 
-        @Override public void onReceive(Object message) throws Exception {
+        @Override public void onReceive(final Object message) throws Exception {
             if(message instanceof FindPrimary) {
                 FindPrimary fp = (FindPrimary)message;
                 Object resp = findPrimaryResponses.get(fp.getShardName());
@@ -105,7 +105,7 @@ public class ActorContextTest extends AbstractActorTest{
             }
         }
 
-        void addFindPrimaryResp(String shardName, Object resp) {
+        void addFindPrimaryResp(final String shardName, final Object resp) {
             findPrimaryResponses.put(shardName, resp);
         }
 
@@ -127,7 +127,7 @@ public class ActorContextTest extends AbstractActorTest{
                 this.actorRef = null;
             }
 
-            MockShardManagerCreator(boolean found, ActorRef actorRef) {
+            MockShardManagerCreator(final boolean found, final ActorRef actorRef) {
                 this.found = found;
                 this.actorRef = actorRef;
             }
@@ -300,7 +300,6 @@ public class ActorContextTest extends AbstractActorTest{
                         mock(Configuration.class), DatastoreContext.newBuilder().build(), new PrimaryShardInfoFutureCache());
 
         assertEquals(getSystem().dispatchers().defaultGlobalDispatcher(), actorContext.getClientDispatcher());
-
     }
 
     @Test
@@ -313,8 +312,7 @@ public class ActorContextTest extends AbstractActorTest{
 
         assertNotEquals(actorSystem.dispatchers().defaultGlobalDispatcher(), actorContext.getClientDispatcher());
 
-        actorSystem.shutdown();
-
+        actorSystem.terminate();
     }
 
     @Test
@@ -362,7 +360,7 @@ public class ActorContextTest extends AbstractActorTest{
                     new ActorContext(getSystem(), shardManager, mock(ClusterWrapper.class),
                             mock(Configuration.class), dataStoreContext, new PrimaryShardInfoFutureCache()) {
                         @Override
-                        protected Future<Object> doAsk(ActorRef actorRef, Object message, Timeout timeout) {
+                        protected Future<Object> doAsk(final ActorRef actorRef, final Object message, final Timeout timeout) {
                             return Futures.successful((Object) new RemotePrimaryShardFound(expPrimaryPath, expPrimaryVersion));
                         }
                     };
@@ -405,7 +403,7 @@ public class ActorContextTest extends AbstractActorTest{
                     new ActorContext(getSystem(), shardManager, mock(ClusterWrapper.class),
                             mock(Configuration.class), dataStoreContext, new PrimaryShardInfoFutureCache()) {
                         @Override
-                        protected Future<Object> doAsk(ActorRef actorRef, Object message, Timeout timeout) {
+                        protected Future<Object> doAsk(final ActorRef actorRef, final Object message, final Timeout timeout) {
                             return Futures.successful((Object) new LocalPrimaryShardFound(expPrimaryPath, mockDataTree));
                         }
                     };
@@ -443,7 +441,7 @@ public class ActorContextTest extends AbstractActorTest{
         testFindPrimaryExceptions(new NotInitializedException("not initialized"));
     }
 
-    private void testFindPrimaryExceptions(final Object expectedException) throws Exception {
+    private static void testFindPrimaryExceptions(final Object expectedException) throws Exception {
         TestActorRef<MessageCollectorActor> shardManager =
             TestActorRef.create(getSystem(), Props.create(MessageCollectorActor.class));
 
@@ -455,7 +453,7 @@ public class ActorContextTest extends AbstractActorTest{
             new ActorContext(getSystem(), shardManager, mock(ClusterWrapper.class),
                 mock(Configuration.class), dataStoreContext, new PrimaryShardInfoFutureCache()) {
                 @Override
-                protected Future<Object> doAsk(ActorRef actorRef, Object message, Timeout timeout) {
+                protected Future<Object> doAsk(final ActorRef actorRef, final Object message, final Timeout timeout) {
                     return Futures.successful(expectedException);
                 }
             };
@@ -500,7 +498,7 @@ public class ActorContextTest extends AbstractActorTest{
 
             actorContext.broadcast(new Function<Short, Object>() {
                 @Override
-                public Object apply(Short v) {
+                public Object apply(final Short v) {
                     return new TestMessage();
                 }
             }, TestMessage.class);
