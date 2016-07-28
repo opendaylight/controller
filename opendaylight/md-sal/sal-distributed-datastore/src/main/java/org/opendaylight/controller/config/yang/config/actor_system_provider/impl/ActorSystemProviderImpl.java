@@ -26,6 +26,7 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import scala.concurrent.Await;
 import scala.concurrent.duration.Duration;
 
 public class ActorSystemProviderImpl implements ActorSystemProvider, AutoCloseable {
@@ -70,7 +71,7 @@ public class ActorSystemProviderImpl implements ActorSystemProvider, AutoCloseab
 
     @Override
     public ListenerRegistration<ActorSystemProviderListener> registerActorSystemProviderListener(
-            ActorSystemProviderListener listener) {
+            final ActorSystemProviderListener listener) {
         return listeners.register(listener);
     }
 
@@ -78,9 +79,8 @@ public class ActorSystemProviderImpl implements ActorSystemProvider, AutoCloseab
     public void close() {
         LOG.info("Shutting down ActorSystem");
 
-        actorSystem.shutdown();
         try {
-            actorSystem.awaitTermination(Duration.create(10, TimeUnit.SECONDS));
+            Await.result(actorSystem.terminate(), Duration.create(10, TimeUnit.SECONDS));
         } catch (Exception e) {
             LOG.warn("Error awaiting actor termination", e);
         }

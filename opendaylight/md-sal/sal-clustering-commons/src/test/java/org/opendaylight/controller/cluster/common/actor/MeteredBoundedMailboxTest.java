@@ -17,8 +17,8 @@ import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
-import org.junit.After;
-import org.junit.Before;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import scala.concurrent.duration.FiniteDuration;
 
@@ -28,8 +28,8 @@ public class MeteredBoundedMailboxTest {
     private static CommonConfig config;
     private final ReentrantLock lock = new ReentrantLock();
 
-    @Before
-    public void setUp() throws Exception {
+    @BeforeClass
+    public static void setUp() throws Exception {
         config = new CommonConfig.Builder<>("testsystem").withConfigReader(new AkkaConfigurationReader() {
             @Override
             public Config read() {
@@ -39,11 +39,12 @@ public class MeteredBoundedMailboxTest {
         actorSystem = ActorSystem.create("testsystem", config.get());
     }
 
-    @After
-    public void tearDown() throws Exception {
-       if (actorSystem != null) {
-        actorSystem.shutdown();
-    }
+    @AfterClass
+    public static void tearDown() throws Exception {
+        if (actorSystem != null) {
+            actorSystem.terminate();
+            actorSystem = null;
+        }
     }
 
     @Test
@@ -81,7 +82,7 @@ public class MeteredBoundedMailboxTest {
 
         ReentrantLock lock;
 
-        private PingPongActor(ReentrantLock lock){
+        private PingPongActor(final ReentrantLock lock){
             this.lock = lock;
         }
 
@@ -90,7 +91,7 @@ public class MeteredBoundedMailboxTest {
         }
 
         @Override
-        public void onReceive(Object message) throws Exception {
+        public void onReceive(final Object message) throws Exception {
             lock.lock();
             try {
                 if ("ping".equals(message)) {
