@@ -22,8 +22,7 @@ public final class LeaderTransitioning implements Serializable {
         // Hidden on purpose
     }
 
-    @SuppressWarnings({ "static-method", "unused" })
-    private LeaderTransitioning readResolve() {
+    private Object readResolve() {
         return INSTANCE;
     }
 }

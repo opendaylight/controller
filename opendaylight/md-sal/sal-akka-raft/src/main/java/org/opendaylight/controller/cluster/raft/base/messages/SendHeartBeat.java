@@ -24,8 +24,7 @@ public final class SendHeartBeat implements Serializable {
         // Hidden on purpose
     }
 
-    @SuppressWarnings({ "static-method", "unused" })
-    private SendHeartBeat readResolve() {
+    private Object readResolve() {
         return INSTANCE;
     }
 }

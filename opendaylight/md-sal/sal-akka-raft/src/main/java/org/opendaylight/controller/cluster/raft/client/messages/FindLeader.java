@@ -27,8 +27,7 @@ public final class FindLeader implements Serializable {
         // Hidden to force reuse
     }
 
-    @SuppressWarnings({ "static-method", "unused" })
-    private FindLeader readResolve() {
+    private Object readResolve() {
         return INSTANCE;
     }
 }

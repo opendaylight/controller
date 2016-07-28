@@ -21,8 +21,7 @@ public final class ElectionTimeout implements Serializable {
         // Hidden on purpose
     }
 
-    @SuppressWarnings({ "static-method", "unused" })
-    private ElectionTimeout readResolve() {
+    private Object readResolve() {
         return INSTANCE;
     }
 }
