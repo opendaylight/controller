@@ -78,6 +78,7 @@ import org.opendaylight.controller.cluster.datastore.modification.DeleteModifica
 import org.opendaylight.controller.cluster.datastore.modification.MergeModification;
 import org.opendaylight.controller.cluster.datastore.modification.MutableCompositeModification;
 import org.opendaylight.controller.cluster.datastore.modification.WriteModification;
+import org.opendaylight.controller.cluster.datastore.persisted.LegacyShardDataTreeSnapshot;
 import org.opendaylight.controller.cluster.datastore.utils.MockDataChangeListener;
 import org.opendaylight.controller.cluster.datastore.utils.MockDataTreeChangeListener;
 import org.opendaylight.controller.cluster.datastore.utils.SerializationUtils;
@@ -425,7 +426,7 @@ public class ShardTest extends AbstractShardTest {
         final YangInstanceIdentifier root = YangInstanceIdentifier.EMPTY;
         final NormalizedNode<?,?> expected = readStore(store, root);
 
-        final Snapshot snapshot = Snapshot.create(SerializationUtils.serializeNormalizedNode(expected),
+        final Snapshot snapshot = Snapshot.create(new LegacyShardDataTreeSnapshot(expected).serialize(),
                 Collections.<ReplicatedLogEntry>emptyList(), 1, 2, 3, 4);
 
         shard.underlyingActor().getRaftActorSnapshotCohort().applySnapshot(snapshot.getState());

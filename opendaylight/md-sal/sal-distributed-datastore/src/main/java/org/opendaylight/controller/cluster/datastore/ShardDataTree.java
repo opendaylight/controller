@@ -16,6 +16,8 @@ import java.util.Map.Entry;
 import javax.annotation.concurrent.NotThreadSafe;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
+import org.opendaylight.controller.cluster.datastore.persisted.AbstractShardDataTreeSnapshot;
+import org.opendaylight.controller.cluster.datastore.persisted.BoronShardDataTreeSnapshot;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeListener;
@@ -82,6 +84,18 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     void updateSchemaContext(final SchemaContext schemaContext) {
         dataTree.setSchemaContext(schemaContext);
         this.schemaContext = Preconditions.checkNotNull(schemaContext);
+    }
+
+    AbstractShardDataTreeSnapshot takeRecoverySnapshot() {
+        return new BoronShardDataTreeSnapshot(dataTree.takeSnapshot().readNode(YangInstanceIdentifier.EMPTY).get());
+    }
+
+    void applyRecoveryTransaction(final ReadWriteShardDataTreeTransaction transaction) throws DataValidationFailedException {
+        final DataTreeModification snapshot = transaction.getSnapshot();
+        snapshot.ready();
+
+        dataTree.validate(snapshot);
+        dataTree.commit(dataTree.prepare(snapshot));
     }
 
     private ShardDataTreeTransactionChain ensureTransactionChain(final LocalHistoryIdentifier localHistoryIdentifier) {
