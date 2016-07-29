@@ -18,6 +18,7 @@ import akka.actor.Status;
 import akka.actor.SupervisorStrategy;
 import akka.actor.SupervisorStrategy.Directive;
 import akka.cluster.ClusterEvent;
+import akka.cluster.ClusterEvent.MemberWeaklyUp;
 import akka.cluster.Member;
 import akka.dispatch.Futures;
 import akka.dispatch.OnComplete;
@@ -195,6 +196,8 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             onActorInitialized(message);
         } else if (message instanceof ClusterEvent.MemberUp){
             memberUp((ClusterEvent.MemberUp) message);
+        } else if (message instanceof ClusterEvent.MemberWeaklyUp){
+            memberWeaklyUp((ClusterEvent.MemberWeaklyUp) message);
         } else if (message instanceof ClusterEvent.MemberExited){
             memberExited((ClusterEvent.MemberExited) message);
         } else if(message instanceof ClusterEvent.MemberRemoved) {
@@ -733,7 +736,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     private void memberRemoved(ClusterEvent.MemberRemoved message) {
         MemberName memberName = memberToName(message.member());
 
-        LOG.debug("{}: Received MemberRemoved: memberName: {}, address: {}", persistenceId(), memberName,
+        LOG.info("{}: Received MemberRemoved: memberName: {}, address: {}", persistenceId(), memberName,
                 message.member().address());
 
         peerAddressResolver.removePeerAddress(memberName);
@@ -746,7 +749,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     private void memberExited(ClusterEvent.MemberExited message) {
         MemberName memberName = memberToName(message.member());
 
-        LOG.debug("{}: Received MemberExited: memberName: {}, address: {}", persistenceId(), memberName,
+        LOG.info("{}: Received MemberExited: memberName: {}, address: {}", persistenceId(), memberName,
                 message.member().address());
 
         peerAddressResolver.removePeerAddress(memberName);
@@ -759,12 +762,24 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     private void memberUp(ClusterEvent.MemberUp message) {
         MemberName memberName = memberToName(message.member());
 
-        LOG.debug("{}: Received MemberUp: memberName: {}, address: {}", persistenceId(), memberName,
+        LOG.info("{}: Received MemberUp: memberName: {}, address: {}", persistenceId(), memberName,
                 message.member().address());
 
-        addPeerAddress(memberName, message.member().address());
+        memberUp(memberName, message.member().address());
+    }
 
+    private void memberUp(MemberName memberName, Address address) {
+        addPeerAddress(memberName, address);
         checkReady();
+    }
+
+    private void memberWeaklyUp(MemberWeaklyUp message) {
+        MemberName memberName = memberToName(message.member());
+
+        LOG.info("{}: Received MemberWeaklyUp: memberName: {}, address: {}", persistenceId(), memberName,
+                message.member().address());
+
+        memberUp(memberName, message.member().address());
     }
 
     private void addPeerAddress(MemberName memberName, Address address) {
@@ -781,7 +796,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
     private void memberReachable(ClusterEvent.ReachableMember message) {
         MemberName memberName = memberToName(message.member());
-        LOG.debug("Received ReachableMember: memberName {}, address: {}", memberName, message.member().address());
+        LOG.info("Received ReachableMember: memberName {}, address: {}", memberName, message.member().address());
 
         addPeerAddress(memberName, message.member().address());
 
@@ -790,7 +805,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
     private void memberUnreachable(ClusterEvent.UnreachableMember message) {
         MemberName memberName = memberToName(message.member());
-        LOG.debug("Received UnreachableMember: memberName {}, address: {}", memberName, message.member().address());
+        LOG.info("Received UnreachableMember: memberName {}, address: {}", memberName, message.member().address());
 
         markMemberUnavailable(memberName);
     }
