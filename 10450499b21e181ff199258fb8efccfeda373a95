@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "9a561d44_2514d99e",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ChainedCommitCohort.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-07-29T16:53:32Z",
+      "side": 1,
+      "message": "right, it should propagate the calls in onSuccess/onFailure",
+      "parentUuid": "9a561d44_cf71bc0d",
+      "revId": "10450499b21e181ff199258fb8efccfeda373a95",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a561d44_4f5dac78",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/CompositeDataTreeCohort.java",
         "patchSetId": 7
@@ -139,6 +157,24 @@
     },
     {
       "key": {
+        "uuid": "9a561d44_8524c50d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardDataTree.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 379,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-07-29T16:53:32Z",
+      "side": 1,
+      "message": "Let\u0027s keep here for now and remove once your patch lands",
+      "parentUuid": "9a561d44_82703b73",
+      "revId": "10450499b21e181ff199258fb8efccfeda373a95",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a561d44_42290336",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardDataTree.java",
         "patchSetId": 7
@@ -150,6 +186,24 @@
       "writtenOn": "2016-07-29T14:46:18Z",
       "side": 1,
       "message": "Why would we propagate the journal index? That\u0027s internal raft details and I don\u0027t think we want to leak that.",
+      "revId": "10450499b21e181ff199258fb8efccfeda373a95",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_450f4d88",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardDataTree.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 389,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-07-29T16:53:32Z",
+      "side": 1,
+      "message": "This is related to the notion I mentioned about a month ago, that it would be potentially useful to have a notion of a cluster-wide unique identifier of a committed transaction. The combination of shard identifier and journal index is exactly that.\n\nI thought to lay the ground work here instead of using a Void...",
+      "parentUuid": "9a561d44_42290336",
       "revId": "10450499b21e181ff199258fb8efccfeda373a95",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -184,6 +238,24 @@
       "writtenOn": "2016-07-29T14:46:18Z",
       "side": 1,
       "message": "Should we ensure the current state is CAN_COMMIT_PENDING? Same with failedCanCommit, successfulPreCommit et al",
+      "revId": "10450499b21e181ff199258fb8efccfeda373a95",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_e51dc1bf",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/SimpleShardDataTreeCohort.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-07-29T16:53:32Z",
+      "side": 1,
+      "message": "Sure, more defensiveness does not hurt :)",
+      "parentUuid": "9a561d44_42d463bc",
       "revId": "10450499b21e181ff199258fb8efccfeda373a95",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
