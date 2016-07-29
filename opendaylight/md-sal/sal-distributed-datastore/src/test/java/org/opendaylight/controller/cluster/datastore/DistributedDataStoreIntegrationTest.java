@@ -51,8 +51,8 @@ import org.opendaylight.controller.cluster.datastore.exceptions.NotInitializedEx
 import org.opendaylight.controller.cluster.datastore.messages.DatastoreSnapshot;
 import org.opendaylight.controller.cluster.datastore.messages.FindLocalShard;
 import org.opendaylight.controller.cluster.datastore.messages.LocalShardFound;
+import org.opendaylight.controller.cluster.datastore.persisted.LegacyShardDataTreeSnapshot;
 import org.opendaylight.controller.cluster.datastore.utils.MockDataChangeListener;
-import org.opendaylight.controller.cluster.datastore.utils.SerializationUtils;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.Snapshot;
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
@@ -1177,7 +1177,7 @@ public class DistributedDataStoreIntegrationTest {
             NormalizedNode<?, ?> root = AbstractShardTest.readStore(dataTree.getDataTree(),
                     YangInstanceIdentifier.EMPTY);
 
-            Snapshot carsSnapshot = Snapshot.create(SerializationUtils.serializeNormalizedNode(root),
+            Snapshot carsSnapshot = Snapshot.create(new LegacyShardDataTreeSnapshot(root).serialize(),
                     Collections.<ReplicatedLogEntry>emptyList(), 2, 1, 2, 1, 1, "member-1");
 
             NormalizedNode<?, ?> peopleNode = PeopleModel.create();
@@ -1185,7 +1185,7 @@ public class DistributedDataStoreIntegrationTest {
             AbstractShardTest.writeToStore(dataTree, PeopleModel.BASE_PATH, peopleNode);
             root = AbstractShardTest.readStore(dataTree.getDataTree(), YangInstanceIdentifier.EMPTY);
 
-            Snapshot peopleSnapshot = Snapshot.create(SerializationUtils.serializeNormalizedNode(root),
+            Snapshot peopleSnapshot = Snapshot.create(new LegacyShardDataTreeSnapshot(root).serialize(),
                     Collections.<ReplicatedLogEntry>emptyList(), 2, 1, 2, 1, 1, "member-1");
 
             restoreFromSnapshot = new DatastoreSnapshot(name, null, Arrays.asList(
