@@ -8,16 +8,17 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Throwables;
 import java.io.File;
 import java.io.IOException;
 import java.util.Map.Entry;
 import java.util.Optional;
-import org.opendaylight.controller.cluster.datastore.persisted.DataTreeCandidateSupplier;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
+import org.opendaylight.controller.cluster.datastore.persisted.AbstractShardDataTreeSnapshot;
+import org.opendaylight.controller.cluster.datastore.persisted.DataTreeCandidateSupplier;
 import org.opendaylight.controller.cluster.datastore.utils.DataTreeModificationOutput;
 import org.opendaylight.controller.cluster.datastore.utils.NormalizedNodeXMLOutput;
 import org.opendaylight.controller.cluster.datastore.utils.PruningDataTreeModification;
-import org.opendaylight.controller.cluster.datastore.utils.SerializationUtils;
 import org.opendaylight.controller.cluster.raft.RaftActorRecoveryCohort;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -116,10 +117,20 @@ class ShardRecoveryCoordinator implements RaftActorRecoveryCohort {
     public void applyRecoverySnapshot(final byte[] snapshotBytes) {
         log.debug("{}: Applying recovered snapshot", shardName);
 
-        final NormalizedNode<?, ?> node = SerializationUtils.deserializeNormalizedNode(snapshotBytes);
+        final AbstractShardDataTreeSnapshot snapshot;
+        try {
+            snapshot = AbstractShardDataTreeSnapshot.deserialize(snapshotBytes);
+        } catch (IOException e) {
+            log.error("{}: failed to deserialize snapshot", e);
+            throw Throwables.propagate(e);
+        }
+
         final PruningDataTreeModification tx = new PruningDataTreeModification(store.newModification(),
                 store.getDataTree(), store.getSchemaContext());
+
+        final NormalizedNode<?, ?> node = snapshot.getRootNode().orElse(null);
         tx.write(YangInstanceIdentifier.EMPTY, node);
+
         try {
             commitTransaction(tx);
         } catch (Exception e) {
