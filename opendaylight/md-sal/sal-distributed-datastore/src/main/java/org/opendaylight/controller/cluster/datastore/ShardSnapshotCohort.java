@@ -7,8 +7,11 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import akka.actor.ActorContext;
 import akka.actor.ActorRef;
 import com.google.common.base.Preconditions;
+import java.io.IOException;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
@@ -16,8 +19,8 @@ import org.opendaylight.controller.cluster.access.concepts.FrontendType;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
-import org.opendaylight.controller.cluster.datastore.messages.CreateSnapshot;
-import org.opendaylight.controller.cluster.datastore.utils.SerializationUtils;
+import org.opendaylight.controller.cluster.datastore.actors.ShardSnapshotActor;
+import org.opendaylight.controller.cluster.datastore.persisted.AbstractShardDataTreeSnapshot;
 import org.opendaylight.controller.cluster.raft.RaftActorSnapshotCohort;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -30,67 +33,68 @@ import org.slf4j.Logger;
  */
 class ShardSnapshotCohort implements RaftActorSnapshotCohort {
     private static final FrontendType SNAPSHOT_APPLY = FrontendType.forName("snapshot-apply");
-    private static final FrontendType SNAPSHOT_READ = FrontendType.forName("snapshot-read");
 
-    private final ShardTransactionActorFactory transactionActorFactory;
     private final LocalHistoryIdentifier applyHistoryId;
-    private final LocalHistoryIdentifier readHistoryId;
+    private final ActorRef snapshotActor;
     private final ShardDataTree store;
     private final String logId;
     private final Logger log;
 
     private long applyCounter;
-    private long readCounter;
 
-    ShardSnapshotCohort(MemberName memberName, ShardTransactionActorFactory transactionActorFactory, ShardDataTree store,
-            Logger log, String logId) {
-        this.transactionActorFactory = Preconditions.checkNotNull(transactionActorFactory);
+    private ShardSnapshotCohort(final LocalHistoryIdentifier applyHistoryId, final ActorRef snapshotActor,
+            final ShardDataTree store, final Logger log, final String logId) {
+        this.applyHistoryId = Preconditions.checkNotNull(applyHistoryId);
+        this.snapshotActor = Preconditions.checkNotNull(snapshotActor);
         this.store = Preconditions.checkNotNull(store);
         this.log = log;
         this.logId = logId;
+    }
 
-        this.applyHistoryId = new LocalHistoryIdentifier(ClientIdentifier.create(
+    static ShardSnapshotCohort create(final ActorContext actorContext, final MemberName memberName,
+            final ShardDataTree store, final Logger log, final String logId) {
+        final LocalHistoryIdentifier applyHistoryId = new LocalHistoryIdentifier(ClientIdentifier.create(
             FrontendIdentifier.create(memberName, SNAPSHOT_APPLY), 0), 0);
-        this.readHistoryId = new LocalHistoryIdentifier(ClientIdentifier.create(
-            FrontendIdentifier.create(memberName, SNAPSHOT_READ), 0), 0);
+        final String snapshotActorName = "shard-" + memberName.getName() + ':' + "snapshot-read";
+
+        // Create a snapshot actor. This actor will act as a worker to offload snapshot serialization for all
+        // requests.
+        final ActorRef snapshotActor = actorContext.actorOf(ShardSnapshotActor.props(), snapshotActorName);
+
+        return new ShardSnapshotCohort(applyHistoryId, snapshotActor, store, log, logId);
     }
 
     @Override
-    public void createSnapshot(ActorRef actorRef) {
-        // Create a transaction actor. We are really going to treat the transaction as a worker
-        // so that this actor does not get block building the snapshot. THe transaction actor will
-        // after processing the CreateSnapshot message.
-
-        ActorRef createSnapshotTransaction = transactionActorFactory.newShardTransaction(
-                TransactionType.READ_ONLY, new TransactionIdentifier(readHistoryId, readCounter++));
-
-        createSnapshotTransaction.tell(CreateSnapshot.INSTANCE, actorRef);
+    public void createSnapshot(final ActorRef actorRef) {
+        // Forward the request to the snapshot actor
+        ShardSnapshotActor.requestSnapshot(snapshotActor, store.takeRecoverySnapshot(), actorRef);
     }
 
-    @Override
-    public void applySnapshot(byte[] snapshotBytes) {
-        // Since this will be done only on Recovery or when this actor is a Follower
-        // we can safely commit everything in here. We not need to worry about event notifications
-        // as they would have already been disabled on the follower
-
-        log.info("{}: Applying snapshot", logId);
+    private void deserializeAndApplySnapshot(final byte[] snapshotBytes) {
+        final AbstractShardDataTreeSnapshot snapshot;
+        try {
+            snapshot = AbstractShardDataTreeSnapshot.deserialize(snapshotBytes);
+        } catch (IOException e) {
+            log.error("{}: Failed to deserialize snapshot", logId, e);
+            return;
+        }
 
         try {
-            ReadWriteShardDataTreeTransaction transaction = store.newReadWriteTransaction(
+            final ReadWriteShardDataTreeTransaction transaction = store.newReadWriteTransaction(
                 new TransactionIdentifier(applyHistoryId, applyCounter++));
-
-            NormalizedNode<?, ?> node = SerializationUtils.deserializeNormalizedNode(snapshotBytes);
 
             // delete everything first
             transaction.getSnapshot().delete(YangInstanceIdentifier.EMPTY);
 
-            // Add everything from the remote node back
-            transaction.getSnapshot().write(YangInstanceIdentifier.EMPTY, node);
-            syncCommitTransaction(transaction);
-        } catch (InterruptedException | ExecutionException e) {
+            final Optional<NormalizedNode<?, ?>> maybeNode = snapshot.getRootNode();
+            if (maybeNode.isPresent()) {
+                // Add everything from the remote node back
+                transaction.getSnapshot().write(YangInstanceIdentifier.EMPTY, maybeNode.get());
+            }
+
+            store.applyRecoveryTransaction(transaction);
+        } catch (Exception e) {
             log.error("{}: An exception occurred when applying snapshot", logId, e);
-        } finally {
-            log.info("{}: Done applying snapshot", logId);
         }
 
     }
@@ -100,5 +104,16 @@ class ShardSnapshotCohort implements RaftActorSnapshotCohort {
         ShardDataTreeCohort commitCohort = store.finishTransaction(transaction);
         commitCohort.preCommit().get();
         commitCohort.commit().get();
+    }
+
+    @Override
+    public void applySnapshot(final byte[] snapshotBytes) {
+        // Since this will be done only on Recovery or when this actor is a Follower
+        // we can safely commit everything in here. We not need to worry about event notifications
+        // as they would have already been disabled on the follower
+
+        log.info("{}: Applying snapshot", logId);
+        deserializeAndApplySnapshot(snapshotBytes);
+        log.info("{}: Done applying snapshot", logId);
     }
 }
