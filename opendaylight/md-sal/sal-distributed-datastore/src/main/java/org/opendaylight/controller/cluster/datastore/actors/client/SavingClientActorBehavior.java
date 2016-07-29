@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.cluster.datastore.actors.client;
 
+import akka.persistence.DeleteSnapshotsFailure;
+import akka.persistence.DeleteSnapshotsSuccess;
 import akka.persistence.SaveSnapshotFailure;
 import akka.persistence.SaveSnapshotSuccess;
 import akka.persistence.SnapshotSelectionCriteria;
@@ -33,17 +35,23 @@ final class SavingClientActorBehavior extends RecoveredClientActorBehavior<Initi
             LOG.error("{}: failed to persist state", persistenceId(), ((SaveSnapshotFailure) command).cause());
             return null;
         } else if (command instanceof SaveSnapshotSuccess) {
-            context().unstash();
-
+            LOG.debug("{}: got command: {}", persistenceId(), command);
             SaveSnapshotSuccess saved = (SaveSnapshotSuccess)command;
             context().deleteSnapshots(new SnapshotSelectionCriteria(saved.metadata().sequenceNr(),
                     saved.metadata().timestamp() - 1, 0L, 0L));
-
-            return context().createBehavior(myId);
+            return this;
+        } else if (command instanceof DeleteSnapshotsSuccess) {
+            LOG.debug("{}: got command: {}", persistenceId(), command);
+        } else if (command instanceof DeleteSnapshotsFailure) {
+            // Not treating this as a fatal error.
+            LOG.warn("{}: failed to delete prior snapshots", persistenceId(), ((DeleteSnapshotsFailure) command).cause());
         } else {
             LOG.debug("{}: stashing command {}", persistenceId(), command);
             context().stash();
             return this;
         }
+
+        context().unstash();
+        return context().createBehavior(myId);
     }
 }
