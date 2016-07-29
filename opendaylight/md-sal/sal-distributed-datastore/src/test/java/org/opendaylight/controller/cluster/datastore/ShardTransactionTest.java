@@ -33,7 +33,6 @@ import org.opendaylight.controller.cluster.datastore.messages.BatchedModificatio
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.CommitTransactionReply;
-import org.opendaylight.controller.cluster.datastore.messages.CreateSnapshot;
 import org.opendaylight.controller.cluster.datastore.messages.DataExists;
 import org.opendaylight.controller.cluster.datastore.messages.DataExistsReply;
 import org.opendaylight.controller.cluster.datastore.messages.ReadData;
@@ -42,8 +41,6 @@ import org.opendaylight.controller.cluster.datastore.messages.ReadyTransactionRe
 import org.opendaylight.controller.cluster.datastore.modification.DeleteModification;
 import org.opendaylight.controller.cluster.datastore.modification.MergeModification;
 import org.opendaylight.controller.cluster.datastore.modification.WriteModification;
-import org.opendaylight.controller.cluster.datastore.utils.SerializationUtils;
-import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
@@ -342,35 +339,6 @@ public class ShardTransactionTest extends AbstractActorTest {
             if(failure != null) {
                 throw failure.cause();
             }
-        }};
-    }
-
-    @Test
-    public void testOnReceiveCreateSnapshot() throws Exception {
-        new JavaTestKit(getSystem()) {{
-            ShardTest.writeToStore(store.getDataTree(), TestModel.TEST_PATH,
-                    ImmutableNodes.containerNode(TestModel.TEST_QNAME));
-
-            NormalizedNode<?,?> expectedRoot = ShardTest.readStore(store.getDataTree(),
-                    YangInstanceIdentifier.EMPTY);
-
-            final ActorRef transaction = newTransactionActor(TransactionType.READ_ONLY, readOnlyTransaction(),
-                    "testOnReceiveCreateSnapshot");
-
-            watch(transaction);
-
-            transaction.tell(CreateSnapshot.INSTANCE, getRef());
-
-            CaptureSnapshotReply reply = expectMsgClass(duration("3 seconds"), CaptureSnapshotReply.class);
-
-            assertNotNull("getSnapshot is null", reply.getSnapshot());
-
-            NormalizedNode<?,?> actualRoot = SerializationUtils.deserializeNormalizedNode(
-                    reply.getSnapshot());
-
-            assertEquals("Root node", expectedRoot, actualRoot);
-
-            expectTerminated(duration("3 seconds"), transaction);
         }};
     }
 
