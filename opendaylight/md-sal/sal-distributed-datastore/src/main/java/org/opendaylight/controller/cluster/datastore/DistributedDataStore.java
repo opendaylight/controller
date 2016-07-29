@@ -42,6 +42,8 @@ import org.opendaylight.mdsal.dom.api.DOMDataTreeCommitCohort;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeCommitCohortRegistration;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeCommitCohortRegistry;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
+import org.opendaylight.mdsal.dom.api.DOMDataTreeService;
+import org.opendaylight.mdsal.dom.api.DOMDataTreeShardingService;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -77,6 +79,7 @@ public class DistributedDataStore implements DistributedDataStoreInterface, Sche
     private final TransactionContextFactory txContextFactory;
 
     public DistributedDataStore(final ActorSystem actorSystem, final ClusterWrapper cluster,
+                                final DOMDataTreeService dataTreeService, final DOMDataTreeShardingService shardingService,
             final Configuration configuration, final DatastoreContextFactory datastoreContextFactory,
             final DatastoreSnapshot restoreFromSnapshot) {
         Preconditions.checkNotNull(actorSystem, "actorSystem should not be null");
@@ -84,17 +87,17 @@ public class DistributedDataStore implements DistributedDataStoreInterface, Sche
         Preconditions.checkNotNull(configuration, "configuration should not be null");
         Preconditions.checkNotNull(datastoreContextFactory, "datastoreContextFactory should not be null");
 
-        String shardManagerId = ShardManagerIdentifier.builder()
+        final String shardManagerId = ShardManagerIdentifier.builder()
                 .type(datastoreContextFactory.getBaseDatastoreContext().getDataStoreName()).build().toString();
 
         LOG.info("Creating ShardManager : {}", shardManagerId);
 
-        String shardDispatcher =
+        final String shardDispatcher =
                 new Dispatchers(actorSystem.dispatchers()).getDispatcherPath(Dispatchers.DispatcherType.Shard);
 
-        PrimaryShardInfoFutureCache primaryShardInfoCache = new PrimaryShardInfoFutureCache();
+        final PrimaryShardInfoFutureCache primaryShardInfoCache = new PrimaryShardInfoFutureCache();
 
-        ShardManagerCreator creator = new ShardManagerCreator().cluster(cluster).configuration(configuration).
+        final ShardManagerCreator creator = new ShardManagerCreator().cluster(cluster).configuration(configuration).
                 datastoreContextFactory(datastoreContextFactory).waitTillReadyCountdownLatch(waitTillReadyCountDownLatch).
                 primaryShardInfoCache(primaryShardInfoCache).restoreFromSnapshot(restoreFromSnapshot);
 
@@ -106,11 +109,13 @@ public class DistributedDataStore implements DistributedDataStoreInterface, Sche
         final ActorRef clientActor = actorSystem.actorOf(clientProps);
         try {
             client = DistributedDataStoreClientActor.getDistributedDataStoreClient(clientActor, 30, TimeUnit.SECONDS);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             LOG.error("Failed to get actor for {}", clientProps, e);
             clientActor.tell(PoisonPill.getInstance(), ActorRef.noSender());
             throw Throwables.propagate(e);
         }
+
+
 
         identifier = client.getIdentifier();
         LOG.debug("Distributed data store client {} started", identifier);
@@ -156,7 +161,7 @@ public class DistributedDataStore implements DistributedDataStoreInterface, Sche
 
         LOG.debug("Registering listener: {} for path: {} scope: {}", listener, path, scope);
 
-        String shardName = actorContext.getShardStrategyFactory().getStrategy(path).findShard(path);
+        final String shardName = actorContext.getShardStrategyFactory().getStrategy(path).findShard(path);
 
         final DataChangeListenerRegistrationProxy listenerRegistrationProxy =
                 new DataChangeListenerRegistrationProxy(shardName, actorContext, listener);
@@ -184,7 +189,7 @@ public class DistributedDataStore implements DistributedDataStoreInterface, Sche
     @Override
     public <C extends DOMDataTreeCommitCohort> DOMDataTreeCommitCohortRegistration<C> registerCommitCohort(
             final DOMDataTreeIdentifier subtree, final C cohort) {
-        YangInstanceIdentifier treeId =
+        final YangInstanceIdentifier treeId =
                 Preconditions.checkNotNull(subtree, "subtree should not be null").getRootIdentifier();
         Preconditions.checkNotNull(cohort, "listener should not be null");
 
@@ -192,7 +197,7 @@ public class DistributedDataStore implements DistributedDataStoreInterface, Sche
         final String shardName = actorContext.getShardStrategyFactory().getStrategy(treeId).findShard(treeId);
         LOG.debug("Registering cohort: {} for tree: {} shard: {}", cohort, treeId, shardName);
 
-        DataTreeCohortRegistrationProxy<C> cohortProxy = new DataTreeCohortRegistrationProxy<C>(actorContext, subtree, cohort);
+        final DataTreeCohortRegistrationProxy<C> cohortProxy = new DataTreeCohortRegistrationProxy<C>(actorContext, subtree, cohort);
         cohortProxy.init(shardName);
         return cohortProxy;
     }
@@ -246,7 +251,7 @@ public class DistributedDataStore implements DistributedDataStoreInterface, Sche
         if (closeable != null) {
             try {
                 closeable.close();
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 LOG.debug("Error closing instance", e);
             }
         }
@@ -273,7 +278,7 @@ public class DistributedDataStore implements DistributedDataStoreInterface, Sche
             } else {
                 LOG.error("Shared leaders failed to settle in {} seconds, giving up", TimeUnit.MILLISECONDS.toSeconds(waitTillReadyTimeInMillis));
             }
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
             LOG.error("Interrupted while waiting for shards to settle", e);
         }
     }
@@ -286,7 +291,7 @@ public class DistributedDataStore implements DistributedDataStoreInterface, Sche
             try {
                 return actorSystem.actorOf(creator.props().withDispatcher(shardDispatcher).withMailbox(
                         ActorContext.BOUNDED_MAILBOX), shardManagerId);
-            } catch (Exception e){
+            } catch (final Exception e){
                 lastException = e;
                 Uninterruptibles.sleepUninterruptibly(100, TimeUnit.MILLISECONDS);
                 LOG.debug("Could not create actor {} because of {} - waiting for sometime before retrying (retry count = {})",

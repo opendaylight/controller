@@ -42,24 +42,24 @@ public final class ModifyTransactionRequestBuilder implements Builder<ModifyTran
         return identifier;
     }
 
-    private void checkFinished() {
-        Preconditions.checkState(protocol != null, "Batch has already been finished");
+    private void checkNotFinished() {
+        Preconditions.checkState(protocol == null, "Batch has already been finished");
     }
 
     public void addModification(final TransactionModification modification) {
-        checkFinished();
+        checkNotFinished();
         modifications.add(Preconditions.checkNotNull(modification));
     }
 
     public void setAbort() {
-        checkFinished();
+        checkNotFinished();
         // Transaction is being aborted, no need to transmit operations
         modifications.clear();
         protocol = PersistenceProtocol.ABORT;
     }
 
     public void setCommit(final boolean coordinated) {
-        checkFinished();
+        checkNotFinished();
         protocol = coordinated ? PersistenceProtocol.THREE_PHASE : PersistenceProtocol.SIMPLE;
     }
 

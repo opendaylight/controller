@@ -159,7 +159,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         final Builder<Class<? extends ShardDataTreeSnapshotMetadata<?>>, ShardDataTreeSnapshotMetadata<?>> metaBuilder =
                 ImmutableMap.builder();
 
-        for (ShardDataTreeMetadata<?> m : metadata) {
+        for (final ShardDataTreeMetadata<?> m : metadata) {
             final ShardDataTreeSnapshotMetadata<?> meta = m.toStapshot();
             if (meta != null) {
                 metaBuilder.put(meta.getType(), meta);
@@ -184,7 +184,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
             snapshotMeta = ImmutableMap.of();
         }
 
-        for (ShardDataTreeMetadata<?> m : metadata) {
+        for (final ShardDataTreeMetadata<?> m : metadata) {
             final ShardDataTreeSnapshotMetadata<?> s = snapshotMeta.get(m.getSupportedType());
             if (s != null) {
                 m.applySnapshot(s);
@@ -276,7 +276,8 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         }
     }
 
-    private void applyReplicatedCandidate(final Identifier identifier, final DataTreeCandidate foreign)
+    @VisibleForTesting
+    void applyReplicatedCandidate(final Identifier identifier, final DataTreeCandidate foreign)
             throws DataValidationFailedException {
         LOG.debug("{}: Applying foreign transaction {}", logContext, identifier);
 
@@ -345,7 +346,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     }
 
     private void allMetadataCommittedTransaction(final TransactionIdentifier txId) {
-        for (ShardDataTreeMetadata<?> m : metadata) {
+        for (final ShardDataTreeMetadata<?> m : metadata) {
             m.onTransactionCommitted(txId);
         }
     }
@@ -385,7 +386,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     void notifyOfInitialData(final DataChangeListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier,
             NormalizedNode<?, ?>>> listenerReg, final Optional<DataTreeCandidate> currentState) {
         if (currentState.isPresent()) {
-            ShardDataChangeListenerPublisher localPublisher = dataChangeListenerPublisher.newInstance();
+            final ShardDataChangeListenerPublisher localPublisher = dataChangeListenerPublisher.newInstance();
             localPublisher.registerDataChangeListener(listenerReg.getPath(), listenerReg.getInstance(),
                     listenerReg.getScope());
             localPublisher.publishChanges(currentState.get(), logContext);
@@ -395,14 +396,14 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     void notifyOfInitialData(final YangInstanceIdentifier path, final DOMDataTreeChangeListener listener,
             final Optional<DataTreeCandidate> currentState) {
         if (currentState.isPresent()) {
-            ShardDataTreeChangeListenerPublisher localPublisher = treeChangeListenerPublisher.newInstance();
+            final ShardDataTreeChangeListenerPublisher localPublisher = treeChangeListenerPublisher.newInstance();
             localPublisher.registerTreeChangeListener(path, listener);
             localPublisher.publishChanges(currentState.get(), logContext);
         }
     }
 
     void closeAllTransactionChains() {
-        for (ShardDataTreeTransactionChain chain : transactionChains.values()) {
+        for (final ShardDataTreeTransactionChain chain : transactionChains.values()) {
             chain.close();
         }
 
@@ -479,14 +480,14 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     public DataTreeCandidate commit(final DataTreeModification modification) throws DataValidationFailedException {
         modification.ready();
         dataTree.validate(modification);
-        DataTreeCandidate candidate = dataTree.prepare(modification);
+        final DataTreeCandidate candidate = dataTree.prepare(modification);
         dataTree.commit(candidate);
         return candidate;
     }
 
     public Collection<ShardDataTreeCohort> getAndClearPendingTransactions() {
-        Collection<ShardDataTreeCohort> ret = new ArrayList<>(pendingTransactions.size());
-        for(CommitEntry entry: pendingTransactions) {
+        final Collection<ShardDataTreeCohort> ret = new ArrayList<>(pendingTransactions.size());
+        for(final CommitEntry entry: pendingTransactions) {
             ret.add(entry.cohort);
         }
 
@@ -505,18 +506,18 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
             }
 
             LOG.debug("{}: Validating transaction {}", logContext, cohort.getIdentifier());
-            Exception cause;
+            final Exception cause;
             try {
                 dataTree.validate(modification);
                 LOG.debug("{}: Transaction {} validated", logContext, cohort.getIdentifier());
                 cohort.successfulCanCommit();
                 entry.lastAccess = shard.ticker().read();
                 return;
-            } catch (ConflictingModificationAppliedException e) {
+            } catch (final ConflictingModificationAppliedException e) {
                 LOG.warn("{}: Store Tx {}: Conflicting modification for path {}.", logContext, cohort.getIdentifier(),
                     e.getPath());
                 cause = new OptimisticLockFailedException("Optimistic lock failed.", e);
-            } catch (DataValidationFailedException e) {
+            } catch (final DataValidationFailedException e) {
                 LOG.warn("{}: Store Tx {}: Data validation failed for path {}.", logContext, cohort.getIdentifier(),
                     e.getPath(), e);
 
@@ -524,7 +525,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
                 // precondition log, it should allow us to understand what went on.
                 LOG.debug("{}: Store Tx {}: modifications: {} tree: {}", cohort.getIdentifier(), modification, dataTree);
                 cause = new TransactionCommitFailedException("Data did not pass validation.", e);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 LOG.warn("{}: Unexpected failure in validation phase", logContext, e);
                 cause = e;
             }
@@ -561,7 +562,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         final DataTreeCandidateTip candidate;
         try {
             candidate = dataTree.prepare(cohort.getDataTreeModification());
-        } catch (Exception e) {
+        } catch (final Exception e) {
             failPreCommit(e);
             return;
         }
@@ -591,7 +592,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
 
         try {
             dataTree.commit(candidate);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             LOG.error("{}: Failed to commit transaction {}", logContext, txId, e);
             failCommit(e);
             return;
@@ -626,7 +627,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         final Payload payload;
         try {
             payload = CommitTransactionPayload.create(txId, candidate);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             LOG.error("{}: Failed to encode transaction {} candidate {}", logContext, txId, candidate, e);
             pendingTransactions.poll().cohort.failedCommit(e);
             return;
@@ -644,7 +645,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
 
     ShardDataTreeCohort createReadyCohort(final TransactionIdentifier txId,
             final DataTreeModification modification) {
-        SimpleShardDataTreeCohort cohort = new SimpleShardDataTreeCohort(this, modification, txId,
+        final SimpleShardDataTreeCohort cohort = new SimpleShardDataTreeCohort(this, modification, txId,
                 cohortRegistry.createCohort(schemaContext, txId, COMMIT_STEP_TIMEOUT));
         pendingTransactions.add(new CommitEntry(cohort, shard.ticker().read()));
         return cohort;

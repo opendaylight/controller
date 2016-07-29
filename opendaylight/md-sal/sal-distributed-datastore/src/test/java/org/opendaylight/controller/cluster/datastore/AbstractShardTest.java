@@ -19,6 +19,7 @@ import static org.opendaylight.controller.cluster.datastore.DataStoreVersions.CU
 import static org.opendaylight.controller.cluster.datastore.ShardDataTreeMocking.successfulCanCommit;
 import static org.opendaylight.controller.cluster.datastore.ShardDataTreeMocking.successfulCommit;
 import static org.opendaylight.controller.cluster.datastore.ShardDataTreeMocking.successfulPreCommit;
+
 import akka.actor.ActorRef;
 import akka.actor.PoisonPill;
 import akka.actor.Props;
@@ -205,7 +206,7 @@ public abstract class AbstractShardTest extends AbstractActorTest{
     }
 
     protected TipProducingDataTree createDelegatingMockDataTree() throws Exception {
-        TipProducingDataTree actual = InMemoryDataTreeFactory.getInstance().create(TreeType.CONFIGURATION);
+        final TipProducingDataTree actual = InMemoryDataTreeFactory.getInstance().create(TreeType.CONFIGURATION);
         final TipProducingDataTree mock = mock(TipProducingDataTree.class);
 
         doAnswer(invocation -> {
@@ -239,8 +240,8 @@ public abstract class AbstractShardTest extends AbstractActorTest{
     }
 
     protected ShardDataTreeCohort mockShardDataTreeCohort() {
-        ShardDataTreeCohort cohort = mock(ShardDataTreeCohort.class);
-        DataTreeCandidate candidate = mockCandidate("candidate");
+        final ShardDataTreeCohort cohort = mock(ShardDataTreeCohort.class);
+        final DataTreeCandidate candidate = mockCandidate("candidate");
         successfulCanCommit(cohort);
         successfulPreCommit(cohort, candidate);
         successfulCommit(cohort);
@@ -251,14 +252,14 @@ public abstract class AbstractShardTest extends AbstractActorTest{
     protected Map<TransactionIdentifier, CapturingShardDataTreeCohort> setupCohortDecorator(final Shard shard,
             final TransactionIdentifier... transactionIDs) {
         final Map<TransactionIdentifier, CapturingShardDataTreeCohort> cohortMap = new HashMap<>();
-        for(TransactionIdentifier id: transactionIDs) {
+        for(final TransactionIdentifier id: transactionIDs) {
             cohortMap.put(id, new CapturingShardDataTreeCohort());
         }
 
         shard.getCommitCoordinator().setCohortDecorator(new ShardCommitCoordinator.CohortDecorator() {
             @Override
             public ShardDataTreeCohort decorate(final Identifier transactionID, final ShardDataTreeCohort actual) {
-                CapturingShardDataTreeCohort cohort = cohortMap.get(transactionID);
+                final CapturingShardDataTreeCohort cohort = cohortMap.get(transactionID);
                 cohort.setDelegate(actual);
                 return cohort;
             }
@@ -293,7 +294,7 @@ public abstract class AbstractShardTest extends AbstractActorTest{
     protected static ForwardedReadyTransaction prepareForwardedReadyTransaction(final TestActorRef<Shard> shard,
             final TransactionIdentifier transactionID, final YangInstanceIdentifier path,
             final NormalizedNode<?, ?> data, final boolean doCommitOnReady) {
-        ReadWriteShardDataTreeTransaction rwTx = shard.underlyingActor().getDataStore().
+        final ReadWriteShardDataTreeTransaction rwTx = shard.underlyingActor().getDataStore().
                 newReadWriteTransaction(transactionID);
         rwTx.getSnapshot().write(path, data);
         return new ForwardedReadyTransaction(transactionID, CURRENT_VERSION, rwTx, doCommitOnReady);
@@ -310,22 +311,22 @@ public abstract class AbstractShardTest extends AbstractActorTest{
 
     public void writeToStore(final TestActorRef<Shard> shard, final YangInstanceIdentifier id,
             final NormalizedNode<?,?> node) throws InterruptedException, ExecutionException {
-        Future<Object> future = Patterns.ask(shard, newBatchedModifications(nextTransactionId(), id, node, true, true, 1),
+        final Future<Object> future = Patterns.ask(shard, newBatchedModifications(nextTransactionId(), id, node, true, true, 1),
                 new Timeout(5, TimeUnit.SECONDS));
         try {
             Await.ready(future, Duration.create(5, TimeUnit.SECONDS));
-        } catch(TimeoutException e) {
+        } catch(final TimeoutException e) {
             throw new ExecutionException(e);
         }
     }
 
     public static void writeToStore(final ShardDataTree store, final YangInstanceIdentifier id,
             final NormalizedNode<?,?> node) throws Exception {
-        BatchedModifications batched = newBatchedModifications(nextTransactionId(), id, node, true, true, 1);
-        DataTreeModification modification = store.getDataTree().takeSnapshot().newModification();
+        final BatchedModifications batched = newBatchedModifications(nextTransactionId(), id, node, true, true, 1);
+        final DataTreeModification modification = store.getDataTree().takeSnapshot().newModification();
         batched.apply(modification);
         modification.ready();
-        store.applyForeignCandidate(batched.getTransactionID(), store.getDataTree().prepare(modification));
+        store.applyReplicatedCandidate(batched.getTransactionID(), store.getDataTree().prepare(modification));
     }
 
     public void mergeToStore(final ShardDataTree store, final YangInstanceIdentifier id,
@@ -336,10 +337,10 @@ public abstract class AbstractShardTest extends AbstractActorTest{
         batched.setDoCommitOnReady(true);
         batched.setTotalMessagesSent(1);
 
-        DataTreeModification modification = store.getDataTree().takeSnapshot().newModification();
+        final DataTreeModification modification = store.getDataTree().takeSnapshot().newModification();
         batched.apply(modification);
         modification.ready();
-        store.applyForeignCandidate(batched.getTransactionID(), store.getDataTree().prepare(modification));
+        store.applyReplicatedCandidate(batched.getTransactionID(), store.getDataTree().prepare(modification));
     }
 
     public static void writeToStore(final DataTree store, final YangInstanceIdentifier id,
@@ -447,7 +448,7 @@ public abstract class AbstractShardTest extends AbstractActorTest{
         private FutureCallback<DataTreeCandidate> preCommit;
         private FutureCallback<UnsignedLong> commit;
 
-        public void setDelegate(ShardDataTreeCohort delegate) {
+        public void setDelegate(final ShardDataTreeCohort delegate) {
             this.delegate = delegate;
         }
 
@@ -482,26 +483,26 @@ public abstract class AbstractShardTest extends AbstractActorTest{
         }
 
         @Override
-        public void canCommit(FutureCallback<Void> callback) {
+        public void canCommit(final FutureCallback<Void> callback) {
             canCommit = mockFutureCallback(callback);
             delegate.canCommit(canCommit);
         }
 
         @Override
-        public void preCommit(FutureCallback<DataTreeCandidate> callback) {
+        public void preCommit(final FutureCallback<DataTreeCandidate> callback) {
             preCommit = mockFutureCallback(callback);
             delegate.preCommit(preCommit);
         }
 
         @Override
-        public void commit(FutureCallback<UnsignedLong> callback) {
+        public void commit(final FutureCallback<UnsignedLong> callback) {
             commit = mockFutureCallback(callback);
             delegate.commit(commit);
         }
 
         @SuppressWarnings("unchecked")
         private <T> FutureCallback<T> mockFutureCallback(final FutureCallback<T> actual ) {
-            FutureCallback<T> mock = mock(FutureCallback.class);
+            final FutureCallback<T> mock = mock(FutureCallback.class);
             doAnswer(invocation -> {
                 actual.onFailure(invocation.getArgumentAt(0, Throwable.class));
                 return null;

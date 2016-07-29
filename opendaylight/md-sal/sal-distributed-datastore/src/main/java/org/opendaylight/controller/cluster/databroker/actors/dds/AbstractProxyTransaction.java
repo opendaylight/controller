@@ -24,7 +24,7 @@ import org.opendaylight.controller.cluster.access.commands.TransactionRequest;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.RequestFailure;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
-import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import org.opendaylight.mdsal.common.api.ReadFailedException;
 import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -85,27 +85,27 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
     }
 
     final void delete(final YangInstanceIdentifier path) {
-        checkSealed();
+        checkNotSealed();
         doDelete(path);
     }
 
     final void merge(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
-        checkSealed();
+        checkNotSealed();
         doMerge(path, data);
     }
 
     final void write(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
-        checkSealed();
+        checkNotSealed();
         doWrite(path, data);
     }
 
     final CheckedFuture<Boolean, ReadFailedException> exists(final YangInstanceIdentifier path) {
-        checkSealed();
+        checkNotSealed();
         return doExists(path);
     }
 
     final CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> read(final YangInstanceIdentifier path) {
-        checkSealed();
+        checkNotSealed();
         return doRead(path);
     }
 
@@ -113,7 +113,7 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
      * Seal this transaction before it is either
      */
     final void seal() {
-        checkSealed();
+        checkNotSealed();
         doSeal();
         sealed = true;
     }
@@ -122,12 +122,16 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
         Preconditions.checkState(sealed, "Transaction %s has not been sealed yet", getIdentifier());
     }
 
+    private void checkNotSealed() {
+        Preconditions.checkState(!sealed, "Transaction %s has already been sealed", getIdentifier());
+    }
+
     /**
      * Abort this transaction. This is invoked only for read-only transactions and will result in an explicit message
      * being sent to the backend.
      */
     final void abort() {
-        checkSealed();
+        checkNotSealed();
         doAbort();
     }
 
@@ -154,7 +158,7 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
     }
 
     void abort(final VotingFuture<Void> ret) {
-        checkSealed();
+        checkNotSealed();
 
         client.sendRequest(nextSequence(), new TransactionAbortRequest(getIdentifier(), client().self()), t -> {
             if (t instanceof TransactionAbortSuccess) {

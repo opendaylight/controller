@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
+import akka.actor.ActorRef;
 import akka.dispatch.ExecutionContexts;
 import akka.dispatch.OnComplete;
 import akka.util.Timeout;
@@ -19,6 +20,7 @@ import com.google.common.util.concurrent.MoreExecutors;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import javax.annotation.concurrent.GuardedBy;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.client.BackendInfo;
@@ -30,7 +32,11 @@ import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import scala.Option;
+import scala.concurrent.Await;
 import scala.concurrent.ExecutionContext;
+import scala.concurrent.Future;
+import scala.util.Try;
 
 /**
  * {@link BackendInfoResolver} implementation for static shard configuration based on ShardManager. Each string-named
@@ -78,6 +84,8 @@ final class ModuleShardBackendResolver extends BackendInfoResolver<ShardBackendI
     }
 
     Long resolveShardForPath(final YangInstanceIdentifier path) {
+        // this should work for prefix based shards aswell since the strategy factory would get the correct strategy from configuration
+        // which will return the correct shardName
         final String shardName = actorContext.getShardStrategyFactory().getStrategy(path).findShard(path);
         Long cookie = shards.get(shardName);
         if (cookie == null) {
@@ -86,7 +94,7 @@ final class ModuleShardBackendResolver extends BackendInfoResolver<ShardBackendI
                 if (cookie == null) {
                     cookie = nextShard++;
 
-                    Builder<String, Long> b = ImmutableBiMap.builder();
+                    final Builder<String, Long> b = ImmutableBiMap.builder();
                     b.putAll(shards);
                     b.put(shardName, cookie);
                     shards = b.build();
@@ -135,8 +143,23 @@ final class ModuleShardBackendResolver extends BackendInfoResolver<ShardBackendI
         Preconditions.checkArgument(result instanceof PrimaryShardInfo);
         final PrimaryShardInfo info = (PrimaryShardInfo) result;
 
-        LOG.debug("Creating backend information for {}", info);
-        return new ShardBackendInfo(info.getPrimaryShardActor().resolveOne(DEAD_TIMEOUT).value().get().get(),
+        LOG.debug("Creating backend information for selection: {}, version: {}, shardDataTree: {}",
+                info.getPrimaryShardActor(), info.getPrimaryShardVersion(), info.getLocalShardDataTree());
+
+        final Future<ActorRef> actorRefFuture = info.getPrimaryShardActor().resolveOne(DEAD_TIMEOUT);
+        try {
+            // TODO do we want to block here? for 15 minutes?
+            // without blocking this would throw None.get exceptions from scala
+            // maybe block for shorter time with retries?
+            Await.ready(actorRefFuture, DEAD_TIMEOUT.duration());
+        } catch (TimeoutException | InterruptedException e) {
+            throw new IllegalStateException("Unable to resolve backend shard in the required time", e);
+        }
+
+        final Option<Try<ActorRef>> tryActor = actorRefFuture.value();
+        LOG.debug("Primary actor try: {}", tryActor);
+
+        return new ShardBackendInfo(tryActor.get().get(),
             toABIVersion(info.getPrimaryShardVersion()), shardName, UnsignedLong.fromLongBits(cookie),
             info.getLocalShardDataTree());
      }
