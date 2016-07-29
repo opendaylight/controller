@@ -25,7 +25,6 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidates;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataValidationFailedException;
-import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.slf4j.Logger;
 
 /**
@@ -41,24 +40,22 @@ class ShardRecoveryCoordinator implements RaftActorRecoveryCohort {
     private final ShardDataTree store;
     private final String shardName;
     private final Logger log;
-    private final SchemaContext schemaContext;
     private PruningDataTreeModification transaction;
     private int size;
     private final byte[] restoreFromSnapshot;
 
-    ShardRecoveryCoordinator(ShardDataTree store, SchemaContext schemaContext, byte[] restoreFromSnapshot,
-            String shardName, Logger log) {
+    ShardRecoveryCoordinator(ShardDataTree store,  byte[] restoreFromSnapshot, String shardName, Logger log) {
         this.store = Preconditions.checkNotNull(store);
         this.restoreFromSnapshot = restoreFromSnapshot;
-        this.shardName = shardName;
-        this.log = log;
-        this.schemaContext = schemaContext;
+        this.shardName = Preconditions.checkNotNull(shardName);
+        this.log = Preconditions.checkNotNull(log);
     }
 
     @Override
     public void startLogRecoveryBatch(int maxBatchSize) {
         log.debug("{}: starting log recovery batch with max size {}", shardName, maxBatchSize);
-        transaction = new PruningDataTreeModification(store.newModification(), store.getDataTree(), schemaContext);
+        transaction = new PruningDataTreeModification(store.newModification(), store.getDataTree(),
+            store.getSchemaContext());
         size = 0;
     }
 
@@ -121,7 +118,7 @@ class ShardRecoveryCoordinator implements RaftActorRecoveryCohort {
 
         final NormalizedNode<?, ?> node = SerializationUtils.deserializeNormalizedNode(snapshotBytes);
         final PruningDataTreeModification tx = new PruningDataTreeModification(store.newModification(),
-                store.getDataTree(), schemaContext);
+                store.getDataTree(), store.getSchemaContext());
         tx.write(YangInstanceIdentifier.EMPTY, node);
         try {
             commitTransaction(tx);
