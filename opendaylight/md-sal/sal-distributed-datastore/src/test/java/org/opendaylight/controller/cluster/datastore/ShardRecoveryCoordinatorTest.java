@@ -52,7 +52,7 @@ public class ShardRecoveryCoordinatorTest extends AbstractTest {
     @Test
     public void testAppendRecoveredLogEntryDataTreeCandidatePayload(){
         final ShardRecoveryCoordinator coordinator = new ShardRecoveryCoordinator(peopleDataTree,
-                peopleSchemaContext, null, "foobar", LoggerFactory.getLogger("foo"));
+                null, "foobar", LoggerFactory.getLogger("foo"));
         coordinator.startLogRecoveryBatch(10);
         try {
             coordinator.appendRecoveredLogEntry(DataTreeCandidatePayload.create(createCar()));
@@ -66,7 +66,7 @@ public class ShardRecoveryCoordinatorTest extends AbstractTest {
     @Test
     public void testAppendRecoveredLogEntryCommitTransactionPayload() throws IOException {
         final ShardRecoveryCoordinator coordinator = new ShardRecoveryCoordinator(peopleDataTree,
-                peopleSchemaContext, null, "foobar", LoggerFactory.getLogger("foo"));
+                null, "foobar", LoggerFactory.getLogger("foo"));
         coordinator.startLogRecoveryBatch(10);
         try {
             coordinator.appendRecoveredLogEntry(CommitTransactionPayload.create(nextTransactionId(), createCar()));
@@ -80,7 +80,7 @@ public class ShardRecoveryCoordinatorTest extends AbstractTest {
     @Test
     public void testApplyRecoverySnapshot(){
         final ShardRecoveryCoordinator coordinator = new ShardRecoveryCoordinator(peopleDataTree,
-                peopleSchemaContext, null, "foobar", LoggerFactory.getLogger("foo"));
+                null, "foobar", LoggerFactory.getLogger("foo"));
         coordinator.startLogRecoveryBatch(10);
 
         coordinator.applyRecoverySnapshot(createSnapshot());
@@ -93,7 +93,7 @@ public class ShardRecoveryCoordinatorTest extends AbstractTest {
     @Test
     public void testApplyCurrentLogRecoveryBatch(){
         final ShardRecoveryCoordinator coordinator = new ShardRecoveryCoordinator(peopleDataTree,
-                peopleSchemaContext, null, "foobar", LoggerFactory.getLogger("foo"));
+                null, "foobar", LoggerFactory.getLogger("foo"));
         coordinator.startLogRecoveryBatch(10);
 
         try {
