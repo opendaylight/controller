@@ -48,6 +48,7 @@ public abstract class ClientActorBehavior extends RecoveredClientActorBehavior<C
     @Override
     final ClientActorBehavior onReceiveCommand(final Object command) {
         if (command instanceof InternalCommand) {
+            LOG.debug("Executing InternalCommand {}", command);
             return ((InternalCommand) command).execute(this);
         }
         if (command instanceof SuccessEnvelope) {
@@ -127,6 +128,7 @@ public abstract class ClientActorBehavior extends RecoveredClientActorBehavior<C
     private ClientActorBehavior finishResolve(final SequencedQueue queue,
             final CompletionStage<? extends BackendInfo> futureBackend, final BackendInfo backend) {
 
+        LOG.debug("Handling finishResolve");
         final Optional<FiniteDuration> maybeTimeout = queue.setBackendInfo(futureBackend, backend);
         if (maybeTimeout.isPresent()) {
             scheduleQueueTimeout(queue, maybeTimeout.get());
@@ -146,7 +148,7 @@ public abstract class ClientActorBehavior extends RecoveredClientActorBehavior<C
 
         try {
             needBackend = queue.runTimeout();
-        } catch (NoProgressException e) {
+        } catch (final NoProgressException e) {
             // Uh-oh, no progress. The queue has already killed itself, now we need to remove it
             context().removeQueue(queue);
             return this;

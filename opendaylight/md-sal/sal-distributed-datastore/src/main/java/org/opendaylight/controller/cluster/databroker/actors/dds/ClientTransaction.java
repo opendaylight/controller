@@ -16,8 +16,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
-import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
+import org.opendaylight.mdsal.common.api.ReadFailedException;
+import org.opendaylight.mdsal.dom.spi.store.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -125,7 +125,7 @@ public final class ClientTransaction extends LocalAbortable implements Identifia
     public DOMStoreThreePhaseCommitCohort ready() {
         Preconditions.checkState(ensureClosed(), "Attempted to submit a closed transaction %s", this);
 
-        for (AbstractProxyTransaction p : proxies.values()) {
+        for (final AbstractProxyTransaction p : proxies.values()) {
             p.seal();
         }
         parent.onTransactionReady(this);
@@ -145,7 +145,7 @@ public final class ClientTransaction extends LocalAbortable implements Identifia
      */
     public void abort() {
         if (ensureClosed()) {
-            for (AbstractProxyTransaction proxy : proxies.values()) {
+            for (final AbstractProxyTransaction proxy : proxies.values()) {
                 proxy.abort();
             }
             proxies.clear();

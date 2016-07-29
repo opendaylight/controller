@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.datastore;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
+
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.cluster.Cluster;
@@ -28,6 +29,7 @@ import org.mockito.Mockito;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext.Builder;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.config.ConfigurationImpl;
+import org.opendaylight.controller.cluster.datastore.config.EmptyModuleShardConfigProvider;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStats;
 import org.opendaylight.controller.cluster.datastore.messages.DatastoreSnapshot;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
@@ -48,7 +50,7 @@ public class IntegrationTestKit extends ShardTestKit {
     protected DatastoreContext.Builder datastoreContextBuilder;
     protected DatastoreSnapshot restoreFromSnapshot;
 
-    public IntegrationTestKit(ActorSystem actorSystem, Builder datastoreContextBuilder) {
+    public IntegrationTestKit(final ActorSystem actorSystem, final Builder datastoreContextBuilder) {
         super(actorSystem);
         this.datastoreContextBuilder = datastoreContextBuilder;
     }
@@ -57,35 +59,55 @@ public class IntegrationTestKit extends ShardTestKit {
         return datastoreContextBuilder;
     }
 
-    public DistributedDataStore setupDistributedDataStore(String typeName, String... shardNames) {
+    public DistributedDataStore setupDistributedDataStore(final String typeName, final String... shardNames) {
         return setupDistributedDataStore(typeName, "module-shards.conf", true, SchemaContextHelper.full(), shardNames);
     }
 
-    public DistributedDataStore setupDistributedDataStore(String typeName, boolean waitUntilLeader,
-            String... shardNames) {
+    public DistributedDataStore setupDistributedDataStore(final String typeName, final boolean waitUntilLeader,
+            final String... shardNames) {
         return setupDistributedDataStore(typeName, "module-shards.conf", waitUntilLeader,
                 SchemaContextHelper.full(), shardNames);
     }
 
-    public DistributedDataStore setupDistributedDataStore(String typeName, String moduleShardsConfig,
-            boolean waitUntilLeader, String... shardNames) {
+    public DistributedDataStore setupDistributedDataStore(final String typeName, final String moduleShardsConfig,
+            final boolean waitUntilLeader, final String... shardNames) {
         return setupDistributedDataStore(typeName, moduleShardsConfig, waitUntilLeader,
                 SchemaContextHelper.full(), shardNames);
     }
 
-    public DistributedDataStore setupDistributedDataStore(String typeName, String moduleShardsConfig,
-            boolean waitUntilLeader, SchemaContext schemaContext, String... shardNames) {
-        ClusterWrapper cluster = new ClusterWrapperImpl(getSystem());
-        Configuration config = new ConfigurationImpl(moduleShardsConfig, "modules.conf");
+    public DistributedDataStore setupDistributedDataStoreWithoutConfig(final String typeName, final SchemaContext schemaContext) {
+        final ClusterWrapper cluster = new ClusterWrapperImpl(getSystem());
+        final ConfigurationImpl configuration = new ConfigurationImpl(new EmptyModuleShardConfigProvider());
 
-        datastoreContextBuilder.dataStoreName(typeName);
+        getDatastoreContextBuilder().dataStoreName(typeName);
 
-        DatastoreContext datastoreContext = datastoreContextBuilder.build();
-        DatastoreContextFactory mockContextFactory = Mockito.mock(DatastoreContextFactory.class);
+        final DatastoreContext datastoreContext = getDatastoreContextBuilder().build();
+
+        final DatastoreContextFactory mockContextFactory = Mockito.mock(DatastoreContextFactory.class);
         Mockito.doReturn(datastoreContext).when(mockContextFactory).getBaseDatastoreContext();
         Mockito.doReturn(datastoreContext).when(mockContextFactory).getShardDatastoreContext(Mockito.anyString());
 
-        DistributedDataStore dataStore = new DistributedDataStore(getSystem(), cluster, config, mockContextFactory,
+        final DistributedDataStore dataStore = new DistributedDataStore(getSystem(), cluster, configuration, mockContextFactory, restoreFromSnapshot);
+
+        dataStore.onGlobalContextUpdated(schemaContext);
+
+        datastoreContextBuilder = DatastoreContext.newBuilderFrom(datastoreContext);
+        return dataStore;
+    }
+
+    public DistributedDataStore setupDistributedDataStore(final String typeName, final String moduleShardsConfig,
+            final boolean waitUntilLeader, final SchemaContext schemaContext, final String... shardNames) {
+        final ClusterWrapper cluster = new ClusterWrapperImpl(getSystem());
+        final Configuration config = new ConfigurationImpl(moduleShardsConfig, "modules.conf");
+
+        datastoreContextBuilder.dataStoreName(typeName);
+
+        final DatastoreContext datastoreContext = datastoreContextBuilder.build();
+        final DatastoreContextFactory mockContextFactory = Mockito.mock(DatastoreContextFactory.class);
+        Mockito.doReturn(datastoreContext).when(mockContextFactory).getBaseDatastoreContext();
+        Mockito.doReturn(datastoreContext).when(mockContextFactory).getShardDatastoreContext(Mockito.anyString());
+
+        final DistributedDataStore dataStore = new DistributedDataStore(getSystem(), cluster, config, mockContextFactory,
                 restoreFromSnapshot);
 
         dataStore.onGlobalContextUpdated(schemaContext);
@@ -98,9 +120,9 @@ public class IntegrationTestKit extends ShardTestKit {
         return dataStore;
     }
 
-    public void waitUntilLeader(ActorContext actorContext, String... shardNames) {
-        for(String shardName: shardNames) {
-            ActorRef shard = findLocalShard(actorContext, shardName);
+    public void waitUntilLeader(final ActorContext actorContext, final String... shardNames) {
+        for(final String shardName: shardNames) {
+            final ActorRef shard = findLocalShard(actorContext, shardName);
 
             assertNotNull("Shard was not created for " + shardName, shard);
 
@@ -108,21 +130,21 @@ public class IntegrationTestKit extends ShardTestKit {
         }
     }
 
-    public void waitUntilNoLeader(ActorContext actorContext, String... shardNames) {
-        for(String shardName: shardNames) {
-            ActorRef shard = findLocalShard(actorContext, shardName);
+    public void waitUntilNoLeader(final ActorContext actorContext, final String... shardNames) {
+        for(final String shardName: shardNames) {
+            final ActorRef shard = findLocalShard(actorContext, shardName);
             assertNotNull("No local shard found for " + shardName, shard);
 
             waitUntilNoLeader(shard);
         }
     }
 
-    public void waitForMembersUp(String... otherMembers) {
-        Set<String> otherMembersSet = Sets.newHashSet(otherMembers);
-        Stopwatch sw = Stopwatch.createStarted();
+    public void waitForMembersUp(final String... otherMembers) {
+        final Set<String> otherMembersSet = Sets.newHashSet(otherMembers);
+        final Stopwatch sw = Stopwatch.createStarted();
         while(sw.elapsed(TimeUnit.SECONDS) <= 10) {
-            CurrentClusterState state = Cluster.get(getSystem()).state();
-            for(Member m: state.getMembers()) {
+            final CurrentClusterState state = Cluster.get(getSystem()).state();
+            for(final Member m: state.getMembers()) {
                 if(m.status() == MemberStatus.up() && otherMembersSet.remove(m.getRoles().iterator().next()) &&
                         otherMembersSet.isEmpty()) {
                     return;
@@ -135,11 +157,11 @@ public class IntegrationTestKit extends ShardTestKit {
         fail("Member(s) " + otherMembersSet + " are not Up");
     }
 
-    public static ActorRef findLocalShard(ActorContext actorContext, String shardName) {
+    public static ActorRef findLocalShard(final ActorContext actorContext, final String shardName) {
         ActorRef shard = null;
         for(int i = 0; i < 20 * 5 && shard == null; i++) {
             Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
-            Optional<ActorRef> shardReply = actorContext.findLocalShard(shardName);
+            final Optional<ActorRef> shardReply = actorContext.findLocalShard(shardName);
             if(shardReply.isPresent()) {
                 shard = shardReply.get();
             }
@@ -147,23 +169,23 @@ public class IntegrationTestKit extends ShardTestKit {
         return shard;
     }
 
-    public static void verifyShardStats(DistributedDataStore datastore, String shardName, ShardStatsVerifier verifier)
+    public static void verifyShardStats(final DistributedDataStore datastore, final String shardName, final ShardStatsVerifier verifier)
             throws Exception {
-        ActorContext actorContext = datastore.getActorContext();
+        final ActorContext actorContext = datastore.getActorContext();
 
-        Future<ActorRef> future = actorContext.findLocalShardAsync(shardName);
-        ActorRef shardActor = Await.result(future, Duration.create(10, TimeUnit.SECONDS));
+        final Future<ActorRef> future = actorContext.findLocalShardAsync(shardName);
+        final ActorRef shardActor = Await.result(future, Duration.create(10, TimeUnit.SECONDS));
 
         AssertionError lastError = null;
-        Stopwatch sw = Stopwatch.createStarted();
+        final Stopwatch sw = Stopwatch.createStarted();
         while(sw.elapsed(TimeUnit.SECONDS) <= 5) {
-            ShardStats shardStats = (ShardStats)actorContext.
+            final ShardStats shardStats = (ShardStats)actorContext.
                     executeOperation(shardActor, Shard.GET_SHARD_MBEAN_MESSAGE);
 
             try {
                 verifier.verify(shardStats);
                 return;
-            } catch (AssertionError e) {
+            } catch (final AssertionError e) {
                 lastError = e;
                 Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
             }
@@ -172,12 +194,12 @@ public class IntegrationTestKit extends ShardTestKit {
         throw lastError;
     }
 
-    void testWriteTransaction(DistributedDataStore dataStore, YangInstanceIdentifier nodePath,
-            NormalizedNode<?, ?> nodeToWrite) throws Exception {
+    void testWriteTransaction(final DistributedDataStore dataStore, final YangInstanceIdentifier nodePath,
+            final NormalizedNode<?, ?> nodeToWrite) throws Exception {
 
         // 1. Create a write-only Tx
 
-        DOMStoreWriteTransaction writeTx = dataStore.newWriteOnlyTransaction();
+        final DOMStoreWriteTransaction writeTx = dataStore.newWriteOnlyTransaction();
         assertNotNull("newWriteOnlyTransaction returned null", writeTx);
 
         // 2. Write some data
@@ -186,7 +208,7 @@ public class IntegrationTestKit extends ShardTestKit {
 
         // 3. Ready the Tx for commit
 
-        DOMStoreThreePhaseCommitCohort cohort = writeTx.ready();
+        final DOMStoreThreePhaseCommitCohort cohort = writeTx.ready();
 
         // 4. Commit the Tx
 
@@ -194,39 +216,39 @@ public class IntegrationTestKit extends ShardTestKit {
 
         // 5. Verify the data in the store
 
-        DOMStoreReadTransaction readTx = dataStore.newReadOnlyTransaction();
+        final DOMStoreReadTransaction readTx = dataStore.newReadOnlyTransaction();
 
-        Optional<NormalizedNode<?, ?>> optional = readTx.read(nodePath).get(5, TimeUnit.SECONDS);
+        final Optional<NormalizedNode<?, ?>> optional = readTx.read(nodePath).get(5, TimeUnit.SECONDS);
         assertEquals("isPresent", true, optional.isPresent());
         assertEquals("Data node", nodeToWrite, optional.get());
     }
 
     public void doCommit(final DOMStoreThreePhaseCommitCohort cohort) throws Exception {
-        Boolean canCommit = cohort.canCommit().get(7, TimeUnit.SECONDS);
+        final Boolean canCommit = cohort.canCommit().get(7, TimeUnit.SECONDS);
         assertEquals("canCommit", true, canCommit);
         cohort.preCommit().get(5, TimeUnit.SECONDS);
         cohort.commit().get(5, TimeUnit.SECONDS);
     }
 
     void doCommit(final ListenableFuture<Boolean> canCommitFuture, final DOMStoreThreePhaseCommitCohort cohort) throws Exception {
-        Boolean canCommit = canCommitFuture.get(7, TimeUnit.SECONDS);
+        final Boolean canCommit = canCommitFuture.get(7, TimeUnit.SECONDS);
         assertEquals("canCommit", true, canCommit);
         cohort.preCommit().get(5, TimeUnit.SECONDS);
         cohort.commit().get(5, TimeUnit.SECONDS);
     }
 
-    void assertExceptionOnCall(Callable<Void> callable, Class<? extends Exception> expType)
+    void assertExceptionOnCall(final Callable<Void> callable, final Class<? extends Exception> expType)
             throws Exception {
         try {
             callable.call();
             fail("Expected " + expType.getSimpleName());
-        } catch(Exception e) {
+        } catch(final Exception e) {
             assertEquals("Exception type", expType, e.getClass());
         }
     }
 
     void assertExceptionOnTxChainCreates(final DOMStoreTransactionChain txChain,
-            Class<? extends Exception> expType) throws Exception {
+            final Class<? extends Exception> expType) throws Exception {
         assertExceptionOnCall(new Callable<Void>() {
             @Override
             public Void call() throws Exception {

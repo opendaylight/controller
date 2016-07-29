@@ -18,6 +18,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.AddressFromURIString;
@@ -183,21 +184,21 @@ public class ShardManagerTest extends AbstractActorTest {
         InMemoryJournal.clear();
         InMemorySnapshotStore.clear();
 
-        for(ActorSystem system: actorSystems) {
+        for(final ActorSystem system: actorSystems) {
             JavaTestKit.shutdownActorSystem(system, null, Boolean.TRUE);
         }
 
         actorFactory.close();
     }
 
-    private ActorSystem newActorSystem(String config) {
-        ActorSystem system = ActorSystem.create("cluster-test", ConfigFactory.load().getConfig(config));
+    private ActorSystem newActorSystem(final String config) {
+        final ActorSystem system = ActorSystem.create("cluster-test", ConfigFactory.load().getConfig(config));
         actorSystems.add(system);
         return system;
     }
 
-    private ActorRef newMockShardActor(ActorSystem system, String shardName, String memberName) {
-        String name = ShardIdentifier.create(shardName, MemberName.forName(memberName), "config").toString();
+    private ActorRef newMockShardActor(final ActorSystem system, final String shardName, final String memberName) {
+        final String name = ShardIdentifier.create(shardName, MemberName.forName(memberName), "config").toString();
         if(system == getSystem()) {
             return actorFactory.createTestActor(Props.create(MessageCollectorActor.class), name);
         }
@@ -209,8 +210,8 @@ public class ShardManagerTest extends AbstractActorTest {
         return newShardMgrProps(new MockConfiguration());
     }
 
-    private static DatastoreContextFactory newDatastoreContextFactory(DatastoreContext datastoreContext) {
-        DatastoreContextFactory mockFactory = mock(DatastoreContextFactory.class);
+    private static DatastoreContextFactory newDatastoreContextFactory(final DatastoreContext datastoreContext) {
+        final DatastoreContextFactory mockFactory = mock(DatastoreContextFactory.class);
         Mockito.doReturn(datastoreContext).when(mockFactory).getBaseDatastoreContext();
         Mockito.doReturn(datastoreContext).when(mockFactory).getShardDatastoreContext(Mockito.anyString());
         return mockFactory;
@@ -220,11 +221,11 @@ public class ShardManagerTest extends AbstractActorTest {
         return TestShardManager.builder(datastoreContextBuilder);
     }
 
-    private TestShardManager.Builder newTestShardMgrBuilder(Configuration config) {
+    private TestShardManager.Builder newTestShardMgrBuilder(final Configuration config) {
         return TestShardManager.builder(datastoreContextBuilder).configuration(config);
     }
 
-    private Props newShardMgrProps(Configuration config) {
+    private Props newShardMgrProps(final Configuration config) {
         return newTestShardMgrBuilder(config).props();
     }
 
@@ -232,7 +233,7 @@ public class ShardManagerTest extends AbstractActorTest {
         return newTestShardMgrBuilderWithMockShardActor(mockShardActor);
     }
 
-    private TestShardManager.Builder newTestShardMgrBuilderWithMockShardActor(ActorRef shardActor) {
+    private TestShardManager.Builder newTestShardMgrBuilderWithMockShardActor(final ActorRef shardActor) {
         return TestShardManager.builder(datastoreContextBuilder).shardActor(shardActor);
     }
 
@@ -242,7 +243,7 @@ public class ShardManagerTest extends AbstractActorTest {
                 Dispatchers.DefaultDispatcherId());
     }
 
-    private Props newPropsShardMgrWithMockShardActor(ActorRef shardActor) {
+    private Props newPropsShardMgrWithMockShardActor(final ActorRef shardActor) {
         return newTestShardMgrBuilderWithMockShardActor(shardActor).props();
     }
 
@@ -251,22 +252,22 @@ public class ShardManagerTest extends AbstractActorTest {
         return newTestShardManager(newShardMgrProps());
     }
 
-    private TestShardManager newTestShardManager(Props props) {
-        TestActorRef<TestShardManager> shardManagerActor = actorFactory.createTestActor(props);
-        TestShardManager shardManager = shardManagerActor.underlyingActor();
+    private TestShardManager newTestShardManager(final Props props) {
+        final TestActorRef<TestShardManager> shardManagerActor = actorFactory.createTestActor(props);
+        final TestShardManager shardManager = shardManagerActor.underlyingActor();
         shardManager.waitForRecoveryComplete();
         return shardManager;
     }
 
-    private static void waitForShardInitialized(ActorRef shardManager, String shardName, JavaTestKit kit) {
+    private static void waitForShardInitialized(final ActorRef shardManager, final String shardName, final JavaTestKit kit) {
         AssertionError last = null;
-        Stopwatch sw = Stopwatch.createStarted();
+        final Stopwatch sw = Stopwatch.createStarted();
         while(sw.elapsed(TimeUnit.SECONDS) <= 5) {
             try {
                 shardManager.tell(new FindLocalShard(shardName, true), kit.getRef());
                 kit.expectMsgClass(LocalShardFound.class);
                 return;
-            } catch(AssertionError e) {
+            } catch(final AssertionError e) {
                 last = e;
             }
 
@@ -276,8 +277,8 @@ public class ShardManagerTest extends AbstractActorTest {
         throw last;
     }
 
-    private static <T> T expectMsgClassOrFailure(Class<T> msgClass, JavaTestKit kit, String msg) {
-        Object reply = kit.expectMsgAnyClassOf(JavaTestKit.duration("5 sec"), msgClass, Failure.class);
+    private static <T> T expectMsgClassOrFailure(final Class<T> msgClass, final JavaTestKit kit, final String msg) {
+        final Object reply = kit.expectMsgAnyClassOf(JavaTestKit.duration("5 sec"), msgClass, Failure.class);
         if(reply instanceof Failure) {
             throw new AssertionError(msg + " failed", ((Failure)reply).cause());
         }
@@ -299,12 +300,12 @@ public class ShardManagerTest extends AbstractActorTest {
 
         final MockConfiguration mockConfig = new MockConfiguration() {
             @Override
-            public Collection<String> getMemberShardNames(MemberName memberName) {
+            public Collection<String> getMemberShardNames(final MemberName memberName) {
                 return Arrays.asList("default", "topology");
             }
 
             @Override
-            public Collection<MemberName> getMembersFromShardName(String shardName) {
+            public Collection<MemberName> getMembersFromShardName(final String shardName) {
                 return members("member-1");
             }
         };
@@ -322,13 +323,13 @@ public class ShardManagerTest extends AbstractActorTest {
         final PrimaryShardInfoFutureCache primaryShardInfoCache = new PrimaryShardInfoFutureCache();
         final CountDownLatch newShardActorLatch = new CountDownLatch(2);
         class LocalShardManager extends ShardManager {
-            public LocalShardManager(AbstractShardManagerCreator<?> creator) {
+            public LocalShardManager(final AbstractShardManagerCreator<?> creator) {
                 super(creator);
             }
 
             @Override
-            protected ActorRef newShardActor(SchemaContext schemaContext, ShardInformation info) {
-                Entry<ActorRef, DatastoreContext> entry = shardInfoMap.get(info.getShardName());
+            protected ActorRef newShardActor(final SchemaContext schemaContext, final ShardInformation info) {
+                final Entry<ActorRef, DatastoreContext> entry = shardInfoMap.get(info.getShardName());
                 ActorRef ref = null;
                 if(entry != null) {
                     ref = entry.getKey();
@@ -350,7 +351,7 @@ public class ShardManagerTest extends AbstractActorTest {
             }
         };
 
-        JavaTestKit kit = new JavaTestKit(getSystem());
+        final JavaTestKit kit = new JavaTestKit(getSystem());
 
         final ActorRef shardManager = actorFactory.createActor(Props.create(
                 new DelegatingShardManagerCreator(creator)).withDispatcher(Dispatchers.DefaultDispatcherId()));
@@ -363,7 +364,7 @@ public class ShardManagerTest extends AbstractActorTest {
         assertEquals("getShardElectionTimeoutFactor", 7, shardInfoMap.get("topology").getValue().
                 getShardElectionTimeoutFactor());
 
-        DatastoreContextFactory newMockFactory = newDatastoreContextFactory(
+        final DatastoreContextFactory newMockFactory = newDatastoreContextFactory(
                 datastoreContextBuilder.shardElectionTimeoutFactor(5).build());
         Mockito.doReturn(DatastoreContext.newBuilderFrom(datastoreContextBuilder.build()).
                 shardElectionTimeoutFactor(66).build()).when(newMockFactory).getShardDatastoreContext("default");
@@ -399,14 +400,14 @@ public class ShardManagerTest extends AbstractActorTest {
     public void testOnReceiveFindPrimaryForLocalLeaderShard() throws Exception {
         LOG.info("testOnReceiveFindPrimaryForLocalLeaderShard starting");
         new JavaTestKit(getSystem()) {{
-            String memberId = "member-1-shard-default-" + shardMrgIDSuffix;
+            final String memberId = "member-1-shard-default-" + shardMrgIDSuffix;
 
             final ActorRef shardManager = actorFactory.createActor(newPropsShardMgrWithMockShardActor());
 
             shardManager.tell(new UpdateSchemaContext(TestModel.createTestContext()), getRef());
             shardManager.tell(new ActorInitialized(), mockShardActor);
 
-            DataTree mockDataTree = mock(DataTree.class);
+            final DataTree mockDataTree = mock(DataTree.class);
             shardManager.tell(new ShardLeaderStateChanged(memberId, memberId, mockDataTree,
                     DataStoreVersions.CURRENT_VERSION), getRef());
 
@@ -416,7 +417,7 @@ public class ShardManagerTest extends AbstractActorTest {
 
             shardManager.tell(new FindPrimary(Shard.DEFAULT_NAME, false), getRef());
 
-            LocalPrimaryShardFound primaryFound = expectMsgClass(duration("5 seconds"), LocalPrimaryShardFound.class);
+            final LocalPrimaryShardFound primaryFound = expectMsgClass(duration("5 seconds"), LocalPrimaryShardFound.class);
             assertTrue("Unexpected primary path " +  primaryFound.getPrimaryPath(),
                     primaryFound.getPrimaryPath().contains("member-1-shard-default"));
             assertSame("getLocalShardDataTree", mockDataTree, primaryFound.getLocalShardDataTree());
@@ -434,8 +435,8 @@ public class ShardManagerTest extends AbstractActorTest {
             shardManager.tell(new UpdateSchemaContext(TestModel.createTestContext()), getRef());
             shardManager.tell(new ActorInitialized(), mockShardActor);
 
-            String memberId2 = "member-2-shard-default-" + shardMrgIDSuffix;
-            String memberId1 = "member-1-shard-default-" + shardMrgIDSuffix;
+            final String memberId2 = "member-2-shard-default-" + shardMrgIDSuffix;
+            final String memberId1 = "member-1-shard-default-" + shardMrgIDSuffix;
             shardManager.tell(new RoleChangeNotification(memberId1,
                     RaftState.Candidate.name(), RaftState.Follower.name()), mockShardActor);
             shardManager.tell(new LeaderStateChanged(memberId1, memberId2, DataStoreVersions.CURRENT_VERSION), mockShardActor);
@@ -457,18 +458,18 @@ public class ShardManagerTest extends AbstractActorTest {
             shardManager.tell(new UpdateSchemaContext(TestModel.createTestContext()), getRef());
             shardManager.tell(new ActorInitialized(), mockShardActor);
 
-            String memberId2 = "member-2-shard-default-" + shardMrgIDSuffix;
+            final String memberId2 = "member-2-shard-default-" + shardMrgIDSuffix;
             MockClusterWrapper.sendMemberUp(shardManager, "member-2", getRef().path().toString());
 
-            String memberId1 = "member-1-shard-default-" + shardMrgIDSuffix;
+            final String memberId1 = "member-1-shard-default-" + shardMrgIDSuffix;
             shardManager.tell(new RoleChangeNotification(memberId1,
                     RaftState.Candidate.name(), RaftState.Follower.name()), mockShardActor);
-            short leaderVersion = DataStoreVersions.CURRENT_VERSION - 1;
+            final short leaderVersion = DataStoreVersions.CURRENT_VERSION - 1;
             shardManager.tell(new ShardLeaderStateChanged(memberId1, memberId2, leaderVersion), mockShardActor);
 
             shardManager.tell(new FindPrimary(Shard.DEFAULT_NAME, false), getRef());
 
-            RemotePrimaryShardFound primaryFound = expectMsgClass(duration("5 seconds"), RemotePrimaryShardFound.class);
+            final RemotePrimaryShardFound primaryFound = expectMsgClass(duration("5 seconds"), RemotePrimaryShardFound.class);
             assertTrue("Unexpected primary path " +  primaryFound.getPrimaryPath(),
                     primaryFound.getPrimaryPath().contains("member-2-shard-default"));
             assertEquals("getPrimaryVersion", leaderVersion, primaryFound.getPrimaryVersion());
@@ -511,7 +512,7 @@ public class ShardManagerTest extends AbstractActorTest {
             shardManager.tell(new UpdateSchemaContext(TestModel.createTestContext()), getRef());
             shardManager.tell(new ActorInitialized(), mockShardActor);
 
-            String memberId = "member-1-shard-default-" + shardMrgIDSuffix;
+            final String memberId = "member-1-shard-default-" + shardMrgIDSuffix;
             shardManager.tell(new RoleChangeNotification(memberId,
                     RaftState.Candidate.name(), RaftState.Follower.name()), mockShardActor);
 
@@ -519,13 +520,13 @@ public class ShardManagerTest extends AbstractActorTest {
 
             expectMsgClass(duration("5 seconds"), NoShardLeaderException.class);
 
-            DataTree mockDataTree = mock(DataTree.class);
+            final DataTree mockDataTree = mock(DataTree.class);
             shardManager.tell(new ShardLeaderStateChanged(memberId, memberId, mockDataTree,
                     DataStoreVersions.CURRENT_VERSION), mockShardActor);
 
             shardManager.tell(new FindPrimary(Shard.DEFAULT_NAME, false), getRef());
 
-            LocalPrimaryShardFound primaryFound = expectMsgClass(duration("5 seconds"), LocalPrimaryShardFound.class);
+            final LocalPrimaryShardFound primaryFound = expectMsgClass(duration("5 seconds"), LocalPrimaryShardFound.class);
             assertTrue("Unexpected primary path " +  primaryFound.getPrimaryPath(),
                     primaryFound.getPrimaryPath().contains("member-1-shard-default"));
             assertSame("getLocalShardDataTree", mockDataTree, primaryFound.getLocalShardDataTree());
@@ -553,17 +554,17 @@ public class ShardManagerTest extends AbstractActorTest {
 
             expectNoMsg(FiniteDuration.create(150, TimeUnit.MILLISECONDS));
 
-            String memberId = "member-1-shard-default-" + shardMrgIDSuffix;
+            final String memberId = "member-1-shard-default-" + shardMrgIDSuffix;
             shardManager.tell(new RoleChangeNotification(memberId,
                     RaftState.Candidate.name(), RaftState.Leader.name()), mockShardActor);
 
             expectNoMsg(FiniteDuration.create(150, TimeUnit.MILLISECONDS));
 
-            DataTree mockDataTree = mock(DataTree.class);
+            final DataTree mockDataTree = mock(DataTree.class);
             shardManager.tell(new ShardLeaderStateChanged(memberId, memberId, mockDataTree,
                     DataStoreVersions.CURRENT_VERSION), mockShardActor);
 
-            LocalPrimaryShardFound primaryFound = expectMsgClass(duration("5 seconds"), LocalPrimaryShardFound.class);
+            final LocalPrimaryShardFound primaryFound = expectMsgClass(duration("5 seconds"), LocalPrimaryShardFound.class);
             assertTrue("Unexpected primary path " +  primaryFound.getPrimaryPath(),
                     primaryFound.getPrimaryPath().contains("member-1-shard-default"));
             assertSame("getLocalShardDataTree", mockDataTree, primaryFound.getLocalShardDataTree() );
@@ -652,7 +653,7 @@ public class ShardManagerTest extends AbstractActorTest {
     @Test
     public void testOnReceiveFindPrimaryForRemoteShard() throws Exception {
         LOG.info("testOnReceiveFindPrimaryForRemoteShard starting");
-        String shardManagerID = ShardManagerIdentifier.builder().type(shardMrgIDSuffix).build().toString();
+        final String shardManagerID = ShardManagerIdentifier.builder().type(shardMrgIDSuffix).build().toString();
 
         // Create an ActorSystem ShardManager actor for member-1.
 
@@ -672,7 +673,7 @@ public class ShardManagerTest extends AbstractActorTest {
 
         final ActorRef mockShardActor2 = newMockShardActor(system2, "astronauts", "member-2");
 
-        MockConfiguration mockConfig2 = new MockConfiguration(ImmutableMap.<String, List<String>>builder().
+        final MockConfiguration mockConfig2 = new MockConfiguration(ImmutableMap.<String, List<String>>builder().
                 put("default", Arrays.asList("member-1", "member-2")).
                 put("astronauts", Arrays.asList("member-2")).build());
 
@@ -688,8 +689,8 @@ public class ShardManagerTest extends AbstractActorTest {
 
             shardManager2.tell(new ActorInitialized(), mockShardActor2);
 
-            String memberId2 = "member-2-shard-astronauts-" + shardMrgIDSuffix;
-            short leaderVersion = DataStoreVersions.CURRENT_VERSION - 1;
+            final String memberId2 = "member-2-shard-astronauts-" + shardMrgIDSuffix;
+            final short leaderVersion = DataStoreVersions.CURRENT_VERSION - 1;
             shardManager2.tell(new ShardLeaderStateChanged(memberId2, memberId2,
                     mock(DataTree.class), leaderVersion), mockShardActor2);
             shardManager2.tell(new RoleChangeNotification(memberId2,
@@ -698,8 +699,8 @@ public class ShardManagerTest extends AbstractActorTest {
             shardManager1.underlyingActor().waitForMemberUp();
             shardManager1.tell(new FindPrimary("astronauts", false), getRef());
 
-            RemotePrimaryShardFound found = expectMsgClass(duration("5 seconds"), RemotePrimaryShardFound.class);
-            String path = found.getPrimaryPath();
+            final RemotePrimaryShardFound found = expectMsgClass(duration("5 seconds"), RemotePrimaryShardFound.class);
+            final String path = found.getPrimaryPath();
             assertTrue("Unexpected primary path " + path, path.contains("member-2-shard-astronauts-config"));
             assertEquals("getPrimaryVersion", leaderVersion, found.getPrimaryVersion());
 
@@ -720,7 +721,7 @@ public class ShardManagerTest extends AbstractActorTest {
     @Test
     public void testShardAvailabilityOnChangeOfMemberReachability() throws Exception {
         LOG.info("testShardAvailabilityOnChangeOfMemberReachability starting");
-        String shardManagerID = ShardManagerIdentifier.builder().type(shardMrgIDSuffix).build().toString();
+        final String shardManagerID = ShardManagerIdentifier.builder().type(shardMrgIDSuffix).build().toString();
 
         // Create an ActorSystem ShardManager actor for member-1.
 
@@ -742,7 +743,7 @@ public class ShardManagerTest extends AbstractActorTest {
 
         final ActorRef mockShardActor2 = newMockShardActor(system2, Shard.DEFAULT_NAME, "member-2");
 
-        MockConfiguration mockConfig2 = new MockConfiguration(ImmutableMap.<String, List<String>>builder().
+        final MockConfiguration mockConfig2 = new MockConfiguration(ImmutableMap.<String, List<String>>builder().
             put("default", Arrays.asList("member-1", "member-2")).build());
 
         final TestActorRef<TestShardManager> shardManager2 = TestActorRef.create(system2,
@@ -757,8 +758,8 @@ public class ShardManagerTest extends AbstractActorTest {
             shardManager1.tell(new ActorInitialized(), mockShardActor1);
             shardManager2.tell(new ActorInitialized(), mockShardActor2);
 
-            String memberId2 = "member-2-shard-default-" + shardMrgIDSuffix;
-            String memberId1 = "member-1-shard-default-" + shardMrgIDSuffix;
+            final String memberId2 = "member-2-shard-default-" + shardMrgIDSuffix;
+            final String memberId1 = "member-1-shard-default-" + shardMrgIDSuffix;
             shardManager1.tell(new ShardLeaderStateChanged(memberId1, memberId2,
                 mock(DataTree.class), DataStoreVersions.CURRENT_VERSION), mockShardActor1);
             shardManager1.tell(new RoleChangeNotification(memberId1,
@@ -772,8 +773,8 @@ public class ShardManagerTest extends AbstractActorTest {
 
             shardManager1.tell(new FindPrimary("default", true), getRef());
 
-            RemotePrimaryShardFound found = expectMsgClass(duration("5 seconds"), RemotePrimaryShardFound.class);
-            String path = found.getPrimaryPath();
+            final RemotePrimaryShardFound found = expectMsgClass(duration("5 seconds"), RemotePrimaryShardFound.class);
+            final String path = found.getPrimaryPath();
             assertTrue("Unexpected primary path " + path, path.contains("member-2-shard-default-config"));
 
             shardManager1.tell(MockClusterWrapper.
@@ -781,7 +782,7 @@ public class ShardManagerTest extends AbstractActorTest {
 
             shardManager1.underlyingActor().waitForUnreachableMember();
 
-            PeerDown peerDown = MessageCollectorActor.expectFirstMatching(mockShardActor1, PeerDown.class);
+            final PeerDown peerDown = MessageCollectorActor.expectFirstMatching(mockShardActor1, PeerDown.class);
             assertEquals("getMemberName", MEMBER_2, peerDown.getMemberName());
             MessageCollectorActor.clearMessages(mockShardActor1);
 
@@ -799,14 +800,14 @@ public class ShardManagerTest extends AbstractActorTest {
 
             shardManager1.underlyingActor().waitForReachableMember();
 
-            PeerUp peerUp = MessageCollectorActor.expectFirstMatching(mockShardActor1, PeerUp.class);
+            final PeerUp peerUp = MessageCollectorActor.expectFirstMatching(mockShardActor1, PeerUp.class);
             assertEquals("getMemberName", MEMBER_2, peerUp.getMemberName());
             MessageCollectorActor.clearMessages(mockShardActor1);
 
             shardManager1.tell(new FindPrimary("default", true), getRef());
 
-            RemotePrimaryShardFound found1 = expectMsgClass(duration("5 seconds"), RemotePrimaryShardFound.class);
-            String path1 = found1.getPrimaryPath();
+            final RemotePrimaryShardFound found1 = expectMsgClass(duration("5 seconds"), RemotePrimaryShardFound.class);
+            final String path1 = found1.getPrimaryPath();
             assertTrue("Unexpected primary path " + path1, path1.contains("member-2-shard-default-config"));
 
             shardManager1.tell(MockClusterWrapper.
@@ -825,8 +826,8 @@ public class ShardManagerTest extends AbstractActorTest {
             shardManager1.tell(MockClusterWrapper.
                     createReachableMember("member-2", "akka.tcp://cluster-test@127.0.0.1:2558"), getRef());
 
-            RemotePrimaryShardFound found2 = expectMsgClass(duration("5 seconds"), RemotePrimaryShardFound.class);
-            String path2 = found2.getPrimaryPath();
+            final RemotePrimaryShardFound found2 = expectMsgClass(duration("5 seconds"), RemotePrimaryShardFound.class);
+            final String path2 = found2.getPrimaryPath();
             assertTrue("Unexpected primary path " + path2, path2.contains("member-2-shard-default-config"));
         }};
 
@@ -836,7 +837,7 @@ public class ShardManagerTest extends AbstractActorTest {
     @Test
     public void testShardAvailabilityChangeOnMemberUnreachableAndLeadershipChange() throws Exception {
         LOG.info("testShardAvailabilityChangeOnMemberUnreachableAndLeadershipChange starting");
-        String shardManagerID = ShardManagerIdentifier.builder().type(shardMrgIDSuffix).build().toString();
+        final String shardManagerID = ShardManagerIdentifier.builder().type(shardMrgIDSuffix).build().toString();
 
         // Create an ActorSystem ShardManager actor for member-1.
 
@@ -859,7 +860,7 @@ public class ShardManagerTest extends AbstractActorTest {
 
         final ActorRef mockShardActor2 = newMockShardActor(system2, Shard.DEFAULT_NAME, "member-2");
 
-        MockConfiguration mockConfig2 = new MockConfiguration(ImmutableMap.<String, List<String>>builder().
+        final MockConfiguration mockConfig2 = new MockConfiguration(ImmutableMap.<String, List<String>>builder().
             put("default", Arrays.asList("member-1", "member-2")).build());
 
         final TestActorRef<TestShardManager> shardManager2 = TestActorRef.create(system2,
@@ -873,8 +874,8 @@ public class ShardManagerTest extends AbstractActorTest {
             shardManager1.tell(new ActorInitialized(), mockShardActor1);
             shardManager2.tell(new ActorInitialized(), mockShardActor2);
 
-            String memberId2 = "member-2-shard-default-" + shardMrgIDSuffix;
-            String memberId1 = "member-1-shard-default-" + shardMrgIDSuffix;
+            final String memberId2 = "member-2-shard-default-" + shardMrgIDSuffix;
+            final String memberId1 = "member-1-shard-default-" + shardMrgIDSuffix;
             shardManager1.tell(new ShardLeaderStateChanged(memberId1, memberId2,
                 mock(DataTree.class), DataStoreVersions.CURRENT_VERSION), mockShardActor1);
             shardManager1.tell(new RoleChangeNotification(memberId1,
@@ -888,8 +889,8 @@ public class ShardManagerTest extends AbstractActorTest {
 
             shardManager1.tell(new FindPrimary("default", true), getRef());
 
-            RemotePrimaryShardFound found = expectMsgClass(duration("5 seconds"), RemotePrimaryShardFound.class);
-            String path = found.getPrimaryPath();
+            final RemotePrimaryShardFound found = expectMsgClass(duration("5 seconds"), RemotePrimaryShardFound.class);
+            final String path = found.getPrimaryPath();
             assertTrue("Unexpected primary path " + path, path.contains("member-2-shard-default-config"));
 
             primaryShardInfoCache.putSuccessful("default", new PrimaryShardInfo(system1.actorSelection(
@@ -913,8 +914,8 @@ public class ShardManagerTest extends AbstractActorTest {
 
             shardManager1.tell(new FindPrimary("default", true), getRef());
 
-            LocalPrimaryShardFound found1 = expectMsgClass(duration("5 seconds"), LocalPrimaryShardFound.class);
-            String path1 = found1.getPrimaryPath();
+            final LocalPrimaryShardFound found1 = expectMsgClass(duration("5 seconds"), LocalPrimaryShardFound.class);
+            final String path1 = found1.getPrimaryPath();
             assertTrue("Unexpected primary path " + path1, path1.contains("member-1-shard-default-config"));
 
         }};
@@ -932,7 +933,7 @@ public class ShardManagerTest extends AbstractActorTest {
 
             shardManager.tell(new FindLocalShard("non-existent", false), getRef());
 
-            LocalShardNotFound notFound = expectMsgClass(duration("5 seconds"), LocalShardNotFound.class);
+            final LocalShardNotFound notFound = expectMsgClass(duration("5 seconds"), LocalShardNotFound.class);
 
             assertEquals("getShardName", "non-existent", notFound.getShardName());
         }};
@@ -948,7 +949,7 @@ public class ShardManagerTest extends AbstractActorTest {
 
             shardManager.tell(new FindLocalShard(Shard.DEFAULT_NAME, false), getRef());
 
-            LocalShardFound found = expectMsgClass(duration("5 seconds"), LocalShardFound.class);
+            final LocalShardFound found = expectMsgClass(duration("5 seconds"), LocalShardFound.class);
 
             assertTrue("Found path contains " + found.getPath().path().toString(),
                     found.getPath().path().toString().contains("member-1-shard-default-config"));
@@ -976,12 +977,12 @@ public class ShardManagerTest extends AbstractActorTest {
 
             // We're passing waitUntilInitialized = true to FindLocalShard so the response should be
             // delayed until we send ActorInitialized.
-            Future<Object> future = Patterns.ask(shardManager, new FindLocalShard(Shard.DEFAULT_NAME, true),
+            final Future<Object> future = Patterns.ask(shardManager, new FindLocalShard(Shard.DEFAULT_NAME, true),
                     new Timeout(5, TimeUnit.SECONDS));
 
             shardManager.tell(new ActorInitialized(), mockShardActor);
 
-            Object resp = Await.result(future, duration("5 seconds"));
+            final Object resp = Await.result(future, duration("5 seconds"));
             assertTrue("Expected: LocalShardFound, Actual: " + resp, resp instanceof LocalShardFound);
         }};
 
@@ -990,7 +991,7 @@ public class ShardManagerTest extends AbstractActorTest {
 
     @Test
     public void testOnRecoveryJournalIsCleaned() {
-        String persistenceID = "shard-manager-" + shardMrgIDSuffix;
+        final String persistenceID = "shard-manager-" + shardMrgIDSuffix;
         InMemoryJournal.addEntry(persistenceID, 1L, new SchemaContextModules(ImmutableSet.of("foo")));
         InMemoryJournal.addEntry(persistenceID, 2L, new SchemaContextModules(ImmutableSet.of("bar")));
         InMemoryJournal.addDeleteMessagesCompleteLatch(persistenceID);
@@ -1000,7 +1001,7 @@ public class ShardManagerTest extends AbstractActorTest {
         InMemoryJournal.waitForDeleteMessagesComplete(persistenceID);
 
         // Journal entries up to the last one should've been deleted
-        Map<Long, Object> journal = InMemoryJournal.get(persistenceID);
+        final Map<Long, Object> journal = InMemoryJournal.get(persistenceID);
         synchronized (journal) {
             assertEquals("Journal size", 0, journal.size());
         }
@@ -1008,9 +1009,9 @@ public class ShardManagerTest extends AbstractActorTest {
 
     @Test
     public void testRoleChangeNotificationAndShardLeaderStateChangedReleaseReady() throws Exception {
-        TestShardManager shardManager = newTestShardManager();
+        final TestShardManager shardManager = newTestShardManager();
 
-        String memberId = "member-1-shard-default-" + shardMrgIDSuffix;
+        final String memberId = "member-1-shard-default-" + shardMrgIDSuffix;
         shardManager.onReceiveCommand(new RoleChangeNotification(
                 memberId, RaftState.Candidate.name(), RaftState.Leader.name()));
 
@@ -1025,9 +1026,9 @@ public class ShardManagerTest extends AbstractActorTest {
     @Test
     public void testRoleChangeNotificationToFollowerWithShardLeaderStateChangedReleaseReady() throws Exception {
         new JavaTestKit(getSystem()) {{
-            TestShardManager shardManager = newTestShardManager();
+            final TestShardManager shardManager = newTestShardManager();
 
-            String memberId = "member-1-shard-default-" + shardMrgIDSuffix;
+            final String memberId = "member-1-shard-default-" + shardMrgIDSuffix;
             shardManager.onReceiveCommand(new RoleChangeNotification(
                     memberId, null, RaftState.Follower.name()));
 
@@ -1046,9 +1047,9 @@ public class ShardManagerTest extends AbstractActorTest {
     @Test
     public void testReadyCountDownForMemberUpAfterLeaderStateChanged() throws Exception {
         new JavaTestKit(getSystem()) {{
-            TestShardManager shardManager = newTestShardManager();
+            final TestShardManager shardManager = newTestShardManager();
 
-            String memberId = "member-1-shard-default-" + shardMrgIDSuffix;
+            final String memberId = "member-1-shard-default-" + shardMrgIDSuffix;
             shardManager.onReceiveCommand(new RoleChangeNotification(memberId, null, RaftState.Follower.name()));
 
             verify(ready, never()).countDown();
@@ -1065,7 +1066,7 @@ public class ShardManagerTest extends AbstractActorTest {
 
     @Test
     public void testRoleChangeNotificationDoNothingForUnknownShard() throws Exception {
-        TestShardManager shardManager = newTestShardManager();
+        final TestShardManager shardManager = newTestShardManager();
 
         shardManager.onReceiveCommand(new RoleChangeNotification(
                 "unknown", RaftState.Candidate.name(), RaftState.Leader.name()));
@@ -1075,14 +1076,14 @@ public class ShardManagerTest extends AbstractActorTest {
 
     @Test
     public void testByDefaultSyncStatusIsFalse() throws Exception{
-        TestShardManager shardManager = newTestShardManager();
+        final TestShardManager shardManager = newTestShardManager();
 
         assertEquals(false, shardManager.getMBean().getSyncStatus());
     }
 
     @Test
     public void testWhenShardIsLeaderSyncStatusIsTrue() throws Exception{
-        TestShardManager shardManager = newTestShardManager();
+        final TestShardManager shardManager = newTestShardManager();
 
         shardManager.onReceiveCommand(new RoleChangeNotification("member-1-shard-default-" + shardMrgIDSuffix,
                 RaftState.Follower.name(), RaftState.Leader.name()));
@@ -1092,9 +1093,9 @@ public class ShardManagerTest extends AbstractActorTest {
 
     @Test
     public void testWhenShardIsCandidateSyncStatusIsFalse() throws Exception{
-        TestShardManager shardManager = newTestShardManager();
+        final TestShardManager shardManager = newTestShardManager();
 
-        String shardId = "member-1-shard-default-" + shardMrgIDSuffix;
+        final String shardId = "member-1-shard-default-" + shardMrgIDSuffix;
         shardManager.onReceiveCommand(new RoleChangeNotification(shardId,
                 RaftState.Follower.name(), RaftState.Candidate.name()));
 
@@ -1109,9 +1110,9 @@ public class ShardManagerTest extends AbstractActorTest {
 
     @Test
     public void testWhenShardIsFollowerSyncStatusDependsOnFollowerInitialSyncStatus() throws Exception{
-        TestShardManager shardManager = newTestShardManager();
+        final TestShardManager shardManager = newTestShardManager();
 
-        String shardId = "member-1-shard-default-" + shardMrgIDSuffix;
+        final String shardId = "member-1-shard-default-" + shardMrgIDSuffix;
         shardManager.onReceiveCommand(new RoleChangeNotification(shardId,
                 RaftState.Candidate.name(), RaftState.Follower.name()));
 
@@ -1133,9 +1134,9 @@ public class ShardManagerTest extends AbstractActorTest {
     @Test
     public void testWhenMultipleShardsPresentSyncStatusMustBeTrueForAllShards() throws Exception{
         LOG.info("testWhenMultipleShardsPresentSyncStatusMustBeTrueForAllShards starting");
-        TestShardManager shardManager = newTestShardManager(newShardMgrProps(new MockConfiguration() {
+        final TestShardManager shardManager = newTestShardManager(newShardMgrProps(new MockConfiguration() {
             @Override
-            public List<String> getMemberShardNames(MemberName memberName) {
+            public List<String> getMemberShardNames(final MemberName memberName) {
                 return Arrays.asList("default", "astronauts");
             }
         }));
@@ -1144,7 +1145,7 @@ public class ShardManagerTest extends AbstractActorTest {
         assertEquals(false, shardManager.getMBean().getSyncStatus());
 
         // Make default shard leader
-        String defaultShardId = "member-1-shard-default-" + shardMrgIDSuffix;
+        final String defaultShardId = "member-1-shard-default-" + shardMrgIDSuffix;
         shardManager.onReceiveCommand(new RoleChangeNotification(defaultShardId,
                 RaftState.Follower.name(), RaftState.Leader.name()));
 
@@ -1152,7 +1153,7 @@ public class ShardManagerTest extends AbstractActorTest {
         assertEquals(false, shardManager.getMBean().getSyncStatus());
 
         // Make astronauts shard leader as well
-        String astronautsShardId = "member-1-shard-astronauts-" + shardMrgIDSuffix;
+        final String astronautsShardId = "member-1-shard-astronauts-" + shardMrgIDSuffix;
         shardManager.onReceiveCommand(new RoleChangeNotification(astronautsShardId,
                 RaftState.Follower.name(), RaftState.Leader.name()));
 
@@ -1185,14 +1186,14 @@ public class ShardManagerTest extends AbstractActorTest {
 
             shardManager.tell(new SwitchShardBehavior(mockShardName, RaftState.Leader, 1000), getRef());
 
-            SwitchBehavior switchBehavior = MessageCollectorActor.expectFirstMatching(mockShardActor, SwitchBehavior.class);
+            final SwitchBehavior switchBehavior = MessageCollectorActor.expectFirstMatching(mockShardActor, SwitchBehavior.class);
 
             assertEquals(RaftState.Leader, switchBehavior.getNewState());
             assertEquals(1000, switchBehavior.getNewTerm());
         }};
     }
 
-    private static List<MemberName> members(String... names) {
+    private static List<MemberName> members(final String... names) {
         return Arrays.asList(names).stream().map(MemberName::forName).collect(Collectors.toList());
     }
 
@@ -1202,17 +1203,17 @@ public class ShardManagerTest extends AbstractActorTest {
         new JavaTestKit(getSystem()) {{
             datastoreContextBuilder.shardInitializationTimeout(1, TimeUnit.MINUTES).persistent(true);
 
-            ActorRef shardManager = actorFactory.createActor(newShardMgrProps(
+            final ActorRef shardManager = actorFactory.createActor(newShardMgrProps(
                     new ConfigurationImpl(new EmptyModuleShardConfigProvider())));
 
-            SchemaContext schemaContext = TestModel.createTestContext();
+            final SchemaContext schemaContext = TestModel.createTestContext();
             shardManager.tell(new UpdateSchemaContext(schemaContext), ActorRef.noSender());
 
-            DatastoreContext datastoreContext = DatastoreContext.newBuilder().shardElectionTimeoutFactor(100).
+            final DatastoreContext datastoreContext = DatastoreContext.newBuilder().shardElectionTimeoutFactor(100).
                     persistent(false).build();
-            Shard.Builder shardBuilder = Shard.builder();
+            final Shard.Builder shardBuilder = Shard.builder();
 
-            ModuleShardConfiguration config = new ModuleShardConfiguration(URI.create("foo-ns"), "foo-module",
+            final ModuleShardConfiguration config = new ModuleShardConfiguration(URI.create("foo-ns"), "foo-module",
                     "foo", null, members("member-1", "member-5", "member-6"));
             shardManager.tell(new CreateShard(config, shardBuilder, datastoreContext), getRef());
 
@@ -1237,7 +1238,7 @@ public class ShardManagerTest extends AbstractActorTest {
 
             shardManager.tell(new CreateShard(config, shardBuilder, null), getRef());
 
-            Success success = expectMsgClass(duration("5 seconds"), Success.class);
+            final Success success = expectMsgClass(duration("5 seconds"), Success.class);
             assertNotNull("Success status is null", success.status());
         }};
 
@@ -1250,13 +1251,13 @@ public class ShardManagerTest extends AbstractActorTest {
         new JavaTestKit(getSystem()) {{
             datastoreContextBuilder.shardInitializationTimeout(1, TimeUnit.MINUTES).persistent(true);
 
-            ActorRef shardManager = actorFactory.createActor(newShardMgrProps(
+            final ActorRef shardManager = actorFactory.createActor(newShardMgrProps(
                     new ConfigurationImpl(new EmptyModuleShardConfigProvider())));
 
             shardManager.tell(new UpdateSchemaContext(TestModel.createTestContext()), ActorRef.noSender());
 
-            Shard.Builder shardBuilder = Shard.builder();
-            ModuleShardConfiguration config = new ModuleShardConfiguration(URI.create("foo-ns"), "foo-module",
+            final Shard.Builder shardBuilder = Shard.builder();
+            final ModuleShardConfiguration config = new ModuleShardConfiguration(URI.create("foo-ns"), "foo-module",
                     "foo", null, members("member-5", "member-6"));
 
             shardManager.tell(new CreateShard(config, shardBuilder, null), getRef());
@@ -1277,18 +1278,18 @@ public class ShardManagerTest extends AbstractActorTest {
     public void testOnCreateShardWithNoInitialSchemaContext() {
         LOG.info("testOnCreateShardWithNoInitialSchemaContext starting");
         new JavaTestKit(getSystem()) {{
-            ActorRef shardManager = actorFactory.createActor(newShardMgrProps(
+            final ActorRef shardManager = actorFactory.createActor(newShardMgrProps(
                     new ConfigurationImpl(new EmptyModuleShardConfigProvider())));
 
-            Shard.Builder shardBuilder = Shard.builder();
+            final Shard.Builder shardBuilder = Shard.builder();
 
-            ModuleShardConfiguration config = new ModuleShardConfiguration(URI.create("foo-ns"), "foo-module",
+            final ModuleShardConfiguration config = new ModuleShardConfiguration(URI.create("foo-ns"), "foo-module",
                     "foo", null, members("member-1"));
             shardManager.tell(new CreateShard(config, shardBuilder, null), getRef());
 
             expectMsgClass(duration("5 seconds"), Success.class);
 
-            SchemaContext schemaContext = TestModel.createTestContext();
+            final SchemaContext schemaContext = TestModel.createTestContext();
             shardManager.tell(new UpdateSchemaContext(schemaContext), ActorRef.noSender());
 
             shardManager.tell(new FindLocalShard("foo", true), getRef());
@@ -1305,18 +1306,18 @@ public class ShardManagerTest extends AbstractActorTest {
     @Test
     public void testGetSnapshot() throws Throwable {
         LOG.info("testGetSnapshot starting");
-        JavaTestKit kit = new JavaTestKit(getSystem());
+        final JavaTestKit kit = new JavaTestKit(getSystem());
 
-        MockConfiguration mockConfig = new MockConfiguration(ImmutableMap.<String, List<String>>builder().
+        final MockConfiguration mockConfig = new MockConfiguration(ImmutableMap.<String, List<String>>builder().
                    put("shard1", Arrays.asList("member-1")).
                    put("shard2", Arrays.asList("member-1")).
                    put("astronauts", Collections.<String>emptyList()).build());
 
-        TestActorRef<TestShardManager> shardManager = actorFactory.createTestActor(newShardMgrProps(mockConfig).
+        final TestActorRef<TestShardManager> shardManager = actorFactory.createTestActor(newShardMgrProps(mockConfig).
                 withDispatcher(Dispatchers.DefaultDispatcherId()));
 
         shardManager.tell(GetSnapshot.INSTANCE, kit.getRef());
-        Failure failure = kit.expectMsgClass(Failure.class);
+        final Failure failure = kit.expectMsgClass(Failure.class);
         assertEquals("Failure cause type", IllegalStateException.class, failure.cause().getClass());
 
         shardManager.tell(new UpdateSchemaContext(TestModel.createTestContext()), ActorRef.noSender());
@@ -1331,16 +1332,16 @@ public class ShardManagerTest extends AbstractActorTest {
         assertEquals("getType", shardMrgIDSuffix, datastoreSnapshot.getType());
         assertNull("Expected null ShardManagerSnapshot", datastoreSnapshot.getShardManagerSnapshot());
 
-        Function<ShardSnapshot, String> shardNameTransformer = s -> s.getName();
+        final Function<ShardSnapshot, String> shardNameTransformer = s -> s.getName();
 
         assertEquals("Shard names", Sets.newHashSet("shard1", "shard2"), Sets.newHashSet(
                 Lists.transform(datastoreSnapshot.getShardSnapshots(), shardNameTransformer)));
 
         // Add a new replica
 
-        JavaTestKit mockShardLeaderKit = new JavaTestKit(getSystem());
+        final JavaTestKit mockShardLeaderKit = new JavaTestKit(getSystem());
 
-        TestShardManager shardManagerInstance = shardManager.underlyingActor();
+        final TestShardManager shardManagerInstance = shardManager.underlyingActor();
         shardManagerInstance.setMessageInterceptor(newFindPrimaryInterceptor(mockShardLeaderKit.getRef()));
 
         shardManager.tell(new AddShardReplica("astronauts"), kit.getRef());
@@ -1357,9 +1358,9 @@ public class ShardManagerTest extends AbstractActorTest {
         assertEquals("Shard names", Sets.newHashSet("shard1", "shard2", "astronauts"), Sets.newHashSet(
                 Lists.transform(datastoreSnapshot.getShardSnapshots(), shardNameTransformer)));
 
-        byte[] snapshotBytes = datastoreSnapshot.getShardManagerSnapshot();
+        final byte[] snapshotBytes = datastoreSnapshot.getShardManagerSnapshot();
         assertNotNull("Expected ShardManagerSnapshot", snapshotBytes);
-        ShardManagerSnapshot snapshot = SerializationUtils.deserialize(snapshotBytes);
+        final ShardManagerSnapshot snapshot = SerializationUtils.deserialize(snapshotBytes);
         assertEquals("Shard names", Sets.newHashSet("shard1", "shard2", "astronauts"),
                 Sets.newHashSet(snapshot.getShardList()));
 
@@ -1372,18 +1373,18 @@ public class ShardManagerTest extends AbstractActorTest {
 
         datastoreContextBuilder.shardInitializationTimeout(3, TimeUnit.SECONDS);
 
-        JavaTestKit kit = new JavaTestKit(getSystem());
+        final JavaTestKit kit = new JavaTestKit(getSystem());
 
-        MockConfiguration mockConfig = new MockConfiguration(ImmutableMap.<String, List<String>>builder().
+        final MockConfiguration mockConfig = new MockConfiguration(ImmutableMap.<String, List<String>>builder().
                    put("shard1", Collections.<String>emptyList()).
                    put("shard2", Collections.<String>emptyList()).
                    put("astronauts", Collections.<String>emptyList()).build());
 
 
         ShardManagerSnapshot snapshot = new ShardManagerSnapshot(Arrays.asList("shard1", "shard2", "astronauts"));
-        DatastoreSnapshot restoreFromSnapshot = new DatastoreSnapshot(shardMrgIDSuffix,
+        final DatastoreSnapshot restoreFromSnapshot = new DatastoreSnapshot(shardMrgIDSuffix,
                 SerializationUtils.serialize(snapshot), Collections.<ShardSnapshot>emptyList());
-        TestActorRef<TestShardManager> shardManager = actorFactory.createTestActor(newTestShardMgrBuilder(mockConfig).
+        final TestActorRef<TestShardManager> shardManager = actorFactory.createTestActor(newTestShardMgrBuilder(mockConfig).
                 restoreFromSnapshot(restoreFromSnapshot).props().withDispatcher(Dispatchers.DefaultDispatcherId()));
 
         shardManager.underlyingActor().waitForRecoveryComplete();
@@ -1396,11 +1397,11 @@ public class ShardManagerTest extends AbstractActorTest {
 
         shardManager.tell(GetSnapshot.INSTANCE, kit.getRef());
 
-        DatastoreSnapshot datastoreSnapshot = expectMsgClassOrFailure(DatastoreSnapshot.class, kit, "GetSnapshot");
+        final DatastoreSnapshot datastoreSnapshot = expectMsgClassOrFailure(DatastoreSnapshot.class, kit, "GetSnapshot");
 
         assertEquals("getType", shardMrgIDSuffix, datastoreSnapshot.getType());
 
-        byte[] snapshotBytes = datastoreSnapshot.getShardManagerSnapshot();
+        final byte[] snapshotBytes = datastoreSnapshot.getShardManagerSnapshot();
         assertNotNull("Expected ShardManagerSnapshot", snapshotBytes);
         snapshot = SerializationUtils.deserialize(snapshotBytes);
         assertEquals("Shard names", Sets.newHashSet("shard1", "shard2", "astronauts"),
@@ -1412,11 +1413,11 @@ public class ShardManagerTest extends AbstractActorTest {
     @Test
     public void testAddShardReplicaForNonExistentShardConfig() throws Exception {
         new JavaTestKit(getSystem()) {{
-            ActorRef shardManager = actorFactory.createActor(newShardMgrProps(
+            final ActorRef shardManager = actorFactory.createActor(newShardMgrProps(
                     new ConfigurationImpl(new EmptyModuleShardConfigProvider())));
 
             shardManager.tell(new AddShardReplica("model-inventory"), getRef());
-            Status.Failure resp = expectMsgClass(duration("2 seconds"), Status.Failure.class);
+            final Status.Failure resp = expectMsgClass(duration("2 seconds"), Status.Failure.class);
 
             assertEquals("Failure obtained", true,
                           (resp.cause() instanceof IllegalArgumentException));
@@ -1426,7 +1427,7 @@ public class ShardManagerTest extends AbstractActorTest {
     @Test
     public void testAddShardReplica() throws Exception {
         LOG.info("testAddShardReplica starting");
-        MockConfiguration mockConfig =
+        final MockConfiguration mockConfig =
                 new MockConfiguration(ImmutableMap.<String, List<String>>builder().
                    put("default", Arrays.asList("member-1", "member-2")).
                    put("astronauts", Arrays.asList("member-2")).build());
@@ -1437,7 +1438,7 @@ public class ShardManagerTest extends AbstractActorTest {
         // Create an ActorSystem ShardManager actor for member-1.
         final ActorSystem system1 = newActorSystem("Member1");
         Cluster.get(system1).join(AddressFromURIString.parse("akka.tcp://cluster-test@127.0.0.1:2558"));
-        ActorRef mockDefaultShardActor = newMockShardActor(system1, Shard.DEFAULT_NAME, "member-1");
+        final ActorRef mockDefaultShardActor = newMockShardActor(system1, Shard.DEFAULT_NAME, "member-1");
         final TestActorRef<TestShardManager> newReplicaShardManager = TestActorRef.create(system1,
                 newTestShardMgrBuilder(mockConfig).shardActor(mockDefaultShardActor).cluster(
                         new ClusterWrapperImpl(system1)).props().withDispatcher(Dispatchers.DefaultDispatcherId()), shardManagerID);
@@ -1446,8 +1447,8 @@ public class ShardManagerTest extends AbstractActorTest {
         final ActorSystem system2 = newActorSystem("Member2");
         Cluster.get(system2).join(AddressFromURIString.parse("akka.tcp://cluster-test@127.0.0.1:2558"));
 
-        String memberId2 = "member-2-shard-astronauts-" + shardMrgIDSuffix;
-        String name = ShardIdentifier.create("astronauts", MEMBER_2, "config").toString();
+        final String memberId2 = "member-2-shard-astronauts-" + shardMrgIDSuffix;
+        final String name = ShardIdentifier.create("astronauts", MEMBER_2, "config").toString();
         final TestActorRef<MockRespondActor> mockShardLeaderActor =
                 TestActorRef.create(system2, Props.create(MockRespondActor.class, AddServer.class,
                         new AddServerReply(ServerChangeStatus.OK, memberId2)).
@@ -1464,7 +1465,7 @@ public class ShardManagerTest extends AbstractActorTest {
 
             leaderShardManager.tell(new ActorInitialized(), mockShardLeaderActor);
 
-            short leaderVersion = DataStoreVersions.CURRENT_VERSION - 1;
+            final short leaderVersion = DataStoreVersions.CURRENT_VERSION - 1;
             leaderShardManager.tell(new ShardLeaderStateChanged(memberId2, memberId2,
                     mock(DataTree.class), leaderVersion), mockShardLeaderActor);
             leaderShardManager.tell(new RoleChangeNotification(memberId2,
@@ -1474,8 +1475,8 @@ public class ShardManagerTest extends AbstractActorTest {
             leaderShardManager.underlyingActor().waitForMemberUp();
 
             //Have a dummy snapshot to be overwritten by the new data persisted.
-            String[] restoredShards = {"default", "people"};
-            ShardManagerSnapshot snapshot = new ShardManagerSnapshot(Arrays.asList(restoredShards));
+            final String[] restoredShards = {"default", "people"};
+            final ShardManagerSnapshot snapshot = new ShardManagerSnapshot(Arrays.asList(restoredShards));
             InMemorySnapshotStore.addSnapshot(shardManagerID, snapshot);
             Uninterruptibles.sleepUninterruptibly(2, TimeUnit.MILLISECONDS);
 
@@ -1484,18 +1485,18 @@ public class ShardManagerTest extends AbstractActorTest {
 
             //construct a mock response message
             newReplicaShardManager.tell(new AddShardReplica("astronauts"), getRef());
-            AddServer addServerMsg = MessageCollectorActor.expectFirstMatching(mockShardLeaderActor,
+            final AddServer addServerMsg = MessageCollectorActor.expectFirstMatching(mockShardLeaderActor,
                 AddServer.class);
-            String addServerId = "member-1-shard-astronauts-" + shardMrgIDSuffix;
+            final String addServerId = "member-1-shard-astronauts-" + shardMrgIDSuffix;
             assertEquals("AddServer serverId", addServerId, addServerMsg.getNewServerId());
             expectMsgClass(duration("5 seconds"), Status.Success.class);
 
             InMemorySnapshotStore.waitForSavedSnapshot(shardManagerID, ShardManagerSnapshot.class);
             InMemorySnapshotStore.waitForDeletedSnapshot(shardManagerID);
-            List<ShardManagerSnapshot> persistedSnapshots =
+            final List<ShardManagerSnapshot> persistedSnapshots =
                 InMemorySnapshotStore.getSnapshots(shardManagerID, ShardManagerSnapshot.class);
             assertEquals("Number of snapshots persisted", 1, persistedSnapshots.size());
-            ShardManagerSnapshot shardManagerSnapshot = persistedSnapshots.get(0);
+            final ShardManagerSnapshot shardManagerSnapshot = persistedSnapshots.get(0);
             assertEquals("Persisted local shards", Sets.newHashSet("default", "astronauts"),
                     Sets.newHashSet(shardManagerSnapshot.getShardList()));
         }};
@@ -1506,20 +1507,20 @@ public class ShardManagerTest extends AbstractActorTest {
     public void testAddShardReplicaWithPreExistingReplicaInRemoteShardLeader() throws Exception {
         LOG.info("testAddShardReplicaWithPreExistingReplicaInRemoteShardLeader starting");
         new JavaTestKit(getSystem()) {{
-            TestActorRef<TestShardManager> shardManager = actorFactory.createTestActor(
+            final TestActorRef<TestShardManager> shardManager = actorFactory.createTestActor(
                     newPropsShardMgrWithMockShardActor(), shardMgrID);
 
             shardManager.tell(new UpdateSchemaContext(TestModel.createTestContext()), getRef());
             shardManager.tell(new ActorInitialized(), mockShardActor);
 
-            String leaderId = "leader-member-shard-default-" + shardMrgIDSuffix;
-            AddServerReply addServerReply = new AddServerReply(ServerChangeStatus.ALREADY_EXISTS, null);
-            ActorRef leaderShardActor = shardManager.underlyingActor().getContext().actorOf(
+            final String leaderId = "leader-member-shard-default-" + shardMrgIDSuffix;
+            final AddServerReply addServerReply = new AddServerReply(ServerChangeStatus.ALREADY_EXISTS, null);
+            final ActorRef leaderShardActor = shardManager.underlyingActor().getContext().actorOf(
                     Props.create(MockRespondActor.class, AddServer.class, addServerReply), leaderId);
 
             MockClusterWrapper.sendMemberUp(shardManager, "leader-member", leaderShardActor.path().toString());
 
-            String newReplicaId = "member-1-shard-default-" + shardMrgIDSuffix;
+            final String newReplicaId = "member-1-shard-default-" + shardMrgIDSuffix;
             shardManager.tell(new RoleChangeNotification(newReplicaId,
                     RaftState.Candidate.name(), RaftState.Follower.name()), mockShardActor);
             shardManager.tell(new ShardLeaderStateChanged(newReplicaId, leaderId,
@@ -1560,8 +1561,8 @@ public class ShardManagerTest extends AbstractActorTest {
     public void testAddShardReplicaWithPreExistingLocalReplicaLeader() throws Exception {
         LOG.info("testAddShardReplicaWithPreExistingLocalReplicaLeader starting");
         new JavaTestKit(getSystem()) {{
-            String memberId = "member-1-shard-default-" + shardMrgIDSuffix;
-            ActorRef shardManager = actorFactory.createActor(newPropsShardMgrWithMockShardActor());
+            final String memberId = "member-1-shard-default-" + shardMrgIDSuffix;
+            final ActorRef shardManager = actorFactory.createActor(newPropsShardMgrWithMockShardActor());
 
             shardManager.tell(new UpdateSchemaContext(TestModel.createTestContext()), getRef());
             shardManager.tell(new ActorInitialized(), mockShardActor);
@@ -1571,7 +1572,7 @@ public class ShardManagerTest extends AbstractActorTest {
                     RaftState.Leader.name())), mockShardActor);
 
             shardManager.tell(new AddShardReplica(Shard.DEFAULT_NAME), getRef());
-            Failure resp = expectMsgClass(duration("5 seconds"), Failure.class);
+            final Failure resp = expectMsgClass(duration("5 seconds"), Failure.class);
             assertEquals("Failure cause", AlreadyExistsException.class, resp.cause().getClass());
 
             shardManager.tell(new FindLocalShard(Shard.DEFAULT_NAME, false), getRef());
@@ -1585,25 +1586,25 @@ public class ShardManagerTest extends AbstractActorTest {
     public void testAddShardReplicaWithAddServerReplyFailure() throws Exception {
         LOG.info("testAddShardReplicaWithAddServerReplyFailure starting");
         new JavaTestKit(getSystem()) {{
-            JavaTestKit mockShardLeaderKit = new JavaTestKit(getSystem());
+            final JavaTestKit mockShardLeaderKit = new JavaTestKit(getSystem());
 
-            MockConfiguration mockConfig =
+            final MockConfiguration mockConfig =
                     new MockConfiguration(ImmutableMap.<String, List<String>>builder().
                        put("astronauts", Arrays.asList("member-2")).build());
 
-            ActorRef mockNewReplicaShardActor = newMockShardActor(getSystem(), "astronauts", "member-1");
+            final ActorRef mockNewReplicaShardActor = newMockShardActor(getSystem(), "astronauts", "member-1");
             final TestActorRef<TestShardManager> shardManager = actorFactory.createTestActor(
                     newTestShardMgrBuilder(mockConfig).shardActor(mockNewReplicaShardActor).props(), shardMgrID);
             shardManager.underlyingActor().setMessageInterceptor(newFindPrimaryInterceptor(mockShardLeaderKit.getRef()));
 
             shardManager.tell(new UpdateSchemaContext(TestModel.createTestContext()), getRef());
 
-            JavaTestKit terminateWatcher = new JavaTestKit(getSystem());
+            final JavaTestKit terminateWatcher = new JavaTestKit(getSystem());
             terminateWatcher.watch(mockNewReplicaShardActor);
 
             shardManager.tell(new AddShardReplica("astronauts"), getRef());
 
-            AddServer addServerMsg = mockShardLeaderKit.expectMsgClass(AddServer.class);
+            final AddServer addServerMsg = mockShardLeaderKit.expectMsgClass(AddServer.class);
             assertEquals("AddServer serverId", "member-1-shard-astronauts-" + shardMrgIDSuffix,
                     addServerMsg.getNewServerId());
             mockShardLeaderKit.reply(new AddServerReply(ServerChangeStatus.TIMEOUT, null));
@@ -1637,7 +1638,7 @@ public class ShardManagerTest extends AbstractActorTest {
         LOG.info("testAddShardReplicaWithFindPrimaryTimeout starting");
         datastoreContextBuilder.shardInitializationTimeout(100, TimeUnit.MILLISECONDS);
         new JavaTestKit(getSystem()) {{
-            MockConfiguration mockConfig = new MockConfiguration(ImmutableMap.<String, List<String>>builder().
+            final MockConfiguration mockConfig = new MockConfiguration(ImmutableMap.<String, List<String>>builder().
                        put("astronauts", Arrays.asList("member-2")).build());
 
             final ActorRef newReplicaShardManager = actorFactory.createActor(newTestShardMgrBuilder(mockConfig).
@@ -1648,7 +1649,7 @@ public class ShardManagerTest extends AbstractActorTest {
                     AddressFromURIString.parse("akka.tcp://non-existent@127.0.0.1:5").toString());
 
             newReplicaShardManager.tell(new AddShardReplica("astronauts"), getRef());
-            Status.Failure resp = expectMsgClass(duration("5 seconds"), Status.Failure.class);
+            final Status.Failure resp = expectMsgClass(duration("5 seconds"), Status.Failure.class);
             assertEquals("Failure obtained", true,
                           (resp.cause() instanceof RuntimeException));
         }};
@@ -1659,11 +1660,11 @@ public class ShardManagerTest extends AbstractActorTest {
     @Test
     public void testRemoveShardReplicaForNonExistentShard() throws Exception {
         new JavaTestKit(getSystem()) {{
-            ActorRef shardManager = actorFactory.createActor(newShardMgrProps(
+            final ActorRef shardManager = actorFactory.createActor(newShardMgrProps(
                     new ConfigurationImpl(new EmptyModuleShardConfigProvider())));
 
             shardManager.tell(new RemoveShardReplica("model-inventory", MEMBER_1), getRef());
-            Status.Failure resp = expectMsgClass(duration("10 seconds"), Status.Failure.class);
+            final Status.Failure resp = expectMsgClass(duration("10 seconds"), Status.Failure.class);
             assertEquals("Failure obtained", true,
                          (resp.cause() instanceof PrimaryNotFoundException));
         }};
@@ -1675,13 +1676,13 @@ public class ShardManagerTest extends AbstractActorTest {
      */
     public void testRemoveShardReplicaLocal() throws Exception {
         new JavaTestKit(getSystem()) {{
-            String memberId = "member-1-shard-default-" + shardMrgIDSuffix;
+            final String memberId = "member-1-shard-default-" + shardMrgIDSuffix;
 
             final TestActorRef<MockRespondActor> respondActor =
                     actorFactory.createTestActor(Props.create(MockRespondActor.class, RemoveServer.class,
                             new RemoveServerReply(ServerChangeStatus.OK, null)), memberId);
 
-            ActorRef shardManager = getSystem().actorOf(newPropsShardMgrWithMockShardActor(respondActor));
+            final ActorRef shardManager = getSystem().actorOf(newPropsShardMgrWithMockShardActor(respondActor));
 
             shardManager.tell(new UpdateSchemaContext(TestModel.createTestContext()), getRef());
             shardManager.tell(new ActorInitialized(), respondActor);
@@ -1700,17 +1701,17 @@ public class ShardManagerTest extends AbstractActorTest {
 
     @Test
     public void testRemoveShardReplicaRemote() throws Exception {
-        MockConfiguration mockConfig =
+        final MockConfiguration mockConfig =
                 new MockConfiguration(ImmutableMap.<String, List<String>>builder().
                         put("default", Arrays.asList("member-1", "member-2")).
                         put("astronauts", Arrays.asList("member-1")).build());
 
-        String shardManagerID = ShardManagerIdentifier.builder().type(shardMrgIDSuffix).build().toString();
+        final String shardManagerID = ShardManagerIdentifier.builder().type(shardMrgIDSuffix).build().toString();
 
         // Create an ActorSystem ShardManager actor for member-1.
         final ActorSystem system1 = newActorSystem("Member1");
         Cluster.get(system1).join(AddressFromURIString.parse("akka.tcp://cluster-test@127.0.0.1:2558"));
-        ActorRef mockDefaultShardActor = newMockShardActor(system1, Shard.DEFAULT_NAME, "member-1");
+        final ActorRef mockDefaultShardActor = newMockShardActor(system1, Shard.DEFAULT_NAME, "member-1");
 
         final TestActorRef<TestShardManager> newReplicaShardManager = TestActorRef.create(system1,
                 newTestShardMgrBuilder().configuration(mockConfig).shardActor(mockDefaultShardActor).cluster(
@@ -1721,8 +1722,8 @@ public class ShardManagerTest extends AbstractActorTest {
         final ActorSystem system2 = newActorSystem("Member2");
         Cluster.get(system2).join(AddressFromURIString.parse("akka.tcp://cluster-test@127.0.0.1:2558"));
 
-        String name = ShardIdentifier.create("default", MEMBER_2, shardMrgIDSuffix).toString();
-        String memberId2 = "member-2-shard-default-" + shardMrgIDSuffix;
+        final String name = ShardIdentifier.create("default", MEMBER_2, shardMrgIDSuffix).toString();
+        final String memberId2 = "member-2-shard-default-" + shardMrgIDSuffix;
         final TestActorRef<MockRespondActor> mockShardLeaderActor =
                 TestActorRef.create(system2, Props.create(MockRespondActor.class, RemoveServer.class,
                         new RemoveServerReply(ServerChangeStatus.OK, memberId2)), name);
@@ -1759,13 +1760,13 @@ public class ShardManagerTest extends AbstractActorTest {
             leaderShardManager.tell(new ActorInitialized(), mockShardLeaderActor);
             newReplicaShardManager.tell(new ActorInitialized(), mockShardLeaderActor);
 
-            short leaderVersion = DataStoreVersions.CURRENT_VERSION - 1;
+            final short leaderVersion = DataStoreVersions.CURRENT_VERSION - 1;
             leaderShardManager.tell(new ShardLeaderStateChanged(memberId2, memberId2,
                     mock(DataTree.class), leaderVersion), mockShardLeaderActor);
             leaderShardManager.tell(new RoleChangeNotification(memberId2,
                     RaftState.Candidate.name(), RaftState.Leader.name()), mockShardLeaderActor);
 
-            String memberId1 = "member-1-shard-default-" + shardMrgIDSuffix;
+            final String memberId1 = "member-1-shard-default-" + shardMrgIDSuffix;
             newReplicaShardManager.tell(new ShardLeaderStateChanged(memberId1, memberId2,
                     mock(DataTree.class), leaderVersion), mockShardActor);
             newReplicaShardManager.tell(new RoleChangeNotification(memberId1,
@@ -1776,9 +1777,9 @@ public class ShardManagerTest extends AbstractActorTest {
 
             //construct a mock response message
             newReplicaShardManager.tell(new RemoveShardReplica("default", MEMBER_1), getRef());
-            RemoveServer removeServer = MessageCollectorActor.expectFirstMatching(mockShardLeaderActor,
+            final RemoveServer removeServer = MessageCollectorActor.expectFirstMatching(mockShardLeaderActor,
                     RemoveServer.class);
-            String removeServerId = ShardIdentifier.create("default", MEMBER_1, shardMrgIDSuffix).toString();
+            final String removeServerId = ShardIdentifier.create("default", MEMBER_1, shardMrgIDSuffix).toString();
             assertEquals("RemoveServer serverId", removeServerId, removeServer.getServerId());
             expectMsgClass(duration("5 seconds"), Status.Success.class);
         }};
@@ -1802,10 +1803,10 @@ public class ShardManagerTest extends AbstractActorTest {
                                                       final Class<?> firstForwardedServerChangeClass,
                                                       final Object secondServerChange) throws Exception {
         new JavaTestKit(getSystem()) {{
-            JavaTestKit mockShardLeaderKit = new JavaTestKit(getSystem());
-            JavaTestKit secondRequestKit = new JavaTestKit(getSystem());
+            final JavaTestKit mockShardLeaderKit = new JavaTestKit(getSystem());
+            final JavaTestKit secondRequestKit = new JavaTestKit(getSystem());
 
-            MockConfiguration mockConfig =
+            final MockConfiguration mockConfig =
                     new MockConfiguration(ImmutableMap.<String, List<String>>builder().
                             put(shardName, Arrays.asList("member-2")).build());
 
@@ -1832,13 +1833,13 @@ public class ShardManagerTest extends AbstractActorTest {
     public void testServerRemovedShardActorNotRunning() throws Exception {
         LOG.info("testServerRemovedShardActorNotRunning starting");
         new JavaTestKit(getSystem()) {{
-            MockConfiguration mockConfig =
+            final MockConfiguration mockConfig =
                     new MockConfiguration(ImmutableMap.<String, List<String>>builder().
                             put("default", Arrays.asList("member-1", "member-2")).
                             put("astronauts", Arrays.asList("member-2")).
                             put("people", Arrays.asList("member-1", "member-2")).build());
 
-            TestActorRef<TestShardManager> shardManager = actorFactory.createTestActor(newShardMgrProps(mockConfig));
+            final TestActorRef<TestShardManager> shardManager = actorFactory.createTestActor(newShardMgrProps(mockConfig));
 
             shardManager.underlyingActor().waitForRecoveryComplete();
             shardManager.tell(new FindLocalShard("people", false), getRef());
@@ -1848,8 +1849,8 @@ public class ShardManagerTest extends AbstractActorTest {
             expectMsgClass(duration("5 seconds"), NotInitializedException.class);
 
             // Removed the default shard replica from member-1
-            ShardIdentifier.Builder builder = new ShardIdentifier.Builder();
-            ShardIdentifier shardId = builder.shardName("default").memberName(MEMBER_1).type(shardMrgIDSuffix).build();
+            final ShardIdentifier.Builder builder = new ShardIdentifier.Builder();
+            final ShardIdentifier shardId = builder.shardName("default").memberName(MEMBER_1).type(shardMrgIDSuffix).build();
             shardManager.tell(new ServerRemoved(shardId.toString()), getRef());
 
             shardManager.underlyingActor().verifySnapshotPersisted(Sets.newHashSet("people"));
@@ -1862,17 +1863,17 @@ public class ShardManagerTest extends AbstractActorTest {
     public void testServerRemovedShardActorRunning() throws Exception {
         LOG.info("testServerRemovedShardActorRunning starting");
         new JavaTestKit(getSystem()) {{
-            MockConfiguration mockConfig =
+            final MockConfiguration mockConfig =
                     new MockConfiguration(ImmutableMap.<String, List<String>>builder().
                             put("default", Arrays.asList("member-1", "member-2")).
                             put("astronauts", Arrays.asList("member-2")).
                             put("people", Arrays.asList("member-1", "member-2")).build());
 
-            String shardId = ShardIdentifier.create("default", MEMBER_1, shardMrgIDSuffix).toString();
-            TestActorRef<MessageCollectorActor> shard = actorFactory.createTestActor(
+            final String shardId = ShardIdentifier.create("default", MEMBER_1, shardMrgIDSuffix).toString();
+            final TestActorRef<MessageCollectorActor> shard = actorFactory.createTestActor(
                     MessageCollectorActor.props(), shardId);
 
-            TestActorRef<TestShardManager> shardManager = actorFactory.createTestActor(
+            final TestActorRef<TestShardManager> shardManager = actorFactory.createTestActor(
                     newTestShardMgrBuilder(mockConfig).addShardActor("default", shard).props());
 
             shardManager.underlyingActor().waitForRecoveryComplete();
@@ -1899,23 +1900,23 @@ public class ShardManagerTest extends AbstractActorTest {
     public void testShardPersistenceWithRestoredData() throws Exception {
         LOG.info("testShardPersistenceWithRestoredData starting");
         new JavaTestKit(getSystem()) {{
-            MockConfiguration mockConfig =
+            final MockConfiguration mockConfig =
                 new MockConfiguration(ImmutableMap.<String, List<String>>builder().
                    put("default", Arrays.asList("member-1", "member-2")).
                    put("astronauts", Arrays.asList("member-2")).
                    put("people", Arrays.asList("member-1", "member-2")).build());
-            String[] restoredShards = {"default", "astronauts"};
-            ShardManagerSnapshot snapshot = new ShardManagerSnapshot(Arrays.asList(restoredShards));
+            final String[] restoredShards = {"default", "astronauts"};
+            final ShardManagerSnapshot snapshot = new ShardManagerSnapshot(Arrays.asList(restoredShards));
             InMemorySnapshotStore.addSnapshot("shard-manager-" + shardMrgIDSuffix, snapshot);
 
             //create shardManager to come up with restored data
-            TestActorRef<TestShardManager> newRestoredShardManager = actorFactory.createTestActor(
+            final TestActorRef<TestShardManager> newRestoredShardManager = actorFactory.createTestActor(
                     newShardMgrProps(mockConfig));
 
             newRestoredShardManager.underlyingActor().waitForRecoveryComplete();
 
             newRestoredShardManager.tell(new FindLocalShard("people", false), getRef());
-            LocalShardNotFound notFound = expectMsgClass(duration("5 seconds"), LocalShardNotFound.class);
+            final LocalShardNotFound notFound = expectMsgClass(duration("5 seconds"), LocalShardNotFound.class);
             assertEquals("for uninitialized shard", "people", notFound.getShardName());
 
             //Verify a local shard is created for the restored shards,
@@ -1935,20 +1936,20 @@ public class ShardManagerTest extends AbstractActorTest {
     public void testShutDown() throws Exception {
         LOG.info("testShutDown starting");
         new JavaTestKit(getSystem()) {{
-            MockConfiguration mockConfig =
+            final MockConfiguration mockConfig =
                     new MockConfiguration(ImmutableMap.<String, List<String>>builder().
                             put("shard1", Arrays.asList("member-1")).
                             put("shard2", Arrays.asList("member-1")).build());
 
-            String shardId1 = ShardIdentifier.create("shard1", MEMBER_1, shardMrgIDSuffix).toString();
-            TestActorRef<MessageCollectorActor> shard1 = actorFactory.createTestActor(
+            final String shardId1 = ShardIdentifier.create("shard1", MEMBER_1, shardMrgIDSuffix).toString();
+            final TestActorRef<MessageCollectorActor> shard1 = actorFactory.createTestActor(
                     MessageCollectorActor.props().withDispatcher(Dispatchers.DefaultDispatcherId()), shardId1);
 
-            String shardId2 = ShardIdentifier.create("shard2", MEMBER_1, shardMrgIDSuffix).toString();
-            TestActorRef<MessageCollectorActor> shard2 = actorFactory.createTestActor(
+            final String shardId2 = ShardIdentifier.create("shard2", MEMBER_1, shardMrgIDSuffix).toString();
+            final TestActorRef<MessageCollectorActor> shard2 = actorFactory.createTestActor(
                     MessageCollectorActor.props().withDispatcher(Dispatchers.DefaultDispatcherId()), shardId2);
 
-            TestActorRef<TestShardManager> shardManager = actorFactory.createTestActor(newTestShardMgrBuilder(
+            final TestActorRef<TestShardManager> shardManager = actorFactory.createTestActor(newTestShardMgrBuilder(
                     mockConfig).addShardActor("shard1", shard1).addShardActor("shard2", shard2).props().
                         withDispatcher(Dispatchers.DefaultDispatcherId()));
 
@@ -1956,8 +1957,8 @@ public class ShardManagerTest extends AbstractActorTest {
             shardManager.tell(new ActorInitialized(), shard1);
             shardManager.tell(new ActorInitialized(), shard2);
 
-            FiniteDuration duration = FiniteDuration.create(5, TimeUnit.SECONDS);
-            Future<Boolean> stopFuture = Patterns.gracefulStop(shardManager, duration, Shutdown.INSTANCE);
+            final FiniteDuration duration = FiniteDuration.create(5, TimeUnit.SECONDS);
+            final Future<Boolean> stopFuture = Patterns.gracefulStop(shardManager, duration, Shutdown.INSTANCE);
 
             MessageCollectorActor.expectFirstMatching(shard1, Shutdown.class);
             MessageCollectorActor.expectFirstMatching(shard2, Shutdown.class);
@@ -1965,14 +1966,14 @@ public class ShardManagerTest extends AbstractActorTest {
             try {
                 Await.ready(stopFuture, FiniteDuration.create(500, TimeUnit.MILLISECONDS));
                 fail("ShardManager actor stopped without waiting for the Shards to be stopped");
-            } catch(TimeoutException e) {
+            } catch(final TimeoutException e) {
                 // expected
             }
 
             actorFactory.killActor(shard1, this);
             actorFactory.killActor(shard2, this);
 
-            Boolean stopped = Await.result(stopFuture, duration);
+            final Boolean stopped = Await.result(stopFuture, duration);
             assertEquals("Stopped", Boolean.TRUE, stopped);
         }};
 
@@ -1982,13 +1983,13 @@ public class ShardManagerTest extends AbstractActorTest {
     @Test
     public void testChangeServersVotingStatus() throws Exception {
         new JavaTestKit(getSystem()) {{
-            String memberId = "member-1-shard-default-" + shardMrgIDSuffix;
+            final String memberId = "member-1-shard-default-" + shardMrgIDSuffix;
 
-            TestActorRef<MockRespondActor> respondActor =
+            final TestActorRef<MockRespondActor> respondActor =
                     actorFactory.createTestActor(Props.create(MockRespondActor.class, ChangeServersVotingStatus.class,
                             new ServerChangeReply(ServerChangeStatus.OK, null)), memberId);
 
-            ActorRef shardManager = getSystem().actorOf(newPropsShardMgrWithMockShardActor(respondActor));
+            final ActorRef shardManager = getSystem().actorOf(newPropsShardMgrWithMockShardActor(respondActor));
 
             shardManager.tell(new UpdateSchemaContext(TestModel.createTestContext()), getRef());
             shardManager.tell(new ActorInitialized(), respondActor);
@@ -2000,7 +2001,7 @@ public class ShardManagerTest extends AbstractActorTest {
             shardManager.tell(new ChangeShardMembersVotingStatus("default",
                     ImmutableMap.of("member-2", Boolean.TRUE)), getRef());
 
-            ChangeServersVotingStatus actualChangeStatusMsg = MessageCollectorActor.expectFirstMatching(
+            final ChangeServersVotingStatus actualChangeStatusMsg = MessageCollectorActor.expectFirstMatching(
                     respondActor, ChangeServersVotingStatus.class);
             assertEquals("ChangeServersVotingStatus map", actualChangeStatusMsg.getServerVotingStatusMap(),
                     ImmutableMap.of(ShardIdentifier.create("default", MemberName.forName("member-2"),
@@ -2013,13 +2014,13 @@ public class ShardManagerTest extends AbstractActorTest {
     @Test
     public void testChangeServersVotingStatusWithNoLeader() throws Exception {
         new JavaTestKit(getSystem()) {{
-            String memberId = "member-1-shard-default-" + shardMrgIDSuffix;
+            final String memberId = "member-1-shard-default-" + shardMrgIDSuffix;
 
-            TestActorRef<MockRespondActor> respondActor =
+            final TestActorRef<MockRespondActor> respondActor =
                     actorFactory.createTestActor(Props.create(MockRespondActor.class, ChangeServersVotingStatus.class,
                             new ServerChangeReply(ServerChangeStatus.NO_LEADER, null)), memberId);
 
-            ActorRef shardManager = getSystem().actorOf(newPropsShardMgrWithMockShardActor(respondActor));
+            final ActorRef shardManager = getSystem().actorOf(newPropsShardMgrWithMockShardActor(respondActor));
 
             shardManager.tell(new UpdateSchemaContext(TestModel.createTestContext()), getRef());
             shardManager.tell(new ActorInitialized(), respondActor);
@@ -2030,12 +2031,12 @@ public class ShardManagerTest extends AbstractActorTest {
 
             MessageCollectorActor.expectFirstMatching(respondActor, ChangeServersVotingStatus.class);
 
-            Status.Failure resp = expectMsgClass(duration("5 seconds"), Status.Failure.class);
+            final Status.Failure resp = expectMsgClass(duration("5 seconds"), Status.Failure.class);
             assertEquals("Failure resposnse", true, (resp.cause() instanceof NoShardLeaderException));
         }};
     }
 
-    private static class TestShardManager extends ShardManager {
+    public static class TestShardManager extends ShardManager {
         private final CountDownLatch recoveryComplete = new CountDownLatch(1);
         private final CountDownLatch snapshotPersist = new CountDownLatch(1);
         private ShardManagerSnapshot snapshot;
@@ -2048,14 +2049,14 @@ public class ShardManagerTest extends AbstractActorTest {
         private CountDownLatch memberReachableReceived = new CountDownLatch(1);
         private volatile MessageInterceptor messageInterceptor;
 
-        private TestShardManager(Builder builder) {
+        private TestShardManager(final Builder builder) {
             super(builder);
             shardActor = builder.shardActor;
             shardActors = builder.shardActors;
         }
 
         @Override
-        protected void handleRecover(Object message) throws Exception {
+        protected void handleRecover(final Object message) throws Exception {
             try {
                 super.handleRecover(message);
             } finally {
@@ -2065,14 +2066,14 @@ public class ShardManagerTest extends AbstractActorTest {
             }
         }
 
-        private void countDownIfOther(final Member member, CountDownLatch latch) {
+        private void countDownIfOther(final Member member, final CountDownLatch latch) {
             if (!getCluster().getCurrentMemberName().equals(memberToName(member))) {
                 latch.countDown();
             }
         }
 
         @Override
-        public void handleCommand(Object message) throws Exception {
+        public void handleCommand(final Object message) throws Exception {
             try{
                 if(messageInterceptor != null && messageInterceptor.canIntercept(message)) {
                     getSender().tell(messageInterceptor.apply(message), getSelf());
@@ -2094,16 +2095,16 @@ public class ShardManagerTest extends AbstractActorTest {
             }
         }
 
-        void setMessageInterceptor(MessageInterceptor messageInterceptor) {
+        void setMessageInterceptor(final MessageInterceptor messageInterceptor) {
             this.messageInterceptor = messageInterceptor;
         }
 
-        void waitForRecoveryComplete() {
+        public void waitForRecoveryComplete() {
             assertEquals("Recovery complete", true,
                     Uninterruptibles.awaitUninterruptibly(recoveryComplete, 5, TimeUnit.SECONDS));
         }
 
-        void waitForMemberUp() {
+        public void waitForMemberUp() {
             assertEquals("MemberUp received", true,
                     Uninterruptibles.awaitUninterruptibly(memberUpReceived, 5, TimeUnit.SECONDS));
             memberUpReceived = new CountDownLatch(1);
@@ -2134,45 +2135,45 @@ public class ShardManagerTest extends AbstractActorTest {
             findPrimaryMessageReceived = new CountDownLatch(1);
         }
 
-        public static Builder builder(DatastoreContext.Builder datastoreContextBuilder) {
+        public static Builder builder(final DatastoreContext.Builder datastoreContextBuilder) {
             return new Builder(datastoreContextBuilder);
         }
 
-        private static class Builder extends AbstractGenericCreator<Builder, TestShardManager> {
+        public static class Builder extends AbstractGenericCreator<Builder, TestShardManager> {
             private ActorRef shardActor;
             private final Map<String, ActorRef> shardActors = new HashMap<>();
 
-            Builder(DatastoreContext.Builder datastoreContextBuilder) {
+            Builder(final DatastoreContext.Builder datastoreContextBuilder) {
                 super(TestShardManager.class);
                 datastoreContextFactory(newDatastoreContextFactory(datastoreContextBuilder.build()));
             }
 
-            Builder shardActor(ActorRef shardActor) {
+            public Builder shardActor(final ActorRef shardActor) {
                 this.shardActor = shardActor;
                 return this;
             }
 
-            Builder addShardActor(String shardName, ActorRef actorRef){
+            Builder addShardActor(final String shardName, final ActorRef actorRef){
                 shardActors.put(shardName, actorRef);
                 return this;
             }
         }
 
         @Override
-        public void saveSnapshot(Object obj) {
+        public void saveSnapshot(final Object obj) {
             snapshot = (ShardManagerSnapshot) obj;
             snapshotPersist.countDown();
             super.saveSnapshot(obj);
         }
 
-        void verifySnapshotPersisted(Set<String> shardList) {
+        void verifySnapshotPersisted(final Set<String> shardList) {
             assertEquals("saveSnapshot invoked", true,
                     Uninterruptibles.awaitUninterruptibly(snapshotPersist, 5, TimeUnit.SECONDS));
             assertEquals("Shard Persisted", shardList, Sets.newHashSet(snapshot.getShardList()));
         }
 
         @Override
-        protected ActorRef newShardActor(SchemaContext schemaContext, ShardInformation info) {
+        protected ActorRef newShardActor(final SchemaContext schemaContext, final ShardInformation info) {
             if(shardActors.get(info.getShardName()) != null){
                 return shardActors.get(info.getShardName());
             }
@@ -2189,7 +2190,7 @@ public class ShardManagerTest extends AbstractActorTest {
                                                      extends AbstractShardManagerCreator<T> {
         private final Class<C> shardManagerClass;
 
-        AbstractGenericCreator(Class<C> shardManagerClass) {
+        AbstractGenericCreator(final Class<C> shardManagerClass) {
             this.shardManagerClass = shardManagerClass;
             cluster(new MockClusterWrapper()).configuration(new MockConfiguration()).
                     waitTillReadyCountdownLatch(ready).primaryShardInfoCache(new PrimaryShardInfoFutureCache());
@@ -2203,7 +2204,7 @@ public class ShardManagerTest extends AbstractActorTest {
     }
 
     private static class GenericCreator<C extends ShardManager> extends AbstractGenericCreator<GenericCreator<C>, C> {
-        GenericCreator(Class<C> shardManagerClass) {
+        GenericCreator(final Class<C> shardManagerClass) {
             super(shardManagerClass);
         }
     }
@@ -2212,7 +2213,7 @@ public class ShardManagerTest extends AbstractActorTest {
         private static final long serialVersionUID = 1L;
         private final Creator<ShardManager> delegate;
 
-        public DelegatingShardManagerCreator(Creator<ShardManager> delegate) {
+        public DelegatingShardManagerCreator(final Creator<ShardManager> delegate) {
             this.delegate = delegate;
         }
 
@@ -2229,12 +2230,12 @@ public class ShardManagerTest extends AbstractActorTest {
     private static MessageInterceptor newFindPrimaryInterceptor(final ActorRef primaryActor) {
         return new MessageInterceptor(){
             @Override
-            public Object apply(Object message) {
+            public Object apply(final Object message) {
                 return new RemotePrimaryShardFound(Serialization.serializedActorPath(primaryActor), (short) 1);
             }
 
             @Override
-            public boolean canIntercept(Object message) {
+            public boolean canIntercept(final Object message) {
                 return message instanceof FindPrimary;
             }
         };
@@ -2247,13 +2248,13 @@ public class ShardManagerTest extends AbstractActorTest {
         private final Class<?> requestClass;
 
         @SuppressWarnings("unused")
-        public MockRespondActor(Class<?> requestClass, Object responseMsg) {
+        public MockRespondActor(final Class<?> requestClass, final Object responseMsg) {
             this.requestClass = requestClass;
             this.responseMsg = responseMsg;
         }
 
         @Override
-        public void onReceive(Object message) throws Exception {
+        public void onReceive(final Object message) throws Exception {
             if(message.equals(CLEAR_RESPONSE)) {
                 responseMsg = null;
             } else {
