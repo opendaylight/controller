@@ -58,17 +58,23 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     public ShardDataTree(final SchemaContext schemaContext, final TreeType treeType,
             final ShardDataTreeChangeListenerPublisher treeChangeListenerPublisher,
             final ShardDataChangeListenerPublisher dataChangeListenerPublisher, final String logContext) {
-        dataTree = InMemoryDataTreeFactory.getInstance().create(treeType);
-        updateSchemaContext(schemaContext);
-
-        this.treeChangeListenerPublisher = Preconditions.checkNotNull(treeChangeListenerPublisher);
-        this.dataChangeListenerPublisher = Preconditions.checkNotNull(dataChangeListenerPublisher);
-        this.logContext = Preconditions.checkNotNull(logContext);
+        this(schemaContext, treeType, YangInstanceIdentifier.EMPTY, treeChangeListenerPublisher, dataChangeListenerPublisher, logContext);
     }
 
     public ShardDataTree(final SchemaContext schemaContext, final TreeType treeType) {
         this(schemaContext, treeType, new DefaultShardDataTreeChangeListenerPublisher(),
                 new DefaultShardDataChangeListenerPublisher(), "");
+    }
+
+    public ShardDataTree(final SchemaContext schemaContext, final TreeType treeType, final YangInstanceIdentifier root,
+                         final ShardDataTreeChangeListenerPublisher treeChangeListenerPublisher,
+                         final ShardDataChangeListenerPublisher dataChangeListenerPublisher, final String logContext) {
+        dataTree = InMemoryDataTreeFactory.getInstance().create(treeType, root);
+        updateSchemaContext(schemaContext);
+
+        this.treeChangeListenerPublisher = Preconditions.checkNotNull(treeChangeListenerPublisher);
+        this.dataChangeListenerPublisher = Preconditions.checkNotNull(dataChangeListenerPublisher);
+        this.logContext = Preconditions.checkNotNull(logContext);
     }
 
     public TipProducingDataTree getDataTree() {
@@ -119,7 +125,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     void notifyOfInitialData(final DataChangeListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier,
             NormalizedNode<?, ?>>> listenerReg, final Optional<DataTreeCandidate> currentState) {
         if (currentState.isPresent()) {
-            ShardDataChangeListenerPublisher localPublisher = dataChangeListenerPublisher.newInstance();
+            final ShardDataChangeListenerPublisher localPublisher = dataChangeListenerPublisher.newInstance();
             localPublisher.registerDataChangeListener(listenerReg.getPath(), listenerReg.getInstance(),
                     listenerReg.getScope());
             localPublisher.publishChanges(currentState.get(), logContext);
@@ -129,14 +135,14 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     void notifyOfInitialData(final YangInstanceIdentifier path, final DOMDataTreeChangeListener listener,
             final Optional<DataTreeCandidate> currentState) {
         if (currentState.isPresent()) {
-            ShardDataTreeChangeListenerPublisher localPublisher = treeChangeListenerPublisher.newInstance();
+            final ShardDataTreeChangeListenerPublisher localPublisher = treeChangeListenerPublisher.newInstance();
             localPublisher.registerTreeChangeListener(path, listener);
             localPublisher.publishChanges(currentState.get(), logContext);
         }
     }
 
     void closeAllTransactionChains() {
-        for (ShardDataTreeTransactionChain chain : transactionChains.values()) {
+        for (final ShardDataTreeTransactionChain chain : transactionChains.values()) {
             chain.close();
         }
 
@@ -218,7 +224,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     public DataTreeCandidate commit(final DataTreeModification modification) throws DataValidationFailedException {
         modification.ready();
         dataTree.validate(modification);
-        DataTreeCandidateTip candidate = dataTree.prepare(modification);
+        final DataTreeCandidateTip candidate = dataTree.prepare(modification);
         dataTree.commit(candidate);
         return candidate;
     }

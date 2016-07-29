@@ -19,12 +19,22 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
+import org.opendaylight.controller.cluster.datastore.PrefixShardConfiguration;
+import org.opendaylight.controller.cluster.datastore.PrefixShardStrategy;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategy;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategyFactory;
+import org.opendaylight.controller.cluster.datastore.utils.ClusterUtils;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
+// TODO really needs cleaning up, get rid of module based configuration, it should easily map into Identifier with single PathArgument
 public class ConfigurationImpl implements Configuration {
     private volatile Map<String, ModuleConfig> moduleConfigMap;
+
+    // TODO should this be initialized with something? on restart we should restore the shards from configuration?
+    private volatile Map<YangInstanceIdentifier, PrefixShardConfiguration> prefixConfigMap = Collections.emptyMap();
 
     // Look up maps to speed things up
 
@@ -36,8 +46,8 @@ public class ConfigurationImpl implements Configuration {
     }
 
     public ConfigurationImpl(final ModuleShardConfigProvider provider) {
-        ImmutableMap.Builder<String, ModuleConfig> mapBuilder = ImmutableMap.builder();
-        for(Map.Entry<String, ModuleConfig.Builder> e: provider.retrieveModuleConfigs(this).entrySet()) {
+        final ImmutableMap.Builder<String, ModuleConfig> mapBuilder = ImmutableMap.builder();
+        for (final Map.Entry<String, ModuleConfig.Builder> e : provider.retrieveModuleConfigs(this).entrySet()) {
             mapBuilder.put(e.getKey(), e.getValue().build());
         }
 
@@ -47,19 +57,19 @@ public class ConfigurationImpl implements Configuration {
         this.namespaceToModuleName = createNamespaceToModuleName(moduleConfigMap.values());
     }
 
-    private static Set<String> createAllShardNames(Iterable<ModuleConfig> moduleConfigs) {
+    private static Set<String> createAllShardNames(final Iterable<ModuleConfig> moduleConfigs) {
         final ImmutableSet.Builder<String> builder = ImmutableSet.builder();
-        for(ModuleConfig moduleConfig : moduleConfigs) {
+        for (final ModuleConfig moduleConfig : moduleConfigs) {
             builder.addAll(moduleConfig.getShardNames());
         }
 
         return builder.build();
     }
 
-    private static Map<String, String> createNamespaceToModuleName(Iterable<ModuleConfig> moduleConfigs) {
+    private static Map<String, String> createNamespaceToModuleName(final Iterable<ModuleConfig> moduleConfigs) {
         final ImmutableMap.Builder<String, String> builder = ImmutableMap.builder();
-        for(ModuleConfig moduleConfig : moduleConfigs) {
-            if(moduleConfig.getNameSpace() != null) {
+        for (final ModuleConfig moduleConfig : moduleConfigs) {
+            if (moduleConfig.getNameSpace() != null) {
                 builder.put(moduleConfig.getNameSpace(), moduleConfig.getName());
             }
         }
@@ -68,13 +78,13 @@ public class ConfigurationImpl implements Configuration {
     }
 
     @Override
-    public Collection<String> getMemberShardNames(final MemberName memberName){
+    public Collection<String> getMemberShardNames(final MemberName memberName) {
         Preconditions.checkNotNull(memberName, "memberName should not be null");
 
-        List<String> shards = new ArrayList<>();
-        for (ModuleConfig moduleConfig: moduleConfigMap.values()) {
-            for (ShardConfig shardConfig: moduleConfig.getShardConfigs()) {
-                if(shardConfig.getReplicas().contains(memberName)) {
+        final List<String> shards = new ArrayList<>();
+        for (final ModuleConfig moduleConfig : moduleConfigMap.values()) {
+            for (final ShardConfig shardConfig : moduleConfig.getShardConfigs()) {
+                if (shardConfig.getReplicas().contains(memberName)) {
                     shards.add(shardConfig.getName());
                 }
             }
@@ -91,30 +101,39 @@ public class ConfigurationImpl implements Configuration {
     }
 
     @Override
-    public ShardStrategy getStrategyForModule(String moduleName) {
+    public ShardStrategy getStrategyForModule(final String moduleName) {
         Preconditions.checkNotNull(moduleName, "moduleName should not be null");
 
-        ModuleConfig moduleConfig = moduleConfigMap.get(moduleName);
-        return moduleConfig != null ? moduleConfig.getShardStrategy(): null;
+        final ModuleConfig moduleConfig = moduleConfigMap.get(moduleName);
+        return moduleConfig != null ? moduleConfig.getShardStrategy() : null;
     }
 
     @Override
     public String getShardNameForModule(final String moduleName) {
         Preconditions.checkNotNull(moduleName, "moduleName should not be null");
 
-        ModuleConfig moduleConfig = moduleConfigMap.get(moduleName);
-        Collection<ShardConfig> shardConfigs = moduleConfig != null ? moduleConfig.getShardConfigs() :
-            Collections.<ShardConfig>emptySet();
-        return !shardConfigs.isEmpty() ? shardConfigs.iterator().next().getName(): null;
+        final ModuleConfig moduleConfig = moduleConfigMap.get(moduleName);
+        final Collection<ShardConfig> shardConfigs = moduleConfig != null ? moduleConfig.getShardConfigs() :
+                Collections.<ShardConfig>emptySet();
+        return !shardConfigs.isEmpty() ? shardConfigs.iterator().next().getName() : null;
+    }
+
+    @Nullable
+    @Override
+    public String getShardNameForPrefix(@Nonnull final YangInstanceIdentifier prefix) {
+        Preconditions.checkNotNull(prefix, "prefix should not be null");
+
+        //TODO we really should have mapping based on prefix instead of Strings
+        return prefixConfigMap.get(prefix).getPrefix().toString();
     }
 
     @Override
     public Collection<MemberName> getMembersFromShardName(final String shardName) {
         Preconditions.checkNotNull(shardName, "shardName should not be null");
 
-        for(ModuleConfig moduleConfig: moduleConfigMap.values()) {
-            ShardConfig shardConfig = moduleConfig.getShardConfig(shardName);
-            if(shardConfig != null) {
+        for (final ModuleConfig moduleConfig : moduleConfigMap.values()) {
+            final ShardConfig shardConfig = moduleConfig.getShardConfig(shardName);
+            if (shardConfig != null) {
                 return shardConfig.getReplicas();
             }
         }
@@ -129,8 +148,8 @@ public class ConfigurationImpl implements Configuration {
 
     @Override
     public Collection<MemberName> getUniqueMemberNamesForAllShards() {
-        Set<MemberName> allNames = new HashSet<>();
-        for(String shardName: getAllShardNames()) {
+        final Set<MemberName> allNames = new HashSet<>();
+        for (final String shardName : getAllShardNames()) {
             allNames.addAll(getMembersFromShardName(shardName));
         }
 
@@ -138,10 +157,10 @@ public class ConfigurationImpl implements Configuration {
     }
 
     @Override
-    public synchronized void addModuleShardConfiguration(ModuleShardConfiguration config) {
+    public synchronized void addModuleShardConfiguration(final ModuleShardConfiguration config) {
         Preconditions.checkNotNull(config, "ModuleShardConfiguration should not be null");
 
-        ModuleConfig moduleConfig = ModuleConfig.builder(config.getModuleName()).
+        final ModuleConfig moduleConfig = ModuleConfig.builder(config.getModuleName()).
                 nameSpace(config.getNamespace().toASCIIString()).
                 shardStrategy(createShardStrategy(config.getModuleName(), config.getShardStrategyName())).
                 shardConfig(config.getShardName(), config.getShardMemberNames()).build();
@@ -153,25 +172,40 @@ public class ConfigurationImpl implements Configuration {
         allShardNames = ImmutableSet.<String>builder().addAll(allShardNames).add(config.getShardName()).build();
     }
 
-    private ShardStrategy createShardStrategy(String moduleName, String shardStrategyName) {
+    @Override
+    public void addPrefixShardConfiguration(final PrefixShardConfiguration config) {
+        Preconditions.checkNotNull(config, "PrefixShardConfiguration cannot be null");
+
+        updatePrefixConfigMap(config);
+
+        allShardNames = ImmutableSet.<String>builder().addAll(allShardNames).add(ClusterUtils.getCleanShardName(config.getPrefix().getRootIdentifier())).build();
+    }
+
+    private void updatePrefixConfigMap(final PrefixShardConfiguration config) {
+        final Map<YangInstanceIdentifier, PrefixShardConfiguration> newPrefixConfigMap = new HashMap<>(prefixConfigMap);
+        newPrefixConfigMap.put(config.getPrefix().getRootIdentifier(), config);
+        prefixConfigMap = ImmutableMap.copyOf(newPrefixConfigMap);
+    }
+
+    private ShardStrategy createShardStrategy(final String moduleName, final String shardStrategyName) {
         return ShardStrategyFactory.newShardStrategyInstance(moduleName, shardStrategyName, this);
     }
 
     @Override
-    public boolean isShardConfigured(String shardName) {
+    public boolean isShardConfigured(final String shardName) {
         Preconditions.checkNotNull(shardName, "shardName should not be null");
         return allShardNames.contains(shardName);
     }
 
     @Override
-    public void addMemberReplicaForShard (String shardName, MemberName newMemberName) {
+    public void addMemberReplicaForShard(final String shardName, final MemberName newMemberName) {
         Preconditions.checkNotNull(shardName, "shardName should not be null");
         Preconditions.checkNotNull(newMemberName, "MemberName should not be null");
 
-        for(ModuleConfig moduleConfig: moduleConfigMap.values()) {
-            ShardConfig shardConfig = moduleConfig.getShardConfig(shardName);
-            if(shardConfig != null) {
-                Set<MemberName> replicas = new HashSet<>(shardConfig.getReplicas());
+        for (final ModuleConfig moduleConfig : moduleConfigMap.values()) {
+            final ShardConfig shardConfig = moduleConfig.getShardConfig(shardName);
+            if (shardConfig != null) {
+                final Set<MemberName> replicas = new HashSet<>(shardConfig.getReplicas());
                 replicas.add(newMemberName);
                 updateModuleConfigMap(ModuleConfig.builder(moduleConfig).shardConfig(shardName, replicas).build());
                 return;
@@ -180,14 +214,14 @@ public class ConfigurationImpl implements Configuration {
     }
 
     @Override
-    public void removeMemberReplicaForShard (String shardName, MemberName newMemberName) {
+    public void removeMemberReplicaForShard(final String shardName, final MemberName newMemberName) {
         Preconditions.checkNotNull(shardName, "shardName should not be null");
         Preconditions.checkNotNull(newMemberName, "MemberName should not be null");
 
-        for(ModuleConfig moduleConfig: moduleConfigMap.values()) {
-            ShardConfig shardConfig = moduleConfig.getShardConfig(shardName);
-            if(shardConfig != null) {
-                Set<MemberName> replicas = new HashSet<>(shardConfig.getReplicas());
+        for (final ModuleConfig moduleConfig : moduleConfigMap.values()) {
+            final ShardConfig shardConfig = moduleConfig.getShardConfig(shardName);
+            if (shardConfig != null) {
+                final Set<MemberName> replicas = new HashSet<>(shardConfig.getReplicas());
                 replicas.remove(newMemberName);
                 updateModuleConfigMap(ModuleConfig.builder(moduleConfig).shardConfig(shardName, replicas).build());
                 return;
@@ -195,8 +229,16 @@ public class ConfigurationImpl implements Configuration {
         }
     }
 
-    private void updateModuleConfigMap(ModuleConfig moduleConfig) {
-        Map<String, ModuleConfig> newModuleConfigMap = new HashMap<>(moduleConfigMap);
+    @Override
+    public ShardStrategy getStrategyForPrefix(@Nonnull final YangInstanceIdentifier prefix) {
+        Preconditions.checkNotNull(prefix, "Prefix cannot be null");
+
+        return new PrefixShardStrategy(prefixConfigMap.get(prefix).getPrefix().toString(), this);
+
+    }
+
+    private void updateModuleConfigMap(final ModuleConfig moduleConfig) {
+        final Map<String, ModuleConfig> newModuleConfigMap = new HashMap<>(moduleConfigMap);
         newModuleConfigMap.put(moduleConfig.getName(), moduleConfig);
         moduleConfigMap = ImmutableMap.copyOf(newModuleConfigMap);
     }

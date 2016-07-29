@@ -25,17 +25,23 @@ public class ShardStrategyFactory {
     public ShardStrategy getStrategy(final YangInstanceIdentifier path) {
         Preconditions.checkNotNull(path, "path should not be null");
 
-        String moduleName = getModuleName(path);
-        ShardStrategy shardStrategy = configuration.getStrategyForModule(moduleName);
+        // try with the legacy module based shard mapping
+        final String moduleName = getModuleName(path);
+        final ShardStrategy shardStrategy = configuration.getStrategyForModule(moduleName);
         if (shardStrategy == null) {
-            return DefaultShardStrategy.getInstance();
+            // retry with prefix based sharding
+            final ShardStrategy strategyForPrefix = configuration.getStrategyForPrefix(path);
+            if (strategyForPrefix == null) {
+                return DefaultShardStrategy.getInstance();
+            }
+            return strategyForPrefix;
         }
 
         return shardStrategy;
     }
 
-    public static ShardStrategy newShardStrategyInstance(String moduleName, String strategyName,
-            Configuration configuration) {
+    public static ShardStrategy newShardStrategyInstance(final String moduleName, final String strategyName,
+            final Configuration configuration) {
         if(ModuleShardStrategy.NAME.equals(strategyName)){
             return new ModuleShardStrategy(moduleName, configuration);
         }
@@ -48,8 +54,8 @@ public class ShardStrategyFactory {
             return UNKNOWN_MODULE_NAME;
         }
 
-        String namespace = path.getPathArguments().iterator().next().getNodeType().getNamespace().toASCIIString();
-        String moduleName = configuration.getModuleNameFromNameSpace(namespace);
+        final String namespace = path.getPathArguments().iterator().next().getNodeType().getNamespace().toASCIIString();
+        final String moduleName = configuration.getModuleNameFromNameSpace(namespace);
         return moduleName != null ? moduleName : UNKNOWN_MODULE_NAME;
     }
 }
