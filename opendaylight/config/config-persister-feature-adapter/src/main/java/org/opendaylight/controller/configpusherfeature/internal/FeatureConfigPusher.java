@@ -77,7 +77,7 @@ public class FeatureConfigPusher {
         if(isInstalled(feature)) {
             // FIXME Workaround for BUG-2836, features service returns null for feature: standard-condition-webconsole_0_0_0, 3.0.1
             if(featuresService.getFeature(feature.getName(), feature.getVersion()) == null) {
-                LOG.warn("Feature: {}, {} is missing from features service. Skipping", feature.getName(), feature.getVersion());
+                LOG.debug("Feature: {}, {} is missing from features service. Skipping", feature.getName(), feature.getVersion());
             } else {
                 ChildAwareFeatureWrapper wrappedFeature = new ChildAwareFeatureWrapper(feature, featuresService);
                 configs = wrappedFeature.getFeatureConfigSnapshotHolders();
