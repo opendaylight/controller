@@ -15,7 +15,7 @@ import java.io.IOException;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.persisted.CommitTransactionPayload;
-import org.opendaylight.controller.cluster.datastore.utils.SerializationUtils;
+import org.opendaylight.controller.cluster.datastore.persisted.PreBoronShardDataTreeSnapshot;
 import org.opendaylight.controller.md.cluster.datastore.model.CarsModel;
 import org.opendaylight.controller.md.cluster.datastore.model.PeopleModel;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
@@ -140,18 +140,9 @@ public class ShardRecoveryCoordinatorTest extends AbstractTest {
         modification.merge(CarsModel.BASE_PATH, CarsModel.create());
         modification.merge(PeopleModel.BASE_PATH, PeopleModel.create());
         modification.ready();
-        final DataTreeCandidateTip prepare = dataTree.prepare(modification);
+        dataTree.commit(dataTree.prepare(modification));
 
-        dataTree.commit(prepare);
-
-        snapshot = dataTree.takeSnapshot();
-
-        modification = snapshot.newModification();
-
-        final Optional<NormalizedNode<?, ?>> optional = modification.readNode(YangInstanceIdentifier.EMPTY);
-
-        final byte[] bytes = SerializationUtils.serializeNormalizedNode(optional.get());
-
-        return bytes;
+        return new PreBoronShardDataTreeSnapshot(dataTree.takeSnapshot().readNode(YangInstanceIdentifier.EMPTY).get())
+                .serialize();
     }
 }
