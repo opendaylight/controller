@@ -1,0 +1,174 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a561d44_cf71bc0d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ChainedCommitCohort.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-07-29T14:46:18Z",
+      "side": 1,
+      "message": "This does not use the callback that\u0027s passed in. Shouldn\u0027t this call delegate.commit(callback)?",
+      "revId": "10450499b21e181ff199258fb8efccfeda373a95",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_4f5dac78",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/CompositeDataTreeCohort.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-07-29T14:46:18Z",
+      "side": 1,
+      "message": "sendMesageToSuccessful (sic) - I know it was like that before..",
+      "revId": "10450499b21e181ff199258fb8efccfeda373a95",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_0fce142e",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 197,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-07-29T14:46:18Z",
+      "side": 1,
+      "message": "extraneous change (a lot of these).  Is space after if official ODL coding style?",
+      "revId": "10450499b21e181ff199258fb8efccfeda373a95",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_021f0b6d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardCommitCoordinator.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 443,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-07-29T14:46:18Z",
+      "side": 1,
+      "message": "It looks like this method is no longer called - ShardDataTree handles it.",
+      "revId": "10450499b21e181ff199258fb8efccfeda373a95",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_82495b33",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardCommitCoordinator.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 493,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-07-29T14:46:18Z",
+      "side": 1,
+      "message": "Should be \u003c maxModificationsPerBatch",
+      "revId": "10450499b21e181ff199258fb8efccfeda373a95",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_e252d7dc",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardCommitCoordinator.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 529,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-07-29T14:46:18Z",
+      "side": 1,
+      "message": "Why was this method re-written? Didn\u0027t seem necessary for this patch.",
+      "revId": "10450499b21e181ff199258fb8efccfeda373a95",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_82703b73",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardDataTree.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 379,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-07-29T14:46:18Z",
+      "side": 1,
+      "message": "You can remove this if you want. I have a patch to handle/avoid this scenario in RaftActor.",
+      "revId": "10450499b21e181ff199258fb8efccfeda373a95",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_42290336",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardDataTree.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 389,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-07-29T14:46:18Z",
+      "side": 1,
+      "message": "Why would we propagate the journal index? That\u0027s internal raft details and I don\u0027t think we want to leak that.",
+      "revId": "10450499b21e181ff199258fb8efccfeda373a95",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_457f4d66",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardDataTree.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 543,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-07-29T14:46:18Z",
+      "side": 1,
+      "message": "The ShardCommitCoordinator handleAbort will remove the current cohort and also can-commit the next one if ready. This will call canCommit on the SimpleDataTreeCohort which will fail if already in the CAN_COMMIT_PENDING state. In fact it looks like this issue could occur any time a tx is complete and ShardCommitCoordinator calls maybeProcessNextCohortEntry. Unless I\u0027m missing something...",
+      "revId": "10450499b21e181ff199258fb8efccfeda373a95",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_42d463bc",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/SimpleShardDataTreeCohort.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-07-29T14:46:18Z",
+      "side": 1,
+      "message": "Should we ensure the current state is CAN_COMMIT_PENDING? Same with failedCanCommit, successfulPreCommit et al",
+      "revId": "10450499b21e181ff199258fb8efccfeda373a95",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
