@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.datastore;
 import com.google.common.base.Preconditions;
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Map.Entry;
 import java.util.Optional;
 import org.opendaylight.controller.cluster.datastore.persisted.DataTreeCandidateSupplier;
@@ -115,6 +116,10 @@ class ShardRecoveryCoordinator implements RaftActorRecoveryCohort {
     @Override
     public void applyRecoverySnapshot(final byte[] snapshotBytes) {
         log.debug("{}: Applying recovered snapshot", shardName);
+        
+        
+        
+        
 
         final NormalizedNode<?, ?> node = SerializationUtils.deserializeNormalizedNode(snapshotBytes);
         final PruningDataTreeModification tx = new PruningDataTreeModification(store.newModification(),
