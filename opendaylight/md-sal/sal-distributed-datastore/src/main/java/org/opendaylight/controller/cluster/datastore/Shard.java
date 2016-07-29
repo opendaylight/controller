@@ -174,8 +174,8 @@ public class Shard extends RaftActor {
                 new Dispatchers(context().system().dispatchers()).getDispatcherPath(
                         Dispatchers.DispatcherType.Transaction), self(), getContext(), shardMBean);
 
-        snapshotCohort = new ShardSnapshotCohort(builder.getId().getMemberName(), transactionActorFactory, store,
-            LOG, this.name);
+        snapshotCohort = ShardSnapshotCohort.create(getContext(), builder.getId().getMemberName(), store, LOG,
+            this.name);
 
         messageRetrySupport = new ShardTransactionMessageRetrySupport(this);
     }
