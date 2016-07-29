@@ -114,22 +114,19 @@ public final class SerializationUtils {
     }
 
     public static NormalizedNode<?, ?> deserializeNormalizedNode(byte [] bytes) {
-        NormalizedNode<?, ?> node = null;
         try {
-            node = tryDeserializeNormalizedNode(new DataInputStream(new ByteArrayInputStream(bytes)));
+            return tryDeserializeNormalizedNode(new DataInputStream(new ByteArrayInputStream(bytes)));
         } catch(InvalidNormalizedNodeStreamException e) {
             // Probably from legacy protobuf serialization - try that.
             try {
                 NormalizedNodeMessages.Node serializedNode = NormalizedNodeMessages.Node.parseFrom(bytes);
-                node =  new NormalizedNodeToNodeCodec(null).decode(serializedNode);
+                return new NormalizedNodeToNodeCodec(null).decode(serializedNode);
             } catch (InvalidProtocolBufferException e2) {
                 throw new IllegalArgumentException("Error deserializing NormalizedNode", e);
             }
         } catch (IOException e) {
             throw new IllegalArgumentException("Error deserializing NormalizedNode", e);
         }
-
-        return node;
     }
 
     public static byte [] serializeNormalizedNode(NormalizedNode<?, ?> node) {
