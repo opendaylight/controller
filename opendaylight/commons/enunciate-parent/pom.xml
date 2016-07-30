@@ -13,7 +13,7 @@
     <parent>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>commons.opendaylight</artifactId>
-        <version>1.6.3-SNAPSHOT</version>
+        <version>1.6.3-Beryllium-SR3</version>
         <relativePath>../opendaylight</relativePath>
     </parent>
 

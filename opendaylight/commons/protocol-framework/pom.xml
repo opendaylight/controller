@@ -6,12 +6,12 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>commons.opendaylight</artifactId>
-    <version>1.6.3-SNAPSHOT</version>
+    <version>1.6.3-Beryllium-SR3</version>
     <relativePath>../../commons/opendaylight</relativePath>
   </parent>
 
   <artifactId>protocol-framework</artifactId>
-  <version>0.7.3-SNAPSHOT</version>
+  <version>0.7.3-Beryllium-SR3</version>
   <packaging>bundle</packaging>
   <name>${project.artifactId}</name>
   <description>Common protocol framework</description>

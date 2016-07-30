@@ -5,12 +5,12 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>commons.opendaylight</artifactId>
-    <version>1.6.3-SNAPSHOT</version>
+    <version>1.6.3-Beryllium-SR3</version>
     <relativePath>../commons/opendaylight</relativePath>
   </parent>
   <artifactId>config-subsystem</artifactId>
 
-  <version>0.4.3-SNAPSHOT</version>
+  <version>0.4.3-Beryllium-SR3</version>
   <packaging>pom</packaging>
   <name>${project.artifactId}</name>
 
@@ -106,7 +106,7 @@
             <dependency>
               <groupId>org.opendaylight.mdsal</groupId>
               <artifactId>maven-sal-api-gen-plugin</artifactId>
-              <version>0.8.3-SNAPSHOT</version>
+              <version>0.8.3-Beryllium-SR3</version>
               <type>jar</type>
             </dependency>
           </dependencies>
