@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "9a561d44_dbd5fae5",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/ShardSnapshotActor.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-07-30T12:10:35Z",
+      "side": 1,
+      "message": "It also occurred to me: using getSender() is a bit misleading -- the real sender is Shard, not RaftActor, we just want the reply to go directly to RaftActor.",
+      "parentUuid": "9a561d44_5bb3aae8",
+      "revId": "bd977e2f5fb77438c4c54a1225d1ef2ab0b7e33b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a561d44_5b5baaf5",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/persisted/BoronShardDataTreeSnapshot.java",
         "patchSetId": 7
