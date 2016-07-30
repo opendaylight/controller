@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "9a561d44_5bb3aae8",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/ShardSnapshotActor.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-07-30T11:55:37Z",
+      "side": 1,
+      "message": "In this particular case it does not matter, but it is for consistency.\n\nFollowing http://doc.akka.io/docs/akka/current/scala/typed.html, including explicit replyTo in the message allows decoupling of behaviors from UntypeActor -- thus allowing them be tested without an actual ActorSystem.",
+      "parentUuid": "9a561d44_3b6076a4",
+      "revId": "bd977e2f5fb77438c4c54a1225d1ef2ab0b7e33b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a561d44_5b5baaf5",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/persisted/BoronShardDataTreeSnapshot.java",
         "patchSetId": 7
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "9a561d44_bbcbe651",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/persisted/BoronShardDataTreeSnapshot.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-07-30T11:55:37Z",
+      "side": 1,
+      "message": "Yeah, in a previous version I called it \u0027MetadataShardDataTreeSnapshot\u0027, but at that point it did not have actual metadata, which was confusing :)\n\nWill that name work?",
+      "parentUuid": "9a561d44_5b5baaf5",
+      "revId": "bd977e2f5fb77438c4c54a1225d1ef2ab0b7e33b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a561d44_bb73e67e",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/persisted/LegacyShardDataTreeSnapshot.java",
         "patchSetId": 7
@@ -47,6 +83,24 @@
       "writtenOn": "2016-07-30T10:10:14Z",
       "side": 1,
       "message": "Usually we have included the ODL release name for older versions. If ShardDataTreeSnapshot ever changes again, what would we call that legacy version? How about PreBoronShardDataTreeSnapshot?",
+      "revId": "bd977e2f5fb77438c4c54a1225d1ef2ab0b7e33b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a561d44_9bc8a256",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/persisted/LegacyShardDataTreeSnapshot.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-07-30T11:55:37Z",
+      "side": 1,
+      "message": "sure",
+      "parentUuid": "9a561d44_bb73e67e",
       "revId": "bd977e2f5fb77438c4c54a1225d1ef2ab0b7e33b",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
