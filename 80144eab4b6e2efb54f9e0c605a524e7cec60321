@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a561d44_80b4b382",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/client/SavingClientActorBehavior.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-07-30T00:13:05Z",
+      "side": 1,
+      "message": "can we move these two shared lines below the if/else chain and fall-through to them in both DeleteSnapshots{Failure,Success} ?",
+      "range": {
+        "startLine": 52,
+        "startChar": 0,
+        "endLine": 53,
+        "endChar": 50
+      },
+      "revId": "80144eab4b6e2efb54f9e0c605a524e7cec60321",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
