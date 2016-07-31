@@ -15,6 +15,8 @@ import java.io.DataOutput;
 import java.io.IOException;
 import javax.annotation.Nonnull;
 import org.opendaylight.yangtools.concepts.WritableObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Enumeration of all ABI versions supported by this implementation of the client access API.
@@ -42,6 +44,8 @@ public enum ABIVersion implements WritableObject {
      */
     @VisibleForTesting
     TEST_FUTURE_VERSION(65535);
+
+    private static final Logger LOG = LoggerFactory.getLogger(ABIVersion.class);
 
     private final short value;
 
@@ -112,6 +116,19 @@ public enum ABIVersion implements WritableObject {
             return valueOf(s);
         } catch (FutureVersionException | PastVersionException e) {
             throw new IOException("Unsupported version", e);
+        }
+    }
+
+    public static ABIVersion inexactReadFrom(final @Nonnull DataInput in) throws IOException {
+        final short onWire = in.readShort();
+        try {
+            return ABIVersion.valueOf(onWire);
+        } catch (FutureVersionException e) {
+            LOG.debug("Received future version", e);
+            return ABIVersion.TEST_FUTURE_VERSION;
+        } catch (PastVersionException e) {
+            LOG.debug("Received past version", e);
+            return ABIVersion.TEST_PAST_VERSION;
         }
     }
 }
