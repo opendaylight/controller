@@ -13,7 +13,7 @@ import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 
 /**
- * Successuful reply to an {@link ExistsTransactionRequest}. It indicates presence of requested data via
+ * Successful reply to an {@link ExistsTransactionRequest}. It indicates presence of requested data via
  * {@link #getExists()}.
  *
  * @author Robert Varga
