@@ -85,7 +85,10 @@
     <ietf-topology.version>2013.10.21.9-SNAPSHOT</ietf-topology.version>
     <ietf-yang-types.version>2013.07.15.9-SNAPSHOT</ietf-yang-types.version>
     <jdepend.maven.plugin.version>2.0-beta-2</jdepend.maven.plugin.version>
+
+    <!-- Path prefix where we generate configuration subsystem bindings -->
     <jmxGeneratorPath>target/generated-sources/config-binding</jmxGeneratorPath>
+
     <jolokia-bridge.version>0.3.0-SNAPSHOT</jolokia-bridge.version>
     <karaf.branding.version>1.3.0-SNAPSHOT</karaf.branding.version>
     <karaf.shell.version>${karaf.version}</karaf.shell.version>
@@ -110,7 +113,11 @@
     <sal.implementation.version>0.7.0-SNAPSHOT</sal.implementation.version>
     <sal.networkconfiguration.version>0.3.0-SNAPSHOT</sal.networkconfiguration.version>
     <sal.version>0.11.0-SNAPSHOT</sal.version>
-    <salGeneratorPath>src/main/yang-gen-sal</salGeneratorPath>
+
+    <!-- Path prefix where we generate YANG Java Bindings. This really should be inherited
+         from mdsal's binding-parent -->
+    <salGeneratorPath>target/generated-sources/mdsal-binding</salGeneratorPath>
+
     <samples.loadbalancer>0.8.0-SNAPSHOT</samples.loadbalancer>
     <samples.loadbalancer.northbound.version>0.7.0-SNAPSHOT</samples.loadbalancer.northbound.version>
     <samples.simpleforwarding.version>0.7.0-SNAPSHOT</samples.simpleforwarding.version>
