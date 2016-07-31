@@ -14,7 +14,6 @@ import java.io.IOException;
 import org.apache.commons.lang.SerializationUtils;
 import org.junit.Assert;
 import org.junit.Test;
-import org.opendaylight.controller.cluster.datastore.node.NormalizedNodeToNodeCodec;
 import org.opendaylight.controller.cluster.datastore.util.TestModel;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -138,17 +137,6 @@ public class NormalizedNodeStreamReaderWriterTest {
         Assert.assertEquals(path, newPath);
 
         writer.close();
-    }
-
-    @Test(expected=InvalidNormalizedNodeStreamException.class, timeout=10000)
-    public void testInvalidNormalizedNodeStream() throws IOException {
-        byte[] protobufBytes = new NormalizedNodeToNodeCodec(null).encode(
-                TestModel.createBaseTestContainerBuilder().build()).getNormalizedNode().toByteArray();
-
-        NormalizedNodeInputStreamReader reader = new NormalizedNodeInputStreamReader(
-            ByteStreams.newDataInput(protobufBytes));
-
-        reader.readNormalizedNode();
     }
 
     @Test(expected=InvalidNormalizedNodeStreamException.class, timeout=10000)
