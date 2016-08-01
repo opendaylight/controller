@@ -72,6 +72,24 @@
     },
     {
       "key": {
+        "uuid": "7a6b29fe_1f3c2f93",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/CompositeDataTreeCohort.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-08-01T13:11:25Z",
+      "side": 1,
+      "message": "The name is fine - it\u0027s misspelled :)  sic -\u003e spelling incorrect",
+      "parentUuid": "9a561d44_2065e7b4",
+      "revId": "10450499b21e181ff199258fb8efccfeda373a95",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a561d44_0fce142e",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
         "patchSetId": 7
@@ -257,6 +275,24 @@
       "side": 1,
       "message": "I am not sure I understand. The key difference between ShardCommitCoordinator\u0027s queue and pendingTransactions here is that the latter holds only transactions which have transitioned to CAN_COMMIT_PENDING, while the former also holds READY transactions.\n\nI think I changed ShardCommitCoordinator to immediately issue CanCommit *only* when the corresponding message arrives -- hence the lifecycle is handled by ShardDataTree.",
       "parentUuid": "9a561d44_457f4d66",
+      "revId": "10450499b21e181ff199258fb8efccfeda373a95",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_3fd3eb39",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardDataTree.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 543,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-08-01T13:11:25Z",
+      "side": 1,
+      "message": "yeah - you\u0027re right - I missed that. The SCC only CanCommits the head of the queue at which point it gets queued here.",
+      "parentUuid": "7a6b29fe_1c9a7d14",
       "revId": "10450499b21e181ff199258fb8efccfeda373a95",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
