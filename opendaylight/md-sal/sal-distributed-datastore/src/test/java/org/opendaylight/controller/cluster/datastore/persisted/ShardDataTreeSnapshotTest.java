@@ -53,7 +53,7 @@ public class ShardDataTreeSnapshotTest {
                 new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME)).
                 withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo")).build();
 
-        Map<Class<? extends ShardDataTreeSnapshotMetadata>, ShardDataTreeSnapshotMetadata> expMetadata =
+        Map<Class<? extends ShardDataTreeSnapshotMetadata<?>>, ShardDataTreeSnapshotMetadata<?>> expMetadata =
                 ImmutableMap.of(TestShardDataTreeSnapshotMetadata.class, new TestShardDataTreeSnapshotMetadata("test"));
         MetadataShardDataTreeSnapshot snapshot = new MetadataShardDataTreeSnapshot(expectedNode, expMetadata);
         byte[] serialized = snapshot.serialize();
@@ -84,13 +84,18 @@ public class ShardDataTreeSnapshotTest {
         assertEquals("Deserialized type", PreBoronShardDataTreeSnapshot.class, deserialized.getClass());
     }
 
-    static class TestShardDataTreeSnapshotMetadata extends ShardDataTreeSnapshotMetadata {
+    static class TestShardDataTreeSnapshotMetadata extends ShardDataTreeSnapshotMetadata<TestShardDataTreeSnapshotMetadata> {
         private static final long serialVersionUID = 1L;
 
         private final String data;
 
-        TestShardDataTreeSnapshotMetadata(String data) {
+        TestShardDataTreeSnapshotMetadata(final String data) {
             this.data = data;
+        }
+
+        @Override
+        public Class<TestShardDataTreeSnapshotMetadata> getType() {
+            return TestShardDataTreeSnapshotMetadata.class;
         }
 
         @Override
@@ -104,10 +109,9 @@ public class ShardDataTreeSnapshotTest {
         }
 
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(final Object obj) {
             return data.equals(((TestShardDataTreeSnapshotMetadata)obj).data);
         }
-
 
         private static class Proxy implements Externalizable {
             private String data;
@@ -115,17 +119,17 @@ public class ShardDataTreeSnapshotTest {
             public Proxy() {
             }
 
-            Proxy(String data) {
+            Proxy(final String data) {
                 this.data = data;
             }
 
             @Override
-            public void writeExternal(ObjectOutput out) throws IOException {
+            public void writeExternal(final ObjectOutput out) throws IOException {
                 out.writeObject(data);
             }
 
             @Override
-            public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+            public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
                 data = (String) in.readObject();
             }
 
