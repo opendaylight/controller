@@ -11,18 +11,14 @@ import akka.actor.ActorContext;
 import akka.actor.ActorRef;
 import com.google.common.base.Preconditions;
 import java.io.IOException;
-import java.util.Optional;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendType;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
-import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.actors.ShardSnapshotActor;
 import org.opendaylight.controller.cluster.datastore.persisted.ShardDataTreeSnapshot;
 import org.opendaylight.controller.cluster.raft.RaftActorSnapshotCohort;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.slf4j.Logger;
 
 /**
@@ -33,17 +29,13 @@ import org.slf4j.Logger;
 class ShardSnapshotCohort implements RaftActorSnapshotCohort {
     private static final FrontendType SNAPSHOT_APPLY = FrontendType.forName("snapshot-apply");
 
-    private final LocalHistoryIdentifier applyHistoryId;
     private final ActorRef snapshotActor;
     private final ShardDataTree store;
     private final String logId;
     private final Logger log;
 
-    private long applyCounter;
-
     private ShardSnapshotCohort(final LocalHistoryIdentifier applyHistoryId, final ActorRef snapshotActor,
             final ShardDataTree store, final Logger log, final String logId) {
-        this.applyHistoryId = Preconditions.checkNotNull(applyHistoryId);
         this.snapshotActor = Preconditions.checkNotNull(snapshotActor);
         this.store = Preconditions.checkNotNull(store);
         this.log = log;
@@ -66,36 +58,7 @@ class ShardSnapshotCohort implements RaftActorSnapshotCohort {
     @Override
     public void createSnapshot(final ActorRef actorRef) {
         // Forward the request to the snapshot actor
-        ShardSnapshotActor.requestSnapshot(snapshotActor, store.takeRecoverySnapshot(), actorRef);
-    }
-
-    private void deserializeAndApplySnapshot(final byte[] snapshotBytes) {
-        final ShardDataTreeSnapshot snapshot;
-        try {
-            snapshot = ShardDataTreeSnapshot.deserialize(snapshotBytes);
-        } catch (IOException e) {
-            log.error("{}: Failed to deserialize snapshot", logId, e);
-            return;
-        }
-
-        try {
-            final ReadWriteShardDataTreeTransaction transaction = store.newReadWriteTransaction(
-                new TransactionIdentifier(applyHistoryId, applyCounter++));
-
-            // delete everything first
-            transaction.getSnapshot().delete(YangInstanceIdentifier.EMPTY);
-
-            final Optional<NormalizedNode<?, ?>> maybeNode = snapshot.getRootNode();
-            if (maybeNode.isPresent()) {
-                // Add everything from the remote node back
-                transaction.getSnapshot().write(YangInstanceIdentifier.EMPTY, maybeNode.get());
-            }
-
-            store.applyRecoveryTransaction(transaction);
-        } catch (Exception e) {
-            log.error("{}: An exception occurred when applying snapshot", logId, e);
-        }
-
+        ShardSnapshotActor.requestSnapshot(snapshotActor, store.takeStateSnapshot(), actorRef);
     }
 
     @Override
@@ -105,7 +68,22 @@ class ShardSnapshotCohort implements RaftActorSnapshotCohort {
         // as they would have already been disabled on the follower
 
         log.info("{}: Applying snapshot", logId);
-        deserializeAndApplySnapshot(snapshotBytes);
+
+        final ShardDataTreeSnapshot snapshot;
+        try {
+            snapshot = ShardDataTreeSnapshot.deserialize(snapshotBytes);
+        } catch (IOException e) {
+            log.error("{}: Failed to deserialize snapshot", logId, e);
+            return;
+        }
+
+        try {
+            store.applySnapshot(snapshot);
+        } catch (Exception e) {
+            log.error("{}: Failed to apply snapshot {}", logId, snapshot, e);
+            return;
+        }
+
         log.info("{}: Done applying snapshot", logId);
     }
 }
