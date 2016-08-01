@@ -10,6 +10,8 @@ package org.opendaylight.controller.cluster.datastore.utils;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ForwardingObject;
 import java.io.IOException;
 import org.opendaylight.controller.cluster.datastore.node.utils.transformer.NormalizedNodePruner;
 import org.opendaylight.controller.cluster.datastore.util.AbstractDataTreeModificationCursor;
@@ -29,7 +31,7 @@ import org.slf4j.LoggerFactory;
  * The PruningDataTreeModification first removes all entries from the data which do not belong in the schemaContext
  * before delegating it to the actual DataTreeModification
  */
-public class PruningDataTreeModification implements DataTreeModification {
+public class PruningDataTreeModification extends ForwardingObject implements DataTreeModification {
 
     private static final Logger LOG = LoggerFactory.getLogger(PruningDataTreeModification.class);
     private DataTreeModification delegate;
@@ -37,9 +39,14 @@ public class PruningDataTreeModification implements DataTreeModification {
     private final DataTree dataTree;
 
     public PruningDataTreeModification(DataTreeModification delegate, DataTree dataTree, SchemaContext schemaContext) {
-        this.delegate = delegate;
-        this.dataTree = dataTree;
-        this.schemaContext = schemaContext;
+        this.delegate = Preconditions.checkNotNull(delegate);
+        this.dataTree = Preconditions.checkNotNull(dataTree);
+        this.schemaContext = Preconditions.checkNotNull(schemaContext);
+    }
+
+    @Override
+    public DataTreeModification delegate() {
+        return delegate;
     }
 
     @Override
@@ -138,10 +145,6 @@ public class PruningDataTreeModification implements DataTreeModification {
         }
 
         return pruner.normalizedNode();
-    }
-
-    public DataTreeModification getResultingModification(){
-        return delegate;
     }
 
     private static class PruningDataTreeModificationCursor extends AbstractDataTreeModificationCursor {
