@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a6b29fe_3fee4b8c",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/persisted/ShardDataTreeSnapshotMetadata.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-08-01T14:02:16Z",
+      "side": 1,
+      "message": "This should be writeReplace.",
+      "revId": "1db48fcd6cdfd758d37f84c0c10160e27e515fcf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
