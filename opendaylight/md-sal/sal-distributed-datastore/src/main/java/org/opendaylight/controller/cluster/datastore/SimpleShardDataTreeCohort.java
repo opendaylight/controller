@@ -20,7 +20,6 @@ import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
-import org.opendaylight.controller.cluster.datastore.utils.PruningDataTreeModification;
 import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidateTip;
@@ -61,15 +60,12 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort implements Ide
     }
 
     @Override
-    public DataTreeModification getDataTreeModification() {
-        DataTreeModification dataTreeModification = transaction;
-        if (transaction instanceof PruningDataTreeModification){
-            dataTreeModification = ((PruningDataTreeModification) transaction).getResultingModification();
-        }
-        return dataTreeModification;
+
+    DataTreeModification getDataTreeModification() {
+        return transaction;
     }
 
-    private void checkState(State expected) {
+    private void checkState(final State expected) {
         Preconditions.checkState(state == expected, "State %s does not match expected state %s", state, expected);
     }
 
