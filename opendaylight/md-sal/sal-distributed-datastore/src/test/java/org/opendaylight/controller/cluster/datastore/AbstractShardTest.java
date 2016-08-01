@@ -63,7 +63,6 @@ import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
 import org.opendaylight.controller.md.cluster.datastore.model.CarsModel;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
-import org.opendaylight.yangtools.concepts.Identifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
@@ -137,19 +136,14 @@ public abstract class AbstractShardTest extends AbstractActorTest{
         final CountDownLatch recoveryComplete = new CountDownLatch(1);
 
         @SuppressWarnings("serial")
-        final Creator<Shard> creator = new Creator<Shard>() {
+        final Creator<Shard> creator = () -> new Shard(newShardBuilder()) {
             @Override
-            public Shard create() throws Exception {
-                return new Shard(newShardBuilder()) {
-                    @Override
-                    protected void onRecoveryComplete() {
-                        try {
-                            super.onRecoveryComplete();
-                        } finally {
-                            recoveryComplete.countDown();
-                        }
-                    }
-                };
+            protected void onRecoveryComplete() {
+                try {
+                    super.onRecoveryComplete();
+                } finally {
+                    recoveryComplete.countDown();
+                }
             }
         };
 
@@ -255,13 +249,10 @@ public abstract class AbstractShardTest extends AbstractActorTest{
             cohortMap.put(id, new CapturingShardDataTreeCohort());
         }
 
-        shard.getCommitCoordinator().setCohortDecorator(new ShardCommitCoordinator.CohortDecorator() {
-            @Override
-            public ShardDataTreeCohort decorate(final Identifier transactionID, final ShardDataTreeCohort actual) {
-                CapturingShardDataTreeCohort cohort = cohortMap.get(transactionID);
-                cohort.setDelegate(actual);
-                return cohort;
-            }
+        shard.getCommitCoordinator().setCohortDecorator((transactionID, actual) -> {
+            CapturingShardDataTreeCohort cohort = cohortMap.get(transactionID);
+            cohort.setDelegate(actual);
+            return cohort;
         });
 
         return cohortMap;
@@ -324,8 +315,7 @@ public abstract class AbstractShardTest extends AbstractActorTest{
         BatchedModifications batched = newBatchedModifications(nextTransactionId(), id, node, true, true, 1);
         DataTreeModification modification = store.getDataTree().takeSnapshot().newModification();
         batched.apply(modification);
-        modification.ready();
-        store.applyForeignCandidate(batched.getTransactionID(), store.getDataTree().prepare(modification));
+        store.commit(modification);
     }
 
     public void mergeToStore(final ShardDataTree store, final YangInstanceIdentifier id,
@@ -338,8 +328,7 @@ public abstract class AbstractShardTest extends AbstractActorTest{
 
         DataTreeModification modification = store.getDataTree().takeSnapshot().newModification();
         batched.apply(modification);
-        modification.ready();
-        store.applyForeignCandidate(batched.getTransactionID(), store.getDataTree().prepare(modification));
+        store.commit(modification);
     }
 
     public static void writeToStore(final DataTree store, final YangInstanceIdentifier id,
