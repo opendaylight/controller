@@ -50,7 +50,6 @@ import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeList
 import org.opendaylight.controller.cluster.datastore.messages.RegisterDataTreeChangeListener;
 import org.opendaylight.controller.cluster.datastore.messages.ShardLeaderStateChanged;
 import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContext;
-import org.opendaylight.controller.cluster.datastore.persisted.DataTreeCandidateSupplier;
 import org.opendaylight.controller.cluster.datastore.utils.Dispatchers;
 import org.opendaylight.controller.cluster.notifications.LeaderStateChanged;
 import org.opendaylight.controller.cluster.notifications.RegisterRoleChangeListener;
@@ -569,21 +568,14 @@ public class Shard extends RaftActor {
 
     @Override
     protected void applyState(final ActorRef clientActor, final Identifier identifier, final Object data) {
-        if (data instanceof DataTreeCandidateSupplier) {
-            if (clientActor == null) {
-                // No clientActor indicates a replica coming from the leader
-                try {
-                    store.applyStateFromLeader(identifier, (DataTreeCandidateSupplier)data);
-                } catch (DataValidationFailedException | IOException e) {
-                    LOG.error("{}: Error applying replica {}", persistenceId(), identifier, e);
-                }
-            } else {
-                // Replication consensus reached, proceed to commit
-                store.payloadReplicationComplete(identifier, (DataTreeCandidateSupplier)data);
+        if (data instanceof Payload) {
+            try {
+                store.applyReplicatedPayload(identifier, (Payload)data);
+            } catch (DataValidationFailedException | IOException e) {
+                LOG.error("{}: Error applying replica {}", persistenceId(), identifier, e);
             }
         } else {
-            LOG.error("{}: Unknown state received {} ClassLoader {}", persistenceId(), data,
-                data.getClass().getClassLoader());
+            LOG.error("{}: Unknown state for {} received {}", persistenceId(), identifier, data);
         }
     }
 
