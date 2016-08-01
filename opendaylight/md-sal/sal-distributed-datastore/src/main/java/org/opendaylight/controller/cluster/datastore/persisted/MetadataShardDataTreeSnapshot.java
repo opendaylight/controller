@@ -20,6 +20,8 @@ import java.io.Serializable;
 import java.util.Map;
 import org.opendaylight.controller.cluster.datastore.utils.SerializationUtils;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * An {@link AbstractVersionedShardDataTreeSnapshot} which contains additional metadata.
@@ -30,8 +32,9 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 public final class MetadataShardDataTreeSnapshot extends AbstractVersionedShardDataTreeSnapshot implements Serializable {
     private static final class Proxy implements Externalizable {
         private static final long serialVersionUID = 1L;
+        private static final Logger LOG = LoggerFactory.getLogger(MetadataShardDataTreeSnapshot.class);
 
-        private Map<Class<? extends ShardDataTreeSnapshotMetadata>, ShardDataTreeSnapshotMetadata> metadata;
+        private Map<Class<? extends ShardDataTreeSnapshotMetadata<?>>, ShardDataTreeSnapshotMetadata<?>> metadata;
         private NormalizedNode<?, ?> rootNode;
 
         public Proxy() {
@@ -46,7 +49,7 @@ public final class MetadataShardDataTreeSnapshot extends AbstractVersionedShardD
         @Override
         public void writeExternal(final ObjectOutput out) throws IOException {
             out.writeInt(metadata.size());
-            for (ShardDataTreeSnapshotMetadata m : metadata.values()) {
+            for (ShardDataTreeSnapshotMetadata<?> m : metadata.values()) {
                 out.writeObject(m);
             }
 
@@ -59,11 +62,15 @@ public final class MetadataShardDataTreeSnapshot extends AbstractVersionedShardD
             Preconditions.checkArgument(metaSize >= 0, "Invalid negative metadata map length %s", metaSize);
 
             // Default pre-allocate is 4, which should be fine
-            final Builder<Class<? extends ShardDataTreeSnapshotMetadata>, ShardDataTreeSnapshotMetadata> metaBuilder =
+            final Builder<Class<? extends ShardDataTreeSnapshotMetadata<?>>, ShardDataTreeSnapshotMetadata<?>> metaBuilder =
                     ImmutableMap.builder();
             for (int i = 0; i < metaSize; ++i) {
-                final ShardDataTreeSnapshotMetadata m = (ShardDataTreeSnapshotMetadata) in.readObject();
-                metaBuilder.put(m.getClass(), m);
+                final ShardDataTreeSnapshotMetadata<?> m = (ShardDataTreeSnapshotMetadata<?>) in.readObject();
+                if (m != null) {
+                    metaBuilder.put(m.getType(), m);
+                } else {
+                    LOG.warn("Skipping null metadata");
+                }
             }
 
             metadata = metaBuilder.build();
@@ -77,7 +84,7 @@ public final class MetadataShardDataTreeSnapshot extends AbstractVersionedShardD
 
     private static final long serialVersionUID = 1L;
 
-    private final Map<Class<? extends ShardDataTreeSnapshotMetadata>, ShardDataTreeSnapshotMetadata> metadata;
+    private final Map<Class<? extends ShardDataTreeSnapshotMetadata<?>>, ShardDataTreeSnapshotMetadata<?>> metadata;
     private final NormalizedNode<?, ?> rootNode;
 
     public MetadataShardDataTreeSnapshot(final NormalizedNode<?, ?> rootNode) {
@@ -85,12 +92,12 @@ public final class MetadataShardDataTreeSnapshot extends AbstractVersionedShardD
     }
 
     public MetadataShardDataTreeSnapshot(final NormalizedNode<?, ?> rootNode,
-            final Map<Class<? extends ShardDataTreeSnapshotMetadata>, ShardDataTreeSnapshotMetadata> metadata) {
+            final Map<Class<? extends ShardDataTreeSnapshotMetadata<?>>, ShardDataTreeSnapshotMetadata<?>> metadata) {
         this.rootNode = Preconditions.checkNotNull(rootNode);
         this.metadata = ImmutableMap.copyOf(metadata);
     }
 
-    public Map<Class<? extends ShardDataTreeSnapshotMetadata>, ShardDataTreeSnapshotMetadata> getMetadata() {
+    public Map<Class<? extends ShardDataTreeSnapshotMetadata<?>>, ShardDataTreeSnapshotMetadata<?>> getMetadata() {
         return metadata;
     }
 
