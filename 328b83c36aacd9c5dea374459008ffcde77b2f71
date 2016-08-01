@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a6b29fe_f08c0082",
+        "filename": "opendaylight/md-sal/cds-access-api/src/main/java/org/opendaylight/controller/cluster/access/commands/ConnectClientSuccessProxyV1.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-08-01T22:05:53Z",
+      "side": 1,
+      "message": "You might want to use writeObject as it optimizes when there\u0027s multiple references.  writeObject is specially optimized for String - it only outputs 1 more byte. Also writeUTF has a 64K limit, although we shouldn\u0027t come close to that with actor paths.",
+      "revId": "328b83c36aacd9c5dea374459008ffcde77b2f71",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
