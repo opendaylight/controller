@@ -53,7 +53,7 @@ public class ShardDataTreeSnapshotTest {
                 new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME)).
                 withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo")).build();
 
-        Map<Class<? extends ShardDataTreeSnapshotMetadata>, ShardDataTreeSnapshotMetadata> expMetadata =
+        Map<Class<? extends ShardDataTreeSnapshotMetadata<?>>, ShardDataTreeSnapshotMetadata<?>> expMetadata =
                 ImmutableMap.of(TestShardDataTreeSnapshotMetadata.class, new TestShardDataTreeSnapshotMetadata("test"));
         MetadataShardDataTreeSnapshot snapshot = new MetadataShardDataTreeSnapshot(expectedNode, expMetadata);
         byte[] serialized = snapshot.serialize();
@@ -84,13 +84,18 @@ public class ShardDataTreeSnapshotTest {
         assertEquals("Deserialized type", PreBoronShardDataTreeSnapshot.class, deserialized.getClass());
     }
 
-    static class TestShardDataTreeSnapshotMetadata extends ShardDataTreeSnapshotMetadata {
+    static class TestShardDataTreeSnapshotMetadata extends ShardDataTreeSnapshotMetadata<TestShardDataTreeSnapshotMetadata> {
         private static final long serialVersionUID = 1L;
 
         private final String data;
 
         TestShardDataTreeSnapshotMetadata(String data) {
             this.data = data;
+        }
+
+        @Override
+        public Class<TestShardDataTreeSnapshotMetadata> getType() {
+            return TestShardDataTreeSnapshotMetadata.class;
         }
 
         @Override
@@ -107,7 +112,6 @@ public class ShardDataTreeSnapshotTest {
         public boolean equals(Object obj) {
             return data.equals(((TestShardDataTreeSnapshotMetadata)obj).data);
         }
-
 
         private static class Proxy implements Externalizable {
             private String data;

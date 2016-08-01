@@ -19,7 +19,6 @@ import java.io.ObjectOutput;
 import java.io.Serializable;
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Map.Entry;
-import java.util.Optional;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
@@ -31,7 +30,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
  * @author Robert Varga
  */
 @Beta
-public final class CommitTransactionPayload extends Payload implements DataTreeCandidateSupplier, Serializable {
+public final class CommitTransactionPayload extends Payload implements Serializable {
     private static final class Proxy implements Externalizable {
         private static final long serialVersionUID = 1L;
         private byte[] serialized;
@@ -78,10 +77,9 @@ public final class CommitTransactionPayload extends Payload implements DataTreeC
         return new CommitTransactionPayload(out.toByteArray());
     }
 
-    @Override
-    public Entry<Optional<TransactionIdentifier>, DataTreeCandidate> getCandidate() throws IOException {
+    public Entry<TransactionIdentifier, DataTreeCandidate> getCandidate() throws IOException {
         final DataInput in = ByteStreams.newDataInput(serialized);
-        return new SimpleImmutableEntry<>(Optional.of(TransactionIdentifier.readFrom(in)),
+        return new SimpleImmutableEntry<>(TransactionIdentifier.readFrom(in),
                 DataTreeCandidateInputOutput.readDataTreeCandidate(in));
     }
 

@@ -26,7 +26,7 @@ import javax.annotation.Nonnull;
  *
  * @author Robert Varga
  */
-public abstract class ShardDataTreeSnapshotMetadata implements Serializable {
+public abstract class ShardDataTreeSnapshotMetadata<T extends ShardDataTreeSnapshotMetadata<T>> implements Serializable {
     private static final long serialVersionUID = 1L;
 
     ShardDataTreeSnapshotMetadata() {
@@ -43,4 +43,6 @@ public abstract class ShardDataTreeSnapshotMetadata implements Serializable {
      * @return Externalizable proxy, may not be null
      */
     protected abstract @Nonnull Externalizable externalizableProxy();
+
+    public abstract Class<T> getType();
 }

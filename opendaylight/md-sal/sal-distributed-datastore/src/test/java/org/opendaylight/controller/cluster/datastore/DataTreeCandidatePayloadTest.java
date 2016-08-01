@@ -119,13 +119,13 @@ public class DataTreeCandidatePayloadTest {
     @Test
     public void testCandidateSerDes() throws IOException {
         final DataTreeCandidatePayload payload = DataTreeCandidatePayload.create(candidate);
-        assertCandidateEquals(candidate, payload.getCandidate().getValue());
+        assertCandidateEquals(candidate, payload.getCandidate());
     }
 
     @Test
     public void testPayloadSerDes() throws IOException {
         final DataTreeCandidatePayload payload = DataTreeCandidatePayload.create(candidate);
-        assertCandidateEquals(candidate, SerializationUtils.clone(payload).getCandidate().getValue());
+        assertCandidateEquals(candidate, SerializationUtils.clone(payload).getCandidate());
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -140,7 +140,7 @@ public class DataTreeCandidatePayloadTest {
 
         DataTreeCandidate candidate = DataTreeCandidates.fromNormalizedNode(leafSetEntryPath, leafSetEntryNode);
         DataTreeCandidatePayload payload = DataTreeCandidatePayload.create(candidate);
-        assertCandidateEquals(candidate, payload.getCandidate().getValue());
+        assertCandidateEquals(candidate, payload.getCandidate());
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -156,7 +156,7 @@ public class DataTreeCandidatePayloadTest {
 
         DataTreeCandidate candidate = DataTreeCandidates.fromNormalizedNode(leafSetPath, leafSetNode);
         DataTreeCandidatePayload payload = DataTreeCandidatePayload.create(candidate);
-        assertCandidateEquals(candidate, payload.getCandidate().getValue());
+        assertCandidateEquals(candidate, payload.getCandidate());
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -172,7 +172,7 @@ public class DataTreeCandidatePayloadTest {
 
         DataTreeCandidate candidate = DataTreeCandidates.fromNormalizedNode(leafSetPath, leafSetNode);
         DataTreeCandidatePayload payload = DataTreeCandidatePayload.create(candidate);
-        assertCandidateEquals(candidate, payload.getCandidate().getValue());
+        assertCandidateEquals(candidate, payload.getCandidate());
     }
 
     @Test
@@ -183,6 +183,6 @@ public class DataTreeCandidatePayloadTest {
 
         DataTreeCandidate candidate = DataTreeCandidates.fromNormalizedNode(leafPath, leafNode);
         DataTreeCandidatePayload payload = DataTreeCandidatePayload.create(candidate);
-        assertCandidateEquals(candidate, payload.getCandidate().getValue());
+        assertCandidateEquals(candidate, payload.getCandidate());
     }
 }
