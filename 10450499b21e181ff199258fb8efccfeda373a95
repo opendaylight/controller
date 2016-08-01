@@ -54,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "9a561d44_2065e7b4",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/CompositeDataTreeCohort.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-08-01T12:21:54Z",
+      "side": 1,
+      "message": "right, it does send a message to cohorts which have previously reported success... not sure what would be a better name.",
+      "parentUuid": "9a561d44_4f5dac78",
+      "revId": "10450499b21e181ff199258fb8efccfeda373a95",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a561d44_0fce142e",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
         "patchSetId": 7
@@ -221,6 +239,24 @@
       "writtenOn": "2016-07-29T14:46:18Z",
       "side": 1,
       "message": "The ShardCommitCoordinator handleAbort will remove the current cohort and also can-commit the next one if ready. This will call canCommit on the SimpleDataTreeCohort which will fail if already in the CAN_COMMIT_PENDING state. In fact it looks like this issue could occur any time a tx is complete and ShardCommitCoordinator calls maybeProcessNextCohortEntry. Unless I\u0027m missing something...",
+      "revId": "10450499b21e181ff199258fb8efccfeda373a95",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_1c9a7d14",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardDataTree.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 543,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-08-01T12:21:54Z",
+      "side": 1,
+      "message": "I am not sure I understand. The key difference between ShardCommitCoordinator\u0027s queue and pendingTransactions here is that the latter holds only transactions which have transitioned to CAN_COMMIT_PENDING, while the former also holds READY transactions.\n\nI think I changed ShardCommitCoordinator to immediately issue CanCommit *only* when the corresponding message arrives -- hence the lifecycle is handled by ShardDataTree.",
+      "parentUuid": "9a561d44_457f4d66",
       "revId": "10450499b21e181ff199258fb8efccfeda373a95",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
