@@ -393,7 +393,7 @@ public class ShardTest extends AbstractShardTest {
     @Test
     public void testPeerAddressResolved() throws Exception {
         new ShardTestKit(getSystem()) {{
-            ShardIdentifier peerID = ShardIdentifier.create("inventory", MemberName.forName("member-2"), "config");
+            final ShardIdentifier peerID = ShardIdentifier.create("inventory", MemberName.forName("member-2"), "config");
             final TestActorRef<Shard> shard = actorFactory.createTestActor(newShardBuilder().
                     peerAddresses(Collections.<String, String>singletonMap(peerID.toString(), null)).props().
                         withDispatcher(Dispatchers.DefaultDispatcherId()), "testPeerAddressResolved");
@@ -402,7 +402,7 @@ public class ShardTest extends AbstractShardTest {
             shard.tell(new PeerAddressResolved(peerID.toString(), address), ActorRef.noSender());
 
             shard.tell(GetOnDemandRaftState.INSTANCE, getRef());
-            OnDemandRaftState state = expectMsgClass(OnDemandRaftState.class);
+            final OnDemandRaftState state = expectMsgClass(OnDemandRaftState.class);
             assertEquals("getPeerAddress", address, state.getPeerAddresses().get(peerID.toString()));
         }};
     }
@@ -433,14 +433,14 @@ public class ShardTest extends AbstractShardTest {
 
         shard.tell(new ApplySnapshot(snapshot), ActorRef.noSender());
 
-        Stopwatch sw = Stopwatch.createStarted();
+        final Stopwatch sw = Stopwatch.createStarted();
         while(sw.elapsed(TimeUnit.SECONDS) <= 5) {
             Uninterruptibles.sleepUninterruptibly(75, TimeUnit.MILLISECONDS);
 
             try {
                 assertEquals("Root node", expected, readStore(shard, root));
                 return;
-            } catch(AssertionError e) {
+            } catch(final AssertionError e) {
                 // try again
             }
         }
@@ -455,19 +455,28 @@ public class ShardTest extends AbstractShardTest {
 
         ShardTestKit.waitUntilLeader(shard);
 
-        final DataTree source = setupInMemorySnapshotStore();
-        final DataTreeModification writeMod = source.takeSnapshot().newModification();
-        ContainerNode node = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+        final DataTree store = InMemoryDataTreeFactory.getInstance().create(TreeType.OPERATIONAL);
+        store.setSchemaContext(SCHEMA_CONTEXT);
+        writeToStore(store, TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
+
+        final NormalizedNode<?, ?> root = readStore(store, YangInstanceIdentifier.EMPTY);
+        final Snapshot snapshot = Snapshot.create(new MetadataShardDataTreeSnapshot(root).serialize(),
+                Collections.<ReplicatedLogEntry> emptyList(), 1, 2, 3, 4);
+
+        shard.tell(new ApplySnapshot(snapshot), ActorRef.noSender());
+
+        final DataTreeModification writeMod = store.takeSnapshot().newModification();
+        final ContainerNode node = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
         writeMod.write(TestModel.TEST_PATH, node);
         writeMod.ready();
 
         final TransactionIdentifier tx = nextTransactionId();
         final ApplyState applyState = new ApplyState(null, tx,
-            new ReplicatedLogImplEntry(1, 2, payloadForModification(source, writeMod, tx)));
+                new ReplicatedLogImplEntry(1, 2, payloadForModification(store, writeMod, tx)));
 
         shard.tell(applyState, shard);
 
-        Stopwatch sw = Stopwatch.createStarted();
+        final Stopwatch sw = Stopwatch.createStarted();
         while(sw.elapsed(TimeUnit.SECONDS) <= 5) {
             Uninterruptibles.sleepUninterruptibly(75, TimeUnit.MILLISECONDS);
 
@@ -532,7 +541,7 @@ public class ShardTest extends AbstractShardTest {
             final TransactionIdentifier transactionID2 = nextTransactionId();
             final TransactionIdentifier transactionID3 = nextTransactionId();
 
-            Map<TransactionIdentifier, CapturingShardDataTreeCohort> cohortMap = setupCohortDecorator(
+            final Map<TransactionIdentifier, CapturingShardDataTreeCohort> cohortMap = setupCohortDecorator(
                     shard.underlyingActor(), transactionID1, transactionID2, transactionID3);
             final CapturingShardDataTreeCohort cohort1 = cohortMap.get(transactionID1);
             final CapturingShardDataTreeCohort cohort2 = cohortMap.get(transactionID2);
@@ -797,9 +806,9 @@ public class ShardTest extends AbstractShardTest {
             // Test merge with invalid data. An exception should occur when the merge is applied. Note that
             // write will not validate the children for performance reasons.
 
-            TransactionIdentifier transactionID = nextTransactionId();
+            final TransactionIdentifier transactionID = nextTransactionId();
 
-            ContainerNode invalidData = ImmutableContainerNodeBuilder.create().withNodeIdentifier(
+            final ContainerNode invalidData = ImmutableContainerNodeBuilder.create().withNodeIdentifier(
                     new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME)).
                         withChild(ImmutableNodes.leafNode(TestModel.JUNK_QNAME, "junk")).build();
 
@@ -808,7 +817,7 @@ public class ShardTest extends AbstractShardTest {
             shard.tell(batched, getRef());
             Failure failure = expectMsgClass(duration("5 seconds"), akka.actor.Status.Failure.class);
 
-            Throwable cause = failure.cause();
+            final Throwable cause = failure.cause();
 
             batched = new BatchedModifications(transactionID, DataStoreVersions.CURRENT_VERSION);
             batched.setReady(true);
@@ -1108,7 +1117,7 @@ public class ShardTest extends AbstractShardTest {
             final FiniteDuration duration = duration("5 seconds");
 
             if(readWrite) {
-                ReadWriteShardDataTreeTransaction rwTx = shard.underlyingActor().getDataStore().
+                final ReadWriteShardDataTreeTransaction rwTx = shard.underlyingActor().getDataStore().
                         newReadWriteTransaction(transactionID);
                 shard.tell(new ForwardedReadyTransaction(transactionID, CURRENT_VERSION, rwTx, false), getRef());
             } else {
@@ -1764,7 +1773,7 @@ public class ShardTest extends AbstractShardTest {
             // Now send CanCommitTransaction - should fail.
 
             shard.tell(new CanCommitTransaction(transactionID1, CURRENT_VERSION).toSerializable(), getRef());
-            Throwable failure = expectMsgClass(duration, akka.actor.Status.Failure.class).cause();
+            final Throwable failure = expectMsgClass(duration, akka.actor.Status.Failure.class).cause();
             assertTrue("Failure type", failure instanceof IllegalStateException);
 
             // Ready and CanCommit another and verify success.
@@ -2056,7 +2065,7 @@ public class ShardTest extends AbstractShardTest {
     @Test
     public void testClusteredDataChangeListenerDelayedRegistration() throws Exception {
         new ShardTestKit(getSystem()) {{
-            String testName = "testClusteredDataChangeListenerDelayedRegistration";
+            final String testName = "testClusteredDataChangeListenerDelayedRegistration";
             dataStoreContextBuilder.shardElectionTimeoutFactor(1000).
                     customRaftPolicyImplementation(DisableElectionsRaftPolicy.class.getName());
 
@@ -2089,7 +2098,7 @@ public class ShardTest extends AbstractShardTest {
     @Test
     public void testClusteredDataChangeListenerRegistration() throws Exception {
         new ShardTestKit(getSystem()) {{
-            String testName = "testClusteredDataChangeListenerRegistration";
+            final String testName = "testClusteredDataChangeListenerRegistration";
             final ShardIdentifier followerShardID = ShardIdentifier.create("inventory",
                     MemberName.forName(actorFactory.generateActorId(testName + "-follower")), "config");
 
@@ -2110,7 +2119,7 @@ public class ShardTest extends AbstractShardTest {
                     withDispatcher(Dispatchers.DefaultDispatcherId()), leaderShardID.toString());
 
             leaderShard.tell(TimeoutNow.INSTANCE, ActorRef.noSender());
-            String leaderPath = waitUntilLeader(followerShard);
+            final String leaderPath = waitUntilLeader(followerShard);
             assertEquals("Shard leader path", leaderShard.path().toString(), leaderPath);
 
             final YangInstanceIdentifier path = TestModel.TEST_PATH;
@@ -2132,7 +2141,7 @@ public class ShardTest extends AbstractShardTest {
     @Test
     public void testClusteredDataTreeChangeListenerDelayedRegistration() throws Exception {
         new ShardTestKit(getSystem()) {{
-            String testName = "testClusteredDataTreeChangeListenerDelayedRegistration";
+            final String testName = "testClusteredDataTreeChangeListenerDelayedRegistration";
             dataStoreContextBuilder.shardElectionTimeoutFactor(1000).
                     customRaftPolicyImplementation(DisableElectionsRaftPolicy.class.getName());
 
@@ -2163,7 +2172,7 @@ public class ShardTest extends AbstractShardTest {
     @Test
     public void testClusteredDataTreeChangeListenerRegistration() throws Exception {
         new ShardTestKit(getSystem()) {{
-            String testName = "testClusteredDataTreeChangeListenerRegistration";
+            final String testName = "testClusteredDataTreeChangeListenerRegistration";
             final ShardIdentifier followerShardID = ShardIdentifier.create("inventory",
                     MemberName.forName(actorFactory.generateActorId(testName + "-follower")), "config");
 
@@ -2184,7 +2193,7 @@ public class ShardTest extends AbstractShardTest {
                     withDispatcher(Dispatchers.DefaultDispatcherId()), leaderShardID.toString());
 
             leaderShard.tell(TimeoutNow.INSTANCE, ActorRef.noSender());
-            String leaderPath = waitUntilLeader(followerShard);
+            final String leaderPath = waitUntilLeader(followerShard);
             assertEquals("Shard leader path", leaderShard.path().toString(), leaderPath);
 
             final YangInstanceIdentifier path = TestModel.TEST_PATH;
