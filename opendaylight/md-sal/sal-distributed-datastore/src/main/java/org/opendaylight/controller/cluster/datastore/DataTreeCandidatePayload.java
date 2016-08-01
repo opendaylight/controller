@@ -14,12 +14,7 @@ import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
-import java.util.AbstractMap.SimpleImmutableEntry;
-import java.util.Map.Entry;
-import java.util.Optional;
-import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.persisted.DataTreeCandidateInputOutput;
-import org.opendaylight.controller.cluster.datastore.persisted.DataTreeCandidateSupplier;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 
@@ -27,7 +22,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
  * @deprecated Deprecated in Boron in favor of CommitTransactionPayload
  */
 @Deprecated
-final class DataTreeCandidatePayload extends Payload implements DataTreeCandidateSupplier, Externalizable {
+final class DataTreeCandidatePayload extends Payload implements Externalizable {
     private static final long serialVersionUID = 1L;
 
     private transient byte[] serialized;
@@ -55,11 +50,8 @@ final class DataTreeCandidatePayload extends Payload implements DataTreeCandidat
         return new DataTreeCandidatePayload(out.toByteArray());
     }
 
-
-    @Override
-    public Entry<Optional<TransactionIdentifier>, DataTreeCandidate> getCandidate() throws IOException {
-        return new SimpleImmutableEntry<>(Optional.empty(),
-                DataTreeCandidateInputOutput.readDataTreeCandidate(ByteStreams.newDataInput(serialized)));
+    public DataTreeCandidate getCandidate() throws IOException {
+        return DataTreeCandidateInputOutput.readDataTreeCandidate(ByteStreams.newDataInput(serialized));
     }
 
     @Override
