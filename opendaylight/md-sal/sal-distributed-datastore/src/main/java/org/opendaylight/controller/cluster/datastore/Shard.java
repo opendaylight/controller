@@ -17,7 +17,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Ticker;
-import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
@@ -50,7 +49,6 @@ import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeList
 import org.opendaylight.controller.cluster.datastore.messages.RegisterDataTreeChangeListener;
 import org.opendaylight.controller.cluster.datastore.messages.ShardLeaderStateChanged;
 import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContext;
-import org.opendaylight.controller.cluster.datastore.persisted.DataTreeCandidateSupplier;
 import org.opendaylight.controller.cluster.datastore.utils.Dispatchers;
 import org.opendaylight.controller.cluster.notifications.LeaderStateChanged;
 import org.opendaylight.controller.cluster.notifications.RegisterRoleChangeListener;
@@ -64,7 +62,6 @@ import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.messages.ServerRemoved;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.opendaylight.yangtools.concepts.Identifier;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.DataValidationFailedException;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.TreeType;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import scala.concurrent.duration.Duration;
@@ -564,21 +561,11 @@ public class Shard extends RaftActor {
 
     @Override
     protected void applyState(final ActorRef clientActor, final Identifier identifier, final Object data) {
-        if (data instanceof DataTreeCandidateSupplier) {
-            if (clientActor == null) {
-                // No clientActor indicates a replica coming from the leader
-                try {
-                    store.applyStateFromLeader(identifier, (DataTreeCandidateSupplier)data);
-                } catch (DataValidationFailedException | IOException e) {
-                    LOG.error("{}: Error applying replica {}", persistenceId(), identifier, e);
-                }
-            } else {
-                // Replication consensus reached, proceed to commit
-                store.payloadReplicationComplete(identifier, (DataTreeCandidateSupplier)data);
-            }
+        if (data instanceof Payload) {
+            // No clientActor indicates a replica coming from the leader
+            store.applyPayload(identifier, (Payload)data, clientActor != null);
         } else {
-            LOG.error("{}: Unknown state received {} ClassLoader {}", persistenceId(), data,
-                data.getClass().getClassLoader());
+            LOG.error("{}: Unknown state for {} received {}", persistenceId(), identifier, data);
         }
     }
 

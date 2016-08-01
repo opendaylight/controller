@@ -12,11 +12,16 @@ import akka.util.Timeout;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Stopwatch;
 import com.google.common.base.Verify;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMap.Builder;
 import com.google.common.primitives.UnsignedLong;
 import java.io.IOException;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayDeque;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -34,6 +39,7 @@ import org.opendaylight.controller.cluster.datastore.persisted.CommitTransaction
 import org.opendaylight.controller.cluster.datastore.persisted.DataTreeCandidateSupplier;
 import org.opendaylight.controller.cluster.datastore.persisted.MetadataShardDataTreeSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.ShardDataTreeSnapshot;
+import org.opendaylight.controller.cluster.datastore.persisted.ShardDataTreeSnapshotMetadata;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
@@ -88,6 +94,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     private final Queue<CommitEntry> pendingTransactions = new ArrayDeque<>();
     private final ShardDataTreeChangeListenerPublisher treeChangeListenerPublisher;
     private final ShardDataChangeListenerPublisher dataChangeListenerPublisher;
+    private final Collection<ShardDataTreeMetadata<?>> metadata;
     private final TipProducingDataTree dataTree;
     private final String logContext;
     private final Shard shard;
@@ -96,7 +103,8 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
 
     public ShardDataTree(final Shard shard, final SchemaContext schemaContext, final TreeType treeType,
             final ShardDataTreeChangeListenerPublisher treeChangeListenerPublisher,
-            final ShardDataChangeListenerPublisher dataChangeListenerPublisher, final String logContext) {
+            final ShardDataChangeListenerPublisher dataChangeListenerPublisher, final String logContext,
+            final ShardDataTreeMetadata<?>... metadata) {
         dataTree = InMemoryDataTreeFactory.getInstance().create(treeType);
         updateSchemaContext(schemaContext);
 
@@ -104,6 +112,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         this.treeChangeListenerPublisher = Preconditions.checkNotNull(treeChangeListenerPublisher);
         this.dataChangeListenerPublisher = Preconditions.checkNotNull(dataChangeListenerPublisher);
         this.logContext = Preconditions.checkNotNull(logContext);
+        this.metadata = ImmutableList.copyOf(metadata);
     }
 
     @VisibleForTesting
@@ -130,17 +139,62 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     }
 
     ShardDataTreeSnapshot takeRecoverySnapshot() {
-        return new MetadataShardDataTreeSnapshot(dataTree.takeSnapshot().readNode(YangInstanceIdentifier.EMPTY).get());
+        final NormalizedNode<?, ?> rootNode = dataTree.takeSnapshot().readNode(YangInstanceIdentifier.EMPTY).get();
+        final Builder<Class<? extends ShardDataTreeSnapshotMetadata<?>>, ShardDataTreeSnapshotMetadata<?>> metaBuilder =
+                ImmutableMap.builder();
+
+        for (ShardDataTreeMetadata<?> m : metadata) {
+            final ShardDataTreeSnapshotMetadata<?> meta = m.toStapshot();
+            if (meta != null) {
+                metaBuilder.put(meta.getType(), meta);
+            }
+        }
+
+        return new MetadataShardDataTreeSnapshot(rootNode, metaBuilder.build());
     }
 
-    void applyRecoveryTransaction(final ReadWriteShardDataTreeTransaction transaction) throws DataValidationFailedException {
-        // FIXME: purge any outstanding transactions
+    void applyRecoverySnapshot(final ShardDataTreeSnapshot snapshot) {
+        final Stopwatch elapsed = Stopwatch.createStarted();
 
-        final DataTreeModification snapshot = transaction.getSnapshot();
-        snapshot.ready();
+        if (!pendingTransactions.isEmpty()) {
+            LOG.warn("{}: applying recovery snapshot with pending transactions", logContext);
+        }
 
-        dataTree.validate(snapshot);
-        dataTree.commit(dataTree.prepare(snapshot));
+        final Map<Class<? extends ShardDataTreeSnapshotMetadata<?>>, ShardDataTreeSnapshotMetadata<?>> snapshotMeta;
+        if (snapshot instanceof MetadataShardDataTreeSnapshot) {
+            snapshotMeta = ((MetadataShardDataTreeSnapshot) snapshot).getMetadata();
+        } else {
+            snapshotMeta = ImmutableMap.of();
+        }
+
+        for (ShardDataTreeMetadata<?> m : metadata) {
+            final ShardDataTreeSnapshotMetadata<?> s = snapshotMeta.get(m.getSupportedType());
+            if (s != null) {
+                m.applySnapshot(s);
+            } else {
+                m.reset();
+            }
+        }
+
+        final DataTreeModification mod = dataTree.takeSnapshot().newModification();
+        // delete everything first
+        mod.delete(YangInstanceIdentifier.EMPTY);
+
+        try {
+            final java.util.Optional<NormalizedNode<?, ?>> maybeNode = snapshot.getRootNode();
+            if (maybeNode.isPresent()) {
+                // Add everything from the remote node back
+                mod.write(YangInstanceIdentifier.EMPTY, maybeNode.get());
+            }
+
+            mod.ready();
+            dataTree.validate(mod);
+            dataTree.commit(dataTree.prepare(mod));
+            LOG.debug("{}: recovery snapshot applied in %s", logContext, elapsed);
+        } catch (Exception e) {
+            // TODO: we should probably die here and now
+            LOG.error("{}: Failed to apply snapshot to data tree", logContext, e);
+        }
     }
 
     private ShardDataTreeTransactionChain ensureTransactionChain(final LocalHistoryIdentifier localHistoryIdentifier) {
@@ -239,7 +293,8 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         return pendingTransactions.size();
     }
 
-    void applyForeignCandidate(final Identifier identifier, final DataTreeCandidate foreign) throws DataValidationFailedException {
+    private void applyForeignCandidate(final Identifier identifier, final DataTreeCandidate foreign)
+            throws DataValidationFailedException {
         LOG.debug("{}: Applying foreign transaction {}", logContext, identifier);
 
         final DataTreeModification mod = dataTree.takeSnapshot().newModification();
@@ -441,28 +496,6 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         LOG.debug("{}: Transaction {} submitted to persistence", logContext, txId);
     }
 
-    private void payloadReplicationComplete(final TransactionIdentifier txId, final DataTreeCandidateSupplier payload) {
-        final CommitEntry current = pendingTransactions.peek();
-        if (current == null) {
-            LOG.warn("{}: No outstanding transactions, ignoring consensus on transaction {}", logContext, txId);
-            return;
-        }
-
-        if (!current.cohort.getIdentifier().equals(txId)) {
-            LOG.warn("{}: Head of queue is {}, ignoring consensus on transaction {}", logContext,
-                current.cohort.getIdentifier(), txId);
-            return;
-        }
-
-        finishCommit(current.cohort);
-    }
-
-    void payloadReplicationComplete(final Identifier identifier, final DataTreeCandidateSupplier payload) {
-        // For now we do not care about anything else but transactions
-        Verify.verify(identifier instanceof TransactionIdentifier);
-        payloadReplicationComplete((TransactionIdentifier)identifier, payload);
-    }
-
     void processCohortRegistryCommand(final ActorRef sender, final CohortRegistryCommand message) {
         cohortRegistry.process(sender, message);
     }
@@ -471,11 +504,6 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
             final DataTreeModification modification) {
         return new SimpleShardDataTreeCohort(this, modification, txId,
             cohortRegistry.createCohort(schemaContext, txId, COMMIT_STEP_TIMEOUT));
-    }
-
-    void applyStateFromLeader(final Identifier identifier, final DataTreeCandidateSupplier payload)
-            throws DataValidationFailedException, IOException {
-        applyForeignCandidate(identifier, payload.getCandidate().getValue());
     }
 
     void checkForExpiredTransactions(final long transactionCommitTimeoutMillis) {
@@ -564,5 +592,44 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         }
 
         LOG.debug("{}: aborted transaction {} not found in the queue", logContext, cohort.getIdentifier());
+    }
+
+    private void payloadReplicationComplete(final Identifier identifier, final DataTreeCandidateSupplier payload) {
+        // For now we do not care about anything else but transactions
+        Verify.verify(identifier instanceof TransactionIdentifier);
+
+        final TransactionIdentifier txId = (TransactionIdentifier) identifier;
+        final CommitEntry current = pendingTransactions.peek();
+        if (current == null) {
+            LOG.warn("{}: No outstanding transactions, ignoring consensus on transaction {}", logContext, txId);
+            return;
+        }
+
+        if (!current.cohort.getIdentifier().equals(txId)) {
+            LOG.warn("{}: Head of queue is {}, ignoring consensus on transaction {}", logContext,
+                current.cohort.getIdentifier(), txId);
+            return;
+        }
+
+        finishCommit(current.cohort);
+    }
+
+    void applyPayload(final Identifier identifier, final Payload data, final boolean localState) {
+        if (data instanceof DataTreeCandidateSupplier) {
+            final DataTreeCandidateSupplier supplier = (DataTreeCandidateSupplier) data;
+            if (!localState) {
+                try {
+                    applyForeignCandidate(identifier, supplier.getCandidate().getValue());
+                } catch (DataValidationFailedException | IOException e) {
+                    LOG.error("{}: Error applying replica {}", logContext, identifier, e);
+                }
+            } else {
+                // Replication consensus reached, proceed to commit
+                payloadReplicationComplete(identifier, supplier);
+            }
+        } else {
+            LOG.warn("{}: ignoring unhandled {} identifier {} payload {}", logContext, localState ? "local" : "remote",
+                    identifier, data);
+        }
     }
 }
