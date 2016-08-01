@@ -18,7 +18,6 @@ import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
-import org.opendaylight.controller.cluster.datastore.utils.PruningDataTreeModification;
 import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidateTip;
@@ -75,11 +74,7 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort implements Ide
 
     @Override
     DataTreeModification getDataTreeModification() {
-        DataTreeModification dataTreeModification = transaction;
-        if (transaction instanceof PruningDataTreeModification){
-            dataTreeModification = ((PruningDataTreeModification) transaction).getResultingModification();
-        }
-        return dataTreeModification;
+        return transaction;
     }
 
     @Override

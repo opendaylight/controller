@@ -293,7 +293,7 @@ public class PruningDataTreeModificationTest {
 
     private DataTreeCandidateTip getCandidate() throws DataValidationFailedException {
         pruningDataTreeModification.ready();
-        DataTreeModification mod = pruningDataTreeModification.getResultingModification();
+        DataTreeModification mod = pruningDataTreeModification.delegate();
         mod = mod == proxyModification ? realModification : mod;
         dataTree.validate(mod);
         DataTreeCandidateTip candidate = dataTree.prepare(mod);
