@@ -157,6 +157,10 @@ public class Candidate extends AbstractRaftActorBehavior {
             if (rpc.getTerm() > context.getTermInformation().getCurrentTerm()) {
                 context.getTermInformation().updateAndPersist(rpc.getTerm(), null);
 
+                if (message instanceof RequestVote) {
+                    super.handleMessage(sender, message);
+                }
+
                 return internalSwitchBehavior(RaftState.Follower);
             }
         }
