@@ -34,6 +34,24 @@
       "revId": "328b83c36aacd9c5dea374459008ffcde77b2f71",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_e0da6be8",
+        "filename": "opendaylight/md-sal/cds-access-api/src/main/java/org/opendaylight/controller/cluster/access/commands/ConnectClientSuccessProxyV1.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-08-02T14:44:19Z",
+      "side": 1,
+      "message": "I meant on the string. There wouldn\u0027t really be string reuse with this message and we shouldn\u0027t hit the 64K writeUTF limit. It\u0027s fine either way.",
+      "parentUuid": "7a6b29fe_003167ec",
+      "revId": "328b83c36aacd9c5dea374459008ffcde77b2f71",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
