@@ -117,7 +117,9 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput 
                 YangInstanceIdentifier.AugmentationIdentifier augIdentifier =
                     new YangInstanceIdentifier.AugmentationIdentifier(readQNameSet());
 
-                LOG.debug("Reading augmentation node {} ", augIdentifier);
+                if(LOG.isDebugEnabled()) {
+                    LOG.debug("Reading augmentation node {} ", augIdentifier);
+                }
 
                 return addDataContainerChildren(Builders.augmentationBuilder().
                         withNodeIdentifier(augIdentifier)).build();
@@ -131,7 +133,9 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput 
                 Object value = readObject();
                 NodeWithValue<Object> leafIdentifier = new NodeWithValue<>(name, value);
 
-                LOG.debug("Reading leaf set entry node {}, value {}", leafIdentifier, value);
+                if(LOG.isDebugEnabled()) {
+                    LOG.debug("Reading leaf set entry node {}, value {}", leafIdentifier, value);
+                }
 
                 return leafSetEntryBuilder().withNodeIdentifier(leafIdentifier).withValue(value).build();
 
@@ -139,7 +143,9 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput 
                 NodeIdentifierWithPredicates entryIdentifier = new NodeIdentifierWithPredicates(
                         readQName(), readKeyValueMap());
 
-                LOG.debug("Reading map entry node {} ", entryIdentifier);
+                if(LOG.isDebugEnabled()) {
+                    LOG.debug("Reading map entry node {} ", entryIdentifier);
+                }
 
                 return addDataContainerChildren(Builders.mapEntryBuilder().
                         withNodeIdentifier(entryIdentifier)).build();
@@ -172,7 +178,9 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput 
 
         switch(nodeType) {
             case NodeTypes.LEAF_NODE :
-                LOG.debug("Read leaf node {}", identifier);
+                if(LOG.isDebugEnabled()) {
+                    LOG.debug("Read leaf node {}", identifier);
+                }
                 // Read the object value
                 return leafBuilder().withNodeIdentifier(identifier).withValue(readObject()).build();
 
@@ -181,42 +189,59 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput 
                 return Builders.anyXmlBuilder().withValue((DOMSource) readObject()).build();
 
             case NodeTypes.MAP_NODE :
-                LOG.debug("Read map node {}", identifier);
+                if(LOG.isDebugEnabled()) {
+                    LOG.debug("Read map node {}", identifier);
+                }
                 return addDataContainerChildren(Builders.mapBuilder().
                         withNodeIdentifier(identifier)).build();
 
             case NodeTypes.CHOICE_NODE :
-                LOG.debug("Read choice node {}", identifier);
+                if(LOG.isDebugEnabled()) {
+                    LOG.debug("Read choice node {}", identifier);
+                }
+
                 return addDataContainerChildren(Builders.choiceBuilder().
                         withNodeIdentifier(identifier)).build();
 
             case NodeTypes.ORDERED_MAP_NODE :
-                LOG.debug("Reading ordered map node {}", identifier);
+                if(LOG.isDebugEnabled()) {
+                    LOG.debug("Reading ordered map node {}", identifier);
+                }
                 return addDataContainerChildren(Builders.orderedMapBuilder().
                         withNodeIdentifier(identifier)).build();
 
             case NodeTypes.UNKEYED_LIST :
-                LOG.debug("Read unkeyed list node {}", identifier);
+                if(LOG.isDebugEnabled()) {
+                    LOG.debug("Read unkeyed list node {}", identifier);
+                }
                 return addDataContainerChildren(Builders.unkeyedListBuilder().
                         withNodeIdentifier(identifier)).build();
 
             case NodeTypes.UNKEYED_LIST_ITEM :
-                LOG.debug("Read unkeyed list item node {}", identifier);
+                if(LOG.isDebugEnabled()) {
+                    LOG.debug("Read unkeyed list item node {}", identifier);
+                }
                 return addDataContainerChildren(Builders.unkeyedListEntryBuilder().
                         withNodeIdentifier(identifier)).build();
 
             case NodeTypes.CONTAINER_NODE :
-                LOG.debug("Read container node {}", identifier);
+                if(LOG.isDebugEnabled()) {
+                    LOG.debug("Read container node {}", identifier);
+                }
                 return addDataContainerChildren(Builders.containerBuilder().
                         withNodeIdentifier(identifier)).build();
 
             case NodeTypes.LEAF_SET :
-                LOG.debug("Read leaf set node {}", identifier);
+                if(LOG.isDebugEnabled()) {
+                    LOG.debug("Read leaf set node {}", identifier);
+                }
                 return addLeafSetChildren(identifier.getNodeType(),
                         Builders.leafSetBuilder().withNodeIdentifier(identifier)).build();
 
             case NodeTypes.ORDERED_LEAF_SET:
-                LOG.debug("Read ordered leaf set node {}", identifier);
+                if(LOG.isDebugEnabled()) {
+                    LOG.debug("Read ordered leaf set node {}", identifier);
+                }
                 ListNodeBuilder<Object, LeafSetEntryNode<Object>> orderedLeafSetBuilder =
                         Builders.orderedLeafSetBuilder().withNodeIdentifier(identifier);
                 orderedLeafSetBuilder = addLeafSetChildren(identifier.getNodeType(), orderedLeafSetBuilder);
