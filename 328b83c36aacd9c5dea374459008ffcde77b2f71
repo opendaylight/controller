@@ -16,6 +16,24 @@
       "revId": "328b83c36aacd9c5dea374459008ffcde77b2f71",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_003167ec",
+        "filename": "opendaylight/md-sal/cds-access-api/src/main/java/org/opendaylight/controller/cluster/access/commands/ConnectClientSuccessProxyV1.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-08-02T13:38:19Z",
+      "side": 1,
+      "message": "do you mean writeObject() on the ActorSelection or the String? I do not think we will be seeing same Strings, though ActorReselection components will certainly be shared...",
+      "parentUuid": "7a6b29fe_f08c0082",
+      "revId": "328b83c36aacd9c5dea374459008ffcde77b2f71",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
