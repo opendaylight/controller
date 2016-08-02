@@ -313,7 +313,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
         context.getTermInformation().update(2, "test");
 
         // Send an unknown message so that the state of the RaftActor remains unchanged
-        RaftActorBehavior expected = behavior.handleMessage(candidateActor, "unknown");
+        behavior.handleMessage(candidateActor, "unknown");
 
         RaftActorBehavior raftBehavior = behavior.handleMessage(candidateActor, appendEntries);
 
@@ -333,6 +333,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
         return new MockRaftActorContext("candidate", getSystem(), candidateActor);
     }
 
+    @SuppressWarnings("unchecked")
     private Map<String, String> setupPeers(final int count) {
         Map<String, String> peerMap = new HashMap<>();
         peerActors = new TestActorRef[count];
@@ -349,6 +350,10 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
     protected void assertStateChangesToFollowerWhenRaftRPCHasNewerTerm(final MockRaftActorContext actorContext,
             final ActorRef actorRef, final RaftRPC rpc) throws Exception {
         super.assertStateChangesToFollowerWhenRaftRPCHasNewerTerm(actorContext, actorRef, rpc);
-        assertEquals("New votedFor", null, actorContext.getTermInformation().getVotedFor());
+        if(rpc instanceof RequestVote) {
+            assertEquals("New votedFor", ((RequestVote)rpc).getCandidateId(), actorContext.getTermInformation().getVotedFor());
+        } else {
+            assertEquals("New votedFor", null, actorContext.getTermInformation().getVotedFor());
+        }
     }
 }

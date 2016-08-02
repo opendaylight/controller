@@ -157,6 +157,12 @@ public class Candidate extends AbstractRaftActorBehavior {
             if (rpc.getTerm() > context.getTermInformation().getCurrentTerm()) {
                 context.getTermInformation().updateAndPersist(rpc.getTerm(), null);
 
+                // The raft paper does not say whether or not a Candidate can/should process a RequestVote in
+                // this case but doing so gains quicker convergence when the sender's log is more up-to-date.
+                if (message instanceof RequestVote) {
+                    super.handleMessage(sender, message);
+                }
+
                 return internalSwitchBehavior(RaftState.Follower);
             }
         }
