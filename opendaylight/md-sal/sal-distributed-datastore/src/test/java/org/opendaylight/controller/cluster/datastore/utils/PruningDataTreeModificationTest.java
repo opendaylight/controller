@@ -43,6 +43,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidateTip;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModificationCursor;
@@ -183,22 +184,21 @@ public class PruningDataTreeModificationTest {
 
     @Test
     public void testWriteRootNode() throws Exception {
-        final Shard mockShard = Mockito.mock(Shard.class);
+        final DataTree dataTree = InMemoryDataTreeFactory.getInstance().create(TreeType.CONFIGURATION);
+        dataTree.setSchemaContext(SCHEMA_CONTEXT);
 
-        ShardDataTree shardDataTree = new ShardDataTree(mockShard, SCHEMA_CONTEXT, TreeType.CONFIGURATION);
-        DataTreeModification mod = shardDataTree.newModification();
-
+        DataTreeModification mod = dataTree.takeSnapshot().newModification();
         mod.write(CarsModel.BASE_PATH, CarsModel.create());
-        shardDataTree.commit(mod);
+        mod.ready();
+        dataTree.commit(dataTree.prepare(mod));
 
-        NormalizedNode<?, ?> normalizedNode = shardDataTree.readNode(YangInstanceIdentifier.EMPTY).get();
+        NormalizedNode<?, ?> normalizedNode = dataTree.takeSnapshot().readNode(YangInstanceIdentifier.EMPTY).get();
         pruningDataTreeModification.write(YangInstanceIdentifier.EMPTY, normalizedNode);
         dataTree.commit(getCandidate());
 
         Optional<NormalizedNode<?, ?>> actual = dataTree.takeSnapshot().readNode(YangInstanceIdentifier.EMPTY);
         assertEquals("Root present", true, actual.isPresent());
         assertEquals("Root node", normalizedNode, actual.get());
-
     }
 
     @Test
