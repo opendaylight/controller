@@ -337,7 +337,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
 
     private void allMetadataCommittedTransaction(final TransactionIdentifier txId) {
         for (ShardDataTreeMetadata<?> m : metadata) {
-            m.transactionCommitted(txId);
+            m.onTransactionCommitted(txId);
         }
     }
 

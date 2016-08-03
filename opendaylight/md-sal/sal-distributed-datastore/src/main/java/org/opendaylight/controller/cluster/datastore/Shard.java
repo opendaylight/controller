@@ -143,6 +143,7 @@ public class Shard extends RaftActor {
     private final ShardTransactionMessageRetrySupport messageRetrySupport;
 
     private final Map<FrontendIdentifier, LeaderFrontendState> knownFrontends = new HashMap<>();
+    private final FrontendMetadata followerFrontendState = new FrontendMetadata();
 
     protected Shard(final AbstractBuilder<?, ?> builder) {
         super(builder.getId().toString(), builder.getPeerAddresses(),
@@ -158,7 +159,8 @@ public class Shard extends RaftActor {
 
         store = new ShardDataTree(this, builder.getSchemaContext(), builder.getTreeType(),
                 new ShardDataTreeChangeListenerPublisherActorProxy(getContext(), name + "-DTCL-publisher"),
-                new ShardDataChangeListenerPublisherActorProxy(getContext(), name + "-DCL-publisher"), name);
+                new ShardDataChangeListenerPublisherActorProxy(getContext(), name + "-DCL-publisher"), name,
+                followerFrontendState);
 
         shardMBean = ShardMBeanFactory.getShardStatsMBean(name.toString(),
                 datastoreContext.getDataStoreMXBeanType());
