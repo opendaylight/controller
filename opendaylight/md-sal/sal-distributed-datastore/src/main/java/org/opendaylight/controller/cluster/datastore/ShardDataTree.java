@@ -368,6 +368,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         return ensureTransactionChain(txId.getHistoryId()).newReadWriteTransaction(txId);
     }
 
+    @VisibleForTesting
     public void notifyListeners(final DataTreeCandidate candidate) {
         treeChangeListenerPublisher.publishChanges(candidate, logContext);
         dataChangeListenerPublisher.publishChanges(candidate, logContext);
@@ -454,10 +455,11 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         return dataTree.takeSnapshot().readNode(path);
     }
 
-    public DataTreeSnapshot takeSnapshot() {
+    DataTreeSnapshot takeSnapshot() {
         return dataTree.takeSnapshot();
     }
 
+    @VisibleForTesting
     public DataTreeModification newModification() {
         return dataTree.takeSnapshot().newModification();
     }
