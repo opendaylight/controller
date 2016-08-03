@@ -113,6 +113,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
           </executions>
         </plugin>
         <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-clean-plugin</artifactId>
           <configuration>
             <filesets>
@@ -155,6 +156,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   </build>
   <profiles>
     <profile>
+      <id>attach-config-without-filtering</id>
       <activation>
         <file>
           <exists>${config.file}</exists>
