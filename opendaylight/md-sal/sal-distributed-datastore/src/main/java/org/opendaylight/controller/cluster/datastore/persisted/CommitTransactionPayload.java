@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.datastore.persisted;
 
 import com.google.common.annotations.Beta;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Throwables;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import java.io.DataInput;
@@ -22,7 +23,10 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
+import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Payload persisted when a transaction commits. It contains the transaction identifier and the
@@ -31,7 +35,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
  * @author Robert Varga
  */
 @Beta
-public final class CommitTransactionPayload extends Payload implements DataTreeCandidateSupplier, Serializable {
+public final class CommitTransactionPayload extends Payload implements DataTreeCandidateSupplier, Identifiable<TransactionIdentifier>, Serializable {
     private static final class Proxy implements Externalizable {
         private static final long serialVersionUID = 1L;
         private byte[] serialized;
@@ -58,16 +62,20 @@ public final class CommitTransactionPayload extends Payload implements DataTreeC
         }
 
         private Object readResolve() {
-            return new CommitTransactionPayload(serialized);
+            return new CommitTransactionPayload(serialized, null);
         }
     }
 
+    private static final Logger LOG = LoggerFactory.getLogger(CommitTransactionPayload.class);
     private static final long serialVersionUID = 1L;
 
     private final byte[] serialized;
 
-    CommitTransactionPayload(final byte[] serialized) {
+    private volatile TransactionIdentifier identifier;
+
+    CommitTransactionPayload(final byte[] serialized, final TransactionIdentifier identifier) {
         this.serialized = Preconditions.checkNotNull(serialized);
+        this.identifier = identifier;
     }
 
     public static CommitTransactionPayload create(final TransactionIdentifier transactionId,
@@ -75,7 +83,7 @@ public final class CommitTransactionPayload extends Payload implements DataTreeC
         final ByteArrayDataOutput out = ByteStreams.newDataOutput();
         transactionId.writeTo(out);
         DataTreeCandidateInputOutput.writeDataTreeCandidate(out, candidate);
-        return new CommitTransactionPayload(out.toByteArray());
+        return new CommitTransactionPayload(out.toByteArray(), transactionId);
     }
 
     @Override
@@ -92,5 +100,26 @@ public final class CommitTransactionPayload extends Payload implements DataTreeC
 
     private Object writeReplace() {
         return new Proxy(serialized);
+    }
+
+    @Override
+    public TransactionIdentifier getIdentifier() {
+        TransactionIdentifier local = identifier;
+        if (local == null) {
+            synchronized (this) {
+                local = identifier;
+                if (local == null) {
+                    LOG.warn("Inefficient code path: getCandidate() should have been called");
+                    try {
+                        local = getCandidate().getKey();
+                    } catch (IOException e) {
+                        throw Throwables.propagate(e);
+                    }
+                    identifier = local;
+                }
+            }
+        }
+
+        return local;
     }
 }
