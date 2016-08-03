@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.datastore;
 import com.google.common.base.Verify;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.persisted.ShardDataTreeSnapshotMetadata;
 
@@ -29,5 +30,7 @@ abstract class ShardDataTreeMetadata<T extends ShardDataTreeSnapshotMetadata<T>>
     abstract @Nullable T toStapshot();
 
     // Lifecycle events
-    abstract void transactionCommitted(TransactionIdentifier txId);
+    abstract void onTransactionCommitted(TransactionIdentifier txId);
+    abstract void onHistoryClosed(LocalHistoryIdentifier historyId);
+    abstract void onHistoryPurged(LocalHistoryIdentifier historyId);
 }
