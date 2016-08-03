@@ -144,6 +144,7 @@ public class Shard extends RaftActor {
     private final ShardTransactionMessageRetrySupport messageRetrySupport;
 
     private final Map<FrontendIdentifier, LeaderFrontendState> knownFrontends = new HashMap<>();
+    private final FrontendMetadata followerFrontendState = new FrontendMetadata();
 
     protected Shard(final AbstractBuilder<?, ?> builder) {
         super(builder.getId().toString(), builder.getPeerAddresses(),
