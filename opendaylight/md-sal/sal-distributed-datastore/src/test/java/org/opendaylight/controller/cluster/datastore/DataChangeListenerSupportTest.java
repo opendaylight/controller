@@ -14,7 +14,6 @@ import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.O
 import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.OUTER_LIST_PATH;
 import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.OUTER_LIST_QNAME;
 import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.TEST_PATH;
-import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.TEST_QNAME;
 import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.innerEntryPath;
 import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.innerNode;
 import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.outerEntryKey;
@@ -23,15 +22,13 @@ import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.o
 import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.outerNodeEntry;
 import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.testNodeWithOuter;
 import akka.actor.ActorRef;
+import akka.dispatch.Dispatchers;
 import akka.testkit.TestActorRef;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeListener;
 import org.opendaylight.controller.cluster.datastore.utils.MockDataChangeListener;
-import org.opendaylight.controller.cluster.raft.TestActorFactory;
+import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNodes;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 
@@ -41,127 +38,202 @@ import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
  * @author Thomas Pantelis
  */
 public class DataChangeListenerSupportTest extends AbstractShardTest {
-    private final TestActorFactory actorFactory = new TestActorFactory(getSystem());
-
-    private Shard shard;
-    private DataChangeListenerSupport support;
-
-    @Before
-    public void setup() throws InterruptedException {
-        shard = createShard();
-        support = new DataChangeListenerSupport(shard);
-    }
-
-    @Override
-    @After
-    public void tearDown() {
-        super.tearDown();
-        actorFactory.close();
-    }
 
     @Test
     public void testChangeListenerWithNoInitialData() throws Exception {
-        MockDataChangeListener listener = registerChangeListener(TEST_PATH, DataChangeScope.ONE, 0, true);
 
-        listener.expectNoMoreChanges("Unexpected initial change event");
+        new ShardTestKit(getSystem()) {
+            {
+                final TestActorRef<Shard> actor = actorFactory.createTestActor(
+                        newShardProps().withDispatcher(Dispatchers.DefaultDispatcherId()),
+                        "testChangeListenerWithNoInitialData");
+
+                waitUntilLeader(actor);
+
+                final Shard shard = actor.underlyingActor();
+                final MockDataChangeListener listener = new MockDataChangeListener(0);
+                final ActorRef dclActor = actorFactory.createActor(DataChangeListener.props(listener),
+                        "testChangeListenerWithNoInitialData-DataChangeListener");
+                final DataChangeListenerSupport support = new DataChangeListenerSupport(shard);
+                support.onMessage(new RegisterChangeListener(TEST_PATH, dclActor, DataChangeScope.ONE, false),true,true);
+
+                listener.expectNoMoreChanges("Unexpected initial change event");
+            }
+        };
     }
 
     @Test
     public void testInitialChangeListenerEventWithContainerPath() throws Exception {
-        writeToStore(shard.getDataStore(), TEST_PATH, ImmutableNodes.containerNode(TEST_QNAME));
 
-        MockDataChangeListener listener = registerChangeListener(TEST_PATH, DataChangeScope.ONE, 1, true);
+        new ShardTestKit(getSystem()) {
+            {
+                final TestActorRef<Shard> actor = actorFactory.createTestActor(
+                        newShardProps().withDispatcher(Dispatchers.DefaultDispatcherId()),
+                        "testInitialChangeListenerEventWithContainerPath");
 
-        listener.waitForChangeEvents(TEST_PATH);
+                waitUntilLeader(actor);
+
+                final Shard shard = actor.underlyingActor();
+                writeToStore(shard.getDataStore(), TestModel.TEST_PATH,
+                        ImmutableNodes.containerNode(TestModel.TEST_QNAME));
+                final MockDataChangeListener listener = new MockDataChangeListener(1);
+                final ActorRef dclActor = actorFactory.createActor(DataChangeListener.props(listener),
+                        "testInitialChangeListenerEventWithContainerPath-DataChangeListener");
+                final DataChangeListenerSupport support = new DataChangeListenerSupport(shard);
+                support.onMessage(new RegisterChangeListener(TEST_PATH, dclActor, DataChangeScope.ONE, false),true,true);
+
+                listener.waitForChangeEvents(TEST_PATH);
+            }
+        };
     }
 
     @Test
     public void testInitialChangeListenerEventWithListPath() throws Exception {
-        mergeToStore(shard.getDataStore(), TEST_PATH, testNodeWithOuter(1, 2));
+        new ShardTestKit(getSystem()) {
+            {
+                final TestActorRef<Shard> actor = actorFactory.createTestActor(
+                        newShardProps().withDispatcher(Dispatchers.DefaultDispatcherId()),
+                        "testInitialChangeListenerEventWithListPath");
 
-        MockDataChangeListener listener = registerChangeListener(OUTER_LIST_PATH, DataChangeScope.ONE, 1, true);
+                waitUntilLeader(actor);
 
-        listener.waitForChangeEvents();
-        assertEquals("Outer entry 1 present", true, NormalizedNodes.findNode(
-                listener.getCreatedData(0, OUTER_LIST_PATH), outerEntryKey(1)).isPresent());
-        assertEquals("Outer entry 2 present", true, NormalizedNodes.findNode(
-                listener.getCreatedData(0, OUTER_LIST_PATH), outerEntryKey(2)).isPresent());
+                final Shard shard = actor.underlyingActor();
+                mergeToStore(shard.getDataStore(), TEST_PATH, testNodeWithOuter(1, 2));
+
+                final MockDataChangeListener listener = new MockDataChangeListener(1);
+                final ActorRef dclActor = actorFactory.createActor(DataChangeListener.props(listener),
+                        "testInitialChangeListenerEventWithListPath-DataChangeListener");
+                final DataChangeListenerSupport support = new DataChangeListenerSupport(shard);
+                support.onMessage(new RegisterChangeListener(OUTER_LIST_PATH, dclActor, DataChangeScope.ONE, false),
+                        true, true);
+
+                listener.waitForChangeEvents();
+                assertEquals("Outer entry 1 present", true, NormalizedNodes
+                        .findNode(listener.getCreatedData(0, OUTER_LIST_PATH), outerEntryKey(1)).isPresent());
+                assertEquals("Outer entry 2 present", true, NormalizedNodes
+                        .findNode(listener.getCreatedData(0, OUTER_LIST_PATH), outerEntryKey(2)).isPresent());
+            }
+        };
     }
 
     @Test
     public void testInitialChangeListenerEventWithWildcardedListPath() throws Exception {
-        mergeToStore(shard.getDataStore(), TEST_PATH, testNodeWithOuter(1, 2));
-        writeToStore(shard.getDataStore(), OUTER_CONTAINER_PATH, ImmutableNodes.containerNode(OUTER_CONTAINER_QNAME));
 
-        MockDataChangeListener listener = registerChangeListener(OUTER_LIST_PATH.node(OUTER_LIST_QNAME),
-                DataChangeScope.ONE, 1, true);
+        new ShardTestKit(getSystem()) {
+            {
+                final TestActorRef<Shard> actor = actorFactory.createTestActor(
+                        newShardProps().withDispatcher(Dispatchers.DefaultDispatcherId()),
+                        "testInitialChangeListenerEventWithWildcardedListPath");
 
-        listener.waitForChangeEvents();
-        listener.verifyCreatedData(0, outerEntryPath(1));
-        listener.verifyCreatedData(0, outerEntryPath(2));
-        listener.verifyNoCreatedData(0, OUTER_CONTAINER_PATH);
+                waitUntilLeader(actor);
+
+                final Shard shard = actor.underlyingActor();
+
+                mergeToStore(shard.getDataStore(), TEST_PATH, testNodeWithOuter(1, 2));
+                writeToStore(shard.getDataStore(), OUTER_CONTAINER_PATH,
+                        ImmutableNodes.containerNode(OUTER_CONTAINER_QNAME));
+
+                final MockDataChangeListener listener = new MockDataChangeListener(1);
+                final ActorRef dclActor = actorFactory.createActor(DataChangeListener.props(listener),
+                        "testInitialChangeListenerEventWithWildcardedListPath-DataChangeListener");
+                final DataChangeListenerSupport support = new DataChangeListenerSupport(shard);
+                support.onMessage(new RegisterChangeListener(OUTER_LIST_PATH.node(OUTER_LIST_QNAME), dclActor,
+                        DataChangeScope.ONE, false), true, true);
+
+                listener.waitForChangeEvents();
+                listener.verifyCreatedData(0, outerEntryPath(1));
+                listener.verifyCreatedData(0, outerEntryPath(2));
+                listener.verifyNoCreatedData(0, OUTER_CONTAINER_PATH);
+            }
+        };
     }
 
     @Test
     public void testInitialChangeListenerEventWithNestedWildcardedListsPath() throws Exception {
-        mergeToStore(shard.getDataStore(), TEST_PATH, testNodeWithOuter(outerNode(
-                outerNodeEntry(1, innerNode("one", "two")), outerNodeEntry(2, innerNode("three", "four")))));
 
-        MockDataChangeListener listener = registerChangeListener(
-                OUTER_LIST_PATH.node(OUTER_LIST_QNAME).node(INNER_LIST_QNAME).node(INNER_LIST_QNAME),
-                DataChangeScope.ONE, 1, true);
+        new ShardTestKit(getSystem()) {
+            {
+                final TestActorRef<Shard> actor = actorFactory.createTestActor(
+                        newShardProps().withDispatcher(Dispatchers.DefaultDispatcherId()),
+                        "testInitialChangeListenerEventWithNestedWildcardedListsPath");
 
-        listener.waitForChangeEvents();
-        listener.verifyCreatedData(0, innerEntryPath(1, "one"));
-        listener.verifyCreatedData(0, innerEntryPath(1, "two"));
-        listener.verifyCreatedData(0, innerEntryPath(2, "three"));
-        listener.verifyCreatedData(0, innerEntryPath(2, "four"));
+                waitUntilLeader(actor);
 
-        // Register for a specific outer list entry
+                final Shard shard = actor.underlyingActor();
 
-        MockDataChangeListener listener2 = registerChangeListener(
-                OUTER_LIST_PATH.node(outerEntryKey(1)).node(INNER_LIST_QNAME).node(INNER_LIST_QNAME),
-                DataChangeScope.ONE, 1, true);
+                mergeToStore(shard.getDataStore(), TEST_PATH,
+                        testNodeWithOuter(outerNode(outerNodeEntry(1, innerNode("one", "two")),
+                                outerNodeEntry(2, innerNode("three", "four")))));
 
-        listener2.waitForChangeEvents();
-        listener2.verifyCreatedData(0, innerEntryPath(1, "one"));
-        listener2.verifyCreatedData(0, innerEntryPath(1, "two"));
-        listener2.verifyNoCreatedData(0, innerEntryPath(2, "three"));
-        listener2.verifyNoCreatedData(0, innerEntryPath(2, "four"));
+                final MockDataChangeListener listener = new MockDataChangeListener(1);
+                final ActorRef dclActor = actorFactory.createActor(DataChangeListener.props(listener),
+                        "testInitialChangeListenerEventWithNestedWildcardedListsPath-DataChangeListener");
+                final DataChangeListenerSupport support = new DataChangeListenerSupport(shard);
+                support.onMessage(new RegisterChangeListener(OUTER_LIST_PATH.node(OUTER_LIST_QNAME).node(INNER_LIST_QNAME).node(INNER_LIST_QNAME), dclActor,
+                        DataChangeScope.ONE, false), true, true);
+
+
+                listener.waitForChangeEvents();
+                listener.verifyCreatedData(0, innerEntryPath(1, "one"));
+                listener.verifyCreatedData(0, innerEntryPath(1, "two"));
+                listener.verifyCreatedData(0, innerEntryPath(2, "three"));
+                listener.verifyCreatedData(0, innerEntryPath(2, "four"));
+
+                // Register for a specific outer list entry
+                final MockDataChangeListener listener2 = new MockDataChangeListener(1);
+                final ActorRef dclActor2 = actorFactory.createActor(DataChangeListener.props(listener2),
+                        "testInitialChangeListenerEventWithNestedWildcardedListsPath-DataChangeListener2");
+                final DataChangeListenerSupport support2 = new DataChangeListenerSupport(shard);
+                support2.onMessage(new RegisterChangeListener(
+                        OUTER_LIST_PATH.node(outerEntryKey(1)).node(INNER_LIST_QNAME).node(INNER_LIST_QNAME), dclActor2,
+                        DataChangeScope.ONE, false), true, true);
+
+                listener2.waitForChangeEvents();
+                listener2.verifyCreatedData(0, innerEntryPath(1, "one"));
+                listener2.verifyCreatedData(0, innerEntryPath(1, "two"));
+                listener2.verifyNoCreatedData(0, innerEntryPath(2, "three"));
+                listener2.verifyNoCreatedData(0, innerEntryPath(2, "four"));
+            }
+        };
     }
 
     @Test
     public void testInitialChangeListenerEventWhenNotInitiallyLeader() throws Exception {
-        mergeToStore(shard.getDataStore(), TEST_PATH, testNodeWithOuter(outerNode(
-                outerNodeEntry(1, innerNode("one", "two")), outerNodeEntry(2, innerNode("three", "four")))));
 
-        MockDataChangeListener listener = registerChangeListener(
-                OUTER_LIST_PATH.node(OUTER_LIST_QNAME).node(INNER_LIST_QNAME).node(INNER_LIST_QNAME),
-                DataChangeScope.ONE, 0, false);
+        new ShardTestKit(getSystem()) {
+            {
+                final TestActorRef<Shard> actor = actorFactory.createTestActor(
+                        newShardProps().withDispatcher(Dispatchers.DefaultDispatcherId()),
+                        "testInitialChangeListenerEventWhenNotInitiallyLeader");
 
-        listener.expectNoMoreChanges("Unexpected initial change event");
-        listener.reset(1);
+                waitUntilLeader(actor);
 
-        support.onLeadershipChange(true, true);
+                final Shard shard = actor.underlyingActor();
 
-        listener.waitForChangeEvents();
-        listener.verifyCreatedData(0, innerEntryPath(1, "one"));
-        listener.verifyCreatedData(0, innerEntryPath(1, "two"));
-        listener.verifyCreatedData(0, innerEntryPath(2, "three"));
-        listener.verifyCreatedData(0, innerEntryPath(2, "four"));
-    }
+                mergeToStore(shard.getDataStore(), TEST_PATH,
+                        testNodeWithOuter(outerNode(outerNodeEntry(1, innerNode("one", "two")),
+                                outerNodeEntry(2, innerNode("three", "four")))));
 
-    private MockDataChangeListener registerChangeListener(final YangInstanceIdentifier path, final DataChangeScope scope,
-            final int expectedEvents, final boolean isLeader) {
-        MockDataChangeListener listener = new MockDataChangeListener(expectedEvents);
-        ActorRef dclActor = actorFactory.createActor(DataChangeListener.props(listener));
+                final MockDataChangeListener listener = new MockDataChangeListener(0);
+                final ActorRef dclActor = actorFactory.createActor(DataChangeListener.props(listener),
+                        "testInitialChangeListenerEventWhenNotInitiallyLeader-DataChangeListener");
+                final DataChangeListenerSupport support = new DataChangeListenerSupport(shard);
+                support.onMessage(new RegisterChangeListener(
+                        OUTER_LIST_PATH.node(OUTER_LIST_QNAME).node(INNER_LIST_QNAME).node(INNER_LIST_QNAME), dclActor,
+                        DataChangeScope.ONE, false), false, true);
 
-        support.onMessage(new RegisterChangeListener(path, dclActor, scope, false), isLeader, true);
-        return listener;
-    }
+                listener.expectNoMoreChanges("Unexpected initial change event");
+                listener.reset(1);
 
-    private Shard createShard() {
-        TestActorRef<Shard> actor = actorFactory.createTestActor(newShardProps());
-        return actor.underlyingActor();
+                support.onLeadershipChange(true, true);
+
+                listener.waitForChangeEvents();
+                listener.verifyCreatedData(0, innerEntryPath(1, "one"));
+                listener.verifyCreatedData(0, innerEntryPath(1, "two"));
+                listener.verifyCreatedData(0, innerEntryPath(2, "three"));
+                listener.verifyCreatedData(0, innerEntryPath(2, "four"));
+            }
+        };
+
     }
 }
