@@ -12,10 +12,9 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>org.opendaylight.controller</groupId>
+    <groupId>org.opendaylight.odlparent</groupId>
     <artifactId>karaf-parent</artifactId>
     <version>1.7.0-SNAPSHOT</version>
-    <relativePath/>
   </parent>
 
   <groupId>${groupId}</groupId>
