@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "7a6b29fe_04f5e982",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/NoopPayload.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-08-04T23:10:17Z",
+      "side": 1,
+      "message": "The non-existent one :) What I was thinking was to create cluster.raft.persisted package to hold the things we persist, making it very clear that they are off-limits where serialization/semantics are concerned. There is also ServerConfigurationPayload -- I think we can move that the way we moved DataTreeCandidatePayload.",
+      "parentUuid": "7a6b29fe_c187630e",
+      "range": {
+        "startLine": 19,
+        "startChar": 13,
+        "endLine": 19,
+        "endChar": 40
+      },
+      "revId": "217fd7a8ff9d49a92948d845931c07559aac7914",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a6b29fe_0ef50a83",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/NoopPayload.java",
         "patchSetId": 2
@@ -88,6 +112,52 @@
         "startLine": 23,
         "startChar": 4,
         "endLine": 23,
+        "endChar": 23
+      },
+      "revId": "217fd7a8ff9d49a92948d845931c07559aac7914",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_847e19e3",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 238,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-08-04T23:10:17Z",
+      "side": 1,
+      "message": "!\u003d on objects incurs wrath of Sonar. NoopPayload.INSTANCE.equals() instead?",
+      "range": {
+        "startLine": 238,
+        "startChar": 60,
+        "endLine": 238,
+        "endChar": 63
+      },
+      "revId": "217fd7a8ff9d49a92948d845931c07559aac7914",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_64777d03",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/PreLeader.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-08-04T23:10:17Z",
+      "side": 1,
+      "message": "You mentioned that there is a single sentence in RAFT talking about a no-op payload. Can we reference it somehow?",
+      "range": {
+        "startLine": 23,
+        "startChar": 90,
+        "endLine": 24,
         "endChar": 23
       },
       "revId": "217fd7a8ff9d49a92948d845931c07559aac7914",
