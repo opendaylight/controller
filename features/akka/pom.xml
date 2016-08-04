@@ -11,19 +11,19 @@
    <parent>
     <groupId>org.opendaylight.odlparent</groupId>
     <artifactId>features-parent</artifactId>
-    <version>1.6.3-SNAPSHOT</version>
+    <version>1.6.4-SNAPSHOT</version>
     <relativePath/>
    </parent>
    <artifactId>features-akka</artifactId>
    <groupId>org.opendaylight.controller</groupId>
-   <version>1.6.3-SNAPSHOT</version>
+   <version>1.6.4-SNAPSHOT</version>
    <packaging>pom</packaging>
    <properties>
       <features.file>features.xml</features.file>
-      <branding.version>1.2.3-SNAPSHOT</branding.version>
-      <karaf.resources.version>1.6.3-SNAPSHOT</karaf.resources.version>
-      <feature.test.version>0.8.3-SNAPSHOT</feature.test.version>
-      <karaf.empty.version>1.6.3-SNAPSHOT</karaf.empty.version>
+      <branding.version>1.2.4-SNAPSHOT</branding.version>
+      <karaf.resources.version>1.6.4-SNAPSHOT</karaf.resources.version>
+      <feature.test.version>0.8.4-SNAPSHOT</feature.test.version>
+      <karaf.empty.version>1.6.4-SNAPSHOT</karaf.empty.version>
       <surefire.version>2.16</surefire.version>
       <akka.version>2.3.14</akka.version>
       <scala.version>2.11</scala.version>
@@ -33,7 +33,7 @@
             <dependency>
                 <groupId>org.opendaylight.controller</groupId>
                 <artifactId>commons.opendaylight</artifactId>
-                <version>1.6.3-SNAPSHOT</version>
+                <version>1.6.4-SNAPSHOT</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>

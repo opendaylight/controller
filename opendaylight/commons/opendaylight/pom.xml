@@ -4,45 +4,45 @@
   <parent>
     <groupId>org.opendaylight.odlparent</groupId>
     <artifactId>odlparent</artifactId>
-    <version>1.6.3-SNAPSHOT</version>
+    <version>1.6.4-SNAPSHOT</version>
     <relativePath></relativePath>
   </parent>
 
   <groupId>org.opendaylight.controller</groupId>
   <artifactId>commons.opendaylight</artifactId>
-  <version>1.6.3-SNAPSHOT</version>
+  <version>1.6.4-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <properties>
-    <mdsal.version>2.0.3-SNAPSHOT</mdsal.version>
-    <mdsal.model.version>0.8.3-SNAPSHOT</mdsal.model.version>
+    <mdsal.version>2.0.4-SNAPSHOT</mdsal.version>
+    <mdsal.model.version>0.8.4-SNAPSHOT</mdsal.model.version>
     <akka.version>2.3.14</akka.version>
-    <appauth.version>0.6.3-SNAPSHOT</appauth.version>
-    <archetype-app-northbound>0.2.3-SNAPSHOT</archetype-app-northbound>
-    <arphandler.version>0.7.3-SNAPSHOT</arphandler.version>
+    <appauth.version>0.6.4-SNAPSHOT</appauth.version>
+    <archetype-app-northbound>0.2.4-SNAPSHOT</archetype-app-northbound>
+    <arphandler.version>0.7.4-SNAPSHOT</arphandler.version>
     <!-- Plugin Versions -->
-    <bundlescanner.api.version>0.6.3-SNAPSHOT</bundlescanner.api.version>
-    <bundlescanner.implementation.version>0.6.3-SNAPSHOT</bundlescanner.implementation.version>
-    <bundlescanner.version>0.6.3-SNAPSHOT</bundlescanner.version>
-    <clustering.services.version>0.7.3-SNAPSHOT</clustering.services.version>
-    <clustering.services_implementation.version>0.6.3-SNAPSHOT</clustering.services_implementation.version>
-    <clustering.stub.version>0.6.3-SNAPSHOT</clustering.stub.version>
-    <clustering.test.version>0.6.3-SNAPSHOT</clustering.test.version>
-    <commmons.northbound.version>0.6.3-SNAPSHOT</commmons.northbound.version>
+    <bundlescanner.api.version>0.6.4-SNAPSHOT</bundlescanner.api.version>
+    <bundlescanner.implementation.version>0.6.4-SNAPSHOT</bundlescanner.implementation.version>
+    <bundlescanner.version>0.6.4-SNAPSHOT</bundlescanner.version>
+    <clustering.services.version>0.7.4-SNAPSHOT</clustering.services.version>
+    <clustering.services_implementation.version>0.6.4-SNAPSHOT</clustering.services_implementation.version>
+    <clustering.stub.version>0.6.4-SNAPSHOT</clustering.stub.version>
+    <clustering.test.version>0.6.4-SNAPSHOT</clustering.test.version>
+    <commmons.northbound.version>0.6.4-SNAPSHOT</commmons.northbound.version>
     <!-- Third Party Versions -->
     <codahale.metrics.version>3.0.1</codahale.metrics.version>
 
-    <commons.checkstyle.version>0.2.3-SNAPSHOT</commons.checkstyle.version>
-    <commons.httpclient.version>0.3.3-SNAPSHOT</commons.httpclient.version>
-    <commons.logback_settings.version>0.2.3-SNAPSHOT</commons.logback_settings.version>
-    <commons.opendaylight.commons.httpclient>0.3.3-SNAPSHOT</commons.opendaylight.commons.httpclient>
-    <commons.opendaylight.concepts.version>0.7.3-SNAPSHOT</commons.opendaylight.concepts.version>
-    <commons.opendaylight.version>1.6.3-SNAPSHOT</commons.opendaylight.version>
-    <commons.parent.version>1.2.3-SNAPSHOT</commons.parent.version>
-    <commons.httpclient.version>0.3.3-SNAPSHOT</commons.httpclient.version>
-    <concepts.version>0.7.3-SNAPSHOT</concepts.version>
-    <config.version>0.4.3-SNAPSHOT</config.version>
-    <aaa.version>0.3.3-SNAPSHOT</aaa.version>
+    <commons.checkstyle.version>0.2.4-SNAPSHOT</commons.checkstyle.version>
+    <commons.httpclient.version>0.3.4-SNAPSHOT</commons.httpclient.version>
+    <commons.logback_settings.version>0.2.4-SNAPSHOT</commons.logback_settings.version>
+    <commons.opendaylight.commons.httpclient>0.3.4-SNAPSHOT</commons.opendaylight.commons.httpclient>
+    <commons.opendaylight.concepts.version>0.7.4-SNAPSHOT</commons.opendaylight.concepts.version>
+    <commons.opendaylight.version>1.6.4-SNAPSHOT</commons.opendaylight.version>
+    <commons.parent.version>1.2.4-SNAPSHOT</commons.parent.version>
+    <commons.httpclient.version>0.3.4-SNAPSHOT</commons.httpclient.version>
+    <concepts.version>0.7.4-SNAPSHOT</concepts.version>
+    <config.version>0.4.4-SNAPSHOT</config.version>
+    <aaa.version>0.3.4-SNAPSHOT</aaa.version>
     <config.configfile.directory>etc/opendaylight/karaf</config.configfile.directory>
     <config.clustering.configfile>05-clustering.xml</config.clustering.configfile>
     <config.clustered-entity-ownership.configfile>06-clustered-entity-ownership.xml</config.clustered-entity-ownership.configfile>
@@ -52,77 +52,77 @@
     <config.toaster.configfile>03-toaster-sample.xml</config.toaster.configfile>
     <config.restconf.configfile>10-rest-connector.xml</config.restconf.configfile>
 
-    <configuration.implementation.version>0.6.3-SNAPSHOT</configuration.implementation.version>
-    <configuration.version>0.6.3-SNAPSHOT</configuration.version>
-    <connectionmanager.version>0.3.3-SNAPSHOT</connectionmanager.version>
-    <containermanager.it.version>0.7.3-SNAPSHOT</containermanager.it.version>
-    <containermanager.northbound.version>0.6.3-SNAPSHOT</containermanager.northbound.version>
-    <containermanager.shell.version>0.7.3-SNAPSHOT</containermanager.shell.version>
-    <containermanager.version>0.7.3-SNAPSHOT</containermanager.version>
-    <controllermanager.northbound.version>0.2.3-SNAPSHOT</controllermanager.northbound.version>
-    <devices.web.version>0.6.3-SNAPSHOT</devices.web.version>
-    <dummy-console.version>1.3.3-SNAPSHOT</dummy-console.version>
+    <configuration.implementation.version>0.6.4-SNAPSHOT</configuration.implementation.version>
+    <configuration.version>0.6.4-SNAPSHOT</configuration.version>
+    <connectionmanager.version>0.3.4-SNAPSHOT</connectionmanager.version>
+    <containermanager.it.version>0.7.4-SNAPSHOT</containermanager.it.version>
+    <containermanager.northbound.version>0.6.4-SNAPSHOT</containermanager.northbound.version>
+    <containermanager.shell.version>0.7.4-SNAPSHOT</containermanager.shell.version>
+    <containermanager.version>0.7.4-SNAPSHOT</containermanager.version>
+    <controllermanager.northbound.version>0.2.4-SNAPSHOT</controllermanager.northbound.version>
+    <devices.web.version>0.6.4-SNAPSHOT</devices.web.version>
+    <dummy-console.version>1.3.4-SNAPSHOT</dummy-console.version>
     <config.statistics.manager.configfile>30-statistics-manager.xml</config.statistics.manager.configfile>
 
     <!-- OpenEXI third party lib for netconf-->
     <exi.nagasena.version>0000.0002.0053.0</exi.nagasena.version>
-    <features.test.version>1.6.3-SNAPSHOT</features.test.version>
-    <filtervalve.version>1.6.3-SNAPSHOT</filtervalve.version>
+    <features.test.version>1.6.4-SNAPSHOT</features.test.version>
+    <filtervalve.version>1.6.4-SNAPSHOT</filtervalve.version>
     <findbugs.maven.plugin.version>2.4.0</findbugs.maven.plugin.version>
-    <flowprogrammer.northbound.version>0.6.3-SNAPSHOT</flowprogrammer.northbound.version>
-    <flows.web.version>0.6.3-SNAPSHOT</flows.web.version>
-    <forwarding.staticrouting>0.7.3-SNAPSHOT</forwarding.staticrouting>
-    <forwarding.staticrouting.northbound.version>0.6.3-SNAPSHOT</forwarding.staticrouting.northbound.version>
-    <forwardingrulesmanager.implementation.version>0.6.3-SNAPSHOT</forwardingrulesmanager.implementation.version>
-    <forwardingrulesmanager.version>0.8.3-SNAPSHOT</forwardingrulesmanager.version>
-    <hosttracker.api.version>0.7.3-SNAPSHOT</hosttracker.api.version>
-    <hosttracker.implementation.version>0.7.3-SNAPSHOT</hosttracker.implementation.version>
-    <hosttracker.northbound.version>0.6.3-SNAPSHOT</hosttracker.northbound.version>
-    <hosttracker.shell.version>1.2.3-SNAPSHOT</hosttracker.shell.version>
-    <hosttracker_new.api.version>0.6.3-SNAPSHOT</hosttracker_new.api.version>
-    <hosttracker_new.implementation.version>0.6.3-SNAPSHOT</hosttracker_new.implementation.version>
-    <httpservice-bridge.northbound.version>0.2.3-SNAPSHOT</httpservice-bridge.northbound.version>
-    <ietf-inet-types.version>2010.09.24.8.3-SNAPSHOT</ietf-inet-types.version>
-    <ietf-restconf.version>2013.10.19.8.3-SNAPSHOT</ietf-restconf.version>
-    <ietf-topology.version>2013.10.21.8.3-SNAPSHOT</ietf-topology.version>
-    <ietf-yang-types.version>2010.09.24.8.3-SNAPSHOT</ietf-yang-types.version>
+    <flowprogrammer.northbound.version>0.6.4-SNAPSHOT</flowprogrammer.northbound.version>
+    <flows.web.version>0.6.4-SNAPSHOT</flows.web.version>
+    <forwarding.staticrouting>0.7.4-SNAPSHOT</forwarding.staticrouting>
+    <forwarding.staticrouting.northbound.version>0.6.4-SNAPSHOT</forwarding.staticrouting.northbound.version>
+    <forwardingrulesmanager.implementation.version>0.6.4-SNAPSHOT</forwardingrulesmanager.implementation.version>
+    <forwardingrulesmanager.version>0.8.4-SNAPSHOT</forwardingrulesmanager.version>
+    <hosttracker.api.version>0.7.4-SNAPSHOT</hosttracker.api.version>
+    <hosttracker.implementation.version>0.7.4-SNAPSHOT</hosttracker.implementation.version>
+    <hosttracker.northbound.version>0.6.4-SNAPSHOT</hosttracker.northbound.version>
+    <hosttracker.shell.version>1.2.4-SNAPSHOT</hosttracker.shell.version>
+    <hosttracker_new.api.version>0.6.4-SNAPSHOT</hosttracker_new.api.version>
+    <hosttracker_new.implementation.version>0.6.4-SNAPSHOT</hosttracker_new.implementation.version>
+    <httpservice-bridge.northbound.version>0.2.4-SNAPSHOT</httpservice-bridge.northbound.version>
+    <ietf-inet-types.version>2010.09.24.8.4-SNAPSHOT</ietf-inet-types.version>
+    <ietf-restconf.version>2013.10.19.8.4-SNAPSHOT</ietf-restconf.version>
+    <ietf-topology.version>2013.10.21.8.4-SNAPSHOT</ietf-topology.version>
+    <ietf-yang-types.version>2010.09.24.8.4-SNAPSHOT</ietf-yang-types.version>
     <jdepend.maven.plugin.version>2.0-beta-2</jdepend.maven.plugin.version>
     <jmxGeneratorPath>src/main/yang-gen-config</jmxGeneratorPath>
-    <jolokia-bridge.version>0.2.3-SNAPSHOT</jolokia-bridge.version>
-    <karaf.branding.version>1.2.3-SNAPSHOT</karaf.branding.version>
+    <jolokia-bridge.version>0.2.4-SNAPSHOT</jolokia-bridge.version>
+    <karaf.branding.version>1.2.4-SNAPSHOT</karaf.branding.version>
     <karaf.shell.version>${karaf.version}</karaf.shell.version>
     <leveldb.version>0.7</leveldb.version>
     <leveldbjni.version>1.8-odl</leveldbjni.version>
     <lifecycle.mapping.version>1.0.0</lifecycle.mapping.version>
-    <logging.bridge.version>0.6.3-SNAPSHOT</logging.bridge.version>
+    <logging.bridge.version>0.6.4-SNAPSHOT</logging.bridge.version>
     <maven.plugin.api.version>3.0.5</maven.plugin.api.version>
-    <mdsal.version>1.3.3-SNAPSHOT</mdsal.version>
-    <networkconfig.bridgedomain.northbound.version>0.2.3-SNAPSHOT</networkconfig.bridgedomain.northbound.version>
+    <mdsal.version>1.3.4-SNAPSHOT</mdsal.version>
+    <networkconfig.bridgedomain.northbound.version>0.2.4-SNAPSHOT</networkconfig.bridgedomain.northbound.version>
     <!-- ODL repository / plugin repository -->
     <nexusproxy>http://nexus.opendaylight.org/content</nexusproxy>
-    <northbound.commons.version>0.6.3-SNAPSHOT</northbound.commons.version>
-    <northbound.hosttracker.version>1.6.3-SNAPSHOT</northbound.hosttracker.version>
-    <northbound.jolokia.version>1.6.3-SNAPSHOT</northbound.jolokia.version>
-    <opendaylight-l2-types.version>2013.08.27.8.3-SNAPSHOT</opendaylight-l2-types.version>
-    <osgi-brandfragment.web.version>0.2.3-SNAPSHOT</osgi-brandfragment.web.version>
+    <northbound.commons.version>0.6.4-SNAPSHOT</northbound.commons.version>
+    <northbound.hosttracker.version>1.6.4-SNAPSHOT</northbound.hosttracker.version>
+    <northbound.jolokia.version>1.6.4-SNAPSHOT</northbound.jolokia.version>
+    <opendaylight-l2-types.version>2013.08.27.8.4-SNAPSHOT</opendaylight-l2-types.version>
+    <osgi-brandfragment.web.version>0.2.4-SNAPSHOT</osgi-brandfragment.web.version>
     <protobuf.version>2.5.0</protobuf.version>
-    <protocol-framework.version>0.7.3-SNAPSHOT</protocol-framework.version>
-    <protocol_plugins.openflow.version>0.6.3-SNAPSHOT</protocol_plugins.openflow.version>
-    <protocol_plugins.stub.version>0.6.3-SNAPSHOT</protocol_plugins.stub.version>
-    <routing.dijkstra_implementation.version>0.6.3-SNAPSHOT</routing.dijkstra_implementation.version>
-    <sal.connection.version>0.3.3-SNAPSHOT</sal.connection.version>
-    <sal.implementation.version>0.6.3-SNAPSHOT</sal.implementation.version>
-    <sal.networkconfiguration.version>0.2.3-SNAPSHOT</sal.networkconfiguration.version>
-    <sal.version>0.10.3-SNAPSHOT</sal.version>
+    <protocol-framework.version>0.7.4-SNAPSHOT</protocol-framework.version>
+    <protocol_plugins.openflow.version>0.6.4-SNAPSHOT</protocol_plugins.openflow.version>
+    <protocol_plugins.stub.version>0.6.4-SNAPSHOT</protocol_plugins.stub.version>
+    <routing.dijkstra_implementation.version>0.6.4-SNAPSHOT</routing.dijkstra_implementation.version>
+    <sal.connection.version>0.3.4-SNAPSHOT</sal.connection.version>
+    <sal.implementation.version>0.6.4-SNAPSHOT</sal.implementation.version>
+    <sal.networkconfiguration.version>0.2.4-SNAPSHOT</sal.networkconfiguration.version>
+    <sal.version>0.10.4-SNAPSHOT</sal.version>
     <salGeneratorPath>src/main/yang-gen-sal</salGeneratorPath>
-    <samples.loadbalancer>0.7.3-SNAPSHOT</samples.loadbalancer>
-    <samples.loadbalancer.northbound.version>0.6.3-SNAPSHOT</samples.loadbalancer.northbound.version>
-    <samples.simpleforwarding.version>0.6.3-SNAPSHOT</samples.simpleforwarding.version>
-    <sanitytest.version>0.6.3-SNAPSHOT</sanitytest.version>
+    <samples.loadbalancer>0.7.4-SNAPSHOT</samples.loadbalancer>
+    <samples.loadbalancer.northbound.version>0.6.4-SNAPSHOT</samples.loadbalancer.northbound.version>
+    <samples.simpleforwarding.version>0.6.4-SNAPSHOT</samples.simpleforwarding.version>
+    <sanitytest.version>0.6.4-SNAPSHOT</sanitytest.version>
     <scala.version>2.11</scala.version>
     <scala.micro.version>7</scala.micro.version>
-    <security.version>0.6.3-SNAPSHOT</security.version>
-    <karaf.security.version>0.6.3-SNAPSHOT</karaf.security.version>
+    <security.version>0.6.4-SNAPSHOT</security.version>
+    <karaf.security.version>0.6.4-SNAPSHOT</karaf.security.version>
     <sitedeploy>dav:http://nexus.opendaylight.org/content/sites/site</sitedeploy>
     <sonar.host.url>https://sonar.opendaylight.org/</sonar.host.url>
     <!-- Sonar properties using jacoco to retrieve integration test results -->
@@ -132,28 +132,28 @@
     <sonar.jacoco.reportPath>target/code-coverage/jacoco.exec</sonar.jacoco.reportPath>
     <sonar.jacoco.itReportPath>target/code-coverage/jacoco-it.exec</sonar.jacoco.itReportPath>
     <sonar.skippedModules>org.openflow.openflowj,net.sf.jung2,org.opendaylight.controller.protobuff.messages</sonar.skippedModules>
-    <statistics.northbound.version>0.6.3-SNAPSHOT</statistics.northbound.version>
-    <statisticsmanager.implementation.version>0.6.3-SNAPSHOT</statisticsmanager.implementation.version>
-    <statisticsmanager.version>0.7.3-SNAPSHOT</statisticsmanager.version>
-    <subnets.northbound.version>0.6.3-SNAPSHOT</subnets.northbound.version>
-    <switchmanager.api.version>0.9.3-SNAPSHOT</switchmanager.api.version>
-    <switchmanager.implementation.version>0.6.3-SNAPSHOT</switchmanager.implementation.version>
-    <switchmanager.northbound.version>0.6.3-SNAPSHOT</switchmanager.northbound.version>
+    <statistics.northbound.version>0.6.4-SNAPSHOT</statistics.northbound.version>
+    <statisticsmanager.implementation.version>0.6.4-SNAPSHOT</statisticsmanager.implementation.version>
+    <statisticsmanager.version>0.7.4-SNAPSHOT</statisticsmanager.version>
+    <subnets.northbound.version>0.6.4-SNAPSHOT</subnets.northbound.version>
+    <switchmanager.api.version>0.9.4-SNAPSHOT</switchmanager.api.version>
+    <switchmanager.implementation.version>0.6.4-SNAPSHOT</switchmanager.implementation.version>
+    <switchmanager.northbound.version>0.6.4-SNAPSHOT</switchmanager.northbound.version>
     <testvm.argLine>-Xmx1024m -XX:MaxPermSize=256m</testvm.argLine>
-    <topology.northbound.version>0.6.3-SNAPSHOT</topology.northbound.version>
-    <topology.web.version>0.6.3-SNAPSHOT</topology.web.version>
-    <topologymanager.version>0.6.3-SNAPSHOT</topologymanager.version>
-    <topologymanager.shell.version>1.2.3-SNAPSHOT</topologymanager.shell.version>
-    <troubleshoot.web.version>0.6.3-SNAPSHOT</troubleshoot.web.version>
+    <topology.northbound.version>0.6.4-SNAPSHOT</topology.northbound.version>
+    <topology.web.version>0.6.4-SNAPSHOT</topology.web.version>
+    <topologymanager.version>0.6.4-SNAPSHOT</topologymanager.version>
+    <topologymanager.shell.version>1.2.4-SNAPSHOT</topologymanager.shell.version>
+    <troubleshoot.web.version>0.6.4-SNAPSHOT</troubleshoot.web.version>
     <uncommons.maths.version>1.2.2a</uncommons.maths.version>
-    <usermanager.implementation.version>0.6.3-SNAPSHOT</usermanager.implementation.version>
-    <usermanager.northbound.version>0.2.3-SNAPSHOT</usermanager.northbound.version>
-    <usermanager.version>0.6.3-SNAPSHOT</usermanager.version>
-    <nsf.version>0.6.3-SNAPSHOT</nsf.version>
-    <web.version>0.6.3-SNAPSHOT</web.version>
-    <yang-ext.version>2013.09.07.8.3-SNAPSHOT</yang-ext.version>
-    <yang-jmx-generator.version>1.2.3-SNAPSHOT</yang-jmx-generator.version>
-    <yangtools.version>0.8.3-SNAPSHOT</yangtools.version>
+    <usermanager.implementation.version>0.6.4-SNAPSHOT</usermanager.implementation.version>
+    <usermanager.northbound.version>0.2.4-SNAPSHOT</usermanager.northbound.version>
+    <usermanager.version>0.6.4-SNAPSHOT</usermanager.version>
+    <nsf.version>0.6.4-SNAPSHOT</nsf.version>
+    <web.version>0.6.4-SNAPSHOT</web.version>
+    <yang-ext.version>2013.09.07.8.4-SNAPSHOT</yang-ext.version>
+    <yang-jmx-generator.version>1.2.4-SNAPSHOT</yang-jmx-generator.version>
+    <yangtools.version>0.8.4-SNAPSHOT</yangtools.version>
     <jmh.version>0.9.7</jmh.version>
   </properties>
 
@@ -176,7 +176,7 @@
       <dependency>
         <groupId>org.opendaylight.mdsal</groupId>
         <artifactId>mdsal-artifacts</artifactId>
-        <version>2.0.3-SNAPSHOT</version>
+        <version>2.0.4-SNAPSHOT</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -508,12 +508,12 @@
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>httpservice-bridge</artifactId>
-        <version>0.2.3-SNAPSHOT</version>
+        <version>0.2.4-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>jolokia-bridge</artifactId>
-        <version>0.2.3-SNAPSHOT</version>
+        <version>0.2.4-SNAPSHOT</version>
       </dependency>
       <!-- Karaf Dependencies -->
       <dependency>
@@ -788,7 +788,7 @@
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>commons.logback_settings</artifactId>
-        <version>0.2.3-SNAPSHOT</version>
+        <version>0.2.4-SNAPSHOT</version>
         <scope>test</scope>
       </dependency>
       <dependency>
@@ -908,7 +908,7 @@
             <dependency>
               <groupId>org.opendaylight.controller</groupId>
               <artifactId>commons.logback_settings</artifactId>
-              <version>0.2.3-SNAPSHOT</version>
+              <version>0.2.4-SNAPSHOT</version>
             </dependency>
           </dependencies>
           <executions>
@@ -1113,7 +1113,7 @@
             <dependency>
               <groupId>org.opendaylight.mdsal</groupId>
               <artifactId>maven-sal-api-gen-plugin</artifactId>
-              <version>0.8.3-SNAPSHOT</version>
+              <version>0.8.4-SNAPSHOT</version>
               <type>jar</type>
             </dependency>
             <dependency>
@@ -1142,7 +1142,7 @@
           <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>checkstyle</artifactId>
-            <version>0.2.3-SNAPSHOT</version>
+            <version>0.2.4-SNAPSHOT</version>
           </dependency>
         </dependencies>
         <executions>

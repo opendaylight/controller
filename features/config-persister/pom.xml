@@ -4,18 +4,18 @@
   <parent>
     <groupId>org.opendaylight.odlparent</groupId>
     <artifactId>features-parent</artifactId>
-    <version>1.6.3-SNAPSHOT</version>
+    <version>1.6.4-SNAPSHOT</version>
     <relativePath/>
   </parent>
 
   <groupId>org.opendaylight.controller</groupId>
   <artifactId>features-config-persister</artifactId>
-  <version>0.4.3-SNAPSHOT</version>
+  <version>0.4.4-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <properties>
-    <mdsal.version>2.0.3-SNAPSHOT</mdsal.version>
-    <config.version>0.4.3-SNAPSHOT</config.version>
+    <mdsal.version>2.0.4-SNAPSHOT</mdsal.version>
+    <config.version>0.4.4-SNAPSHOT</config.version>
     <features.file>features.xml</features.file>
   </properties>
 

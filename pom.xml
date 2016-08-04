@@ -4,12 +4,12 @@
   <parent>
     <groupId>org.opendaylight.odlparent</groupId>
     <artifactId>odlparent</artifactId>
-    <version>1.6.3-SNAPSHOT</version>
+    <version>1.6.4-SNAPSHOT</version>
     <relativePath/>
   </parent>
   <groupId>org.opendaylight.controller</groupId>
   <artifactId>releasepom</artifactId>
-  <version>0.3.3-SNAPSHOT</version>
+  <version>0.3.4-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>controller</name>
   <!-- Used by Sonar to set project name -->

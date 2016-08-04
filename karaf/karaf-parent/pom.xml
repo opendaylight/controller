@@ -11,7 +11,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <parent>
     <groupId>org.opendaylight.odlparent</groupId>
     <artifactId>odlparent</artifactId>
-    <version>1.6.3-SNAPSHOT</version>
+    <version>1.6.4-SNAPSHOT</version>
     <relativePath/>
   </parent>
   <modelVersion>4.0.0</modelVersion>
@@ -21,8 +21,8 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <packaging>pom</packaging>
 
   <properties>
-    <branding.version>1.2.3-SNAPSHOT</branding.version>
-    <karaf.resources.version>1.6.3-SNAPSHOT</karaf.resources.version>
+    <branding.version>1.2.4-SNAPSHOT</branding.version>
+    <karaf.resources.version>1.6.4-SNAPSHOT</karaf.resources.version>
     <karaf.localFeature>standard</karaf.localFeature>
     <!--  Karaf Maven plugin 3.023 reinstalls already installed
           boot features to container, which could be observed
