@@ -150,6 +150,28 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
             </execution>
           </executions>
         </plugin>
+
+        <!-- This has to match the definition in odlparent and exists only
+             because for some reason PMD does not understand wildcards. -->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-pmd-plugin</artifactId>
+          <executions>
+            <execution>
+              <id>cpd</id>
+              <phase>process-sources</phase>
+              <goals>
+                <goal>cpd-check</goal>
+              </goals>
+              <configuration>
+                <excludeRoots>
+                  <excludeRoot>${jmxGeneratorPath}</excludeRoot>
+                  <excludeRoot>${salGeneratorPath}</excludeRoot>
+                </excludeRoots>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
       </plugins>
     </pluginManagement>
   </build>
