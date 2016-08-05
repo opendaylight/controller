@@ -12,8 +12,10 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
+import akka.cluster.Cluster;
 import com.google.common.annotations.VisibleForTesting;
 import java.util.Collection;
+import java.util.Optional;
 import java.util.function.LongSupplier;
 import javax.annotation.Nullable;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
@@ -55,6 +57,13 @@ public interface RaftActorContext {
      * to the RaftActor
      */
     ActorRef getActor();
+
+    /**
+     * The akka Cluster singleton for the actor system if one is configured.
+     *
+     * @return an Optional containing the CLuster instance is present.
+     */
+    Optional<Cluster> getCluster();
 
     /**
      * @return the ElectionTerm information
