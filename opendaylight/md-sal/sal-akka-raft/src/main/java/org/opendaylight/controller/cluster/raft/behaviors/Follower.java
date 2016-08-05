@@ -9,10 +9,18 @@
 package org.opendaylight.controller.cluster.raft.behaviors;
 
 import akka.actor.ActorRef;
+import akka.actor.ActorSelection;
+import akka.actor.Address;
+import akka.cluster.Cluster;
+import akka.cluster.ClusterEvent.CurrentClusterState;
+import akka.cluster.Member;
+import akka.cluster.MemberStatus;
 import akka.japi.Procedure;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Optional;
 import com.google.common.base.Stopwatch;
 import java.util.ArrayList;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
@@ -402,12 +410,20 @@ public class Follower extends AbstractRaftActorBehavior {
                 context.getConfigParams().getElectionTimeOutInterval().toMillis();
 
         if(canStartElection()) {
-            if(message instanceof TimeoutNow || noLeaderMessageReceived) {
-                LOG.debug("{}: Received {} - switching to Candidate", logName(), message.getClass().getSimpleName());
+            if(message instanceof TimeoutNow) {
+                LOG.debug("{}: Received TimeoutNow - switching to Candidate", logName());
                 return internalSwitchBehavior(RaftState.Candidate);
+            } else if(noLeaderMessageReceived) {
+                if(isLeaderAvailabilityKnown()) {
+                    LOG.debug("{}: Received ElectionTimeout but leader appears to be available", logName());
+                    scheduleElection(electionDuration());
+                } else {
+                    LOG.debug("{}: Received ElectionTimeout - switching to Candidate", logName());
+                    return internalSwitchBehavior(RaftState.Candidate);
+                }
             } else {
-                LOG.debug("{}: Received ElectionTimeout but lastLeaderMessageInterval {} < election timeout",
-                        logName(), lastLeaderMessageInterval);
+                LOG.debug("{}: Received ElectionTimeout but lastLeaderMessageInterval {} < election timeout {}",
+                        logName(), lastLeaderMessageInterval, context.getConfigParams().getElectionTimeOutInterval());
                 scheduleElection(electionDuration());
             }
         } else if(message instanceof ElectionTimeout) {
@@ -419,6 +435,55 @@ public class Follower extends AbstractRaftActorBehavior {
         }
 
         return this;
+    }
+
+    private boolean isLeaderAvailabilityKnown() {
+        if(leaderId == null) {
+            return false;
+        }
+
+        Optional<Cluster> cluster = context.getCluster();
+        if(!cluster.isPresent()) {
+            return false;
+        }
+
+        ActorSelection leaderActor = context.getPeerActorSelection(leaderId);
+        if(leaderActor == null) {
+            return false;
+        }
+
+        Address leaderAddress = leaderActor.anchorPath().address();
+
+        CurrentClusterState state = cluster.get().state();
+        Set<Member> unreachable = state.getUnreachable();
+
+        LOG.debug("{}: Checking for leader {} in the cluster unreachable set {}", logName(), leaderAddress,
+                unreachable);
+
+        for(Member m: unreachable) {
+            if(leaderAddress.equals(m.address())) {
+                LOG.info("{}: Leader {} is unreachable", logName(), leaderAddress);
+                return false;
+            }
+        }
+
+        for(Member m: state.getMembers()) {
+            if(leaderAddress.equals(m.address())) {
+                if(m.status() == MemberStatus.up() || m.status() == MemberStatus.weaklyUp()) {
+                    LOG.debug("{}: Leader {} cluster status is {} - leader is available", logName(),
+                            leaderAddress, m.status());
+                    return true;
+                } else {
+                    LOG.debug("{}: Leader {} cluster status is {} - leader is unavailable", logName(),
+                            leaderAddress, m.status());
+                    return false;
+                }
+            }
+        }
+
+        LOG.debug("{}: Leader {} not found in the cluster member set", logName(), leaderAddress);
+
+        return false;
     }
 
     private void handleInstallSnapshot(final ActorRef sender, InstallSnapshot installSnapshot) {
