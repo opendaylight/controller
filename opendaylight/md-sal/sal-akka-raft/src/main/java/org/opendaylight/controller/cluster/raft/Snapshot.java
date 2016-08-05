@@ -9,7 +9,7 @@ package org.opendaylight.controller.cluster.raft;
 
 import java.io.Serializable;
 import java.util.List;
-
+import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload;
 
 public class Snapshot implements Serializable {
     private static final long serialVersionUID = -8298574936724056236L;
