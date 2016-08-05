@@ -1,0 +1,22 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a6b29fe_fda4bf58",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/PreLeader.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-08-05T15:05:31Z",
+      "side": 1,
+      "message": "#1 Not sure I follow. transaction-chains aren\u0027t related to raft - they\u0027re a higher level concept in CDS. The lag should be small since shard can\u0027t move onto the next tx commit until it gets consensus for the first. Eventually it will timeout then the next one can be tried. But by then the Leader would most likely have transitioned to IsolatedLeader which essentially means we have no (usable) leader. Why would the lag amount matter?\n\n#2  PreLeader still heartbeats and replicates. It derives from AbstractLeader so has all the common functionally of Leader. Leader basically just adds the IsolatedLeader checking which we don\u0027t want with PreLeader.",
+      "parentUuid": "7a6b29fe_3dce375b",
+      "revId": "0f1e8bbe3c01dbb9044f0f18e9458f42de348e2d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
