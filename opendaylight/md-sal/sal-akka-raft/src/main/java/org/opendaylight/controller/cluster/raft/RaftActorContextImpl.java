@@ -13,7 +13,9 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
+import akka.cluster.Cluster;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -71,6 +73,8 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     private int numVotingPeers = -1;
 
+    private Optional<Cluster> cluster;
+
     public RaftActorContextImpl(ActorRef actor, ActorContext context, String id,
             ElectionTerm termInformation, long commitIndex, long lastApplied, Map<String, String> peerAddresses,
             ConfigParams configParams, DataPersistenceProvider persistenceProvider, Logger logger) {
@@ -121,6 +125,20 @@ public class RaftActorContextImpl implements RaftActorContext {
     @Override
     public ActorRef getActor() {
         return actor;
+    }
+
+    @Override
+    public Optional<Cluster> getCluster() {
+        if(cluster == null) {
+            try {
+                cluster = Optional.of(Cluster.get(getActorSystem()));
+            } catch(Exception e) {
+                // An exception means there's no cluster configured. This will only happen in unit tests.
+                cluster = Optional.absent();
+            }
+        }
+
+        return cluster;
     }
 
     @Override
