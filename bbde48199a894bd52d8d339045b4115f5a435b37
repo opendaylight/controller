@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "7a6b29fe_a39fc45e",
+        "filename": "opendaylight/md-sal/samples/clustering-test-app/provider/src/main/java/org/opendaylight/controller/clustering/it/provider/CarProvider.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1602
+      },
+      "writtenOn": "2016-08-05T21:51:58Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a6b29fe_3a69208c",
+      "revId": "bbde48199a894bd52d8d339045b4115f5a435b37",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a6b29fe_da58ecfc",
         "filename": "opendaylight/md-sal/samples/clustering-test-app/provider/src/main/java/org/opendaylight/controller/clustering/it/provider/CarProvider.java",
         "patchSetId": 4
@@ -30,6 +48,24 @@
       "writtenOn": "2016-08-05T03:13:06Z",
       "side": 1,
       "message": "Thus just writes the top-level container. This is not what we want to count. Also why did you add retries here? If it fails we should just fail the RPC request.",
+      "revId": "bbde48199a894bd52d8d339045b4115f5a435b37",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_839c486b",
+        "filename": "opendaylight/md-sal/samples/clustering-test-app/provider/src/main/java/org/opendaylight/controller/clustering/it/provider/CarProvider.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1602
+      },
+      "writtenOn": "2016-08-05T21:51:58Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a6b29fe_da58ecfc",
       "revId": "bbde48199a894bd52d8d339045b4115f5a435b37",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "7a6b29fe_e3889c24",
+        "filename": "opendaylight/md-sal/samples/clustering-test-app/provider/src/main/java/org/opendaylight/controller/clustering/it/provider/CarProvider.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 1602
+      },
+      "writtenOn": "2016-08-05T21:51:58Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a6b29fe_1a72647c",
+      "revId": "bbde48199a894bd52d8d339045b4115f5a435b37",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a6b29fe_9a05d4c4",
         "filename": "opendaylight/md-sal/samples/clustering-test-app/provider/src/main/java/org/opendaylight/controller/clustering/it/provider/CarProvider.java",
         "patchSetId": 4
@@ -64,6 +118,24 @@
       "writtenOn": "2016-08-05T03:13:06Z",
       "side": 1,
       "message": "You don\u0027t need to read here - just return the success and failure counts.",
+      "revId": "bbde48199a894bd52d8d339045b4115f5a435b37",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_c38da033",
+        "filename": "opendaylight/md-sal/samples/clustering-test-app/provider/src/main/java/org/opendaylight/controller/clustering/it/provider/CarProvider.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 212,
+      "author": {
+        "id": 1602
+      },
+      "writtenOn": "2016-08-05T21:51:58Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a6b29fe_9a05d4c4",
       "revId": "bbde48199a894bd52d8d339045b4115f5a435b37",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
