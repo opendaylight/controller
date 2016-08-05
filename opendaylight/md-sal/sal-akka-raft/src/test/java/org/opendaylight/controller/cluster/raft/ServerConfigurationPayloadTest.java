@@ -7,12 +7,13 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
-import static org.opendaylight.controller.cluster.raft.ServerConfigurationPayload.ServerInfo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import java.util.Arrays;
 import org.apache.commons.lang.SerializationUtils;
 import org.junit.Test;
+import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload;
+import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
 
 /**
  * Unit tests for ServerConfigurationPayload.
