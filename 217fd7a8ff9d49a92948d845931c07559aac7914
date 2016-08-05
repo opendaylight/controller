@@ -73,6 +73,30 @@
     },
     {
       "key": {
+        "uuid": "7a6b29fe_1a41c439",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/NoopPayload.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-08-05T02:51:57Z",
+      "side": 1,
+      "message": "I can move NoopPayload (but not ServerConfigurationPayload with this patch).",
+      "parentUuid": "7a6b29fe_04f5e982",
+      "range": {
+        "startLine": 19,
+        "startChar": 13,
+        "endLine": 19,
+        "endChar": 40
+      },
+      "revId": "217fd7a8ff9d49a92948d845931c07559aac7914",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a6b29fe_0ef50a83",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/NoopPayload.java",
         "patchSetId": 2
@@ -143,6 +167,30 @@
     },
     {
       "key": {
+        "uuid": "7a6b29fe_fa3de8bc",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 238,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-08-05T02:51:57Z",
+      "side": 1,
+      "message": "yeah I think it\u0027s PMD that doesn\u0027t like checking reference equality, even though in this case it\u0027s fine. I can change it.",
+      "parentUuid": "7a6b29fe_847e19e3",
+      "range": {
+        "startLine": 238,
+        "startChar": 60,
+        "endLine": 238,
+        "endChar": 63
+      },
+      "revId": "217fd7a8ff9d49a92948d845931c07559aac7914",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a6b29fe_64777d03",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/PreLeader.java",
         "patchSetId": 2
@@ -154,6 +202,30 @@
       "writtenOn": "2016-08-04T23:10:17Z",
       "side": 1,
       "message": "You mentioned that there is a single sentence in RAFT talking about a no-op payload. Can we reference it somehow?",
+      "range": {
+        "startLine": 23,
+        "startChar": 90,
+        "endLine": 24,
+        "endChar": 23
+      },
+      "revId": "217fd7a8ff9d49a92948d845931c07559aac7914",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_9a74b49d",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/PreLeader.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-08-05T02:51:57Z",
+      "side": 1,
+      "message": "yeah let me dig it up. It\u0027s mentioned in the extended raft version.",
+      "parentUuid": "7a6b29fe_64777d03",
       "range": {
         "startLine": 23,
         "startChar": 90,
