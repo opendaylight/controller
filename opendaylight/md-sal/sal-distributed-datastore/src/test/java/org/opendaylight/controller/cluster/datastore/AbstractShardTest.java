@@ -16,9 +16,6 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.opendaylight.controller.cluster.datastore.DataStoreVersions.CURRENT_VERSION;
-import static org.opendaylight.controller.cluster.datastore.ShardDataTreeMocking.immediateCanCommit;
-import static org.opendaylight.controller.cluster.datastore.ShardDataTreeMocking.immediateCommit;
-import static org.opendaylight.controller.cluster.datastore.ShardDataTreeMocking.immediatePreCommit;
 import static org.opendaylight.controller.cluster.datastore.ShardDataTreeMocking.successfulCanCommit;
 import static org.opendaylight.controller.cluster.datastore.ShardDataTreeMocking.successfulCommit;
 import static org.opendaylight.controller.cluster.datastore.ShardDataTreeMocking.successfulPreCommit;
@@ -54,6 +51,7 @@ import org.opendaylight.controller.cluster.datastore.DatastoreContext.Builder;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.BatchedModifications;
 import org.opendaylight.controller.cluster.datastore.messages.ForwardedReadyTransaction;
+import org.opendaylight.controller.cluster.datastore.modification.MergeModification;
 import org.opendaylight.controller.cluster.datastore.modification.MutableCompositeModification;
 import org.opendaylight.controller.cluster.datastore.modification.WriteModification;
 import org.opendaylight.controller.cluster.datastore.persisted.CommitTransactionPayload;
@@ -322,25 +320,26 @@ public abstract class AbstractShardTest extends AbstractActorTest{
     }
 
     public static void writeToStore(final ShardDataTree store, final YangInstanceIdentifier id,
-            final NormalizedNode<?,?> node) throws InterruptedException, ExecutionException {
-        final ReadWriteShardDataTreeTransaction transaction = store.newReadWriteTransaction(nextTransactionId());
-
-        transaction.getSnapshot().write(id, node);
-        final ShardDataTreeCohort cohort = transaction.ready();
-        immediateCanCommit(cohort);
-        immediatePreCommit(cohort);
-        immediateCommit(cohort);
+            final NormalizedNode<?,?> node) throws Exception {
+        BatchedModifications batched = newBatchedModifications(nextTransactionId(), id, node, true, true, 1);
+        DataTreeModification modification = store.getDataTree().takeSnapshot().newModification();
+        batched.apply(modification);
+        modification.ready();
+        store.applyForeignCandidate(batched.getTransactionID(), store.getDataTree().prepare(modification));
     }
 
     public void mergeToStore(final ShardDataTree store, final YangInstanceIdentifier id,
-            final NormalizedNode<?,?> node) throws InterruptedException, ExecutionException {
-        final ReadWriteShardDataTreeTransaction transaction = store.newReadWriteTransaction(nextTransactionId());
+            final NormalizedNode<?,?> node) throws Exception {
+        final BatchedModifications batched = new BatchedModifications(nextTransactionId(), CURRENT_VERSION);
+        batched.addModification(new MergeModification(id, node));
+        batched.setReady(true);
+        batched.setDoCommitOnReady(true);
+        batched.setTotalMessagesSent(1);
 
-        transaction.getSnapshot().merge(id, node);
-        final ShardDataTreeCohort cohort = transaction.ready();
-        immediateCanCommit(cohort);
-        immediatePreCommit(cohort);
-        immediateCommit(cohort);
+        DataTreeModification modification = store.getDataTree().takeSnapshot().newModification();
+        batched.apply(modification);
+        modification.ready();
+        store.applyForeignCandidate(batched.getTransactionID(), store.getDataTree().prepare(modification));
     }
 
     public static void writeToStore(final DataTree store, final YangInstanceIdentifier id,
