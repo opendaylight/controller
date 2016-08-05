@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.raft;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -23,7 +24,10 @@ import org.slf4j.LoggerFactory;
  * Payload data for server configuration log entries.
  *
  * @author Thomas Pantelis
+ *
+ * @deprecated Use {@link org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload} instead.
  */
+@Deprecated
 public class ServerConfigurationPayload extends Payload implements PersistentPayload, Serializable {
     private static final long serialVersionUID = 1L;
 
@@ -65,6 +69,12 @@ public class ServerConfigurationPayload extends Payload implements PersistentPay
         return "ServerConfigurationPayload [serverConfig=" + serverConfig + "]";
     }
 
+    private Object readResolve() {
+        return new org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload(
+            Lists.transform(serverConfig, t -> new org.opendaylight.controller.cluster.raft.persisted.ServerInfo(
+                t.getId(), t.isVoting)));
+    }
+
     public static class ServerInfo implements Serializable {
         private static final long serialVersionUID = 1L;
 
@@ -89,7 +99,7 @@ public class ServerConfigurationPayload extends Payload implements PersistentPay
         public int hashCode() {
             final int prime = 31;
             int result = 1;
-            result = prime * result + (isVoting ? 1231 : 1237);
+            result = prime * result + Boolean.hashCode(isVoting);
             result = prime * result + id.hashCode();
             return result;
         }
