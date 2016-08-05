@@ -162,8 +162,6 @@ public class DataChangeListenerSupportTest extends AbstractShardTest {
 
     private Shard createShard() {
         TestActorRef<Shard> actor = actorFactory.createTestActor(newShardProps());
-        ShardTestKit.waitUntilLeader(actor);
-
         return actor.underlyingActor();
     }
 }

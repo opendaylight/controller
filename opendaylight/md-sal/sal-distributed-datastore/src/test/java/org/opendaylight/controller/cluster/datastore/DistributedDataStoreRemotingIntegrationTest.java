@@ -527,6 +527,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
                 shardElectionTimeoutFactor(1).customRaftPolicyImplementation(null));
 
         JavaTestKit.shutdownActorSystem(leaderSystem, null, true);
+        Cluster.get(followerSystem).leave(MEMBER_1_ADDRESS);
 
         followerTestKit.waitUntilNoLeader(followerDistributedDataStore.getActorContext(), CARS);
 
@@ -781,6 +782,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
                 customRaftPolicyImplementation(DisableElectionsRaftPolicy.class.getName()).
                 shardElectionTimeoutFactor(10));
 
+        Cluster.get(followerSystem).leave(MEMBER_1_ADDRESS);
         leaderTestKit.waitUntilNoLeader(leaderDistributedDataStore.getActorContext(), "cars");
 
         // Submit all tx's - the messages should get queued for retry.
@@ -957,6 +959,8 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
         JavaTestKit.shutdownActorSystem(leaderSystem, null, true);
 
+        Cluster.get(followerSystem).leave(MEMBER_1_ADDRESS);
+
         Uninterruptibles.sleepUninterruptibly(100, TimeUnit.MILLISECONDS);
 
         sendDatastoreContextUpdate(followerDistributedDataStore, followerDatastoreContextBuilder.
@@ -996,6 +1000,8 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
             // Shutdown the leader and try to create a new tx.
 
             JavaTestKit.shutdownActorSystem(leaderSystem, null, true);
+
+            Cluster.get(followerSystem).leave(MEMBER_1_ADDRESS);
 
             sendDatastoreContextUpdate(followerDistributedDataStore, followerDatastoreContextBuilder.
                 operationTimeoutInMillis(500).shardElectionTimeoutFactor(1).customRaftPolicyImplementation(null));
