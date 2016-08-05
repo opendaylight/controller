@@ -309,23 +309,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
                 <overWriteSnapshots>true</overWriteSnapshots>
               </configuration>
             </execution>
-            <execution>
-              <id>copy-dependencies</id>
-              <phase>prepare-package</phase>
-              <goals>
-                <goal>copy-dependencies</goal>
-              </goals>
-              <configuration>
-                <outputDirectory>${project.build.directory}/assembly/system</outputDirectory>
-                <excludeArtifactIds>distribution.vtn-coordinator</excludeArtifactIds>
-                <overWriteReleases>false</overWriteReleases>
-                <overWriteSnapshots>true</overWriteSnapshots>
-                <overWriteIfNewer>true</overWriteIfNewer>
-                <useRepositoryLayout>true</useRepositoryLayout>
-                <addParentPoms>true</addParentPoms>
-                <copyPom>true</copyPom>
-              </configuration>
-            </execution>
           </executions>
         </plugin>
         <plugin>
@@ -354,6 +337,22 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
               </configuration>
             </execution>
           </executions>
+        </plugin>
+        <plugin>
+            <groupId>org.opendaylight.odlparent</groupId>
+            <artifactId>karaf-plugin</artifactId>
+            <version>1.7.0-SNAPSHOT</version>
+            <executions>
+                <execution>
+                    <id>populate-local-repo</id>
+                    <goals>
+                        <goal>populate-local-repo</goal>
+                    </goals>
+                    <configuration>
+                        <localRepo>${project.build.directory}/assembly/system</localRepo>
+                    </configuration>
+                </execution>
+            </executions>
         </plugin>
       </plugins>
     </pluginManagement>
@@ -396,6 +395,10 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-antrun-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.opendaylight.odlparent</groupId>
+        <artifactId>karaf-plugin</artifactId>
       </plugin>
     </plugins>
   </build>
