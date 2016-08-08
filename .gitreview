@@ -2,4 +2,4 @@
 host=git.opendaylight.org
 port=29418
 project=controller.git
-defaultbranch=master
+defaultbranch=stable/boron
