@@ -174,8 +174,8 @@ final class DistributedDataStoreClientBehavior extends ClientActorBehavior imple
         transactions.remove(transaction.getIdentifier());
     }
 
-    void sendRequest(final long sequence, final TransactionRequest<?> request, final Consumer<Response<?, ?>> completer) {
-        sendRequest(sequence, request, response -> {
+    void sendRequest(final TransactionRequest<?> request, final Consumer<Response<?, ?>> completer) {
+        sendRequest(request, response -> {
             completer.accept(response);
             return this;
         });

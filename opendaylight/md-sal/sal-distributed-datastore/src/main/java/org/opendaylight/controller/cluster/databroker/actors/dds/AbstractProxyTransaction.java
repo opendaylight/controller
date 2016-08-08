@@ -67,7 +67,7 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
             final LocalHistoryIdentifier historyId, final long transactionId,
             final java.util.Optional<ShardBackendInfo> backend) {
 
-        final java.util.Optional<DataTree> dataTree = backend.flatMap(t -> t.getDataTree());
+        final java.util.Optional<DataTree> dataTree = backend.flatMap(ShardBackendInfo::getDataTree);
         final TransactionIdentifier identifier = new TransactionIdentifier(historyId, transactionId);
         if (dataTree.isPresent()) {
             return new LocalProxyTransaction(client, identifier, dataTree.get().takeSnapshot());
@@ -141,7 +141,7 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
         checkSealed();
 
         final SettableFuture<Boolean> ret = SettableFuture.create();
-        client().sendRequest(nextSequence(), Verify.verifyNotNull(doCommit(false)), t -> {
+        client().sendRequest(Verify.verifyNotNull(doCommit(false)), t -> {
             if (t instanceof TransactionCommitSuccess) {
                 ret.set(Boolean.TRUE);
             } else if (t instanceof RequestFailure) {
@@ -156,7 +156,7 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
     void abort(final VotingFuture<Void> ret) {
         checkSealed();
 
-        client.sendRequest(nextSequence(), new TransactionAbortRequest(getIdentifier(), client().self()), t -> {
+        client.sendRequest(new TransactionAbortRequest(getIdentifier(), nextSequence(), client().self()), t -> {
             if (t instanceof TransactionAbortSuccess) {
                 ret.voteYes();
             } else if (t instanceof RequestFailure) {
@@ -170,7 +170,7 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
     void canCommit(final VotingFuture<?> ret) {
         checkSealed();
 
-        client.sendRequest(nextSequence(), Verify.verifyNotNull(doCommit(true)), t -> {
+        client.sendRequest(Verify.verifyNotNull(doCommit(true)), t -> {
             if (t instanceof TransactionCanCommitSuccess) {
                 ret.voteYes();
             } else if (t instanceof RequestFailure) {
@@ -184,7 +184,7 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
     void preCommit(final VotingFuture<?> ret) {
         checkSealed();
 
-        client.sendRequest(nextSequence(), new TransactionPreCommitRequest(getIdentifier(), client().self()), t-> {
+        client.sendRequest(new TransactionPreCommitRequest(getIdentifier(), nextSequence(), client().self()), t-> {
             if (t instanceof TransactionPreCommitSuccess) {
                 ret.voteYes();
             } else if (t instanceof RequestFailure) {
@@ -198,7 +198,7 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
     void doCommit(final VotingFuture<?> ret) {
         checkSealed();
 
-        client.sendRequest(nextSequence(), new TransactionDoCommitRequest(getIdentifier(), client().self()), t-> {
+        client.sendRequest(new TransactionDoCommitRequest(getIdentifier(), nextSequence(), client().self()), t-> {
             if (t instanceof TransactionCommitSuccess) {
                 ret.voteYes();
             } else if (t instanceof RequestFailure) {
@@ -224,5 +224,4 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
     abstract void doAbort();
 
     abstract TransactionRequest<?> doCommit(boolean coordinated);
-
 }

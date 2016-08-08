@@ -10,7 +10,7 @@ package org.opendaylight.controller.cluster.access.concepts;
 public abstract class ResponseEnvelope<T extends Response<?, ?>> extends Envelope<T> {
     private static final long serialVersionUID = 1L;
 
-    ResponseEnvelope(final T message, final long sequence, final long retry) {
-        super(message, sequence, retry);
+    ResponseEnvelope(final T message, final long sessionId, final long txSequence) {
+        super(message, sessionId, txSequence);
     }
 }

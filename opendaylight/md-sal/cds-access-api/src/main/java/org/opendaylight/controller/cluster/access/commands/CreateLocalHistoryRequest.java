@@ -22,7 +22,11 @@ public final class CreateLocalHistoryRequest extends LocalHistoryRequest<CreateL
     private static final long serialVersionUID = 1L;
 
     public CreateLocalHistoryRequest(final LocalHistoryIdentifier target, final ActorRef replyTo) {
-        super(target, replyTo);
+        this(target, 0, replyTo);
+    }
+
+    CreateLocalHistoryRequest(final LocalHistoryIdentifier target, final long sequence, final ActorRef replyTo) {
+        super(target, sequence, replyTo);
     }
 
     private CreateLocalHistoryRequest(final CreateLocalHistoryRequest request, final ABIVersion version) {

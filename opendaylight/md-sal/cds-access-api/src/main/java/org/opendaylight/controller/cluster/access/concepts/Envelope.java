@@ -16,13 +16,13 @@ public abstract class Envelope<T extends Message<?, ?>> implements Immutable, Se
     private static final long serialVersionUID = 1L;
 
     private final T message;
-    private final long sequence;
-    private final long retry;
+    private final long txSequence;
+    private final long sessionId;
 
-    Envelope(final T message, final long sequence, final long retry) {
+    Envelope(final T message, final long sessionId, final long txSequence) {
         this.message = Preconditions.checkNotNull(message);
-        this.sequence = sequence;
-        this.retry = retry;
+        this.sessionId = sessionId;
+        this.txSequence = txSequence;
     }
 
     /**
@@ -35,27 +35,27 @@ public abstract class Envelope<T extends Message<?, ?>> implements Immutable, Se
     }
 
     /**
-     * Get the message sequence of this envelope.
+     * Get the message transmission sequence of this envelope.
      *
      * @return Message sequence
      */
-    public long getSequence() {
-        return sequence;
+    public long getTxSequence() {
+        return txSequence;
     }
 
     /**
-     * Get the message retry counter.
+     * Get the session identifier.
      *
-     * @return Retry counter
+     * @return Session identifier
      */
-    public long getRetry() {
-        return retry;
+    public long getSessionId() {
+        return sessionId;
     }
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(Envelope.class).add("sequence", Long.toUnsignedString(sequence, 16)).
-                add("retry", retry).add("message", message).toString();
+        return MoreObjects.toStringHelper(Envelope.class).add("sessionId", Long.toHexString(sessionId))
+                .add("txSequence", Long.toHexString(txSequence)).add("message", message).toString();
     }
 
     final Object writeReplace() {

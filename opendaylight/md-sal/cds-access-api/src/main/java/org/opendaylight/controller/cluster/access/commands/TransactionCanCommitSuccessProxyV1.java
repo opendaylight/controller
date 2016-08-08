@@ -40,7 +40,7 @@ final class TransactionCanCommitSuccessProxyV1 extends AbstractTransactionSucces
     }
 
     @Override
-    protected TransactionCanCommitSuccess createSuccess(final TransactionIdentifier target) {
-        return new TransactionCanCommitSuccess(target);
+    protected TransactionCanCommitSuccess createSuccess(final TransactionIdentifier target, final long sequence) {
+        return new TransactionCanCommitSuccess(target, sequence);
     }
 }
