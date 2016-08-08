@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.access.client;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
@@ -49,7 +50,7 @@ public class SequencedQueueEntryTest {
         private static final long serialVersionUID = 1L;
 
         MockFailure(final WritableIdentifier target, final RequestException cause) {
-            super(target, cause);
+            super(target, 0, cause);
         }
 
         @Override
@@ -67,7 +68,7 @@ public class SequencedQueueEntryTest {
         private static final long serialVersionUID = 1L;
 
         MockRequest(final WritableIdentifier target, final ActorRef replyTo) {
-            super(target, replyTo);
+            super(target, 0, replyTo);
         }
 
         @Override
@@ -127,11 +128,11 @@ public class SequencedQueueEntryTest {
         ticker.increment(ThreadLocalRandom.current().nextLong());
 
         mockActor = TestProbe.apply(actorSystem);
-        mockBackendInfo = new BackendInfo(mockActor.ref(), ABIVersion.current());
+        mockBackendInfo = new BackendInfo(mockActor.ref(), 0, ABIVersion.current(), 5);
         mockRequest = new MockRequest(mockIdentifier, mockReplyTo);
         mockResponse = mockRequest.toRequestFailure(mockCause);
 
-        entry = new SequencedQueueEntry(mockRequest, 0, mockCallback, ticker.read());
+        entry = new SequencedQueueEntry(mockRequest, mockCallback, ticker.read());
     }
 
     @After
@@ -140,19 +141,14 @@ public class SequencedQueueEntryTest {
     }
 
     @Test
-    public void testGetSequence() {
-        assertEquals(0, entry.getSequence());
-    }
-
-    @Test
-    public void testGetCurrentTry() {
-        assertEquals(0, entry.getCurrentTry());
-        entry.retransmit(mockBackendInfo, ticker.read());
-        assertEquals(0, entry.getCurrentTry());
-        entry.retransmit(mockBackendInfo, ticker.read());
-        assertEquals(1, entry.getCurrentTry());
-        entry.retransmit(mockBackendInfo, ticker.read());
-        assertEquals(2, entry.getCurrentTry());
+    public void testGetTxDetails() {
+        assertNull(entry.getTxDetails());
+        entry.retransmit(mockBackendInfo, 0, ticker.read());
+        assertEquals(0, entry.getTxDetails().getTxSequence());
+        entry.retransmit(mockBackendInfo, 1, ticker.read());
+        assertEquals(1, entry.getTxDetails().getTxSequence());
+        entry.retransmit(mockBackendInfo, 3, ticker.read());
+        assertEquals(3, entry.getTxDetails().getTxSequence());
     }
 
     @Test
@@ -175,13 +171,13 @@ public class SequencedQueueEntryTest {
         assertTrue(entry.isTimedOut(ticker.read(), 0));
         assertFalse(entry.isTimedOut(ticker.read(), 1));
 
-        entry.retransmit(mockBackendInfo, ticker.read());
+        entry.retransmit(mockBackendInfo, 0, ticker.read());
         assertTrue(entry.isTimedOut(ticker.read(), 0));
         ticker.increment(10);
         assertTrue(entry.isTimedOut(ticker.read(), 10));
         assertFalse(entry.isTimedOut(ticker.read(), 20));
 
-        entry.retransmit(mockBackendInfo, ticker.read());
+        entry.retransmit(mockBackendInfo, 1, ticker.read());
         assertTrue(entry.isTimedOut(ticker.read(), 0));
         ticker.increment(10);
         assertTrue(entry.isTimedOut(ticker.read(), 10));
@@ -191,7 +187,7 @@ public class SequencedQueueEntryTest {
     @Test
     public void testRetransmit() {
         assertFalse(mockActor.msgAvailable());
-        entry.retransmit(mockBackendInfo, ticker.read());
+        entry.retransmit(mockBackendInfo, 0, ticker.read());
 
         assertTrue(mockActor.msgAvailable());
         assertRequestEquals(mockRequest, mockActor.receiveOne(Duration.apply(5, TimeUnit.SECONDS)));
@@ -201,8 +197,8 @@ public class SequencedQueueEntryTest {
          assertTrue(o instanceof RequestEnvelope);
 
          final RequestEnvelope actual = (RequestEnvelope) o;
-         assertEquals(0, actual.getRetry());
-         assertEquals(0, actual.getSequence());
+         assertEquals(0, actual.getSessionId());
+         assertEquals(0, actual.getTxSequence());
          assertEquals(expected.getTarget(), actual.getMessage().getTarget());
     }
 }

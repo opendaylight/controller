@@ -25,6 +25,6 @@ public final class AbortLocalTransactionRequest extends AbstractLocalTransaction
 
     public AbortLocalTransactionRequest(final @Nonnull TransactionIdentifier identifier,
             final @Nonnull ActorRef replyTo) {
-        super(identifier, replyTo);
+        super(identifier, 0, replyTo);
     }
 }

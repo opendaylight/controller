@@ -28,7 +28,8 @@ final class PurgeLocalHistoryRequestProxyV1 extends AbstractLocalHistoryRequestP
     }
 
     @Override
-    protected PurgeLocalHistoryRequest createRequest(final LocalHistoryIdentifier target, final ActorRef replyTo) {
-        return new PurgeLocalHistoryRequest(target, replyTo);
+    protected PurgeLocalHistoryRequest createRequest(final LocalHistoryIdentifier target, final long sequence,
+            final ActorRef replyTo) {
+        return new PurgeLocalHistoryRequest(target, sequence, replyTo);
     }
 }

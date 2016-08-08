@@ -29,7 +29,7 @@ public final class CommitLocalTransactionRequest extends AbstractLocalTransactio
 
     public CommitLocalTransactionRequest(final @Nonnull TransactionIdentifier identifier,
             final @Nonnull ActorRef replyTo, final @Nonnull DataTreeModification mod, final boolean coordinated) {
-        super(identifier, replyTo);
+        super(identifier, 0, replyTo);
         this.mod = Preconditions.checkNotNull(mod);
         this.coordinated = coordinated;
     }

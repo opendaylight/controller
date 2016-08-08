@@ -21,8 +21,8 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
 public final class TransactionDoCommitRequest extends TransactionRequest<TransactionDoCommitRequest> {
     private static final long serialVersionUID = 1L;
 
-    public TransactionDoCommitRequest(final TransactionIdentifier target, final ActorRef replyTo) {
-        super(target, replyTo);
+    public TransactionDoCommitRequest(final TransactionIdentifier target, final long sequence, final ActorRef replyTo) {
+        super(target, sequence, replyTo);
     }
 
     @Override
