@@ -28,7 +28,8 @@ final class DestroyLocalHistoryRequestProxyV1 extends AbstractLocalHistoryReques
     }
 
     @Override
-    protected DestroyLocalHistoryRequest createRequest(final LocalHistoryIdentifier target, final ActorRef replyTo) {
-        return new DestroyLocalHistoryRequest(target, replyTo);
+    protected DestroyLocalHistoryRequest createRequest(final LocalHistoryIdentifier target, final long sequence,
+            final ActorRef replyTo) {
+        return new DestroyLocalHistoryRequest(target, sequence, replyTo);
     }
 }

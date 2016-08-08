@@ -21,8 +21,8 @@ import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifie
 public final class DestroyLocalHistoryRequest extends LocalHistoryRequest<DestroyLocalHistoryRequest> {
     private static final long serialVersionUID = 1L;
 
-    public DestroyLocalHistoryRequest(final LocalHistoryIdentifier target, final ActorRef replyTo) {
-        super(target, replyTo);
+    public DestroyLocalHistoryRequest(final LocalHistoryIdentifier target, final long sequence, final ActorRef replyTo) {
+        super(target, sequence, replyTo);
     }
 
     private DestroyLocalHistoryRequest(final DestroyLocalHistoryRequest request, final ABIVersion version) {

@@ -34,26 +34,23 @@ public final class ConnectClientRequest extends Request<ClientIdentifier, Connec
 
     private final ABIVersion minVersion;
     private final ABIVersion maxVersion;
-    private final long resumeSequence;
 
-    public ConnectClientRequest(final ClientIdentifier identifier, final ActorRef replyTo, final ABIVersion minVersion,
-            final ABIVersion maxVersion) {
-        this(identifier, replyTo, minVersion, maxVersion, 0);
+    ConnectClientRequest(final ClientIdentifier identifier, final long txSequence, final ActorRef replyTo,
+            final ABIVersion minVersion, final ABIVersion maxVersion) {
+        super(identifier, txSequence, replyTo);
+        this.minVersion = Preconditions.checkNotNull(minVersion);
+        this.maxVersion = Preconditions.checkNotNull(maxVersion);
     }
 
     public ConnectClientRequest(final ClientIdentifier identifier, final ActorRef replyTo, final ABIVersion minVersion,
-            final ABIVersion maxVersion, final long resumeSequence) {
-        super(identifier, replyTo);
-        this.minVersion = Preconditions.checkNotNull(minVersion);
-        this.maxVersion = Preconditions.checkNotNull(maxVersion);
-        this.resumeSequence = resumeSequence;
+            final ABIVersion maxVersion) {
+        this(identifier, 0, replyTo, minVersion, maxVersion);
     }
 
     private ConnectClientRequest(final ConnectClientRequest request, final ABIVersion version) {
         super(request, version);
         this.minVersion = request.minVersion;
         this.maxVersion = request.maxVersion;
-        this.resumeSequence = request.resumeSequence;
     }
 
     public ABIVersion getMinVersion() {
@@ -64,13 +61,9 @@ public final class ConnectClientRequest extends Request<ClientIdentifier, Connec
         return maxVersion;
     }
 
-    public long getResumeSequence() {
-        return resumeSequence;
-    }
-
     @Override
     public final ConnectClientFailure toRequestFailure(final RequestException cause) {
-        return new ConnectClientFailure(getTarget(), cause);
+        return new ConnectClientFailure(getTarget(), getSequence(), cause);
     }
 
     @Override
@@ -85,7 +78,6 @@ public final class ConnectClientRequest extends Request<ClientIdentifier, Connec
 
     @Override
     protected @Nonnull ToStringHelper addToStringAttributes(final @Nonnull ToStringHelper toStringHelper) {
-        return super.addToStringAttributes(toStringHelper).add("minVersion", minVersion).add("maxVersion", maxVersion)
-                .add("resumeSequence", resumeSequence);
+        return super.addToStringAttributes(toStringHelper).add("minVersion", minVersion).add("maxVersion", maxVersion);
     }
 }

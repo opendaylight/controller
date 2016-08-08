@@ -31,8 +31,9 @@ final class LocalHistoryFailureProxyV1 extends AbstractRequestFailureProxy<Local
     }
 
     @Override
-    protected LocalHistoryFailure createFailure(final LocalHistoryIdentifier target, final RequestException cause) {
-        return new LocalHistoryFailure(target, cause);
+    protected LocalHistoryFailure createFailure(final LocalHistoryIdentifier target, final long sequence,
+            final RequestException cause) {
+        return new LocalHistoryFailure(target, sequence, cause);
     }
 
     @Override

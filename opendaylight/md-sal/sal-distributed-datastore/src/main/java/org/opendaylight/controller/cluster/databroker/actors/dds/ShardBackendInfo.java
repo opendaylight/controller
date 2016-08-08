@@ -30,9 +30,9 @@ final class ShardBackendInfo extends BackendInfo {
     private final UnsignedLong cookie;
     private final String shardName;
 
-    ShardBackendInfo(final ActorRef actor, final ABIVersion version, final String shardName, final UnsignedLong cookie,
-        final Optional<DataTree> dataTree) {
-        super(actor, version);
+    ShardBackendInfo(final ActorRef actor, final long sessionId, final ABIVersion version, final String shardName,
+        final UnsignedLong cookie, final Optional<DataTree> dataTree, final int maxMessages) {
+        super(actor, sessionId, version, maxMessages);
         this.shardName = Preconditions.checkNotNull(shardName);
         this.cookie = Preconditions.checkNotNull(cookie);
         this.dataTree = Preconditions.checkNotNull(dataTree);

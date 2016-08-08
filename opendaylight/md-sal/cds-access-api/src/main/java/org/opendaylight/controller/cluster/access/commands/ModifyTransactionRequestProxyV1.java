@@ -76,7 +76,8 @@ final class ModifyTransactionRequestProxyV1 extends AbstractTransactionRequestPr
     }
 
     @Override
-    protected ModifyTransactionRequest createRequest(final TransactionIdentifier target, final ActorRef replyTo) {
-        return new ModifyTransactionRequest(target, replyTo, modifications, protocol.orElse(null));
+    protected ModifyTransactionRequest createRequest(final TransactionIdentifier target, final long sequence,
+            final ActorRef replyTo) {
+        return new ModifyTransactionRequest(target, sequence, replyTo, modifications, protocol.orElse(null));
     }
 }
