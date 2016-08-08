@@ -23,8 +23,8 @@ import org.opendaylight.controller.cluster.access.concepts.RequestFailure;
 public final class ConnectClientFailure extends RequestFailure<ClientIdentifier, ConnectClientFailure> {
     private static final long serialVersionUID = 1L;
 
-    ConnectClientFailure(final ClientIdentifier target, final RequestException cause) {
-        super(target, cause);
+    ConnectClientFailure(final ClientIdentifier target, final long sequence, final RequestException cause) {
+        super(target, sequence, cause);
     }
 
     private ConnectClientFailure(final ConnectClientFailure failure, final ABIVersion version) {

@@ -22,8 +22,8 @@ import org.opendaylight.controller.cluster.access.concepts.RequestFailure;
 public final class LocalHistoryFailure extends RequestFailure<LocalHistoryIdentifier, LocalHistoryFailure> {
     private static final long serialVersionUID = 1L;
 
-    LocalHistoryFailure(final LocalHistoryIdentifier target, final RequestException cause) {
-        super(target, cause);
+    LocalHistoryFailure(final LocalHistoryIdentifier target, final long sequence, final RequestException cause) {
+        super(target, sequence, cause);
     }
 
     @Override

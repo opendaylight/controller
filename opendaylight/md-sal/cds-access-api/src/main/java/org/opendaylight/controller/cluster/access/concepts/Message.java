@@ -50,20 +50,23 @@ import org.opendaylight.yangtools.concepts.WritableIdentifier;
 public abstract class Message<T extends WritableIdentifier, C extends Message<T, C>> implements Immutable,
         Serializable {
     private static final long serialVersionUID = 1L;
-    private final T target;
-    private final ABIVersion version;
 
-    private Message(final ABIVersion version, final T target) {
+    private final ABIVersion version;
+    private final long sequence;
+    private final T target;
+
+    private Message(final ABIVersion version, final T target, final long sequence) {
         this.target = Preconditions.checkNotNull(target);
         this.version = Preconditions.checkNotNull(version);
+        this.sequence = sequence;
     }
 
-    Message(final T target) {
-        this(ABIVersion.current(), target);
+    Message(final T target, final long sequence) {
+        this(ABIVersion.current(), target, sequence);
     }
 
     Message(final C msg, final ABIVersion version) {
-        this(version, msg.getTarget());
+        this(version, msg.getTarget(), msg.getSequence());
     }
 
     /**
@@ -75,8 +78,17 @@ public abstract class Message<T extends WritableIdentifier, C extends Message<T,
         return target;
     }
 
+    /**
+     * Get the logical sequence number.
+     *
+     * @return logical sequence number
+     */
+    public final long getSequence() {
+        return sequence;
+    }
+
     @VisibleForTesting
-    public final ABIVersion getVersion() {
+    public final @Nonnull ABIVersion getVersion() {
         return version;
     }
 
@@ -129,7 +141,7 @@ public abstract class Message<T extends WritableIdentifier, C extends Message<T,
      * @throws NullPointerException if toStringHelper is null
      */
     protected @Nonnull ToStringHelper addToStringAttributes(final @Nonnull ToStringHelper toStringHelper) {
-        return toStringHelper.add("target", target);
+        return toStringHelper.add("target", target).add("sequence", Long.toUnsignedString(sequence));
     }
 
     /**

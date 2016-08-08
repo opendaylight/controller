@@ -35,11 +35,11 @@ public final class ConnectClientSuccess extends RequestSuccess<ClientIdentifier,
     private final List<ActorSelection> alternates;
     private final DataTree dataTree;
     private final ActorRef backend;
-    private final long maxMessages;
+    private final int maxMessages;
 
-    ConnectClientSuccess(final ClientIdentifier target, final ActorRef backend, final List<ActorSelection> alternates,
-        final Optional<DataTree> dataTree, final long maxMessages) {
-        super(target);
+    ConnectClientSuccess(final ClientIdentifier target, final long sequence, final ActorRef backend,
+        final List<ActorSelection> alternates, final Optional<DataTree> dataTree, final int maxMessages) {
+        super(target, sequence);
         this.backend = Preconditions.checkNotNull(backend);
         this.alternates = ImmutableList.copyOf(alternates);
         this.dataTree = dataTree.orElse(null);
@@ -47,9 +47,10 @@ public final class ConnectClientSuccess extends RequestSuccess<ClientIdentifier,
         this.maxMessages = maxMessages;
     }
 
-    public ConnectClientSuccess(final @Nonnull ClientIdentifier target, final @Nonnull ActorRef backend,
-            final @Nonnull List<ActorSelection> alternates, final @Nonnull DataTree dataTree, final long maxMessages) {
-        this(target, backend, alternates, Optional.of(dataTree), maxMessages);
+    public ConnectClientSuccess(final @Nonnull ClientIdentifier target, final long sequence,
+            final @Nonnull ActorRef backend, final @Nonnull List<ActorSelection> alternates,
+            final @Nonnull DataTree dataTree, final int maxMessages) {
+        this(target, sequence, backend, alternates, Optional.of(dataTree), maxMessages);
     }
 
     /**
@@ -69,7 +70,7 @@ public final class ConnectClientSuccess extends RequestSuccess<ClientIdentifier,
         return Optional.ofNullable(dataTree);
     }
 
-    public long getMaxMessages() {
+    public int getMaxMessages() {
         return maxMessages;
     }
 
@@ -85,6 +86,7 @@ public final class ConnectClientSuccess extends RequestSuccess<ClientIdentifier,
 
     @Override
     protected ToStringHelper addToStringAttributes(final ToStringHelper toStringHelper) {
-        return super.addToStringAttributes(toStringHelper).add("alternates", alternates).add("dataTree", dataTree);
+        return super.addToStringAttributes(toStringHelper).add("alternates", alternates).add("dataTree", dataTree)
+                .add("maxMessages", maxMessages);
     }
 }
