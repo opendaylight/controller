@@ -4,7 +4,7 @@
     <parent>
         <artifactId>clustering-it</artifactId>
         <groupId>org.opendaylight.controller.samples</groupId>
-        <version>1.4.0-SNAPSHOT</version>
+        <version>1.5.0-SNAPSHOT</version>
     </parent>
     <!-- FIXME Use org.opendaylight.controller:config-parent -->
     <artifactId>clustering-it-provider</artifactId>
