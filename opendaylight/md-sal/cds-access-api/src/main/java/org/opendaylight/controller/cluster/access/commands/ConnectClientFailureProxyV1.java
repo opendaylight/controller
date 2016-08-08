@@ -29,8 +29,9 @@ final class ConnectClientFailureProxyV1 extends AbstractRequestFailureProxy<Clie
     }
 
     @Override
-    protected ConnectClientFailure createFailure(final ClientIdentifier target, final RequestException cause) {
-        return new ConnectClientFailure(target, cause);
+    protected ConnectClientFailure createFailure(final ClientIdentifier target, final long sequence,
+            final RequestException cause) {
+        return new ConnectClientFailure(target, sequence, cause);
     }
 
     @Override
