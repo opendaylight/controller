@@ -127,6 +127,11 @@
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
+      <artifactId>sal-clustering-commons</artifactId>
+      <type>test-jar</type>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal-common-api</artifactId>
     </dependency>
     <dependency>
