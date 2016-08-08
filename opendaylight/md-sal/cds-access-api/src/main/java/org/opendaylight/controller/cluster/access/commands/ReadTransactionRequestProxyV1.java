@@ -29,8 +29,8 @@ final class ReadTransactionRequestProxyV1 extends AbstractReadTransactionRequest
     }
 
     @Override
-    ReadTransactionRequest createReadRequest(final TransactionIdentifier target, final ActorRef replyTo,
-            final YangInstanceIdentifier path) {
-        return new ReadTransactionRequest(target, replyTo, path);
+    ReadTransactionRequest createReadRequest(final TransactionIdentifier target, final long sequence,
+            final ActorRef replyTo, final YangInstanceIdentifier path) {
+        return new ReadTransactionRequest(target, sequence, replyTo, path);
     }
 }

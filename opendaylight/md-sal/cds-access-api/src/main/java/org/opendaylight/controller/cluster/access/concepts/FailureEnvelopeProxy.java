@@ -19,7 +19,7 @@ final class FailureEnvelopeProxy extends AbstractResponseEnvelopeProxy<RequestFa
     }
 
     @Override
-    FailureEnvelope createEnvelope(final RequestFailure<?, ?> message, final long sequence, final long retry) {
-        return new FailureEnvelope(message, sequence, retry);
+    FailureEnvelope createEnvelope(final RequestFailure<?, ?> message, final long sessionId, final long txSequence) {
+        return new FailureEnvelope(message, sessionId, txSequence);
     }
 }

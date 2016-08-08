@@ -10,7 +10,6 @@ package org.opendaylight.controller.cluster.access.client;
 import akka.actor.ActorRef;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
-import java.util.Optional;
 import org.opendaylight.controller.cluster.access.concepts.Request;
 import org.opendaylight.controller.cluster.access.concepts.RequestEnvelope;
 import org.opendaylight.controller.cluster.access.concepts.RequestException;
@@ -27,12 +26,14 @@ import org.slf4j.LoggerFactory;
  * @param <I> Target identifier type
  */
 final class SequencedQueueEntry {
-    private static final class LastTry {
+    private static final class LastTransmit {
+        final long sessionId;
+        final long txSequence;
         final long timeTicks;
-        final long retry;
 
-        LastTry(final long retry, final long timeTicks) {
-            this.retry = retry;
+        LastTransmit(final long sessionId, final long txSequence, final long timeTicks) {
+            this.sessionId = sessionId;
+            this.txSequence = txSequence;
             this.timeTicks = timeTicks;
         }
     }
@@ -42,29 +43,33 @@ final class SequencedQueueEntry {
     private final Request<?, ?> request;
     private final RequestCallback callback;
     private final long enqueuedTicks;
-    private final long sequence;
 
-    private Optional<LastTry> lastTry = Optional.empty();
+    private LastTransmit lastTx;
 
-    SequencedQueueEntry(final Request<?, ?> request, final long sequence, final RequestCallback callback,
+    SequencedQueueEntry(final Request<?, ?> request, final RequestCallback callback,
         final long now) {
         this.request = Preconditions.checkNotNull(request);
         this.callback = Preconditions.checkNotNull(callback);
         this.enqueuedTicks = now;
-        this.sequence = sequence;
     }
 
-    long getSequence() {
-        return sequence;
+    boolean matchesResponse(final Response<?, ?> response) {
+        return request.getSequence() == response.getSequence() && request.getTarget().equals(response.getTarget());
     }
 
     boolean acceptsResponse(final ResponseEnvelope<?> response) {
-        return getSequence() == response.getSequence() && request.getTarget().equals(response.getMessage().getTarget());
-    }
+        if (lastTx == null) {
+            LOG.warn("Ignoring response {} for unsent request {}", response, request);
+            return false;
+        }
+        if (response.getSessionId() != lastTx.sessionId || response.getTxSequence() != lastTx.txSequence) {
+            LOG.debug("Ignoring mismatched response {}, expecting session {} sequence {}", response,
+                lastTx.sessionId, lastTx.txSequence);
+            return false;
+        }
 
-    long getCurrentTry() {
-        return lastTry.isPresent() ? lastTry.get().retry : 0;
-     }
+        return true;
+    }
 
     ClientActorBehavior complete(final Response<?, ?> response) {
         LOG.debug("Completing request {} with {}", request, response);
@@ -79,8 +84,8 @@ final class SequencedQueueEntry {
     boolean isTimedOut(final long now, final long timeoutNanos) {
         final long elapsed;
 
-        if (lastTry.isPresent()) {
-            elapsed = now - lastTry.get().timeTicks;
+        if (lastTx != null) {
+            elapsed = now - lastTx.timeTicks;
         } else {
             elapsed = now - enqueuedTicks;
         }
@@ -94,13 +99,13 @@ final class SequencedQueueEntry {
     }
 
     void retransmit(final BackendInfo backend, final long now) {
-        final long retry = lastTry.isPresent() ? lastTry.get().retry + 1 : 0;
+        final long retry = lastTx.isPresent() ? lastTx.get().retry + 1 : 0;
         final RequestEnvelope toSend = new RequestEnvelope(request.toVersion(backend.getVersion()), sequence, retry);
 
         final ActorRef actor = backend.getActor();
         LOG.trace("Retransmitting request {} as {} to {}", request, toSend, actor);
         actor.tell(toSend, ActorRef.noSender());
-        lastTry = Optional.of(new LastTry(retry, now));
+        lastTx = new LastTransmit(retry, now);
     }
 
     @Override

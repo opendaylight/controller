@@ -32,8 +32,8 @@ public abstract class RequestFailure<T extends WritableIdentifier, C extends Req
         this.cause = Preconditions.checkNotNull(failure.getCause());
     }
 
-    protected RequestFailure(final @Nonnull T target, final @Nonnull RequestException cause) {
-        super(target);
+    protected RequestFailure(final @Nonnull T target, final long sequence, final @Nonnull RequestException cause) {
+        super(target, sequence);
         this.cause = Preconditions.checkNotNull(cause);
     }
 

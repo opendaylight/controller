@@ -51,9 +51,10 @@ abstract class AbstractReadTransactionRequestProxyV1<T extends AbstractReadTrans
     }
 
     @Override
-    protected final T createRequest(final TransactionIdentifier target, final ActorRef replyTo) {
-        return createReadRequest(target, replyTo, path);
+    protected final T createRequest(final TransactionIdentifier target, final long sequence, final ActorRef replyTo) {
+        return createReadRequest(target, sequence, replyTo, path);
     }
 
-    abstract T createReadRequest(TransactionIdentifier target, ActorRef replyTo, YangInstanceIdentifier path);
+    abstract T createReadRequest(TransactionIdentifier target, long sequence, ActorRef replyTo,
+            YangInstanceIdentifier path);
 }
