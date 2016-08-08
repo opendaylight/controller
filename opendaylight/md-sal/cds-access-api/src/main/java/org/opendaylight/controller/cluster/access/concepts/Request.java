@@ -29,8 +29,8 @@ public abstract class Request<T extends WritableIdentifier, C extends Request<T,
     private static final long serialVersionUID = 1L;
     private final ActorRef replyTo;
 
-    protected Request(final @Nonnull T target, final @Nonnull ActorRef replyTo) {
-        super(target);
+    protected Request(final @Nonnull T target, final long sequence, final @Nonnull ActorRef replyTo) {
+        super(target, sequence);
         this.replyTo = Preconditions.checkNotNull(replyTo);
     }
 

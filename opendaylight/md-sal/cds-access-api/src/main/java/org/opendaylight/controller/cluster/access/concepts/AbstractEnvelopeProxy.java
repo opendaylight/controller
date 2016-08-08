@@ -15,9 +15,10 @@ import org.opendaylight.yangtools.concepts.WritableObjects;
 
 abstract class AbstractEnvelopeProxy<T extends Message<?, ?>> implements Externalizable {
     private static final long serialVersionUID = 1L;
+
     private T message;
-    private long sequence;
-    private long retry;
+    private long sessionId;
+    private long txSequence;
 
     public AbstractEnvelopeProxy() {
         // for Externalizable
@@ -25,13 +26,13 @@ abstract class AbstractEnvelopeProxy<T extends Message<?, ?>> implements Externa
 
     AbstractEnvelopeProxy(final Envelope<T> envelope) {
         message = envelope.getMessage();
-        sequence = envelope.getSequence();
-        retry = envelope.getRetry();
+        txSequence = envelope.getTxSequence();
+        sessionId = envelope.getSessionId();
     }
 
     @Override
     public final void writeExternal(final ObjectOutput out) throws IOException {
-        WritableObjects.writeLongs(out, sequence, retry);
+        WritableObjects.writeLongs(out, sessionId, txSequence);
         out.writeObject(message);
     }
 
@@ -39,14 +40,14 @@ abstract class AbstractEnvelopeProxy<T extends Message<?, ?>> implements Externa
     @Override
     public final void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
         final byte header = WritableObjects.readLongHeader(in);
-        sequence = WritableObjects.readFirstLong(in, header);
-        retry = WritableObjects.readSecondLong(in, header);
+        sessionId = WritableObjects.readFirstLong(in, header);
+        txSequence = WritableObjects.readSecondLong(in, header);
         message = (T) in.readObject();
     }
 
-    abstract Envelope<T> createEnvelope(T message, long sequence, long retry);
+    abstract Envelope<T> createEnvelope(T message, long sessionId, long txSequence);
 
     final Object readResolve() {
-        return createEnvelope(message, sequence, retry);
+        return createEnvelope(message, sessionId, txSequence);
     }
 }

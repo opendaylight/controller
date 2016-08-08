@@ -28,7 +28,8 @@ final class CreateLocalHistoryRequestProxyV1 extends AbstractLocalHistoryRequest
     }
 
     @Override
-    protected CreateLocalHistoryRequest createRequest(final LocalHistoryIdentifier target, final ActorRef replyTo) {
-        return new CreateLocalHistoryRequest(target, replyTo);
+    protected CreateLocalHistoryRequest createRequest(final LocalHistoryIdentifier target, final long sequence,
+            final ActorRef replyTo) {
+        return new CreateLocalHistoryRequest(target, sequence, replyTo);
     }
 }
