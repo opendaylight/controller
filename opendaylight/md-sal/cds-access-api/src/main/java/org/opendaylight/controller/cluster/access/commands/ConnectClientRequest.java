@@ -41,12 +41,17 @@ public final class ConnectClientRequest extends Request<ClientIdentifier, Connec
         this(identifier, replyTo, minVersion, maxVersion, 0);
     }
 
-    public ConnectClientRequest(final ClientIdentifier identifier, final ActorRef replyTo, final ABIVersion minVersion,
-            final ABIVersion maxVersion, final long resumeSequence) {
-        super(identifier, replyTo);
+    public ConnectClientRequest(final ClientIdentifier identifier, final long sequence, final ActorRef replyTo,
+            final ABIVersion minVersion, final ABIVersion maxVersion, final long resumeSequence) {
+        super(identifier, sequence, replyTo);
         this.minVersion = Preconditions.checkNotNull(minVersion);
         this.maxVersion = Preconditions.checkNotNull(maxVersion);
         this.resumeSequence = resumeSequence;
+    }
+
+    ConnectClientRequest(final ClientIdentifier identifier, final ActorRef replyTo, final ABIVersion minVersion,
+            final ABIVersion maxVersion, final long resumeSequence) {
+        this(identifier, 0, replyTo, minVersion, maxVersion, resumeSequence);
     }
 
     private ConnectClientRequest(final ConnectClientRequest request, final ABIVersion version) {

@@ -56,8 +56,9 @@ final class ConnectClientRequestProxyV1 extends AbstractRequestProxy<ClientIdent
     }
 
     @Override
-    protected ConnectClientRequest createRequest(final ClientIdentifier target, final ActorRef replyTo) {
-        return new ConnectClientRequest(target, replyTo, minVersion, maxVersion, resumeSequence);
+    protected ConnectClientRequest createRequest(final ClientIdentifier target, final long sequence,
+            final ActorRef replyTo) {
+        return new ConnectClientRequest(target, sequence, replyTo, minVersion, maxVersion, resumeSequence);
     }
 
     @Override

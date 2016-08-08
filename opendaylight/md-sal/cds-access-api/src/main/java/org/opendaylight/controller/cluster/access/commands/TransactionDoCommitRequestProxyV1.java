@@ -28,7 +28,8 @@ final class TransactionDoCommitRequestProxyV1 extends AbstractTransactionRequest
     }
 
     @Override
-    protected TransactionDoCommitRequest createRequest(final TransactionIdentifier target, final ActorRef replyTo) {
-        return new TransactionDoCommitRequest(target, replyTo);
+    protected TransactionDoCommitRequest createRequest(final TransactionIdentifier target, final long sequence,
+            final ActorRef replyTo) {
+        return new TransactionDoCommitRequest(target, sequence, replyTo);
     }
 }

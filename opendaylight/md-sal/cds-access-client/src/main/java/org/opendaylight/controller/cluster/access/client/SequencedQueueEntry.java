@@ -42,24 +42,25 @@ final class SequencedQueueEntry {
     private final Request<?, ?> request;
     private final RequestCallback callback;
     private final long enqueuedTicks;
-    private final long sequence;
 
     private Optional<LastTry> lastTry = Optional.empty();
 
-    SequencedQueueEntry(final Request<?, ?> request, final long sequence, final RequestCallback callback,
+    SequencedQueueEntry(final Request<?, ?> request, final RequestCallback callback,
         final long now) {
         this.request = Preconditions.checkNotNull(request);
         this.callback = Preconditions.checkNotNull(callback);
         this.enqueuedTicks = now;
-        this.sequence = sequence;
-    }
-
-    long getSequence() {
-        return sequence;
     }
 
     boolean acceptsResponse(final ResponseEnvelope<?> response) {
-        return getSequence() == response.getSequence() && request.getTarget().equals(response.getMessage().getTarget());
+        if (!lastTry.isPresent()) {
+            LOG.warn("Ignoring response {} for unsent request {}", response, request);
+            return false;
+        }
+
+        final LastTry t = lastTry.get();
+        return response.getTxSequence() == t.getTxSequence() && response.getSessionId() == t.getSessionId() &&
+                request.getTarget().equals(response.getMessage().getTarget());
     }
 
     long getCurrentTry() {
