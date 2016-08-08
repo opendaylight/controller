@@ -35,19 +35,21 @@ public final class ConnectClientSuccess extends RequestSuccess<ClientIdentifier,
     private final List<ActorSelection> alternates;
     private final DataTree dataTree;
     private final ActorRef backend;
+    private final long maxMessages;
 
     ConnectClientSuccess(final ClientIdentifier target, final ActorRef backend, final List<ActorSelection> alternates,
-        final Optional<DataTree> dataTree) {
+        final Optional<DataTree> dataTree, final long maxMessages) {
         super(target);
         this.backend = Preconditions.checkNotNull(backend);
         this.alternates = ImmutableList.copyOf(alternates);
         this.dataTree = dataTree.orElse(null);
+        Preconditions.checkArgument(maxMessages > 0, "Maximum messages has to be positive, not %s", maxMessages);
+        this.maxMessages = maxMessages;
     }
 
     public ConnectClientSuccess(final @Nonnull ClientIdentifier target, final @Nonnull ActorRef backend,
-            final @Nonnull List<ActorSelection> alternates,
-            final @Nonnull DataTree dataTree) {
-        this(target, backend, alternates, Optional.of(dataTree));
+            final @Nonnull List<ActorSelection> alternates, final @Nonnull DataTree dataTree, final long maxMessages) {
+        this(target, backend, alternates, Optional.of(dataTree), maxMessages);
     }
 
     /**
@@ -65,6 +67,10 @@ public final class ConnectClientSuccess extends RequestSuccess<ClientIdentifier,
 
     public Optional<DataTree> getDataTree() {
         return Optional.ofNullable(dataTree);
+    }
+
+    public long getMaxMessages() {
+        return maxMessages;
     }
 
     @Override

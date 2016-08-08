@@ -32,6 +32,7 @@ final class ConnectClientSuccessProxyV1 extends AbstractSuccessProxy<ClientIdent
 
     private List<ActorSelection> alternates;
     private ActorRef backend;
+    private long maxMessages;
 
     public ConnectClientSuccessProxyV1() {
         // For Externalizable
@@ -54,6 +55,8 @@ final class ConnectClientSuccessProxyV1 extends AbstractSuccessProxy<ClientIdent
         for (ActorSelection b : alternates) {
             out.writeObject(b.toSerializationFormat());
         }
+
+        out.writeLong(maxMessages);
     }
 
     @Override
@@ -71,11 +74,13 @@ final class ConnectClientSuccessProxyV1 extends AbstractSuccessProxy<ClientIdent
         for (int i = 0; i < backendsSize; ++i) {
             alternates.add(ActorSelection.apply(ActorRef.noSender(), (String)in.readObject()));
         }
+
+        maxMessages = in.readLong();
     }
 
     @Override
     protected ConnectClientSuccess createSuccess(final ClientIdentifier target) {
-        return new ConnectClientSuccess(target, backend, alternates, Optional.empty());
+        return new ConnectClientSuccess(target, backend, alternates, Optional.empty(), maxMessages);
     }
 
     @Override
