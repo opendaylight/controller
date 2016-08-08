@@ -28,14 +28,17 @@ import org.opendaylight.yangtools.concepts.WritableIdentifier;
 public abstract class Request<T extends WritableIdentifier, C extends Request<T, C>> extends Message<T, C> {
     private static final long serialVersionUID = 1L;
     private final ActorRef replyTo;
+    private final long sequence;
 
-    protected Request(final @Nonnull T target, final @Nonnull ActorRef replyTo) {
+    protected Request(final @Nonnull T target, final long sequence, final @Nonnull ActorRef replyTo) {
         super(target);
         this.replyTo = Preconditions.checkNotNull(replyTo);
+        this.sequence = sequence;
     }
 
     protected Request(final @Nonnull C request, final @Nonnull ABIVersion version) {
         super(request, version);
+        this.sequence = request.getSequence();
         this.replyTo = Preconditions.checkNotNull(request.getReplyTo());
     }
 
@@ -48,6 +51,10 @@ public abstract class Request<T extends WritableIdentifier, C extends Request<T,
         return replyTo;
     }
 
+    public final long getSequence() {
+        return sequence;
+    }
+
     /**
      * Return a {@link RequestFailure} for this request, caused by a {@link RequestException}.
      *
@@ -58,7 +65,8 @@ public abstract class Request<T extends WritableIdentifier, C extends Request<T,
 
     @Override
     protected ToStringHelper addToStringAttributes(final ToStringHelper toStringHelper) {
-        return super.addToStringAttributes(toStringHelper).add("replyTo", replyTo);
+        return super.addToStringAttributes(toStringHelper).add("sequence", Long.toUnsignedString(sequence))
+            .add("replyTo", replyTo);
     }
 
     @Override

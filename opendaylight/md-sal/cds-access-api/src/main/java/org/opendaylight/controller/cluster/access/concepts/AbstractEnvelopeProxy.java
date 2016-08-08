@@ -25,7 +25,7 @@ abstract class AbstractEnvelopeProxy<T extends Message<?, ?>> implements Externa
 
     AbstractEnvelopeProxy(final Envelope<T> envelope) {
         message = envelope.getMessage();
-        sequence = envelope.getSequence();
+        sequence = envelope.getTxSequence();
         retry = envelope.getRetry();
     }
 

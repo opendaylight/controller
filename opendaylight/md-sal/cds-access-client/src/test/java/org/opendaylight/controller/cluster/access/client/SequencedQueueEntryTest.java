@@ -28,10 +28,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.opendaylight.controller.cluster.access.ABIVersion;
-import org.opendaylight.controller.cluster.access.client.BackendInfo;
-import org.opendaylight.controller.cluster.access.client.ClientActorBehavior;
-import org.opendaylight.controller.cluster.access.client.RequestCallback;
-import org.opendaylight.controller.cluster.access.client.SequencedQueueEntry;
 import org.opendaylight.controller.cluster.access.concepts.AbstractRequestFailureProxy;
 import org.opendaylight.controller.cluster.access.concepts.AbstractRequestProxy;
 import org.opendaylight.controller.cluster.access.concepts.Request;
@@ -71,7 +67,7 @@ public class SequencedQueueEntryTest {
         private static final long serialVersionUID = 1L;
 
         MockRequest(final WritableIdentifier target, final ActorRef replyTo) {
-            super(target, replyTo);
+            super(target, 0, replyTo);
         }
 
         @Override
@@ -206,7 +202,7 @@ public class SequencedQueueEntryTest {
 
          final RequestEnvelope actual = (RequestEnvelope) o;
          assertEquals(0, actual.getRetry());
-         assertEquals(0, actual.getSequence());
+         assertEquals(0, actual.getTxSequence());
          assertEquals(expected.getTarget(), actual.getMessage().getTarget());
     }
 }

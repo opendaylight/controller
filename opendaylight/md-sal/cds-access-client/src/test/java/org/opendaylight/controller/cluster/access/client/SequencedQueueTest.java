@@ -33,11 +33,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.opendaylight.controller.cluster.access.ABIVersion;
-import org.opendaylight.controller.cluster.access.client.BackendInfo;
-import org.opendaylight.controller.cluster.access.client.ClientActorBehavior;
-import org.opendaylight.controller.cluster.access.client.NoProgressException;
-import org.opendaylight.controller.cluster.access.client.RequestCallback;
-import org.opendaylight.controller.cluster.access.client.SequencedQueue;
 import org.opendaylight.controller.cluster.access.concepts.AbstractRequestFailureProxy;
 import org.opendaylight.controller.cluster.access.concepts.AbstractRequestProxy;
 import org.opendaylight.controller.cluster.access.concepts.FailureEnvelope;
@@ -77,7 +72,7 @@ public class SequencedQueueTest {
         private static final long serialVersionUID = 1L;
 
         MockRequest(final WritableIdentifier target, final ActorRef replyTo) {
-            super(target, replyTo);
+            super(target, 0, replyTo);
         }
 
         @Override
@@ -172,7 +167,7 @@ public class SequencedQueueTest {
         queue.close();
 
         // Kaboom
-        queue.enqueueRequest(0, mockRequest, mockCallback);
+        queue.enqueueRequest(mockRequest, mockCallback);
     }
 
     @Test
@@ -183,7 +178,7 @@ public class SequencedQueueTest {
 
     @Test
     public void testPoison() {
-        queue.enqueueRequest(0, mockRequest, mockCallback);
+        queue.enqueueRequest(mockRequest, mockCallback);
         queue.poison(mockCause);
 
         final ArgumentCaptor<MockFailure> captor = ArgumentCaptor.forClass(MockFailure.class);
@@ -197,7 +192,7 @@ public class SequencedQueueTest {
         queue.poison(mockCause);
 
         // Kaboom
-        queue.enqueueRequest(0, mockRequest, mockCallback);
+        queue.enqueueRequest(mockRequest, mockCallback);
     }
 
     @Test
@@ -208,7 +203,7 @@ public class SequencedQueueTest {
 
     @Test
     public void testEnqueueRequestNeedsBackend() {
-        final Optional<FiniteDuration> ret = queue.enqueueRequest(0, mockRequest, mockCallback);
+        final Optional<FiniteDuration> ret = queue.enqueueRequest(mockRequest, mockCallback);
 
         assertNotNull(ret);
         assertFalse(ret.isPresent());
@@ -230,7 +225,7 @@ public class SequencedQueueTest {
 
     @Test
     public void testSetBackendWithNoResolution() {
-        queue.enqueueRequest(0, mockRequest, mockCallback);
+        queue.enqueueRequest(mockRequest, mockCallback);
 
         final CompletableFuture<BackendInfo> proof = new CompletableFuture<>();
         final Optional<FiniteDuration> ret = queue.setBackendInfo(proof, mockBackendInfo);
@@ -240,7 +235,7 @@ public class SequencedQueueTest {
 
     @Test
     public void testSetBackendWithWrongProof() {
-        queue.enqueueRequest(0, mockRequest, mockCallback);
+        queue.enqueueRequest(mockRequest, mockCallback);
 
         final CompletableFuture<BackendInfo> proof = new CompletableFuture<>();
         assertTrue(queue.expectProof(proof));
@@ -258,7 +253,7 @@ public class SequencedQueueTest {
 
     @Test
     public void testSetbackedWithRequestsNoTimer() {
-        queue.enqueueRequest(0, mockRequest, mockCallback);
+        queue.enqueueRequest(mockRequest, mockCallback);
 
         final CompletableFuture<BackendInfo> proof = new CompletableFuture<>();
         assertTrue(queue.expectProof(proof));
@@ -275,7 +270,7 @@ public class SequencedQueueTest {
     public void testEnqueueRequestNeedsTimer() {
         setupBackend();
 
-        final Optional<FiniteDuration> ret = queue.enqueueRequest(0, mockRequest, mockCallback);
+        final Optional<FiniteDuration> ret = queue.enqueueRequest(mockRequest, mockCallback);
         assertNotNull(ret);
         assertTrue(ret.isPresent());
         assertTransmit(mockRequest, 0);
@@ -286,13 +281,13 @@ public class SequencedQueueTest {
         setupBackend();
 
         // First request
-        Optional<FiniteDuration> ret = queue.enqueueRequest(0, mockRequest, mockCallback);
+        Optional<FiniteDuration> ret = queue.enqueueRequest(mockRequest, mockCallback);
         assertNotNull(ret);
         assertTrue(ret.isPresent());
         assertTransmit(mockRequest, 0);
 
         // Second request, no timer fired
-        ret = queue.enqueueRequest(1, mockRequest2, mockCallback);
+        ret = queue.enqueueRequest(mockRequest2, mockCallback);
         assertNull(ret);
         assertTransmit(mockRequest2, 1);
     }
@@ -305,14 +300,14 @@ public class SequencedQueueTest {
 
     @Test
     public void testRunTimeoutWithoutShift() throws NoProgressException {
-        queue.enqueueRequest(0, mockRequest, mockCallback);
+        queue.enqueueRequest(mockRequest, mockCallback);
         final boolean ret = queue.runTimeout();
         assertFalse(ret);
     }
 
     @Test
     public void testRunTimeoutWithTimeoutLess() throws NoProgressException {
-        queue.enqueueRequest(0, mockRequest, mockCallback);
+        queue.enqueueRequest(mockRequest, mockCallback);
 
         ticker.increment(SequencedQueue.REQUEST_TIMEOUT_NANOS - 1);
 
@@ -322,7 +317,7 @@ public class SequencedQueueTest {
 
     @Test
     public void testRunTimeoutWithTimeoutExact() throws NoProgressException {
-        queue.enqueueRequest(0, mockRequest, mockCallback);
+        queue.enqueueRequest(mockRequest, mockCallback);
 
         ticker.increment(SequencedQueue.REQUEST_TIMEOUT_NANOS);
 
@@ -332,7 +327,7 @@ public class SequencedQueueTest {
 
     @Test
     public void testRunTimeoutWithTimeoutMore() throws NoProgressException {
-        queue.enqueueRequest(0, mockRequest, mockCallback);
+        queue.enqueueRequest(mockRequest, mockCallback);
 
         ticker.increment(SequencedQueue.REQUEST_TIMEOUT_NANOS + 1);
 
@@ -342,7 +337,7 @@ public class SequencedQueueTest {
 
     @Test(expected=NoProgressException.class)
     public void testRunTimeoutWithoutProgressExact() throws NoProgressException {
-        queue.enqueueRequest(0, mockRequest, mockCallback);
+        queue.enqueueRequest(mockRequest, mockCallback);
 
         ticker.increment(SequencedQueue.NO_PROGRESS_TIMEOUT_NANOS);
 
@@ -352,7 +347,7 @@ public class SequencedQueueTest {
 
     @Test(expected=NoProgressException.class)
     public void testRunTimeoutWithoutProgressMore() throws NoProgressException {
-        queue.enqueueRequest(0, mockRequest, mockCallback);
+        queue.enqueueRequest(mockRequest, mockCallback);
 
         ticker.increment(SequencedQueue.NO_PROGRESS_TIMEOUT_NANOS + 1);
 
@@ -387,7 +382,7 @@ public class SequencedQueueTest {
 
     @Test
     public void testCompleteSingle() {
-        queue.enqueueRequest(0, mockRequest, mockCallback);
+        queue.enqueueRequest(mockRequest, mockCallback);
 
         ClientActorBehavior ret = queue.complete(mockBehavior, mockResponseEnvelope);
         verify(mockCallback).complete(mockResponse);
@@ -400,7 +395,7 @@ public class SequencedQueueTest {
 
     @Test
     public void testCompleteNull() {
-        queue.enqueueRequest(0, mockRequest, mockCallback);
+        queue.enqueueRequest(mockRequest, mockCallback);
 
         doReturn(null).when(mockCallback).complete(mockResponse);
 
@@ -413,10 +408,10 @@ public class SequencedQueueTest {
     public void testProgressRecord() throws NoProgressException {
         setupBackend();
 
-        queue.enqueueRequest(0, mockRequest, mockCallback);
+        queue.enqueueRequest(mockRequest, mockCallback);
 
         ticker.increment(10);
-        queue.enqueueRequest(1, mockRequest2, mockCallback);
+        queue.enqueueRequest(mockRequest2, mockCallback);
         queue.complete(mockBehavior, mockResponseEnvelope);
 
         ticker.increment(SequencedQueue.NO_PROGRESS_TIMEOUT_NANOS - 11);
@@ -442,7 +437,7 @@ public class SequencedQueueTest {
 
         final RequestEnvelope actual = (RequestEnvelope) o;
         assertEquals(0, actual.getRetry());
-        assertEquals(sequence, actual.getSequence());
+        assertEquals(sequence, actual.getTxSequence());
         assertSame(expected, actual.getMessage());
     }
 }

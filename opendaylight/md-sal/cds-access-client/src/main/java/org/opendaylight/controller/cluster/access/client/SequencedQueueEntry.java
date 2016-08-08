@@ -59,7 +59,7 @@ final class SequencedQueueEntry {
     }
 
     boolean acceptsResponse(final ResponseEnvelope<?> response) {
-        return getSequence() == response.getSequence() && request.getTarget().equals(response.getMessage().getTarget());
+        return getSequence() == response.getTxSequence() && request.getTarget().equals(response.getMessage().getTarget());
     }
 
     long getCurrentTry() {

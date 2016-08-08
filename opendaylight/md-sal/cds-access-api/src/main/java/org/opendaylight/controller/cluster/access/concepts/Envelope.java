@@ -16,12 +16,12 @@ public abstract class Envelope<T extends Message<?, ?>> implements Immutable, Se
     private static final long serialVersionUID = 1L;
 
     private final T message;
-    private final long sequence;
+    private final long txSequence;
     private final long retry;
 
-    Envelope(final T message, final long sequence, final long retry) {
+    Envelope(final T message, final long txSequence, final long retry) {
         this.message = Preconditions.checkNotNull(message);
-        this.sequence = sequence;
+        this.txSequence = txSequence;
         this.retry = retry;
     }
 
@@ -35,12 +35,12 @@ public abstract class Envelope<T extends Message<?, ?>> implements Immutable, Se
     }
 
     /**
-     * Get the message sequence of this envelope.
+     * Get the message transmission sequence of this envelope.
      *
      * @return Message sequence
      */
-    public long getSequence() {
-        return sequence;
+    public long getTxSequence() {
+        return txSequence;
     }
 
     /**
@@ -54,8 +54,8 @@ public abstract class Envelope<T extends Message<?, ?>> implements Immutable, Se
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(Envelope.class).add("sequence", Long.toUnsignedString(sequence, 16)).
-                add("retry", retry).add("message", message).toString();
+        return MoreObjects.toStringHelper(Envelope.class).add("txSequence", Long.toHexString(txSequence))
+                .add("retry", retry).add("message", message).toString();
     }
 
     final Object writeReplace() {

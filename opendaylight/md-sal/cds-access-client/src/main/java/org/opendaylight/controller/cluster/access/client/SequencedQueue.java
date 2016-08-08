@@ -105,8 +105,7 @@ final class SequencedQueue {
      * @param callback Callback to be invoked
      * @return Optional duration with semantics described above.
      */
-    @Nullable Optional<FiniteDuration> enqueueRequest(final long sequence, final Request<?, ?> request,
-            final RequestCallback callback) {
+    @Nullable Optional<FiniteDuration> enqueueRequest(final Request<?, ?> request, final RequestCallback callback) {
         checkNotClosed();
 
         final long now = ticker.read();
