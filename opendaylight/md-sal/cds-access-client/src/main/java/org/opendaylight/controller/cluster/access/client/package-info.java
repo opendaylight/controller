@@ -10,4 +10,4 @@
  *
  * @author Robert Varga
  */
-package org.opendaylight.controller.cluster.datastore.actors.client;
+package org.opendaylight.controller.cluster.access.client;
