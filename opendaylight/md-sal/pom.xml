@@ -58,6 +58,7 @@
 
     <module>sal-clustering-commons</module>
     <module>cds-access-api</module>
+    <module>cds-access-client</module>
 
     <!-- sal clustering configuration -->
     <module>sal-clustering-config</module>

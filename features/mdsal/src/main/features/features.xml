@@ -85,6 +85,7 @@
         <feature version='${project.version}'>odl-mdsal-broker-local</feature>
         <feature version='${project.version}'>odl-mdsal-clustering-commons</feature>
         <bundle>mvn:org.opendaylight.controller/cds-access-api/{{VERSION}}</bundle>
+        <bundle>mvn:org.opendaylight.controller/cds-access-client/{{VERSION}}</bundle>
         <bundle>mvn:org.opendaylight.controller/sal-distributed-datastore/{{VERSION}}</bundle>
         <bundle>mvn:org.opendaylight.controller/sal-cluster-admin/{{VERSION}}</bundle>
     </feature>
