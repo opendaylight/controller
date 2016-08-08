@@ -21,8 +21,8 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
 public final class TransactionAbortRequest extends TransactionRequest<TransactionAbortRequest> {
     private static final long serialVersionUID = 1L;
 
-    public TransactionAbortRequest(final TransactionIdentifier target, final ActorRef replyTo) {
-        super(target, replyTo);
+    public TransactionAbortRequest(final TransactionIdentifier target, final long sequence, final ActorRef replyTo) {
+        super(target, sequence, replyTo);
     }
 
     @Override

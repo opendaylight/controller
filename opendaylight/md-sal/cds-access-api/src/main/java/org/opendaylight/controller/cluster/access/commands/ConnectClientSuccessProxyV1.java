@@ -32,7 +32,7 @@ final class ConnectClientSuccessProxyV1 extends AbstractSuccessProxy<ClientIdent
 
     private List<ActorSelection> alternates;
     private ActorRef backend;
-    private long maxMessages;
+    private int maxMessages;
 
     public ConnectClientSuccessProxyV1() {
         // For Externalizable
@@ -42,6 +42,7 @@ final class ConnectClientSuccessProxyV1 extends AbstractSuccessProxy<ClientIdent
         super(success);
         this.alternates = success.getAlternates();
         this.backend = success.getBackend();
+        this.maxMessages = success.getMaxMessages();
         // We are ignoring the DataTree, it is not serializable anyway
     }
 
@@ -49,38 +50,32 @@ final class ConnectClientSuccessProxyV1 extends AbstractSuccessProxy<ClientIdent
     public void writeExternal(final ObjectOutput out) throws IOException {
         super.writeExternal(out);
 
-        out.writeUTF(Serialization.serializedActorPath(backend));
+        out.writeObject(Serialization.serializedActorPath(backend));
+        out.writeInt(maxMessages);
 
         out.writeInt(alternates.size());
         for (ActorSelection b : alternates) {
             out.writeObject(b.toSerializationFormat());
         }
-
-        out.writeLong(maxMessages);
     }
 
     @Override
     public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
         super.readExternal(in);
 
-        backend = JavaSerializer.currentSystem().value().provider().resolveActorRef(in.readUTF());
+        backend = JavaSerializer.currentSystem().value().provider().resolveActorRef((String) in.readObject());
+        maxMessages = in.readInt();
 
-        final int backendsSize = in.readInt();
-        if (backendsSize < 1) {
-            throw new IOException("Illegal number of backends " + backendsSize);
-        }
-
-        alternates = new ArrayList<>(backendsSize);
-        for (int i = 0; i < backendsSize; ++i) {
+        final int alternatesSize = in.readInt();
+        alternates = new ArrayList<>(alternatesSize);
+        for (int i = 0; i < alternatesSize; ++i) {
             alternates.add(ActorSelection.apply(ActorRef.noSender(), (String)in.readObject()));
         }
-
-        maxMessages = in.readLong();
     }
 
     @Override
-    protected ConnectClientSuccess createSuccess(final ClientIdentifier target) {
-        return new ConnectClientSuccess(target, backend, alternates, Optional.empty(), maxMessages);
+    protected ConnectClientSuccess createSuccess(final ClientIdentifier target, final long sequence) {
+        return new ConnectClientSuccess(target, sequence, backend, alternates, Optional.empty(), maxMessages);
     }
 
     @Override
