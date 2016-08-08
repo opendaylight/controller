@@ -7,8 +7,12 @@
  */
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
+import akka.actor.ActorRef;
 import akka.dispatch.ExecutionContexts;
+import akka.dispatch.Futures;
 import akka.dispatch.OnComplete;
+import akka.japi.Function;
+import akka.pattern.Patterns;
 import akka.util.Timeout;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.BiMap;
@@ -19,11 +23,14 @@ import com.google.common.util.concurrent.MoreExecutors;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 import javax.annotation.concurrent.GuardedBy;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.client.BackendInfo;
 import org.opendaylight.controller.cluster.access.client.BackendInfoResolver;
-import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
+import org.opendaylight.controller.cluster.access.commands.ConnectClientRequest;
+import org.opendaylight.controller.cluster.access.commands.ConnectClientSuccess;
+import org.opendaylight.controller.cluster.access.concepts.RequestFailure;
 import org.opendaylight.controller.cluster.datastore.messages.PrimaryShardInfo;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.DefaultShardStrategy;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
@@ -31,6 +38,8 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.ExecutionContext;
+import scala.concurrent.Future;
+import scala.runtime.AbstractFunction1;
 
 /**
  * {@link BackendInfoResolver} implementation for static shard configuration based on ShardManager. Each string-named
@@ -40,6 +49,9 @@ import scala.concurrent.ExecutionContext;
  * @author Robert Varga
  */
 final class ModuleShardBackendResolver extends BackendInfoResolver<ShardBackendInfo> {
+    /*
+     * Utility execution context which invokes methods on the calling thread.
+     */
     private static final ExecutionContext DIRECT_EXECUTION_CONTEXT =
             ExecutionContexts.fromExecutor(MoreExecutors.directExecutor());
     private static final CompletableFuture<ShardBackendInfo> NULL_FUTURE = CompletableFuture.completedFuture(null);
@@ -54,6 +66,8 @@ final class ModuleShardBackendResolver extends BackendInfoResolver<ShardBackendI
     private static final Timeout DEAD_TIMEOUT = Timeout.apply(15, TimeUnit.MINUTES);
 
     private final ActorContext actorContext;
+    // FIXME: this counter should be in superclass somewhere
+    private final AtomicLong nextSessionId = new AtomicLong();
 
     @GuardedBy("this")
     private long nextShard = 1;
@@ -105,15 +119,41 @@ final class ModuleShardBackendResolver extends BackendInfoResolver<ShardBackendI
             return NULL_FUTURE;
         }
 
-        final CompletableFuture<ShardBackendInfo> ret = new CompletableFuture<>();
+        final CompletableFuture<ShardBackendInfo> ret = new CompletableFuture<ShardBackendInfo>();
 
-        actorContext.findPrimaryShardAsync(shardName).onComplete(new OnComplete<PrimaryShardInfo>() {
+        actorContext.findPrimaryShardAsync(shardName).flatMap(new AbstractFunction1<PrimaryShardInfo, Future<Object>>() {
             @Override
-            public void onComplete(final Throwable t, final PrimaryShardInfo v) {
+            public Future<Object> apply(final PrimaryShardInfo info) {
+                LOG.debug("Looking up primary info for {} from {}", shardName);
+                return Patterns.ask(info.getPrimaryShardActor(),
+                    (Function<ActorRef, Object>) replyTo -> new ConnectClientRequest(null, replyTo,
+                        ABIVersion.BORON, ABIVersion.current()), DEAD_TIMEOUT);
+            }
+        }, DIRECT_EXECUTION_CONTEXT).flatMap(new AbstractFunction1<Object, Future<ShardBackendInfo>>() {
+            @Override
+            public Future<ShardBackendInfo> apply(final Object response) {
+                if (response instanceof RequestFailure) {
+                    final RequestFailure<?, ?> failure = (RequestFailure<?, ?>) response;
+                    LOG.debug("Connect request failed {}", failure, failure.getCause());
+                    return Futures.failed(failure.getCause());
+                }
+
+                LOG.debug("Resolved backend information to {}", response);
+
+                Preconditions.checkArgument(response instanceof ConnectClientSuccess, "Unhandled response {}", response);
+                final ConnectClientSuccess success = (ConnectClientSuccess) response;
+
+                return Futures.successful(new ShardBackendInfo(success.getBackend(), nextSessionId.getAndIncrement(),
+                    success.getVersion(), shardName, UnsignedLong.fromLongBits(cookie), success.getDataTree(),
+                    success.getMaxMessages()));
+            }
+        }, DIRECT_EXECUTION_CONTEXT).onComplete(new OnComplete<ShardBackendInfo>() {
+            @Override
+            public void onComplete(final Throwable t, final ShardBackendInfo info) {
                 if (t != null) {
                     ret.completeExceptionally(t);
                 } else {
-                    ret.complete(createBackendInfo(v, shardName, cookie));
+                    ret.complete(info);
                 }
             }
         }, DIRECT_EXECUTION_CONTEXT);
@@ -121,23 +161,4 @@ final class ModuleShardBackendResolver extends BackendInfoResolver<ShardBackendI
         LOG.debug("Resolving cookie {} to shard {}", cookie, shardName);
         return ret;
     }
-
-    private static ABIVersion toABIVersion(final short version) {
-        switch (version) {
-            case DataStoreVersions.BORON_VERSION:
-                return ABIVersion.BORON;
-        }
-
-        throw new IllegalArgumentException("Unsupported version " + version);
-    }
-
-    private static ShardBackendInfo createBackendInfo(final Object result, final String shardName, final Long cookie) {
-        Preconditions.checkArgument(result instanceof PrimaryShardInfo);
-        final PrimaryShardInfo info = (PrimaryShardInfo) result;
-
-        LOG.debug("Creating backend information for {}", info);
-        return new ShardBackendInfo(info.getPrimaryShardActor().resolveOne(DEAD_TIMEOUT).value().get().get(),
-            toABIVersion(info.getPrimaryShardVersion()), shardName, UnsignedLong.fromLongBits(cookie),
-            info.getLocalShardDataTree());
-     }
 }
