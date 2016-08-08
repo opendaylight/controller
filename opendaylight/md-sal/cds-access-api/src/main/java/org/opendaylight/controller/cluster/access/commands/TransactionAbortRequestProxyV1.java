@@ -28,7 +28,8 @@ final class TransactionAbortRequestProxyV1 extends AbstractTransactionRequestPro
     }
 
     @Override
-    protected TransactionAbortRequest createRequest(final TransactionIdentifier target, final ActorRef replyTo) {
-        return new TransactionAbortRequest(target, replyTo);
+    protected TransactionAbortRequest createRequest(final TransactionIdentifier target, final long sequence,
+            final ActorRef replyTo) {
+        return new TransactionAbortRequest(target, sequence, replyTo);
     }
 }

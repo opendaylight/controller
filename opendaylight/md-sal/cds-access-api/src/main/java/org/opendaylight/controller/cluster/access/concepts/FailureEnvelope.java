@@ -10,8 +10,8 @@ package org.opendaylight.controller.cluster.access.concepts;
 public final class FailureEnvelope extends ResponseEnvelope<RequestFailure<?, ?>> {
     private static final long serialVersionUID = 1L;
 
-    public FailureEnvelope(final RequestFailure<?, ?> message, final long sequence, final long retry) {
-        super(message, sequence, retry);
+    public FailureEnvelope(final RequestFailure<?, ?> message, final long sessionId, final long txSequence) {
+        super(message, sessionId, txSequence);
     }
 
     @Override

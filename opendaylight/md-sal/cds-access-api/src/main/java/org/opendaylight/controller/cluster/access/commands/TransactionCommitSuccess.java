@@ -19,8 +19,8 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
 public final class TransactionCommitSuccess extends TransactionSuccess<TransactionCommitSuccess> {
     private static final long serialVersionUID = 1L;
 
-    public TransactionCommitSuccess(final TransactionIdentifier identifier) {
-        super(identifier);
+    public TransactionCommitSuccess(final TransactionIdentifier identifier, final long sequence) {
+        super(identifier, sequence);
     }
 
     @Override

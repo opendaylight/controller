@@ -23,9 +23,9 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 public final class ReadTransactionRequest extends AbstractReadTransactionRequest<ReadTransactionRequest> {
     private static final long serialVersionUID = 1L;
 
-    public ReadTransactionRequest(final @Nonnull TransactionIdentifier identifier, final @Nonnull ActorRef replyTo,
-            final @Nonnull YangInstanceIdentifier path) {
-        super(identifier, replyTo, path);
+    public ReadTransactionRequest(final @Nonnull TransactionIdentifier identifier, final long sequence,
+            final @Nonnull ActorRef replyTo, final @Nonnull YangInstanceIdentifier path) {
+        super(identifier, sequence, replyTo, path);
     }
 
     private ReadTransactionRequest(final ReadTransactionRequest request, final ABIVersion version) {
