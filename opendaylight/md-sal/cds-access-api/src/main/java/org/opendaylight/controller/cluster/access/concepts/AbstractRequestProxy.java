@@ -42,19 +42,19 @@ public abstract class AbstractRequestProxy<T extends WritableIdentifier, C exten
     @Override
     public void writeExternal(final ObjectOutput out) throws IOException {
         super.writeExternal(out);
-        out.writeUTF(Serialization.serializedActorPath(replyTo));
+        out.writeObject(Serialization.serializedActorPath(replyTo));
     }
 
     @Override
     public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
         super.readExternal(in);
-        replyTo = JavaSerializer.currentSystem().value().provider().resolveActorRef(in.readUTF());
+        replyTo = JavaSerializer.currentSystem().value().provider().resolveActorRef((String) in.readObject());
     }
 
     @Override
-    final @Nonnull C createMessage(@Nonnull final T target) {
-        return createRequest(target, replyTo);
+    final @Nonnull C createMessage(@Nonnull final T target, final long sequence) {
+        return createRequest(target, sequence, replyTo);
     }
 
-    protected abstract @Nonnull C createRequest(@Nonnull T target, @Nonnull ActorRef replyTo);
+    protected abstract @Nonnull C createRequest(@Nonnull T target, long sequence, @Nonnull ActorRef replyTo);
 }

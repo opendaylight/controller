@@ -44,7 +44,7 @@ final class ExistsTransactionSuccessProxyV1 extends AbstractTransactionSuccessPr
     }
 
     @Override
-    protected ExistsTransactionSuccess createSuccess(final TransactionIdentifier target) {
-        return new ExistsTransactionSuccess(target, exists);
+    protected ExistsTransactionSuccess createSuccess(final TransactionIdentifier target, final long sequence) {
+        return new ExistsTransactionSuccess(target, sequence, exists);
     }
 }
