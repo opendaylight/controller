@@ -26,8 +26,8 @@ import org.opendaylight.controller.cluster.access.concepts.RequestException;
 public abstract class LocalHistoryRequest<T extends LocalHistoryRequest<T>> extends Request<LocalHistoryIdentifier, T> {
     private static final long serialVersionUID = 1L;
 
-    LocalHistoryRequest(final LocalHistoryIdentifier target, final ActorRef replyTo) {
-        super(target, replyTo);
+    LocalHistoryRequest(final LocalHistoryIdentifier target, final long sequence, final ActorRef replyTo) {
+        super(target, sequence, replyTo);
     }
 
     LocalHistoryRequest(final T request, final ABIVersion version) {
@@ -36,7 +36,7 @@ public abstract class LocalHistoryRequest<T extends LocalHistoryRequest<T>> exte
 
     @Override
     public final LocalHistoryFailure toRequestFailure(final RequestException cause) {
-        return new LocalHistoryFailure(getTarget(), cause);
+        return new LocalHistoryFailure(getTarget(), getSequence(), cause);
     }
 
     @Override
