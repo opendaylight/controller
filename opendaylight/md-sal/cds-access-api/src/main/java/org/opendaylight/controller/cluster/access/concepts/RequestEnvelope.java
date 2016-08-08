@@ -12,8 +12,8 @@ import akka.actor.ActorRef;
 public final class RequestEnvelope extends Envelope<Request<?, ?>> {
     private static final long serialVersionUID = 1L;
 
-    public RequestEnvelope(final Request<?, ?> message, final long sequence, final long retry) {
-        super(message, sequence, retry);
+    public RequestEnvelope(final Request<?, ?> message, final long sessionId, final long txSequence) {
+        super(message, sessionId, txSequence);
     }
 
     @Override
@@ -28,7 +28,7 @@ public final class RequestEnvelope extends Envelope<Request<?, ?>> {
      * @throws NullPointerException if cause is null
      */
     public void sendFailure(final RequestException cause) {
-        sendResponse(new FailureEnvelope(getMessage().toRequestFailure(cause), getSequence(), getRetry()));
+        sendResponse(new FailureEnvelope(getMessage().toRequestFailure(cause), getSessionId(), getTxSequence()));
     }
 
     /**
@@ -38,7 +38,7 @@ public final class RequestEnvelope extends Envelope<Request<?, ?>> {
      * @throws NullPointerException if success is null
      */
     public void sendSuccess(final RequestSuccess<?, ?> success) {
-        sendResponse(new SuccessEnvelope(success, getSequence(), getRetry()));
+        sendResponse(new SuccessEnvelope(success, getSessionId(), getTxSequence()));
     }
 
     private void sendResponse(final ResponseEnvelope<?> envelope) {
