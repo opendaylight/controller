@@ -28,8 +28,8 @@ public abstract class RequestSuccess<T extends WritableIdentifier, C extends Req
         super(success, version);
     }
 
-    protected RequestSuccess(final @Nonnull T target) {
-        super(target);
+    protected RequestSuccess(final @Nonnull T target, final long sequence) {
+        super(target, sequence);
     }
 
     @Override
