@@ -105,12 +105,11 @@ final class SequencedQueue {
      * @param callback Callback to be invoked
      * @return Optional duration with semantics described above.
      */
-    @Nullable Optional<FiniteDuration> enqueueRequest(final long sequence, final Request<?, ?> request,
-            final RequestCallback callback) {
+    @Nullable Optional<FiniteDuration> enqueueRequest(final Request<?, ?> request, final RequestCallback callback) {
         checkNotClosed();
 
         final long now = ticker.read();
-        final SequencedQueueEntry e = new SequencedQueueEntry(request, sequence, callback, now);
+        final SequencedQueueEntry e = new SequencedQueueEntry(request, callback, now);
 
         queue.add(e);
         LOG.debug("Enqueued request {} to queue {}", request, this);
@@ -133,11 +132,15 @@ final class SequencedQueue {
         final Iterator<SequencedQueueEntry> it = queue.iterator();
         while (it.hasNext()) {
             final SequencedQueueEntry e = it.next();
-            if (e.acceptsResponse(response)) {
-                lastProgress = ticker.read();
-                it.remove();
-                LOG.debug("Completing request {} with {}", e, response);
-                return e.complete(response.getMessage());
+            if (e.matchesResponse(response.getMessage())) {
+                if (e.matchesSequence(response.getRetry(), response.getSequence())) {
+                    lastProgress = ticker.read();
+                    it.remove();
+                    LOG.debug("Completing request {} with {}", e, response);
+                    return e.complete(response.getMessage());
+                }
+
+                return current;
             }
         }
 

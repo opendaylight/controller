@@ -79,8 +79,8 @@ final class ConnectClientSuccessProxyV1 extends AbstractSuccessProxy<ClientIdent
     }
 
     @Override
-    protected ConnectClientSuccess createSuccess(final ClientIdentifier target) {
-        return new ConnectClientSuccess(target, backend, alternates, Optional.empty(), maxMessages);
+    protected ConnectClientSuccess createSuccess(final ClientIdentifier target, final long sequence) {
+        return new ConnectClientSuccess(target, sequence, backend, alternates, Optional.empty(), maxMessages);
     }
 
     @Override

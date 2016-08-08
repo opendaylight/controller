@@ -15,7 +15,6 @@ import java.io.ObjectOutput;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.AbstractRequestProxy;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
-import org.opendaylight.yangtools.concepts.WritableObjects;
 
 /**
  * Externalizable proxy for use with {@link ConnectClientRequest}. It implements the initial (Boron) serialization
@@ -26,7 +25,6 @@ import org.opendaylight.yangtools.concepts.WritableObjects;
 final class ConnectClientRequestProxyV1 extends AbstractRequestProxy<ClientIdentifier, ConnectClientRequest> {
     private ABIVersion minVersion;
     private ABIVersion maxVersion;
-    private long resumeSequence;
 
     public ConnectClientRequestProxyV1() {
         // for Externalizable
@@ -36,7 +34,6 @@ final class ConnectClientRequestProxyV1 extends AbstractRequestProxy<ClientIdent
         super(request);
         this.minVersion = request.getMinVersion();
         this.maxVersion = request.getMaxVersion();
-        this.resumeSequence = request.getResumeSequence();
     }
 
     @Override
@@ -44,7 +41,6 @@ final class ConnectClientRequestProxyV1 extends AbstractRequestProxy<ClientIdent
         super.writeExternal(out);
         minVersion.writeTo(out);
         maxVersion.writeTo(out);
-        WritableObjects.writeLong(out, resumeSequence);
     }
 
     @Override
@@ -52,12 +48,12 @@ final class ConnectClientRequestProxyV1 extends AbstractRequestProxy<ClientIdent
         super.readExternal(in);
         minVersion = ABIVersion.inexactReadFrom(in);
         maxVersion = ABIVersion.inexactReadFrom(in);
-        resumeSequence = WritableObjects.readLong(in);
     }
 
     @Override
-    protected ConnectClientRequest createRequest(final ClientIdentifier target, final ActorRef replyTo) {
-        return new ConnectClientRequest(target, replyTo, minVersion, maxVersion, resumeSequence);
+    protected ConnectClientRequest createRequest(final ClientIdentifier target, final long sequence,
+            final ActorRef replyTo) {
+        return new ConnectClientRequest(target, sequence, replyTo, minVersion, maxVersion);
     }
 
     @Override
