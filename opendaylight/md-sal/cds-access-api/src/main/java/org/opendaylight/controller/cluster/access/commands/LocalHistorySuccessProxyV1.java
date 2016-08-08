@@ -34,7 +34,7 @@ final class LocalHistorySuccessProxyV1 extends AbstractSuccessProxy<LocalHistory
     }
 
     @Override
-    protected LocalHistorySuccess createSuccess(final LocalHistoryIdentifier target) {
-        return new LocalHistorySuccess(target);
+    protected LocalHistorySuccess createSuccess(final LocalHistoryIdentifier target, final long sequence) {
+        return new LocalHistorySuccess(target, sequence);
     }
 }
