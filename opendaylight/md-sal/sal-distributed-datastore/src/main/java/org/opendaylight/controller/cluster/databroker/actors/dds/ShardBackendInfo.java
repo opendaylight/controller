@@ -14,8 +14,8 @@ import com.google.common.primitives.UnsignedLong;
 import java.util.Optional;
 import javax.annotation.concurrent.ThreadSafe;
 import org.opendaylight.controller.cluster.access.ABIVersion;
+import org.opendaylight.controller.cluster.access.client.BackendInfo;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
-import org.opendaylight.controller.cluster.datastore.actors.client.BackendInfo;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
 
 /**
