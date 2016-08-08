@@ -22,8 +22,8 @@ import org.opendaylight.controller.cluster.access.concepts.RequestSuccess;
 public final class LocalHistorySuccess extends RequestSuccess<LocalHistoryIdentifier, LocalHistorySuccess> {
     private static final long serialVersionUID = 1L;
 
-    public LocalHistorySuccess(final LocalHistoryIdentifier target) {
-        super(target);
+    public LocalHistorySuccess(final LocalHistoryIdentifier target, final long sequence) {
+        super(target, sequence);
     }
 
     private LocalHistorySuccess(final LocalHistorySuccess success, final ABIVersion version) {

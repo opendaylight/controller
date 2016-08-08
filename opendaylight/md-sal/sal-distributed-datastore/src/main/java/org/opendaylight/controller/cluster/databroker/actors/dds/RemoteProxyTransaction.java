@@ -95,21 +95,21 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
 
         // Make sure we send any modifications before issuing a read
         ensureFlushedBuider();
-        client().sendRequest(nextSequence(), request, completer);
+        client().sendRequest(request, completer);
         return MappingCheckedFuture.create(future, ReadFailedException.MAPPER);
     }
 
     @Override
     CheckedFuture<Boolean, ReadFailedException> doExists(final YangInstanceIdentifier path) {
         final SettableFuture<Boolean> future = SettableFuture.create();
-        return sendReadRequest(new ExistsTransactionRequest(getIdentifier(), client().self(), path),
+        return sendReadRequest(new ExistsTransactionRequest(getIdentifier(), nextSequence(), client().self(), path),
             t -> completeExists(future, t), future);
     }
 
     @Override
     CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> doRead(final YangInstanceIdentifier path) {
         final SettableFuture<Optional<NormalizedNode<?, ?>>> future = SettableFuture.create();
-        return sendReadRequest(new ReadTransactionRequest(getIdentifier(), client().self(), path),
+        return sendReadRequest(new ReadTransactionRequest(getIdentifier(), nextSequence(), client().self(), path),
             t -> completeRead(future, t), future);
     }
 
@@ -122,6 +122,7 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
 
     private void ensureInitializedBuider() {
         if (!builderBusy) {
+            builder.setSequence(nextSequence());
             builderBusy = true;
         }
     }
@@ -133,7 +134,7 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
     }
 
     private void flushBuilder() {
-        client().sendRequest(nextSequence(), builder.build(), this::completeModify);
+        client().sendRequest(builder.build(), this::completeModify);
         builderBusy = false;
     }
 
