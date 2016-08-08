@@ -49,7 +49,7 @@ public class SequencedQueueEntryTest {
         private static final long serialVersionUID = 1L;
 
         MockFailure(final WritableIdentifier target, final RequestException cause) {
-            super(target, cause);
+            super(target, 0, cause);
         }
 
         @Override
@@ -67,7 +67,7 @@ public class SequencedQueueEntryTest {
         private static final long serialVersionUID = 1L;
 
         MockRequest(final WritableIdentifier target, final ActorRef replyTo) {
-            super(target, replyTo);
+            super(target, 0, replyTo);
         }
 
         @Override
@@ -127,21 +127,16 @@ public class SequencedQueueEntryTest {
         ticker.increment(ThreadLocalRandom.current().nextLong());
 
         mockActor = TestProbe.apply(actorSystem);
-        mockBackendInfo = new BackendInfo(mockActor.ref(), ABIVersion.current());
+        mockBackendInfo = new BackendInfo(mockActor.ref(), 0, ABIVersion.current(), 5);
         mockRequest = new MockRequest(mockIdentifier, mockReplyTo);
         mockResponse = mockRequest.toRequestFailure(mockCause);
 
-        entry = new SequencedQueueEntry(mockRequest, 0, mockCallback, ticker.read());
+        entry = new SequencedQueueEntry(mockRequest, mockCallback, ticker.read());
     }
 
     @After
     public void teardown() {
         actorSystem.stop(mockActor.ref());
-    }
-
-    @Test
-    public void testGetSequence() {
-        assertEquals(0, entry.getSequence());
     }
 
     @Test
@@ -202,7 +197,7 @@ public class SequencedQueueEntryTest {
 
          final RequestEnvelope actual = (RequestEnvelope) o;
          assertEquals(0, actual.getRetry());
-         assertEquals(0, actual.getSequence());
+         assertEquals(0, actual.getTxSequence());
          assertEquals(expected.getTarget(), actual.getMessage().getTarget());
     }
 }

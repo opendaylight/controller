@@ -19,7 +19,7 @@ final class RequestEnvelopeProxy extends AbstractEnvelopeProxy<Request<?, ?>> {
     }
 
     @Override
-    RequestEnvelope createEnvelope(final Request<?, ?> message, final long sequence, final long retry) {
-        return new RequestEnvelope(message, sequence, retry);
+    RequestEnvelope createEnvelope(final Request<?, ?> message, final long sessionId, final long txSequence) {
+        return new RequestEnvelope(message, sessionId, txSequence);
     }
 }

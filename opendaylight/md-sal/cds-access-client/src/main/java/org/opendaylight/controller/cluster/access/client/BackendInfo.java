@@ -26,10 +26,15 @@ import org.opendaylight.controller.cluster.access.ABIVersion;
 public class BackendInfo {
     private final ABIVersion version;
     private final ActorRef actor;
+    private final int maxMessages;
+    private final long sessionId;
 
-    protected BackendInfo(final ActorRef actor, final ABIVersion version) {
+    protected BackendInfo(final ActorRef actor, final long sessionId, final ABIVersion version, final int maxMessages) {
         this.version = Preconditions.checkNotNull(version);
         this.actor = Preconditions.checkNotNull(actor);
+        Preconditions.checkArgument(maxMessages > 0, "Maximum messages has to be positive, not %s", maxMessages);
+        this.maxMessages = maxMessages;
+        this.sessionId = sessionId;
     }
 
     public final ActorRef getActor() {
@@ -38,6 +43,14 @@ public class BackendInfo {
 
     public final ABIVersion getVersion() {
         return version;
+    }
+
+    public final int getMaxMessages() {
+        return maxMessages;
+    }
+
+    public final long getSessionId() {
+        return sessionId;
     }
 
     @Override
@@ -56,6 +69,7 @@ public class BackendInfo {
     }
 
     protected ToStringHelper addToStringAttributes(final ToStringHelper toStringHelper) {
-        return toStringHelper.add("actor", actor).add("version", version);
+        return toStringHelper.add("actor", actor).add("sessionId", sessionId).add("version", version)
+                .add("maxMessages", maxMessages);
     }
 }
