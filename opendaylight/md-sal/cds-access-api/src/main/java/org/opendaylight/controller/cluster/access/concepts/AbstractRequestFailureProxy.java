@@ -49,9 +49,9 @@ public abstract class AbstractRequestFailureProxy<T extends WritableIdentifier, 
     }
 
     @Override
-    final C createResponse(final T target) {
-        return createFailure(target, cause);
+    final C createResponse(final T target, final long sequence) {
+        return createFailure(target, sequence, cause);
     }
 
-    protected abstract @Nonnull C createFailure(@Nonnull T target, @Nonnull RequestException cause);
+    protected abstract @Nonnull C createFailure(@Nonnull T target, long sequence, @Nonnull RequestException cause);
 }

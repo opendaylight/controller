@@ -83,13 +83,12 @@ public abstract class ClientActorBehavior extends RecoveredClientActorBehavior<C
     }
 
     // This method is executing in the actor context, hence we can safely interact with the queue
-    private ClientActorBehavior doSendRequest(final long sequence, final TransactionRequest<?> request,
-            final RequestCallback callback) {
+    private ClientActorBehavior doSendRequest(final TransactionRequest<?> request, final RequestCallback callback) {
         // Get or allocate queue for the request
         final SequencedQueue queue = context().queueFor(request.getTarget().getHistoryId().getCookie());
 
         // Note this is a tri-state return and can be null
-        final Optional<FiniteDuration> result = queue.enqueueRequest(sequence, request, callback);
+        final Optional<FiniteDuration> result = queue.enqueueRequest(request, callback);
         if (result == null) {
             // Happy path: we are done here
             return this;
@@ -189,7 +188,7 @@ public abstract class ClientActorBehavior extends RecoveredClientActorBehavior<C
      * @param request Request to send
      * @param callback Callback to invoke
      */
-    public final void sendRequest(final long sequence, final TransactionRequest<?> request, final RequestCallback callback) {
-        context().executeInActor(cb -> cb.doSendRequest(sequence, request, callback));
+    public final void sendRequest(final TransactionRequest<?> request, final RequestCallback callback) {
+        context().executeInActor(cb -> cb.doSendRequest(request, callback));
     }
 }

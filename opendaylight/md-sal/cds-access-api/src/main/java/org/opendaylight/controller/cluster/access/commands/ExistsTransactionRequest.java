@@ -23,9 +23,9 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 public final class ExistsTransactionRequest extends AbstractReadTransactionRequest<ExistsTransactionRequest> {
     private static final long serialVersionUID = 1L;
 
-    public ExistsTransactionRequest(final @Nonnull TransactionIdentifier identifier, final @Nonnull ActorRef replyTo,
-        final @Nonnull YangInstanceIdentifier path) {
-        super(identifier, replyTo, path);
+    public ExistsTransactionRequest(final @Nonnull TransactionIdentifier identifier, final long sequence,
+            final @Nonnull ActorRef replyTo, final @Nonnull YangInstanceIdentifier path) {
+        super(identifier, sequence, replyTo, path);
     }
 
     private ExistsTransactionRequest(final ExistsTransactionRequest request, final ABIVersion version) {
