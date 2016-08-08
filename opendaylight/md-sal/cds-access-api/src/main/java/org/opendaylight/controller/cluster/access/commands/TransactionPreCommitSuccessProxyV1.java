@@ -27,7 +27,7 @@ final class TransactionPreCommitSuccessProxyV1 extends AbstractTransactionSucces
     }
 
     @Override
-    protected TransactionPreCommitSuccess createSuccess(final TransactionIdentifier target) {
-        return new TransactionPreCommitSuccess(target);
+    protected TransactionPreCommitSuccess createSuccess(final TransactionIdentifier target, final long sequence) {
+        return new TransactionPreCommitSuccess(target, sequence);
     }
 }
