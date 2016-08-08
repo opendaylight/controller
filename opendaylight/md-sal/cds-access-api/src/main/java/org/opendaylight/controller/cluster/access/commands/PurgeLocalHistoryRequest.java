@@ -22,8 +22,8 @@ import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifie
 public final class PurgeLocalHistoryRequest extends LocalHistoryRequest<PurgeLocalHistoryRequest> {
     private static final long serialVersionUID = 1L;
 
-    public PurgeLocalHistoryRequest(final LocalHistoryIdentifier target, final ActorRef replyTo) {
-        super(target, replyTo);
+    public PurgeLocalHistoryRequest(final LocalHistoryIdentifier target, final long sequence, final ActorRef replyTo) {
+        super(target, sequence, replyTo);
     }
 
     private PurgeLocalHistoryRequest(final PurgeLocalHistoryRequest request, final ABIVersion version) {
