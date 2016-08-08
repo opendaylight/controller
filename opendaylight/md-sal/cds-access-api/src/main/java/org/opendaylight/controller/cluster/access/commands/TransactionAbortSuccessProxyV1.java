@@ -27,7 +27,7 @@ final class TransactionAbortSuccessProxyV1 extends AbstractTransactionSuccessPro
     }
 
     @Override
-    protected TransactionAbortSuccess createSuccess(final TransactionIdentifier target) {
-        return new TransactionAbortSuccess(target);
+    protected TransactionAbortSuccess createSuccess(final TransactionIdentifier target, final long sequence) {
+        return new TransactionAbortSuccess(target, sequence);
     }
 }

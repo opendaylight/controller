@@ -15,11 +15,13 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Optional;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.NotThreadSafe;
 import org.opendaylight.controller.cluster.access.concepts.Request;
 import org.opendaylight.controller.cluster.access.concepts.RequestException;
+import org.opendaylight.controller.cluster.access.concepts.Response;
 import org.opendaylight.controller.cluster.access.concepts.ResponseEnvelope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,6 +44,13 @@ final class SequencedQueue {
         TimeUnit.NANOSECONDS);
 
     /**
+     * Default number of permits we start with. This value is used when we start up only, once we resolve a backend
+     * we will use its advertized {@link BackendInfo#getMaxMessages()} forever, refreshing the value on each successful
+     * resolution.
+     */
+    private static final int DEFAULT_TX_LIMIT = 1000;
+
+    /**
      * We need to keep the sequence of operations towards the backend, hence we use a queue. Since targets can
      * progress at different speeds, these may be completed out of order.
      *
@@ -49,6 +58,7 @@ final class SequencedQueue {
      *       figure out a more efficient lookup mechanism to deal with responses which do not match the queue
      *       order.
      */
+    private final Semaphore txSemaphore = new Semaphore(DEFAULT_TX_LIMIT);
     private final Deque<SequencedQueueEntry> queue = new LinkedList<>();
     private final Ticker ticker;
     private final Long cookie;
@@ -61,6 +71,11 @@ final class SequencedQueue {
      */
     private CompletionStage<? extends BackendInfo> backendProof;
     private BackendInfo backend;
+
+    // This is not final because we need to be able to replace it.
+    private long txSequence;
+
+    private int lastTxLimit = DEFAULT_TX_LIMIT;
 
     /**
      * Last scheduled timer. We use this to prevent multiple timers from being scheduled for this queue.
@@ -86,12 +101,16 @@ final class SequencedQueue {
         Preconditions.checkState(notClosed, "Queue %s is closed", this);
     }
 
+    private long nextTxSequence() {
+        return txSequence++;
+    }
+
     /**
      * Enqueue, and possibly transmit a request. Results of this method are tri-state, indicating to the caller
      * the following scenarios:
      * 1) The request has been enqueued and transmitted. No further actions are necessary
      * 2) The request has been enqueued and transmitted, but the caller needs to schedule a new timer
-     * 3) The request has been enqueued,but the caller needs to request resolution of backend information and that
+     * 3) The request has been enqueued, but the caller needs to request resolution of backend information and that
      *    process needs to complete before transmission occurs
      *
      * These options are covered via returning an {@link Optional}. The caller needs to examine it and decode
@@ -105,66 +124,137 @@ final class SequencedQueue {
      * @param callback Callback to be invoked
      * @return Optional duration with semantics described above.
      */
-    @Nullable Optional<FiniteDuration> enqueueRequest(final long sequence, final Request<?, ?> request,
-            final RequestCallback callback) {
+    @Nullable Optional<FiniteDuration> enqueueRequest(final Request<?, ?> request, final RequestCallback callback) {
         checkNotClosed();
 
         final long now = ticker.read();
-        final SequencedQueueEntry e = new SequencedQueueEntry(request, sequence, callback, now);
+        final SequencedQueueEntry e = new SequencedQueueEntry(request, callback, now);
 
         queue.add(e);
         LOG.debug("Enqueued request {} to queue {}", request, this);
 
         if (backend == null) {
+            LOG.debug("No backend available, request resolution");
             return Optional.empty();
         }
 
-        e.retransmit(backend, now);
-        if (expectingTimer == null) {
-            expectingTimer = now + REQUEST_TIMEOUT_NANOS;
-            return Optional.of(INITIAL_REQUEST_TIMEOUT);
-        } else {
+        if (!txSemaphore.tryAcquire()) {
+            LOG.debug("Queue is at capacity, delayed sending of request {}", request);
             return null;
+        }
+        try {
+            e.retransmit(backend, nextTxSequence(), now);
+            if (expectingTimer == null) {
+                expectingTimer = now + REQUEST_TIMEOUT_NANOS;
+                return Optional.of(INITIAL_REQUEST_TIMEOUT);
+            } else {
+                return null;
+            }
+        } finally {
+            txSemaphore.release();
         }
     }
 
-    ClientActorBehavior complete(final ClientActorBehavior current, final ResponseEnvelope<?> response) {
+    ClientActorBehavior complete(final ClientActorBehavior current, final ResponseEnvelope<?> envelope) {
         // Responses to different targets may arrive out of order, hence we use an iterator
         final Iterator<SequencedQueueEntry> it = queue.iterator();
         while (it.hasNext()) {
             final SequencedQueueEntry e = it.next();
-            if (e.acceptsResponse(response)) {
-                lastProgress = ticker.read();
-                it.remove();
-                LOG.debug("Completing request {} with {}", e, response);
-                return e.complete(response.getMessage());
+            final TxDetails txDetails = e.getTxDetails();
+            if (txDetails == null) {
+                LOG.warn("Ignoring response {}: no transmitted request found", envelope);
+                return current;
             }
+
+            final Request<?, ?> request = e.getRequest();
+            final Response<?, ?> response = envelope.getMessage();
+
+            // First check for matching target, or move to next entry
+            if (!request.getTarget().equals(response.getTarget())) {
+                continue;
+            }
+
+            // Sanity-check logical sequence, ignore any out-of-order messages
+            if (request.getSequence() != response.getSequence()) {
+                LOG.debug("Expecting sequence {}, ignoring response {}", request.getSequence(), envelope);
+                return current;
+            }
+
+            // Now check session match
+            if (envelope.getSessionId() != txDetails.getSessionId()) {
+                LOG.debug("Expecting session {}, ignoring response {}", txDetails.getSessionId(), envelope);
+                return current;
+            }
+            if (envelope.getTxSequence() != txDetails.getTxSequence()) {
+                LOG.warn("Expecting txSequence {}, ignoring response", txDetails.getTxSequence(), envelope);
+                return current;
+            }
+
+            lastProgress = ticker.read();
+            it.remove();
+            LOG.debug("Completing request {} with {}", request, envelope);
+            return e.complete(response);
         }
 
-        LOG.debug("No request matching {} found", response);
+        LOG.debug("No request matching {} found", envelope);
         return current;
     }
 
+    private void adjustSemaphore(final int newTxLimit) {
+        final int diff = lastTxLimit - newTxLimit;
+        LOG.debug("Adjustin semaphore {} from {} to {}", txSemaphore, lastTxLimit, newTxLimit);
+
+        if (diff > 0) {
+            // Blocking here, we are not transmitting, so this should be fine
+            txSemaphore.acquireUninterruptibly(diff);
+        } else {
+            // This is non-blocking
+            txSemaphore.release(-diff);
+        }
+
+        lastTxLimit = newTxLimit;
+        LOG.debug("Adjusted semaphore {} to {}", txSemaphore, newTxLimit);
+    }
+
     Optional<FiniteDuration> setBackendInfo(final CompletionStage<? extends BackendInfo> proof, final BackendInfo backend) {
+        Preconditions.checkNotNull(backend);
         if (!proof.equals(backendProof)) {
             LOG.debug("Ignoring resolution {} while waiting for {}", proof, this.backendProof);
             return Optional.empty();
         }
 
-        this.backend = Preconditions.checkNotNull(backend);
+        // We are unblocking transmission. Make sure to update transmit limit if needed
+        final int txLimit = backend.getMaxMessages();
+        if (lastTxLimit != txLimit) {
+            adjustSemaphore(txLimit);
+        }
+
+        // This prevents any further transmissions until we finish processing here
+        int permits = txSemaphore.drainPermits();
+
+        this.backend = backend;
         backendProof = null;
+        txSequence = 0;
+        lastProgress = ticker.read();
         LOG.debug("Resolved backend {}",  backend);
 
         if (queue.isEmpty()) {
-            // No pending requests, hence no need for a timer
+            // No pending requests, hence no need for a timer, remember to return our permits
+            txSemaphore.release(permits);
             return Optional.empty();
         }
 
-        LOG.debug("Resending requests to backend {}", backend);
+        LOG.debug("Resending up to {} requests to backend {}", permits, backend);
         final long now = ticker.read();
-        for (SequencedQueueEntry e : queue) {
-            e.retransmit(backend, now);
+
+        for (final Iterator<SequencedQueueEntry> it = queue.iterator(); permits > 0 && it.hasNext(); --permits) {
+            final SequencedQueueEntry e = it.next();
+
+            LOG.debug("Transmitting entry {}", e);
+            e.retransmit(backend, nextTxSequence(), now);
         }
+
+        txSemaphore.release(permits);
 
         if (expectingTimer != null) {
             // We already have a timer going, no need to schedule a new one

@@ -30,7 +30,8 @@ public final class ModifyTransactionRequestBuilder implements Builder<ModifyTran
     private final List<TransactionModification> modifications = new ArrayList<>(1);
     private final TransactionIdentifier identifier;
     private final ActorRef replyTo;
-    private PersistenceProtocol protocol = null;
+    private PersistenceProtocol protocol;
+    private Long sequence;
 
     public ModifyTransactionRequestBuilder(final TransactionIdentifier identifier, final ActorRef replyTo) {
         this.identifier = Preconditions.checkNotNull(identifier);
@@ -51,6 +52,10 @@ public final class ModifyTransactionRequestBuilder implements Builder<ModifyTran
         modifications.add(Preconditions.checkNotNull(modification));
     }
 
+    public void setSequence(final long sequence) {
+        this.sequence = sequence;
+    }
+
     public void setAbort() {
         checkFinished();
         // Transaction is being aborted, no need to transmit operations
@@ -69,9 +74,13 @@ public final class ModifyTransactionRequestBuilder implements Builder<ModifyTran
 
     @Override
     public ModifyTransactionRequest build() {
-        final ModifyTransactionRequest ret = new ModifyTransactionRequest(identifier, replyTo, modifications, protocol);
+        Preconditions.checkState(sequence != null, "Request sequence has not been set");
+
+        final ModifyTransactionRequest ret = new ModifyTransactionRequest(identifier, sequence, replyTo, modifications,
+            protocol);
         modifications.clear();
         protocol = null;
+        sequence = null;
         return ret;
     }
 }
