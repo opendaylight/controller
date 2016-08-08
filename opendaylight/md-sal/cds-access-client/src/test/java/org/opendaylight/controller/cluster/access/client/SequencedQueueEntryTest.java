@@ -49,7 +49,7 @@ public class SequencedQueueEntryTest {
         private static final long serialVersionUID = 1L;
 
         MockFailure(final WritableIdentifier target, final RequestException cause) {
-            super(target, cause);
+            super(target, 0, cause);
         }
 
         @Override
@@ -67,7 +67,7 @@ public class SequencedQueueEntryTest {
         private static final long serialVersionUID = 1L;
 
         MockRequest(final WritableIdentifier target, final ActorRef replyTo) {
-            super(target, replyTo);
+            super(target, 0, replyTo);
         }
 
         @Override
@@ -127,11 +127,11 @@ public class SequencedQueueEntryTest {
         ticker.increment(ThreadLocalRandom.current().nextLong());
 
         mockActor = TestProbe.apply(actorSystem);
-        mockBackendInfo = new BackendInfo(mockActor.ref(), ABIVersion.current());
+        mockBackendInfo = new BackendInfo(mockActor.ref(), 0, ABIVersion.current(), 5);
         mockRequest = new MockRequest(mockIdentifier, mockReplyTo);
         mockResponse = mockRequest.toRequestFailure(mockCause);
 
-        entry = new SequencedQueueEntry(mockRequest, 0, mockCallback, ticker.read());
+        entry = new SequencedQueueEntry(mockRequest, mockCallback, ticker.read());
     }
 
     @After
@@ -140,19 +140,14 @@ public class SequencedQueueEntryTest {
     }
 
     @Test
-    public void testGetSequence() {
-        assertEquals(0, entry.getSequence());
-    }
-
-    @Test
-    public void testGetCurrentTry() {
-        assertEquals(0, entry.getCurrentTry());
+    public void testGetTxDetails() {
+        assertEquals(0, entry.getTxDetails());
         entry.retransmit(mockBackendInfo, ticker.read());
-        assertEquals(0, entry.getCurrentTry());
+        assertEquals(0, entry.getTxDetails());
         entry.retransmit(mockBackendInfo, ticker.read());
-        assertEquals(1, entry.getCurrentTry());
+        assertEquals(1, entry.getTxDetails());
         entry.retransmit(mockBackendInfo, ticker.read());
-        assertEquals(2, entry.getCurrentTry());
+        assertEquals(2, entry.getTxDetails());
     }
 
     @Test
@@ -201,8 +196,8 @@ public class SequencedQueueEntryTest {
          assertTrue(o instanceof RequestEnvelope);
 
          final RequestEnvelope actual = (RequestEnvelope) o;
-         assertEquals(0, actual.getRetry());
-         assertEquals(0, actual.getSequence());
+         assertEquals(0, actual.getSessionId());
+         assertEquals(0, actual.getTxSequence());
          assertEquals(expected.getTarget(), actual.getMessage().getTarget());
     }
 }
