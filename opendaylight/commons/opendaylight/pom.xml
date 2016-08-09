@@ -83,7 +83,7 @@
     <ietf-inet-types.version>1.2.0-SNAPSHOT</ietf-inet-types.version>
     <ietf-restconf.version>2013.10.19.7-SNAPSHOT</ietf-restconf.version>
     <ietf-topology.version>2013.10.21.7-SNAPSHOT</ietf-topology.version>
-    <ietf-yang-types.version>2013.07.15.7-SNAPSHOT</ietf-yang-types.version>
+    <ietf-yang-types.version>2013.07.15.9-SNAPSHOT</ietf-yang-types.version>
     <jdepend.maven.plugin.version>2.0-beta-2</jdepend.maven.plugin.version>
 
     <!-- Path prefix where we generate configuration subsystem bindings -->
