@@ -143,7 +143,7 @@ public class Leader extends AbstractLeader {
 
             // Now send an ElectionTimeout to the matching follower to immediately start an election.
             ActorSelection followerActor = context.getPeerActorSelection(followerId);
-            followerActor.tell(new ElectionTimeout(), context.getActor());
+            followerActor.tell(new ElectionTimeout(-1), context.getActor());
 
             LOG.debug("{}: Leader transfer complete", logName());
 

@@ -93,7 +93,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest {
         candidate = new Candidate(raftActorContext);
 
         RaftActorBehavior newBehavior =
-            candidate.handleMessage(candidateActor, new ElectionTimeout());
+            candidate.handleMessage(candidateActor, new ElectionTimeout(-1));
 
         assertEquals("Behavior", RaftState.Leader, newBehavior.state());
     }
@@ -104,7 +104,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest {
         raftActorContext.setPeerAddresses(setupPeers(1));
         candidate = new Candidate(raftActorContext);
 
-        candidate = candidate.handleMessage(candidateActor, new ElectionTimeout());
+        candidate = candidate.handleMessage(candidateActor, new ElectionTimeout(-1));
 
         assertEquals("Behavior", RaftState.Candidate, candidate.state());
     }

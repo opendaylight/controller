@@ -61,7 +61,7 @@ public class PartitionedCandidateOnStartupElectionScenarioTest extends AbstractL
         member3Actor.expectMessageClass(RequestVote.class, 1);
         member3Actor.expectBehaviorStateChange();
 
-        member1ActorRef.tell(new ElectionTimeout(), ActorRef.noSender());
+        member1ActorRef.tell(new ElectionTimeout(-1), ActorRef.noSender());
 
         member2Actor.waitForExpectedMessages(RequestVote.class);
         member3Actor.waitForExpectedMessages(RequestVote.class);
@@ -118,7 +118,7 @@ public class PartitionedCandidateOnStartupElectionScenarioTest extends AbstractL
             member3Actor.clear();
             member3Actor.expectMessageClass(RequestVoteReply.class, 1);
 
-            member3ActorRef.tell(new ElectionTimeout(), ActorRef.noSender());
+            member3ActorRef.tell(new ElectionTimeout(-1), ActorRef.noSender());
 
             member1Actor.waitForExpectedMessages(RequestVote.class);
             member2Actor.waitForExpectedMessages(RequestVote.class);
@@ -187,7 +187,7 @@ public class PartitionedCandidateOnStartupElectionScenarioTest extends AbstractL
         // current term.
 
         for(int i = 0; i < numCandidateElections - 1; i++) {
-            member3ActorRef.tell(new ElectionTimeout(), ActorRef.noSender());
+            member3ActorRef.tell(new ElectionTimeout(-1), ActorRef.noSender());
         }
 
         member1Actor.waitForExpectedMessages(RequestVote.class);

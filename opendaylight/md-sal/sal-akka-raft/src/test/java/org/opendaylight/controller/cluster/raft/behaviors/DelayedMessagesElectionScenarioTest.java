@@ -76,7 +76,7 @@ public class DelayedMessagesElectionScenarioTest extends AbstractLeaderElectionS
         member3Actor.expectMessageClass(RequestVoteReply.class, 1);
         member3Actor.expectMessageClass(AppendEntriesReply.class, 2);
 
-        member3ActorRef.tell(new ElectionTimeout(), ActorRef.noSender());
+        member3ActorRef.tell(new ElectionTimeout(-1L), ActorRef.noSender());
 
         member3Actor.waitForExpectedMessages(RequestVoteReply.class);
 
@@ -154,7 +154,7 @@ public class DelayedMessagesElectionScenarioTest extends AbstractLeaderElectionS
 
         member3Actor.dropMessagesToBehavior(RequestVote.class);
 
-        member2ActorRef.tell(new ElectionTimeout(), ActorRef.noSender());
+        member2ActorRef.tell(new ElectionTimeout(-1), ActorRef.noSender());
 
         member1Actor.waitForExpectedMessages(RequestVote.class);
         member3Actor.waitForExpectedMessages(RequestVote.class);

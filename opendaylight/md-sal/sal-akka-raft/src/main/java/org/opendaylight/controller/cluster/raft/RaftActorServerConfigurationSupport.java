@@ -762,7 +762,7 @@ class RaftActorServerConfigurationSupport {
                 return;
             }
 
-            raftContext.getActor().tell(new ElectionTimeout(), raftContext.getActor());
+            raftContext.getActor().tell(new ElectionTimeout(-1L), raftContext.getActor());
 
             currentOperationState = new WaitingForLeaderElected(changeVotingStatusContext, previousServerConfig);
         }

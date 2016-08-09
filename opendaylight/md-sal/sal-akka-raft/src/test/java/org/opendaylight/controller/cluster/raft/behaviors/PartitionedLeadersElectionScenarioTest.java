@@ -159,7 +159,7 @@ public class PartitionedLeadersElectionScenarioTest extends AbstractLeaderElecti
         member3Actor.dropMessagesToBehavior(AppendEntries.class);
         member3Actor.dropMessagesToBehavior(RequestVote.class);
 
-        member2ActorRef.tell(new ElectionTimeout(), ActorRef.noSender());
+        member2ActorRef.tell(new ElectionTimeout(-1), ActorRef.noSender());
 
         member2Actor.waitForExpectedMessages(RequestVoteReply.class);
 
@@ -207,7 +207,7 @@ public class PartitionedLeadersElectionScenarioTest extends AbstractLeaderElecti
         member3Actor.expectMessageClass(RequestVoteReply.class, 1);
         member3Actor.expectMessageClass(AppendEntriesReply.class, 1);
 
-        member3ActorRef.tell(new ElectionTimeout(), ActorRef.noSender());
+        member3ActorRef.tell(new ElectionTimeout(-1), ActorRef.noSender());
 
         member1Actor.waitForExpectedMessages(RequestVote.class);
         member2Actor.waitForExpectedMessages(RequestVote.class);
@@ -251,7 +251,7 @@ public class PartitionedLeadersElectionScenarioTest extends AbstractLeaderElecti
 
         member3Actor.dropMessagesToBehavior(RequestVote.class);
 
-        member2ActorRef.tell(new ElectionTimeout(), ActorRef.noSender());
+        member2ActorRef.tell(new ElectionTimeout(-1), ActorRef.noSender());
 
         member1Actor.waitForExpectedMessages(RequestVote.class);
         member3Actor.waitForExpectedMessages(RequestVote.class);
