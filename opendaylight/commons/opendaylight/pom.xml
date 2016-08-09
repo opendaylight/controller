@@ -81,9 +81,9 @@
     <hosttracker_new.implementation.version>0.8.0-SNAPSHOT</hosttracker_new.implementation.version>
     <httpservice-bridge.northbound.version>0.4.0-SNAPSHOT</httpservice-bridge.northbound.version>
     <ietf-inet-types.version>1.2.0-SNAPSHOT</ietf-inet-types.version>
-    <ietf-restconf.version>2013.10.19.7-SNAPSHOT</ietf-restconf.version>
-    <ietf-topology.version>2013.10.21.7-SNAPSHOT</ietf-topology.version>
-    <ietf-yang-types.version>2013.07.15.9-SNAPSHOT</ietf-yang-types.version>
+    <ietf-restconf.version>2013.10.19.10-SNAPSHOT</ietf-restconf.version>
+    <ietf-topology.version>2013.10.21.10-SNAPSHOT</ietf-topology.version>
+    <ietf-yang-types.version>2013.07.15.10-SNAPSHOT</ietf-yang-types.version>
     <jdepend.maven.plugin.version>2.0-beta-2</jdepend.maven.plugin.version>
 
     <!-- Path prefix where we generate configuration subsystem bindings -->
@@ -103,7 +103,7 @@
     <northbound.commons.version>0.8.0-SNAPSHOT</northbound.commons.version>
     <northbound.hosttracker.version>1.8.0-SNAPSHOT</northbound.hosttracker.version>
     <northbound.jolokia.version>1.8.0-SNAPSHOT</northbound.jolokia.version>
-    <opendaylight-l2-types.version>2013.08.27.7-SNAPSHOT</opendaylight-l2-types.version>
+    <opendaylight-l2-types.version>2013.08.27.10-SNAPSHOT</opendaylight-l2-types.version>
     <osgi-brandfragment.web.version>0.4.0-SNAPSHOT</osgi-brandfragment.web.version>
     <protocol-framework.version>0.9.0-SNAPSHOT</protocol-framework.version>
     <protocol_plugins.openflow.version>0.8.0-SNAPSHOT</protocol_plugins.openflow.version>
@@ -151,7 +151,7 @@
     <usermanager.version>0.8.0-SNAPSHOT</usermanager.version>
     <nsf.version>0.8.0-SNAPSHOT</nsf.version>
     <web.version>0.8.0-SNAPSHOT</web.version>
-    <yang-ext.version>2013.09.07.7-SNAPSHOT</yang-ext.version>
+    <yang-ext.version>2013.09.07.10-SNAPSHOT</yang-ext.version>
     <yang-jmx-generator.version>1.4.0-SNAPSHOT</yang-jmx-generator.version>
     <yangtools.version>1.1.0-SNAPSHOT</yangtools.version>
     <jmh.version>0.9.7</jmh.version>
