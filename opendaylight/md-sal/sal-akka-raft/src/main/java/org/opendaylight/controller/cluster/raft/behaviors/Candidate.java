@@ -66,7 +66,7 @@ public class Candidate extends AbstractRaftActorBehavior {
         startNewTerm();
 
         if(votingPeers.isEmpty()){
-            actor().tell(ELECTION_TIMEOUT, actor());
+            actor().tell(new ElectionTimeout(-1L), actor());
         } else {
             scheduleElection(electionDuration());
         }

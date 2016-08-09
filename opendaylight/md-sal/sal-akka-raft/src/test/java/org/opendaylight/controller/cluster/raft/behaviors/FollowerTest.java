@@ -112,7 +112,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
 
         follower = new Follower(createActorContext());
 
-        RaftActorBehavior raftBehavior = follower.handleMessage(followerActor, new ElectionTimeout());
+        RaftActorBehavior raftBehavior = follower.handleMessage(followerActor, new ElectionTimeout(-1));
 
         assertTrue(raftBehavior instanceof Candidate);
     }

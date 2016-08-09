@@ -62,7 +62,7 @@ public class Follower extends AbstractRaftActorBehavior {
         initialSyncStatusTracker = new SyncStatusTracker(context.getActor(), getId(), SYNC_THRESHOLD);
 
         if (context.getPeerIds().isEmpty() && getLeaderId() == null) {
-            actor().tell(ELECTION_TIMEOUT, actor());
+            actor().tell(new ElectionTimeout(-1), actor());
         } else {
             scheduleElection(electionDuration());
         }
@@ -336,7 +336,12 @@ public class Follower extends AbstractRaftActorBehavior {
         if (message instanceof ElectionTimeout) {
             if(canStartElection()) {
                 LOG.debug("{}: Received ElectionTimeout - switching to Candidate", logName());
-                return internalSwitchBehavior(RaftState.Candidate);
+                ElectionTimeout timeout = (ElectionTimeout) message;
+                if ((timeout.getCount() >= electionTimeoutcount) || (timeout.getCount() < 0)) {
+                    return internalSwitchBehavior(RaftState.Candidate);
+                } else {
+                    return this;
+                }
             } else {
                 setLeaderId(null);
                 scheduleElection(electionDuration());

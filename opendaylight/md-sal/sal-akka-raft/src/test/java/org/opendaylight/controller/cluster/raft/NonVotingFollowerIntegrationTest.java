@@ -367,7 +367,7 @@ public class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrati
                 setHeartBeatInterval(FiniteDuration.apply(100, TimeUnit.MILLISECONDS));
 
         MessageCollectorActor.clearMessages(roleChangeNotifier);
-        follower1Actor.tell(new ElectionTimeout(), ActorRef.noSender());
+        follower1Actor.tell(new ElectionTimeout(-1), ActorRef.noSender());
         followerInstance.startDropMessages(AppendEntries.class);
 
         LeaderStateChanged leaderStateChanged = MessageCollectorActor.expectFirstMatching(roleChangeNotifier,

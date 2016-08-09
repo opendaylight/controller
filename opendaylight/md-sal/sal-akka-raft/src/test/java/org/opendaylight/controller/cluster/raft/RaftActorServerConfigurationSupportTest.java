@@ -1405,7 +1405,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
         MessageCollectorActor.expectFirstMatching(node2Collector, RequestVote.class);
 
-        node2RaftActorRef.tell(new ElectionTimeout(), ActorRef.noSender());
+        node2RaftActorRef.tell(new ElectionTimeout(-1), ActorRef.noSender());
 
         ServerChangeReply reply = testKit.expectMsgClass(JavaTestKit.duration("5 seconds"), ServerChangeReply.class);
         assertEquals("getStatus", ServerChangeStatus.OK, reply.getStatus());
