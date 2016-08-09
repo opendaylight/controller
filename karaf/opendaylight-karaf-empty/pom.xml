@@ -1,27 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <parent>
-    <groupId>org.opendaylight.controller</groupId>
-    <artifactId>karaf-parent</artifactId>
+    <groupId>org.opendaylight.odlparent</groupId>
+    <artifactId>opendaylight-karaf-empty</artifactId>
     <version>1.8.0-SNAPSHOT</version>
-    <relativePath>../karaf-parent</relativePath>
+    <relativePath />
   </parent>
   <modelVersion>4.0.0</modelVersion>
+  <groupId>org.opendaylight.controller</groupId>
   <artifactId>opendaylight-karaf-empty</artifactId>
   <name>${project.artifactId}</name>
   <packaging>pom</packaging>
-  <prerequisites>
-    <maven>3.1.1</maven>
-  </prerequisites>
-  <dependencies>
-    <dependency>
-      <!-- scope is compile so all features (there is only one) are installed
-      into startup.properties and the feature repo itself is not installed -->
-      <groupId>org.apache.karaf.features</groupId>
-      <artifactId>framework</artifactId>
-      <type>kar</type>
-    </dependency>
-  </dependencies>
+
   <scm>
     <connection>scm:git:http://git.opendaylight.org/gerrit/controller.git</connection>
     <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
