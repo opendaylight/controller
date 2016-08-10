@@ -127,11 +127,6 @@ public class ProxySchemaContext implements SchemaContext {
     }
 
     @Override
-    public DataSchemaNode getDataChildByName(final String s) {
-        return getCurrentSchema().getDataChildByName(s);
-    }
-
-    @Override
     public Set<UsesNode> getUses() {
         return getCurrentSchema().getUses();
     }
