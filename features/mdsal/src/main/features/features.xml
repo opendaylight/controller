@@ -40,6 +40,7 @@
         <feature version='[3.3.0,4.0.0)'>odl-lmax</feature>
         <!-- FIXME: Bug 4202: Add MD-SAL provided odl-mdsal-binding-adapter -->
         <!-- FIXME: Bug 4202: Add MD-SAL provided odl-mdsal-dom-broker -->
+        <feature version='${mdsal.version}'>odl-mdsal-dom</feature>
         <feature version='${mdsal.version}'>odl-mdsal-eos-dom</feature>
         <feature version='${mdsal.version}'>odl-mdsal-eos-binding</feature>
         <feature version='${mdsal.version}'>odl-mdsal-singleton-dom</feature>
