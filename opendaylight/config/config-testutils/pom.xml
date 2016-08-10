@@ -1,0 +1,76 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.opendaylight.controller</groupId>
+    <artifactId>config-subsystem</artifactId>
+    <version>0.6.0-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>config-testutils</artifactId>
+
+  <!-- NOTE: The use of <scope> here is a little particular, compared to other standard projects...
+
+        As this test helper project is intended to itself be used as a <scope>test
+        <dependency> so that the utility code in src/main/java of this project can
+        be used to write src/test/java code in projects using it, all <dependencies>
+        here are <scope>compile here (the default, don't mention it), and NOT <scope>test.
+      -->
+  <dependencies>
+    <dependency>
+      <groupId>org.opendaylight.yangtools</groupId>
+      <artifactId>testutils</artifactId>
+      <version>1.1.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>sal-binding-broker-impl</artifactId>
+      <type>test-jar</type>
+    </dependency>
+    <dependency>
+      <groupId>com.google.dagger</groupId>
+      <artifactId>dagger</artifactId>
+      <!-- TODO remove this when Dagger is in odlparent https://git.opendaylight.org/gerrit/#/c/42644/ -->
+      <!-- This version has to kept the same as com.google.dagger:dagger-compiler's -->
+      <version>2.5</version>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-all</artifactId>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <!-- TODO remove this when Dagger is in odlparent https://git.opendaylight.org/gerrit/#/c/42644/ -->
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <annotationProcessorPaths>
+            <!-- dagger-compiler is here instead of standard <dependency> with <optional>true
+                 because of a version conflict between Guava 19 required by Dagger 2.5
+                 and Guava 18 currently used by OpenDaylight dependencyManagement.
+                 (java.lang.NoSuchMethodError: com.google.common.base.CharMatcher.whitespace()Lcom/google/common/base/CharMatcher)
+
+                 Also dagger.@Component in src/test/java did not generated code (only src/main/java)
+                 when the dagger-compiler was a standard <dependency> with <optional>true,
+                 whereas putting it here makes that work.
+
+                 Anyhow even when odlparent will upgrade from Guava 18 to Guava 19,
+                 keeping code generators separate from application's main classpath
+                 is a better build architecture overall, so please keep this as-is.
+             -->
+            <path>
+              <groupId>com.google.dagger</groupId>
+              <artifactId>dagger-compiler</artifactId>
+              <!-- This version has to kept the same as com.google.dagger:dagger's <dependency> -->
+              <version>2.5</version>
+            </path>
+          </annotationProcessorPaths>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>

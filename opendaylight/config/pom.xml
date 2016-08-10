@@ -19,6 +19,7 @@
     <module>config-manager</module>
     <module>config-plugin-parent</module>
     <module>config-util</module>
+    <module>config-testutils</module>
     <module>config-persister-api</module>
     <module>config-persister-file-xml-adapter</module>
     <module>config-persister-feature-adapter</module>
