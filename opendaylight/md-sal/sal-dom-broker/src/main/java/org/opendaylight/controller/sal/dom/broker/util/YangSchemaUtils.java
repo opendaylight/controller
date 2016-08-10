@@ -150,12 +150,6 @@ public final class YangSchemaUtils {
         }
 
         @Override
-        public DataSchemaNode getDataChildByName(final String name) {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
         public Set<UsesNode> getUses() {
             // TODO Auto-generated method stub
             return null;

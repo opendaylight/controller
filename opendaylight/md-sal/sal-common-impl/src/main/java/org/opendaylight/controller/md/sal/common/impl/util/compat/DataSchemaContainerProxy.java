@@ -43,11 +43,6 @@ class DataSchemaContainerProxy implements DataNodeContainer {
     }
 
     @Override
-    public DataSchemaNode getDataChildByName(final String arg0) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public Set<GroupingDefinition> getGroupings() {
         return Collections.emptySet();
     }
