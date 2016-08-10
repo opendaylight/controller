@@ -188,6 +188,54 @@
       "revId": "cf7e45dc475f5323284af47a853adbdc5d36dfc8",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_e3bfe3ce",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 450,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-08-10T19:04:05Z",
+      "side": 1,
+      "message": "We\u0027re just creating an ActorSelection to get the Address instance - it  doesn\u0027t do anything until you resolve or send a message.  It looks like we could use AddressFromURIString as well although it shouldn\u0027t matter either way. I can try that later.",
+      "parentUuid": "7a6b29fe_e29364f8",
+      "range": {
+        "startLine": 450,
+        "startChar": 8,
+        "endLine": 450,
+        "endChar": 34
+      },
+      "revId": "cf7e45dc475f5323284af47a853adbdc5d36dfc8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_42ee9889",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 450,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-08-10T19:04:05Z",
+      "side": 1,
+      "message": "I think that\u0027s an extreme edge case. If it\u0027s stuck in an endless loop then the process would eventually have to be restarted. I have yet to see such a case - I\u0027m willing to live with the recourse in lieu of better stability in the more common cases.",
+      "parentUuid": "7a6b29fe_37600032",
+      "range": {
+        "startLine": 450,
+        "startChar": 8,
+        "endLine": 450,
+        "endChar": 34
+      },
+      "revId": "cf7e45dc475f5323284af47a853adbdc5d36dfc8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
