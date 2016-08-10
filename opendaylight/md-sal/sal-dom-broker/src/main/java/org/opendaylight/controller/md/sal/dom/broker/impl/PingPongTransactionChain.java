@@ -436,7 +436,7 @@ public final class PingPongTransactionChain implements DOMTransactionChain {
     public DOMDataReadWriteTransaction newReadWriteTransaction() {
         final PingPongTransaction tx = allocateTransaction();
         final DOMDataReadWriteTransaction ret = new ForwardingDOMDataReadWriteTransaction() {
-            private boolean isOpen;
+            private boolean isOpen = true;
 
             @Override
             protected DOMDataReadWriteTransaction delegate() {
