@@ -164,6 +164,30 @@
       "revId": "cf7e45dc475f5323284af47a853adbdc5d36dfc8",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_37600032",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 450,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-08-10T01:14:54Z",
+      "side": 1,
+      "message": "So this does not really check the actor, just the cluster member state...\n\nI can see how we recover from a restarted actor, or (eventually) from a GC pause, but how do we recover from leader actor which is stuck in an infinite loop?",
+      "parentUuid": "7a6b29fe_2bd1bf57",
+      "range": {
+        "startLine": 450,
+        "startChar": 8,
+        "endLine": 450,
+        "endChar": 34
+      },
+      "revId": "cf7e45dc475f5323284af47a853adbdc5d36dfc8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
