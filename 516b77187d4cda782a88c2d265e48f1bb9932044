@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "7a6b29fe_5e030d0d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/mdsal/MdsalDOMDataBroker.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 4580
+      },
+      "writtenOn": "2016-08-11T12:11:01Z",
+      "side": 1,
+      "message": "Yeah you are absolutely right, naming is not really best one. Actually it is really bad one.",
+      "parentUuid": "7a6b29fe_9455871f",
+      "revId": "516b77187d4cda782a88c2d265e48f1bb9932044",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a6b29fe_f4315b0c",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/mdsal/MdsalDOMDataBroker.java",
         "patchSetId": 3
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "7a6b29fe_fe41393a",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/mdsal/MdsalDOMDataBroker.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 4580
+      },
+      "writtenOn": "2016-08-11T12:11:01Z",
+      "side": 1,
+      "message": "Yeah, we can reference just org.opendaylight.mdsal.dom.api.DOMDataBroker, but this implementation acts as adapter for ShardedDOMDataBrokerAdapter.\n\nWe may be placing unnecessary restrictions on read and read/write transactions, if another implementation of org.opendaylight.mdsal.dom.api.DOMDataBroker would be injected",
+      "parentUuid": "7a6b29fe_f4315b0c",
+      "revId": "516b77187d4cda782a88c2d265e48f1bb9932044",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a6b29fe_d436df02",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/mdsal/MdsalDOMDataBroker.java",
         "patchSetId": 3
@@ -47,6 +83,24 @@
       "writtenOn": "2016-08-11T11:38:37Z",
       "side": 1,
       "message": "Why isn\u0027t this supported?",
+      "revId": "516b77187d4cda782a88c2d265e48f1bb9932044",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_3e5611d3",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/mdsal/MdsalDOMDataBroker.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 4580
+      },
+      "writtenOn": "2016-08-11T12:11:01Z",
+      "side": 1,
+      "message": "DOMDataChangeListener is deprecated",
+      "parentUuid": "7a6b29fe_d436df02",
       "revId": "516b77187d4cda782a88c2d265e48f1bb9932044",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
