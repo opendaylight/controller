@@ -10,17 +10,17 @@ package org.opendaylight.controller.cluster.raft;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.AdditionalMatchers.aryEq;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import akka.japi.Procedure;
 import akka.persistence.RecoveryCompleted;
 import akka.persistence.SnapshotMetadata;
 import akka.persistence.SnapshotOffer;
-import akka.persistence.SnapshotSelectionCriteria;
 import com.google.common.collect.Sets;
 import java.util.Arrays;
 import java.util.Collections;
@@ -35,11 +35,11 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.PersistentDataProvider;
-import org.opendaylight.controller.cluster.raft.base.messages.ApplyJournalEntries;
-import org.opendaylight.controller.cluster.raft.base.messages.DeleteEntries;
-import org.opendaylight.controller.cluster.raft.base.messages.UpdateElectionTerm;
+import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
+import org.opendaylight.controller.cluster.raft.persisted.DeleteEntries;
 import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload;
 import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
+import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -241,22 +241,6 @@ public class RaftActorRecoverySupportTest {
     }
 
     @Test
-    public void testOnDeprecatedDeleteEntries() {
-        ReplicatedLog replicatedLog = context.getReplicatedLog();
-        replicatedLog.append(new MockRaftActorContext.MockReplicatedLogEntry(1,
-                0, new MockRaftActorContext.MockPayload("0")));
-        replicatedLog.append(new MockRaftActorContext.MockReplicatedLogEntry(1,
-                1, new MockRaftActorContext.MockPayload("1")));
-        replicatedLog.append(new MockRaftActorContext.MockReplicatedLogEntry(1,
-                2, new MockRaftActorContext.MockPayload("2")));
-
-        sendMessageToSupport(new org.opendaylight.controller.cluster.raft.RaftActor.DeleteEntries(1));
-
-        assertEquals("Journal log size", 1, context.getReplicatedLog().size());
-        assertEquals("Last index", 0, context.getReplicatedLog().lastIndex());
-    }
-
-    @Test
     public void testOnDeleteEntries() {
         ReplicatedLog replicatedLog = context.getReplicatedLog();
         replicatedLog.append(new MockRaftActorContext.MockReplicatedLogEntry(1,
@@ -281,27 +265,19 @@ public class RaftActorRecoverySupportTest {
         assertEquals("Voted For", "member2", context.getTermInformation().getVotedFor());
     }
 
-    @Test
-    public void testDeprecatedUpdateElectionTerm() {
-
-        sendMessageToSupport(new org.opendaylight.controller.cluster.raft.RaftActor.UpdateElectionTerm(5, "member2"));
-
-        assertEquals("Current term", 5, context.getTermInformation().getCurrentTerm());
-        assertEquals("Voted For", "member2", context.getTermInformation().getVotedFor());
-    }
-
     @SuppressWarnings("unchecked")
     @Test
     public void testDataRecoveredWithPersistenceDisabled() {
+        doNothing().when(mockCohort).applyRecoverySnapshot(aryEq(new byte[0]));
         doReturn(false).when(mockPersistence).isRecoveryApplicable();
         doReturn(10L).when(mockPersistentProvider).getLastSequenceNumber();
-
-        sendMessageToSupport(new UpdateElectionTerm(5, "member2"));
 
         Snapshot snapshot = Snapshot.create(new byte[]{1}, Collections.<ReplicatedLogEntry>emptyList(), 3, 1, 3, 1);
         SnapshotOffer snapshotOffer = new SnapshotOffer(new SnapshotMetadata("test", 6, 12345), snapshot);
 
         sendMessageToSupport(snapshotOffer);
+
+        sendMessageToSupport(new UpdateElectionTerm(5, "member2"));
 
         sendMessageToSupport(new MockRaftActorContext.MockReplicatedLogEntry(1,
                 4, new MockRaftActorContext.MockPayload("4")));
@@ -311,8 +287,6 @@ public class RaftActorRecoverySupportTest {
         sendMessageToSupport(new ApplyJournalEntries(4));
 
         sendMessageToSupport(new DeleteEntries(5));
-
-        sendMessageToSupport(new org.opendaylight.controller.cluster.raft.RaftActor.DeleteEntries(5));
 
         assertEquals("Journal log size", 0, context.getReplicatedLog().size());
         assertEquals("Last index", -1, context.getReplicatedLog().lastIndex());
@@ -326,12 +300,11 @@ public class RaftActorRecoverySupportTest {
 
         sendMessageToSupport(RecoveryCompleted.getInstance(), true);
 
-        verify(mockCohort).getRestoreFromSnapshot();
+        verify(mockCohort).applyRecoverySnapshot(aryEq(new byte[0]));
+        verify(mockCohort, never()).getRestoreFromSnapshot();
         verifyNoMoreInteractions(mockCohort);
 
         verify(mockPersistentProvider).deleteMessages(10L);
-        verify(mockPersistentProvider).deleteSnapshots(any(SnapshotSelectionCriteria.class));
-        verify(mockPersistentProvider).persist(updateElectionTerm(5, "member2"), any(Procedure.class));
     }
 
     static UpdateElectionTerm updateElectionTerm(final long term, final String votedFor) {
