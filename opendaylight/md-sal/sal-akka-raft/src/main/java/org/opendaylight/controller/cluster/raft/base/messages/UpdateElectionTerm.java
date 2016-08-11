@@ -12,7 +12,10 @@ import java.io.Serializable;
 
 /**
  * Message class to persist election term information.
+ *
+ * @deprecated Use {@link org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm} instead.
  */
+@Deprecated
 public class UpdateElectionTerm implements Serializable {
     private static final long serialVersionUID = 1L;
 
@@ -30,6 +33,11 @@ public class UpdateElectionTerm implements Serializable {
 
     public String getVotedFor() {
         return votedFor;
+    }
+
+    private Object readResolve() {
+        return org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm.createMigrated(
+                currentTerm, votedFor);
     }
 
     @Override

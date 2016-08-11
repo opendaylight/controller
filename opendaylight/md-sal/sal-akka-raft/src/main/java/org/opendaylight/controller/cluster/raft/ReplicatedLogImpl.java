@@ -11,7 +11,7 @@ import akka.japi.Procedure;
 import com.google.common.base.Preconditions;
 import java.util.Collections;
 import java.util.List;
-import org.opendaylight.controller.cluster.raft.base.messages.DeleteEntries;
+import org.opendaylight.controller.cluster.raft.persisted.DeleteEntries;
 
 /**
  * Implementation of ReplicatedLog used by the RaftActor.

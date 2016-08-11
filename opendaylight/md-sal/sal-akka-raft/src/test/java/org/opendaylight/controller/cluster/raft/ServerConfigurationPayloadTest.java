@@ -8,32 +8,31 @@
 package org.opendaylight.controller.cluster.raft;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import com.google.common.collect.ImmutableSet;
 import java.util.Arrays;
 import org.apache.commons.lang.SerializationUtils;
 import org.junit.Test;
-import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload;
-import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
 
 /**
  * Unit tests for ServerConfigurationPayload.
  *
  * @author Thomas Pantelis
  */
+@Deprecated
 public class ServerConfigurationPayloadTest {
 
     @Test
     public void testSerialization() {
-        ServerConfigurationPayload expected = new ServerConfigurationPayload(Arrays.asList(new ServerInfo("1", true),
-                new ServerInfo("2", false)));
-        ServerConfigurationPayload cloned = (ServerConfigurationPayload) SerializationUtils.clone(expected);
+        ServerConfigurationPayload expected = new ServerConfigurationPayload(Arrays.asList(
+                new ServerConfigurationPayload.ServerInfo("1", true),
+                new ServerConfigurationPayload.ServerInfo("2", false)));
+        org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload cloned =
+                (org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload) SerializationUtils.clone(expected);
 
-        assertEquals("getServerConfig", expected.getServerConfig(), cloned.getServerConfig());
-    }
-
-    @Test
-    public void testSize() {
-        ServerConfigurationPayload expected = new ServerConfigurationPayload(Arrays.asList(new ServerInfo("1", true)));
-        assertTrue(expected.size() > 0);
+        assertEquals("getServerConfig", ImmutableSet.of(
+                new org.opendaylight.controller.cluster.raft.persisted.ServerInfo("1", true),
+                new org.opendaylight.controller.cluster.raft.persisted.ServerInfo("2", false)),
+                ImmutableSet.copyOf(cloned.getServerConfig()));
+        assertEquals("isMigrated", true, cloned.isMigrated());
     }
 }

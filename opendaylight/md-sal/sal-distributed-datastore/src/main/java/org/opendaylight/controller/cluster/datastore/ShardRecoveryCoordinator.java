@@ -14,8 +14,8 @@ import java.io.IOException;
 import java.util.Map.Entry;
 import java.util.Optional;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
-import org.opendaylight.controller.cluster.datastore.persisted.ShardDataTreeSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.DataTreeCandidateSupplier;
+import org.opendaylight.controller.cluster.datastore.persisted.ShardDataTreeSnapshot;
 import org.opendaylight.controller.cluster.datastore.utils.DataTreeModificationOutput;
 import org.opendaylight.controller.cluster.datastore.utils.NormalizedNodeXMLOutput;
 import org.opendaylight.controller.cluster.datastore.utils.PruningDataTreeModification;
@@ -76,7 +76,7 @@ class ShardRecoveryCoordinator implements RaftActorRecoveryCohort {
                     // FIXME: BUG-5280: propagate transaction state
                 }
             } else {
-                log.error("{}: Unknown payload {} received during recovery", shardName, payload);
+                log.debug("{}: Unknown payload {} received during recovery", shardName, payload);
             }
         } catch (IOException e) {
             log.error("{}: Error extracting payload", shardName, e);
