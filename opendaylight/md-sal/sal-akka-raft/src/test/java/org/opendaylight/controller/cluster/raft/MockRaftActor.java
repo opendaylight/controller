@@ -52,7 +52,9 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
         state = new ArrayList<>();
         this.actorDelegate = mock(RaftActor.class);
         this.recoveryCohortDelegate = mock(RaftActorRecoveryCohort.class);
-        this.snapshotCohortDelegate = mock(RaftActorSnapshotCohort.class);
+
+        this.snapshotCohortDelegate = builder.snapshotCohort != null ? builder.snapshotCohort :
+            mock(RaftActorSnapshotCohort.class);
 
         if(builder.dataPersistenceProvider == null){
             setPersistence(builder.persistent.isPresent() ? builder.persistent.get() : true);
@@ -284,6 +286,7 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
         private Optional<Boolean> persistent = Optional.absent();
         private final Class<A> actorClass;
         private Function<Runnable, Void> pauseLeaderFunction;
+        private RaftActorSnapshotCohort snapshotCohort;
 
         protected AbstractBuilder(Class<A> actorClass) {
             this.actorClass = actorClass;
@@ -336,6 +339,11 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
 
         public T pauseLeaderFunction(Function<Runnable, Void> pauseLeaderFunction) {
             this.pauseLeaderFunction = pauseLeaderFunction;
+            return self();
+        }
+
+        public T snapshotCohort(RaftActorSnapshotCohort snapshotCohort) {
+            this.snapshotCohort = snapshotCohort;
             return self();
         }
 
