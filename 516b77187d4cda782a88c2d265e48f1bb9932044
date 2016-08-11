@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a6b29fe_9455871f",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/mdsal/MdsalDOMDataBroker.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-08-11T11:38:37Z",
+      "side": 1,
+      "message": "How about if we call this ShardedDOMDataBrokerAdapter or LegacyShardedDOMDataBrokerAdapter?",
+      "revId": "516b77187d4cda782a88c2d265e48f1bb9932044",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_f4315b0c",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/mdsal/MdsalDOMDataBroker.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-08-11T11:38:37Z",
+      "side": 1,
+      "message": "This can reference just org.opendaylight.mdsal.dom.api.DOMDataBroker",
+      "revId": "516b77187d4cda782a88c2d265e48f1bb9932044",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_d436df02",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/mdsal/MdsalDOMDataBroker.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-08-11T11:38:37Z",
+      "side": 1,
+      "message": "Why isn\u0027t this supported?",
+      "revId": "516b77187d4cda782a88c2d265e48f1bb9932044",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
