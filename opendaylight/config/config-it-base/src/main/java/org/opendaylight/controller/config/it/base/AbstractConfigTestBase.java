@@ -9,6 +9,7 @@
 package org.opendaylight.controller.config.it.base;
 
 import static org.ops4j.pax.exam.CoreOptions.maven;
+import static org.ops4j.pax.exam.CoreOptions.systemTimeout;
 import static org.ops4j.pax.exam.CoreOptions.when;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.features;
@@ -41,6 +42,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public abstract class AbstractConfigTestBase {
+
     private static final String MAVEN_REPO_LOCAL = "maven.repo.local";
     private static final String ORG_OPS4J_PAX_URL_MVN_LOCAL_REPOSITORY = "org.ops4j.pax.url.mvn.localRepository";
     private static final String ETC_ORG_OPS4J_PAX_URL_MVN_CFG = "etc/org.ops4j.pax.url.mvn.cfg";
@@ -69,12 +71,12 @@ public abstract class AbstractConfigTestBase {
     private static final String KARAF_DISTRO_GROUPID_PROP = "karaf.distro.groupId";
 
     /**
-     * Property file used to store the Karaf distribution version
+     * Property file used to store the Karaf distribution version.
      */
     private static final String PROPERTIES_FILENAME = "abstractconfigtestbase.properties";
 
-    /*
-     * Wait up to 10s for our configured module to come up
+    /**
+     * Wait up to 10s for our configured module to come up.
      */
     private static final int MODULE_TIMEOUT_MILLIS = 60000;
 
@@ -110,7 +112,7 @@ public abstract class AbstractConfigTestBase {
     }
 
     /**
-     * Override this method to provide more options to config
+     * Override this method to provide more options to config.
      *
      * @return An array of additional config options
      */
@@ -166,7 +168,9 @@ public abstract class AbstractConfigTestBase {
                 features(getFeatureRepo(), getFeatureName()),
                 getLoggingOption(),
                 mvnLocalRepoOption(),
-                editConfigurationFilePut(ETC_ORG_OPS4J_PAX_LOGGING_CFG, "log4j.rootLogger", "INFO, stdout, osgi:*")};
+                editConfigurationFilePut(ETC_ORG_OPS4J_PAX_LOGGING_CFG, "log4j.rootLogger", "INFO, stdout, osgi:*"),
+                systemTimeout(1000)
+        };
         return OptionUtils.combine(options, getAdditionalOptions());
     }
 
@@ -174,7 +178,7 @@ public abstract class AbstractConfigTestBase {
     public void setup() throws Exception {
         String moduleName = getModuleName();
         String instanceName = getInstanceName();
-        if(moduleName == null || instanceName == null) {
+        if (moduleName == null || instanceName == null) {
             return;
         }
 
@@ -182,7 +186,7 @@ public abstract class AbstractConfigTestBase {
                 moduleName, instanceName);
         Stopwatch stopWatch = Stopwatch.createStarted();
         ObjectName objectName = null;
-        for(int i = 0;i<MODULE_TIMEOUT_MILLIS;i++) {
+        for (int i = 0; i < MODULE_TIMEOUT_MILLIS; i++) {
             try {
                 ConfigRegistry configRegistryClient = new ConfigRegistryJMXClient(ManagementFactory
                         .getPlatformMBeanServer());
@@ -191,7 +195,7 @@ public abstract class AbstractConfigTestBase {
                         moduleName,instanceName,objectName);
                 break;
             } catch (Exception e) {
-                if(i<MODULE_TIMEOUT_MILLIS) {
+                if (i < MODULE_TIMEOUT_MILLIS) {
                     Thread.sleep(1);
                     continue;
                 } else {
@@ -199,13 +203,13 @@ public abstract class AbstractConfigTestBase {
                 }
             }
         }
-        if(objectName != null) {
+        if (objectName != null) {
             LOG.info("Module: {} Instance: {} configured after {} ms",
                 moduleName,instanceName,
                 stopWatch.elapsed(TimeUnit.MILLISECONDS));
         } else {
-            throw new RuntimeException("NOT FOUND Module: " +moduleName + " Instance: " + instanceName +
-                    " configured after " + stopWatch.elapsed(TimeUnit.MILLISECONDS) + " ms");
+            throw new RuntimeException("NOT FOUND Module: " + moduleName + " Instance: " + instanceName
+                    + " configured after " + stopWatch.elapsed(TimeUnit.MILLISECONDS) + " ms");
         }
     }
 
