@@ -16,16 +16,17 @@ import org.junit.Test;
  *
  * @author Thomas Pantelis
  */
+@Deprecated
 public class UpdateElectionTermTest {
 
     @Test
     public void testSerialization() {
-
-        UpdateElectionTerm deleteEntries = new UpdateElectionTerm(5, "member1");
-
-        UpdateElectionTerm clone = (UpdateElectionTerm) SerializationUtils.clone(deleteEntries);
+        UpdateElectionTerm expected = new UpdateElectionTerm(5, "member1");
+        org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm clone =
+                (org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm) SerializationUtils.clone(expected);
 
         Assert.assertEquals("getCurrentTerm", 5, clone.getCurrentTerm());
         Assert.assertEquals("getVotedFor", "member1", clone.getVotedFor());
+        Assert.assertEquals("isMigrated", true, clone.isMigrated());
     }
 }

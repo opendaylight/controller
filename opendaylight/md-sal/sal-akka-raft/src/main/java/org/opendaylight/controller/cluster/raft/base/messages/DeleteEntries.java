@@ -13,7 +13,10 @@ import java.io.Serializable;
  * Internal message that is stored in the akka's persistent journal to delete journal entries.
  *
  * @author Thomas Pantelis
+ *
+ * @deprecated Use {@link org.opendaylight.controller.cluster.raft.persisted.DeleteEntries} instead.
  */
+@Deprecated
 public class DeleteEntries implements Serializable {
     private static final long serialVersionUID = 1L;
 
@@ -25,6 +28,10 @@ public class DeleteEntries implements Serializable {
 
     public long getFromIndex() {
         return fromIndex;
+    }
+
+    private Object readResolve() {
+        return org.opendaylight.controller.cluster.raft.persisted.DeleteEntries.createMigrated(fromIndex);
     }
 
     @Override
