@@ -22,6 +22,30 @@
       "revId": "66c2bb710b3eca4731958cc7bf25f104fd214c2d",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_41bfacfb",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2016-08-11T13:51:06Z",
+      "side": 1,
+      "message": "How about the fact that the move from old JUnit v3 to JUnit v4 at the time intentionally abandoned the old TestCase parent class, and introduced @Rule and @RunWith just because of exactly this design principle? ;-)  \n\nIn practical terms, what people don\u0027t like about test parent classes is that you can have only 1 of them - it makes it hard to mix things.\n\nSome more general articles I found just by Googling for you: \n\n* https://en.wikipedia.org/wiki/Composition_over_inheritance\n\n* https://www.thoughtworks.com/insights/blog/composition-vs-inheritance-how-choose\n\n* http://c2.com/cgi/wiki?CompositionInsteadOfInheritance\n\n* https://javarevisited.blogspot.com/2013/06/why-favor-composition-over-inheritance-java-oops-design.html\n\n* http://programmers.stackexchange.com/questions/134097/why-should-i-prefer-composition-over-inheritance\n\n* https://www.petrikainulainen.net/programming/unit-testing/3-reasons-why-we-should-not-use-inheritance-in-our-tests/\n\nHTH.",
+      "parentUuid": "7a6b29fe_f4603b37",
+      "range": {
+        "startLine": 13,
+        "startChar": 0,
+        "endLine": 14,
+        "endChar": 12
+      },
+      "revId": "66c2bb710b3eca4731958cc7bf25f104fd214c2d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
