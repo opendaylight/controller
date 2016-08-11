@@ -80,7 +80,7 @@
         <feature version='[2.4.1,2.5.0)'>odl-akka-clustering</feature>
         <bundle>mvn:org.opendaylight.controller/sal-clustering-commons/{{VERSION}}</bundle>
         <bundle>mvn:org.opendaylight.controller/sal-akka-raft/{{VERSION}}</bundle>
-        <bundle>mvn:com.codahale.metrics/metrics-core/3.0.1</bundle>
+        <bundle>mvn:io.dropwizard.metrics/metrics-core/{{VERSION}}</bundle>
     </feature>
     <feature name ='odl-mdsal-distributed-datastore' version='${project.version}'>
         <feature version='${project.version}'>odl-mdsal-broker-local</feature>
