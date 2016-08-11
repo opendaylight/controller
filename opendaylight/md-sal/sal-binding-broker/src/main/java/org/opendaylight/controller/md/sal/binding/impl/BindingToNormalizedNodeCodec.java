@@ -59,7 +59,7 @@ import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class BindingToNormalizedNodeCodec implements BindingCodecTreeFactory, BindingNormalizedNodeSerializer, SchemaContextListener, AutoCloseable {
+public class BindingToNormalizedNodeCodec implements BindingCodecTreeFactory, BindingNormalizedNodeSerializer, SchemaContextListener, AutoCloseable {
 
     private static final long WAIT_DURATION_SEC = 5;
     private static final Logger LOG = LoggerFactory.getLogger(BindingToNormalizedNodeCodec.class);
@@ -356,7 +356,7 @@ public final class BindingToNormalizedNodeCodec implements BindingCodecTreeFacto
          * return non-null value.
          */
         final BindingCodecTreeNode<?> codecContext = currentCodecTree.getSubtreeCodec(bindingPath);
-        return new SimpleEntry<InstanceIdentifier<?>, BindingCodecTreeNode<?>>(bindingPath, codecContext);
+        return new SimpleEntry<>(bindingPath, codecContext);
     }
 
     @SuppressWarnings("unchecked")
