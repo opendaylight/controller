@@ -16,7 +16,10 @@ import java.io.Serializable;
  * behavior to the RaftActor to persist.
  *
  * @author Thomas Pantelis
+ *
+ * @deprecated Use {@link org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries} instead.
  */
+@Deprecated
 public class ApplyJournalEntries implements Serializable {
     private static final long serialVersionUID = 1L;
 
@@ -28,6 +31,10 @@ public class ApplyJournalEntries implements Serializable {
 
     public long getToIndex() {
         return toIndex;
+    }
+
+    private Object readResolve() {
+        return org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries.createMigrated(toIndex);
     }
 
     @Override

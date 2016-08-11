@@ -272,7 +272,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         } else if (payload instanceof DataTreeCandidatePayload) {
             applyRecoveryCandidate(((DataTreeCandidatePayload) payload).getCandidate());
         } else {
-            LOG.warn("{}: ignoring unhandled payload {}", logContext, payload);
+            LOG.debug("{}: ignoring unhandled payload {}", logContext, payload);
         }
     }
 
