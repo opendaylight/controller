@@ -9,17 +9,18 @@ package org.opendaylight.controller.cluster.raft;
 
 import akka.persistence.RecoveryCompleted;
 import akka.persistence.SnapshotOffer;
-import akka.persistence.SnapshotSelectionCriteria;
 import com.google.common.base.Stopwatch;
 import java.io.ByteArrayInputStream;
 import java.io.ObjectInputStream;
-import org.opendaylight.controller.cluster.DataPersistenceProvider;
+import java.util.Collections;
 import org.opendaylight.controller.cluster.PersistentDataProvider;
-import org.opendaylight.controller.cluster.raft.base.messages.ApplyJournalEntries;
+import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
-import org.opendaylight.controller.cluster.raft.base.messages.DeleteEntries;
-import org.opendaylight.controller.cluster.raft.base.messages.UpdateElectionTerm;
+import org.opendaylight.controller.cluster.raft.persisted.DeleteEntries;
+import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
+import org.opendaylight.controller.cluster.raft.persisted.MigratedSerializable;
 import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload;
+import org.opendaylight.controller.cluster.raft.protobuff.client.messages.PersistentPayload;
 import org.slf4j.Logger;
 
 /**
@@ -34,6 +35,7 @@ class RaftActorRecoverySupport {
     private int currentRecoveryBatchCount;
     private boolean dataRecoveredWithPersistenceDisabled;
     private boolean anyDataRecovered;
+    private boolean hasMigratedDataRecovered;
 
     private Stopwatch recoveryTimer;
     private final Logger log;
@@ -50,66 +52,24 @@ class RaftActorRecoverySupport {
         anyDataRecovered = anyDataRecovered || !(message instanceof RecoveryCompleted);
 
         boolean recoveryComplete = false;
-        DataPersistenceProvider persistence = context.getPersistenceProvider();
-        if (message instanceof org.opendaylight.controller.cluster.raft.RaftActor.UpdateElectionTerm) {
-            // Handle this message for backwards compatibility with pre-Lithium versions.
-            org.opendaylight.controller.cluster.raft.RaftActor.UpdateElectionTerm update =
-                    (org.opendaylight.controller.cluster.raft.RaftActor.UpdateElectionTerm)message;
-            context.getTermInformation().update(update.getCurrentTerm(), update.getVotedFor());
-        } else if (message instanceof UpdateElectionTerm) {
+        if (message instanceof UpdateElectionTerm) {
             context.getTermInformation().update(((UpdateElectionTerm) message).getCurrentTerm(),
                     ((UpdateElectionTerm) message).getVotedFor());
-        } else if(persistence.isRecoveryApplicable()) {
-            if (message instanceof SnapshotOffer) {
-                onRecoveredSnapshot((SnapshotOffer) message);
-            } else if (message instanceof ReplicatedLogEntry) {
-                onRecoveredJournalLogEntry((ReplicatedLogEntry) message);
-            } else if (message instanceof ApplyJournalEntries) {
-                onRecoveredApplyLogEntries(((ApplyJournalEntries) message).getToIndex());
-            } else if (message instanceof DeleteEntries) {
-                replicatedLog().removeFrom(((DeleteEntries) message).getFromIndex());
-            } else if (message instanceof org.opendaylight.controller.cluster.raft.RaftActor.DeleteEntries) {
-                // Handle this message for backwards compatibility with pre-Lithium versions.
-                replicatedLog().removeFrom(((org.opendaylight.controller.cluster.raft.RaftActor.DeleteEntries) message).getFromIndex());
-            } else if (message instanceof RecoveryCompleted) {
-                onRecoveryCompletedMessage();
-                possiblyRestoreFromSnapshot();
-                recoveryComplete = true;
-            }
+        } else if (message instanceof SnapshotOffer) {
+            onRecoveredSnapshot((SnapshotOffer) message);
+        } else if (message instanceof ReplicatedLogEntry) {
+            onRecoveredJournalLogEntry((ReplicatedLogEntry) message);
+        } else if (message instanceof ApplyJournalEntries) {
+            onRecoveredApplyLogEntries(((ApplyJournalEntries) message).getToIndex());
+        } else if (message instanceof DeleteEntries) {
+            replicatedLog().removeFrom(((DeleteEntries) message).getFromIndex());
         } else if (message instanceof RecoveryCompleted) {
             recoveryComplete = true;
+            onRecoveryCompletedMessage(persistentProvider);
+        }
 
-            if(dataRecoveredWithPersistenceDisabled) {
-                // Data persistence is disabled but we recovered some data entries so we must have just
-                // transitioned to disabled or a persistence backup was restored. Either way, delete all the
-                // messages from the akka journal for efficiency and so that we do not end up with consistency
-                // issues in case persistence is -re-enabled.
-                persistentProvider.deleteMessages(persistentProvider.getLastSequenceNumber());
-
-                // Delete all the akka snapshots as they will not be needed
-                persistentProvider.deleteSnapshots(new SnapshotSelectionCriteria(scala.Long.MaxValue(),
-                        scala.Long.MaxValue(), 0L, 0L));
-
-                // Since we cleaned out the journal, we need to re-write the current election info.
-                context.getTermInformation().updateAndPersist(context.getTermInformation().getCurrentTerm(),
-                        context.getTermInformation().getVotedFor());
-            }
-
-            onRecoveryCompletedMessage();
-            possiblyRestoreFromSnapshot();
-        } else {
-            boolean isServerConfigPayload = false;
-            if(message instanceof ReplicatedLogEntry){
-                ReplicatedLogEntry repLogEntry = (ReplicatedLogEntry)message;
-                if(isServerConfigurationPayload(repLogEntry)){
-                    isServerConfigPayload = true;
-                    context.updatePeerIds((ServerConfigurationPayload)repLogEntry.getData());
-                }
-            }
-
-            if(!isServerConfigPayload){
-                dataRecoveredWithPersistenceDisabled = true;
-            }
+        if(isMigratedSerializable(message)) {
+            hasMigratedDataRecovered = true;
         }
 
         return recoveryComplete;
@@ -157,6 +117,13 @@ class RaftActorRecoverySupport {
 
         Snapshot snapshot = (Snapshot) offer.snapshot();
 
+        if(!context.getPersistenceProvider().isRecoveryApplicable()) {
+            // We may have just transitioned to disabled and have a snapshot containing state data and/or log
+            // entries - we don;t want to preserve these, only the server config and election term info.
+            snapshot = Snapshot.create(new byte[0], Collections.emptyList(), -1, -1, -1, -1,
+                    snapshot.getElectionTerm(), snapshot.getElectionVotedFor(), snapshot.getServerConfiguration());
+        }
+
         // Create a replicated log with the snapshot information
         // The replicated log can be used later on to retrieve this snapshot
         // when we need to install it on a peer
@@ -190,10 +157,23 @@ class RaftActorRecoverySupport {
         if(isServerConfigurationPayload(logEntry)){
             context.updatePeerIds((ServerConfigurationPayload)logEntry.getData());
         }
-        replicatedLog().append(logEntry);
+
+        if(isMigratedPayload(logEntry)) {
+            hasMigratedDataRecovered = true;
+        }
+
+        if(context.getPersistenceProvider().isRecoveryApplicable()) {
+            replicatedLog().append(logEntry);
+        } else if(!isPersistentPayload(logEntry)) {
+            dataRecoveredWithPersistenceDisabled = true;
+        }
     }
 
     private void onRecoveredApplyLogEntries(long toIndex) {
+        if(!context.getPersistenceProvider().isRecoveryApplicable()) {
+            return;
+        }
+
         long lastUnappliedIndex = context.getLastApplied() + 1;
 
         if(log.isDebugEnabled()) {
@@ -242,7 +222,7 @@ class RaftActorRecoverySupport {
         currentRecoveryBatchCount = 0;
     }
 
-    private void onRecoveryCompletedMessage() {
+    private void onRecoveryCompletedMessage(PersistentDataProvider persistentProvider) {
         if(currentRecoveryBatchCount > 0) {
             endCurrentLogRecoveryBatch();
         }
@@ -259,9 +239,48 @@ class RaftActorRecoverySupport {
                  " Last index in log = {}, snapshotIndex = {}, snapshotTerm = {}, " +
                  "journal-size = {}", replicatedLog().lastIndex(), replicatedLog().getSnapshotIndex(),
                  replicatedLog().getSnapshotTerm(), replicatedLog().size());
+
+        if(dataRecoveredWithPersistenceDisabled ||
+                (hasMigratedDataRecovered && !context.getPersistenceProvider().isRecoveryApplicable())) {
+            if(hasMigratedDataRecovered) {
+                log.info("{}: Saving snapshot after recovery due to migrated messages", context.getId());
+            } else {
+                log.info("{}: Saving snapshot after recovery due to data persistence disabled", context.getId());
+            }
+
+            // If data persistence is disabled but we recovered some data entries so we must have just
+            // transitioned to disabled or a persistence backup was restored. Either way, delete all the
+            // messages from the akka journal for efficiency and so that we do not end up with consistency
+            // issues in case persistence is -re-enabled. In addition, save a snapshot with the raft info.
+            persistentProvider.deleteMessages(persistentProvider.getLastSequenceNumber());
+
+            Snapshot snapshot = Snapshot.create(new byte[0], Collections.<ReplicatedLogEntry>emptyList(), -1, -1, -1, -1,
+                    context.getTermInformation().getCurrentTerm(), context.getTermInformation().getVotedFor(),
+                    context.getPeerServerInfo(true));
+
+            persistentProvider.saveSnapshot(snapshot);
+        } else if(hasMigratedDataRecovered) {
+            log.info("{}: Snapshot capture initiated after recovery due to migrated messages", context.getId());
+
+            context.getSnapshotManager().capture(replicatedLog().last(), -1);
+        } else {
+            possiblyRestoreFromSnapshot();
+        }
     }
 
     private static boolean isServerConfigurationPayload(ReplicatedLogEntry repLogEntry){
-        return (repLogEntry.getData() instanceof ServerConfigurationPayload);
+        return repLogEntry.getData() instanceof ServerConfigurationPayload;
+    }
+
+    private static boolean isPersistentPayload(ReplicatedLogEntry repLogEntry){
+        return repLogEntry.getData() instanceof PersistentPayload;
+    }
+
+    private static boolean isMigratedPayload(ReplicatedLogEntry repLogEntry){
+        return isMigratedSerializable(repLogEntry.getData());
+    }
+
+    private static boolean isMigratedSerializable(Object message){
+        return message instanceof MigratedSerializable && ((MigratedSerializable)message).isMigrated();
     }
 }

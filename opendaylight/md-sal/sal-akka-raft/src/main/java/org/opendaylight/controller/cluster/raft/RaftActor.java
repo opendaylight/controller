@@ -34,7 +34,7 @@ import org.opendaylight.controller.cluster.PersistentDataProvider;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedPersistentActor;
 import org.opendaylight.controller.cluster.notifications.LeaderStateChanged;
 import org.opendaylight.controller.cluster.notifications.RoleChanged;
-import org.opendaylight.controller.cluster.raft.base.messages.ApplyJournalEntries;
+import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.InitiateCaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.LeaderTransitioning;
@@ -839,7 +839,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     }
 
     /**
-     * @deprecated Deprecated in favor of {@link org.opendaylight.controller.cluster.raft.base.messages.DeleteEntries}
+     * @deprecated Deprecated in favor of {@link org.opendaylight.controller.cluster.raft.persisted.DeleteEntries}
      *             whose type for fromIndex is long instead of int. This class was kept for backwards
      *             compatibility with Helium.
      */
@@ -856,10 +856,14 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         public int getFromIndex() {
             return fromIndex;
         }
+
+        private Object readResolve() {
+            return org.opendaylight.controller.cluster.raft.persisted.DeleteEntries.createMigrated(fromIndex);
+        }
     }
 
     /**
-     * @deprecated Deprecated in favor of non-inner class {@link org.opendaylight.controller.cluster.raft.base.messages.UpdateElectionTerm}
+     * @deprecated Deprecated in favor of non-inner class {@link org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm}
      *             which has serialVersionUID set. This class was kept for backwards compatibility with Helium.
      */
     // Suppressing this warning as we can't set serialVersionUID to maintain backwards compatibility.
@@ -880,6 +884,11 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
         public String getVotedFor() {
             return votedFor;
+        }
+
+        private Object readResolve() {
+            return org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm.createMigrated(
+                    currentTerm, votedFor);
         }
     }
 

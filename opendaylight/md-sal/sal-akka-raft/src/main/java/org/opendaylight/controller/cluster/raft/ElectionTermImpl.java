@@ -8,7 +8,7 @@
 package org.opendaylight.controller.cluster.raft;
 
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
-import org.opendaylight.controller.cluster.raft.base.messages.UpdateElectionTerm;
+import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.slf4j.Logger;
 
 /**
