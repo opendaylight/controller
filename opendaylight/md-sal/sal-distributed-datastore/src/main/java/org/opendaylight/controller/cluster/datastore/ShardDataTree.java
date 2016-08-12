@@ -18,6 +18,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
 import com.google.common.primitives.UnsignedLong;
+import java.io.File;
 import java.io.IOException;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayDeque;
@@ -42,6 +43,7 @@ import org.opendaylight.controller.cluster.datastore.persisted.CommitTransaction
 import org.opendaylight.controller.cluster.datastore.persisted.MetadataShardDataTreeSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.ShardDataTreeSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.ShardDataTreeSnapshotMetadata;
+import org.opendaylight.controller.cluster.datastore.utils.DataTreeModificationOutput;
 import org.opendaylight.controller.cluster.datastore.utils.PruningDataTreeModification;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
@@ -160,7 +162,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
                 ImmutableMap.builder();
 
         for (ShardDataTreeMetadata<?> m : metadata) {
-            final ShardDataTreeSnapshotMetadata<?> meta = m.toStapshot();
+            final ShardDataTreeSnapshotMetadata<?> meta = m.toSnapshot();
             if (meta != null) {
                 metaBuilder.put(meta.getType(), meta);
             }
@@ -252,8 +254,17 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         final DataTreeModification unwrapped = mod.delegate();
         LOG.trace("{}: Applying recovery modification {}", logContext, unwrapped);
 
-        dataTree.validate(unwrapped);
-        dataTree.commit(dataTree.prepare(unwrapped));
+        try {
+            dataTree.validate(unwrapped);
+            dataTree.commit(dataTree.prepare(unwrapped));
+        } catch (Exception e) {
+            File file = new File(System.getProperty("karaf.data", "."),
+                    "failed-recovery-payload-" + logContext + ".out");
+            DataTreeModificationOutput.toFile(file, unwrapped);
+            throw new IllegalStateException(String.format(
+                    "%s: Failed to apply recovery payload. Modification data was written to file %s",
+                    logContext, file), e);
+        }
     }
 
     /**
