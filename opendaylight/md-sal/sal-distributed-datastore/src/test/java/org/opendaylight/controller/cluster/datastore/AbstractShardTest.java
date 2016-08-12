@@ -324,8 +324,7 @@ public abstract class AbstractShardTest extends AbstractActorTest{
         BatchedModifications batched = newBatchedModifications(nextTransactionId(), id, node, true, true, 1);
         DataTreeModification modification = store.getDataTree().takeSnapshot().newModification();
         batched.apply(modification);
-        modification.ready();
-        store.applyForeignCandidate(batched.getTransactionID(), store.getDataTree().prepare(modification));
+        store.commit(modification);
     }
 
     public void mergeToStore(final ShardDataTree store, final YangInstanceIdentifier id,
@@ -338,8 +337,7 @@ public abstract class AbstractShardTest extends AbstractActorTest{
 
         DataTreeModification modification = store.getDataTree().takeSnapshot().newModification();
         batched.apply(modification);
-        modification.ready();
-        store.applyForeignCandidate(batched.getTransactionID(), store.getDataTree().prepare(modification));
+        store.commit(modification);
     }
 
     public static void writeToStore(final DataTree store, final YangInstanceIdentifier id,
