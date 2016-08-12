@@ -72,7 +72,7 @@ class ShardRecoveryCoordinator implements RaftActorRecoveryCohort {
 
     private File writeRoot(final String kind, final NormalizedNode<?, ?> node) {
         final File file = new File(System.getProperty("karaf.data", "."),
-            "failed-" + kind + "-snapshot-" + shardName + ".xml");
+            "failed-recovery-" + kind + "-" + shardName + ".xml");
         NormalizedNodeXMLOutput.toFile(file, node);
         return file;
     }
@@ -97,11 +97,10 @@ class ShardRecoveryCoordinator implements RaftActorRecoveryCohort {
         try {
             store.applyRecoverySnapshot(snapshot);
         } catch (Exception e) {
-            log.error("{}: failed to apply snapshot {}", shardName, snapshot, e);
-
-            final File f = writeRoot("recovery", snapshot.getRootNode().orElse(null));
+            final File f = writeRoot("snapshot", snapshot.getRootNode().orElse(null));
             throw new IllegalStateException(String.format(
-                    "%s: Failed to apply recovery snapshot. Node data was written to file %s", shardName, f), e);
+                    "%s: Failed to apply recovery snapshot %s. Node data was written to file %s",
+                    shardName, snapshot, f), e);
         }
     }
 

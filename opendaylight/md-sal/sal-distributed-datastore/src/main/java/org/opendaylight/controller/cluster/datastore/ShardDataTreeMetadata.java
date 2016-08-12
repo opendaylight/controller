@@ -27,7 +27,7 @@ abstract class ShardDataTreeMetadata<T extends ShardDataTreeSnapshotMetadata<T>>
 
     abstract @Nonnull Class<T> getSupportedType();
 
-    abstract @Nullable T toStapshot();
+    abstract @Nullable T toSnapshot();
 
     // Lifecycle events
     abstract void onTransactionCommitted(TransactionIdentifier txId);

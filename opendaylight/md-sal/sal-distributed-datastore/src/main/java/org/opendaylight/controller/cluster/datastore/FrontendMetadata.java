@@ -53,7 +53,7 @@ final class FrontendMetadata extends ShardDataTreeMetadata<FrontendShardDataTree
     }
 
     @Override
-    FrontendShardDataTreeSnapshotMetadata toStapshot() {
+    FrontendShardDataTreeSnapshotMetadata toSnapshot() {
         return new FrontendShardDataTreeSnapshotMetadata(Collections2.transform(clients.values(),
             FrontendClientMetadataBuilder::build));
     }
