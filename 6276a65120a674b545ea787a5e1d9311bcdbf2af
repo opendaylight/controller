@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a6b29fe_f884a9b2",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardDataTreeMetadata.java",
+        "patchSetId": 19
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-08-12T11:46:49Z",
+      "side": 1,
+      "message": "toStapshot (sic) -\u003e toSnapshot",
+      "revId": "6276a65120a674b545ea787a5e1d9311bcdbf2af",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_d8b72d85",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardRecoveryCoordinator.java",
+        "patchSetId": 19
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-08-12T11:46:49Z",
+      "side": 1,
+      "message": "We should write the data to a file for troubleshooting.",
+      "revId": "6276a65120a674b545ea787a5e1d9311bcdbf2af",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
