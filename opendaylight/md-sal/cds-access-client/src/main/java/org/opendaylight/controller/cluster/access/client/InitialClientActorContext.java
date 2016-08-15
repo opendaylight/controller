@@ -20,7 +20,7 @@ final class InitialClientActorContext extends AbstractClientActorContext {
     private final AbstractClientActor actor;
 
     InitialClientActorContext(final AbstractClientActor actor, final String persistenceId) {
-        super(actor.self(), persistenceId);
+        super(actor.getSelf(), persistenceId);
         this.actor = Preconditions.checkNotNull(actor);
     }
 
@@ -28,7 +28,7 @@ final class InitialClientActorContext extends AbstractClientActorContext {
         actor.saveSnapshot(snapshot);
     }
 
-    void deleteSnapshots(SnapshotSelectionCriteria criteria) {
+    void deleteSnapshots(final SnapshotSelectionCriteria criteria) {
         actor.deleteSnapshots(criteria);
     }
 
