@@ -79,6 +79,12 @@
       <scope>test</scope>
     </dependency>
     <dependency>
+      <groupId>ch.vorburger</groupId>
+      <artifactId>xtendbeans</artifactId>
+      <version>1.0.1-SNAPSHOT</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>org.opendaylight.yangtools</groupId>
       <artifactId>yang-parser-impl</artifactId>
       <scope>test</scope>
