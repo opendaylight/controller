@@ -84,11 +84,23 @@
       <scope>test</scope>
     </dependency>
     <dependency>
+      <groupId>ch.vorburger</groupId>
+      <artifactId>xtendbeans</artifactId>
+      <version>1.2.0</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>javax.inject</groupId>
+      <artifactId>javax.inject</artifactId>
+      <!-- TODO Can remove <version>1 here when https://git.opendaylight.org/gerrit/#/c/44502/ is merged -->
+      <version>1</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>org.opendaylight.yangtools</groupId>
       <artifactId>yang-parser-impl</artifactId>
       <scope>test</scope>
     </dependency>
-
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal-test-model</artifactId>
@@ -170,6 +182,10 @@
           </execution>
         </executions>
       </plugin>
+      <plugin>
+         <groupId>org.eclipse.xtend</groupId>
+         <artifactId>xtend-maven-plugin</artifactId>
+       </plugin>
     </plugins>
   </build>
   <scm>
