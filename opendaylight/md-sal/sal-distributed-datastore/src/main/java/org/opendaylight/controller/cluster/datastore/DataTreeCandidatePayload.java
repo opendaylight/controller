@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import org.opendaylight.controller.cluster.datastore.persisted.DataTreeCandidateInputOutput;
+import org.opendaylight.controller.cluster.raft.persisted.MigratedSerializable;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 
@@ -22,7 +23,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
  * @deprecated Deprecated in Boron in favor of CommitTransactionPayload
  */
 @Deprecated
-final class DataTreeCandidatePayload extends Payload implements Externalizable {
+final class DataTreeCandidatePayload extends Payload implements Externalizable, MigratedSerializable {
     private static final long serialVersionUID = 1L;
 
     private transient byte[] serialized;
@@ -74,5 +75,17 @@ final class DataTreeCandidatePayload extends Payload implements Externalizable {
         final int length = in.readInt();
         serialized = new byte[length];
         in.readFully(serialized);
+    }
+
+    @Override
+    public boolean isMigrated() {
+        return true;
+    }
+
+    @Deprecated
+    @Override
+    public Object writeReplace() {
+        // this is fine
+        return this;
     }
 }
