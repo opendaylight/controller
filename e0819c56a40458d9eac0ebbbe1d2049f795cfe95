@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a6b29fe_a2e825b5",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/test/java/org/opendaylight/controller/md/sal/binding/test/tests/AbstractDataBrokerTestTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-08-17T12:07:38Z",
+      "side": 1,
+      "message": "This is OK but is essentially redundant with DataBrokerTestModuleTest.",
+      "revId": "e0819c56a40458d9eac0ebbbe1d2049f795cfe95",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_42e151cf",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/test/java/org/opendaylight/controller/md/sal/binding/test/tests/DataBrokerTestModuleTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-08-17T12:07:38Z",
+      "side": 1,
+      "message": "So this is a unit test to test a unit test class? It\u0027s fine but not sure we need to go that far.",
+      "revId": "e0819c56a40458d9eac0ebbbe1d2049f795cfe95",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
