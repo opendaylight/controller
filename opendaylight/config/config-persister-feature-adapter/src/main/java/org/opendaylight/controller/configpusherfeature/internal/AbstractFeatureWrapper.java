@@ -10,6 +10,7 @@ package org.opendaylight.controller.configpusherfeature.internal;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.io.Files;
+import java.io.File;
 import java.util.LinkedHashSet;
 import java.util.List;
 import javax.xml.bind.JAXBException;
@@ -32,6 +33,7 @@ import org.slf4j.LoggerFactory;
 public class AbstractFeatureWrapper implements Feature {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractFeatureWrapper.class);
 
+    private static final String CONFIG_FILE_PATH_SUFFIX = "opendaylight" + File.separator + "karaf";
     protected static final String CONFIG_FILE_SUFFIX = "xml";
 
     protected Feature feature = null;
@@ -56,7 +58,7 @@ public class AbstractFeatureWrapper implements Feature {
         final LinkedHashSet <FeatureConfigSnapshotHolder> snapShotHolders = new LinkedHashSet<>();
         for(final ConfigFileInfo c: getConfigurationFiles()) {
             // Skip non xml files
-            if(Files.getFileExtension(c.getFinalname()).equals(CONFIG_FILE_SUFFIX)) {
+            if(isConfigXMLFile(c.getFinalname())) {
                 final Optional<FeatureConfigSnapshotHolder> featureConfigSnapshotHolder = getFeatureConfigSnapshotHolder(c);
                 if(featureConfigSnapshotHolder.isPresent()) {
                     snapShotHolders.add(featureConfigSnapshotHolder.get());
@@ -64,6 +66,12 @@ public class AbstractFeatureWrapper implements Feature {
             }
         }
         return snapShotHolders;
+    }
+
+    private static boolean isConfigXMLFile(String fullName) {
+        String path = new File(fullName).getPath();
+        return path.contains(CONFIG_FILE_PATH_SUFFIX) &&
+                Files.getFileExtension(fullName).equals(CONFIG_FILE_SUFFIX);
     }
 
     protected Optional<FeatureConfigSnapshotHolder> getFeatureConfigSnapshotHolder(final ConfigFileInfo c) {
@@ -86,7 +94,7 @@ public class AbstractFeatureWrapper implements Feature {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((feature == null) ? 0 : feature.hashCode());
+        result = prime * result + (feature == null ? 0 : feature.hashCode());
         return result;
     }
 
