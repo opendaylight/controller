@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a6b29fe_1d569ed2",
+        "filename": "karaf/opendaylight-karaf-empty/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 2759
+      },
+      "writtenOn": "2016-08-17T14:47:49Z",
+      "side": 0,
+      "message": "relativePath should be changed to:\n\n\u003crelativePath/\u003e",
+      "revId": "7afabf1610a04034a1c4e3da2e0af28f6644c518",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
