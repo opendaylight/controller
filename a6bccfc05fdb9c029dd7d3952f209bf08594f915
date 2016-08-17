@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a6b29fe_8536d0e5",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-08-17T21:24:29Z",
+      "side": 1,
+      "message": "Can you add some detail here?",
+      "revId": "a6bccfc05fdb9c029dd7d3952f209bf08594f915",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_a53b0cd0",
+        "filename": "opendaylight/md-sal/sal-sharded-inmemory-datastore/src/main/java/org/opendaylight/controller/md/sal/sharded/dom/data/tree/RootInMemoryShardActivator.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-08-17T21:24:29Z",
+      "side": 1,
+      "message": "Can you add class javadocs?",
+      "revId": "a6bccfc05fdb9c029dd7d3952f209bf08594f915",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
