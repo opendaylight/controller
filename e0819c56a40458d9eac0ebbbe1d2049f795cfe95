@@ -69,6 +69,24 @@
       "revId": "e0819c56a40458d9eac0ebbbe1d2049f795cfe95",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_d8a3949c",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/test/java/org/opendaylight/controller/md/sal/binding/test/tests/DataBrokerTestModuleTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-08-17T17:39:14Z",
+      "side": 1,
+      "message": "It\u0027s fine - I just found it interesting to test a test class. What about testing the test of the test class :)",
+      "parentUuid": "7a6b29fe_7d5b522e",
+      "revId": "e0819c56a40458d9eac0ebbbe1d2049f795cfe95",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
