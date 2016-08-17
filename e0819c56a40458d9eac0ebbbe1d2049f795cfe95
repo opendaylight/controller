@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "7a6b29fe_9d58ee33",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/test/java/org/opendaylight/controller/md/sal/binding/test/tests/AbstractDataBrokerTestTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2016-08-17T13:59:36Z",
+      "side": 1,
+      "message": "Not really, no; this tests the AbstractDataBrokerTest, whereas the DataBrokerTestModuleTest tests the DataBrokerTestModule.\n\nOf course the implementation of DataBrokerTestModule (currently!) just delegates to AbstractDataBrokerTest, but that is an \"implementation detail\", which the test should not  care about / be aware of.\n\nIt\u0027s a Good Thing(TM) to test test utilities also! ;)",
+      "parentUuid": "7a6b29fe_a2e825b5",
+      "revId": "e0819c56a40458d9eac0ebbbe1d2049f795cfe95",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a6b29fe_42e151cf",
         "filename": "opendaylight/md-sal/sal-binding-broker/src/test/java/org/opendaylight/controller/md/sal/binding/test/tests/DataBrokerTestModuleTest.java",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2016-08-17T12:07:38Z",
       "side": 1,
       "message": "So this is a unit test to test a unit test class? It\u0027s fine but not sure we need to go that far.",
+      "revId": "e0819c56a40458d9eac0ebbbe1d2049f795cfe95",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_7d5b522e",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/test/java/org/opendaylight/controller/md/sal/binding/test/tests/DataBrokerTestModuleTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2016-08-17T13:59:36Z",
+      "side": 1,
+      "message": "Wehl... it\u0027s a test which ensures non-regression on a test utility.  Which is useful, don\u0027t you think?  To me, this is basically the same as test of any other utility helper class. It just happens that this utility helper class is for writing tests - but that is not relevant to \"why is this tested\".  Everything should be tested. ;-)\n\nWhat I would agree with it that the test is extremely basic, just non null; not real functionality. That is intentional, because the point is more to make sure the initialisation works and doesn\u0027t throw exceptions, and (in this case) trust that if it does return a DataBroker, it is a working one.",
+      "parentUuid": "7a6b29fe_42e151cf",
       "revId": "e0819c56a40458d9eac0ebbbe1d2049f795cfe95",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
