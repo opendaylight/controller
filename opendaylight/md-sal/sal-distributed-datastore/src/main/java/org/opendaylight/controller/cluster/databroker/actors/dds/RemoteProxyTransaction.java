@@ -62,7 +62,7 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
     RemoteProxyTransaction(final DistributedDataStoreClientBehavior client,
         final TransactionIdentifier identifier) {
         super(client);
-        builder = new ModifyTransactionRequestBuilder(identifier, client.self());
+        builder = new ModifyTransactionRequestBuilder(identifier, localActor());
     }
 
     @Override
@@ -95,21 +95,21 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
 
         // Make sure we send any modifications before issuing a read
         ensureFlushedBuider();
-        client().sendRequest(request, completer);
+        sendRequest(request, completer);
         return MappingCheckedFuture.create(future, ReadFailedException.MAPPER);
     }
 
     @Override
     CheckedFuture<Boolean, ReadFailedException> doExists(final YangInstanceIdentifier path) {
         final SettableFuture<Boolean> future = SettableFuture.create();
-        return sendReadRequest(new ExistsTransactionRequest(getIdentifier(), nextSequence(), client().self(), path),
+        return sendReadRequest(new ExistsTransactionRequest(getIdentifier(), nextSequence(), localActor(), path),
             t -> completeExists(future, t), future);
     }
 
     @Override
     CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> doRead(final YangInstanceIdentifier path) {
         final SettableFuture<Optional<NormalizedNode<?, ?>>> future = SettableFuture.create();
-        return sendReadRequest(new ReadTransactionRequest(getIdentifier(), nextSequence(), client().self(), path),
+        return sendReadRequest(new ReadTransactionRequest(getIdentifier(), nextSequence(), localActor(), path),
             t -> completeRead(future, t), future);
     }
 
@@ -134,8 +134,10 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
     }
 
     private void flushBuilder() {
-        client().sendRequest(builder.build(), this::completeModify);
+        final ModifyTransactionRequest message = builder.build();
         builderBusy = false;
+
+        sendRequest(message, this::completeModify);
     }
 
     private void appendModification(final TransactionModification modification) {
