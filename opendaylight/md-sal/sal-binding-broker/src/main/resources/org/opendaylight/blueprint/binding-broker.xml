@@ -13,7 +13,7 @@
   </bean>
 
   <!-- Register the BindingToNormalizedNodeCodec with the SchemaService as a SchemaContextListener -->
-  <bean id="mappingCodecReg" class="org.opendaylight.controller.md.sal.binding.impl.BindingToNormalizedNodeCodecFactory"
+  <bean id="mappingCodecListenerReg" class="org.opendaylight.controller.md.sal.binding.impl.BindingToNormalizedNodeCodecFactory"
          factory-method="registerInstance" destroy-method="close">
     <argument ref="mappingCodec"/>
     <argument ref="schemaService"/>
@@ -30,16 +30,11 @@
 
   <!-- We also register the BindingToNormalizedNodeCodec with its actual class name for
        backwards compatibility for CSS users that inject the binding-dom-mapping-service -->
-  <service ref="mappingCodec" interface="org.opendaylight.controller.md.sal.binding.impl.BindingToNormalizedNodeCodec"
-        odl:type="default">
-    <!-- Set the appropriate service properties so the corresponding CSS module is restarted if this
-         blueprint container is restarted -->
-    <service-properties>
-      <entry key="config-module-namespace" value="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl"/>
-      <entry key="config-module-name" value="runtime-generated-mapping"/>
-      <entry key="config-instance-name" value="runtime-mapping-singleton"/>
-    </service-properties>
-  </service>
+  <bean id="mappingCodecServiceReg" class="org.opendaylight.controller.md.sal.binding.impl.BindingToNormalizedNodeCodecFactory"
+         factory-method="registerOSGiService" destroy-method="unregister">
+    <argument ref="mappingCodec"/>
+    <argument ref="blueprintBundleContext"/>
+  </bean>
 
   <!-- Binding RPC Registry Service -->
 
