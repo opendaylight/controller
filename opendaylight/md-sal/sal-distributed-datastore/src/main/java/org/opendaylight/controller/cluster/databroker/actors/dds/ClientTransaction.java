@@ -72,18 +72,16 @@ public final class ClientTransaction extends LocalAbortable implements Identifia
         Preconditions.checkState(state == OPEN_STATE, "Transaction %s is closed", transactionId);
     }
 
+    private AbstractProxyTransaction createProxy(final Long shard) {
+        return parent.createTransactionProxy(transactionId, shard);
+    }
+
     private AbstractProxyTransaction ensureProxy(final YangInstanceIdentifier path) {
         checkNotClosed();
 
         final ModuleShardBackendResolver resolver = parent.getClient().resolver();
         final Long shard = resolver.resolveShardForPath(path);
-        AbstractProxyTransaction ret = proxies.get(shard);
-        if (ret == null) {
-            ret = AbstractProxyTransaction.create(parent.getClient(), parent.getHistoryForCookie(shard),
-                transactionId.getTransactionId(), resolver.getFutureBackendInfo(shard));
-            proxies.put(shard, ret);
-        }
-        return ret;
+        return proxies.computeIfAbsent(shard, this::createProxy);
     }
 
     @Override
