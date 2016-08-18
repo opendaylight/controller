@@ -43,8 +43,8 @@ public final class ClientLocalHistory extends AbstractClientHistory implements A
         Preconditions.checkState(local == State.IDLE, "Local history %s state is %s", this, local);
         updateState(local, State.TX_OPEN);
 
-        return new ClientTransaction(getClient(), this,
-            new TransactionIdentifier(getIdentifier(), NEXT_TX_UPDATER.getAndIncrement(this)));
+        return new ClientTransaction(this, new TransactionIdentifier(getIdentifier(),
+            NEXT_TX_UPDATER.getAndIncrement(this)));
     }
 
     @Override
