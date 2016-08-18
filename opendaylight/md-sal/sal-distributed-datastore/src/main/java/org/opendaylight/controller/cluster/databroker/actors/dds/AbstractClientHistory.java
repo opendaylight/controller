@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
+import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.yangtools.concepts.Identifiable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,7 +55,7 @@ abstract class AbstractClientHistory extends LocalAbortable implements Identifia
         Preconditions.checkState(success, "Race condition detected, state changed from %s to %s", expected, state);
     }
 
-    final LocalHistoryIdentifier getHistoryForCookie(final Long cookie) {
+    private LocalHistoryIdentifier getHistoryForCookie(final Long cookie) {
         LocalHistoryIdentifier ret = histories.get(cookie);
         if (ret == null) {
             ret = new LocalHistoryIdentifier(identifier.getClientId(), identifier.getHistoryId(), cookie);
@@ -80,6 +81,11 @@ abstract class AbstractClientHistory extends LocalAbortable implements Identifia
     final void localAbort(final Throwable cause) {
         LOG.debug("Force-closing history {}", getIdentifier(), cause);
         state = State.CLOSED;
+    }
+
+    final AbstractProxyTransaction createTransactionProxy(final TransactionIdentifier transactionId, final Long shard) {
+        return AbstractProxyTransaction.create(client, getHistoryForCookie(shard),
+            transactionId.getTransactionId(), client.resolver().getFutureBackendInfo(shard));
     }
 
     /**
