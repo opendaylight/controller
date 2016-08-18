@@ -87,13 +87,13 @@ final class LocalProxyTransaction extends AbstractProxyTransaction {
 
     @Override
     void doAbort() {
-        client().sendRequest(new AbortLocalTransactionRequest(identifier, client().self()), ABORT_COMPLETER);
+        sendRequest(new AbortLocalTransactionRequest(identifier, localActor()), ABORT_COMPLETER);
         modification = new FailedDataTreeModification(() -> new IllegalStateException("Tracker has been aborted"));
     }
 
     @Override
     CommitLocalTransactionRequest doCommit(final boolean coordinated) {
-        final CommitLocalTransactionRequest ret = new CommitLocalTransactionRequest(identifier, client().self(),
+        final CommitLocalTransactionRequest ret = new CommitLocalTransactionRequest(identifier, localActor(),
             modification, coordinated);
         modification = new FailedDataTreeModification(() -> new IllegalStateException("Tracker has been submitted"));
         return ret;

@@ -154,7 +154,7 @@ final class DistributedDataStoreClientBehavior extends ClientActorBehavior imple
     public ClientTransaction createTransaction() {
         final TransactionIdentifier txId = new TransactionIdentifier(singleHistory.getIdentifier(),
             nextTransactionId.getAndIncrement());
-        final ClientTransaction tx = new ClientTransaction(this, singleHistory, txId);
+        final ClientTransaction tx = new ClientTransaction(singleHistory, txId);
         LOG.debug("{}: creating a new transaction {}", persistenceId(), tx);
 
         return returnIfOperational(transactions, txId, tx, aborted);
