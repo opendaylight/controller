@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a6b29fe_9c8589af",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/legacy/sharded/adapter/ShardedDOMDataBrokerDelegatingReadWriteTransaction.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-08-18T16:08:13Z",
+      "side": 1,
+      "message": "It looks like these maps are initialized once therefore they should be immutable.",
+      "revId": "db26f07846509287111e5d3169420838132cd38d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_dce1c19b",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/legacy/sharded/adapter/ShardedDOMDataBrokerDelegatingReadWriteTransaction.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-08-18T16:08:13Z",
+      "side": 1,
+      "message": "I\u0027m unclear as to your intent wrt synchronization. In general synchronized methods should be avoided. Outside of that, this method is synchronized as well as read, yet put, merge. exists are not. This seems inconsistent.\n\nHowever do we need synchronization at all? I don\u0027t think the MD-SAL transaction APIs guarantee thread safety.",
+      "revId": "db26f07846509287111e5d3169420838132cd38d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_fcabdd1a",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/legacy/sharded/adapter/ShardedDOMDataBrokerDelegatingReadWriteTransaction.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-08-18T16:08:13Z",
+      "side": 1,
+      "message": "The underlying Queue can be accessed concurrently via applyModificationHistoryToSnapshot and isn\u0027t thread-safe.",
+      "revId": "db26f07846509287111e5d3169420838132cd38d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_1c9a1914",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/legacy/sharded/adapter/ShardedDOMDataBrokerDelegatingReadWriteTransaction.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-08-18T16:08:13Z",
+      "side": 1,
+      "message": "It seems the semantics are that the user must perform a modify operation before a read can be performed. Instead of throwing an NPE with no context, it would be better to throw an IllegalStateException with a friendly message explaining this, e.g. \"A modify operation (put, merge, delete) must first be performed prior to a read operation\".",
+      "revId": "db26f07846509287111e5d3169420838132cd38d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_777ec66c",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/legacy/sharded/adapter/ShardedDOMDataBrokerDelegatingReadWriteTransaction.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 198,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-08-18T16:08:13Z",
+      "side": 1,
+      "message": "The dataTreeModification and modificationHistory aren\u0027t thread-safe - they need to be protected.",
+      "revId": "db26f07846509287111e5d3169420838132cd38d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_bc5fa540",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/legacy/sharded/adapter/ShardedDOMDataBrokerDelegatingReadWriteTransaction.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 199,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-08-18T16:08:13Z",
+      "side": 1,
+      "message": "Should do !modificationHistory.isEmpty()",
+      "revId": "db26f07846509287111e5d3169420838132cd38d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
