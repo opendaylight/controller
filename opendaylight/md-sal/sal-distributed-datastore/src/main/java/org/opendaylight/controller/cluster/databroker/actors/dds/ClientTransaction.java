@@ -62,8 +62,7 @@ public final class ClientTransaction extends LocalAbortable implements Identifia
 
     private volatile int state = OPEN_STATE;
 
-    ClientTransaction(final DistributedDataStoreClientBehavior client, final AbstractClientHistory parent,
-        final TransactionIdentifier transactionId) {
+    ClientTransaction(final AbstractClientHistory parent, final TransactionIdentifier transactionId) {
         this.transactionId = Preconditions.checkNotNull(transactionId);
         this.parent = Preconditions.checkNotNull(parent);
     }
