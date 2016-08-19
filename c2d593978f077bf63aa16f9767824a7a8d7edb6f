@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a6b29fe_027bcbf5",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/DataStoreAppConfigMetadata.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-08-19T11:39:10Z",
+      "side": 1,
+      "message": "Should be primitive boolean.",
+      "revId": "c2d593978f077bf63aa16f9767824a7a8d7edb6f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_a21c97c2",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/DataStoreAppConfigMetadata.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-08-19T11:39:10Z",
+      "side": 1,
+      "message": "I think the parsing should be done in OpendaylightNamespaceHandler. You could pass a boolean into this class or, better yet, create a corresponding Java enum for UpdateStrategy.",
+      "revId": "c2d593978f077bf63aa16f9767824a7a8d7edb6f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_c221d3fc",
+        "filename": "opendaylight/blueprint/src/main/resources/opendaylight-blueprint-ext-1.0.0.xsd",
+        "patchSetId": 1
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-08-19T11:39:10Z",
+      "side": 1,
+      "message": "I would just call this TupdateStrategyType in case we reuse it elsewhere.",
+      "revId": "c2d593978f077bf63aa16f9767824a7a8d7edb6f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
