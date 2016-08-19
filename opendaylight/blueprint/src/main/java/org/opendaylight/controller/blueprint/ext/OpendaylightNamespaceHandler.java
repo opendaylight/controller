@@ -54,6 +54,7 @@ public class OpendaylightNamespaceHandler implements NamespaceHandler {
     static final String RPC_REGISTRY_NAME = "org.opendaylight.blueprint.RpcRegistry";
     static final String NOTIFICATION_SERVICE_NAME = "org.opendaylight.blueprint.NotificationService";
     static final String TYPE_ATTR = "type";
+    static final String UPDATE_STRATEGY_ATTR = "update-strategy";
 
     private static final Logger LOG = LoggerFactory.getLogger(OpendaylightNamespaceHandler.class);
     private static final String COMPONENT_PROCESSOR_NAME = ComponentProcessor.class.getName();
@@ -350,7 +351,20 @@ public class OpendaylightNamespaceHandler implements NamespaceHandler {
         return new DataStoreAppConfigMetadata(getId(context, element), element.getAttribute(
                 DataStoreAppConfigMetadata.BINDING_CLASS), element.getAttribute(
                         DataStoreAppConfigMetadata.LIST_KEY_VALUE), element.getAttribute(
-                                DataStoreAppConfigMetadata.DEFAULT_CONFIG_FILE_NAME), defaultAppConfigElement);
+                        DataStoreAppConfigMetadata.DEFAULT_CONFIG_FILE_NAME), parseUpdateStrategy(
+                        element.getAttribute(UPDATE_STRATEGY_ATTR)), defaultAppConfigElement);
+    }
+
+    private UpdateStrategy parseUpdateStrategy(String updateStrategyValue) {
+        if (Strings.isNullOrEmpty(updateStrategyValue) ||
+                updateStrategyValue.equalsIgnoreCase(UpdateStrategy.RELOAD.name())) {
+            return UpdateStrategy.RELOAD;
+        } else if(updateStrategyValue.equalsIgnoreCase(UpdateStrategy.NONE.name())){
+            return UpdateStrategy.NONE;
+        } else {
+            LOG.warn("update-strategy {} not supported, using reload", updateStrategyValue);
+            return UpdateStrategy.RELOAD;
+        }
     }
 
     private Metadata parseSpecificReferenceList(Element element, ParserContext context) {
