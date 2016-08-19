@@ -350,7 +350,8 @@ public class OpendaylightNamespaceHandler implements NamespaceHandler {
         return new DataStoreAppConfigMetadata(getId(context, element), element.getAttribute(
                 DataStoreAppConfigMetadata.BINDING_CLASS), element.getAttribute(
                         DataStoreAppConfigMetadata.LIST_KEY_VALUE), element.getAttribute(
-                                DataStoreAppConfigMetadata.DEFAULT_CONFIG_FILE_NAME), defaultAppConfigElement);
+                        DataStoreAppConfigMetadata.DEFAULT_CONFIG_FILE_NAME), element.getAttribute(
+                        DataStoreAppConfigMetadata.UPDATE_STRATEGY), defaultAppConfigElement);
     }
 
     private Metadata parseSpecificReferenceList(Element element, ParserContext context) {

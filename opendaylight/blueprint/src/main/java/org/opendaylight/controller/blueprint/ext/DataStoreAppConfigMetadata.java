@@ -73,6 +73,8 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
     static final String DEFAULT_CONFIG = "default-config";
     static final String DEFAULT_CONFIG_FILE_NAME = "default-config-file-name";
     static final String LIST_KEY_VALUE = "list-key-value";
+    static final String UPDATE_STRATEGY = "update-strategy";
+    static final String UPDATE_STRATEGY_RELOAD = "reload";
 
     private static final String DEFAULT_APP_CONFIG_FILE_PATH = "etc" + File.separator +
             "opendaylight" + File.separator + "datastore" + File.separator + "initial" +
@@ -93,6 +95,7 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
     private final String defaultAppConfigFileName;
     private final String appConfigBindingClassName;
     private final String appConfigListKeyValue;
+    private final Boolean appConfigUpdateStrategyReload;
     private final AtomicBoolean readingInitialAppConfig = new AtomicBoolean(true);
 
     private volatile BindingContext bindingContext;
@@ -106,12 +109,18 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
 
     public DataStoreAppConfigMetadata(@Nonnull String id, @Nonnull String appConfigBindingClassName,
             @Nullable String appConfigListKeyValue, @Nullable String defaultAppConfigFileName,
-            @Nullable Element defaultAppConfigElement) {
+            @Nullable String appConfigUpdateStrategyValue, @Nullable Element defaultAppConfigElement) {
         super(id);
         this.defaultAppConfigElement = defaultAppConfigElement;
         this.defaultAppConfigFileName = defaultAppConfigFileName;
         this.appConfigBindingClassName = appConfigBindingClassName;
         this.appConfigListKeyValue = appConfigListKeyValue;
+        if (Strings.isNullOrEmpty(appConfigUpdateStrategyValue) ||
+                appConfigUpdateStrategyValue.equals(UPDATE_STRATEGY_RELOAD)) {
+            this.appConfigUpdateStrategyReload = true;
+        } else {
+            this.appConfigUpdateStrategyReload = false;
+        }
     }
 
     @Override
@@ -252,12 +261,16 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
                         !Objects.equals(currentAppConfig, newAppConfig)) {
                     LOG.debug("App config was updated - scheduling container for restart");
 
-                    restartContainer();
+                    if(appConfigUpdateStrategyReload) {
+                        restartContainer();
+                    }
                 }
             } else if(type == ModificationType.DELETE) {
                 LOG.debug("App config was deleted - scheduling container for restart");
 
-                restartContainer();
+                if(appConfigUpdateStrategyReload) {
+                    restartContainer();
+                }
             }
         }
     }
