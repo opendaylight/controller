@@ -93,6 +93,7 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
     private final String defaultAppConfigFileName;
     private final String appConfigBindingClassName;
     private final String appConfigListKeyValue;
+    private final UpdateStrategy appConfigUpdateStrategy;
     private final AtomicBoolean readingInitialAppConfig = new AtomicBoolean(true);
 
     private volatile BindingContext bindingContext;
@@ -106,12 +107,13 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
 
     public DataStoreAppConfigMetadata(@Nonnull String id, @Nonnull String appConfigBindingClassName,
             @Nullable String appConfigListKeyValue, @Nullable String defaultAppConfigFileName,
-            @Nullable Element defaultAppConfigElement) {
+            @Nonnull UpdateStrategy updateStrategyValue, @Nullable Element defaultAppConfigElement) {
         super(id);
         this.defaultAppConfigElement = defaultAppConfigElement;
         this.defaultAppConfigFileName = defaultAppConfigFileName;
         this.appConfigBindingClassName = appConfigBindingClassName;
         this.appConfigListKeyValue = appConfigListKeyValue;
+        this.appConfigUpdateStrategy = updateStrategyValue;
     }
 
     @Override
@@ -252,12 +254,16 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
                         !Objects.equals(currentAppConfig, newAppConfig)) {
                     LOG.debug("App config was updated - scheduling container for restart");
 
-                    restartContainer();
+                    if(appConfigUpdateStrategy == UpdateStrategy.RELOAD) {
+                        restartContainer();
+                    }
                 }
             } else if(type == ModificationType.DELETE) {
                 LOG.debug("App config was deleted - scheduling container for restart");
 
-                restartContainer();
+                if(appConfigUpdateStrategy == UpdateStrategy.RELOAD) {
+                    restartContainer();
+                }
             }
         }
     }
