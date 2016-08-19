@@ -54,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "7a6b29fe_fdf2b46d",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/DataStoreAppConfigMetadata.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-08-19T14:23:25Z",
+      "side": 1,
+      "message": "We might want to reuse update strategy for something else so I\u0027d prefer to parse it in OpendaylightNamespaceHandler into a UpdateStrategy enum.",
+      "parentUuid": "7a6b29fe_7d9224a0",
+      "revId": "c2d593978f077bf63aa16f9767824a7a8d7edb6f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a6b29fe_c221d3fc",
         "filename": "opendaylight/blueprint/src/main/resources/opendaylight-blueprint-ext-1.0.0.xsd",
         "patchSetId": 1
@@ -83,6 +101,24 @@
       "side": 1,
       "message": "Will do. One question: in my testing it looks like the default doesn\u0027t work as I expected. I thought default means if user doesn\u0027t specify any, it will come in as \u0027reload\u0027. But I noticed it came as \"\" if not specified. Is this expected? If yes, then can skip using default in line 44.",
       "parentUuid": "7a6b29fe_c221d3fc",
+      "revId": "c2d593978f077bf63aa16f9767824a7a8d7edb6f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_dde6d8b3",
+        "filename": "opendaylight/blueprint/src/main/resources/opendaylight-blueprint-ext-1.0.0.xsd",
+        "patchSetId": 1
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-08-19T14:23:25Z",
+      "side": 1,
+      "message": "I would think you\u0027d get the default if not specified but it seems not. We\u0027ll have to default it on code if empty. I\u0027d still keep the default in the xsd for doc purposes.",
+      "parentUuid": "7a6b29fe_bd8cbc80",
       "revId": "c2d593978f077bf63aa16f9767824a7a8d7edb6f",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
