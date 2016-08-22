@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a6b29fe_39df193d",
+        "filename": "opendaylight/config/config-persister-feature-adapter/src/main/java/org/opendaylight/controller/configpusherfeature/internal/AbstractFeatureWrapper.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2016-08-22T16:02:53Z",
+      "side": 1,
+      "message": "When reviewing this, I struggled why you would convert a String based file path into a io.File just to then afterwards immediately do a String-based check on it? Then I realized that you may have done this in order to abstract away from platform differences re. File.separate, the eternal PITA of \u0027/\u0027 vs \u0027\\\u0027, yes? If I interpreted that right, then perhaps a small in-line comment à la \"// Normalize to avoid File.separator \u0027/\u0027 VS \u0027\\\u0027 issues would clarify.\n\nI\u0027ve also hesitated for a moment whether this new File of a relative path, which in Java could turn into something based on the current working directory, if you asked it for its absolute path, could ever be an issue in this context, but I don\u0027t see how, so you should be good.",
+      "revId": "4a6d81e5187757d27e75fbb7bf66ce744a961b2d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
