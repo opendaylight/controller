@@ -10,7 +10,6 @@ package org.opendaylight.controller.configpusherfeature.internal;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.io.Files;
-import java.io.File;
 import java.util.LinkedHashSet;
 import java.util.List;
 import javax.xml.bind.JAXBException;
@@ -33,7 +32,6 @@ import org.slf4j.LoggerFactory;
 public class AbstractFeatureWrapper implements Feature {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractFeatureWrapper.class);
 
-    private static final String CONFIG_FILE_PATH_SUFFIX = "opendaylight" + File.separator + "karaf";
     protected static final String CONFIG_FILE_SUFFIX = "xml";
 
     protected Feature feature = null;
@@ -69,9 +67,7 @@ public class AbstractFeatureWrapper implements Feature {
     }
 
     private static boolean isConfigXMLFile(String fullName) {
-        String path = new File(fullName).getPath();
-        return path.contains(CONFIG_FILE_PATH_SUFFIX) &&
-                Files.getFileExtension(fullName).equals(CONFIG_FILE_SUFFIX);
+        return Files.getFileExtension(fullName).equals(CONFIG_FILE_SUFFIX);
     }
 
     protected Optional<FeatureConfigSnapshotHolder> getFeatureConfigSnapshotHolder(final ConfigFileInfo c) {
