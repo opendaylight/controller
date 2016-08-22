@@ -311,11 +311,7 @@ public class Shard extends RaftActor {
 
         setTransactionCommitTimeout();
 
-        if (datastoreContext.isPersistent() && !persistence().isRecoveryApplicable()) {
-            setPersistence(true);
-        } else if (!datastoreContext.isPersistent() && persistence().isRecoveryApplicable()) {
-            setPersistence(false);
-        }
+        setPersistence(datastoreContext.isPersistent());
 
         updateConfigParams(datastoreContext.getShardRaftConfig());
     }
