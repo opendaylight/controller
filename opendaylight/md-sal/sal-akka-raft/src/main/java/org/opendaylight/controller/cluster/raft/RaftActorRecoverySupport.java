@@ -66,6 +66,8 @@ class RaftActorRecoverySupport {
             onRecoveredApplyLogEntries(((ApplyJournalEntries) message).getToIndex());
         } else if (message instanceof DeleteEntries) {
             onDeleteEntries((DeleteEntries) message);
+        } else if (message instanceof ServerConfigurationPayload) {
+            context.updatePeerIds((ServerConfigurationPayload)message);
         } else if (message instanceof RecoveryCompleted) {
             recoveryComplete = true;
             onRecoveryCompletedMessage(persistentProvider);
@@ -260,7 +262,7 @@ class RaftActorRecoverySupport {
                  replicatedLog().getSnapshotTerm(), replicatedLog().size());
 
         if(dataRecoveredWithPersistenceDisabled ||
-                (hasMigratedDataRecovered && !context.getPersistenceProvider().isRecoveryApplicable())) {
+                hasMigratedDataRecovered && !context.getPersistenceProvider().isRecoveryApplicable()) {
             if(hasMigratedDataRecovered) {
                 log.info("{}: Saving snapshot after recovery due to migrated messages", context.getId());
             } else {

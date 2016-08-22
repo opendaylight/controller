@@ -12,6 +12,7 @@ import com.google.common.base.Preconditions;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.DelegatingPersistentDataProvider;
 import org.opendaylight.controller.cluster.PersistentDataProvider;
+import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.PersistentPayload;
 
 /**
@@ -30,17 +31,19 @@ class RaftActorDelegatingPersistentDataProvider extends DelegatingPersistentData
     }
 
     @Override
-    public <T> void persist(T o, Procedure<T> procedure) {
+    public <T> void persist(final T o, final Procedure<T> procedure) {
         if(getDelegate().isRecoveryApplicable()) {
             super.persist(o, procedure);
         } else {
-            boolean isPersistentPayload = false;
             if(o instanceof ReplicatedLogEntry) {
-                isPersistentPayload = ((ReplicatedLogEntry)o).getData() instanceof PersistentPayload;
-            }
-
-            if(isPersistentPayload) {
-                persistentProvider.persist(o, procedure);
+                Payload payload = ((ReplicatedLogEntry)o).getData();
+                if(payload instanceof PersistentPayload) {
+                    // We persist the Payload but not the ReplicatedLogEntry to avoid gaps in the journal indexes
+                    // on recovery if data persistence is later enabled.
+                    persistentProvider.persist(payload, p -> procedure.apply(o));
+                } else {
+                    super.persist(o, procedure);
+                }
             } else {
                 super.persist(o, procedure);
             }
