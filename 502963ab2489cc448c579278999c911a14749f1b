@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a6b29fe_165f8a73",
+        "filename": "opendaylight/md-sal/cds-access-client/src/main/java/org/opendaylight/controller/cluster/access/client/SequencedQueue.java",
+        "patchSetId": 26
+      },
+      "lineNbr": 170,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-08-22T15:21:46Z",
+      "side": 1,
+      "message": "queus (sic) -\u003e queues",
+      "revId": "502963ab2489cc448c579278999c911a14749f1b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_5650e25d",
+        "filename": "opendaylight/md-sal/cds-access-client/src/main/java/org/opendaylight/controller/cluster/access/client/SequencedQueue.java",
+        "patchSetId": 26
+      },
+      "lineNbr": 221,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-08-22T15:21:46Z",
+      "side": 1,
+      "message": "Is this an error? It means we got a response back for which there was no request which *shouldn\u0027t* happen right?",
+      "revId": "502963ab2489cc448c579278999c911a14749f1b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_76dcfee4",
+        "filename": "opendaylight/md-sal/cds-access-client/src/main/java/org/opendaylight/controller/cluster/access/client/SequencedQueue.java",
+        "patchSetId": 26
+      },
+      "lineNbr": 296,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-08-22T15:21:46Z",
+      "side": 1,
+      "message": "Doesn\u0027t \"clear\" and \"new\" essentially do the same thing, i.e. restart with an empty queue? Why not just \"clear\" or \"new\"?",
+      "revId": "502963ab2489cc448c579278999c911a14749f1b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_190e9d34",
+        "filename": "opendaylight/md-sal/cds-access-client/src/main/java/org/opendaylight/controller/cluster/access/client/SequencedQueueEntry.java",
+        "patchSetId": 26
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-08-22T15:21:46Z",
+      "side": 1,
+      "message": "Should be @Nullable?",
+      "revId": "502963ab2489cc448c579278999c911a14749f1b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_d667d223",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/ModuleShardBackendResolver.java",
+        "patchSetId": 26
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-08-22T15:21:46Z",
+      "side": 1,
+      "message": "Missing var arg",
+      "revId": "502963ab2489cc448c579278999c911a14749f1b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_195cdd24",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/ModuleShardBackendResolver.java",
+        "patchSetId": 26
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-08-22T15:21:46Z",
+      "side": 1,
+      "message": "Shouldn\u0027t the DataTree come from the PrimaryShardInfo returned from the ShardManager?",
+      "revId": "502963ab2489cc448c579278999c911a14749f1b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
