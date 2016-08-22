@@ -16,6 +16,24 @@
       "revId": "4a6d81e5187757d27e75fbb7bf66ce744a961b2d",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_1987bd10",
+        "filename": "opendaylight/config/config-persister-feature-adapter/src/main/java/org/opendaylight/controller/configpusherfeature/internal/AbstractFeatureWrapper.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-08-22T16:33:28Z",
+      "side": 1,
+      "message": "Originally I converted to File with the intention of getting just the path portion sans file name in order to do endsWith. But I didn\u0027t see a method to get just the path although I could\u0027ve done lastIndexOf separator. I realized I didn\u0027t really need the File anymore after submitting but didn\u0027t bother to change it. Shouldn\u0027t matter either way.",
+      "parentUuid": "7a6b29fe_39df193d",
+      "revId": "4a6d81e5187757d27e75fbb7bf66ce744a961b2d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
