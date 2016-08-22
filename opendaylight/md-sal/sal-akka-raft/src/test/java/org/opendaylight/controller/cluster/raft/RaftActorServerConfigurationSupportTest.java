@@ -208,20 +208,15 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         assertEquals("New follower commit index", 3, newFollowerActorContext.getCommitIndex());
         assertEquals("New follower last applied index", 3, newFollowerActorContext.getLastApplied());
 
-        List<ReplicatedLogImplEntry> persistedLogEntries = InMemoryJournal.get(LEADER_ID, ReplicatedLogImplEntry.class);
-        assertEquals("Leader ReplicatedLogImplEntry entries", 1, persistedLogEntries.size());
-        ReplicatedLogImplEntry logEntry = persistedLogEntries.get(0);
-        assertEquals("Leader ReplicatedLogImplEntry getTerm", 1, logEntry.getTerm());
-        assertEquals("Leader ReplicatedLogImplEntry getIndex", 3, logEntry.getIndex());
-        assertEquals("Leader ReplicatedLogImplEntry getData", ServerConfigurationPayload.class, logEntry.getData().getClass());
+        assertEquals("Leader persisted ReplicatedLogImplEntry entries", 0,
+                InMemoryJournal.get(LEADER_ID, ReplicatedLogImplEntry.class).size());
+        assertEquals("Leader persisted ServerConfigurationPayload entries", 1,
+                InMemoryJournal.get(LEADER_ID, ServerConfigurationPayload.class).size());
 
-        persistedLogEntries = InMemoryJournal.get(NEW_SERVER_ID, ReplicatedLogImplEntry.class);
-        assertEquals("New follower ReplicatedLogImplEntry entries", 1, persistedLogEntries.size());
-        logEntry = persistedLogEntries.get(0);
-        assertEquals("New follower ReplicatedLogImplEntry getTerm", 1, logEntry.getTerm());
-        assertEquals("New follower ReplicatedLogImplEntry getIndex", 3, logEntry.getIndex());
-        assertEquals("New follower ReplicatedLogImplEntry getData", ServerConfigurationPayload.class,
-                logEntry.getData().getClass());
+        assertEquals("New follower persisted ReplicatedLogImplEntry entries", 0,
+                InMemoryJournal.get(NEW_SERVER_ID, ReplicatedLogImplEntry.class).size());
+        assertEquals("New follower persisted ServerConfigurationPayload entries", 1,
+                InMemoryJournal.get(NEW_SERVER_ID, ServerConfigurationPayload.class).size());
 
         LOG.info("testAddServerWithExistingFollower ending");
     }

@@ -7,11 +7,14 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.never;
 import akka.japi.Procedure;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
@@ -72,13 +75,18 @@ public class RaftActorDelegatingPersistentDataProviderTest {
         verify(mockDelegateProvider).persist(OTHER_DATA_OBJECT, mockProcedure);
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Test
-    public void testPersistWithPersistenceDisabled() {
+    public void testPersistWithPersistenceDisabled() throws Exception {
         doReturn(false).when(mockDelegateProvider).isRecoveryApplicable();
 
         provider.persist(mockPersistentLogEntry, mockProcedure);
-        verify(mockPersistentProvider).persist(mockPersistentLogEntry, mockProcedure);
+
+        ArgumentCaptor<Procedure> procedureCaptor = ArgumentCaptor.forClass(Procedure.class);
+        verify(mockPersistentProvider).persist(eq(PERSISTENT_PAYLOAD), procedureCaptor.capture());
+        verify(mockDelegateProvider, never()).persist(mockNonPersistentLogEntry, mockProcedure);
+        procedureCaptor.getValue().apply(PERSISTENT_PAYLOAD);
+        verify(mockProcedure).apply(mockPersistentLogEntry);
 
         provider.persist(mockNonPersistentLogEntry, mockProcedure);
         verify(mockDelegateProvider).persist(mockNonPersistentLogEntry, mockProcedure);

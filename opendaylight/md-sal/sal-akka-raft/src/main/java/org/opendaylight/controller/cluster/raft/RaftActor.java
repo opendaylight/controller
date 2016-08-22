@@ -134,7 +134,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         context = new RaftActorContextImpl(this.getSelf(),
             this.getContext(), id, new ElectionTermImpl(persistentProvider, id, LOG),
             -1, -1, peerAddresses,
-            (configParams.isPresent() ? configParams.get(): new DefaultConfigParamsImpl()),
+            configParams.isPresent() ? configParams.get(): new DefaultConfigParamsImpl(),
             delegatingPersistenceProvider, LOG);
 
         context.setPayloadVersion(payloadVersion);
@@ -275,7 +275,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         } else if(message instanceof InitiateCaptureSnapshot) {
             captureSnapshot();
         } else if(message instanceof SwitchBehavior) {
-            switchBehavior(((SwitchBehavior) message));
+            switchBehavior((SwitchBehavior) message);
         } else if(message instanceof LeaderTransitioning) {
             onLeaderTransitioning();
         } else if(message instanceof Shutdown) {
@@ -488,7 +488,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         }
 
         if (roleChangeNotifier.isPresent() &&
-                (oldBehavior == null || (oldBehavior.state() != currentBehavior.state()))) {
+                (oldBehavior == null || oldBehavior.state() != currentBehavior.state())) {
             roleChangeNotifier.get().tell(new RoleChanged(getId(), oldBehaviorStateName ,
                     currentBehavior.state().name()), getSelf());
         }
@@ -663,9 +663,15 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     }
 
     protected void setPersistence(boolean persistent) {
-        if(persistent) {
+        DataPersistenceProvider currentPersistence = persistence();
+        if(persistent && (currentPersistence == null || !currentPersistence.isRecoveryApplicable())) {
             setPersistence(new PersistentDataProvider(this));
-        } else {
+
+            if(getCurrentBehavior() != null) {
+                LOG.info("{}: Persistence has been enabled - capturing snapshot", persistenceId());
+                captureSnapshot();
+            }
+        } else if(!persistent && (currentPersistence == null || currentPersistence.isRecoveryApplicable())) {
             setPersistence(new NonPersistentDataProvider() {
                 /**
                  * The way snapshotting works is,
