@@ -62,4 +62,9 @@ public final class PingPongDataBroker extends ForwardingDOMDataBroker implements
 
         throw new UnsupportedOperationException("Delegate " + delegate + " does not support required functionality");
     }
+
+    @Override
+    public String toString() {
+        return "PingPongDataBroker backed by " + delegate;
+    }
 }
