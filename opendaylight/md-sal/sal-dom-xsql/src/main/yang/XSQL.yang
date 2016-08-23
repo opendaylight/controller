@@ -1,13 +1,7 @@
-module XSQL{
+module XSQL {
     yang-version 1;
     namespace "http://netconfcentral.org/ns/XSQL";
     prefix XSQL;
-
-    import config { prefix config; revision-date 2013-04-05; }
-    import opendaylight-md-sal-binding { prefix mdsal; revision-date 2013-10-28; }
-    import rpc-context { prefix rpcx; revision-date 2013-06-17; }
-    import opendaylight-md-sal-dom {prefix sal;}
-    import opendaylight-md-sal-common {prefix common;}
 
     organization "Netconf Central";
     contact "Sharon Aicler <saichler@cisco.com>";
@@ -25,47 +19,6 @@ module XSQL{
             config false;
             mandatory true;
             description "The port the XSQL binds on";
-        }
-    }
-
-    identity XSQL {
-        base config:module-type;
-        config:java-name-prefix XSQL;
-    }
-
-    augment "/config:modules/config:module/config:configuration" {
-        case XSQL {
-            when "/config:modules/config:module/config:type = 'XSQL'";
-
-            container data-broker {
-                uses config:service-ref {
-                    refine type {
-                        mandatory false;
-                        config:required-identity mdsal:binding-async-data-broker;
-                    }
-                }
-            }
-
-            container async-data-broker {
-                uses config:service-ref {
-                    refine type {
-                        mandatory false;
-                        config:required-identity sal:dom-async-data-broker;
-                    }
-                }
-
-            }
-
-            container schema-service {
-                uses config:service-ref {
-                    refine type {
-                        mandatory false;
-                        config:required-identity sal:schema-service;
-                    }
-                }
-
-            }
-
         }
     }
 
