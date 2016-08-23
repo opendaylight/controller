@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "7a6b29fe_f713e50a",
+        "filename": "opendaylight/config/config-filtering-parent/pom.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 2046
+      },
+      "writtenOn": "2016-08-23T17:16:02Z",
+      "side": 1,
+      "message": "Great part is from config-parent, but 2016 is probably better year to claim.",
+      "parentUuid": "7a6b29fe_97bf11fb",
+      "range": {
+        "startLine": 3,
+        "startChar": 14,
+        "endLine": 3,
+        "endChar": 18
+      },
+      "revId": "4f86972888a1d98c79eaa400152ec6b0b24627df",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a6b29fe_f7ce45b3",
         "filename": "opendaylight/config/config-filtering-parent/pom.xml",
         "patchSetId": 4
@@ -42,6 +66,24 @@
     },
     {
       "key": {
+        "uuid": "7a6b29fe_d706a9cd",
+        "filename": "opendaylight/config/config-filtering-parent/pom.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 2046
+      },
+      "writtenOn": "2016-08-23T17:16:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a6b29fe_f7ce45b3",
+      "revId": "4f86972888a1d98c79eaa400152ec6b0b24627df",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a6b29fe_57c5798c",
         "filename": "opendaylight/config/config-parent/pom.xml",
         "patchSetId": 4
@@ -53,6 +95,24 @@
       "writtenOn": "2016-08-23T17:01:02Z",
       "side": 1,
       "message": "This isn\u0027t necessary, that\u0027s the default groupId for plugins.",
+      "revId": "4f86972888a1d98c79eaa400152ec6b0b24627df",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_976d519b",
+        "filename": "opendaylight/config/config-parent/pom.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 2046
+      },
+      "writtenOn": "2016-08-23T17:16:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a6b29fe_57c5798c",
       "revId": "4f86972888a1d98c79eaa400152ec6b0b24627df",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
