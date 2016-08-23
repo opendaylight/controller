@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "7a6b29fe_97bf11fb",
+        "filename": "opendaylight/config/config-filtering-parent/pom.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 3635
+      },
+      "writtenOn": "2016-08-23T17:03:30Z",
+      "side": 1,
+      "message": "Old copyright?  Was this copied from somewhere else?",
+      "range": {
+        "startLine": 3,
+        "startChar": 14,
+        "endLine": 3,
+        "endChar": 18
+      },
+      "revId": "4f86972888a1d98c79eaa400152ec6b0b24627df",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a6b29fe_f7ce45b3",
         "filename": "opendaylight/config/config-filtering-parent/pom.xml",
         "patchSetId": 4
