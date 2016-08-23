@@ -18,13 +18,9 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 /**
  * @author Sharon Aicler(saichler@gmail.com)
  **/
-public class XSQLProvider implements AutoCloseable {
+public class XSQLProvider {
 
     public static final InstanceIdentifier<XSQL> ID = InstanceIdentifier.builder(XSQL.class).build();
-    //public static final InstanceIdentifier<SalTest> ID2 = InstanceIdentifier.builder(SalTest.class).build();
-
-    public void close() {
-    }
 
     public XSQL buildXSQL(DataBroker dps) {
             XSQLAdapter.log("Building XSL...");

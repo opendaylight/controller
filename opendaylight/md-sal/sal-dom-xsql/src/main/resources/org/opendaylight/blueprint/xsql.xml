@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+           xmlns:odl="http://opendaylight.org/xmlns/blueprint/v1.0.0"
+           xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0"
+           odl:use-default-for-reference-types="true">
+
+  <reference id="dataBroker" interface="org.opendaylight.controller.md.sal.binding.api.DataBroker"/>
+  <reference id="domDataBroker" interface="org.opendaylight.controller.md.sal.dom.api.DOMDataBroker"/>
+  <reference id="schemaService" interface="org.opendaylight.controller.sal.core.api.model.SchemaService"/>
+
+  <bean id="XSQLModule" class="org.opendaylight.xsql.XSQLModule">
+      <argument ref="dataBroker" />
+      <argument ref="domDataBroker" />
+      <argument ref="schemaService" />
+  </bean>
+
+  <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.1.0">
+      <command>
+          <action class="org.opendaylight.xsql.cli.xsql">
+          </action>
+      </command>
+  </command-bundle>
+</blueprint>
