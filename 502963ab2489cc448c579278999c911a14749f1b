@@ -53,6 +53,24 @@
     },
     {
       "key": {
+        "uuid": "7a6b29fe_bf2f89f5",
+        "filename": "opendaylight/md-sal/cds-access-client/src/main/java/org/opendaylight/controller/cluster/access/client/SequencedQueue.java",
+        "patchSetId": 26
+      },
+      "lineNbr": 296,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-08-23T08:54:41Z",
+      "side": 1,
+      "message": "Essentially, yes, but they are very different when you take the effect on backing array into account...",
+      "parentUuid": "7a6b29fe_76dcfee4",
+      "revId": "502963ab2489cc448c579278999c911a14749f1b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a6b29fe_190e9d34",
         "filename": "opendaylight/md-sal/cds-access-client/src/main/java/org/opendaylight/controller/cluster/access/client/SequencedQueueEntry.java",
         "patchSetId": 26
@@ -98,6 +116,24 @@
       "writtenOn": "2016-08-22T15:21:46Z",
       "side": 1,
       "message": "Shouldn\u0027t the DataTree come from the PrimaryShardInfo returned from the ShardManager?",
+      "revId": "502963ab2489cc448c579278999c911a14749f1b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_1f379d4f",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/ModuleShardBackendResolver.java",
+        "patchSetId": 26
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-08-23T08:54:41Z",
+      "side": 1,
+      "message": "It could, except ConnectClientSuccess contains more information (and is more authoritative, as it comes from the Shard itself).",
+      "parentUuid": "7a6b29fe_195cdd24",
       "revId": "502963ab2489cc448c579278999c911a14749f1b",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
