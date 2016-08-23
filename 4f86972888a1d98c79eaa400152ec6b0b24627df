@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a6b29fe_f7ce45b3",
+        "filename": "opendaylight/config/config-filtering-parent/pom.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-08-23T17:01:02Z",
+      "side": 1,
+      "message": "This should be 0.6.0-SNAPSHOT for Carbon.",
+      "revId": "4f86972888a1d98c79eaa400152ec6b0b24627df",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_57c5798c",
+        "filename": "opendaylight/config/config-parent/pom.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-08-23T17:01:02Z",
+      "side": 1,
+      "message": "This isn\u0027t necessary, that\u0027s the default groupId for plugins.",
+      "revId": "4f86972888a1d98c79eaa400152ec6b0b24627df",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
