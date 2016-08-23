@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "7a6b29fe_a5dc9613",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/legacy/sharded/adapter/ShardedDOMDataBrokerDelegatingReadWriteTransaction.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 4580
+      },
+      "writtenOn": "2016-08-23T14:45:36Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a6b29fe_a563f6da",
+      "revId": "96a0204925a2a8a5b67b39b6ed04788bbd5810ea",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a6b29fe_05810a4a",
         "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/legacy/sharded/adapter/ShardedDOMDataBrokerDelegatingReadWriteTransaction.java",
         "patchSetId": 9
@@ -30,6 +48,24 @@
       "writtenOn": "2016-08-23T14:25:25Z",
       "side": 1,
       "message": "It still may be possible for the Queue to be accessed concurrently by read. I think you need to synchronize access to the Queue here and in read:\n\n  Queue\u003cModification\u003e queue \u003d modificationHistoryMap.get(store);\n  synchronized(queue) {\n       queue.add(...);\n  }",
+      "revId": "96a0204925a2a8a5b67b39b6ed04788bbd5810ea",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_c52f12f5",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/legacy/sharded/adapter/ShardedDOMDataBrokerDelegatingReadWriteTransaction.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 4580
+      },
+      "writtenOn": "2016-08-23T14:45:36Z",
+      "side": 1,
+      "message": "Yeah you are right, but actually I want to make something like this. In every read I want to make copy of current modification history and reply it on clean initial read snapshot.\n\nI placed creating copy of queue outside of future\u0027s callback know, so it shouldn\u0027t be concurrently accessed now (only by multiple threads, but that is not guaranteed by API anyway).\nWhen initial read finishes, I apply the history to this snapshot and this should capture the tx state at the time of read/write tx read call.",
+      "parentUuid": "7a6b29fe_05810a4a",
       "revId": "96a0204925a2a8a5b67b39b6ed04788bbd5810ea",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -64,6 +100,24 @@
       "writtenOn": "2016-08-23T14:25:25Z",
       "side": 1,
       "message": "If you in-line this code in the constructor then you can make these 2 maps final.",
+      "revId": "96a0204925a2a8a5b67b39b6ed04788bbd5810ea",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_85d7daec",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/legacy/sharded/adapter/ShardedDOMDataBrokerDelegatingReadWriteTransaction.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 195,
+      "author": {
+        "id": 4580
+      },
+      "writtenOn": "2016-08-23T14:45:36Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a6b29fe_a56db69a",
       "revId": "96a0204925a2a8a5b67b39b6ed04788bbd5810ea",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
