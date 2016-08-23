@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a6b29fe_a563f6da",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/legacy/sharded/adapter/ShardedDOMDataBrokerDelegatingReadWriteTransaction.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-08-23T14:25:25Z",
+      "side": 1,
+      "message": "This is no longer used and can be removed.",
+      "revId": "96a0204925a2a8a5b67b39b6ed04788bbd5810ea",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_05810a4a",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/legacy/sharded/adapter/ShardedDOMDataBrokerDelegatingReadWriteTransaction.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-08-23T14:25:25Z",
+      "side": 1,
+      "message": "It still may be possible for the Queue to be accessed concurrently by read. I think you need to synchronize access to the Queue here and in read:\n\n  Queue\u003cModification\u003e queue \u003d modificationHistoryMap.get(store);\n  synchronized(queue) {\n       queue.add(...);\n  }",
+      "revId": "96a0204925a2a8a5b67b39b6ed04788bbd5810ea",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_c5ed5227",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/legacy/sharded/adapter/ShardedDOMDataBrokerDelegatingReadWriteTransaction.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-08-23T14:25:25Z",
+      "side": 1,
+      "message": "This looks incorrect - you\u0027re making a copy of the Queue in an unsynchronized manner and applyModificationHistoryToSnapshot modifies/clears the copy, not the actual Queue stored in modificationHistoryMap. I think this is what you need to do:\n\n  Queue\u003cModification\u003e queue \u003d modificationHistoryMap.get(store);\n  synchronized(queue) {\n       applyModificationHistoryToSnapshot(queue);\n  }",
+      "revId": "96a0204925a2a8a5b67b39b6ed04788bbd5810ea",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_a56db69a",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/legacy/sharded/adapter/ShardedDOMDataBrokerDelegatingReadWriteTransaction.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 195,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-08-23T14:25:25Z",
+      "side": 1,
+      "message": "If you in-line this code in the constructor then you can make these 2 maps final.",
+      "revId": "96a0204925a2a8a5b67b39b6ed04788bbd5810ea",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
