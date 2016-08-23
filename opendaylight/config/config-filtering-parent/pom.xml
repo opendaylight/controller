@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Copyright (c) 2016 Cisco Systems, Inc. and others.  All rights reserved.
+
+This program and the accompanying materials are made available under the
+terms of the Eclipse Public License v1.0 which accompanies this distribution,
+and is available at http://www.eclipse.org/legal/epl-v10.html
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <parent>
+    <groupId>org.opendaylight.controller</groupId>
+    <artifactId>config-parent</artifactId>
+    <version>0.5.0-SNAPSHOT</version>
+    <relativePath>../config-parent</relativePath>
+  </parent>
+
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.opendaylight.controller</groupId>
+  <artifactId>config-filtering-parent</artifactId>
+  <packaging>pom</packaging>
+
+  <properties>
+    <config.dir>src/main/config</config.dir>
+    <config.filename>default-config.xml</config.filename>
+    <config.file>${config.dir}/${config.filename}</config.file>
+    <generated.config.dir>target/generated-config</generated.config.dir>
+    <generated.config.file>${generated.config.dir}/${config.filename}</generated.config.file>
+  </properties>
+
+  <profiles>
+    <profile>
+      <id>apply-filtering-before-attaching-config</id>
+      <activation>
+        <file>
+          <exists>${config.file}</exists>
+        </file>
+      </activation>
+      <build>
+        <pluginManagement>
+          <plugins>
+            <plugin>
+              <artifactId>maven-resources-plugin</artifactId>
+              <executions>
+                <execution>
+                  <id>copy-resources</id>
+                  <phase>validate</phase>
+                  <goals>
+                    <goal>copy-resources</goal>
+                  </goals>
+                  <configuration>
+                    <outputDirectory>${generated.config.dir}</outputDirectory>
+                    <resources>
+                      <resource>
+                        <directory>${config.dir}</directory>
+                        <filtering>true</filtering>
+                      </resource>
+                    </resources>
+                  </configuration>
+                </execution>
+              </executions>
+            </plugin>
+            <plugin>
+              <groupId>org.codehaus.mojo</groupId>
+              <artifactId>build-helper-maven-plugin</artifactId>
+              <executions>
+                <execution>
+                  <id>attach-artifacts</id>
+                  <goals>
+                    <goal>attach-artifact</goal>
+                  </goals>
+                  <phase>package</phase>
+                  <configuration>
+                    <artifacts>
+                      <artifact>
+                        <file>${generated.config.file}</file>
+                        <type>xml</type>
+                        <classifier>config</classifier>
+                      </artifact>
+                    </artifacts>
+                  </configuration>
+                </execution>
+              </executions>
+            </plugin>
+          </plugins>
+        </pluginManagement>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-resources-plugin</artifactId>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+</project>
