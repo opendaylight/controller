@@ -263,7 +263,7 @@ public class ConcurrentDOMDataBroker extends AbstractDOMBroker implements DOMDat
         /**
          * ThreadLocal used to detect if the task completion thread is running the future listener Runnables.
          */
-        private static final ThreadLocal<Boolean> ON_TASK_COMPLETION_THREAD_TL = new ThreadLocal<Boolean>();
+        private static final ThreadLocal<Boolean> ON_TASK_COMPLETION_THREAD_TL = new ThreadLocal<>();
 
         private final Executor listenerExecutor;
 
@@ -349,5 +349,10 @@ public class ConcurrentDOMDataBroker extends AbstractDOMBroker implements DOMDat
             default:
                 throw new IllegalArgumentException("Unsupported data store type: " + datastoreType);
         }
+    }
+
+    @Override
+    public String toString() {
+        return "Clustered ConcurrentDOMDataBroker";
     }
 }

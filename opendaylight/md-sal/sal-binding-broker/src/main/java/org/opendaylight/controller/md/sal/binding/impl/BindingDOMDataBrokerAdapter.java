@@ -40,14 +40,7 @@ import org.opendaylight.yangtools.yang.binding.DataObject;
 public class BindingDOMDataBrokerAdapter extends AbstractForwardedDataBroker implements DataBroker, DataTreeChangeService {
 
 
-    static final Factory<DataBroker> BUILDER_FACTORY = new BindingDOMAdapterBuilder.Factory<DataBroker>() {
-
-        @Override
-        public BindingDOMAdapterBuilder<DataBroker> newBuilder() {
-            return new Builder();
-        }
-
-    };
+    static final Factory<DataBroker> BUILDER_FACTORY = () -> new Builder();
     private final DataTreeChangeService treeChangeService;
 
     public BindingDOMDataBrokerAdapter(final DOMDataBroker domDataBroker, final BindingToNormalizedNodeCodec codec) {
@@ -79,6 +72,11 @@ public class BindingDOMDataBrokerAdapter extends AbstractForwardedDataBroker imp
     @Override
     public BindingTransactionChain createTransactionChain(final TransactionChainListener listener) {
         return new BindingDOMTransactionChainAdapter(getDelegate(), getCodec(), listener);
+    }
+
+    @Override
+    public String toString() {
+        return "BindingDOMDataBrokerAdapter for " + getDelegate();
     }
 
     private static class Builder extends BindingDOMAdapterBuilder<DataBroker> {
