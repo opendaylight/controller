@@ -177,6 +177,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   </build>
   <profiles>
     <profile>
+      <id>attach-config-without-filtering</id>
       <activation>
         <file>
           <exists>${config.file}</exists>

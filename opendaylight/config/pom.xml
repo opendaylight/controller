@@ -42,6 +42,7 @@
 
     <module>config-artifacts</module>
     <module>config-parent</module>
+    <module>config-filtering-parent</module>
     <module>config-persister-impl</module>
     <module>config-it-base</module>
   </modules>
