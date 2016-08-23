@@ -72,7 +72,7 @@ public class GlobalBundleScanningSchemaServiceImpl implements SchemaContextProvi
         return context;
     }
 
-    public void start() {
+    private void start() {
         checkState(context != null);
         LOG.debug("start() starting");
 
