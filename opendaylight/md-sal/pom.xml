@@ -44,9 +44,6 @@
     <!-- Samples -->
     <module>samples</module>
 
-    <!-- Base Models -->
-    <module>sal-remote</module>
-
     <!-- Connectors -->
     <module>sal-connector-api</module>
 
