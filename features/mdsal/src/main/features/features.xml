@@ -98,7 +98,7 @@
     <feature name ='odl-mdsal-broker' version='${project.version}'>
         <feature version='${project.version}'>odl-mdsal-remoterpc-connector</feature>
         <feature version='${project.version}'>odl-mdsal-distributed-datastore</feature>
-        <configfile finalname="${config.configfile.directory}/${config.clustering.configfile}">mvn:org.opendaylight.controller/sal-clustering-config/{{VERSION}}/xml/config</configfile>
+        <configfile finalname="${config.configfile.directory}/${config.clustering.configfile}" override="true" >mvn:org.opendaylight.controller/sal-clustering-config/{{VERSION}}/xml/config</configfile>
         <configfile finalname="${config.configfile.directory}/${config.clustered-entity-ownership.configfile}">mvn:org.opendaylight.controller/sal-clustering-config/{{VERSION}}/xml/entityownershipconfig</configfile>
         <configfile finalname="configuration/initial/akka.conf">mvn:org.opendaylight.controller/sal-clustering-config/{{VERSION}}/xml/akkaconf</configfile>
         <configfile finalname="configuration/factory/akka.conf" override="true">mvn:org.opendaylight.controller/sal-clustering-config/{{VERSION}}/xml/factoryakkaconf</configfile>
