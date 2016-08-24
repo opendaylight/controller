@@ -16,6 +16,24 @@
       "revId": "9228b373992228a2c3d64713a633ff6abea6b68e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_70023b0c",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/legacy/sharded/adapter/ShardedDOMDataBrokerDelegatingReadWriteTransaction.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 4580
+      },
+      "writtenOn": "2016-08-24T11:45:07Z",
+      "side": 1,
+      "message": "I think I do not want to clear the modification history after copying.\n\nWhat I am trying to do now, is that on every read I apply modification history on clean initial snapshot, so if I would clear the queue I would lost modification history prior to that read.\n\nI am not saving state after that read anywhere.\n\n\nAbout that synchronization. I can add the synchronized blocks to guard modificationHistory, but I don\u0027t really get the difference between API contract may not support concurrent access to the transaction and access from multiple threads is/should be allowed",
+      "parentUuid": "7a6b29fe_c57d52e9",
+      "revId": "9228b373992228a2c3d64713a633ff6abea6b68e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
