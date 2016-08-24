@@ -1,0 +1,46 @@
+module opendaylight-inmemory-datastore-provider-config {
+
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:inmemory-datastore-provider:config";
+    prefix "inmemory-datastore-provider-config";
+
+    description
+        "InMemory datastore provider configuration for config & operational
+        datastore";
+
+    revision "2014-06-17" {
+        description
+                "Initial revision.";
+    }
+
+    container datastore-configuration {
+        leaf max-data-change-executor-queue-size {
+            default 1000;
+            type uint16;
+            description "The maximum queue size for the data change notification executor.";
+        }
+
+        leaf max-data-change-executor-pool-size {
+            default 20;
+            type uint16;
+            description "The maximum thread pool size for the data change notification
+                        executor.";
+        }
+
+        leaf max-data-change-listener-queue-size {
+            default 1000;
+            type uint16;
+            description "The maximum queue size for the data change listeners.";
+        }
+        leaf max-data-store-executor-queue-size {
+            default 5000;
+            type uint16;
+            description "The maximum queue size for the data store executor.";
+        }
+        leaf debug-transactions {
+            type boolean;
+            default false;
+            description "Enable transaction lifecycle debugging.";
+        }
+    }
+}

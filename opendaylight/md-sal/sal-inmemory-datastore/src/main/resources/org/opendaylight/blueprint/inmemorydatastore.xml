@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+           xmlns:odl="http://opendaylight.org/xmlns/blueprint/v1.0.0"
+           xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0"
+           odl:use-default-for-reference-types="true">
+
+  <reference id="schemaService" interface="org.opendaylight.controller.sal.core.api.model.SchemaService"/>
+
+  <odl:clustered-app-config id="datastoreConfig"
+    binding-class="org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.inmemory.datastore.provider.rev140617.DatastoreConfiguration">
+  </odl:clustered-app-config>
+
+<!-- In-Memory Operational Datastore -->
+
+  <bean id="inMemoryOperationalDataStoreProvider" class="org.opendaylight.controller.md.sal.dom.store.impl.module.InMemoryOperationalDataStoreProvider"
+        destroy-method="close">
+      <argument ref="schemaService" />
+      <argument ref="datastoreConfig" />
+  </bean>
+
+  <!-- In-Memory Config Datastore -->
+
+  <bean id="inMemoryConfigDataStoreProvider" class="org.opendaylight.controller.md.sal.dom.store.impl.module.InMemoryConfigDataStoreProvider"
+        destroy-method="close">
+      <argument ref="schemaService" />
+      <argument ref="datastoreConfig" />
+  </bean>
+
+</blueprint>
