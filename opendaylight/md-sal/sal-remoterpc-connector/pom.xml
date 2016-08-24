@@ -194,7 +194,17 @@
             <Bundle-Name>${project.groupId}.${project.artifactId}</Bundle-Name>
             <Export-package></Export-package>
             <Private-Package></Private-Package>
-            <Import-Package>!org.iq80.*;!*snappy;!org.jboss.*;!com.jcraft.*;!org.fusesource.*;!*jetty*;!sun.security.*;*</Import-Package>
+            <Import-Package>
+              !org.iq80.*;
+              !*snappy;
+              !org.jboss.*;
+              !com.jcraft.*;
+              !org.fusesource.*;
+              !*jetty*;
+              !sun.security.*;
+              org.opendaylight.controller.cluster;
+              *
+            </Import-Package>
             <!--
             <Embed-Dependency>
                 sal-clustering-commons;
