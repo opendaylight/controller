@@ -34,6 +34,24 @@
       "revId": "9228b373992228a2c3d64713a633ff6abea6b68e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_4bfaf0bd",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/legacy/sharded/adapter/ShardedDOMDataBrokerDelegatingReadWriteTransaction.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-08-24T13:41:30Z",
+      "side": 1,
+      "message": "OK - I see that you\u0027re reading from the local DataTreeModification that you build from all the previous mods - I missed that before. Seems like that should work. In that case you shouldn\u0027t need any synchronization.",
+      "parentUuid": "7a6b29fe_70023b0c",
+      "revId": "9228b373992228a2c3d64713a633ff6abea6b68e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
