@@ -1,0 +1,208 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a6b29fe_ad03dc0b",
+        "filename": "opendaylight/md-sal/cds-access-client/src/test/java/org/opendaylight/controller/cluster/access/client/BackendInfoResolverTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-08-24T04:25:19Z",
+      "side": 1,
+      "message": "mockBackedInfo (sic) -\u003e mockBackedInfo",
+      "revId": "9dfe000f9e3c10ce5a7ff4adca2fc6db07dcde3c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_cd00d803",
+        "filename": "opendaylight/md-sal/cds-access-client/src/test/java/org/opendaylight/controller/cluster/access/client/BackendInfoResolverTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-08-24T04:25:19Z",
+      "side": 1,
+      "message": "Can you rename to executor for clarity? Also the executor should be shut down in an @After tearDown method.",
+      "revId": "9dfe000f9e3c10ce5a7ff4adca2fc6db07dcde3c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_7a021c0c",
+        "filename": "opendaylight/md-sal/cds-access-client/src/test/java/org/opendaylight/controller/cluster/access/client/BackendInfoResolverTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-08-24T04:25:19Z",
+      "side": 1,
+      "message": "backedInfoResolver (sic) -\u003e backendInfoResolver",
+      "revId": "9dfe000f9e3c10ce5a7ff4adca2fc6db07dcde3c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_ba1cb478",
+        "filename": "opendaylight/md-sal/cds-access-client/src/test/java/org/opendaylight/controller/cluster/access/client/BackendInfoResolverTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-08-24T04:25:19Z",
+      "side": 1,
+      "message": "futureBacadInfo? Do you mean futureBackendInfo?",
+      "revId": "9dfe000f9e3c10ce5a7ff4adca2fc6db07dcde3c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_1a14c84c",
+        "filename": "opendaylight/md-sal/cds-access-client/src/test/java/org/opendaylight/controller/cluster/access/client/BackendInfoResolverTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-08-24T04:25:19Z",
+      "side": 1,
+      "message": "Isn\u0027t this the same as line 54?",
+      "revId": "9dfe000f9e3c10ce5a7ff4adca2fc6db07dcde3c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_5a0da03d",
+        "filename": "opendaylight/md-sal/cds-access-client/src/test/java/org/opendaylight/controller/cluster/access/client/BackendInfoResolverTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-08-24T04:25:19Z",
+      "side": 1,
+      "message": "Same comments as above.",
+      "revId": "9dfe000f9e3c10ce5a7ff4adca2fc6db07dcde3c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_3a08a42c",
+        "filename": "opendaylight/md-sal/cds-access-client/src/test/java/org/opendaylight/controller/cluster/access/client/BackendInfoResolverTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-08-24T04:25:19Z",
+      "side": 1,
+      "message": "backedInfo (sic) -\u003e backendInfo",
+      "revId": "9dfe000f9e3c10ce5a7ff4adca2fc6db07dcde3c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_9a07381c",
+        "filename": "opendaylight/md-sal/cds-access-client/src/test/java/org/opendaylight/controller/cluster/access/client/BackendInfoResolverTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-08-24T04:25:19Z",
+      "side": 1,
+      "message": "TestBackedInfoResolver (sic) -\u003e TestBackendInfoResolver",
+      "revId": "9dfe000f9e3c10ce5a7ff4adca2fc6db07dcde3c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_8d6380db",
+        "filename": "opendaylight/md-sal/cds-access-client/src/test/java/org/opendaylight/controller/cluster/access/client/ClientActorBehaviorTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 208,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-08-24T04:25:19Z",
+      "side": 1,
+      "message": "TestClientActorBehaviorTest -\u003e TestClientActorBehavior",
+      "revId": "9dfe000f9e3c10ce5a7ff4adca2fc6db07dcde3c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_2d0fcc2f",
+        "filename": "opendaylight/md-sal/cds-access-client/src/test/java/org/opendaylight/controller/cluster/access/client/ClientActorContextTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-08-24T04:25:19Z",
+      "side": 1,
+      "message": "This looks like a duplicate of the class in ClientActorBehaviorTest. Please refactor to to its own file for reuse.",
+      "revId": "9dfe000f9e3c10ce5a7ff4adca2fc6db07dcde3c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_6d19c478",
+        "filename": "opendaylight/md-sal/cds-access-client/src/test/java/org/opendaylight/controller/cluster/access/client/RecoveringClientActorBehaviorTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-08-24T04:25:19Z",
+      "side": 1,
+      "message": "testOnReceiveRecoverAddGenereationId (sic) -\u003e testOnReceiveRecoverAddGenerationId",
+      "revId": "9dfe000f9e3c10ce5a7ff4adca2fc6db07dcde3c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_cd2738b5",
+        "filename": "opendaylight/md-sal/cds-access-client/src/test/java/org/opendaylight/controller/cluster/access/client/RecoveringClientActorBehaviorTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-08-24T04:25:19Z",
+      "side": 1,
+      "message": "Should verify the expected ClientIdentifier in SavingClientActorBehavior",
+      "revId": "9dfe000f9e3c10ce5a7ff4adca2fc6db07dcde3c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
