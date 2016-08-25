@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.access.client;
 
+import com.google.common.annotations.Beta;
 import java.util.AbstractQueue;
 import java.util.Collections;
 import java.util.Iterator;
@@ -21,7 +22,8 @@ import java.util.Queue;
  * @param <E> the type of elements held in this collection
  */
 // TODO: move this class into yangtools.util
-final class EmptyQueue<T> extends AbstractQueue<T> {
+@Beta
+public final class EmptyQueue<E> extends AbstractQueue<E> {
     private static final EmptyQueue<?> INSTANCE = new EmptyQueue<>();
 
     private EmptyQueue() {
@@ -29,27 +31,27 @@ final class EmptyQueue<T> extends AbstractQueue<T> {
     }
 
     @SuppressWarnings("unchecked")
-    static <T> Queue<T> getInstance() {
+    public static <T> Queue<T> getInstance() {
         return (Queue<T>) INSTANCE;
     }
 
     @Override
-    public boolean offer(final T e) {
+    public boolean offer(final E e) {
         return false;
     }
 
     @Override
-    public T poll() {
+    public E poll() {
         return null;
     }
 
     @Override
-    public T peek() {
+    public E peek() {
         return null;
     }
 
     @Override
-    public Iterator<T> iterator() {
+    public Iterator<E> iterator() {
         return Collections.emptyIterator();
     }
 
