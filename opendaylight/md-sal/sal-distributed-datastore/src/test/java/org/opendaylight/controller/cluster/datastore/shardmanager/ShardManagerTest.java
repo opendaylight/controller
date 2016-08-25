@@ -18,6 +18,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.AddressFromURIString;
@@ -322,7 +323,7 @@ public class ShardManagerTest extends AbstractActorTest {
         final PrimaryShardInfoFutureCache primaryShardInfoCache = new PrimaryShardInfoFutureCache();
         final CountDownLatch newShardActorLatch = new CountDownLatch(2);
         class LocalShardManager extends ShardManager {
-            public LocalShardManager(AbstractShardManagerCreator<?> creator) {
+            public LocalShardManager(final AbstractShardManagerCreator<?> creator) {
                 super(creator);
             }
 
@@ -2035,7 +2036,7 @@ public class ShardManagerTest extends AbstractActorTest {
         }};
     }
 
-    private static class TestShardManager extends ShardManager {
+    public static class TestShardManager extends ShardManager {
         private final CountDownLatch recoveryComplete = new CountDownLatch(1);
         private final CountDownLatch snapshotPersist = new CountDownLatch(1);
         private ShardManagerSnapshot snapshot;
@@ -2065,7 +2066,7 @@ public class ShardManagerTest extends AbstractActorTest {
             }
         }
 
-        private void countDownIfOther(final Member member, CountDownLatch latch) {
+        private void countDownIfOther(Member member, CountDownLatch latch) {
             if (!getCluster().getCurrentMemberName().equals(memberToName(member))) {
                 latch.countDown();
             }
@@ -2103,7 +2104,7 @@ public class ShardManagerTest extends AbstractActorTest {
                     Uninterruptibles.awaitUninterruptibly(recoveryComplete, 5, TimeUnit.SECONDS));
         }
 
-        void waitForMemberUp() {
+        public void waitForMemberUp() {
             assertEquals("MemberUp received", true,
                     Uninterruptibles.awaitUninterruptibly(memberUpReceived, 5, TimeUnit.SECONDS));
             memberUpReceived = new CountDownLatch(1);
@@ -2138,7 +2139,7 @@ public class ShardManagerTest extends AbstractActorTest {
             return new Builder(datastoreContextBuilder);
         }
 
-        private static class Builder extends AbstractGenericCreator<Builder, TestShardManager> {
+        public static class Builder extends AbstractGenericCreator<Builder, TestShardManager> {
             private ActorRef shardActor;
             private final Map<String, ActorRef> shardActors = new HashMap<>();
 
