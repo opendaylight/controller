@@ -10,9 +10,11 @@ package org.opendaylight.controller.configpusherfeature.internal;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.io.Files;
+import java.io.FileInputStream;
 import java.util.LinkedHashSet;
 import java.util.List;
 import javax.xml.bind.JAXBException;
+import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.stream.XMLStreamException;
 import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.Conditional;
@@ -20,8 +22,10 @@ import org.apache.karaf.features.ConfigFileInfo;
 import org.apache.karaf.features.ConfigInfo;
 import org.apache.karaf.features.Dependency;
 import org.apache.karaf.features.Feature;
+import org.opendaylight.controller.config.persist.storage.file.xml.model.ConfigSnapshot;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Element;
 
 /*
  * Wrap a Feature for the purposes of extracting the FeatureConfigSnapshotHolders from
@@ -74,16 +78,28 @@ public class AbstractFeatureWrapper implements Feature {
         try {
             return Optional.of(new FeatureConfigSnapshotHolder(c, this));
         } catch (final JAXBException e) {
-            LOG.warn("Unable to parse configuration snapshot. Config from '{}' will be IGNORED. " +
-                            "Note that subsequent config files may fail due to this problem. " +
-                            "Xml markup in this file needs to be fixed, for detailed information see enclosed exception.",
-                    c.getFinalname(), e);
+            if(isConfigSnapshot(c.getFinalname())) {
+                LOG.warn("Unable to parse configuration snapshot. Config from '{}' will be IGNORED. " +
+                                "Note that subsequent config files may fail due to this problem. " +
+                                "Xml markup in this file needs to be fixed, for detailed information see enclosed exception.",
+                        c.getFinalname(), e);
+            }
         } catch (final XMLStreamException e) {
             // Files that cannot be loaded are ignored as non config subsystem files e.g. jetty.xml
             LOG.debug("Unable to read configuration file '{}'. Not a configuration snapshot",
                     c.getFinalname(), e);
         }
         return Optional.absent();
+    }
+
+    private boolean isConfigSnapshot(String fileName) {
+        try(FileInputStream fis = new FileInputStream(fileName)) {
+            Element root = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(fis).getDocumentElement();
+            return ConfigSnapshot.SNAPSHOT_ROOT_ELEMENT_NAME.equals(root.getLocalName());
+        } catch (Exception e) {
+            LOG.debug("Could not parse {}", fileName, e);
+            return false;
+        }
     }
 
     @Override
