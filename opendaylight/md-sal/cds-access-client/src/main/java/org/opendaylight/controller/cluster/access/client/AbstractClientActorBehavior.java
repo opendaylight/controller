@@ -52,7 +52,7 @@ public abstract class AbstractClientActorBehavior<C extends AbstractClientActorC
     /**
      * Return an {@link ActorRef} of this ClientActor.
      *
-     * @return
+     * @return Actor associated with this behavior
      */
     public final @Nonnull ActorRef self() {
         return context.self();
