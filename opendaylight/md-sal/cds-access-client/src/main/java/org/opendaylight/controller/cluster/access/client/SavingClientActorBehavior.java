@@ -18,6 +18,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * Transient behavior handling messages while the new generation is being persisted.
+ *
  * @author Robert Varga
  */
 final class SavingClientActorBehavior extends RecoveredClientActorBehavior<InitialClientActorContext> {
