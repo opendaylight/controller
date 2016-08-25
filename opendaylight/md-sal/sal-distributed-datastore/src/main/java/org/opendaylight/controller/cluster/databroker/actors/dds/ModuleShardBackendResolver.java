@@ -81,6 +81,8 @@ final class ModuleShardBackendResolver extends BackendInfoResolver<ShardBackendI
     }
 
     Long resolveShardForPath(final YangInstanceIdentifier path) {
+        // this should work for prefix based shards aswell since the strategy factory would get the correct strategy from configuration
+        // which will return the correct shardName
         final String shardName = actorContext.getShardStrategyFactory().getStrategy(path).findShard(path);
         Long cookie = shards.get(shardName);
         if (cookie == null) {
