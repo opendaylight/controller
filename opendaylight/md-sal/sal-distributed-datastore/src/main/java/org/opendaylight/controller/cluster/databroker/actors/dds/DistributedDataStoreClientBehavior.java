@@ -65,7 +65,7 @@ final class DistributedDataStoreClientBehavior extends ClientActorBehavior imple
 
     DistributedDataStoreClientBehavior(final ClientActorContext context, final ActorContext actorContext) {
         super(context);
-        resolver = new ModuleShardBackendResolver(actorContext);
+        resolver = new ModuleShardBackendResolver(context.getIdentifier(), actorContext);
         singleHistory = new SingleClientHistory(this, new LocalHistoryIdentifier(getIdentifier(), 0));
     }
 
