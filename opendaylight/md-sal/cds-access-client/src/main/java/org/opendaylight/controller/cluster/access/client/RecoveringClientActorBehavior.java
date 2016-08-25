@@ -16,7 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * @param <T> Frontend type
+ * Transient behavior handling messages during initial actor recovery.
  *
  * @author Robert Varga
  */
@@ -41,8 +41,8 @@ final class RecoveringClientActorBehavior extends AbstractClientActorBehavior<In
             final ClientIdentifier nextId;
             if (lastId != null) {
                 if (!currentFrontend.equals(lastId.getFrontendId())) {
-                    LOG.error("Mismatched frontend identifier, shutting down. Current: {} Saved: {}", currentFrontend,
-                    lastId.getFrontendId());
+                    LOG.error("{}: Mismatched frontend identifier, shutting down. Current: {} Saved: {}",
+                        persistenceId(), currentFrontend, lastId.getFrontendId());
                     return null;
                 }
 
@@ -56,9 +56,9 @@ final class RecoveringClientActorBehavior extends AbstractClientActorBehavior<In
             return new SavingClientActorBehavior(context(), nextId);
         } else if (recover instanceof SnapshotOffer) {
             lastId = (ClientIdentifier) ((SnapshotOffer)recover).snapshot();
-            LOG.debug("{}: recovered identifier {}", lastId);
+            LOG.debug("{}: recovered identifier {}", persistenceId(), lastId);
         } else {
-            LOG.warn("{}: ignoring recovery message {}", recover);
+            LOG.warn("{}: ignoring recovery message {}", persistenceId(), recover);
         }
 
         return this;
