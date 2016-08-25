@@ -10,9 +10,12 @@ package org.opendaylight.controller.configpusherfeature.internal;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.io.Files;
+import java.io.File;
+import java.io.FileInputStream;
 import java.util.LinkedHashSet;
 import java.util.List;
 import javax.xml.bind.JAXBException;
+import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.stream.XMLStreamException;
 import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.Conditional;
@@ -20,8 +23,10 @@ import org.apache.karaf.features.ConfigFileInfo;
 import org.apache.karaf.features.ConfigInfo;
 import org.apache.karaf.features.Dependency;
 import org.apache.karaf.features.Feature;
+import org.opendaylight.controller.config.persist.storage.file.xml.model.ConfigSnapshot;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Element;
 
 /*
  * Wrap a Feature for the purposes of extracting the FeatureConfigSnapshotHolders from
@@ -55,8 +60,8 @@ public class AbstractFeatureWrapper implements Feature {
     public LinkedHashSet<FeatureConfigSnapshotHolder> getFeatureConfigSnapshotHolders() throws Exception {
         final LinkedHashSet <FeatureConfigSnapshotHolder> snapShotHolders = new LinkedHashSet<>();
         for(final ConfigFileInfo c: getConfigurationFiles()) {
-            // Skip non xml files
-            if(Files.getFileExtension(c.getFinalname()).equals(CONFIG_FILE_SUFFIX)) {
+            // Skip non config snapshot XML files
+            if(isConfigSnapshot(c.getFinalname())) {
                 final Optional<FeatureConfigSnapshotHolder> featureConfigSnapshotHolder = getFeatureConfigSnapshotHolder(c);
                 if(featureConfigSnapshotHolder.isPresent()) {
                     snapShotHolders.add(featureConfigSnapshotHolder.get());
@@ -71,8 +76,8 @@ public class AbstractFeatureWrapper implements Feature {
             return Optional.of(new FeatureConfigSnapshotHolder(c, this));
         } catch (final JAXBException e) {
             LOG.warn("Unable to parse configuration snapshot. Config from '{}' will be IGNORED. " +
-                            "Note that subsequent config files may fail due to this problem. " +
-                            "Xml markup in this file needs to be fixed, for detailed information see enclosed exception.",
+                    "Note that subsequent config files may fail due to this problem. " +
+                    "Xml markup in this file needs to be fixed, for detailed information see enclosed exception.",
                     c.getFinalname(), e);
         } catch (final XMLStreamException e) {
             // Files that cannot be loaded are ignored as non config subsystem files e.g. jetty.xml
@@ -82,11 +87,39 @@ public class AbstractFeatureWrapper implements Feature {
         return Optional.absent();
     }
 
+    private static boolean isConfigSnapshot(String fileName) {
+        if(!Files.getFileExtension(fileName).equals(CONFIG_FILE_SUFFIX)) {
+            return false;
+        }
+
+        if(fileName.endsWith("jetty.xml")) {
+            // Special case - ignore the jetty.xml file as it contains a DTD and causes a "Connection refused"
+            // error when it tries to go out to the network to retrieve it. We don't want it trying to go out
+            // to the network nor do we want an error logged trying to parse it.
+            return false;
+        }
+
+        File file = new File(System.getProperty("karaf.home"), fileName);
+        try(FileInputStream fis = new FileInputStream(file)) {
+            DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
+            builderFactory.setNamespaceAware(true);
+            builderFactory.setCoalescing(true);
+            builderFactory.setIgnoringElementContentWhitespace(true);
+            builderFactory.setIgnoringComments(true);
+
+            Element root = builderFactory.newDocumentBuilder().parse(fis).getDocumentElement();
+            return ConfigSnapshot.SNAPSHOT_ROOT_ELEMENT_NAME.equals(root.getLocalName());
+        } catch (Exception e) {
+            LOG.error("Could not parse XML file {}", file, e);
+            return false;
+        }
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((feature == null) ? 0 : feature.hashCode());
+        result = prime * result + (feature == null ? 0 : feature.hashCode());
         return result;
     }
 
