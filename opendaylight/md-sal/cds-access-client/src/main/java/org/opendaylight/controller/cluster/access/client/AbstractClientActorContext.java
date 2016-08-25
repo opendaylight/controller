@@ -31,7 +31,7 @@ abstract class AbstractClientActorContext implements Mutable {
         return persistenceId;
     }
 
-    final @Nonnull ActorRef self() {
+    public final @Nonnull ActorRef self() {
         return self;
     }
 }
