@@ -1,0 +1,123 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a6b29fe_5a72b511",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DistributedShardFactory.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-08-26T11:23:05Z",
+      "side": 1,
+      "message": "Class javadocs please",
+      "revId": "39433bb7d598723bc2960aedb1522f20a4b223a9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_fa8101c4",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DistributedShardFactory.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-08-26T11:23:05Z",
+      "side": 1,
+      "message": "\"at least\"",
+      "revId": "39433bb7d598723bc2960aedb1522f20a4b223a9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_3a6ff92c",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DistributedShardFactory.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-08-26T11:23:05Z",
+      "side": 1,
+      "message": "\"at least\"",
+      "revId": "39433bb7d598723bc2960aedb1522f20a4b223a9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_9a672d4d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DistributedShardedDOMDataTree.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-08-26T11:23:05Z",
+      "side": 1,
+      "message": "Class javadocs please",
+      "revId": "39433bb7d598723bc2960aedb1522f20a4b223a9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_7a4cd1c8",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DistributedShardedDOMDataTree.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 162,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-08-26T11:23:05Z",
+      "side": 1,
+      "message": "The API declares DOMDataTreeShardingConflictException or DOMDataTreeProducerException to be thrown so it should not throw undocumented, unchecked exceptions. Please wrap with one of the declared exceptions.",
+      "revId": "39433bb7d598723bc2960aedb1522f20a4b223a9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_5a4915b6",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DistributedShardedDOMDataTree.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 168,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-08-26T11:23:05Z",
+      "side": 1,
+      "message": "Same as above",
+      "revId": "39433bb7d598723bc2960aedb1522f20a4b223a9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_dad405bf",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/PrefixShardConfiguration.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-08-26T11:23:05Z",
+      "side": 1,
+      "message": "I think this class belongs in the config package",
+      "revId": "39433bb7d598723bc2960aedb1522f20a4b223a9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
