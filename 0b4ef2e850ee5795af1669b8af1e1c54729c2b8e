@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "7a6b29fe_c076d2a3",
+        "filename": "opendaylight/config/config-persister-feature-adapter/src/main/java/org/opendaylight/controller/configpusherfeature/internal/AbstractFeatureWrapper.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-08-26T18:01:06Z",
+      "side": 1,
+      "message": "yeah I thought about that . It doesn\u0027t really matter to me either way - I can change it.",
+      "parentUuid": "7a6b29fe_35d0aa1e",
+      "revId": "0b4ef2e850ee5795af1669b8af1e1c54729c2b8e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a6b29fe_d5b7b6f3",
         "filename": "opendaylight/config/config-persister-feature-adapter/src/main/java/org/opendaylight/controller/configpusherfeature/internal/AbstractFeatureWrapper.java",
         "patchSetId": 3
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "7a6b29fe_006d6acc",
+        "filename": "opendaylight/config/config-persister-feature-adapter/src/main/java/org/opendaylight/controller/configpusherfeature/internal/AbstractFeatureWrapper.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-08-26T18:01:06Z",
+      "side": 1,
+      "message": "Originally it was isConfigSnapshot but the method also returns true if it\u0027s invalid XML, in which case I let the above code log the original JAXB ex. So isConfigSnapshot is only partly true.",
+      "parentUuid": "7a6b29fe_d5b7b6f3",
+      "revId": "0b4ef2e850ee5795af1669b8af1e1c54729c2b8e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a6b29fe_f5b2b204",
         "filename": "opendaylight/config/config-persister-feature-adapter/src/main/java/org/opendaylight/controller/configpusherfeature/internal/AbstractFeatureWrapper.java",
         "patchSetId": 3
@@ -47,6 +83,24 @@
       "writtenOn": "2016-08-26T13:45:31Z",
       "side": 1,
       "message": "I think I\u0027d make this a warn and not a debug LOG.  Why?  Debug logs are never enabled, but warn are, and this is a condition which should never arise (it would signify corrupt unreadable config XML, not just an XML that\u0027s not a config snapshot, right?), so if it does, it should jump out and be seen.",
+      "revId": "0b4ef2e850ee5795af1669b8af1e1c54729c2b8e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_e0714ea9",
+        "filename": "opendaylight/config/config-persister-feature-adapter/src/main/java/org/opendaylight/controller/configpusherfeature/internal/AbstractFeatureWrapper.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-08-26T18:01:06Z",
+      "side": 1,
+      "message": "I didn\u0027t make it warn b/c the method returns true in which case the original JAXB ex will be logged. No need to log 2 warnings for the same issue.",
+      "parentUuid": "7a6b29fe_f5b2b204",
       "revId": "0b4ef2e850ee5795af1669b8af1e1c54729c2b8e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
