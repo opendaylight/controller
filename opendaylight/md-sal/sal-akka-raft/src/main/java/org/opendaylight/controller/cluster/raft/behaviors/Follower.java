@@ -56,12 +56,8 @@ public class Follower extends AbstractRaftActorBehavior {
 
     private final SyncStatusTracker initialSyncStatusTracker;
 
-    private final Procedure<ReplicatedLogEntry> appendAndPersistCallback = new Procedure<ReplicatedLogEntry>() {
-        @Override
-        public void apply(ReplicatedLogEntry logEntry) {
-            context.getReplicatedLog().captureSnapshotIfReady(logEntry);
-        }
-    };
+    private final Procedure<ReplicatedLogEntry> appendAndPersistCallback =
+            logEntry -> context.getReplicatedLog().captureSnapshotIfReady(logEntry);
 
     private final Stopwatch lastLeaderMessageTimer = Stopwatch.createStarted();
     private SnapshotTracker snapshotTracker = null;
@@ -141,6 +137,12 @@ public class Follower extends AbstractRaftActorBehavior {
         // TODO : Refactor this method into a bunch of smaller methods
         // to make it easier to read. Before refactoring ensure tests
         // cover the code properly
+
+        if (snapshotTracker != null && !snapshotTracker.getLeaderId().equals(appendEntries.getLeaderId())) {
+            LOG.debug("{}: snapshot install is in progress but the prior snapshot leaderId {} does not match the " +
+                    "AppendEntries leaderId {}", logName(), snapshotTracker.getLeaderId(), appendEntries.getLeaderId());
+            snapshotTracker = null;
+        }
 
         if (snapshotTracker != null || context.getSnapshotManager().isApplying()) {
             // if snapshot install is in progress, follower should just acknowledge append entries with a reply.
@@ -500,7 +502,7 @@ public class Follower extends AbstractRaftActorBehavior {
         leaderId = installSnapshot.getLeaderId();
 
         if(snapshotTracker == null){
-            snapshotTracker = new SnapshotTracker(LOG, installSnapshot.getTotalChunks());
+            snapshotTracker = new SnapshotTracker(LOG, installSnapshot.getTotalChunks(), installSnapshot.getLeaderId());
         }
 
         updateInitialSyncStatus(installSnapshot.getLastIncludedIndex(), installSnapshot.getLeaderId());
