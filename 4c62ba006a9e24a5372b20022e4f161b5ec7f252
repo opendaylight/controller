@@ -33,6 +33,24 @@
       "revId": "4c62ba006a9e24a5372b20022e4f161b5ec7f252",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_466ad7b3",
+        "filename": "opendaylight/md-sal/sal-dom-xsql/src/main/java/org/opendaylight/xsql/XSQLModule.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-08-29T19:03:56Z",
+      "side": 1,
+      "message": "True... that\u0027s quite funny. I\u0027ll add Sharon as reviewer to get his insight on this.",
+      "parentUuid": "7a6b29fe_a6548bff",
+      "revId": "4c62ba006a9e24a5372b20022e4f161b5ec7f252",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
