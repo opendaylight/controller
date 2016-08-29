@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a6b29fe_861b4f72",
+        "filename": "opendaylight/md-sal/sal-dom-xsql/src/main/java/org/opendaylight/xsql/XSQLModule.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-08-29T18:58:36Z",
+      "side": 1,
+      "message": "Should be formatted.",
+      "revId": "4c62ba006a9e24a5372b20022e4f161b5ec7f252",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_a6548bff",
+        "filename": "opendaylight/md-sal/sal-dom-xsql/src/main/java/org/opendaylight/xsql/XSQLModule.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-08-29T18:58:36Z",
+      "side": 1,
+      "message": "Hmm - this Runnable isn\u0027t run... I know you copied this code and it was like this before.",
+      "revId": "4c62ba006a9e24a5372b20022e4f161b5ec7f252",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
