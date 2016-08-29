@@ -9,6 +9,7 @@
 package org.opendaylight.controller.cluster.raft.behaviors;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.google.protobuf.ByteString;
 import java.util.Arrays;
 import org.slf4j.Logger;
@@ -19,14 +20,16 @@ import org.slf4j.Logger;
 public class SnapshotTracker {
     private final Logger LOG;
     private final int totalChunks;
+    private String leaderId;
     private ByteString collectedChunks = ByteString.EMPTY;
     private int lastChunkIndex = AbstractLeader.FIRST_CHUNK_INDEX - 1;
     private boolean sealed = false;
     private int lastChunkHashCode = AbstractLeader.INITIAL_LAST_CHUNK_HASH_CODE;
 
-    SnapshotTracker(Logger LOG, int totalChunks){
+    SnapshotTracker(Logger LOG, int totalChunks, String leaderId) {
         this.LOG = LOG;
         this.totalChunks = totalChunks;
+        this.leaderId = Preconditions.checkNotNull(leaderId);
     }
 
     /**
@@ -56,7 +59,7 @@ public class SnapshotTracker {
             }
         }
 
-        sealed = (chunkIndex == totalChunks);
+        sealed = chunkIndex == totalChunks;
         lastChunkIndex = chunkIndex;
         collectedChunks = collectedChunks.concat(ByteString.copyFrom(chunk));
         this.lastChunkHashCode = Arrays.hashCode(chunk);
@@ -73,6 +76,10 @@ public class SnapshotTracker {
 
     ByteString getCollectedChunks(){
         return collectedChunks;
+    }
+
+    String getLeaderId() {
+        return leaderId;
     }
 
     public static class InvalidChunkException extends Exception {

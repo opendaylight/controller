@@ -48,14 +48,14 @@ public class SnapshotTrackerTest {
 
     @Test
     public void testAddChunk() throws SnapshotTracker.InvalidChunkException {
-        SnapshotTracker tracker1 = new SnapshotTracker(logger, 5);
+        SnapshotTracker tracker1 = new SnapshotTracker(logger, 5, "leader");
 
         tracker1.addChunk(1, chunk1, Optional.<Integer>absent());
         tracker1.addChunk(2, chunk2, Optional.<Integer>absent());
         tracker1.addChunk(3, chunk3, Optional.<Integer>absent());
 
         // Verify that an InvalidChunkException is thrown when we try to add a chunk to a sealed tracker
-        SnapshotTracker tracker2 = new SnapshotTracker(logger, 2);
+        SnapshotTracker tracker2 = new SnapshotTracker(logger, 2, "leader");
 
         tracker2.addChunk(1, chunk1, Optional.<Integer>absent());
         tracker2.addChunk(2, chunk2, Optional.<Integer>absent());
@@ -68,7 +68,7 @@ public class SnapshotTrackerTest {
         }
 
         // The first chunk's index must at least be FIRST_CHUNK_INDEX
-        SnapshotTracker tracker3 = new SnapshotTracker(logger, 2);
+        SnapshotTracker tracker3 = new SnapshotTracker(logger, 2, "leader");
 
         try {
             tracker3.addChunk(AbstractLeader.FIRST_CHUNK_INDEX - 1, chunk1, Optional.<Integer>absent());
@@ -78,7 +78,7 @@ public class SnapshotTrackerTest {
         }
 
         // Out of sequence chunk indexes won't work
-        SnapshotTracker tracker4 = new SnapshotTracker(logger, 2);
+        SnapshotTracker tracker4 = new SnapshotTracker(logger, 2, "leader");
 
         tracker4.addChunk(AbstractLeader.FIRST_CHUNK_INDEX, chunk1, Optional.<Integer>absent());
 
@@ -91,7 +91,7 @@ public class SnapshotTrackerTest {
 
         // No exceptions will be thrown when invalid chunk is added with the right sequence
         // If the lastChunkHashCode is missing
-        SnapshotTracker tracker5 = new SnapshotTracker(logger, 2);
+        SnapshotTracker tracker5 = new SnapshotTracker(logger, 2, "leader");
 
         tracker5.addChunk(AbstractLeader.FIRST_CHUNK_INDEX, chunk1, Optional.<Integer>absent());
         // Look I can add the same chunk again
@@ -99,7 +99,7 @@ public class SnapshotTrackerTest {
 
         // An exception will be thrown when an invalid chunk is addedd with the right sequence
         // when the lastChunkHashCode is present
-        SnapshotTracker tracker6 = new SnapshotTracker(logger, 2);
+        SnapshotTracker tracker6 = new SnapshotTracker(logger, 2, "leader");
 
         tracker6.addChunk(AbstractLeader.FIRST_CHUNK_INDEX, chunk1, Optional.of(-1));
 
@@ -117,7 +117,7 @@ public class SnapshotTrackerTest {
     public void testGetSnapShot() throws SnapshotTracker.InvalidChunkException {
 
         // Trying to get a snapshot before all chunks have been received will throw an exception
-        SnapshotTracker tracker1 = new SnapshotTracker(logger, 5);
+        SnapshotTracker tracker1 = new SnapshotTracker(logger, 5, "leader");
 
         tracker1.addChunk(1, chunk1, Optional.<Integer>absent());
         try {
@@ -127,7 +127,7 @@ public class SnapshotTrackerTest {
 
         }
 
-        SnapshotTracker tracker2 = new SnapshotTracker(logger, 3);
+        SnapshotTracker tracker2 = new SnapshotTracker(logger, 3, "leader");
 
         tracker2.addChunk(1, chunk1, Optional.of(AbstractLeader.INITIAL_LAST_CHUNK_HASH_CODE));
         tracker2.addChunk(2, chunk2, Optional.of(Arrays.hashCode(chunk1)));
@@ -140,7 +140,7 @@ public class SnapshotTrackerTest {
 
     @Test
     public void testGetCollectedChunks() throws SnapshotTracker.InvalidChunkException {
-        SnapshotTracker tracker1 = new SnapshotTracker(logger, 5);
+        SnapshotTracker tracker1 = new SnapshotTracker(logger, 5, "leader");
 
         ByteString chunks = ByteString.copyFrom(chunk1).concat(ByteString.copyFrom(chunk2));
 
@@ -156,7 +156,7 @@ public class SnapshotTrackerTest {
         if (size > snapshotLength) {
             size = snapshotLength;
         } else {
-            if ((start + size) > snapshotLength) {
+            if (start + size > snapshotLength) {
                 size = snapshotLength - start;
             }
         }
