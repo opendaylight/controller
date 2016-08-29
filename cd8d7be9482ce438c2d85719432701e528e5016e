@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a6b29fe_8304e118",
+        "filename": "opendaylight/md-sal/sal-inmemory-datastore/src/main/resources/org/opendaylight/blueprint/inmemorydatastore.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-08-29T18:48:05Z",
+      "side": 1,
+      "message": "I think you want to use a cfg file for this. This would require the clustered data store and I don\u0027t think one would install CDS and IMDS.",
+      "revId": "cd8d7be9482ce438c2d85719432701e528e5016e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_a6064b1b",
+        "filename": "opendaylight/md-sal/sal-inmemory-datastore/src/main/resources/org/opendaylight/blueprint/inmemorydatastore.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-08-29T18:48:05Z",
+      "side": 1,
+      "message": "These would have to be advertised as services to be useful. The in-memory data broker would use them.",
+      "revId": "cd8d7be9482ce438c2d85719432701e528e5016e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
