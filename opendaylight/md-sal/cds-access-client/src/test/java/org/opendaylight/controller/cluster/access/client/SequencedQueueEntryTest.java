@@ -98,7 +98,7 @@ public class SequencedQueueEntryTest {
     @Mock
     private RequestCallback mockCallback;
     @Mock
-    private ClientActorBehavior mockBehavior;
+    private ClientActorBehavior<?> mockBehavior;
 
     private TestTicker ticker;
     private BackendInfo mockBackendInfo;
