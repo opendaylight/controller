@@ -222,7 +222,8 @@ final class SequencedQueue {
         return null;
     }
 
-    ClientActorBehavior complete(final ClientActorBehavior current, final ResponseEnvelope<?> envelope) {
+    <T extends BackendInfo> ClientActorBehavior<T> complete(final ClientActorBehavior<T> current,
+            final ResponseEnvelope<?> envelope) {
         Optional<SequencedQueueEntry> maybeEntry = findMatchingEntry(currentInflight, envelope);
         if (maybeEntry == null) {
             maybeEntry = findMatchingEntry(lastInflight, envelope);
@@ -234,7 +235,8 @@ final class SequencedQueue {
         }
 
         lastProgress = ticker.read();
-        final ClientActorBehavior ret = maybeEntry.get().complete(envelope.getMessage());
+        @SuppressWarnings("unchecked")
+        final ClientActorBehavior<T> ret = (ClientActorBehavior<T>) maybeEntry.get().complete(envelope.getMessage());
 
         // We have freed up a slot, try to transmit something
         if (backend != null) {

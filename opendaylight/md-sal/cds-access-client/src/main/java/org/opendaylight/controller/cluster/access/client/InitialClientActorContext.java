@@ -29,11 +29,11 @@ final class InitialClientActorContext extends AbstractClientActorContext {
         actor.saveSnapshot(snapshot);
     }
 
-    void deleteSnapshots(SnapshotSelectionCriteria criteria) {
+    void deleteSnapshots(final SnapshotSelectionCriteria criteria) {
         actor.deleteSnapshots(criteria);
     }
 
-    ClientActorBehavior createBehavior(final ClientIdentifier clientId) {
+    ClientActorBehavior<?> createBehavior(final ClientIdentifier clientId) {
         final ActorSystem system = actor.getContext().system();
         final ClientActorContext context = new ClientActorContext(self(), system.scheduler(), system.dispatcher(),
             persistenceId(), clientId);
