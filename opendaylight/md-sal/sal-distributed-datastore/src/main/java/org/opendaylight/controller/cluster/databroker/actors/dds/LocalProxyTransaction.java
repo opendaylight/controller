@@ -11,10 +11,12 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import javax.annotation.concurrent.NotThreadSafe;
 import org.opendaylight.controller.cluster.access.commands.AbortLocalTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.CommitLocalTransactionRequest;
+import org.opendaylight.controller.cluster.access.concepts.Request;
 import org.opendaylight.controller.cluster.access.concepts.Response;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
@@ -48,9 +50,9 @@ final class LocalProxyTransaction extends AbstractProxyTransaction {
     private final TransactionIdentifier identifier;
     private DataTreeModification modification;
 
-    LocalProxyTransaction(final DistributedDataStoreClientBehavior client,
-        final TransactionIdentifier identifier, final DataTreeSnapshot snapshot) {
-        super(client);
+    LocalProxyTransaction(final ProxyHistory parent, final TransactionIdentifier identifier,
+        final DataTreeSnapshot snapshot) {
+        super(parent);
         this.identifier = Preconditions.checkNotNull(identifier);
         this.modification = snapshot.newModification();
     }
@@ -102,5 +104,11 @@ final class LocalProxyTransaction extends AbstractProxyTransaction {
     @Override
     void doSeal() {
         modification.ready();
+    }
+
+    @Override
+    void replaySuccessfulRequests(final BiConsumer<Request<?, ?>, Consumer<Response<?, ?>>> replayTo) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException();
     }
 }

@@ -12,8 +12,8 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterables;
 import com.google.common.util.concurrent.CheckedFuture;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
@@ -56,7 +56,7 @@ public final class ClientTransaction extends LocalAbortable implements Identifia
     private static final int OPEN_STATE = 0;
     private static final int CLOSED_STATE = 1;
 
-    private final Map<Long, AbstractProxyTransaction> proxies = new HashMap<>();
+    private final Map<Long, AbstractProxyTransaction> proxies = new ConcurrentHashMap<>();
     private final TransactionIdentifier transactionId;
     private final AbstractClientHistory parent;
 
@@ -78,8 +78,7 @@ public final class ClientTransaction extends LocalAbortable implements Identifia
     private AbstractProxyTransaction ensureProxy(final YangInstanceIdentifier path) {
         checkNotClosed();
 
-        final ModuleShardBackendResolver resolver = parent.getClient().resolver();
-        final Long shard = resolver.resolveShardForPath(path);
+        final Long shard = parent.getResolver().resolveShardForPath(path);
         return proxies.computeIfAbsent(shard, this::createProxy);
     }
 
@@ -110,13 +109,13 @@ public final class ClientTransaction extends LocalAbortable implements Identifia
 
     private boolean ensureClosed() {
         final int local = state;
-        if (local != CLOSED_STATE) {
-            final boolean success = STATE_UPDATER.compareAndSet(this, OPEN_STATE, CLOSED_STATE);
-            Preconditions.checkState(success, "Transaction %s raced during close", this);
-            return true;
-        } else {
+        if (local == CLOSED_STATE) {
             return false;
         }
+
+        final boolean success = STATE_UPDATER.compareAndSet(this, OPEN_STATE, CLOSED_STATE);
+        Preconditions.checkState(success, "Transaction %s raced during close", this);
+        return true;
     }
 
     public DOMStoreThreePhaseCommitCohort ready() {

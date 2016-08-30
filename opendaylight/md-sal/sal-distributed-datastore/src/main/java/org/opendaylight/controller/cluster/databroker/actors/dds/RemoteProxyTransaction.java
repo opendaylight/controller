@@ -12,6 +12,7 @@ import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import org.opendaylight.controller.cluster.access.commands.AbstractReadTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.ExistsTransactionRequest;
@@ -25,6 +26,7 @@ import org.opendaylight.controller.cluster.access.commands.TransactionMerge;
 import org.opendaylight.controller.cluster.access.commands.TransactionModification;
 import org.opendaylight.controller.cluster.access.commands.TransactionSuccess;
 import org.opendaylight.controller.cluster.access.commands.TransactionWrite;
+import org.opendaylight.controller.cluster.access.concepts.Request;
 import org.opendaylight.controller.cluster.access.concepts.RequestFailure;
 import org.opendaylight.controller.cluster.access.concepts.Response;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
@@ -59,9 +61,8 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
 
     private volatile Exception operationFailure;
 
-    RemoteProxyTransaction(final DistributedDataStoreClientBehavior client,
-        final TransactionIdentifier identifier) {
-        super(client);
+    RemoteProxyTransaction(final ProxyHistory parent, final TransactionIdentifier identifier) {
+        super(parent);
         builder = new ModifyTransactionRequestBuilder(identifier, localActor());
     }
 
@@ -216,5 +217,11 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
     @Override
     void doSeal() {
         // No-op
+    }
+
+    @Override
+    void replaySuccessfulRequests(final BiConsumer<Request<?, ?>, Consumer<Response<?, ?>>> replayTo) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException();
     }
 }

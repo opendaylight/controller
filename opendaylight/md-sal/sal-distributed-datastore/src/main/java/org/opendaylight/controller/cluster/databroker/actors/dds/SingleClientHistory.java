@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
-import java.util.Optional;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.slf4j.Logger;
@@ -34,8 +33,8 @@ final class SingleClientHistory extends AbstractClientHistory {
     }
 
     @Override
-    AbstractProxyHistory createHistoryProxy(final LocalHistoryIdentifier historyId,
-            final Optional<ShardBackendInfo> backendInfo) {
-        return AbstractProxyHistory.createSingle(getClient(), backendInfo, historyId);
+    ProxyHistory createHistoryProxy(final LocalHistoryIdentifier historyId,
+            final AbstractClientConnection connection) {
+        return ProxyHistory.createSingle(connection, historyId);
     }
 }
