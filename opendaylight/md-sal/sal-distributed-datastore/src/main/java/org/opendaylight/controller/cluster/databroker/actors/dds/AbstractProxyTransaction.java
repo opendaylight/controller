@@ -23,6 +23,7 @@ import org.opendaylight.controller.cluster.access.commands.TransactionDoCommitRe
 import org.opendaylight.controller.cluster.access.commands.TransactionPreCommitRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionPreCommitSuccess;
 import org.opendaylight.controller.cluster.access.commands.TransactionRequest;
+import org.opendaylight.controller.cluster.access.concepts.RequestException;
 import org.opendaylight.controller.cluster.access.concepts.RequestFailure;
 import org.opendaylight.controller.cluster.access.concepts.Response;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
@@ -45,17 +46,18 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
  * @author Robert Varga
  */
 abstract class AbstractProxyTransaction implements Identifiable<TransactionIdentifier> {
-    private final DistributedDataStoreClientBehavior client;
+    private final ProxyHistory parent;
 
+    private AbstractProxyTransaction successor;
     private long sequence;
     private boolean sealed;
 
-    AbstractProxyTransaction(final DistributedDataStoreClientBehavior client) {
-        this.client = Preconditions.checkNotNull(client);
+    AbstractProxyTransaction(final ProxyHistory parent) {
+        this.parent = Preconditions.checkNotNull(parent);
     }
 
     final ActorRef localActor() {
-        return client.self();
+        return parent.localActor();
     }
 
     final long nextSequence() {
@@ -88,11 +90,11 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
     }
 
     final void sendRequest(final TransactionRequest<?> request, final Consumer<Response<?, ?>> completer) {
-        client.sendRequest(request, completer);
+        parent.sendRequest(request, completer);
     }
 
     /**
-     * Seals this transaction when ready.
+     * Seal this transaction before it is either committed or aborted.
      */
     final void seal() {
         checkSealed();
@@ -113,20 +115,6 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
         doAbort();
     }
 
-    void abort(final VotingFuture<Void> ret) {
-        checkSealed();
-
-        sendRequest(new TransactionAbortRequest(getIdentifier(), nextSequence(), localActor()), t -> {
-            if (t instanceof TransactionAbortSuccess) {
-                ret.voteYes();
-            } else if (t instanceof RequestFailure) {
-                ret.voteNo(((RequestFailure<?, ?>) t).getCause());
-            } else {
-                ret.voteNo(new IllegalStateException("Unhandled response " + t.getClass()));
-            }
-        });
-    }
-
     /**
      * Commit this transaction, possibly in a coordinated fashion.
      *
@@ -145,8 +133,26 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
             } else {
                 ret.setException(new IllegalStateException("Unhandled response " + t.getClass()));
             }
+
+            parent.completeTransaction(this);
         });
         return ret;
+    }
+
+    void abort(final VotingFuture<Void> ret) {
+        checkSealed();
+
+        sendRequest(new TransactionAbortRequest(getIdentifier(), nextSequence(), localActor()), t -> {
+            if (t instanceof TransactionAbortSuccess) {
+                ret.voteYes();
+            } else if (t instanceof RequestFailure) {
+                ret.voteNo(((RequestFailure<?, ?>) t).getCause());
+            } else {
+                ret.voteNo(new IllegalStateException("Unhandled response " + t.getClass()));
+            }
+
+            parent.completeTransaction(this);
+        });
     }
 
     void canCommit(final VotingFuture<?> ret) {
@@ -188,10 +194,35 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
             } else {
                 ret.voteNo(new IllegalStateException("Unhandled response " + t.getClass()));
             }
+
+            parent.completeTransaction(this);
         });
     }
 
-    abstract TransactionRequest<?> doCommit(boolean coordinated);
+    void replaySuccessfulRequests(final AbstractProxyTransaction successor) {
+        this.successor = Preconditions.checkNotNull(successor);
+    }
+
+    /**
+     * Invoked from a retired connection for requests which have been in-flight and need to be re-adjusted
+     * and forwarded to the successor connection.
+     *
+     * @param request Request to be forwarded
+     * @param callback Original callback
+     * @throws RequestException when the request is unhandled by the successor
+     */
+    final void replayRequest(final TransactionRequest<?> request, final Consumer<Response<?, ?>> callback)
+            throws RequestException {
+        Preconditions.checkState(successor != null, "%s does not have a successor set", this);
+
+        if (successor instanceof LocalProxyTransaction) {
+            forwardToLocal((LocalProxyTransaction)successor, request, callback);
+        } else if (successor instanceof RemoteProxyTransaction) {
+            forwardToRemote((RemoteProxyTransaction)successor, request, callback);
+        } else {
+            throw new IllegalStateException("Unhandled successor " + successor);
+        }
+    }
 
     abstract void doDelete(final YangInstanceIdentifier path);
 
@@ -207,4 +238,29 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
     abstract void doSeal();
 
     abstract void doAbort();
+
+    abstract TransactionRequest<?> doCommit(boolean coordinated);
+
+    /**
+     * Invoked from {@link RemoteProxyTransaction} when it replays its successful requests to its successor. There is
+     * no equivalent of this call from {@link LocalProxyTransaction} because it does not send a request until all
+     * operations are packaged in the message.
+     *
+     * Note: this method is invoked by the predecessor on the successor.
+     *
+     * @param request Request which needs to be forwarded.
+     */
+    abstract void handleForwardedRemoteRequest(TransactionRequest<?> request);
+
+    /**
+     * Replay a request originating in this proxy to a successor remote proxy.
+     */
+    abstract void forwardToRemote(RemoteProxyTransaction successor, TransactionRequest<?> request,
+            Consumer<Response<?, ?>> callback) throws RequestException;
+
+    /**
+     * Replay a request originating in this proxy to a successor local proxy.
+     */
+    abstract void forwardToLocal(LocalProxyTransaction successor, TransactionRequest<?> request,
+            Consumer<Response<?, ?>> callback) throws RequestException;
 }
