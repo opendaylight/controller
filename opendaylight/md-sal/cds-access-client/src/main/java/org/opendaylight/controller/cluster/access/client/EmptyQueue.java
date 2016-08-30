@@ -12,6 +12,7 @@ import java.util.AbstractQueue;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Queue;
+import org.opendaylight.yangtools.concepts.Immutable;
 
 /**
  * A specialized always-empty implementation of {@link java.util.Queue}. This implementation will always refuse new
@@ -23,7 +24,7 @@ import java.util.Queue;
  */
 // TODO: move this class into yangtools.util
 @Beta
-public final class EmptyQueue<E> extends AbstractQueue<E> {
+public final class EmptyQueue<E> extends AbstractQueue<E> implements Immutable {
     private static final EmptyQueue<?> INSTANCE = new EmptyQueue<>();
 
     private EmptyQueue() {
