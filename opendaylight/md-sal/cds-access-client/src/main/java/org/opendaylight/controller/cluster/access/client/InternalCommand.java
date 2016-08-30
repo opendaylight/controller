@@ -17,12 +17,12 @@ import javax.annotation.Nullable;
  * @author Robert Varga
  */
 @FunctionalInterface
-public interface InternalCommand {
+public interface InternalCommand<T extends BackendInfo> {
     /**
      * Run command actions.
      *
      * @param currentBehavior Current Behavior
      * @return Next behavior to use in the client actor
      */
-    @Nullable ClientActorBehavior execute(@Nonnull ClientActorBehavior currentBehavior);
+    @Nullable ClientActorBehavior<T> execute(@Nonnull ClientActorBehavior<T> currentBehavior);
 }
