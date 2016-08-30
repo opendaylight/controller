@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a6b29fe_e63e83d9",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/FollowerTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 896,
+      "author": {
+        "id": 3635
+      },
+      "writtenOn": "2016-08-30T00:28:32Z",
+      "side": 1,
+      "message": "awesome name :)",
+      "range": {
+        "startLine": 896,
+        "startChar": 19,
+        "endLine": 896,
+        "endChar": 21
+      },
+      "revId": "7c7aeb3294cf7ac3b5ec45a40de5c568401aefbd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
