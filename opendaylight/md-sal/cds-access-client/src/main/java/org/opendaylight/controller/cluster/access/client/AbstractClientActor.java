@@ -67,5 +67,5 @@ public abstract class AbstractClientActor extends UntypedPersistentActor {
         switchBehavior(currentBehavior.onReceiveRecover(recover));
     }
 
-    protected abstract ClientActorBehavior initialBehavior(ClientActorContext context);
+    protected abstract ClientActorBehavior<?> initialBehavior(ClientActorContext context);
 }
