@@ -20,7 +20,7 @@ import org.opendaylight.controller.cluster.access.ABIVersion;
  * <p>
  * This class is not final so concrete actor behavior implementations may subclass it and track more information about
  * the backend. The {@link #hashCode()} and {@link #equals(Object)} methods are made final to ensure subclasses compare
- * on identity.
+ * on object identity.
  *
  * @author Robert Varga
  */
