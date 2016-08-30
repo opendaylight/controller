@@ -102,7 +102,7 @@ public class SequencedQueueTest {
     @Mock
     private RequestCallback mockCallback;
     @Mock
-    private ClientActorBehavior mockBehavior;
+    private ClientActorBehavior<?> mockBehavior;
 
     private TestTicker ticker;
     private BackendInfo mockBackendInfo;
@@ -381,7 +381,7 @@ public class SequencedQueueTest {
 
     @Test
     public void testCompleteEmpty() {
-        final ClientActorBehavior ret = queue.complete(mockBehavior, mockResponseEnvelope);
+        final ClientActorBehavior<?> ret = queue.complete(mockBehavior, mockResponseEnvelope);
         assertSame(mockBehavior, ret);
         verifyNoMoreInteractions(mockCallback);
     }
@@ -392,7 +392,7 @@ public class SequencedQueueTest {
 
         queue.enqueueRequest(mockRequest, mockCallback);
 
-        ClientActorBehavior ret = queue.complete(mockBehavior, mockResponseEnvelope);
+        ClientActorBehavior<?> ret = queue.complete(mockBehavior, mockResponseEnvelope);
         verify(mockCallback).complete(mockResponse);
         assertSame(mockBehavior, ret);
 
@@ -409,7 +409,7 @@ public class SequencedQueueTest {
 
         doReturn(null).when(mockCallback).complete(mockResponse);
 
-        ClientActorBehavior ret = queue.complete(mockBehavior, mockResponseEnvelope);
+        ClientActorBehavior<?> ret = queue.complete(mockBehavior, mockResponseEnvelope);
         verify(mockCallback).complete(mockResponse);
         assertNull(ret);
     }

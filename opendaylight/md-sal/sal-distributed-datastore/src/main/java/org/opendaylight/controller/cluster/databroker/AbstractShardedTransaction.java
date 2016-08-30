@@ -9,7 +9,7 @@ package org.opendaylight.controller.cluster.databroker;
 
 import com.google.common.base.Preconditions;
 import org.opendaylight.controller.cluster.databroker.actors.dds.ClientTransaction;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransaction;
+import org.opendaylight.mdsal.dom.spi.store.DOMStoreTransaction;
 
 /**
  * Abstract base class for concrete {@link DOMStoreTransaction} implementations. It holds a reference to the associated

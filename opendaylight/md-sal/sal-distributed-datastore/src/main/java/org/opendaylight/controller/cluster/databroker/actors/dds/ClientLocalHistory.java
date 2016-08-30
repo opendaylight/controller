@@ -9,8 +9,7 @@ package org.opendaylight.controller.cluster.databroker.actors.dds;
 
 import com.google.common.annotations.Beta;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Verify;
-import java.util.Optional;
+import org.opendaylight.controller.cluster.access.client.AbstractClientConnection;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 
@@ -20,14 +19,14 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
  *
  * <p>
  * This interface is used by the world outside of the actor system and in the actor system it is manifested via
- * its client actor. That requires some state transfer with {@link DistributedDataStoreClientBehavior}. In order to
+ * its client actor. That requires some state transfer with {@link AbstractDataStoreClientBehavior}. In order to
  * reduce request latency, all messages are carbon-copied (and enqueued first) to the client actor.
  *
  * @author Robert Varga
  */
 @Beta
 public final class ClientLocalHistory extends AbstractClientHistory implements AutoCloseable {
-    ClientLocalHistory(final DistributedDataStoreClientBehavior client, final LocalHistoryIdentifier historyId) {
+    ClientLocalHistory(final AbstractDataStoreClientBehavior client, final LocalHistoryIdentifier historyId) {
         super(client, historyId);
     }
 
@@ -52,17 +51,25 @@ public final class ClientLocalHistory extends AbstractClientHistory implements A
     @Override
     AbstractTransactionCommitCohort onTransactionReady(final TransactionIdentifier txId,
             final AbstractTransactionCommitCohort cohort) {
-        // FIXME: deal with CLOSED here
         final State local = state();
-        Verify.verify(local == State.TX_OPEN, "Local history %s is in unexpected state %s", this, local);
-        updateState(local, State.IDLE);
+        switch (local) {
+            case CLOSED:
+                return super.onTransactionReady(txId, cohort);
+            case IDLE:
+                throw new IllegalStateException(String.format("Local history %s is idle when readying transaction %s",
+                    this, txId));
+            case TX_OPEN:
+                updateState(local, State.IDLE);
+                return super.onTransactionReady(txId, cohort);
+            default:
+                throw new IllegalStateException(String.format("Local history %s in unhandled state %s", this, local));
 
-        return super.onTransactionReady(txId, cohort);
+        }
     }
 
     @Override
-    AbstractProxyHistory createHistoryProxy(final LocalHistoryIdentifier historyId,
-            final Optional<ShardBackendInfo> backendInfo) {
-        return AbstractProxyHistory.createClient(getClient(), backendInfo, historyId);
+    ProxyHistory createHistoryProxy(final LocalHistoryIdentifier historyId,
+            final AbstractClientConnection<ShardBackendInfo> connection) {
+        return ProxyHistory.createClient(connection, historyId);
     }
 }
