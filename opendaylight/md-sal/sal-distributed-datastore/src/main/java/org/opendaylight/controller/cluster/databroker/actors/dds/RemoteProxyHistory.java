@@ -11,13 +11,13 @@ import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifie
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 
 final class RemoteProxyHistory extends AbstractProxyHistory {
-    RemoteProxyHistory(DistributedDataStoreClientBehavior client, LocalHistoryIdentifier identifier) {
-        super(client, identifier);
+    RemoteProxyHistory(final AbstractClientConnection connection, final LocalHistoryIdentifier identifier) {
+        super(connection, identifier);
     }
 
     @Override
-    AbstractProxyTransaction doCreateTransactionProxy(final DistributedDataStoreClientBehavior client,
+    AbstractProxyTransaction doCreateTransactionProxy(final AbstractClientConnection connection,
             final TransactionIdentifier txId) {
-        return new RemoteProxyTransaction(client, txId);
+        return new RemoteProxyTransaction(connection, txId);
     }
 }
