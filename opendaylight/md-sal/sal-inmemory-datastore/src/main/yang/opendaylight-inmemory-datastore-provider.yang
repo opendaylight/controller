@@ -23,6 +23,7 @@ module opendaylight-inmemory-datastore-provider {
             base config:module-type;
             config:provided-service config-dom-store-spi:config-dom-datastore;
             config:java-name-prefix InMemoryConfigDataStoreProvider;
+            status deprecated;
     }
 
         // This is the definition of the service implementation as a module identity.
@@ -31,6 +32,7 @@ module opendaylight-inmemory-datastore-provider {
             base config:module-type;
             config:provided-service operational-dom-store-spi:operational-dom-datastore;
             config:java-name-prefix InMemoryOperationalDataStoreProvider;
+            status deprecated;
     }
 
     grouping datastore-configuration {
