@@ -16,6 +16,11 @@
 * Do not modify this file unless it is present under src/main directory
 */
 package org.opendaylight.controller.config.yang.inmemory_datastore_provider;
+
+/**
+ * The in-memory data store isn't used anymore. Deprecation notice in Carbon. Removal plan in Nitrogen.
+ */
+@Deprecated
 public class InMemoryConfigDataStoreProviderModuleFactory extends org.opendaylight.controller.config.yang.inmemory_datastore_provider.AbstractInMemoryConfigDataStoreProviderModuleFactory {
 
 }
