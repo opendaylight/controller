@@ -15,9 +15,9 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
 abstract class AbstractLocalProxyHistory extends AbstractProxyHistory {
     private final DataTree dataTree;
 
-    AbstractLocalProxyHistory(final DistributedDataStoreClientBehavior client, final LocalHistoryIdentifier identifier,
+    AbstractLocalProxyHistory(final AbstractClientConnection connection, final LocalHistoryIdentifier identifier,
         final DataTree dataTree) {
-        super(client, identifier);
+        super(connection, identifier);
         this.dataTree = Preconditions.checkNotNull(dataTree);
     }
 

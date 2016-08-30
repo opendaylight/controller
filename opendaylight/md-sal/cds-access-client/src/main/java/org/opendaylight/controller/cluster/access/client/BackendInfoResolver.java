@@ -87,7 +87,7 @@ public abstract class BackendInfoResolver<T extends BackendInfo> {
 
     // This is what the client needs to start processing. For as long as we do not have this, we should not complete
     // this stage until we have this information
-    final CompletionStage<? extends T> getBackendInfo(final Long cookie) {
+    public final CompletionStage<? extends T> getBackendInfo(final Long cookie) {
         return lookupBackend(cookie);
     }
 
