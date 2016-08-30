@@ -12,6 +12,8 @@ import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.function.Consumer;
 import org.opendaylight.controller.cluster.access.commands.AbstractReadTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.ExistsTransactionRequest;
@@ -25,6 +27,7 @@ import org.opendaylight.controller.cluster.access.commands.TransactionMerge;
 import org.opendaylight.controller.cluster.access.commands.TransactionModification;
 import org.opendaylight.controller.cluster.access.commands.TransactionSuccess;
 import org.opendaylight.controller.cluster.access.commands.TransactionWrite;
+import org.opendaylight.controller.cluster.access.concepts.Request;
 import org.opendaylight.controller.cluster.access.concepts.RequestFailure;
 import org.opendaylight.controller.cluster.access.concepts.Response;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
@@ -53,15 +56,15 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
     // FIXME: make this tuneable
     private static final int REQUEST_MAX_MODIFICATIONS = 1000;
 
+    private final Collection<Request<?, ?>> successfulRequests = new ArrayList<>();
     private final ModifyTransactionRequestBuilder builder;
 
     private boolean builderBusy;
 
     private volatile Exception operationFailure;
 
-    RemoteProxyTransaction(final DistributedDataStoreClientBehavior client,
-        final TransactionIdentifier identifier) {
-        super(client);
+    RemoteProxyTransaction(final ProxyHistory parent, final TransactionIdentifier identifier) {
+        super(parent);
         builder = new ModifyTransactionRequestBuilder(identifier, localActor());
     }
 
@@ -134,10 +137,10 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
     }
 
     private void flushBuilder() {
-        final ModifyTransactionRequest message = builder.build();
+        final ModifyTransactionRequest request = builder.build();
         builderBusy = false;
 
-        sendRequest(message, this::completeModify);
+        sendRequest(request, response -> completeModify(request, response));
     }
 
     private void appendModification(final TransactionModification modification) {
@@ -153,11 +156,12 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
         }
     }
 
-    private void completeModify(final Response<?, ?> response) {
-        LOG.debug("Modification request completed with {}", response);
+    private void completeModify(final Request<?, ?> request, final Response<?, ?> response) {
+        LOG.debug("Modification request {} completed with {}", request, response);
 
         if (response instanceof TransactionSuccess) {
-            // Happy path no-op
+            // Happy path
+            successfulRequests.add(request);
         } else {
             recordFailedResponse(response);
         }
@@ -216,5 +220,15 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
     @Override
     void doSeal() {
         // No-op
+    }
+
+    @Override
+    void replaySuccessfulRequests(final ConnectedClientConnection newConnection) {
+        for (Request<?, ?> req : successfulRequests) {
+            // FIXME: do not use sendRequest() once we have throttling in place, as we have already waited the
+            //        period required to get into the queue.
+            newConnection.sendRequest(req, response -> completeModify(req, response));
+        }
+        successfulRequests.clear();
     }
 }

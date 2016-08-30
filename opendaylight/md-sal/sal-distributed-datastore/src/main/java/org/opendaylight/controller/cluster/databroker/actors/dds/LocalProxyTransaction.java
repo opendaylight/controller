@@ -12,6 +12,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
 import java.util.function.Consumer;
+import javax.annotation.concurrent.GuardedBy;
 import javax.annotation.concurrent.NotThreadSafe;
 import org.opendaylight.controller.cluster.access.commands.AbortLocalTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.CommitLocalTransactionRequest;
@@ -47,10 +48,12 @@ final class LocalProxyTransaction extends AbstractProxyTransaction {
 
     private final TransactionIdentifier identifier;
     private DataTreeModification modification;
+    @GuardedBy("this")
+    private ConnectedClientConnection nextConnection;
 
-    LocalProxyTransaction(final DistributedDataStoreClientBehavior client,
-        final TransactionIdentifier identifier, final DataTreeSnapshot snapshot) {
-        super(client);
+    LocalProxyTransaction(final ProxyHistory parent, final TransactionIdentifier identifier,
+        final DataTreeSnapshot snapshot) {
+        super(parent);
         this.identifier = Preconditions.checkNotNull(identifier);
         this.modification = snapshot.newModification();
     }
@@ -100,7 +103,27 @@ final class LocalProxyTransaction extends AbstractProxyTransaction {
     }
 
     @Override
-    void doSeal() {
+    synchronized void doSeal() {
         modification.ready();
+        if (nextConnection != null) {
+            LOG.debug("Resuming replay of {} to connection {}", this, nextConnection);
+
+            // FIXME: check if the connection is still local and talks to the same data tree. Based on that check,
+            //        there are three possible outcomes:
+            //        - happy path, where reconnect has resolved to the same backend (unrestarted) and we do not have
+            //          to do anything
+            //        - local connection, where we need to acquire a new modification, replay the one we have on top
+            //          of it and keep working in local mode
+            //        - remote connection, where we need to replay the modifications, effectively issuing events
+            //          the user has emitted
+
+            throw new UnsupportedOperationException();
+        }
+    }
+
+    @Override
+    synchronized void replaySuccessfulRequests(final ConnectedClientConnection newConnection) {
+        LOG.debug("Delaying replay of {} to connection {}", this, newConnection);
+        nextConnection = Preconditions.checkNotNull(newConnection);
     }
 }
