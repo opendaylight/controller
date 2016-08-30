@@ -19,5 +19,5 @@ public interface RequestCallback {
      * @param response Response to the request
      * @return Next client actor behavior
      */
-    @Nullable ClientActorBehavior complete(@Nonnull Response<?, ?> response);
+    @Nullable ClientActorBehavior<?> complete(@Nonnull Response<?, ?> response);
 }

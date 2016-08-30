@@ -44,8 +44,8 @@ public class ClientActorContext extends AbstractClientActorContext implements Id
     private static final Logger LOG = LoggerFactory.getLogger(ClientActorContext.class);
 
     private final Map<Long, SequencedQueue> queues = new ConcurrentHashMap<>();
-    private final ClientIdentifier identifier;
     private final ExecutionContext executionContext;
+    private final ClientIdentifier identifier;
     private final Scheduler scheduler;
 
     // Hidden to avoid subclassing
@@ -80,11 +80,12 @@ public class ClientActorContext extends AbstractClientActorContext implements Id
      *
      * @param command Block of code which needs to be execute
      */
-    public void executeInActor(@Nonnull final InternalCommand command) {
+    public <T extends BackendInfo> void executeInActor(@Nonnull final InternalCommand<T> command) {
         self().tell(Preconditions.checkNotNull(command), ActorRef.noSender());
     }
 
-    public Cancellable executeInActor(@Nonnull final InternalCommand command, final FiniteDuration delay) {
+    public<T extends BackendInfo> Cancellable executeInActor(@Nonnull final InternalCommand<T> command,
+            final FiniteDuration delay) {
         return scheduler.scheduleOnce(Preconditions.checkNotNull(delay), self(), Preconditions.checkNotNull(command),
             executionContext, ActorRef.noSender());
     }
@@ -97,7 +98,8 @@ public class ClientActorContext extends AbstractClientActorContext implements Id
         queues.remove(queue.getCookie(), queue);
     }
 
-    ClientActorBehavior completeRequest(final ClientActorBehavior current, final ResponseEnvelope<?> response) {
+    <T extends BackendInfo> ClientActorBehavior<T> completeRequest(final ClientActorBehavior<T> current,
+            final ResponseEnvelope<?> response) {
         final WritableIdentifier id = response.getMessage().getTarget();
 
         // FIXME: this will need to be updated for other Request/Response types to extract cookie
@@ -108,9 +110,9 @@ public class ClientActorContext extends AbstractClientActorContext implements Id
         if (queue == null) {
             LOG.info("{}: Ignoring unknown response {}", persistenceId(), response);
             return current;
-        } else {
-            return queue.complete(current, response);
         }
+
+        return queue.complete(current, response);
     }
 
     void poison(final RequestException cause) {
