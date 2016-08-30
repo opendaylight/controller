@@ -9,18 +9,30 @@ package org.opendaylight.controller.cluster.databroker.actors.dds;
 
 import akka.actor.ActorRef;
 import akka.actor.Status;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import com.google.common.base.Verify;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.Consumer;
+import javax.annotation.concurrent.GuardedBy;
+import org.opendaylight.controller.cluster.access.client.AbstractClientConnection;
 import org.opendaylight.controller.cluster.access.client.ClientActorBehavior;
 import org.opendaylight.controller.cluster.access.client.ClientActorContext;
-import org.opendaylight.controller.cluster.access.commands.TransactionRequest;
+import org.opendaylight.controller.cluster.access.client.ConnectedClientConnection;
+import org.opendaylight.controller.cluster.access.client.ConnectingClientConnection;
+import org.opendaylight.controller.cluster.access.client.InversibleLock;
+import org.opendaylight.controller.cluster.access.client.InversibleLockException;
+import org.opendaylight.controller.cluster.access.client.ReconnectingClientConnection;
+import org.opendaylight.controller.cluster.access.concepts.FailureEnvelope;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
-import org.opendaylight.controller.cluster.access.concepts.Response;
+import org.opendaylight.controller.cluster.access.concepts.ResponseEnvelope;
+import org.opendaylight.controller.cluster.access.concepts.SuccessEnvelope;
+import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
+import org.opendaylight.yangtools.concepts.WritableIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,6 +71,23 @@ final class DistributedDataStoreClientBehavior extends ClientActorBehavior imple
     private static final Logger LOG = LoggerFactory.getLogger(DistributedDataStoreClientBehavior.class);
 
     private final Map<LocalHistoryIdentifier, ClientLocalHistory> histories = new ConcurrentHashMap<>();
+
+    /**
+     * Map of connections to the backend. This map is concurrent to allow lookups, but given complex operations
+     * involved in connection transitions it is protected by a {@link InversibleLock}. Write-side of the lock is taken
+     * during connection transitions. Optimistic read-side of the lock is taken when new connections are introduced
+     * into the map.
+     *
+     * <p>
+     * The lock detects potential AB/BA deadlock scenarios and will force the reader side out by throwing
+     * a {@link InversibleLockException} -- which must be propagated up, releasing locks as it propagates. The initial
+     * entry point causing the the conflicting lookup must then call {@link InversibleLockException#awaitResolution()}
+     * before retrying the operation.
+     */
+    // TODO: it should be possible to move these two into ClientActorBehavior (or ClientActorContext).
+    private final Map<Long, AbstractClientConnection<ShardBackendInfo>> connections = new ConcurrentHashMap<>();
+    private final InversibleLock connectionsLock = new InversibleLock();
+
     private final AtomicLong nextHistoryId = new AtomicLong(1);
     private final ModuleShardBackendResolver resolver;
     private final SingleClientHistory singleHistory;
@@ -79,7 +108,7 @@ final class DistributedDataStoreClientBehavior extends ClientActorBehavior imple
 
     @Override
     protected void haltClient(final Throwable cause) {
-        // If we have encountered a previous problem there is not cleanup necessary, as we have already cleaned up
+        // If we have encountered a previous problem there is no cleanup necessary, as we have already cleaned up
         // Thread safely is not an issue, as both this method and any failures are executed from the same (client actor)
         // thread.
         if (aborted != null) {
@@ -114,29 +143,134 @@ final class DistributedDataStoreClientBehavior extends ClientActorBehavior imple
         return this;
     }
 
+    private void backendConnectFinished(final Long shard, final AbstractClientConnection<ShardBackendInfo> conn,
+            final ShardBackendInfo backend, final Throwable failure) {
+        if (failure != null) {
+            LOG.error("{}: failed to resolve shard {}", persistenceId(), shard, failure);
+            return;
+        }
+
+        final long stamp = connectionsLock.writeLock();
+        try {
+            // Bring the connection up
+            final ConnectedClientConnection<ShardBackendInfo> newConn = connectionUp(shard, conn, backend);
+
+            // Make sure new lookups pick up the new connection
+            connections.replace(shard, conn, newConn);
+            LOG.debug("{}: replaced connection {} with {}", persistenceId(), conn, newConn);
+        } finally {
+            connectionsLock.unlockWrite(stamp);
+        }
+    }
+
+    /*
+     * The connection has resolved, which means we have to potentially perform message adaptation. This is a bit more
+     * involved, as the messages need to be replayed to the individual proxies.
+     */
+    @GuardedBy("connectionsLock")
+    private ConnectedClientConnection<ShardBackendInfo> connectionUp(final Long shard,
+            final AbstractClientConnection<ShardBackendInfo> conn, final ShardBackendInfo backend) {
+
+        // Step 0: create a new connected connection
+        final ConnectedClientConnection<ShardBackendInfo> newConn = new ConnectedClientConnection<>(conn.context(),
+                shard, backend);
+
+        LOG.debug("{}: resolving connection {} to {}", persistenceId(), conn, newConn);
+
+        final Collection<HistoryReconnectCohort> cohorts = new ArrayList<>();
+        try {
+            // Step 1: Freeze all AbstractProxyHistory instances pointing to that shard. This indirectly means that no
+            //         further TransactionProxies can be created and we can safely traverse maps without risking
+            //         missing an entry
+            startReconnect(singleHistory, shard, newConn, cohorts);
+            for (ClientLocalHistory h : histories.values()) {
+                startReconnect(h, shard, newConn, cohorts);
+            }
+
+            // Step 2: Collect previous successful requests from the cohorts. We do not want to expose
+            //         the non-throttling interface to the connection, hence we use a wrapper consumer
+            for (HistoryReconnectCohort c : cohorts) {
+                c.replaySuccessfulRequests();
+            }
+
+            // Step 3: Install a forwarder, which will forward requests back to affected cohorts. Any outstanding
+            //         requests will be immediately sent to it and requests being sent concurrently will get forwarded
+            //         once they hit the new connection.
+            conn.setForwarder(BouncingReconnectForwarder.forCohorts(newConn, cohorts));
+        } finally {
+            // Step 4: Complete switchover of the connection. The cohorts can resume normal operations.
+            for (HistoryReconnectCohort c : cohorts) {
+                c.close();
+            }
+        }
+
+        return newConn;
+    }
+
+    private static void startReconnect(final AbstractClientHistory history, final Long shard,
+            final ConnectedClientConnection<ShardBackendInfo> newConn,
+            final Collection<HistoryReconnectCohort> cohorts) {
+        final HistoryReconnectCohort cohort = history.startReconnect(shard, newConn);
+        if (cohort != null) {
+            cohorts.add(cohort);
+        }
+    }
+
+    private void onResponse(final ResponseEnvelope<?> response) {
+        final WritableIdentifier id = response.getMessage().getTarget();
+
+        // FIXME: this will need to be updated for other Request/Response types to extract cookie
+        Preconditions.checkArgument(id instanceof TransactionIdentifier);
+        final TransactionIdentifier txId = (TransactionIdentifier) id;
+
+        final AbstractClientConnection<ShardBackendInfo> connection = connections.get(txId.getHistoryId().getCookie());
+        if (connection != null) {
+            connection.receiveResponse(response);
+        } else {
+            LOG.info("{}: Ignoring unknown response {}", persistenceId(), response);
+        }
+    }
+
+    @Override
+    protected ClientActorBehavior onRequestSuccess(final SuccessEnvelope success) {
+        onResponse(success);
+        return this;
+    }
+
+    @Override
+    protected ClientActorBehavior onRequestFailure(final FailureEnvelope failure) {
+        onResponse(failure);
+        return this;
+    }
+
+    @Override
+    protected void removeConnection(final AbstractClientConnection<?> conn) {
+        connections.remove(conn.cookie(), conn);
+        LOG.debug("{}: removed connection {}", persistenceId(), conn);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    protected void reconnectConnection(final ConnectedClientConnection<?> oldConn,
+            final ReconnectingClientConnection<?> newConn) {
+        final ReconnectingClientConnection<ShardBackendInfo> conn =
+                (ReconnectingClientConnection<ShardBackendInfo>)newConn;
+        connections.replace(oldConn.cookie(), (AbstractClientConnection<ShardBackendInfo>)oldConn, conn);
+        LOG.debug("{}: connection {} reconnecting as {}", persistenceId(), oldConn, newConn);
+
+        final Long shard = oldConn.cookie();
+        resolver.refreshBackendInfo(shard, conn.getBackendInfo().get()).whenComplete(
+            (backend, failure) -> context().executeInActor(behavior -> {
+                backendConnectFinished(shard, conn, backend, failure);
+                return behavior;
+            }));
+    }
+
     //
     //
     // Methods below are invoked from application threads
     //
     //
-
-    @SuppressWarnings("checkstyle:IllegalCatch")
-    private static <K, V extends LocalAbortable> V returnIfOperational(final Map<K , V> map, final K key, final V value,
-            final Throwable aborted) {
-        Verify.verify(map.put(key, value) == null);
-
-        if (aborted != null) {
-            try {
-                value.localAbort(aborted);
-            } catch (Exception e) {
-                LOG.debug("Close of {} failed", value, e);
-            }
-            map.remove(key, value);
-            throw Throwables.propagate(aborted);
-        }
-
-        return value;
-    }
 
     @Override
     public ClientLocalHistory createLocalHistory() {
@@ -145,7 +279,16 @@ final class DistributedDataStoreClientBehavior extends ClientActorBehavior imple
         final ClientLocalHistory history = new ClientLocalHistory(this, historyId);
         LOG.debug("{}: creating a new local history {}", persistenceId(), history);
 
-        return returnIfOperational(histories, historyId, history, aborted);
+        Verify.verify(histories.put(historyId, history) == null);
+
+        final Throwable a = aborted;
+        if (a != null) {
+            history.localAbort(a);
+            histories.remove(historyId, history);
+            throw Throwables.propagate(a);
+        }
+
+        return history;
     }
 
     @Override
@@ -163,11 +306,31 @@ final class DistributedDataStoreClientBehavior extends ClientActorBehavior imple
         return resolver;
     }
 
-    void sendRequest(final TransactionRequest<?> request, final Consumer<Response<?, ?>> completer) {
-        sendRequest(request, response -> {
-            completer.accept(response);
-            return this;
-        });
+    private ConnectingClientConnection<ShardBackendInfo> createConnection(final Long shard) {
+        final ConnectingClientConnection<ShardBackendInfo> conn = new ConnectingClientConnection<>(context(), shard);
+
+        resolver.getBackendInfo(shard).whenComplete((backend, failure) -> context().executeInActor(behavior -> {
+            backendConnectFinished(shard, conn, backend, failure);
+            return behavior;
+        }));
+
+        return conn;
     }
 
+    /**
+     * Get a connection to a shard.
+     *
+     * @throws InversibleLockException if the shard is being reconnected
+     */
+    AbstractClientConnection<ShardBackendInfo> getConnection(final Long shard) {
+        while (true) {
+            final long stamp = connectionsLock.optimisticRead();
+            final AbstractClientConnection<ShardBackendInfo> conn = connections.computeIfAbsent(shard,
+                this::createConnection);
+            if (connectionsLock.validate(stamp)) {
+                // No write-lock in-between, return success
+                return conn;
+            }
+        }
+    }
 }
