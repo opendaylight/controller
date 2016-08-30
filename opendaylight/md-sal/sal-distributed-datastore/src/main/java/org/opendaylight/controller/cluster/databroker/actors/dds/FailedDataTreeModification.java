@@ -12,7 +12,7 @@ import com.google.common.base.Preconditions;
 import java.util.function.Supplier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.CursorAwareDataTreeModification;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModificationCursor;
 
 /**
@@ -21,7 +21,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification
  *
  * @author Robert Varga
  */
-final class FailedDataTreeModification implements DataTreeModification {
+final class FailedDataTreeModification implements CursorAwareDataTreeModification {
     private final Supplier<? extends RuntimeException> supplier;
 
     FailedDataTreeModification(final Supplier<? extends RuntimeException> supplier) {
@@ -34,7 +34,7 @@ final class FailedDataTreeModification implements DataTreeModification {
     }
 
     @Override
-    public DataTreeModification newModification() {
+    public CursorAwareDataTreeModification newModification() {
         throw supplier.get();
     }
 
@@ -60,6 +60,11 @@ final class FailedDataTreeModification implements DataTreeModification {
 
     @Override
     public void applyToCursor(final DataTreeModificationCursor cursor) {
+        throw supplier.get();
+    }
+
+    @Override
+    public DataTreeModificationCursor createCursor(final YangInstanceIdentifier path) {
         throw supplier.get();
     }
 }
