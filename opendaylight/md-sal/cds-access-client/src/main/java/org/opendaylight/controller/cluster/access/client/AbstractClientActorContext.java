@@ -27,6 +27,7 @@ abstract class AbstractClientActorContext implements Mutable {
         this.self = Preconditions.checkNotNull(self);
     }
 
+    // TOOD: rename this to logContext()
     @Nonnull
     final String persistenceId() {
         return persistenceId;
