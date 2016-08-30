@@ -14,6 +14,10 @@ import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStoreCon
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStoreFactory;
 import org.opendaylight.controller.md.sal.dom.store.impl.jmx.InMemoryDataStoreStats;
 
+/**
+ * The in-memory data store isn't used anymore. Deprecation notice in Carbon. Removal plan in Nitrogen.
+ */
+@Deprecated
 public class InMemoryConfigDataStoreProviderModule extends org.opendaylight.controller.config.yang.inmemory_datastore_provider.AbstractInMemoryConfigDataStoreProviderModule {
 
     public InMemoryConfigDataStoreProviderModule(final org.opendaylight.controller.config.api.ModuleIdentifier identifier, final org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
