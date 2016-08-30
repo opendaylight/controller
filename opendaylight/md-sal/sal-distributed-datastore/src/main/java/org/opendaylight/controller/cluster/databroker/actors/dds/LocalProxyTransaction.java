@@ -48,9 +48,9 @@ final class LocalProxyTransaction extends AbstractProxyTransaction {
     private final TransactionIdentifier identifier;
     private DataTreeModification modification;
 
-    LocalProxyTransaction(final DistributedDataStoreClientBehavior client,
-        final TransactionIdentifier identifier, final DataTreeSnapshot snapshot) {
-        super(client);
+    LocalProxyTransaction(final AbstractClientConnection connection, final TransactionIdentifier identifier,
+        final DataTreeSnapshot snapshot) {
+        super(connection);
         this.identifier = Preconditions.checkNotNull(identifier);
         this.modification = snapshot.newModification();
     }

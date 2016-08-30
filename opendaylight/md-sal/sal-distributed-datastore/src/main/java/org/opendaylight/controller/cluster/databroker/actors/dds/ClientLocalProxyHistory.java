@@ -12,16 +12,16 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
 
 final class ClientLocalProxyHistory extends AbstractLocalProxyHistory {
-    ClientLocalProxyHistory(final DistributedDataStoreClientBehavior client, final LocalHistoryIdentifier identifier,
+    ClientLocalProxyHistory(final AbstractClientConnection connection, final LocalHistoryIdentifier identifier,
         final DataTree dataTree) {
-        super(client, identifier, dataTree);
+        super(connection, identifier, dataTree);
     }
 
     @Override
-    AbstractProxyTransaction doCreateTransactionProxy(final DistributedDataStoreClientBehavior client,
+    AbstractProxyTransaction doCreateTransactionProxy(final AbstractClientConnection connection,
             final TransactionIdentifier txId) {
         // FIXME: this violates history contract: we should use the last submitted transaction instead to ensure
         //        causality
-        return new LocalProxyTransaction(client, txId, takeSnapshot());
+        return new LocalProxyTransaction(connection, txId, takeSnapshot());
     }
 }
