@@ -108,9 +108,9 @@ public class ClientActorContext extends AbstractClientActorContext implements Id
         if (queue == null) {
             LOG.info("{}: Ignoring unknown response {}", persistenceId(), response);
             return current;
-        } else {
-            return queue.complete(current, response);
         }
+
+        return queue.complete(current, response);
     }
 
     void poison(final RequestException cause) {
