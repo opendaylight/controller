@@ -47,7 +47,7 @@ final class SequencedQueueEntry {
         return txDetails;
     }
 
-    ClientActorBehavior complete(final Response<?, ?> response) {
+    ClientActorBehavior<?> complete(final Response<?, ?> response) {
         LOG.debug("Completing request {} with {}", request, response);
         return callback.complete(response);
     }
@@ -69,9 +69,8 @@ final class SequencedQueueEntry {
         if (elapsed >= timeoutNanos) {
             LOG.debug("Request {} timed out after {}ns", request, elapsed);
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     void retransmit(final BackendInfo backend, final long txSequence, final long now) {
