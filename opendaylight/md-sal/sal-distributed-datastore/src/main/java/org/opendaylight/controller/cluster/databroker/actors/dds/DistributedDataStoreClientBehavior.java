@@ -11,16 +11,19 @@ import akka.actor.ActorRef;
 import akka.actor.Status;
 import com.google.common.base.Throwables;
 import com.google.common.base.Verify;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.Consumer;
+import javax.annotation.concurrent.GuardedBy;
+import org.opendaylight.controller.cluster.access.client.AbstractClientConnection;
 import org.opendaylight.controller.cluster.access.client.ClientActorBehavior;
 import org.opendaylight.controller.cluster.access.client.ClientActorContext;
-import org.opendaylight.controller.cluster.access.commands.TransactionRequest;
+import org.opendaylight.controller.cluster.access.client.ConnectedClientConnection;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
-import org.opendaylight.controller.cluster.access.concepts.Response;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,19 +58,18 @@ import org.slf4j.LoggerFactory;
  *
  * @author Robert Varga
  */
-final class DistributedDataStoreClientBehavior extends ClientActorBehavior implements DistributedDataStoreClient {
+final class DistributedDataStoreClientBehavior extends ClientActorBehavior<ShardBackendInfo>
+        implements DistributedDataStoreClient {
     private static final Logger LOG = LoggerFactory.getLogger(DistributedDataStoreClientBehavior.class);
 
     private final Map<LocalHistoryIdentifier, ClientLocalHistory> histories = new ConcurrentHashMap<>();
     private final AtomicLong nextHistoryId = new AtomicLong(1);
-    private final ModuleShardBackendResolver resolver;
     private final SingleClientHistory singleHistory;
 
     private volatile Throwable aborted;
 
     DistributedDataStoreClientBehavior(final ClientActorContext context, final ActorContext actorContext) {
-        super(context);
-        resolver = new ModuleShardBackendResolver(context.getIdentifier(), actorContext);
+        super(context, new ModuleShardBackendResolver(context.getIdentifier(), actorContext));
         singleHistory = new SingleClientHistory(this, new LocalHistoryIdentifier(getIdentifier(), 0));
     }
 
@@ -79,7 +81,7 @@ final class DistributedDataStoreClientBehavior extends ClientActorBehavior imple
 
     @Override
     protected void haltClient(final Throwable cause) {
-        // If we have encountered a previous problem there is not cleanup necessary, as we have already cleaned up
+        // If we have encountered a previous problem there is no cleanup necessary, as we have already cleaned up
         // Thread safely is not an issue, as both this method and any failures are executed from the same (client actor)
         // thread.
         if (aborted != null) {
@@ -98,7 +100,7 @@ final class DistributedDataStoreClientBehavior extends ClientActorBehavior imple
         histories.clear();
     }
 
-    private DistributedDataStoreClientBehavior shutdown(final ClientActorBehavior currentBehavior) {
+    private DistributedDataStoreClientBehavior shutdown(final ClientActorBehavior<ShardBackendInfo> currentBehavior) {
         abortOperations(new IllegalStateException("Client " + getIdentifier() + " has been shut down"));
         return null;
     }
@@ -114,29 +116,65 @@ final class DistributedDataStoreClientBehavior extends ClientActorBehavior imple
         return this;
     }
 
+    /*
+     * The connection has resolved, which means we have to potentially perform message adaptation. This is a bit more
+     * involved, as the messages need to be replayed to the individual proxies.
+     */
+    @Override
+    @GuardedBy("connectionsLock")
+    protected ConnectedClientConnection<ShardBackendInfo> connectionUp(
+            final AbstractClientConnection<ShardBackendInfo> conn, final ShardBackendInfo backend) {
+
+        // Step 0: create a new connected connection
+        final ConnectedClientConnection<ShardBackendInfo> newConn = new ConnectedClientConnection<>(conn.context(),
+                conn.cookie(), backend);
+
+        LOG.debug("{}: resolving connection {} to {}", persistenceId(), conn, newConn);
+
+        final Collection<HistoryReconnectCohort> cohorts = new ArrayList<>();
+        try {
+            // Step 1: Freeze all AbstractProxyHistory instances pointing to that shard. This indirectly means that no
+            //         further TransactionProxies can be created and we can safely traverse maps without risking
+            //         missing an entry
+            startReconnect(singleHistory, newConn, cohorts);
+            for (ClientLocalHistory h : histories.values()) {
+                startReconnect(h, newConn, cohorts);
+            }
+
+            // Step 2: Collect previous successful requests from the cohorts. We do not want to expose
+            //         the non-throttling interface to the connection, hence we use a wrapper consumer
+            for (HistoryReconnectCohort c : cohorts) {
+                c.replaySuccessfulRequests();
+            }
+
+            // Step 3: Install a forwarder, which will forward requests back to affected cohorts. Any outstanding
+            //         requests will be immediately sent to it and requests being sent concurrently will get forwarded
+            //         once they hit the new connection.
+            conn.setForwarder(BouncingReconnectForwarder.forCohorts(newConn, cohorts));
+        } finally {
+            // Step 4: Complete switchover of the connection. The cohorts can resume normal operations.
+            for (HistoryReconnectCohort c : cohorts) {
+                c.close();
+            }
+        }
+
+        return newConn;
+    }
+
+    private static void startReconnect(final AbstractClientHistory history,
+            final ConnectedClientConnection<ShardBackendInfo> newConn,
+            final Collection<HistoryReconnectCohort> cohorts) {
+        final HistoryReconnectCohort cohort = history.startReconnect(newConn);
+        if (cohort != null) {
+            cohorts.add(cohort);
+        }
+    }
+
     //
     //
     // Methods below are invoked from application threads
     //
     //
-
-    @SuppressWarnings("checkstyle:IllegalCatch")
-    private static <K, V extends LocalAbortable> V returnIfOperational(final Map<K , V> map, final K key, final V value,
-            final Throwable aborted) {
-        Verify.verify(map.put(key, value) == null);
-
-        if (aborted != null) {
-            try {
-                value.localAbort(aborted);
-            } catch (Exception e) {
-                LOG.debug("Close of {} failed", value, e);
-            }
-            map.remove(key, value);
-            throw Throwables.propagate(aborted);
-        }
-
-        return value;
-    }
 
     @Override
     public ClientLocalHistory createLocalHistory() {
@@ -145,7 +183,16 @@ final class DistributedDataStoreClientBehavior extends ClientActorBehavior imple
         final ClientLocalHistory history = new ClientLocalHistory(this, historyId);
         LOG.debug("{}: creating a new local history {}", persistenceId(), history);
 
-        return returnIfOperational(histories, historyId, history, aborted);
+        Verify.verify(histories.put(historyId, history) == null);
+
+        final Throwable a = aborted;
+        if (a != null) {
+            history.localAbort(a);
+            histories.remove(historyId, history);
+            throw Throwables.propagate(a);
+        }
+
+        return history;
     }
 
     @Override
@@ -158,16 +205,7 @@ final class DistributedDataStoreClientBehavior extends ClientActorBehavior imple
         context().executeInActor(this::shutdown);
     }
 
-    @Override
-    protected ModuleShardBackendResolver resolver() {
-        return resolver;
+    Long resolveShardForPath(final YangInstanceIdentifier path) {
+        return ((ModuleShardBackendResolver) resolver()).resolveShardForPath(path);
     }
-
-    void sendRequest(final TransactionRequest<?> request, final Consumer<Response<?, ?>> completer) {
-        sendRequest(request, response -> {
-            completer.accept(response);
-            return this;
-        });
-    }
-
 }
