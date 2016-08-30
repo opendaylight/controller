@@ -43,6 +43,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
  * @author Robert Varga
  */
 abstract class AbstractProxyTransaction implements Identifiable<TransactionIdentifier> {
+    // FIXME: this should really be ClientConnection
     private final DistributedDataStoreClientBehavior client;
 
     private long sequence;
