@@ -9,13 +9,10 @@ package org.opendaylight.controller.cluster.access.client;
 
 import akka.actor.ActorRef;
 import com.google.common.base.Preconditions;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.ThreadSafe;
 import org.slf4j.Logger;
@@ -33,26 +30,6 @@ import org.slf4j.LoggerFactory;
 public abstract class BackendInfoResolver<T extends BackendInfo> {
     private static final Logger LOG = LoggerFactory.getLogger(BackendInfoResolver.class);
     private final ConcurrentMap<Long, CompletableFuture<T>> backends = new ConcurrentHashMap<>();
-
-    /**
-     * Return the currently-resolved backend information, if available. This method is guaranteed not to block, but will
-     * initiate resolution of the information if there is none.
-     *
-     * @param cookie Backend cookie
-     * @return Backend information, if available
-     */
-    public final Optional<T> getFutureBackendInfo(final Long cookie) {
-        final Future<T> f = lookupBackend(cookie);
-        if (f.isDone()) {
-            try {
-                return Optional.of(f.get());
-            } catch (InterruptedException | ExecutionException e) {
-                LOG.debug("Resolution of {} failed", f, e);
-            }
-        }
-
-        return Optional.empty();
-    }
 
     /**
      * Invalidate a particular instance of {@link BackendInfo}, typically as a response to a request timing out. If
@@ -88,7 +65,7 @@ public abstract class BackendInfoResolver<T extends BackendInfo> {
 
     // This is what the client needs to start processing. For as long as we do not have this, we should not complete
     // this stage until we have this information
-    final CompletionStage<? extends T> getBackendInfo(final Long cookie) {
+    public final CompletionStage<? extends T> getBackendInfo(final Long cookie) {
         return lookupBackend(cookie);
     }
 
