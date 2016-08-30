@@ -53,17 +53,21 @@ public abstract class ClientActorBehavior extends RecoveredClientActorBehavior<C
             return onRequestSuccess((SuccessEnvelope) command);
         }
         if (command instanceof FailureEnvelope) {
-            return onRequestFailure((FailureEnvelope) command);
+            return internalOnRequestFailure((FailureEnvelope) command);
         }
 
         return onCommand(command);
     }
 
-    private ClientActorBehavior onRequestSuccess(final SuccessEnvelope command) {
-        return context().completeRequest(this, command);
+    protected ClientActorBehavior onRequestSuccess(final SuccessEnvelope success) {
+        return context().completeRequest(this, success);
     }
 
-    private ClientActorBehavior onRequestFailure(final FailureEnvelope command) {
+    protected ClientActorBehavior onRequestFailure(final FailureEnvelope failure) {
+        return context().completeRequest(this, failure);
+    }
+
+    private ClientActorBehavior internalOnRequestFailure(final FailureEnvelope command) {
         final RequestFailure<?, ?> failure = command.getMessage();
         final RequestException cause = failure.getCause();
         if (cause instanceof RetiredGenerationException) {
@@ -73,14 +77,7 @@ public abstract class ClientActorBehavior extends RecoveredClientActorBehavior<C
             return null;
         }
 
-        if (failure.isHardFailure()) {
-            return context().completeRequest(this, command);
-        }
-
-        // TODO: add instanceof checks on cause to detect more problems
-
-        LOG.warn("{}: Unhandled retriable failure {}, promoting to hard failure", persistenceId(), command);
-        return context().completeRequest(this, command);
+        return onRequestFailure(command);
     }
 
     // This method is executing in the actor context, hence we can safely interact with the queue
@@ -183,6 +180,12 @@ public abstract class ClientActorBehavior extends RecoveredClientActorBehavior<C
      */
     @Nonnull
     protected abstract BackendInfoResolver<?> resolver();
+
+    // XXX: move these to ClientActorContext and made package-private?
+    protected abstract void removeConnection(AbstractClientConnection<?> conn);
+
+    protected abstract void reconnectConnection(ConnectedClientConnection<?> oldConn,
+            ReconnectingClientConnection<?> newConn);
 
     /**
      * Send a request to the backend and invoke a specified callback when it finishes. This method is safe to invoke
