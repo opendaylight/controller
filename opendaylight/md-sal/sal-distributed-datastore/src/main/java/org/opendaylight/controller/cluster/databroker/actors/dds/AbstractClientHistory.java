@@ -10,7 +10,6 @@ package org.opendaylight.controller.cluster.databroker.actors.dds;
 import com.google.common.base.Preconditions;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLongFieldUpdater;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
@@ -99,20 +98,42 @@ abstract class AbstractClientHistory extends LocalAbortable implements Identifia
         }
     }
 
+    /**
+     *
+     * @param shard
+     * @return
+     * @throws InversibleLockException
+     */
     private AbstractProxyHistory createHistoryProxy(final Long shard) {
+        final AbstractClientConnection connection = client.getConnection(shard);
         return createHistoryProxy(new LocalHistoryIdentifier(identifier.getClientId(),
-            identifier.getHistoryId(), shard), client.resolver().getFutureBackendInfo(shard));
+            identifier.getHistoryId(), shard), connection);
     }
 
     abstract AbstractProxyHistory createHistoryProxy(final LocalHistoryIdentifier historyId,
-            final Optional<ShardBackendInfo> backendInfo);
+            final AbstractClientConnection connection);
 
+    /**
+     *
+     * @param transactionId
+     * @param shard
+     * @return
+     * @throws InversibleLockException
+     */
     final AbstractProxyTransaction createTransactionProxy(final TransactionIdentifier transactionId, final Long shard) {
-        final AbstractProxyHistory history = histories.computeIfAbsent(shard, this::createHistoryProxy);
-        return history.createTransactionProxy(transactionId);
+        while (true) {
+            try {
+                final AbstractProxyHistory history = histories.computeIfAbsent(shard, this::createHistoryProxy);
+                return history.createTransactionProxy(transactionId);
+            } catch (InversibleLockException e) {
+                LOG.trace("Waiting for transaction {} shard {} connection to resolve", transactionId, shard);
+                e.awaitResolution();
+                LOG.trace("Retrying transaction {} shard {} connection", transactionId, shard);
+            }
+        }
     }
 
-    public synchronized final ClientTransaction createTransaction() {
+    public final ClientTransaction createTransaction() {
         Preconditions.checkState(state != State.CLOSED);
 
         synchronized (this) {
@@ -165,5 +186,10 @@ abstract class AbstractClientHistory extends LocalAbortable implements Identifia
         if (readyTransactions.remove(txId) == null) {
             LOG.warn("Could not find completed transaction {}", txId);
         }
+    }
+
+    synchronized void updateConnection(final Long shard, final ConnectedClientConnection newConn) {
+        // TODO Auto-generated method stub
+
     }
 }

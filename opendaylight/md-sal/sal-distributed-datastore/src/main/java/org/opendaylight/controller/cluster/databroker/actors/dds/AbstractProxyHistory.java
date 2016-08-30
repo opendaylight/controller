@@ -21,27 +21,26 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
  * @author Robert Varga
  */
 abstract class AbstractProxyHistory implements Identifiable<LocalHistoryIdentifier> {
-    // FIXME: this should really be ClientConnection
-    private final DistributedDataStoreClientBehavior client;
+    private final AbstractClientConnection connection;
     private final LocalHistoryIdentifier identifier;
 
-    AbstractProxyHistory(final DistributedDataStoreClientBehavior client, final LocalHistoryIdentifier identifier) {
-        this.client = Preconditions.checkNotNull(client);
+    AbstractProxyHistory(final AbstractClientConnection connection, final LocalHistoryIdentifier identifier) {
+        this.connection = Preconditions.checkNotNull(connection);
         this.identifier = Preconditions.checkNotNull(identifier);
     }
 
-    static AbstractProxyHistory createClient(final DistributedDataStoreClientBehavior client,
-            final Optional<ShardBackendInfo> backendInfo, final LocalHistoryIdentifier identifier) {
-        final Optional<DataTree> dataTree = backendInfo.flatMap(ShardBackendInfo::getDataTree);
-        return dataTree.isPresent() ? new ClientLocalProxyHistory(client, identifier, dataTree.get())
-             : new RemoteProxyHistory(client, identifier);
+    static AbstractProxyHistory createClient(final AbstractClientConnection connection,
+            final LocalHistoryIdentifier identifier) {
+        final Optional<DataTree> dataTree = connection.getBackendInfo().flatMap(ShardBackendInfo::getDataTree);
+        return dataTree.isPresent() ? new ClientLocalProxyHistory(connection, identifier, dataTree.get())
+             : new RemoteProxyHistory(connection, identifier);
     }
 
-    static AbstractProxyHistory createSingle(final DistributedDataStoreClientBehavior client,
-            final Optional<ShardBackendInfo> backendInfo, final LocalHistoryIdentifier identifier) {
-        final Optional<DataTree> dataTree = backendInfo.flatMap(ShardBackendInfo::getDataTree);
-        return dataTree.isPresent() ? new SingleLocalProxyHistory(client, identifier, dataTree.get())
-             : new RemoteProxyHistory(client, identifier);
+    static AbstractProxyHistory createSingle(final AbstractClientConnection connection,
+            final LocalHistoryIdentifier identifier) {
+        final Optional<DataTree> dataTree = connection.getBackendInfo().flatMap(ShardBackendInfo::getDataTree);
+        return dataTree.isPresent() ? new SingleLocalProxyHistory(connection, identifier, dataTree.get())
+             : new RemoteProxyHistory(connection, identifier);
     }
 
     @Override
@@ -50,13 +49,13 @@ abstract class AbstractProxyHistory implements Identifiable<LocalHistoryIdentifi
     }
 
     final ActorRef localActor() {
-        return client.self();
+        return connection.localActor();
     }
 
     final AbstractProxyTransaction createTransactionProxy(final TransactionIdentifier txId) {
-        return doCreateTransactionProxy(client, new TransactionIdentifier(identifier, txId.getTransactionId()));
+        return doCreateTransactionProxy(connection, new TransactionIdentifier(identifier, txId.getTransactionId()));
     }
 
-    abstract AbstractProxyTransaction doCreateTransactionProxy(DistributedDataStoreClientBehavior client,
+    abstract AbstractProxyTransaction doCreateTransactionProxy(AbstractClientConnection connection,
             TransactionIdentifier txId);
 }

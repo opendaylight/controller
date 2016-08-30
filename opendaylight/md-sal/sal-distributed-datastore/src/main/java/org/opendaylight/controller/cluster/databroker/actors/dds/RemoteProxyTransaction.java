@@ -59,9 +59,8 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
 
     private volatile Exception operationFailure;
 
-    RemoteProxyTransaction(final DistributedDataStoreClientBehavior client,
-        final TransactionIdentifier identifier) {
-        super(client);
+    RemoteProxyTransaction(final AbstractClientConnection connection, final TransactionIdentifier identifier) {
+        super(connection);
         builder = new ModifyTransactionRequestBuilder(identifier, localActor());
     }
 

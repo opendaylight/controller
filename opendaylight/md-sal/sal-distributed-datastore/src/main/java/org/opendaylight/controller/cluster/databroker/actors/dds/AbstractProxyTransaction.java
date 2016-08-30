@@ -43,17 +43,17 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
  * @author Robert Varga
  */
 abstract class AbstractProxyTransaction implements Identifiable<TransactionIdentifier> {
-    private final DistributedDataStoreClientBehavior client;
+    private final AbstractClientConnection connection;
 
     private long sequence;
     private boolean sealed;
 
-    AbstractProxyTransaction(final DistributedDataStoreClientBehavior client) {
-        this.client = Preconditions.checkNotNull(client);
+    AbstractProxyTransaction(final AbstractClientConnection connection) {
+        this.connection = Preconditions.checkNotNull(connection);
     }
 
     final ActorRef localActor() {
-        return client.self();
+        return connection.localActor();
     }
 
     final long nextSequence() {
@@ -86,7 +86,7 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
     }
 
     final void sendRequest(final TransactionRequest<?> request, final Consumer<Response<?, ?>> completer) {
-        client.sendRequest(request, completer);
+        connection.sendRequest(request, completer);
     }
 
     /**
