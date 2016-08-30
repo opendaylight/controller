@@ -12,7 +12,7 @@ import org.opendaylight.controller.cluster.access.concepts.RequestException;
 
 /**
  * Internal {@link RequestException} used as poison cause when the client fails to make progress for a long time.
- * See {@link SequencedQueue} for details.
+ * See {@link AbstractClientConnection} for details.
  *
  * @author Robert Varga
  */
