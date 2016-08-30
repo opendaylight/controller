@@ -8,13 +8,15 @@
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Verify;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLongFieldUpdater;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import javax.annotation.concurrent.GuardedBy;
+import org.opendaylight.controller.cluster.access.client.AbstractClientConnection;
+import org.opendaylight.controller.cluster.access.client.ConnectedClientConnection;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.yangtools.concepts.Identifiable;
@@ -45,7 +47,7 @@ abstract class AbstractClientHistory extends LocalAbortable implements Identifia
     @GuardedBy("this")
     private final Map<TransactionIdentifier, AbstractTransactionCommitCohort> readyTransactions = new HashMap<>();
 
-    private final Map<Long, AbstractProxyHistory> histories = new ConcurrentHashMap<>();
+    private final Map<Long, ProxyHistory> histories = new ConcurrentHashMap<>();
     private final DistributedDataStoreClientBehavior client;
     private final LocalHistoryIdentifier identifier;
 
@@ -75,8 +77,8 @@ abstract class AbstractClientHistory extends LocalAbortable implements Identifia
         return identifier;
     }
 
-    final DistributedDataStoreClientBehavior getClient() {
-        return client;
+    final ModuleShardBackendResolver getResolver() {
+        return client.resolver();
     }
 
     final long nextTx() {
@@ -99,17 +101,32 @@ abstract class AbstractClientHistory extends LocalAbortable implements Identifia
         }
     }
 
-    private AbstractProxyHistory createHistoryProxy(final Long shard) {
+    /**
+     * @throws InversibleLockException if the shard is being reconnected
+     */
+    private ProxyHistory createHistoryProxy(final Long shard) {
+        final AbstractClientConnection<ShardBackendInfo> connection = client.getConnection(shard);
         return createHistoryProxy(new LocalHistoryIdentifier(identifier.getClientId(),
-            identifier.getHistoryId(), shard), client.resolver().getFutureBackendInfo(shard));
+            identifier.getHistoryId(), shard), connection);
     }
 
-    abstract AbstractProxyHistory createHistoryProxy(final LocalHistoryIdentifier historyId,
-            final Optional<ShardBackendInfo> backendInfo);
+    abstract ProxyHistory createHistoryProxy(final LocalHistoryIdentifier historyId,
+            final AbstractClientConnection<ShardBackendInfo> connection);
 
     final AbstractProxyTransaction createTransactionProxy(final TransactionIdentifier transactionId, final Long shard) {
-        final AbstractProxyHistory history = histories.computeIfAbsent(shard, this::createHistoryProxy);
-        return history.createTransactionProxy(transactionId);
+        while (true) {
+            final ProxyHistory history;
+            try {
+                history = histories.computeIfAbsent(shard, this::createHistoryProxy);
+            } catch (InversibleLockException e) {
+                LOG.trace("Waiting for transaction {} shard {} connection to resolve", transactionId, shard);
+                e.awaitResolution();
+                LOG.trace("Retrying transaction {} shard {} connection", transactionId, shard);
+                continue;
+            }
+
+            return history.createTransactionProxy(transactionId);
+        }
     }
 
     public final ClientTransaction createTransaction() {
@@ -165,5 +182,36 @@ abstract class AbstractClientHistory extends LocalAbortable implements Identifia
         if (readyTransactions.remove(txId) == null) {
             LOG.warn("Could not find completed transaction {}", txId);
         }
+    }
+
+    HistoryReconnectCohort startReconnect(final Long shard,
+            final ConnectedClientConnection<ShardBackendInfo> newConnection) {
+        final ProxyHistory oldProxy = histories.get(shard);
+        if (oldProxy == null) {
+            return null;
+        }
+
+        final ProxyReconnectCohort proxy = Verify.verifyNotNull(oldProxy.startReconnect(newConnection));
+        return new HistoryReconnectCohort() {
+            @Override
+            ProxyReconnectCohort getProxy() {
+                return proxy;
+            }
+
+            @Override
+            void replaySuccessfulRequests() {
+                proxy.replaySuccessfulRequests();
+            }
+
+            @Override
+            public void close() {
+                LOG.debug("Client history {} finishing reconnect to {}", newConnection);
+                final ProxyHistory newProxy = proxy.finishReconnect();
+                if (!histories.replace(shard, oldProxy, newProxy)) {
+                    LOG.warn("Failed to replace proxy {} with {} in {}", oldProxy, newProxy,
+                        AbstractClientHistory.this);
+                }
+            }
+        };
     }
 }

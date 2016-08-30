@@ -12,19 +12,24 @@ import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.function.Consumer;
 import org.opendaylight.controller.cluster.access.commands.AbstractReadTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.ExistsTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.ExistsTransactionSuccess;
 import org.opendaylight.controller.cluster.access.commands.ModifyTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.ModifyTransactionRequestBuilder;
+import org.opendaylight.controller.cluster.access.commands.PersistenceProtocol;
 import org.opendaylight.controller.cluster.access.commands.ReadTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.ReadTransactionSuccess;
 import org.opendaylight.controller.cluster.access.commands.TransactionDelete;
 import org.opendaylight.controller.cluster.access.commands.TransactionMerge;
 import org.opendaylight.controller.cluster.access.commands.TransactionModification;
+import org.opendaylight.controller.cluster.access.commands.TransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionSuccess;
 import org.opendaylight.controller.cluster.access.commands.TransactionWrite;
+import org.opendaylight.controller.cluster.access.concepts.RequestException;
 import org.opendaylight.controller.cluster.access.concepts.RequestFailure;
 import org.opendaylight.controller.cluster.access.concepts.Response;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
@@ -55,15 +60,15 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
     // FIXME: make this tuneable
     private static final int REQUEST_MAX_MODIFICATIONS = 1000;
 
+    private final Collection<TransactionRequest<?>> successfulRequests = new ArrayList<>();
     private final ModifyTransactionRequestBuilder builder;
 
     private boolean builderBusy;
 
     private volatile Exception operationFailure;
 
-    RemoteProxyTransaction(final DistributedDataStoreClientBehavior client,
-        final TransactionIdentifier identifier) {
-        super(client);
+    RemoteProxyTransaction(final ProxyHistory parent, final TransactionIdentifier identifier) {
+        super(parent);
         builder = new ModifyTransactionRequestBuilder(identifier, localActor());
     }
 
@@ -136,10 +141,22 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
     }
 
     private void flushBuilder() {
-        final ModifyTransactionRequest message = builder.build();
+        final ModifyTransactionRequest request = builder.build();
         builderBusy = false;
 
-        sendRequest(message, this::completeModify);
+        sendModification(request);
+    }
+
+    private void sendModification(final TransactionRequest<?> request) {
+        sendRequest(request, response -> completeModify(request, response));
+    }
+
+    @Override
+    void handleForwardedRemoteRequest(final TransactionRequest<?> request) {
+        nextSequence();
+        // FIXME: do not use sendRequest() once we have throttling in place, as we have already waited the
+        //        period required to get into the queue.
+        sendModification(request);
     }
 
     private void appendModification(final TransactionModification modification) {
@@ -155,11 +172,12 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
         }
     }
 
-    private void completeModify(final Response<?, ?> response) {
-        LOG.debug("Modification request completed with {}", response);
+    private void completeModify(final TransactionRequest<?> request, final Response<?, ?> response) {
+        LOG.debug("Modification request {} completed with {}", request, response);
 
         if (response instanceof TransactionSuccess) {
-            // Happy path no-op
+            // Happy path
+            successfulRequests.add(request);
         } else {
             recordFailedResponse(response);
         }
@@ -219,5 +237,58 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
     @Override
     void doSeal() {
         // No-op
+    }
+
+    @Override
+    void replaySuccessfulRequests(final AbstractProxyTransaction successor) {
+        super.replaySuccessfulRequests(successor);
+
+        for (TransactionRequest<?> req : successfulRequests) {
+            successor.handleForwardedRemoteRequest(req);
+        }
+        successfulRequests.clear();
+    }
+
+    @Override
+    void forwardToRemote(final RemoteProxyTransaction successor, final TransactionRequest<?> request,
+            final Consumer<Response<?, ?>> callback) throws RequestException {
+        successor.handleForwardedRequest(request, callback);
+    }
+
+    private void handleForwardedRequest(final TransactionRequest<?> request, final Consumer<Response<?, ?>> callback)
+            throws RequestException {
+        if (request instanceof ModifyTransactionRequest) {
+            final ModifyTransactionRequest req = (ModifyTransactionRequest) request;
+
+            req.getModifications().forEach(this::appendModification);
+
+            final java.util.Optional<PersistenceProtocol> maybeProto = req.getPersistenceProtocol();
+            if (maybeProto.isPresent()) {
+
+                // NOTE: we must invoke callback (eventually) in this case...
+
+                switch (maybeProto.get()) {
+                    case ABORT:
+                        // FIXME: implement this
+                        break;
+                    case SIMPLE:
+                        // FIXME: implement this
+                        break;
+                    case THREE_PHASE:
+                        // FIXME: implement this
+                        break;
+                }
+            }
+        } else {
+            throw new IllegalArgumentException("Unhandled request {}" + request);
+        }
+    }
+
+    @Override
+    void forwardToLocal(final LocalProxyTransaction successor, final TransactionRequest<?> request,
+            final Consumer<Response<?, ?>> callback) throws RequestException {
+        // XXX: almost, except we must not lose the callback (commit mechanics requires it)
+
+        successor.handleForwardedRemoteRequest(request);
     }
 }
