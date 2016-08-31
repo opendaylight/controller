@@ -103,7 +103,7 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
      * Seal this transaction before it is either committed or aborted.
      */
     final void seal() {
-        checkSealed();
+        checkNotSealed();
         doSeal();
         sealed = true;
         parent.onTransactionSealed(this);
