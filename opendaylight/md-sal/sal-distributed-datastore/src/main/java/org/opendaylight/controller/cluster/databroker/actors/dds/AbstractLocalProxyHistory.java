@@ -9,22 +9,19 @@ package org.opendaylight.controller.cluster.databroker.actors.dds;
 
 import com.google.common.base.Preconditions;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
-import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
 
-final class LocalProxyHistory extends AbstractProxyHistory {
+abstract class AbstractLocalProxyHistory extends AbstractProxyHistory {
     private final DataTree dataTree;
 
-    LocalProxyHistory(DistributedDataStoreClientBehavior client, LocalHistoryIdentifier identifier, DataTree dataTree) {
+    AbstractLocalProxyHistory(final DistributedDataStoreClientBehavior client, final LocalHistoryIdentifier identifier,
+        final DataTree dataTree) {
         super(client, identifier);
         this.dataTree = Preconditions.checkNotNull(dataTree);
     }
 
-    @Override
-    AbstractProxyTransaction doCreateTransactionProxy(final DistributedDataStoreClientBehavior client,
-            final TransactionIdentifier txId) {
-        // FIXME: this violates history contract: we should use the last submitted transaction instead to ensure
-        //        causality
-        return new LocalProxyTransaction(client, txId, dataTree.takeSnapshot());
+    final DataTreeSnapshot takeSnapshot() {
+        return dataTree.takeSnapshot();
     }
 }
