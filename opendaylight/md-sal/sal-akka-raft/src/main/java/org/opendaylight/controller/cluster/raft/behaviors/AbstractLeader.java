@@ -96,7 +96,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
     private final Queue<ClientRequestTracker> trackers = new LinkedList<>();
 
     private Cancellable heartbeatSchedule = null;
-    private Optional<SnapshotHolder> snapshot;
+    private Optional<SnapshotHolder> snapshot = Optional.absent();;
     private int minReplicationCount;
 
     protected AbstractLeader(RaftActorContext context, RaftState state,
@@ -105,6 +105,8 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
 
         if(initializeFromLeader != null) {
             followerToLog.putAll(initializeFromLeader.followerToLog);
+            snapshot = initializeFromLeader.snapshot;
+            trackers.addAll(initializeFromLeader.trackers);
         } else {
             for(PeerInfo peerInfo: context.getPeers()) {
                 FollowerLogInformation followerLogInformation = new FollowerLogInformationImpl(peerInfo, -1, context);
@@ -115,8 +117,6 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         LOG.debug("{}: Election: Leader has following peers: {}", logName(), getFollowerIds());
 
         updateMinReplicaCount();
-
-        snapshot = Optional.absent();
 
         // Immediately schedule a heartbeat
         // Upon election: send initial empty AppendEntries RPCs
@@ -175,7 +175,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         //2 peers = 2 votesRequired , minIsolatedLeaderPeerCount = 1
         //4 peers = 3 votesRequired, minIsolatedLeaderPeerCount = 2
 
-        return minReplicationCount > 0 ? (minReplicationCount - 1) : 0;
+        return minReplicationCount > 0 ? minReplicationCount - 1 : 0;
     }
 
     @VisibleForTesting
@@ -265,8 +265,8 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
 
                 // Force initiate a snapshot capture
                 initiateCaptureSnapshot(followerId);
-            } else if(followerLastLogIndex < 0 || (followersLastLogTerm >= 0 &&
-                    followersLastLogTerm == appendEntriesReply.getLogLastTerm())) {
+            } else if(followerLastLogIndex < 0 || followersLastLogTerm >= 0 &&
+                    followersLastLogTerm == appendEntriesReply.getLogLastTerm()) {
                 // The follower's log is empty or the last entry is present in the leader's journal
                 // and the terms match so the follower is just behind the leader's journal from
                 // the last snapshot, if any. We'll catch up the follower quickly by starting at the
@@ -299,7 +299,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
             LOG.trace("{}: checking Nth index {}", logName(), N);
             for (FollowerLogInformation info : followerToLog.values()) {
                 final PeerInfo peerInfo = context.getPeerInfo(info.getId());
-                if(info.getMatchIndex() >= N && (peerInfo != null && peerInfo.isVoting())) {
+                if(info.getMatchIndex() >= N && peerInfo != null && peerInfo.isVoting()) {
                     replicatedCount++;
                 } else if(LOG.isTraceEnabled()) {
                     LOG.trace("{}: Not counting follower {} - matchIndex: {}, {}", logName(), info.getId(),
@@ -601,7 +601,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                 long leaderLastIndex = context.getReplicatedLog().lastIndex();
                 long leaderSnapShotIndex = context.getReplicatedLog().getSnapshotIndex();
 
-                if((!isHeartbeat && LOG.isDebugEnabled()) || LOG.isTraceEnabled()) {
+                if(!isHeartbeat && LOG.isDebugEnabled() || LOG.isTraceEnabled()) {
                     LOG.debug("{}: Checking sendAppendEntries for follower {}: active: {}, followerNextIndex: {}, leaderLastIndex: {}, leaderSnapShotIndex: {}",
                             logName(), followerId, isFollowerActive, followerNextIndex, leaderLastIndex, leaderSnapShotIndex);
                 }
@@ -699,9 +699,9 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         // If the follower's nextIndex is -1 then we might as well send it a snapshot
         // Otherwise send it a snapshot only if the nextIndex is not present in the log but is present
         // in the snapshot
-        return (nextIndex == -1 ||
-                (!context.getReplicatedLog().isPresent(nextIndex)
-                        && context.getReplicatedLog().isInSnapshot(nextIndex)));
+        return nextIndex == -1 ||
+                !context.getReplicatedLog().isPresent(nextIndex)
+                        && context.getReplicatedLog().isInSnapshot(nextIndex);
 
     }
 
@@ -841,7 +841,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                 }
             }
         }
-        return (minPresent != 0);
+        return minPresent != 0;
     }
 
     /**
@@ -863,8 +863,8 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         public FollowerToSnapshot(ByteString snapshotBytes) {
             this.snapshotBytes = snapshotBytes;
             int size = snapshotBytes.size();
-            totalChunks = ( size / context.getConfigParams().getSnapshotChunkSize()) +
-                ((size % context.getConfigParams().getSnapshotChunkSize()) > 0 ? 1 : 0);
+            totalChunks = size / context.getConfigParams().getSnapshotChunkSize() +
+                (size % context.getConfigParams().getSnapshotChunkSize() > 0 ? 1 : 0);
             if(LOG.isDebugEnabled()) {
                 LOG.debug("{}: Snapshot {} bytes, total chunks to send:{}",
                         logName(), size, totalChunks);
@@ -929,7 +929,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
             int size = context.getConfigParams().getSnapshotChunkSize();
             if (context.getConfigParams().getSnapshotChunkSize() > snapshotLength) {
                 size = snapshotLength;
-            } else if ((start + context.getConfigParams().getSnapshotChunkSize()) > snapshotLength) {
+            } else if (start + context.getConfigParams().getSnapshotChunkSize() > snapshotLength) {
                 size = snapshotLength - start;
             }
 
