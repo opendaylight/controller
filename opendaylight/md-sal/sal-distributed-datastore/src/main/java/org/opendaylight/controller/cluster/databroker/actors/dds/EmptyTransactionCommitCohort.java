@@ -8,7 +8,7 @@
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
 import com.google.common.util.concurrent.ListenableFuture;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
+import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 
 /**
  * An {@link AbstractTransactionCommitCohort} for use with empty transactions. This relies on the fact that no backends
@@ -20,10 +20,8 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCoh
  * @author Robert Varga
  */
 final class EmptyTransactionCommitCohort extends AbstractTransactionCommitCohort {
-    static final DOMStoreThreePhaseCommitCohort INSTANCE = new EmptyTransactionCommitCohort();
-
-    private EmptyTransactionCommitCohort() {
-        // Hidden
+    EmptyTransactionCommitCohort(final AbstractClientHistory parent, final TransactionIdentifier txId) {
+        super(parent, txId);
     }
 
     @Override
@@ -38,11 +36,13 @@ final class EmptyTransactionCommitCohort extends AbstractTransactionCommitCohort
 
     @Override
     public ListenableFuture<Void> abort() {
+        complete();
         return VOID_FUTURE;
     }
 
     @Override
     public ListenableFuture<Void> commit() {
+        complete();
         return VOID_FUTURE;
     }
 }
