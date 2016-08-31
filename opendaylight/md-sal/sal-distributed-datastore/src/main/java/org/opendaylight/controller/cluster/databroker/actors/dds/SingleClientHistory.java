@@ -7,7 +7,11 @@
  */
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
+import java.util.Optional;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
+import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * An {@link AbstractClientHistory} which handles free-standing transactions.
@@ -15,8 +19,23 @@ import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifie
  * @author Robert Varga
  */
 final class SingleClientHistory extends AbstractClientHistory {
-    protected SingleClientHistory(final DistributedDataStoreClientBehavior client,
-            final LocalHistoryIdentifier identifier) {
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractClientHistory.class);
+
+    SingleClientHistory(final DistributedDataStoreClientBehavior client, final LocalHistoryIdentifier identifier) {
         super(client, identifier);
+    }
+
+    @Override
+    ClientTransaction doCreateTransaction() {
+        final TransactionIdentifier txId = new TransactionIdentifier(getIdentifier(), nextTx());
+        LOG.debug("{}: creating a new transaction {}", this, txId);
+
+        return new ClientTransaction(this, txId);
+    }
+
+    @Override
+    AbstractProxyHistory createHistoryProxy(final LocalHistoryIdentifier historyId,
+            final Optional<ShardBackendInfo> backendInfo) {
+        return AbstractProxyHistory.createSingle(getClient(), backendInfo, historyId);
     }
 }
