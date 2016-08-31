@@ -419,13 +419,14 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
     }
 
     protected RaftActorBehavior internalSwitchBehavior(RaftState newState) {
-        if(context.getRaftPolicy().automaticElectionsEnabled()){
-            return internalSwitchBehavior(createBehavior(context, newState));
-        }
-        return this;
+        return internalSwitchBehavior(createBehavior(context, newState));
     }
 
     protected RaftActorBehavior internalSwitchBehavior(RaftActorBehavior newBehavior) {
+        if(!context.getRaftPolicy().automaticElectionsEnabled()) {
+            return this;
+        }
+
         LOG.info("{} :- Switching from behavior {} to {}", logName(), this.state(), newBehavior.state());
         try {
             close();
