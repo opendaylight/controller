@@ -87,6 +87,24 @@
     },
     {
       "key": {
+        "uuid": "7a6b29fe_c82d4d97",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DistributedShardedDOMDataTree.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 162,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2016-08-31T16:11:35Z",
+      "side": 1,
+      "message": "This is now in the second patchset. But just so it\u0027s in one place.\n\nThe thing is that Await.result() declares it can throw any unchecked exception. In reality it wraps the Failure returned from the actor in a CompletionException hence this branch.\nIn case the actor sends something else than DOMDataTreeShardingConflictException it\u0027s a programming error and we can\u0027t expect the user to handle those hence the propagate.",
+      "parentUuid": "7a6b29fe_7a4cd1c8",
+      "revId": "39433bb7d598723bc2960aedb1522f20a4b223a9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a6b29fe_5a4915b6",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DistributedShardedDOMDataTree.java",
         "patchSetId": 2
@@ -98,6 +116,24 @@
       "writtenOn": "2016-08-26T11:23:05Z",
       "side": 1,
       "message": "Same as above",
+      "revId": "39433bb7d598723bc2960aedb1522f20a4b223a9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_281fa15c",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DistributedShardedDOMDataTree.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 168,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2016-08-31T16:11:35Z",
+      "side": 1,
+      "message": "This is just in case the Await returns something else, but again if it does it a programming error and wrapping it in either of the declared exceptions seems wrong since we cannot expect the user to handle anything else.",
+      "parentUuid": "7a6b29fe_5a4915b6",
       "revId": "39433bb7d598723bc2960aedb1522f20a4b223a9",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
