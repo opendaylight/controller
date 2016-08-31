@@ -22,6 +22,7 @@ import org.opendaylight.controller.cluster.raft.DefaultConfigParamsImpl;
 import org.opendaylight.controller.cluster.raft.PeerAddressResolver;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStoreConfigProperties;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import scala.concurrent.duration.Duration;
 import scala.concurrent.duration.FiniteDuration;
 
@@ -69,6 +70,7 @@ public class DatastoreContext {
     private final DefaultConfigParamsImpl raftConfig = new DefaultConfigParamsImpl();
     private String dataStoreName = UNKNOWN_DATA_STORE_TYPE;
     private LogicalDatastoreType logicalStoreType = LogicalDatastoreType.OPERATIONAL;
+    private YangInstanceIdentifier storeRoot = YangInstanceIdentifier.EMPTY;
     private int shardBatchedModificationCount = DEFAULT_SHARD_BATCHED_MODIFICATION_COUNT;
     private boolean writeOnlyTransactionOptimizationsEnabled = true;
     private long shardCommitQueueExpiryTimeoutInMillis = DEFAULT_SHARD_COMMIT_QUEUE_EXPIRY_TIMEOUT_IN_MS;
@@ -89,7 +91,7 @@ public class DatastoreContext {
         setShardSnapshotChunkSize(DEFAULT_SHARD_SNAPSHOT_CHUNK_SIZE);
     }
 
-    private DatastoreContext(DatastoreContext other) {
+    private DatastoreContext(final DatastoreContext other) {
         this.dataStoreProperties = other.dataStoreProperties;
         this.shardTransactionIdleTimeout = other.shardTransactionIdleTimeout;
         this.operationTimeoutInMillis = other.operationTimeoutInMillis;
@@ -103,6 +105,7 @@ public class DatastoreContext {
         this.transactionCreationInitialRateLimit = other.transactionCreationInitialRateLimit;
         this.dataStoreName = other.dataStoreName;
         this.logicalStoreType = other.logicalStoreType;
+        this.storeRoot = other.storeRoot;
         this.shardBatchedModificationCount = other.shardBatchedModificationCount;
         this.writeOnlyTransactionOptimizationsEnabled = other.writeOnlyTransactionOptimizationsEnabled;
         this.shardCommitQueueExpiryTimeoutInMillis = other.shardCommitQueueExpiryTimeoutInMillis;
@@ -182,6 +185,10 @@ public class DatastoreContext {
 
     public LogicalDatastoreType getLogicalStoreType() {
         return logicalStoreType;
+    }
+
+    public YangInstanceIdentifier getStoreRoot() {
+        return storeRoot;
     }
 
     public long getTransactionCreationInitialRateLimit() {
@@ -405,13 +412,18 @@ public class DatastoreContext {
             return this;
         }
 
+        public Builder storeRoot(final YangInstanceIdentifier storeRoot) {
+            datastoreContext.storeRoot = storeRoot;
+            return this;
+        }
+
         public Builder dataStoreName(String dataStoreName){
             datastoreContext.dataStoreName = Preconditions.checkNotNull(dataStoreName);
             datastoreContext.dataStoreMXBeanType = "Distributed" + WordUtils.capitalize(dataStoreName) + "Datastore";
             return this;
         }
 
-        public Builder shardBatchedModificationCount(int shardBatchedModificationCount) {
+        public Builder shardBatchedModificationCount(final int shardBatchedModificationCount) {
             datastoreContext.shardBatchedModificationCount = shardBatchedModificationCount;
             return this;
         }
