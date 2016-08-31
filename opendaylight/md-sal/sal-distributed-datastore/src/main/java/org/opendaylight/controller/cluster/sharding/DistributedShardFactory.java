@@ -6,8 +6,9 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.opendaylight.controller.cluster.datastore;
+package org.opendaylight.controller.cluster.sharding;
 
+import com.google.common.annotations.Beta;
 import java.util.Collection;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
@@ -20,6 +21,7 @@ import org.opendaylight.yangtools.concepts.Registration;
  * all the boilerplate that comes with registration of a new clustered shard into the system and creating the backend
  * shard/replicas that come along with it.
  */
+@Beta
 public interface DistributedShardFactory {
 
     /**
@@ -36,7 +38,8 @@ public interface DistributedShardFactory {
      */
     DistributedShardRegistration createDistributedShard(DOMDataTreeIdentifier prefix,
                                                         Collection<MemberName> replicaMembers)
-            throws DOMDataTreeShardingConflictException, DOMDataTreeProducerException;
+            throws DOMDataTreeShardingConflictException, DOMDataTreeProducerException,
+            DOMDataTreeShardCreationFailedException;
 
     interface DistributedShardRegistration extends Registration {
         @Override
