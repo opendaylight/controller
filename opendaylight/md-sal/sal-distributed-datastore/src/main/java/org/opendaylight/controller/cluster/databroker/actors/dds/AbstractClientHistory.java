@@ -8,9 +8,12 @@
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
 import com.google.common.base.Preconditions;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLongFieldUpdater;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
+import javax.annotation.concurrent.GuardedBy;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.yangtools.concepts.Identifiable;
@@ -31,12 +34,20 @@ abstract class AbstractClientHistory extends LocalAbortable implements Identifia
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractClientHistory.class);
+    private static final AtomicLongFieldUpdater<AbstractClientHistory> NEXT_TX_UPDATER =
+            AtomicLongFieldUpdater.newUpdater(AbstractClientHistory.class, "nextTx");
     private static final AtomicReferenceFieldUpdater<AbstractClientHistory, State> STATE_UPDATER =
             AtomicReferenceFieldUpdater.newUpdater(AbstractClientHistory.class, State.class, "state");
 
+    @GuardedBy("this")
+    private final Map<TransactionIdentifier, ClientTransaction> transactions = new HashMap<>();
     private final Map<Long, AbstractProxyHistory> histories = new ConcurrentHashMap<>();
     private final DistributedDataStoreClientBehavior client;
     private final LocalHistoryIdentifier identifier;
+
+    // Used via NEXT_TX_UPDATER
+    @SuppressWarnings("unused")
+    private volatile long nextTx = 0;
 
     private volatile State state = State.IDLE;
 
@@ -64,10 +75,23 @@ abstract class AbstractClientHistory extends LocalAbortable implements Identifia
         return client;
     }
 
+    final long nextTx() {
+        return NEXT_TX_UPDATER.getAndIncrement(this);
+    }
+
     @Override
     final void localAbort(final Throwable cause) {
-        LOG.debug("Force-closing history {}", getIdentifier(), cause);
-        state = State.CLOSED;
+        final State oldState = STATE_UPDATER.getAndSet(this, State.CLOSED);
+        if (oldState != State.CLOSED) {
+            LOG.debug("Force-closing history {}", getIdentifier(), cause);
+
+            synchronized (this) {
+                for (ClientTransaction t : transactions.values()) {
+                    t.localAbort(cause);
+                }
+                transactions.clear();
+            }
+        }
     }
 
     private AbstractProxyHistory createHistoryProxy(final Long shard) {
@@ -81,12 +105,37 @@ abstract class AbstractClientHistory extends LocalAbortable implements Identifia
         return history.createTransactionProxy(transactionId);
     }
 
+
+    public synchronized final ClientTransaction createTransaction() {
+        Preconditions.checkState(state != State.CLOSED);
+
+        synchronized (this) {
+            final ClientTransaction ret = doCreateTransaction();
+            transactions.put(ret.getIdentifier(), ret);
+            return ret;
+        }
+    }
+
+    @GuardedBy("this")
+    abstract ClientTransaction doCreateTransaction();
+
     /**
-     * Callback invoked from {@link ClientTransaction} when a transaction has been sub
+     * Callback invoked from {@link ClientTransaction} when a child transaction readied for submission.
      *
      * @param transaction Transaction handle
      */
-    void onTransactionReady(final ClientTransaction transaction) {
-        client.transactionComplete(transaction);
+    abstract void onTransactionReady(ClientTransaction transaction);
+
+    /**
+     * Callback invoked from {@link ClientTransaction} when a child transaction has been completed and all its state
+     * can be removed.
+     *
+     * @param transaction Transaction handle
+     */
+    void onTransactionComplete(ClientTransaction transaction) {
+        final boolean removed = transactions.remove(transaction.getIdentifier(), transaction);
+        if (!removed) {
+            LOG.warn("Failed to remove completed transaction {}", transaction);
+        }
     }
 }
