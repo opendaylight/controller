@@ -17,6 +17,8 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
 
 public abstract class AbstractTest {
     protected static final MemberName MEMBER_NAME = MemberName.forName("member-1");
+    protected static final MemberName MEMBER_2_NAME = MemberName.forName("member-2");
+
     private static final FrontendType FRONTEND_TYPE = FrontendType.forName(ShardTransactionTest.class.getSimpleName());
 
     protected static final FrontendIdentifier FRONTEND_ID = FrontendIdentifier.create(MEMBER_NAME, FRONTEND_TYPE);
