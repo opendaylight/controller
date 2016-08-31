@@ -16,7 +16,7 @@ import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
 
 /**
- * Per-connection representation of a local history.
+ * Per-connection representation of a local history. This class handles state replication across a single connection.
  *
  * @author Robert Varga
  */
@@ -30,10 +30,18 @@ abstract class AbstractProxyHistory implements Identifiable<LocalHistoryIdentifi
         this.identifier = Preconditions.checkNotNull(identifier);
     }
 
-    static AbstractProxyHistory create(final DistributedDataStoreClientBehavior client,
+    static AbstractProxyHistory createClient(final DistributedDataStoreClientBehavior client,
             final Optional<ShardBackendInfo> backendInfo, final LocalHistoryIdentifier identifier) {
         final Optional<DataTree> dataTree = backendInfo.flatMap(ShardBackendInfo::getDataTree);
-        return dataTree.isPresent() ? new LocalProxyHistory(client, identifier, dataTree.get()) : new RemoteProxyHistory(client, identifier);
+        return dataTree.isPresent() ? new ClientLocalProxyHistory(client, identifier, dataTree.get())
+             : new RemoteProxyHistory(client, identifier);
+    }
+
+    static AbstractProxyHistory createSingle(final DistributedDataStoreClientBehavior client,
+            final Optional<ShardBackendInfo> backendInfo, final LocalHistoryIdentifier identifier) {
+        final Optional<DataTree> dataTree = backendInfo.flatMap(ShardBackendInfo::getDataTree);
+        return dataTree.isPresent() ? new SingleLocalProxyHistory(client, identifier, dataTree.get())
+             : new RemoteProxyHistory(client, identifier);
     }
 
     @Override
