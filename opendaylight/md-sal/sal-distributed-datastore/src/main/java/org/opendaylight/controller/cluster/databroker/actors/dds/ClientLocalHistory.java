@@ -10,7 +10,6 @@ package org.opendaylight.controller.cluster.databroker.actors.dds;
 import com.google.common.annotations.Beta;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Verify;
-import java.util.concurrent.atomic.AtomicLongFieldUpdater;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 
@@ -26,25 +25,8 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
  */
 @Beta
 public final class ClientLocalHistory extends AbstractClientHistory implements AutoCloseable {
-
-    private static final AtomicLongFieldUpdater<ClientLocalHistory> NEXT_TX_UPDATER =
-            AtomicLongFieldUpdater.newUpdater(ClientLocalHistory.class, "nextTx");
-
-    // Used via NEXT_TX_UPDATER
-    @SuppressWarnings("unused")
-    private volatile long nextTx = 0;
-
     ClientLocalHistory(final DistributedDataStoreClientBehavior client, final LocalHistoryIdentifier historyId) {
         super(client, historyId);
-    }
-
-    public ClientTransaction createTransaction() {
-        final State local = state();
-        Preconditions.checkState(local == State.IDLE, "Local history %s state is %s", this, local);
-        updateState(local, State.TX_OPEN);
-
-        return new ClientTransaction(this, new TransactionIdentifier(getIdentifier(),
-            NEXT_TX_UPDATER.getAndIncrement(this)));
     }
 
     @Override
@@ -57,10 +39,22 @@ public final class ClientLocalHistory extends AbstractClientHistory implements A
     }
 
     @Override
-    void onTransactionReady(final ClientTransaction transaction) {
+    ClientTransaction doCreateTransaction() {
+        final State local = state();
+        Preconditions.checkState(local == State.IDLE, "Local history %s state is %s", this, local);
+        updateState(local, State.TX_OPEN);
+
+        return new ClientTransaction(this, new TransactionIdentifier(getIdentifier(), nextTx()));
+    }
+
+    @Override
+    AbstractTransactionCommitCohort onTransactionReady(final TransactionIdentifier txId,
+            final AbstractTransactionCommitCohort cohort) {
+        // FIXME: deal with CLOSED here
         final State local = state();
         Verify.verify(local == State.TX_OPEN, "Local history %s is in unexpected state %s", this, local);
         updateState(local, State.IDLE);
-        super.onTransactionReady(transaction);
+
+        return super.onTransactionReady(txId, cohort);
     }
 }

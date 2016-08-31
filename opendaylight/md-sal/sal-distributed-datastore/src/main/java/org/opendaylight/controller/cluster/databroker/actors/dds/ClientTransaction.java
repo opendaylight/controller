@@ -125,16 +125,22 @@ public final class ClientTransaction extends LocalAbortable implements Identifia
         for (AbstractProxyTransaction p : proxies.values()) {
             p.seal();
         }
-        parent.onTransactionReady(this);
 
+        final AbstractTransactionCommitCohort cohort;
         switch (proxies.size()) {
             case 0:
-                return EmptyTransactionCommitCohort.INSTANCE;
+                cohort = new EmptyTransactionCommitCohort(parent, transactionId);
+                break;
             case 1:
-                return new DirectTransactionCommitCohort(Iterables.getOnlyElement(proxies.values()));
+                cohort = new DirectTransactionCommitCohort(parent, transactionId,
+                    Iterables.getOnlyElement(proxies.values()));
+                break;
             default:
-                return new ClientTransactionCommitCohort(proxies.values());
+                cohort = new ClientTransactionCommitCohort(parent, transactionId, proxies.values());
+                break;
         }
+
+        return parent.onTransactionReady(transactionId, cohort);
     }
 
     /**
@@ -146,6 +152,8 @@ public final class ClientTransaction extends LocalAbortable implements Identifia
                 proxy.abort();
             }
             proxies.clear();
+
+            parent.onTransactionAbort(transactionId);
         }
     }
 
@@ -153,5 +161,9 @@ public final class ClientTransaction extends LocalAbortable implements Identifia
     void localAbort(final Throwable cause) {
         LOG.debug("Aborting transaction {}", getIdentifier(), cause);
         abort();
+    }
+
+    Map<Long, AbstractProxyTransaction> getProxies() {
+        return proxies;
     }
 }
