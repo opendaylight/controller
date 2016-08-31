@@ -71,7 +71,7 @@ public class Leader extends AbstractLeader {
             if (isLeaderIsolated()) {
                 LOG.warn("{}: At least {} followers need to be active, Switching {} from Leader to IsolatedLeader",
                     context.getId(), getMinIsolatedLeaderPeerCount(), getLeaderId());
-                return internalSwitchBehavior(RaftState.IsolatedLeader);
+                return internalSwitchBehavior(new IsolatedLeader(context, this));
             } else {
                 return this;
             }

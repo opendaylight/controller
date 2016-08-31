@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.raft.behaviors;
 
 import akka.actor.ActorRef;
+import javax.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
@@ -26,8 +27,12 @@ import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
  *
  */
 public class IsolatedLeader extends AbstractLeader {
+    IsolatedLeader(RaftActorContext context, @Nullable AbstractLeader initializeFromLeader) {
+        super(context, RaftState.IsolatedLeader, initializeFromLeader);
+    }
+
     public IsolatedLeader(RaftActorContext context) {
-        super(context, RaftState.IsolatedLeader);
+        this(context, null);
     }
 
     // we received an Append Entries reply, we should switch the Behavior to Leader
@@ -40,7 +45,7 @@ public class IsolatedLeader extends AbstractLeader {
         // changes its state to Follower, hence we only need to switch to Leader if the state is still Isolated
         if (ret.state() == RaftState.IsolatedLeader && !isLeaderIsolated()) {
             LOG.info("IsolatedLeader {} switching from IsolatedLeader to Leader", getLeaderId());
-            return internalSwitchBehavior(RaftState.Leader);
+            return internalSwitchBehavior(new Leader(context, this));
         }
         return ret;
     }
