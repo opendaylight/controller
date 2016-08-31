@@ -60,7 +60,6 @@ import org.opendaylight.controller.cluster.raft.ReplicatedLogImplEntry;
 import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload;
 import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
 import org.opendaylight.controller.cluster.raft.base.messages.UpdateElectionTerm;
-import org.opendaylight.controller.cluster.raft.client.messages.OnDemandRaftState;
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
 import org.opendaylight.controller.md.cluster.datastore.model.CarsModel;
@@ -197,12 +196,9 @@ public class ClusterAdminRpcServiceTest {
         // Verify all data has been replicated. We expect 3 log entries and thus last applied index of 2 -
         // 2 ServerConfigurationPayload entries and the transaction payload entry.
 
-        RaftStateVerifier verifier = new RaftStateVerifier() {
-            @Override
-            public void verify(OnDemandRaftState raftState) {
-                assertEquals("Commit index", 2, raftState.getCommitIndex());
-                assertEquals("Last applied index", 2, raftState.getLastApplied());
-            }
+        RaftStateVerifier verifier = raftState -> {
+            assertEquals("Commit index", 2, raftState.getCommitIndex());
+            assertEquals("Last applied index", 2, raftState.getLastApplied());
         };
 
         verifyRaftState(leaderNode1.configDataStore(), "cars", verifier);
@@ -317,7 +313,7 @@ public class ClusterAdminRpcServiceTest {
 
     @Test
     public void testRemoveShardReplica() throws Exception {
-        String name = "testRemoveShardReplicaLocal";
+        String name = "testRemoveShardReplica";
         String moduleShardsConfig = "module-shards-member1-and-2-and-3.conf";
         MemberNode leaderNode1 = MemberNode.builder(memberNodes).akkaConfig("Member1").testName(name ).
                 moduleShardsConfig(moduleShardsConfig).
@@ -331,6 +327,7 @@ public class ClusterAdminRpcServiceTest {
                 moduleShardsConfig(moduleShardsConfig).build();
 
         leaderNode1.configDataStore().waitTillReady();
+        replicaNode3.configDataStore().waitTillReady();
         verifyRaftPeersPresent(leaderNode1.configDataStore(), "cars", "member-2", "member-3");
         verifyRaftPeersPresent(replicaNode2.configDataStore(), "cars", "member-1", "member-3");
         verifyRaftPeersPresent(replicaNode3.configDataStore(), "cars", "member-1", "member-2");
@@ -357,6 +354,7 @@ public class ClusterAdminRpcServiceTest {
         replicaNode2 = MemberNode.builder(memberNodes).akkaConfig("Member2").testName(name).
                 moduleShardsConfig(moduleShardsConfig).build();
 
+        replicaNode2.configDataStore().waitTillReady();
         verifyRaftPeersPresent(replicaNode2.configDataStore(), "cars", "member-1");
 
         // Invoke RPC service on member-1 to remove member-2
@@ -406,13 +404,8 @@ public class ClusterAdminRpcServiceTest {
                         get(10, TimeUnit.SECONDS);
         verifySuccessfulRpcResult(rpcResult);
 
-        verifyRaftState(replicaNode2.configDataStore(), "cars", new RaftStateVerifier() {
-            @Override
-            public void verify(OnDemandRaftState raftState) {
-                assertThat("Leader Id", raftState.getLeader(), anyOf(containsString("member-2"),
-                        containsString("member-3")));
-            }
-        });
+        verifyRaftState(replicaNode2.configDataStore(), "cars", raftState ->
+                assertThat("Leader Id", raftState.getLeader(), anyOf(containsString("member-2"), containsString("member-3"))));
 
         verifyRaftPeersPresent(replicaNode2.configDataStore(), "cars", "member-3");
         verifyRaftPeersPresent(replicaNode3.configDataStore(), "cars", "member-2");
