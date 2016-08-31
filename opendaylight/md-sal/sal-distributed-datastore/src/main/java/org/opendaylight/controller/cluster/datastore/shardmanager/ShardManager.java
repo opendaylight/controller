@@ -307,7 +307,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
     private void onRemoveServerReply(ActorRef originalSender, ShardIdentifier shardId, RemoveServerReply replyMsg,
             String leaderPath) {
-        shardReplicaOperationsInProgress.remove(shardId);
+        shardReplicaOperationsInProgress.remove(shardId.getShardName());
 
         LOG.debug ("{}: Received {} for shard {}", persistenceId(), replyMsg, shardId.getShardName());
 
@@ -1094,12 +1094,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         findPrimary(shardName, new AutoFindPrimaryFailureResponseHandler(getSender(), shardName, persistenceId(), getSelf()) {
             @Override
             public void onRemotePrimaryShardFound(RemotePrimaryShardFound response) {
-                getSelf().tell(new RunnableMessage() {
-                    @Override
-                    public void run() {
-                        addShard(getShardName(), response, getSender());
-                    }
-                }, getTargetActor());
+                getSelf().tell((RunnableMessage) () -> addShard(getShardName(), response, getSender()), getTargetActor());
             }
 
             @Override
@@ -1256,12 +1251,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             }
 
             private void doRemoveShardReplicaAsync(final String primaryPath) {
-                getSelf().tell(new RunnableMessage() {
-                    @Override
-                    public void run() {
-                        removeShardReplica(shardReplicaMsg, getShardName(), primaryPath, getSender());
-                    }
-                }, getTargetActor());
+                getSelf().tell((RunnableMessage) () -> removeShardReplica(shardReplicaMsg, getShardName(), primaryPath, getSender()), getTargetActor());
             }
         });
     }
@@ -1380,12 +1370,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
                             String.format("Failed to find local shard %s", shardName), failure)), self());
                 } else {
                     if(response instanceof LocalShardFound) {
-                        getSelf().tell(new RunnableMessage() {
-                            @Override
-                            public void run() {
-                                onLocalShardFound.accept((LocalShardFound) response);
-                            }
-                        }, sender);
+                        getSelf().tell((RunnableMessage) () -> onLocalShardFound.accept((LocalShardFound) response), sender);
                     } else if(response instanceof LocalShardNotFound) {
                         String msg = String.format("Local shard %s does not exist", shardName);
                         LOG.debug ("{}: {}", persistenceId, msg);
