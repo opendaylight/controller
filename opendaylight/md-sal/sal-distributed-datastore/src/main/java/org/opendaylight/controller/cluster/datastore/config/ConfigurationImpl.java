@@ -19,12 +19,21 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
+import org.opendaylight.controller.cluster.datastore.shardstrategy.PrefixShardStrategy;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategy;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategyFactory;
+import org.opendaylight.controller.cluster.datastore.utils.ClusterUtils;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
+// TODO clean this up once we get rid of module based configuration, prefix one should be alot simpler
 public class ConfigurationImpl implements Configuration {
     private volatile Map<String, ModuleConfig> moduleConfigMap;
+
+    // TODO should this be initialized with something? on restart we should restore the shards from configuration?
+    private volatile Map<YangInstanceIdentifier, PrefixShardConfiguration> prefixConfigMap = Collections.emptyMap();
 
     // Look up maps to speed things up
 
@@ -108,6 +117,23 @@ public class ConfigurationImpl implements Configuration {
         return !shardConfigs.isEmpty() ? shardConfigs.iterator().next().getName(): null;
     }
 
+    @Nullable
+    @Override
+    public String getShardNameForPrefix(@Nonnull final YangInstanceIdentifier prefix) {
+        Preconditions.checkNotNull(prefix, "prefix should not be null");
+
+        YangInstanceIdentifier bestMatch = YangInstanceIdentifier.EMPTY;
+
+        for (final YangInstanceIdentifier yid : prefixConfigMap.keySet()) {
+            if (yid.contains(prefix) && yid.getPathArguments().size() > bestMatch.getPathArguments().size()) {
+                bestMatch = yid;
+            }
+        }
+
+        //TODO we really should have mapping based on prefix instead of Strings
+        return ClusterUtils.getCleanShardName(prefixConfigMap.get(bestMatch).getPrefix().getRootIdentifier());
+    }
+
     @Override
     public Collection<MemberName> getMembersFromShardName(final String shardName) {
         Preconditions.checkNotNull(shardName, "shardName should not be null");
@@ -116,6 +142,12 @@ public class ConfigurationImpl implements Configuration {
             ShardConfig shardConfig = moduleConfig.getShardConfig(shardName);
             if(shardConfig != null) {
                 return shardConfig.getReplicas();
+            }
+        }
+
+        for (final PrefixShardConfiguration prefixConfig : prefixConfigMap.values()) {
+            if (shardName.equals(ClusterUtils.getCleanShardName(prefixConfig.getPrefix().getRootIdentifier()))) {
+                return prefixConfig.getShardMemberNames();
             }
         }
 
@@ -151,6 +183,19 @@ public class ConfigurationImpl implements Configuration {
         namespaceToModuleName = ImmutableMap.<String, String>builder().putAll(namespaceToModuleName).
                 put(moduleConfig.getNameSpace(), moduleConfig.getName()).build();
         allShardNames = ImmutableSet.<String>builder().addAll(allShardNames).add(config.getShardName()).build();
+    }
+
+    @Override
+    public void addPrefixShardConfiguration(final PrefixShardConfiguration config) {
+        Preconditions.checkNotNull(config, "PrefixShardConfiguration cannot be null");
+        updatePrefixConfigMap(config);
+        allShardNames = ImmutableSet.<String>builder().addAll(allShardNames).add(ClusterUtils.getCleanShardName(config.getPrefix().getRootIdentifier())).build();
+    }
+
+    private void updatePrefixConfigMap(final PrefixShardConfiguration config) {
+        final Map<YangInstanceIdentifier, PrefixShardConfiguration> newPrefixConfigMap = new HashMap<>(prefixConfigMap);
+        newPrefixConfigMap.put(config.getPrefix().getRootIdentifier(), config);
+        prefixConfigMap = ImmutableMap.copyOf(newPrefixConfigMap);
     }
 
     private ShardStrategy createShardStrategy(String moduleName, String shardStrategyName) {
@@ -195,8 +240,27 @@ public class ConfigurationImpl implements Configuration {
         }
     }
 
-    private void updateModuleConfigMap(ModuleConfig moduleConfig) {
-        Map<String, ModuleConfig> newModuleConfigMap = new HashMap<>(moduleConfigMap);
+    @Override
+    public ShardStrategy getStrategyForPrefix(@Nonnull final YangInstanceIdentifier prefix) {
+        Preconditions.checkNotNull(prefix, "Prefix cannot be null");
+        // FIXME using prefix tables like in mdsal will be better
+        YangInstanceIdentifier lastFound = YangInstanceIdentifier.EMPTY;
+
+        for (final YangInstanceIdentifier yid : prefixConfigMap.keySet()) {
+            if (yid.contains(prefix) && yid.getPathArguments().size() > lastFound.getPathArguments().size()) {
+                lastFound = yid;
+            }
+        }
+
+        final PrefixShardConfiguration configuration = prefixConfigMap.get(lastFound);
+        if (configuration == null) {
+            return null;
+        }
+        return new PrefixShardStrategy(ClusterUtils.getCleanShardName(configuration.getPrefix().getRootIdentifier()), this);
+    }
+
+    private void updateModuleConfigMap(final ModuleConfig moduleConfig) {
+        final Map<String, ModuleConfig> newModuleConfigMap = new HashMap<>(moduleConfigMap);
         newModuleConfigMap.put(moduleConfig.getName(), moduleConfig);
         moduleConfigMap = ImmutableMap.copyOf(newModuleConfigMap);
     }
