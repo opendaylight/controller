@@ -68,14 +68,14 @@ public class IntegrationTestKit extends ShardTestKit {
                 SchemaContextHelper.full(), shardNames);
     }
 
-    public DistributedDataStore setupDistributedDataStore(String typeName, String moduleShardsConfig,
-            boolean waitUntilLeader, String... shardNames) {
+    public DistributedDataStore setupDistributedDataStore(final String typeName, final String moduleShardsConfig,
+            final boolean waitUntilLeader, final String... shardNames) {
         return setupDistributedDataStore(typeName, moduleShardsConfig, waitUntilLeader,
                 SchemaContextHelper.full(), shardNames);
     }
 
-    public DistributedDataStore setupDistributedDataStore(String typeName, String moduleShardsConfig,
-            boolean waitUntilLeader, SchemaContext schemaContext, String... shardNames) {
+    public DistributedDataStore setupDistributedDataStore(final String typeName, final String moduleShardsConfig,
+            final boolean waitUntilLeader, final SchemaContext schemaContext, final String... shardNames) {
         final ClusterWrapper cluster = new ClusterWrapperImpl(getSystem());
         final Configuration config = new ConfigurationImpl(moduleShardsConfig, "modules.conf");
 
@@ -230,9 +230,12 @@ public class IntegrationTestKit extends ShardTestKit {
 
     void assertExceptionOnTxChainCreates(final DOMStoreTransactionChain txChain,
             Class<? extends Exception> expType) throws Exception {
-        assertExceptionOnCall(() -> {
-            txChain.newWriteOnlyTransaction();
-            return null;
+        assertExceptionOnCall(new Callable<Void>() {
+            @Override
+            public Void call() throws Exception {
+                txChain.newWriteOnlyTransaction();
+                return null;
+            }
         }, expType);
 
         assertExceptionOnCall(() -> {
