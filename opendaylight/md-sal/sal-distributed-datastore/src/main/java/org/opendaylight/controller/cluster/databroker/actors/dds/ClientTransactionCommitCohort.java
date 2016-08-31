@@ -9,16 +9,19 @@ package org.opendaylight.controller.cluster.databroker.actors.dds;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.MoreExecutors;
 import java.util.Collection;
-import java.util.List;
+import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 
 final class ClientTransactionCommitCohort extends AbstractTransactionCommitCohort {
-    private final List<AbstractProxyTransaction> proxies;
+    private final Collection<AbstractProxyTransaction> proxies;
 
     /**
      * @param clientTransaction
      */
-    ClientTransactionCommitCohort(final Collection<AbstractProxyTransaction> proxies) {
+    ClientTransactionCommitCohort(final AbstractClientHistory parent, final TransactionIdentifier txId,
+        final Collection<AbstractProxyTransaction> proxies) {
+        super(parent, txId);
         this.proxies = ImmutableList.copyOf(proxies);
     }
 
@@ -52,6 +55,7 @@ final class ClientTransactionCommitCohort extends AbstractTransactionCommitCohor
             proxy.doCommit(ret);
         }
 
+        ret.addListener(this::complete, MoreExecutors.directExecutor());
         return ret;
     }
 
@@ -62,6 +66,7 @@ final class ClientTransactionCommitCohort extends AbstractTransactionCommitCohor
             proxy.abort(ret);
         }
 
+        ret.addListener(this::complete, MoreExecutors.directExecutor());
         return ret;
     }
 }
