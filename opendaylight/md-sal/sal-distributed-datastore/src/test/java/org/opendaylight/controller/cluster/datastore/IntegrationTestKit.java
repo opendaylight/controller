@@ -29,6 +29,7 @@ import org.mockito.Mockito;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext.Builder;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.config.ConfigurationImpl;
+import org.opendaylight.controller.cluster.datastore.config.EmptyModuleShardConfigProvider;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStats;
 import org.opendaylight.controller.cluster.datastore.messages.DatastoreSnapshot;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
@@ -68,14 +69,14 @@ public class IntegrationTestKit extends ShardTestKit {
                 SchemaContextHelper.full(), shardNames);
     }
 
-    public DistributedDataStore setupDistributedDataStore(String typeName, String moduleShardsConfig,
-            boolean waitUntilLeader, String... shardNames) {
+    public DistributedDataStore setupDistributedDataStore(final String typeName, final String moduleShardsConfig,
+            final boolean waitUntilLeader, final String... shardNames) {
         return setupDistributedDataStore(typeName, moduleShardsConfig, waitUntilLeader,
                 SchemaContextHelper.full(), shardNames);
     }
 
-    public DistributedDataStore setupDistributedDataStore(String typeName, String moduleShardsConfig,
-            boolean waitUntilLeader, SchemaContext schemaContext, String... shardNames) {
+    public DistributedDataStore setupDistributedDataStore(final String typeName, final String moduleShardsConfig,
+            final boolean waitUntilLeader, final SchemaContext schemaContext, final String... shardNames) {
         final ClusterWrapper cluster = new ClusterWrapperImpl(getSystem());
         final Configuration config = new ConfigurationImpl(moduleShardsConfig, "modules.conf");
 
@@ -110,7 +111,7 @@ public class IntegrationTestKit extends ShardTestKit {
     }
 
     public void waitUntilNoLeader(ActorContext actorContext, String... shardNames) {
-        for (String shardName: shardNames) {
+        for(String shardName: shardNames) {
             ActorRef shard = findLocalShard(actorContext, shardName);
             assertNotNull("No local shard found for " + shardName, shard);
 
@@ -121,11 +122,11 @@ public class IntegrationTestKit extends ShardTestKit {
     public void waitForMembersUp(String... otherMembers) {
         Set<String> otherMembersSet = Sets.newHashSet(otherMembers);
         Stopwatch sw = Stopwatch.createStarted();
-        while (sw.elapsed(TimeUnit.SECONDS) <= 10) {
+        while(sw.elapsed(TimeUnit.SECONDS) <= 10) {
             CurrentClusterState state = Cluster.get(getSystem()).state();
-            for (Member m: state.getMembers()) {
-                if (m.status() == MemberStatus.up() && otherMembersSet.remove(m.getRoles().iterator().next())
-                        && otherMembersSet.isEmpty()) {
+            for(Member m: state.getMembers()) {
+                if(m.status() == MemberStatus.up() && otherMembersSet.remove(m.getRoles().iterator().next()) &&
+                        otherMembersSet.isEmpty()) {
                     return;
                 }
             }
@@ -230,9 +231,12 @@ public class IntegrationTestKit extends ShardTestKit {
 
     void assertExceptionOnTxChainCreates(final DOMStoreTransactionChain txChain,
             Class<? extends Exception> expType) throws Exception {
-        assertExceptionOnCall(() -> {
-            txChain.newWriteOnlyTransaction();
-            return null;
+        assertExceptionOnCall(new Callable<Void>() {
+            @Override
+            public Void call() throws Exception {
+                txChain.newWriteOnlyTransaction();
+                return null;
+            }
         }, expType);
 
         assertExceptionOnCall(() -> {

@@ -47,7 +47,6 @@ import com.google.common.util.concurrent.Uninterruptibles;
 import com.typesafe.config.ConfigFactory;
 import java.net.URI;
 import java.util.AbstractMap;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -61,14 +60,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.SerializationUtils;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
-import org.opendaylight.controller.cluster.datastore.AbstractActorTest;
+import org.opendaylight.controller.cluster.datastore.AbstractShardManagerTest;
 import org.opendaylight.controller.cluster.datastore.ClusterWrapperImpl;
 import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
@@ -111,7 +106,6 @@ import org.opendaylight.controller.cluster.notifications.LeaderStateChanged;
 import org.opendaylight.controller.cluster.notifications.RegisterRoleChangeListener;
 import org.opendaylight.controller.cluster.notifications.RoleChangeNotification;
 import org.opendaylight.controller.cluster.raft.RaftState;
-import org.opendaylight.controller.cluster.raft.TestActorFactory;
 import org.opendaylight.controller.cluster.raft.base.messages.FollowerInitialSyncUpStatus;
 import org.opendaylight.controller.cluster.raft.base.messages.SwitchBehavior;
 import org.opendaylight.controller.cluster.raft.client.messages.GetSnapshot;
@@ -137,54 +131,12 @@ import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.FiniteDuration;
 
-public class ShardManagerTest extends AbstractActorTest {
+public class ShardManagerTest extends AbstractShardManagerTest {
     private static final Logger LOG = LoggerFactory.getLogger(ShardManagerTest.class);
-    private static final MemberName MEMBER_1 = MemberName.forName("member-1");
     private static final MemberName MEMBER_2 = MemberName.forName("member-2");
     private static final MemberName MEMBER_3 = MemberName.forName("member-3");
 
-    private static int ID_COUNTER = 1;
-
-    private final String shardMrgIDSuffix = "config" + ID_COUNTER++;
     private final String shardMgrID = ShardManagerIdentifier.builder().type(shardMrgIDSuffix).build().toString();
-
-    @Mock
-    private static CountDownLatch ready;
-
-    private static ShardIdentifier mockShardName = ShardIdentifier.create(Shard.DEFAULT_NAME, MEMBER_1, "config");
-
-    private static TestActorRef<MessageCollectorActor> mockShardActor = TestActorRef.create(getSystem(),
-            Props.create(MessageCollectorActor.class), mockShardName.toString());
-
-    private final DatastoreContext.Builder datastoreContextBuilder = DatastoreContext.newBuilder()
-            .dataStoreName(shardMrgIDSuffix).shardInitializationTimeout(600, TimeUnit.MILLISECONDS)
-            .shardHeartbeatIntervalInMillis(100).shardElectionTimeoutFactor(6);
-
-    private final Collection<ActorSystem> actorSystems = new ArrayList<>();
-
-    private final TestActorFactory actorFactory = new TestActorFactory(getSystem());
-
-    @Before
-    public void setUp() {
-        MockitoAnnotations.initMocks(this);
-
-        InMemoryJournal.clear();
-        InMemorySnapshotStore.clear();
-
-        mockShardActor.underlyingActor().clear();
-    }
-
-    @After
-    public void tearDown() {
-        InMemoryJournal.clear();
-        InMemorySnapshotStore.clear();
-
-        for (ActorSystem system: actorSystems) {
-            JavaTestKit.shutdownActorSystem(system, null, Boolean.TRUE);
-        }
-
-        actorFactory.close();
-    }
 
     private ActorSystem newActorSystem(String config) {
         ActorSystem system = ActorSystem.create("cluster-test", ConfigFactory.load().getConfig(config));
@@ -205,23 +157,11 @@ public class ShardManagerTest extends AbstractActorTest {
         return newShardMgrProps(new MockConfiguration());
     }
 
-    private Props newShardMgrProps(Configuration config) {
-        return newTestShardMgrBuilder(config).props();
-    }
-
     private static DatastoreContextFactory newDatastoreContextFactory(DatastoreContext datastoreContext) {
         DatastoreContextFactory mockFactory = mock(DatastoreContextFactory.class);
         Mockito.doReturn(datastoreContext).when(mockFactory).getBaseDatastoreContext();
         Mockito.doReturn(datastoreContext).when(mockFactory).getShardDatastoreContext(Mockito.anyString());
         return mockFactory;
-    }
-
-    private TestShardManager.Builder newTestShardMgrBuilder() {
-        return TestShardManager.builder(datastoreContextBuilder);
-    }
-
-    private TestShardManager.Builder newTestShardMgrBuilder(Configuration config) {
-        return TestShardManager.builder(datastoreContextBuilder).configuration(config);
     }
 
     private TestShardManager.Builder newTestShardMgrBuilderWithMockShardActor() {
@@ -2075,12 +2015,8 @@ public class ShardManagerTest extends AbstractActorTest {
                 MessageCollectorActor.expectFirstMatching(shard1, Shutdown.class);
                 MessageCollectorActor.expectFirstMatching(shard2, Shutdown.class);
 
-                try {
-                    Await.ready(stopFuture, FiniteDuration.create(500, TimeUnit.MILLISECONDS));
-                    fail("ShardManager actor stopped without waiting for the Shards to be stopped");
-                } catch (TimeoutException e) {
-                    // expected
-                }
+                Await.ready(stopFuture, FiniteDuration.create(500, TimeUnit.MILLISECONDS));
+                fail("ShardManager actor stopped without waiting for the Shards to be stopped");
 
                 actorFactory.killActor(shard1, this);
                 actorFactory.killActor(shard2, this);
@@ -2157,7 +2093,7 @@ public class ShardManagerTest extends AbstractActorTest {
         };
     }
 
-    private static class TestShardManager extends ShardManager {
+    public static class TestShardManager extends ShardManager {
         private final CountDownLatch recoveryComplete = new CountDownLatch(1);
         private final CountDownLatch snapshotPersist = new CountDownLatch(1);
         private ShardManagerSnapshot snapshot;
@@ -2225,7 +2161,7 @@ public class ShardManagerTest extends AbstractActorTest {
                     Uninterruptibles.awaitUninterruptibly(recoveryComplete, 5, TimeUnit.SECONDS));
         }
 
-        void waitForMemberUp() {
+        public void waitForMemberUp() {
             assertEquals("MemberUp received", true,
                     Uninterruptibles.awaitUninterruptibly(memberUpReceived, 5, TimeUnit.SECONDS));
             memberUpReceived = new CountDownLatch(1);
@@ -2260,7 +2196,7 @@ public class ShardManagerTest extends AbstractActorTest {
             return new Builder(datastoreContextBuilder);
         }
 
-        private static class Builder extends AbstractGenericCreator<Builder, TestShardManager> {
+        public static class Builder extends AbstractGenericCreator<Builder, TestShardManager> {
             private ActorRef shardActor;
             private final Map<String, ActorRef> shardActors = new HashMap<>();
 
