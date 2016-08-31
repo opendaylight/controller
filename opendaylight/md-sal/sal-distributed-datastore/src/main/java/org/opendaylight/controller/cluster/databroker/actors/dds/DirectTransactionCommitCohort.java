@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.databroker.actors.dds;
 
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.ListenableFuture;
+import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 
 /**
  * An {@link AbstractTransactionCommitCohort} implementation for transactions which contain a single proxy. Since there
@@ -22,7 +23,9 @@ final class DirectTransactionCommitCohort extends AbstractTransactionCommitCohor
     /**
      * @param clientTransaction
      */
-    DirectTransactionCommitCohort(final AbstractProxyTransaction proxy) {
+    DirectTransactionCommitCohort(final AbstractClientHistory parent, final TransactionIdentifier txId,
+        final AbstractProxyTransaction proxy) {
+        super(parent, txId);
         this.proxy = Preconditions.checkNotNull(proxy);
     }
 
@@ -38,11 +41,13 @@ final class DirectTransactionCommitCohort extends AbstractTransactionCommitCohor
 
     @Override
     public ListenableFuture<Void> abort() {
+        complete();
         return VOID_FUTURE;
     }
 
     @Override
     public ListenableFuture<Void> commit() {
+        complete();
         return VOID_FUTURE;
     }
 }
