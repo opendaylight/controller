@@ -6,7 +6,7 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.opendaylight.controller.cluster.datastore;
+package org.opendaylight.controller.cluster.sharding;
 
 import java.util.Collection;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
@@ -34,7 +34,7 @@ public interface DistributedShardFactory {
      *                                              register the shard into the ShardingService
      */
     DistributedShardRegistration createDistributedShard(DOMDataTreeIdentifier prefix, Collection<MemberName> replicaMembers)
-            throws DOMDataTreeShardingConflictException, DOMDataTreeProducerException;
+            throws DOMDataTreeShardingConflictException, DOMDataTreeShardCreationFailedException, DOMDataTreeProducerException;
 
     interface DistributedShardRegistration {
         void close();
