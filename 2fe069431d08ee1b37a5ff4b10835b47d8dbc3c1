@@ -1,0 +1,429 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a6b29fe_89719746",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/config/ConfigurationImpl.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-09-01T15:18:53Z",
+      "side": 1,
+      "message": "You could store the bestMatchConfig in a local var to avoid the extra Map lookup",
+      "revId": "2fe069431d08ee1b37a5ff4b10835b47d8dbc3c1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_a9abb373",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/config/ConfigurationImpl.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 189,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-09-01T15:18:53Z",
+      "side": 1,
+      "message": "Add @Nonnull",
+      "revId": "2fe069431d08ee1b37a5ff4b10835b47d8dbc3c1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_69a51ba1",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/config/ConfigurationImpl.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 192,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-09-01T15:18:53Z",
+      "side": 1,
+      "message": "I think line is a bit too long here",
+      "revId": "2fe069431d08ee1b37a5ff4b10835b47d8dbc3c1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_c9bd4fb9",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/config/ConfigurationImpl.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 255,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-09-01T15:18:53Z",
+      "side": 1,
+      "message": "Again, could store the lastFoundConfig in a local var",
+      "revId": "2fe069431d08ee1b37a5ff4b10835b47d8dbc3c1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_e965ab1e",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/config/PrefixShardConfiguration.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-09-01T15:18:53Z",
+      "side": 1,
+      "message": "please add javadoc",
+      "revId": "2fe069431d08ee1b37a5ff4b10835b47d8dbc3c1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_09baa76d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/AddPrefixShardReplica.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-09-01T15:18:53Z",
+      "side": 1,
+      "message": "please fix indentation",
+      "revId": "2fe069431d08ee1b37a5ff4b10835b47d8dbc3c1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_89a51749",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/ReplicateCreatedShard.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-09-01T15:18:53Z",
+      "side": 1,
+      "message": "Why doesn\u0027t this just take the PrefixShardConfiguration?",
+      "revId": "2fe069431d08ee1b37a5ff4b10835b47d8dbc3c1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_296cc307",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/shardmanager/ShardManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 435,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-09-01T15:18:53Z",
+      "side": 1,
+      "message": "We shouldn\u0027t use toString as the shardName. This should use ClusterUtils.getShardIdentifier to match what doCreatePrefixedShard does.",
+      "revId": "2fe069431d08ee1b37a5ff4b10835b47d8dbc3c1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_69799bc7",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/shardmanager/ShardManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 490,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-09-01T15:18:53Z",
+      "side": 1,
+      "message": "Line looks a bit too long",
+      "revId": "2fe069431d08ee1b37a5ff4b10835b47d8dbc3c1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_3bafea95",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/shardmanager/ShardManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 493,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-09-01T15:18:53Z",
+      "side": 1,
+      "message": "Shouldn\u0027t we also persist the shard config in the ShardManagerSnapshot?",
+      "revId": "2fe069431d08ee1b37a5ff4b10835b47d8dbc3c1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_9bb1de49",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/shardmanager/ShardManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 495,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-09-01T15:18:53Z",
+      "side": 1,
+      "message": "This should honor the DatastoreContext in CreatePrefixedShard as doCreateShard does.",
+      "revId": "2fe069431d08ee1b37a5ff4b10835b47d8dbc3c1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_5b7bc67a",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/shardmanager/ShardManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 502,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-09-01T15:18:53Z",
+      "side": 1,
+      "message": "Don\u0027t need to set these here - they\u0027re set when the shard actor is created",
+      "revId": "2fe069431d08ee1b37a5ff4b10835b47d8dbc3c1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_5bdc6646",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/shardmanager/ShardManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 505,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-09-01T15:18:53Z",
+      "side": 1,
+      "message": "Not used here but probably should be as onCreateShard does.",
+      "revId": "2fe069431d08ee1b37a5ff4b10835b47d8dbc3c1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_9bdf1e69",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/shardmanager/ShardManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 508,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-09-01T15:18:53Z",
+      "side": 1,
+      "message": "Do we want to assume the local shard should be an active member? It might not be in the config memberNames. It seems this should follow what doCreateShard does.",
+      "revId": "2fe069431d08ee1b37a5ff4b10835b47d8dbc3c1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_3bf7eaf6",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/shardmanager/ShardManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 527,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-09-01T15:18:53Z",
+      "side": 1,
+      "message": "Should prefix persistenceId(). Also shouldn\u0027t the last arg be the shardName?",
+      "revId": "2fe069431d08ee1b37a5ff4b10835b47d8dbc3c1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_bb15bae6",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/shardmanager/ShardManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 528,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-09-01T15:18:53Z",
+      "side": 1,
+      "message": "What if the remote peer isn\u0027t available? How would the shard config then get replicated?",
+      "revId": "2fe069431d08ee1b37a5ff4b10835b47d8dbc3c1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_7bc32289",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/shardmanager/ShardManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 1166,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-09-01T15:18:53Z",
+      "side": 1,
+      "message": "This should either be a javadoc or move comment into method",
+      "revId": "2fe069431d08ee1b37a5ff4b10835b47d8dbc3c1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_9b227e50",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/shardmanager/ShardManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 1171,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-09-01T15:18:53Z",
+      "side": 1,
+      "message": "What if a shard configuration doesn\u0027t exist for the shard name? onReplicateCreatedShard adds the prefix config before sending AddPrefixShardReplica so that shouldn\u0027t happen unless someone else sends AddPrefixShardReplica. So other than not checking for a shard config, this method is the same as onAddShardReplica so why not use AddShardReplica in place of AddPrefixShardReplica?",
+      "revId": "2fe069431d08ee1b37a5ff4b10835b47d8dbc3c1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_9b4d5e41",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/shardmanager/ShardManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 1247,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-09-01T15:18:53Z",
+      "side": 1,
+      "message": "The passed in Builder isn\u0027t used - left over from previous code?",
+      "revId": "2fe069431d08ee1b37a5ff4b10835b47d8dbc3c1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_09b467cf",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/shardstrategy/PrefixShardStrategy.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-09-01T15:18:53Z",
+      "side": 1,
+      "message": "\"into\" -\u003e \"to a\"",
+      "revId": "2fe069431d08ee1b37a5ff4b10835b47d8dbc3c1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_894997b9",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ClusterUtils.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-09-01T15:18:53Z",
+      "side": 1,
+      "message": "Can you javadoc this method explaining what is meant by \"clean\" and what it returns?",
+      "revId": "2fe069431d08ee1b37a5ff4b10835b47d8dbc3c1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_095e2776",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ClusterUtils.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-09-01T15:18:53Z",
+      "side": 1,
+      "message": "This method isn\u0027t used",
+      "revId": "2fe069431d08ee1b37a5ff4b10835b47d8dbc3c1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_e9f00b69",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/PrefixShardCreationTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-09-01T15:18:53Z",
+      "side": 1,
+      "message": "Can you add javadoc? Looks like this class tests ShardManager prefix shard creation",
+      "revId": "2fe069431d08ee1b37a5ff4b10835b47d8dbc3c1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_c99c2f12",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/PrefixShardCreationTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-09-01T15:18:53Z",
+      "side": 1,
+      "message": "All this code above (mostly anyway) is duplicated from ShardManagerTest. I think it would make sense to refactor it into an AbstractShardManagerTest.",
+      "revId": "2fe069431d08ee1b37a5ff4b10835b47d8dbc3c1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_09a3c74f",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/PrefixShardCreationTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 139,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-09-01T15:18:53Z",
+      "side": 1,
+      "message": "Should be testPrefixShardCreation.",
+      "revId": "2fe069431d08ee1b37a5ff4b10835b47d8dbc3c1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
