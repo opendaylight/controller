@@ -208,7 +208,10 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
 
         final DataTreeModification unwrapped = unwrap(mod);
         dataTree.validate(unwrapped);
-        dataTree.commit(dataTree.prepare(unwrapped));
+        DataTreeCandidateTip candidate = dataTree.prepare(unwrapped);
+        dataTree.commit(candidate);
+        notifyListeners(candidate);
+
         LOG.debug("{}: state snapshot applied in %s", logContext, elapsed);
     }
 
