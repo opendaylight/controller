@@ -1,0 +1,191 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a6b29fe_aaad5beb",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardedDOMDataTree.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-09-02T20:55:59Z",
+      "side": 1,
+      "message": "line way too long",
+      "revId": "6647c697db08900f3adce15746838bb4fae787db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_cab09745",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardedDOMDataTree.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-09-02T20:55:59Z",
+      "side": 1,
+      "message": "Should there be a TODO here? Throw UnsupportedOperationEx?",
+      "revId": "6647c697db08900f3adce15746838bb4fae787db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_0a60cfcd",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardedDOMDataTree.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-09-02T20:55:59Z",
+      "side": 1,
+      "message": "I\u0027m not a fan of throwing unchecked exceptions to users where the API docs don\u0027t  indicate failures can occur. Such a practice is littered though out mdsal and yang tools code and has caused latent bugs in callers. I know others have noted frustration about this as well. As a user you basically have to be paranoid and  put try/catch RuntimeException around all calls to gracefully handle it just in case.\n\nThe createProducer API only documents:\n\n  @throws IllegalArgumentException if subtrees is empty.\n\nIn that case it\u0027s fine to throw an IEA b/c it\u0027s documented and is a caller error. But the internal errors above should not be blindly propagated. If we want to propagate such errors then it should at least be documented in the API and preferably define a throws clause with a specific exception like DOMDataTreeServiceException, either checked or unchecked but I prefer the former. Either that or just log the error and return a noop DOMDataTreeProducer that throws a checked exception somewhere down the line when accessed.",
+      "revId": "6647c697db08900f3adce15746838bb4fae787db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_0ab72f3b",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardedDOMDataTree.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-09-02T20:55:59Z",
+      "side": 1,
+      "message": "line too long",
+      "revId": "6647c697db08900f3adce15746838bb4fae787db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_4a84875d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardedDOMDataTree.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 146,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-09-02T20:55:59Z",
+      "side": 1,
+      "message": "Throw DOMDataTreeProducerException with \u0027e\u0027 as the cause. Same below with the oner exceptions.",
+      "revId": "6647c697db08900f3adce15746838bb4fae787db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_8a3fbf86",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardedDOMDataTree.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 151,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-09-02T20:55:59Z",
+      "side": 1,
+      "message": "Why is the producer created in a try/resource block? It is passed to the ShardFrontEnd but will be closed after exiting the try.",
+      "revId": "6647c697db08900f3adce15746838bb4fae787db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_eab8f312",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardedDOMDataTree.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 158,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-09-02T20:55:59Z",
+      "side": 1,
+      "message": "line too long",
+      "revId": "6647c697db08900f3adce15746838bb4fae787db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_aadb9b7a",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/ShardedDataTreeActor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-09-02T20:55:59Z",
+      "side": 1,
+      "message": "If this actor doesn\u0027t persist data then it shouldn\u0027t be an AbstractUntypedPersistentActor.",
+      "revId": "6647c697db08900f3adce15746838bb4fae787db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_6acd03b7",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/ShardedDataTreeActor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 255,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-09-02T20:55:59Z",
+      "side": 1,
+      "message": "Not usually a good idea to block the actor.",
+      "revId": "6647c697db08900f3adce15746838bb4fae787db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_ca4c1745",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/ShardedDataTreeActor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 364,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-09-02T20:55:59Z",
+      "side": 1,
+      "message": "So what if the CreatePrefixShard call fails to a remote node? How do we recover from that?",
+      "revId": "6647c697db08900f3adce15746838bb4fae787db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_0abc4f05",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/ShardingServiceAddressResolver.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-09-02T20:55:59Z",
+      "side": 1,
+      "message": "This looks similar to ShardPeerAddressResolver - why not reuse it?",
+      "revId": "6647c697db08900f3adce15746838bb4fae787db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
