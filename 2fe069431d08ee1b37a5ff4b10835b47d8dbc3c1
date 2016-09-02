@@ -172,6 +172,24 @@
     },
     {
       "key": {
+        "uuid": "7a6b29fe_ea0c76ef",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/shardmanager/ShardManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 493,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2016-09-02T13:37:44Z",
+      "side": 1,
+      "message": "Yeah this is actually a good idea, I missed this since the module configuration wasn\u0027t persisted anywhere but it\u0027s actually in the static configuration that\u0027s there at the start.",
+      "parentUuid": "7a6b29fe_3bafea95",
+      "revId": "2fe069431d08ee1b37a5ff4b10835b47d8dbc3c1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a6b29fe_9bb1de49",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/shardmanager/ShardManager.java",
         "patchSetId": 3
