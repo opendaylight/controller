@@ -115,8 +115,8 @@ public class Candidate extends AbstractRaftActorBehavior {
         }
 
         if (voteCount >= votesRequired) {
-            if(context.getCommitIndex() < context.getReplicatedLog().lastIndex()) {
-                LOG.debug("{}: Connmit index {} is behind last index {}", logName(), context.getCommitIndex(),
+            if(context.getLastApplied() < context.getReplicatedLog().lastIndex()) {
+                LOG.debug("{}: LastApplied index {} is behind last index {}", logName(), context.getLastApplied(),
                         context.getReplicatedLog().lastIndex());
                 return internalSwitchBehavior(RaftState.PreLeader);
             } else {
