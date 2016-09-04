@@ -257,6 +257,9 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
                 context.getSnapshotManager().trimLog(context.getLastApplied());
             }
 
+            // Send it to the current behavior - some behaviors like PreLeader need to be notified of ApplyState.
+            possiblyHandleBehaviorMessage(message);
+
         } else if (message instanceof ApplyJournalEntries) {
             ApplyJournalEntries applyEntries = (ApplyJournalEntries) message;
             if(LOG.isDebugEnabled()) {
@@ -284,21 +287,25 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             ((Runnable)message).run();
         } else if(message instanceof NoopPayload) {
             persistData(null, null, (NoopPayload)message);
-        } else {
-            // Processing the message may affect the state, hence we need to capture it
-            final RaftActorBehavior currentBehavior = getCurrentBehavior();
-            final BehaviorState state = behaviorStateTracker.capture(currentBehavior);
-
-            // A behavior indicates that it processed the change by returning a reference to the next behavior
-            // to be used. A null return indicates it has not processed the message and we should be passing it to
-            // the subclass for handling.
-            final RaftActorBehavior nextBehavior = currentBehavior.handleMessage(getSender(), message);
-            if (nextBehavior != null) {
-                switchBehavior(state, nextBehavior);
-            } else {
-                handleNonRaftCommand(message);
-            }
+        } else if (!possiblyHandleBehaviorMessage(message)) {
+            handleNonRaftCommand(message);
         }
+    }
+
+    private boolean possiblyHandleBehaviorMessage(final Object message) {
+        final RaftActorBehavior currentBehavior = getCurrentBehavior();
+        final BehaviorState state = behaviorStateTracker.capture(currentBehavior);
+
+        // A behavior indicates that it processed the change by returning a reference to the next behavior
+        // to be used. A null return indicates it has not processed the message and we should be passing it to
+        // the subclass for handling.
+        final RaftActorBehavior nextBehavior = currentBehavior.handleMessage(getSender(), message);
+        if (nextBehavior != null) {
+            switchBehavior(state, nextBehavior);
+            return true;
+        }
+
+        return false;
     }
 
     private void initiateLeadershipTransfer(final RaftActorLeadershipTransferCohort.OnComplete onComplete) {
@@ -594,7 +601,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
      *
      * @return A reference to the leader if known, null otherwise
      */
-    protected ActorSelection getLeader(){
+    public ActorSelection getLeader(){
         String leaderAddress = getLeaderAddress();
 
         if(leaderAddress == null){

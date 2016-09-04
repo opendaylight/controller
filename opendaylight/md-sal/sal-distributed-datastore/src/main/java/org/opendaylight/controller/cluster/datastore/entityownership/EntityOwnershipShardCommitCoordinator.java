@@ -168,7 +168,7 @@ class EntityOwnershipShardCommitCoordinator {
         if(inflightCommit != null || !hasLeader) {
             if(log.isDebugEnabled()) {
                 log.debug("{} - adding modifications to pending",
-                        (inflightCommit != null ? "A commit is inflight" : "No shard leader"));
+                        inflightCommit != null ? "A commit is inflight" : "No shard leader");
             }
 
             pendingModifications.addAll(modifications.getModifications());
@@ -179,6 +179,8 @@ class EntityOwnershipShardCommitCoordinator {
     }
 
     void onStateChanged(EntityOwnershipShard shard, boolean isLeader) {
+        shard.possiblyRemoveAllInitialCandidates(shard.getLeader());
+
         if(!isLeader && inflightCommit != null) {
             // We're no longer the leader but we have an inflight local commit. This likely means we didn't get
             // consensus for the commit and switched to follower due to another node with a higher term. We
