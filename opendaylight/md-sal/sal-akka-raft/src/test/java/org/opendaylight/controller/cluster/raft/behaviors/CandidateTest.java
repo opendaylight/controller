@@ -112,6 +112,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
     @Test
     public void testBecomeLeaderOnReceivingMajorityVotesInThreeNodeCluster(){
         MockRaftActorContext raftActorContext = createActorContext();
+        raftActorContext.setLastApplied(raftActorContext.getReplicatedLog().lastIndex());
         raftActorContext.setPeerAddresses(setupPeers(2));
         candidate = new Candidate(raftActorContext);
 
@@ -121,12 +122,25 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
     }
 
     @Test
+    public void testBecomePreLeaderOnReceivingMajorityVotesInThreeNodeCluster(){
+        MockRaftActorContext raftActorContext = createActorContext();
+        raftActorContext.setPeerAddresses(setupPeers(2));
+        candidate = new Candidate(raftActorContext);
+
+        candidate = candidate.handleMessage(peerActors[0], new RequestVoteReply(1, true));
+
+        // LastApplied is -1 and behind the last index.
+        assertEquals("Behavior", RaftState.PreLeader, candidate.state());
+    }
+
+    @Test
     public void testBecomeLeaderOnReceivingMajorityVotesInFiveNodeCluster(){
         MockRaftActorContext raftActorContext = createActorContext();
         raftActorContext.getTermInformation().update(2L, "other");
         raftActorContext.setReplicatedLog(new MockRaftActorContext.MockReplicatedLogBuilder().
                 createEntries(0, 5, 1).build());
         raftActorContext.setCommitIndex(raftActorContext.getReplicatedLog().lastIndex());
+        raftActorContext.setLastApplied(raftActorContext.getReplicatedLog().lastIndex());
         raftActorContext.setPeerAddresses(setupPeers(4));
         candidate = new Candidate(raftActorContext);
 

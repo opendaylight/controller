@@ -11,7 +11,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.AdditionalMatchers.or;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
@@ -239,22 +238,19 @@ public class DistributedEntityOwnershipIntegrationTest {
         verifyCandidates(leaderDistributedDataStore, ENTITY4, "member-3", "member-2");
         verifyOwner(leaderDistributedDataStore, ENTITY4, "member-3");
 
-        // Shutdown follower2 and verify it's owned entities (entity 2 & 4) get re-assigned
+        // Shutdown follower2 and verify it's owned entities (entity 4) get re-assigned
 
         reset(leaderMockListener, follower1MockListener);
         follower2Node.cleanup();
 
-        verify(follower1MockListener, timeout(15000).times(2)).ownershipChanged(or(ownershipChange(ENTITY4, false, true, true),
-                ownershipChange(ENTITY2, false, false, false)));
-        verify(leaderMockListener, timeout(15000).times(2)).ownershipChanged(or(ownershipChange(ENTITY4, false, false, true),
-                ownershipChange(ENTITY2, false, false, false)));
-        verifyOwner(leaderDistributedDataStore, ENTITY2, ""); // no other candidate
+        verify(follower1MockListener, timeout(15000)).ownershipChanged(ownershipChange(ENTITY4, false, true, true));
+        verify(leaderMockListener, timeout(15000)).ownershipChanged(ownershipChange(ENTITY4, false, false, true));
 
         // Register leader candidate for entity2 and verify it becomes owner
 
         DOMEntityOwnershipCandidateRegistration leaderEntity2Reg = leaderEntityOwnershipService.registerCandidate(ENTITY2);
-        verify(leaderMockListener, timeout(5000)).ownershipChanged(ownershipChange(ENTITY2, false, true, true));
         verifyOwner(leaderDistributedDataStore, ENTITY2, "member-1");
+        verify(leaderMockListener, timeout(5000)).ownershipChanged(ownershipChange(ENTITY2, false, true, true));
 
         // Unregister leader candidate for entity2 and verify the owner is cleared
 
@@ -265,7 +261,7 @@ public class DistributedEntityOwnershipIntegrationTest {
     }
 
     @Test
-    public void testLeaderCandidatesRemovedAfterShutdown() throws Exception {
+    public void testLeaderEntityOwnersReassignedAfterShutdown() throws Exception {
         followerDatastoreContextBuilder.shardElectionTimeoutFactor(5).
                     customRaftPolicyImplementation(DisableElectionsRaftPolicy.class.getName());
 
@@ -331,16 +327,16 @@ public class DistributedEntityOwnershipIntegrationTest {
         MemberNode.verifyRaftState(follower1Node.configDataStore(), ENTITY_OWNERSHIP_SHARD_NAME,
             raftState -> assertEquals("Raft state", RaftState.Leader.toString(), raftState.getRaftState()));
 
-        // Verify the prior leader's candidates are removed
+        // Verify the prior leader's entity owners are re-assigned.
 
-        verifyCandidates(follower1Node.configDataStore(), ENTITY1, "member-2");
-        verifyCandidates(follower1Node.configDataStore(), ENTITY2, "member-3");
+        verifyCandidates(follower1Node.configDataStore(), ENTITY1, "member-2", "member-1");
+        verifyCandidates(follower1Node.configDataStore(), ENTITY2, "member-1", "member-3");
         verifyOwner(follower1Node.configDataStore(), ENTITY1, "member-2");
         verifyOwner(follower1Node.configDataStore(), ENTITY2, "member-3");
     }
 
     @Test
-    public void testLeaderAndFollowerCandidatesRemovedAfterShutdown() throws Exception {
+    public void testLeaderAndFollowerEntityOwnersReassignedAfterShutdown() throws Exception {
         followerDatastoreContextBuilder.shardElectionTimeoutFactor(5).
                 customRaftPolicyImplementation(DisableElectionsRaftPolicy.class.getName());
 
@@ -375,7 +371,7 @@ public class DistributedEntityOwnershipIntegrationTest {
         DOMEntityOwnershipService follower1EntityOwnershipService = newOwnershipService(follower1Node.configDataStore());
         DOMEntityOwnershipService follower2EntityOwnershipService = newOwnershipService(follower2Node.configDataStore());
         DOMEntityOwnershipService follower3EntityOwnershipService = newOwnershipService(follower3Node.configDataStore());
-        DOMEntityOwnershipService follower4EntityOwnershipService = newOwnershipService(follower4Node.configDataStore());
+        newOwnershipService(follower4Node.configDataStore());
 
         leaderNode.kit().waitUntilLeader(leaderNode.configDataStore().getActorContext(), ENTITY_OWNERSHIP_SHARD_NAME);
 
@@ -407,8 +403,7 @@ public class DistributedEntityOwnershipIntegrationTest {
         verifyCandidates(leaderDistributedDataStore, ENTITY2, "member-1", "member-3", "member-4");
         verifyOwner(leaderDistributedDataStore, ENTITY2, "member-1");
 
-
-        // Shutdown the leader and verify its removed from the candidate list
+        // Shutdown the leader and follower3
 
         leaderNode.cleanup();
         follower3Node.cleanup();
@@ -426,10 +421,10 @@ public class DistributedEntityOwnershipIntegrationTest {
         MemberNode.verifyRaftState(follower1Node.configDataStore(), ENTITY_OWNERSHIP_SHARD_NAME,
                 raftState -> assertEquals("Raft state", RaftState.Leader.toString(), raftState.getRaftState()));
 
-        // Verify the prior leader's and follower3 candidates are removed
+        // Verify the prior leader's and follower3 entity owners are re-assigned.
 
-        verifyCandidates(follower1Node.configDataStore(), ENTITY1, "member-2");
-        verifyCandidates(follower1Node.configDataStore(), ENTITY2, "member-3");
+        verifyCandidates(follower1Node.configDataStore(), ENTITY1, "member-2", "member-1");
+        verifyCandidates(follower1Node.configDataStore(), ENTITY2, "member-1", "member-3", "member-4");
         verifyOwner(follower1Node.configDataStore(), ENTITY1, "member-2");
         verifyOwner(follower1Node.configDataStore(), ENTITY2, "member-3");
     }
