@@ -10,7 +10,7 @@ package org.opendaylight.controller.cluster.raft.behaviors;
 import akka.actor.ActorRef;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
-import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
+import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.persisted.NoopPayload;
 
 /**
@@ -37,12 +37,17 @@ public class PreLeader extends AbstractLeader {
     }
 
     @Override
-    protected RaftActorBehavior handleAppendEntriesReply(ActorRef sender, AppendEntriesReply appendEntriesReply) {
-        RaftActorBehavior returnBehavior = super.handleAppendEntriesReply(sender, appendEntriesReply);
-
-        if(context.getCommitIndex() >= context.getReplicatedLog().lastIndex()) {
-            // We've committed all entries - we can switch to Leader.
-            returnBehavior = internalSwitchBehavior(new Leader(context, this));
+    public RaftActorBehavior handleMessage(ActorRef sender, Object message) {
+        RaftActorBehavior returnBehavior;
+        if (message instanceof ApplyState) {
+            if(context.getLastApplied() >= context.getReplicatedLog().lastIndex()) {
+                // We've applied all entries - we can switch to Leader.
+                returnBehavior = internalSwitchBehavior(new Leader(context, this));
+            } else {
+                returnBehavior = this;
+            }
+        } else {
+            returnBehavior = super.handleMessage(sender, message);
         }
 
         return returnBehavior;
