@@ -897,7 +897,7 @@ public class ShardTest extends AbstractShardTest {
                         }
 
                         @Override
-                        protected ActorSelection getLeader() {
+                        public ActorSelection getLeader() {
                             return overrideLeaderCalls.get() ? getSystem().actorSelection(getRef().path()) :
                                 super.getLeader();
                         }
@@ -1427,19 +1427,14 @@ public class ShardTest extends AbstractShardTest {
     @Test
     public void testAbortWithCommitPending() throws Throwable {
         new ShardTestKit(getSystem()) {{
-            final Creator<Shard> creator = new Creator<Shard>() {
+            final Creator<Shard> creator = () -> new Shard(newShardBuilder()) {
                 @Override
-                public Shard create() throws Exception {
-                    return new Shard(newShardBuilder()) {
-                        @Override
-                        void persistPayload(final TransactionIdentifier transactionId, final Payload payload) {
-                            // Simulate an AbortTransaction message occurring during replication, after
-                            // persisting and before finishing the commit to the in-memory store.
+                void persistPayload(final TransactionIdentifier transactionId, final Payload payload) {
+                    // Simulate an AbortTransaction message occurring during replication, after
+                    // persisting and before finishing the commit to the in-memory store.
 
-                            doAbortTransaction(transactionId, null);
-                            super.persistPayload(transactionId, payload);
-                        }
-                    };
+                    doAbortTransaction(transactionId, null);
+                    super.persistPayload(transactionId, payload);
                 }
             };
 

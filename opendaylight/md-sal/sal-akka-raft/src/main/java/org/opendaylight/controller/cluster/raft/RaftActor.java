@@ -594,7 +594,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
      *
      * @return A reference to the leader if known, null otherwise
      */
-    protected ActorSelection getLeader(){
+    public ActorSelection getLeader(){
         String leaderAddress = getLeaderAddress();
 
         if(leaderAddress == null){
