@@ -11,7 +11,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.AdditionalMatchers.or;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
@@ -239,22 +238,19 @@ public class DistributedEntityOwnershipIntegrationTest {
         verifyCandidates(leaderDistributedDataStore, ENTITY4, "member-3", "member-2");
         verifyOwner(leaderDistributedDataStore, ENTITY4, "member-3");
 
-        // Shutdown follower2 and verify it's owned entities (entity 2 & 4) get re-assigned
+        // Shutdown follower2 and verify it's owned entities (entity 4) get re-assigned
 
         reset(leaderMockListener, follower1MockListener);
         follower2Node.cleanup();
 
-        verify(follower1MockListener, timeout(15000).times(2)).ownershipChanged(or(ownershipChange(ENTITY4, false, true, true),
-                ownershipChange(ENTITY2, false, false, false)));
-        verify(leaderMockListener, timeout(15000).times(2)).ownershipChanged(or(ownershipChange(ENTITY4, false, false, true),
-                ownershipChange(ENTITY2, false, false, false)));
-        verifyOwner(leaderDistributedDataStore, ENTITY2, ""); // no other candidate
+        verify(follower1MockListener, timeout(15000)).ownershipChanged(ownershipChange(ENTITY4, false, true, true));
+        verify(leaderMockListener, timeout(15000)).ownershipChanged(ownershipChange(ENTITY4, false, false, true));
 
         // Register leader candidate for entity2 and verify it becomes owner
 
         DOMEntityOwnershipCandidateRegistration leaderEntity2Reg = leaderEntityOwnershipService.registerCandidate(ENTITY2);
-        verify(leaderMockListener, timeout(5000)).ownershipChanged(ownershipChange(ENTITY2, false, true, true));
         verifyOwner(leaderDistributedDataStore, ENTITY2, "member-1");
+        verify(leaderMockListener, timeout(5000)).ownershipChanged(ownershipChange(ENTITY2, false, true, true));
 
         // Unregister leader candidate for entity2 and verify the owner is cleared
 

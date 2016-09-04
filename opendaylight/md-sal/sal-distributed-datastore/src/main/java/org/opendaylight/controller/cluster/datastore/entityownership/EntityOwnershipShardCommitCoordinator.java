@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.datastore.entityownership;
 
 import akka.actor.ActorRef;
+import akka.actor.ActorSelection;
 import akka.actor.Cancellable;
 import akka.actor.Status.Failure;
 import com.google.common.base.Preconditions;
@@ -21,6 +22,7 @@ import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifie
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
+import org.opendaylight.controller.cluster.datastore.entityownership.messages.RemoveAllCandidates;
 import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
 import org.opendaylight.controller.cluster.datastore.messages.BatchedModifications;
 import org.opendaylight.controller.cluster.datastore.messages.CommitTransactionReply;
@@ -49,6 +51,7 @@ class EntityOwnershipShardCommitCoordinator {
     private BatchedModifications inflightCommit;
     private Cancellable retryCommitSchedule;
     private long transactionIDCounter = 0;
+    private boolean removeAllInitialCandidates = true;
 
     EntityOwnershipShardCommitCoordinator(MemberName localMemberName, Logger log) {
         this.log = Preconditions.checkNotNull(log);
@@ -168,7 +171,7 @@ class EntityOwnershipShardCommitCoordinator {
         if(inflightCommit != null || !hasLeader) {
             if(log.isDebugEnabled()) {
                 log.debug("{} - adding modifications to pending",
-                        (inflightCommit != null ? "A commit is inflight" : "No shard leader"));
+                        inflightCommit != null ? "A commit is inflight" : "No shard leader");
             }
 
             pendingModifications.addAll(modifications.getModifications());
@@ -179,6 +182,23 @@ class EntityOwnershipShardCommitCoordinator {
     }
 
     void onStateChanged(EntityOwnershipShard shard, boolean isLeader) {
+        // The following handles removing all candidates on startup when re-joining with a remote leader. When a
+        // follower is detected as down, the leader will re-assign new owners to entities that were owned by the
+        // down member but doesn't remove the down member as a candidate, as the down node may actually be isolated
+        // and still running. Therefore on startup we send an initial message to the remote leader to remove any
+        // potential stale candidates we had previously registered, as it's possible a candidate may not be
+        // registered by a client in the new incarnation. We have to send the RemoveAllCandidates message prior to any
+        // pending registrations.
+        ActorSelection leader = shard.getLeader();
+        if(removeAllInitialCandidates && leader != null) {
+            removeAllInitialCandidates = false;
+            if(!isLeader) {
+                log.debug("{} - got new leader {} on startup - sending RemoveAllCandidates", shard.persistenceId(), leader);
+
+                leader.tell(new RemoveAllCandidates(shard.getLocalMemberName()), ActorRef.noSender());
+            }
+        }
+
         if(!isLeader && inflightCommit != null) {
             // We're no longer the leader but we have an inflight local commit. This likely means we didn't get
             // consensus for the commit and switched to follower due to another node with a higher term. We
