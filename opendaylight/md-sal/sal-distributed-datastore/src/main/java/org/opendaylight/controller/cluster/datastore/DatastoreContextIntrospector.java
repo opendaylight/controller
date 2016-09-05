@@ -225,7 +225,7 @@ public class DatastoreContextIntrospector {
 
     /**
      * Applies the given properties to the cached DatastoreContext and yields a new DatastoreContext
-     * instance which can be obtained via {@link getContext}.
+     * instance which can be obtained via {@link #getContext()}.
      *
      * @param properties the properties to apply
      * @return true if the cached DatastoreContext was updated, false otherwise.

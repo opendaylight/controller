@@ -28,7 +28,7 @@ public class CreateShard {
      * Constructor.
      *
      * @param moduleShardConfig the configuration of the new shard.
-     * @param shardPropsCreator used to obtain the Props for creating the shard actor instance.
+     * @param shardBuilder used to obtain the Props for creating the shard actor instance.
      * @param datastoreContext the DatastoreContext for the new shard. If null, the default is used.
      */
     public CreateShard(@Nonnull ModuleShardConfiguration moduleShardConfig,
