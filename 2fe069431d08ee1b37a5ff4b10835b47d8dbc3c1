@@ -241,6 +241,24 @@
     },
     {
       "key": {
+        "uuid": "7a6b29fe_deb17990",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/shardmanager/ShardManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 505,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2016-09-05T15:03:19Z",
+      "side": 1,
+      "message": "We probably don\u0027t need this here, since if we receive this message the shard will be an active member.",
+      "parentUuid": "7a6b29fe_5bdc6646",
+      "revId": "2fe069431d08ee1b37a5ff4b10835b47d8dbc3c1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a6b29fe_9bdf1e69",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/shardmanager/ShardManager.java",
         "patchSetId": 3
@@ -252,6 +270,24 @@
       "writtenOn": "2016-09-01T15:18:53Z",
       "side": 1,
       "message": "Do we want to assume the local shard should be an active member? It might not be in the config memberNames. It seems this should follow what doCreateShard does.",
+      "revId": "2fe069431d08ee1b37a5ff4b10835b47d8dbc3c1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_1e4771bd",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/shardmanager/ShardManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 508,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2016-09-05T15:03:19Z",
+      "side": 1,
+      "message": "If it\u0027s not in member names then this ShardManager should not receive CreatePrefixedShard, sending of CreatePrefixedShard is handled in the second patch in DistributedShardedDOMDataTree and it only sends the message to create the shard to member\u0027s which are present in MemberNames.",
+      "parentUuid": "7a6b29fe_9bdf1e69",
       "revId": "2fe069431d08ee1b37a5ff4b10835b47d8dbc3c1",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -292,6 +328,24 @@
     },
     {
       "key": {
+        "uuid": "7a6b29fe_9e338161",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/shardmanager/ShardManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 528,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2016-09-05T15:03:19Z",
+      "side": 1,
+      "message": "If we are going to be persisting the configuration, we could just resync when the peer becomes reachable etc.",
+      "parentUuid": "7a6b29fe_bb15bae6",
+      "revId": "2fe069431d08ee1b37a5ff4b10835b47d8dbc3c1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a6b29fe_7bc32289",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/shardmanager/ShardManager.java",
         "patchSetId": 3
@@ -320,6 +374,24 @@
       "writtenOn": "2016-09-01T15:18:53Z",
       "side": 1,
       "message": "What if a shard configuration doesn\u0027t exist for the shard name? onReplicateCreatedShard adds the prefix config before sending AddPrefixShardReplica so that shouldn\u0027t happen unless someone else sends AddPrefixShardReplica. So other than not checking for a shard config, this method is the same as onAddShardReplica so why not use AddShardReplica in place of AddPrefixShardReplica?",
+      "revId": "2fe069431d08ee1b37a5ff4b10835b47d8dbc3c1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_be00fd34",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/shardmanager/ShardManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 1171,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2016-09-05T15:03:19Z",
+      "side": 1,
+      "message": "On a second thought i think we should be able to remove this method altogether, since we are going to persisting the configuration we could just send the create message to all the nodes with the configuration(including which members should create the shard) and if the member should not spawn the shard it would only add the configuration to the shard manager snapshot.",
+      "parentUuid": "7a6b29fe_9b227e50",
       "revId": "2fe069431d08ee1b37a5ff4b10835b47d8dbc3c1",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
