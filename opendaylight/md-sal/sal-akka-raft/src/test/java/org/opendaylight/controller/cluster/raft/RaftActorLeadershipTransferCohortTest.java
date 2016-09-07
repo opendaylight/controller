@@ -24,7 +24,7 @@ import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolic
  *
  * @author Thomas Pantelis
  */
-public class RaftActorLeadershipTransferCohortTest extends AbstractActorTest {
+public class RaftActorLeadershipTransferCohortTest extends AbstractClusterRefActorTest {
     private final TestActorFactory factory = new TestActorFactory(getSystem());
     private MockRaftActor mockRaftActor;
     private RaftActorLeadershipTransferCohort cohort;

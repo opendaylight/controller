@@ -76,7 +76,7 @@ import scala.concurrent.duration.FiniteDuration;
  *
  * @author Thomas Pantelis
  */
-public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
+public class RaftActorServerConfigurationSupportTest extends AbstractClusterRefActorTest {
     static final String LEADER_ID = "leader";
     static final String FOLLOWER_ID = "follower";
     static final String FOLLOWER_ID2 = "follower2";

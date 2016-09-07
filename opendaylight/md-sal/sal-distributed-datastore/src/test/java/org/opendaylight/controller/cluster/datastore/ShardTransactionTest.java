@@ -51,7 +51,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
 
-public class ShardTransactionTest extends AbstractActorTest {
+public class ShardTransactionTest extends AbstractClusterRefActorTest {
 
     private static final TransactionType RO = TransactionType.READ_ONLY;
     private static final TransactionType RW = TransactionType.READ_WRITE;

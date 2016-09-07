@@ -16,6 +16,7 @@ import akka.actor.ActorSystem;
 import akka.actor.PoisonPill;
 import akka.actor.Props;
 import akka.actor.Status;
+import akka.cluster.Cluster;
 import akka.cluster.ClusterEvent;
 import akka.cluster.ClusterEvent.MemberExited;
 import akka.cluster.ClusterEvent.MemberRemoved;
@@ -24,22 +25,27 @@ import akka.cluster.ClusterEvent.MemberWeaklyUp;
 import akka.cluster.ClusterEvent.ReachableMember;
 import akka.cluster.ClusterEvent.UnreachableMember;
 import akka.cluster.Member;
+import akka.cluster.ddata.DistributedData;
+import akka.cluster.ddata.ORMap;
+import akka.cluster.ddata.Replicator;
+import akka.cluster.ddata.Replicator.Changed;
+import akka.cluster.ddata.Replicator.Subscribe;
+import akka.cluster.ddata.Replicator.Update;
 import akka.util.Timeout;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Throwables;
+import com.google.common.collect.Sets;
+import com.google.common.collect.Sets.SetView;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedPersistentActor;
-import org.opendaylight.controller.cluster.databroker.actors.dds.DataStoreClient;
-import org.opendaylight.controller.cluster.databroker.actors.dds.SimpleDataStoreClientActor;
 import org.opendaylight.controller.cluster.datastore.ClusterWrapper;
 import org.opendaylight.controller.cluster.datastore.DistributedDataStore;
 import org.opendaylight.controller.cluster.datastore.config.PrefixShardConfiguration;
@@ -53,13 +59,9 @@ import org.opendaylight.controller.cluster.sharding.messages.PrefixShardRemoved;
 import org.opendaylight.controller.cluster.sharding.messages.ProducerCreated;
 import org.opendaylight.controller.cluster.sharding.messages.ProducerRemoved;
 import org.opendaylight.controller.cluster.sharding.messages.RemovePrefixShard;
-import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeProducer;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeProducerException;
-import org.opendaylight.mdsal.dom.api.DOMDataTreeService;
-import org.opendaylight.mdsal.dom.api.DOMDataTreeShardingConflictException;
-import org.opendaylight.mdsal.dom.api.DOMDataTreeShardingService;
 import org.opendaylight.yangtools.concepts.AbstractObjectRegistration;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import scala.compat.java8.FutureConverters;
@@ -73,10 +75,9 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
     private static final String PERSISTENCE_ID = "sharding-service-actor";
     private static final Timeout DEFAULT_ASK_TIMEOUT = new Timeout(15, TimeUnit.SECONDS);
 
-    private final DOMDataTreeService dataTreeService;
-    private final DOMDataTreeShardingService shardingService;
+    private final DistributedShardedDOMDataTree shardingService;
     private final ActorSystem actorSystem;
-    private final ClusterWrapper cluster;
+    private final ClusterWrapper clusterWrapper;
     // helper actorContext used only for static calls to executeAsync etc
     // for calls that need specific actor context tied to a datastore use the one provided in the DistributedDataStore
     private final ActorContext actorContext;
@@ -87,20 +88,35 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
     private final Map<DOMDataTreeIdentifier, ActorProducerRegistration> idToProducer = new HashMap<>();
     private final Map<DOMDataTreeIdentifier, ShardFrontendRegistration> idToShardRegistration = new HashMap<>();
 
+    private final Cluster cluster;
+    private final ActorRef replicator;
+
+    private ORMap<PrefixShardConfiguration> currentData = ORMap.create();
+    private Map<DOMDataTreeIdentifier, PrefixShardConfiguration> currentConfiguration = new HashMap<>();
+
     ShardedDataTreeActor(final ShardedDataTreeActorCreator builder) {
         LOG.debug("Creating ShardedDataTreeActor on {}", builder.getClusterWrapper().getCurrentMemberName());
 
-        dataTreeService = builder.getDataTreeService();
         shardingService = builder.getShardingService();
         actorSystem = builder.getActorSystem();
-        cluster = builder.getClusterWrapper();
+        clusterWrapper = builder.getClusterWrapper();
         distributedConfigDatastore = builder.getDistributedConfigDatastore();
         distributedOperDatastore = builder.getDistributedOperDatastore();
         actorContext = distributedConfigDatastore.getActorContext();
         resolver = new ShardingServiceAddressResolver(
-                DistributedShardedDOMDataTree.ACTOR_ID, cluster.getCurrentMemberName());
+                DistributedShardedDOMDataTree.ACTOR_ID, clusterWrapper.getCurrentMemberName());
 
-        cluster.subscribeToMemberEvents(self());
+        clusterWrapper.subscribeToMemberEvents(self());
+        cluster = Cluster.get(actorSystem);
+
+        replicator = DistributedData.get(context().system()).replicator();
+    }
+
+    @Override
+    public void preStart() {
+        final Subscribe<ORMap<PrefixShardConfiguration>> subscribe =
+                new Subscribe<>(ClusterUtils.CONFIGURATION_KEY, self());
+        replicator.tell(subscribe, noSender());
     }
 
     @Override
@@ -110,6 +126,7 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
 
     @Override
     protected void handleCommand(final Object message) throws Exception {
+        LOG.debug("Received {}", message);
         if (message instanceof ClusterEvent.MemberUp) {
             memberUp((ClusterEvent.MemberUp) message);
         } else if (message instanceof ClusterEvent.MemberWeaklyUp) {
@@ -122,6 +139,8 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
             memberUnreachable((ClusterEvent.UnreachableMember) message);
         } else if (message instanceof ClusterEvent.ReachableMember) {
             memberReachable((ClusterEvent.ReachableMember) message);
+        } else if (message instanceof Changed) {
+            onConfigChanged((Changed) message);
         } else if (message instanceof ProducerCreated) {
             onProducerCreated((ProducerCreated) message);
         } else if (message instanceof NotifyProducerCreated) {
@@ -139,6 +158,42 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
         } else if (message instanceof PrefixShardRemoved) {
             onPrefixShardRemoved((PrefixShardRemoved) message);
         }
+    }
+
+    private void onConfigChanged(final Changed<ORMap<PrefixShardConfiguration>> change) {
+        LOG.debug("member : {}, Received configuration changed: {}", clusterWrapper.getCurrentMemberName(), change);
+
+        currentData = change.dataValue();
+        final Map<String, PrefixShardConfiguration> changedConfig = change.dataValue().getEntries();
+
+        LOG.debug("Changed set {}", changedConfig);
+
+        try {
+            final Map<DOMDataTreeIdentifier, PrefixShardConfiguration> newConfig =
+                    changedConfig.values().stream().collect(
+                            Collectors.toMap(PrefixShardConfiguration::getPrefix, Function.identity()));
+            resolveConfig(newConfig);
+        } catch (final IllegalStateException e) {
+            LOG.error("Failed, ", e);
+        }
+
+    }
+
+    private void resolveConfig(final Map<DOMDataTreeIdentifier, PrefixShardConfiguration> newConfig) {
+
+        // get the removed configurations
+        final SetView<DOMDataTreeIdentifier> deleted =
+                Sets.difference(currentConfiguration.keySet(), newConfig.keySet());
+        shardingService.resolveShardRemovals(deleted);
+
+        // get the added configurations
+        final SetView<DOMDataTreeIdentifier> additions =
+                Sets.difference(newConfig.keySet(), currentConfiguration.keySet());
+        shardingService.resolveShardAdditions(additions);
+        // we can ignore those that existed previously since the potential changes in replicas will be handled by
+        // shard manager.
+
+        currentConfiguration = new HashMap<>(newConfig);
     }
 
     @Override
@@ -198,6 +253,12 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
 
     private void onProducerCreated(final ProducerCreated message) {
         LOG.debug("Received ProducerCreated: {}", message);
+
+        // fastpath if no replication is needed, since there is only one node
+        if (resolver.getShardingServicePeerActorAddresses().size() == 1) {
+            getSender().tell(new Status.Success(null), noSender());
+        }
+
         final ActorRef sender = getSender();
         final Collection<DOMDataTreeIdentifier> subtrees = message.getSubtrees();
 
@@ -216,18 +277,6 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
                 futures.toArray(new CompletableFuture[futures.size()]));
 
         combinedFuture.thenRun(() -> {
-            for (final CompletableFuture<Object> future : futures) {
-                try {
-                    final Object result = future.get();
-                    if (result instanceof Status.Failure) {
-                        sender.tell(result, self());
-                        return;
-                    }
-                } catch (InterruptedException | ExecutionException e) {
-                    sender.tell(new Status.Failure(e), self());
-                    return;
-                }
-            }
             sender.tell(new Status.Success(null), noSender());
         }).exceptionally(throwable -> {
             sender.tell(new Status.Failure(throwable), self());
@@ -242,7 +291,7 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
 
         try {
             final ActorProducerRegistration registration =
-                    new ActorProducerRegistration(dataTreeService.createProducer(subtrees), subtrees);
+                    new ActorProducerRegistration(shardingService.localCreateProducer(subtrees), subtrees);
             subtrees.forEach(id -> idToProducer.put(id, registration));
             sender().tell(new Status.Success(null), self());
         } catch (final IllegalArgumentException e) {
@@ -298,59 +347,19 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
 
     @SuppressWarnings("checkstyle:IllegalCatch")
     private void onCreatePrefixShard(final CreatePrefixShard message) {
-        LOG.debug("Received CreatePrefixShard: {}", message);
+        LOG.debug("Member: {}, Received CreatePrefixShard: {}", clusterWrapper.getCurrentMemberName(), message);
 
         final PrefixShardConfiguration configuration = message.getConfiguration();
 
-        final DOMDataTreeProducer producer =
-                dataTreeService.createProducer(Collections.singleton(configuration.getPrefix()));
+        final Update<ORMap<PrefixShardConfiguration>> update =
+                new Update<>(ClusterUtils.CONFIGURATION_KEY, currentData, Replicator.writeLocal(),
+                    map -> map.put(cluster, configuration.toDataMapKey(), configuration));
 
-        final DistributedDataStore distributedDataStore =
-                configuration.getPrefix().getDatastoreType() == LogicalDatastoreType.CONFIGURATION
-                        ? distributedConfigDatastore : distributedOperDatastore;
-        final String shardName = ClusterUtils.getCleanShardName(configuration.getPrefix().getRootIdentifier());
-        LOG.debug("Creating distributed datastore client for shard {}", shardName);
-        final Props distributedDataStoreClientProps =
-                SimpleDataStoreClientActor.props(cluster.getCurrentMemberName(),
-                        "Shard-" + shardName, distributedDataStore.getActorContext(), shardName);
-
-        final ActorRef clientActor = actorSystem.actorOf(distributedDataStoreClientProps);
-        final DataStoreClient client;
-        try {
-            client = SimpleDataStoreClientActor.getDistributedDataStoreClient(clientActor, 30, TimeUnit.SECONDS);
-        } catch (final Exception e) {
-            LOG.error("Failed to get actor for {}", distributedDataStoreClientProps, e);
-            clientActor.tell(PoisonPill.getInstance(), ActorRef.noSender());
-            throw Throwables.propagate(e);
-        }
-
-        try {
-            final ListenerRegistration<ShardFrontend> shardFrontendRegistration =
-                    shardingService.registerDataTreeShard(configuration.getPrefix(),
-                            new ShardFrontend(
-                                    client,
-                                    configuration.getPrefix()
-                            ),
-                            producer);
-            idToShardRegistration.put(configuration.getPrefix(),
-                    new ShardFrontendRegistration(clientActor, shardFrontendRegistration));
-
-            sender().tell(new Status.Success(null), self());
-        } catch (final DOMDataTreeShardingConflictException e) {
-            LOG.error("Unable to create shard", e);
-            clientActor.tell(PoisonPill.getInstance(), ActorRef.noSender());
-            sender().tell(new Status.Failure(e), self());
-        } finally {
-            try {
-                producer.close();
-            } catch (final DOMDataTreeProducerException e) {
-                LOG.error("Unable to close producer that was used for shard registration {}", producer, e);
-            }
-        }
+        replicator.tell(update, self());
     }
 
     private void onPrefixShardCreated(final PrefixShardCreated message) {
-        LOG.debug("Received PrefixShardCreated: {}", message);
+        LOG.debug("Member: {}, Received PrefixShardCreated: {}", clusterWrapper.getCurrentMemberName(), message);
 
         final Collection<String> addresses = resolver.getShardingServicePeerActorAddresses();
         final ActorRef sender = getSender();
@@ -367,18 +376,6 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
                 CompletableFuture.allOf(futures.toArray(new CompletableFuture[futures.size()]));
 
         combinedFuture.thenRun(() -> {
-            for (final CompletableFuture<Object> future : futures) {
-                try {
-                    final Object result = future.get();
-                    if (result instanceof Status.Failure) {
-                        sender.tell(result, self());
-                        return;
-                    }
-                } catch (InterruptedException | ExecutionException e) {
-                    sender.tell(new Status.Failure(e), self());
-                    return;
-                }
-            }
             sender.tell(new Status.Success(null), self());
         }).exceptionally(throwable -> {
             sender.tell(new Status.Failure(throwable), self());
@@ -387,12 +384,13 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
     }
 
     private void onRemovePrefixShard(final RemovePrefixShard message) {
-        LOG.debug("Received RemovePrefixShard: {}", message);
+        LOG.debug("Member: {}, Received RemovePrefixShard: {}", clusterWrapper.getCurrentMemberName(), message);
 
-        for (final String address : resolver.getShardingServicePeerActorAddresses()) {
-            final ActorSelection selection = actorContext.actorSelection(address);
-            selection.tell(new PrefixShardRemoved(message.getPrefix()), getSelf());
-        }
+        //TODO the removal message should have the configuration or some other way to get to the key
+        final Update<ORMap<PrefixShardConfiguration>> removal =
+                new Update<>(ClusterUtils.CONFIGURATION_KEY, currentData, Replicator.writeLocal(),
+                    map -> map.remove(cluster, "prefix=" + message.getPrefix()));
+        replicator.tell(removal, self());
     }
 
     private void onPrefixShardRemoved(final PrefixShardRemoved message) {
@@ -431,13 +429,13 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
     }
 
     private static class ShardFrontendRegistration extends
-            AbstractObjectRegistration<ListenerRegistration<ShardFrontend>> {
+            AbstractObjectRegistration<ListenerRegistration<DistributedShardFrontend>> {
 
         private final ActorRef clientActor;
-        private final ListenerRegistration<ShardFrontend> shardRegistration;
+        private final ListenerRegistration<DistributedShardFrontend> shardRegistration;
 
         ShardFrontendRegistration(final ActorRef clientActor,
-                                         final ListenerRegistration<ShardFrontend> shardRegistration) {
+                                  final ListenerRegistration<DistributedShardFrontend> shardRegistration) {
             super(shardRegistration);
             this.clientActor = clientActor;
             this.shardRegistration = shardRegistration;
@@ -452,27 +450,17 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
 
     public static class ShardedDataTreeActorCreator {
 
-        private DOMDataTreeService dataTreeService;
-        private DOMDataTreeShardingService shardingService;
+        private DistributedShardedDOMDataTree shardingService;
         private DistributedDataStore distributedConfigDatastore;
         private DistributedDataStore distributedOperDatastore;
         private ActorSystem actorSystem;
         private ClusterWrapper cluster;
 
-        public DOMDataTreeService getDataTreeService() {
-            return dataTreeService;
-        }
-
-        public ShardedDataTreeActorCreator setDataTreeService(final DOMDataTreeService dataTreeService) {
-            this.dataTreeService = dataTreeService;
-            return this;
-        }
-
-        public DOMDataTreeShardingService getShardingService() {
+        public DistributedShardedDOMDataTree getShardingService() {
             return shardingService;
         }
 
-        public ShardedDataTreeActorCreator setShardingService(final DOMDataTreeShardingService shardingService) {
+        public ShardedDataTreeActorCreator setShardingService(final DistributedShardedDOMDataTree shardingService) {
             this.shardingService = shardingService;
             return this;
         }
@@ -516,7 +504,6 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
         }
 
         private void verify() {
-            Preconditions.checkNotNull(dataTreeService);
             Preconditions.checkNotNull(shardingService);
             Preconditions.checkNotNull(actorSystem);
             Preconditions.checkNotNull(cluster);
