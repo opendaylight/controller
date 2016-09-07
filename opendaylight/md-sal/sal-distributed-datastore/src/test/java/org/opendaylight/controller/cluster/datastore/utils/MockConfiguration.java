@@ -19,7 +19,7 @@ import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.config.ConfigurationImpl;
 import org.opendaylight.controller.cluster.datastore.config.ModuleConfig;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategy;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
 
 public class MockConfiguration extends ConfigurationImpl {
     public MockConfiguration() {
@@ -41,7 +41,7 @@ public class MockConfiguration extends ConfigurationImpl {
     }
 
     @Override
-    public ShardStrategy getStrategyForPrefix(@Nonnull final YangInstanceIdentifier prefix) {
+    public ShardStrategy getStrategyForPrefix(@Nonnull final DOMDataTreeIdentifier prefix) {
         return null;
     }
 }
