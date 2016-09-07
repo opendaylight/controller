@@ -1393,7 +1393,8 @@ public class ShardManagerTest extends AbstractShardManagerTest {
                 .put("shard1", Collections.<String>emptyList()).put("shard2", Collections.<String>emptyList())
                 .put("astronauts", Collections.<String>emptyList()).build());
 
-        ShardManagerSnapshot snapshot = new ShardManagerSnapshot(Arrays.asList("shard1", "shard2", "astronauts"));
+        ShardManagerSnapshot snapshot =
+                new ShardManagerSnapshot(Arrays.asList("shard1", "shard2", "astronauts"), Collections.emptyMap());
         DatastoreSnapshot restoreFromSnapshot = new DatastoreSnapshot(shardMrgIDSuffix,
                 SerializationUtils.serialize(snapshot), Collections.<ShardSnapshot>emptyList());
         TestActorRef<TestShardManager> shardManager = actorFactory.createTestActor(newTestShardMgrBuilder(mockConfig)
@@ -1495,7 +1496,8 @@ public class ShardManagerTest extends AbstractShardManagerTest {
                 // Have a dummy snapshot to be overwritten by the new data
                 // persisted.
                 String[] restoredShards = { "default", "people" };
-                ShardManagerSnapshot snapshot = new ShardManagerSnapshot(Arrays.asList(restoredShards));
+                ShardManagerSnapshot snapshot =
+                        new ShardManagerSnapshot(Arrays.asList(restoredShards), Collections.emptyMap());
                 InMemorySnapshotStore.addSnapshot(shardManagerID, snapshot);
                 Uninterruptibles.sleepUninterruptibly(2, TimeUnit.MILLISECONDS);
 
@@ -1950,12 +1952,14 @@ public class ShardManagerTest extends AbstractShardManagerTest {
         LOG.info("testShardPersistenceWithRestoredData starting");
         new JavaTestKit(getSystem()) {
             {
-                MockConfiguration mockConfig = new MockConfiguration(ImmutableMap.<String, List<String>>builder()
-                        .put("default", Arrays.asList("member-1", "member-2"))
-                        .put("astronauts", Arrays.asList("member-2"))
-                        .put("people", Arrays.asList("member-1", "member-2")).build());
-                String[] restoredShards = { "default", "astronauts" };
-                ShardManagerSnapshot snapshot = new ShardManagerSnapshot(Arrays.asList(restoredShards));
+                MockConfiguration mockConfig =
+                    new MockConfiguration(ImmutableMap.<String, List<String>>builder()
+                            .put("default", Arrays.asList("member-1", "member-2"))
+                            .put("astronauts", Arrays.asList("member-2"))
+                            .put("people", Arrays.asList("member-1", "member-2")).build());
+                String[] restoredShards = {"default", "astronauts"};
+                ShardManagerSnapshot snapshot =
+                        new ShardManagerSnapshot(Arrays.asList(restoredShards), Collections.emptyMap());
                 InMemorySnapshotStore.addSnapshot("shard-manager-" + shardMrgIDSuffix, snapshot);
 
                 // create shardManager to come up with restored data

@@ -46,7 +46,6 @@ import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 import org.opendaylight.yangtools.concepts.Identifier;
-import org.opendaylight.yangtools.util.AbstractStringIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.Await;
@@ -57,15 +56,7 @@ import scala.concurrent.duration.FiniteDuration;
  *
  * @author Thomas Pantelis
  */
-public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest {
-
-    private static final class MockIdentifier extends AbstractStringIdentifier<MockIdentifier> {
-        private static final long serialVersionUID = 1L;
-
-        protected MockIdentifier(String string) {
-            super(string);
-        }
-    }
+public abstract class AbstractRaftActorIntegrationTest extends AbstractClusterRefActorTest {
 
     public static class SetPeerAddress {
         private final String peerId;
