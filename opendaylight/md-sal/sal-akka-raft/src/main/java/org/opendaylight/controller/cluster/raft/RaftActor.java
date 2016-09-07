@@ -284,7 +284,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         } else if (message instanceof Runnable) {
             ((Runnable)message).run();
         } else if (message instanceof NoopPayload) {
-            persistData(null, null, (NoopPayload)message);
+            persistData(null, null, (NoopPayload) message);
         } else if (!possiblyHandleBehaviorMessage(message)) {
             handleNonRaftCommand(message);
         }
