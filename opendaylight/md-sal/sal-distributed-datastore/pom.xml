@@ -22,6 +22,16 @@
       <scope>test</scope>
     </dependency>
     <dependency>
+      <groupId>org.powermock</groupId>
+      <artifactId>powermock-module-junit4</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.powermock</groupId>
+      <artifactId>powermock-api-mockito</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
       <scope>test</scope>
@@ -52,6 +62,11 @@
     <dependency>
       <groupId>com.typesafe.akka</groupId>
       <artifactId>akka-remote_${scala.version}</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.typesafe.akka</groupId>
+      <artifactId>akka-distributed-data-experimental_${scala.version}</artifactId>
+      <version>2.4.7</version>
     </dependency>
     <dependency>
       <groupId>com.typesafe.akka</groupId>
