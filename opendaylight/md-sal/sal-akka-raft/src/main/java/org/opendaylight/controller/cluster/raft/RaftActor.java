@@ -232,13 +232,13 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
             if (LOG.isDebugEnabled()) {
                 LOG.debug("{}: Applying state for log index {} data {}",
-                    persistenceId(), applyState.getReplicatedLogEntry().getIndex(),
-                    applyState.getReplicatedLogEntry().getData());
+                        persistenceId(), applyState.getReplicatedLogEntry().getIndex(),
+                        applyState.getReplicatedLogEntry().getData());
             }
 
             if (!(applyState.getReplicatedLogEntry().getData() instanceof NoopPayload)) {
                 applyState(applyState.getClientActor(), applyState.getIdentifier(),
-                    applyState.getReplicatedLogEntry().getData());
+                        applyState.getReplicatedLogEntry().getData());
             }
 
             long elapsedTime = System.nanoTime() - startTime;
@@ -268,8 +268,8 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
         } else if (message instanceof FindLeader) {
             getSender().tell(
-                new FindLeaderReply(getLeaderAddress()),
-                getSelf()
+                    new FindLeaderReply(getLeaderAddress()),
+                    getSelf()
             );
         } else if (message instanceof GetOnDemandRaftState) {
             onGetOnDemandRaftStats();
@@ -282,9 +282,9 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         } else if (message instanceof Shutdown) {
             onShutDown();
         } else if (message instanceof Runnable) {
-            ((Runnable)message).run();
+            ((Runnable) message).run();
         } else if (message instanceof NoopPayload) {
-            persistData(null, null, (NoopPayload)message);
+            persistData(null, null, (NoopPayload) message);
         } else if (!possiblyHandleBehaviorMessage(message)) {
             handleNonRaftCommand(message);
         }
