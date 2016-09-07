@@ -17,8 +17,11 @@ import akka.actor.Props;
 import akka.util.Timeout;
 import com.google.common.base.Throwables;
 import com.google.common.util.concurrent.Uninterruptibles;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumMap;
+import java.util.Map.Entry;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nonnull;
@@ -36,6 +39,7 @@ import org.opendaylight.controller.cluster.sharding.messages.PrefixShardCreated;
 import org.opendaylight.controller.cluster.sharding.messages.PrefixShardRemoved;
 import org.opendaylight.controller.cluster.sharding.messages.ProducerCreated;
 import org.opendaylight.controller.cluster.sharding.messages.ProducerRemoved;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeCursorAwareTransaction;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeListener;
@@ -48,6 +52,7 @@ import org.opendaylight.mdsal.dom.api.DOMDataTreeShardingConflictException;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeShardingService;
 import org.opendaylight.mdsal.dom.broker.ShardedDOMDataTree;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.Await;
@@ -72,6 +77,9 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
     private final ActorRef shardedDataTreeActor;
     private final MemberName memberName;
 
+    private final EnumMap<LogicalDatastoreType, ListenerRegistration<DistributedShardFrontend>> defaultShardRegistrations =
+            new EnumMap<>(LogicalDatastoreType.class);
+
     public DistributedShardedDOMDataTree(final ActorSystem actorSystem,
                                          final DistributedDataStore distributedOperDatastore,
                                          final DistributedDataStore distributedConfigDatastore) {
@@ -91,6 +99,20 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
                 , ACTOR_ID);
 
         this.memberName = distributedConfigDatastore.getActorContext().getCurrentMemberName();
+
+        //create shard registration for DEFAULT_SHARD
+        try {
+            defaultShardRegistrations.put(LogicalDatastoreType.CONFIGURATION,
+                    initDefaultShard(distributedConfigDatastore, LogicalDatastoreType.CONFIGURATION));
+        } catch (final DOMDataTreeShardCreationFailedException | DOMDataTreeProducerException | DOMDataTreeShardingConflictException e) {
+            LOG.error("Unable to create default shard frontend for config shard", e);
+        }
+        try {
+            defaultShardRegistrations.put(LogicalDatastoreType.OPERATIONAL,
+                    initDefaultShard(distributedOperDatastore, LogicalDatastoreType.OPERATIONAL));
+        } catch (final DOMDataTreeShardCreationFailedException | DOMDataTreeProducerException | DOMDataTreeShardingConflictException e) {
+            LOG.error("Unable to create default shard frontend for operational shard", e);
+        }
     }
 
     @Nonnull
@@ -131,32 +153,22 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
 
         final PrefixShardConfiguration config = new PrefixShardConfiguration(prefix, "prefix", replicaMembers);
         if (replicaMembers.contains(memberName)) {
-            // spawn the backend shard and have the shard Manager create all replicas
+            // spawn the backend shard only on this node, replicas will be handled when the configuration is distributed
             final ActorRef shardManager = distributedDataStore.getActorContext().getShardManager();
 
             shardManager.tell(new CreatePrefixedShard(config, null, Shard.builder()), noSender());
         }
 
-        LOG.debug("Creating distributed datastore client for shard {}", shardName);
-        final Props distributedDataStoreClientProps =
-                DistributedDataStoreClientActor.props(memberName, "Shard-" + shardName, distributedDataStore.getActorContext());
-
-        final ActorRef clientActor = actorSystem.actorOf(distributedDataStoreClientProps);
-        final DistributedDataStoreClient client;
-        try {
-            client = DistributedDataStoreClientActor.getDistributedDataStoreClient(clientActor, 30, TimeUnit.SECONDS);
-        } catch (final Exception e) {
-            LOG.error("Failed to get actor for {}", distributedDataStoreClientProps, e);
-            clientActor.tell(PoisonPill.getInstance(), noSender());
-            throw new DOMDataTreeProducerException("Unable to create producer", e);
-        }
+        final Entry<DistributedDataStoreClient, ActorRef> entry = createDatastoreClient(shardName, distributedDataStore.getActorContext());
+        final DistributedDataStoreClient client = entry.getKey();
+        final ActorRef clientActor = entry.getValue();
 
         // register the frontend into the sharding service and let the actor distribute this onto the other nodes
-        final ListenerRegistration<ShardFrontend> shardFrontendRegistration;
+        final ListenerRegistration<DistributedShardFrontend> shardFrontendRegistration;
         try (DOMDataTreeProducer producer = createProducer(Collections.singletonList(prefix))) {
             shardFrontendRegistration = shardedDOMDataTree
                     .registerDataTreeShard(prefix,
-                            new ShardFrontend(client, prefix, distributedDataStore.getActorContext()),
+                            new DistributedShardFrontend(client, prefix),
                             ((ProxyProducer) producer).getDelegate());
         }
 
@@ -197,12 +209,53 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
         return shardedDOMDataTree.registerDataTreeShard(prefix, shard, producer);
     }
 
+    private Entry<DistributedDataStoreClient, ActorRef> createDatastoreClient(final String shardName, final ActorContext actorContext)
+            throws DOMDataTreeShardCreationFailedException {
+
+        LOG.debug("Creating distributed datastore client for shard {}", shardName);
+        final Props distributedDataStoreClientProps =
+                DistributedDataStoreClientActor.props(memberName, "Shard-" + shardName, actorContext);
+
+        final ActorRef clientActor = actorSystem.actorOf(distributedDataStoreClientProps);
+        try {
+            return new SimpleEntry<>(DistributedDataStoreClientActor
+                    .getDistributedDataStoreClient(clientActor, 30, TimeUnit.SECONDS), clientActor);
+        } catch (final Exception e) {
+            LOG.error("Failed to get actor for {}", distributedDataStoreClientProps, e);
+            clientActor.tell(PoisonPill.getInstance(), noSender());
+            throw new DOMDataTreeShardCreationFailedException("Unable to create datastore client for shard{" + shardName + "}", e);
+        }
+    }
+
+    private ListenerRegistration<DistributedShardFrontend> initDefaultShard(
+            final DistributedDataStore distributedDataStore, final LogicalDatastoreType logicalDatastoreType)
+            throws DOMDataTreeShardCreationFailedException, DOMDataTreeProducerException, DOMDataTreeShardingConflictException {
+
+        final DOMDataTreeIdentifier prefix = new DOMDataTreeIdentifier(logicalDatastoreType, YangInstanceIdentifier.EMPTY);
+        final String shardName = ClusterUtils.getCleanShardName(prefix.getRootIdentifier());
+
+        final Entry<DistributedDataStoreClient, ActorRef> entry =
+                createDatastoreClient(shardName, distributedDataStore.getActorContext());
+
+        try (final DOMDataTreeProducer producer = shardedDOMDataTree.createProducer(Collections.singletonList(prefix))) {
+            return shardedDOMDataTree
+                    .registerDataTreeShard(
+                            prefix,
+                            new DistributedShardFrontend(entry.getKey(), prefix),
+                            producer);
+        }
+    }
+
     private static void closeProducer(final DOMDataTreeProducer producer) {
         try {
             producer.close();
         } catch (final DOMDataTreeProducerException e) {
             LOG.error("Unable to close producer", e);
         }
+    }
+
+    public void close() {
+
     }
 
     private static ActorRef createShardedDataTreeActor(final ActorSystem actorSystem,
@@ -226,11 +279,11 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
 
     private class DistributedShardRegistrationImpl implements DistributedShardRegistration {
 
-        private final ListenerRegistration<ShardFrontend> registration;
+        private final ListenerRegistration<DistributedShardFrontend> registration;
         private final DOMDataTreeIdentifier prefix;
         private final ActorRef shardedDataTreeActor;
 
-        DistributedShardRegistrationImpl(final ListenerRegistration<ShardFrontend> registration,
+        DistributedShardRegistrationImpl(final ListenerRegistration<DistributedShardFrontend> registration,
                                          final DOMDataTreeIdentifier prefix,
                                          final ActorRef shardedDataTreeActor) {
             this.registration = registration;
