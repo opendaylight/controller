@@ -25,7 +25,7 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
  * @author Robert Varga
  */
 @Beta
-public final class ClientLocalHistory extends AbstractClientHistory implements AutoCloseable {
+public class ClientLocalHistory extends AbstractClientHistory implements AutoCloseable {
     ClientLocalHistory(final AbstractDataStoreClientBehavior client, final LocalHistoryIdentifier historyId) {
         super(client, historyId);
     }

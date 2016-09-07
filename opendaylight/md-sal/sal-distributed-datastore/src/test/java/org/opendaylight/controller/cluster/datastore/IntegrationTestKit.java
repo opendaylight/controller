@@ -41,11 +41,15 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
 
 public class IntegrationTestKit extends ShardTestKit {
+
+    private static final Logger LOG = LoggerFactory.getLogger(IntegrationTestKit.class);
 
     protected DatastoreContext.Builder datastoreContextBuilder;
     protected DatastoreSnapshot restoreFromSnapshot;
@@ -169,6 +173,19 @@ public class IntegrationTestKit extends ShardTestKit {
             }
         }
         return shard;
+    }
+
+    public static void waitUntilShardIsDown(ActorContext actorContext, String shardName) {
+        for (int i = 0; i < 20 * 5 ; i++) {
+            LOG.debug("Waiting for shard down {}", shardName);
+            Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
+            Optional<ActorRef> shardReply = actorContext.findLocalShard(shardName);
+            if (!shardReply.isPresent()) {
+                return;
+            }
+        }
+
+        throw new IllegalStateException("Shard[" + shardName + " did not shutdown in time");
     }
 
     public static void verifyShardStats(final AbstractDataStore datastore, final String shardName,

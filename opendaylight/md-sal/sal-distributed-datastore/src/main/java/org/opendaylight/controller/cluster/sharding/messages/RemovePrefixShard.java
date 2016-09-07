@@ -13,8 +13,9 @@ import org.opendaylight.controller.cluster.sharding.ShardedDataTreeActor;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
 
 /**
- * Sent to the local {@link ShardedDataTreeActor} to notify of a shard removal on the local node. The local actor
- * should then notify the remote nodes of the Removal with {@link PrefixShardRemoved} message.
+ * Sent to the local {@link ShardedDataTreeActor} to notify of a shard removal on the local node.
+ * The local actor should update the configuration so that the change is picked up by other CDS Node Agents and
+ * backend ShardManagers.
  */
 public class RemovePrefixShard {
 
@@ -27,5 +28,12 @@ public class RemovePrefixShard {
 
     public DOMDataTreeIdentifier getPrefix() {
         return prefix;
+    }
+
+    @Override
+    public String toString() {
+        return "RemovePrefixShard{"
+                + "prefix=" + prefix
+                + '}';
     }
 }

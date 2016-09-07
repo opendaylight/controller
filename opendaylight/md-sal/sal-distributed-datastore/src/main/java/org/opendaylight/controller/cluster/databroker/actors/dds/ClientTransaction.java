@@ -53,7 +53,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
  * @author Robert Varga
  */
 @Beta
-public final class ClientTransaction extends AbstractClientHandle<AbstractProxyTransaction> {
+public class ClientTransaction extends AbstractClientHandle<AbstractProxyTransaction> {
 
     private ClientTransactionCursor cursor;
 

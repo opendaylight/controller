@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Robert Varga
  */
-abstract class AbstractClientHistory extends LocalAbortable implements Identifiable<LocalHistoryIdentifier> {
+public abstract class AbstractClientHistory extends LocalAbortable implements Identifiable<LocalHistoryIdentifier> {
     enum State {
         IDLE,
         TX_OPEN,
@@ -194,7 +194,7 @@ abstract class AbstractClientHistory extends LocalAbortable implements Identifia
      * @throws TransactionChainClosedException if this history is closed
      * @throws IllegalStateException if a previous dependent transaction has not been closed
      */
-    public final ClientTransaction createTransaction() {
+    public ClientTransaction createTransaction() {
         checkNotClosed();
 
         synchronized (this) {

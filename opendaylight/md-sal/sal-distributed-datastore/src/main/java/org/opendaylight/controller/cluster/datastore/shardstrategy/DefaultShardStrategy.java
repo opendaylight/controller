@@ -31,4 +31,9 @@ public final class DefaultShardStrategy implements ShardStrategy {
     public String findShard(YangInstanceIdentifier path) {
         return DEFAULT_SHARD;
     }
+
+    @Override
+    public YangInstanceIdentifier getPrefixForPath(YangInstanceIdentifier path) {
+        return YangInstanceIdentifier.EMPTY;
+    }
 }
