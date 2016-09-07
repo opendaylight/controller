@@ -8,7 +8,6 @@
 
 package org.opendaylight.controller.cluster.datastore.shardstrategy;
 
-import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 /**
@@ -19,16 +18,21 @@ public class PrefixShardStrategy implements ShardStrategy {
     public static final String NAME = "prefix";
 
     private final String shardName;
-    private final Configuration configuration;
+    private final YangInstanceIdentifier prefix;
 
-    public PrefixShardStrategy(final String shardName, final Configuration configuration) {
-        this.shardName = shardName;
-        this.configuration = configuration;
+    public PrefixShardStrategy(final String shardName,
+                               final YangInstanceIdentifier prefix) {
+        this.shardName = shardName != null ? shardName : DefaultShardStrategy.DEFAULT_SHARD;
+        this.prefix = prefix;
     }
 
     @Override
     public String findShard(final YangInstanceIdentifier path) {
-        final String shardNameForPrefix = configuration.getShardNameForPrefix(path);
-        return shardNameForPrefix != null ? shardName : DefaultShardStrategy.DEFAULT_SHARD;
+        return shardName;
+    }
+
+    @Override
+    public YangInstanceIdentifier getPrefixForPath(YangInstanceIdentifier path) {
+        return prefix;
     }
 }

@@ -74,7 +74,7 @@ import scala.concurrent.duration.Duration;
  *
  * @author Thomas Pantelis
  */
-public class DistributedEntityOwnershipServiceTest extends AbstractEntityOwnershipTest {
+public class DistributedEntityOwnershipServiceTest extends AbstractClusterRefEntityOwnershipTest {
     static final String ENTITY_TYPE = "test";
     static final String ENTITY_TYPE2 = "test2";
     static final QName QNAME = QName.create("test", "2015-08-11", "foo");
