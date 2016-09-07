@@ -1,0 +1,8 @@
+Verified+1: jenkins-releng <jenkins-releng@opendaylight.org>
+Code-Review+1: A H <an.ho@huawei.com>
+Code-Review+2: Thanh Ha <thanh.ha@linuxfoundation.org>
+Submitted-by: Thanh Ha <thanh.ha@linuxfoundation.org>
+Submitted-at: Wed, 07 Sep 2016 21:28:32 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/45349
+Project: controller
+Branch: refs/heads/stable/boron
