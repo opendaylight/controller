@@ -10,16 +10,20 @@ package org.opendaylight.controller.cluster.datastore.shardstrategy;
 
 import com.google.common.base.Preconditions;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
+import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 public class ShardStrategyFactory {
     private static final String UNKNOWN_MODULE_NAME = "unknown";
 
     private final Configuration configuration;
+    private LogicalDatastoreType logicalStoreType;
 
-    public ShardStrategyFactory(final Configuration configuration) {
+    public ShardStrategyFactory(final Configuration configuration, LogicalDatastoreType logicalStoreType) {
         Preconditions.checkState(configuration != null, "configuration should not be missing");
         this.configuration = configuration;
+        this.logicalStoreType = Preconditions.checkNotNull(logicalStoreType);
     }
 
     public ShardStrategy getStrategy(final YangInstanceIdentifier path) {
@@ -30,7 +34,8 @@ public class ShardStrategyFactory {
         final ShardStrategy shardStrategy = configuration.getStrategyForModule(moduleName);
         if (shardStrategy == null) {
             // retry with prefix based sharding
-            final ShardStrategy strategyForPrefix = configuration.getStrategyForPrefix(path);
+            final ShardStrategy strategyForPrefix =
+                    configuration.getStrategyForPrefix(new DOMDataTreeIdentifier(logicalStoreType, path));
             if (strategyForPrefix == null) {
                 return DefaultShardStrategy.getInstance();
             }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2016 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -10,25 +10,21 @@ package org.opendaylight.controller.cluster.raft;
 
 import akka.actor.ActorSystem;
 import akka.testkit.JavaTestKit;
-import java.io.File;
+import com.typesafe.config.ConfigFactory;
 import java.io.IOException;
-import org.apache.commons.io.FileUtils;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
-public abstract class AbstractActorTest {
+public abstract class AbstractClusterRefActorTest {
     private static ActorSystem system;
 
     @BeforeClass
-    public static void setUpClass() throws Exception {
-        deleteJournal();
-        System.setProperty("shard.persistent", "false");
-        system = ActorSystem.create("test");
+    public static void setUpClass() throws IOException {
+        system = ActorSystem.create("test", ConfigFactory.load().getConfig("test"));
     }
 
     @AfterClass
-    public static void tearDownClass() throws Exception {
-        deleteJournal();
+    public static void tearDownClass() throws IOException {
         JavaTestKit.shutdownActorSystem(system);
         system = null;
     }
@@ -36,13 +32,4 @@ public abstract class AbstractActorTest {
     protected ActorSystem getSystem() {
         return system;
     }
-
-    protected static void deleteJournal() throws IOException {
-        File journal = new File("journal");
-
-        if (journal.exists()) {
-            FileUtils.deleteDirectory(journal);
-        }
-    }
-
 }
