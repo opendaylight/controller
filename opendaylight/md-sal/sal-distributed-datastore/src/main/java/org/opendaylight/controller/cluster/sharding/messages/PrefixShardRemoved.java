@@ -14,8 +14,9 @@ import org.opendaylight.controller.cluster.sharding.ShardedDataTreeActor;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
 
 /**
- * Message sent to remote {@link ShardedDataTreeActor}'s when there is an
- * attempt to remove a shard from the sharding service.
+ * Message sent to remote {@link ShardedDataTreeActor}'s when there is an attempt to remove the shard,
+ * the ShardedDataTreeActor should remove the shard from the current configuration so that the change is picked up
+ * in the backend ShardManager.
  */
 @Beta
 public class PrefixShardRemoved implements Serializable {

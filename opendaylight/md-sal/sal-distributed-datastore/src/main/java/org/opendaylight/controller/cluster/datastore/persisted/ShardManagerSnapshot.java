@@ -8,14 +8,19 @@
 package org.opendaylight.controller.cluster.datastore.persisted;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.annotation.Nonnull;
+import org.opendaylight.controller.cluster.datastore.config.PrefixShardConfiguration;
+import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
 
 /**
  * Represents the persisted snapshot state for the ShardManager.
@@ -47,6 +52,12 @@ public class ShardManagerSnapshot implements Serializable {
             for (String shard: snapshot.shardList) {
                 out.writeObject(shard);
             }
+
+            out.writeInt(snapshot.prefixShardConfiguration.size());
+            for (Map.Entry prefixShardConfigEntry : snapshot.prefixShardConfiguration.entrySet()) {
+                out.writeObject(prefixShardConfigEntry.getKey());
+                out.writeObject(prefixShardConfigEntry.getValue());
+            }
         }
 
         @Override
@@ -57,7 +68,14 @@ public class ShardManagerSnapshot implements Serializable {
                 shardList.add((String) in.readObject());
             }
 
-            snapshot = new ShardManagerSnapshot(shardList);
+            size = in.readInt();
+            Map<DOMDataTreeIdentifier, PrefixShardConfiguration> prefixShardConfiguration = new HashMap<>(size);
+            for (int i = 0; i < size; i++) {
+                prefixShardConfiguration.put((DOMDataTreeIdentifier) in.readObject(),
+                        (PrefixShardConfiguration) in.readObject());
+            }
+
+            snapshot = new ShardManagerSnapshot(shardList, prefixShardConfiguration);
         }
 
         private Object readResolve() {
@@ -66,9 +84,12 @@ public class ShardManagerSnapshot implements Serializable {
     }
 
     private final List<String> shardList;
+    private final Map<DOMDataTreeIdentifier, PrefixShardConfiguration> prefixShardConfiguration;
 
-    public ShardManagerSnapshot(@Nonnull final List<String> shardList) {
+    public ShardManagerSnapshot(@Nonnull final List<String> shardList,
+                                final Map<DOMDataTreeIdentifier, PrefixShardConfiguration> prefixShardConfiguration) {
         this.shardList = ImmutableList.copyOf(shardList);
+        this.prefixShardConfiguration = ImmutableMap.copyOf(prefixShardConfiguration);
     }
 
     public List<String> getShardList() {

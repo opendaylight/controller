@@ -32,7 +32,7 @@ import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 
-public class AbstractShardManagerTest extends AbstractActorTest {
+public class AbstractShardManagerTest extends AbstractClusterRefActorTest {
 
     protected static final MemberName MEMBER_1 = MemberName.forName("member-1");
 

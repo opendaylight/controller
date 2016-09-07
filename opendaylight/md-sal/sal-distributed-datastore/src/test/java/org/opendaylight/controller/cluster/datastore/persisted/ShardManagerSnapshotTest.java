@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.datastore.persisted;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
+import java.util.Collections;
 import org.apache.commons.lang.SerializationUtils;
 import org.junit.Test;
 
@@ -22,7 +23,8 @@ public class ShardManagerSnapshotTest {
 
     @Test
     public void testSerialization() {
-        ShardManagerSnapshot expected = new ShardManagerSnapshot(Arrays.asList("shard1", "shard2"));
+        ShardManagerSnapshot expected =
+                new ShardManagerSnapshot(Arrays.asList("shard1", "shard2"), Collections.emptyMap());
         ShardManagerSnapshot cloned = (ShardManagerSnapshot) SerializationUtils.clone(expected);
 
         assertEquals("getShardList", expected.getShardList(), cloned.getShardList());
