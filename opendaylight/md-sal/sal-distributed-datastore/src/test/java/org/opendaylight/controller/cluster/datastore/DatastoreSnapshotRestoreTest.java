@@ -126,7 +126,7 @@ public class DatastoreSnapshotRestoreTest {
     }
 
     private static ShardManagerSnapshot newShardManagerSnapshot(String... shards) {
-        return new ShardManagerSnapshot(Arrays.asList(shards));
+        return new ShardManagerSnapshot(Arrays.asList(shards), Collections.emptyMap());
     }
 
     private static Snapshot newSnapshot(YangInstanceIdentifier path, NormalizedNode<?, ?> node)

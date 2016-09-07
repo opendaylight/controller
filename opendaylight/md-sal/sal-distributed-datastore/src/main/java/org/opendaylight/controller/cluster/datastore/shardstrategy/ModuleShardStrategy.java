@@ -28,4 +28,11 @@ public class ModuleShardStrategy implements ShardStrategy {
         String shardName = configuration.getShardNameForModule(moduleName);
         return shardName != null ? shardName : DefaultShardStrategy.DEFAULT_SHARD;
     }
+
+    @Override
+    public YangInstanceIdentifier getPrefixForPath(YangInstanceIdentifier path) {
+        return YangInstanceIdentifier.EMPTY;
+    }
+
+
 }

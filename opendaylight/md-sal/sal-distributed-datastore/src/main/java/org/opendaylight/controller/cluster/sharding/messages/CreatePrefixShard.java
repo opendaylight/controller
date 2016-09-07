@@ -32,4 +32,13 @@ public class CreatePrefixShard implements Serializable {
     public PrefixShardConfiguration getConfiguration() {
         return configuration;
     }
+
+
+    @Override
+    public String toString() {
+        return "CreatePrefixShard{"
+                + "configuration="
+                + configuration
+                + '}';
+    }
 }

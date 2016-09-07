@@ -12,6 +12,7 @@ import com.google.common.base.Preconditions;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import javax.annotation.Nonnull;
 
@@ -40,6 +41,7 @@ public class ShardManagerSnapshot implements Serializable {
     }
 
     private Object readResolve() throws ObjectStreamException {
-        return new org.opendaylight.controller.cluster.datastore.persisted.ShardManagerSnapshot(shardList);
+        return new org.opendaylight.controller.cluster.datastore.persisted.ShardManagerSnapshot(shardList,
+                Collections.emptyMap());
     }
 }

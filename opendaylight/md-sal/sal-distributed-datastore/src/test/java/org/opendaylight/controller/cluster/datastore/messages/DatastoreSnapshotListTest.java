@@ -76,7 +76,7 @@ public class DatastoreSnapshotListTest {
         assertEquals("DatastoreSnapshotList size", 2, cloned.size());
         assertDatastoreSnapshotEquals(legacyConfigSnapshot, cloned.get(0),
                 new org.opendaylight.controller.cluster.datastore.persisted.ShardManagerSnapshot(
-                        legacyShardManagerSnapshot.getShardList()),
+                        legacyShardManagerSnapshot.getShardList(), Collections.emptyMap()),
                 Optional.of(legacyConfigRoot1), Optional.of(legacyConfigRoot2));
         assertDatastoreSnapshotEquals(legacyOperSnapshot, cloned.get(1),
                 (org.opendaylight.controller.cluster.datastore.persisted.ShardManagerSnapshot)null,
