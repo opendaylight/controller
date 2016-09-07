@@ -8,30 +8,40 @@
 
 package org.opendaylight.controller.cluster.sharding;
 
-import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.base.Preconditions;
 import java.util.Collection;
+import java.util.concurrent.atomic.AtomicLong;
 import javax.annotation.Nonnull;
+import org.opendaylight.controller.cluster.databroker.actors.dds.ClientLocalHistory;
 import org.opendaylight.controller.cluster.databroker.actors.dds.DataStoreClient;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
 import org.opendaylight.mdsal.dom.spi.shard.DOMDataTreeShardProducer;
 import org.opendaylight.mdsal.dom.spi.shard.DOMDataTreeShardWriteTransaction;
+import org.opendaylight.mdsal.dom.store.inmemory.InMemoryDOMDataTreeShard;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * Proxy producer implementation that creates transactions that forward all calls to {@link DistributedDataStoreClient}.
+ * Proxy producer implementation that creates transactions that forward all calls to {@link DataStoreClient}.
  */
 class ShardProxyProducer implements DOMDataTreeShardProducer {
 
+    private static final Logger LOG = LoggerFactory.getLogger(InMemoryDOMDataTreeShard.class);
+    private static final AtomicLong COUNTER = new AtomicLong();
+
     private final DOMDataTreeIdentifier shardRoot;
     private final Collection<DOMDataTreeIdentifier> prefixes;
-    private final DataStoreClient client;
-    private final ListeningExecutorService executorService;
+    private final ClientLocalHistory history;
+    private DistributedShardModificationFactory modificationFactory;
 
-    ShardProxyProducer(final DOMDataTreeIdentifier shardRoot, final Collection<DOMDataTreeIdentifier> prefixes,
-                       final DataStoreClient client, final ListeningExecutorService executorService) {
-        this.shardRoot = shardRoot;
-        this.prefixes = prefixes;
-        this.client = client;
-        this.executorService = executorService;
+    ShardProxyProducer(final DOMDataTreeIdentifier shardRoot,
+                       final Collection<DOMDataTreeIdentifier> prefixes,
+                       final DataStoreClient client,
+                       final DistributedShardModificationFactory modificationFactory) {
+        this.shardRoot = Preconditions.checkNotNull(shardRoot);
+        this.prefixes = Preconditions.checkNotNull(prefixes);
+        this.modificationFactory = Preconditions.checkNotNull(modificationFactory);
+        history = client.createLocalHistory();
     }
 
     @Nonnull
@@ -42,7 +52,16 @@ class ShardProxyProducer implements DOMDataTreeShardProducer {
 
     @Override
     public DOMDataTreeShardWriteTransaction createTransaction() {
-        return new ShardProxyTransaction(shardRoot, prefixes, client, executorService);
+        return new ShardProxyTransaction(shardRoot, prefixes,
+                modificationFactory.createModification(history.createTransaction()));
+    }
+
+    DistributedShardModificationFactory getModificationFactory() {
+        return modificationFactory;
+    }
+
+    void setModificationFactory(final DistributedShardModificationFactory modificationFactory) {
+        this.modificationFactory = Preconditions.checkNotNull(modificationFactory);
     }
 }
 
