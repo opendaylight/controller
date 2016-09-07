@@ -197,6 +197,11 @@ public class ConfigurationImpl implements Configuration {
                 .add(ClusterUtils.getCleanShardName(config.getPrefix().getRootIdentifier())).build();
     }
 
+    @Override
+    public Map<YangInstanceIdentifier, PrefixShardConfiguration> getAllPrefixShardConfigurations() {
+        return ImmutableMap.copyOf(prefixConfigMap);
+    }
+
     private void updatePrefixConfigMap(final PrefixShardConfiguration config) {
         final Map<YangInstanceIdentifier, PrefixShardConfiguration> newPrefixConfigMap = new HashMap<>(prefixConfigMap);
         newPrefixConfigMap.put(config.getPrefix().getRootIdentifier(), config);

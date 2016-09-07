@@ -33,6 +33,8 @@ import akka.persistence.SnapshotSelectionCriteria;
 import akka.util.Timeout;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.MapDifference;
+import com.google.common.collect.Maps;
 import java.io.ByteArrayInputStream;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
@@ -105,6 +107,7 @@ import org.opendaylight.controller.cluster.raft.messages.ServerChangeStatus;
 import org.opendaylight.controller.cluster.raft.messages.ServerRemoved;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -518,6 +521,8 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
                 shardDatastoreContext, createPrefixedShard.getShardBuilder(), peerAddressResolver);
         info.setActiveMember(isActiveMember);
         localShards.put(info.getShardName(), info);
+
+        persistShardList();
 
         if(schemaContext != null) {
             info.setActor(newShardActor(schemaContext, info));
@@ -1404,8 +1409,8 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
                 shardList.remove(shardInfo.getShardName());
             }
         }
-        LOG.debug("{}: persisting the shard list {}", persistenceId(), shardList);
-        saveSnapshot(updateShardManagerSnapshot(shardList));
+        LOG.debug ("{}: persisting the shard list {}", persistenceId(), shardList);
+        saveSnapshot(updateShardManagerSnapshot(shardList, configuration.getAllPrefixShardConfigurations()));
     }
 
     private ShardManagerSnapshot updateShardManagerSnapshot(List<String> shardList) {
@@ -1435,6 +1440,18 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             LOG.debug("{}: removing shard {}", persistenceId(), shard);
             configuration.removeMemberReplicaForShard(shard, currentMember);
         }
+
+        final Map<YangInstanceIdentifier, PrefixShardConfiguration> prefixShardConfiguration =
+                snapshot.getPrefixShardConfiguration();
+
+        final MapDifference<YangInstanceIdentifier, PrefixShardConfiguration> difference =
+                Maps.difference(prefixShardConfiguration, configuration.getAllPrefixShardConfigurations());
+
+        // these should be despawned
+        difference.entriesOnlyOnLeft();
+
+        // these should be created
+        difference.entriesOnlyOnRight();
     }
 
     private void onSaveSnapshotSuccess(SaveSnapshotSuccess successMessage) {
