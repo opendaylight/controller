@@ -28,4 +28,12 @@ public class ModuleShardStrategy implements ShardStrategy {
         String shardName = configuration.getShardNameForModule(moduleName);
         return shardName != null ? shardName : DefaultShardStrategy.DEFAULT_SHARD;
     }
+
+    @Override
+    public YangInstanceIdentifier getPrefixForPath(YangInstanceIdentifier path) {
+        // TODO should this be empty? seems like module based shards dont have the data tree rooted elsewhere.
+        return YangInstanceIdentifier.EMPTY;
+    }
+
+
 }

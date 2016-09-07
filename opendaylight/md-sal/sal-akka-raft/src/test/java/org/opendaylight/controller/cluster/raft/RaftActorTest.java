@@ -95,7 +95,7 @@ import org.slf4j.LoggerFactory;
 import scala.concurrent.duration.Duration;
 import scala.concurrent.duration.FiniteDuration;
 
-public class RaftActorTest extends AbstractActorTest {
+public class RaftActorTest extends AbstractClusterRefActorTest {
 
     static final Logger TEST_LOG = LoggerFactory.getLogger(RaftActorTest.class);
 

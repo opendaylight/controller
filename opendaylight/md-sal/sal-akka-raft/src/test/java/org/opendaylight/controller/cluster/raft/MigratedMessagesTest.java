@@ -51,7 +51,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Thomas Pantelis
  */
-public class MigratedMessagesTest extends AbstractActorTest {
+public class MigratedMessagesTest extends AbstractClusterRefActorTest {
     static final Logger TEST_LOG = LoggerFactory.getLogger(MigratedMessagesTest.class);
 
     private TestActorFactory factory;

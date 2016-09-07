@@ -44,6 +44,7 @@ public class TestModel {
     public static final QName OUTER_CHOICE_QNAME = QName.create(TEST_QNAME, "outer-choice");
     public static final QName ID_QNAME = QName.create(TEST_QNAME, "id");
     public static final QName NAME_QNAME = QName.create(TEST_QNAME, "name");
+    public static final QName VALUE_QNAME = QName.create(TEST_QNAME, "value");
     public static final QName DESC_QNAME = QName.create(TEST_QNAME, "desc");
     private static final String DATASTORE_TEST_YANG = "/odl-datastore-test.yang";
 

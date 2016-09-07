@@ -90,7 +90,7 @@ import scala.concurrent.duration.Duration;
  *
  * @author Thomas Pantelis
  */
-public abstract class AbstractShardTest extends AbstractActorTest {
+public abstract class AbstractShardTest extends AbstractClusterRefActorTest {
     protected static final SchemaContext SCHEMA_CONTEXT = TestModel.createTestContext();
 
     private static final AtomicInteger NEXT_SHARD_NUM = new AtomicInteger();

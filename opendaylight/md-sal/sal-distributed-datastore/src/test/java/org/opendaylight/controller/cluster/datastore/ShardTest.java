@@ -22,6 +22,7 @@ import static org.opendaylight.controller.cluster.datastore.DataStoreVersions.CU
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
+import akka.actor.Address;
 import akka.actor.Props;
 import akka.actor.Status.Failure;
 import akka.dispatch.Dispatchers;
@@ -374,7 +375,8 @@ public class ShardTest extends AbstractShardTest {
 
                 final String path = reply.getTransactionPath().toString();
                 assertTrue("Unexpected transaction path " + path, path
-                        .startsWith("akka://test/user/testCreateTransaction/shard-member-1:ShardTransactionTest@0:"));
+                        .startsWith("akka://test@127.0.0.1:2565/user/"
+                        + "testCreateTransaction/shard-member-1:ShardTransactionTest@0:"));
             }
         };
     }
@@ -395,7 +397,8 @@ public class ShardTest extends AbstractShardTest {
 
                 final String path = reply.getTransactionPath().toString();
                 assertTrue("Unexpected transaction path " + path, path.startsWith(
-                        "akka://test/user/testCreateTransactionOnChain/shard-member-1:ShardTransactionTest@0:"));
+                        "akka://test@127.0.0.1:2565/user/"
+                        + "testCreateTransactionOnChain/shard-member-1:ShardTransactionTest@0:"));
             }
         };
     }
@@ -621,7 +624,9 @@ public class ShardTest extends AbstractShardTest {
                         ImmutableNodes.containerNode(TestModel.TEST_QNAME), false), getRef());
                 final ReadyTransactionReply readyReply = ReadyTransactionReply
                         .fromSerializable(expectMsgClass(duration, ReadyTransactionReply.class));
-                assertEquals("Cohort path", shard.path().toString(), readyReply.getCohortPath());
+                assertEquals("Cohort path",
+                        shard.path().toStringWithAddress(new Address("akka", "test", "127.0.0.1", 2565)),
+                        readyReply.getCohortPath());
 
                 // Send the CanCommitTransaction message for the first Tx.
 

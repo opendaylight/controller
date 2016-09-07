@@ -33,7 +33,7 @@ import scala.concurrent.duration.Duration;
  *
  * @author Basheeruddin Ahmed
  */
-public class ShardTransactionFailureTest extends AbstractActorTest {
+public class ShardTransactionFailureTest extends AbstractClusterRefActorTest {
     private static final SchemaContext TEST_SCHEMA_CONTEXT = TestModel.createTestContext();
     private static final TransactionType RO = TransactionType.READ_ONLY;
     private static final TransactionType RW = TransactionType.READ_WRITE;
