@@ -34,7 +34,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedPersistentActor;
@@ -197,6 +196,12 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
 
     private void onProducerCreated(final ProducerCreated message) {
         LOG.debug("Received ProducerCreated: {}", message);
+
+        // fastpath if no replication is needed, since there is only one node
+        if (resolver.getShardingServicePeerActorAddresses().size() == 1) {
+            getSender().tell(new Status.Success(null), noSender());
+        }
+
         final ActorRef sender = getSender();
         final Collection<DOMDataTreeIdentifier> subtrees = message.getSubtrees();
 
@@ -216,18 +221,20 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
         combinedFuture.handleAsync((avoid, throwable) -> {
             LOG.debug("Create producer futures completed");
             if (throwable == null) {
-                for (final CompletableFuture<Object> future : futures) {
-                    try {
-                        final Object result = future.get();
-                        if (result instanceof Status.Failure) {
-                            sender.tell(result, self());
-                            return new CompletableFuture<>().completeExceptionally(((Status.Failure) result).cause());
-                        }
-                    } catch (InterruptedException | ExecutionException e) {
-                        sender.tell(new Status.Failure(e), self());
-                        return new CompletableFuture<>().completeExceptionally(e);
-                    }
-                }
+                // TODO we most likely dont need this, since the combined future will fail already when any of the
+                // asks fail
+//                for (final CompletableFuture<Object> future : futures) {
+//                    try {
+//                        final Object result = future.get();
+//                        if (result instanceof Status.Failure) {
+//                            sender.tell(result, self());
+//                            return new CompletableFuture<>().completeExceptionally(((Status.Failure) result).cause());
+//                        }
+//                    } catch (InterruptedException | ExecutionException e) {
+//                        sender.tell(new Status.Failure(e), self());
+//                        return new CompletableFuture<>().completeExceptionally(e);
+//                    }
+//                }
                 sender.tell(new Status.Success(null), noSender());
                 return CompletableFuture.completedFuture(null);
             } else {
@@ -288,7 +295,7 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
 
     @SuppressWarnings("checkstyle:IllegalCatch")
     private void onCreatePrefixShard(final CreatePrefixShard message) {
-        LOG.debug("Received CreatePrefixShard: {}", message);
+        LOG.debug("Member: {}, Received CreatePrefixShard: {}", cluster.getCurrentMemberName(), message);
 
         final PrefixShardConfiguration configuration = message.getConfiguration();
 
@@ -315,12 +322,9 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
         }
 
         try {
-            final ListenerRegistration<ShardFrontend> shardFrontendRegistration =
+            final ListenerRegistration<DistributedShardFrontend> shardFrontendRegistration =
                     shardingService.registerDataTreeShard(configuration.getPrefix(),
-                            new ShardFrontend(
-                                    client,
-                                    configuration.getPrefix()
-                            ),
+                            new DistributedShardFrontend(client, configuration.getPrefix()),
                             producer);
             idToShardRegistration.put(configuration.getPrefix(),
                     new ShardFrontendRegistration(clientActor, shardFrontendRegistration));
@@ -340,12 +344,18 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
     }
 
     private void onPrefixShardCreated(final PrefixShardCreated message) {
-        LOG.debug("Received PrefixShardCreated: {}", message);
+        LOG.debug("Member: {}, Received PrefixShardCreated: {}", cluster.getCurrentMemberName(), message);
 
         final Collection<String> addresses = resolver.getShardingServicePeerActorAddresses();
         final ActorRef sender = getSender();
 
         final List<CompletableFuture<Object>> futures = new ArrayList<>();
+
+//        final Collection<MemberName> replicas = message.getConfiguration().getShardMemberNames();
+
+//        // remove current node
+//        replicas.remove(cluster.getCurrentMemberName());
+
 
         for (final String address : addresses) {
             final ActorSelection actorSelection = actorSystem.actorSelection(address);
@@ -358,18 +368,20 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
 
         combinedFuture.handleAsync((avoid, throwable) -> {
             if (throwable == null) {
-                for (final CompletableFuture<Object> future : futures) {
-                    try {
-                        final Object result = future.get();
-                        if (result instanceof Status.Failure) {
-                            sender.tell(result, self());
-                            return new CompletableFuture<>().completeExceptionally(((Status.Failure) result).cause());
-                        }
-                    } catch (InterruptedException | ExecutionException e) {
-                        sender.tell(new Status.Failure(e), self());
-                        return new CompletableFuture<>().completeExceptionally(e);
-                    }
-                }
+                // TODO we most likely dont need this, since the combinedfuture will fail already when any of the
+                // asks fail
+//                for (final CompletableFuture<Object> future : futures) {
+//                    try {
+//                        final Object result = future.get();
+//                        if (result instanceof Status.Failure) {
+//                            sender.tell(result, self());
+//                            return new CompletableFuture<>().completeExceptionally(((Status.Failure) result).cause());
+//                        }
+//                    } catch (InterruptedException | ExecutionException e) {
+//                        sender.tell(new Status.Failure(e), self());
+//                        return new CompletableFuture<>().completeExceptionally(e);
+//                    }
+//                }
                 sender.tell(new Status.Success(null), self());
                 return CompletableFuture.completedFuture(null);
             } else {
@@ -426,10 +438,10 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
     private static class ShardFrontendRegistration {
 
         private final ActorRef clientActor;
-        private final ListenerRegistration<ShardFrontend> shardRegistration;
+        private final ListenerRegistration<DistributedShardFrontend> shardRegistration;
 
         ShardFrontendRegistration(final ActorRef clientActor,
-                                         final ListenerRegistration<ShardFrontend> shardRegistration) {
+                                  final ListenerRegistration<DistributedShardFrontend> shardRegistration) {
             this.clientActor = clientActor;
             this.shardRegistration = shardRegistration;
         }
@@ -514,12 +526,10 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
             Preconditions.checkNotNull(distributedOperDatastore);
         }
 
-
         public Props props() {
             verify();
             return Props.create(ShardedDataTreeActor.class, this);
         }
-
 
     }
 }
