@@ -25,7 +25,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.mockito.Mockito;
 import org.opendaylight.controller.cluster.datastore.AbstractTest;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext.Builder;
@@ -51,8 +50,12 @@ import org.opendaylight.mdsal.dom.broker.ShardedDOMDataTree;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableLeafNodeBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DistributedShardedDOMDataTreeTest extends AbstractTest {
+
+    private static final Logger LOG = LoggerFactory.getLogger(DistributedShardedDOMDataTreeTest.class);
 
     private static final Address MEMBER_1_ADDRESS = AddressFromURIString.parse("akka.tcp://cluster-test@127.0.0.1:2558");
 
@@ -87,7 +90,6 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
         Cluster.get(leaderSystem).join(MEMBER_1_ADDRESS);
 
         followerSystem = ActorSystem.create("cluster-test", ConfigFactory.load().getConfig("Member2"));
-        Cluster.get(followerSystem).join(MEMBER_1_ADDRESS);
     }
 
     @After
@@ -108,21 +110,37 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
 
         leaderDistributedDataStore = leaderTestKit.setupDistributedDataStoreWithoutConfig(type, SchemaContextHelper.full());
 
+        leaderShardFactory = new DistributedShardedDOMDataTree(leaderSystem,
+                leaderDistributedDataStore,
+                leaderDistributedDataStore);
+    }
+
+    private void initEmptyDatastores(final String type) {
+        followerSystem = ActorSystem.create("cluster-test", ConfigFactory.load().getConfig("Member2"));
+        Cluster.get(followerSystem).join(MEMBER_1_ADDRESS);
+
+        leaderTestKit = new IntegrationTestKit(leaderSystem, leaderDatastoreContextBuilder);
+
+        leaderDistributedDataStore = leaderTestKit.setupDistributedDataStoreWithoutConfig(type, SchemaContextHelper.full());
+
         followerTestKit = new IntegrationTestKit(followerSystem, followerDatastoreContextBuilder);
         followerDistributedDataStore = followerTestKit.setupDistributedDataStoreWithoutConfig(type, SchemaContextHelper.full());
 
         leaderShardFactory = new DistributedShardedDOMDataTree(leaderSystem,
-                Mockito.mock(DistributedDataStore.class),
+                leaderDistributedDataStore,
                 leaderDistributedDataStore);
 
         followerShardFactory = new DistributedShardedDOMDataTree(followerSystem,
-                Mockito.mock(DistributedDataStore.class),
+                followerDistributedDataStore,
                 followerDistributedDataStore);
     }
 
     @Test
+    @Ignore("Needs different shard creation handling due to replicas")
     public void testProducerRegistrations() throws Exception {
-        initEmptyDatastore("config");
+        initEmptyDatastores("config");
+
+        leaderTestKit.waitForMembersUp("member-2");
 
         final DistributedShardRegistration shardRegistration = leaderShardFactory.createDistributedShard(TEST_ID, Lists.newArrayList(AbstractTest.MEMBER_NAME, AbstractTest.MEMBER_2_NAME));
 
@@ -171,14 +189,19 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
     }
 
     @Test
-    @Ignore("Needs some other stuff related to 5280")
+    @Ignore("Needs different shard creation handling due to replicas")
     public void testWriteIntoMultipleShards() throws Exception {
-        initEmptyDatastore("config");
+        initEmptyDatastores("config");
 
+        leaderTestKit.waitForMembersUp("member-2");
+
+        LOG.warn("registering first shard");
         final DistributedShardRegistration shardRegistration = leaderShardFactory.createDistributedShard(TEST_ID, Lists.newArrayList(AbstractTest.MEMBER_NAME, AbstractTest.MEMBER_2_NAME));
 
         leaderTestKit.waitUntilLeader(leaderDistributedDataStore.getActorContext(), ClusterUtils.getCleanShardName(TEST_ID.getRootIdentifier()));
+        IntegrationTestKit.findLocalShard(followerDistributedDataStore.getActorContext(), ClusterUtils.getCleanShardName(TEST_ID.getRootIdentifier()));
 
+        LOG.warn("Got after waiting for nonleader");
         final ActorRef leaderShardManager = leaderDistributedDataStore.getActorContext().getShardManager();
 
         new JavaTestKit(leaderSystem) {{
@@ -187,7 +210,44 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
 
             final ActorRef followerShardManager = followerDistributedDataStore.getActorContext().getShardManager();
 
-            followerShardManager.tell(new FindLocalShard(ClusterUtils.getCleanShardName(TestModel.TEST_PATH), true), getRef());
+            followerShardManager.tell(new FindLocalShard(ClusterUtils.getCleanShardName(TestModel.TEST_PATH), true), followerTestKit.getRef());
+            followerTestKit.expectMsgClass(duration("5 seconds"), LocalShardFound.class);
+            LOG.warn("Found follower shard");
+
+            leaderDistributedDataStore.getActorContext().getShardManager().tell(new FindPrimary(ClusterUtils.getCleanShardName(TestModel.TEST_PATH), true), getRef());
+            expectMsgClass(duration("5 seconds"), LocalPrimaryShardFound.class);
+        }};
+
+        final DOMDataTreeProducer producer = leaderShardFactory.createProducer(Collections.singleton(TEST_ID));
+
+        final DOMDataTreeCursorAwareTransaction tx = producer.createTransaction(true);
+        final DOMDataTreeWriteCursor cursor = tx.createCursor(TEST_ID);
+        Assert.assertNotNull(cursor);
+        final YangInstanceIdentifier nameId = YangInstanceIdentifier.builder(TestModel.TEST_PATH).node(TestModel.NAME_QNAME).build();
+        cursor.write(nameId.getLastPathArgument(),
+                ImmutableLeafNodeBuilder.<String>create().withNodeIdentifier(new NodeIdentifier(TestModel.NAME_QNAME)).withValue("Test Value").build());
+
+        cursor.close();
+        LOG.warn("Got to pre submit");
+
+        tx.submit();
+
+
+    }
+
+    @Test
+    @Ignore("The datastore client doesn't forward the requests to backend yet")
+    public void testSingleNodeWrites() throws Exception {
+        initEmptyDatastore("config");
+
+        final DistributedShardRegistration shardRegistration = leaderShardFactory.createDistributedShard(TEST_ID, Lists.newArrayList(AbstractTest.MEMBER_NAME));
+        leaderTestKit.waitUntilLeader(leaderDistributedDataStore.getActorContext(), ClusterUtils.getCleanShardName(TEST_ID.getRootIdentifier()));
+
+        LOG.warn("Got after waiting for nonleader");
+        final ActorRef leaderShardManager = leaderDistributedDataStore.getActorContext().getShardManager();
+
+        new JavaTestKit(leaderSystem) {{
+            leaderShardManager.tell(new FindLocalShard(ClusterUtils.getCleanShardName(TestModel.TEST_PATH), true), getRef());
             expectMsgClass(duration("5 seconds"), LocalShardFound.class);
 
             leaderDistributedDataStore.getActorContext().getShardManager().tell(new FindPrimary(ClusterUtils.getCleanShardName(TestModel.TEST_PATH), true), getRef());
@@ -204,8 +264,8 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
                 ImmutableLeafNodeBuilder.<String>create().withNodeIdentifier(new NodeIdentifier(TestModel.NAME_QNAME)).withValue("Test Value").build());
 
         cursor.close();
-        tx.submit();
+        LOG.warn("Got to pre submit");
 
-
+        tx.submit().checkedGet();
     }
 }
