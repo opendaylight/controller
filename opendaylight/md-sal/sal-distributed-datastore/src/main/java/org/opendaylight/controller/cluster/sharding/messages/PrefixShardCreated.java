@@ -29,4 +29,11 @@ public class PrefixShardCreated {
     public PrefixShardConfiguration getConfiguration() {
         return configuration;
     }
+
+    @Override
+    public String toString() {
+        return "PrefixShardCreated{"
+                + "configuration=" + configuration
+                + '}';
+    }
 }

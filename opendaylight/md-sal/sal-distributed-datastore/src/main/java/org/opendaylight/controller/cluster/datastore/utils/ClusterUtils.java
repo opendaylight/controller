@@ -8,10 +8,13 @@
 
 package org.opendaylight.controller.cluster.datastore.utils;
 
+import java.util.Map;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
+import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
 
 /**
  * Utils for encoding prefix shard name.
@@ -35,6 +38,14 @@ public class ClusterUtils {
         // TODO need a better mapping that includes namespace, but we'll need to cleanup the string beforehand
         path.getPathArguments().forEach(p -> {
             builder.append(p.getNodeType().getLocalName());
+            if (p instanceof NodeIdentifierWithPredicates) {
+                builder.append("$key=");
+                final Map<QName, Object> key = ((NodeIdentifierWithPredicates) p).getKeyValues();
+                key.entrySet().forEach(e -> {
+                    builder.append(e.getKey().getLocalName());
+                    builder.append(e.getValue());
+                });
+            }
             builder.append("!");
         });
         return builder.toString();
