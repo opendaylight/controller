@@ -9,12 +9,13 @@
 package org.opendaylight.controller.cluster.datastore.config;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.Set;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategy;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
 
 public interface Configuration {
 
@@ -36,7 +37,7 @@ public interface Configuration {
     /**
      * Return the shard name corresponding to the prefix, or null if none is configured.
      */
-    @Nullable String getShardNameForPrefix(@Nonnull YangInstanceIdentifier prefix);
+    @Nullable String getShardNameForPrefix(@Nonnull DOMDataTreeIdentifier prefix);
 
     /**
      * Returns the member replicas for the given shard name.
@@ -64,6 +65,18 @@ public interface Configuration {
     void addPrefixShardConfiguration(@Nonnull PrefixShardConfiguration config);
 
     /**
+     * Removes a shard configuration for the specified prefix.
+     */
+    void removePrefixShardConfiguration(@Nonnull DOMDataTreeIdentifier prefix);
+
+    /**
+     * Returns the configuration for all configured prefix shards.
+     *
+     * @return An immutable copy of the currently configured prefix shards.
+     */
+    Map<DOMDataTreeIdentifier, PrefixShardConfiguration> getAllPrefixShardConfigurations();
+
+    /**
      * Returns a unique set of all member names configured for all shards.
      */
     Collection<MemberName> getUniqueMemberNamesForAllShards();
@@ -86,5 +99,5 @@ public interface Configuration {
     /**
      * Returns the ShardStrategy for the given prefix or null if the prefix is not found.
      */
-    @Nullable ShardStrategy getStrategyForPrefix(@Nonnull YangInstanceIdentifier prefix);
+    @Nullable ShardStrategy getStrategyForPrefix(@Nonnull DOMDataTreeIdentifier prefix);
 }
