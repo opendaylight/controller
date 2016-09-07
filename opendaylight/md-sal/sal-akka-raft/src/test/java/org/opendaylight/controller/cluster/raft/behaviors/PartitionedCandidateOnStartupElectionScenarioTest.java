@@ -165,10 +165,11 @@ public class PartitionedCandidateOnStartupElectionScenarioTest extends AbstractL
         // will be 2 and the last term will be 1 so it is behind the leader's log.
 
         SimpleReplicatedLog candidateReplicatedLog = new SimpleReplicatedLog();
-        candidateReplicatedLog.append(new MockReplicatedLogEntry(1, 1, new MockPayload("")));
-        candidateReplicatedLog.append(new MockReplicatedLogEntry(2, 1, new MockPayload("")));
+        candidateReplicatedLog.append(new MockReplicatedLogEntry(2, 0, new MockPayload("")));
 
         member3Context.setReplicatedLog(candidateReplicatedLog);
+        member3Context.setCommitIndex(candidateReplicatedLog.lastIndex());
+        member3Context.setLastApplied(candidateReplicatedLog.lastIndex());
         member3Context.getTermInformation().update(2, member1Context.getId());
 
         // The member 3 Candidate will start a new term and send RequestVotes. However it will be
@@ -210,6 +211,13 @@ public class PartitionedCandidateOnStartupElectionScenarioTest extends AbstractL
     private void setupInitialMember1AndMember2Behaviors() throws Exception {
         testLog.info("setupInitialMember1AndMember2Behaviors starting");
 
+        // Initialize the ReplicatedLog and election term info for member 1 and 2. The current term
+        // will be 3 and the last term will be 2.
+
+        SimpleReplicatedLog replicatedLog = new SimpleReplicatedLog();
+        replicatedLog.append(new MockReplicatedLogEntry(2, 0, new MockPayload("")));
+        replicatedLog.append(new MockReplicatedLogEntry(3, 1, new MockPayload("")));
+
         // Create member 2's behavior as Follower.
 
         member2Context = newRaftActorContext("member2", member2ActorRef,
@@ -219,6 +227,11 @@ public class PartitionedCandidateOnStartupElectionScenarioTest extends AbstractL
 
         DefaultConfigParamsImpl member2ConfigParams = newConfigParams();
         member2Context.setConfigParams(member2ConfigParams);
+
+        member2Context.setReplicatedLog(replicatedLog);
+        member2Context.setCommitIndex(replicatedLog.lastIndex());
+        member2Context.setLastApplied(replicatedLog.lastIndex());
+        member2Context.getTermInformation().update(3, "member1");
 
         member2Actor.behavior = new Follower(member2Context);
         member2Context.setCurrentBehavior(member2Actor.behavior);
@@ -233,23 +246,15 @@ public class PartitionedCandidateOnStartupElectionScenarioTest extends AbstractL
         DefaultConfigParamsImpl member1ConfigParams = newConfigParams();
         member1Context.setConfigParams(member1ConfigParams);
 
+        member1Context.setReplicatedLog(replicatedLog);
+        member1Context.setCommitIndex(replicatedLog.lastIndex());
+        member1Context.setLastApplied(replicatedLog.lastIndex());
+        member1Context.getTermInformation().update(3, "member1");
+
         initializeLeaderBehavior(member1Actor, member1Context, 1);
 
         member2Actor.clear();
         member3Actor.clear();
-
-        // Initialize the ReplicatedLog and election term info for member 1 and 2. The current term
-        // will be 3 and the last term will be 2.
-
-        SimpleReplicatedLog replicatedLog = new SimpleReplicatedLog();
-        replicatedLog.append(new MockReplicatedLogEntry(2, 1, new MockPayload("")));
-        replicatedLog.append(new MockReplicatedLogEntry(3, 1, new MockPayload("")));
-
-        member1Context.setReplicatedLog(replicatedLog);
-        member1Context.getTermInformation().update(3, "");
-
-        member2Context.setReplicatedLog(replicatedLog);
-        member2Context.getTermInformation().update(3, member1Context.getId());
 
         testLog.info("setupInitialMember1AndMember2Behaviors ending");
 
