@@ -42,4 +42,13 @@ public class PrefixShardConfiguration implements Serializable {
     public Collection<MemberName> getShardMemberNames() {
         return shardMemberNames;
     }
+
+    @Override
+    public String toString() {
+        return "PrefixShardConfiguration{" +
+                "prefix=" + prefix +
+                ", shardStrategyName='" + shardStrategyName + '\'' +
+                ", shardMemberNames=" + shardMemberNames +
+                '}';
+    }
 }

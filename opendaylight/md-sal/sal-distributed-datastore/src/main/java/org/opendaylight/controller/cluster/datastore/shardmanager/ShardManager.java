@@ -104,6 +104,7 @@ import org.opendaylight.controller.cluster.raft.messages.ServerChangeStatus;
 import org.opendaylight.controller.cluster.raft.messages.ServerRemoved;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -500,8 +501,8 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
         final Map<String, String> peerAddresses = Collections.emptyMap();
         final boolean isActiveMember = true;
-        LOG.debug("{} doCreatePrefixedShard: shardId: {}, memberNames: {}, peerAddresses: {}, isActiveMember: {}",
-                persistenceId(), shardId, peerAddresses, isActiveMember);
+        LOG.debug("{} doCreatePrefixedShard: persistenceId(): {}, memberNames: {}, peerAddresses: {}, isActiveMember: {}",
+                shardId, persistenceId(), createPrefixedShard.getConfig().getShardMemberNames(), peerAddresses, isActiveMember);
 
         final ShardInformation info = new ShardInformation(shardName, shardId, peerAddresses,
                 shardDatastoreContext, createPrefixedShard.getShardBuilder(), peerAddressResolver);
@@ -511,6 +512,10 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         if (schemaContext != null) {
             info.setActor(newShardActor(schemaContext, info));
         }
+
+        persistShardList();
+
+        // do not replicate on this level
     }
 
     private void doCreateShard(final CreateShard createShard) {
@@ -1386,12 +1391,14 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
                 shardList.remove(shardInfo.getShardName());
             }
         }
-        LOG.debug("{}: persisting the shard list {}", persistenceId(), shardList);
-        saveSnapshot(updateShardManagerSnapshot(shardList));
+        LOG.debug ("{}: persisting the shard list {}", persistenceId(), shardList);
+        saveSnapshot(updateShardManagerSnapshot(shardList, configuration.getAllPrefixShardConfigurations()));
     }
 
-    private ShardManagerSnapshot updateShardManagerSnapshot(List<String> shardList) {
-        currentSnapshot = new ShardManagerSnapshot(shardList);
+    private ShardManagerSnapshot updateShardManagerSnapshot(
+            final List<String> shardList,
+            final Map<YangInstanceIdentifier, PrefixShardConfiguration> allPrefixShardConfigurations) {
+        currentSnapshot = new ShardManagerSnapshot(shardList, allPrefixShardConfigurations);
         return currentSnapshot;
     }
 
@@ -1417,6 +1424,8 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             LOG.debug("{}: removing shard {}", persistenceId(), shard);
             configuration.removeMemberReplicaForShard(shard, currentMember);
         }
+
+        // TODO apply the snapshot for prefix based shards
     }
 
     private void onSaveSnapshotSuccess(SaveSnapshotSuccess successMessage) {
