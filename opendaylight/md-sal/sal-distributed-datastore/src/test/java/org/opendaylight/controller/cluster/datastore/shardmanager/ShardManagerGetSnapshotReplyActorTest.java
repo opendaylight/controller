@@ -45,7 +45,7 @@ public class ShardManagerGetSnapshotReplyActorTest extends AbstractActorTest {
         JavaTestKit kit = new JavaTestKit(getSystem());
 
         List<String> shardList = Arrays.asList("shard1", "shard2", "shard3");
-        ShardManagerSnapshot shardManagerSnapshot = new ShardManagerSnapshot(shardList);
+        ShardManagerSnapshot shardManagerSnapshot = new ShardManagerSnapshot(shardList, Collections.emptyMap());
         ActorRef replyActor = getSystem().actorOf(ShardManagerGetSnapshotReplyActor.props(
                 shardList, "config", shardManagerSnapshot, kit.getRef(),
                 "shard-manager", Duration.create(100, TimeUnit.SECONDS)), "testSuccess");

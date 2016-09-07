@@ -622,7 +622,6 @@ public class ShardTest extends AbstractShardTest {
                 final ReadyTransactionReply readyReply = ReadyTransactionReply
                         .fromSerializable(expectMsgClass(duration, ReadyTransactionReply.class));
                 assertEquals("Cohort path", shard.path().toString(), readyReply.getCohortPath());
-
                 // Send the CanCommitTransaction message for the first Tx.
 
                 shard.tell(new CanCommitTransaction(transactionID1, CURRENT_VERSION).toSerializable(), getRef());
