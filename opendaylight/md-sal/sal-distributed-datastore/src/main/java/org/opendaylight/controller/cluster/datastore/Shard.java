@@ -62,6 +62,8 @@ import org.opendaylight.controller.cluster.raft.base.messages.FollowerInitialSyn
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.messages.ServerRemoved;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
+import org.opendaylight.controller.cluster.sharding.messages.ChildShardAttached;
+import org.opendaylight.controller.cluster.sharding.messages.ChildShardDetached;
 import org.opendaylight.yangtools.concepts.Identifier;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataValidationFailedException;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.TipProducingDataTree;
@@ -214,7 +216,7 @@ public class Shard extends RaftActor {
     @Override
     protected void handleRecover(final Object message) {
         LOG.debug("{}: onReceiveRecover: Received message {} from {}", persistenceId(), message.getClass(),
-            getSender());
+                getSender());
 
         super.handleRecover(message);
         if (LOG.isTraceEnabled()) {
@@ -278,6 +280,10 @@ public class Shard extends RaftActor {
             } else if (message instanceof DataTreeCohortActorRegistry.CohortRegistryCommand) {
                 store.processCohortRegistryCommand(getSender(),
                         (DataTreeCohortActorRegistry.CohortRegistryCommand) message);
+            } else if (message instanceof ChildShardAttached) {
+                onChildShardAttached((ChildShardAttached) message);
+            } else if (message instanceof ChildShardDetached) {
+                onChildShardDetached((ChildShardDetached) message);
             } else {
                 super.handleNonRaftCommand(message);
             }
@@ -645,6 +651,14 @@ public class Shard extends RaftActor {
     protected void pauseLeader(final Runnable operation) {
         LOG.debug("{}: In pauseLeader, operation: {}", persistenceId(), operation);
         store.setRunOnPendingTransactionsComplete(operation);
+    }
+
+    private void onChildShardAttached(ChildShardAttached message) {
+
+    }
+
+    private void onChildShardDetached(ChildShardDetached message) {
+
     }
 
     @Override

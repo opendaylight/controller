@@ -9,6 +9,7 @@
 package org.opendaylight.controller.cluster.datastore.config;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.Set;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -62,6 +63,13 @@ public interface Configuration {
      * Adds a new configuration for a shard based on prefix.
      */
     void addPrefixShardConfiguration(@Nonnull PrefixShardConfiguration config);
+
+    /**
+     * Returns the configuration for all configured prefix shards.
+     *
+     * @return An immutable copy of the currently configured prefix shards.
+     */
+    Map<YangInstanceIdentifier, PrefixShardConfiguration> getAllPrefixShardConfigurations();
 
     /**
      * Returns a unique set of all member names configured for all shards.
