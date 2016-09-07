@@ -8,7 +8,9 @@
 
 package org.opendaylight.controller.cluster.sharding.messages;
 
+import akka.cluster.Member;
 import java.io.Serializable;
+import java.util.List;
 import org.opendaylight.controller.cluster.datastore.config.PrefixShardConfiguration;
 import org.opendaylight.controller.cluster.sharding.ShardedDataTreeActor;
 
@@ -28,5 +30,13 @@ public class CreatePrefixShard implements Serializable {
 
     public PrefixShardConfiguration getConfiguration() {
         return configuration;
+    }
+
+
+    @Override
+    public String toString() {
+        return "CreatePrefixShard{" +
+                "configuration=" + configuration +
+                '}';
     }
 }

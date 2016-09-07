@@ -213,7 +213,7 @@ public class Shard extends RaftActor {
     @Override
     protected void handleRecover(final Object message) {
         LOG.debug("{}: onReceiveRecover: Received message {} from {}", persistenceId(), message.getClass(),
-            getSender());
+                getSender());
 
         super.handleRecover(message);
         if (LOG.isTraceEnabled()) {
