@@ -610,8 +610,7 @@ public class Shard extends RaftActor {
             // them to transaction messages and send to the new leader.
             ActorSelection leader = getLeader();
             if (leader != null) {
-                Collection<?> messagesToForward = commitCoordinator.convertPendingTransactionsToMessages(
-                            datastoreContext.getShardBatchedModificationCount());
+                Collection<?> messagesToForward = convertPendingTransactionsToMessages();
 
                 if (!messagesToForward.isEmpty()) {
                     LOG.debug("{}: Forwarding {} pending transaction messages to leader {}", persistenceId(),
@@ -631,6 +630,15 @@ public class Shard extends RaftActor {
         if (hasLeader && !isIsolatedLeader()) {
             messageRetrySupport.retryMessages();
         }
+    }
+
+    /**
+     * Clears all pending transactions and converts them to messages to be forwarded to a new leader.
+     *
+     * @return the converted messages
+     */
+    public Collection<?> convertPendingTransactionsToMessages() {
+        return commitCoordinator.convertPendingTransactionsToMessages(datastoreContext.getShardBatchedModificationCount());
     }
 
     @Override
