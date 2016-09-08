@@ -17,18 +17,30 @@ import static org.opendaylight.controller.cluster.datastore.entityownership.Enti
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.ENTITY_OWNER_QNAME;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.ENTITY_QNAME;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.ENTITY_TYPE_QNAME;
+import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.candidatePath;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.entityPath;
+
+import akka.pattern.Patterns;
+import akka.testkit.TestActorRef;
+import akka.util.Timeout;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Stopwatch;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 import org.hamcrest.Description;
 import org.junit.Assert;
 import org.mockito.ArgumentMatcher;
 import org.mockito.Matchers;
+import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.AbstractActorTest;
+import org.opendaylight.controller.cluster.datastore.AbstractShardTest;
 import org.opendaylight.controller.cluster.datastore.ShardDataTree;
+import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
+import org.opendaylight.controller.cluster.raft.client.messages.GetOnDemandRaftState;
+import org.opendaylight.controller.cluster.raft.client.messages.OnDemandRaftState;
 import org.opendaylight.mdsal.eos.common.api.EntityOwnershipChangeState;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntity;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipChange;
@@ -48,6 +60,12 @@ import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataValidationFailedException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import scala.concurrent.Await;
+import scala.concurrent.Future;
+import scala.concurrent.duration.Duration;
+import scala.concurrent.duration.FiniteDuration;
 
 /**
  * Abstract base class providing utility methods.
@@ -55,6 +73,10 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataValidationFailed
  * @author Thomas Pantelis
  */
 public class AbstractEntityOwnershipTest extends AbstractActorTest {
+    protected final Logger testLog = LoggerFactory.getLogger(getClass());
+
+    private static final AtomicInteger NEXT_SHARD_NUM = new AtomicInteger();
+
     protected void verifyEntityCandidate(NormalizedNode<?, ?> node, String entityType,
             YangInstanceIdentifier entityId, String candidateName, boolean expectPresent) {
         try {
@@ -175,18 +197,24 @@ public class AbstractEntityOwnershipTest extends AbstractActorTest {
 
     static DOMEntityOwnershipChange ownershipChange(final DOMEntity expEntity, final boolean expWasOwner,
             final boolean expIsOwner, final boolean expHasOwner) {
+        return ownershipChange(expEntity, expWasOwner, expIsOwner, expHasOwner, false);
+    }
+
+    static DOMEntityOwnershipChange ownershipChange(final DOMEntity expEntity, final boolean expWasOwner,
+            final boolean expIsOwner, final boolean expHasOwner, final boolean expInJeopardy) {
         return Matchers.argThat(new ArgumentMatcher<DOMEntityOwnershipChange>() {
             @Override
             public boolean matches(Object argument) {
                 DOMEntityOwnershipChange change = (DOMEntityOwnershipChange) argument;
                 return expEntity.equals(change.getEntity()) && expWasOwner == change.getState().wasOwner() &&
-                        expIsOwner == change.getState().isOwner() && expHasOwner == change.getState().hasOwner();
+                        expIsOwner == change.getState().isOwner() && expHasOwner == change.getState().hasOwner() &&
+                        expInJeopardy == change.inJeopardy();
             }
 
             @Override
             public void describeTo(Description description) {
                 description.appendValue(new DOMEntityOwnershipChange(expEntity, EntityOwnershipChangeState.from(
-                        expWasOwner, expIsOwner, expHasOwner)));
+                        expWasOwner, expIsOwner, expHasOwner), expInJeopardy));
             }
         });
     }
@@ -205,5 +233,75 @@ public class AbstractEntityOwnershipTest extends AbstractActorTest {
                         false, false, false)));
             }
         });
+    }
+
+    static void verifyOwner(final TestActorRef<? extends EntityOwnershipShard> shard, String entityType,
+            YangInstanceIdentifier entityId, String localMemberName) {
+        verifyOwner(localMemberName, entityType, entityId, path -> {
+            try {
+                return AbstractShardTest.readStore(shard, path);
+            } catch(Exception e) {
+                return null;
+            }
+        });
+    }
+
+    static void verifyRaftState(final TestActorRef<? extends EntityOwnershipShard> shard, Consumer<OnDemandRaftState> verifier)
+            throws Exception {
+        AssertionError lastError = null;
+        Stopwatch sw = Stopwatch.createStarted();
+        while(sw.elapsed(TimeUnit.SECONDS) <= 5) {
+            FiniteDuration operationDuration = Duration.create(5, TimeUnit.SECONDS);
+            Future<Object> future = Patterns.ask(shard, GetOnDemandRaftState.INSTANCE, new Timeout(operationDuration));
+            OnDemandRaftState raftState = (OnDemandRaftState)Await.result(future, operationDuration);
+            try {
+                verifier.accept(raftState);
+                return;
+            } catch (AssertionError e) {
+                lastError = e;
+                Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
+            }
+        }
+
+        throw lastError;
+    }
+
+    static ShardIdentifier newShardId(String memberName) {
+        return ShardIdentifier.create("entity-ownership", MemberName.forName(memberName),
+            "operational" + NEXT_SHARD_NUM.getAndIncrement());
+    }
+
+    void verifyEntityCandidateRemoved(final TestActorRef<EntityOwnershipShard> shard, String entityType,
+            YangInstanceIdentifier entityId, String candidateName) {
+        verifyNodeRemoved(candidatePath(entityType, entityId, candidateName),
+                path -> {
+                    try {
+                        return AbstractShardTest.readStore(shard, path);
+                    } catch(Exception e) {
+                        throw new AssertionError("Failed to read " + path, e);
+                    }
+            });
+    }
+
+    void verifyCommittedEntityCandidate(final TestActorRef<? extends EntityOwnershipShard> shard, String entityType,
+            YangInstanceIdentifier entityId, String candidateName) {
+        verifyEntityCandidate(entityType, entityId, candidateName, path -> {
+            try {
+                return AbstractShardTest.readStore(shard, path);
+            } catch(Exception e) {
+                throw new AssertionError("Failed to read " + path, e);
+            }
+        });
+    }
+
+    void verifyNoEntityCandidate(final TestActorRef<? extends EntityOwnershipShard> shard, String entityType,
+            YangInstanceIdentifier entityId, String candidateName) {
+        verifyEntityCandidate(entityType, entityId, candidateName, path -> {
+            try {
+                return AbstractShardTest.readStore(shard, path);
+            } catch(Exception e) {
+                throw new AssertionError("Failed to read " + path, e);
+            }
+        }, false);
     }
 }

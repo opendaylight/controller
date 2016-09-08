@@ -322,8 +322,6 @@ class EntityOwnershipShard extends Shard {
 
     @Override
     protected void onStateChanged() {
-        super.onStateChanged();
-
         boolean isLeader = isLeader();
         LOG.debug("{}: onStateChanged: isLeader: {}, hasLeader: {}", persistenceId(), isLeader, hasLeader());
 
@@ -337,12 +335,12 @@ class EntityOwnershipShard extends Shard {
         }
 
         commitCoordinator.onStateChanged(this, isLeader);
+
+        super.onStateChanged();
     }
 
     @Override
     protected void onLeaderChanged(String oldLeader, String newLeader) {
-        super.onLeaderChanged(oldLeader, newLeader);
-
         boolean isLeader = isLeader();
         LOG.debug("{}: onLeaderChanged: oldLeader: {}, newLeader: {}, isLeader: {}", persistenceId(), oldLeader,
                 newLeader, isLeader);
@@ -366,6 +364,8 @@ class EntityOwnershipShard extends Shard {
             // leader and stays in the follower state. In that case no behavior state change occurs.
             commitCoordinator.onStateChanged(this, isLeader);
         }
+
+        super.onLeaderChanged(oldLeader, newLeader);
     }
 
     private void onCandidateRemoved(CandidateRemoved message) {
@@ -373,10 +373,8 @@ class EntityOwnershipShard extends Shard {
 
         if(isLeader()) {
             String currentOwner = getCurrentOwner(message.getEntityPath());
-            if(message.getRemovedCandidate().equals(currentOwner) || message.getRemainingCandidates().isEmpty()){
-                writeNewOwner(message.getEntityPath(),
-                        newOwner(currentOwner, message.getRemainingCandidates(), getEntityOwnerElectionStrategy(message.getEntityPath())));
-            }
+            writeNewOwner(message.getEntityPath(),
+                    newOwner(currentOwner, message.getRemainingCandidates(), getEntityOwnerElectionStrategy(message.getEntityPath())));
         }
     }
 
