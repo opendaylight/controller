@@ -71,7 +71,7 @@ public class SnapshotTrackerTest {
         SnapshotTracker tracker3 = new SnapshotTracker(logger, 2, "leader");
 
         try {
-            tracker3.addChunk(AbstractLeader.FIRST_CHUNK_INDEX - 1, chunk1, Optional.<Integer>absent());
+            tracker3.addChunk(LeaderInstallSnapshotState.FIRST_CHUNK_INDEX - 1, chunk1, Optional.<Integer>absent());
             Assert.fail();
         } catch(SnapshotTracker.InvalidChunkException e){
 
@@ -80,10 +80,10 @@ public class SnapshotTrackerTest {
         // Out of sequence chunk indexes won't work
         SnapshotTracker tracker4 = new SnapshotTracker(logger, 2, "leader");
 
-        tracker4.addChunk(AbstractLeader.FIRST_CHUNK_INDEX, chunk1, Optional.<Integer>absent());
+        tracker4.addChunk(LeaderInstallSnapshotState.FIRST_CHUNK_INDEX, chunk1, Optional.<Integer>absent());
 
         try {
-            tracker4.addChunk(AbstractLeader.FIRST_CHUNK_INDEX+2, chunk2, Optional.<Integer>absent());
+            tracker4.addChunk(LeaderInstallSnapshotState.FIRST_CHUNK_INDEX+2, chunk2, Optional.<Integer>absent());
             Assert.fail();
         } catch(SnapshotTracker.InvalidChunkException e){
 
@@ -93,19 +93,19 @@ public class SnapshotTrackerTest {
         // If the lastChunkHashCode is missing
         SnapshotTracker tracker5 = new SnapshotTracker(logger, 2, "leader");
 
-        tracker5.addChunk(AbstractLeader.FIRST_CHUNK_INDEX, chunk1, Optional.<Integer>absent());
+        tracker5.addChunk(LeaderInstallSnapshotState.FIRST_CHUNK_INDEX, chunk1, Optional.<Integer>absent());
         // Look I can add the same chunk again
-        tracker5.addChunk(AbstractLeader.FIRST_CHUNK_INDEX + 1, chunk1, Optional.<Integer>absent());
+        tracker5.addChunk(LeaderInstallSnapshotState.FIRST_CHUNK_INDEX + 1, chunk1, Optional.<Integer>absent());
 
         // An exception will be thrown when an invalid chunk is addedd with the right sequence
         // when the lastChunkHashCode is present
         SnapshotTracker tracker6 = new SnapshotTracker(logger, 2, "leader");
 
-        tracker6.addChunk(AbstractLeader.FIRST_CHUNK_INDEX, chunk1, Optional.of(-1));
+        tracker6.addChunk(LeaderInstallSnapshotState.FIRST_CHUNK_INDEX, chunk1, Optional.of(-1));
 
         try {
             // Here we add a second chunk and tell addChunk that the previous chunk had a hash code 777
-            tracker6.addChunk(AbstractLeader.FIRST_CHUNK_INDEX + 1, chunk2, Optional.of(777));
+            tracker6.addChunk(LeaderInstallSnapshotState.FIRST_CHUNK_INDEX + 1, chunk2, Optional.of(777));
             Assert.fail();
         }catch(SnapshotTracker.InvalidChunkException e){
 
@@ -129,7 +129,7 @@ public class SnapshotTrackerTest {
 
         SnapshotTracker tracker2 = new SnapshotTracker(logger, 3, "leader");
 
-        tracker2.addChunk(1, chunk1, Optional.of(AbstractLeader.INITIAL_LAST_CHUNK_HASH_CODE));
+        tracker2.addChunk(1, chunk1, Optional.of(LeaderInstallSnapshotState.INITIAL_LAST_CHUNK_HASH_CODE));
         tracker2.addChunk(2, chunk2, Optional.of(Arrays.hashCode(chunk1)));
         tracker2.addChunk(3, chunk3, Optional.of(Arrays.hashCode(chunk2)));
 
@@ -144,7 +144,7 @@ public class SnapshotTrackerTest {
 
         ByteString chunks = ByteString.copyFrom(chunk1).concat(ByteString.copyFrom(chunk2));
 
-        tracker1.addChunk(1, chunk1, Optional.of(AbstractLeader.INITIAL_LAST_CHUNK_HASH_CODE));
+        tracker1.addChunk(1, chunk1, Optional.of(LeaderInstallSnapshotState.INITIAL_LAST_CHUNK_HASH_CODE));
         tracker1.addChunk(2, chunk2, Optional.of(Arrays.hashCode(chunk1)));
 
         assertEquals(chunks, tracker1.getCollectedChunks());

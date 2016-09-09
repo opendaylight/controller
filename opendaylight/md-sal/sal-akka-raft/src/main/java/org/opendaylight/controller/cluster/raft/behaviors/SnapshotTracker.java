@@ -22,9 +22,9 @@ public class SnapshotTracker {
     private final int totalChunks;
     private final String leaderId;
     private ByteString collectedChunks = ByteString.EMPTY;
-    private int lastChunkIndex = AbstractLeader.FIRST_CHUNK_INDEX - 1;
+    private int lastChunkIndex = LeaderInstallSnapshotState.FIRST_CHUNK_INDEX - 1;
     private boolean sealed = false;
-    private int lastChunkHashCode = AbstractLeader.INITIAL_LAST_CHUNK_HASH_CODE;
+    private int lastChunkHashCode = LeaderInstallSnapshotState.INITIAL_LAST_CHUNK_HASH_CODE;
 
     SnapshotTracker(Logger LOG, int totalChunks, String leaderId) {
         this.LOG = LOG;

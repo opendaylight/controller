@@ -51,7 +51,6 @@ import org.opendaylight.controller.cluster.raft.base.messages.Replicate;
 import org.opendaylight.controller.cluster.raft.base.messages.SendHeartBeat;
 import org.opendaylight.controller.cluster.raft.base.messages.SendInstallSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.TimeoutNow;
-import org.opendaylight.controller.cluster.raft.behaviors.AbstractLeader.FollowerToSnapshot;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.messages.InstallSnapshot;
@@ -585,7 +584,8 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         ByteString bs = toByteString(leadersSnapshot);
         leader.setSnapshot(Snapshot.create(bs.toByteArray(), Collections.<ReplicatedLogEntry>emptyList(),
                 commitIndex, snapshotTerm, commitIndex, snapshotTerm));
-        FollowerToSnapshot fts = leader.new FollowerToSnapshot(bs);
+        LeaderInstallSnapshotState fts = new LeaderInstallSnapshotState(bs,
+                actorContext.getConfigParams().getSnapshotChunkSize(), leader.logName());
         leader.setFollowerSnapshot(FOLLOWER_ID, fts);
 
         //send first chunk and no InstallSnapshotReply received yet
@@ -918,7 +918,8 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         ByteString bs = toByteString(leadersSnapshot);
         leader.setSnapshot(Snapshot.create(bs.toByteArray(), Collections.<ReplicatedLogEntry>emptyList(),
                 commitIndex, snapshotTerm, commitIndex, snapshotTerm));
-        FollowerToSnapshot fts = leader.new FollowerToSnapshot(bs);
+        LeaderInstallSnapshotState fts = new LeaderInstallSnapshotState(bs,
+                actorContext.getConfigParams().getSnapshotChunkSize(), leader.logName());
         leader.setFollowerSnapshot(FOLLOWER_ID, fts);
         while(!fts.isLastChunk(fts.getChunkIndex())) {
             fts.getNextChunk();
@@ -1128,7 +1129,8 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         assertEquals(1, installSnapshot.getChunkIndex());
         assertEquals(3, installSnapshot.getTotalChunks());
-        assertEquals(AbstractLeader.INITIAL_LAST_CHUNK_HASH_CODE, installSnapshot.getLastChunkHashCode().get().intValue());
+        assertEquals(LeaderInstallSnapshotState.INITIAL_LAST_CHUNK_HASH_CODE,
+                installSnapshot.getLastChunkHashCode().get().intValue());
 
         int hashCode = Arrays.hashCode(installSnapshot.getData());
 
@@ -1167,7 +1169,8 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         ByteString bs = toByteString(leadersSnapshot);
         byte[] barray = bs.toByteArray();
 
-        FollowerToSnapshot fts = leader.new FollowerToSnapshot(bs);
+        LeaderInstallSnapshotState fts = new LeaderInstallSnapshotState(bs,
+                actorContext.getConfigParams().getSnapshotChunkSize(), leader.logName());
         leader.setFollowerSnapshot(FOLLOWER_ID, fts);
 
         assertEquals(bs.size(), barray.length);
