@@ -39,9 +39,6 @@ public class ApplyState implements Serializable {
 
     @Override
     public String toString() {
-        return "ApplyState{" +
-                "identifier='" + identifier + '\'' +
-                ", replicatedLogEntry.index =" + replicatedLogEntry.getIndex() +
-                '}';
+        return "ApplyState [identifier=" + identifier + ", replicatedLogEntry=" + replicatedLogEntry + "]";
     }
 }
