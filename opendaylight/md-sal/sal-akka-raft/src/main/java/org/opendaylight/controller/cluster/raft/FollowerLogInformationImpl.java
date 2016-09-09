@@ -11,6 +11,9 @@ package org.opendaylight.controller.cluster.raft;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Stopwatch;
 import java.util.concurrent.TimeUnit;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import org.opendaylight.controller.cluster.raft.behaviors.LeaderInstallSnapshotState;
 
 public class FollowerLogInformationImpl implements FollowerLogInformation {
     private final Stopwatch stopwatch = Stopwatch.createUnstarted();
@@ -34,6 +37,8 @@ public class FollowerLogInformationImpl implements FollowerLogInformation {
     private short raftVersion = RaftVersions.HELIUM_VERSION;
 
     private final PeerInfo peerInfo;
+
+    private LeaderInstallSnapshotState installSnapshotState;
 
     public FollowerLogInformationImpl(PeerInfo peerInfo, long matchIndex, RaftActorContext context) {
         this.nextIndex = context.getCommitIndex();
@@ -167,6 +172,22 @@ public class FollowerLogInformationImpl implements FollowerLogInformation {
     @Override
     public void setRaftVersion(short raftVersion) {
         this.raftVersion = raftVersion;
+    }
+
+    @Override
+    @Nullable
+    public LeaderInstallSnapshotState getInstallSnapshotState() {
+        return installSnapshotState;
+    }
+
+    @Override
+    public void setLeaderInstallSnapshotState(@Nonnull LeaderInstallSnapshotState state) {
+        this.installSnapshotState = Preconditions.checkNotNull(state);
+    }
+
+    @Override
+    public void clearLeaderInstallSnapshotState() {
+        installSnapshotState = null;
     }
 
     @Override

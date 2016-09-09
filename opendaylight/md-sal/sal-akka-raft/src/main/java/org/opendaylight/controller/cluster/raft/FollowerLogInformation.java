@@ -7,6 +7,10 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import org.opendaylight.controller.cluster.raft.behaviors.LeaderInstallSnapshotState;
+
 /**
  * The state of the followers log as known by the Leader
  */
@@ -118,4 +122,24 @@ public interface FollowerLogInformation {
      * Sets the raft version of the follower.
      */
     void setRaftVersion(short payloadVersion);
+
+    /**
+     * Returns the LeaderInstallSnapshotState for the in progress install snapshot.
+     *
+     * @return the LeaderInstallSnapshotState if a snapshot install is in progress, null otherwise.
+     */
+    @Nullable
+    LeaderInstallSnapshotState getInstallSnapshotState();
+
+    /**
+     * Sets the LeaderInstallSnapshotState when an install snapshot is initiated.
+     *
+     * @param state the LeaderInstallSnapshotState
+     */
+    void setLeaderInstallSnapshotState(@Nonnull LeaderInstallSnapshotState state);
+
+    /**
+     * Clears the LeaderInstallSnapshotState when an install snapshot is complete.
+     */
+    void clearLeaderInstallSnapshotState();
 }
