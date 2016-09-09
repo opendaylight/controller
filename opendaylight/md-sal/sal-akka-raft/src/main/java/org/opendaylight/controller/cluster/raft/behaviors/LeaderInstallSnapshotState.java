@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Encapsulates the leader state and logic for sending snapshot chunks to a follower.
  */
-class LeaderInstallSnapshotState {
+public final class LeaderInstallSnapshotState {
     private static final Logger LOG = LoggerFactory.getLogger(LeaderInstallSnapshotState.class);
 
     // The index of the first chunk that is sent when installing a snapshot
@@ -40,12 +40,12 @@ class LeaderInstallSnapshotState {
     private int lastChunkHashCode = INITIAL_LAST_CHUNK_HASH_CODE;
     private int nextChunkHashCode = INITIAL_LAST_CHUNK_HASH_CODE;
 
-    public LeaderInstallSnapshotState(ByteString snapshotBytes, int snapshotChunkSize, String logName) {
+    LeaderInstallSnapshotState(ByteString snapshotBytes, int snapshotChunkSize, String logName) {
         this.snapshotChunkSize = snapshotChunkSize;
         this.snapshotBytes = snapshotBytes;
         this.logName = logName;
         int size = snapshotBytes.size();
-        totalChunks = (size / snapshotChunkSize) +
+        totalChunks = size / snapshotChunkSize +
                 (size % snapshotChunkSize > 0 ? 1 : 0);
 
         LOG.debug("{}: Snapshot {} bytes, total chunks to send: {}", logName, size, totalChunks);
@@ -110,7 +110,7 @@ class LeaderInstallSnapshotState {
         int size = snapshotChunkSize;
         if (snapshotChunkSize > snapshotLength) {
             size = snapshotLength;
-        } else if ((start + snapshotChunkSize) > snapshotLength) {
+        } else if (start + snapshotChunkSize > snapshotLength) {
             size = snapshotLength - start;
         }
 

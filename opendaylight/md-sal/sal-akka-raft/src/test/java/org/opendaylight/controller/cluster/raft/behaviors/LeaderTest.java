@@ -9,6 +9,7 @@
 package org.opendaylight.controller.cluster.raft.behaviors;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
@@ -586,7 +587,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
                 commitIndex, snapshotTerm, commitIndex, snapshotTerm));
         LeaderInstallSnapshotState fts = new LeaderInstallSnapshotState(bs,
                 actorContext.getConfigParams().getSnapshotChunkSize(), leader.logName());
-        leader.setFollowerSnapshot(FOLLOWER_ID, fts);
+        leader.getFollower(FOLLOWER_ID).setLeaderInstallSnapshotState(fts);
 
         //send first chunk and no InstallSnapshotReply received yet
         fts.getNextChunk();
@@ -920,7 +921,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
                 commitIndex, snapshotTerm, commitIndex, snapshotTerm));
         LeaderInstallSnapshotState fts = new LeaderInstallSnapshotState(bs,
                 actorContext.getConfigParams().getSnapshotChunkSize(), leader.logName());
-        leader.setFollowerSnapshot(FOLLOWER_ID, fts);
+        leader.getFollower(FOLLOWER_ID).setLeaderInstallSnapshotState(fts);
         while(!fts.isLastChunk(fts.getChunkIndex())) {
             fts.getNextChunk();
             fts.incrementChunkIndex();
@@ -934,12 +935,13 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         assertTrue(raftBehavior instanceof Leader);
 
-        assertEquals(0, leader.followerSnapshotSize());
         assertEquals(1, leader.followerLogSize());
         FollowerLogInformation fli = leader.getFollower(FOLLOWER_ID);
         assertNotNull(fli);
+        assertNull(fli.getInstallSnapshotState());
         assertEquals(commitIndex, fli.getMatchIndex());
         assertEquals(commitIndex + 1, fli.getNextIndex());
+        assertFalse(leader.hasSnapshot());
     }
 
     @Test
@@ -1147,19 +1149,8 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
     }
 
     @Test
-    public void testFollowerToSnapshotLogic() {
-        logStart("testFollowerToSnapshotLogic");
-
-        MockRaftActorContext actorContext = createActorContext();
-
-        actorContext.setConfigParams(new DefaultConfigParamsImpl() {
-            @Override
-            public int getSnapshotChunkSize() {
-                return 50;
-            }
-        });
-
-        leader = new Leader(actorContext);
+    public void testLeaderInstallSnapshotState() {
+        logStart("testLeaderInstallSnapshotState");
 
         Map<String, String> leadersSnapshot = new HashMap<>();
         leadersSnapshot.put("1", "A");
@@ -1169,9 +1160,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         ByteString bs = toByteString(leadersSnapshot);
         byte[] barray = bs.toByteArray();
 
-        LeaderInstallSnapshotState fts = new LeaderInstallSnapshotState(bs,
-                actorContext.getConfigParams().getSnapshotChunkSize(), leader.logName());
-        leader.setFollowerSnapshot(FOLLOWER_ID, fts);
+        LeaderInstallSnapshotState fts = new LeaderInstallSnapshotState(bs, 50, "test");
 
         assertEquals(bs.size(), barray.length);
 
