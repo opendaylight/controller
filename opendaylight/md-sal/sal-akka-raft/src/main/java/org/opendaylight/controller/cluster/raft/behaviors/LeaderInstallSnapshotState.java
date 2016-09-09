@@ -27,42 +27,47 @@ public class LeaderInstallSnapshotState {
     // This would be passed as the hash code of the last chunk when sending the first chunk
     static final int INITIAL_LAST_CHUNK_HASH_CODE = -1;
 
-    private int snapshotChunkSize;
-    private final ByteString snapshotBytes;
+    private final int snapshotChunkSize;
     private final String logName;
+    private ByteString snapshotBytes;
     private int offset = 0;
     // the next snapshot chunk is sent only if the replyReceivedForOffset matches offset
-    private int replyReceivedForOffset;
+    private int replyReceivedForOffset = -1;
     // if replyStatus is false, the previous chunk is attempted
     private boolean replyStatus = false;
-    private int chunkIndex;
-    private final int totalChunks;
+    private int chunkIndex = FIRST_CHUNK_INDEX;
+    private int totalChunks;
     private int lastChunkHashCode = INITIAL_LAST_CHUNK_HASH_CODE;
     private int nextChunkHashCode = INITIAL_LAST_CHUNK_HASH_CODE;
 
     /**
      * Constructor.
      *
-     * @param snapshotBytes
      * @param snapshotChunkSize
      * @param logName
      */
-    public LeaderInstallSnapshotState(ByteString snapshotBytes, int snapshotChunkSize, String logName) {
+    public LeaderInstallSnapshotState(int snapshotChunkSize, String logName) {
         this.snapshotChunkSize = snapshotChunkSize;
-        this.snapshotBytes = snapshotBytes;
         this.logName = logName;
+    }
+
+    ByteString getSnapshotBytes() {
+        return snapshotBytes;
+    }
+
+    void setSnapshotBytes(ByteString snapshotBytes) {
+        if(this.snapshotBytes != null) {
+            return;
+        }
+
+        this.snapshotBytes = snapshotBytes;
         int size = snapshotBytes.size();
-        totalChunks = (size / snapshotChunkSize) +
-                (size % snapshotChunkSize > 0 ? 1 : 0);
+        totalChunks = (size / snapshotChunkSize) + (size % snapshotChunkSize > 0 ? 1 : 0);
 
         LOG.debug("{}: Snapshot {} bytes, total chunks to send: {}", logName, size, totalChunks);
 
         replyReceivedForOffset = -1;
         chunkIndex = FIRST_CHUNK_INDEX;
-    }
-
-    ByteString getSnapshotBytes() {
-        return snapshotBytes;
     }
 
     int incrementOffset() {
@@ -91,7 +96,7 @@ public class LeaderInstallSnapshotState {
 
     boolean canSendNextChunk() {
         // we only send a false if a chunk is sent but we have not received a reply yet
-        return replyReceivedForOffset == offset;
+        return snapshotBytes != null && replyReceivedForOffset == offset;
     }
 
     boolean isLastChunk(int index) {

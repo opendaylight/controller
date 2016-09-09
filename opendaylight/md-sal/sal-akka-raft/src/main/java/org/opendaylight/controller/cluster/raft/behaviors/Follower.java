@@ -261,7 +261,9 @@ public class Follower extends AbstractRaftActorBehavior {
         lastIndex = lastIndex();
         long prevCommitIndex = context.getCommitIndex();
 
-        context.setCommitIndex(Math.min(appendEntries.getLeaderCommit(), lastIndex));
+        if(appendEntries.getLeaderCommit() > prevCommitIndex) {
+            context.setCommitIndex(Math.min(appendEntries.getLeaderCommit(), lastIndex));
+        }
 
         if (prevCommitIndex != context.getCommitIndex()) {
             LOG.debug("{}: Commit index set to {}", logName(), context.getCommitIndex());
@@ -329,9 +331,9 @@ public class Follower extends AbstractRaftActorBehavior {
             // prevLogIndex entry does exist in the follower's log but it has
             // a different term in it
 
-            LOG.debug(
-                    "{}: Cannot append entries because previous entry term {}  is not equal to append entries prevLogTerm {}",
-                    logName(), prevLogTerm, appendEntries.getPrevLogTerm());
+            LOG.debug("{}: The prevLogIndex {} was found in the log but the term {} is not equal to the append entries " +
+                      "prevLogTerm {} - lastIndex: {}, snapshotIndex: {}", logName(), appendEntries.getPrevLogIndex(),
+                      prevLogTerm, appendEntries.getPrevLogTerm(), lastIndex, context.getReplicatedLog().getSnapshotIndex());
         } else if(appendEntries.getPrevLogIndex() == -1 && appendEntries.getPrevLogTerm() == -1
                 && appendEntries.getReplicatedToAllIndex() != -1
                 && !isLogEntryPresent(appendEntries.getReplicatedToAllIndex())) {
