@@ -182,7 +182,9 @@ public class FollowerLogInformationImpl implements FollowerLogInformation {
 
     @Override
     public void setLeaderInstallSnapshotState(@Nonnull LeaderInstallSnapshotState state) {
-        this.installSnapshotState = Preconditions.checkNotNull(state);
+        if(this.installSnapshotState == null) {
+            this.installSnapshotState = Preconditions.checkNotNull(state);
+        }
     }
 
     @Override

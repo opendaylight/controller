@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
-import static akka.pattern.Patterns.ask;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor.clearMessages;
@@ -16,16 +15,11 @@ import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.pattern.Patterns;
 import akka.testkit.TestActorRef;
-import akka.util.Timeout;
-import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.concurrent.TimeUnit;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.notifications.LeaderStateChanged;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
-import org.opendaylight.controller.cluster.raft.client.messages.GetOnDemandRaftState;
-import org.opendaylight.controller.cluster.raft.client.messages.OnDemandRaftState;
 import org.opendaylight.controller.cluster.raft.client.messages.Shutdown;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
@@ -167,23 +161,8 @@ public class LeadershipTransferIntegrationTest extends AbstractRaftActorIntegrat
         testLog.info("createRaftActors starting");
     }
 
-    private static void verifyRaftState(ActorRef raftActor, final RaftState expState) throws Throwable {
-        Timeout timeout = new Timeout(500, TimeUnit.MILLISECONDS);
-        Throwable lastError = null;
-        Stopwatch sw = Stopwatch.createStarted();
-        while(sw.elapsed(TimeUnit.SECONDS) <= 5) {
-            try {
-                OnDemandRaftState raftState = (OnDemandRaftState)Await.result(ask(raftActor,
-                        GetOnDemandRaftState.INSTANCE, timeout), timeout.duration());
-                assertEquals("getRaftState", expState.toString(), raftState.getRaftState());
-                return;
-            } catch (Exception | AssertionError e) {
-                lastError = e;
-                Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
-            }
-        }
-
-        throw lastError;
+    private static void verifyRaftState(ActorRef raftActor, final RaftState expState) {
+        verifyRaftState(raftActor, rs -> assertEquals("getRaftState", expState.toString(), rs.getRaftState()));
     }
 
     private static void assertNullLeaderIdChange(TestActorRef<MessageCollectorActor> notifierActor) {

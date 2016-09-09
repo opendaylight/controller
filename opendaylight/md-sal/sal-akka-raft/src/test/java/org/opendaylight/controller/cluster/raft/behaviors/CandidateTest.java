@@ -124,6 +124,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
     @Test
     public void testBecomePreLeaderOnReceivingMajorityVotesInThreeNodeCluster(){
         MockRaftActorContext raftActorContext = createActorContext();
+        raftActorContext.setLastApplied(-1);
         raftActorContext.setPeerAddresses(setupPeers(2));
         candidate = new Candidate(raftActorContext);
 
