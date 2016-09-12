@@ -11,8 +11,8 @@
     <nexusproxy>http://nexus.opendaylight.org/content</nexusproxy>
     <nexus.repository.release>opendaylight.release</nexus.repository.release>
     <nexus.repository.snapshot>opendaylight.release</nexus.repository.snapshot>
-    <yang.version>1.0.0-SNAPSHOT</yang.version>
-    <mdsal.model.version>0.9.0-SNAPSHOT</mdsal.model.version>
+    <yang.version>1.0.0-Boron</yang.version>
+    <mdsal.model.version>0.9.0-Boron</mdsal.model.version>
     <bundle.plugin.version>2.3.7</bundle.plugin.version>
   </properties>
   <scm>

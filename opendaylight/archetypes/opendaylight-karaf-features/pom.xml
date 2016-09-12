@@ -5,12 +5,12 @@
   <parent>
      <groupId>org.opendaylight.controller.archetypes</groupId>
      <artifactId>archetypes-parent</artifactId>
-     <version>0.4.0-SNAPSHOT</version>
+     <version>0.4.0-Boron</version>
   </parent>
 
   <groupId>org.opendaylight.controller</groupId>
   <artifactId>opendaylight-karaf-features-archetype</artifactId>
-  <version>1.3.0-SNAPSHOT</version>
+  <version>1.3.0-Boron</version>
   <packaging>maven-archetype</packaging>
   <name>opendaylight-karaf-features-archetype</name>
 

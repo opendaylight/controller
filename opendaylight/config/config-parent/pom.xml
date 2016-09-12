@@ -11,20 +11,20 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <parent>
     <groupId>org.opendaylight.mdsal</groupId>
     <artifactId>binding-parent</artifactId>
-    <version>0.9.0-SNAPSHOT</version>
+    <version>0.9.0-Boron</version>
     <relativePath/>
   </parent>
 
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.opendaylight.controller</groupId>
   <artifactId>config-parent</artifactId>
-  <version>0.5.0-SNAPSHOT</version>
+  <version>0.5.0-Boron</version>
   <packaging>pom</packaging>
 
   <properties>
-    <config.version>0.5.0-SNAPSHOT</config.version>
-    <mdsal.version>1.4.0-SNAPSHOT</mdsal.version>
-    <yangtools.version>1.0.0-SNAPSHOT</yangtools.version>
+    <config.version>0.5.0-Boron</config.version>
+    <mdsal.version>1.4.0-Boron</mdsal.version>
+    <yangtools.version>1.0.0-Boron</yangtools.version>
     <jmxGeneratorPath>target/generated-sources/config-binding</jmxGeneratorPath>
     <config.file>src/main/config/default-config.xml</config.file>
   </properties>
@@ -56,7 +56,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <dependency>
         <groupId>org.opendaylight.mdsal</groupId>
         <artifactId>mdsal-artifacts</artifactId>
-        <version>2.1.0-SNAPSHOT</version>
+        <version>2.1.0-Boron</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>

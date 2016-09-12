@@ -64,7 +64,7 @@
 
         * Basic MD-SAL Provider
         <feature name='odl-${repoName}-provider' version='${symbol_dollar}{project.version}' description='OpenDaylight :: ${repoName} :: Provider '>
-            <feature version='1.4.0-SNAPSHOT'>odl-mdsal-broker</feature>
+            <feature version='1.4.0-Boron'>odl-mdsal-broker</feature>
             <feature version='${symbol_dollar}{project.version}'>odl-${repoName}-model</feature>
             <bundle>mvn:${groupId}/${repoName}-provider/{{VERSION}}</bundle>
             ... whatever other bundles you need
@@ -72,15 +72,15 @@
 
         * Basic MD-SAL Model feature
         <feature name='odl-${repoName}-model' version='${symbol_dollar}{project.version}' description='OpenDaylight :: ${repoName} :: Model'>
-            <feature version='0.9.0-SNAPSHOT'>odl-yangtools-binding</feature>
-            <feature version='0.9.0-SNAPSHOT'>odl-yangtools-models</feature>
+            <feature version='0.9.0-Boron'>odl-yangtools-binding</feature>
+            <feature version='0.9.0-Boron'>odl-yangtools-models</feature>
             <bundle>mvn:${groupId}/${repoName}-model/{{VERSION}}</bundle>
             ... whatever other bundles you need
         </feature>
 
         * Config Subsystem example - the config file is your config subsystem configuration
         <feature name='odl-${repoName}-provider' version='${symbol_dollar}{project.version}' description='OpenDaylight :: ${repoName} :: Provider'>
-            <feature version='1.4.0-SNAPSHOT'>odl-mdsal-broker</feature>
+            <feature version='1.4.0-Boron'>odl-mdsal-broker</feature>
             <bundle>mvn:${groupId}/${repoName}-provider/{{VERSION}}</bundle>
             <configfile finalname="etc/opendaylight/karaf/80-${repoName}.xml">mvn:${groupId}/${repoName}-config/{{VERSION}}/xml/config</configfile>
             ... whatever other bundles you need
@@ -88,7 +88,7 @@
 
         * Basic MD-SAL Provider that uses openflowplugin-flow-services (which brings along odl-mdsal-broker)
         <feature name='odl-${repoName}-provider' version='${symbol_dollar}{project.version}' description='OpenDaylight :: ${repoName} :: Provider'>
-            <feature version='0.3.0-SNAPSHOT'>odl-openflowplugin-flow-services</feature>
+            <feature version='0.3.0-Boron'>odl-openflowplugin-flow-services</feature>
             <bundle>mvn:${groupId}/${repoName}-provider/{{VERSION}}</bundle>
             ... whatever other bundles you need
         </feature>

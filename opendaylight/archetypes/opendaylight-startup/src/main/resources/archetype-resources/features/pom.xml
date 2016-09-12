@@ -15,7 +15,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
   <parent>
     <groupId>org.opendaylight.odlparent</groupId>
     <artifactId>features-parent</artifactId>
-    <version>1.7.0-SNAPSHOT</version>
+    <version>1.7.0-Boron</version>
     <relativePath/>
   </parent>
 
@@ -29,11 +29,11 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
   </prerequisites>
 
   <properties>
-    <mdsal.model.version>0.9.0-SNAPSHOT</mdsal.model.version>
-    <mdsal.version>1.4.0-SNAPSHOT</mdsal.version>
-    <restconf.version>1.4.0-SNAPSHOT</restconf.version>
-    <yangtools.version>1.0.0-SNAPSHOT</yangtools.version>
-    <dlux.version>0.4.0-SNAPSHOT</dlux.version>
+    <mdsal.model.version>0.9.0-Boron</mdsal.model.version>
+    <mdsal.version>1.4.0-Boron</mdsal.version>
+    <restconf.version>1.4.0-Boron</restconf.version>
+    <yangtools.version>1.0.0-Boron</yangtools.version>
+    <dlux.version>0.4.0-Boron</dlux.version>
     <configfile.directory>etc/opendaylight/karaf</configfile.directory>
   </properties>
 
