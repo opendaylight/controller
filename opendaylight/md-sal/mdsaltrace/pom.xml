@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Copyright © 2016 Red Hat and others. All rights reserved.
+This program and the accompanying materials are made available under the
+terms of the Eclipse Public License v1.0 which accompanies this distribution,
+and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.opendaylight.odlparent</groupId>
+    <artifactId>odlparent</artifactId>
+    <version>1.8.0-SNAPSHOT</version>
+    <relativePath/>
+  </parent>
+
+  <groupId>org.opendaylight.controller</groupId>
+  <artifactId>mdsaltrace-aggregator</artifactId>
+  <version>0.1.5-SNAPSHOT</version>
+  <name>mdsaltrace</name>
+  <packaging>pom</packaging>
+
+  <prerequisites>
+    <maven>3.1.1</maven>
+  </prerequisites>
+
+  <modules>
+    <module>api</module>
+    <module>impl</module>
+    <module>features</module>
+  </modules>
+
+  <!-- DO NOT install or deploy the repo root pom as it's only needed to initiate a build -->
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-deploy-plugin</artifactId>
+        <configuration>
+          <skip>true</skip>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-install-plugin</artifactId>
+        <configuration>
+          <skip>true</skip>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <profiles>
+    <profile>
+      <!--
+          This profile is to ensure we only build javadocs reports
+          when we plan to deploy Maven site for our project.
+      -->
+      <id>maven-site</id>
+      <activation>
+        <file>
+          <exists>${user.dir}/deploy-site.xml</exists>
+        </file>
+      </activation>
+
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <inherited>false</inherited>
+            <executions>
+              <execution>
+                <id>aggregate</id>
+                <goals>
+                  <goal>aggregate</goal>
+                </goals>
+                <phase>package</phase>
+            </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+
+  <!--
+      Maven Site Configuration
+
+      The following configuration is necessary for maven-site-plugin to
+      correctly identify the correct deployment path for OpenDaylight Maven
+      sites.
+  -->
+  <url>${odl.site.url}/${project.groupId}/${stream}/</url>
+
+  <distributionManagement>
+    <site>
+      <id>opendaylight-site</id>
+      <url>${nexus.site.url}/</url>
+    </site>
+  </distributionManagement>
+</project>
