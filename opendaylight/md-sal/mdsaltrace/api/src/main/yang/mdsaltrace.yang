@@ -1,0 +1,18 @@
+module mdsaltrace {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:mdsaltrace";
+    prefix "mdsaltrace";
+
+    revision "2016-09-08" {
+        description "Initial revision of mdsaltrace model";
+    }
+
+    container config {
+        leaf-list registration-watches {
+            type string;
+        }
+        leaf-list write-watches {
+            type string;
+        }
+    }
+}
