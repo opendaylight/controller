@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- vi: set et smarttab sw=4 tabstop=4: -->
+<!--
+Copyright © 2016 Red Hat and others. All rights reserved.
+
+This program and the accompanying materials are made available under the
+terms of the Eclipse Public License v1.0 which accompanies this distribution,
+and is available at http://www.eclipse.org/legal/epl-v10.html
+-->
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+  xmlns:odl="http://opendaylight.org/xmlns/blueprint/v1.0.0"
+  odl:use-default-for-reference-types="true">
+
+  <odl:clustered-app-config id="mdsalConfig"
+                            binding-class="org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.mdsaltrace.rev160908.Config">
+  </odl:clustered-app-config>
+
+  <!--
+    Ping pong broker
+   -->
+  <reference id="realPingPongBroker"
+     interface="org.opendaylight.controller.md.sal.binding.api.DataBroker"
+     odl:type="pingpong" />
+
+  <bean id="tracingPingPongBroker" class="org.opendaylight.controller.mdsaltrace.impl.TracingBroker">
+    <argument ref="realPingPongBroker" />
+    <argument ref="mdsalConfig" />
+  </bean>
+
+  <service id="tracingPingPongBrokerSvc" ref="tracingPingPongBroker"
+    interface="org.opendaylight.controller.md.sal.binding.api.DataBroker"
+    ranking="10" odl:type="pingpong" />
+
+  <!--
+    Default broker
+   -->
+  <reference id="realDefaultBroker"
+    interface="org.opendaylight.controller.md.sal.binding.api.DataBroker"
+    odl:type="default" />
+
+  <bean id="tracingDefaultBroker" class="org.opendaylight.controller.mdsaltrace.impl.TracingBroker">
+    <argument ref="realDefaultBroker" />
+    <argument ref="mdsalConfig" />
+  </bean>
+
+  <service id="tracingDefaultBrokerSvc" ref="tracingDefaultBroker"
+    interface="org.opendaylight.controller.md.sal.binding.api.DataBroker"
+    ranking="10" odl:type="default" />
+
+</blueprint>
