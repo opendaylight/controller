@@ -190,6 +190,30 @@
     },
     {
       "key": {
+        "uuid": "7a6b29fe_d7181ed5",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/test/java/org/opendaylight/controller/md/sal/binding/test/xtendbeans/AssertDataObjects.java",
+        "patchSetId": 15
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2016-09-14T15:44:45Z",
+      "side": 1,
+      "message": "\u003d\u003d\u003e https://git.opendaylight.org/gerrit/#/c/45589/",
+      "parentUuid": "7a6b29fe_d49bfc15",
+      "range": {
+        "startLine": 21,
+        "startChar": 5,
+        "endLine": 21,
+        "endChar": 8
+      },
+      "revId": "a04804898076d88a2a7287848636715db6e85e28",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a6b29fe_d86b381c",
         "filename": "opendaylight/md-sal/sal-binding-broker/src/test/java/org/opendaylight/controller/md/sal/binding/test/xtendbeans/AssertDataObjects.java",
         "patchSetId": 15
