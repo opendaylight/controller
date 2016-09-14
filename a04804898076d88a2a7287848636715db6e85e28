@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "7a6b29fe_54524c67",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/test/java/org/opendaylight/controller/md/sal/binding/test/tests/DataBrokerUtils.java",
+        "patchSetId": 15
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2016-09-14T13:12:33Z",
+      "side": 1,
+      "message": "No TestDataBroker sounds too much like an implementation of DataBroker for tests to me.  But how do you like DataBrokerTransactionHelper?",
+      "parentUuid": "7a6b29fe_985d407c",
+      "range": {
+        "startLine": 30,
+        "startChar": 6,
+        "endLine": 30,
+        "endChar": 28
+      },
+      "revId": "a04804898076d88a2a7287848636715db6e85e28",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a6b29fe_1872d010",
         "filename": "opendaylight/md-sal/sal-binding-broker/src/test/java/org/opendaylight/controller/md/sal/binding/test/tests/DataBrokerUtils.java",
         "patchSetId": 15
@@ -36,6 +60,30 @@
       "writtenOn": "2016-09-12T09:39:52Z",
       "side": 1,
       "message": "Preconditions.checkNotNull()",
+      "range": {
+        "startLine": 37,
+        "startChar": 24,
+        "endLine": 37,
+        "endChar": 37
+      },
+      "revId": "a04804898076d88a2a7287848636715db6e85e28",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_34d190cd",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/test/java/org/opendaylight/controller/md/sal/binding/test/tests/DataBrokerUtils.java",
+        "patchSetId": 15
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2016-09-14T13:12:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a6b29fe_1872d010",
       "range": {
         "startLine": 37,
         "startChar": 24,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "7a6b29fe_94dfc4d5",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/test/java/org/opendaylight/controller/md/sal/binding/test/tests/DataBrokerUtils.java",
+        "patchSetId": 15
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2016-09-14T13:12:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a6b29fe_5867284d",
+      "range": {
+        "startLine": 43,
+        "startChar": 60,
+        "endLine": 43,
+        "endChar": 105
+      },
+      "revId": "a04804898076d88a2a7287848636715db6e85e28",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a6b29fe_f86ef42d",
         "filename": "opendaylight/md-sal/sal-binding-broker/src/test/java/org/opendaylight/controller/md/sal/binding/test/xtendbeans/AssertDataObjects.java",
         "patchSetId": 15
@@ -82,6 +154,30 @@
       "writtenOn": "2016-09-12T09:39:52Z",
       "side": 1,
       "message": "final",
+      "range": {
+        "startLine": 21,
+        "startChar": 5,
+        "endLine": 21,
+        "endChar": 8
+      },
+      "revId": "a04804898076d88a2a7287848636715db6e85e28",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_d49bfc15",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/test/java/org/opendaylight/controller/md/sal/binding/test/xtendbeans/AssertDataObjects.java",
+        "patchSetId": 15
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2016-09-14T13:12:33Z",
+      "side": 1,
+      "message": "Done, but we have a problem that Checkstyle hasn\u0027t caught this, I\u0027ll dig into and address that issue through separate Gerrit(s)",
+      "parentUuid": "7a6b29fe_f86ef42d",
       "range": {
         "startLine": 21,
         "startChar": 5,
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "7a6b29fe_14a2944a",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/test/java/org/opendaylight/controller/md/sal/binding/test/xtendbeans/AssertDataObjects.java",
+        "patchSetId": 15
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2016-09-14T13:12:33Z",
+      "side": 1,
+      "message": "Done, but we have a problem that Checkstyle hasn\u0027t caught this, I\u0027ll dig into and address that issue through separate Gerrit(s)",
+      "parentUuid": "7a6b29fe_d86b381c",
+      "range": {
+        "startLine": 23,
+        "startChar": 12,
+        "endLine": 23,
+        "endChar": 24
+      },
+      "revId": "a04804898076d88a2a7287848636715db6e85e28",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a6b29fe_78c94425",
         "filename": "opendaylight/md-sal/sal-binding-broker/src/test/java/org/opendaylight/controller/md/sal/binding/test/xtendbeans/AugmentableExtension.java",
         "patchSetId": 15
@@ -128,6 +248,30 @@
       "writtenOn": "2016-09-12T09:41:40Z",
       "side": 1,
       "message": "should be static",
+      "range": {
+        "startLine": 35,
+        "startChar": 4,
+        "endLine": 35,
+        "endChar": 10
+      },
+      "revId": "a04804898076d88a2a7287848636715db6e85e28",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_14b9f478",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/test/java/org/opendaylight/controller/md/sal/binding/test/xtendbeans/AugmentableExtension.java",
+        "patchSetId": 15
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2016-09-14T13:12:33Z",
+      "side": 1,
+      "message": "no I personally quite like it not static, that way one could extend and override this somewhere, e.g. if in the future there are going to be better ways to obtain all augmentations from an Augmentable.  Of course if you insist I\u0027ll change it anyway - do you insist?",
+      "parentUuid": "7a6b29fe_78c94425",
       "range": {
         "startLine": 35,
         "startChar": 4,
@@ -163,6 +307,30 @@
     },
     {
       "key": {
+        "uuid": "7a6b29fe_74b30898",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/test/java/org/opendaylight/controller/md/sal/binding/test/xtendbeans/XtendBuilderExtensions.java",
+        "patchSetId": 15
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2016-09-14T13:12:33Z",
+      "side": 1,
+      "message": "Done, but we have a problem that Checkstyle hasn\u0027t caught this, I\u0027ll dig into and address that issue through separate Gerrit(s)",
+      "parentUuid": "7a6b29fe_384cecc7",
+      "range": {
+        "startLine": 35,
+        "startChar": 0,
+        "endLine": 35,
+        "endChar": 12
+      },
+      "revId": "a04804898076d88a2a7287848636715db6e85e28",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a6b29fe_38750cfa",
         "filename": "opendaylight/md-sal/sal-binding-broker/src/test/java/org/opendaylight/controller/md/sal/binding/test/xtendbeans/tests/ExpectedObjects.xtend",
         "patchSetId": 15
@@ -174,6 +342,30 @@
       "writtenOn": "2016-09-12T09:39:52Z",
       "side": 1,
       "message": "any particular reason this is written in xtend? It does look arcane without much in terms of documentation",
+      "range": {
+        "startLine": 19,
+        "startChar": 0,
+        "endLine": 19,
+        "endChar": 21
+      },
+      "revId": "a04804898076d88a2a7287848636715db6e85e28",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_3444f072",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/test/java/org/opendaylight/controller/md/sal/binding/test/xtendbeans/tests/ExpectedObjects.xtend",
+        "patchSetId": 15
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2016-09-14T13:12:33Z",
+      "side": 1,
+      "message": "Yes there is a particular reason - that\u0027s sort of the point of this whole thing... ;-) The object initialization code in this class was generated by AssertDataObjects, see also the AssertDataObjectsTest, and check out https://github.com/vorburger/xtendbeans for more background.",
+      "parentUuid": "7a6b29fe_38750cfa",
       "range": {
         "startLine": 19,
         "startChar": 0,
