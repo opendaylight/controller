@@ -2,6 +2,40 @@
   "comments": [
     {
       "key": {
+        "uuid": "7a6b29fe_37dd1243",
+        "filename": "opendaylight/md-sal/mdsaltrace/api/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-09-14T15:31:02Z",
+      "side": 1,
+      "message": "0.10.0-SNAPSHOT",
+      "revId": "3b1ffe34cb970fd61fb301a1e59de80c0a9ca1fd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_175bb6f6",
+        "filename": "opendaylight/md-sal/mdsaltrace/api/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-09-14T15:31:02Z",
+      "side": 1,
+      "message": "I thought we\u0027d discussed using 1.5.0-SNAPSHOT here (and elsewhere) to match the mdsal version...",
+      "revId": "3b1ffe34cb970fd61fb301a1e59de80c0a9ca1fd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a6b29fe_5711ae50",
         "filename": "opendaylight/md-sal/mdsaltrace/deploy-site.xml",
         "patchSetId": 1
@@ -19,6 +53,24 @@
     },
     {
       "key": {
+        "uuid": "7a6b29fe_375872f9",
+        "filename": "opendaylight/md-sal/mdsaltrace/deploy-site.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-09-14T15:31:02Z",
+      "side": 1,
+      "message": "AFAIK yes, I have an item on my TODO list to check it out... ISTR Thanh giving the reason for this but I can\u0027t remember it off-hand.",
+      "parentUuid": "7a6b29fe_5711ae50",
+      "revId": "3b1ffe34cb970fd61fb301a1e59de80c0a9ca1fd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a6b29fe_97450645",
         "filename": "opendaylight/md-sal/mdsaltrace/features/pom.xml",
         "patchSetId": 1
@@ -30,6 +82,23 @@
       "writtenOn": "2016-09-14T14:42:48Z",
       "side": 1,
       "message": "note that all feature.xml in controller appear to be in controller/features and in a features/ project next to the respective bundles.  You should probably move this, and align it with what you see in controller/features",
+      "revId": "3b1ffe34cb970fd61fb301a1e59de80c0a9ca1fd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_9714e6e9",
+        "filename": "opendaylight/md-sal/mdsaltrace/features/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-09-14T15:31:02Z",
+      "side": 1,
+      "message": "1.8.0-SNAPSHOT",
       "revId": "3b1ffe34cb970fd61fb301a1e59de80c0a9ca1fd",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -70,6 +139,58 @@
     },
     {
       "key": {
+        "uuid": "7a6b29fe_57708e71",
+        "filename": "opendaylight/md-sal/mdsaltrace/features/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-09-14T15:31:02Z",
+      "side": 1,
+      "message": "I don\u0027t think there\u0027s an intermediate POM which inherits from features-parent in mdsal.\n\nAll the versions are off by 0.1, these are Boron versions...",
+      "parentUuid": "7a6b29fe_9717c644",
+      "revId": "3b1ffe34cb970fd61fb301a1e59de80c0a9ca1fd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_b76be283",
+        "filename": "opendaylight/md-sal/mdsaltrace/features/src/main/features/features.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-09-14T15:31:02Z",
+      "side": 1,
+      "message": "This isn\u0027t necessary.",
+      "revId": "3b1ffe34cb970fd61fb301a1e59de80c0a9ca1fd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_17e0d6f8",
+        "filename": "opendaylight/md-sal/mdsaltrace/impl/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-09-14T15:31:02Z",
+      "side": 1,
+      "message": "0.6.0-SNAPSHOT",
+      "revId": "3b1ffe34cb970fd61fb301a1e59de80c0a9ca1fd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a6b29fe_7744aa49",
         "filename": "opendaylight/md-sal/mdsaltrace/impl/pom.xml",
         "patchSetId": 1
@@ -104,6 +225,23 @@
     },
     {
       "key": {
+        "uuid": "7a6b29fe_d732dea5",
+        "filename": "opendaylight/md-sal/mdsaltrace/impl/src/main/java/org/opendaylight/controller/mdsaltrace/impl/TracingBroker.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-09-14T15:31:02Z",
+      "side": 1,
+      "message": "\"Blueprint\" ;-)",
+      "revId": "3b1ffe34cb970fd61fb301a1e59de80c0a9ca1fd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a6b29fe_f729da8a",
         "filename": "opendaylight/md-sal/mdsaltrace/impl/src/main/java/org/opendaylight/controller/mdsaltrace/impl/TracingBroker.java",
         "patchSetId": 1
@@ -115,6 +253,24 @@
       "writtenOn": "2016-09-14T14:42:48Z",
       "side": 1,
       "message": "Stephen will say that all \"TBD\" and \"TODO\" should be resolved in Gerrits... ;-)",
+      "revId": "3b1ffe34cb970fd61fb301a1e59de80c0a9ca1fd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_17129608",
+        "filename": "opendaylight/md-sal/mdsaltrace/impl/src/main/java/org/opendaylight/controller/mdsaltrace/impl/TracingBroker.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-09-14T15:31:02Z",
+      "side": 1,
+      "message": "No, that\u0027s not what I say — in the incident you\u0027re thinking of, I complained because a TODO was removed without being resolved either way.",
+      "parentUuid": "7a6b29fe_f729da8a",
       "revId": "3b1ffe34cb970fd61fb301a1e59de80c0a9ca1fd",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -155,6 +311,40 @@
     },
     {
       "key": {
+        "uuid": "7a6b29fe_1729f636",
+        "filename": "opendaylight/md-sal/mdsaltrace/impl/src/main/java/org/opendaylight/controller/mdsaltrace/impl/TracingBroker.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-09-14T15:31:02Z",
+      "side": 1,
+      "message": "Shouldn\u0027t these be final?",
+      "revId": "3b1ffe34cb970fd61fb301a1e59de80c0a9ca1fd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_57e52e07",
+        "filename": "opendaylight/md-sal/mdsaltrace/impl/src/main/java/org/opendaylight/controller/mdsaltrace/impl/TracingBroker.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-09-14T15:31:02Z",
+      "side": 1,
+      "message": "You can use a foreach-style loop here, or even a Java 8 joiner...",
+      "revId": "3b1ffe34cb970fd61fb301a1e59de80c0a9ca1fd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a6b29fe_77e02a29",
         "filename": "opendaylight/md-sal/mdsaltrace/impl/src/main/java/org/opendaylight/controller/mdsaltrace/impl/TracingBroker.java",
         "patchSetId": 1
@@ -172,6 +362,23 @@
     },
     {
       "key": {
+        "uuid": "7a6b29fe_57cc0e89",
+        "filename": "opendaylight/md-sal/mdsaltrace/impl/src/main/java/org/opendaylight/controller/mdsaltrace/impl/TracingBroker.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-09-14T15:31:02Z",
+      "side": 1,
+      "message": "startsWith() handles this case itself.",
+      "revId": "3b1ffe34cb970fd61fb301a1e59de80c0a9ca1fd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a6b29fe_d7ef7e1c",
         "filename": "opendaylight/md-sal/mdsaltrace/impl/src/main/java/org/opendaylight/controller/mdsaltrace/impl/TracingBroker.java",
         "patchSetId": 1
@@ -183,6 +390,74 @@
       "writtenOn": "2016-09-14T14:42:48Z",
       "side": 1,
       "message": "If I were you I think I would have written a small JUnit test for what you are doing around here... incl. isParent() your call, of course.",
+      "revId": "3b1ffe34cb970fd61fb301a1e59de80c0a9ca1fd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_77982a78",
+        "filename": "opendaylight/md-sal/mdsaltrace/impl/src/main/java/org/opendaylight/controller/mdsaltrace/impl/TracingBroker.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-09-14T15:31:02Z",
+      "side": 1,
+      "message": "Since you have your own null-check,\n\n    if (this.store !\u003d null \u0026\u0026 !this.store.equals(store)) {",
+      "revId": "3b1ffe34cb970fd61fb301a1e59de80c0a9ca1fd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_57936e5a",
+        "filename": "opendaylight/md-sal/mdsaltrace/impl/src/main/java/org/opendaylight/controller/mdsaltrace/impl/TracingBroker.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-09-14T15:31:02Z",
+      "side": 1,
+      "message": "As above.",
+      "revId": "3b1ffe34cb970fd61fb301a1e59de80c0a9ca1fd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_9799867b",
+        "filename": "opendaylight/md-sal/mdsaltrace/impl/src/main/java/org/opendaylight/controller/mdsaltrace/impl/TracingBroker.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-09-14T15:31:02Z",
+      "side": 1,
+      "message": "Just use Java:\n\n    private List\u003cWatch\u003e registrationWatches \u003d new ArrayList\u003c\u003e();",
+      "revId": "3b1ffe34cb970fd61fb301a1e59de80c0a9ca1fd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_17857606",
+        "filename": "opendaylight/md-sal/mdsaltrace/impl/src/main/java/org/opendaylight/controller/mdsaltrace/impl/TracingBroker.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-09-14T15:31:02Z",
+      "side": 1,
+      "message": "As above.",
       "revId": "3b1ffe34cb970fd61fb301a1e59de80c0a9ca1fd",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -217,6 +492,40 @@
       "writtenOn": "2016-09-14T14:42:48Z",
       "side": 1,
       "message": "I\u0027d remove this JavaDoc, it\u0027s useless \"noise\" which only hinders code readability",
+      "revId": "3b1ffe34cb970fd61fb301a1e59de80c0a9ca1fd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_777f8a15",
+        "filename": "opendaylight/md-sal/mdsaltrace/impl/src/main/java/org/opendaylight/controller/mdsaltrace/impl/TracingBroker.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 153,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-09-14T15:31:02Z",
+      "side": 1,
+      "message": "This needs to be final since it\u0027s called from the constructor. (And finals need to be cascaded — or you could just make the TracingBroker final, assuming it never needs to be proxied.)",
+      "revId": "3b1ffe34cb970fd61fb301a1e59de80c0a9ca1fd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_97706641",
+        "filename": "opendaylight/md-sal/mdsaltrace/impl/src/main/java/org/opendaylight/controller/mdsaltrace/impl/TracingBroker.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 221,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-09-14T15:31:02Z",
+      "side": 1,
+      "message": "foreach loop?",
       "revId": "3b1ffe34cb970fd61fb301a1e59de80c0a9ca1fd",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -342,6 +651,24 @@
     },
     {
       "key": {
+        "uuid": "7a6b29fe_3799926e",
+        "filename": "opendaylight/md-sal/mdsaltrace/impl/src/main/java/org/opendaylight/controller/mdsaltrace/impl/TracingWriteTransaction.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-09-14T15:31:02Z",
+      "side": 1,
+      "message": "and \"\u003d new ArrayList\u003c\u003e();\"",
+      "parentUuid": "7a6b29fe_1771f6a7",
+      "revId": "3b1ffe34cb970fd61fb301a1e59de80c0a9ca1fd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a6b29fe_975ce61a",
         "filename": "opendaylight/md-sal/mdsaltrace/impl/src/main/java/org/opendaylight/controller/mdsaltrace/impl/TracingWriteTransaction.java",
         "patchSetId": 1
@@ -353,6 +680,24 @@
       "writtenOn": "2016-09-14T14:42:48Z",
       "side": 1,
       "message": "I\u0027m not 100% sure, but if I\u0027m not mistaken, I vaguely recall that there is a non-negligeable performance impact of doing this in Java, so careful...  But you would have a much simpler alternative in this case - why not simply have a new first arg String methodName in your recordOp() method, and pass in the right fixed string each time you call it? Simple enough, no? (Perhaps I\u0027m missing something.)",
+      "revId": "3b1ffe34cb970fd61fb301a1e59de80c0a9ca1fd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_97a7c6a6",
+        "filename": "opendaylight/md-sal/mdsaltrace/impl/src/main/java/org/opendaylight/controller/mdsaltrace/impl/TracingWriteTransaction.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-09-14T15:31:02Z",
+      "side": 1,
+      "message": "Yup; the performance impact has decreased in recent JVMs but it\u0027s still non-negligible AFAIR (we should profile to make sure). Michael\u0027s alternative seems much better!",
+      "parentUuid": "7a6b29fe_975ce61a",
       "revId": "3b1ffe34cb970fd61fb301a1e59de80c0a9ca1fd",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -421,6 +766,23 @@
       "writtenOn": "2016-09-14T14:42:48Z",
       "side": 1,
       "message": "wanna remove this instead of leaving it commented out?",
+      "revId": "3b1ffe34cb970fd61fb301a1e59de80c0a9ca1fd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_f7d6fa26",
+        "filename": "opendaylight/md-sal/mdsaltrace/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-09-14T15:31:02Z",
+      "side": 1,
+      "message": "1.8.0-SNAPSHOT",
       "revId": "3b1ffe34cb970fd61fb301a1e59de80c0a9ca1fd",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
