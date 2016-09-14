@@ -27,7 +27,6 @@
 
     <!-- Parents -->
     <module>opendaylight/commons/protocol-framework</module>
-    <module>opendaylight/commons/checkstyle</module>
     <module>opendaylight/commons/opendaylight</module>
     <module>opendaylight/commons/logback_settings</module>
     <module>opendaylight/commons/filter-valve</module>
