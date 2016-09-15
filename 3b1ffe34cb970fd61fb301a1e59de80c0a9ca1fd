@@ -319,6 +319,24 @@
     },
     {
       "key": {
+        "uuid": "7a6b29fe_3d35f345",
+        "filename": "opendaylight/md-sal/mdsaltrace/features/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 5357
+      },
+      "writtenOn": "2016-09-15T10:12:05Z",
+      "side": 1,
+      "message": "I found -DarchetypeVersion\u003d1.2.0-SNAPSHOT in my bash history so I assume that was it. I think I probably took it off the wiki.",
+      "parentUuid": "7a6b29fe_3d0fb3e2",
+      "revId": "3b1ffe34cb970fd61fb301a1e59de80c0a9ca1fd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a6b29fe_b76be283",
         "filename": "opendaylight/md-sal/mdsaltrace/features/src/main/features/features.xml",
         "patchSetId": 1
