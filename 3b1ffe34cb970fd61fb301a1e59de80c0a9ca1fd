@@ -301,6 +301,24 @@
     },
     {
       "key": {
+        "uuid": "7a6b29fe_3d0fb3e2",
+        "filename": "opendaylight/md-sal/mdsaltrace/features/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-09-15T07:45:48Z",
+      "side": 1,
+      "message": "Which version of the archetype did you use? (The archetype may well be wrong, I\u0027ll check...) But you\u0027re better off deleting the properties you don\u0027t need (all of them?).",
+      "parentUuid": "7a6b29fe_37351246",
+      "revId": "3b1ffe34cb970fd61fb301a1e59de80c0a9ca1fd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a6b29fe_b76be283",
         "filename": "opendaylight/md-sal/mdsaltrace/features/src/main/features/features.xml",
         "patchSetId": 1
@@ -651,6 +669,24 @@
     },
     {
       "key": {
+        "uuid": "7a6b29fe_5df70fd3",
+        "filename": "opendaylight/md-sal/mdsaltrace/impl/src/main/java/org/opendaylight/controller/mdsaltrace/impl/TracingBroker.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-09-15T07:45:48Z",
+      "side": 1,
+      "message": "See below...",
+      "parentUuid": "7a6b29fe_77de6ade",
+      "revId": "3b1ffe34cb970fd61fb301a1e59de80c0a9ca1fd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a6b29fe_77e02a29",
         "filename": "opendaylight/md-sal/mdsaltrace/impl/src/main/java/org/opendaylight/controller/mdsaltrace/impl/TracingBroker.java",
         "patchSetId": 1
@@ -861,6 +897,24 @@
     },
     {
       "key": {
+        "uuid": "7a6b29fe_1d12b708",
+        "filename": "opendaylight/md-sal/mdsaltrace/impl/src/main/java/org/opendaylight/controller/mdsaltrace/impl/TracingBroker.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-09-15T07:45:48Z",
+      "side": 1,
+      "message": "A little history... When generics first became available, they had to be specified everywhere:\n\n    List\u003cWatch\u003e registrationWatches \u003d new ArrayList\u003cWatch\u003e();\n\nexcept for many generic methods where the compiler could figure out the generic type itself; so Google added some handy utility methods to Guava (Google Collections initially):\n\n    List\u003cWatch\u003e registrationWatches \u003d Lists.newArrayList();\n\nThat doesn\u0027t make much difference here, but for longer (or more complex) type parameters it was useful. It especially made maintenance easier — changing the generic type only involved changing one parameter, not both.\n\nIn Java 7 we got more type inference:\n\n    List\u003cWatch\u003e registrationWatches \u003d new ArrayList\u003c\u003e();\n\nso we no longer need Guava\u0027s help...\n\nThis means you\u0027ll see the helpers in lots of historical code, and lots of copy-pasted new code; but there\u0027s no reason to use them any more.",
+      "parentUuid": "7a6b29fe_f7f1da6b",
+      "revId": "3b1ffe34cb970fd61fb301a1e59de80c0a9ca1fd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a6b29fe_17857606",
         "filename": "opendaylight/md-sal/mdsaltrace/impl/src/main/java/org/opendaylight/controller/mdsaltrace/impl/TracingBroker.java",
         "patchSetId": 1
@@ -1030,6 +1084,24 @@
       "side": 1,
       "message": "didn\u0027t work for me with the iterator??",
       "parentUuid": "7a6b29fe_97706641",
+      "revId": "3b1ffe34cb970fd61fb301a1e59de80c0a9ca1fd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_7dfc8bb8",
+        "filename": "opendaylight/md-sal/mdsaltrace/impl/src/main/java/org/opendaylight/controller/mdsaltrace/impl/TracingBroker.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 221,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-09-15T07:45:48Z",
+      "side": 1,
+      "message": "It works for me:\n\n        for (InstanceIdentifier.PathArgument pathArgument : (Iterable\u003cInstanceIdentifier.PathArgument\u003e) iid\n                .getPathArguments()) {\n            builder.append(\u0027/\u0027).append(pathArgument.getType().getSimpleName());\n        }\n\n(not sure yet why the cast is needed... grmbl...)",
+      "parentUuid": "7a6b29fe_97f6a65b",
       "revId": "3b1ffe34cb970fd61fb301a1e59de80c0a9ca1fd",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
