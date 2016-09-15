@@ -424,6 +424,24 @@
     },
     {
       "key": {
+        "uuid": "7a6b29fe_9d4367ae",
+        "filename": "opendaylight/md-sal/mdsaltrace/impl/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2016-09-15T10:15:31Z",
+      "side": 1,
+      "message": "Friendly reminder / re-encouragement... ;-) If Checkstyle gives you any trouble, feel free to reach out to me any time!",
+      "parentUuid": "7a6b29fe_7744aa49",
+      "revId": "3b1ffe34cb970fd61fb301a1e59de80c0a9ca1fd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a6b29fe_97e1862c",
         "filename": "opendaylight/md-sal/mdsaltrace/impl/src/main/java/org/opendaylight/controller/mdsaltrace/impl/TracingBroker.java",
         "patchSetId": 1
@@ -997,6 +1015,24 @@
       "side": 1,
       "message": "IIRC, checkstyle whines when there is not javadoc",
       "parentUuid": "7a6b29fe_b733e2f4",
+      "revId": "3b1ffe34cb970fd61fb301a1e59de80c0a9ca1fd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_1d01176a",
+        "filename": "opendaylight/md-sal/mdsaltrace/impl/src/main/java/org/opendaylight/controller/mdsaltrace/impl/TracingBroker.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2016-09-15T10:15:31Z",
+      "side": 1,
+      "message": "Nope, not anymore - I had removed that rule, a while ago (with general agreement; email me if you want me to send you the link to the respective on-list discussion about this topic).",
+      "parentUuid": "7a6b29fe_57008e33",
       "revId": "3b1ffe34cb970fd61fb301a1e59de80c0a9ca1fd",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
