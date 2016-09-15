@@ -14,6 +14,8 @@ import akka.actor.UntypedActor;
 import akka.pattern.Patterns;
 import akka.util.Timeout;
 import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.ArrayList;
@@ -85,11 +87,17 @@ public class MessageCollectorActor extends UntypedActor {
     }
 
     public static <T> List<T> expectMatching(ActorRef actor, Class<T> clazz, int count) {
+        return expectMatching(actor, clazz, count, msg -> true);
+    }
+
+    public static <T> List<T> expectMatching(ActorRef actor, Class<T> clazz, int count,
+            Predicate<T> matcher) {
         int timeout = 5000;
         List<T> messages = Collections.emptyList();
         for(int i = 0; i < timeout / 50; i++) {
             try {
                 messages = getAllMatching(actor, clazz);
+                Iterables.removeIf(messages, Predicates.not(matcher));
                 if(messages.size() >= count) {
                     return messages;
                 }
