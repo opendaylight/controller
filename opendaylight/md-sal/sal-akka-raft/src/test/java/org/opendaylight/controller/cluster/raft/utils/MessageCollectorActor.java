@@ -18,6 +18,7 @@ import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -85,11 +86,23 @@ public class MessageCollectorActor extends UntypedActor {
     }
 
     public static <T> List<T> expectMatching(ActorRef actor, Class<T> clazz, int count) {
+        return expectMatching(actor, clazz, count, msg -> true);
+    }
+
+    public static <T> List<T> expectMatching(ActorRef actor, Class<T> clazz, int count,
+            Predicate<T> matcher) {
         int timeout = 5000;
         List<T> messages = Collections.emptyList();
         for(int i = 0; i < timeout / 50; i++) {
             try {
                 messages = getAllMatching(actor, clazz);
+                Iterator<T> iter = messages.iterator();
+                while(iter.hasNext()) {
+                    if(!matcher.apply(iter.next())) {
+                        iter.remove();
+                    }
+                }
+
                 if(messages.size() >= count) {
                     return messages;
                 }
