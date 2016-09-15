@@ -246,6 +246,20 @@ public class AbstractEntityOwnershipTest extends AbstractActorTest {
         });
     }
 
+    static void verifyNoOwnerSet(TestActorRef<? extends EntityOwnershipShard> shard, String entityType,
+            YangInstanceIdentifier entityId) {
+        YangInstanceIdentifier entityPath = entityPath(entityType, entityId).node(ENTITY_OWNER_QNAME);
+        try {
+            NormalizedNode<?, ?> node = AbstractShardTest.readStore(shard, entityPath);
+            if(node != null) {
+                Assert.fail("Owner " + node.getValue() + " was set for " + entityPath);
+            }
+
+        } catch (Exception e) {
+            throw new AssertionError("read failed", e);
+        }
+    }
+
     static void verifyRaftState(final TestActorRef<? extends EntityOwnershipShard> shard, Consumer<OnDemandRaftState> verifier)
             throws Exception {
         AssertionError lastError = null;
