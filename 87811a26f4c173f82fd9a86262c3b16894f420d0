@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a6b29fe_9dfd27b4",
+        "filename": "opendaylight/md-sal/mdsaltrace/features/pom.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-09-15T07:52:08Z",
+      "side": 1,
+      "message": "This doesn\u0027t seem to be used.",
+      "revId": "87811a26f4c173f82fd9a86262c3b16894f420d0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_fd2ffb3c",
+        "filename": "opendaylight/md-sal/mdsaltrace/impl/src/main/java/org/opendaylight/controller/mdsaltrace/impl/TracingBroker.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-09-15T07:52:08Z",
+      "side": 1,
+      "message": "You forgot the \"private\" ;-).",
+      "revId": "87811a26f4c173f82fd9a86262c3b16894f420d0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_dd32ffa5",
+        "filename": "opendaylight/md-sal/mdsaltrace/impl/src/main/java/org/opendaylight/controller/mdsaltrace/impl/TracingBroker.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-09-15T07:52:08Z",
+      "side": 1,
+      "message": "The canonical order is\n\n    private static final\n\n(I think Checkstyle or Sonar complain about this...)",
+      "revId": "87811a26f4c173f82fd9a86262c3b16894f420d0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_3d269368",
+        "filename": "opendaylight/md-sal/mdsaltrace/impl/src/main/java/org/opendaylight/controller/mdsaltrace/impl/TracingWriteTransaction.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-09-15T07:52:08Z",
+      "side": 1,
+      "message": "Can\u0027t this be final too?",
+      "revId": "87811a26f4c173f82fd9a86262c3b16894f420d0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
