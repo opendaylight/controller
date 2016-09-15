@@ -1108,6 +1108,24 @@
     },
     {
       "key": {
+        "uuid": "7a6b29fe_5d1eef0c",
+        "filename": "opendaylight/md-sal/mdsaltrace/impl/src/main/java/org/opendaylight/controller/mdsaltrace/impl/TracingBroker.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 221,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-09-15T08:06:13Z",
+      "side": 1,
+      "message": "OK, so using a raw type in the method\u0027s parameter declarations erases the generic types throughout:\n\n    String toPathString(InstanceIdentifier\u003c? extends DataObject\u003e iid) {\n        StringBuilder builder \u003d new StringBuilder();\n        for (InstanceIdentifier.PathArgument pathArgument : iid.getPathArguments()) {\n            builder.append(\u0027/\u0027).append(pathArgument.getType().getSimpleName());\n        }\n\n        return builder.toString();\n    }",
+      "parentUuid": "7a6b29fe_7dfc8bb8",
+      "revId": "3b1ffe34cb970fd61fb301a1e59de80c0a9ca1fd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a6b29fe_57940e8a",
         "filename": "opendaylight/md-sal/mdsaltrace/impl/src/main/java/org/opendaylight/controller/mdsaltrace/impl/TracingBroker.java",
         "patchSetId": 1
