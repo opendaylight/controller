@@ -6,7 +6,7 @@
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>mdsal-it-parent</artifactId>
     <version>1.4.1-SNAPSHOT</version>
-    <relativePath/>
+    <relativePath>../../mdsal-it-parent</relativePath>
   </parent>
   <artifactId>sample-toaster-it</artifactId>
 
