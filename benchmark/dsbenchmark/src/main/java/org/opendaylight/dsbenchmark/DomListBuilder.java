@@ -28,8 +28,8 @@ public final class DomListBuilder {
     // Outer List Qname identifier for yang model's 'id'
     private static final org.opendaylight.yangtools.yang.common.QName OL_ID = QName.create(OuterList.QNAME, "id");
 
-    static public List<MapEntryNode> buildOuterList(int outerElements, int innerElements) {
-        List<MapEntryNode> outerList = new ArrayList<MapEntryNode>(outerElements);
+    public static List<MapEntryNode> buildOuterList(int outerElements, int innerElements) {
+        List<MapEntryNode> outerList = new ArrayList<>(outerElements);
         for (int j = 0; j < outerElements; j++) {
             outerList.add(ImmutableNodes.mapEntryBuilder()
                                 .withNodeIdentifier(new NodeIdentifierWithPredicates(OuterList.QNAME, OL_ID, j))
@@ -37,15 +37,14 @@ public final class DomListBuilder {
                                 .withChild(buildInnerList(j, innerElements))
                                 .build());
         }
-
         return outerList;
     }
 
-    static private MapNode buildInnerList(int index, int elements ) {
+    private static MapNode buildInnerList(int index, int elements ) {
         CollectionNodeBuilder<MapEntryNode, MapNode> innerList = ImmutableNodes.mapNodeBuilder(InnerList.QNAME);
 
         final String itemStr = "Item-" + String.valueOf(index) + "-";
-        for( int i = 0; i < elements; i++ ) {
+        for (int i = 0; i < elements; i++) {
             innerList.addChild(ImmutableNodes.mapEntryBuilder()
                                 .withNodeIdentifier(new NodeIdentifierWithPredicates(InnerList.QNAME, IL_NAME, i))
                                 .withChild(ImmutableNodes.leafNode(IL_NAME, i))
@@ -54,6 +53,4 @@ public final class DomListBuilder {
         }
         return innerList.build();
     }
-
-
 }

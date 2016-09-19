@@ -14,7 +14,6 @@ import com.google.common.util.concurrent.CheckedFuture;
 import org.opendaylight.controller.md.sal.common.api.data.*;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadOnlyTransaction;
-import org.opendaylight.controller.md.sal.dom.api.DOMTransactionChain;
 import org.opendaylight.dsbenchmark.DatastoreAbstractWriter;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.StartTestInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.StartTestInput.DataStore;
@@ -27,11 +26,11 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TxchainDomRead extends DatastoreAbstractWriter implements TransactionChainListener{
+public class TxchainDomRead extends DatastoreAbstractWriter implements TransactionChainListener {
     private static final Logger LOG = LoggerFactory.getLogger(TxchainDomRead.class);
     private final DOMDataBroker domDataBroker;
 
-    public TxchainDomRead(DOMDataBroker domDataBroker, int outerListElem, int innerListElem, 
+    public TxchainDomRead(DOMDataBroker domDataBroker, int outerListElem, int innerListElem,
             long writesPerTx, DataStore dataStore) {
         super(StartTestInput.Operation.DELETE, outerListElem, innerListElem, writesPerTx, dataStore);
         this.domDataBroker = domDataBroker;
@@ -57,20 +56,19 @@ public class TxchainDomRead extends DatastoreAbstractWriter implements Transacti
     @Override
     public void executeList() {
 
-        org.opendaylight.yangtools.yang.common.QName OL_ID = QName.create(OuterList.QNAME, "id");
-        DOMTransactionChain chain = domDataBroker.createTransactionChain(this);
+        org.opendaylight.yangtools.yang.common.QName olId = QName.create(OuterList.QNAME, "id");
         DOMDataReadOnlyTransaction tx = domDataBroker.newReadOnlyTransaction();
 
-        YangInstanceIdentifier pid = YangInstanceIdentifier.builder().node(TestExec.QNAME).node(OuterList.QNAME).build();
+        YangInstanceIdentifier pid =
+                YangInstanceIdentifier.builder().node(TestExec.QNAME).node(OuterList.QNAME).build();
         for (int l = 0; l < outerListElem; l++) {
-            NormalizedNode<?,?> ret;
-            YangInstanceIdentifier yid = pid.node(new NodeIdentifierWithPredicates(OuterList.QNAME, OL_ID, l));
+            YangInstanceIdentifier yid = pid.node(new NodeIdentifierWithPredicates(OuterList.QNAME, olId, l));
             Optional<NormalizedNode<?,?>> optionalDataObject;
-            CheckedFuture<Optional<NormalizedNode<?,?>>, ReadFailedException> submitFuture = tx.read(LogicalDatastoreType.CONFIGURATION, yid);
+            CheckedFuture<Optional<NormalizedNode<?,?>>, ReadFailedException> submitFuture =
+                    tx.read(LogicalDatastoreType.CONFIGURATION, yid);
             try {
                 optionalDataObject = submitFuture.checkedGet();
                 if (optionalDataObject != null && optionalDataObject.isPresent()) {
-                    ret = optionalDataObject.get();
                     txOk++;
                 }
             } catch (ReadFailedException e) {

@@ -22,8 +22,9 @@ import org.slf4j.LoggerFactory;
 
 public class DsbenchmarkListenerProvider {
     private static final Logger LOG = LoggerFactory.getLogger(DsbenchmarkListenerProvider.class);
-    private static final InstanceIdentifier<TestExec> TEST_EXEC_IID = InstanceIdentifier.builder(TestExec.class).build();
-    private final List<ListenerRegistration<DsbenchmarkListener>> listeners = 
+    private static final InstanceIdentifier<TestExec> TEST_EXEC_IID =
+            InstanceIdentifier.builder(TestExec.class).build();
+    private final List<ListenerRegistration<DsbenchmarkListener>> listeners =
             new ArrayList<ListenerRegistration<DsbenchmarkListener>>();
     private DataBroker dataBroker;
 
@@ -33,7 +34,7 @@ public class DsbenchmarkListenerProvider {
     }
 
     public void createAndRegisterListeners(int numListeners) {
-        for(int i = 0; i < numListeners; i++) {
+        for (int i = 0; i < numListeners; i++) {
             DsbenchmarkListener listener = new DsbenchmarkListener();
             listeners.add(dataBroker.registerDataTreeChangeListener(
                     new DataTreeIdentifier<TestExec>(LogicalDatastoreType.CONFIGURATION, TEST_EXEC_IID), listener));
@@ -44,16 +45,24 @@ public class DsbenchmarkListenerProvider {
         LOG.info("DsbenchmarkListenerProvider created {} listeneres", numListeners);
     }
 
+    public long getDataChangeCount() {
+        long dataChanges = 0;
+
+        for (ListenerRegistration<DsbenchmarkListener> listenerRegistration : listeners) {
+            dataChanges += listenerRegistration.getInstance().getNumDataChanges();
+        }
+        LOG.info("DsbenchmarkListenerProvider , total data changes {}", dataChanges);
+        return dataChanges;
+    }
+
     public long getEventCountAndDestroyListeners() {
         long totalEvents = 0;
 
         for (ListenerRegistration<DsbenchmarkListener> listenerRegistration : listeners) {
-            totalEvents = totalEvents + listenerRegistration.getInstance().getNumEvents();
+            totalEvents += listenerRegistration.getInstance().getNumEvents();
             listenerRegistration.close();
         }
-
         listeners.clear();
-        totalEvents = totalEvents / 2;  // Each listener is registered 2x: adjust for event double-counting
         LOG.info("DsbenchmarkListenerProvider destroyed listeneres, total events {}", totalEvents);
         return totalEvents;
     }

@@ -206,7 +206,14 @@ module dsbenchmark {
             leaf ntfOk {
                 type uint32;
                 description
-                  "The number of successfully received data tree change notifications";
+                  "The number of successfully received data tree change
+                   notifications";
+            }
+            leaf dataChangeEventsOk {
+                type uint32;
+                description
+                  "The number of data change events received in data tree
+                   change notifications";
             }
         }
     }

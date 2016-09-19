@@ -49,9 +49,11 @@ public class SimpletxDomWrite extends DatastoreAbstractWriter {
         LogicalDatastoreType dsType = getDataStoreType();
         long writeCnt = 0;
 
-        YangInstanceIdentifier pid = YangInstanceIdentifier.builder().node(TestExec.QNAME).node(OuterList.QNAME).build();
+        YangInstanceIdentifier pid =
+                YangInstanceIdentifier.builder().node(TestExec.QNAME).node(OuterList.QNAME).build();
         for (MapEntryNode element : this.list) {
-            YangInstanceIdentifier yid = pid.node(new NodeIdentifierWithPredicates(OuterList.QNAME, element.getIdentifier().getKeyValues()));
+            YangInstanceIdentifier yid =
+                    pid.node(new NodeIdentifierWithPredicates(OuterList.QNAME, element.getIdentifier().getKeyValues()));
 
             if (oper == StartTestInput.Operation.PUT) {
                 tx.put(dsType, yid, element);

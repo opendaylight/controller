@@ -8,6 +8,9 @@
 
 package org.opendaylight.dsbenchmark.txchain;
 
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+
 import org.opendaylight.controller.md.sal.binding.api.BindingTransactionChain;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
@@ -26,14 +29,12 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-
-public class TxchainBaDelete extends DatastoreAbstractWriter implements TransactionChainListener{
+public class TxchainBaDelete extends DatastoreAbstractWriter implements TransactionChainListener {
     private static final Logger LOG = LoggerFactory.getLogger(TxchainBaDelete.class);
     private DataBroker bindingDataBroker;
 
-    public TxchainBaDelete(DataBroker bindingDataBroker, int outerListElem, int innerListElem, long writesPerTx, DataStore dataStore) {
+    public TxchainBaDelete(DataBroker bindingDataBroker, int outerListElem, int innerListElem,
+            long writesPerTx, DataStore dataStore) {
         super(StartTestInput.Operation.DELETE, outerListElem, innerListElem, writesPerTx, dataStore);
         this.bindingDataBroker = bindingDataBroker;
         LOG.info("Created TxchainBaDelete");
@@ -77,6 +78,7 @@ public class TxchainBaDelete extends DatastoreAbstractWriter implements Transact
                     public void onSuccess(final Void result) {
                         txOk++;
                     }
+
                     @Override
                     public void onFailure(final Throwable t) {
                         LOG.error("Transaction failed, {}", t);
@@ -100,8 +102,7 @@ public class TxchainBaDelete extends DatastoreAbstractWriter implements Transact
         }
         try {
             chain.close();
-        }
-        catch (IllegalStateException e){
+        } catch (IllegalStateException e) {
             LOG.error("Transaction close failed,", e);
         }
         LOG.info("Transactions: submitted {}, completed {}", txSubmitted, (txOk + txError));

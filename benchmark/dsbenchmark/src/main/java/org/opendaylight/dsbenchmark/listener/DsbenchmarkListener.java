@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 public class DsbenchmarkListener implements DataTreeChangeListener<TestExec> {
     private static final Logger LOG = LoggerFactory.getLogger(DsbenchmarkListener.class);
     private AtomicInteger numEvents = new AtomicInteger(0);
+    private AtomicInteger numDataChanges = new AtomicInteger(0);
 
     @Override
     public void onDataTreeChanged(
@@ -33,7 +34,9 @@ public class DsbenchmarkListener implements DataTreeChangeListener<TestExec> {
         // from different threads, and we need to use atomic counters.
 
         final int eventNum = numEvents.incrementAndGet();
-        if(LOG.isDebugEnabled()){
+        numDataChanges.addAndGet(changes.size());
+
+        if (LOG.isDebugEnabled()) {
             logDataTreeChangeEvent(eventNum, changes);
         }
     }
@@ -42,11 +45,12 @@ public class DsbenchmarkListener implements DataTreeChangeListener<TestExec> {
             Collection<DataTreeModification<TestExec>> changes) {
         LOG.debug("DsbenchmarkListener-onDataTreeChanged: Event {}", eventNum);
 
-        for(DataTreeModification<TestExec> change : changes) {
+        for (DataTreeModification<TestExec> change : changes) {
             final DataObjectModification<TestExec> rootNode = change.getRootNode();
             final ModificationType modType = rootNode.getModificationType();
             final PathArgument changeId = rootNode.getIdentifier();
-            final Collection<DataObjectModification<? extends DataObject>> modifications = rootNode.getModifiedChildren();
+            final Collection<DataObjectModification<? extends DataObject>> modifications =
+                    rootNode.getModifiedChildren();
 
             LOG.debug("    changeId {}, modType {}, mods: {}", changeId, modType, modifications.size());
 
@@ -60,4 +64,7 @@ public class DsbenchmarkListener implements DataTreeChangeListener<TestExec> {
         return numEvents.get();
     }
 
+    public int getNumDataChanges() {
+        return numDataChanges.get();
+    }
 }

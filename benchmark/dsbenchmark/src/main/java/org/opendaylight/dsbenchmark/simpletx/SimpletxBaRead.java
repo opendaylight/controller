@@ -32,7 +32,7 @@ public class SimpletxBaRead extends DatastoreAbstractWriter {
     private static final Logger LOG = LoggerFactory.getLogger(SimpletxBaRead.class);
     private DataBroker dataBroker;
 
-    public SimpletxBaRead(DataBroker dataBroker, int outerListElem, int innerListElem, 
+    public SimpletxBaRead(DataBroker dataBroker, int outerListElem, int innerListElem,
             long writesPerTx, DataStore dataStore) {
         super(StartTestInput.Operation.DELETE, outerListElem, innerListElem, writesPerTx, dataStore);
         this.dataBroker = dataBroker;
@@ -64,7 +64,8 @@ public class SimpletxBaRead extends DatastoreAbstractWriter {
             InstanceIdentifier<OuterList> iid = InstanceIdentifier.create(TestExec.class)
                     .child(OuterList.class, new OuterListKey((int)l));
             Optional<OuterList> optionalDataObject;
-            CheckedFuture<Optional<OuterList>, ReadFailedException> submitFuture = tx.read(LogicalDatastoreType.CONFIGURATION, iid);
+            CheckedFuture<Optional<OuterList>, ReadFailedException> submitFuture =
+                    tx.read(LogicalDatastoreType.CONFIGURATION, iid);
             try {
                 optionalDataObject = submitFuture.checkedGet();
                 if (optionalDataObject != null && optionalDataObject.isPresent()) {
@@ -72,19 +73,16 @@ public class SimpletxBaRead extends DatastoreAbstractWriter {
 
                     String[] objectsArray = new String[outerList.getInnerList().size()];
 
-                    //LOG.info("innerList element: " + objectsArray );
                     for (InnerList innerList : outerList.getInnerList()) {
                         if (objectsArray[innerList.getName()] != null) {
-                            LOG.error("innerList: DUPLICATE name: {}, value: {}", innerList.getName(), innerList.getValue());
+                            LOG.error("innerList: DUPLICATE name: {}, value: {}", innerList.getName(),
+                                    innerList.getValue());
                         }
                         objectsArray[innerList.getName()] = innerList.getValue();
-                        // LOG.info("innerList: name: {}, value: {}", innerList.getName(), innerList.getValue());
                     }
-                    boolean foundAll = true;
                     for (int i = 0; i < outerList.getInnerList().size(); i++) {
                         String itemStr = objectsArray[i];
                         if (!itemStr.contentEquals("Item-" + String.valueOf(l) + "-" + String.valueOf(i))) {
-                            foundAll = false;
                             LOG.error("innerList: name: {}, value: {}", i, itemStr);
                             break;
                         }

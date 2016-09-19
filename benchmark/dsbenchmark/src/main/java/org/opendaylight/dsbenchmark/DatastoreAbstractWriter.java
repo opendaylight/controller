@@ -42,6 +42,7 @@ public abstract class DatastoreAbstractWriter {
     }
 
     public abstract void createList();
+
     public abstract void executeList();
 
     public int getTxError() {
@@ -56,12 +57,9 @@ public abstract class DatastoreAbstractWriter {
         final LogicalDatastoreType dsType;
         if (dataStore == DataStore.CONFIG) {
             dsType = LogicalDatastoreType.CONFIGURATION;
-        }
-        else if (dataStore == DataStore.OPERATIONAL) {
+        } else if (dataStore == DataStore.OPERATIONAL) {
             dsType = LogicalDatastoreType.OPERATIONAL;
-        }
-        else
-        {
+        } else {
             if (rn.nextBoolean() == true) {
                 dsType = LogicalDatastoreType.OPERATIONAL;
             } else {
