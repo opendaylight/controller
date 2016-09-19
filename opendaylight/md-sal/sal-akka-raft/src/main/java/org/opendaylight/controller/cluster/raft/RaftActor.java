@@ -17,7 +17,6 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -848,60 +847,6 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
                     }
                 }
             });
-        }
-    }
-
-    /**
-     * @deprecated Deprecated in favor of {@link org.opendaylight.controller.cluster.raft.persisted.DeleteEntries}
-     *             whose type for fromIndex is long instead of int. This class was kept for backwards
-     *             compatibility with Helium.
-     */
-    // Suppressing this warning as we can't set serialVersionUID to maintain backwards compatibility.
-    @SuppressWarnings("serial")
-    @Deprecated
-    static class DeleteEntries implements Serializable {
-        private final int fromIndex;
-
-        public DeleteEntries(int fromIndex) {
-            this.fromIndex = fromIndex;
-        }
-
-        public int getFromIndex() {
-            return fromIndex;
-        }
-
-        private Object readResolve() {
-            return org.opendaylight.controller.cluster.raft.persisted.DeleteEntries.createMigrated(fromIndex);
-        }
-    }
-
-    /**
-     * @deprecated Deprecated in favor of non-inner class {@link org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm}
-     *             which has serialVersionUID set. This class was kept for backwards compatibility with Helium.
-     */
-    // Suppressing this warning as we can't set serialVersionUID to maintain backwards compatibility.
-    @SuppressWarnings("serial")
-    @Deprecated
-    static class UpdateElectionTerm implements Serializable {
-        private final long currentTerm;
-        private final String votedFor;
-
-        public UpdateElectionTerm(long currentTerm, String votedFor) {
-            this.currentTerm = currentTerm;
-            this.votedFor = votedFor;
-        }
-
-        public long getCurrentTerm() {
-            return currentTerm;
-        }
-
-        public String getVotedFor() {
-            return votedFor;
-        }
-
-        private Object readResolve() {
-            return org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm.createMigrated(
-                    currentTerm, votedFor);
         }
     }
 
