@@ -31,7 +31,7 @@ public class SimpletxDomDelete extends DatastoreAbstractWriter {
         super(StartTestInput.Operation.DELETE, outerListElem, innerListElem, writesPerTx, dataStore);
         this.domDataBroker = domDataBroker;
         LOG.info("Created simpleTxDomDelete");
-   }
+    }
 
     @Override
     public void createList() {
@@ -52,14 +52,14 @@ public class SimpletxDomDelete extends DatastoreAbstractWriter {
     public void executeList() {
         long writeCnt = 0;
 
-        org.opendaylight.yangtools.yang.common.QName OL_ID = QName.create(OuterList.QNAME, "id");
+        org.opendaylight.yangtools.yang.common.QName olId = QName.create(OuterList.QNAME, "id");
         DOMDataWriteTransaction tx = domDataBroker.newWriteOnlyTransaction();
 
         for (int l = 0; l < outerListElem; l++) {
             YangInstanceIdentifier yid = YangInstanceIdentifier.builder()
                                          .node(TestExec.QNAME)
                                          .node(OuterList.QNAME)
-                                         .nodeWithKey(OuterList.QNAME, OL_ID, l)
+                                         .nodeWithKey(OuterList.QNAME, olId, l)
                                          .build();
 
             tx.delete(LogicalDatastoreType.CONFIGURATION, yid);
@@ -69,7 +69,7 @@ public class SimpletxDomDelete extends DatastoreAbstractWriter {
                     tx.submit().checkedGet();
                     txOk++;
                 } catch (TransactionCommitFailedException e) {
-                    LOG.error("Transaction failed: {}", e.toString());
+                    LOG.error("Transaction failed: {}", e);
                     txError++;
                 }
                 tx = domDataBroker.newWriteOnlyTransaction();
@@ -80,7 +80,7 @@ public class SimpletxDomDelete extends DatastoreAbstractWriter {
             try {
                 tx.submit().checkedGet();
             } catch (TransactionCommitFailedException e) {
-                LOG.error("Transaction failed: {}", e.toString());
+                LOG.error("Transaction failed: {}", e);
             }
         }
     }

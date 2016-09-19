@@ -53,14 +53,17 @@ import com.google.common.util.concurrent.Futures;
 public class DsbenchmarkProvider implements BindingAwareProvider, DsbenchmarkService, AutoCloseable {
 
     private static final Logger LOG = LoggerFactory.getLogger(DsbenchmarkProvider.class);
-    private static final InstanceIdentifier<TestExec> TEST_EXEC_IID = InstanceIdentifier.builder(TestExec.class).build();
-    private static final InstanceIdentifier<TestStatus> TEST_STATUS_IID = InstanceIdentifier.builder(TestStatus.class).build();
+    private static final InstanceIdentifier<TestExec> TEST_EXEC_IID =
+            InstanceIdentifier.builder(TestExec.class).build();
+    private static final InstanceIdentifier<TestStatus> TEST_STATUS_IID =
+            InstanceIdentifier.builder(TestStatus.class).build();
 
     private final AtomicReference<ExecStatus> execStatus = new AtomicReference<ExecStatus>( ExecStatus.Idle );
     private final DsbenchmarkListenerProvider listenerProvider = new DsbenchmarkListenerProvider();
     private final DOMDataBroker domDataBroker;  // Async DOM Broker for use with all DOM operations
-    private final DataBroker bindingDataBroker; // Async Binding-Aware Broker for use in tx chains; initialized to ping-pong
-                                                // broker in default config (see default-config.xml and dsbenchmark-impl.yang)
+    private final DataBroker bindingDataBroker; // Async Binding-Aware Broker for use in tx chains; initialized to
+                                                // ping-pong broker in default config (see default-config.xml and
+                                                // dsbenchmark-impl.yang)
     private DataBroker dataBroker;              // "Legacy" OSGI Data Broker for use in simple transactions
     private RpcRegistration<DsbenchmarkService> dstReg;
 
@@ -93,7 +96,7 @@ public class DsbenchmarkProvider implements BindingAwareProvider, DsbenchmarkSer
     public Future<RpcResult<Void>> cleanupStore() {
         cleanupTestStore();
         LOG.info("Data Store cleaned up");
-        return Futures.immediateFuture( RpcResultBuilder.<Void> success().build() );
+        return Futures.immediateFuture( RpcResultBuilder.<Void>success().build());
     }
 
     @Override
@@ -133,7 +136,7 @@ public class DsbenchmarkProvider implements BindingAwareProvider, DsbenchmarkSer
 
             this.testsCompleted++;
 
-        } catch ( Exception e ) {
+        } catch (Exception e) {
             LOG.error( "Test error: {}", e.toString());
             execStatus.set( ExecStatus.Idle );
             return RpcResultBuilder.success(new StartTestOutputBuilder()
@@ -146,6 +149,7 @@ public class DsbenchmarkProvider implements BindingAwareProvider, DsbenchmarkSer
         execStatus.set(ExecStatus.Idle);
 
         // Get the number of data change events and cleanup the data change listeners
+        long numDataChanges = listenerProvider.getDataChangeCount();
         long numEvents = listenerProvider.getEventCountAndDestroyListeners();
 
         StartTestOutput output = new StartTestOutputBuilder()
@@ -154,6 +158,7 @@ public class DsbenchmarkProvider implements BindingAwareProvider, DsbenchmarkSer
                 .setExecTime(execTime)
                 .setTxOk((long)dsWriter.getTxOk())
                 .setNtfOk(numEvents)
+                .setDataChangeEventsOk(numDataChanges)
                 .setTxError((long)dsWriter.getTxError())
                 .build();
 
@@ -192,7 +197,7 @@ public class DsbenchmarkProvider implements BindingAwareProvider, DsbenchmarkSer
             LOG.info("Failed to cleanup DataStore configtest data");
             throw new IllegalStateException(e);
         }
-        
+
         tx = dataBroker.newWriteOnlyTransaction();
         tx.put(LogicalDatastoreType.OPERATIONAL, TEST_EXEC_IID, data);
         try {

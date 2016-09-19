@@ -11,7 +11,6 @@ package org.opendaylight.dsbenchmark.txchain;
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
 
-import org.opendaylight.controller.md.sal.binding.api.BindingTransactionChain;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.*;
@@ -26,11 +25,12 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TxchainBaRead extends DatastoreAbstractWriter implements TransactionChainListener{
+public class TxchainBaRead extends DatastoreAbstractWriter implements TransactionChainListener {
     private static final Logger LOG = LoggerFactory.getLogger(TxchainBaRead.class);
     private DataBroker bindingDataBroker;
 
-    public TxchainBaRead(DataBroker bindingDataBroker, int outerListElem, int innerListElem, long writesPerTx, DataStore dataStore) {
+    public TxchainBaRead(DataBroker bindingDataBroker, int outerListElem, int innerListElem,
+            long writesPerTx, DataStore dataStore) {
         super(StartTestInput.Operation.DELETE, outerListElem, innerListElem, writesPerTx, dataStore);
         this.bindingDataBroker = bindingDataBroker;
         LOG.info("Created TxchainBaRead");
@@ -54,8 +54,6 @@ public class TxchainBaRead extends DatastoreAbstractWriter implements Transactio
 
     @Override
     public void executeList() {
-
-        BindingTransactionChain chain = bindingDataBroker.createTransactionChain(this);
         ReadTransaction tx = bindingDataBroker.newReadOnlyTransaction();
 
         for (long l = 0; l < outerListElem; l++) {
@@ -64,39 +62,31 @@ public class TxchainBaRead extends DatastoreAbstractWriter implements Transactio
             InstanceIdentifier<OuterList> iid = InstanceIdentifier.create(TestExec.class)
                     .child(OuterList.class, new OuterListKey((int) l));
             Optional<OuterList> optionalDataObject;
-            CheckedFuture<Optional<OuterList>, ReadFailedException> submitFuture = tx.read(LogicalDatastoreType.CONFIGURATION, iid);
+            CheckedFuture<Optional<OuterList>, ReadFailedException> submitFuture =
+                    tx.read(LogicalDatastoreType.CONFIGURATION, iid);
 
             try {
                 optionalDataObject = submitFuture.checkedGet();
-                /*if (optionalDataObject != null && optionalDataObject.isPresent()) {
-                    ret = optionalDataObject.get();
-                    txOk++;
-                }*/
                 if (optionalDataObject != null && optionalDataObject.isPresent()) {
                     outerList = optionalDataObject.get();
 
                     String[] objectsArray = new String[outerList.getInnerList().size()];
-
-                    //LOG.info("innerList element: " + objectsArray );
                     for (InnerList innerList : outerList.getInnerList()) {
                         if (objectsArray[innerList.getName()] != null) {
-                            LOG.error("innerList: DUPLICATE name: {}, value: {}", innerList.getName(), innerList.getValue());
+                            LOG.error("innerList: DUPLICATE name: {}, value: {}", innerList.getName(),
+                                    innerList.getValue());
                         }
                         objectsArray[innerList.getName()] = innerList.getValue();
-                        // LOG.info("innerList: name: {}, value: {}", innerList.getName(), innerList.getValue());
                     }
-                    boolean foundAll = true;
                     for (int i = 0; i < outerList.getInnerList().size(); i++) {
                         String itemStr = objectsArray[i];
                         if (!itemStr.contentEquals("Item-" + String.valueOf(l) + "-" + String.valueOf(i))) {
-                            foundAll = false;
                             LOG.error("innerList: name: {}, value: {}", i, itemStr);
                             break;
                         }
                     }
                     txOk++;
-                }
-                else {
+                } else {
                     txError++;
                 }
             } catch (ReadFailedException e) {

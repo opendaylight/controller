@@ -36,10 +36,10 @@ public class SimpletxBaWrite extends DatastoreAbstractWriter {
         LOG.info("Created SimpletxBaWrite");
     }
 
-     @Override
-     public void createList() {
-         list = BaListBuilder.buildOuterList(this.outerListElem, this.innerListElem);
-     }
+    @Override
+    public void createList() {
+        list = BaListBuilder.buildOuterList(this.outerListElem, this.innerListElem);
+    }
 
     @Override
     public void executeList() {
@@ -64,7 +64,7 @@ public class SimpletxBaWrite extends DatastoreAbstractWriter {
                     tx.submit().checkedGet();
                     txOk++;
                 } catch (TransactionCommitFailedException e) {
-                    LOG.error("Transaction failed: {}", e.toString());
+                    LOG.error("Transaction failed: {}", e);
                     txError++;
                 }
                 tx = dataBroker.newWriteOnlyTransaction();
@@ -78,7 +78,7 @@ public class SimpletxBaWrite extends DatastoreAbstractWriter {
             try {
                 tx.submit().checkedGet();
             } catch (TransactionCommitFailedException e) {
-                LOG.error("Transaction failed: {}", e.toString());
+                LOG.error("Transaction failed: {}", e);
             }
         }
     }

@@ -30,11 +30,11 @@ import org.slf4j.LoggerFactory;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 
-public class TxchainDomDelete extends DatastoreAbstractWriter implements TransactionChainListener{
+public class TxchainDomDelete extends DatastoreAbstractWriter implements TransactionChainListener {
     private static final Logger LOG = LoggerFactory.getLogger(TxchainBaWrite.class);
     private final DOMDataBroker domDataBroker;
 
-    public TxchainDomDelete(DOMDataBroker domDataBroker, int outerListElem, int innerListElem, 
+    public TxchainDomDelete(DOMDataBroker domDataBroker, int outerListElem, int innerListElem,
             long writesPerTx, DataStore dataStore) {
         super(StartTestInput.Operation.DELETE, outerListElem, innerListElem, writesPerTx, dataStore);
         this.domDataBroker = domDataBroker;
@@ -62,13 +62,14 @@ public class TxchainDomDelete extends DatastoreAbstractWriter implements Transac
         int txSubmitted = 0;
         int writeCnt = 0;
 
-        org.opendaylight.yangtools.yang.common.QName OL_ID = QName.create(OuterList.QNAME, "id");
+        org.opendaylight.yangtools.yang.common.QName olId = QName.create(OuterList.QNAME, "id");
         DOMTransactionChain chain = domDataBroker.createTransactionChain(this);
         DOMDataWriteTransaction tx = chain.newWriteOnlyTransaction();
 
-        YangInstanceIdentifier pid = YangInstanceIdentifier.builder().node(TestExec.QNAME).node(OuterList.QNAME).build();
+        YangInstanceIdentifier pid =
+                YangInstanceIdentifier.builder().node(TestExec.QNAME).node(OuterList.QNAME).build();
         for (int l = 0; l < outerListElem; l++) {
-            YangInstanceIdentifier yid = pid.node(new NodeIdentifierWithPredicates(OuterList.QNAME, OL_ID, l));
+            YangInstanceIdentifier yid = pid.node(new NodeIdentifierWithPredicates(OuterList.QNAME, olId, l));
             tx.delete(LogicalDatastoreType.CONFIGURATION, yid);
 
             writeCnt++;
@@ -80,6 +81,7 @@ public class TxchainDomDelete extends DatastoreAbstractWriter implements Transac
                     public void onSuccess(final Void result) {
                         txOk++;
                     }
+
                     @Override
                     public void onFailure(final Throwable t) {
                         LOG.error("Transaction failed, {}", t);
@@ -104,8 +106,7 @@ public class TxchainDomDelete extends DatastoreAbstractWriter implements Transac
         }
         try {
             chain.close();
-        }
-        catch (IllegalStateException e){
+        } catch (IllegalStateException e) {
             LOG.error("Transaction close failed,", e);
         }
         LOG.info("Transactions: submitted {}, completed {}", txSubmitted, (txOk + txError));

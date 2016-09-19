@@ -59,9 +59,11 @@ public class TxchainDomWrite extends DatastoreAbstractWriter implements Transact
         LogicalDatastoreType dsType = getDataStoreType();
         DOMDataWriteTransaction tx = chain.newWriteOnlyTransaction();
 
-        YangInstanceIdentifier pid = YangInstanceIdentifier.builder().node(TestExec.QNAME).node(OuterList.QNAME).build();
+        YangInstanceIdentifier pid =
+                YangInstanceIdentifier.builder().node(TestExec.QNAME).node(OuterList.QNAME).build();
         for (MapEntryNode element : this.list) {
-            YangInstanceIdentifier yid = pid.node(new NodeIdentifierWithPredicates(OuterList.QNAME, element.getIdentifier().getKeyValues()));
+            YangInstanceIdentifier yid =
+                    pid.node(new NodeIdentifierWithPredicates(OuterList.QNAME, element.getIdentifier().getKeyValues()));
 
             if (oper == StartTestInput.Operation.PUT) {
                 tx.put(dsType, yid, element);
@@ -79,6 +81,7 @@ public class TxchainDomWrite extends DatastoreAbstractWriter implements Transact
                     public void onSuccess(final Void result) {
                         txOk++;
                     }
+
                     @Override
                     public void onFailure(final Throwable t) {
                         LOG.error("Transaction failed, {}", t);
@@ -105,10 +108,10 @@ public class TxchainDomWrite extends DatastoreAbstractWriter implements Transact
         }
         try {
             chain.close();
-        }
-        catch (IllegalStateException e){
+        } catch (IllegalStateException e) {
             LOG.error("Transaction close failed,", e);
         }
+
         LOG.info("Transactions: submitted {}, completed {}", txSubmitted, (txOk + txError));
     }
 
