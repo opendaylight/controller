@@ -22,6 +22,13 @@ public final class ReplicatedLogImplEntry implements ReplicatedLogEntry, Seriali
     private final long term;
     private final Payload payload;
 
+    /**
+     * Constructs an instance.
+     *
+     * @param index the index
+     * @param term the term
+     * @param payload the payload
+     */
     public ReplicatedLogImplEntry(final long index, final long term, final Payload payload) {
         this.index = index;
         this.term = term;

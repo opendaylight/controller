@@ -28,12 +28,8 @@ abstract class TimedRunnable implements Runnable {
     TimedRunnable(FiniteDuration timeout, RaftActor actor) {
         Preconditions.checkNotNull(timeout);
         Preconditions.checkNotNull(actor);
-        cancelTimer = actor.getContext().system().scheduler().scheduleOnce(timeout, actor.self(), new Runnable() {
-            @Override
-            public void run() {
-                cancel();
-            }
-        }, actor.getContext().system().dispatcher(), actor.self());
+        cancelTimer = actor.getContext().system().scheduler().scheduleOnce(timeout, actor.self(),
+                (Runnable) () -> cancel(), actor.getContext().system().dispatcher(), actor.self());
     }
 
     @Override

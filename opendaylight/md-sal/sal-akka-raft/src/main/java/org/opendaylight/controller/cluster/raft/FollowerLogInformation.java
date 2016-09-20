@@ -7,115 +7,134 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
+import com.google.common.annotations.VisibleForTesting;
+
 /**
- * The state of the followers log as known by the Leader
+ * The state of the followers log as known by the Leader.
  */
 public interface FollowerLogInformation {
 
     /**
-     * Increment the value of the nextIndex
+     * Increments the value of the follower's next index.
      *
-     * @return the new value of nextIndex
+     * @return the new value of nextIndex.
      */
     long incrNextIndex();
 
     /**
-     * Decrement the value of the nextIndex
+     * Decrements the value of the follower's next index.
      *
-     * @return the new value of nextIndex
+     * @return the new value of nextIndex,
      */
     long decrNextIndex();
 
     /**
-     * Sets the index of the next log entry for this follower.
+     * Sets the index of the follower's next log entry.
      *
-     * @param nextIndex
+     * @param nextIndex the new index.
      * @return true if the new index differed from the current index and the current index was updated, false
      *              otherwise.
      */
     boolean setNextIndex(long nextIndex);
 
     /**
-     * Increment the value of the matchIndex
+     * Increments the value of the follower's match index.
      *
-     * @return the new value of matchIndex
+     * @return the new value of matchIndex.
      */
     long incrMatchIndex();
 
     /**
-     * Sets the index of the highest log entry for this follower.
+     * Sets the index of the follower's highest log entry.
      *
-     * @param matchIndex
+     * @param matchIndex the new index.
      * @return true if the new index differed from the current index and the current index was updated, false
      *              otherwise.
      */
     boolean setMatchIndex(long matchIndex);
 
     /**
+     * Returns the identifier of the follower.
      *
-     * @return the identifier of the follower. This could simply be the url of the remote actor.
+     * @return the identifier of the follower.
      */
     String getId();
 
     /**
-     * @return index of the next log entry to send to that server (initialized to leader last log index + 1)
+     * Returns the index of the next log entry to send to the follower.
+     *
+     * @return index of the follower's next log entry.
      */
     long getNextIndex();
 
     /**
-     * @return index of highest log entry known to be replicated on server (initialized to 0, increases monotonically)
+     * Returns the index of highest log entry known to be replicated on the follower.
+     *
+     * @return the index of highest log entry.
      */
     long getMatchIndex();
 
     /**
-     * Checks if the follower is active by comparing the last updated with the duration
+     * Checks if the follower is active by comparing the time of the last activity with the election time out. The
+     * follower is active if some activity has occurred for the follower within the election time out interval.
      *
-     * @return true if follower is active, false otherwise
+     * @return true if follower is active, false otherwise.
      */
     boolean isFollowerActive();
 
     /**
-     * restarts the timeout clock of the follower
+     * Marks the follower as active. This should be called when some activity has occurred for the follower.
      */
     void markFollowerActive();
 
     /**
-     * This will stop the timeout clock
+     * Marks the follower as inactive. This should only be called from unit tests.
      */
+    @VisibleForTesting
     void markFollowerInActive();
 
 
     /**
-     * This will return the active time of follower, since it was last reset
+     * Returns the time since the last activity occurred for the follower.
      *
-     * @return time in milliseconds since the last activity from the follower
+     * @return time in milliseconds since the last activity from the follower.
      */
     long timeSinceLastActivity();
 
     /**
-     * This method checks if it is ok to replicate
+     * This method checks if the next replicate message can be sent to the follower. This is an optimization to avoid
+     * sending duplicate message too frequently if the last replicate message was sent and no reply has been received
+     * yet within the current heart beat interval
      *
      * @return true if it is ok to replicate, false otherwise
      */
     boolean okToReplicate();
 
     /**
-     * @return the payload data version of the follower.
+     * Returns the log entry payload data version of the follower.
+     *
+     * @return the payload data version.
      */
     short getPayloadVersion();
 
     /**
      * Sets the payload data version of the follower.
+     *
+     * @param payloadVersion the payload data version.
      */
     void setPayloadVersion(short payloadVersion);
 
     /**
+     * Returns the the raft version of the follower.
+     *
      * @return the raft version of the follower.
      */
     short getRaftVersion();
 
     /**
      * Sets the raft version of the follower.
+     *
+     * @param raftVersion the raft version.
      */
-    void setRaftVersion(short payloadVersion);
+    void setRaftVersion(short raftVersion);
 }

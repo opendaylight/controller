@@ -17,6 +17,13 @@ public class PeerInfo {
     private String address;
     private VotingState votingState;
 
+    /**
+     * Constructs an instance.
+     *
+     * @param id the id of the peer.
+     * @param address the address of the peer.
+     * @param votingState the VotingState of the peer.
+     */
     public PeerInfo(String id, String address, VotingState votingState) {
         this.id = id;
         this.address = address;

@@ -54,8 +54,6 @@ import org.opendaylight.controller.cluster.raft.persisted.NoopPayload;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.opendaylight.yangtools.concepts.Identifier;
 import org.opendaylight.yangtools.concepts.Immutable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * RaftActor encapsulates a state machine that needs to be kept synchronized
@@ -101,8 +99,6 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
     private static final long APPLY_STATE_DELAY_THRESHOLD_IN_NANOS = TimeUnit.MILLISECONDS.toNanos(50L); // 50 millis
 
-    protected final Logger LOG = LoggerFactory.getLogger(getClass());
-
     /**
      * This context should NOT be passed directly to any other actor it is
      * only to be consumed by the RaftActorBehaviors
@@ -125,7 +121,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
     private boolean shuttingDown;
 
-    public RaftActor(String id, Map<String, String> peerAddresses,
+    protected RaftActor(String id, Map<String, String> peerAddresses,
          Optional<ConfigParams> configParams, short payloadVersion) {
 
         persistentProvider = new PersistentDataProvider(this);
@@ -785,8 +781,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     }
 
     protected void onLeaderChanged(String oldLeader, String newLeader) {
-
-    };
+    }
 
     private String getLeaderAddress(){
         if(isLeader()){
@@ -908,7 +903,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     /**
      * A point-in-time capture of {@link RaftActorBehavior} state critical for transitioning between behaviors.
      */
-    private static abstract class BehaviorState implements Immutable {
+    private abstract static class BehaviorState implements Immutable {
         @Nullable abstract RaftActorBehavior getBehavior();
         @Nullable abstract String getLastValidLeaderId();
         @Nullable abstract String getLastLeaderId();

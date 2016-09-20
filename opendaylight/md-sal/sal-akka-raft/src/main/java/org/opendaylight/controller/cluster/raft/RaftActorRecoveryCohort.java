@@ -20,6 +20,8 @@ public interface RaftActorRecoveryCohort {
     /**
      * This method is called during recovery at the start of a batch of state entries. Derived
      * classes should perform any initialization needed to start a batch.
+     *
+     * @param maxBatchSize the maximum batch size.
      */
     void startLogRecoveryBatch(int maxBatchSize);
 

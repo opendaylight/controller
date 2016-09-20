@@ -174,8 +174,7 @@ public class DefaultConfigParamsImpl implements ConfigParams {
                 String className = DefaultConfigParamsImpl.this.customRaftPolicyImplementationClass;
                 LOG.info("Trying to use custom RaftPolicy {}", className);
                 Class<?> c = Class.forName(className);
-                RaftPolicy obj = (RaftPolicy)c.newInstance();
-                return obj;
+                return (RaftPolicy)c.newInstance();
             } catch (Exception e) {
                 if(LOG.isDebugEnabled()) {
                     LOG.error("Could not create custom raft policy, will stick with default", e);
