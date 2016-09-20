@@ -19,11 +19,7 @@ import org.opendaylight.controller.cluster.raft.persisted.DeleteEntries;
 class ReplicatedLogImpl extends AbstractReplicatedLogImpl {
     private static final int DATA_SIZE_DIVIDER = 5;
 
-    private final Procedure<DeleteEntries> deleteProcedure = new Procedure<DeleteEntries>() {
-        @Override
-        public void apply(final DeleteEntries notUsed) {
-        }
-    };
+    private final Procedure<DeleteEntries> deleteProcedure = NoopProcedure.instance();
 
     private final RaftActorContext context;
     private long dataSizeSinceLastSnapshot = 0L;
@@ -111,17 +107,14 @@ class ReplicatedLogImpl extends AbstractReplicatedLogImpl {
         // handler. This also holds for multiple persist calls in context
         // of a single command.
         context.getPersistenceProvider().persist(replicatedLogEntry,
-            new Procedure<ReplicatedLogEntry>() {
-                @Override
-                public void apply(final ReplicatedLogEntry param) throws Exception {
-                    context.getLogger().debug("{}: persist complete {}", context.getId(), param);
+            param -> {
+                context.getLogger().debug("{}: persist complete {}", context.getId(), param);
 
-                    int logEntrySize = param.size();
-                    dataSizeSinceLastSnapshot += logEntrySize;
+                int logEntrySize = param.size();
+                dataSizeSinceLastSnapshot += logEntrySize;
 
-                    if (callback != null) {
-                        callback.apply(param);
-                    }
+                if (callback != null) {
+                    callback.apply(param);
                 }
             }
         );

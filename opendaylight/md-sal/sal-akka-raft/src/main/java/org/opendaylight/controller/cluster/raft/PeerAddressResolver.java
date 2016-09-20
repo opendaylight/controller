@@ -14,6 +14,7 @@ import javax.annotation.Nullable;
  *
  * @author Thomas Pantelis
  */
+@FunctionalInterface
 public interface PeerAddressResolver {
     /**
      * Resolves a raft actor peer id to it's remote actor address.

@@ -8,6 +8,8 @@
 package org.opendaylight.controller.cluster.raft;
 
 /**
+ * Enumerates the raft versions.
+ *
  * @author Thomas Pantelis
  */
 public interface RaftVersions {

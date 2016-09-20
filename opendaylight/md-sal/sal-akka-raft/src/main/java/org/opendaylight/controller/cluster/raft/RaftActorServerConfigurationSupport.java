@@ -343,11 +343,11 @@ class RaftActorServerConfigurationSupport {
         }
 
         @Override
-        public void onNewOperation(ServerOperationContext<?> operationContext) {
+        public void onNewOperation(ServerOperationContext<?> newOperationContext) {
             if(timedOut) {
-                sendReply(operationContext, ServerChangeStatus.PRIOR_REQUEST_CONSENSUS_TIMEOUT);
+                sendReply(newOperationContext, ServerChangeStatus.PRIOR_REQUEST_CONSENSUS_TIMEOUT);
             } else {
-                super.onNewOperation(operationContext);
+                super.onNewOperation(newOperationContext);
             }
         }
     }
@@ -538,7 +538,7 @@ class RaftActorServerConfigurationSupport {
      *
      * @param <T> the operation type
      */
-    private static abstract class ServerOperationContext<T> {
+    private abstract static class ServerOperationContext<T> {
         private final T operation;
         private final ActorRef clientRequestor;
         private final Identifier contextId;

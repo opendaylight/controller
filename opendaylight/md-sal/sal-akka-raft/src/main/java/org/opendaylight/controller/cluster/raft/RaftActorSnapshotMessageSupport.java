@@ -71,7 +71,8 @@ class RaftActorSnapshotMessageSupport {
     }
 
     private void onCaptureSnapshotReply(byte[] snapshotBytes) {
-        log.debug("{}: CaptureSnapshotReply received by actor: snapshot size {}", context.getId(), snapshotBytes.length);
+        log.debug("{}: CaptureSnapshotReply received by actor: snapshot size {}", context.getId(),
+                snapshotBytes.length);
 
         context.getSnapshotManager().persist(snapshotBytes, context.getTotalMemory());
     }
@@ -100,7 +101,7 @@ class RaftActorSnapshotMessageSupport {
     private void onGetSnapshot(ActorRef sender) {
         log.debug("{}: onGetSnapshot", context.getId());
 
-        if(context.getPersistenceProvider().isRecoveryApplicable()) {
+        if (context.getPersistenceProvider().isRecoveryApplicable()) {
             CaptureSnapshot captureSnapshot = context.getSnapshotManager().newCaptureSnapshot(
                     context.getReplicatedLog().last(), -1, false);
 
@@ -110,7 +111,8 @@ class RaftActorSnapshotMessageSupport {
 
             cohort.createSnapshot(snapshotReplyActor);
         } else {
-            Snapshot snapshot = Snapshot.create(new byte[0], Collections.<ReplicatedLogEntry>emptyList(), -1, -1, -1, -1,
+            Snapshot snapshot = Snapshot.create(new byte[0], Collections.<ReplicatedLogEntry>emptyList(),
+                    -1, -1, -1, -1,
                     context.getTermInformation().getCurrentTerm(), context.getTermInformation().getVotedFor(),
                     context.getPeerServerInfo(true));
 

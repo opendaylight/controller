@@ -47,7 +47,7 @@ public class ServerConfigurationPayload extends Payload implements PersistentPay
 
     @Override
     public int size() {
-        if(serializedSize < 0) {
+        if (serializedSize < 0) {
             try {
                 ByteArrayOutputStream bos = new ByteArrayOutputStream();
                 ObjectOutputStream out = new ObjectOutputStream(bos);
