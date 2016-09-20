@@ -15,6 +15,12 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.behaviors.LeaderInstallSnapshotState;
 
+/**
+ * Implementation of the FollowerLogInformation interface.
+ *
+ * @author Moiz Raja
+ * @author Thomas Pantelis
+ */
 public class FollowerLogInformationImpl implements FollowerLogInformation {
     private final Stopwatch stopwatch = Stopwatch.createUnstarted();
 
@@ -40,6 +46,13 @@ public class FollowerLogInformationImpl implements FollowerLogInformation {
 
     private LeaderInstallSnapshotState installSnapshotState;
 
+    /**
+     * Constructs an instance.
+     *
+     * @param peerInfo the associated PeerInfo of the follower.
+     * @param matchIndex the initial match index.
+     * @param context the RaftActorContext.
+     */
     public FollowerLogInformationImpl(PeerInfo peerInfo, long matchIndex, RaftActorContext context) {
         this.nextIndex = context.getCommitIndex();
         this.matchIndex = matchIndex;
@@ -59,7 +72,7 @@ public class FollowerLogInformationImpl implements FollowerLogInformation {
 
     @Override
     public boolean setNextIndex(long nextIndex) {
-        if(this.nextIndex != nextIndex) {
+        if (this.nextIndex != nextIndex) {
             this.nextIndex = nextIndex;
             return true;
         }
@@ -68,13 +81,13 @@ public class FollowerLogInformationImpl implements FollowerLogInformation {
     }
 
     @Override
-    public long incrMatchIndex(){
+    public long incrMatchIndex() {
         return matchIndex++;
     }
 
     @Override
     public boolean setMatchIndex(long matchIndex) {
-        if(this.matchIndex != matchIndex) {
+        if (this.matchIndex != matchIndex) {
             this.matchIndex = matchIndex;
             return true;
         }
@@ -99,13 +112,13 @@ public class FollowerLogInformationImpl implements FollowerLogInformation {
 
     @Override
     public boolean isFollowerActive() {
-        if(peerInfo.getVotingState() == VotingState.VOTING_NOT_INITIALIZED) {
+        if (peerInfo.getVotingState() == VotingState.VOTING_NOT_INITIALIZED) {
             return false;
         }
 
         long elapsed = stopwatch.elapsed(TimeUnit.MILLISECONDS);
-        return (stopwatch.isRunning()) &&
-                (elapsed <= context.getConfigParams().getElectionTimeOutInterval().toMillis());
+        return stopwatch.isRunning()
+                && elapsed <= context.getConfigParams().getElectionTimeOutInterval().toMillis();
     }
 
     @Override
@@ -130,16 +143,14 @@ public class FollowerLogInformationImpl implements FollowerLogInformation {
 
     @Override
     public boolean okToReplicate() {
-        if(peerInfo.getVotingState() == VotingState.VOTING_NOT_INITIALIZED) {
+        if (peerInfo.getVotingState() == VotingState.VOTING_NOT_INITIALIZED) {
             return false;
         }
 
         // Return false if we are trying to send duplicate data before the heartbeat interval
-        if(getNextIndex() == lastReplicatedIndex){
-            if(lastReplicatedStopwatch.elapsed(TimeUnit.MILLISECONDS) < context.getConfigParams()
-                    .getHeartBeatInterval().toMillis()){
-                return false;
-            }
+        if (getNextIndex() == lastReplicatedIndex && lastReplicatedStopwatch.elapsed(TimeUnit.MILLISECONDS)
+                < context.getConfigParams().getHeartBeatInterval().toMillis()) {
+            return false;
         }
 
         resetLastReplicated();
@@ -148,7 +159,7 @@ public class FollowerLogInformationImpl implements FollowerLogInformation {
 
     private void resetLastReplicated(){
         lastReplicatedIndex = getNextIndex();
-        if(lastReplicatedStopwatch.isRunning()){
+        if (lastReplicatedStopwatch.isRunning()) {
             lastReplicatedStopwatch.reset();
         }
         lastReplicatedStopwatch.start();
@@ -182,7 +193,7 @@ public class FollowerLogInformationImpl implements FollowerLogInformation {
 
     @Override
     public void setLeaderInstallSnapshotState(@Nonnull LeaderInstallSnapshotState state) {
-        if(this.installSnapshotState == null) {
+        if (this.installSnapshotState == null) {
             this.installSnapshotState = Preconditions.checkNotNull(state);
         }
     }

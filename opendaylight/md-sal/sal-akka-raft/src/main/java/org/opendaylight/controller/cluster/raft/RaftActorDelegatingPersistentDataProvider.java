@@ -31,21 +31,21 @@ class RaftActorDelegatingPersistentDataProvider extends DelegatingPersistentData
     }
 
     @Override
-    public <T> void persist(final T o, final Procedure<T> procedure) {
-        if(getDelegate().isRecoveryApplicable()) {
-            super.persist(o, procedure);
+    public <T> void persist(final T object, final Procedure<T> procedure) {
+        if (getDelegate().isRecoveryApplicable()) {
+            super.persist(object, procedure);
         } else {
-            if(o instanceof ReplicatedLogEntry) {
-                Payload payload = ((ReplicatedLogEntry)o).getData();
-                if(payload instanceof PersistentPayload) {
+            if (object instanceof ReplicatedLogEntry) {
+                Payload payload = ((ReplicatedLogEntry)object).getData();
+                if (payload instanceof PersistentPayload) {
                     // We persist the Payload but not the ReplicatedLogEntry to avoid gaps in the journal indexes
                     // on recovery if data persistence is later enabled.
-                    persistentProvider.persist(payload, p -> procedure.apply(o));
+                    persistentProvider.persist(payload, p -> procedure.apply(object));
                 } else {
-                    super.persist(o, procedure);
+                    super.persist(object, procedure);
                 }
             } else {
-                super.persist(o, procedure);
+                super.persist(object, procedure);
             }
         }
     }

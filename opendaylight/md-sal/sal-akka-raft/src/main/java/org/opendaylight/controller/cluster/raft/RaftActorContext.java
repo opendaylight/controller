@@ -17,6 +17,7 @@ import com.google.common.annotations.VisibleForTesting;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.function.LongSupplier;
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
@@ -31,29 +32,32 @@ import org.slf4j.Logger;
  */
 public interface RaftActorContext {
     /**
-     * Create a new local actor
-     * @param props
-     * @return a reference to the newly created actor
+     * Creates a new local actor.
+     *
+     * @param props the Props used to create the actor.
+     * @return a reference to the newly created actor.
      */
     ActorRef actorOf(Props props);
 
     /**
-     * Create a actor selection
-     * @param path
-     * @return an actor selection for the given actor path
+     * Creates an actor selection.
+     *
+     * @param path the path.
+     * @return an actor selection for the given actor path.
      */
     ActorSelection actorSelection(String path);
 
     /**
-     * Get the identifier for the RaftActor. This identifier represents the
-     * name of the actor whose common state is being shared. For example the
-     * id could be 'inventory'
+     * Returns the identifier for the RaftActor. This identifier represents the
+     * name of the actor whose common state is being shared.
      *
      * @return the identifier
      */
     String getId();
 
     /**
+     * Returns the reference to the RaftActor.
+     *
      * @return A reference to the RaftActor itself. This could be used to send messages
      * to the RaftActor
      */
@@ -62,204 +66,255 @@ public interface RaftActorContext {
     /**
      * The akka Cluster singleton for the actor system if one is configured.
      *
-     * @return an Optional containing the CLuster instance is present.
+     * @return an Optional containing the Cluster instance is present.
      */
     Optional<Cluster> getCluster();
 
     /**
-     * @return the ElectionTerm information
+     * Returns the current ElectionTerm information.
+     *
+     * @return the ElectionTerm.
      */
+    @Nonnull
     ElectionTerm getTermInformation();
 
     /**
-     * @return index of highest log entry known to be committed (initialized to 0, increases monotonically)
+     * Returns the index of highest log entry known to be committed.
+     *
+     * @return index of highest log entry known to be committed.
      */
     long getCommitIndex();
 
 
     /**
+     * Sets the index of highest log entry known to be committed.
+     *
      * @param commitIndex new commit index
      */
     void setCommitIndex(long commitIndex);
 
     /**
-     * @return index of highest log entry applied to state machine (initialized to 0, increases monotonically)
+     * Returns index of highest log entry applied to state machine.
+     *
+     * @return index of highest log entry applied to state machine.
      */
     long getLastApplied();
 
-
     /**
-     * @param lastApplied the index of the last log entry that was applied to the state
+     * Sets index of highest log entry applied to state machine.
+     *
+     * @param lastApplied the new applied index.
      */
     void setLastApplied(long lastApplied);
 
     /**
+     * Sets the ReplicatedLog instance.
      *
-     * @param replicatedLog the replicated log of the current RaftActor
+     * @param replicatedLog the ReplicatedLog instance.
      */
-    void setReplicatedLog(ReplicatedLog replicatedLog);
+    void setReplicatedLog(@Nonnull ReplicatedLog replicatedLog);
 
     /**
-     * @return A representation of the log
+     * Returns the ReplicatedLog instance.
+     *
+     * @return the ReplicatedLog instance.
      */
+    @Nonnull
     ReplicatedLog getReplicatedLog();
 
     /**
-     * @return The ActorSystem associated with this context
+     * Returns the The ActorSystem associated with this context.
+     *
+     * @return the ActorSystem.
      */
+    @Nonnull
     ActorSystem getActorSystem();
 
     /**
-     * @return the logger to be used for logging messages to a log file
+     * Returns the logger to be used for logging messages.
+     *
+     * @return the logger.
      */
+    @Nonnull
     Logger getLogger();
 
     /**
-     * Get the address of the peer as a String. This is the same format in
-     * which a consumer would provide the address
+     * Gets the address of a peer as a String. This is the same format in which a consumer would provide the address.
      *
-     * @param peerId
-     * @return The address of the peer or null if the address has not yet been
-     *         resolved
+     * @param peerId the id of the peer.
+     * @return the address of the peer or null if the address has not yet been resolved.
      */
+    @Nullable
     String getPeerAddress(String peerId);
 
     /**
-     * @param serverCfgPayload
+     * Updates the peers and information to match the given ServerConfigurationPayload.
+     *
+     * @param serverCfgPayload the ServerConfigurationPayload.
      */
     void updatePeerIds(ServerConfigurationPayload serverCfgPayload);
 
     /**
+     * Returns the PeerInfo instances for each peer.
+     *
      * @return list of PeerInfo
      */
+    @Nonnull
     Collection<PeerInfo> getPeers();
 
     /**
-     * @return the list of peer IDs.
+     * Returns the id's for each peer.
+     *
+     * @return the list of peer id's.
      */
+    @Nonnull
     Collection<String> getPeerIds();
 
     /**
-     * Get the PeerInfo for the given peer.
+     * Returns the PeerInfo for the given peer.
      *
      * @param peerId
-     * @return the PeerInfo
+     * @return the PeerInfo or null if not found.
      */
+    @Nullable
     PeerInfo getPeerInfo(String peerId);
 
     /**
-     * Add to actor peers
+     * Adds a new peer.
      *
-     * @param name
-     * @param address
+     * @param id the id of the new peer.
+     * @param address the address of the new peer.
+     * @param votingState the VotingState of the new peer.
      */
-    void addToPeers(String name, String address, VotingState votingState);
+    void addToPeers(String id, String address, VotingState votingState);
 
     /**
+     * Removes a peer.
      *
-     * @param name
+     * @param id the id of the peer to remove.
      */
-    void removePeer(String name);
+    void removePeer(String id);
 
     /**
-     * Given a peerId return the corresponding actor
-     * <p>
+     * Returns an ActorSelection for a peer.
      *
-     *
-     * @param peerId
-     * @return The actorSelection corresponding to the peer or null if the
-     *         address has not yet been resolved
+     * @param peerId the id of the peer.
+     * @return the actorSelection corresponding to the peer or null if the address has not yet been resolved.
      */
+    @Nullable
     ActorSelection getPeerActorSelection(String peerId);
 
     /**
-     * Set Peer Address can be called at a later time to change the address of
-     * a known peer.
+     * Sets the address of a peer.
      *
-     * <p>
-     * Throws an IllegalStateException if the peer is unknown
-     *
-     * @param peerId
-     * @param peerAddress
+     * @param peerId the id of the peer.
+     * @param peerAddress the address of the peer.
      */
     void setPeerAddress(String peerId, String peerAddress);
 
     /**
-     * @return ConfigParams
+     * Returns the ConfigParams instance.
+     *
+     * @return the ConfigParams instance.
      */
+    @Nonnull
     ConfigParams getConfigParams();
 
     /**
+     * Returns the SnapshotManager instance.
      *
-     * @return the SnapshotManager for this RaftActor
+     * @return the SnapshotManager instance.
      */
+    @Nonnull
     SnapshotManager getSnapshotManager();
 
     /**
+     * Returns the DataPersistenceProvider instance.
      *
-     * @return the DataPersistenceProvider for this RaftActor
+     * @return the DataPersistenceProvider instance.
      */
+    @Nonnull
     DataPersistenceProvider getPersistenceProvider();
 
     /**
+     * Determines if there are any peer followers.
      *
-     * @return true if the RaftActor has followers else false
+     * @return true if there are followers otherwise false.
      */
     boolean hasFollowers();
 
     /**
+     * Returns the total available memory for use in calculations. Normally this returns JVM's max memory but can be
+     * overridden for unit tests.
      *
-     * @return the total memory used by the ReplicatedLog
+     * @return the total memory.
      */
     long getTotalMemory();
 
     /**
+     * Sets the retriever of the total memory metric.
      *
-     * @param retriever a supplier of the total memory metric
+     * @param retriever a supplier of the total memory metric.
      */
     @VisibleForTesting
     void setTotalMemoryRetriever(LongSupplier retriever);
 
     /**
+     * Returns the payload version to be used when replicating data.
      *
-     * @return the payload version to be used when replicating data
+     * @return the payload version.
      */
     short getPayloadVersion();
 
     /**
-     * @return an implementation of the RaftPolicy so that the Raft code can be adapted
+     * Returns the RaftPolicy used to determine certain Raft behaviors.
+     *
+     * @return the RaftPolicy instance.
      */
+    @Nonnull
     RaftPolicy getRaftPolicy();
 
     /**
-     * @return true if there are any dynamic server configuration changes available,
-     *  false if static peer configurations are still in use
+     * Determines if there have been any dynamic server configuration changes applied.
+     *
+     * @return true if dynamic server configuration changes have been applied, false otherwise, meaning that static
+     *         peer configuration is still in use.
      */
     boolean isDynamicServerConfigurationInUse();
 
     /**
-     * Configures the dynamic server configurations are avaialble for the RaftActor
+     * Sets that dynamic server configuration changes have been applied.
      */
     void setDynamicServerConfigurationInUse();
 
     /**
-     * @return the RaftActor's peer information as a ServerConfigurationPayload if the
-     * dynamic server configurations are available, otherwise returns null
+     * Returns the peer information as a ServerConfigurationPayload if dynamic server configurations have been applied.
+     *
+     * @param includeSelf include this peer's info.
+     * @return the peer information as a ServerConfigurationPayload or null if no dynamic server configurations have
+     *         been applied.
      */
-    @Nullable ServerConfigurationPayload getPeerServerInfo(boolean includeSelf);
+    @Nullable
+    ServerConfigurationPayload getPeerServerInfo(boolean includeSelf);
 
     /**
-     * @return true if this RaftActor is a voting member of the cluster, false otherwise.
+     * Determines if this peer is a voting member of the cluster.
+     *
+     * @return true if this peer is a voting member, false otherwise.
      */
     boolean isVotingMember();
 
     /**
+     * Determines if there are any voting peers.
+     *
      * @return true if there are any voting peers, false otherwise.
      */
     boolean anyVotingPeers();
 
     /**
-     * @return current behavior attached to the raft actor.
+     * Returns the current behavior attached to the RaftActor.
+     *
+     * @return current behavior.
      */
     RaftActorBehavior getCurrentBehavior();
 }

@@ -11,30 +11,34 @@ package org.opendaylight.controller.cluster.raft;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 
 /**
- * Represents one entry in the replicated log
+ * Represents one entry in the replicated log.
  */
 public interface ReplicatedLogEntry {
     /**
+     * Returns the payload/data to be replicated.
      *
-     * @return The payload/data to be replicated
+     * @return the payload/data
      */
     Payload getData();
 
     /**
+     * Returns the term of the entry.
      *
-     * @return The term of the entry
+     * @return the term
      */
     long getTerm();
 
     /**
+     * Returns the index of the entry.
      *
-     * @return The index of the entry
+     * @return the index
      */
     long getIndex();
 
     /**
+     * Returns the size of the entry in bytes. An approximate number may be good enough.
      *
-     * @return The size of the entry in bytes. An approximate number may be good enough.
+     * @return the size of the entry in bytes.
      */
     int size();
 }

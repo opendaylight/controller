@@ -14,6 +14,7 @@ import scala.concurrent.duration.FiniteDuration;
 /**
  * An abstract class that implements a Runnable operation with a timer such that if the run method isn't
  * invoked within a timeout period, the operation is cancelled via {@link #doCancel}.
+ *
  * <p>
  * <b>Note:</b> this class is not thread safe and is intended for use only within the context of the same
  * actor that's passed on construction. The run method must be called on this actor's thread dispatcher as it
@@ -28,17 +29,13 @@ abstract class TimedRunnable implements Runnable {
     TimedRunnable(FiniteDuration timeout, RaftActor actor) {
         Preconditions.checkNotNull(timeout);
         Preconditions.checkNotNull(actor);
-        cancelTimer = actor.getContext().system().scheduler().scheduleOnce(timeout, actor.self(), new Runnable() {
-            @Override
-            public void run() {
-                cancel();
-            }
-        }, actor.getContext().system().dispatcher(), actor.self());
+        cancelTimer = actor.getContext().system().scheduler().scheduleOnce(timeout, actor.self(),
+                (Runnable) () -> cancel(), actor.getContext().system().dispatcher(), actor.self());
     }
 
     @Override
     public void run() {
-        if(canRun) {
+        if (canRun) {
             canRun = false;
             cancelTimer.cancel();
             doRun();

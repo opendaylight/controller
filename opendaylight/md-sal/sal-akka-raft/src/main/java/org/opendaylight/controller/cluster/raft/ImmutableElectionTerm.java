@@ -32,12 +32,12 @@ public class ImmutableElectionTerm implements ElectionTerm {
     }
 
     @Override
-    public void update(long currentTerm, String votedFor) {
+    public void update(long newTerm, String newVotedFor) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void updateAndPersist(long currentTerm, String votedFor) {
+    public void updateAndPersist(long newTerm, String newVotedFor) {
         throw new UnsupportedOperationException();
     }
 

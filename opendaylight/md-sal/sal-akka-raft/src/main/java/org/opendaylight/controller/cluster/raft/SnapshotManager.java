@@ -19,13 +19,19 @@ import org.opendaylight.controller.cluster.raft.base.messages.SnapshotComplete;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.slf4j.Logger;
 
+/**
+ * Manages the capturing of snapshots for a RaftActor.
+ *
+ * @author Moiz Raja
+ * @author Thomas Pantelis
+ */
 public class SnapshotManager implements SnapshotState {
 
     private final SnapshotState IDLE = new Idle();
     private final SnapshotState PERSISTING = new Persisting();
     private final SnapshotState CREATING = new Creating();
 
-    private final Logger LOG;
+    private final Logger log;
     private final RaftActorContext context;
     private final LastAppliedTermInformationReader lastAppliedTermInformationReader =
             new LastAppliedTermInformationReader();
@@ -42,9 +48,15 @@ public class SnapshotManager implements SnapshotState {
     private ApplySnapshot applySnapshot;
     private Consumer<byte[]> applySnapshotProcedure;
 
+    /**
+     * Constructs an instance.
+     *
+     * @param context the RaftActorContext
+     * @param logger the Logger
+     */
     public SnapshotManager(RaftActorContext context, Logger logger) {
         this.context = context;
-        this.LOG = logger;
+        this.log = logger;
     }
 
     public boolean isApplying() {
@@ -108,14 +120,22 @@ public class SnapshotManager implements SnapshotState {
         return captureSnapshot;
     }
 
-    private boolean hasFollowers(){
+    private boolean hasFollowers() {
         return context.hasFollowers();
     }
 
-    private String persistenceId(){
+    private String persistenceId() {
         return context.getId();
     }
 
+    /**
+     * Constructs a CaptureSnapshot instance.
+     *
+     * @param lastLogEntry the last log entry for the snapshot.
+     * @param replicatedToAllIndex the index of the last entry replicated to all followers.
+     * @param installSnapshotInitiated true if snapshot is initiated to install on a follower.
+     * @return a new CaptureSnapshot instance.
+     */
     public CaptureSnapshot newCaptureSnapshot(ReplicatedLogEntry lastLogEntry, long replicatedToAllIndex,
             boolean installSnapshotInitiated) {
         TermInformationReader lastAppliedTermInfoReader =
@@ -135,11 +155,11 @@ public class SnapshotManager implements SnapshotState {
 
         long lastLogEntryIndex = lastAppliedIndex;
         long lastLogEntryTerm = lastAppliedTerm;
-        if(lastLogEntry != null) {
+        if (lastLogEntry != null) {
             lastLogEntryIndex = lastLogEntry.getIndex();
             lastLogEntryTerm = lastLogEntry.getTerm();
         } else {
-            LOG.debug("{}: Capturing Snapshot : lastLogEntry is null. Using lastAppliedIndex {} and lastAppliedTerm {} instead.",
+            log.debug("{}: Capturing Snapshot : lastLogEntry is null. Using lastAppliedIndex {} and lastAppliedTerm {} instead.",
                     persistenceId(), lastAppliedIndex, lastAppliedTerm);
         }
 
@@ -156,54 +176,55 @@ public class SnapshotManager implements SnapshotState {
 
         @Override
         public boolean capture(ReplicatedLogEntry lastLogEntry, long replicatedToAllIndex) {
-            LOG.debug("capture should not be called in state {}", this);
+            log.debug("capture should not be called in state {}", this);
             return false;
         }
 
         @Override
-        public boolean captureToInstall(ReplicatedLogEntry lastLogEntry, long replicatedToAllIndex, String targetFollower) {
-            LOG.debug("captureToInstall should not be called in state {}", this);
+        public boolean captureToInstall(ReplicatedLogEntry lastLogEntry, long replicatedToAllIndex,
+                String targetFollower) {
+            log.debug("captureToInstall should not be called in state {}", this);
             return false;
         }
 
         @Override
         public void apply(ApplySnapshot snapshot) {
-            LOG.debug("apply should not be called in state {}", this);
+            log.debug("apply should not be called in state {}", this);
         }
 
         @Override
         public void persist(final byte[] snapshotBytes, final long totalMemory) {
-            LOG.debug("persist should not be called in state {}", this);
+            log.debug("persist should not be called in state {}", this);
         }
 
         @Override
         public void commit(final long sequenceNumber, long timeStamp) {
-            LOG.debug("commit should not be called in state {}", this);
+            log.debug("commit should not be called in state {}", this);
         }
 
         @Override
         public void rollback() {
-            LOG.debug("rollback should not be called in state {}", this);
+            log.debug("rollback should not be called in state {}", this);
         }
 
         @Override
         public long trimLog(final long desiredTrimIndex) {
-            LOG.debug("trimLog should not be called in state {}", this);
+            log.debug("trimLog should not be called in state {}", this);
             return -1;
         }
 
         protected long doTrimLog(final long desiredTrimIndex) {
             //  we would want to keep the lastApplied as its used while capturing snapshots
             long lastApplied = context.getLastApplied();
-            long tempMin = Math.min(desiredTrimIndex, (lastApplied > -1 ? lastApplied - 1 : -1));
+            long tempMin = Math.min(desiredTrimIndex, lastApplied > -1 ? lastApplied - 1 : -1);
 
-            if(LOG.isTraceEnabled()) {
-                LOG.trace("{}: performSnapshotWithoutCapture: desiredTrimIndex: {}, lastApplied: {}, tempMin: {}",
+            if (log.isTraceEnabled()) {
+                log.trace("{}: performSnapshotWithoutCapture: desiredTrimIndex: {}, lastApplied: {}, tempMin: {}",
                         persistenceId(), desiredTrimIndex, lastApplied, tempMin);
             }
 
             if (tempMin > -1 && context.getReplicatedLog().isPresent(tempMin)) {
-                LOG.debug("{}: fakeSnapshot purging log to {} for term {}", persistenceId(), tempMin,
+                log.debug("{}: fakeSnapshot purging log to {} for term {}", persistenceId(), tempMin,
                         context.getTermInformation().getCurrentTerm());
 
                 //use the term of the temp-min, since we check for isPresent, entry will not be null
@@ -214,7 +235,7 @@ public class SnapshotManager implements SnapshotState {
             }
 
             final RaftActorBehavior currentBehavior = context.getCurrentBehavior();
-            if(tempMin > currentBehavior.getReplicatedToAllIndex()) {
+            if (tempMin > currentBehavior.getReplicatedToAllIndex()) {
                 // It's possible a follower was lagging and an install snapshot advanced its match index past
                 // the current replicatedToAllIndex. Since the follower is now caught up we should advance the
                 // replicatedToAllIndex (to tempMin). The fact that tempMin wasn't found in the log is likely
@@ -236,16 +257,16 @@ public class SnapshotManager implements SnapshotState {
         private boolean capture(ReplicatedLogEntry lastLogEntry, long replicatedToAllIndex, String targetFollower) {
             captureSnapshot = newCaptureSnapshot(lastLogEntry, replicatedToAllIndex, targetFollower != null);
 
-            if(captureSnapshot.isInstallSnapshotInitiated()) {
-                LOG.info("{}: Initiating snapshot capture {} to install on {}",
+            if (captureSnapshot.isInstallSnapshotInitiated()) {
+                log.info("{}: Initiating snapshot capture {} to install on {}",
                         persistenceId(), captureSnapshot, targetFollower);
             } else {
-                LOG.info("{}: Initiating snapshot capture {}", persistenceId(), captureSnapshot);
+                log.info("{}: Initiating snapshot capture {}", persistenceId(), captureSnapshot);
             }
 
             lastSequenceNumber = context.getPersistenceProvider().getLastSequenceNumber();
 
-            LOG.debug("{}: lastSequenceNumber prior to capture: {}", persistenceId(), lastSequenceNumber);
+            log.debug("{}: lastSequenceNumber prior to capture: {}", persistenceId(), lastSequenceNumber);
 
             SnapshotManager.this.currentState = CREATING;
 
@@ -253,7 +274,7 @@ public class SnapshotManager implements SnapshotState {
                 createSnapshotProcedure.run();
             } catch (Exception e) {
                 SnapshotManager.this.currentState = IDLE;
-                LOG.error("Error creating snapshot", e);
+                log.error("Error creating snapshot", e);
                 return false;
             }
 
@@ -266,19 +287,20 @@ public class SnapshotManager implements SnapshotState {
         }
 
         @Override
-        public boolean captureToInstall(ReplicatedLogEntry lastLogEntry, long replicatedToAllIndex, String targetFollower) {
+        public boolean captureToInstall(ReplicatedLogEntry lastLogEntry, long replicatedToAllIndex,
+                String targetFollower) {
             return capture(lastLogEntry, replicatedToAllIndex, targetFollower);
         }
 
         @Override
-        public void apply(ApplySnapshot applySnapshot) {
-            SnapshotManager.this.applySnapshot = applySnapshot;
+        public void apply(ApplySnapshot toApply) {
+            SnapshotManager.this.applySnapshot = toApply;
 
             lastSequenceNumber = context.getPersistenceProvider().getLastSequenceNumber();
 
-            LOG.debug("lastSequenceNumber prior to persisting applied snapshot: {}", lastSequenceNumber);
+            log.debug("lastSequenceNumber prior to persisting applied snapshot: {}", lastSequenceNumber);
 
-            context.getPersistenceProvider().saveSnapshot(applySnapshot.getSnapshot());
+            context.getPersistenceProvider().saveSnapshot(toApply.getSnapshot());
 
             SnapshotManager.this.currentState = PERSISTING;
         }
@@ -310,10 +332,9 @@ public class SnapshotManager implements SnapshotState {
 
             context.getPersistenceProvider().saveSnapshot(snapshot);
 
-            LOG.info("{}: Persisting of snapshot done: {}", persistenceId(), snapshot);
+            log.info("{}: Persisting of snapshot done: {}", persistenceId(), snapshot);
 
-            long dataThreshold = totalMemory *
-                    context.getConfigParams().getSnapshotDataThresholdPercentage() / 100;
+            long dataThreshold = totalMemory * context.getConfigParams().getSnapshotDataThresholdPercentage() / 100;
             boolean dataSizeThresholdExceeded = context.getReplicatedLog().dataSize() > dataThreshold;
 
             boolean logSizeExceededSnapshotBatchCount =
@@ -321,15 +342,16 @@ public class SnapshotManager implements SnapshotState {
 
             final RaftActorBehavior currentBehavior = context.getCurrentBehavior();
             if (dataSizeThresholdExceeded || logSizeExceededSnapshotBatchCount) {
-                if(LOG.isDebugEnabled()) {
-                    if(dataSizeThresholdExceeded) {
-                        LOG.debug("{}: log data size {} exceeds the memory threshold {} - doing snapshotPreCommit with index {}",
+                if (log.isDebugEnabled()) {
+                    if (dataSizeThresholdExceeded) {
+                        log.debug("{}: log data size {} exceeds the memory threshold {} - doing snapshotPreCommit with index {}",
                                 context.getId(), context.getReplicatedLog().dataSize(), dataThreshold,
                                 captureSnapshot.getLastAppliedIndex());
                     } else {
-                        LOG.debug("{}: log size {} exceeds the snapshot batch count {} - doing snapshotPreCommit with index {}",
+                        log.debug("{}: log size {} exceeds the snapshot batch count {} - doing snapshotPreCommit with index {}",
                                 context.getId(), context.getReplicatedLog().size(),
-                                context.getConfigParams().getSnapshotBatchCount(), captureSnapshot.getLastAppliedIndex());
+                                context.getConfigParams().getSnapshotBatchCount(),
+                                captureSnapshot.getLastAppliedIndex());
                     }
                 }
 
@@ -342,11 +364,11 @@ public class SnapshotManager implements SnapshotState {
 
                 // Don't reset replicatedToAllIndex to -1 as this may prevent us from trimming the log after an
                 // install snapshot to a follower.
-                if(captureSnapshot.getReplicatedToAllIndex() >= 0) {
+                if (captureSnapshot.getReplicatedToAllIndex() >= 0) {
                     currentBehavior.setReplicatedToAllIndex(captureSnapshot.getReplicatedToAllIndex());
                 }
 
-            } else if(captureSnapshot.getReplicatedToAllIndex() != -1){
+            } else if (captureSnapshot.getReplicatedToAllIndex() != -1) {
                 // clear the log based on replicatedToAllIndex
                 context.getReplicatedLog().snapshotPreCommit(captureSnapshot.getReplicatedToAllIndex(),
                         captureSnapshot.getReplicatedToAllTerm());
@@ -361,8 +383,8 @@ public class SnapshotManager implements SnapshotState {
                         context.getReplicatedLog().getSnapshotTerm());
             }
 
-            LOG.info("{}: Removed in-memory snapshotted entries, adjusted snaphsotIndex: {} " +
-                    "and term: {}", context.getId(), context.getReplicatedLog().getSnapshotIndex(),
+            log.info("{}: Removed in-memory snapshotted entries, adjusted snaphsotIndex: {} and term: {}",
+                    context.getId(), context.getReplicatedLog().getSnapshotIndex(),
                     context.getReplicatedLog().getSnapshotTerm());
 
             if (context.getId().equals(currentBehavior.getLeaderId())
@@ -386,9 +408,9 @@ public class SnapshotManager implements SnapshotState {
 
         @Override
         public void commit(final long sequenceNumber, long timeStamp) {
-            LOG.debug("{}: Snapshot success -  sequence number: {}", persistenceId(), sequenceNumber);
+            log.debug("{}: Snapshot success -  sequence number: {}", persistenceId(), sequenceNumber);
 
-            if(applySnapshot != null) {
+            if (applySnapshot != null) {
                 try {
                     Snapshot snapshot = applySnapshot.getSnapshot();
 
@@ -398,17 +420,17 @@ public class SnapshotManager implements SnapshotState {
                     context.setCommitIndex(snapshot.getLastAppliedIndex());
                     context.getTermInformation().update(snapshot.getElectionTerm(), snapshot.getElectionVotedFor());
 
-                    if(snapshot.getServerConfiguration() != null) {
+                    if (snapshot.getServerConfiguration() != null) {
                         context.updatePeerIds(snapshot.getServerConfiguration());
                     }
 
-                    if(snapshot.getState().length > 0 ) {
+                    if (snapshot.getState().length > 0 ) {
                         applySnapshotProcedure.accept(snapshot.getState());
                     }
 
                     applySnapshot.getCallback().onSuccess();
                 } catch (Exception e) {
-                    LOG.error("{}: Error applying snapshot", context.getId(), e);
+                    log.error("{}: Error applying snapshot", context.getId(), e);
                 }
             } else {
                 context.getReplicatedLog().snapshotCommit();
@@ -425,11 +447,11 @@ public class SnapshotManager implements SnapshotState {
         @Override
         public void rollback() {
             // Nothing to rollback if we're applying a snapshot from the leader.
-            if(applySnapshot == null) {
+            if (applySnapshot == null) {
                 context.getReplicatedLog().snapshotRollback();
 
-                LOG.info("{}: Replicated Log rolled back. Snapshot will be attempted in the next cycle." +
-                        "snapshotIndex:{}, snapshotTerm:{}, log-size:{}", persistenceId(),
+                log.info("{}: Replicated Log rolled back. Snapshot will be attempted in the next cycle."
+                        + "snapshotIndex:{}, snapshotTerm:{}, log-size:{}", persistenceId(),
                         context.getReplicatedLog().getSnapshotIndex(),
                         context.getReplicatedLog().getSnapshotTerm(),
                         context.getReplicatedLog().size());
@@ -457,20 +479,21 @@ public class SnapshotManager implements SnapshotState {
 
     private interface TermInformationReader {
         long getIndex();
+
         long getTerm();
     }
 
-    static class LastAppliedTermInformationReader implements TermInformationReader{
+    static class LastAppliedTermInformationReader implements TermInformationReader {
         private long index;
         private long term;
 
-        public LastAppliedTermInformationReader init(ReplicatedLog log, long originalIndex,
-                                         ReplicatedLogEntry lastLogEntry, boolean hasFollowers){
+        LastAppliedTermInformationReader init(ReplicatedLog log, long originalIndex, ReplicatedLogEntry lastLogEntry,
+                boolean hasFollowers) {
             ReplicatedLogEntry entry = log.get(originalIndex);
             this.index = -1L;
             this.term = -1L;
             if (!hasFollowers) {
-                if(lastLogEntry != null) {
+                if (lastLogEntry != null) {
                     // since we have persisted the last-log-entry to persistent journal before the capture,
                     // we would want to snapshot from this entry.
                     index = lastLogEntry.getIndex();
@@ -479,7 +502,7 @@ public class SnapshotManager implements SnapshotState {
             } else if (entry != null) {
                 index = entry.getIndex();
                 term = entry.getTerm();
-            } else if(log.getSnapshotIndex() > -1){
+            } else if (log.getSnapshotIndex() > -1) {
                 index = log.getSnapshotIndex();
                 term = log.getSnapshotTerm();
             }
@@ -487,21 +510,21 @@ public class SnapshotManager implements SnapshotState {
         }
 
         @Override
-        public long getIndex(){
+        public long getIndex() {
             return this.index;
         }
 
         @Override
-        public long getTerm(){
+        public long getTerm() {
             return this.term;
         }
     }
 
-    private static class ReplicatedToAllTermInformationReader implements TermInformationReader{
+    private static class ReplicatedToAllTermInformationReader implements TermInformationReader {
         private long index;
         private long term;
 
-        ReplicatedToAllTermInformationReader init(ReplicatedLog log, long originalIndex){
+        ReplicatedToAllTermInformationReader init(ReplicatedLog log, long originalIndex) {
             ReplicatedLogEntry entry = log.get(originalIndex);
             this.index = -1L;
             this.term = -1L;
@@ -515,12 +538,12 @@ public class SnapshotManager implements SnapshotState {
         }
 
         @Override
-        public long getIndex(){
+        public long getIndex() {
             return this.index;
         }
 
         @Override
-        public long getTerm(){
+        public long getTerm() {
             return this.term;
         }
     }

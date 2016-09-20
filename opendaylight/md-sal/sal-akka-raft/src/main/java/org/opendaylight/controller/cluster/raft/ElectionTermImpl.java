@@ -15,9 +15,6 @@ import org.slf4j.Logger;
  * Implementation of ElectionTerm for the RaftActor.
  */
 class ElectionTermImpl implements ElectionTerm {
-    /**
-     * Identifier of the actor whose election term information this is
-     */
     private long currentTerm = 0;
     private String votedFor = null;
 
@@ -42,17 +39,16 @@ class ElectionTermImpl implements ElectionTerm {
         return votedFor;
     }
 
-    @Override public void update(long currentTerm, String votedFor) {
-        if(log.isDebugEnabled()) {
-            log.debug("{}: Set currentTerm={}, votedFor={}", logId, currentTerm, votedFor);
-        }
-        this.currentTerm = currentTerm;
-        this.votedFor = votedFor;
+    @Override
+    public void update(long newTerm, String newVotedFor) {
+        log.debug("{}: Set currentTerm={}, votedFor={}", logId, newTerm, newVotedFor);
+        this.currentTerm = newTerm;
+        this.votedFor = newVotedFor;
     }
 
     @Override
-    public void updateAndPersist(long currentTerm, String votedFor){
-        update(currentTerm, votedFor);
+    public void updateAndPersist(long newTerm, String newVotedFor) {
+        update(newTerm, newVotedFor);
         // FIXME : Maybe first persist then update the state
         persistence.persist(new UpdateElectionTerm(this.currentTerm, this.votedFor), NoopProcedure.instance());
     }

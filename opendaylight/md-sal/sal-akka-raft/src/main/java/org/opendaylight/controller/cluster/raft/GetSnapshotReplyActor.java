@@ -41,7 +41,7 @@ class GetSnapshotReplyActor extends UntypedActor {
 
     @Override
     public void onReceive(Object message) {
-        if(message instanceof CaptureSnapshotReply) {
+        if (message instanceof CaptureSnapshotReply) {
             Snapshot snapshot = Snapshot.create(((CaptureSnapshotReply)message).getSnapshot(),
                     params.captureSnapshot.getUnAppliedEntries(),
                     params.captureSnapshot.getLastIndex(), params.captureSnapshot.getLastTerm(),
@@ -51,7 +51,8 @@ class GetSnapshotReplyActor extends UntypedActor {
 
             LOG.debug("{}: Received CaptureSnapshotReply, sending {}", params.id, snapshot);
 
-            params.replyToActor.tell(new GetSnapshotReply(params.id, SerializationUtils.serialize(snapshot)), getSelf());
+            params.replyToActor.tell(new GetSnapshotReply(params.id, SerializationUtils.serialize(snapshot)),
+                    getSelf());
             getSelf().tell(PoisonPill.getInstance(), getSelf());
         } else if (message instanceof ReceiveTimeout) {
             LOG.warn("{}: Got ReceiveTimeout for inactivity - did not receive CaptureSnapshotReply within {} ms",
