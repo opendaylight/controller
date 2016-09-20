@@ -26,20 +26,28 @@ public interface ReplicatedLog {
      * @return the ReplicatedLogEntry if found, otherwise null if the adjusted index less than 0 or
      * greater than the size of the in-memory journal.
      */
-    @Nullable ReplicatedLogEntry get(long index);
+    @Nullable
+    ReplicatedLogEntry get(long index);
 
     /**
      * Return the last replicated log entry in the log or null of not found.
+     *
+     * @return the last replicated log entry in the log or null of not found.
      */
-    @Nullable ReplicatedLogEntry last();
+    @Nullable
+    ReplicatedLogEntry last();
 
     /**
      * Return the index of the last entry in the log or -1 if the log is empty.
+     *
+     * @return the index of the last entry in the log or -1 if the log is empty.
      */
     long lastIndex();
 
     /**
      * Return the term of the last entry in the log or -1 if the log is empty.
+     *
+     * @return the term of the last entry in the log or -1 if the log is empty.
      */
     long lastTerm();
 
@@ -85,6 +93,12 @@ public interface ReplicatedLog {
      */
     void appendAndPersist(final ReplicatedLogEntry replicatedLogEntry);
 
+    /**
+     * Appends an entry to the in-memory log and persists it as well.
+     *
+     * @param replicatedLogEntry the entry to append
+     * @param callback the Procedure to be notified when persistence is complete.
+     */
     void appendAndPersist(ReplicatedLogEntry replicatedLogEntry, Procedure<ReplicatedLogEntry> callback);
 
     /**
@@ -182,14 +196,16 @@ public interface ReplicatedLog {
     void snapshotRollback();
 
     /**
-     * Size of the data in the log (in bytes)
+     * Returns the size of the data in the log (in bytes)
+     *
+     * @return the size of the data in the log (in bytes).
      */
     int dataSize();
 
     /**
-     * We decide if snapshot need to be captured based on the count/memory consumed.
-     * @param replicatedLogEntry
+     * Determines if a snapshot need to be captured based on the count/memory consumed.
+     *
+     * @param replicatedLogEntry the last log entry.
      */
     void captureSnapshotIfReady(ReplicatedLogEntry replicatedLogEntry);
-
 }

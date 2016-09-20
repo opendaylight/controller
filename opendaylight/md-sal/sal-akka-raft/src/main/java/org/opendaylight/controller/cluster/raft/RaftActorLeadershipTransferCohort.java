@@ -136,12 +136,9 @@ public class RaftActorLeadershipTransferCohort {
         // safely run on the actor's thread dispatcher.
         FiniteDuration timeout = FiniteDuration.create(newLeaderTimeoutInMillis, TimeUnit.MILLISECONDS);
         newLeaderTimer = raftActor.getContext().system().scheduler().scheduleOnce(timeout, raftActor.self(),
-                new Runnable() {
-                    @Override
-                    public void run() {
-                        LOG.debug("{}: leader not elected in time", raftActor.persistenceId());
-                        finish(true);
-                    }
+                (Runnable) () -> {
+                    LOG.debug("{}: leader not elected in time", raftActor.persistenceId());
+                    finish(true);
                 }, raftActor.getContext().system().dispatcher(), raftActor.self());
     }
 

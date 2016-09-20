@@ -19,6 +19,12 @@ import org.opendaylight.controller.cluster.raft.base.messages.SnapshotComplete;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.slf4j.Logger;
 
+/**
+ * Manages the capturing of snapshots for a RaftActor.
+ *
+ * @author Moiz Raja
+ * @author Thomas Pantelis
+ */
 public class SnapshotManager implements SnapshotState {
 
     private final SnapshotState IDLE = new Idle();
@@ -42,6 +48,12 @@ public class SnapshotManager implements SnapshotState {
     private ApplySnapshot applySnapshot;
     private Consumer<byte[]> applySnapshotProcedure;
 
+    /**
+     * Constructs an instance.
+     *
+     * @param context the RaftActorContext
+     * @param logger the Logger
+     */
     public SnapshotManager(RaftActorContext context, Logger logger) {
         this.context = context;
         this.LOG = logger;
@@ -116,6 +128,14 @@ public class SnapshotManager implements SnapshotState {
         return context.getId();
     }
 
+    /**
+     * Constructs a CaptureSnapshot instance.
+     *
+     * @param lastLogEntry the last log entry for the snapshot.
+     * @param replicatedToAllIndex the index of the last entry replicated to all followers.
+     * @param installSnapshotInitiated true if snapshot is initiated to install on a follower.
+     * @return
+     */
     public CaptureSnapshot newCaptureSnapshot(ReplicatedLogEntry lastLogEntry, long replicatedToAllIndex,
             boolean installSnapshotInitiated) {
         TermInformationReader lastAppliedTermInfoReader =
@@ -195,7 +215,7 @@ public class SnapshotManager implements SnapshotState {
         protected long doTrimLog(final long desiredTrimIndex) {
             //  we would want to keep the lastApplied as its used while capturing snapshots
             long lastApplied = context.getLastApplied();
-            long tempMin = Math.min(desiredTrimIndex, (lastApplied > -1 ? lastApplied - 1 : -1));
+            long tempMin = Math.min(desiredTrimIndex, lastApplied > -1 ? lastApplied - 1 : -1);
 
             if(LOG.isTraceEnabled()) {
                 LOG.trace("{}: performSnapshotWithoutCapture: desiredTrimIndex: {}, lastApplied: {}, tempMin: {}",
@@ -271,14 +291,14 @@ public class SnapshotManager implements SnapshotState {
         }
 
         @Override
-        public void apply(ApplySnapshot applySnapshot) {
-            SnapshotManager.this.applySnapshot = applySnapshot;
+        public void apply(ApplySnapshot toApply) {
+            SnapshotManager.this.applySnapshot = toApply;
 
             lastSequenceNumber = context.getPersistenceProvider().getLastSequenceNumber();
 
             LOG.debug("lastSequenceNumber prior to persisting applied snapshot: {}", lastSequenceNumber);
 
-            context.getPersistenceProvider().saveSnapshot(applySnapshot.getSnapshot());
+            context.getPersistenceProvider().saveSnapshot(toApply.getSnapshot());
 
             SnapshotManager.this.currentState = PERSISTING;
         }
@@ -464,8 +484,8 @@ public class SnapshotManager implements SnapshotState {
         private long index;
         private long term;
 
-        public LastAppliedTermInformationReader init(ReplicatedLog log, long originalIndex,
-                                         ReplicatedLogEntry lastLogEntry, boolean hasFollowers){
+        LastAppliedTermInformationReader init(ReplicatedLog log, long originalIndex, ReplicatedLogEntry lastLogEntry,
+                boolean hasFollowers){
             ReplicatedLogEntry entry = log.get(originalIndex);
             this.index = -1L;
             this.term = -1L;

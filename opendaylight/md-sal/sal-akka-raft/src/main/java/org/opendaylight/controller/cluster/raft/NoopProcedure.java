@@ -13,6 +13,8 @@ import akka.japi.Procedure;
  * An akka Procedure that does nothing.
  *
  * @author Thomas Pantelis
+ *
+ * @param <T> the Procedure type
  */
 public class NoopProcedure<T> implements Procedure<T> {
 
@@ -28,5 +30,6 @@ public class NoopProcedure<T> implements Procedure<T> {
 
     @Override
     public void apply(Object notUsed) {
+        // nothing to do
     }
 }

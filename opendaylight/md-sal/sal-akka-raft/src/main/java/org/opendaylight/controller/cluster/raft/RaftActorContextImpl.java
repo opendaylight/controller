@@ -32,6 +32,12 @@ import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
 import org.slf4j.Logger;
 
+/**
+ * Implementation of the RaftActorContext interface.
+ *
+ * @author Moiz Raja
+ * @author Thomas Pantelis
+ */
 public class RaftActorContextImpl implements RaftActorContext {
     private static final LongSupplier JVM_MEMORY_RETRIEVER = () -> Runtime.getRuntime().maxMemory();
 
@@ -51,7 +57,7 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     private final Map<String, PeerInfo> peerInfoMap = new HashMap<>();
 
-    private final Logger LOG;
+    private final Logger log;
 
     private ConfigParams configParams;
 
@@ -87,7 +93,7 @@ public class RaftActorContextImpl implements RaftActorContext {
         this.lastApplied = lastApplied;
         this.configParams = configParams;
         this.persistenceProvider = persistenceProvider;
-        this.LOG = logger;
+        this.log = logger;
 
         for(Map.Entry<String, String> e: peerAddresses.entrySet()) {
             peerInfoMap.put(e.getKey(), new PeerInfo(e.getKey(), e.getValue(), VotingState.VOTING));
@@ -135,7 +141,7 @@ public class RaftActorContextImpl implements RaftActorContext {
                 cluster = Optional.of(Cluster.get(getActorSystem()));
             } catch(Exception e) {
                 // An exception means there's no cluster configured. This will only happen in unit tests.
-                LOG.debug("{}: Could not obtain Cluster: {}", getId(), e);
+                log.debug("{}: Could not obtain Cluster: {}", getId(), e);
                 cluster = Optional.empty();
             }
         }
@@ -182,7 +188,7 @@ public class RaftActorContextImpl implements RaftActorContext {
     }
 
     @Override public Logger getLogger() {
-        return this.LOG;
+        return this.log;
     }
 
     @Override
@@ -202,7 +208,7 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     @Override
     public String getPeerAddress(String peerId) {
-        String peerAddress = null;
+        String peerAddress;
         PeerInfo peerInfo = peerInfoMap.get(peerId);
         if(peerInfo != null) {
             peerAddress = peerInfo.getAddress();
@@ -247,7 +253,7 @@ public class RaftActorContextImpl implements RaftActorContext {
             votingMember = false;
         }
 
-        LOG.debug("{}: Updated server config: isVoting: {}, peers: {}", id, votingMember, peerInfoMap.values());
+        log.debug("{}: Updated server config: isVoting: {}, peers: {}", id, votingMember, peerInfoMap.values());
 
         setDynamicServerConfigurationInUse();
     }
@@ -257,8 +263,8 @@ public class RaftActorContextImpl implements RaftActorContext {
     }
 
     @Override
-    public void addToPeers(String id, String address, VotingState votingState) {
-        peerInfoMap.put(id, new PeerInfo(id, address, votingState));
+    public void addToPeers(String peerId, String address, VotingState votingState) {
+        peerInfoMap.put(peerId, new PeerInfo(peerId, address, votingState));
         numVotingPeers = -1;
     }
 
@@ -284,7 +290,7 @@ public class RaftActorContextImpl implements RaftActorContext {
     public void setPeerAddress(String peerId, String peerAddress) {
         PeerInfo peerInfo = peerInfoMap.get(peerId);
         if(peerInfo != null) {
-            LOG.info("Peer address for peer {} set to {}", peerId, peerAddress);
+            log.info("Peer address for peer {} set to {}", peerId, peerAddress);
             peerInfo.setAddress(peerAddress);
         }
     }
@@ -292,7 +298,7 @@ public class RaftActorContextImpl implements RaftActorContext {
     @Override
     public SnapshotManager getSnapshotManager() {
         if(snapshotManager == null){
-            snapshotManager = new SnapshotManager(this, LOG);
+            snapshotManager = new SnapshotManager(this, log);
         }
         return snapshotManager;
     }
@@ -309,7 +315,7 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     @Override
     public boolean hasFollowers() {
-        return getPeerIds().size() > 0;
+        return !getPeerIds().isEmpty();
     }
 
     @Override
@@ -348,7 +354,7 @@ public class RaftActorContextImpl implements RaftActorContext {
             newConfig.add(new ServerInfo(getId(), votingMember));
         }
 
-        return (new ServerConfigurationPayload(newConfig));
+        return new ServerConfigurationPayload(newConfig);
     }
 
     @Override
@@ -384,7 +390,7 @@ public class RaftActorContextImpl implements RaftActorContext {
             try {
                 currentBehavior.close();
             } catch (Exception e) {
-                LOG.debug("{}: Error closing behavior {}", getId(), currentBehavior.state());
+                log.debug("{}: Error closing behavior {}", getId(), currentBehavior.state(), e);
             }
         }
     }

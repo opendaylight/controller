@@ -10,6 +10,12 @@ package org.opendaylight.controller.cluster.raft;
 
 import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
 
+/**
+ * Interface for a snapshot phase state.
+ *
+ * @author Moiz Raja
+ * @author Thomas Pantelis
+ */
 public interface SnapshotState {
     /**
      * @return true when a snapshot is being captured

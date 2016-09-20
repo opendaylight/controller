@@ -12,6 +12,12 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Stopwatch;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Implementation of the FollowerLogInformation interface.
+ *
+ * @author Moiz Raja
+ * @author Thomas Pantelis
+ */
 public class FollowerLogInformationImpl implements FollowerLogInformation {
     private final Stopwatch stopwatch = Stopwatch.createUnstarted();
 
@@ -35,6 +41,13 @@ public class FollowerLogInformationImpl implements FollowerLogInformation {
 
     private final PeerInfo peerInfo;
 
+    /**
+     * Constructs an instance.
+     *
+     * @param peerInfo the associated PeerInfo of the follower.
+     * @param matchIndex the initial match index.
+     * @param context the RaftActorContext.
+     */
     public FollowerLogInformationImpl(PeerInfo peerInfo, long matchIndex, RaftActorContext context) {
         this.nextIndex = context.getCommitIndex();
         this.matchIndex = matchIndex;
@@ -99,8 +112,8 @@ public class FollowerLogInformationImpl implements FollowerLogInformation {
         }
 
         long elapsed = stopwatch.elapsed(TimeUnit.MILLISECONDS);
-        return (stopwatch.isRunning()) &&
-                (elapsed <= context.getConfigParams().getElectionTimeOutInterval().toMillis());
+        return stopwatch.isRunning() &&
+                elapsed <= context.getConfigParams().getElectionTimeOutInterval().toMillis();
     }
 
     @Override
@@ -130,11 +143,9 @@ public class FollowerLogInformationImpl implements FollowerLogInformation {
         }
 
         // Return false if we are trying to send duplicate data before the heartbeat interval
-        if(getNextIndex() == lastReplicatedIndex){
-            if(lastReplicatedStopwatch.elapsed(TimeUnit.MILLISECONDS) < context.getConfigParams()
-                    .getHeartBeatInterval().toMillis()){
-                return false;
-            }
+        if(getNextIndex() == lastReplicatedIndex && lastReplicatedStopwatch.elapsed(TimeUnit.MILLISECONDS) <
+                context.getConfigParams().getHeartBeatInterval().toMillis()) {
+            return false;
         }
 
         resetLastReplicated();

@@ -8,47 +8,48 @@
 
 package org.opendaylight.controller.cluster.raft;
 
+import javax.annotation.Nullable;
+
 /**
  * ElectionTerm contains information about a RaftActors election term.
  * <p>
  * This information includes the last known current term of the RaftActor
- * and which peer was voted for by the RaftActor in that term
+ * and which candidate was voted for by the RaftActor in that term.
  * <p>
- * This class ensures that election term information is persisted
+ * This class ensures that election term information is persisted.
  */
 public interface ElectionTerm {
     /**
-     * latest term server has seen (initialized to 0
-     * on first boot, increases monotonically)
+     * Returns the current leader's Raft term.
+     *
+     * @return the current leader's Raft term.
      */
     long getCurrentTerm();
 
     /**
-     * candidateId that received vote in current
-     * term (or null if none)
+     * Returns the id of the candidate that this server voted for in current term.
+     *
+     * @return candidate id that received the vote or null if no candidate was voted for.
      */
+    @Nullable
     String getVotedFor();
 
     /**
-     * To be called mainly when we are recovering in-memory election state from
-     * persistent storage
+     * This method updates the in-memory election term state. This method should be called when recovering election
+     * state from persistent storage.
      *
-     * @param currentTerm
-     * @param votedFor
+     * @param term the election term.
+     * @param votedFor the candidate id that was voted for.
      */
-    void update(long currentTerm, String votedFor);
+    void update(long term, @Nullable String votedFor);
 
     /**
-     * To be called when we need to update the current term either because we
-     * received a message from someone with a more up-to-date term or because we
-     * just voted for someone
-     * <p>
-     * This information needs to be persisted so that on recovery the replica
-     * can start itself in the right term and know if it has already voted in
-     * that term or not
+     * This method updates the in-memory election term state and persists it so it can be recovered on next restart.
+     * This method should be called when starting a new election or when a Raft RPC message is received  with a higher
+     * term.
      *
-     * @param currentTerm
-     * @param votedFor
+     * @param term the election term.
+     * @param votedFor the candidate id that was voted for.
      */
-    void updateAndPersist(long currentTerm, String votedFor);
+    void updateAndPersist(long term, @Nullable String votedFor);
 }
