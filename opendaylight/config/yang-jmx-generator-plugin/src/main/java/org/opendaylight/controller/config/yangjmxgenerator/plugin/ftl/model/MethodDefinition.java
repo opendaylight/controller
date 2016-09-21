@@ -9,8 +9,11 @@ package org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model;
 
 import java.util.Collections;
 import java.util.List;
+import javax.lang.model.element.Modifier;
 
 public class MethodDefinition implements Method {
+    private static final String VISIBILITY_PUBLIC = Modifier.PUBLIC.toString();
+
     private final List<String> modifiers;
     private final String returnType;
     private final String name;
@@ -64,6 +67,11 @@ public class MethodDefinition implements Method {
 
     public void setJavadoc(String javadoc) {
         this.javadoc = javadoc;
+    }
+
+    @Override
+    public String getVisibility() {
+        return VISIBILITY_PUBLIC;
     }
 
     @Override

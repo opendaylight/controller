@@ -10,6 +10,8 @@ package org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model;
 import java.util.List;
 
 public interface Method {
+    String getVisibility();
+
     List<String> getModifiers();
 
     String getReturnType();
