@@ -22,7 +22,8 @@ class MethodSerializer {
             build.append(a);
         }
 
-        build.append("    " + "public ");
+        build.append("    ");
+        build.append(method.getVisibility()).append(" ");
         for (String mod : method.getModifiers()) {
             build.append(mod).append(" ");
         }
