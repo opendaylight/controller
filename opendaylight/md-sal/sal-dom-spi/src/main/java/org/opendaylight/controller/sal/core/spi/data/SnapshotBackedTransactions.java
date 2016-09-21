@@ -28,7 +28,7 @@ public final class SnapshotBackedTransactions {
      * @param snapshot Snapshot which will be modified.
      */
     public static <T> SnapshotBackedReadTransaction<T> newReadTransaction(final T identifier, final boolean debug, final DataTreeSnapshot snapshot) {
-        return new SnapshotBackedReadTransaction<T>(identifier, debug, snapshot);
+        return new SnapshotBackedReadTransaction<>(identifier, debug, snapshot);
     }
 
     /**
@@ -41,7 +41,7 @@ public final class SnapshotBackedTransactions {
      */
     public static <T> SnapshotBackedReadWriteTransaction<T> newReadWriteTransaction(final T identifier, final boolean debug,
             final DataTreeSnapshot snapshot, final TransactionReadyPrototype<T> readyImpl) {
-        return new SnapshotBackedReadWriteTransaction<T>(identifier, debug, snapshot, readyImpl);
+        return new SnapshotBackedReadWriteTransaction<>(identifier, debug, snapshot, readyImpl);
     }
 
     /**
@@ -54,6 +54,6 @@ public final class SnapshotBackedTransactions {
      */
     public static <T> SnapshotBackedWriteTransaction<T> newWriteTransaction(final T identifier, final boolean debug,
             final DataTreeSnapshot snapshot, final TransactionReadyPrototype<T> readyImpl) {
-        return new SnapshotBackedWriteTransaction<T>(identifier, debug, snapshot, readyImpl);
+        return new SnapshotBackedWriteTransaction<>(identifier, debug, snapshot, readyImpl);
     }
 }

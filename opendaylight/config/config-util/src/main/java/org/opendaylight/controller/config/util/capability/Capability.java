@@ -18,15 +18,15 @@ import java.util.Collection;
 // TODO this should be placed into API bundle for netconf
 public interface Capability {
 
-    public String getCapabilityUri();
+    String getCapabilityUri();
 
-    public Optional<String> getModuleNamespace();
+    Optional<String> getModuleNamespace();
 
-    public Optional<String> getModuleName();
+    Optional<String> getModuleName();
 
-    public Optional<String> getRevision();
+    Optional<String> getRevision();
 
-    public Optional<String> getCapabilitySchema();
+    Optional<String> getCapabilitySchema();
 
-    public Collection<String> getLocation();
+    Collection<String> getLocation();
 }

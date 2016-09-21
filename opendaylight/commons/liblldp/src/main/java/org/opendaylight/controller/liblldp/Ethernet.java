@@ -27,15 +27,15 @@ public class Ethernet extends Packet {
     // to add new coming packet classes
     public static final Map<Short, Class<? extends Packet>> etherTypeClassMap;
     static {
-        etherTypeClassMap = new HashMap<Short, Class<? extends Packet>>();
+        etherTypeClassMap = new HashMap<>();
         etherTypeClassMap.put(EtherTypes.LLDP.shortValue(), LLDP.class);
     }
     private static Map<String, Pair<Integer, Integer>> fieldCoordinates = new LinkedHashMap<String, Pair<Integer, Integer>>() {
         private static final long serialVersionUID = 1L;
         {
-            put(DMAC, new ImmutablePair<Integer, Integer>(0, 48));
-            put(SMAC, new ImmutablePair<Integer, Integer>(48, 48));
-            put(ETHT, new ImmutablePair<Integer, Integer>(96, 16));
+            put(DMAC, new ImmutablePair<>(0, 48));
+            put(SMAC, new ImmutablePair<>(48, 48));
+            put(ETHT, new ImmutablePair<>(96, 16));
         }
     };
     private final Map<String, byte[]> fieldValues;
@@ -45,7 +45,7 @@ public class Ethernet extends Packet {
      */
     public Ethernet() {
         super();
-        fieldValues = new HashMap<String, byte[]>();
+        fieldValues = new HashMap<>();
         hdrFieldCoordMap = fieldCoordinates;
         hdrFieldsMap = fieldValues;
     }
@@ -56,7 +56,7 @@ public class Ethernet extends Packet {
      */
     public Ethernet(boolean writeAccess) {
         super(writeAccess);
-        fieldValues = new HashMap<String, byte[]>();
+        fieldValues = new HashMap<>();
         hdrFieldCoordMap = fieldCoordinates;
         hdrFieldsMap = fieldValues;
     }

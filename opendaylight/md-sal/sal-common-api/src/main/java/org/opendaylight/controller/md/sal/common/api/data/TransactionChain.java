@@ -62,7 +62,7 @@ public interface TransactionChain<P extends Path<P>, D> extends AutoCloseable,
      *             if the chain has been closed.
      */
     @Override
-    public AsyncReadOnlyTransaction<P, D> newReadOnlyTransaction();
+    AsyncReadOnlyTransaction<P, D> newReadOnlyTransaction();
 
     /**
      * Create a new read-write transaction which will continue the chain.
@@ -89,7 +89,7 @@ public interface TransactionChain<P extends Path<P>, D> extends AutoCloseable,
      *             if the chain has been closed.
      */
     @Override
-    public AsyncReadWriteTransaction<P, D> newReadWriteTransaction();
+    AsyncReadWriteTransaction<P, D> newReadWriteTransaction();
 
     /**
      * Create a new write-only transaction which will continue the chain.
@@ -116,7 +116,7 @@ public interface TransactionChain<P extends Path<P>, D> extends AutoCloseable,
      *             if the chain has been closed.
      */
     @Override
-    public AsyncWriteTransaction<P, D> newWriteOnlyTransaction();
+    AsyncWriteTransaction<P, D> newWriteOnlyTransaction();
 
     @Override
     void close();

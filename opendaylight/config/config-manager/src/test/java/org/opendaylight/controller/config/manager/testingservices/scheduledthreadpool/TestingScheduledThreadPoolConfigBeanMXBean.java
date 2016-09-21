@@ -12,10 +12,10 @@ import org.opendaylight.controller.config.manager.testingservices.threadpool.Tes
 public interface TestingScheduledThreadPoolConfigBeanMXBean extends
         TestingThreadPoolConfigMXBean {
 
-    public boolean isRecreate();
+    boolean isRecreate();
 
-    public void setRecreate(boolean recreate);
+    void setRecreate(boolean recreate);
 
-    public void setThreadCount(int threadCount);
+    void setThreadCount(int threadCount);
 
 }

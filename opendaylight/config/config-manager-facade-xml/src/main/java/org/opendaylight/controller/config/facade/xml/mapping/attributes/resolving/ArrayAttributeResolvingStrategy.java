@@ -77,7 +77,8 @@ final class ArrayAttributeResolvingStrategy extends AbstractAttributeResolvingSt
         // Rebuild open type. Underlying composite types might have changed
         if (innerTypeResolvingStrategy.getOpenType() instanceof CompositeType) {
             try {
-                final ArrayType<?> openType = new ArrayType<Object>(getOpenType().getDimension(), innerTypeResolvingStrategy.getOpenType());
+                final ArrayType<?> openType =
+                        new ArrayType<>(getOpenType().getDimension(), innerTypeResolvingStrategy.getOpenType());
                 setOpenType(openType);
             } catch (OpenDataException e) {
                 throw new IllegalStateException("An error occurred during restoration of array type " + this

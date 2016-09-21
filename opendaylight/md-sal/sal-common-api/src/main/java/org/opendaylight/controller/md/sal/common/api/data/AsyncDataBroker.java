@@ -100,7 +100,7 @@ public interface AsyncDataBroker<P extends Path<P>, D, L extends AsyncDataChange
      * @see http://www.idevelopment.info/data/LDAP/LDAP_Resources/
      *      SEARCH_Setting_the_SCOPE_Parameter.shtml
      */
-    public enum DataChangeScope {
+    enum DataChangeScope {
 
         /**
          * Represents only a direct change of the node, such as replacement of a node, addition or
@@ -159,19 +159,19 @@ public interface AsyncDataBroker<P extends Path<P>, D, L extends AsyncDataChange
      * {@inheritDoc}
      */
     @Override
-    public AsyncReadOnlyTransaction<P, D> newReadOnlyTransaction();
+    AsyncReadOnlyTransaction<P, D> newReadOnlyTransaction();
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public AsyncReadWriteTransaction<P, D> newReadWriteTransaction();
+    AsyncReadWriteTransaction<P, D> newReadWriteTransaction();
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public AsyncWriteTransaction<P, D> newWriteOnlyTransaction();
+    AsyncWriteTransaction<P, D> newWriteOnlyTransaction();
 
     /**
      * Registers a {@link AsyncDataChangeListener} to receive

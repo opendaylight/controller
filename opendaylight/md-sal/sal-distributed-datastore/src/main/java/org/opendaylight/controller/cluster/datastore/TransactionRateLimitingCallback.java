@@ -22,7 +22,7 @@ import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 public class TransactionRateLimitingCallback implements OperationCallback{
     private static Ticker TICKER = Ticker.systemTicker();
 
-    private static enum State {
+    private enum State {
         STOPPED,
         RUNNING,
         PAUSED

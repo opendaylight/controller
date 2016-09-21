@@ -79,7 +79,7 @@ public class InstallSnapshot extends AbstractRaftRPC {
     }
 
 
-    public <T extends Object> Object toSerializable(short version) {
+    public <T> Object toSerializable(short version) {
         return this;
     }
 

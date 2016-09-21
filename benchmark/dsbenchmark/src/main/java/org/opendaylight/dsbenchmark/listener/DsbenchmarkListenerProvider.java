@@ -25,7 +25,7 @@ public class DsbenchmarkListenerProvider {
     private static final InstanceIdentifier<TestExec> TEST_EXEC_IID =
             InstanceIdentifier.builder(TestExec.class).build();
     private final List<ListenerRegistration<DsbenchmarkListener>> listeners =
-            new ArrayList<ListenerRegistration<DsbenchmarkListener>>();
+            new ArrayList<>();
     private DataBroker dataBroker;
 
     public void setDataBroker(DataBroker dataBroker) {
@@ -37,9 +37,9 @@ public class DsbenchmarkListenerProvider {
         for (int i = 0; i < numListeners; i++) {
             DsbenchmarkListener listener = new DsbenchmarkListener();
             listeners.add(dataBroker.registerDataTreeChangeListener(
-                    new DataTreeIdentifier<TestExec>(LogicalDatastoreType.CONFIGURATION, TEST_EXEC_IID), listener));
+                    new DataTreeIdentifier<>(LogicalDatastoreType.CONFIGURATION, TEST_EXEC_IID), listener));
             listeners.add(dataBroker.registerDataTreeChangeListener(
-                    new DataTreeIdentifier<TestExec>(LogicalDatastoreType.OPERATIONAL, TEST_EXEC_IID), listener));
+                    new DataTreeIdentifier<>(LogicalDatastoreType.OPERATIONAL, TEST_EXEC_IID), listener));
 
         }
         LOG.info("DsbenchmarkListenerProvider created {} listeneres", numListeners);

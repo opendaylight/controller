@@ -18,7 +18,7 @@ import java.util.concurrent.TimeUnit;
 public interface AutoCloseableEventExecutor extends EventExecutor, AutoCloseable {
 
 
-    public static class CloseableEventExecutorMixin implements AutoCloseable {
+    class CloseableEventExecutorMixin implements AutoCloseable {
         public static final int DEFAULT_SHUTDOWN_SECONDS = 1;
         private final EventExecutor eventExecutor;
 

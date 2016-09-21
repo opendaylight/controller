@@ -22,17 +22,17 @@ public abstract class ForwardingDOMNotificationPublishService extends Forwarding
     protected abstract DOMNotificationPublishService delegate();
 
     @Override
-    public ListenableFuture<? extends Object> putNotification(final DOMNotification notification) throws InterruptedException {
+    public ListenableFuture<?> putNotification(final DOMNotification notification) throws InterruptedException {
         return delegate().putNotification(notification);
     }
 
     @Override
-    public ListenableFuture<? extends Object> offerNotification(final DOMNotification notification) {
+    public ListenableFuture<?> offerNotification(final DOMNotification notification) {
         return delegate().offerNotification(notification);
     }
 
     @Override
-    public ListenableFuture<? extends Object> offerNotification(final DOMNotification notification, final long timeout,
+    public ListenableFuture<?> offerNotification(final DOMNotification notification, final long timeout,
             final TimeUnit unit) throws InterruptedException {
         return delegate().offerNotification(notification, timeout, unit);
     }

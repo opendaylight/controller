@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
  * @author Robert Varga
  */
 abstract class AbstractClientHistory extends LocalAbortable implements Identifiable<LocalHistoryIdentifier> {
-    static enum State {
+    enum State {
         IDLE,
         TX_OPEN,
         CLOSED,

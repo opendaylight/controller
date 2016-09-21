@@ -39,9 +39,9 @@ public class MockedDependenciesTest extends AbstractParallelAPSPTest {
                 mockedThreadPoolConfigFactory));
     }
 
-    public static interface MockedTestingThreadPoolConfigMXBean extends
+    public interface MockedTestingThreadPoolConfigMXBean extends
             TestingThreadPoolConfigMXBean {
-        public void setThreadCount(int threadCount);
+        void setThreadCount(int threadCount);
     }
 
     public static class MockedThreadPoolModule implements Module,

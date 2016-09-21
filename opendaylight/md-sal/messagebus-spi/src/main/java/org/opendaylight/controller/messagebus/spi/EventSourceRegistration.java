@@ -17,6 +17,6 @@ import org.opendaylight.yangtools.concepts.ObjectRegistration;
 public interface EventSourceRegistration <T extends EventSource> extends ObjectRegistration<T>{
 
     @Override
-    public void close();
+    void close();
 
 }

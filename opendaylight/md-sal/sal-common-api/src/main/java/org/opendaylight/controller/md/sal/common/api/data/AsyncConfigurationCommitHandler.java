@@ -76,7 +76,7 @@ public interface AsyncConfigurationCommitHandler<P extends Path<P>, D> {
      * @param <D>
      *            Type of data (payload), which represents data payload
      */
-    static interface ConfigurationCommitRequest<P extends Path<P>, D> {
+    interface ConfigurationCommitRequest<P extends Path<P>, D> {
 
         /**
          *

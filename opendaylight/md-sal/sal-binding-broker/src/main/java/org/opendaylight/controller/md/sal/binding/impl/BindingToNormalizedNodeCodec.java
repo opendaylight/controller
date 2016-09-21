@@ -356,7 +356,7 @@ public final class BindingToNormalizedNodeCodec implements BindingCodecTreeFacto
          * return non-null value.
          */
         final BindingCodecTreeNode<?> codecContext = currentCodecTree.getSubtreeCodec(bindingPath);
-        return new SimpleEntry<InstanceIdentifier<?>, BindingCodecTreeNode<?>>(bindingPath, codecContext);
+        return new SimpleEntry<>(bindingPath, codecContext);
     }
 
     @SuppressWarnings("unchecked")

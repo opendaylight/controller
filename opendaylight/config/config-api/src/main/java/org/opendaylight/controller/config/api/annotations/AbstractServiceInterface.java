@@ -13,5 +13,5 @@ package org.opendaylight.controller.config.api.annotations;
  * one SI can extend another one, in which case all annotations in hierarchy
  * will be observed.
  */
-public abstract interface AbstractServiceInterface {
+public interface AbstractServiceInterface {
 }

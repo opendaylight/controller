@@ -103,7 +103,7 @@ public abstract class AbstractDispatcher<S extends ProtocolSession<?>, L extends
 
             @Override
             protected void initChannel(final CH ch) {
-                initializer.initializeChannel(ch, new DefaultPromise<S>(executor));
+                initializer.initializeChannel(ch, new DefaultPromise<>(executor));
             }
         });
 

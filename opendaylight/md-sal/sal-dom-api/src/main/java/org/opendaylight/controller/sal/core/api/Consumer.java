@@ -35,7 +35,7 @@ public interface Consumer {
      * @param session
      *            Unique session between consumer and SAL.
      */
-    public void onSessionInitiated(ConsumerSession session);
+    void onSessionInitiated(ConsumerSession session);
 
     /**
      * @deprecated - no longer used or needed
@@ -48,13 +48,13 @@ public interface Consumer {
      * }
      */
     @Deprecated
-    public Collection<ConsumerFunctionality> getConsumerFunctionality();
+    Collection<ConsumerFunctionality> getConsumerFunctionality();
 
     /**
      * @deprecated - no longer used or needed
      */
     @Deprecated
-    public interface ConsumerFunctionality {
+    interface ConsumerFunctionality {
 
     }
 }

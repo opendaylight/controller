@@ -70,7 +70,7 @@ public interface DOMNotificationPublishService extends DOMService, BrokerService
      * @throws InterruptedException if interrupted while waiting
      * @throws NullPointerException if notification is null.
      */
-    @Nonnull ListenableFuture<? extends Object> putNotification(@Nonnull DOMNotification notification) throws InterruptedException;
+    @Nonnull ListenableFuture<?> putNotification(@Nonnull DOMNotification notification) throws InterruptedException;
 
     /**
      * Attempt to publish a notification. The result of this method is a {@link ListenableFuture}
@@ -87,7 +87,7 @@ public interface DOMNotificationPublishService extends DOMService, BrokerService
      *         the implementation from accepting the notification for delivery.
      * @throws NullPointerException if notification is null.
      */
-    @Nonnull ListenableFuture<? extends Object> offerNotification(@Nonnull DOMNotification notification);
+    @Nonnull ListenableFuture<?> offerNotification(@Nonnull DOMNotification notification);
 
     /**
      * Attempt to publish a notification. The result of this method is a {@link ListenableFuture}
@@ -108,6 +108,6 @@ public interface DOMNotificationPublishService extends DOMService, BrokerService
      * @throws NullPointerException if notification or unit is null.
      * @throws IllegalArgumentException if timeout is negative.
      */
-    @Nonnull ListenableFuture<? extends Object> offerNotification(@Nonnull DOMNotification notification,
+    @Nonnull ListenableFuture<?> offerNotification(@Nonnull DOMNotification notification,
         @Nonnegative long timeout, @Nonnull TimeUnit unit) throws InterruptedException;
 }

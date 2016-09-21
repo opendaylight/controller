@@ -13,7 +13,7 @@ import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
 
 public interface ServiceReferenceRegistrator extends AutoCloseable {
 
-    public String getNullableTransactionName();
+    String getNullableTransactionName();
 
     ServiceReferenceJMXRegistration registerMBean(ServiceReferenceMXBeanImpl object,
                                                           ObjectName on) throws InstanceAlreadyExistsException;
@@ -21,7 +21,7 @@ public interface ServiceReferenceRegistrator extends AutoCloseable {
     @Override
     void close();
 
-    public static class ServiceReferenceJMXRegistration implements AutoCloseable {
+    class ServiceReferenceJMXRegistration implements AutoCloseable {
         private final InternalJMXRegistration registration;
 
         ServiceReferenceJMXRegistration(InternalJMXRegistration registration) {
@@ -34,11 +34,11 @@ public interface ServiceReferenceRegistrator extends AutoCloseable {
         }
     }
 
-    public static interface ServiceReferenceTransactionRegistratorFactory {
-        public ServiceReferenceRegistrator create();
+    interface ServiceReferenceTransactionRegistratorFactory {
+        ServiceReferenceRegistrator create();
     }
 
-    public static class ServiceReferenceRegistratorImpl implements ServiceReferenceRegistrator {
+    class ServiceReferenceRegistratorImpl implements ServiceReferenceRegistrator {
         private final InternalJMXRegistrator currentJMXRegistrator;
         private final String nullableTransactionName;
 
@@ -73,13 +73,13 @@ public interface ServiceReferenceRegistrator extends AutoCloseable {
         public void close() {
             currentJMXRegistrator.close();
         }
-        public static interface ServiceReferenceTransactionRegistratorFactory {
-            public ServiceReferenceRegistrator create();
+        public interface ServiceReferenceTransactionRegistratorFactory {
+            ServiceReferenceRegistrator create();
         }
     }
 
 
-    public static class ServiceReferenceTransactionRegistratorFactoryImpl implements ServiceReferenceTransactionRegistratorFactory {
+    class ServiceReferenceTransactionRegistratorFactoryImpl implements ServiceReferenceTransactionRegistratorFactory {
         private final NestableJMXRegistrator parentRegistrator;
         private final String nullableTransactionName;
 

@@ -785,7 +785,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
     protected void onLeaderChanged(String oldLeader, String newLeader) {
 
-    };
+    }
 
     private String getLeaderAddress(){
         if(isLeader()){

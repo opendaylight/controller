@@ -32,7 +32,7 @@ public class ConfigPushingRunnable implements Runnable {
 
     @Override
     public void run() {
-        List<Feature> toInstall = new ArrayList<Feature>();
+        List<Feature> toInstall = new ArrayList<>();
         FeatureEvent event = null;
         boolean interuppted = false;
         while(true) {

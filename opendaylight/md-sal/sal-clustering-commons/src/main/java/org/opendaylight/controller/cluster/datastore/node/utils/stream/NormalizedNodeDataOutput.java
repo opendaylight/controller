@@ -12,7 +12,7 @@ import java.io.DataOutput;
 import java.io.IOException;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
-import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;;
+import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 /**
  * Interface for emitting {@link NormalizedNode}s, {@link YangInstanceIdentifier}s and {@link PathArgument}s.

@@ -22,7 +22,7 @@ public class ConfigPusherFeatureActivator implements BundleActivator {
     public void start(BundleContext context) throws Exception {
         bc = context;
         cpc = new ConfigPusherCustomizer();
-        cpst = new ServiceTracker<ConfigPusher, ConfigPusher>(bc, ConfigPusher.class.getName(), cpc);
+        cpst = new ServiceTracker<>(bc, ConfigPusher.class.getName(), cpc);
         cpst.open();
     }
 
