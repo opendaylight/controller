@@ -65,7 +65,7 @@ public interface NotificationPublishService extends BindingService {
      * constraints prevent
      * @throws NullPointerException if the notification is null
      */
-    ListenableFuture<? extends Object> offerNotification(Notification notification);
+    ListenableFuture<?> offerNotification(Notification notification);
 
     /**
      * Publishes a notification to subscribed listeners. This initiates
@@ -86,7 +86,7 @@ public interface NotificationPublishService extends BindingService {
      * @throws NullPointerException if the notification or unit is null
      * @throws IllegalArgumentException if timeout is negative.
      */
-    ListenableFuture<? extends Object> offerNotification(Notification notification, int timeout, TimeUnit unit)
+    ListenableFuture<?> offerNotification(Notification notification, int timeout, TimeUnit unit)
             throws InterruptedException;
 
 }

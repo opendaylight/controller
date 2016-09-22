@@ -23,7 +23,7 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 public interface MountProviderService extends MountService {
 
     @Override
-    public MountProviderInstance getMountPoint(InstanceIdentifier<?> path);
+    MountProviderInstance getMountPoint(InstanceIdentifier<?> path);
 
     MountProviderInstance createMountPoint(InstanceIdentifier<?> path);
 
@@ -31,7 +31,7 @@ public interface MountProviderService extends MountService {
 
     ListenerRegistration<MountProvisionListener> registerProvisionListener(MountProvisionListener listener);
 
-    public interface MountProvisionListener extends EventListener {
+    interface MountProvisionListener extends EventListener {
 
         void onMountPointCreated(InstanceIdentifier<?> path);
 

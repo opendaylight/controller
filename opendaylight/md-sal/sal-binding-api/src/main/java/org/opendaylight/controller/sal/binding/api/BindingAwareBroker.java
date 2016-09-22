@@ -129,7 +129,7 @@ public interface BindingAwareBroker {
      * infrastructure services and other functionality provided by
      * {@link Provider}s.
      */
-    public interface ConsumerContext extends RpcConsumerRegistry {
+    interface ConsumerContext extends RpcConsumerRegistry {
 
         /**
          * Returns a session specific instance (implementation) of requested
@@ -158,7 +158,7 @@ public interface BindingAwareBroker {
      * functionality provided by other {@link BindingAwareConsumer}s.
      *
      */
-    public interface ProviderContext extends ConsumerContext, RpcProviderRegistry {
+    interface ProviderContext extends ConsumerContext, RpcProviderRegistry {
 
     }
 
@@ -168,7 +168,7 @@ public interface BindingAwareBroker {
      *
      * @param <T> the implemented RPC service interface
      */
-    public interface RpcRegistration<T extends RpcService> extends ObjectRegistration<T> {
+    interface RpcRegistration<T extends RpcService> extends ObjectRegistration<T> {
 
         /**
          * Returns the implemented RPC service interface.
@@ -185,7 +185,7 @@ public interface BindingAwareBroker {
      *
      * @param <T> the implemented RPC service interface
      */
-    public interface RoutedRpcRegistration<T extends RpcService> extends RpcRegistration<T>,
+    interface RoutedRpcRegistration<T extends RpcService> extends RpcRegistration<T>,
             RoutedRegistration<Class<? extends BaseIdentity>, InstanceIdentifier<?>, T> {
 
         /**
