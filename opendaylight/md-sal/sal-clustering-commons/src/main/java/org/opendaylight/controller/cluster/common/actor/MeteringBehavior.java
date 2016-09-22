@@ -94,7 +94,11 @@ public class MeteringBehavior implements Procedure<Object> {
         final Timer.Context context = msgProcessingTimer.time();
         final Timer.Context contextByMsgType = msgProcessingTimerByMsgType.time();
 
-        meteredActor.onReceive(message);
+        try {
+            meteredActor.onReceive(message);
+        } catch (Throwable throwable) {
+            throw new Exception(throwable);
+        }
 
         //stop timers
         contextByMsgType.stop();
