@@ -42,12 +42,18 @@ public final class DistributedDataStoreClientActor extends AbstractClientActor {
 
     @Override
     protected DistributedDataStoreClientBehavior initialBehavior(final ClientActorContext context) {
+        if (actorContext == null) {
+            int i = 0;
+        }
         return new DistributedDataStoreClientBehavior(context, actorContext);
     }
 
     public static Props props(final @Nonnull MemberName memberName, @Nonnull final String storeName, final ActorContext ctx) {
         final String name = "datastore-" + storeName;
         final FrontendIdentifier frontendId = FrontendIdentifier.create(memberName, FrontendType.forName(name));
+        if (ctx == null) {
+            int i = 0;
+        }
         return Props.create(DistributedDataStoreClientActor.class,
             () -> new DistributedDataStoreClientActor(frontendId, ctx));
     }

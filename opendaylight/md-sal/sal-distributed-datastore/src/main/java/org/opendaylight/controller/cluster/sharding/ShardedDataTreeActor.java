@@ -196,6 +196,12 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
 
     private void onProducerCreated(final ProducerCreated message) {
         LOG.debug("Received ProducerCreated: {}", message);
+
+        // fastpath if no replication is needed, since there is only one node
+        if (resolver.getShardingServicePeerActorAddresses().size() == 1) {
+            getSender().tell(new Status.Success(null), noSender());
+        }
+
         final ActorRef sender = getSender();
         final Collection<DOMDataTreeIdentifier> subtrees = message.getSubtrees();
 
@@ -282,7 +288,7 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
     }
 
     private void onCreatePrefixShard(final CreatePrefixShard message) {
-        LOG.debug("Received CreatePrefixShard: {}", message);
+        LOG.debug("Member: {}, Received CreatePrefixShard: {}", cluster.getCurrentMemberName(), message);
 
         final PrefixShardConfiguration configuration = message.getConfiguration();
 
@@ -305,9 +311,9 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
         }
 
         try {
-            final ListenerRegistration<ShardFrontend> shardFrontendRegistration =
+            final ListenerRegistration<DistributedShardFrontend> shardFrontendRegistration =
                     shardingService.registerDataTreeShard(configuration.getPrefix(),
-                            new ShardFrontend(client, configuration.getPrefix(), distributedDataStore.getActorContext()),
+                            new DistributedShardFrontend(client, configuration.getPrefix()),
                             producer);
             idToShardRegistration.put(configuration.getPrefix(), new ShardFrontendRegistration(clientActor, shardFrontendRegistration));
 
@@ -326,12 +332,18 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
     }
 
     private void onPrefixShardCreated(final PrefixShardCreated message) {
-        LOG.debug("Received PrefixShardCreated: {}", message);
+        LOG.debug("Member: {}, Received PrefixShardCreated: {}", cluster.getCurrentMemberName(), message);
 
         final Collection<String> addresses = resolver.getShardingServicePeerActorAddresses();
         final ActorRef sender = getSender();
 
         final List<CompletableFuture<Object>> futures = new ArrayList<>();
+
+        final Collection<MemberName> replicas = message.getConfiguration().getShardMemberNames();
+
+//        // remove current node
+//        replicas.remove(cluster.getCurrentMemberName());
+
 
         for (final String address : addresses) {
             final ActorSelection actorSelection = actorSystem.actorSelection(address);
@@ -410,9 +422,9 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
     private static class ShardFrontendRegistration {
 
         private final ActorRef clientActor;
-        private final ListenerRegistration<ShardFrontend> shardRegistration;
+        private final ListenerRegistration<DistributedShardFrontend> shardRegistration;
 
-        public ShardFrontendRegistration(final ActorRef clientActor, final ListenerRegistration<ShardFrontend> shardRegistration) {
+        public ShardFrontendRegistration(final ActorRef clientActor, final ListenerRegistration<DistributedShardFrontend> shardRegistration) {
             this.clientActor = clientActor;
             this.shardRegistration = shardRegistration;
         }

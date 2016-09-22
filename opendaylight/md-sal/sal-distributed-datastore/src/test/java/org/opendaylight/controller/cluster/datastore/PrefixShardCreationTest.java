@@ -161,6 +161,9 @@ public class PrefixShardCreationTest extends AbstractShardManagerTest {
             shardManager2.tell(new AddPrefixShardReplica(TEST_ID.getRootIdentifier()), kit2.getRef());
             kit2.expectMsgClass(duration("5 seconds"), Success.class);
 
+            shardManager2.tell(new FindLocalShard(ClusterUtils.getCleanShardName(TestModel.TEST_PATH), true), kit2.getRef());
+            kit2.expectMsgClass(duration("5 seconds"), LocalShardFound.class);
+
         }};
     }
 
