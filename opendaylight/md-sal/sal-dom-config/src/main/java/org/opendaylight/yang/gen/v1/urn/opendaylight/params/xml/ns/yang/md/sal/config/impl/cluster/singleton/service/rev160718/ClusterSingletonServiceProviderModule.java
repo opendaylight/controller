@@ -61,7 +61,7 @@ public class ClusterSingletonServiceProviderModule extends AbstractClusterSingle
         this.bundleContext = bundleContext;
     }
 
-    private static interface AutoCloseableDOMClusterSingletonServiceProvider
+    private interface AutoCloseableDOMClusterSingletonServiceProvider
             extends ClusterSingletonServiceProvider, AutoCloseable {
     }
 }
