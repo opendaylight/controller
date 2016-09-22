@@ -364,7 +364,7 @@ public class ClusterAdminRpcService implements ClusterAdminService {
         for(String shardName: allShardNames) {
             ListenableFuture<T> future = this.<T>ask(actorContext.getShardManager(), messageSupplier.apply(shardName),
                     SHARD_MGR_TIMEOUT);
-            shardResultData.add(new SimpleEntry<ListenableFuture<T>, ShardResultBuilder>(future,
+            shardResultData.add(new SimpleEntry<>(future,
                     new ShardResultBuilder().setShardName(shardName).setDataStoreType(dataStoreType)));
         }
     }
