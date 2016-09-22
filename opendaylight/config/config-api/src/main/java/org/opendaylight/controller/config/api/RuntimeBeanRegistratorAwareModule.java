@@ -23,7 +23,7 @@ public interface RuntimeBeanRegistratorAwareModule extends Module {
      *
      * @param rootRuntimeBeanRegistrator
      */
-    public void setRuntimeBeanRegistrator(
+    void setRuntimeBeanRegistrator(
             RootRuntimeBeanRegistrator rootRuntimeBeanRegistrator);
 
 }

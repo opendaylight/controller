@@ -108,7 +108,7 @@ public class BlankTransactionServiceTracker implements ServiceTrackerCustomizer<
     }
 
     @VisibleForTesting
-    static interface BlankTransaction {
+    interface BlankTransaction {
         CommitStatus hit() throws ValidationException, ConflictingVersionException;
     }
 }

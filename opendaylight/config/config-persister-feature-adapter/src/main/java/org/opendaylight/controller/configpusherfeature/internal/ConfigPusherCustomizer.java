@@ -28,7 +28,7 @@ public class ConfigPusherCustomizer implements ServiceTrackerCustomizer<ConfigPu
         BundleContext bc = configPusherServiceReference.getBundle().getBundleContext();
         ConfigPusher cpService = bc.getService(configPusherServiceReference);
         featureServiceCustomizer = new FeatureServiceCustomizer(cpService);
-        fsst = new ServiceTracker<FeaturesService, FeaturesService>(bc, FeaturesService.class.getName(), featureServiceCustomizer);
+        fsst = new ServiceTracker<>(bc, FeaturesService.class.getName(), featureServiceCustomizer);
         fsst.open();
         return cpService;
     }

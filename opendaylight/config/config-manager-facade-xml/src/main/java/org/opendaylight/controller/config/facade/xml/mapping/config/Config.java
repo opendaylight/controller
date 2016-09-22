@@ -293,7 +293,7 @@ public class Config {
     }
 
     private interface ResolvingStrategy<T> {
-        public T resolveElement(ModuleConfig moduleMapping, XmlElement moduleElement, ServiceRegistryWrapper serviceTracker,
-                                String instanceName, String moduleNamespace, EditStrategyType defaultStrategy) throws DocumentedException;
+        T resolveElement(ModuleConfig moduleMapping, XmlElement moduleElement, ServiceRegistryWrapper serviceTracker,
+                String instanceName, String moduleNamespace, EditStrategyType defaultStrategy) throws DocumentedException;
     }
 }

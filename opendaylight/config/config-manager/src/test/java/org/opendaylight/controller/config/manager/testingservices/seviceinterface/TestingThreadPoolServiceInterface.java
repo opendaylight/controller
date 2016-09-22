@@ -15,5 +15,5 @@ import org.opendaylight.controller.config.manager.testingservices.threadpool.Tes
     namespace = "ns", revision = "foo", localName = "testing-threadpool")
 public interface TestingThreadPoolServiceInterface extends
         AbstractServiceInterface {
-    public static final String QNAME = "(ns?revision=foo)testing-threadpool";
+    String QNAME = "(ns?revision=foo)testing-threadpool";
 }

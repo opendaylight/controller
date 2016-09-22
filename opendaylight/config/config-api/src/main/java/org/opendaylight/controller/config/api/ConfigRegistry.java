@@ -23,8 +23,8 @@ public interface ConfigRegistry extends LookupRegistry, ServiceReferenceReadable
      * Only well-known ObjectName in configuration system, under which
      * ConfigRegisry is registered.
      */
-    public static final ObjectName OBJECT_NAME = ConfigRegistryConstants.OBJECT_NAME;
-    public static final ObjectName OBJECT_NAME_NO_NOTIFICATIONS = ConfigRegistryConstants.OBJECT_NAME_NO_NOTIFICATIONS;
+    ObjectName OBJECT_NAME = ConfigRegistryConstants.OBJECT_NAME;
+    ObjectName OBJECT_NAME_NO_NOTIFICATIONS = ConfigRegistryConstants.OBJECT_NAME_NO_NOTIFICATIONS;
 
     /**
      * Opens new configuration transaction.

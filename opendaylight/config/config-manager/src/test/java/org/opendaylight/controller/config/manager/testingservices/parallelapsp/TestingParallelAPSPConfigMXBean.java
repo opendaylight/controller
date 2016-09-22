@@ -14,7 +14,7 @@ import org.opendaylight.controller.config.api.annotations.ServiceInterfaceAnnota
     namespace = "namespace", revision = "rev", localName = TestingParallelAPSPConfigMXBean.NAME)
 public interface TestingParallelAPSPConfigMXBean {
 
-    static final String NAME = "apsp";
+    String NAME = "apsp";
 
     ObjectName getThreadPool();
 

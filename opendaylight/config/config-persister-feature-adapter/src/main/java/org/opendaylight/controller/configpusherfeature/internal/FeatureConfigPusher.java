@@ -36,7 +36,7 @@ public class FeatureConfigPusher {
      * chains.  Also, preserves the *original* Feature chain for which we pushed the config.
      * (which is handy for logging).
      */
-    LinkedHashSet<FeatureConfigSnapshotHolder> pushedConfigs = new LinkedHashSet<FeatureConfigSnapshotHolder>();
+    LinkedHashSet<FeatureConfigSnapshotHolder> pushedConfigs = new LinkedHashSet<>();
     /*
      * LinkedHashMultimap to track which configs we pushed for each Feature installation
      * For future use
@@ -118,7 +118,7 @@ public class FeatureConfigPusher {
     }
 
     private LinkedHashSet<FeatureConfigSnapshotHolder> pushConfig(final LinkedHashSet<FeatureConfigSnapshotHolder> configs, final Feature feature) throws InterruptedException {
-        LinkedHashSet<FeatureConfigSnapshotHolder> configsToPush = new LinkedHashSet<FeatureConfigSnapshotHolder>(configs);
+        LinkedHashSet<FeatureConfigSnapshotHolder> configsToPush = new LinkedHashSet<>(configs);
         configsToPush.removeAll(pushedConfigs);
         if (!configsToPush.isEmpty()) {
 
@@ -134,7 +134,7 @@ public class FeatureConfigPusher {
 
             pushedConfigs.addAll(configsToPush);
         }
-        LinkedHashSet<FeatureConfigSnapshotHolder> configsPushed = new LinkedHashSet<FeatureConfigSnapshotHolder>(pushedConfigs);
+        LinkedHashSet<FeatureConfigSnapshotHolder> configsPushed = new LinkedHashSet<>(pushedConfigs);
         configsPushed.retainAll(configs);
         return configsPushed;
     }

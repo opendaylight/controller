@@ -40,7 +40,7 @@ import org.opendaylight.controller.config.persist.storage.file.xml.model.ConfigS
 public class FeatureConfigSnapshotHolder implements ConfigSnapshotHolder {
     private ConfigSnapshot unmarshalled = null;
     private ConfigFileInfo fileInfo = null;
-    private List<Feature> featureChain = new ArrayList<Feature>();
+    private List<Feature> featureChain = new ArrayList<>();
 
     /*
      * @param holder - FeatureConfigSnapshotHolder that we

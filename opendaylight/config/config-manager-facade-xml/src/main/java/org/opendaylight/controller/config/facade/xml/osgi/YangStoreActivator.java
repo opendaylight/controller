@@ -81,7 +81,8 @@ public class YangStoreActivator implements BundleActivator {
                     yangStoreService.refresh(runtimeContext);
                 }
 
-                yangStoreServiceServiceRegistration = context.registerService(YangStoreService.class, yangStoreService, new Hashtable<String, Object>());
+                yangStoreServiceServiceRegistration = context.registerService(YangStoreService.class, yangStoreService,
+                        new Hashtable<>());
                 configRegistryLookup = new ConfigRegistryLookupThread(yangStoreService);
                 configRegistryLookup.start();
                 return yangStoreService;
@@ -186,7 +187,8 @@ public class YangStoreActivator implements BundleActivator {
 
             final ConfigSubsystemFacadeFactory configSubsystemFacade =
                     new ConfigSubsystemFacadeFactory(jmxClient, jmxClientNoNotifications, yangStoreService);
-            osgiRegistrayion = context.registerService(ConfigSubsystemFacadeFactory.class, configSubsystemFacade, new Hashtable<String, Object>());
+            osgiRegistrayion = context.registerService(ConfigSubsystemFacadeFactory.class, configSubsystemFacade,
+                    new Hashtable<>());
         }
     }
 }

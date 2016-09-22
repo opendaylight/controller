@@ -132,7 +132,7 @@ public final class ExtensibleBundleTracker<T> extends BundleTracker<Future<T>> {
         }
     }
 
-    private static interface BundleStrategy {
+    private interface BundleStrategy {
         void execute(BundleTrackerCustomizer<?> tracker);
     }
 

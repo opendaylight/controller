@@ -81,6 +81,6 @@ public final class HashedWheelTimerModule extends
         this.bundleContext = bundleContext;
     }
 
-    private static interface AutoCloseableTimerInterface extends Timer, AutoCloseable {
+    private interface AutoCloseableTimerInterface extends Timer, AutoCloseable {
     }
 }

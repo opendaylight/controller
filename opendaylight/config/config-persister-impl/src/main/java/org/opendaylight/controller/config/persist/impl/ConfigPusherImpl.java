@@ -72,7 +72,6 @@ public class ConfigPusherImpl implements ConfigPusher {
     public void process(List<AutoCloseable> autoCloseables, MBeanServerConnection platformMBeanServer,
             Persister persisterAggregator, boolean propagateExceptions) throws InterruptedException {
         while(processSingle(autoCloseables, platformMBeanServer, persisterAggregator, propagateExceptions)) {
-            ;
         }
     }
 

@@ -14,6 +14,6 @@ import org.opendaylight.controller.config.util.xml.XmlElement;
 
 public interface AttributeReadingStrategy {
 
-    public abstract AttributeConfigElement readElement(List<XmlElement> element) throws DocumentedException;
+    AttributeConfigElement readElement(List<XmlElement> element) throws DocumentedException;
 
 }

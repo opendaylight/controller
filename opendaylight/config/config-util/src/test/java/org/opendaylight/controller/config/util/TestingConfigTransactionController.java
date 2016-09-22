@@ -49,8 +49,8 @@ public class TestingConfigTransactionController implements
                 + ":type=Module," + ObjectNameUtil.MODULE_FACTORY_NAME_KEY
                 + "=" + moduleName2 + "," + ObjectNameUtil.INSTANCE_NAME_KEY
                 + "=" + instName2);
-        mapSub = new HashMap<String, ObjectName>();
-        map = new HashMap<String, Map<String,ObjectName>>();
+        mapSub = new HashMap<>();
+        map = new HashMap<>();
     }
 
     @Override

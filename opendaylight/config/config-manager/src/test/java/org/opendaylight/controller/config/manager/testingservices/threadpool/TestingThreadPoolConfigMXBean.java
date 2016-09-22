@@ -9,5 +9,5 @@ package org.opendaylight.controller.config.manager.testingservices.threadpool;
 
 public interface TestingThreadPoolConfigMXBean {
 
-    public int getThreadCount();
+    int getThreadCount();
 }

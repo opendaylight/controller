@@ -203,7 +203,7 @@ public abstract class AbstractConfigTest extends AbstractLockedPlatformMBeanServ
         return mock(BindingRuntimeContext.class);
     }
 
-    public static interface BundleContextServiceRegistrationHandler {
+    public interface BundleContextServiceRegistrationHandler {
         void handleServiceRegistration(Class<?> clazz, Object serviceInstance, Dictionary<String, ?> props);
     }
 

@@ -96,7 +96,7 @@ public class AnnotationsTest {
 
     @ServiceInterfaceAnnotation(value = SIMPLE, osgiRegistrationType = Executor.class,
         namespace = "ns", revision = "rev", localName = SIMPLE)
-    static interface SimpleSI extends AbstractServiceInterface {
+    interface SimpleSI extends AbstractServiceInterface {
 
     }
 
@@ -155,14 +155,13 @@ public class AnnotationsTest {
                 emptySetOfInterfaces(), "class");
     }
 
-    static interface SubSI extends SimpleSI {
+    interface SubSI extends SimpleSI {
 
     }
 
     @ServiceInterfaceAnnotation(value = SUBCLASS2, osgiRegistrationType = ExecutorService.class,
         namespace = "ns", revision = "rev", localName = SUBCLASS2)
-
-    static interface SubSI2 extends SubSI {
+    interface SubSI2 extends SubSI {
 
     }
 
@@ -192,7 +191,7 @@ public class AnnotationsTest {
         }
     }
 
-    public static interface HasSomeMethod {
+    public interface HasSomeMethod {
         void setSomething(ObjectName objectName);
     }
 
@@ -245,7 +244,7 @@ public class AnnotationsTest {
     }
 
     @Description("class")
-    static interface HasSomeMethodWithAnnotations {
+    interface HasSomeMethodWithAnnotations {
 
         @RequireInterface(SubSI2.class)
         @Description("descr")
@@ -273,7 +272,7 @@ public class AnnotationsTest {
 
         assertDescriptionOnClass(
                 HasSomeMethodWithAnnotationsImpl.class,
-                new HashSet<Class<?>>(Arrays
+                new HashSet<>(Arrays
                         .asList(HasSomeMethodWithAnnotations.class)), "class");
     }
 

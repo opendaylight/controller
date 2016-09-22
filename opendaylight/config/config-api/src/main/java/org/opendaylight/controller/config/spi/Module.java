@@ -64,7 +64,7 @@ public interface Module extends Identifiable<ModuleIdentifier>{
      * @param oldModule old instance of Module
      * @return true if the instance produced by oldModule can be reused with current instance as well.
      */
-    public boolean canReuse(Module oldModule);
+    boolean canReuse(Module oldModule);
 
 
 }

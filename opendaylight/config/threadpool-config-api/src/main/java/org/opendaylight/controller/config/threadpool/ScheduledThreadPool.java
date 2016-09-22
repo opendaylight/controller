@@ -16,5 +16,5 @@ import java.util.concurrent.ScheduledExecutorService;
 public interface ScheduledThreadPool extends ThreadPool {
 
     @Override
-    public ScheduledExecutorService getExecutor();
+    ScheduledExecutorService getExecutor();
 }

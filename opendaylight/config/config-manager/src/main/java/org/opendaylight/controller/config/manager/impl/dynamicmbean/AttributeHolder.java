@@ -131,7 +131,7 @@ class AttributeHolder {
                 .findMethodAnnotationInSuperClassesAndIfcs(setter, RequireInterface.class, inspectedInterfaces);
         // make sure the list if not empty contains always annotation with same
         // value
-        Set<Class<?>> foundValues = new HashSet<Class<?>>();
+        Set<Class<?>> foundValues = new HashSet<>();
         for (RequireInterface ri : foundRequireInterfaces) {
             foundValues.add(ri.value());
         }

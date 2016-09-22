@@ -257,7 +257,7 @@ final class DependencyResolverImpl implements DependencyResolver,
         transactionStatus.checkCommitStarted();
         if (maxDependencyDepth == null) {
             maxDependencyDepth = getMaxDepth(this, manager,
-                    new LinkedHashSet<ModuleIdentifier>());
+                    new LinkedHashSet<>());
         }
     }
 

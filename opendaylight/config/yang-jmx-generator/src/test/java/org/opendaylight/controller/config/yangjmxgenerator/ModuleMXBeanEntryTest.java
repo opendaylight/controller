@@ -273,18 +273,18 @@ public class ModuleMXBeanEntryTest extends AbstractYangTest {
                 assertThat(toAttr.getLowerCaseCammelCase(), is("peer"));
                 assertThat(toAttr.getUpperCaseCammelCase(), is("Peer"));
                 assertThat(toAttr.getOpenType(), isA(CompositeType.class));
-                Set<String> propsExpected = new HashSet<String>(2);
+                Set<String> propsExpected = new HashSet<>(2);
                 propsExpected.add("port");
                 propsExpected.add("core-size");
                 assertThat(toAttr.getYangPropertiesToTypesMap().keySet(),
                         is(propsExpected));
-                propsExpected = new HashSet<String>(2);
+                propsExpected = new HashSet<>(2);
                 propsExpected.add("Port");
                 propsExpected.add("CoreSize");
                 assertThat(
                         toAttr.getCapitalizedPropertiesToTypesMap().keySet(),
                         is(propsExpected));
-                propsExpected = new HashSet<String>(2);
+                propsExpected = new HashSet<>(2);
                 propsExpected.add("port");
                 propsExpected.add("coreSize");
                 assertThat(toAttr.getJmxPropertiesToTypesMap().keySet(),

@@ -54,7 +54,7 @@ public class ChildAwareFeatureWrapper extends AbstractFeatureWrapper implements 
      */
     public LinkedHashSet <? extends ChildAwareFeatureWrapper> getChildFeatures() throws Exception {
         List<Dependency> dependencies = feature.getDependencies();
-        LinkedHashSet <ChildAwareFeatureWrapper> childFeatures = new LinkedHashSet<ChildAwareFeatureWrapper>();
+        LinkedHashSet <ChildAwareFeatureWrapper> childFeatures = new LinkedHashSet<>();
         if(dependencies != null) {
             for(Dependency dependency: dependencies) {
                 Feature fi = extractFeatureFromDependency(dependency);
@@ -73,7 +73,7 @@ public class ChildAwareFeatureWrapper extends AbstractFeatureWrapper implements 
 
     @Override
     public LinkedHashSet<FeatureConfigSnapshotHolder> getFeatureConfigSnapshotHolders() throws Exception {
-        LinkedHashSet <FeatureConfigSnapshotHolder> snapShotHolders = new LinkedHashSet<FeatureConfigSnapshotHolder>();
+        LinkedHashSet <FeatureConfigSnapshotHolder> snapShotHolders = new LinkedHashSet<>();
         for(ChildAwareFeatureWrapper c: getChildFeatures()) {
             for(FeatureConfigSnapshotHolder h: c.getFeatureConfigSnapshotHolders()) {
                 final Optional<FeatureConfigSnapshotHolder> featureConfigSnapshotHolder = getFeatureConfigSnapshotHolder(h.getFileInfo());

@@ -15,7 +15,7 @@ import java.util.concurrent.ExecutorService;
  */
 public interface ThreadPool {
 
-    public ExecutorService getExecutor();
+    ExecutorService getExecutor();
 
-    public int getMaxThreadCount();
+    int getMaxThreadCount();
 }

@@ -78,7 +78,7 @@ public class AnnotationsHelper {
      */
     static <T extends Annotation> List<T> findClassAnnotationInSuperClassesAndIfcs(
             final Class<?> clazz, final Class<T> annotationType, final Set<Class<?>> interfaces) {
-        List<T> result = new ArrayList<T>();
+        List<T> result = new ArrayList<>();
         Class<?> declaringClass = clazz;
         do {
             T annotation = declaringClass.getAnnotation(annotationType);

@@ -105,7 +105,7 @@ public class ClassBasedModuleFactory implements ModuleFactory {
 
     @Override
     public Set<Module> getDefaultModules(DependencyResolverFactory dependencyResolverFactory, BundleContext bundleContext) {
-        return new HashSet<Module>();
+        return new HashSet<>();
     }
 
     @Override

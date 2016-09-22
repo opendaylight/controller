@@ -66,7 +66,7 @@ public final class WaitingServiceTracker<T> implements AutoCloseable {
     public static <T> WaitingServiceTracker<T> create(@Nonnull Class<T> serviceInterface, @Nonnull BundleContext context) {
         ServiceTracker<T, ?> tracker = new ServiceTracker<>(context, serviceInterface, null);
         tracker.open();
-        return new WaitingServiceTracker<T>(serviceInterface, tracker);
+        return new WaitingServiceTracker<>(serviceInterface, tracker);
     }
 
     /**
@@ -83,7 +83,7 @@ public final class WaitingServiceTracker<T> implements AutoCloseable {
         try {
             ServiceTracker<T, ?> tracker = new ServiceTracker<>(context, context.createFilter(newFilter), null);
             tracker.open();
-            return new WaitingServiceTracker<T>(serviceInterface, tracker);
+            return new WaitingServiceTracker<>(serviceInterface, tracker);
         } catch(InvalidSyntaxException e) {
             throw new IllegalArgumentException(String.format("Invalid OSGi filter %s", newFilter), e);
         }

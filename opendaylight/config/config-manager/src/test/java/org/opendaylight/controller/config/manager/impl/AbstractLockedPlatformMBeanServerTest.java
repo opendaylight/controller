@@ -35,7 +35,7 @@ public abstract class AbstractLockedPlatformMBeanServerTest {
 
     }
 
-    public static interface SimpleBeanMBean {
+    public interface SimpleBeanMBean {
 
     }
 

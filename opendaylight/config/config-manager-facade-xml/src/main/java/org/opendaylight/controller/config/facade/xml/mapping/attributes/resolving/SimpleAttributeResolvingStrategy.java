@@ -71,7 +71,7 @@ final class SimpleAttributeResolvingStrategy extends AbstractAttributeResolvingS
         resolverPlugins.put(BigDecimal.class.getCanonicalName(), new BigDecimalResolver());
     }
 
-    static interface Resolver {
+    interface Resolver {
         Object resolveObject(Class<?> type, String attrName, String value) throws DocumentedException;
     }
 
