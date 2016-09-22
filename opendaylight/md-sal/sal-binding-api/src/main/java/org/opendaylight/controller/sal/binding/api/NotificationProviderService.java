@@ -27,7 +27,7 @@ public interface NotificationProviderService extends NotificationService, Notifi
      * {@inheritDoc}
      */
     @Override
-    public void publish(Notification notification);
+    void publish(Notification notification);
 
     /**
      * {@inheritDoc}
@@ -56,7 +56,7 @@ public interface NotificationProviderService extends NotificationService, Notifi
     /**
      * Interface for a listener interested in being notified about notification subscriptions.
      */
-    public interface NotificationInterestListener extends EventListener {
+    interface NotificationInterestListener extends EventListener {
 
         /**
          * Callback that is invoked when a notification listener subscribes for a
