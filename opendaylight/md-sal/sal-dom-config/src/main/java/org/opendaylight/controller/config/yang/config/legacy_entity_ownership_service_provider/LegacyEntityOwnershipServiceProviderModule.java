@@ -60,7 +60,7 @@ public class LegacyEntityOwnershipServiceProviderModule extends AbstractLegacyEn
         this.bundleContext = bundleContext;
     }
 
-    private static interface AutoCloseableEntityOwnershipService extends EntityOwnershipService, AutoCloseable {
+    private interface AutoCloseableEntityOwnershipService extends EntityOwnershipService, AutoCloseable {
     }
 
 }
