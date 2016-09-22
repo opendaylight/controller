@@ -22,6 +22,30 @@
       "revId": "864ed94cdd85001744d4511d0817ef9353866173",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_614844cc",
+        "filename": "opendaylight/md-sal/sal-common-util/src/main/java/org/opendaylight/controller/sal/common/util/Rpcs.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-09-22T15:47:40Z",
+      "side": 1,
+      "message": "Done in https://git.opendaylight.org/gerrit/46074",
+      "parentUuid": "7a6b29fe_017a3023",
+      "range": {
+        "startLine": 32,
+        "startChar": 8,
+        "endLine": 32,
+        "endChar": 26
+      },
+      "revId": "864ed94cdd85001744d4511d0817ef9353866173",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
