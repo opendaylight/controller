@@ -23,18 +23,16 @@ import com.google.common.collect.ImmutableList;
 public class Rpcs {
 
     public static <T> RpcResult<T> getRpcResult(boolean successful) {
-        RpcResult<T> ret = new RpcResultTO<T>(successful, null, ImmutableList.<RpcError>of());
-        return ret;
+        return new RpcResultTO<>(successful, null, ImmutableList.of());
     }
 
     public static <T> RpcResult<T> getRpcResult(boolean successful, T result,
             Collection<RpcError> errors) {
-        RpcResult<T> ret = new RpcResultTO<T>(successful, result, errors);
-        return ret;
+        return new RpcResultTO<>(successful, result, errors);
     }
 
     public static <T> RpcResult<T> getRpcResult(boolean successful, Collection<RpcError> errors) {
-        return new RpcResultTO<T>(successful, null, errors);
+        return new RpcResultTO<>(successful, null, errors);
     }
 
     private static class RpcResultTO<T> implements RpcResult<T>, Serializable, Immutable {
