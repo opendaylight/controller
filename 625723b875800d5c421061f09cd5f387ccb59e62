@@ -22,6 +22,30 @@
       "revId": "625723b875800d5c421061f09cd5f387ccb59e62",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_a166dc27",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/DOMNotificationPublishService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-09-22T16:07:24Z",
+      "side": 0,
+      "message": "Hmm, it works for me:\n\n    public class Test {\n        public interface TestInterface {\n            ListenableFuture\u003c?\u003e testMethod();\n        }\n    \n        public static class Foo implements TestInterface {\n    \n            @Override\n            public ListenableFuture\u003c? extends Exception\u003e testMethod() {\n                return Futures.immediateFuture(new Exception());\n            }\n        }\n    \n        public static void main(String[] args) {\n            try {\n                new Foo().testMethod().get().printStackTrace();\n            } catch (InterruptedException | ExecutionException e) {\n                e.printStackTrace();\n            }\n        }\n    }",
+      "parentUuid": "7a6b29fe_e198d46b",
+      "range": {
+        "startLine": 90,
+        "startChar": 29,
+        "endLine": 90,
+        "endChar": 47
+      },
+      "revId": "625723b875800d5c421061f09cd5f387ccb59e62",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
