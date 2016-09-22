@@ -193,7 +193,7 @@ public final class DOMNotificationRouter implements AutoCloseable, DOMNotificati
     }
 
     @Override
-    public ListenableFuture<? extends Object> putNotification(final DOMNotification notification) throws InterruptedException {
+    public ListenableFuture<?> putNotification(final DOMNotification notification) throws InterruptedException {
         final Collection<ListenerRegistration<? extends DOMNotificationListener>> subscribers = listeners.get(notification.getType());
         if (subscribers.isEmpty()) {
             return NO_LISTENERS;
@@ -203,7 +203,7 @@ public final class DOMNotificationRouter implements AutoCloseable, DOMNotificati
         return publish(seq, notification, subscribers);
     }
 
-    private ListenableFuture<? extends Object> tryPublish(final DOMNotification notification, final Collection<ListenerRegistration<? extends DOMNotificationListener>> subscribers) {
+    private ListenableFuture<?> tryPublish(final DOMNotification notification, final Collection<ListenerRegistration<? extends DOMNotificationListener>> subscribers) {
         final long seq;
         try {
              seq = disruptor.getRingBuffer().tryNext();
@@ -215,7 +215,7 @@ public final class DOMNotificationRouter implements AutoCloseable, DOMNotificati
     }
 
     @Override
-    public ListenableFuture<? extends Object> offerNotification(final DOMNotification notification) {
+    public ListenableFuture<?> offerNotification(final DOMNotification notification) {
         final Collection<ListenerRegistration<? extends DOMNotificationListener>> subscribers = listeners.get(notification.getType());
         if (subscribers.isEmpty()) {
             return NO_LISTENERS;
@@ -225,7 +225,7 @@ public final class DOMNotificationRouter implements AutoCloseable, DOMNotificati
     }
 
     @Override
-    public ListenableFuture<? extends Object> offerNotification(final DOMNotification notification, final long timeout,
+    public ListenableFuture<?> offerNotification(final DOMNotification notification, final long timeout,
             final TimeUnit unit) throws InterruptedException {
         final Collection<ListenerRegistration<? extends DOMNotificationListener>> subscribers = listeners.get(notification.getType());
         if (subscribers.isEmpty()) {
@@ -233,7 +233,7 @@ public final class DOMNotificationRouter implements AutoCloseable, DOMNotificati
         }
 
         // Attempt to perform a non-blocking publish first
-        final ListenableFuture<? extends Object> noBlock = tryPublish(notification, subscribers);
+        final ListenableFuture<?> noBlock = tryPublish(notification, subscribers);
         if (!DOMNotificationPublishService.REJECTED.equals(noBlock)) {
             return noBlock;
         }

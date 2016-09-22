@@ -152,7 +152,7 @@ abstract class AbstractDOMForwardedTransactionFactory<T extends DOMStoreTransact
         for (Entry<LogicalDatastoreType, T> store : storeTxFactories.entrySet()) {
             txns.put(store.getKey(), store.getValue().newWriteOnlyTransaction());
         }
-        return new DOMForwardedWriteTransaction<DOMStoreWriteTransaction>(newTransactionIdentifier(), txns, this);
+        return new DOMForwardedWriteTransaction<>(newTransactionIdentifier(), txns, this);
     }
 
     /**
