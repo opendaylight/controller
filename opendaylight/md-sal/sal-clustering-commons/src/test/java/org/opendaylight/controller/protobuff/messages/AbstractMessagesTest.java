@@ -45,7 +45,7 @@ public abstract class AbstractMessagesTest {
 
     FileOutputStream output = new FileOutputStream(file);
     builder.build().writeTo(output);
-    output.close();;
+    output.close();
 
   }
 

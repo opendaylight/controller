@@ -62,7 +62,7 @@ public class PathArgumentSerializer {
     }
 
 
-    private static interface PathArgumentAttributesGetter {
+    private interface PathArgumentAttributesGetter {
         Iterable<? extends NormalizedNodeMessages.PathArgumentAttribute> get(
                 QNameSerializationContext context, YangInstanceIdentifier.PathArgument pathArgument);
     }
