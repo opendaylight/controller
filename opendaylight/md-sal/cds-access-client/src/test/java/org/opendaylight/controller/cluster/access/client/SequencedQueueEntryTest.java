@@ -85,7 +85,7 @@ public class SequencedQueueEntryTest {
         protected MockRequest cloneAsVersion(final ABIVersion version) {
             return this;
         }
-    };
+    }
 
     @Mock
     private ActorRef mockReplyTo;
