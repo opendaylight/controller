@@ -87,7 +87,7 @@ public class BucketStoreTest {
 
         //Add a new remote bucket
         Address a4 = new Address("tcp", "system4");
-        Bucket<T> b4 = new BucketImpl<T>();
+        Bucket<T> b4 = new BucketImpl<>();
         remoteBuckets.clear();
         remoteBuckets.put(a4, b4);
         store.receiveUpdateRemoteBuckets(remoteBuckets);
@@ -99,7 +99,7 @@ public class BucketStoreTest {
         Assert.assertTrue(remoteBucketsInStore.size() == 4);
 
         //Update a bucket
-        Bucket<T> b3_new = new BucketImpl<T>();
+        Bucket<T> b3_new = new BucketImpl<>();
         remoteBuckets.clear();
         remoteBuckets.put(a3, b3_new);
         remoteBuckets.put(a1, null);

@@ -120,7 +120,7 @@ public class BucketStore<T extends Copier<T>> extends AbstractUntypedActorWithMe
      */
     void receiveGetAllBuckets(){
         final ActorRef sender = getSender();
-        sender.tell(new GetAllBucketsReply<T>(getAllBuckets()), getSelf());
+        sender.tell(new GetAllBucketsReply<>(getAllBuckets()), getSelf());
     }
 
     /**
@@ -148,7 +148,7 @@ public class BucketStore<T extends Copier<T>> extends AbstractUntypedActorWithMe
     void receiveGetBucketsByMembers(Set<Address> members){
         final ActorRef sender = getSender();
         Map<Address, Bucket<T>> buckets = getBucketsByMembers(members);
-        sender.tell(new GetBucketsByMembersReply<T>(buckets), getSelf());
+        sender.tell(new GetBucketsByMembersReply<>(buckets), getSelf());
     }
 
     /**

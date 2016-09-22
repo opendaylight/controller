@@ -81,7 +81,7 @@ public class RemoteRpcImplementationTest extends AbstractRpcTest {
         assertEquals("getType", TEST_RPC, routeIdentifier.getType());
         assertEquals("getRoute", TEST_PATH, routeIdentifier.getRoute());
 
-        rpcRegistry1Probe.reply(new RpcRegistry.Messages.FindRoutersReply(Arrays.asList(new Pair<ActorRef, Long>(
+        rpcRegistry1Probe.reply(new RpcRegistry.Messages.FindRoutersReply(Arrays.asList(new Pair<>(
                 rpcBroker2, 200L))));
 
         final DOMRpcResult result = frontEndFuture.checkedGet(5, TimeUnit.SECONDS);
@@ -111,7 +111,7 @@ public class RemoteRpcImplementationTest extends AbstractRpcTest {
         assertEquals("getType", TEST_RPC, routeIdentifier.getType());
         assertEquals("getRoute", TEST_PATH, routeIdentifier.getRoute());
 
-        rpcRegistry1Probe.reply(new RpcRegistry.Messages.FindRoutersReply(Arrays.asList(new Pair<ActorRef, Long>(
+        rpcRegistry1Probe.reply(new RpcRegistry.Messages.FindRoutersReply(Arrays.asList(new Pair<>(
                 rpcBroker2, 200L))));
 
         final DOMRpcResult result = frontEndFuture.checkedGet(5, TimeUnit.SECONDS);
@@ -143,7 +143,7 @@ public class RemoteRpcImplementationTest extends AbstractRpcTest {
         assertEquals("getType", TEST_RPC, routeIdentifier.getType());
         assertEquals("getRoute", TEST_PATH, routeIdentifier.getRoute());
 
-        rpcRegistry1Probe.reply(new RpcRegistry.Messages.FindRoutersReply(Arrays.asList(new Pair<ActorRef, Long>(
+        rpcRegistry1Probe.reply(new RpcRegistry.Messages.FindRoutersReply(Arrays.asList(new Pair<>(
                 rpcBroker2, 200L))));
 
         final DOMRpcResult result = frontEndFuture.checkedGet(5, TimeUnit.SECONDS);
@@ -176,7 +176,7 @@ public class RemoteRpcImplementationTest extends AbstractRpcTest {
         assertEquals("getType", TEST_RPC, routeIdentifier.getType());
         assertEquals("getRoute", TEST_PATH, routeIdentifier.getRoute());
 
-        rpcRegistry1Probe.reply(new RpcRegistry.Messages.FindRoutersReply(Arrays.asList(new Pair<ActorRef, Long>(
+        rpcRegistry1Probe.reply(new RpcRegistry.Messages.FindRoutersReply(Arrays.asList(new Pair<>(
                 rpcBroker2, 200L))));
         frontEndFuture.checkedGet(5, TimeUnit.SECONDS);
     }
