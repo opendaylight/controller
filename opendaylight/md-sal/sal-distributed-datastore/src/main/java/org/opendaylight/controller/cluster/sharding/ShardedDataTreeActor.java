@@ -305,9 +305,9 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
         }
 
         try {
-            final ListenerRegistration<ShardFrontend> shardFrontendRegistration =
+            final ListenerRegistration<DistributedShardFrontend> shardFrontendRegistration =
                     shardingService.registerDataTreeShard(configuration.getPrefix(),
-                            new ShardFrontend(client, configuration.getPrefix(), distributedDataStore.getActorContext()),
+                            new DistributedShardFrontend(client, configuration.getPrefix()),
                             producer);
             idToShardRegistration.put(configuration.getPrefix(), new ShardFrontendRegistration(clientActor, shardFrontendRegistration));
 
@@ -410,9 +410,9 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
     private static class ShardFrontendRegistration {
 
         private final ActorRef clientActor;
-        private final ListenerRegistration<ShardFrontend> shardRegistration;
+        private final ListenerRegistration<DistributedShardFrontend> shardRegistration;
 
-        public ShardFrontendRegistration(final ActorRef clientActor, final ListenerRegistration<ShardFrontend> shardRegistration) {
+        public ShardFrontendRegistration(final ActorRef clientActor, final ListenerRegistration<DistributedShardFrontend> shardRegistration) {
             this.clientActor = clientActor;
             this.shardRegistration = shardRegistration;
         }

@@ -77,7 +77,7 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
     private final ActorRef shardedDataTreeActor;
     private final MemberName memberName;
 
-    private final EnumMap<LogicalDatastoreType, ListenerRegistration<ShardFrontend>> defaultShardRegistrations =
+    private final EnumMap<LogicalDatastoreType, ListenerRegistration<DistributedShardFrontend>> defaultShardRegistrations =
             new EnumMap<>(LogicalDatastoreType.class);
 
     public DistributedShardedDOMDataTree(final ActorSystem actorSystem,
@@ -164,11 +164,11 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
         final ActorRef clientActor = entry.getValue();
 
         // register the frontend into the sharding service and let the actor distribute this onto the other nodes
-        final ListenerRegistration<ShardFrontend> shardFrontendRegistration;
+        final ListenerRegistration<DistributedShardFrontend> shardFrontendRegistration;
         try (DOMDataTreeProducer producer = createProducer(Collections.singletonList(prefix))) {
             shardFrontendRegistration = shardedDOMDataTree
                     .registerDataTreeShard(prefix,
-                            new ShardFrontend(client, prefix, distributedDataStore.getActorContext()),
+                            new DistributedShardFrontend(client, prefix),
                             ((ProxyProducer) producer).getDelegate());
         }
 
@@ -227,7 +227,7 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
         }
     }
 
-    private ListenerRegistration<ShardFrontend> initDefaultShard(
+    private ListenerRegistration<DistributedShardFrontend> initDefaultShard(
             final DistributedDataStore distributedDataStore, final LogicalDatastoreType logicalDatastoreType)
             throws DOMDataTreeShardCreationFailedException, DOMDataTreeProducerException, DOMDataTreeShardingConflictException {
 
@@ -241,7 +241,7 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
             return shardedDOMDataTree
                     .registerDataTreeShard(
                             prefix,
-                            new ShardFrontend(entry.getKey(), prefix, distributedDataStore.getActorContext()),
+                            new DistributedShardFrontend(entry.getKey(), prefix),
                             producer);
         }
     }
@@ -275,11 +275,11 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
 
     private class DistributedShardRegistrationImpl implements DistributedShardRegistration {
 
-        private final ListenerRegistration<ShardFrontend> registration;
+        private final ListenerRegistration<DistributedShardFrontend> registration;
         private final DOMDataTreeIdentifier prefix;
         private final ActorRef shardedDataTreeActor;
 
-        DistributedShardRegistrationImpl(final ListenerRegistration<ShardFrontend> registration,
+        DistributedShardRegistrationImpl(final ListenerRegistration<DistributedShardFrontend> registration,
                                          final DOMDataTreeIdentifier prefix,
                                          final ActorRef shardedDataTreeActor) {
             this.registration = registration;
