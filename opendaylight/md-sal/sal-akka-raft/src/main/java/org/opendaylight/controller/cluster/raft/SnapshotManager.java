@@ -455,7 +455,7 @@ public class SnapshotManager implements SnapshotState {
 
     }
 
-    private static interface TermInformationReader {
+    private interface TermInformationReader {
         long getIndex();
         long getTerm();
     }
