@@ -48,7 +48,7 @@ public class SimpleAttributeMappingStrategy extends AbstractAttributeMappingStra
     /**
      * Custom writer plugins must implement this interface.
      */
-    static interface WriterPlugin {
+    interface WriterPlugin {
         String writeObject(Object value);
     }
 

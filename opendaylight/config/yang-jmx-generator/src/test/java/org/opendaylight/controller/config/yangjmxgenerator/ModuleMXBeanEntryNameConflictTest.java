@@ -54,7 +54,7 @@ public class ModuleMXBeanEntryNameConflictTest extends AbstractYangTest {
             try {
                 LOG.debug("Testing {}", yangFile);
                 ModuleMXBeanEntry.create(testedModule,
-                        new HashMap<QName, ServiceInterfaceEntry>(), context,
+                        new HashMap<>(), context,
                         new TypeProviderWrapper(new TypeProviderImpl(context)),
                         PACKAGE_NAME);
                 fail(yangFile.toString()

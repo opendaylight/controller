@@ -58,7 +58,7 @@ public abstract class ConfigJMXNotification extends Notification {
     }
 
     enum NotificationType {
-        COMMIT;
+        COMMIT
     }
 
 }

@@ -103,7 +103,7 @@ public class RuntimeBeanEntryTest extends AbstractYangTest {
         assertEquals(THREAD_RUNTIME_BEAN_YANG_NAME, runtimeBeanEntry.getYangName());
 
         // get thread runtime bean rpcs
-        List<RuntimeBeanEntry.Rpc> rpcs = new ArrayList<RuntimeBeanEntry.Rpc>(
+        List<RuntimeBeanEntry.Rpc> rpcs = new ArrayList<>(
                 runtimeBeanEntry.getRpcs());
         assertEquals(2, rpcs.size());
 

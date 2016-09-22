@@ -74,6 +74,6 @@ public final class NettyThreadgroupModule extends org.opendaylight.controller.co
         this.bundleContext = bundleContext;
     }
 
-    private static interface AutoCloseableEventLoopGroupInterface extends EventLoopGroup, AutoCloseable {
+    private interface AutoCloseableEventLoopGroupInterface extends EventLoopGroup, AutoCloseable {
     }
 }

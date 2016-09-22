@@ -32,7 +32,7 @@ public interface ModuleFactory {
      *
      * @return human-friendly implementation name
      */
-    public String getImplementationName();
+    String getImplementationName();
 
     /**
      * Create a new Module instance. The returned object is expected to use the
@@ -49,7 +49,7 @@ public interface ModuleFactory {
      * @return newly created module
      *
      */
-    public Module createModule(String instanceName,
+    Module createModule(String instanceName,
             DependencyResolver dependencyResolver, BundleContext bundleContext);
 
     /**
@@ -90,7 +90,7 @@ public interface ModuleFactory {
      *             leaves server in a running state but no configuration
      *             transaction can be created.
      */
-    public Module createModule(String instanceName, DependencyResolver dependencyResolver,
+    Module createModule(String instanceName, DependencyResolver dependencyResolver,
             DynamicMBeanWithInstance old, BundleContext bundleContext) throws Exception;
 
     boolean isModuleImplementingServiceInterface(
@@ -112,7 +112,7 @@ public interface ModuleFactory {
      *
      * @return set of default modules. Null is not allowed.
      */
-    public Set<? extends Module> getDefaultModules(DependencyResolverFactory dependencyResolverFactory,
+    Set<? extends Module> getDefaultModules(DependencyResolverFactory dependencyResolverFactory,
             BundleContext bundleContext);
 
 }

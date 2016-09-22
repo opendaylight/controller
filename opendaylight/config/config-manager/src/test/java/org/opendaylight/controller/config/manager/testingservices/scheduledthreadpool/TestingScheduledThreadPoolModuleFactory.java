@@ -67,7 +67,7 @@ public class TestingScheduledThreadPoolModuleFactory implements ModuleFactory {
 
     @Override
     public Set<Module> getDefaultModules(final DependencyResolverFactory dependencyResolverFactory, final BundleContext bundleContext) {
-        return new HashSet<Module>();
+        return new HashSet<>();
     }
 
     @Override
