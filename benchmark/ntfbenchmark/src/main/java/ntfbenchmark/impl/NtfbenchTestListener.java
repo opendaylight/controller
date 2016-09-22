@@ -29,7 +29,7 @@ public class NtfbenchTestListener implements NtfbenchPayloadListener {
         if (expectedSize == notification.getPayload().size()) {
             received++;
         }
-    };
+    }
 
     public int getReceived() {
         return received;

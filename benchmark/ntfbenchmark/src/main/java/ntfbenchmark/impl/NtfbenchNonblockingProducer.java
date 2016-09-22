@@ -29,10 +29,10 @@ public class NtfbenchNonblockingProducer extends AbstractNtfbenchProducer {
     public void run() {
         int ntfOk = 0;
         int ntfError = 0;
-        ListenableFuture<? extends Object> lastOkFuture = null;
+        ListenableFuture<?> lastOkFuture = null;
         for (int i = 0; i < this.iterations; i++) {
             try {
-                final ListenableFuture<? extends Object> result = this.publishService.offerNotification(this.ntf);
+                final ListenableFuture<?> result = this.publishService.offerNotification(this.ntf);
                 if (NotificationPublishService.REJECTED == result) {
                     ntfError++;
                 } else {

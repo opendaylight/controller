@@ -45,7 +45,7 @@ public class RpcbenchmarkProvider implements BindingAwareProvider, AutoCloseable
     private static final Logger LOG = LoggerFactory.getLogger(RpcbenchmarkProvider.class);
     private static final GlobalBindingRTCServer gServer = new GlobalBindingRTCServer();
     private static final int testTimeout = 5;
-    private final AtomicReference<ExecStatus> execStatus = new AtomicReference<ExecStatus>(ExecStatus.Idle );
+    private final AtomicReference<ExecStatus> execStatus = new AtomicReference<>(ExecStatus.Idle);
     private RpcConsumerRegistry consumerRegistry;
     private RpcProviderRegistry providerRegistry;
 
