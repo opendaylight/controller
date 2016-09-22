@@ -21,7 +21,7 @@ public interface DOMStoreTransaction extends AutoCloseable, Identifiable<Object>
      * Unique identifier of the transaction
      */
     @Override
-    public Object getIdentifier();
+    Object getIdentifier();
 
     @Override
     void close();

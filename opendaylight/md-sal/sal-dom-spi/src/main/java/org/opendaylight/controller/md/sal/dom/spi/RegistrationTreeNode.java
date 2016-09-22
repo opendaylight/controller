@@ -97,7 +97,7 @@ public final class RegistrationTreeNode<T> implements Identifiable<PathArgument>
     RegistrationTreeNode<T> ensureChild(@Nonnull final PathArgument child) {
         RegistrationTreeNode<T> potential = children.get(Preconditions.checkNotNull(child));
         if (potential == null) {
-            potential = new RegistrationTreeNode<T>(this, child);
+            potential = new RegistrationTreeNode<>(this, child);
             children.put(child, potential);
         }
         return potential;

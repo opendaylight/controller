@@ -140,7 +140,8 @@ public abstract class AbstractSnapshotBackedTransactionChain<T> extends Transact
 
         do {
             entry = getSnapshot(transactionId);
-            ret = new SnapshotBackedReadWriteTransaction<T>(transactionId, getDebugTransactions(), entry.getValue(), this);
+            ret = new SnapshotBackedReadWriteTransaction<>(transactionId, getDebugTransactions(), entry.getValue(),
+                    this);
         } while (!recordTransaction(entry.getKey(), ret));
 
         return ret;
@@ -157,7 +158,7 @@ public abstract class AbstractSnapshotBackedTransactionChain<T> extends Transact
 
         do {
             entry = getSnapshot(transactionId);
-            ret = new SnapshotBackedWriteTransaction<T>(transactionId, getDebugTransactions(), entry.getValue(), this);
+            ret = new SnapshotBackedWriteTransaction<>(transactionId, getDebugTransactions(), entry.getValue(), this);
         } while (!recordTransaction(entry.getKey(), ret));
 
         return ret;
