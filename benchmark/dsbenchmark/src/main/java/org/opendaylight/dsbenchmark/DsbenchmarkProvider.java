@@ -58,7 +58,7 @@ public class DsbenchmarkProvider implements BindingAwareProvider, DsbenchmarkSer
     private static final InstanceIdentifier<TestStatus> TEST_STATUS_IID =
             InstanceIdentifier.builder(TestStatus.class).build();
 
-    private final AtomicReference<ExecStatus> execStatus = new AtomicReference<ExecStatus>( ExecStatus.Idle );
+    private final AtomicReference<ExecStatus> execStatus = new AtomicReference<>(ExecStatus.Idle);
     private final DsbenchmarkListenerProvider listenerProvider = new DsbenchmarkListenerProvider();
     private final DOMDataBroker domDataBroker;  // Async DOM Broker for use with all DOM operations
     private final DataBroker bindingDataBroker; // Async Binding-Aware Broker for use in tx chains; initialized to
