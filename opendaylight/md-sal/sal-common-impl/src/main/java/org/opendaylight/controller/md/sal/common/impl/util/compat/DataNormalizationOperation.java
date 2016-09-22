@@ -53,7 +53,7 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
     @Override
     public T getIdentifier() {
         return identifier;
-    };
+    }
 
     protected DataNormalizationOperation(final T identifier, final SchemaNode schema) {
         super();
