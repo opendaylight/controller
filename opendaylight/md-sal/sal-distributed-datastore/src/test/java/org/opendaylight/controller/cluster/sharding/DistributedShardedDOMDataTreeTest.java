@@ -23,9 +23,7 @@ import java.util.Collections;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
-import org.mockito.Mockito;
 import org.opendaylight.controller.cluster.datastore.AbstractTest;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext.Builder;
@@ -51,8 +49,12 @@ import org.opendaylight.mdsal.dom.broker.ShardedDOMDataTree;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableLeafNodeBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DistributedShardedDOMDataTreeTest extends AbstractTest {
+
+    private static final Logger LOG = LoggerFactory.getLogger(DistributedShardedDOMDataTreeTest.class);
 
     private static final Address MEMBER_1_ADDRESS = AddressFromURIString.parse("akka.tcp://cluster-test@127.0.0.1:2558");
 
@@ -112,11 +114,11 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
         followerDistributedDataStore = followerTestKit.setupDistributedDataStoreWithoutConfig(type, SchemaContextHelper.full());
 
         leaderShardFactory = new DistributedShardedDOMDataTree(leaderSystem,
-                Mockito.mock(DistributedDataStore.class),
+                leaderDistributedDataStore,
                 leaderDistributedDataStore);
 
         followerShardFactory = new DistributedShardedDOMDataTree(followerSystem,
-                Mockito.mock(DistributedDataStore.class),
+                followerDistributedDataStore,
                 followerDistributedDataStore);
     }
 
@@ -171,24 +173,26 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
     }
 
     @Test
-    @Ignore("Needs some other stuff related to 5280")
     public void testWriteIntoMultipleShards() throws Exception {
         initEmptyDatastore("config");
 
+        LOG.warn("registering first shard");
         final DistributedShardRegistration shardRegistration = leaderShardFactory.createDistributedShard(TEST_ID, Lists.newArrayList(AbstractTest.MEMBER_NAME, AbstractTest.MEMBER_2_NAME));
 
         leaderTestKit.waitUntilLeader(leaderDistributedDataStore.getActorContext(), ClusterUtils.getCleanShardName(TEST_ID.getRootIdentifier()));
+        followerTestKit.waitUntilNoLeader(followerDistributedDataStore.getActorContext(), ClusterUtils.getCleanShardName(TEST_ID.getRootIdentifier()));
 
+        LOG.warn("Got after waiting for nonleader");
         final ActorRef leaderShardManager = leaderDistributedDataStore.getActorContext().getShardManager();
 
         new JavaTestKit(leaderSystem) {{
             leaderShardManager.tell(new FindLocalShard(ClusterUtils.getCleanShardName(TestModel.TEST_PATH), true), getRef());
-            expectMsgClass(duration("5 seconds"), LocalShardFound.class);
+            expectMsgClass(duration("60 seconds"), LocalShardFound.class);
 
             final ActorRef followerShardManager = followerDistributedDataStore.getActorContext().getShardManager();
 
             followerShardManager.tell(new FindLocalShard(ClusterUtils.getCleanShardName(TestModel.TEST_PATH), true), getRef());
-            expectMsgClass(duration("5 seconds"), LocalShardFound.class);
+            expectMsgClass(duration("60 seconds"), LocalShardFound.class);
 
             leaderDistributedDataStore.getActorContext().getShardManager().tell(new FindPrimary(ClusterUtils.getCleanShardName(TestModel.TEST_PATH), true), getRef());
             expectMsgClass(duration("5 seconds"), LocalPrimaryShardFound.class);

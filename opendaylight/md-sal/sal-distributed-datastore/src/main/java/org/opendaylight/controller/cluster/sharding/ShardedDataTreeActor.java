@@ -282,7 +282,7 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
     }
 
     private void onCreatePrefixShard(final CreatePrefixShard message) {
-        LOG.debug("Received CreatePrefixShard: {}", message);
+        LOG.debug("Member: {}, Received CreatePrefixShard: {}", cluster.getCurrentMemberName(), message);
 
         final PrefixShardConfiguration configuration = message.getConfiguration();
 
@@ -305,9 +305,9 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
         }
 
         try {
-            final ListenerRegistration<ShardFrontend> shardFrontendRegistration =
+            final ListenerRegistration<DistributedShardFrontend> shardFrontendRegistration =
                     shardingService.registerDataTreeShard(configuration.getPrefix(),
-                            new ShardFrontend(client, configuration.getPrefix(), distributedDataStore.getActorContext()),
+                            new DistributedShardFrontend(client, configuration.getPrefix()),
                             producer);
             idToShardRegistration.put(configuration.getPrefix(), new ShardFrontendRegistration(clientActor, shardFrontendRegistration));
 
@@ -326,7 +326,7 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
     }
 
     private void onPrefixShardCreated(final PrefixShardCreated message) {
-        LOG.debug("Received PrefixShardCreated: {}", message);
+        LOG.debug("Member: {}, Received PrefixShardCreated: {}", cluster.getCurrentMemberName(), message);
 
         final Collection<String> addresses = resolver.getShardingServicePeerActorAddresses();
         final ActorRef sender = getSender();
@@ -410,9 +410,9 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
     private static class ShardFrontendRegistration {
 
         private final ActorRef clientActor;
-        private final ListenerRegistration<ShardFrontend> shardRegistration;
+        private final ListenerRegistration<DistributedShardFrontend> shardRegistration;
 
-        public ShardFrontendRegistration(final ActorRef clientActor, final ListenerRegistration<ShardFrontend> shardRegistration) {
+        public ShardFrontendRegistration(final ActorRef clientActor, final ListenerRegistration<DistributedShardFrontend> shardRegistration) {
             this.clientActor = clientActor;
             this.shardRegistration = shardRegistration;
         }

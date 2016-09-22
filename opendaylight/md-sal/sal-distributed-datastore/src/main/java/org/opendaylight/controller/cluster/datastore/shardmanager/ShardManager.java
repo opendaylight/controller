@@ -514,29 +514,29 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
         final Map<String, String> peerAddresses = Collections.emptyMap();
         final boolean isActiveMember = true;
-        LOG.debug("{} doCreatePrefixedShard: shardId: {}, memberNames: {}, peerAddresses: {}, isActiveMember: {}",
-                persistenceId(), shardId, peerAddresses, isActiveMember);
+        LOG.debug("{} doCreatePrefixedShard: persistenceId(): {}, memberNames: {}, peerAddresses: {}, isActiveMember: {}",
+                shardId, persistenceId(), createPrefixedShard.getConfig().getShardMemberNames(), peerAddresses, isActiveMember);
 
         final ShardInformation info = new ShardInformation(shardName, shardId, peerAddresses,
                 shardDatastoreContext, createPrefixedShard.getShardBuilder(), peerAddressResolver);
         info.setActiveMember(isActiveMember);
         localShards.put(info.getShardName(), info);
 
-        persistShardList();
+//        persistShardList();
 
         if(schemaContext != null) {
             info.setActor(newShardActor(schemaContext, info));
         }
 
         // after the shard is created, create the replicas that are configured automatically
-        for (final String address : peerAddressResolver.getShardManagerPeerActorAddresses()) {
-            if (cluster.getSelfAddress().toString().contains(address)) {
-                continue;
-            }
-
-            LOG.debug("Trying to create replica on {} for shard {}", cluster.getCurrentMemberName(), config.getPrefix());
-            getContext().actorSelection(address).tell(new ReplicateCreatedShard(createPrefixedShard.getConfig()), self());
-        }
+//        for (final String address : peerAddressResolver.getShardManagerPeerActorAddresses()) {
+//            if (cluster.getSelfAddress().toString().contains(address)) {
+//                continue;
+//            }
+//
+//            LOG.debug("Trying to create replica on {} for shard {}", cluster.getCurrentMemberName(), config.getPrefix());
+//            getContext().actorSelection(address).tell(new ReplicateCreatedShard(createPrefixedShard.getConfig()), self());
+//        }
     }
 
     private void doCreateShard(final CreateShard createShard) {
@@ -1413,8 +1413,10 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         saveSnapshot(updateShardManagerSnapshot(shardList, configuration.getAllPrefixShardConfigurations()));
     }
 
-    private ShardManagerSnapshot updateShardManagerSnapshot(List<String> shardList) {
-        currentSnapshot = new ShardManagerSnapshot(shardList);
+    private ShardManagerSnapshot updateShardManagerSnapshot(
+            final List<String> shardList,
+            final Map<YangInstanceIdentifier, PrefixShardConfiguration> allPrefixShardConfigurations) {
+        currentSnapshot = new ShardManagerSnapshot(shardList, allPrefixShardConfigurations);
         return currentSnapshot;
     }
 
