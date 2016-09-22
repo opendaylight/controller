@@ -74,10 +74,7 @@ public class GlobalBindingRTCClient implements RTCClient {
                         rpcError++;
                     }
                 }
-            } catch (InterruptedException e) {
-                rpcError++;
-                LOG.error("Execution failed: ", e);
-            } catch (ExecutionException e) {
+            } catch (InterruptedException | ExecutionException e) {
                 rpcError++;
                 LOG.error("Execution failed: ", e);
             }
