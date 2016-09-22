@@ -26,7 +26,7 @@ class DataSchemaContainerProxy implements DataNodeContainer {
 
     public DataSchemaContainerProxy(final Set<DataSchemaNode> realChildSchema) {
         realChildSchemas = realChildSchema;
-        mappedChildSchemas = new HashMap<QName, DataSchemaNode>();
+        mappedChildSchemas = new HashMap<>();
         for(DataSchemaNode schema : realChildSchemas) {
             mappedChildSchemas.put(schema.getQName(),schema);
         }
