@@ -116,7 +116,7 @@ public interface Broker {
      *
      *
      */
-    public interface ConsumerSession {
+    interface ConsumerSession {
 
         boolean isClosed();
 
@@ -156,7 +156,7 @@ public interface Broker {
      * functionality provided by other {@link Provider}s.
      *
      */
-    public interface ProviderSession extends ConsumerSession {
+    interface ProviderSession extends ConsumerSession {
         /**
          * Closes a session between provider and SAL.
          *

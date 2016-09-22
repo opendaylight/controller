@@ -26,7 +26,7 @@ public interface DOMMountPointService extends BrokerService {
 
     ListenerRegistration<MountProvisionListener> registerProvisionListener(MountProvisionListener listener);
 
-    public interface DOMMountPointBuilder {
+    interface DOMMountPointBuilder {
 
         <T extends DOMService> DOMMountPointBuilder addService(Class<T> type,T impl);
 
