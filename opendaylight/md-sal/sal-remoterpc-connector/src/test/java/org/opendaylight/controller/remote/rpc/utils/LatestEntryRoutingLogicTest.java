@@ -46,9 +46,9 @@ public class LatestEntryRoutingLogicTest {
     ActorRef actor1 = probe1.ref();
     ActorRef actor2 = probe2.ref();
     ActorRef actor3 = probe3.ref();
-    pairList.add(new Pair<ActorRef, Long>(actor1, 1000L));
-    pairList.add(new Pair<ActorRef, Long>(actor2, 3000L));
-    pairList.add(new Pair<ActorRef, Long>(actor3, 2000L));
+    pairList.add(new Pair<>(actor1, 1000L));
+    pairList.add(new Pair<>(actor2, 3000L));
+    pairList.add(new Pair<>(actor3, 2000L));
     RoutingLogic logic = new LatestEntryRoutingLogic(pairList);
     assertTrue(logic.select().equals(actor2));
   }

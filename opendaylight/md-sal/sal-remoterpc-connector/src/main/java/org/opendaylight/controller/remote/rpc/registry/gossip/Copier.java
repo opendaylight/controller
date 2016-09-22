@@ -12,5 +12,5 @@ package org.opendaylight.controller.remote.rpc.registry.gossip;
  * The implementers should do deep cloning in copy() method.
  */
 public interface Copier<T> {
-    public T copy();
+    T copy();
 }
