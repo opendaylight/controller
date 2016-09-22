@@ -19,5 +19,5 @@ public interface RaftRPC extends Serializable {
      *
      * @return The term ID
      */
-    public long getTerm();
+    long getTerm();
 }
