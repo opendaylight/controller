@@ -74,7 +74,7 @@ public class ConcurrentDOMDataBrokerTest {
     private final DOMStoreThreePhaseCommitCohort mockCohort1 = mock(DOMStoreThreePhaseCommitCohort.class);
     private final DOMStoreThreePhaseCommitCohort mockCohort2 = mock(DOMStoreThreePhaseCommitCohort.class);
     private final ThreadPoolExecutor futureExecutor =
-            new ThreadPoolExecutor(0, 1, 5, TimeUnit.SECONDS, new SynchronousQueue<Runnable>());
+            new ThreadPoolExecutor(0, 1, 5, TimeUnit.SECONDS, new SynchronousQueue<>());
     private ConcurrentDOMDataBroker coordinator;
 
     @Before

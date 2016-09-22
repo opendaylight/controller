@@ -20,14 +20,14 @@ public class Dispatchers {
 
     private final akka.dispatch.Dispatchers dispatchers;
 
-    public static enum DispatcherType {
+    public enum DispatcherType {
         Client(CLIENT_DISPATCHER_PATH),
         Transaction(TXN_DISPATCHER_PATH),
         Shard(SHARD_DISPATCHER_PATH),
         Notification(NOTIFICATION_DISPATCHER_PATH);
 
         private final String path;
-        private DispatcherType(String path){
+        DispatcherType(String path){
             this.path = path;
         }
         private String path(akka.dispatch.Dispatchers dispatchers){
