@@ -19,7 +19,7 @@ import java.util.Random;
  * Created by kramesha on 7/16/14.
  */
 public class LogGenerator {
-    private Map<ActorRef, LoggingThread> clientToLoggingThread = new HashMap<ActorRef, LoggingThread>();
+    private Map<ActorRef, LoggingThread> clientToLoggingThread = new HashMap<>();
 
     public void startLoggingForClient(ActorRef client) {
         LoggingThread lt = new LoggingThread(client);
