@@ -83,7 +83,7 @@ public class TemplateFactory {
                 // convert JavaAttribute parameters into fields
                 List<Field> fields = new ArrayList<>();
                 for (JavaAttribute ja : rpc.getParameters()) {
-                    Field field = new Field(Collections.<String> emptyList(),
+                    Field field = new Field(Collections.emptyList(),
                             ja.getType().getFullyQualifiedName(),
                             ja.getLowerCaseCammelCase(), ja.getNullableDefaultWrappedForCode());
                     fields.add(field);

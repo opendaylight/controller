@@ -8,25 +8,27 @@
 
 package org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model;
 
+import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
+import javax.lang.model.element.Modifier;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.util.StringUtil;
 
 class MethodSerializer {
 
     static String toString(Method method) {
         StringBuilder build = new StringBuilder();
+        Consumer<Modifier> appendWithSpace = string -> build.append(string).append(" ");
+
         if (method.getJavadoc() != null) {
             build.append(StringUtil.writeComment(method.getJavadoc(), true));
         }
 
-        for(Annotation a: method.getAnnotations()) {
-            build.append(a);
-        }
+        method.getAnnotations().forEach(build::append);
 
         build.append("    ");
-        build.append(method.getVisibility()).append(" ");
-        for (String mod : method.getModifiers()) {
-            build.append(mod).append(" ");
-        }
+        method.getVisibility().ifPresent(appendWithSpace);
+        method.getModifiers().forEach(appendWithSpace);
         build.append(method.getReturnType()).append(" ");
 
         build.append(method.getName()).append("(");
@@ -35,30 +37,27 @@ class MethodSerializer {
             if (!firstParam) {
                 build.append(", ");
             }
-            for (String mod : param.getModifiers()) {
-                build.append(mod).append(" ");
-            }
+            param.getModifiers().forEach(appendWithSpace);
             build.append(param.getType()).append(" ");
             build.append(param.getName());
             firstParam = false;
         }
         build.append(")");
 
-        if (method instanceof MethodDeclaration) {
+        if (!method.getThrowsExceptions().isEmpty()) {
+            build.append(" throws ");
+            build.append(method.getThrowsExceptions().stream().collect(Collectors.joining(", ")));
+        }
+
+        Optional<String> body = method.getBody();
+        if (!body.isPresent()) {
             build.append(";");
             build.append("\n");
-        } else if (method instanceof MethodDefinition) {
-            MethodDefinition definition = (MethodDefinition) method;
-            if (!definition.getThrowsExceptions().isEmpty()) {
-                build.append(" throws ");
-            }
-            for (String ex : definition.getThrowsExceptions()) {
-                build.append(ex).append(" ");
-            }
+        } else {
             build.append(" {");
             build.append("\n");
             build.append("        ");
-            build.append(definition.getBody());
+            build.append(body.get());
             build.append("\n");
             build.append("    ");
             build.append("}");

@@ -9,7 +9,8 @@ package org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model;
 
 import java.util.Collections;
 import java.util.List;
-import org.apache.commons.lang3.StringUtils;
+import java.util.Optional;
+import javax.lang.model.element.Modifier;
 
 public class MethodDeclaration implements Method {
     private final String returnType;
@@ -20,7 +21,7 @@ public class MethodDeclaration implements Method {
 
     public MethodDeclaration(String returnType, String name,
             List<Field> parameters) {
-        this(returnType, name, parameters, Collections.<Annotation> emptyList());
+        this(returnType, name, parameters, Collections.emptyList());
     }
 
     public MethodDeclaration(String returnType, String name,
@@ -37,6 +38,16 @@ public class MethodDeclaration implements Method {
     }
 
     @Override
+    public List<String> getThrowsExceptions() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public Optional<String> getBody() {
+        return Optional.empty();
+    }
+
+    @Override
     public String getJavadoc() {
         return javadoc;
     }
@@ -46,8 +57,8 @@ public class MethodDeclaration implements Method {
     }
 
     @Override
-    public String getVisibility() {
-        return StringUtils.EMPTY;
+    public Optional<Modifier> getVisibility() {
+        return Optional.empty();
     }
 
     @Override
@@ -66,7 +77,7 @@ public class MethodDeclaration implements Method {
     }
 
     @Override
-    public List<String> getModifiers() {
+    public List<Modifier> getModifiers() {
         return Collections.emptyList();
     }
 

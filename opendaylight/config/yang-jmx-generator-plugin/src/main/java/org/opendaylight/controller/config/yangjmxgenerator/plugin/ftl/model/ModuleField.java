@@ -11,6 +11,7 @@ package org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import javax.lang.model.element.Modifier;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.Dependency;
 
 public class ModuleField extends Field {
@@ -19,8 +20,9 @@ public class ModuleField extends Field {
     private final boolean dependent, isListOfDependencies;
     private final Dependency dependency;
 
-    private ModuleField(List<String> modifiers, String type, String name, String attributeName, String nullableDefault,
-            boolean isDependency, Dependency dependency, boolean isListOfDependencies, boolean needsDepResolver) {
+    private ModuleField(List<Modifier> modifiers, String type, String name, String attributeName,
+            String nullableDefault, boolean isDependency, Dependency dependency, boolean isListOfDependencies,
+            boolean needsDepResolver) {
         super(modifiers, type, name, null, needsDepResolver);
         this.dependent = isDependency;
         this.dependency = dependency;
@@ -35,7 +37,7 @@ public class ModuleField extends Field {
 
     public ModuleField(String type, String name, String attributeName, String nullableDefault, boolean isDependency,
             Dependency dependency, boolean isListOfDependencies, boolean needsDepResolve) {
-        this(Collections.<String> emptyList(), type, name, attributeName, nullableDefault, isDependency, dependency,
+        this(Collections.emptyList(), type, name, attributeName, nullableDefault, isDependency, dependency,
                 isListOfDependencies, needsDepResolve);
     }
 

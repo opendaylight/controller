@@ -8,11 +8,13 @@
 package org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model;
 
 import java.util.List;
+import java.util.Optional;
+import javax.lang.model.element.Modifier;
 
 public interface Method {
-    String getVisibility();
+    Optional<Modifier> getVisibility();
 
-    List<String> getModifiers();
+    List<Modifier> getModifiers();
 
     String getReturnType();
 
@@ -23,4 +25,8 @@ public interface Method {
     String getJavadoc();
 
     List<Annotation> getAnnotations();
+
+    List<String> getThrowsExceptions();
+
+    Optional<String> getBody();
 }
