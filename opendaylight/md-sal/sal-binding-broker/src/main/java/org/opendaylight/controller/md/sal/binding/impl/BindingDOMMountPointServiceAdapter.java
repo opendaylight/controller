@@ -56,7 +56,7 @@ public class BindingDOMMountPointServiceAdapter implements MountPointService {
     @Override
     public <T extends MountPointListener> ListenerRegistration<T> registerListener(InstanceIdentifier<?> path,
             T listener) {
-        return new BindingDOMMountPointListenerAdapter<T>(listener,codec,mountService);
+        return new BindingDOMMountPointListenerAdapter<>(listener, codec, mountService);
     }
 
 }

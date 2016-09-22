@@ -53,9 +53,9 @@ final class BindingDOMDataTreeChangeServiceAdapter implements DataTreeChangeServ
         @SuppressWarnings({ "rawtypes", "unchecked" })
         final BindingDOMDataTreeChangeListenerAdapter<T> domListener =
                 listener instanceof ClusteredDataTreeChangeListener ?
-                        new BindingClusteredDOMDataTreeChangeListenerAdapter<T>(
-                                codec, (ClusteredDataTreeChangeListener)listener, treeId.getDatastoreType()) :
-                        new BindingDOMDataTreeChangeListenerAdapter<T>(codec, listener, treeId.getDatastoreType());
+                        new BindingClusteredDOMDataTreeChangeListenerAdapter<>(
+                                codec, (ClusteredDataTreeChangeListener) listener, treeId.getDatastoreType()) :
+                        new BindingDOMDataTreeChangeListenerAdapter<>(codec, listener, treeId.getDatastoreType());
 
         final ListenerRegistration<BindingDOMDataTreeChangeListenerAdapter<T>> domReg =
                 dataTreeChangeService.registerDataTreeChangeListener(domIdentifier, domListener);
