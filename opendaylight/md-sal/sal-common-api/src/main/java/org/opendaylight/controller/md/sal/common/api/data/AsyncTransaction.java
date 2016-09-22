@@ -32,7 +32,7 @@ public interface AsyncTransaction<P extends Path<P>,D> extends //
     Identifiable<Object> {
 
     @Override
-    public Object getIdentifier();
+    Object getIdentifier();
 
 
 }
