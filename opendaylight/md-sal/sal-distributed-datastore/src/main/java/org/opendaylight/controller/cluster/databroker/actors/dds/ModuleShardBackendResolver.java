@@ -112,7 +112,7 @@ final class ModuleShardBackendResolver extends BackendInfoResolver<ShardBackendI
             return NULL_FUTURE;
         }
 
-        final CompletableFuture<ShardBackendInfo> ret = new CompletableFuture<ShardBackendInfo>();
+        final CompletableFuture<ShardBackendInfo> ret = new CompletableFuture<>();
 
         FutureConverters.toJava(actorContext.findPrimaryShardAsync(shardName)).thenCompose(info -> {
             LOG.debug("Looking up primary info for {} from {}", shardName, info);

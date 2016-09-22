@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 public class DatastoreContextConfigAdminOverlay implements AutoCloseable {
     public static final String CONFIG_ID = "org.opendaylight.controller.cluster.datastore";
 
-    public static interface Listener {
+    public interface Listener {
         void onDatastoreContextUpdated(DatastoreContextFactory contextFactory);
     }
 

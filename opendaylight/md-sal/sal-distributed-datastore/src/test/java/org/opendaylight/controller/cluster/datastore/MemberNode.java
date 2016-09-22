@@ -292,7 +292,7 @@ public class MemberNode {
         }
     }
 
-    public static interface RaftStateVerifier {
+    public interface RaftStateVerifier {
         void verify(OnDemandRaftState raftState);
     }
 }

@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
 
 final class DOMBrokerTransactionChain extends AbstractDOMTransactionFactory<DOMStoreTransactionChain>
         implements DOMTransactionChain {
-    private static enum State {
+    private enum State {
         RUNNING,
         CLOSING,
         CLOSED,

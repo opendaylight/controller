@@ -112,7 +112,7 @@ public class DatastoreContextIntrospectorTest {
         updated = introspector.update(null);
         assertEquals("updated", false, updated);
 
-        updated = introspector.update(new Hashtable<String, Object>());
+        updated = introspector.update(new Hashtable<>());
         assertEquals("updated", false, updated);
     }
 

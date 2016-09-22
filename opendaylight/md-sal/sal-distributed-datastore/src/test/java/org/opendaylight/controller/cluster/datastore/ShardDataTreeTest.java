@@ -233,7 +233,7 @@ public class ShardDataTreeTest extends AbstractTest {
     }
 
     @FunctionalInterface
-    private static interface DataTreeOperation {
+    private interface DataTreeOperation {
         void execute(DataTreeModification snapshot);
     }
 

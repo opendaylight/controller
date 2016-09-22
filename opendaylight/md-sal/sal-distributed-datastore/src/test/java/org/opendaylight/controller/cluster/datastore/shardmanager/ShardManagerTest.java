@@ -316,8 +316,8 @@ public class ShardManagerTest extends AbstractActorTest {
 
         final Map<String, Entry<ActorRef, DatastoreContext>> shardInfoMap = Collections.synchronizedMap(
                 new HashMap<String, Entry<ActorRef, DatastoreContext>>());
-        shardInfoMap.put("default", new AbstractMap.SimpleEntry<ActorRef, DatastoreContext>(defaultShardActor, null));
-        shardInfoMap.put("topology", new AbstractMap.SimpleEntry<ActorRef, DatastoreContext>(topologyShardActor, null));
+        shardInfoMap.put("default", new AbstractMap.SimpleEntry<>(defaultShardActor, null));
+        shardInfoMap.put("topology", new AbstractMap.SimpleEntry<>(topologyShardActor, null));
 
         final PrimaryShardInfoFutureCache primaryShardInfoCache = new PrimaryShardInfoFutureCache();
         final CountDownLatch newShardActorLatch = new CountDownLatch(2);

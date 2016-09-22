@@ -1518,14 +1518,14 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         }, new Dispatchers(context().system().dispatchers()).getDispatcher(Dispatchers.DispatcherType.Client));
     }
 
-    private static interface RunnableMessage extends Runnable {
+    private interface RunnableMessage extends Runnable {
     }
 
     /**
      * The FindPrimaryResponseHandler provides specific callback methods which are invoked when a response to the
      * a remote or local find primary message is processed
      */
-    private static interface FindPrimaryResponseHandler {
+    private interface FindPrimaryResponseHandler {
         /**
          * Invoked when a Failure message is received as a response
          *

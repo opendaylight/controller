@@ -26,5 +26,5 @@ public final class MockIdentifiers {
 
     public static TransactionIdentifier transactionIdentifier(final Class<?> clazz, final String memberName) {
         return new TransactionIdentifier(historyIdentifier(clazz, memberName), 0);
-    };
+    }
 }
