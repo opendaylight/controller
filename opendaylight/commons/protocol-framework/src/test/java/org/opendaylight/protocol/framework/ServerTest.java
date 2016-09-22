@@ -277,7 +277,7 @@ public class ServerTest {
                     }
                 };
             }
-        }, new DefaultPromise<SimpleSession>(GlobalEventExecutor.INSTANCE), eventLoopGroup);
+        }, new DefaultPromise<>(GlobalEventExecutor.INSTANCE), eventLoopGroup);
 
         final ReconnectStrategyFactory reconnectStrategyFactory = mock(ReconnectStrategyFactory.class);
         final ReconnectStrategy reconnectStrategy = getMockedReconnectStrategy();
@@ -303,7 +303,7 @@ public class ServerTest {
                                                                          final Channel channel, final Promise<SimpleSession> promise) {
                 return new SimpleSessionNegotiator(promise, channel);
             }
-        }, new DefaultPromise<SimpleSession>(GlobalEventExecutor.INSTANCE), eventLoopGroup);
+        }, new DefaultPromise<>(GlobalEventExecutor.INSTANCE), eventLoopGroup);
     }
 
     private ReconnectStrategy getMockedReconnectStrategy() throws Exception {
