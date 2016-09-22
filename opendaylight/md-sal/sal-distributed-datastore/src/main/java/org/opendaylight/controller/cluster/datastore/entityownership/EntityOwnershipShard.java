@@ -599,7 +599,7 @@ class EntityOwnershipShard extends Shard {
     }
 
     @FunctionalInterface
-    private static interface EntityWalker {
+    private interface EntityWalker {
         void onEntity(MapEntryNode entityTypeNode, MapEntryNode entityNode);
     }
 

@@ -82,7 +82,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
     static class TestException extends RuntimeException {
     }
 
-    static interface Invoker {
+    interface Invoker {
         CheckedFuture<?, ReadFailedException> invoke(TransactionProxy proxy) throws Exception;
     }
 
@@ -775,7 +775,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
                 eq(actorSelection(actorRef)), isA(CloseTransaction.class));
     }
 
-    private static interface TransactionProxyOperation {
+    private interface TransactionProxyOperation {
         void run(TransactionProxy transactionProxy);
     }
 
