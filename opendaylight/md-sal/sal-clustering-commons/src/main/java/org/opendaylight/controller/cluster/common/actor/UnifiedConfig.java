@@ -26,5 +26,5 @@ public interface UnifiedConfig {
      * Returns an immutable instance of unified configuration
      * @return
      */
-    public Config get();
+    Config get();
 }

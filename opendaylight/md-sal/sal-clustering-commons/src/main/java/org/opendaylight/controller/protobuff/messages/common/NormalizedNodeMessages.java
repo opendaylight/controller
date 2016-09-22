@@ -1698,8 +1698,7 @@ public final class NormalizedNodeMessages {
           org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.QName, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.QName.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.QNameOrBuilder>
           getNameFieldBuilder() {
         if (nameBuilder_ == null) {
-          nameBuilder_ = new com.google.protobuf.SingleFieldBuilder<
-              org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.QName, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.QName.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.QNameOrBuilder>(
+          nameBuilder_ = new com.google.protobuf.SingleFieldBuilder<>(
                   name_,
                   getParentForChildren(),
                   isClean());
@@ -1958,8 +1957,7 @@ public final class NormalizedNodeMessages {
           org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifierOrBuilder>
           getInstanceIdentifierValueFieldBuilder() {
         if (instanceIdentifierValueBuilder_ == null) {
-          instanceIdentifierValueBuilder_ = new com.google.protobuf.SingleFieldBuilder<
-              org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifierOrBuilder>(
+          instanceIdentifierValueBuilder_ = new com.google.protobuf.SingleFieldBuilder<>(
                   instanceIdentifierValue_,
                   getParentForChildren(),
                   isClean());
@@ -3133,7 +3131,7 @@ public final class NormalizedNodeMessages {
             }
             case 34: {
               if (!((mutable_bitField0_ & 0x00000008) == 0x00000008)) {
-                attribute_ = new java.util.ArrayList<org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.PathArgumentAttribute>();
+                attribute_ = new java.util.ArrayList<>();
                 mutable_bitField0_ |= 0x00000008;
               }
               attribute_.add(input.readMessage(org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.PathArgumentAttribute.PARSER, extensionRegistry));
@@ -3141,7 +3139,7 @@ public final class NormalizedNodeMessages {
             }
             case 42: {
               if (!((mutable_bitField0_ & 0x00000010) == 0x00000010)) {
-                attributes_ = new java.util.ArrayList<org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Attribute>();
+                attributes_ = new java.util.ArrayList<>();
                 mutable_bitField0_ |= 0x00000010;
               }
               attributes_.add(input.readMessage(org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Attribute.PARSER, extensionRegistry));
@@ -4156,8 +4154,7 @@ public final class NormalizedNodeMessages {
           org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.QName, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.QName.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.QNameOrBuilder>
           getNodeTypeFieldBuilder() {
         if (nodeTypeBuilder_ == null) {
-          nodeTypeBuilder_ = new com.google.protobuf.SingleFieldBuilder<
-              org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.QName, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.QName.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.QNameOrBuilder>(
+          nodeTypeBuilder_ = new com.google.protobuf.SingleFieldBuilder<>(
                   nodeType_,
                   getParentForChildren(),
                   isClean());
@@ -4171,7 +4168,7 @@ public final class NormalizedNodeMessages {
         java.util.Collections.emptyList();
       private void ensureAttributeIsMutable() {
         if (!((bitField0_ & 0x00000008) == 0x00000008)) {
-          attribute_ = new java.util.ArrayList<org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.PathArgumentAttribute>(attribute_);
+          attribute_ = new java.util.ArrayList<>(attribute_);
           bitField0_ |= 0x00000008;
          }
       }
@@ -4395,8 +4392,7 @@ public final class NormalizedNodeMessages {
           org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.PathArgumentAttribute, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.PathArgumentAttribute.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.PathArgumentAttributeOrBuilder>
           getAttributeFieldBuilder() {
         if (attributeBuilder_ == null) {
-          attributeBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
-              org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.PathArgumentAttribute, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.PathArgumentAttribute.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.PathArgumentAttributeOrBuilder>(
+          attributeBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<>(
                   attribute_,
                   ((bitField0_ & 0x00000008) == 0x00000008),
                   getParentForChildren(),
@@ -4411,7 +4407,7 @@ public final class NormalizedNodeMessages {
         java.util.Collections.emptyList();
       private void ensureAttributesIsMutable() {
         if (!((bitField0_ & 0x00000010) == 0x00000010)) {
-          attributes_ = new java.util.ArrayList<org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Attribute>(attributes_);
+          attributes_ = new java.util.ArrayList<>(attributes_);
           bitField0_ |= 0x00000010;
          }
       }
@@ -4707,8 +4703,7 @@ public final class NormalizedNodeMessages {
           org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Attribute, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Attribute.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.AttributeOrBuilder>
           getAttributesFieldBuilder() {
         if (attributesBuilder_ == null) {
-          attributesBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
-              org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Attribute, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Attribute.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.AttributeOrBuilder>(
+          attributesBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<>(
                   attributes_,
                   ((bitField0_ & 0x00000010) == 0x00000010),
                   getParentForChildren(),
@@ -4887,7 +4882,7 @@ public final class NormalizedNodeMessages {
             }
             case 10: {
               if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
-                arguments_ = new java.util.ArrayList<org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.PathArgument>();
+                arguments_ = new java.util.ArrayList<>();
                 mutable_bitField0_ |= 0x00000001;
               }
               arguments_.add(input.readMessage(org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.PathArgument.PARSER, extensionRegistry));
@@ -5342,7 +5337,7 @@ public final class NormalizedNodeMessages {
         java.util.Collections.emptyList();
       private void ensureArgumentsIsMutable() {
         if (!((bitField0_ & 0x00000001) == 0x00000001)) {
-          arguments_ = new java.util.ArrayList<org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.PathArgument>(arguments_);
+          arguments_ = new java.util.ArrayList<>(arguments_);
           bitField0_ |= 0x00000001;
          }
       }
@@ -5566,8 +5561,7 @@ public final class NormalizedNodeMessages {
           org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.PathArgument, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.PathArgument.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.PathArgumentOrBuilder>
           getArgumentsFieldBuilder() {
         if (argumentsBuilder_ == null) {
-          argumentsBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
-              org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.PathArgument, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.PathArgument.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.PathArgumentOrBuilder>(
+          argumentsBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<>(
                   arguments_,
                   ((bitField0_ & 0x00000001) == 0x00000001),
                   getParentForChildren(),
@@ -6115,7 +6109,7 @@ public final class NormalizedNodeMessages {
             }
             case 42: {
               if (!((mutable_bitField0_ & 0x00000010) == 0x00000010)) {
-                attributes_ = new java.util.ArrayList<org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Attribute>();
+                attributes_ = new java.util.ArrayList<>();
                 mutable_bitField0_ |= 0x00000010;
               }
               attributes_.add(input.readMessage(org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Attribute.PARSER, extensionRegistry));
@@ -6123,7 +6117,7 @@ public final class NormalizedNodeMessages {
             }
             case 50: {
               if (!((mutable_bitField0_ & 0x00000020) == 0x00000020)) {
-                child_ = new java.util.ArrayList<org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node>();
+                child_ = new java.util.ArrayList<>();
                 mutable_bitField0_ |= 0x00000020;
               }
               child_.add(input.readMessage(org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.PARSER, extensionRegistry));
@@ -7616,8 +7610,7 @@ public final class NormalizedNodeMessages {
           org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.PathArgument, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.PathArgument.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.PathArgumentOrBuilder>
           getPathArgumentFieldBuilder() {
         if (pathArgumentBuilder_ == null) {
-          pathArgumentBuilder_ = new com.google.protobuf.SingleFieldBuilder<
-              org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.PathArgument, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.PathArgument.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.PathArgumentOrBuilder>(
+          pathArgumentBuilder_ = new com.google.protobuf.SingleFieldBuilder<>(
                   pathArgument_,
                   getParentForChildren(),
                   isClean());
@@ -7664,7 +7657,7 @@ public final class NormalizedNodeMessages {
         java.util.Collections.emptyList();
       private void ensureAttributesIsMutable() {
         if (!((bitField0_ & 0x00000010) == 0x00000010)) {
-          attributes_ = new java.util.ArrayList<org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Attribute>(attributes_);
+          attributes_ = new java.util.ArrayList<>(attributes_);
           bitField0_ |= 0x00000010;
          }
       }
@@ -7888,8 +7881,7 @@ public final class NormalizedNodeMessages {
           org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Attribute, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Attribute.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.AttributeOrBuilder>
           getAttributesFieldBuilder() {
         if (attributesBuilder_ == null) {
-          attributesBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
-              org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Attribute, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Attribute.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.AttributeOrBuilder>(
+          attributesBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<>(
                   attributes_,
                   ((bitField0_ & 0x00000010) == 0x00000010),
                   getParentForChildren(),
@@ -7904,7 +7896,7 @@ public final class NormalizedNodeMessages {
         java.util.Collections.emptyList();
       private void ensureChildIsMutable() {
         if (!((bitField0_ & 0x00000020) == 0x00000020)) {
-          child_ = new java.util.ArrayList<org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node>(child_);
+          child_ = new java.util.ArrayList<>(child_);
           bitField0_ |= 0x00000020;
          }
       }
@@ -8128,8 +8120,7 @@ public final class NormalizedNodeMessages {
           org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeOrBuilder>
           getChildFieldBuilder() {
         if (childBuilder_ == null) {
-          childBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
-              org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeOrBuilder>(
+          childBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<>(
                   child_,
                   ((bitField0_ & 0x00000020) == 0x00000020),
                   getParentForChildren(),
@@ -8503,8 +8494,7 @@ public final class NormalizedNodeMessages {
           org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifierOrBuilder>
           getInstanceIdentifierValueFieldBuilder() {
         if (instanceIdentifierValueBuilder_ == null) {
-          instanceIdentifierValueBuilder_ = new com.google.protobuf.SingleFieldBuilder<
-              org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifierOrBuilder>(
+          instanceIdentifierValueBuilder_ = new com.google.protobuf.SingleFieldBuilder<>(
                   instanceIdentifierValue_,
                   getParentForChildren(),
                   isClean());
@@ -9480,8 +9470,7 @@ public final class NormalizedNodeMessages {
           org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeOrBuilder>
           getNormalizedNodeFieldBuilder() {
         if (normalizedNodeBuilder_ == null) {
-          normalizedNodeBuilder_ = new com.google.protobuf.SingleFieldBuilder<
-              org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeOrBuilder>(
+          normalizedNodeBuilder_ = new com.google.protobuf.SingleFieldBuilder<>(
                   normalizedNode_,
                   getParentForChildren(),
                   isClean());
@@ -10090,8 +10079,7 @@ public final class NormalizedNodeMessages {
           org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifierOrBuilder>
           getInstanceIdentifierPathFieldBuilder() {
         if (instanceIdentifierPathBuilder_ == null) {
-          instanceIdentifierPathBuilder_ = new com.google.protobuf.SingleFieldBuilder<
-              org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifierOrBuilder>(
+          instanceIdentifierPathBuilder_ = new com.google.protobuf.SingleFieldBuilder<>(
                   instanceIdentifierPath_,
                   getParentForChildren(),
                   isClean());
@@ -10207,8 +10195,7 @@ public final class NormalizedNodeMessages {
           org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeOrBuilder>
           getNormalizedNodeFieldBuilder() {
         if (normalizedNodeBuilder_ == null) {
-          normalizedNodeBuilder_ = new com.google.protobuf.SingleFieldBuilder<
-              org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeOrBuilder>(
+          normalizedNodeBuilder_ = new com.google.protobuf.SingleFieldBuilder<>(
                   normalizedNode_,
                   getParentForChildren(),
                   isClean());
@@ -10309,7 +10296,7 @@ public final class NormalizedNodeMessages {
             }
             case 10: {
               if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
-                mapEntries_ = new java.util.ArrayList<org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMapEntry>();
+                mapEntries_ = new java.util.ArrayList<>();
                 mutable_bitField0_ |= 0x00000001;
               }
               mapEntries_.add(input.readMessage(org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMapEntry.PARSER, extensionRegistry));
@@ -10668,7 +10655,7 @@ public final class NormalizedNodeMessages {
         java.util.Collections.emptyList();
       private void ensureMapEntriesIsMutable() {
         if (!((bitField0_ & 0x00000001) == 0x00000001)) {
-          mapEntries_ = new java.util.ArrayList<org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMapEntry>(mapEntries_);
+          mapEntries_ = new java.util.ArrayList<>(mapEntries_);
           bitField0_ |= 0x00000001;
          }
       }
@@ -10892,8 +10879,7 @@ public final class NormalizedNodeMessages {
           org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMapEntry, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMapEntry.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMapEntryOrBuilder>
           getMapEntriesFieldBuilder() {
         if (mapEntriesBuilder_ == null) {
-          mapEntriesBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
-              org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMapEntry, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMapEntry.Builder, org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.NodeMapEntryOrBuilder>(
+          mapEntriesBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<>(
                   mapEntries_,
                   ((bitField0_ & 0x00000001) == 0x00000001),
                   getParentForChildren(),

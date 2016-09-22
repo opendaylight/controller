@@ -421,7 +421,7 @@ public class NormalizedNodeSerializer {
             return PathArgumentSerializer.deSerialize(this, pathArgument);
         }
 
-        private static interface DeSerializationFunction {
+        private interface DeSerializationFunction {
             NormalizedNode<?, ?> apply(DeSerializer deserializer, NormalizedNodeMessages.Node node);
         }
     }
