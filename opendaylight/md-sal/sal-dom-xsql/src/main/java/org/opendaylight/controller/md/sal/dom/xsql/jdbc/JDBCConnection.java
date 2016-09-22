@@ -45,7 +45,7 @@ public class JDBCConnection implements Connection, Runnable {
     private Socket socket = null;
     private DataInputStream in = null;
     private DataOutputStream out = null;
-    private LinkedList<byte[]> queue = new LinkedList<byte[]>();
+    private LinkedList<byte[]> queue = new LinkedList<>();
     private XSQLAdapter adapter = null;
     private XSQLBluePrint metaData = null;
     private String addr = null;

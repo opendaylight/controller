@@ -39,8 +39,8 @@ public class XSQLBluePrint implements DatabaseMetaData, Serializable {
 
     public static final String CACHE_FILE_NAME = "./BluePrintCache.dat";
 
-    private Map<String, XSQLBluePrintNode> tableNameToBluePrint = new HashMap<String, XSQLBluePrintNode>();
-    private Map<String, Map<String, XSQLBluePrintNode>> odlNameToBluePrint = new HashMap<String, Map<String, XSQLBluePrintNode>>();
+    private Map<String, XSQLBluePrintNode> tableNameToBluePrint = new HashMap<>();
+    private Map<String, Map<String, XSQLBluePrintNode>> odlNameToBluePrint = new HashMap<>();
 
     private boolean cacheLoadedSuccessfuly = false;
     private DatabaseMetaData myProxy = null;
@@ -221,7 +221,7 @@ public class XSQLBluePrint implements DatabaseMetaData, Serializable {
             this.tableNameToBluePrint.put(blNode.getBluePrintNodeName(), blNode);
             Map<String, XSQLBluePrintNode> map = this.odlNameToBluePrint.get(blNode.getODLTableName());
             if (map == null) {
-                map = new HashMap<String, XSQLBluePrintNode>();
+                map = new HashMap<>();
                 this.odlNameToBluePrint.put(blNode.getODLTableName(), map);
             }
             map.put(blNode.getBluePrintNodeName(), blNode);
@@ -253,7 +253,7 @@ public class XSQLBluePrint implements DatabaseMetaData, Serializable {
     }
 
     public List<String> getAllTableNames() {
-        List<String> names = new ArrayList<String>();
+        List<String> names = new ArrayList<>();
         for (XSQLBluePrintNode n : this.tableNameToBluePrint.values()) {
             if (!n.isModule() && !n.getColumns().isEmpty()) {
                 names.add(n.getBluePrintNodeName());
@@ -265,7 +265,7 @@ public class XSQLBluePrint implements DatabaseMetaData, Serializable {
 
     public List<String> getInterfaceNames(XSQLBluePrintNode node) {
         Set<XSQLBluePrintNode> children = node.getChildren();
-        List<String> names = new ArrayList<String>();
+        List<String> names = new ArrayList<>();
         for (XSQLBluePrintNode n : children) {
             if (!n.isModule() && !n.getColumns().isEmpty()) {
                 names.add(n.toString());

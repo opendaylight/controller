@@ -37,7 +37,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class JDBCStatement implements PreparedStatement {
     private JDBCResultSet rs = null;
     private transient JDBCConnection connection = null;
-    private static Map<Integer, JDBCResultSet> queries = new ConcurrentHashMap<Integer, JDBCResultSet>();
+    private static Map<Integer, JDBCResultSet> queries = new ConcurrentHashMap<>();
     private String sql = null;
 
     public JDBCStatement(JDBCConnection con,String _sql) {
