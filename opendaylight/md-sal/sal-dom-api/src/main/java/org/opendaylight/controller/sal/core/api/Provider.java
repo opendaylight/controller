@@ -39,7 +39,7 @@ public interface Provider {
      * @param session
      *            Unique session between provider and SAL.
      */
-    public void onSessionInitiated(ProviderSession session);
+    void onSessionInitiated(ProviderSession session);
 
     /**
      * @deprecated - No longer used or needed
@@ -52,13 +52,13 @@ public interface Provider {
      * }
      */
     @Deprecated
-    public Collection<ProviderFunctionality> getProviderFunctionality();
+    Collection<ProviderFunctionality> getProviderFunctionality();
 
     /**
      * @deprecated - no longer used or needed
      */
     @Deprecated
-    public interface ProviderFunctionality {
+    interface ProviderFunctionality {
 
     }
 }
