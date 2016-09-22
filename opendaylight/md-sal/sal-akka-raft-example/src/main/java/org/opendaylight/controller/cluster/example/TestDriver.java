@@ -33,8 +33,8 @@ public class TestDriver {
 
 
     private static Map<String, String> allPeers = new HashMap<>();
-    private static Map<String, ActorRef> clientActorRefs  = new HashMap<String, ActorRef>();
-    private static Map<String, ActorRef> actorRefs = new HashMap<String, ActorRef>();
+    private static Map<String, ActorRef> clientActorRefs  = new HashMap<>();
+    private static Map<String, ActorRef> actorRefs = new HashMap<>();
     private static LogGenerator logGenerator = new LogGenerator();
     private int nameCounter = 0;
     private static ConfigParams configParams = new ExampleConfigParamsImpl();
