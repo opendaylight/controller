@@ -55,8 +55,8 @@ public class DataTreeChangeListenerTest extends AbstractDataBrokerTest {
     private static final InstanceIdentifier<TopLevelList> BAR_PATH = path(TOP_BAR_KEY);
     private static final PathArgument BAR_ARGUMENT = Iterables.getLast(BAR_PATH.getPathArguments());
     private static final TopLevelList BAR_DATA = topLevelList(TOP_BAR_KEY);
-private static final DataTreeIdentifier<Top> TOP_IDENTIFIER = new DataTreeIdentifier<Top>(LogicalDatastoreType.OPERATIONAL,
-            TOP_PATH);
+private static final DataTreeIdentifier<Top> TOP_IDENTIFIER = new DataTreeIdentifier<>(LogicalDatastoreType.OPERATIONAL,
+        TOP_PATH);
 
     private static final Top TOP_INITIAL_DATA = top(FOO_DATA);
 

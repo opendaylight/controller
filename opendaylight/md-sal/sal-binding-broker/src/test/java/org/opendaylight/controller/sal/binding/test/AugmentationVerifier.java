@@ -31,7 +31,7 @@ public class AugmentationVerifier<T extends Augmentable<T>> {
     }
 
     public static <T extends Augmentable<T>> AugmentationVerifier<T> from(T obj) {
-        return new AugmentationVerifier<T>(obj);
+        return new AugmentationVerifier<>(obj);
     }
 
 }

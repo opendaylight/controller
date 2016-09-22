@@ -71,7 +71,7 @@ public class BindingNormalizedCodecTest extends AbstractSchemaAwareTest {
         final DataObjectSerializerGenerator streamWriter = StreamWriterGenerator.create(JavassistUtils.forClassPool(ClassPool.getDefault()));
         final BindingNormalizedNodeCodecRegistry registry = new BindingNormalizedNodeCodecRegistry(streamWriter);
         codec = new BindingToNormalizedNodeCodec(GeneratedClassLoadingStrategy.getTCCLClassLoadingStrategy(), registry, true);
-    };
+    }
 
     @Test
     public void testComplexAugmentationSerialization() {
