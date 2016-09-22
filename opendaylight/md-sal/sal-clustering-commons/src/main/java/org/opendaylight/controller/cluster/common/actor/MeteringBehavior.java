@@ -12,6 +12,7 @@ import akka.japi.Procedure;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Throwables;
 import org.opendaylight.controller.cluster.reporting.MetricsReporter;
 
 /**
@@ -79,10 +80,9 @@ public class MeteringBehavior implements Procedure<Object> {
      *     http://dropwizard.github.io/metrics/manual/core/#timers</a>
      *
      * @param message
-     * @throws Exception
      */
     @Override
-    public void apply(Object message) throws Exception {
+    public void apply(Object message) {
         final String messageType = message.getClass().getSimpleName();
 
         final String msgProcessingTimeByMsgType =
@@ -94,7 +94,11 @@ public class MeteringBehavior implements Procedure<Object> {
         final Timer.Context context = msgProcessingTimer.time();
         final Timer.Context contextByMsgType = msgProcessingTimerByMsgType.time();
 
-        meteredActor.onReceive(message);
+        try {
+            meteredActor.onReceive(message);
+        } catch (Throwable throwable) {
+            Throwables.propagate(throwable);
+        }
 
         //stop timers
         contextByMsgType.stop();
