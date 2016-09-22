@@ -100,7 +100,7 @@ public final class ShardedDOMDataTree implements DOMDataTreeService, DOMDataTree
 
             // FIXME: wrap the shard in a proper adaptor based on implemented interface
 
-            reg = new ShardRegistration<T>(this, prefix, shard);
+            reg = new ShardRegistration<>(this, prefix, shard);
 
             storeShard(prefix, reg);
 
