@@ -14,7 +14,7 @@ import org.opendaylight.yangtools.concepts.Immutable;
 public interface BindingAwareRpcRouter extends RpcRouter<String, String, String, byte[]> {
 
     @Override
-    public Future<org.opendaylight.controller.sal.connector.api.RpcRouter.RpcReply<byte[]>> sendRpc(
+    Future<org.opendaylight.controller.sal.connector.api.RpcRouter.RpcReply<byte[]>> sendRpc(
             RpcRequest<String, String, String, byte[]> input);
 
     class BindingAwareRequest implements RpcRequest<String, String, String, byte[]>, Immutable {
