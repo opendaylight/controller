@@ -27,5 +27,5 @@ public interface AsyncReadOnlyTransaction<P extends Path<P>, D> extends AsyncRea
      *
      */
     @Override
-    public void close();
+    void close();
 }
