@@ -17,5 +17,5 @@ public interface ConfigPusher {
      * Pushes configs into the config subsystem
      */
 
-    public void pushConfigs(List<? extends ConfigSnapshotHolder> configs) throws InterruptedException;
+    void pushConfigs(List<? extends ConfigSnapshotHolder> configs) throws InterruptedException;
 }

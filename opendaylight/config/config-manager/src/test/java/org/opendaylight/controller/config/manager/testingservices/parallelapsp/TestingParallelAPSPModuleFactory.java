@@ -67,7 +67,7 @@ public class TestingParallelAPSPModuleFactory implements ModuleFactory {
 
     @Override
     public Set<Module> getDefaultModules(DependencyResolverFactory dependencyResolverFactory, BundleContext context) {
-        return new HashSet<Module>();
+        return new HashSet<>();
     }
 
     @Override

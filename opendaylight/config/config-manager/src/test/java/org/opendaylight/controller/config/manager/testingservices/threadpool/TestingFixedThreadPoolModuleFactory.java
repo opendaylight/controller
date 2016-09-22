@@ -69,7 +69,7 @@ public class TestingFixedThreadPoolModuleFactory extends AbstractTestingFixedThr
 
     @Override
     public Set<Module> getDefaultModules(final DependencyResolverFactory dependencyResolverFactory, final BundleContext bundleContext) {
-        return new HashSet<Module>();
+        return new HashSet<>();
     }
 
     @Override

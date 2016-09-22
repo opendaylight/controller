@@ -43,7 +43,7 @@ public class YangStoreService implements YangStoreContext {
      * of the listener set.
      */
     @GuardedBy("listeners")
-    private final Set<ModuleListener> listeners = new HashSet<ModuleListener>();
+    private final Set<ModuleListener> listeners = new HashSet<>();
 
     /**
      * This is the latest snapshot. Some of its state is always initialized, but the MXBean maps potentially cause
