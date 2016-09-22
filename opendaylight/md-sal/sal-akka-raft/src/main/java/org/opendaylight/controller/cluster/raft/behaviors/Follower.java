@@ -514,7 +514,7 @@ public class Follower extends AbstractRaftActorBehavior {
             if(snapshotTracker.addChunk(installSnapshot.getChunkIndex(), installSnapshot.getData(),
                     installSnapshot.getLastChunkHashCode())){
                 Snapshot snapshot = Snapshot.create(snapshotTracker.getSnapshot(),
-                        new ArrayList<ReplicatedLogEntry>(),
+                        new ArrayList<>(),
                         installSnapshot.getLastIncludedIndex(),
                         installSnapshot.getLastIncludedTerm(),
                         installSnapshot.getLastIncludedIndex(),
