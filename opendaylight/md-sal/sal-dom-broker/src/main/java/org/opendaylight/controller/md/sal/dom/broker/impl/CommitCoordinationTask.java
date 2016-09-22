@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
  * support of cancellation.
  */
 final class CommitCoordinationTask implements Callable<Void> {
-    private static enum Phase {
+    private enum Phase {
         canCommit,
         preCommit,
         doCommit,
