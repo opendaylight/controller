@@ -28,9 +28,7 @@ public class ModuleFieldSerializer {
         builder.append("\n");
 
         builder.append("     private ");
-        for (String mod : moduleField.getModifiers()) {
-            builder.append(mod).append(" ");
-        }
+        moduleField.getModifiers().forEach(mod -> builder.append(mod).append(" "));
         builder.append(moduleField.getType()).append(" ");
         builder.append(moduleField.getName());
         if (moduleField.getNullableDefault() != null) {

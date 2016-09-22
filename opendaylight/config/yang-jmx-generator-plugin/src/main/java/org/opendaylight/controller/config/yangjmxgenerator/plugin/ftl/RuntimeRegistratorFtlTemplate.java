@@ -12,6 +12,7 @@ import static com.google.common.base.Preconditions.checkState;
 import static java.lang.String.format;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import java.io.Closeable;
 import java.util.ArrayList;
@@ -25,11 +26,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import javax.lang.model.element.Modifier;
 import org.opendaylight.controller.config.api.runtime.HierarchicalRuntimeBeanRegistration;
 import org.opendaylight.controller.config.api.runtime.RootRuntimeBeanRegistrator;
 import org.opendaylight.controller.config.yangjmxgenerator.RuntimeBeanEntry;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.Annotation;
-import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.Annotation.Parameter;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.Field;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.model.MethodDefinition;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.util.FullyQualifiedNameHelper;
@@ -40,7 +41,7 @@ public class RuntimeRegistratorFtlTemplate extends GeneralClassTemplate {
             String name, List<Field> fields, List<MethodDefinition> methods) {
         // TODO header
         super(null, runtimeBeanEntry.getPackageName(), name, Collections
-                .<String> emptyList(), Collections.singletonList(Closeable.class
+                .emptyList(), Collections.singletonList(Closeable.class
                 .getCanonicalName()), fields, methods);
     }
 
@@ -85,7 +86,7 @@ public class RuntimeRegistratorFtlTemplate extends GeneralClassTemplate {
         String registratorName = getJavaNameOfRuntimeRegistrator(rootRB);
         List<MethodDefinition> methods = new ArrayList<>();
         Field rootRuntimeBeanRegistratorField = new Field(
-                Lists.newArrayList("final"),
+                Collections.singletonList(Modifier.FINAL),
                 RootRuntimeBeanRegistrator.class.getName(),
                 "rootRuntimeBeanRegistrator");
         List<Field> constructorParameters = Lists
@@ -95,8 +96,8 @@ public class RuntimeRegistratorFtlTemplate extends GeneralClassTemplate {
                 registratorName, constructorParameters, constructorBody);
         methods.add(constructor);
 
-        LinkedHashMap<String, RuntimeRegistratorFtlTemplate> RuntimeRegistratorFtlTemplates = createRegistrationHierarchy(
-                rootRB, Collections.<String> emptySet());
+        LinkedHashMap<String, RuntimeRegistratorFtlTemplate> RuntimeRegistratorFtlTemplates =
+                createRegistrationHierarchy(rootRB, Collections.emptySet());
         RuntimeRegistratorFtlTemplate rootFtlFile = RuntimeRegistratorFtlTemplates
                 .values().iterator().next();
 
@@ -127,7 +128,7 @@ public class RuntimeRegistratorFtlTemplate extends GeneralClassTemplate {
         // TODO add header
         GeneralClassTemplate registrator = new GeneralClassTemplate(null,
                 rootRB.getPackageName(), registratorName,
-                Collections.<String> emptyList(), Collections.singletonList(Closeable.class
+                Collections.emptyList(), Collections.singletonList(Closeable.class
                 .getCanonicalName()), constructorParameters, methods);
 
         checkState(!RuntimeRegistratorFtlTemplates.containsKey(registrator
@@ -140,7 +141,7 @@ public class RuntimeRegistratorFtlTemplate extends GeneralClassTemplate {
     }
 
     private static Field hierachicalRegistration = new Field(
-            Lists.newArrayList("final"),
+            Collections.singletonList(Modifier.FINAL),
             HierarchicalRuntimeBeanRegistration.class.getCanonicalName(),
             "registration");
 
@@ -172,7 +173,7 @@ public class RuntimeRegistratorFtlTemplate extends GeneralClassTemplate {
         Set<String> currentOccupiedKeys = new HashSet<>(occupiedKeys);
         currentOccupiedKeys.add(parent.getJavaNamePrefix());
 
-        Field registratorsMapField = new Field(Collections.singletonList("final"),
+        Field registratorsMapField = new Field(Collections.singletonList(Modifier.FINAL),
                 TypeHelper.getGenericType(Map.class, String.class,
                         AtomicInteger.class), "unkeyedMap", "new "
                         + TypeHelper.getGenericType(HashMap.class,
@@ -209,8 +210,9 @@ public class RuntimeRegistratorFtlTemplate extends GeneralClassTemplate {
                         "String key = \"%s\"; //TODO: check for conflicts\n",
                         key));
 
-                if (child.getKeyJavaName().isPresent()) {
-                    value = "bean.get" + child.getKeyJavaName().get() + "()";
+                Optional<String> childKeyJavaName = child.getKeyJavaName();
+                if (childKeyJavaName.isPresent()) {
+                    value = "bean.get" + childKeyJavaName.get() + "()";
                     value = "String.valueOf(" + value + ")";
                 } else {
                     body.append("java.util.concurrent.atomic.AtomicInteger counter = unkeyedMap.get(key);\n"
@@ -227,13 +229,13 @@ public class RuntimeRegistratorFtlTemplate extends GeneralClassTemplate {
                 body.append(format("return new %s(r);",
                         childRegistrator.getFullyQualifiedName()));
 
-                Field param = new Field(Lists.newArrayList("final"),
+                Field param = new Field(Collections.singletonList(Modifier.FINAL),
                         child.getJavaNameOfRuntimeMXBean(), "bean");
                 MethodDefinition register = new MethodDefinition(
-                        Collections.singletonList("synchronized"),
+                        Collections.singletonList(Modifier.SYNCHRONIZED),
                         childRegistrator.getFullyQualifiedName(), "register",
-                        Collections.singletonList(param), Collections.<String> emptyList(),
-                        Collections.<Annotation> emptyList(), body.toString());
+                        Collections.singletonList(param), Collections.emptyList(),
+                        Collections.emptyList(), body.toString());
                 methods.add(register);
 
             }
@@ -274,10 +276,10 @@ public class RuntimeRegistratorFtlTemplate extends GeneralClassTemplate {
         // Arrays.asList(IOException.class.getCanonicalName()),
         // Collections.<Annotation> emptyList(), body);
         List<Annotation> annotations = Lists.newArrayList(new Annotation(
-                "Override", Collections.<Parameter> emptyList()));
-        return new MethodDefinition(Collections.<String> emptyList(), "void",
-                "close", Collections.<Field> emptyList(),
-                Collections.<String> emptyList(), annotations, body);
+                "Override", Collections.emptyList()));
+        return new MethodDefinition(Collections.emptyList(), "void",
+                "close", Collections.emptyList(),
+                Collections.emptyList(), annotations, body);
     }
 
     @VisibleForTesting
