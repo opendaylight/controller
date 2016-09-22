@@ -257,7 +257,7 @@ public class BlueprintBundleTracker implements BundleActivator, BundleTrackerCus
     }
 
     private List<Bundle> getBundlesToDestroy(Collection<Bundle> containerBundles) {
-        List<Bundle> bundlesToDestroy = new ArrayList<Bundle>();
+        List<Bundle> bundlesToDestroy = new ArrayList<>();
 
         // Find all container bundles that either have no registered services or whose services are no
         // longer in use.
