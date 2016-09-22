@@ -48,7 +48,7 @@ public interface DataBrokerService extends BindingAwareService,
      */
     @Override
     @Deprecated
-    public DataObject readConfigurationData(InstanceIdentifier<? extends DataObject> path);
+    DataObject readConfigurationData(InstanceIdentifier<? extends DataObject> path);
 
     /**
      * Reads data subtree from operational store.
@@ -59,7 +59,7 @@ public interface DataBrokerService extends BindingAwareService,
      */
     @Override
     @Deprecated
-    public DataObject readOperationalData(InstanceIdentifier<? extends DataObject> path);
+    DataObject readOperationalData(InstanceIdentifier<? extends DataObject> path);
 
     /**
      * Register a data change listener for particular subtree.
@@ -70,6 +70,6 @@ public interface DataBrokerService extends BindingAwareService,
      * which provides more fine-grained registration options.
      */
     @Deprecated
-    public ListenerRegistration<DataChangeListener> registerDataChangeListener(
+    ListenerRegistration<DataChangeListener> registerDataChangeListener(
             InstanceIdentifier<? extends DataObject> path, DataChangeListener listener);
 }

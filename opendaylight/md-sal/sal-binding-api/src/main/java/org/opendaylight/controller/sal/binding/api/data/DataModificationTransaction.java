@@ -75,7 +75,7 @@ public interface DataModificationTransaction extends
     /**
      * Listener for transaction state changes
      */
-    public interface DataTransactionListener extends EventListener {
+    interface DataTransactionListener extends EventListener {
         /**
          * Callback is invoked after each transaction status change.
          *
