@@ -146,11 +146,11 @@ public class DatastoreTestTask {
     }
 
     public interface WriteTransactionCustomizer {
-        public void customize(DOMStoreReadWriteTransaction tx);
+        void customize(DOMStoreReadWriteTransaction tx);
     }
 
     public interface ReadTransactionVerifier {
-        public void verify(DOMStoreReadTransaction tx);
+        void verify(DOMStoreReadTransaction tx);
     }
 
     private final class ChangeEventListener implements
