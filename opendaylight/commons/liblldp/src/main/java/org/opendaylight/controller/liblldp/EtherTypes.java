@@ -32,7 +32,7 @@ public enum EtherTypes {
     private String description;
     private int number;
 
-    private EtherTypes(String description, int number) {
+    EtherTypes(String description, int number) {
         this.description = description;
         this.number = number;
     }
@@ -95,7 +95,7 @@ public enum EtherTypes {
     }
 
     public static List<String> getEtherTypesNameList() {
-        List<String> ethertypesList = new ArrayList<String>();
+        List<String> ethertypesList = new ArrayList<>();
         for (EtherTypes type : EtherTypes.values()) {
             ethertypesList.add(type.toString());
         }

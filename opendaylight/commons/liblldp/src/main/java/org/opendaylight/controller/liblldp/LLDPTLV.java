@@ -57,7 +57,7 @@ public class LLDPTLV extends Packet {
 
         private byte value;
 
-        private TLVType(byte value) {
+        TLVType(byte value) {
             this.value = value;
         }
 
@@ -70,9 +70,9 @@ public class LLDPTLV extends Packet {
         private static final long serialVersionUID = 1L;
 
         {
-            put(TYPE, new MutablePair<Integer, Integer>(0, 7));
-            put(LENGTH, new MutablePair<Integer, Integer>(7, 9));
-            put(VALUE, new MutablePair<Integer, Integer>(16, 0));
+            put(TYPE, new MutablePair<>(0, 7));
+            put(LENGTH, new MutablePair<>(7, 9));
+            put(VALUE, new MutablePair<>(16, 0));
         }
     };
 
@@ -84,7 +84,7 @@ public class LLDPTLV extends Packet {
      */
     public LLDPTLV() {
         payload = null;
-        fieldValues = new HashMap<String, byte[]>(LLDPTLVFields);
+        fieldValues = new HashMap<>(LLDPTLVFields);
         hdrFieldCoordMap = fieldCoordinates;
         hdrFieldsMap = fieldValues;
     }
