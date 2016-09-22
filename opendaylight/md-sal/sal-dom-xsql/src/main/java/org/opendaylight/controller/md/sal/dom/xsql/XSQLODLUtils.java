@@ -37,7 +37,7 @@ import org.opendaylight.yangtools.yang.model.util.type.DerivedTypes;
 public class XSQLODLUtils {
 
     private static Map<Class<?>, Class<?>> types =
-        new ConcurrentHashMap<Class<?>, Class<?>>();
+            new ConcurrentHashMap<>();
 
     static {
         types.put(QName.class, QName.class);
@@ -174,7 +174,7 @@ public class XSQLODLUtils {
     }
 
     public static Map<String, Field> refFieldsCache =
-        new HashMap<String, Field>();
+            new HashMap<>();
 
     public static Field findField(Class<?> c, String name) {
         if (c == null) {
@@ -219,7 +219,7 @@ public class XSQLODLUtils {
 
     public static List<Object> getMChildren(Object o) {
         Map<?, ?> children = getChildren(o);
-        List<Object> result = new LinkedList<Object>();
+        List<Object> result = new LinkedList<>();
         for (Object val : children.values()) {
             result.add((Object) val);
         }

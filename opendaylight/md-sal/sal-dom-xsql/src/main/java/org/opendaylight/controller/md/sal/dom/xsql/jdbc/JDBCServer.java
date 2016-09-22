@@ -106,8 +106,8 @@ public class JDBCServer extends Thread {
             return;
         }
 
-        Map<String, XSQLBluePrintNode> logicalNameToNode = new HashMap<String, XSQLBluePrintNode>();
-        Map<String, String> origNameToName = new HashMap<String, String>();
+        Map<String, XSQLBluePrintNode> logicalNameToNode = new HashMap<>();
+        Map<String, String> origNameToName = new HashMap<>();
         List<XSQLColumn> columnOrder = new ArrayList<>();
         int nextLogField = addNextLogicalField(sql, 0,
                 logicalNameToNode, origNameToName,columnOrder);
@@ -269,12 +269,12 @@ public class JDBCServer extends Thread {
         Map<XSQLColumn, List<XSQLCriteria>> tblCriteria = rs.getCriteria().get(
                 col.getTableName());
         if (tblCriteria == null) {
-            tblCriteria = new ConcurrentHashMap<XSQLColumn, List<XSQLCriteria>>();
+            tblCriteria = new ConcurrentHashMap<>();
             rs.getCriteria().put(col.getTableName(), tblCriteria);
         }
         List<XSQLCriteria> lstCriteria = tblCriteria.get(col);
         if (lstCriteria == null) {
-            lstCriteria = new ArrayList<XSQLCriteria>();
+            lstCriteria = new ArrayList<>();
             tblCriteria.put(col, lstCriteria);
         }
         lstCriteria.add(c);

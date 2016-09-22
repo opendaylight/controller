@@ -11,7 +11,7 @@ package org.opendaylight.controller.md.sal.dom.xsql;
 import java.util.LinkedList;
 
 public class XSQLThreadPool {
-    private LinkedList<Runnable> tasks = new LinkedList<Runnable>();
+    private LinkedList<Runnable> tasks = new LinkedList<>();
     private int threadCount = 0;
     private int maxThreadCount = 10;
     private String threadPoolName = "Simple Thread Pool";

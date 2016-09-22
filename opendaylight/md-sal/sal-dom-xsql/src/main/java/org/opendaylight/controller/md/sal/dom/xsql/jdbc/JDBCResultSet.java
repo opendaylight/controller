@@ -58,18 +58,18 @@ public class JDBCResultSet implements Serializable, ResultSet, ResultSetMetaData
     private static int nextID = 0;
 
     private String sql = null;
-    private List<XSQLBluePrintNode> tablesInQuery = new ArrayList<XSQLBluePrintNode>();
-    private Map<String, XSQLBluePrintNode> tablesInQueryMap = new ConcurrentHashMap<String, XSQLBluePrintNode>();
-    private List<XSQLColumn> fieldsInQuery = new ArrayList<XSQLColumn>();
+    private List<XSQLBluePrintNode> tablesInQuery = new ArrayList<>();
+    private Map<String, XSQLBluePrintNode> tablesInQueryMap = new ConcurrentHashMap<>();
+    private List<XSQLColumn> fieldsInQuery = new ArrayList<>();
     private transient LinkedList<Map<String, Object>> records = new LinkedList<>();
     private transient Map<String, Object> currentRecord = null;
     private boolean finished = false;
     private int id = 0;
     public int numberOfTasks = 0;
-    private Map<String, Map<XSQLColumn, List<XSQLCriteria>>> criteria = new ConcurrentHashMap<String, Map<XSQLColumn, List<XSQLCriteria>>>();
+    private Map<String, Map<XSQLColumn, List<XSQLCriteria>>> criteria = new ConcurrentHashMap<>();
     private Exception err = null;
-    private List<Record> EMPTY_RESULT = new LinkedList<Record>();
-    private transient Map<String, JDBCResultSet> subQueries = new HashMap<String, JDBCResultSet>();
+    private List<Record> EMPTY_RESULT = new LinkedList<>();
+    private transient Map<String, JDBCResultSet> subQueries = new HashMap<>();
 
     public ResultSet getProxy() {
         return this;
@@ -82,7 +82,7 @@ public class JDBCResultSet implements Serializable, ResultSet, ResultSetMetaData
 
     public JDBCResultSet addSubQuery(String _sql, String logicalName) {
         if (subQueries == null) {
-            subQueries = new HashMap<String, JDBCResultSet>();
+            subQueries = new HashMap<>();
         }
         JDBCResultSet rs = new JDBCResultSet(_sql);
         this.subQueries.put(logicalName, rs);
@@ -319,8 +319,8 @@ public class JDBCResultSet implements Serializable, ResultSet, ResultSetMetaData
     }
 
     public static class RecordsContainer {
-        public List<Record> records = new LinkedList<Record>();
-        public List<Record> fitRecords = new LinkedList<Record>();
+        public List<Record> records = new LinkedList<>();
+        public List<Record> fitRecords = new LinkedList<>();
         public Object currentObject = null;
     }
 
@@ -394,7 +394,7 @@ public class JDBCResultSet implements Serializable, ResultSet, ResultSetMetaData
 
     private boolean beenHere(Set<String> beenHereElement, Object element) {
         if (beenHereElement == null) {
-            beenHereElement = new HashSet<String>();
+            beenHereElement = new HashSet<>();
         }
 
         String elementKey = null;
@@ -417,7 +417,7 @@ public class JDBCResultSet implements Serializable, ResultSet, ResultSetMetaData
             XSQLBluePrint bluePrint) {
 
         List<Object> children = XSQLODLUtils.getMChildren(node);
-        List<Object> result = new LinkedList<Object>();
+        List<Object> result = new LinkedList<>();
 
         for (Object child : children) {
 
@@ -475,7 +475,7 @@ public class JDBCResultSet implements Serializable, ResultSet, ResultSetMetaData
 
     public List<Record> addRecords(Object element, XSQLBluePrintNode node,
             boolean root, String tableName, XSQLBluePrint bluePrint) {
-        List<Record> result = new LinkedList<Record>();
+        List<Record> result = new LinkedList<>();
         String nodeID = XSQLODLUtils.getNodeIdentiofier(element);
         if (node.getODLTableName().equals(nodeID)) {
             XSQLBluePrintNode bluePrintNode = bluePrint

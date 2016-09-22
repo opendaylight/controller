@@ -23,16 +23,16 @@ public class XSQLBluePrintNode implements Serializable {
     private static final long serialVersionUID = 1L;
     private Class<?> myInterface = null;
     private String myInterfaceString = null;
-    private Set<XSQLBluePrintRelation> relations = new HashSet<XSQLBluePrintRelation>();
-    private Set<XSQLBluePrintNode> inheritingNodes = new HashSet<XSQLBluePrintNode>();
-    private Set<XSQLBluePrintNode> children = new HashSet<XSQLBluePrintNode>();
+    private Set<XSQLBluePrintRelation> relations = new HashSet<>();
+    private Set<XSQLBluePrintNode> inheritingNodes = new HashSet<>();
+    private Set<XSQLBluePrintNode> children = new HashSet<>();
     private XSQLBluePrintNode parent = null;
 
     private int level = -1;
     private transient Set<String> parentHierarchySet = null;
     private String myInterfaceName = null;
-    private Set<XSQLColumn> columns = new HashSet<XSQLColumn>();
-    private Map<String, XSQLColumn> origNameToColumn = new HashMap<String, XSQLColumn>();
+    private Set<XSQLColumn> columns = new HashSet<>();
+    private Map<String, XSQLColumn> origNameToColumn = new HashMap<>();
 
     private transient Object[] odlSchemaNodes = null;
     private boolean module = false;
@@ -249,7 +249,7 @@ public class XSQLBluePrintNode implements Serializable {
     }
 
     public Set<XSQLBluePrintRelation> getClonedParents() {
-        Set<XSQLBluePrintRelation> result = new HashSet<XSQLBluePrintRelation>();
+        Set<XSQLBluePrintRelation> result = new HashSet<>();
         result.addAll(this.relations);
         return result;
     }

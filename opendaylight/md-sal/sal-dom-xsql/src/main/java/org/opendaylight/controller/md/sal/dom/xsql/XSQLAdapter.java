@@ -42,7 +42,7 @@ public class XSQLAdapter extends Thread implements SchemaContextListener {
     private static String tmpDir = null;
     private static File xqlLog = null;
     public boolean stopped = false;
-    private List<String> elementHosts = new ArrayList<String>();
+    private List<String> elementHosts = new ArrayList<>();
     private String username;
     private String password;
     private String transport = "tcp";
@@ -50,7 +50,7 @@ public class XSQLAdapter extends Thread implements SchemaContextListener {
     private int nThreads;
     private int qsize;
     private String applicationName = "NQL Adapter";
-    private Map<String, NEEntry> elements = new ConcurrentHashMap<String, XSQLAdapter.NEEntry>();
+    private Map<String, NEEntry> elements = new ConcurrentHashMap<>();
     private StringBuffer lastInputString = new StringBuffer();
     private XSQLBluePrint bluePrint = new XSQLBluePrint();
     private boolean toCsv = false;
@@ -159,7 +159,7 @@ public class XSQLAdapter extends Thread implements SchemaContextListener {
     public List<Object> collectModuleRoots(XSQLBluePrintNode table,LogicalDatastoreType type) {
         if (table.getParent().isModule()) {
             try {
-                List<Object> result = new LinkedList<Object>();
+                List<Object> result = new LinkedList<>();
                 YangInstanceIdentifier instanceIdentifier = YangInstanceIdentifier
                         .builder()
                         .node(XSQLODLUtils.getPath(table.getFirstFromSchemaNodes()).get(0))
@@ -196,7 +196,7 @@ public class XSQLAdapter extends Thread implements SchemaContextListener {
             rs.setFinished(true);
         }
         XSQLBluePrintNode main = rs.getMainTable();
-        List<NETask> tasks = new LinkedList<XSQLAdapter.NETask>();
+        List<NETask> tasks = new LinkedList<>();
 
         for (Object entry : roots) {
             NETask task = new NETask(rs, entry, main, bluePrint);
@@ -251,7 +251,7 @@ public class XSQLAdapter extends Thread implements SchemaContextListener {
                 sout.println("Unknown Interface " + substr);
                 return;
             }
-            List<String> fld = new ArrayList<String>();
+            List<String> fld = new ArrayList<>();
             for (XSQLBluePrintRelation r : node.getRelations()) {
                 fld.add(r.toString());
             }
@@ -268,7 +268,7 @@ public class XSQLAdapter extends Thread implements SchemaContextListener {
                 sout.println("Unknown Interface " + substr);
                 return;
             }
-            List<String> fld = new ArrayList<String>();
+            List<String> fld = new ArrayList<>();
             for (XSQLColumn c : node.getColumns()) {
                 fld.add(c.getName());
             }

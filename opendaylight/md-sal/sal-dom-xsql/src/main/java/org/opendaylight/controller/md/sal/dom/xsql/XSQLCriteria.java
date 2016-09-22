@@ -44,7 +44,7 @@ public class XSQLCriteria implements Serializable {
     private String criteria = null;
 
     private static final Map<Class<?>, Map<String, Method>> methodCache =
-        new ConcurrentHashMap<Class<?>, Map<String, Method>>();
+            new ConcurrentHashMap<>();
 
     public XSQLCriteria(final String data, final int parentOperation) {
         criteria = data;
@@ -124,7 +124,7 @@ public class XSQLCriteria implements Serializable {
         try {
             Map<String, Method> cache = methodCache.get(element.getClass());
             if (cache == null) {
-                cache = new ConcurrentHashMap<String, Method>();
+                cache = new ConcurrentHashMap<>();
                 methodCache.put(element.getClass(), cache);
             }
 
