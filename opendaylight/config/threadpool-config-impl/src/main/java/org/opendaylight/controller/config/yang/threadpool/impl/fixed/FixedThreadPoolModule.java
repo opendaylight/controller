@@ -21,8 +21,9 @@ import org.opendaylight.controller.config.api.JmxAttributeValidationException;
 import org.opendaylight.controller.config.threadpool.util.FixedThreadPoolWrapper;
 
 /**
-*
-*/
+ * To be removed in Nitrogen
+ */
+@Deprecated
 public final class FixedThreadPoolModule extends org.opendaylight.controller.config.yang.threadpool.impl.fixed.AbstractFixedThreadPoolModule
 {
 

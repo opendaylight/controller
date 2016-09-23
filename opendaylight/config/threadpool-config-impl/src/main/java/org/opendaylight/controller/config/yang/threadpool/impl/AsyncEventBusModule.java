@@ -20,8 +20,9 @@ package org.opendaylight.controller.config.yang.threadpool.impl;
 import org.opendaylight.controller.config.threadpool.util.CloseableAsyncEventBus;
 
 /**
-*
+* To be removed in Nitrogen
 */
+@Deprecated
 public final class AsyncEventBusModule extends
         org.opendaylight.controller.config.yang.threadpool.impl.AbstractAsyncEventBusModule {
 
