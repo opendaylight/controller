@@ -21,6 +21,10 @@ import org.opendaylight.controller.config.yang.threadpool.impl.AsyncEventBusRunt
 /**
  * Closeable version of {@link AsyncEventBus}.
  */
+/**
+ * To be removed in Nitrogen
+ */
+@Deprecated
 public class CloseableAsyncEventBus extends AsyncEventBus implements Closeable {
     private final ThreadPool threadPool;
     private final AsyncEventBusRuntimeRegistration rootRegistration;

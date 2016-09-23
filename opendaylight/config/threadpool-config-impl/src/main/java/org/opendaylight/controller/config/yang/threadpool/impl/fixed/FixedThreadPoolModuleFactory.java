@@ -18,8 +18,9 @@
 package org.opendaylight.controller.config.yang.threadpool.impl.fixed;
 
 /**
-*
-*/
+ * To be removed in Nitrogen
+ */
+@Deprecated
 public class FixedThreadPoolModuleFactory extends org.opendaylight.controller.config.yang.threadpool.impl.fixed.AbstractFixedThreadPoolModuleFactory
 {
 

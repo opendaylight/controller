@@ -19,6 +19,10 @@ import org.opendaylight.controller.config.yang.threadpool.impl.EventBusRuntimeRe
 /**
  * Closeable {@link EventBus}.
  */
+/**
+ * To be removed in Nitrogen
+ */
+@Deprecated
 public class CloseableEventBus extends EventBus implements Closeable {
 
     private final EventBusRuntimeRegistration rootRegistration;
