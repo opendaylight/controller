@@ -18,6 +18,10 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 /**
  * @author Sharon Aicler(saichler@gmail.com)
  **/
+/**
+ * To be removed in Nitrogen
+ */
+@Deprecated
 public class XSQLProvider implements AutoCloseable {
 
     public static final InstanceIdentifier<XSQL> ID = InstanceIdentifier.builder(XSQL.class).build();

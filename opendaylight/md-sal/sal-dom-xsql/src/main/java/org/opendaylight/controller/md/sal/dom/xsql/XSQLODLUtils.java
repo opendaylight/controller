@@ -34,6 +34,10 @@ import org.opendaylight.yangtools.yang.model.util.type.DerivedTypes;
 /**
  * @author Sharon Aicler(saichler@gmail.com)
  **/
+/**
+ * To be removed in Nitrogen
+ */
+@Deprecated
 public class XSQLODLUtils {
 
     private static Map<Class<?>, Class<?>> types =

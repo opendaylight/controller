@@ -13,6 +13,10 @@ import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * To be removed in Nitrogen
+ */
+@Deprecated
 public class XSQLCriteria implements Serializable {
     private static final long serialVersionUID = 1L;
 

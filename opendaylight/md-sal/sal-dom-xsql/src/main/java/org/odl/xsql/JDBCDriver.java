@@ -20,6 +20,10 @@ import org.opendaylight.controller.md.sal.dom.xsql.jdbc.JDBCConnection;
 /**
  * @author Sharon Aicler(saichler@gmail.com)
  **/
+/**
+ * To be removed in Nitrogen
+ */
+@Deprecated
 public class JDBCDriver implements Driver {
 
     public static JDBCDriver drv = new JDBCDriver();

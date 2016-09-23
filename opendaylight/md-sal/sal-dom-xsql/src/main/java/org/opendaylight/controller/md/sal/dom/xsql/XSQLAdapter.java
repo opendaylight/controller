@@ -34,6 +34,10 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
 /**
  * @author Sharon Aicler(saichler@gmail.com)
  **/
+/**
+ * To be removed in Nitrogen
+ */
+@Deprecated
 public class XSQLAdapter extends Thread implements SchemaContextListener {
 
     private static final int SLEEP = 10000;

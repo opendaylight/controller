@@ -34,6 +34,10 @@ import java.util.Calendar;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * To be removed in Nitrogen
+ */
+@Deprecated
 public class JDBCStatement implements PreparedStatement {
     private JDBCResultSet rs = null;
     private transient JDBCConnection connection = null;

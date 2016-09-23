@@ -14,6 +14,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * To be removed in Nitrogen
+ */
+@Deprecated
 public class XSQLBluePrintRelation implements Serializable {
     private static final long serialVersionUID = 2L;
     private XSQLBluePrintNode parent = null;
