@@ -18,8 +18,9 @@
 package org.opendaylight.controller.config.yang.threadpool.impl;
 
 /**
-*
-*/
+ * To be removed in Nitrogen
+ */
+@Deprecated
 public class AsyncEventBusModuleFactory extends
         org.opendaylight.controller.config.yang.threadpool.impl.AbstractAsyncEventBusModuleFactory {
 
