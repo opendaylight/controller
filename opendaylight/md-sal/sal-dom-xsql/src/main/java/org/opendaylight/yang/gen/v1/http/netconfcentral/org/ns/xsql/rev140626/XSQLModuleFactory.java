@@ -8,6 +8,10 @@
 * Do not modify this file unless it is present under src/main directory
 */
 package org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.xsql.rev140626;
+/**
+ * To be removed in Nitrogen
+ */
+@Deprecated
 public class XSQLModuleFactory extends org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.xsql.rev140626.AbstractXSQLModuleFactory {
 
 }

@@ -13,6 +13,10 @@ import java.util.Map;
 
 import org.opendaylight.controller.md.sal.dom.xsql.XSQLBluePrint;
 
+/**
+ * To be removed in Nitrogen
+ */
+@Deprecated
 public class JDBCCommand implements Serializable {
     private static final long serialVersionUID = 1L;
 

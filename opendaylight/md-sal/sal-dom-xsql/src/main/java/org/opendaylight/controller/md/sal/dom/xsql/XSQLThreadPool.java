@@ -10,6 +10,10 @@ package org.opendaylight.controller.md.sal.dom.xsql;
 
 import java.util.LinkedList;
 
+/**
+ * To be removed in Nitrogen
+ */
+@Deprecated
 public class XSQLThreadPool {
     private LinkedList<Runnable> tasks = new LinkedList<Runnable>();
     private int threadCount = 0;

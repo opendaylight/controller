@@ -31,6 +31,10 @@ import java.util.Map;
 /**
  * @author Sharon Aicler(saichler@gmail.com)
  **/
+/**
+ * To be removed in Nitrogen
+ */
+@Deprecated
 public class TablesResultSet implements ResultSet {
 
     private String tables[] = null;
