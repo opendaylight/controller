@@ -10,6 +10,10 @@ package org.opendaylight.controller.md.sal.dom.xsql;
 
 import java.io.Serializable;
 
+/**
+ * To be removed in Nitrogen
+ */
+@Deprecated
 public class XSQLColumn implements Serializable, Comparable<Object> {
     private static final long serialVersionUID = 4854919735031714751L;
 

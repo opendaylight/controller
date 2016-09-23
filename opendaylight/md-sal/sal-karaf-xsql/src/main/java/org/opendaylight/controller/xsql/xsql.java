@@ -14,6 +14,10 @@ import org.apache.karaf.shell.commands.Option;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
 import org.opendaylight.controller.md.sal.dom.xsql.XSQLAdapter;
 
+/**
+ * To be removed in Nitrogen
+ */
+@Deprecated
 @Command(scope = "odl", name = "xsql", description = "XSQL Karaf Command")
 public class xsql extends OsgiCommandSupport {
 

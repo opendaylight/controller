@@ -33,6 +33,10 @@ import java.util.Set;
 /**
  * @author Sharon Aicler(saichler@gmail.com)
  **/
+/**
+ * To be removed in Nitrogen
+ */
+@Deprecated
 public class XSQLBluePrint implements DatabaseMetaData, Serializable {
 
     private static final long serialVersionUID = 1L;

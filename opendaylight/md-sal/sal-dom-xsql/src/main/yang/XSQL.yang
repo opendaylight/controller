@@ -31,9 +31,11 @@ module XSQL{
     identity XSQL {
         base config:module-type;
         config:java-name-prefix XSQL;
+        status deprecated;
     }
 
     augment "/config:modules/config:module/config:configuration" {
+        status deprecated;
         case XSQL {
             when "/config:modules/config:module/config:type = 'XSQL'";
 

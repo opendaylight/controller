@@ -51,6 +51,10 @@ import org.opendaylight.yangtools.yang.data.api.schema.DataContainerNode;
 /**
  * @author Sharon Aicler(saichler@gmail.com)
  **/
+/**
+ * To be removed in Nitrogen
+ */
+@Deprecated
 public class JDBCResultSet implements Serializable, ResultSet, ResultSetMetaData {
     private static final long serialVersionUID = -7450200738431047057L;
     private static final ClassLoader CLASS_LOADER = JDBCResultSet.class.getClassLoader();

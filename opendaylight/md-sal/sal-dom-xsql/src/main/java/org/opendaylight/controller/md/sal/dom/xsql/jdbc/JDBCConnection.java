@@ -41,6 +41,10 @@ import java.util.concurrent.Executor;
 import org.opendaylight.controller.md.sal.dom.xsql.XSQLAdapter;
 import org.opendaylight.controller.md.sal.dom.xsql.XSQLBluePrint;
 
+/**
+ * To be removed in Nitrogen
+ */
+@Deprecated
 public class JDBCConnection implements Connection, Runnable {
     private Socket socket = null;
     private DataInputStream in = null;

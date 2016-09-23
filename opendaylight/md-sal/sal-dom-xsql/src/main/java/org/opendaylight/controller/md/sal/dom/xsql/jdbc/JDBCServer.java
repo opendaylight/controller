@@ -23,6 +23,10 @@ import org.opendaylight.controller.md.sal.dom.xsql.XSQLBluePrintNode;
 import org.opendaylight.controller.md.sal.dom.xsql.XSQLColumn;
 import org.opendaylight.controller.md.sal.dom.xsql.XSQLCriteria;
 
+/**
+ * To be removed in Nitrogen
+ */
+@Deprecated
 public class JDBCServer extends Thread {
     private ServerSocket socket = null;
     private XSQLAdapter adapter = null;
