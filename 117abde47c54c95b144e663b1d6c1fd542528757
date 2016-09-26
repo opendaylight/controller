@@ -16,6 +16,24 @@
       "revId": "117abde47c54c95b144e663b1d6c1fd542528757",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_7e29fa88",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/test/java/org/opendaylight/controller/md/sal/binding/impl/test/DataTreeChangeListenerTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-09-26T16:44:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a6b29fe_32f059c8",
+      "revId": "117abde47c54c95b144e663b1d6c1fd542528757",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
