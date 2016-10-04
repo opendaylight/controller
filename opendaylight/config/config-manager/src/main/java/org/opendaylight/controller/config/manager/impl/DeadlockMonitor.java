@@ -75,14 +75,15 @@ public class DeadlockMonitor implements AutoCloseable {
 
         @Override
         public void run() {
-            ModuleIdentifierWithNanos old = new ModuleIdentifierWithNanos(); // null moduleId
-            while (this.isInterrupted() == false) {
+            // null moduleId
+            ModuleIdentifierWithNanos old = new ModuleIdentifierWithNanos();
+            while (!this.isInterrupted()) {
                 ModuleIdentifierWithNanos copy;
                 synchronized(this) {
                     copy = new ModuleIdentifierWithNanos(DeadlockMonitor.this.top);
                 }
 
-                if (old.moduleIdentifier == null || old.equals(copy) == false) {
+                if (old.moduleIdentifier == null || !old.equals(copy)) {
                     // started
                     old = copy;
                 } else {

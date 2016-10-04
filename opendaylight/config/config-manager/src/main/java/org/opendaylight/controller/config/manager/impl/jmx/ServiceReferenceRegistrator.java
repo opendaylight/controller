@@ -47,22 +47,24 @@ public interface ServiceReferenceRegistrator extends AutoCloseable {
             this.nullableTransactionName = nullableTransactionName;
         }
 
-        public String getNullableTransactionName() {
+        @Override
+		public String getNullableTransactionName() {
             return nullableTransactionName;
         }
 
 
-        public ServiceReferenceJMXRegistration registerMBean(ServiceReferenceMXBeanImpl object,
+        @Override
+		public ServiceReferenceJMXRegistration registerMBean(ServiceReferenceMXBeanImpl object,
                                                              ObjectName on) throws InstanceAlreadyExistsException {
             String actualTransactionName = ObjectNameUtil.getTransactionName(on);
             boolean broken = false;
             broken |= (nullableTransactionName == null) != (actualTransactionName == null);
-            broken |= (nullableTransactionName != null) && nullableTransactionName.equals(actualTransactionName) == false;
+            broken |= (nullableTransactionName != null) && !nullableTransactionName.equals(actualTransactionName);
             if (broken) {
                 throw new IllegalArgumentException("Transaction name mismatch between expected "
                         + nullableTransactionName + ", got " + actualTransactionName + " in " + on);
             }
-            if (ObjectNameUtil.isServiceReference(on) == false) {
+            if (!ObjectNameUtil.isServiceReference(on)) {
                 throw new IllegalArgumentException("Invalid type of " + on);
             }
             return new ServiceReferenceJMXRegistration(currentJMXRegistrator.registerMBean(object, on));
@@ -94,7 +96,8 @@ public interface ServiceReferenceRegistrator extends AutoCloseable {
             this.nullableTransactionName = null;
         }
 
-        public ServiceReferenceRegistrator create() {
+        @Override
+		public ServiceReferenceRegistrator create() {
             return new ServiceReferenceRegistratorImpl(parentRegistrator, nullableTransactionName);
         }
     }
