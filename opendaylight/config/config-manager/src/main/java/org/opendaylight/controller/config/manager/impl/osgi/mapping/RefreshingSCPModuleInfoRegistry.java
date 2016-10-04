@@ -10,9 +10,10 @@ package org.opendaylight.controller.config.manager.impl.osgi.mapping;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
+
+import org.opendaylight.mdsal.sal.binding.generator.api.ClassLoadingStrategy;
+import org.opendaylight.mdsal.sal.binding.generator.api.ModuleInfoRegistry;
 import org.opendaylight.yangtools.concepts.ObjectRegistration;
-import org.opendaylight.yangtools.sal.binding.generator.api.ClassLoadingStrategy;
-import org.opendaylight.yangtools.sal.binding.generator.api.ModuleInfoRegistry;
 import org.opendaylight.yangtools.sal.binding.generator.util.BindingRuntimeContext;
 import org.opendaylight.yangtools.yang.binding.YangModuleInfo;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextProvider;
