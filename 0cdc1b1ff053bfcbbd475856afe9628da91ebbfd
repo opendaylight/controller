@@ -93,6 +93,30 @@
       "revId": "0cdc1b1ff053bfcbbd475856afe9628da91ebbfd",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_903aece5",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/md/sal/binding/api/DataBrokerPairsUtil.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-10-04T17:56:18Z",
+      "side": 1,
+      "message": "Ok, thanks for the javadoc",
+      "parentUuid": "7a6b29fe_f0536037",
+      "range": {
+        "startLine": 40,
+        "startChar": 0,
+        "endLine": 58,
+        "endChar": 5
+      },
+      "revId": "0cdc1b1ff053bfcbbd475856afe9628da91ebbfd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
