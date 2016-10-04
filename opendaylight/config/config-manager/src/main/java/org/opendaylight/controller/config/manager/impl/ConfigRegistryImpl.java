@@ -113,7 +113,8 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
     @GuardedBy("configTransactionLock")
     private List<ModuleFactory> lastListOfFactories = Collections.emptyList();
 
-    @GuardedBy("readableSRRegistryLock") // switched in every 2ndPC
+    // switched in every 2ndPC
+    @GuardedBy("readableSRRegistryLock")
     private CloseableServiceReferenceReadableRegistry readableSRRegistry =
             ServiceReferenceRegistryImpl.createInitialSRLookupRegistry();
 
@@ -207,7 +208,7 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
         // add all factories that disappeared from SR but are still committed
         for (ModuleInternalInfo moduleInternalInfo : currentConfig.getEntries()) {
             String name = moduleInternalInfo.getModuleFactory().getImplementationName();
-            if (allCurrentFactories.containsKey(name) == false) {
+            if (!allCurrentFactories.containsKey(name)) {
                 LOG.trace("Factory {} not found in SR, using reference from previous commit", name);
                 allCurrentFactories.put(name,
                         Maps.immutableEntry(moduleInternalInfo.getModuleFactory(), moduleInternalInfo.getBundleContext()));
@@ -237,11 +238,12 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
 
     /**
      * {@inheritDoc}
+     * @throws ConflictingVersionException
      */
     @Override
     public CommitStatus commitConfig(ObjectName transactionControllerON)
-            throws ConflictingVersionException, ValidationException {
-        if(transactionControllerON == NOOP_TX_NAME || closed.get()) {
+            throws ValidationException, ConflictingVersionException {
+        if(NOOP_TX_NAME.equals(transactionControllerON) || closed.get()) {
             return new CommitStatus(Collections.emptyList(), Collections.emptyList(), Collections.emptyList());
         }
 
@@ -283,15 +285,16 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
         // non recoverable from here:
         try {
             return secondPhaseCommit(configTransactionController, commitInfo, configTransactionControllerEntry.getValue());
-        } catch (Error | RuntimeException t) { // some libs throw Errors: e.g.
+            // some libs throw Errors: e.g.
             // javax.xml.ws.spi.FactoryFinder$ConfigurationError
+        } catch (RuntimeException t) {
             isHealthy = false;
             LOG.error("Configuration Transaction failed on 2PC, server is unhealthy", t);
-            if (t instanceof RuntimeException) {
-                throw (RuntimeException) t;
-            } else {
-                throw (Error) t;
-            }
+            throw t;
+        } catch (Error e) {
+            isHealthy = false;
+            LOG.error("Configuration Transaction failed on 2PC, server is unhealthy", e);
+            throw e;
         }
     }
 
@@ -303,10 +306,11 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
         // (hopefully) runtime beans
         for (DestroyedModule toBeDestroyed : commitInfo
                 .getDestroyedFromPreviousTransactions()) {
-            toBeDestroyed.close(); // closes instance (which should close
+            // closes instance (which should close
             // runtime jmx registrator),
             // also closes osgi registration and ModuleJMXRegistrator
             // registration
+            toBeDestroyed.close();
             currentConfig.remove(toBeDestroyed.getIdentifier());
         }
 

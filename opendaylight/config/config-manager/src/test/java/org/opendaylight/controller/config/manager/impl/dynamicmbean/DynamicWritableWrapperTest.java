@@ -9,7 +9,6 @@ package org.opendaylight.controller.config.manager.impl.dynamicmbean;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
-
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.management.Attribute;
 import javax.management.AttributeList;
@@ -20,7 +19,6 @@ import javax.management.ObjectName;
 import org.junit.Test;
 import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
-import org.opendaylight.controller.config.manager.impl.TransactionIdentifier;
 import org.opendaylight.controller.config.manager.impl.dynamicmbean.ReadOnlyAtomicBoolean.ReadOnlyAtomicBooleanImpl;
 import org.opendaylight.controller.config.manager.testingservices.parallelapsp.TestingParallelAPSPConfigMXBean;
 import org.opendaylight.controller.config.manager.testingservices.parallelapsp.TestingParallelAPSPModule;
@@ -38,7 +36,7 @@ public class DynamicWritableWrapperTest extends AbstractDynamicWrapperTest {
     protected AbstractDynamicWrapper getDynamicWrapper(Module module,
             ModuleIdentifier moduleIdentifier) {
         return new DynamicWritableWrapper(module, moduleIdentifier,
-                new TransactionIdentifier("transaction-1"),
+                "transaction-1",
                 readOnlyAtomicBoolean, MBeanServerFactory.createMBeanServer(),
                 platformMBeanServer);
     }

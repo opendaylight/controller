@@ -7,8 +7,7 @@
  */
 package org.opendaylight.controller.config.manager.impl;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static java.lang.String.format;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -48,6 +47,7 @@ import org.opendaylight.yangtools.concepts.Identifiable;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 /**
  * This is a JMX bean representing current transaction. It contains
  * transaction identifier, unique version and parent version for
@@ -129,12 +129,12 @@ class ConfigTransactionControllerImpl implements
         List<ModuleFactory> toBeAdded = new ArrayList<>();
         List<ModuleFactory> toBeRemoved = new ArrayList<>();
         for (ModuleFactory moduleFactory : factoriesHolder.getModuleFactories()) {
-            if (oldSet.contains(moduleFactory) == false) {
+            if (!oldSet.contains(moduleFactory)) {
                 toBeAdded.add(moduleFactory);
             }
         }
         for (ModuleFactory moduleFactory : lastListOfFactories) {
-            if (newSet.contains(moduleFactory) == false) {
+            if (!newSet.contains(moduleFactory)) {
                 toBeRemoved.add(moduleFactory);
             }
         }
@@ -214,7 +214,7 @@ class ConfigTransactionControllerImpl implements
                     moduleIdentifier.getInstanceName(), dependencyResolver,
                     oldConfigBeanInfo.getReadableModule(), bc);
         } catch (Exception e) {
-            throw new IllegalStateException(format(
+            throw new IllegalStateException(String.format(
                     "Error while copying old configuration from %s to %s",
                     oldConfigBeanInfo, moduleFactory), e);
         }
@@ -266,16 +266,16 @@ class ConfigTransactionControllerImpl implements
             throws InstanceAlreadyExistsException {
 
         LOG.debug("Adding module {} to transaction {}", moduleIdentifier, this);
-        if (moduleIdentifier.equals(module.getIdentifier()) == false) {
+        if (!moduleIdentifier.equals(module.getIdentifier())) {
             throw new IllegalStateException("Incorrect name reported by module. Expected "
                     + moduleIdentifier + ", got " + module.getIdentifier());
         }
-        if (dependencyResolver.getIdentifier().equals(moduleIdentifier) == false) {
+        if (!dependencyResolver.getIdentifier().equals(moduleIdentifier)) {
             throw new IllegalStateException("Incorrect name reported by dependency resolver. Expected "
                     + moduleIdentifier + ", got " + dependencyResolver.getIdentifier());
         }
         DynamicMBean writableDynamicWrapper = new DynamicWritableWrapper(
-                module, moduleIdentifier, getTransactionIdentifier(),
+                module, moduleIdentifier, getTransactionIdentifier().getName(),
                 readOnlyAtomicBoolean, transactionsMBeanServer,
                 configMBeanServer);
 
@@ -303,7 +303,7 @@ class ConfigTransactionControllerImpl implements
     private void checkTransactionName(ObjectName objectName) {
         String foundTransactionName = ObjectNameUtil
                 .getTransactionName(objectName);
-        if (getTransactionIdentifier().getName().equals(foundTransactionName) == false) {
+        if (!getTransactionIdentifier().getName().equals(foundTransactionName)) {
             throw new IllegalArgumentException("Wrong transaction name "
                     + objectName);
         }
@@ -314,7 +314,7 @@ class ConfigTransactionControllerImpl implements
         transactionStatus.checkNotAborted();
 
         ModuleInternalTransactionalInfo found = dependencyResolverManager.findModuleInternalTransactionalInfo(moduleIdentifier);
-        if (blankTransaction == false &&
+        if (!blankTransaction &&
                 found.isDefaultBean()) {
             LOG.warn("Warning: removing default bean. This will be forbidden in next version of config-subsystem");
         }
@@ -398,7 +398,8 @@ class ConfigTransactionControllerImpl implements
             validateNoLocks();
         } catch (ValidationException e) {
             LOG.trace("Commit failed on validation");
-            configBeanModificationDisabled.set(false); // recoverable error
+            // recoverable error
+            configBeanModificationDisabled.set(false);
             throw e;
         }
         // errors in this state are not recoverable. modules are not mutable
@@ -414,7 +415,7 @@ class ConfigTransactionControllerImpl implements
     public synchronized List<ModuleIdentifier> secondPhaseCommit() {
         transactionStatus.checkNotAborted();
         transactionStatus.checkCommitStarted();
-        if (configBeanModificationDisabled.get() == false) {
+        if (!configBeanModificationDisabled.get()) {
             throw new IllegalStateException(
                     "Internal error - validateBeforeCommitAndLockTransaction should be called "
                             + "to obtain a lock");
@@ -435,13 +436,13 @@ class ConfigTransactionControllerImpl implements
                 LOG.debug("About to commit {} in transaction {}",
                         moduleIdentifier, getTransactionIdentifier());
                 AutoCloseable instance = module.getInstance();
-                checkNotNull(instance, "Instance is null:{} in transaction {}", moduleIdentifier, getTransactionIdentifier());
+                Preconditions.checkNotNull(instance, "Instance is null:{} in transaction {}", moduleIdentifier, getTransactionIdentifier());
             } catch (Exception e) {
                 LOG.error("Commit failed on {} in transaction {}", moduleIdentifier,
                         getTransactionIdentifier(), e);
                 internalAbort();
                 throw new IllegalStateException(
-                        format("Error - getInstance() failed for %s in transaction %s",
+                        String.format("Error - getInstance() failed for %s in transaction %s",
                                 moduleIdentifier, getTransactionIdentifier()), e);
             }
         }

@@ -30,7 +30,7 @@ class AttributeHolder {
     private final RequireInterface requireInterfaceAnnotation;
     private final String attributeType;
 
-    public static final Set<Class<?>> PERMITTED_PARAMETER_TYPES_FOR_DEPENDENCY_SETTER = new HashSet<>();
+    protected static final Set<Class<?>> PERMITTED_PARAMETER_TYPES_FOR_DEPENDENCY_SETTER = new HashSet<>();
 
     static {
         PERMITTED_PARAMETER_TYPES_FOR_DEPENDENCY_SETTER.add(ObjectName.class);
@@ -57,9 +57,8 @@ class AttributeHolder {
     }
 
     public MBeanAttributeInfo toMBeanAttributeInfo() {
-        MBeanAttributeInfo info = new MBeanAttributeInfo(name, attributeType,
+        return new MBeanAttributeInfo(name, attributeType,
                 description, true, true, false);
-        return info;
     }
 
     /**
@@ -120,10 +119,8 @@ class AttributeHolder {
 
         // only allow setX(ObjectName y) or setX(ObjectName[] y) or setX(List<ObjectName> y) to continue
 
-        if (setter.getParameterTypes().length > 1) {
-            return null;
-        }
-        if (PERMITTED_PARAMETER_TYPES_FOR_DEPENDENCY_SETTER.contains(setter.getParameterTypes()[0]) == false) {
+        if (setter.getParameterTypes().length > 1 ||
+                !PERMITTED_PARAMETER_TYPES_FOR_DEPENDENCY_SETTER.contains(setter.getParameterTypes()[0])) {
             return null;
         }
 

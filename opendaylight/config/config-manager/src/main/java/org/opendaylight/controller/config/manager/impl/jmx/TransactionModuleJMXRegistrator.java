@@ -41,7 +41,7 @@ public class TransactionModuleJMXRegistrator implements Closeable, NestableJMXRe
 
     public TransactionModuleJMXRegistration registerMBean(Object object,
             ObjectName on) throws InstanceAlreadyExistsException {
-        if (transactionName.equals(ObjectNameUtil.getTransactionName(on)) == false) {
+        if (!transactionName.equals(ObjectNameUtil.getTransactionName(on))) {
             throw new IllegalArgumentException("Transaction name mismatch between expected "
                             + transactionName + " " + "and " + on);
         }
@@ -63,6 +63,7 @@ public class TransactionModuleJMXRegistrator implements Closeable, NestableJMXRe
         return transactionName;
     }
 
+    @Override
     public InternalJMXRegistrator createChild() {
         return currentJMXRegistrator.createChild();
     }

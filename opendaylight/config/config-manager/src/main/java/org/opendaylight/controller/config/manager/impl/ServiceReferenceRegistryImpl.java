@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.config.manager.impl;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import java.util.AbstractMap.SimpleImmutableEntry;
@@ -217,7 +217,7 @@ public class ServiceReferenceRegistryImpl implements CloseableServiceReferenceRe
 
 
         for (Entry<String, ModuleFactory> entry : factories.entrySet()) {
-            if (entry.getKey().equals(entry.getValue().getImplementationName()) == false) {
+            if (!entry.getKey().equals(entry.getValue().getImplementationName())) {
                 LOG.error("Possible error in code: Mismatch between supplied and actual name of {}", entry);
                 throw new IllegalArgumentException("Possible error in code: Mismatch between supplied and actual name of " + entry);
             }
@@ -343,7 +343,7 @@ public class ServiceReferenceRegistryImpl implements CloseableServiceReferenceRe
     @Override
     public synchronized ObjectName getServiceReference(final String serviceInterfaceQName, final String refName) throws InstanceNotFoundException {
         ServiceReference serviceReference = new ServiceReference(serviceInterfaceQName, refName);
-        if (mBeans.containsKey(serviceReference) == false) {
+        if (!mBeans.containsKey(serviceReference)) {
             throw new InstanceNotFoundException("Cannot find " + serviceReference);
         }
         return getServiceON(serviceReference);
@@ -353,22 +353,21 @@ public class ServiceReferenceRegistryImpl implements CloseableServiceReferenceRe
     public synchronized void checkServiceReferenceExists(final ObjectName objectName) throws InstanceNotFoundException {
         String actualTransactionName = ObjectNameUtil.getTransactionName(objectName);
         String expectedTransactionName = serviceReferenceRegistrator.getNullableTransactionName();
-        if (writable & actualTransactionName == null || (writable && actualTransactionName.equals(expectedTransactionName) == false)) {
+        if (writable & actualTransactionName == null || (writable && !actualTransactionName.equals(expectedTransactionName))) {
             throw new IllegalArgumentException("Mismatched transaction name in " + objectName);
         }
         String serviceQName = ObjectNameUtil.getServiceQName(objectName);
         String referenceName = ObjectNameUtil.getReferenceName(objectName);
         ServiceReference serviceReference = new ServiceReference(serviceQName, referenceName);
-        if (refNames.containsKey(serviceReference) == false) {
+        if (!refNames.containsKey(serviceReference)) {
             LOG.warn("Cannot find {} in {}", serviceReference, refNames);
             throw new InstanceNotFoundException("Service reference not found:" + objectName);
         }
     }
 
     // writing:
-
     private void assertWritable() {
-        if (writable == false) {
+        if (!writable) {
             throw new IllegalStateException("Cannot write to readable registry");
         }
     }
@@ -389,7 +388,7 @@ public class ServiceReferenceRegistryImpl implements CloseableServiceReferenceRe
                                                          final boolean skipChecks) throws InstanceNotFoundException {
 
         // make sure it is found
-        if (skipChecks == false) {
+        if (!skipChecks) {
             lookupRegistry.checkConfigBeanExists(moduleON);
         }
         String factoryName = ObjectNameUtil.getFactoryName(moduleON);
@@ -436,7 +435,7 @@ public class ServiceReferenceRegistryImpl implements CloseableServiceReferenceRe
         }
 
         ServiceInterfaceAnnotation annotation = serviceQNamesToAnnotations.get(serviceReference.getServiceInterfaceQName());
-        checkNotNull(annotation, "Possible error in code, cannot find annotation for " + serviceReference);
+        Preconditions.checkNotNull(annotation, "Possible error in code, cannot find annotation for " + serviceReference);
         refNamesToAnnotations.put(annotation, serviceReference.getRefName());
         return result;
     }
@@ -460,7 +459,7 @@ public class ServiceReferenceRegistryImpl implements CloseableServiceReferenceRe
         LOG.debug("Removing service reference {} from {}", serviceReference, this);
         assertWritable();
         // is the qName known?
-        if (allQNames.contains(serviceReference.getServiceInterfaceQName()) == false) {
+        if (!allQNames.contains(serviceReference.getServiceInterfaceQName())) {
             LOG.error("Cannot find qname {} in {}", serviceReference.getServiceInterfaceQName(), allQNames);
             throw new IllegalArgumentException("Cannot find service interface " + serviceReference.getServiceInterfaceQName());
         }
@@ -504,7 +503,7 @@ public class ServiceReferenceRegistryImpl implements CloseableServiceReferenceRe
         for (ServiceReference sr : serviceReferencesLinkingTo) {
             removeServiceReference(sr);
         }
-        return serviceReferencesLinkingTo.isEmpty() == false;
+        return !serviceReferencesLinkingTo.isEmpty();
     }
 
     private Set<ServiceReference> findServiceReferencesLinkingTo(final ObjectName moduleObjectName, final Set<String> serviceInterfaceQNames) {
