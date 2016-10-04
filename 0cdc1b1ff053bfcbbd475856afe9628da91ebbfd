@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "7a6b29fe_1057fc27",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/md/sal/binding/api/DataBrokerPairsUtil.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2016-10-04T17:52:14Z",
+      "side": 1,
+      "message": "Agreed, I\u0027d like to name this something else, and would welcome suggestions...",
+      "parentUuid": "7a6b29fe_30cb1820",
+      "range": {
+        "startLine": 30,
+        "startChar": 7,
+        "endLine": 30,
+        "endChar": 88
+      },
+      "revId": "0cdc1b1ff053bfcbbd475856afe9628da91ebbfd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a6b29fe_d052a467",
         "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/md/sal/binding/api/DataBrokerPairsUtil.java",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2016-10-04T17:13:00Z",
       "side": 1,
       "message": "Please provide javadoc. \n\nAlso, maybe it could make sense to split the APIs definition and their implementation. But this is a Util class so I might oversee the point of it.\n\nBut if the purpose is to share common APIs across ODL then I think it be useful",
+      "range": {
+        "startLine": 40,
+        "startChar": 0,
+        "endLine": 58,
+        "endChar": 5
+      },
+      "revId": "0cdc1b1ff053bfcbbd475856afe9628da91ebbfd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_f0536037",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/md/sal/binding/api/DataBrokerPairsUtil.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2016-10-04T17:52:14Z",
+      "side": 1,
+      "message": "Added JavaDoc. Disagree that in this particular very simple case a split interface and impl class would make sense, so leave that as is.",
+      "parentUuid": "7a6b29fe_d052a467",
       "range": {
         "startLine": 40,
         "startChar": 0,
