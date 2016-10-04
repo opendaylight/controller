@@ -37,14 +37,10 @@ public class BlankTransactionServiceTracker implements ServiceTrackerCustomizer<
     private final int maxAttempts;
 
     public BlankTransactionServiceTracker(final ConfigRegistryImpl configRegistry) {
-        this(new BlankTransaction() {
-            @Override
-            public CommitStatus hit()
-                    throws ValidationException, ConflictingVersionException {
-                ObjectName tx = configRegistry.beginConfig(true);
-                return configRegistry.commitConfig(tx);
-            }
-        });
+        this(() -> {
+            ObjectName tx = configRegistry.beginConfig(true);
+            return configRegistry.commitConfig(tx);
+         });
     }
 
     public BlankTransactionServiceTracker(final BlankTransaction blankTransaction) {
@@ -67,7 +63,7 @@ public class BlankTransactionServiceTracker implements ServiceTrackerCustomizer<
     }
 
     private void blankTransactionAsync() {
-        txExecutor.execute(() -> { blankTransactionSync(); });
+        txExecutor.execute(this::blankTransactionSync);
     }
 
     void blankTransactionSync() {

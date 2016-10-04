@@ -8,7 +8,8 @@
 package org.opendaylight.controller.config.manager.impl.jmx;
 
 public class ServiceReference {
-    private final String serviceInterfaceName, refName;
+    private final String serviceInterfaceName;
+    private final String refName;
 
     public ServiceReference(String serviceInterfaceName, String refName) {
         this.serviceInterfaceName = serviceInterfaceName;

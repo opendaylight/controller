@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.config.manager.impl.factoriesresolver;
 
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -55,7 +54,7 @@ public class HierarchicalConfigMBeanFactoriesHolder {
      * @throws IllegalArgumentException
      *             if factory is not found
      */
-    public ModuleFactory findByModuleName(String moduleName) throws ModuleFactoryNotFoundException {
+    public ModuleFactory findByModuleName(String moduleName) {
         Map.Entry<ModuleFactory, BundleContext> result = moduleNamesToConfigBeanFactories.get(moduleName);
         if (result == null) {
             throw new ModuleFactoryNotFoundException(moduleName);

@@ -27,7 +27,7 @@ public class DeadlockMonitor implements AutoCloseable {
     @GuardedBy("this")
     private final Deque<ModuleIdentifierWithNanos> moduleIdentifierWithNanosStack = new LinkedList<>();
     @GuardedBy("this")
-    private ModuleIdentifierWithNanos top = ModuleIdentifierWithNanos.EMPTY;
+    private ModuleIdentifierWithNanos top = ModuleIdentifierWithNanos.empty;
 
     public DeadlockMonitor(TransactionIdentifier transactionIdentifier) {
         this.transactionIdentifier = transactionIdentifier;
@@ -41,7 +41,7 @@ public class DeadlockMonitor implements AutoCloseable {
         if (popping) {
             moduleIdentifierWithNanosStack.pop();
             if (moduleIdentifierWithNanosStack.isEmpty()) {
-                top = ModuleIdentifierWithNanos.EMPTY;
+                top = ModuleIdentifierWithNanos.empty;
             } else {
                 top = moduleIdentifierWithNanosStack.peekLast();
             }
@@ -75,14 +75,15 @@ public class DeadlockMonitor implements AutoCloseable {
 
         @Override
         public void run() {
-            ModuleIdentifierWithNanos old = new ModuleIdentifierWithNanos(); // null moduleId
-            while (this.isInterrupted() == false) {
+            // null moduleId
+            ModuleIdentifierWithNanos old = new ModuleIdentifierWithNanos();
+            while (!this.isInterrupted()) {
                 ModuleIdentifierWithNanos copy;
                 synchronized(this) {
                     copy = new ModuleIdentifierWithNanos(DeadlockMonitor.this.top);
                 }
 
-                if (old.moduleIdentifier == null || old.equals(copy) == false) {
+                if (old.moduleIdentifier == null || !old.equals(copy)) {
                     // started
                     old = copy;
                 } else {
@@ -107,11 +108,8 @@ public class DeadlockMonitor implements AutoCloseable {
         }
     }
 
-
-
-
     private static class ModuleIdentifierWithNanos {
-        private static ModuleIdentifierWithNanos EMPTY = new ModuleIdentifierWithNanos();
+        private static ModuleIdentifierWithNanos empty = new ModuleIdentifierWithNanos();
         @Nullable
         private final ModuleIdentifier moduleIdentifier;
 

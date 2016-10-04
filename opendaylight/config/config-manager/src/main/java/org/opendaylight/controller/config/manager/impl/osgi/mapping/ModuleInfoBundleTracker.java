@@ -7,14 +7,14 @@
  */
 package org.opendaylight.controller.config.manager.impl.osgi.mapping;
 
-import static java.lang.String.format;
 import com.google.common.io.Resources;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.nio.charset.StandardCharsets;
 import org.opendaylight.yangtools.concepts.ObjectRegistration;
 import org.opendaylight.yangtools.yang.binding.YangModelBindingProvider;
 import org.opendaylight.yangtools.yang.binding.YangModuleInfo;
@@ -73,8 +73,8 @@ public final class ModuleInfoBundleTracker implements AutoCloseable,
     public Collection<ObjectRegistration<YangModuleInfo>> addingBundle(Bundle bundle, BundleEvent event) {
         URL resource = bundle.getEntry(MODULE_INFO_PROVIDER_PATH_PREFIX + YangModelBindingProvider.class.getName());
         LOG.debug("Got addingBundle({}) with YangModelBindingProvider resource {}", bundle, resource);
-        if(resource==null) {
-            return null;
+        if(resource == null) {
+            return Collections.emptyList();
         }
         List<ObjectRegistration<YangModuleInfo>> registrations = new LinkedList<>();
 
@@ -121,7 +121,7 @@ public final class ModuleInfoBundleTracker implements AutoCloseable,
         String errorMessage;
         Class<?> clazz = loadClass(moduleInfoClass, bundle);
 
-        if (YangModelBindingProvider.class.isAssignableFrom(clazz) == false) {
+        if (!YangModelBindingProvider.class.isAssignableFrom(clazz)) {
             errorMessage = logMessage("Class {} does not implement {} in bundle {}", clazz, YangModelBindingProvider.class, bundle);
             throw new IllegalStateException(errorMessage);
         }
@@ -157,6 +157,6 @@ public final class ModuleInfoBundleTracker implements AutoCloseable,
     public static String logMessage(String slfMessage, Object... params) {
         LOG.info(slfMessage, params);
         String formatMessage = slfMessage.replaceAll("\\{\\}", "%s");
-        return format(formatMessage, params);
+        return String.format(formatMessage, params);
     }
 }

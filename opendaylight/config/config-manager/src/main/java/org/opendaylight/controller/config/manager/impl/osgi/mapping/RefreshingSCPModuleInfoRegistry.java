@@ -59,7 +59,8 @@ public class RefreshingSCPModuleInfoRegistry implements ModuleInfoRegistry, Auto
                 final Dictionary<String, Object> props = new Hashtable<>();
                 props.put(BindingRuntimeContext.class.getName(), bindingContextProvider.getBindingContext());
                 props.put(SchemaSourceProvider.class.getName(), sourceProvider);
-                osgiReg.setProperties(props); // send modifiedService event
+                // send modifiedService event
+                osgiReg.setProperties(props);
             } catch (RuntimeException e) {
                 // The ModuleInfoBackedContext throws a RuntimeException if it can't create the schema context.
                 LOG.warn("Error updating the BindingContextProvider", e);
@@ -70,8 +71,7 @@ public class RefreshingSCPModuleInfoRegistry implements ModuleInfoRegistry, Auto
     @Override
     public ObjectRegistration<YangModuleInfo> registerModuleInfo(final YangModuleInfo yangModuleInfo) {
         ObjectRegistration<YangModuleInfo> yangModuleInfoObjectRegistration = moduleInfoRegistry.registerModuleInfo(yangModuleInfo);
-        ObjectRegistrationWrapper wrapper = new ObjectRegistrationWrapper(yangModuleInfoObjectRegistration);
-        return wrapper;
+        return new ObjectRegistrationWrapper(yangModuleInfoObjectRegistration);
     }
 
     @Override
@@ -98,7 +98,8 @@ public class RefreshingSCPModuleInfoRegistry implements ModuleInfoRegistry, Auto
         @Override
         public void close() throws Exception {
             inner.close();
-            updateService();// send modify event when a bundle disappears
+            // send modify event when a bundle disappears
+            updateService();
         }
 
         @Override

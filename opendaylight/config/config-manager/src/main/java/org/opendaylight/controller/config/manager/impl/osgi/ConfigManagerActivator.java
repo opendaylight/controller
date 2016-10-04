@@ -7,16 +7,14 @@
  */
 package org.opendaylight.controller.config.manager.impl.osgi;
 
-import static org.opendaylight.controller.config.manager.impl.util.OsgiRegistrationUtil.registerService;
-import static org.opendaylight.controller.config.manager.impl.util.OsgiRegistrationUtil.wrap;
 import java.lang.management.ManagementFactory;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.MBeanServer;
-import org.opendaylight.controller.config.api.ConfigSystemService;
 import org.opendaylight.controller.config.api.ConfigRegistry;
+import org.opendaylight.controller.config.api.ConfigSystemService;
 import org.opendaylight.controller.config.manager.impl.ConfigRegistryImpl;
 import org.opendaylight.controller.config.manager.impl.jmx.ConfigRegistryJMXRegistrator;
 import org.opendaylight.controller.config.manager.impl.jmx.JMXNotifierConfigRegistry;
@@ -54,7 +52,8 @@ public class ConfigManagerActivator implements BundleActivator, SynchronousBundl
     @Override
     public void start(final BundleContext context) {
         try {
-            ModuleInfoBackedContext moduleInfoBackedContext = ModuleInfoBackedContext.create();// the inner strategy is backed by thread context cl?
+            // the inner strategy is backed by thread context cl?
+            ModuleInfoBackedContext moduleInfoBackedContext = ModuleInfoBackedContext.create();
 
             BindingContextProvider bindingContextProvider = new BindingContextProvider();
 
@@ -97,8 +96,8 @@ public class ConfigManagerActivator implements BundleActivator, SynchronousBundl
                     new JMXNotifierConfigRegistry(configRegistry, configMBeanServer);
 
             // register config registry to OSGi
-            AutoCloseable clsReg = registerService(context, moduleInfoBackedContext, ClassLoadingStrategy.class);
-            AutoCloseable configRegReg = registerService(context, notifyingConfigRegistry, ConfigRegistry.class);
+            AutoCloseable clsReg = OsgiRegistrationUtil.registerService(context, moduleInfoBackedContext, ClassLoadingStrategy.class);
+            AutoCloseable configRegReg = OsgiRegistrationUtil.registerService(context, notifyingConfigRegistry, ConfigRegistry.class);
 
             // register config registry to jmx
             ConfigRegistryJMXRegistrator configRegistryJMXRegistrator = new ConfigRegistryJMXRegistrator(configMBeanServer);
@@ -124,12 +123,12 @@ public class ConfigManagerActivator implements BundleActivator, SynchronousBundl
                     blankTransactionServiceTracker);
             serviceTracker.open();
 
-            AutoCloseable configMgrReg = registerService(context, this, ConfigSystemService.class);
+            AutoCloseable configMgrReg = OsgiRegistrationUtil.registerService(context, this, ConfigSystemService.class);
 
             List<AutoCloseable> list = Arrays.asList(bindingContextProvider, clsReg,
-                    wrap(moduleFactoryBundleTracker), moduleInfoBundleTracker,
+                    OsgiRegistrationUtil.wrap(moduleFactoryBundleTracker), moduleInfoBundleTracker,
                     configRegReg, configRegistryJMXRegistrator, configRegistryJMXRegistratorWithNotifications,
-                    wrap(serviceTracker), moduleInfoRegistryWrapper, notifyingConfigRegistry, configMgrReg);
+                    OsgiRegistrationUtil.wrap(serviceTracker), moduleInfoRegistryWrapper, notifyingConfigRegistry, configMgrReg);
             autoCloseable = OsgiRegistrationUtil.aggregate(list);
 
             context.addBundleListener(this);

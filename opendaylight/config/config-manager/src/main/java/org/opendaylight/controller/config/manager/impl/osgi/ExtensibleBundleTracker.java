@@ -8,7 +8,6 @@
 package org.opendaylight.controller.config.manager.impl.osgi;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -74,27 +73,18 @@ public final class ExtensibleBundleTracker<T> extends BundleTracker<Future<T>> {
     @Override
     public Future<T> addingBundle(final Bundle bundle, final BundleEvent event) {
         LOG.trace("Submiting AddingBundle for bundle {} and event {} to be processed asynchronously",bundle,event);
-        Future<T> future = eventExecutor.submit(new Callable<T>() {
-            @Override
-            public T call() throws Exception {
-                try {
-                    T primaryTrackerRetVal = primaryTracker.addingBundle(bundle, event);
+        return eventExecutor.submit(() -> {
+            try {
+                T primaryTrackerRetVal = primaryTracker.addingBundle(bundle, event);
 
-                    forEachAdditionalBundle(new BundleStrategy() {
-                        @Override
-                        public void execute(final BundleTrackerCustomizer<?> tracker) {
-                            tracker.addingBundle(bundle, event);
-                        }
-                    });
-                    LOG.trace("AddingBundle for {} and event {} finished successfully",bundle,event);
-                    return primaryTrackerRetVal;
-                } catch (Exception e) {
-                    LOG.error("Failed to add bundle {}", bundle, e);
-                    throw e;
-                }
+                forEachAdditionalBundle(tracker -> tracker.addingBundle(bundle, event));
+                LOG.trace("AddingBundle for {} and event {} finished successfully",bundle,event);
+                return primaryTrackerRetVal;
+            } catch (Exception e) {
+                LOG.error("Failed to add bundle {}", bundle, e);
+                throw e;
             }
         });
-        return future;
     }
 
     @Override
@@ -114,12 +104,7 @@ public final class ExtensibleBundleTracker<T> extends BundleTracker<Future<T>> {
         try {
             LOG.trace("Invoking removedBundle event for {}",bundle);
             primaryTracker.removedBundle(bundle, event, object.get());
-            forEachAdditionalBundle(new BundleStrategy() {
-                @Override
-                public void execute(final BundleTrackerCustomizer<?> tracker) {
-                    tracker.removedBundle(bundle, event, null);
-                }
-            });
+            forEachAdditionalBundle(tracker -> tracker.removedBundle(bundle, event, null));
             LOG.trace("Removed bundle event for {} finished successfully.",bundle);
         } catch (Exception e) {
             LOG.error("Failed to remove bundle {}", bundle, e);

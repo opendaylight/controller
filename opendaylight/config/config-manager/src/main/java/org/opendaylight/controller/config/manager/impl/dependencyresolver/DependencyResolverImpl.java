@@ -7,8 +7,6 @@
  */
 package org.opendaylight.controller.config.manager.impl.dependencyresolver;
 
-import static java.lang.String.format;
-
 import com.google.common.base.Preconditions;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -56,6 +54,7 @@ final class DependencyResolverImpl implements DependencyResolver,
     private final BindingContextProvider bindingContextProvider;
     private final String transactionName;
     private final MBeanServer mBeanServer;
+    private Integer maxDependencyDepth;
 
     DependencyResolverImpl(ModuleIdentifier currentModule,
                            TransactionStatus transactionStatus, ModulesHolder modulesHolder,
@@ -100,8 +99,8 @@ final class DependencyResolverImpl implements DependencyResolver,
         boolean hasTransaction = ObjectNameUtil
                 .getTransactionName(dependentReadOnlyON) != null;
         JmxAttributeValidationException.checkCondition(
-                hasTransaction == false,
-                format("ObjectName should not contain "
+                !hasTransaction,
+                String.format("ObjectName should not contain "
                                 + "transaction name. %s set to %s. ", jmxAttribute,
                         dependentReadOnlyON
             ), jmxAttribute
@@ -116,8 +115,8 @@ final class DependencyResolverImpl implements DependencyResolver,
 
         boolean implementsSI = foundFactory
                 .isModuleImplementingServiceInterface(expectedServiceInterface);
-        if (implementsSI == false) {
-            String message = format(
+        if (!implementsSI) {
+            String message = String.format(
                     "Found module factory does not expose expected service interface. "
                             + "Module name is %s : %s, expected service interface %s, dependent module ON %s , "
                             + "attribute %s",
@@ -158,7 +157,7 @@ final class DependencyResolverImpl implements DependencyResolver,
         }
         AutoCloseable instance = module.getInstance();
         if (instance == null) {
-            String message = format(
+            String message = String.format(
                     "Error while %s resolving instance %s. getInstance() returned null. "
                             + "Expected type %s , attribute %s", name,
                     module.getIdentifier(), expectedType, jmxAttribute
@@ -168,7 +167,7 @@ final class DependencyResolverImpl implements DependencyResolver,
         try {
             return expectedType.cast(instance);
         } catch (ClassCastException e) {
-            String message = format(
+            String message = String.format(
                     "Instance cannot be cast to expected type. Instance class is %s , "
                             + "expected type %s , attribute %s",
                     instance.getClass(), expectedType, jmxAttribute
@@ -240,8 +239,6 @@ final class DependencyResolverImpl implements DependencyResolver,
                 o.getMaxDependencyDepth());
     }
 
-    private Integer maxDependencyDepth;
-
     int getMaxDependencyDepth() {
         if (maxDependencyDepth == null) {
             throw new IllegalStateException("Dependency depth was not computed");
@@ -272,7 +269,7 @@ final class DependencyResolverImpl implements DependencyResolver,
             DependencyResolverImpl dependentDRI = manager
                     .getOrCreate(dependencyName);
             if (chainForDetectingCycles2.contains(dependencyName)) {
-                throw new IllegalStateException(format(
+                throw new IllegalStateException(String.format(
                         "Cycle detected, %s contains %s",
                         chainForDetectingCycles2, dependencyName));
             }

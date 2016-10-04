@@ -12,6 +12,7 @@ import javax.annotation.concurrent.ThreadSafe;
 import javax.management.Attribute;
 import javax.management.AttributeList;
 import javax.management.AttributeNotFoundException;
+import javax.management.DynamicMBean;
 import javax.management.InstanceNotFoundException;
 import javax.management.InvalidAttributeValueException;
 import javax.management.MBeanException;
@@ -21,8 +22,8 @@ import javax.management.ObjectName;
 import javax.management.ReflectionException;
 import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.config.api.ValidationException;
+import org.opendaylight.controller.config.api.annotations.RequireInterface;
 import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
-import org.opendaylight.controller.config.manager.impl.TransactionIdentifier;
 import org.opendaylight.controller.config.spi.Module;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,11 +54,11 @@ public class DynamicWritableWrapper extends AbstractDynamicWrapper {
 
     public DynamicWritableWrapper(Module module,
                                   ModuleIdentifier moduleIdentifier,
-                                  TransactionIdentifier transactionIdentifier,
+                                  String transactionIdentifier,
                                   ReadOnlyAtomicBoolean configBeanModificationDisabled,
                                   MBeanServer internalServer, MBeanServer configMBeanServer) {
         super(module, true, moduleIdentifier, ObjectNameUtil
-                        .createTransactionModuleON(transactionIdentifier.getName(), moduleIdentifier), getOperations(moduleIdentifier),
+                        .createTransactionModuleON(transactionIdentifier, moduleIdentifier), getOperations(moduleIdentifier),
                 internalServer, configMBeanServer);
         this.configBeanModificationDisabled = configBeanModificationDisabled;
     }
@@ -77,7 +78,7 @@ public class DynamicWritableWrapper extends AbstractDynamicWrapper {
     public synchronized void setAttribute(Attribute attribute)
             throws AttributeNotFoundException, InvalidAttributeValueException, MBeanException, ReflectionException {
         Attribute newAttribute = attribute;
-        if (configBeanModificationDisabled.get() == true) {
+        if (configBeanModificationDisabled.get()) {
             throw new IllegalStateException("Operation is not allowed now");
         }
 
