@@ -14,7 +14,8 @@ import java.math.BigInteger;
 import java.util.Date;
 import java.util.Map;
 import javax.management.openmbean.SimpleType;
-import org.opendaylight.yangtools.sal.binding.model.api.Type;
+
+import org.opendaylight.mdsal.sal.binding.model.api.Type;
 
 public class SimpleTypeResolver {
 

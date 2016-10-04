@@ -21,7 +21,7 @@ import org.opendaylight.controller.config.yangjmxgenerator.attribute.AttributeIf
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.JavaAttribute;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.AbstractFactoryTemplate;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.ftl.TemplateFactory;
-import org.opendaylight.yangtools.sal.binding.model.api.Type;
+import org.opendaylight.mdsal.sal.binding.model.api.Type;
 
 public class ModuleMXBeanEntryTemplatesTest {
 
