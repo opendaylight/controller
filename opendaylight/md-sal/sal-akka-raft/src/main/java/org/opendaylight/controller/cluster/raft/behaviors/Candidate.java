@@ -23,7 +23,7 @@ import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 
 /**
- * The behavior of a RaftActor when it is in the CandidateState
+ * The behavior of a RaftActor when it is in the Candidate raft state.
  * <p/>
  * Candidates (§5.2):
  * <ul>
@@ -51,21 +51,19 @@ public class Candidate extends AbstractRaftActorBehavior {
     public Candidate(RaftActorContext context) {
         super(context, RaftState.Candidate);
 
-        for(PeerInfo peer: context.getPeers()) {
-            if(peer.isVoting()) {
+        for (PeerInfo peer: context.getPeers()) {
+            if (peer.isVoting()) {
                 votingPeers.add(peer.getId());
             }
         }
 
-        if(LOG.isDebugEnabled()) {
-            LOG.debug("{}: Election: Candidate has following voting peers: {}", logName(), votingPeers);
-        }
+        log.debug("{}: Election: Candidate has following voting peers: {}", logName(), votingPeers);
 
         votesRequired = getMajorityVoteCount(votingPeers.size());
 
         startNewTerm();
 
-        if(votingPeers.isEmpty()){
+        if (votingPeers.isEmpty()) {
             actor().tell(ElectionTimeout.INSTANCE, actor());
         } else {
             scheduleElection(electionDuration());
@@ -83,16 +81,13 @@ public class Candidate extends AbstractRaftActorBehavior {
     }
 
     @Override
-    protected RaftActorBehavior handleAppendEntries(ActorRef sender,
-        AppendEntries appendEntries) {
+    protected RaftActorBehavior handleAppendEntries(ActorRef sender, AppendEntries appendEntries) {
 
-        if(LOG.isDebugEnabled()) {
-            LOG.debug("{}: handleAppendEntries: {}", logName(), appendEntries);
-        }
+        log.debug("{}: handleAppendEntries: {}", logName(), appendEntries);
 
         // Some other candidate for the same term became a leader and sent us an append entry
-        if(currentTerm() == appendEntries.getTerm()){
-            LOG.debug("{}: New Leader sent an append entry to Candidate for term {} will switch to Follower",
+        if (currentTerm() == appendEntries.getTerm()) {
+            log.debug("{}: New Leader sent an append entry to Candidate for term {} will switch to Follower",
                     logName(), currentTerm());
 
             return switchBehavior(new Follower(context));
@@ -108,15 +103,15 @@ public class Candidate extends AbstractRaftActorBehavior {
 
     @Override
     protected RaftActorBehavior handleRequestVoteReply(ActorRef sender, RequestVoteReply requestVoteReply) {
-        LOG.debug("{}: handleRequestVoteReply: {}, current voteCount: {}", logName(), requestVoteReply, voteCount);
+        log.debug("{}: handleRequestVoteReply: {}, current voteCount: {}", logName(), requestVoteReply, voteCount);
 
         if (requestVoteReply.isVoteGranted()) {
             voteCount++;
         }
 
         if (voteCount >= votesRequired) {
-            if(context.getLastApplied() < context.getReplicatedLog().lastIndex()) {
-                LOG.debug("{}: LastApplied index {} is behind last index {}", logName(), context.getLastApplied(),
+            if (context.getLastApplied() < context.getReplicatedLog().lastIndex()) {
+                log.debug("{}: LastApplied index {} is behind last index {}", logName(), context.getLastApplied(),
                         context.getReplicatedLog().lastIndex());
                 return internalSwitchBehavior(RaftState.PreLeader);
             } else {
@@ -130,7 +125,7 @@ public class Candidate extends AbstractRaftActorBehavior {
     @Override
     public RaftActorBehavior handleMessage(ActorRef sender, Object message) {
         if (message instanceof ElectionTimeout) {
-            LOG.debug("{}: Received ElectionTimeout", logName());
+            log.debug("{}: Received ElectionTimeout", logName());
 
             if (votesRequired == 0) {
                 // If there are no peers then we should be a Leader
@@ -151,10 +146,8 @@ public class Candidate extends AbstractRaftActorBehavior {
 
             RaftRPC rpc = (RaftRPC) message;
 
-            if(LOG.isDebugEnabled()) {
-                LOG.debug("{}: RaftRPC message received {}, my term is {}", logName(), rpc,
+            log.debug("{}: RaftRPC message received {}, my term is {}", logName(), rpc,
                         context.getTermInformation().getCurrentTerm());
-            }
 
             // If RPC request or response contains term T > currentTerm:
             // set currentTerm = T, convert to follower (§5.1)
@@ -187,21 +180,21 @@ public class Candidate extends AbstractRaftActorBehavior {
         long newTerm = currentTerm + 1;
         context.getTermInformation().updateAndPersist(newTerm, context.getId());
 
-        LOG.debug("{}: Starting new term {}", logName(), newTerm);
+        log.debug("{}: Starting new term {}", logName(), newTerm);
 
         // Request for a vote
         // TODO: Retry request for vote if replies do not arrive in a reasonable
         // amount of time TBD
         for (String peerId : votingPeers) {
             ActorSelection peerActor = context.getPeerActorSelection(peerId);
-            if(peerActor != null) {
+            if (peerActor != null) {
                 RequestVote requestVote = new RequestVote(
                         context.getTermInformation().getCurrentTerm(),
                         context.getId(),
                         context.getReplicatedLog().lastIndex(),
                         context.getReplicatedLog().lastTerm());
 
-                LOG.debug("{}: Sending {} to peer {}", logName(), requestVote, peerId);
+                log.debug("{}: Sending {} to peer {}", logName(), requestVote, peerId);
 
                 peerActor.tell(requestVote, context.getActor());
             }

@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * The response to a GetOnDemandRaftState message,
+ * The response to a GetOnDemandRaftState message.
  *
  * @author Thomas Pantelis
  */

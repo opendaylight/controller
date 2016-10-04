@@ -13,7 +13,7 @@ import javax.annotation.Nonnull;
 import org.opendaylight.controller.cluster.raft.Snapshot;
 
 /**
- * Internal message, issued by follower to its actor
+ * Internal message, issued by follower to its actor.
  */
 public class ApplySnapshot {
     private static final Callback NOOP_CALLBACK = new Callback() {

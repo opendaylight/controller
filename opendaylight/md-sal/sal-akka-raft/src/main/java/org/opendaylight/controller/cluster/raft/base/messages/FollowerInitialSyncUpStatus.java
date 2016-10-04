@@ -13,8 +13,7 @@ import javax.annotation.Nonnull;
 
 /**
  * The FollowerInitialSyncUpStatus is sent by a Follower to inform any RaftActor subclass whether the Follower
- * is at least at the same commitIndex as the Leader was when it sent the follower the very first heartbeat.
- *
+ * is at least at the same commitIndex as the Leader was when it sent the follower the very first heart beat.
  * This status can be used to determine if a Follower has caught up with the current Leader in an upgrade scenario
  * for example.
  */

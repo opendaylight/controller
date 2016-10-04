@@ -40,29 +40,29 @@ public class SyncStatusTracker {
         this.syncThreshold = syncThreshold;
     }
 
-    public void update(String leaderId, long leaderCommit, long commitIndex){
-        leaderId = Preconditions.checkNotNull(leaderId, "leaderId should not be null");
+    public void update(String leaderId, long leaderCommit, long commitIndex) {
+        Preconditions.checkNotNull(leaderId, "leaderId should not be null");
 
-        if(!leaderId.equals(syncedLeaderId)){
+        if (!leaderId.equals(syncedLeaderId)) {
             minimumExpectedIndex = leaderCommit;
             changeSyncStatus(NOT_IN_SYNC, FORCE_STATUS_CHANGE);
             syncedLeaderId = leaderId;
             return;
         }
 
-        if((leaderCommit - commitIndex) > syncThreshold){
+        if (leaderCommit - commitIndex > syncThreshold) {
             changeSyncStatus(NOT_IN_SYNC);
-        } else if((leaderCommit - commitIndex) <= syncThreshold && commitIndex >= minimumExpectedIndex) {
+        } else if (leaderCommit - commitIndex <= syncThreshold && commitIndex >= minimumExpectedIndex) {
             changeSyncStatus(IN_SYNC);
         }
     }
 
-    private void changeSyncStatus(boolean newSyncStatus){
+    private void changeSyncStatus(boolean newSyncStatus) {
         changeSyncStatus(newSyncStatus, !FORCE_STATUS_CHANGE);
     }
 
-    private void changeSyncStatus(boolean newSyncStatus, boolean forceStatusChange){
-        if(syncStatus == newSyncStatus && !forceStatusChange){
+    private void changeSyncStatus(boolean newSyncStatus, boolean forceStatusChange) {
+        if (syncStatus == newSyncStatus && !forceStatusChange) {
             return;
         }
         actor.tell(new FollowerInitialSyncUpStatus(newSyncStatus, id), ActorRef.noSender());

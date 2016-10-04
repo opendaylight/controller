@@ -22,6 +22,9 @@ public class UpdateElectionTerm implements Serializable, MigratedSerializable {
 
         private UpdateElectionTerm updateElectionTerm;
 
+        // checkstyle flags the public modifier as redundant which really doesn't make sense since it clearly isn't
+        // redundant. It is explicitly needed for Java serialization to be able to create instances via reflection.
+        @SuppressWarnings("checkstyle:RedundantModifier")
         public Proxy() {
             // For Externalizable
         }
@@ -34,7 +37,7 @@ public class UpdateElectionTerm implements Serializable, MigratedSerializable {
         public void writeExternal(final ObjectOutput out) throws IOException {
             out.writeLong(updateElectionTerm.currentTerm);
             out.writeObject(updateElectionTerm.votedFor);
-         }
+        }
 
         @Override
         public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {

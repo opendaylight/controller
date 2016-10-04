@@ -30,8 +30,6 @@ public class ServerRemoved implements Serializable {
 
     @Override
     public String toString() {
-        return "ServerRemoved{" +
-                "serverId='" + serverId + '\'' +
-                '}';
+        return "ServerRemoved [serverId=" + serverId + "]";
     }
 }
