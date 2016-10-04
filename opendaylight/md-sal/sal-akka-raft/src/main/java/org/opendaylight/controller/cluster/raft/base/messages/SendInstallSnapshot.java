@@ -13,8 +13,8 @@ import javax.annotation.Nonnull;
 import org.opendaylight.controller.cluster.raft.Snapshot;
 
 /**
- * Internal message sent from the SnapshotManager to its associated leader. The leader is expected to apply the
- * {@link Snapshot} to its state.
+ * Internal message sent from the SnapshotManager to its associated leader when a snapshot capture is complete to
+ * prompt the leader to install the snapshot on its followers as needed.
  */
 public final class SendInstallSnapshot {
     private final Snapshot snapshot;
@@ -23,7 +23,8 @@ public final class SendInstallSnapshot {
         this.snapshot = Preconditions.checkNotNull(snapshot);
     }
 
-    @Nonnull public Snapshot getSnapshot() {
+    @Nonnull
+    public Snapshot getSnapshot() {
         return snapshot;
     }
 }

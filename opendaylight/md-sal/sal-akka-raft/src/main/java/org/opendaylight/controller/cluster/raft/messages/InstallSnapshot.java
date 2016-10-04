@@ -15,6 +15,9 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload;
 
+/**
+ * Message sent from a leader to install a snapshot chunk on a follower.
+ */
 public class InstallSnapshot extends AbstractRaftRPC {
     private static final long serialVersionUID = 1L;
 
@@ -28,7 +31,8 @@ public class InstallSnapshot extends AbstractRaftRPC {
     private final Optional<ServerConfigurationPayload> serverConfig;
 
     public InstallSnapshot(long term, String leaderId, long lastIncludedIndex, long lastIncludedTerm, byte[] data,
-            int chunkIndex, int totalChunks, Optional<Integer> lastChunkHashCode, Optional<ServerConfigurationPayload> serverConfig) {
+            int chunkIndex, int totalChunks, Optional<Integer> lastChunkHashCode,
+            Optional<ServerConfigurationPayload> serverConfig) {
         super(term);
         this.leaderId = leaderId;
         this.lastIncludedIndex = lastIncludedIndex;
@@ -100,6 +104,9 @@ public class InstallSnapshot extends AbstractRaftRPC {
 
         private InstallSnapshot installSnapshot;
 
+        // checkstyle flags the public modifier as redundant which really doesn't make sense since it clearly isn't
+        // redundant. It is explicitly needed for Java serialization to be able to create instances via reflection.
+        @SuppressWarnings("checkstyle:RedundantModifier")
         public Proxy() {
         }
 
@@ -117,12 +124,12 @@ public class InstallSnapshot extends AbstractRaftRPC {
             out.writeInt(installSnapshot.totalChunks);
 
             out.writeByte(installSnapshot.lastChunkHashCode.isPresent() ? 1 : 0);
-            if(installSnapshot.lastChunkHashCode.isPresent()) {
+            if (installSnapshot.lastChunkHashCode.isPresent()) {
                 out.writeInt(installSnapshot.lastChunkHashCode.get().intValue());
             }
 
             out.writeByte(installSnapshot.serverConfig.isPresent() ? 1 : 0);
-            if(installSnapshot.serverConfig.isPresent()) {
+            if (installSnapshot.serverConfig.isPresent()) {
                 out.writeObject(installSnapshot.serverConfig.get());
             }
 
@@ -140,13 +147,13 @@ public class InstallSnapshot extends AbstractRaftRPC {
 
             Optional<Integer> lastChunkHashCode = Optional.absent();
             boolean chunkHashCodePresent = in.readByte() == 1;
-            if(chunkHashCodePresent) {
+            if (chunkHashCodePresent) {
                 lastChunkHashCode = Optional.of(in.readInt());
             }
 
             Optional<ServerConfigurationPayload> serverConfig = Optional.absent();
             boolean serverConfigPresent = in.readByte() == 1;
-            if(serverConfigPresent) {
+            if (serverConfigPresent) {
                 serverConfig = Optional.of((ServerConfigurationPayload)in.readObject());
             }
 

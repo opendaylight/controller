@@ -14,7 +14,7 @@ public class AbstractRaftRPC implements RaftRPC {
     // term
     private long term;
 
-    protected AbstractRaftRPC(long term){
+    protected AbstractRaftRPC(long term) {
         this.term = term;
     }
 

@@ -23,7 +23,7 @@ import org.opendaylight.controller.cluster.raft.base.messages.TimeoutNow;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 
 /**
- * The behavior of a RaftActor when it is in the Leader state
+ * The behavior of a RaftActor when it is in the Leader state.
  * <p/>
  * Leaders:
  * <ul>
@@ -34,15 +34,14 @@ import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
  * respond after entry applied to state machine (§5.3)
  * <li> If last log index ≥ nextIndex for a follower: send
  * AppendEntries RPC with log entries starting at nextIndex
- * <ul>
  * <li> If successful: update nextIndex and matchIndex for
  * follower (§5.3)
  * <li> If AppendEntries fails because of log inconsistency:
  * decrement nextIndex and retry (§5.3)
- * </ul>
  * <li> If there exists an N such that N > commitIndex, a majority
  * of matchIndex[i] ≥ N, and log[N].term == currentTerm:
  * set commitIndex = N (§5.3, §5.4).
+ * </ul>
  */
 public class Leader extends AbstractLeader {
     /**
@@ -53,7 +52,7 @@ public class Leader extends AbstractLeader {
     static final Object ISOLATED_LEADER_CHECK = new Object();
 
     private final Stopwatch isolatedLeaderCheck = Stopwatch.createStarted();
-    private @Nullable LeadershipTransferContext leadershipTransferContext;
+    @Nullable private LeadershipTransferContext leadershipTransferContext;
 
     Leader(RaftActorContext context, @Nullable AbstractLeader initializeFromLeader) {
         super(context, RaftState.Leader, initializeFromLeader);
@@ -69,7 +68,7 @@ public class Leader extends AbstractLeader {
 
         if (ISOLATED_LEADER_CHECK.equals(originalMessage)) {
             if (isLeaderIsolated()) {
-                LOG.warn("{}: At least {} followers need to be active, Switching {} from Leader to IsolatedLeader",
+                log.warn("{}: At least {} followers need to be active, Switching {} from Leader to IsolatedLeader",
                     context.getId(), getMinIsolatedLeaderPeerCount(), getLeaderId());
                 return internalSwitchBehavior(new IsolatedLeader(context, this));
             } else {
@@ -81,15 +80,16 @@ public class Leader extends AbstractLeader {
     }
 
     @Override
-    protected void beforeSendHeartbeat(){
-        if(isolatedLeaderCheck.elapsed(TimeUnit.MILLISECONDS) > context.getConfigParams().getIsolatedCheckIntervalInMillis()){
+    protected void beforeSendHeartbeat() {
+        if (isolatedLeaderCheck.elapsed(TimeUnit.MILLISECONDS)
+                > context.getConfigParams().getIsolatedCheckIntervalInMillis()) {
             context.getActor().tell(ISOLATED_LEADER_CHECK, context.getActor());
             isolatedLeaderCheck.reset().start();
         }
 
-        if(leadershipTransferContext != null && leadershipTransferContext.isExpired(
+        if (leadershipTransferContext != null && leadershipTransferContext.isExpired(
                 context.getConfigParams().getElectionTimeOutInterval().toMillis())) {
-            LOG.debug("{}: Leadership transfer expired", logName());
+            log.debug("{}: Leadership transfer expired", logName());
             leadershipTransferContext = null;
         }
     }
@@ -117,10 +117,10 @@ public class Leader extends AbstractLeader {
      *     {@link RaftActorLeadershipTransferCohort#abortTtransfer}.</li>
      * </ul>
      *
-     * @param leadershipTransferCohort
+     * @param leadershipTransferCohort the cohort participating in the leadership transfer
      */
     public void transferLeadership(@Nonnull RaftActorLeadershipTransferCohort leadershipTransferCohort) {
-        LOG.debug("{}: Attempting to transfer leadership", logName());
+        log.debug("{}: Attempting to transfer leadership", logName());
 
         leadershipTransferContext = new LeadershipTransferContext(leadershipTransferCohort);
 
@@ -129,23 +129,23 @@ public class Leader extends AbstractLeader {
     }
 
     private void tryToCompleteLeadershipTransfer(String followerId) {
-        if(leadershipTransferContext == null) {
+        if (leadershipTransferContext == null) {
             return;
         }
 
         FollowerLogInformation followerInfo = getFollower(followerId);
-        if(followerInfo == null) {
+        if (followerInfo == null) {
             return;
         }
 
         long lastIndex = context.getReplicatedLog().lastIndex();
         boolean isVoting = context.getPeerInfo(followerId).isVoting();
 
-        LOG.debug("{}: tryToCompleteLeadershipTransfer: followerId: {}, matchIndex: {}, lastIndex: {}, isVoting: {}",
+        log.debug("{}: tryToCompleteLeadershipTransfer: followerId: {}, matchIndex: {}, lastIndex: {}, isVoting: {}",
                 logName(), followerId, followerInfo.getMatchIndex(), lastIndex, isVoting);
 
-        if(isVoting && followerInfo.getMatchIndex() == lastIndex) {
-            LOG.debug("{}: Follower's log matches - sending ElectionTimeout", logName());
+        if (isVoting && followerInfo.getMatchIndex() == lastIndex) {
+            log.debug("{}: Follower's log matches - sending ElectionTimeout", logName());
 
             // We can't be sure if the follower has applied all its log entries to its state so send an
             // additional AppendEntries with the latest commit index.
@@ -155,7 +155,7 @@ public class Leader extends AbstractLeader {
             ActorSelection followerActor = context.getPeerActorSelection(followerId);
             followerActor.tell(TimeoutNow.INSTANCE, context.getActor());
 
-            LOG.debug("{}: Leader transfer complete", logName());
+            log.debug("{}: Leader transfer complete", logName());
 
             leadershipTransferContext.transferCohort.transferComplete();
             leadershipTransferContext = null;
@@ -164,7 +164,7 @@ public class Leader extends AbstractLeader {
 
     @Override
     public void close() {
-        if(leadershipTransferContext != null) {
+        if (leadershipTransferContext != null) {
             LeadershipTransferContext localLeadershipTransferContext = leadershipTransferContext;
             leadershipTransferContext = null;
             localLeadershipTransferContext.transferCohort.abortTransfer();
@@ -192,7 +192,7 @@ public class Leader extends AbstractLeader {
         }
 
         boolean isExpired(long timeout) {
-            if(timer.elapsed(TimeUnit.MILLISECONDS) >= timeout) {
+            if (timer.elapsed(TimeUnit.MILLISECONDS) >= timeout) {
                 transferCohort.abortTransfer();
                 return true;
             }

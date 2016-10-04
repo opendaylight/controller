@@ -15,7 +15,7 @@ import java.io.ObjectOutput;
 import org.opendaylight.controller.cluster.raft.RaftVersions;
 
 /**
- * Reply for the AppendEntriesRpc message
+ * Reply for the AppendEntries message.
  */
 public class AppendEntriesReply extends AbstractRaftRPC {
     private static final long serialVersionUID = -7487547356392536683L;
@@ -110,6 +110,9 @@ public class AppendEntriesReply extends AbstractRaftRPC {
 
         private AppendEntriesReply appendEntriesReply;
 
+        // checkstyle flags the public modifier as redundant which really doesn't make sense since it clearly isn't
+        // redundant. It is explicitly needed for Java serialization to be able to create instances via reflection.
+        @SuppressWarnings("checkstyle:RedundantModifier")
         public Proxy() {
         }
 

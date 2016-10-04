@@ -29,10 +29,6 @@ public class SwitchBehavior {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("SwitchBehavior{");
-        sb.append("newState=").append(newState);
-        sb.append(", newTerm=").append(newTerm);
-        sb.append('}');
-        return sb.toString();
+        return "SwitchBehavior [newState=" + newState + ", newTerm=" + newTerm + "]";
     }
 }

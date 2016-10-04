@@ -25,8 +25,6 @@ public final class RequestVoteReply extends AbstractRaftRPC {
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("RequestVoteReply [term=").append(getTerm()).append(", voteGranted=").append(voteGranted).append("]");
-        return builder.toString();
+        return "RequestVoteReply [term=" + getTerm() + ", voteGranted=" + voteGranted + "]";
     }
 }

@@ -27,6 +27,9 @@ public class ApplyJournalEntries implements Serializable, MigratedSerializable {
 
         private ApplyJournalEntries applyEntries;
 
+        // checkstyle flags the public modifier as redundant which really doesn't make sense since it clearly isn't
+        // redundant. It is explicitly needed for Java serialization to be able to create instances via reflection.
+        @SuppressWarnings("checkstyle:RedundantModifier")
         public Proxy() {
             // For Externalizable
         }
@@ -38,7 +41,7 @@ public class ApplyJournalEntries implements Serializable, MigratedSerializable {
         @Override
         public void writeExternal(final ObjectOutput out) throws IOException {
             out.writeLong(applyEntries.toIndex);
-         }
+        }
 
         @Override
         public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
