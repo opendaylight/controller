@@ -45,6 +45,54 @@
       "revId": "c07e525c6b1516b5e18e551cbb7c70278805caf8",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_70ec7090",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/md/sal/binding/api/WriteTransaction.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2016-10-04T17:36:57Z",
+      "side": 1,
+      "message": "Oups! :( Fixed now.",
+      "parentUuid": "7a6b29fe_b0d608c2",
+      "range": {
+        "startLine": 23,
+        "startChar": 0,
+        "endLine": 23,
+        "endChar": 1
+      },
+      "revId": "c07e525c6b1516b5e18e551cbb7c70278805caf8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_d000e437",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/md/sal/binding/api/WriteTransaction.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2016-10-04T17:36:57Z",
+      "side": 1,
+      "message": "That is impossible without significantly more work, becuase this is an existing interface probably (?) widely used.  If at all, that could be a later follow-up - maybe for someone else? ;)",
+      "parentUuid": "7a6b29fe_10e41cab",
+      "range": {
+        "startLine": 23,
+        "startChar": 6,
+        "endLine": 23,
+        "endChar": 12
+      },
+      "revId": "c07e525c6b1516b5e18e551cbb7c70278805caf8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
