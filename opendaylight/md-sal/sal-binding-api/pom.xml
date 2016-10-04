@@ -35,6 +35,10 @@
       <artifactId>org.osgi.core</artifactId>
       <scope>provided</scope>
     </dependency>
+    <dependency>
+      <groupId>javax.inject</groupId>
+      <artifactId>javax.inject</artifactId>
+    </dependency>
   </dependencies>
   <scm>
     <connection>scm:git:http://git.opendaylight.org/gerrit/controller.git</connection>
