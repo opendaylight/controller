@@ -13,7 +13,7 @@ package org.opendaylight.controller.cluster.raft.policy;
  * we may want to be able to determine which Raft replica should become the leader - with Raft elections are
  * randomized so it is not possible to specify which replica should be the leader. The ability to specify
  * the leader would be quite useful when testing a raft cluster.
- *
+ * <p/>
  * Similarly we may want to customize when exactly we apply a modification to the state - with Raft a modification
  * is only applied to the state when the modification is replicated to a majority of the replicas. The ability to
  * apply a modification to the state before consensus would be useful in scenarios where you have only 2 nodes
@@ -31,10 +31,10 @@ public interface RaftPolicy {
 
     /**
      * According to Raft consensus on a Raft entry is achieved only after a Leader replicates a log entry to a
-     * majority of it's followers
+     * majority of it's followers.
      *
      * @return true if modification should be applied before consensus, false to apply modification to state
-     * as per Raft
+     *     as per Raft
      */
     boolean applyModificationToStateBeforeConsensus();
 }

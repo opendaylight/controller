@@ -13,19 +13,10 @@ import javax.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.RaftState;
 
 /**
- * A RaftActorBehavior represents the specific behavior of a RaftActor
- * <p>
- * A RaftActor can behave as one of the following,
- * <ul>
- *     <li> Follower </li>
- *     <li> Candidate </li>
- *     <li> Leader </li>
- * </ul>
- * <p>
- * In each of these behaviors the Raft Actor handles the same Raft messages
- * differently.
+ * The interface for a class that implements a specific behavior of a RaftActor. The types of behaviors are enumerated
+ * by {@link RaftState}. Each handles the same Raft messages differently.
  */
-public interface RaftActorBehavior extends AutoCloseable{
+public interface RaftActorBehavior extends AutoCloseable {
 
     /**
      * Handle a message. If the processing of the message warrants a state
@@ -37,42 +28,50 @@ public interface RaftActorBehavior extends AutoCloseable{
      *
      * @return The new behavior or current behavior, or null if the message was not handled.
      */
-    @Nullable RaftActorBehavior handleMessage(ActorRef sender, Object message);
+    @Nullable
+    RaftActorBehavior handleMessage(ActorRef sender, Object message);
 
     /**
+     * Returns the state associated with this behavior.
      *
-     * @return The state associated with a given behavior
+     * @return the RaftState
      */
     RaftState state();
 
     /**
+     * Returns the id of the leader.
      *
-     * @return The Id of the Leader if known else null
+     * @return the id of the leader or null if not known
      */
+    @Nullable
     String getLeaderId();
 
     /**
-     * setting the index of the log entry which is replicated to all nodes
-     * @param replicatedToAllIndex
+     * Sets the index of the last log entry that has been replicated to all peers.
+     *
+     * @param replicatedToAllIndex the index
      */
     void setReplicatedToAllIndex(long replicatedToAllIndex);
 
     /**
-     * @return the index of the log entry which is replicated to all nodes
+     * Returns the index of the last log entry that has been replicated to all peers.
+     *
+     * @return the index or -1 if not known
      */
     long getReplicatedToAllIndex();
 
     /**
-     * @return the leader's payload data version.
+     * Returns the leader's payload data version.
+     *
+     * @return a short representing the version
      */
     short getLeaderPayloadVersion();
 
     /**
-     * switchBehavior makes sure that the current behavior is shutdown before it switches to the new
-     * behavior
+     * Closes the current behavior and switches to the specified behavior, if possible.
      *
-     * @param behavior The new behavior to switch to
-     * @return The new behavior
+     * @param behavior the new behavior to switch to
+     * @return the new behavior
      */
     RaftActorBehavior switchBehavior(RaftActorBehavior behavior);
 

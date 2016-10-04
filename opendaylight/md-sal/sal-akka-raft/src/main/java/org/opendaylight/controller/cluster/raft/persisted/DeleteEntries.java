@@ -24,6 +24,9 @@ public class DeleteEntries implements Serializable, MigratedSerializable {
 
         private DeleteEntries deleteEntries;
 
+        // checkstyle flags the public modifier as redundant which really doesn't make sense since it clearly isn't
+        // redundant. It is explicitly needed for Java serialization to be able to create instances via reflection.
+        @SuppressWarnings("checkstyle:RedundantModifier")
         public Proxy() {
             // For Externalizable
         }
@@ -35,7 +38,7 @@ public class DeleteEntries implements Serializable, MigratedSerializable {
         @Override
         public void writeExternal(final ObjectOutput out) throws IOException {
             out.writeLong(deleteEntries.fromIndex);
-         }
+        }
 
         @Override
         public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {

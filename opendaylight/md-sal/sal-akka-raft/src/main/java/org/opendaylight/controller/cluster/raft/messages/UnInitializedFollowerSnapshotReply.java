@@ -8,14 +8,14 @@
 package org.opendaylight.controller.cluster.raft.messages;
 
 /**
- * Local message sent to self on receiving InstallSnapshotReply from a follower, this message indicates that
- * the catchup of the follower is done succesfully during AddServer scenario
+ * Local message sent to self on receiving the InstallSnapshotReply from a follower indicating that
+ * the catch up of the follower has completed successfully for an AddServer operation.
  */
 public class  UnInitializedFollowerSnapshotReply {
     private final String followerId;
 
-    public UnInitializedFollowerSnapshotReply(String followerId){
-       this.followerId = followerId;
+    public UnInitializedFollowerSnapshotReply(String followerId) {
+        this.followerId = followerId;
     }
 
     public String getFollowerId() {

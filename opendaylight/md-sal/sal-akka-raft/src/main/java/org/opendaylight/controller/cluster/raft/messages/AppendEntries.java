@@ -34,8 +34,7 @@ public class AppendEntries extends AbstractRaftRPC {
     // term of prevLogIndex entry
     private final long prevLogTerm;
 
-    // log entries to store (empty for heartbeat;
-    // may send more than one for efficiency)
+    // log entries to store (empty for heart beat - may send more than one for efficiency)
     private transient List<ReplicatedLogEntry> entries;
 
     // leader's commitIndex
@@ -105,6 +104,9 @@ public class AppendEntries extends AbstractRaftRPC {
 
         private AppendEntries appendEntries;
 
+        // checkstyle flags the public modifier as redundant which really doesn't make sense since it clearly isn't
+        // redundant. It is explicitly needed for Java serialization to be able to create instances via reflection.
+        @SuppressWarnings("checkstyle:RedundantModifier")
         public Proxy() {
         }
 
@@ -123,7 +125,7 @@ public class AppendEntries extends AbstractRaftRPC {
             out.writeShort(appendEntries.payloadVersion);
 
             out.writeInt(appendEntries.entries.size());
-            for(ReplicatedLogEntry e: appendEntries.entries) {
+            for (ReplicatedLogEntry e: appendEntries.entries) {
                 out.writeLong(e.getIndex());
                 out.writeLong(e.getTerm());
                 out.writeObject(e.getData());
@@ -142,7 +144,7 @@ public class AppendEntries extends AbstractRaftRPC {
 
             int size = in.readInt();
             List<ReplicatedLogEntry> entries = new ArrayList<>(size);
-            for(int i = 0; i < size; i++) {
+            for (int i = 0; i < size; i++) {
                 entries.add(new ReplicatedLogImplEntry(in.readLong(), in.readLong(), (Payload) in.readObject()));
             }
 

@@ -58,6 +58,9 @@ public class InstallSnapshotReply extends AbstractRaftRPC {
 
         private InstallSnapshotReply installSnapshotReply;
 
+        // checkstyle flags the public modifier as redundant which really doesn't make sense since it clearly isn't
+        // redundant. It is explicitly needed for Java serialization to be able to create instances via reflection.
+        @SuppressWarnings("checkstyle:RedundantModifier")
         public Proxy() {
         }
 

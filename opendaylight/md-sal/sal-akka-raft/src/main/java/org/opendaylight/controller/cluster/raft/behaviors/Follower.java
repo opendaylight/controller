@@ -40,7 +40,7 @@ import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload;
 
 /**
- * The behavior of a RaftActor in the Follower state
+ * The behavior of a RaftActor in the Follower raft state.
  * <p/>
  * <ul>
  * <li> Respond to RPCs from candidates and leaders
@@ -57,7 +57,7 @@ public class Follower extends AbstractRaftActorBehavior {
     private final SyncStatusTracker initialSyncStatusTracker;
 
     private final Procedure<ReplicatedLogEntry> appendAndPersistCallback =
-            logEntry -> context.getReplicatedLog().captureSnapshotIfReady(logEntry);
+        logEntry -> context.getReplicatedLog().captureSnapshotIfReady(logEntry);
 
     private final Stopwatch lastLeaderMessageTimer = Stopwatch.createStarted();
     private SnapshotTracker snapshotTracker = null;
@@ -110,8 +110,8 @@ public class Follower extends AbstractRaftActorBehavior {
         lastLeaderMessageTimer.start();
     }
 
-    private boolean isLogEntryPresent(long index){
-        if(context.getReplicatedLog().isInSnapshot(index)) {
+    private boolean isLogEntryPresent(long index) {
+        if (context.getReplicatedLog().isInSnapshot(index)) {
             return true;
         }
 
@@ -120,18 +120,18 @@ public class Follower extends AbstractRaftActorBehavior {
 
     }
 
-    private void updateInitialSyncStatus(long currentLeaderCommit, String leaderId){
-        initialSyncStatusTracker.update(leaderId, currentLeaderCommit, context.getCommitIndex());
+    private void updateInitialSyncStatus(long currentLeaderCommit, String newLeaderId) {
+        initialSyncStatusTracker.update(newLeaderId, currentLeaderCommit, context.getCommitIndex());
     }
 
     @Override
     protected RaftActorBehavior handleAppendEntries(ActorRef sender, AppendEntries appendEntries) {
 
         int numLogEntries = appendEntries.getEntries() != null ? appendEntries.getEntries().size() : 0;
-        if(LOG.isTraceEnabled()) {
-            LOG.trace("{}: handleAppendEntries: {}", logName(), appendEntries);
-        } else if(LOG.isDebugEnabled() && numLogEntries > 0) {
-            LOG.debug("{}: handleAppendEntries: {}", logName(), appendEntries);
+        if (log.isTraceEnabled()) {
+            log.trace("{}: handleAppendEntries: {}", logName(), appendEntries);
+        } else if (log.isDebugEnabled() && numLogEntries > 0) {
+            log.debug("{}: handleAppendEntries: {}", logName(), appendEntries);
         }
 
         // TODO : Refactor this method into a bunch of smaller methods
@@ -139,8 +139,8 @@ public class Follower extends AbstractRaftActorBehavior {
         // cover the code properly
 
         if (snapshotTracker != null && !snapshotTracker.getLeaderId().equals(appendEntries.getLeaderId())) {
-            LOG.debug("{}: snapshot install is in progress but the prior snapshot leaderId {} does not match the " +
-                    "AppendEntries leaderId {}", logName(), snapshotTracker.getLeaderId(), appendEntries.getLeaderId());
+            log.debug("{}: snapshot install is in progress but the prior snapshot leaderId {} does not match the "
+                + "AppendEntries leaderId {}", logName(), snapshotTracker.getLeaderId(), appendEntries.getLeaderId());
             snapshotTracker = null;
         }
 
@@ -149,9 +149,7 @@ public class Follower extends AbstractRaftActorBehavior {
             AppendEntriesReply reply = new AppendEntriesReply(context.getId(), currentTerm(), true,
                     lastIndex(), lastTerm(), context.getPayloadVersion());
 
-            if(LOG.isDebugEnabled()) {
-                LOG.debug("{}: snapshot install is in progress, replying immediately with {}", logName(), reply);
-            }
+            log.debug("{}: snapshot install is in progress, replying immediately with {}", logName(), reply);
             sender.tell(reply, actor());
 
             return this;
@@ -169,7 +167,7 @@ public class Follower extends AbstractRaftActorBehavior {
             // We found that the log was out of sync so just send a negative
             // reply and return
 
-            LOG.debug("{}: Follower is out-of-sync, so sending negative reply, lastIndex: {}, lastTerm: {}",
+            log.debug("{}: Follower is out-of-sync, so sending negative reply, lastIndex: {}, lastTerm: {}",
                         logName(), lastIndex, lastTerm());
 
             sender.tell(new AppendEntriesReply(context.getId(), currentTerm(), false, lastIndex,
@@ -179,7 +177,7 @@ public class Follower extends AbstractRaftActorBehavior {
 
         if (appendEntries.getEntries() != null && appendEntries.getEntries().size() > 0) {
 
-            LOG.debug("{}: Number of entries to be appended = {}", logName(),
+            log.debug("{}: Number of entries to be appended = {}", logName(),
                         appendEntries.getEntries().size());
 
             // 3. If an existing entry conflicts with a new one (same index
@@ -192,35 +190,35 @@ public class Follower extends AbstractRaftActorBehavior {
                 for (int i = 0;i < appendEntries.getEntries().size(); i++, addEntriesFrom++) {
                     ReplicatedLogEntry matchEntry = appendEntries.getEntries().get(i);
 
-                    if(!isLogEntryPresent(matchEntry.getIndex())) {
+                    if (!isLogEntryPresent(matchEntry.getIndex())) {
                         // newEntry not found in the log
                         break;
                     }
 
                     long existingEntryTerm = getLogEntryTerm(matchEntry.getIndex());
 
-                    LOG.debug("{}: matchEntry {} is present: existingEntryTerm: {}", logName(), matchEntry,
+                    log.debug("{}: matchEntry {} is present: existingEntryTerm: {}", logName(), matchEntry,
                             existingEntryTerm);
 
                     // existingEntryTerm == -1 means it's in the snapshot and not in the log. We don't know
                     // what the term was so we'll assume it matches.
-                    if(existingEntryTerm == -1 || existingEntryTerm == matchEntry.getTerm()) {
+                    if (existingEntryTerm == -1 || existingEntryTerm == matchEntry.getTerm()) {
                         continue;
                     }
 
-                    if(!context.getRaftPolicy().applyModificationToStateBeforeConsensus()) {
+                    if (!context.getRaftPolicy().applyModificationToStateBeforeConsensus()) {
 
-                        LOG.debug("{}: Removing entries from log starting at {}", logName(),
+                        log.debug("{}: Removing entries from log starting at {}", logName(),
                                 matchEntry.getIndex());
 
                         // Entries do not match so remove all subsequent entries
-                        if(!context.getReplicatedLog().removeFromAndPersist(matchEntry.getIndex())) {
+                        if (!context.getReplicatedLog().removeFromAndPersist(matchEntry.getIndex())) {
                             // Could not remove the entries - this means the matchEntry index must be in the
                             // snapshot and not the log. In this case the prior entries are part of the state
                             // so we must send back a reply to force a snapshot to completely re-sync the
                             // follower's log and state.
 
-                            LOG.debug("{}: Could not remove entries - sending reply to force snapshot", logName());
+                            log.debug("{}: Could not remove entries - sending reply to force snapshot", logName());
                             sender.tell(new AppendEntriesReply(context.getId(), currentTerm(), false, lastIndex,
                                     lastTerm(), context.getPayloadVersion(), true), actor());
                             return this;
@@ -236,23 +234,23 @@ public class Follower extends AbstractRaftActorBehavior {
             }
 
             lastIndex = lastIndex();
-            LOG.debug("{}: After cleanup, lastIndex: {}, entries to be added from: {}", logName(),
+            log.debug("{}: After cleanup, lastIndex: {}, entries to be added from: {}", logName(),
                     lastIndex, addEntriesFrom);
 
             // 4. Append any new entries not already in the log
             for (int i = addEntriesFrom; i < appendEntries.getEntries().size(); i++) {
                 ReplicatedLogEntry entry = appendEntries.getEntries().get(i);
 
-                LOG.debug("{}: Append entry to log {}", logName(), entry.getData());
+                log.debug("{}: Append entry to log {}", logName(), entry.getData());
 
                 context.getReplicatedLog().appendAndPersist(entry, appendAndPersistCallback);
 
-                if(entry.getData() instanceof ServerConfigurationPayload) {
+                if (entry.getData() instanceof ServerConfigurationPayload) {
                     context.updatePeerIds((ServerConfigurationPayload)entry.getData());
                 }
             }
 
-            LOG.debug("{}: Log size is now {}", logName(), context.getReplicatedLog().size());
+            log.debug("{}: Log size is now {}", logName(), context.getReplicatedLog().size());
         }
 
         // 5. If leaderCommit > commitIndex, set commitIndex =
@@ -261,23 +259,22 @@ public class Follower extends AbstractRaftActorBehavior {
         lastIndex = lastIndex();
         long prevCommitIndex = context.getCommitIndex();
 
-        if(appendEntries.getLeaderCommit() > prevCommitIndex) {
+        if (appendEntries.getLeaderCommit() > prevCommitIndex) {
             context.setCommitIndex(Math.min(appendEntries.getLeaderCommit(), lastIndex));
         }
 
         if (prevCommitIndex != context.getCommitIndex()) {
-            LOG.debug("{}: Commit index set to {}", logName(), context.getCommitIndex());
+            log.debug("{}: Commit index set to {}", logName(), context.getCommitIndex());
         }
 
         // If commitIndex > lastApplied: increment lastApplied, apply
         // log[lastApplied] to state machine (§5.3)
         // check if there are any entries to be applied. last-applied can be equal to last-index
-        if (appendEntries.getLeaderCommit() > context.getLastApplied() &&
-            context.getLastApplied() < lastIndex) {
-            if(LOG.isDebugEnabled()) {
-                LOG.debug("{}: applyLogToStateMachine, " +
-                        "appendEntries.getLeaderCommit(): {}," +
-                        "context.getLastApplied(): {}, lastIndex(): {}", logName(),
+        if (appendEntries.getLeaderCommit() > context.getLastApplied()
+                && context.getLastApplied() < lastIndex) {
+            if (log.isDebugEnabled()) {
+                log.debug("{}: applyLogToStateMachine, appendEntries.getLeaderCommit(): {},"
+                        + "context.getLastApplied(): {}, lastIndex(): {}", logName(),
                     appendEntries.getLeaderCommit(), context.getLastApplied(), lastIndex);
             }
 
@@ -287,10 +284,10 @@ public class Follower extends AbstractRaftActorBehavior {
         AppendEntriesReply reply = new AppendEntriesReply(context.getId(), currentTerm(), true,
             lastIndex, lastTerm(), context.getPayloadVersion());
 
-        if(LOG.isTraceEnabled()) {
-            LOG.trace("{}: handleAppendEntries returning : {}", logName(), reply);
-        } else if(LOG.isDebugEnabled() && numLogEntries > 0) {
-            LOG.debug("{}: handleAppendEntries returning : {}", logName(), reply);
+        if (log.isTraceEnabled()) {
+            log.trace("{}: handleAppendEntries returning : {}", logName(), reply);
+        } else if (log.isDebugEnabled() && numLogEntries > 0) {
+            log.debug("{}: handleAppendEntries returning : {}", logName(), reply);
         }
 
         sender.tell(reply, actor());
@@ -316,39 +313,39 @@ public class Follower extends AbstractRaftActorBehavior {
             // an entry at prevLogIndex and this follower has no entries in
             // it's log.
 
-            LOG.debug("{}: The followers log is empty and the senders prevLogIndex is {}",
+            log.debug("{}: The followers log is empty and the senders prevLogIndex is {}",
                         logName(), appendEntries.getPrevLogIndex());
         } else if (lastIndex > -1 && appendEntries.getPrevLogIndex() != -1 && !prevEntryPresent) {
 
             // The follower's log is out of sync because the Leader's
             // prevLogIndex entry was not found in it's log
 
-            LOG.debug("{}: The log is not empty but the prevLogIndex {} was not found in it - lastIndex: {}, snapshotIndex: {}",
-                        logName(), appendEntries.getPrevLogIndex(), lastIndex, context.getReplicatedLog().getSnapshotIndex());
+            log.debug("{}: The log is not empty but the prevLogIndex {} was not found in it - "
+                    + "lastIndex: {}, snapshotIndex: {}", logName(), appendEntries.getPrevLogIndex(), lastIndex,
+                    context.getReplicatedLog().getSnapshotIndex());
         } else if (lastIndex > -1 && prevEntryPresent && prevLogTerm != appendEntries.getPrevLogTerm()) {
 
             // The follower's log is out of sync because the Leader's
             // prevLogIndex entry does exist in the follower's log but it has
             // a different term in it
 
-            LOG.debug("{}: The prevLogIndex {} was found in the log but the term {} is not equal to the append entries " +
-                      "prevLogTerm {} - lastIndex: {}, snapshotIndex: {}", logName(), appendEntries.getPrevLogIndex(),
-                      prevLogTerm, appendEntries.getPrevLogTerm(), lastIndex, context.getReplicatedLog().getSnapshotIndex());
-        } else if(appendEntries.getPrevLogIndex() == -1 && appendEntries.getPrevLogTerm() == -1
+            log.debug("{}: The prevLogIndex {} was found in the log but the term {} is not equal to the append entries"
+                      + "prevLogTerm {} - lastIndex: {}, snapshotIndex: {}", logName(), appendEntries.getPrevLogIndex(),
+                      prevLogTerm, appendEntries.getPrevLogTerm(), lastIndex,
+                      context.getReplicatedLog().getSnapshotIndex());
+        } else if (appendEntries.getPrevLogIndex() == -1 && appendEntries.getPrevLogTerm() == -1
                 && appendEntries.getReplicatedToAllIndex() != -1
                 && !isLogEntryPresent(appendEntries.getReplicatedToAllIndex())) {
             // This append entry comes from a leader who has it's log aggressively trimmed and so does not have
             // the previous entry in it's in-memory journal
 
-            LOG.debug(
-                    "{}: Cannot append entries because the replicatedToAllIndex {} does not appear to be in the in-memory journal",
-                    logName(), appendEntries.getReplicatedToAllIndex());
-        } else if(appendEntries.getPrevLogIndex() == -1 && appendEntries.getPrevLogTerm() == -1
+            log.debug("{}: Cannot append entries because the replicatedToAllIndex {} does not appear to be in the"
+                    + " in-memory journal", logName(), appendEntries.getReplicatedToAllIndex());
+        } else if (appendEntries.getPrevLogIndex() == -1 && appendEntries.getPrevLogTerm() == -1
                 && appendEntries.getReplicatedToAllIndex() != -1 && numLogEntries > 0
                 && !isLogEntryPresent(appendEntries.getEntries().get(0).getIndex() - 1)) {
-            LOG.debug(
-                    "{}: Cannot append entries because the calculated previousIndex {} was not found in the in-memory journal",
-                    logName(), appendEntries.getEntries().get(0).getIndex() - 1);
+            log.debug("{}: Cannot append entries because the calculated previousIndex {} was not found in the "
+                    + " in-memory journal", logName(), appendEntries.getEntries().get(0).getIndex() - 1);
         } else {
             outOfSync = false;
         }
@@ -383,7 +380,7 @@ public class Follower extends AbstractRaftActorBehavior {
         // set currentTerm = T, convert to follower (§5.1)
         // This applies to all RPC messages and responses
         if (rpc.getTerm() > context.getTermInformation().getCurrentTerm()) {
-            LOG.debug("{}: Term {} in \"{}\" message is greater than follower's term {} - updating term",
+            log.debug("{}: Term {} in \"{}\" message is greater than follower's term {} - updating term",
                 logName(), rpc.getTerm(), rpc, context.getTermInformation().getCurrentTerm());
 
             context.getTermInformation().updateAndPersist(rpc.getTerm(), null);
@@ -412,33 +409,33 @@ public class Follower extends AbstractRaftActorBehavior {
         // lastLeaderMessageTimer.
         long lastLeaderMessageInterval = lastLeaderMessageTimer.elapsed(TimeUnit.MILLISECONDS);
         long electionTimeoutInMillis = context.getConfigParams().getElectionTimeOutInterval().toMillis();
-        boolean noLeaderMessageReceived = !lastLeaderMessageTimer.isRunning() ||
-                lastLeaderMessageInterval >= electionTimeoutInMillis;
+        boolean noLeaderMessageReceived = !lastLeaderMessageTimer.isRunning()
+                || lastLeaderMessageInterval >= electionTimeoutInMillis;
 
-        if(canStartElection()) {
-            if(message instanceof TimeoutNow) {
-                LOG.debug("{}: Received TimeoutNow - switching to Candidate", logName());
+        if (canStartElection()) {
+            if (message instanceof TimeoutNow) {
+                log.debug("{}: Received TimeoutNow - switching to Candidate", logName());
                 return internalSwitchBehavior(RaftState.Candidate);
-            } else if(noLeaderMessageReceived) {
+            } else if (noLeaderMessageReceived) {
                 // Check the cluster state to see if the leader is known to be up before we go to Candidate.
                 // However if we haven't heard from the leader in a long time even though the cluster state
                 // indicates it's up then something is wrong - leader might be stuck indefinitely - so switch
                 // to Candidate,
                 long maxElectionTimeout = electionTimeoutInMillis * MAX_ELECTION_TIMEOUT_FACTOR;
-                if(isLeaderAvailabilityKnown() && lastLeaderMessageInterval < maxElectionTimeout) {
-                    LOG.debug("{}: Received ElectionTimeout but leader appears to be available", logName());
+                if (isLeaderAvailabilityKnown() && lastLeaderMessageInterval < maxElectionTimeout) {
+                    log.debug("{}: Received ElectionTimeout but leader appears to be available", logName());
                     scheduleElection(electionDuration());
                 } else {
-                    LOG.debug("{}: Received ElectionTimeout - switching to Candidate", logName());
+                    log.debug("{}: Received ElectionTimeout - switching to Candidate", logName());
                     return internalSwitchBehavior(RaftState.Candidate);
                 }
             } else {
-                LOG.debug("{}: Received ElectionTimeout but lastLeaderMessageInterval {} < election timeout {}",
+                log.debug("{}: Received ElectionTimeout but lastLeaderMessageInterval {} < election timeout {}",
                         logName(), lastLeaderMessageInterval, context.getConfigParams().getElectionTimeOutInterval());
                 scheduleElection(electionDuration());
             }
-        } else if(message instanceof ElectionTimeout) {
-            if(noLeaderMessageReceived) {
+        } else if (message instanceof ElectionTimeout) {
+            if (noLeaderMessageReceived) {
                 setLeaderId(null);
             }
 
@@ -449,17 +446,17 @@ public class Follower extends AbstractRaftActorBehavior {
     }
 
     private boolean isLeaderAvailabilityKnown() {
-        if(leaderId == null) {
+        if (leaderId == null) {
             return false;
         }
 
         Optional<Cluster> cluster = context.getCluster();
-        if(!cluster.isPresent()) {
+        if (!cluster.isPresent()) {
             return false;
         }
 
         ActorSelection leaderActor = context.getPeerActorSelection(leaderId);
-        if(leaderActor == null) {
+        if (leaderActor == null) {
             return false;
         }
 
@@ -468,43 +465,43 @@ public class Follower extends AbstractRaftActorBehavior {
         CurrentClusterState state = cluster.get().state();
         Set<Member> unreachable = state.getUnreachable();
 
-        LOG.debug("{}: Checking for leader {} in the cluster unreachable set {}", logName(), leaderAddress,
+        log.debug("{}: Checking for leader {} in the cluster unreachable set {}", logName(), leaderAddress,
                 unreachable);
 
-        for(Member m: unreachable) {
-            if(leaderAddress.equals(m.address())) {
-                LOG.info("{}: Leader {} is unreachable", logName(), leaderAddress);
+        for (Member m: unreachable) {
+            if (leaderAddress.equals(m.address())) {
+                log.info("{}: Leader {} is unreachable", logName(), leaderAddress);
                 return false;
             }
         }
 
-        for(Member m: state.getMembers()) {
-            if(leaderAddress.equals(m.address())) {
-                if(m.status() == MemberStatus.up() || m.status() == MemberStatus.weaklyUp()) {
-                    LOG.debug("{}: Leader {} cluster status is {} - leader is available", logName(),
+        for (Member m: state.getMembers()) {
+            if (leaderAddress.equals(m.address())) {
+                if (m.status() == MemberStatus.up() || m.status() == MemberStatus.weaklyUp()) {
+                    log.debug("{}: Leader {} cluster status is {} - leader is available", logName(),
                             leaderAddress, m.status());
                     return true;
                 } else {
-                    LOG.debug("{}: Leader {} cluster status is {} - leader is unavailable", logName(),
+                    log.debug("{}: Leader {} cluster status is {} - leader is unavailable", logName(),
                             leaderAddress, m.status());
                     return false;
                 }
             }
         }
 
-        LOG.debug("{}: Leader {} not found in the cluster member set", logName(), leaderAddress);
+        log.debug("{}: Leader {} not found in the cluster member set", logName(), leaderAddress);
 
         return false;
     }
 
     private void handleInstallSnapshot(final ActorRef sender, InstallSnapshot installSnapshot) {
 
-        LOG.debug("{}: handleInstallSnapshot: {}", logName(), installSnapshot);
+        log.debug("{}: handleInstallSnapshot: {}", logName(), installSnapshot);
 
         leaderId = installSnapshot.getLeaderId();
 
-        if(snapshotTracker == null){
-            snapshotTracker = new SnapshotTracker(LOG, installSnapshot.getTotalChunks(), installSnapshot.getLeaderId());
+        if (snapshotTracker == null) {
+            snapshotTracker = new SnapshotTracker(log, installSnapshot.getTotalChunks(), installSnapshot.getLeaderId());
         }
 
         updateInitialSyncStatus(installSnapshot.getLastIncludedIndex(), installSnapshot.getLeaderId());
@@ -513,8 +510,8 @@ public class Follower extends AbstractRaftActorBehavior {
             final InstallSnapshotReply reply = new InstallSnapshotReply(
                     currentTerm(), context.getId(), installSnapshot.getChunkIndex(), true);
 
-            if(snapshotTracker.addChunk(installSnapshot.getChunkIndex(), installSnapshot.getData(),
-                    installSnapshot.getLastChunkHashCode())){
+            if (snapshotTracker.addChunk(installSnapshot.getChunkIndex(), installSnapshot.getData(),
+                    installSnapshot.getLastChunkHashCode())) {
                 Snapshot snapshot = Snapshot.create(snapshotTracker.getSnapshot(),
                         new ArrayList<>(),
                         installSnapshot.getLastIncludedIndex(),
@@ -528,7 +525,7 @@ public class Follower extends AbstractRaftActorBehavior {
                 ApplySnapshot.Callback applySnapshotCallback = new ApplySnapshot.Callback() {
                     @Override
                     public void onSuccess() {
-                        LOG.debug("{}: handleInstallSnapshot returning: {}", logName(), reply);
+                        log.debug("{}: handleInstallSnapshot returning: {}", logName(), reply);
 
                         sender.tell(reply, actor());
                     }
@@ -543,23 +540,16 @@ public class Follower extends AbstractRaftActorBehavior {
 
                 snapshotTracker = null;
             } else {
-                LOG.debug("{}: handleInstallSnapshot returning: {}", logName(), reply);
+                log.debug("{}: handleInstallSnapshot returning: {}", logName(), reply);
 
                 sender.tell(reply, actor());
             }
         } catch (SnapshotTracker.InvalidChunkException e) {
-            LOG.debug("{}: Exception in InstallSnapshot of follower", logName(), e);
+            log.debug("{}: Exception in InstallSnapshot of follower", logName(), e);
 
             sender.tell(new InstallSnapshotReply(currentTerm(), context.getId(),
                     -1, false), actor());
             snapshotTracker = null;
-
-        } catch (Exception e){
-            LOG.error("{}: Exception in InstallSnapshot of follower", logName(), e);
-
-            //send reply with success as false. The chunk will be sent again on failure
-            sender.tell(new InstallSnapshotReply(currentTerm(), context.getId(),
-                    installSnapshot.getChunkIndex(), false), actor());
 
         }
     }
@@ -570,7 +560,7 @@ public class Follower extends AbstractRaftActorBehavior {
     }
 
     @VisibleForTesting
-    SnapshotTracker getSnapshotTracker(){
+    SnapshotTracker getSnapshotTracker() {
         return snapshotTracker;
     }
 }
