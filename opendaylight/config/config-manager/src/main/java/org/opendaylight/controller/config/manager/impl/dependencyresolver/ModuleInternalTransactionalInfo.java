@@ -21,7 +21,8 @@ import org.osgi.framework.BundleContext;
 
 public class ModuleInternalTransactionalInfo implements Identifiable<ModuleIdentifier> {
     private final ModuleIdentifier name;
-    private final Module proxiedModule, realModule;
+    private final Module proxiedModule;
+    private final Module realModule;
     private final ModuleFactory moduleFactory;
 
     private final TransactionModuleJMXRegistration transactionModuleJMXRegistration;

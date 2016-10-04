@@ -15,6 +15,6 @@ import org.opendaylight.controller.config.api.ServiceReferenceReadableRegistry;
  */
 public interface CloseableServiceReferenceReadableRegistry  extends AutoCloseable, ServiceReferenceReadableRegistry {
 
+    @Override
     void close();
-
 }

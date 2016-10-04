@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.config.manager.impl.osgi;
 
-import static com.google.common.base.Preconditions.checkState;
+import com.google.common.base.Preconditions;
 import java.util.Dictionary;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -39,13 +39,6 @@ public class BeanToOsgiServiceManager {
                                            Map<ServiceInterfaceAnnotation, String /* service ref name */> serviceNamesToAnnotations) {
         return new OsgiRegistration(instance, moduleIdentifier, bundleContext, serviceNamesToAnnotations);
     }
-
-    private static Dictionary<String, String> createProps(String serviceName) {
-        Hashtable<String, String> result = new Hashtable<>();
-        result.put(SERVICE_NAME_OSGI_PROP, serviceName);
-        return result;
-    }
-
 
     public static class OsgiRegistration implements AutoCloseable {
         private static final Logger LOG = LoggerFactory.getLogger(OsgiRegistration.class);
@@ -79,7 +72,7 @@ public class BeanToOsgiServiceManager {
                     continue;
                 }
 
-                checkState(requiredInterface.isInstance(instance), instance.getClass().getName() +
+                Preconditions.checkState(requiredInterface.isInstance(instance), instance.getClass().getName() +
                         " instance should implement " + requiredInterface.getName());
                 Dictionary<String, String> propertiesForOsgi = createProps(entry.getValue());
                 ServiceRegistration<?> serviceRegistration = bundleContext
@@ -103,8 +96,8 @@ public class BeanToOsgiServiceManager {
 
         public synchronized void updateRegistrations(Map<ServiceInterfaceAnnotation, String /* service ref name */> newAnnotationMapping,
                                                      BundleContext bundleContext, AutoCloseable newInstance) {
-            boolean notEquals = this.instance != newInstance;
-            notEquals |= newAnnotationMapping.equals(serviceNamesToAnnotations) == false;
+            boolean notEquals = !this.instance.equals(newInstance);
+            notEquals |= !newAnnotationMapping.equals(serviceNamesToAnnotations);
             if (notEquals) {
                 // FIXME: changing from old state to new state can be improved by computing the diff
                 LOG.debug("Detected change in service registrations for {}: old: {}, new: {}", moduleIdentifier,
@@ -115,6 +108,12 @@ public class BeanToOsgiServiceManager {
                 serviceRegistrations.clear();
                 serviceRegistrations.addAll(newRegs);
             }
+        }
+
+        private static Dictionary<String, String> createProps(String serviceName) {
+            Hashtable<String, String> result = new Hashtable<>();
+            result.put(SERVICE_NAME_OSGI_PROP, serviceName);
+            return result;
         }
     }
 }

@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.config.manager.impl.osgi;
 
-import static java.lang.String.format;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.io.Resources;
 import java.io.IOException;
@@ -114,6 +113,6 @@ public class ModuleFactoryBundleTracker implements BundleTrackerCustomizer<Boole
     public static String logMessage(String slfMessage, Object... params) {
         LOG.info(slfMessage, params);
         String formatMessage = slfMessage.replaceAll("\\{\\}", "%s");
-        return format(formatMessage, params);
+        return String.format(formatMessage, params);
     }
 }

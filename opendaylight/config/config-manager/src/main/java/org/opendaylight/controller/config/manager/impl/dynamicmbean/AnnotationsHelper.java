@@ -45,14 +45,15 @@ public class AnnotationsHelper {
                 }
                 // we need to go deeper
                 inspectedClass = inspectedClass.getSuperclass();
+                // no need to go further
             } catch (NoSuchMethodException e) {
-                inspectedClass = Object.class; // no need to go further
+                inspectedClass = Object.class;
             }
         } while (!inspectedClass.equals(Object.class));
 
         // inspect interfaces
         for (Class<?> ifc : inspectedInterfaces) {
-            if (ifc.isInterface() == false) {
+            if (!ifc.isInterface()) {
                 throw new IllegalArgumentException(ifc + " is not an interface");
             }
             try {
@@ -86,10 +87,10 @@ public class AnnotationsHelper {
                 result.add(annotation);
             }
             declaringClass = declaringClass.getSuperclass();
-        } while (declaringClass.equals(Object.class) == false);
+        } while (!declaringClass.equals(Object.class));
         // inspect interfaces
         for (Class<?> ifc : interfaces) {
-            if (ifc.isInterface() == false) {
+            if (!ifc.isInterface()) {
                 throw new IllegalArgumentException(ifc + " is not an interface");
             }
             T annotation = ifc.getAnnotation(annotationType);

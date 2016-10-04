@@ -44,7 +44,7 @@ class ConfigTransactionLookupRegistry  implements LookupRegistry, Closeable {
     private void checkTransactionName(ObjectName objectName) {
         String foundTransactionName = ObjectNameUtil
                 .getTransactionName(objectName);
-        if (transactionIdentifier.getName().equals(foundTransactionName) == false) {
+        if (!transactionIdentifier.getName().equals(foundTransactionName)) {
             throw new IllegalArgumentException("Wrong transaction name "
                     + objectName);
         }
@@ -103,6 +103,7 @@ class ConfigTransactionLookupRegistry  implements LookupRegistry, Closeable {
         return txModuleJMXRegistrator;
     }
 
+    @Override
     public void close() {
         transactionJMXRegistrator.close();
     }

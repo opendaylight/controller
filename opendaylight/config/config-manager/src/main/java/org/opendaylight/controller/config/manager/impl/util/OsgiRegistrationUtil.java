@@ -9,7 +9,6 @@
 package org.opendaylight.controller.config.manager.impl.util;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
@@ -40,32 +39,17 @@ public class OsgiRegistrationUtil {
 
     public static AutoCloseable wrap(final ServiceRegistration<?> reg) {
         checkNotNull(reg);
-        return new AutoCloseable() {
-            @Override
-            public void close() throws Exception {
-                reg.unregister();
-            }
-        };
+        return reg::unregister;
     }
 
     public static AutoCloseable wrap(final BundleTracker<?> bundleTracker) {
         checkNotNull(bundleTracker);
-        return new AutoCloseable() {
-            @Override
-            public void close() throws Exception {
-                bundleTracker.close();
-            }
-        };
+        return bundleTracker::close;
     }
 
     public static AutoCloseable wrap(final ServiceTracker<?, ?> serviceTracker) {
         checkNotNull(serviceTracker);
-        return new AutoCloseable() {
-            @Override
-            public void close() throws Exception {
-                serviceTracker.close();
-            }
-        };
+        return serviceTracker::close;
     }
 
     /**
@@ -74,26 +58,23 @@ public class OsgiRegistrationUtil {
     public static AutoCloseable aggregate(final List<? extends AutoCloseable> list) {
         checkNotNull(list);
 
-        return new AutoCloseable() {
-            @Override
-            public void close() throws Exception {
-                Exception firstException = null;
-                for (ListIterator<? extends AutoCloseable> it = list.listIterator(list.size()); it.hasPrevious();) {
-                    AutoCloseable ac = it.previous();
-                    try {
-                        ac.close();
-                    } catch (Exception e) {
-                        LOG.warn("Exception while closing {}", ac, e);
-                        if (firstException == null) {
-                            firstException = e;
-                        } else {
-                            firstException.addSuppressed(e);
-                        }
+        return () -> {
+            Exception firstException = null;
+            for (ListIterator<? extends AutoCloseable> it = list.listIterator(list.size()); it.hasPrevious();) {
+                AutoCloseable ac = it.previous();
+                try {
+                    ac.close();
+                } catch (Exception e) {
+                    LOG.warn("Exception while closing {}", ac, e);
+                    if (firstException == null) {
+                        firstException = e;
+                    } else {
+                        firstException.addSuppressed(e);
                     }
                 }
-                if (firstException != null) {
-                    throw firstException;
-                }
+            }
+            if (firstException != null) {
+                throw firstException;
             }
         };
     }
