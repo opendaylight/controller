@@ -31,7 +31,7 @@ public final class InterfacesHelper {
         }
         // getInterfaces gets interfaces implemented directly by this class
         Set<Class<?>> toBeInspected = new HashSet<>();
-        while (clazz.equals(Object.class) == false) {
+        while (!clazz.equals(Object.class)) {
             toBeInspected.addAll(Arrays.asList(clazz.getInterfaces()));
             // get parent class
             clazz = clazz.getSuperclass();
@@ -48,7 +48,7 @@ public final class InterfacesHelper {
             Iterator<Class<?>> iterator = interfaces.iterator();
             Class<?> ifc = iterator.next();
             iterator.remove();
-            if (ifc.isInterface() == false)  {
+            if (!ifc.isInterface())  {
                 throw new IllegalArgumentException(ifc + " should be an interface");
             }
             interfaces.addAll(Arrays.asList(ifc.getInterfaces()));
@@ -97,7 +97,7 @@ public final class InterfacesHelper {
 
         Set<Class<? extends AbstractServiceInterface>> foundGeneratedSIClasses = new HashSet<>();
         for (Class<?> clazz : getAllInterfaces(configBeanClass)) {
-            if (AbstractServiceInterface.class.isAssignableFrom(clazz) && AbstractServiceInterface.class.equals(clazz) == false) {
+            if (AbstractServiceInterface.class.isAssignableFrom(clazz) && !AbstractServiceInterface.class.equals(clazz)) {
                 foundGeneratedSIClasses.add((Class<? extends AbstractServiceInterface>) clazz);
             }
         }
@@ -155,7 +155,7 @@ public final class InterfacesHelper {
         Set<Class<? extends AbstractServiceInterface>> result = new HashSet<>();
         for(Class<?> ifc: allInterfaces){
             if (AbstractServiceInterface.class.isAssignableFrom(ifc) &&
-                    ifc.equals(AbstractServiceInterface.class) == false) {
+                    !ifc.equals(AbstractServiceInterface.class)) {
                 result.add((Class<? extends AbstractServiceInterface>) ifc);
             }
 

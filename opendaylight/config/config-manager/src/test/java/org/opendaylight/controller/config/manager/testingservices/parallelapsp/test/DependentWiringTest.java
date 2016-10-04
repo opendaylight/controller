@@ -12,7 +12,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-
 import java.util.Map;
 import javax.management.ObjectName;
 import org.junit.After;
@@ -33,7 +32,6 @@ import org.opendaylight.controller.config.util.ConfigTransactionJMXClient;
 
 public class DependentWiringTest extends AbstractParallelAPSPTest {
     private final String fixed1 = "fixed1";
-    private final String apsp1 = "apsp-parallel";
 
     @Before
     public void setUp() {
