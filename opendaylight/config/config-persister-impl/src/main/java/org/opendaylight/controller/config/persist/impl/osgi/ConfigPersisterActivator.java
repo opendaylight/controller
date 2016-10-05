@@ -68,9 +68,9 @@ public class ConfigPersisterActivator implements BundleActivator {
             public ConfigSubsystemFacadeFactory addingService(ServiceReference<ConfigSubsystemFacadeFactory> reference) {
                 LOG.debug("Got addingService(SchemaContextProvider) event");
                 // Yang store service should not be registered multiple times
-                ConfigSubsystemFacadeFactory ConfigSubsystemFacadeFactory = reference.getBundle().getBundleContext().getService(reference);
-                startPusherThread(configs, maxWaitForCapabilitiesMillis, ConfigSubsystemFacadeFactory, conflictingVersionTimeoutMillis, persisterAggregator);
-                return ConfigSubsystemFacadeFactory;
+                ConfigSubsystemFacadeFactory configSubsystemFacadeFactory = reference.getBundle().getBundleContext().getService(reference);
+                startPusherThread(configs, maxWaitForCapabilitiesMillis, configSubsystemFacadeFactory, conflictingVersionTimeoutMillis, persisterAggregator);
+                return configSubsystemFacadeFactory;
             }
 
             @Override

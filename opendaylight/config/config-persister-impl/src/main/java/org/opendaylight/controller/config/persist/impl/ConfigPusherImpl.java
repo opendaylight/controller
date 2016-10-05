@@ -24,7 +24,6 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import javax.management.MBeanServerConnection;
 import org.opendaylight.controller.config.api.ConflictingVersionException;
@@ -34,15 +33,12 @@ import org.opendaylight.controller.config.facade.xml.ConfigExecution;
 import org.opendaylight.controller.config.facade.xml.ConfigSubsystemFacade;
 import org.opendaylight.controller.config.facade.xml.ConfigSubsystemFacadeFactory;
 import org.opendaylight.controller.config.facade.xml.mapping.config.Config;
-import org.opendaylight.controller.config.facade.xml.osgi.YangStoreService;
-import org.opendaylight.controller.config.facade.xml.util.Util;
 import org.opendaylight.controller.config.persist.api.ConfigPusher;
 import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
 import org.opendaylight.controller.config.persist.api.Persister;
 import org.opendaylight.controller.config.util.capability.Capability;
 import org.opendaylight.controller.config.util.xml.DocumentedException;
 import org.opendaylight.controller.config.util.xml.XmlUtil;
-import org.opendaylight.yangtools.yang.model.api.Module;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
@@ -261,22 +257,6 @@ public class ConfigPusherImpl implements ConfigPusher {
         public String getConfigIdForReporting() {
             return configIdForReporting;
         }
-    }
-
-    private static Set<String> computeNotFoundCapabilities(Set<String> expectedCapabilities, YangStoreService yangStoreService) {
-
-        Collection<String> actual = Collections2.transform(yangStoreService.getModules(), new Function<Module, String>() {
-            @Nullable
-            @Override
-            public String apply(Module input) {
-                final String withoutRevision = input.getNamespace().toString() + "?module=" + input.getName();
-                return !input.getRevision().equals(NO_REVISION) ? withoutRevision + "&revision=" + Util.writeDate(input.getRevision()) : withoutRevision;
-            }
-        });
-
-        Set<String> allNotFound = new HashSet<>(expectedCapabilities);
-        allNotFound.removeAll(actual);
-        return allNotFound;
     }
 
     private void sleep() {
