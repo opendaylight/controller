@@ -59,7 +59,7 @@ public class ConfigPushingRunnable implements Runnable {
         }
     }
 
-    protected void processFeatureEvent(FeatureEvent event, List<Feature> toInstall) throws InterruptedException, Exception {
+    protected void processFeatureEvent(FeatureEvent event, List<Feature> toInstall) throws Exception {
         if(event.getType() == EventType.FeatureInstalled) {
             toInstall.add(event.getFeature());
             LinkedHashMultimap<Feature,FeatureConfigSnapshotHolder> result = configPusher.pushConfigs(toInstall);
