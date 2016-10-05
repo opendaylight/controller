@@ -41,7 +41,7 @@ public class ConfigRegistryJMXClient implements ConfigRegistryClient {
         this.configMBeanServer = configMBeanServer;
         this.configRegistryON = configRegistryON;
         Set<ObjectInstance> searchResult = configMBeanServer.queryMBeans(configRegistryON, null);
-        if (!(searchResult.size() == 1)) {
+        if (searchResult.size() != 1) {
             throw new IllegalStateException("Config registry not found");
         }
         configRegistryMXBeanProxy = JMX.newMXBeanProxy(configMBeanServer, configRegistryON, ConfigRegistryMXBean.class,
@@ -87,7 +87,7 @@ public class ConfigRegistryJMXClient implements ConfigRegistryClient {
 
     static  ObjectName translateServiceRefIfPossible(ObjectName on, Class<?> clazz, MBeanServer configMBeanServer) {
         ObjectName onObj = on;
-        if (ObjectNameUtil.isServiceReference(onObj) && clazz.equals(ServiceReferenceMXBean.class) == false) {
+        if (ObjectNameUtil.isServiceReference(onObj) && !clazz.equals(ServiceReferenceMXBean.class)) {
             ServiceReferenceMXBean proxy = JMX.newMXBeanProxy(configMBeanServer, onObj, ServiceReferenceMXBean.class);
             onObj = proxy.getCurrentImplementation();
         }

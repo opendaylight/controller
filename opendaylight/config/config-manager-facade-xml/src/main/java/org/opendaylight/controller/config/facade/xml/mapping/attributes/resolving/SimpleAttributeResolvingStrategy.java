@@ -83,9 +83,9 @@ final class SimpleAttributeResolvingStrategy extends AbstractAttributeResolvingS
                 return parseObject(type, value);
             } catch (Exception e) {
                 throw new DocumentedException("Unable to resolve attribute " + attrName + " from " + value,
-                        DocumentedException.ErrorType.application,
-                        DocumentedException.ErrorTag.operation_failed,
-                        DocumentedException.ErrorSeverity.error);
+                        DocumentedException.ErrorType.APPLICATION,
+                        DocumentedException.ErrorTag.OPERATION_FAILED,
+                        DocumentedException.ErrorSeverity.ERROR);
             }
         }
 
@@ -97,9 +97,9 @@ final class SimpleAttributeResolvingStrategy extends AbstractAttributeResolvingS
             } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
                 LOG.trace("Error parsing object ",e);
                 throw new DocumentedException("Error parsing object.",
-                        DocumentedException.ErrorType.application,
-                        DocumentedException.ErrorTag.operation_failed,
-                        DocumentedException.ErrorSeverity.error);
+                        DocumentedException.ErrorType.APPLICATION,
+                        DocumentedException.ErrorTag.OPERATION_FAILED,
+                        DocumentedException.ErrorSeverity.ERROR);
             }
         }
     }
@@ -144,9 +144,9 @@ final class SimpleAttributeResolvingStrategy extends AbstractAttributeResolvingS
             } catch (ParseException e) {
                 LOG.trace("Unable parse value {} due to ",value, e);
                 throw new DocumentedException("Unable to parse value "+value+" as date.",
-                        DocumentedException.ErrorType.application,
-                        DocumentedException.ErrorTag.operation_failed,
-                        DocumentedException.ErrorSeverity.error);
+                        DocumentedException.ErrorType.APPLICATION,
+                        DocumentedException.ErrorTag.OPERATION_FAILED,
+                        DocumentedException.ErrorSeverity.ERROR);
             }
         }
     }

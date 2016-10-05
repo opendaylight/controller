@@ -31,9 +31,9 @@ public class MissingInstanceHandlingStrategy extends AbstractEditConfigStrategy 
             LOG.trace("New instance for {} {} created under name {}", module, instance, on);
         } catch (InstanceAlreadyExistsException e1) {
             throw new ConfigHandlingException(String.format("Unable to create instance for %s : %s.", module, instance),
-                    DocumentedException.ErrorType.application,
-                    DocumentedException.ErrorTag.operation_failed,
-                    DocumentedException.ErrorSeverity.error);
+                    DocumentedException.ErrorType.APPLICATION,
+                    DocumentedException.ErrorTag.OPERATION_FAILED,
+                    DocumentedException.ErrorSeverity.ERROR);
         }
     }
 

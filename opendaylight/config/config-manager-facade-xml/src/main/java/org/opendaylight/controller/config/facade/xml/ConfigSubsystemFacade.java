@@ -210,9 +210,9 @@ public class ConfigSubsystemFacade implements Closeable {
                         }
                     } catch (InstanceNotFoundException e) {
                         throw new DocumentedException(String.format("Unable to edit ref name " + refNameToServiceEntry.getKey() + " for instance " + on, e),
-                                ErrorType.application,
-                                ErrorTag.operation_failed,
-                                ErrorSeverity.error);
+                                ErrorType.APPLICATION,
+                                ErrorTag.OPERATION_FAILED,
+                                ErrorSeverity.ERROR);
                     }
                 }
             }

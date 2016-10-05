@@ -9,9 +9,6 @@ package org.opendaylight.controller.config.util.xml;
 
 public final class XmlMappingConstants {
 
-
-    private XmlMappingConstants() {}
-
     public static final String RPC_REPLY_KEY = "rpc-reply";
     public static final String TYPE_KEY = "type";
     public static final String MODULE_KEY = "module";
@@ -27,4 +24,7 @@ public final class XmlMappingConstants {
 
     public static final String URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0 = "urn:ietf:params:xml:ns:netconf:base:1.0";
     public static final String URN_OPENDAYLIGHT_PARAMS_XML_NS_YANG_CONTROLLER_CONFIG = "urn:opendaylight:params:xml:ns:yang:controller:config";
+
+    private XmlMappingConstants() {
+    }
 }

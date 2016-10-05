@@ -28,9 +28,9 @@ public class ReCreateEditConfigStrategy extends AbstractEditConfigStrategy {
             String module, String instance, ServiceRegistryWrapper services) throws ConfigHandlingException {
         throw new ConfigHandlingException(
                 String.format("Unable to recreate %s : %s, Existing module instance not found", module, instance),
-                DocumentedException.ErrorType.application,
-                DocumentedException.ErrorTag.operation_failed,
-                DocumentedException.ErrorSeverity.error);
+                DocumentedException.ErrorType.APPLICATION,
+                DocumentedException.ErrorTag.OPERATION_FAILED,
+                DocumentedException.ErrorSeverity.ERROR);
     }
 
     @Override
@@ -40,9 +40,9 @@ public class ReCreateEditConfigStrategy extends AbstractEditConfigStrategy {
             ta.reCreateModule(objectName);
         } catch(InstanceNotFoundException e) {
             throw new ConfigHandlingException(String.format("Unable to recreate instance for %s", objectName),
-                    DocumentedException.ErrorType.application,
-                    DocumentedException.ErrorTag.operation_failed,
-                    DocumentedException.ErrorSeverity.error);
+                    DocumentedException.ErrorType.APPLICATION,
+                    DocumentedException.ErrorTag.OPERATION_FAILED,
+                    DocumentedException.ErrorSeverity.ERROR);
         }
     }
 }
