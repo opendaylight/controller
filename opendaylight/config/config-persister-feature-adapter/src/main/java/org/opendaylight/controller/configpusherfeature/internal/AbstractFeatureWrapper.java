@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import javax.xml.bind.JAXBException;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.stream.XMLStreamException;
@@ -57,8 +58,8 @@ public class AbstractFeatureWrapper implements Feature {
      * Get FeatureConfigSnapshotHolders appropriate to feed to the config subsystem
      * from the underlying Feature Config files
      */
-    public LinkedHashSet<FeatureConfigSnapshotHolder> getFeatureConfigSnapshotHolders() throws Exception {
-        final LinkedHashSet <FeatureConfigSnapshotHolder> snapShotHolders = new LinkedHashSet<>();
+    public Set<FeatureConfigSnapshotHolder> getFeatureConfigSnapshotHolders() throws Exception {
+        final Set<FeatureConfigSnapshotHolder> snapShotHolders = new LinkedHashSet<>();
         for(final ConfigFileInfo c: getConfigurationFiles()) {
             // Skip non config snapshot XML files
             if(isConfigSnapshot(c.getFinalname())) {

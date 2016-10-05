@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesService;
 import org.opendaylight.controller.config.persist.api.ConfigPusher;
@@ -36,7 +37,7 @@ public class FeatureConfigPusher {
      * chains.  Also, preserves the *original* Feature chain for which we pushed the config.
      * (which is handy for logging).
      */
-    LinkedHashSet<FeatureConfigSnapshotHolder> pushedConfigs = new LinkedHashSet<>();
+    Set<FeatureConfigSnapshotHolder> pushedConfigs = new LinkedHashSet<>();
     /*
      * LinkedHashMultimap to track which configs we pushed for each Feature installation
      * For future use
@@ -64,7 +65,7 @@ public class FeatureConfigPusher {
         for (Feature feature : features) {
 
 
-            LinkedHashSet<FeatureConfigSnapshotHolder> configSnapShots = pushConfig(feature);
+            Set<FeatureConfigSnapshotHolder> configSnapShots = pushConfig(feature);
             if (!configSnapShots.isEmpty()) {
                 pushedFeatures.putAll(feature, configSnapShots);
             }
@@ -72,8 +73,8 @@ public class FeatureConfigPusher {
         return pushedFeatures;
     }
 
-    private LinkedHashSet<FeatureConfigSnapshotHolder> pushConfig(final Feature feature) throws Exception {
-        LinkedHashSet<FeatureConfigSnapshotHolder> configs = new LinkedHashSet<>();
+    private Set<FeatureConfigSnapshotHolder> pushConfig(final Feature feature) throws Exception {
+        Set<FeatureConfigSnapshotHolder> configs = new LinkedHashSet<>();
         if(isInstalled(feature)) {
             // FIXME Workaround for BUG-2836, features service returns null for feature: standard-condition-webconsole_0_0_0, 3.0.1
             if(featuresService.getFeature(feature.getName(), feature.getVersion()) == null) {
@@ -91,7 +92,7 @@ public class FeatureConfigPusher {
     }
 
     private boolean isInstalled(final Feature feature) {
-        for(int retries=0;retries<MAX_RETRIES;retries++) {
+        for (int retries = 0; retries < MAX_RETRIES; retries++) {
             try {
                 List<Feature> installedFeatures = Arrays.asList(featuresService.listInstalledFeatures());
                 if(installedFeatures.contains(feature)) {
@@ -100,12 +101,7 @@ public class FeatureConfigPusher {
                     LOG.warn("Karaf featuresService.listInstalledFeatures() has not yet finished installing feature (retry {}) {} {}",retries,feature.getName(),feature.getVersion());
                 }
             } catch (Exception e) {
-                if(retries < MAX_RETRIES) {
-                    LOG.warn("Karaf featuresService.listInstalledFeatures() has thrown an exception, retry {}", retries, e);
-                } else {
-                    LOG.error("Giving up on Karaf featuresService.listInstalledFeatures() which has thrown an exception, retry {}", retries, e);
-                    throw e;
-                }
+                LOG.warn("Karaf featuresService.listInstalledFeatures() has thrown an exception, retry {}", retries, e);
             }
             try {
                 Thread.sleep(RETRY_PAUSE_MILLIS);
@@ -117,8 +113,9 @@ public class FeatureConfigPusher {
         return false;
     }
 
-    private LinkedHashSet<FeatureConfigSnapshotHolder> pushConfig(final LinkedHashSet<FeatureConfigSnapshotHolder> configs, final Feature feature) throws InterruptedException {
-        LinkedHashSet<FeatureConfigSnapshotHolder> configsToPush = new LinkedHashSet<>(configs);
+    private Set<FeatureConfigSnapshotHolder> pushConfig(final Set<FeatureConfigSnapshotHolder> configs, final Feature feature)
+            throws InterruptedException {
+        Set<FeatureConfigSnapshotHolder> configsToPush = new LinkedHashSet<>(configs);
         configsToPush.removeAll(pushedConfigs);
         if (!configsToPush.isEmpty()) {
 
@@ -134,7 +131,7 @@ public class FeatureConfigPusher {
 
             pushedConfigs.addAll(configsToPush);
         }
-        LinkedHashSet<FeatureConfigSnapshotHolder> configsPushed = new LinkedHashSet<>(pushedConfigs);
+        Set<FeatureConfigSnapshotHolder> configsPushed = new LinkedHashSet<>(pushedConfigs);
         configsPushed.retainAll(configs);
         return configsPushed;
     }
