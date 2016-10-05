@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "7a6b29fe_40e19fcf",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/DataStoreAppConfigMetadata.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2016-10-05T09:11:04Z",
+      "side": 1,
+      "message": "changed this, so not applicable anymore",
+      "parentUuid": "7a6b29fe_027bcbf5",
+      "revId": "c2d593978f077bf63aa16f9767824a7a8d7edb6f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a6b29fe_a21c97c2",
         "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/DataStoreAppConfigMetadata.java",
         "patchSetId": 1
@@ -72,6 +90,24 @@
     },
     {
       "key": {
+        "uuid": "7a6b29fe_60dc9b19",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/DataStoreAppConfigMetadata.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2016-10-05T09:11:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a6b29fe_fdf2b46d",
+      "revId": "c2d593978f077bf63aa16f9767824a7a8d7edb6f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a6b29fe_c221d3fc",
         "filename": "opendaylight/blueprint/src/main/resources/opendaylight-blueprint-ext-1.0.0.xsd",
         "patchSetId": 1
@@ -119,6 +155,24 @@
       "side": 1,
       "message": "I would think you\u0027d get the default if not specified but it seems not. We\u0027ll have to default it on code if empty. I\u0027d still keep the default in the xsd for doc purposes.",
       "parentUuid": "7a6b29fe_bd8cbc80",
+      "revId": "c2d593978f077bf63aa16f9767824a7a8d7edb6f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_80ebb7af",
+        "filename": "opendaylight/blueprint/src/main/resources/opendaylight-blueprint-ext-1.0.0.xsd",
+        "patchSetId": 1
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2016-10-05T09:11:04Z",
+      "side": 1,
+      "message": "done",
+      "parentUuid": "7a6b29fe_c221d3fc",
       "revId": "c2d593978f077bf63aa16f9767824a7a8d7edb6f",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
