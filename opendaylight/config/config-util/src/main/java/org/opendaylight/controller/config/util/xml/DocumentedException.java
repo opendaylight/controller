@@ -10,7 +10,6 @@ package org.opendaylight.controller.config.util.xml;
 
 import static org.opendaylight.controller.config.util.xml.XmlMappingConstants.RPC_REPLY_KEY;
 import static org.opendaylight.controller.config.util.xml.XmlMappingConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -42,7 +41,7 @@ public class DocumentedException extends Exception {
 
     private static final long serialVersionUID = 1L;
 
-    private final static Logger LOG = LoggerFactory.getLogger( DocumentedException.class );
+    private static final Logger LOG = LoggerFactory.getLogger(DocumentedException.class);
 
     private static final DocumentBuilderFactory BUILDER_FACTORY;
 
@@ -64,7 +63,7 @@ public class DocumentedException extends Exception {
     }
 
     public enum ErrorType {
-        transport, rpc, protocol, application;
+        TRANSPORT, RPC, PROTOCOL, APPLICATION;
 
         public String getTagValue() {
             return name();
@@ -75,31 +74,31 @@ public class DocumentedException extends Exception {
                 return valueOf( text );
             }
             catch( Exception e ) {
-                return application;
+                return APPLICATION;
             }
         }
     }
 
     public enum ErrorTag {
-        access_denied("access-denied"),
-        bad_attribute("bad-attribute"),
-        bad_element("bad-element"),
-        data_exists("data-exists"),
-        data_missing("data-missing"),
-        in_use("in-use"),
-        invalid_value("invalid-value"),
-        lock_denied("lock-denied"),
-        malformed_message("malformed-message"),
-        missing_attribute("missing-attribute"),
-        missing_element("missing-element"),
-        operation_failed("operation-failed"),
-        operation_not_supported("operation-not-supported"),
-        resource_denied("resource-denied"),
-        rollback_failed("rollback-failed"),
-        too_big("too-big"),
-        unknown_attribute("unknown-attribute"),
-        unknown_element("unknown-element"),
-        unknown_namespace("unknown-namespace");
+        ACCESS_DENIED("access-denied"),
+        BAD_ATTRIBUTE("bad-attribute"),
+        BAD_ELEMENT("bad-element"),
+        DATA_EXISTS("data-exists"),
+        DATA_MISSING("data-missing"),
+        IN_USE("in-use"),
+        INVALID_VALUE("invalid-value"),
+        LOCK_DENIED("lock-denied"),
+        MALFORMED_MESSAGE("malformed-message"),
+        MISSING_ATTRIBUTE("missing-attribute"),
+        MISSING_ELEMENT("missing-element"),
+        OPERATION_FAILED("operation-failed"),
+        OPERATION_NOT_SUPPORTED("operation-not-supported"),
+        RESOURCE_DENIED("resource-denied"),
+        ROLLBCK_FAILED("rollback-failed"),
+        TOO_BIG("too-big"),
+        UNKNOWN_ATTRIBUTE("unknown-attribute"),
+        UNKNOWN_ELEMENT("unknown-element"),
+        UNKNOWN_NAMESPACE("unknown-namespace");
 
         private final String tagValue;
 
@@ -119,12 +118,12 @@ public class DocumentedException extends Exception {
                 }
             }
 
-            return operation_failed;
+            return OPERATION_FAILED;
         }
     }
 
     public enum ErrorSeverity {
-        error, warning;
+        ERROR, WARNING;
 
         public String getTagValue() {
             return name();
@@ -135,7 +134,7 @@ public class DocumentedException extends Exception {
                 return valueOf( text );
             }
             catch( Exception e ) {
-                return error;
+                return ERROR;
             }
         }
     }
@@ -147,9 +146,9 @@ public class DocumentedException extends Exception {
 
     public DocumentedException(String message) {
         this(message,
-                DocumentedException.ErrorType.application,
-                DocumentedException.ErrorTag.invalid_value,
-                DocumentedException.ErrorSeverity.error
+                DocumentedException.ErrorType.APPLICATION,
+                DocumentedException.ErrorTag.INVALID_VALUE,
+                DocumentedException.ErrorSeverity.ERROR
         );
     }
 
@@ -183,29 +182,29 @@ public class DocumentedException extends Exception {
 
     public static <E extends Exception> DocumentedException wrap(E exception) throws DocumentedException {
         final Map<String, String> errorInfo = new HashMap<>();
-        errorInfo.put(ErrorTag.operation_failed.name(), "Exception thrown");
-        throw new DocumentedException(exception.getMessage(), exception, ErrorType.application, ErrorTag.operation_failed,
-                ErrorSeverity.error, errorInfo);
+        errorInfo.put(ErrorTag.OPERATION_FAILED.name(), "Exception thrown");
+        throw new DocumentedException(exception.getMessage(), exception, ErrorType.APPLICATION, ErrorTag.OPERATION_FAILED,
+                ErrorSeverity.ERROR, errorInfo);
     }
     public static DocumentedException wrap(ValidationException e) throws DocumentedException {
         final Map<String, String> errorInfo = new HashMap<>();
-        errorInfo.put(ErrorTag.operation_failed.name(), "Validation failed");
-        throw new DocumentedException(e.getMessage(), e, ErrorType.application, ErrorTag.operation_failed,
-                ErrorSeverity.error, errorInfo);
+        errorInfo.put(ErrorTag.OPERATION_FAILED.name(), "Validation failed");
+        throw new DocumentedException(e.getMessage(), e, ErrorType.APPLICATION, ErrorTag.OPERATION_FAILED,
+                ErrorSeverity.ERROR, errorInfo);
     }
 
     public static DocumentedException wrap(ConflictingVersionException e) throws DocumentedException {
         final Map<String, String> errorInfo = new HashMap<>();
-        errorInfo.put(ErrorTag.operation_failed.name(), "Optimistic lock failed");
-        throw new DocumentedException(e.getMessage(), e, ErrorType.application, ErrorTag.operation_failed,
-                ErrorSeverity.error, errorInfo);
+        errorInfo.put(ErrorTag.OPERATION_FAILED.name(), "Optimistic lock failed");
+        throw new DocumentedException(e.getMessage(), e, ErrorType.APPLICATION, ErrorTag.OPERATION_FAILED,
+                ErrorSeverity.ERROR, errorInfo);
     }
 
     public static DocumentedException fromXMLDocument( Document fromDoc ) {
 
-        ErrorType errorType = ErrorType.application;
-        ErrorTag errorTag = ErrorTag.operation_failed;
-        ErrorSeverity errorSeverity = ErrorSeverity.error;
+        ErrorType errorType = ErrorType.APPLICATION;
+        ErrorTag errorTag = ErrorTag.OPERATION_FAILED;
+        ErrorSeverity errorSeverity = ErrorSeverity.ERROR;
         Map<String, String> errorInfo = null;
         String errorMessage = "";
 
@@ -310,7 +309,8 @@ public class DocumentedException extends Exception {
             }
         }
         catch( ParserConfigurationException e ) {
-            LOG.error( "Error outputting to XML document", e ); // this shouldn't happen
+            // this shouldn't happen
+            LOG.error("Error outputting to XML document", e);
         }
 
         return doc;
