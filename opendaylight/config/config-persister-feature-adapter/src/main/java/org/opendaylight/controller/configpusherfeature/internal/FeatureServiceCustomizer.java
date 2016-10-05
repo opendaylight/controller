@@ -23,13 +23,11 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 public class FeatureServiceCustomizer implements ServiceTrackerCustomizer<FeaturesService, FeaturesService>, AutoCloseable {
     private ConfigPusher configPusher = null;
-    private ConfigFeaturesListener configFeaturesListener = null;
     private ServiceRegistration<?> registration;
 
     FeatureServiceCustomizer(ConfigPusher c) {
         configPusher = c;
     }
-
 
     @Override
     public FeaturesService addingService(ServiceReference<FeaturesService> reference) {
@@ -50,7 +48,7 @@ public class FeatureServiceCustomizer implements ServiceTrackerCustomizer<Featur
                 }
             });
         }
-        configFeaturesListener = new ConfigFeaturesListener(configPusher,featureService);
+        ConfigFeaturesListener configFeaturesListener = new ConfigFeaturesListener(configPusher, featureService);
         registration = bc.registerService(FeaturesListener.class.getCanonicalName(), configFeaturesListener, null);
         return featureService;
     }
@@ -59,7 +57,6 @@ public class FeatureServiceCustomizer implements ServiceTrackerCustomizer<Featur
     public void modifiedService(ServiceReference<FeaturesService> reference,
             FeaturesService service) {
         // we don't care if the properties change
-
     }
 
     @Override
@@ -75,5 +72,4 @@ public class FeatureServiceCustomizer implements ServiceTrackerCustomizer<Featur
             registration = null;
         }
     }
-
 }
