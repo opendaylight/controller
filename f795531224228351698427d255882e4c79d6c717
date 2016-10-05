@@ -16,6 +16,24 @@
       "revId": "f795531224228351698427d255882e4c79d6c717",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_f6bfd5a8",
+        "filename": "opendaylight/md-sal/sal-binding-broker/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-10-05T15:29:05Z",
+      "side": 1,
+      "message": "truth was on odlparent before stable/boron was pulled so we are good here.",
+      "parentUuid": "7a6b29fe_d693b95a",
+      "revId": "f795531224228351698427d255882e4c79d6c717",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
