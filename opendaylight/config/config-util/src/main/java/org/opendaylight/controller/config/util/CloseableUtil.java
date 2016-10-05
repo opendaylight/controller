@@ -10,6 +10,9 @@ package org.opendaylight.controller.config.util;
 
 public class CloseableUtil {
 
+    private CloseableUtil() {
+    }
+
     public static void closeAll(Iterable<? extends AutoCloseable> autoCloseables) throws Exception {
         Exception lastException = null;
         for (AutoCloseable autoCloseable : autoCloseables) {
@@ -26,6 +29,5 @@ public class CloseableUtil {
         if (lastException != null) {
             throw lastException;
         }
-
     }
 }

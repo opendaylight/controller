@@ -32,9 +32,9 @@ public class ReplaceEditConfigStrategy extends AbstractEditConfigStrategy {
                 String.format("Unable to handle missing instance, no missing instances should appear at this point, missing: %s : %s ",
                         module,
                         instance),
-                DocumentedException.ErrorType.application,
-                DocumentedException.ErrorTag.operation_failed,
-                DocumentedException.ErrorSeverity.error);
+                DocumentedException.ErrorType.APPLICATION,
+                DocumentedException.ErrorTag.OPERATION_FAILED,
+                DocumentedException.ErrorSeverity.ERROR);
     }
 
     @Override

@@ -48,9 +48,9 @@ public enum EditStrategyType {
                 throw new OperationNotPermittedException(String.format("With "
                         + defaultStrategy
                         + " as default-operation operations on module elements are not permitted since the default option is restrictive"),
-                        DocumentedException.ErrorType.application,
-                        DocumentedException.ErrorTag.operation_failed,
-                        DocumentedException.ErrorSeverity.error);
+                        DocumentedException.ErrorType.APPLICATION,
+                        DocumentedException.ErrorTag.OPERATION_FAILED,
+                        DocumentedException.ErrorSeverity.ERROR);
             }
         }
 
