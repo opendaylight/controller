@@ -23,22 +23,22 @@ public class ConfigSnapshot {
 
     public static final String SNAPSHOT_ROOT_ELEMENT_NAME = "snapshot";
 
-    private String configSnapshot;
+    private String configXml;
     private SortedSet<String> capabilities = new TreeSet<>();
     private Set<String> features = new HashSet<>();
 
     ConfigSnapshot(String configXml, SortedSet<String> capabilities) {
-        this.configSnapshot = configXml;
+        this.configXml = configXml;
         this.capabilities = capabilities;
     }
 
     ConfigSnapshot(String configXml, SortedSet<String> capabilities, Set<String> features) {
-        this.configSnapshot = configXml;
+        this.configXml = configXml;
         this.capabilities = capabilities;
         this.features = features;
     }
 
-    public ConfigSnapshot() {
+    ConfigSnapshot() {
     }
 
     public static ConfigSnapshot fromConfigSnapshot(ConfigSnapshotHolder cfg) {
@@ -51,11 +51,11 @@ public class ConfigSnapshot {
 
     @XmlAnyElement(SnapshotHandler.class)
     public String getConfigSnapshot() {
-        return configSnapshot;
+        return configXml;
     }
 
     public void setConfigSnapshot(String configSnapshot) {
-        this.configSnapshot = configSnapshot;
+        this.configXml = configSnapshot;
     }
 
     @XmlElement(name = "capability")
@@ -83,12 +83,11 @@ public class ConfigSnapshot {
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("ConfigSnapshot{");
-        sb.append("configSnapshot='").append(configSnapshot).append('\'');
+        sb.append("configSnapshot='").append(configXml).append('\'');
         sb.append(", capabilities=").append(capabilities);
         sb.append(", features=").append(features);
         sb.append('}');
         return sb.toString();
     }
-
 }
 
