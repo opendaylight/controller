@@ -12,6 +12,11 @@ import static com.google.common.truth.Truth.assertThat;
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.binding.test.DataBrokerTestModule;
 
+/**
+ * Integration tests the DataBrokerTestModule.
+ *
+ * @author Michael Vorburger
+ */
 public class DataBrokerTestModuleTest {
 
     @Test
