@@ -56,30 +56,30 @@ public class XmlFileStorageAdapter implements StorageAdapter, Persister {
             return instance;
         }
 
-        File storage = extractStorageFileFromProperties(propertiesProvider);
-        LOG.debug("Using file {}", storage.getAbsolutePath());
+        File localStorage = extractStorageFileFromProperties(propertiesProvider);
+        LOG.debug("Using file {}", localStorage.getAbsolutePath());
         // Create file if it does not exist
-        File parentFile = storage.getAbsoluteFile().getParentFile();
-        if (parentFile.exists() == false) {
+        File parentFile = localStorage.getAbsoluteFile().getParentFile();
+        if (!parentFile.exists()) {
             LOG.debug("Creating parent folders {}", parentFile);
             parentFile.mkdirs();
         }
-        if (storage.exists() == false) {
+        if (!localStorage.exists()) {
             LOG.debug("Storage file does not exist, creating empty file");
             try {
-                boolean result = storage.createNewFile();
-                if (result == false) {
-                    throw new RuntimeException("Unable to create storage file " + storage);
+                boolean result = localStorage.createNewFile();
+                if (!result) {
+                    throw new RuntimeException("Unable to create storage file " + localStorage);
                 }
             } catch (IOException e) {
-                throw new RuntimeException("Unable to create storage file " + storage, e);
+                throw new RuntimeException("Unable to create storage file " + localStorage, e);
             }
         }
         if (numberOfStoredBackups == 0) {
             throw new RuntimeException(NUMBER_OF_BACKUPS
                     + " property should be either set to positive value, or ommited. Can not be set to 0.");
         }
-        setFileStorage(storage);
+        setFileStorage(localStorage);
 
         instance = this;
         return this;
