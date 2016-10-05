@@ -87,12 +87,21 @@ public final class PersisterAggregator implements Persister {
         }
     }
 
+    /**
+     * Persisters ordered by 'netconf.config.persister' property.
+     */
+    private final List<PersisterWithConfiguration> persisterWithConfigurations;
+
+    public PersisterAggregator(List<PersisterWithConfiguration> persisterWithConfigurations) {
+        this.persisterWithConfigurations = persisterWithConfigurations;
+    }
+
     private static PersisterWithConfiguration loadConfiguration(final String index, final PropertiesProvider propertiesProvider) {
 
         String classKey = index + "." + ConfigPersisterActivator.STORAGE_ADAPTER_CLASS_PROP_SUFFIX;
         String storageAdapterClass = propertiesProvider.getProperty(classKey);
         StorageAdapter storageAdapter;
-        if (storageAdapterClass == null || storageAdapterClass.equals("")) {
+        if (storageAdapterClass == null || storageAdapterClass.isEmpty()) {
             throw new IllegalStateException("No persister is defined in " +
                     propertiesProvider.getFullKeyForReporting(classKey)
                     + " property. Persister is not operational");
@@ -106,11 +115,8 @@ public final class PersisterAggregator implements Persister {
             }
             storageAdapter = StorageAdapter.class.cast(clazz.newInstance());
 
-            boolean readOnly = false;
             String readOnlyProperty = propertiesProvider.getProperty(index + "." + "readonly");
-            if (readOnlyProperty != null && readOnlyProperty.equals("true")) {
-                readOnly = true;
-            }
+            boolean readOnly = Boolean.parseBoolean(readOnlyProperty);
 
             PropertiesProviderAdapterImpl innerProvider = new PropertiesProviderAdapterImpl(propertiesProvider, index);
             Persister storage = storageAdapter.instantiate(innerProvider);
@@ -118,16 +124,6 @@ public final class PersisterAggregator implements Persister {
         } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
             throw new IllegalArgumentException("Unable to instantiate storage adapter from " + storageAdapterClass, e);
         }
-    }
-
-    /**
-     * Persisters ordered by 'netconf.config.persister' property.
-     */
-    private final List<PersisterWithConfiguration> persisterWithConfigurations;
-
-    public PersisterAggregator(List<PersisterWithConfiguration> persisterWithConfigurations) {
-        this.persisterWithConfigurations = persisterWithConfigurations;
-
     }
 
     public static PersisterAggregator createFromProperties(PropertiesProvider propertiesProvider) {
