@@ -71,7 +71,7 @@ public class FeatureConfigSnapshotHolder implements ConfigSnapshotHolder {
         xif.setProperty(XMLInputFactory.SUPPORT_DTD, false);
 
         XMLStreamReader xsr = xif.createXMLStreamReader(new StreamSource(new File(fileInfo.getFinalname())));
-        unmarshalled = ((ConfigSnapshot) um.unmarshal(xsr));
+        unmarshalled = (ConfigSnapshot) um.unmarshal(xsr);
     }
     /*
      * (non-Javadoc)
