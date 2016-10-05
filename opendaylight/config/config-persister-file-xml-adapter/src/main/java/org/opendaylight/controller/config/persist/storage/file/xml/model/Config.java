@@ -80,7 +80,7 @@ public final class Config {
             xif.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false);
             xif.setProperty(XMLInputFactory.SUPPORT_DTD, false);
             XMLStreamReader xsr = xif.createXMLStreamReader(new StreamSource(from));
-            return ((Config) um.unmarshal(xsr));
+            return (Config) um.unmarshal(xsr);
         } catch (JAXBException | XMLStreamException e) {
             throw new PersistException("Unable to restore configuration", e);
         }
@@ -104,7 +104,7 @@ public final class Config {
     }
 
     public void addConfigSnapshot(ConfigSnapshot snap, int numberOfStoredBackups) {
-        if(shouldReplaceLast(numberOfStoredBackups) && snapshots.isEmpty() == false) {
+        if (shouldReplaceLast(numberOfStoredBackups) && !snapshots.isEmpty()) {
             snapshots.remove(0);
         }
         snapshots.add(snap);
