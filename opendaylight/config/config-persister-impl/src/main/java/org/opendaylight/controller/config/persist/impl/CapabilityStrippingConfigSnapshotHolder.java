@@ -40,7 +40,8 @@ public class CapabilityStrippingConfigSnapshotHolder implements ConfigSnapshotHo
     }
 
     private static class StripCapabilitiesResult {
-        private final SortedSet<String> requiredCapabilities, obsoleteCapabilities;
+        private final SortedSet<String> requiredCapabilities;
+        private final SortedSet<String> obsoleteCapabilities;
 
         private StripCapabilitiesResult(SortedSet<String> requiredCapabilities, SortedSet<String> obsoleteCapabilities) {
             this.requiredCapabilities = Collections.unmodifiableSortedSet(requiredCapabilities);
