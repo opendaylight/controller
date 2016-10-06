@@ -34,6 +34,24 @@
       "revId": "09adb5f1bffdc0859514514d0f21df0f5df90aff",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_2a8f19ce",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 559,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-10-06T22:01:58Z",
+      "side": 0,
+      "message": "That said I can put it back add SuppressWarning if you feel more comfortable.",
+      "parentUuid": "7a6b29fe_6af2b170",
+      "revId": "09adb5f1bffdc0859514514d0f21df0f5df90aff",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
