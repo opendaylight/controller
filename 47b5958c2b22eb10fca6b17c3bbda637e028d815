@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a6b29fe_62d2db35",
+        "filename": "opendaylight/config/config-manager/src/main/java/org/opendaylight/controller/config/manager/impl/ConfigRegistryImpl.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 298,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-10-06T10:30:30Z",
+      "side": 1,
+      "message": "rather than duplicating, \u0027throw Throwables.propagate(t);\u0027 would get rid of that if().",
+      "range": {
+        "startLine": 294,
+        "startChar": 0,
+        "endLine": 298,
+        "endChar": 9
+      },
+      "revId": "47b5958c2b22eb10fca6b17c3bbda637e028d815",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
