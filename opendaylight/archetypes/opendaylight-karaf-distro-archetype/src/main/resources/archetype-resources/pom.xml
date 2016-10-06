@@ -13,10 +13,6 @@
   <packaging>pom</packaging>
   <name>${project.artifactId}</name>
 
-  <prerequisites>
-    <maven>3.1.1</maven>
-  </prerequisites>
-
   <properties>
     <!-- If you want a feature included with the featuresBoot in
          etc/org.apache.karaf.features.cfg, uncomment karaf.localFeature and set
