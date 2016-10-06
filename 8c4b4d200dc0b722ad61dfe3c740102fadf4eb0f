@@ -117,6 +117,47 @@
     },
     {
       "key": {
+        "uuid": "7a6b29fe_07e33934",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/OpendaylightNamespaceHandler.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 366,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-10-06T03:38:30Z",
+      "side": 1,
+      "message": "I don\u0027t think we need to get fancy here as we should never get into this case with the xsd validation.",
+      "parentUuid": "7a6b29fe_274ab555",
+      "range": {
+        "startLine": 366,
+        "startChar": 56,
+        "endLine": 366,
+        "endChar": 68
+      },
+      "revId": "8c4b4d200dc0b722ad61dfe3c740102fadf4eb0f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_a7c9a5ae",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/UpdateStrategy.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-10-06T03:38:30Z",
+      "side": 1,
+      "message": "should be @author. Also should add a javadoc comment as well (we\u0027ll likely enforce checkstyle at some point), e.g. \"Enumerates the possibly strategies when a component is updated.\"",
+      "revId": "8c4b4d200dc0b722ad61dfe3c740102fadf4eb0f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a6b29fe_a76d25cf",
         "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/UpdateStrategy.java",
         "patchSetId": 3
@@ -128,6 +169,30 @@
       "writtenOn": "2016-10-06T02:40:46Z",
       "side": 1,
       "message": "Wondering if this could be defined within OpendaylightNamespaceHandler. Thoughts?",
+      "range": {
+        "startLine": 13,
+        "startChar": 12,
+        "endLine": 13,
+        "endChar": 26
+      },
+      "revId": "8c4b4d200dc0b722ad61dfe3c740102fadf4eb0f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_67cf8db4",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/UpdateStrategy.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-10-06T03:38:30Z",
+      "side": 1,
+      "message": "Since it\u0027s referenced outside of OpendaylightNamespaceHandler as well, I\u0027d prefer to keep it in its own file.",
+      "parentUuid": "7a6b29fe_a76d25cf",
       "range": {
         "startLine": 13,
         "startChar": 12,
