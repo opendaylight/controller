@@ -27,7 +27,8 @@ public class DOMBrokerReadOnlyTransaction
      *
      * @param identifier Identifier of transaction.
      */
-    protected DOMBrokerReadOnlyTransaction(Object identifier, Map<LogicalDatastoreType, ? extends DOMStoreTransactionFactory> storeTxFactories) {
+    protected DOMBrokerReadOnlyTransaction(Object identifier,
+            Map<LogicalDatastoreType, ? extends DOMStoreTransactionFactory> storeTxFactories) {
         super(identifier, storeTxFactories);
     }
 

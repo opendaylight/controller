@@ -28,15 +28,16 @@ public class ReadData extends AbstractRead<Optional<NormalizedNode<?, ?>>> {
     }
 
     @Override
-    public CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> apply(DOMStoreReadTransaction readDelegate) {
+    public CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> apply(
+            DOMStoreReadTransaction readDelegate) {
         return readDelegate.read(getPath());
     }
 
     @Override
     public void processResponse(Object readResponse, SettableFuture<Optional<NormalizedNode<?, ?>>> returnFuture) {
-        if(ReadDataReply.isSerializedType(readResponse)) {
+        if (ReadDataReply.isSerializedType(readResponse)) {
             ReadDataReply reply = ReadDataReply.fromSerializable(readResponse);
-            returnFuture.set(Optional.<NormalizedNode<?, ?>> fromNullable(reply.getNormalizedNode()));
+            returnFuture.set(Optional.<NormalizedNode<?, ?>>fromNullable(reply.getNormalizedNode()));
         } else {
             returnFuture.setException(new ReadFailedException("Invalid response reading data for path " + getPath()));
         }

@@ -23,7 +23,8 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 class ShardDataTreeChangeListenerPublisherActorProxy extends AbstractShardDataTreeNotificationPublisherActorProxy
         implements ShardDataTreeChangeListenerPublisher {
 
-    private final ShardDataTreeChangeListenerPublisher delegatePublisher = new DefaultShardDataTreeChangeListenerPublisher();
+    private final ShardDataTreeChangeListenerPublisher delegatePublisher =
+            new DefaultShardDataTreeChangeListenerPublisher();
 
     ShardDataTreeChangeListenerPublisherActorProxy(ActorContext actorContext, String actorName) {
         super(actorContext, actorName);

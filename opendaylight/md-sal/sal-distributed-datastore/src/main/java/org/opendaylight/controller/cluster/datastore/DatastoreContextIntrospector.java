@@ -22,7 +22,6 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.List;
@@ -43,13 +42,13 @@ import org.slf4j.LoggerFactory;
 public class DatastoreContextIntrospector {
     private static final Logger LOG = LoggerFactory.getLogger(DatastoreContextIntrospector.class);
 
-    private static final Map<String, Class<?>> dataStorePropTypes = new HashMap<>();
+    private static final Map<String, Class<?>> DATA_STORE_PROP_TYPES = new HashMap<>();
 
-    private static final Map<Class<?>, Constructor<?>> constructors = new HashMap<>();
+    private static final Map<Class<?>, Constructor<?>> CONSTRUCTORS = new HashMap<>();
 
-    private static final Map<Class<?>, Method> yangTypeGetters = new HashMap<>();
+    private static final Map<Class<?>, Method> YANG_TYPE_GETTERS = new HashMap<>();
 
-    private static final Map<String, Method> builderSetters = new HashMap<>();
+    private static final Map<String, Method> BUILDER_SETTERS = new HashMap<>();
 
     static {
         try {
@@ -66,11 +65,12 @@ public class DatastoreContextIntrospector {
      * constructor that takes a single String argument. For primitive wrappers, this constructor
      * converts from a String representation.
      */
+    @SuppressWarnings("checkstyle:IllegalCatch")
     private static void introspectPrimitiveTypes() {
 
         Set<Class<?>> primitives = ImmutableSet.<Class<?>>builder().addAll(
                 Primitives.allWrapperTypes()).add(String.class).build();
-        for(Class<?> primitive: primitives) {
+        for (Class<?> primitive: primitives) {
             try {
                 processPropertyType(primitive);
             } catch (Exception e) {
@@ -86,9 +86,9 @@ public class DatastoreContextIntrospector {
      * the methods that return Builder.
      */
     private static void introspectDatastoreContextBuilder() {
-        for(Method method: Builder.class.getMethods()) {
-            if(Builder.class.equals(method.getReturnType())) {
-                builderSetters.put(method.getName(), method);
+        for (Method method: Builder.class.getMethods()) {
+            if (Builder.class.equals(method.getReturnType())) {
+                BUILDER_SETTERS.put(method.getName(), method);
             }
         }
     }
@@ -101,7 +101,7 @@ public class DatastoreContextIntrospector {
      */
     private static void introspectDataStoreProperties() throws IntrospectionException {
         BeanInfo beanInfo = Introspector.getBeanInfo(DataStoreProperties.class);
-        for(PropertyDescriptor desc: beanInfo.getPropertyDescriptors()) {
+        for (PropertyDescriptor desc: beanInfo.getPropertyDescriptors()) {
             processDataStoreProperty(desc.getName(), desc.getPropertyType());
         }
 
@@ -109,9 +109,9 @@ public class DatastoreContextIntrospector {
         // properties and thus aren't returned from getPropertyDescriptors. A getter starting with
         // "is" is only supported if it returns primitive boolean. So we'll check for these via
         // getMethodDescriptors.
-        for(MethodDescriptor desc: beanInfo.getMethodDescriptors()) {
+        for (MethodDescriptor desc: beanInfo.getMethodDescriptors()) {
             String methodName = desc.getName();
-            if(Boolean.class.equals(desc.getMethod().getReturnType()) && methodName.startsWith("is")) {
+            if (Boolean.class.equals(desc.getMethod().getReturnType()) && methodName.startsWith("is")) {
                 String propertyName = WordUtils.uncapitalize(methodName.substring(2));
                 processDataStoreProperty(propertyName, Boolean.class);
             }
@@ -121,12 +121,14 @@ public class DatastoreContextIntrospector {
     /**
      * Processes a property defined on the DataStoreProperties interface.
      */
+    @SuppressWarnings("checkstyle:IllegalCatch")
     private static void processDataStoreProperty(String name, Class<?> propertyType) {
-        Preconditions.checkArgument(builderSetters.containsKey(name), String.format(
-                "DataStoreProperties property \"%s\" does not have corresponding setter in DatastoreContext.Builder", name));
+        Preconditions.checkArgument(BUILDER_SETTERS.containsKey(name), String.format(
+                "DataStoreProperties property \"%s\" does not have corresponding setter in DatastoreContext.Builder",
+                name));
         try {
             processPropertyType(propertyType);
-            dataStorePropTypes.put(name, propertyType);
+            DATA_STORE_PROP_TYPES.put(name, propertyType);
         } catch (Exception e) {
             LOG.error("Error finding constructor for type {}", propertyType, e);
         }
@@ -138,27 +140,25 @@ public class DatastoreContextIntrospector {
      */
     private static void processPropertyType(Class<?> propertyType) throws Exception {
         Class<?> wrappedType = Primitives.wrap(propertyType);
-        if(constructors.containsKey(wrappedType)) {
+        if (CONSTRUCTORS.containsKey(wrappedType)) {
             return;
         }
 
         // If the type is a primitive (or String type), we look for the constructor that takes a
         // single String argument, which, for primitives, validates and converts from a String
         // representation which is the form we get on ingress.
-        if(propertyType.isPrimitive() || Primitives.isWrapperType(propertyType) ||
-                propertyType.equals(String.class))
-        {
-            constructors.put(wrappedType, propertyType.getConstructor(String.class));
+        if (propertyType.isPrimitive() || Primitives.isWrapperType(propertyType) || propertyType.equals(String.class)) {
+            CONSTRUCTORS.put(wrappedType, propertyType.getConstructor(String.class));
         } else {
             // This must be a yang-defined type. We need to find the constructor that takes a
             // primitive as the only argument. This will be used to construct instances to perform
             // validation (eg range checking). The yang-generated types have a couple single-argument
             // constructors but the one we want has the bean ConstructorProperties annotation.
-            for(Constructor<?> ctor: propertyType.getConstructors()) {
+            for (Constructor<?> ctor: propertyType.getConstructors()) {
                 ConstructorProperties ctorPropsAnnotation = ctor.getAnnotation(ConstructorProperties.class);
-                if(ctor.getParameterTypes().length == 1 && ctorPropsAnnotation != null) {
+                if (ctor.getParameterTypes().length == 1 && ctorPropsAnnotation != null) {
                     findYangTypeGetter(propertyType, ctorPropsAnnotation.value()[0]);
-                    constructors.put(propertyType, ctor);
+                    CONSTRUCTORS.put(propertyType, ctor);
                     break;
                 }
             }
@@ -170,9 +170,9 @@ public class DatastoreContextIntrospector {
      */
     private static void findYangTypeGetter(Class<?> type, String propertyName)
             throws Exception {
-        for(PropertyDescriptor desc: Introspector.getBeanInfo(type).getPropertyDescriptors()) {
-            if(desc.getName().equals(propertyName)) {
-                yangTypeGetters.put(type, desc.getReadMethod());
+        for (PropertyDescriptor desc: Introspector.getBeanInfo(type).getPropertyDescriptors()) {
+            if (desc.getName().equals(propertyName)) {
+                YANG_TYPE_GETTERS.put(type, desc.getReadMethod());
                 return;
             }
         }
@@ -198,7 +198,7 @@ public class DatastoreContextIntrospector {
     }
 
     public synchronized DatastoreContext getShardDatastoreContext(String forShardName) {
-        if(currentProperties == null) {
+        if (currentProperties == null) {
             return context;
         }
 
@@ -208,13 +208,13 @@ public class DatastoreContextIntrospector {
 
         List<String> keys = getSortedKeysByDatastoreType(currentProperties.keySet(), dataStoreTypePrefix);
 
-        for(String key: keys) {
+        for (String key: keys) {
             Object value = currentProperties.get(key);
-            if(key.startsWith(dataStoreTypePrefix)) {
+            if (key.startsWith(dataStoreTypePrefix)) {
                 key = key.replaceFirst(dataStoreTypePrefix, "");
             }
 
-            if(key.startsWith(shardNamePrefix)) {
+            if (key.startsWith(shardNamePrefix)) {
                 key = key.replaceFirst(shardNamePrefix, "");
                 convertValueAndInvokeSetter(key, value, builder);
             }
@@ -232,7 +232,7 @@ public class DatastoreContextIntrospector {
      */
     public synchronized boolean update(Dictionary<String, Object> properties) {
         currentProperties = null;
-        if(properties == null || properties.isEmpty()) {
+        if (properties == null || properties.isEmpty()) {
             return false;
         }
 
@@ -247,23 +247,23 @@ public class DatastoreContextIntrospector {
         List<String> keys = getSortedKeysByDatastoreType(Collections.list(properties.keys()), dataStoreTypePrefix);
 
         boolean updated = false;
-        for(String key: keys) {
+        for (String key: keys) {
             Object value = properties.get(key);
             mapBuilder.put(key, value);
 
             // If the key is prefixed with the data store type, strip it off.
-            if(key.startsWith(dataStoreTypePrefix)) {
+            if (key.startsWith(dataStoreTypePrefix)) {
                 key = key.replaceFirst(dataStoreTypePrefix, "");
             }
 
-            if(convertValueAndInvokeSetter(key, value, builder)) {
+            if (convertValueAndInvokeSetter(key, value, builder)) {
                 updated = true;
             }
         }
 
         currentProperties = mapBuilder.build();
 
-        if(updated) {
+        if (updated) {
             context = builder.build();
         }
 
@@ -275,23 +275,19 @@ public class DatastoreContextIntrospector {
         // Sort the property keys by putting the names prefixed with the data store type last. This
         // is done so data store specific settings are applied after global settings.
         ArrayList<String> keys = new ArrayList<>(inKeys);
-        Collections.sort(keys, new Comparator<String>() {
-            @Override
-            public int compare(String key1, String key2) {
-                return key1.startsWith(dataStoreTypePrefix) ? 1 :
-                           key2.startsWith(dataStoreTypePrefix) ? -1 : key1.compareTo(key2);
-            }
-        });
+        Collections.sort(keys, (key1, key2) -> key1.startsWith(dataStoreTypePrefix) ? 1 :
+                   key2.startsWith(dataStoreTypePrefix) ? -1 : key1.compareTo(key2));
         return keys;
     }
 
+    @SuppressWarnings("checkstyle:IllegalCatch")
     private boolean convertValueAndInvokeSetter(String inKey, Object inValue, Builder builder) {
         String key = convertToCamelCase(inKey);
 
         try {
             // Convert the value to the right type.
             Object value = convertValue(key, inValue);
-            if(value == null) {
+            if (value == null) {
                 return false;
             }
 
@@ -299,7 +295,7 @@ public class DatastoreContextIntrospector {
                     key, value, value.getClass().getSimpleName());
 
             // Call the setter method on the Builder instance.
-            Method setter = builderSetters.get(key);
+            Method setter = BUILDER_SETTERS.get(key);
             setter.invoke(builder, constructorValueRecursively(
                     Primitives.wrap(setter.getParameterTypes()[0]), value.toString()));
 
@@ -313,7 +309,7 @@ public class DatastoreContextIntrospector {
 
     private static String convertToCamelCase(String inString) {
         String str = inString.trim();
-        if(StringUtils.contains(str, '-') || StringUtils.contains(str, ' ')) {
+        if (StringUtils.contains(str, '-') || StringUtils.contains(str, ' ')) {
             str = inString.replace('-', ' ');
             str = WordUtils.capitalizeFully(str);
             str = StringUtils.deleteWhitespace(str);
@@ -323,8 +319,8 @@ public class DatastoreContextIntrospector {
     }
 
     private Object convertValue(String name, Object from) throws Exception {
-        Class<?> propertyType = dataStorePropTypes.get(name);
-        if(propertyType == null) {
+        Class<?> propertyType = DATA_STORE_PROP_TYPES.get(name);
+        if (propertyType == null) {
             LOG.debug("Property not found for {}", name);
             return null;
         }
@@ -338,8 +334,8 @@ public class DatastoreContextIntrospector {
         Object converted = constructorValueRecursively(propertyType, from.toString());
 
         // If the converted type is a yang-generated type, call the getter to obtain the actual value.
-        Method getter = yangTypeGetters.get(converted.getClass());
-        if(getter != null) {
+        Method getter = YANG_TYPE_GETTERS.get(converted.getClass());
+        if (getter != null) {
             converted = getter.invoke(converted);
         }
 
@@ -350,11 +346,11 @@ public class DatastoreContextIntrospector {
         LOG.trace("convertValueRecursively - toType: {}, fromValue {} ({})",
                 toType.getSimpleName(), fromValue, fromValue.getClass().getSimpleName());
 
-        Constructor<?> ctor = constructors.get(toType);
+        Constructor<?> ctor = CONSTRUCTORS.get(toType);
 
         LOG.trace("Found {}", ctor);
 
-        if(ctor == null) {
+        if (ctor == null) {
             throw new IllegalArgumentException(String.format("Constructor not found for type %s", toType));
         }
 
@@ -362,7 +358,7 @@ public class DatastoreContextIntrospector {
 
         // Since the original input type is a String, once we find a constructor that takes a String
         // argument, we're done recursing.
-        if(!ctor.getParameterTypes()[0].equals(String.class)) {
+        if (!ctor.getParameterTypes()[0].equals(String.class)) {
             value = constructorValueRecursively(ctor.getParameterTypes()[0], fromValue);
         }
 

@@ -13,7 +13,6 @@ import akka.actor.Status.Failure;
 import akka.dispatch.ExecutionContexts;
 import akka.dispatch.Futures;
 import akka.dispatch.Recover;
-import akka.japi.Function;
 import akka.pattern.Patterns;
 import akka.util.Timeout;
 import com.google.common.base.Preconditions;
@@ -33,9 +32,8 @@ import scala.concurrent.Await;
 import scala.concurrent.Future;
 
 /**
- *
  * Composite cohort, which coordinates multiple user-provided cohorts as if it was only one cohort.
- *
+ * <p/>
  * It tracks current operation and list of cohorts which successfuly finished previous phase in
  * case, if abort is necessary to invoke it only on cohort steps which are still active.
  *
@@ -73,13 +71,10 @@ class CompositeDataTreeCohort {
         COMMITED,
         /**
          * Some of cohorts responsed back with unsuccessful message.
-         *
          */
         FAILED,
         /**
-         *
          * Abort message was send to all cohorts which responded with success previously.
-         *
          */
         ABORTED
     }
@@ -110,14 +105,9 @@ class CompositeDataTreeCohort {
     void canCommit(final DataTreeCandidate tip) throws ExecutionException, TimeoutException {
         Collection<CanCommit> messages = registry.createCanCommitMessages(txId, tip, schema);
         // FIXME: Optimize empty collection list with pre-created futures, containing success.
-        Future<Iterable<Object>> canCommitsFuture =
-                Futures.traverse(messages, new Function<CanCommit, Future<Object>>() {
-                    @Override
-                    public Future<Object> apply(final CanCommit input) {
-                        return Patterns.ask(input.getCohort(), input, timeout).recover(EXCEPTION_TO_MESSAGE,
-                                ExecutionContexts.global());
-                    }
-                }, ExecutionContexts.global());
+        Future<Iterable<Object>> canCommitsFuture = Futures.traverse(messages,
+            input -> Patterns.ask(input.getCohort(), input, timeout).recover(EXCEPTION_TO_MESSAGE,
+                    ExecutionContexts.global()), ExecutionContexts.global());
         changeStateFrom(State.IDLE, State.CAN_COMMIT_SENT);
         processResponses(canCommitsFuture, State.CAN_COMMIT_SENT, State.CAN_COMMIT_SUCCESSFUL);
     }
@@ -145,18 +135,13 @@ class CompositeDataTreeCohort {
     }
 
     private Future<Iterable<Object>> sendMesageToSuccessful(final Object message) {
-        return Futures.traverse(successfulFromPrevious, new Function<DataTreeCohortActor.Success, Future<Object>>() {
-
-            @Override
-            public Future<Object> apply(final DataTreeCohortActor.Success cohortResponse) throws Exception {
-                return Patterns.ask(cohortResponse.getCohort(), message, timeout);
-            }
-
-        }, ExecutionContexts.global());
+        return Futures.traverse(successfulFromPrevious, cohortResponse -> Patterns.ask(
+                cohortResponse.getCohort(), message, timeout), ExecutionContexts.global());
     }
 
-    private void processResponses(final Future<Iterable<Object>> resultsFuture, final State currentState, final State afterState)
-            throws TimeoutException, ExecutionException {
+    @SuppressWarnings("checkstyle:IllegalCatch")
+    private void processResponses(final Future<Iterable<Object>> resultsFuture, final State currentState,
+            final State afterState) throws TimeoutException, ExecutionException {
         final Iterable<Object> results;
         try {
             results = Await.result(resultsFuture, timeout.duration());

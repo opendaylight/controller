@@ -14,7 +14,8 @@ import org.osgi.framework.BundleContext;
 
 public class DomConcurrentDataBrokerModuleFactory extends AbstractDomConcurrentDataBrokerModuleFactory {
     @Override
-    public Module createModule(String instanceName, DependencyResolver dependencyResolver, BundleContext bundleContext) {
+    public Module createModule(String instanceName, DependencyResolver dependencyResolver,
+            BundleContext bundleContext) {
         DomConcurrentDataBrokerModule module = (DomConcurrentDataBrokerModule)super.createModule(instanceName,
                 dependencyResolver, bundleContext);
         module.setBundleContext(bundleContext);

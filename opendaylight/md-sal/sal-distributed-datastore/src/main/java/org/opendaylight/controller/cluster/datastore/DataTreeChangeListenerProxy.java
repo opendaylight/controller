@@ -41,11 +41,12 @@ final class DataTreeChangeListenerProxy<T extends DOMDataTreeChangeListener> ext
     @GuardedBy("this")
     private ActorSelection listenerRegistrationActor;
 
-    public DataTreeChangeListenerProxy(final ActorContext actorContext, final T listener) {
+    DataTreeChangeListenerProxy(final ActorContext actorContext, final T listener) {
         super(listener);
         this.actorContext = Preconditions.checkNotNull(actorContext);
         this.dataChangeListenerActor = actorContext.getActorSystem().actorOf(
-            DataTreeChangeListenerActor.props(getInstance()).withDispatcher(actorContext.getNotificationDispatcherPath()));
+                DataTreeChangeListenerActor.props(getInstance())
+                    .withDispatcher(actorContext.getNotificationDispatcherPath()));
     }
 
     @Override
@@ -64,11 +65,11 @@ final class DataTreeChangeListenerProxy<T extends DOMDataTreeChangeListener> ext
             @Override
             public void onComplete(final Throwable failure, final ActorRef shard) {
                 if (failure instanceof LocalShardNotFoundException) {
-                    LOG.debug("No local shard found for {} - DataTreeChangeListener {} at path {} " +
-                            "cannot be registered", shardName, getInstance(), treeId);
+                    LOG.debug("No local shard found for {} - DataTreeChangeListener {} at path {} "
+                            + "cannot be registered", shardName, getInstance(), treeId);
                 } else if (failure != null) {
-                    LOG.error("Failed to find local shard {} - DataTreeChangeListener {} at path {} " +
-                            "cannot be registered: {}", shardName, getInstance(), treeId, failure);
+                    LOG.error("Failed to find local shard {} - DataTreeChangeListener {} at path {} "
+                            + "cannot be registered: {}", shardName, getInstance(), treeId, failure);
                 } else {
                     doRegistration(shard, treeId);
                 }
@@ -100,7 +101,7 @@ final class DataTreeChangeListenerProxy<T extends DOMDataTreeChangeListener> ext
                         getInstance() instanceof ClusteredDOMDataTreeChangeListener),
                 actorContext.getDatastoreContext().getShardInitializationTimeout());
 
-        future.onComplete(new OnComplete<Object>(){
+        future.onComplete(new OnComplete<Object>() {
             @Override
             public void onComplete(final Throwable failure, final Object result) {
                 if (failure != null) {

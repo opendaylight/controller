@@ -53,7 +53,7 @@ class SingleCommitCohortProxy extends AbstractThreePhaseCommitCohort<Object> {
         cohortFuture.onComplete(new OnComplete<Object>() {
             @Override
             public void onComplete(Throwable failure, Object cohortResponse) {
-                if(failure != null) {
+                if (failure != null) {
                     operationCallbackRef.get().failure();
                     returnFuture.setException(failure);
                     return;

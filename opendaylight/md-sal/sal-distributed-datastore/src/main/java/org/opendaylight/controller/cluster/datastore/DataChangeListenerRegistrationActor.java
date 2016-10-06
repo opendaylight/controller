@@ -38,15 +38,15 @@ public class DataChangeListenerRegistrationActor extends AbstractUntypedActor {
         }
     }
 
-    public static Props props(
-        final ListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>> registration) {
+    public static Props props(final ListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier,
+            NormalizedNode<?, ?>>> registration) {
         return Props.create(new DataChangeListenerRegistrationCreator(registration));
     }
 
     private void closeListenerRegistration() {
         registration.close();
 
-        if(isValidSender(getSender())) {
+        if (isValidSender(getSender())) {
             getSender().tell(CloseDataChangeListenerRegistrationReply.INSTANCE, getSelf());
         }
 

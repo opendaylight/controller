@@ -31,10 +31,11 @@ public final class DataTreeModificationOutput {
     private DataTreeModificationOutput() {
     }
 
+    @SuppressWarnings("checkstyle:IllegalCatch")
     public static void toFile(File file, DataTreeModification modification) {
-        try(FileOutputStream outStream = new FileOutputStream(file)) {
+        try (FileOutputStream outStream = new FileOutputStream(file)) {
             modification.applyToCursor(new DataTreeModificationOutputCursor(new DataOutputStream(outStream)));
-        } catch(Exception e) {
+        } catch (Exception e) {
             LOG.error("Error writing DataTreeModification to file {}", file, e);
         }
     }
@@ -52,7 +53,7 @@ public final class DataTreeModificationOutput {
                 output.write("\nDELETE -> ".getBytes());
                 output.write(current().node(child).toString().getBytes());
                 output.writeByte('\n');
-            } catch(IOException e) {
+            } catch (IOException e) {
                 Throwables.propagate(e);
             }
         }
@@ -76,7 +77,7 @@ public final class DataTreeModificationOutput {
                 output.write(": \n".getBytes());
                 NormalizedNodeXMLOutput.toStream(output, data);
                 output.writeByte('\n');
-            } catch(IOException | XMLStreamException e) {
+            } catch (IOException | XMLStreamException e) {
                 Throwables.propagate(e);
             }
         }

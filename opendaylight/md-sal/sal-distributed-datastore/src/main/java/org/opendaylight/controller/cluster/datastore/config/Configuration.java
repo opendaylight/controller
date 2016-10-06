@@ -63,12 +63,12 @@ public interface Configuration {
     boolean isShardConfigured(String shardName);
 
     /**
-     * Adds the given member as the new replica for the given shardName
+     * Adds the given member as the new replica for the given shardName.
      */
-    void addMemberReplicaForShard (String shardName, MemberName memberName);
+    void addMemberReplicaForShard(String shardName, MemberName memberName);
 
     /**
-     * Removes the given member as a replica for the given shardName
+     * Removes the given member as a replica for the given shardName.
      */
-    void removeMemberReplicaForShard (String shardName, MemberName memberName);
+    void removeMemberReplicaForShard(String shardName, MemberName memberName);
 }

@@ -12,8 +12,7 @@ import com.google.common.base.Preconditions;
 import java.io.Serializable;
 
 /**
- * The FindPrimary message is used to locate the primary of any given shard
- *
+ * The FindPrimary message is used to locate the primary of any given shard.
  */
 public class FindPrimary implements Serializable {
     private static final long serialVersionUID = 1L;

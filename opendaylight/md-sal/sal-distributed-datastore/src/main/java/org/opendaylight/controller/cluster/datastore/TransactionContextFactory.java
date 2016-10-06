@@ -35,7 +35,8 @@ final class TransactionContextFactory extends AbstractTransactionContextFactory<
     }
 
     @Override
-    protected LocalTransactionFactoryImpl factoryForShard(final String shardName, final ActorSelection shardLeader, final DataTree dataTree) {
+    protected LocalTransactionFactoryImpl factoryForShard(final String shardName, final ActorSelection shardLeader,
+            final DataTree dataTree) {
         return new LocalTransactionFactoryImpl(getActorContext(), shardLeader, dataTree);
     }
 
@@ -45,7 +46,8 @@ final class TransactionContextFactory extends AbstractTransactionContextFactory<
     }
 
     @Override
-    protected <T> void onTransactionReady(final TransactionIdentifier transaction, final Collection<Future<T>> cohortFutures) {
+    protected <T> void onTransactionReady(final TransactionIdentifier transaction,
+            final Collection<Future<T>> cohortFutures) {
         // Transactions are disconnected, this is a no-op
     }
 

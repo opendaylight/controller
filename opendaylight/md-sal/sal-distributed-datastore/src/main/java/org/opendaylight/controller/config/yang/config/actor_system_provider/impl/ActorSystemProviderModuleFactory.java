@@ -24,8 +24,10 @@ import org.osgi.framework.BundleContext;
 
 public class ActorSystemProviderModuleFactory extends AbstractActorSystemProviderModuleFactory {
     @Override
-    public Module createModule(String instanceName, DependencyResolver dependencyResolver, BundleContext bundleContext) {
-        ActorSystemProviderModule module = (ActorSystemProviderModule)super.createModule(instanceName,dependencyResolver,bundleContext);
+    public Module createModule(String instanceName, DependencyResolver dependencyResolver,
+            BundleContext bundleContext) {
+        ActorSystemProviderModule module = (ActorSystemProviderModule)super.createModule(instanceName,
+                dependencyResolver,bundleContext);
         module.setBundleContext(bundleContext);
         return module;
     }
@@ -33,7 +35,8 @@ public class ActorSystemProviderModuleFactory extends AbstractActorSystemProvide
     @Override
     public Module createModule(String instanceName, DependencyResolver dependencyResolver,
             DynamicMBeanWithInstance old, BundleContext bundleContext) throws Exception {
-        ActorSystemProviderModule module = (ActorSystemProviderModule)super.createModule(instanceName, dependencyResolver,
+        ActorSystemProviderModule module = (ActorSystemProviderModule)super.createModule(instanceName,
+                dependencyResolver,
                 old, bundleContext);
         module.setBundleContext(bundleContext);
         return module;

@@ -10,7 +10,8 @@ package org.opendaylight.controller.cluster.datastore.messages;
 
 
 public class CloseDataChangeListenerRegistrationReply {
-    public static final CloseDataChangeListenerRegistrationReply INSTANCE = new CloseDataChangeListenerRegistrationReply();
+    public static final CloseDataChangeListenerRegistrationReply INSTANCE =
+            new CloseDataChangeListenerRegistrationReply();
 
     private CloseDataChangeListenerRegistrationReply() {
     }

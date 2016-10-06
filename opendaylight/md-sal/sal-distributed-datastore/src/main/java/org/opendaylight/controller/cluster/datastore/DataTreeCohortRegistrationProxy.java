@@ -76,9 +76,9 @@ public class DataTreeCohortRegistrationProxy<C extends DOMDataTreeCommitCohort> 
         future.onComplete(new OnComplete<Object>() {
 
             @Override
-            public void onComplete(Throwable e, Object val) throws Throwable {
-                if (e != null) {
-                    LOG.error("Unable to register {} as commit cohort", getInstance(), e);
+            public void onComplete(Throwable failure, Object val) {
+                if (failure != null) {
+                    LOG.error("Unable to register {} as commit cohort", getInstance(), failure);
                 }
                 if (isClosed()) {
                     removeRegistration();

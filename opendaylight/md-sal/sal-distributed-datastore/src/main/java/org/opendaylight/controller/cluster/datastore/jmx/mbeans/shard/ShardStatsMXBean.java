@@ -12,83 +12,85 @@ import java.util.List;
 import org.opendaylight.controller.cluster.raft.client.messages.FollowerInfo;
 
 /**
+ * MXBean interface for shard stats.
+ *
  * @author: syedbahm
  */
 public interface ShardStatsMXBean {
 
-   String getShardName();
+    String getShardName();
 
-   String getStatRetrievalTime();
+    String getStatRetrievalTime();
 
-   String getStatRetrievalError();
+    String getStatRetrievalError();
 
-   long getCommittedTransactionsCount();
+    long getCommittedTransactionsCount();
 
-   long getReadOnlyTransactionCount();
+    long getReadOnlyTransactionCount();
 
-   long getWriteOnlyTransactionCount();
+    long getWriteOnlyTransactionCount();
 
-   long getReadWriteTransactionCount();
+    long getReadWriteTransactionCount();
 
-   long getLastLogIndex();
+    long getLastLogIndex();
 
-   long getLastLogTerm();
+    long getLastLogTerm();
 
-   long getCurrentTerm();
+    long getCurrentTerm();
 
-   long getCommitIndex();
+    long getCommitIndex();
 
-   long getLastApplied();
+    long getLastApplied();
 
-   long getLastIndex();
+    long getLastIndex();
 
-   long getLastTerm();
+    long getLastTerm();
 
-   long getSnapshotIndex();
+    long getSnapshotIndex();
 
-   long getSnapshotTerm();
+    long getSnapshotTerm();
 
-   long getReplicatedToAllIndex();
+    long getReplicatedToAllIndex();
 
-   String getLastCommittedTransactionTime();
+    String getLastCommittedTransactionTime();
 
-   long getFailedTransactionsCount();
+    long getFailedTransactionsCount();
 
-   long getAbortTransactionsCount();
+    long getAbortTransactionsCount();
 
-   long getFailedReadTransactionsCount();
+    long getFailedReadTransactionsCount();
 
-   String getLeader();
+    String getLeader();
 
-   String getRaftState();
+    String getRaftState();
 
-   String getVotedFor();
+    String getVotedFor();
 
-   boolean isSnapshotCaptureInitiated();
+    boolean isSnapshotCaptureInitiated();
 
-   boolean isVoting();
+    boolean isVoting();
 
-   void resetTransactionCounters();
+    void resetTransactionCounters();
 
-   long getInMemoryJournalDataSize();
+    long getInMemoryJournalDataSize();
 
-   long getInMemoryJournalLogSize();
+    long getInMemoryJournalLogSize();
 
-   boolean getFollowerInitialSyncStatus();
+    boolean getFollowerInitialSyncStatus();
 
-   List<FollowerInfo> getFollowerInfo();
+    List<FollowerInfo> getFollowerInfo();
 
-   String getPeerAddresses();
+    String getPeerAddresses();
 
-   String getPeerVotingStates();
+    String getPeerVotingStates();
 
-   long getLeadershipChangeCount();
+    long getLeadershipChangeCount();
 
-   String getLastLeadershipChangeTime();
+    String getLastLeadershipChangeTime();
 
-   int getPendingTxCommitQueueSize();
+    int getPendingTxCommitQueueSize();
 
-   int getTxCohortCacheSize();
+    int getTxCohortCacheSize();
 
-   void captureSnapshot();
+    void captureSnapshot();
 }

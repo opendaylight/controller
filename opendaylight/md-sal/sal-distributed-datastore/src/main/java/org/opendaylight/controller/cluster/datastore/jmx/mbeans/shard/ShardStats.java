@@ -39,7 +39,7 @@ public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
 
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 
-    private static final Cache<String, OnDemandRaftState> onDemandRaftStateCache =
+    private static final Cache<String, OnDemandRaftState> ONDEMAND_RAFT_STATE_CACHE =
             CacheBuilder.newBuilder().expireAfterWrite(2, TimeUnit.SECONDS).build();
 
     private long committedTransactionsCount;
@@ -78,14 +78,15 @@ public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
         this.shard = shard;
     }
 
+    @SuppressWarnings("checkstyle:IllegalCatch")
     private OnDemandRaftState getOnDemandRaftState() {
         String name = getShardName();
-        OnDemandRaftState state = onDemandRaftStateCache.getIfPresent(name);
-        if(state == null) {
+        OnDemandRaftState state = ONDEMAND_RAFT_STATE_CACHE.getIfPresent(name);
+        if (state == null) {
             statRetrievalError = null;
             statRetrievalTime = null;
 
-            if(shard != null) {
+            if (shard != null) {
                 Timeout timeout = new Timeout(10, TimeUnit.SECONDS);
                 try {
                     Stopwatch timer = Stopwatch.createStarted();
@@ -94,7 +95,7 @@ public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
                             GetOnDemandRaftState.INSTANCE, timeout), timeout.duration());
 
                     statRetrievalTime = timer.stop().toString();
-                    onDemandRaftStateCache.put(name, state);
+                    ONDEMAND_RAFT_STATE_CACHE.put(name, state);
                 } catch (Exception e) {
                     statRetrievalError = e.toString();
                 }
@@ -195,6 +196,7 @@ public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
     public String getVotedFor() {
         return getOnDemandRaftState().getVotedFor();
     }
+
     @Override
     public boolean isVoting() {
         return getOnDemandRaftState().isVoting();
@@ -254,8 +256,7 @@ public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
         return failedReadTransactionsCount.incrementAndGet();
     }
 
-    public long incrementAbortTransactionsCount ()
-    {
+    public long incrementAbortTransactionsCount() {
         return ++abortTransactionsCount;
     }
 
@@ -264,7 +265,7 @@ public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
     }
 
     @Override
-    public long getInMemoryJournalDataSize(){
+    public long getInMemoryJournalDataSize() {
         return getOnDemandRaftState().getInMemoryJournalDataSize();
     }
 
@@ -274,10 +275,10 @@ public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
     }
 
     /**
-     * resets the counters related to transactions
+     * Resets the counters related to transactions.
      */
     @Override
-    public void resetTransactionCounters(){
+    public void resetTransactionCounters() {
         committedTransactionsCount = 0;
 
         readOnlyTransactionCount = 0;
@@ -358,7 +359,7 @@ public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
 
     @Override
     public void captureSnapshot() {
-        if(shard != null) {
+        if (shard != null) {
             shard.getSelf().tell(new InitiateCaptureSnapshot(), ActorRef.noSender());
         }
     }

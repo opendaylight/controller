@@ -34,7 +34,7 @@ abstract class DeletedDataTreeCandidateNode extends AbstractDataTreeCandidateNod
     static DataTreeCandidateNode create(final PathArgument identifier) {
         return new DeletedDataTreeCandidateNode() {
             @Override
-            public final PathArgument getIdentifier() {
+            public PathArgument getIdentifier() {
                 return identifier;
             }
         };

@@ -67,7 +67,8 @@ final class ShardDataTreeTransactionChain extends ShardDataTreeTransactionParent
     @Override
     protected void abortTransaction(final AbstractShardDataTreeTransaction<?> transaction) {
         if (transaction instanceof ReadWriteShardDataTreeTransaction) {
-            Preconditions.checkState(openTransaction != null, "Attempted to abort transaction %s while none is outstanding", transaction);
+            Preconditions.checkState(openTransaction != null,
+                    "Attempted to abort transaction %s while none is outstanding", transaction);
             LOG.debug("Aborted transaction {}", transaction);
             openTransaction = null;
         }
@@ -75,7 +76,8 @@ final class ShardDataTreeTransactionChain extends ShardDataTreeTransactionParent
 
     @Override
     protected ShardDataTreeCohort finishTransaction(final ReadWriteShardDataTreeTransaction transaction) {
-        Preconditions.checkState(openTransaction != null, "Attempted to finish transaction %s while none is outstanding", transaction);
+        Preconditions.checkState(openTransaction != null,
+                "Attempted to finish transaction %s while none is outstanding", transaction);
 
         // dataTree is finalizing ready the transaction, we just record it for the next
         // transaction in chain

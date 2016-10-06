@@ -8,6 +8,7 @@
 package org.opendaylight.controller.config.yang.config.concurrent_data_broker;
 
 import org.opendaylight.controller.config.api.DependencyResolver;
+import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.config.api.osgi.WaitingServiceTracker;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.md.sal.dom.spi.ForwardingDOMDataBroker;
@@ -16,11 +17,14 @@ import org.osgi.framework.BundleContext;
 public class DomConcurrentDataBrokerModule extends AbstractDomConcurrentDataBrokerModule {
     private BundleContext bundleContext;
 
-    public DomConcurrentDataBrokerModule(final org.opendaylight.controller.config.api.ModuleIdentifier identifier, final DependencyResolver dependencyResolver) {
+    public DomConcurrentDataBrokerModule(final ModuleIdentifier identifier,
+            final DependencyResolver dependencyResolver) {
         super(identifier, dependencyResolver);
     }
 
-    public DomConcurrentDataBrokerModule(final org.opendaylight.controller.config.api.ModuleIdentifier identifier, final DependencyResolver dependencyResolver, final DomConcurrentDataBrokerModule oldModule, final AutoCloseable oldInstance) {
+    public DomConcurrentDataBrokerModule(final ModuleIdentifier identifier,
+            final DependencyResolver dependencyResolver, final DomConcurrentDataBrokerModule oldModule,
+            final AutoCloseable oldInstance) {
         super(identifier, dependencyResolver, oldModule, oldInstance);
     }
 

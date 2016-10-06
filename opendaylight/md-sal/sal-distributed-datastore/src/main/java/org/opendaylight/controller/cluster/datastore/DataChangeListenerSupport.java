@@ -42,7 +42,7 @@ final class DataChangeListenerSupport extends AbstractDataListenerSupport<
 
         // Now store a reference to the data change listener so it can be notified
         // at a later point if notifications should be enabled or disabled
-        if(!message.isRegisterOnAllInstances()) {
+        if (!message.isRegisterOnAllInstances()) {
             addListenerActor(dataChangeListenerPath);
         }
 

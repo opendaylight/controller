@@ -70,21 +70,21 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort implements Ide
     }
 
     @Override
-    public void canCommit(final FutureCallback<Void> callback) {
-        if(state == State.CAN_COMMIT_PENDING) {
+    public void canCommit(final FutureCallback<Void> newCallback) {
+        if (state == State.CAN_COMMIT_PENDING) {
             return;
         }
 
         checkState(State.READY);
-        this.callback = Preconditions.checkNotNull(callback);
+        this.callback = Preconditions.checkNotNull(newCallback);
         state = State.CAN_COMMIT_PENDING;
         dataTree.startCanCommit(this);
     }
 
     @Override
-    public void preCommit(final FutureCallback<DataTreeCandidate> callback) {
+    public void preCommit(final FutureCallback<DataTreeCandidate> newCallback) {
         checkState(State.CAN_COMMIT_COMPLETE);
-        this.callback = Preconditions.checkNotNull(callback);
+        this.callback = Preconditions.checkNotNull(newCallback);
         state = State.PRE_COMMIT_PENDING;
 
         if (nextFailure == null) {
@@ -125,9 +125,9 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort implements Ide
     }
 
     @Override
-    public void commit(final FutureCallback<UnsignedLong> callback) {
+    public void commit(final FutureCallback<UnsignedLong> newCallback) {
         checkState(State.PRE_COMMIT_COMPLETE);
-        this.callback = Preconditions.checkNotNull(callback);
+        this.callback = Preconditions.checkNotNull(newCallback);
         state = State.COMMIT_PENDING;
         dataTree.startCommit(this, candidate);
     }
@@ -153,20 +153,20 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort implements Ide
      * Run user-defined canCommit and preCommit hooks. We want to run these before we initiate persistence so that
      * any failure to validate is propagated before we record the transaction.
      *
-     * @param candidate {@link DataTreeCandidate} under consideration
-     * @throws ExecutionException
-     * @throws TimeoutException
+     * @param dataTreeCandidate {@link DataTreeCandidate} under consideration
+     * @throws ExecutionException if the operation fails
+     * @throws TimeoutException if the operation times out
      */
     // FIXME: this should be asynchronous
-    void userPreCommit(final DataTreeCandidate candidate) throws ExecutionException, TimeoutException {
-        userCohorts.canCommit(candidate);
+    void userPreCommit(final DataTreeCandidate dataTreeCandidate) throws ExecutionException, TimeoutException {
+        userCohorts.canCommit(dataTreeCandidate);
         userCohorts.preCommit();
     }
 
-    void successfulPreCommit(final DataTreeCandidateTip candidate) {
-        LOG.trace("Transaction {} prepared candidate {}", transaction, candidate);
-        this.candidate = Verify.verifyNotNull(candidate);
-        switchState(State.PRE_COMMIT_COMPLETE).onSuccess(candidate);
+    void successfulPreCommit(final DataTreeCandidateTip dataTreeCandidate) {
+        LOG.trace("Transaction {} prepared candidate {}", transaction, dataTreeCandidate);
+        this.candidate = Verify.verifyNotNull(dataTreeCandidate);
+        switchState(State.PRE_COMMIT_COMPLETE).onSuccess(dataTreeCandidate);
     }
 
     void failedPreCommit(final Exception cause) {

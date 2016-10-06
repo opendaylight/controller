@@ -22,8 +22,9 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification
  * </p>
  *
  * <p>
- * Modifications can in turn be lumped into a single {@link org.opendaylight.controller.cluster.datastore.modification.CompositeModification}
- * which can then be applied to a write transaction
+ * Modifications can in turn be lumped into a single
+ * {@link org.opendaylight.controller.cluster.datastore.modification.CompositeModification}
+ * which can then be applied to a write transaction.
  * </p>
  */
 public interface Modification extends Externalizable {
@@ -34,16 +35,16 @@ public interface Modification extends Externalizable {
     byte DELETE = 4;
 
     /**
-     * Apply the modification to the specified transaction
+     * Apply the modification to the specified transaction.
      *
-     * @param transaction
+     * @param transaction the transaction
      */
     void apply(DOMStoreWriteTransaction transaction);
 
     /**
-     * Apply the modification to the specified transaction
+     * Apply the modification to the specified transaction.
      *
-     * @param transaction
+     * @param transaction the transaction
      */
     void apply(DataTreeModification transaction);
 

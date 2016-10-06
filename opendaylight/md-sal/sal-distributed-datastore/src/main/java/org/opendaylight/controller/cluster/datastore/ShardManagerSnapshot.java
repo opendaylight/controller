@@ -16,7 +16,7 @@ import java.util.List;
 import javax.annotation.Nonnull;
 
 /**
- * Persisted data of the ShardManager
+ * Persisted data of the ShardManager.
  *
  * @deprecated Use {@link org.opendaylight.controller.cluster.datastore.shardmanager.ShardManagerSnapshot} instead.
  *             This class is scheduled for removal once persistence migration from Beryllium is no longer needed.

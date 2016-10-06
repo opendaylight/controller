@@ -20,15 +20,12 @@ import org.opendaylight.mdsal.common.api.ThreePhaseCommitStep;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeCandidate;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeCommitCohort;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Proxy actor which acts as a facade to the user-provided commit cohort. Responsible for
  * decapsulating DataTreeChanged messages and dispatching their context to the user.
  */
 final class DataTreeCohortActor extends AbstractUntypedActor {
-    private static final Logger LOG = LoggerFactory.getLogger(DataTreeCohortActor.class);
     private final CohortBehaviour<?> idleState = new Idle();
     private final DOMDataTreeCommitCohort cohort;
     private CohortBehaviour<?> currentState = idleState;
@@ -48,7 +45,7 @@ final class DataTreeCohortActor extends AbstractUntypedActor {
      *
      * @param <R> Reply message type
      */
-    static abstract class CommitProtocolCommand<R extends CommitReply> {
+    abstract static class CommitProtocolCommand<R extends CommitReply> {
 
         private final TransactionIdentifier txId;
 
@@ -88,7 +85,7 @@ final class DataTreeCohortActor extends AbstractUntypedActor {
 
     }
 
-    static abstract class CommitReply {
+    abstract static class CommitReply {
 
         private final ActorRef cohortRef;
         private final TransactionIdentifier txId;
@@ -109,7 +106,7 @@ final class DataTreeCohortActor extends AbstractUntypedActor {
 
     static final class Success extends CommitReply {
 
-        public Success(ActorRef cohortRef, TransactionIdentifier txId) {
+        Success(ActorRef cohortRef, TransactionIdentifier txId) {
             super(cohortRef, txId);
         }
 
@@ -117,26 +114,26 @@ final class DataTreeCohortActor extends AbstractUntypedActor {
 
     static final class PreCommit extends CommitProtocolCommand<Success> {
 
-        public PreCommit(TransactionIdentifier txId) {
+        PreCommit(TransactionIdentifier txId) {
             super(txId);
         }
     }
 
     static final class Abort extends CommitProtocolCommand<Success> {
 
-        public Abort(TransactionIdentifier txId) {
+        Abort(TransactionIdentifier txId) {
             super(txId);
         }
     }
 
     static final class Commit extends CommitProtocolCommand<Success> {
 
-        public Commit(TransactionIdentifier txId) {
+        Commit(TransactionIdentifier txId) {
             super(txId);
         }
     }
 
-    private static abstract class CohortBehaviour<E> {
+    private abstract static class CohortBehaviour<E> {
 
         abstract Class<E> getHandledMessageType();
 
@@ -163,6 +160,7 @@ final class DataTreeCohortActor extends AbstractUntypedActor {
         }
 
         @Override
+        @SuppressWarnings("checkstyle:IllegalCatch")
         CohortBehaviour<?> process(CanCommit message) {
             final PostCanCommitStep nextStep;
             try {
@@ -203,6 +201,7 @@ final class DataTreeCohortActor extends AbstractUntypedActor {
         }
 
         @Override
+        @SuppressWarnings("checkstyle:IllegalCatch")
         final CohortBehaviour<?> abort() {
             try {
                 getStep().abort().get();
@@ -229,6 +228,7 @@ final class DataTreeCohortActor extends AbstractUntypedActor {
         }
 
         @Override
+        @SuppressWarnings("checkstyle:IllegalCatch")
         CohortBehaviour<?> process(PreCommit message) {
             final PostPreCommitStep nextStep;
             try {
@@ -250,6 +250,7 @@ final class DataTreeCohortActor extends AbstractUntypedActor {
         }
 
         @Override
+        @SuppressWarnings("checkstyle:IllegalCatch")
         CohortBehaviour<?> process(Commit message) {
             try {
                 getStep().commit().get();

@@ -31,6 +31,8 @@ abstract class ShardDataTreeMetadata<T extends ShardDataTreeSnapshotMetadata<T>>
 
     // Lifecycle events
     abstract void onTransactionCommitted(TransactionIdentifier txId);
+
     abstract void onHistoryClosed(LocalHistoryIdentifier historyId);
+
     abstract void onHistoryPurged(LocalHistoryIdentifier historyId);
 }

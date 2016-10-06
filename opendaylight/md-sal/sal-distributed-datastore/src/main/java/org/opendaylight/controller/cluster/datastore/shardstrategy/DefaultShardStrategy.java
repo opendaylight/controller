@@ -11,10 +11,8 @@ package org.opendaylight.controller.cluster.datastore.shardstrategy;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 /**
- * The DefaultShardStrategy basically puts all data into the default Shard
- * <p>
- *   The default shard stores data for all modules for which a specific set of shards has not been configured
- * </p>
+ * The DefaultShardStrategy basically puts all data into the default shard. The default shard stores data for all
+ * modules for which a specific set of shards has not been configured. This is only intended for testing.
  */
 public final class DefaultShardStrategy implements ShardStrategy {
     public static final String NAME = "default";

@@ -18,7 +18,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 
 /**
- * DeleteModification store all the parameters required to delete a path from the data tree
+ * DeleteModification store all the parameters required to delete a path from the data tree.
  */
 public class DeleteModification extends AbstractModification {
     private static final long serialVersionUID = 1L;

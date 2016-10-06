@@ -11,6 +11,8 @@ import java.io.Serializable;
 import java.util.Set;
 
 /**
+ * Manages shards.
+ *
  * @deprecated This is a deprecated placeholder to keep its inner class present. It serves no other purpose.
  */
 @Deprecated
@@ -25,7 +27,7 @@ public final class ShardManager {
 
         private final Set<String> modules;
 
-        public SchemaContextModules(Set<String> modules){
+        public SchemaContextModules(Set<String> modules) {
             this.modules = modules;
         }
 

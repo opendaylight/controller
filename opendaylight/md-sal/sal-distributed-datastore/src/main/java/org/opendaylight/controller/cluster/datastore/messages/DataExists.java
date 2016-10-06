@@ -32,10 +32,11 @@ public class DataExists extends AbstractRead<Boolean> {
 
     @Override
     public void processResponse(Object response, SettableFuture<Boolean> returnFuture) {
-        if(DataExistsReply.isSerializedType(response)) {
+        if (DataExistsReply.isSerializedType(response)) {
             returnFuture.set(Boolean.valueOf(DataExistsReply.fromSerializable(response).exists()));
         } else {
-            returnFuture.setException(new ReadFailedException("Invalid response checking exists for path " + getPath()));
+            returnFuture.setException(new ReadFailedException("Invalid response checking exists for path "
+                    + getPath()));
         }
     }
 
@@ -44,7 +45,7 @@ public class DataExists extends AbstractRead<Boolean> {
         return new DataExists(getPath(), withVersion);
     }
 
-    public static DataExists fromSerializable(final Object serializable){
+    public static DataExists fromSerializable(final Object serializable) {
         Preconditions.checkArgument(serializable instanceof DataExists);
         return (DataExists)serializable;
     }

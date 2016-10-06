@@ -57,7 +57,8 @@ abstract class AbstractShardDataTreeTransaction<T extends DataTreeSnapshot> {
 
     @Override
     public final String toString() {
-        return MoreObjects.toStringHelper(this).add("id", id).add("closed", closed).add("snapshot", snapshot).toString();
+        return MoreObjects.toStringHelper(this).add("id", id).add("closed", closed).add("snapshot", snapshot)
+                .toString();
     }
 
     abstract void abort();

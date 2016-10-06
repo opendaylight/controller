@@ -21,7 +21,7 @@ import org.opendaylight.yangtools.concepts.WritableObject;
  * whenever:
  * - a new event is defined
  * - serialization format is changed
- *
+ * <p/>
  * This version effectively defines the protocol version between actors participating on a particular shard. A shard
  * participant instance should oppose RAFT candidates which produce persistence of an unsupported version. If a follower
  * encounters an unsupported version it must not become fully-operational, as it does not have an accurate view
@@ -73,7 +73,8 @@ public enum PayloadVersion implements WritableObject {
      *
      * @return Current {@link PayloadVersion}
      */
-    public static @Nonnull PayloadVersion current() {
+    @Nonnull
+    public static PayloadVersion current() {
         return BORON;
     }
 
@@ -81,23 +82,24 @@ public enum PayloadVersion implements WritableObject {
      * Return the {@link PayloadVersion} corresponding to an unsigned short integer. This method is provided for callers
      * which provide their own recovery strategy in case of version incompatibility.
      *
-     * @param s Short integer as returned from {@link #shortValue()}
+     * @param version Short integer as returned from {@link #shortValue()}
      * @return {@link PayloadVersion}
      * @throws FutureVersionException if the specified integer identifies a future version
      * @throws PastVersionException if the specified integer identifies a past version which is no longer supported
      */
-    public static @Nonnull PayloadVersion valueOf(final short s) throws FutureVersionException, PastVersionException {
-        switch (Short.toUnsignedInt(s)) {
+    @Nonnull
+    public static PayloadVersion valueOf(final short version) throws FutureVersionException, PastVersionException {
+        switch (Short.toUnsignedInt(version)) {
             case 0:
             case 1:
             case 2:
             case 3:
             case 4:
-                throw new PastVersionException(s, BORON);
+                throw new PastVersionException(version, BORON);
             case 5:
                 return BORON;
             default:
-                throw new FutureVersionException(s, BORON);
+                throw new FutureVersionException(version, BORON);
         }
     }
 
@@ -114,7 +116,8 @@ public enum PayloadVersion implements WritableObject {
      * @return An {@link PayloadVersion}
      * @throws IOException If read fails or an unsupported version is encountered
      */
-    public static @Nonnull PayloadVersion readFrom(final @Nonnull DataInput in) throws IOException {
+    @Nonnull
+    public static PayloadVersion readFrom(@Nonnull final DataInput in) throws IOException {
         final short s = in.readShort();
         try {
             return valueOf(s);
