@@ -21,10 +21,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
   <name>${artifactId}</name>
   <packaging>pom</packaging>
 
-  <prerequisites>
-    <maven>3.1.1</maven>
-  </prerequisites>
-
   <scm>
     <connection>scm:git:ssh://git.opendaylight.org:29418/${artifactId}.git</connection>
     <developerConnection>scm:git:ssh://git.opendaylight.org:29418/${artifactId}.git</developerConnection>
