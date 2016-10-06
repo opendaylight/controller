@@ -399,6 +399,30 @@
       "revId": "a04804898076d88a2a7287848636715db6e85e28",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_e2242b10",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/test/java/org/opendaylight/controller/md/sal/binding/test/xtendbeans/tests/ExpectedObjects.xtend",
+        "patchSetId": 15
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-10-06T11:53:22Z",
+      "side": 1,
+      "message": "Why does it have to generate xtend code? Why not java? The trend for a while now has been to eliminate xtend code in ODL. Not sure we want to start adding more.",
+      "parentUuid": "7a6b29fe_3444f072",
+      "range": {
+        "startLine": 19,
+        "startChar": 0,
+        "endLine": 19,
+        "endChar": 21
+      },
+      "revId": "a04804898076d88a2a7287848636715db6e85e28",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
