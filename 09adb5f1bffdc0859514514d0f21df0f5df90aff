@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a6b29fe_4a4d35c4",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 559,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2016-10-06T21:17:12Z",
+      "side": 0,
+      "message": "This removal of a catch (Exception e) looks like a non-trivial non formatting change which I think should be sumitted as a separate Gerrit and reviewed by others who know more about this code.  While in general I\u0027ve seen, and removed, wrong use of catch (Exception e) in higher level functional code, I\u0027m not sure it\u0027s a good idea to remove this here..",
+      "revId": "09adb5f1bffdc0859514514d0f21df0f5df90aff",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -1,0 +1,95 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a6b29fe_0a533d6d",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/base/messages/SwitchBehavior.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2016-10-06T21:17:12Z",
+      "side": 1,
+      "message": "why did you replace a StringBuilder, which is better, with String concatenation here?",
+      "range": {
+        "startLine": 32,
+        "startChar": 9,
+        "endLine": 32,
+        "endChar": 10
+      },
+      "revId": "fee4cf65d837ce0e88681f7d1340694ed3f69822",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_ea4fe1bc",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractRaftActorBehavior.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2016-10-06T21:17:12Z",
+      "side": 1,
+      "message": "ODL widely uses upper-case LOG instead of lower case log by convention.  Let\u0027s thus keep that as-is here?  I\u0027ll be adding a Checkstyle rule to enforce this when I get a chance some time.",
+      "revId": "fee4cf65d837ce0e88681f7d1340694ed3f69822",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_2a4a79ac",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/messages/AppendEntries.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2016-10-06T21:17:12Z",
+      "side": 1,
+      "message": "Interesting! IMHO it would be valuable if you have the time to submit this as a bug to Checkstyle on https://github.com/checkstyle/checkstyle/issues, or even better contribute a fix for this to CS.  The problem will be that CS is working off an AST and not a full type model, so it cannot find parent classes, but it should be able to check for direct parent Serializable/Externalizable.  (If you\u0027re motivated, I\u0027d be happy to guide you along in which class in CS this could be added.)",
+      "revId": "fee4cf65d837ce0e88681f7d1340694ed3f69822",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_8ac62d15",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/messages/RequestVoteReply.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2016-10-06T21:17:12Z",
+      "side": 1,
+      "message": "as before, why change this? How about using a toString helper, such as e.g. https://github.com/google/guava/wiki/CommonObjectUtilitiesExplained#tostring ?",
+      "revId": "fee4cf65d837ce0e88681f7d1340694ed3f69822",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_6acbd11e",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/messages/ServerRemoved.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2016-10-06T21:17:12Z",
+      "side": 1,
+      "message": "again",
+      "revId": "fee4cf65d837ce0e88681f7d1340694ed3f69822",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
