@@ -10,25 +10,24 @@ package org.opendaylight.controller.config.yang.config.distributed_datastore_pro
 
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.DistributedDataStoreInterface;
+import org.opendaylight.controller.config.api.DependencyResolver;
+import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.config.api.osgi.WaitingServiceTracker;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.osgi.framework.BundleContext;
 
-public class DistributedOperationalDataStoreProviderModule extends
-    org.opendaylight.controller.config.yang.config.distributed_datastore_provider.AbstractDistributedOperationalDataStoreProviderModule {
+public class DistributedOperationalDataStoreProviderModule
+        extends AbstractDistributedOperationalDataStoreProviderModule {
     private BundleContext bundleContext;
 
-    public DistributedOperationalDataStoreProviderModule(
-        org.opendaylight.controller.config.api.ModuleIdentifier identifier,
-        org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
+    public DistributedOperationalDataStoreProviderModule(ModuleIdentifier identifier,
+            DependencyResolver dependencyResolver) {
         super(identifier, dependencyResolver);
     }
 
-    public DistributedOperationalDataStoreProviderModule(
-        org.opendaylight.controller.config.api.ModuleIdentifier identifier,
-        org.opendaylight.controller.config.api.DependencyResolver dependencyResolver,
-        org.opendaylight.controller.config.yang.config.distributed_datastore_provider.DistributedOperationalDataStoreProviderModule oldModule,
-        java.lang.AutoCloseable oldInstance) {
+    public DistributedOperationalDataStoreProviderModule(ModuleIdentifier identifier,
+            DependencyResolver dependencyResolver,DistributedOperationalDataStoreProviderModule oldModule,
+            AutoCloseable oldInstance) {
         super(identifier, dependencyResolver, oldModule, oldInstance);
     }
 
@@ -58,22 +57,25 @@ public class DistributedOperationalDataStoreProviderModule extends
 
     private static DatastoreContext newDatastoreContext(OperationalProperties inProps) {
         OperationalProperties props = inProps;
-        if(props == null) {
+        if (props == null) {
             props = new OperationalProperties();
         }
 
         return DatastoreContext.newBuilder()
                 .logicalStoreType(LogicalDatastoreType.OPERATIONAL)
                 .maxShardDataChangeExecutorPoolSize(props.getMaxShardDataChangeExecutorPoolSize().getValue().intValue())
-                .maxShardDataChangeExecutorQueueSize(props.getMaxShardDataChangeExecutorQueueSize().getValue().intValue())
-                .maxShardDataChangeListenerQueueSize(props.getMaxShardDataChangeListenerQueueSize().getValue().intValue())
+                .maxShardDataChangeExecutorQueueSize(props.getMaxShardDataChangeExecutorQueueSize()
+                        .getValue().intValue())
+                .maxShardDataChangeListenerQueueSize(props.getMaxShardDataChangeListenerQueueSize()
+                        .getValue().intValue())
                 .maxShardDataStoreExecutorQueueSize(props.getMaxShardDataStoreExecutorQueueSize().getValue().intValue())
                 .shardTransactionIdleTimeoutInMinutes(props.getShardTransactionIdleTimeoutInMinutes().getValue())
                 .operationTimeoutInSeconds(props.getOperationTimeoutInSeconds().getValue())
-                .shardJournalRecoveryLogBatchSize(props.getShardJournalRecoveryLogBatchSize().
-                        getValue().intValue())
+                .shardJournalRecoveryLogBatchSize(props.getShardJournalRecoveryLogBatchSize()
+                        .getValue().intValue())
                 .shardSnapshotBatchCount(props.getShardSnapshotBatchCount().getValue().intValue())
-                .shardSnapshotDataThresholdPercentage(props.getShardSnapshotDataThresholdPercentage().getValue().intValue())
+                .shardSnapshotDataThresholdPercentage(props.getShardSnapshotDataThresholdPercentage()
+                        .getValue().intValue())
                 .shardHeartbeatIntervalInMillis(props.getShardHeartbeatIntervalInMillis().getValue())
                 .shardInitializationTimeoutInSeconds(props.getShardInitializationTimeoutInSeconds().getValue())
                 .shardLeaderElectionTimeoutInSeconds(props.getShardLeaderElectionTimeoutInSeconds().getValue())

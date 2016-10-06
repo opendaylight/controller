@@ -43,9 +43,10 @@ abstract class LocalTransactionContext extends AbstractTransactionContext {
     protected abstract DOMStoreReadTransaction getReadDelegate();
 
     @Override
+    @SuppressWarnings("checkstyle:IllegalCatch")
     public void executeModification(AbstractModification modification) {
         incrementModificationCount();
-        if(operationError == null) {
+        if (operationError == null) {
             try {
                 modification.apply(getWriteDelegate());
             } catch (Exception e) {
@@ -63,8 +64,8 @@ abstract class LocalTransactionContext extends AbstractTransactionContext {
             }
 
             @Override
-            public void onFailure(final Throwable t) {
-                proxyFuture.setException(t);
+            public void onFailure(final Throwable failure) {
+                proxyFuture.setException(failure);
             }
         });
     }

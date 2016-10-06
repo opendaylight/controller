@@ -42,9 +42,9 @@ public abstract class AbstractShardManagerCreator<T extends AbstractShardManager
         return cluster;
     }
 
-    public T cluster(ClusterWrapper cluster) {
+    public T cluster(ClusterWrapper newCluster) {
         checkSealed();
-        this.cluster = cluster;
+        this.cluster = newCluster;
         return self();
     }
 
@@ -52,9 +52,9 @@ public abstract class AbstractShardManagerCreator<T extends AbstractShardManager
         return configuration;
     }
 
-    public T configuration(Configuration configuration) {
+    public T configuration(Configuration newConfiguration) {
         checkSealed();
-        this.configuration = configuration;
+        this.configuration = newConfiguration;
         return self();
     }
 
@@ -62,9 +62,9 @@ public abstract class AbstractShardManagerCreator<T extends AbstractShardManager
         return datastoreContextFactory;
     }
 
-    public T datastoreContextFactory(DatastoreContextFactory datastoreContextFactory) {
+    public T datastoreContextFactory(DatastoreContextFactory newDatastoreContextFactory) {
         checkSealed();
-        this.datastoreContextFactory = datastoreContextFactory;
+        this.datastoreContextFactory = newDatastoreContextFactory;
         return self();
     }
 
@@ -72,9 +72,9 @@ public abstract class AbstractShardManagerCreator<T extends AbstractShardManager
         return waitTillReadyCountdownLatch;
     }
 
-    public T waitTillReadyCountdownLatch(CountDownLatch waitTillReadyCountdownLatch) {
+    public T waitTillReadyCountdownLatch(CountDownLatch newWaitTillReadyCountdownLatch) {
         checkSealed();
-        this.waitTillReadyCountdownLatch = waitTillReadyCountdownLatch;
+        this.waitTillReadyCountdownLatch = newWaitTillReadyCountdownLatch;
         return self();
     }
 
@@ -82,9 +82,9 @@ public abstract class AbstractShardManagerCreator<T extends AbstractShardManager
         return primaryShardInfoCache;
     }
 
-    public T primaryShardInfoCache(PrimaryShardInfoFutureCache primaryShardInfoCache) {
+    public T primaryShardInfoCache(PrimaryShardInfoFutureCache newPrimaryShardInfoCache) {
         checkSealed();
-        this.primaryShardInfoCache = primaryShardInfoCache;
+        this.primaryShardInfoCache = newPrimaryShardInfoCache;
         return self();
     }
 
@@ -92,9 +92,9 @@ public abstract class AbstractShardManagerCreator<T extends AbstractShardManager
         return restoreFromSnapshot;
     }
 
-    public T restoreFromSnapshot(DatastoreSnapshot restoreFromSnapshot) {
+    public T restoreFromSnapshot(DatastoreSnapshot newRestoreFromSnapshot) {
         checkSealed();
-        this.restoreFromSnapshot = restoreFromSnapshot;
+        this.restoreFromSnapshot = newRestoreFromSnapshot;
         return self();
     }
 

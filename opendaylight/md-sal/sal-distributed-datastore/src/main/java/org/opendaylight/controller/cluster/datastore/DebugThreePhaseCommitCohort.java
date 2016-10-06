@@ -47,9 +47,9 @@ class DebugThreePhaseCommitCohort extends AbstractThreePhaseCommitCohort<Object>
             }
 
             @Override
-            public void onFailure(Throwable t) {
+            public void onFailure(Throwable failure) {
                 log.warn("Transaction {} failed with error \"{}\" - was allocated in the following context",
-                        transactionId, t, debugContext);
+                        transactionId, failure, debugContext);
             }
         });
 

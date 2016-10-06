@@ -23,8 +23,7 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 
 /**
- * MutableCompositeModification is just a mutable version of a
- * CompositeModification {@link org.opendaylight.controller.cluster.datastore.modification.MutableCompositeModification#addModification(Modification)}
+ * MutableCompositeModification is just a mutable version of a CompositeModification.
  */
 public class MutableCompositeModification extends VersionedExternalizableMessage implements CompositeModification {
     private static final long serialVersionUID = 1L;
@@ -59,10 +58,9 @@ public class MutableCompositeModification extends VersionedExternalizableMessage
     }
 
     /**
-     * Add a new Modification to the list of Modifications represented by this
-     * composite
+     * Add a new Modification to the list of Modifications represented by this composite.
      *
-     * @param modification
+     * @param modification the modification to add.
      */
     public void addModification(Modification modification) {
         modifications.add(modification);
@@ -79,25 +77,27 @@ public class MutableCompositeModification extends VersionedExternalizableMessage
 
         int size = in.readInt();
 
-        if(size > 1) {
+        if (size > 1) {
             SerializationUtils.REUSABLE_READER_TL.set(new NormalizedNodeInputStreamReader(in));
         }
 
         try {
-            for(int i = 0; i < size; i++) {
+            for (int i = 0; i < size; i++) {
                 byte type = in.readByte();
-                switch(type) {
-                case Modification.WRITE:
-                    modifications.add(WriteModification.fromStream(in, getVersion()));
-                    break;
+                switch (type) {
+                    case Modification.WRITE:
+                        modifications.add(WriteModification.fromStream(in, getVersion()));
+                        break;
 
-                case Modification.MERGE:
-                    modifications.add(MergeModification.fromStream(in, getVersion()));
-                    break;
+                    case Modification.MERGE:
+                        modifications.add(MergeModification.fromStream(in, getVersion()));
+                        break;
 
-                case Modification.DELETE:
-                    modifications.add(DeleteModification.fromStream(in, getVersion()));
-                    break;
+                    case Modification.DELETE:
+                        modifications.add(DeleteModification.fromStream(in, getVersion()));
+                        break;
+                    default:
+                        break;
                 }
             }
         } finally {
@@ -111,12 +111,12 @@ public class MutableCompositeModification extends VersionedExternalizableMessage
 
         out.writeInt(modifications.size());
 
-        if(modifications.size() > 1) {
+        if (modifications.size() > 1) {
             SerializationUtils.REUSABLE_WRITER_TL.set(NormalizedNodeInputOutput.newDataOutput(out));
         }
 
         try {
-            for(Modification mod: modifications) {
+            for (Modification mod: modifications) {
                 out.writeByte(mod.getType());
                 mod.writeExternal(out);
             }

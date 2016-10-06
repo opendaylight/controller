@@ -21,8 +21,9 @@ import org.opendaylight.controller.cluster.datastore.messages.ReadData;
 import org.opendaylight.controller.cluster.datastore.modification.Modification;
 
 /**
+ * Actor for a shard write-only transaction.
+ *
  * @author: syedbahm
- * Date: 8/6/14
  */
 public class ShardWriteTransaction extends ShardTransaction {
 
@@ -50,6 +51,7 @@ public class ShardWriteTransaction extends ShardTransaction {
         }
     }
 
+    @SuppressWarnings("checkstyle:IllegalCatch")
     private void batchedModifications(BatchedModifications batched) {
         if (checkClosed()) {
             if (batched.isReady()) {
@@ -59,17 +61,17 @@ public class ShardWriteTransaction extends ShardTransaction {
         }
 
         try {
-            for(Modification modification: batched.getModifications()) {
+            for (Modification modification: batched.getModifications()) {
                 modification.apply(transaction.getSnapshot());
             }
 
             totalBatchedModificationsReceived++;
-            if(batched.isReady()) {
-                if(lastBatchedModificationsException != null) {
+            if (batched.isReady()) {
+                if (lastBatchedModificationsException != null) {
                     throw lastBatchedModificationsException;
                 }
 
-                if(totalBatchedModificationsReceived != batched.getTotalMessagesSent()) {
+                if (totalBatchedModificationsReceived != batched.getTotalMessagesSent()) {
                     throw new IllegalStateException(String.format(
                             "The total number of batched messages received %d does not match the number sent %d",
                             totalBatchedModificationsReceived, batched.getTotalMessagesSent()));
@@ -83,7 +85,7 @@ public class ShardWriteTransaction extends ShardTransaction {
             lastBatchedModificationsException = e;
             getSender().tell(new akka.actor.Status.Failure(e), getSelf());
 
-            if(batched.isReady()) {
+            if (batched.isReady()) {
                 getSelf().tell(PoisonPill.getInstance(), getSelf());
             }
         }
@@ -99,7 +101,8 @@ public class ShardWriteTransaction extends ShardTransaction {
 
     private boolean checkClosed() {
         if (transaction.isClosed()) {
-            getSender().tell(new akka.actor.Status.Failure(new IllegalStateException("Transaction is closed, no modifications allowed")), getSelf());
+            getSender().tell(new akka.actor.Status.Failure(new IllegalStateException(
+                    "Transaction is closed, no modifications allowed")), getSelf());
             return true;
         } else {
             return false;

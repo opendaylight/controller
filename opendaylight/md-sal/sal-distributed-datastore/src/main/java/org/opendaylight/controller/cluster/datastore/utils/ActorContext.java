@@ -9,6 +9,7 @@
 package org.opendaylight.controller.cluster.datastore.utils;
 
 import static akka.pattern.Patterns.ask;
+
 import akka.actor.ActorPath;
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
@@ -74,11 +75,11 @@ public class ActorContext {
         @Override
         public Throwable apply(Throwable failure) {
             Throwable actualFailure = failure;
-            if(failure instanceof AskTimeoutException) {
+            if (failure instanceof AskTimeoutException) {
                 // A timeout exception most likely means the shard isn't initialized.
                 actualFailure = new NotInitializedException(
-                        "Timed out trying to find the primary shard. Most likely cause is the " +
-                        "shard is not initialized yet.");
+                        "Timed out trying to find the primary shard. Most likely cause is the "
+                        + "shard is not initialized yet.");
             }
 
             return actualFailure;
@@ -101,8 +102,13 @@ public class ActorContext {
     private final Dispatchers dispatchers;
 
     private volatile SchemaContext schemaContext;
+
+    // Used as a write memory barrier.
+    @SuppressWarnings("unused")
     private volatile boolean updated;
-    private final MetricRegistry metricRegistry = MetricsReporter.getInstance(DatastoreContext.METRICS_DOMAIN).getMetricsRegistry();
+
+    private final MetricRegistry metricRegistry = MetricsReporter.getInstance(DatastoreContext.METRICS_DOMAIN)
+            .getMetricsRegistry();
 
     private final PrimaryShardInfoFutureCache primaryShardInfoCache;
     private final ShardStrategyFactory shardStrategyFactory;
@@ -171,7 +177,7 @@ public class ActorContext {
     public void setSchemaContext(SchemaContext schemaContext) {
         this.schemaContext = schemaContext;
 
-        if(shardManager != null) {
+        if (shardManager != null) {
             shardManager.tell(new UpdateSchemaContext(schemaContext), ActorRef.noSender());
         }
     }
@@ -189,7 +195,7 @@ public class ActorContext {
 
         updated = true;
 
-        if(shardManager != null) {
+        if (shardManager != null) {
             shardManager.tell(contextFactory, ActorRef.noSender());
         }
     }
@@ -200,7 +206,7 @@ public class ActorContext {
 
     public Future<PrimaryShardInfo> findPrimaryShardAsync(final String shardName) {
         Future<PrimaryShardInfo> ret = primaryShardInfoCache.getIfPresent(shardName);
-        if(ret != null){
+        if (ret != null) {
             return ret;
         }
         Future<Object> future = executeOperationAsync(shardManager,
@@ -209,20 +215,20 @@ public class ActorContext {
         return future.transform(new Mapper<Object, PrimaryShardInfo>() {
             @Override
             public PrimaryShardInfo checkedApply(Object response) throws UnknownMessageException {
-                if(response instanceof RemotePrimaryShardFound) {
+                if (response instanceof RemotePrimaryShardFound) {
                     LOG.debug("findPrimaryShardAsync received: {}", response);
                     RemotePrimaryShardFound found = (RemotePrimaryShardFound)response;
                     return onPrimaryShardFound(shardName, found.getPrimaryPath(), found.getPrimaryVersion(), null);
-                } else if(response instanceof LocalPrimaryShardFound) {
+                } else if (response instanceof LocalPrimaryShardFound) {
                     LOG.debug("findPrimaryShardAsync received: {}", response);
                     LocalPrimaryShardFound found = (LocalPrimaryShardFound)response;
                     return onPrimaryShardFound(shardName, found.getPrimaryPath(), DataStoreVersions.CURRENT_VERSION,
                             found.getLocalShardDataTree());
-                } else if(response instanceof NotInitializedException) {
+                } else if (response instanceof NotInitializedException) {
                     throw (NotInitializedException)response;
-                } else if(response instanceof PrimaryNotFoundException) {
+                } else if (response instanceof PrimaryNotFoundException) {
                     throw (PrimaryNotFoundException)response;
-                } else if(response instanceof NoShardLeaderException) {
+                } else if (response instanceof NoShardLeaderException) {
                     throw (NoShardLeaderException)response;
                 }
 
@@ -242,7 +248,7 @@ public class ActorContext {
     }
 
     /**
-     * Finds a local shard given its shard name and return it's ActorRef
+     * Finds a local shard given its shard name and return it's ActorRef.
      *
      * @param shardName the name of the local shard that needs to be found
      * @return a reference to a local shard actor which represents the shard
@@ -273,13 +279,13 @@ public class ActorContext {
         return future.map(new Mapper<Object, ActorRef>() {
             @Override
             public ActorRef checkedApply(Object response) throws Throwable {
-                if(response instanceof LocalShardFound) {
+                if (response instanceof LocalShardFound) {
                     LocalShardFound found = (LocalShardFound)response;
                     LOG.debug("Local shard found {}", found.getPath());
                     return found.getPath();
-                } else if(response instanceof NotInitializedException) {
+                } else if (response instanceof NotInitializedException) {
                     throw (NotInitializedException)response;
-                } else if(response instanceof LocalShardNotFound) {
+                } else if (response instanceof LocalShardNotFound) {
                     throw new LocalShardNotFoundException(
                             String.format("Local shard for %s does not exist.", shardName));
                 }
@@ -291,20 +297,40 @@ public class ActorContext {
     }
 
     /**
-     * Executes an operation on a local actor and wait for it's response
+     * Executes an operation on a local actor and wait for it's response.
      *
-     * @param actor
-     * @param message
+     * @param actor the actor
+     * @param message the message to send
      * @return The response of the operation
      */
+    @SuppressWarnings("checkstyle:IllegalCatch")
     public Object executeOperation(ActorRef actor, Object message) {
         Future<Object> future = executeOperationAsync(actor, message, operationTimeout);
 
         try {
             return Await.result(future, operationDuration);
         } catch (Exception e) {
-            throw new TimeoutException("Sending message " + message.getClass().toString() +
-                    " to actor " + actor.toString() + " failed. Try again later.", e);
+            throw new TimeoutException("Sending message " + message.getClass().toString()
+                    + " to actor " + actor.toString() + " failed. Try again later.", e);
+        }
+    }
+
+    /**
+     * Execute an operation on a remote actor and wait for it's response.
+     *
+     * @param actor the actor
+     * @param message the message
+     * @return the response message
+     */
+    @SuppressWarnings("checkstyle:IllegalCatch")
+    public Object executeOperation(ActorSelection actor, Object message) {
+        Future<Object> future = executeOperationAsync(actor, message);
+
+        try {
+            return Await.result(future, operationDuration);
+        } catch (Exception e) {
+            throw new TimeoutException("Sending message " + message.getClass().toString()
+                    + " to actor " + actor.toString() + " failed. Try again later.", e);
         }
     }
 
@@ -314,24 +340,6 @@ public class ActorContext {
 
         LOG.debug("Sending message {} to {}", message.getClass(), actor);
         return doAsk(actor, message, timeout);
-    }
-
-    /**
-     * Execute an operation on a remote actor and wait for it's response
-     *
-     * @param actor
-     * @param message
-     * @return
-     */
-    public Object executeOperation(ActorSelection actor, Object message) {
-        Future<Object> future = executeOperationAsync(actor, message);
-
-        try {
-            return Await.result(future, operationDuration);
-        } catch (Exception e) {
-            throw new TimeoutException("Sending message " + message.getClass().toString() +
-                    " to actor " + actor.toString() + " failed. Try again later.", e);
-        }
     }
 
     /**
@@ -379,11 +387,12 @@ public class ActorContext {
         actor.tell(message, ActorRef.noSender());
     }
 
+    @SuppressWarnings("checkstyle:IllegalCatch")
     public void shutdown() {
         FiniteDuration duration = datastoreContext.getShardRaftConfig().getElectionTimeOutInterval().$times(3);
         try {
             Await.ready(Patterns.gracefulStop(shardManager, duration, Shutdown.INSTANCE), duration);
-        } catch(Exception e) {
+        } catch (Exception e) {
             LOG.warn("ShardManager for {} data store did not shutdown gracefully", getDataStoreName(), e);
         }
     }
@@ -392,21 +401,21 @@ public class ActorContext {
         return clusterWrapper;
     }
 
-    public MemberName getCurrentMemberName(){
+    public MemberName getCurrentMemberName() {
         return clusterWrapper.getCurrentMemberName();
     }
 
     /**
-     * Send the message to each and every shard
+     * Send the message to each and every shard.
      */
-    public void broadcast(final Function<Short, Object> messageSupplier, Class<?> messageClass){
-        for(final String shardName : configuration.getAllShardNames()){
+    public void broadcast(final Function<Short, Object> messageSupplier, Class<?> messageClass) {
+        for (final String shardName : configuration.getAllShardNames()) {
 
             Future<PrimaryShardInfo> primaryFuture = findPrimaryShardAsync(shardName);
             primaryFuture.onComplete(new OnComplete<PrimaryShardInfo>() {
                 @Override
                 public void onComplete(Throwable failure, PrimaryShardInfo primaryShardInfo) {
-                    if(failure != null) {
+                    if (failure != null) {
                         LOG.warn("broadcast failed to send message {} to shard {}:  {}",
                             messageClass.getSimpleName(), shardName, failure);
                     } else {
@@ -457,61 +466,64 @@ public class ActorContext {
      * This is a utility method that lets us get a Timer object for any operation. This is a little open-ended to allow
      * us to create a timer for pretty much anything.
      *
-     * @param operationName
-     * @return
+     * @param operationName the name of the operation
+     * @return the Timer instance
      */
-    public Timer getOperationTimer(String operationName){
+    public Timer getOperationTimer(String operationName) {
         return getOperationTimer(datastoreContext.getDataStoreName(), operationName);
     }
 
-    public Timer getOperationTimer(String dataStoreType, String operationName){
+    public Timer getOperationTimer(String dataStoreType, String operationName) {
         final String rate = MetricRegistry.name(DISTRIBUTED_DATA_STORE_METRIC_REGISTRY, dataStoreType,
                 operationName, METRIC_RATE);
         return metricRegistry.timer(rate);
     }
 
     /**
-     * Get the name of the data store to which this ActorContext belongs
+     * Get the name of the data store to which this ActorContext belongs.
      *
-     * @return
+     * @return the data store name
      */
     public String getDataStoreName() {
         return datastoreContext.getDataStoreName();
     }
 
     /**
-     * Get the current transaction creation rate limit
-     * @return
+     * Get the current transaction creation rate limit.
+     *
+     * @return the rate limit
      */
-    public double getTxCreationLimit(){
+    public double getTxCreationLimit() {
         return txRateLimiter.getTxCreationLimit();
     }
 
     /**
      * Try to acquire a transaction creation permit. Will block if no permits are available.
      */
-    public void acquireTxCreationPermit(){
+    public void acquireTxCreationPermit() {
         txRateLimiter.acquire();
     }
 
     /**
-     * Return the operation timeout to be used when committing transactions
-     * @return
+     * Returns the operation timeout to be used when committing transactions.
+     *
+     * @return the operation timeout
      */
-    public Timeout getTransactionCommitOperationTimeout(){
+    public Timeout getTransactionCommitOperationTimeout() {
         return transactionCommitOperationTimeout;
     }
 
     /**
      * An akka dispatcher that is meant to be used when processing ask Futures which were triggered by client
-     * code on the datastore
-     * @return
+     * code on the datastore.
+     *
+     * @return the dispatcher
      */
     public ExecutionContext getClientDispatcher() {
         return this.dispatchers.getDispatcher(Dispatchers.DispatcherType.Client);
     }
 
-    public String getNotificationDispatcherPath(){
+    public String getNotificationDispatcherPath() {
         return this.dispatchers.getDispatcherPath(Dispatchers.DispatcherType.Notification);
     }
 
@@ -523,11 +535,11 @@ public class ActorContext {
         return shardStrategyFactory;
     }
 
-    protected Future<Object> doAsk(ActorRef actorRef, Object message, Timeout timeout){
+    protected Future<Object> doAsk(ActorRef actorRef, Object message, Timeout timeout) {
         return ask(actorRef, message, timeout);
     }
 
-    protected Future<Object> doAsk(ActorSelection actorRef, Object message, Timeout timeout){
+    protected Future<Object> doAsk(ActorSelection actorRef, Object message, Timeout timeout) {
         return ask(actorRef, message, timeout);
     }
 

@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * The PruningDataTreeModification first removes all entries from the data which do not belong in the schemaContext
- * before delegating it to the actual DataTreeModification
+ * before delegating it to the actual DataTreeModification.
  */
 public class PruningDataTreeModification extends ForwardingObject implements DataTreeModification {
 
@@ -53,7 +53,7 @@ public class PruningDataTreeModification extends ForwardingObject implements Dat
     public void delete(YangInstanceIdentifier yangInstanceIdentifier) {
         try {
             delegate.delete(yangInstanceIdentifier);
-        } catch(SchemaValidationFailedException e){
+        } catch (SchemaValidationFailedException e) {
             LOG.warn("Node at path : {} does not exist ignoring delete", yangInstanceIdentifier);
         }
     }
@@ -61,12 +61,12 @@ public class PruningDataTreeModification extends ForwardingObject implements Dat
     @Override
     public void merge(YangInstanceIdentifier yangInstanceIdentifier, NormalizedNode<?, ?> normalizedNode) {
         try {
-            if(YangInstanceIdentifier.EMPTY.equals(yangInstanceIdentifier)){
+            if (YangInstanceIdentifier.EMPTY.equals(yangInstanceIdentifier)) {
                 pruneAndMergeNode(yangInstanceIdentifier, normalizedNode);
             } else {
                 delegate.merge(yangInstanceIdentifier, normalizedNode);
             }
-        } catch (SchemaValidationFailedException e){
+        } catch (SchemaValidationFailedException e) {
             LOG.warn("Node at path {} was pruned during merge due to validation error: {}",
                     yangInstanceIdentifier, e.getMessage());
 
@@ -78,7 +78,7 @@ public class PruningDataTreeModification extends ForwardingObject implements Dat
     private void pruneAndMergeNode(YangInstanceIdentifier yangInstanceIdentifier, NormalizedNode<?, ?> normalizedNode) {
         NormalizedNode<?,?> pruned = pruneNormalizedNode(yangInstanceIdentifier, normalizedNode);
 
-        if(pruned != null) {
+        if (pruned != null) {
             delegate.merge(yangInstanceIdentifier, pruned);
         }
     }
@@ -86,12 +86,12 @@ public class PruningDataTreeModification extends ForwardingObject implements Dat
     @Override
     public void write(YangInstanceIdentifier yangInstanceIdentifier, NormalizedNode<?, ?> normalizedNode) {
         try {
-            if(YangInstanceIdentifier.EMPTY.equals(yangInstanceIdentifier)){
+            if (YangInstanceIdentifier.EMPTY.equals(yangInstanceIdentifier)) {
                 pruneAndWriteNode(yangInstanceIdentifier, normalizedNode);
             } else {
                 delegate.write(yangInstanceIdentifier, normalizedNode);
             }
-        } catch (SchemaValidationFailedException e){
+        } catch (SchemaValidationFailedException e) {
             LOG.warn("Node at path : {} was pruned during write due to validation error: {}",
                     yangInstanceIdentifier, e.getMessage());
 
@@ -102,7 +102,7 @@ public class PruningDataTreeModification extends ForwardingObject implements Dat
     private void pruneAndWriteNode(YangInstanceIdentifier yangInstanceIdentifier, NormalizedNode<?, ?> normalizedNode) {
         NormalizedNode<?,?> pruned = pruneNormalizedNode(yangInstanceIdentifier, normalizedNode);
 
-        if(pruned != null) {
+        if (pruned != null) {
             delegate.write(yangInstanceIdentifier, pruned);
         }
     }
@@ -161,7 +161,7 @@ public class PruningDataTreeModification extends ForwardingObject implements Dat
         public void write(PathArgument child, NormalizedNode<?, ?> data) {
             YangInstanceIdentifier path = current().node(child);
             NormalizedNode<?, ?> prunedNode = pruningModification.pruneNormalizedNode(path, data);
-            if(prunedNode != null) {
+            if (prunedNode != null) {
                 toModification.write(path, prunedNode);
             }
         }
@@ -170,7 +170,7 @@ public class PruningDataTreeModification extends ForwardingObject implements Dat
         public void merge(PathArgument child, NormalizedNode<?, ?> data) {
             YangInstanceIdentifier path = current().node(child);
             NormalizedNode<?, ?> prunedNode = pruningModification.pruneNormalizedNode(path, data);
-            if(prunedNode != null) {
+            if (prunedNode != null) {
                 toModification.merge(path, prunedNode);
             }
         }
@@ -179,7 +179,7 @@ public class PruningDataTreeModification extends ForwardingObject implements Dat
         public void delete(PathArgument child) {
             try {
                 toModification.delete(current().node(child));
-            } catch(SchemaValidationFailedException e) {
+            } catch (SchemaValidationFailedException e) {
                 // Ignoring since we would've already logged this in the call to the original modification.
             }
         }

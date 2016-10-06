@@ -48,14 +48,14 @@ class ShardTransactionMessageRetrySupport implements Closeable {
     }
 
     void retryMessages() {
-        if(messagesToRetry.isEmpty()) {
+        if (messagesToRetry.isEmpty()) {
             return;
         }
 
         MessageInfo[] copy = messagesToRetry.toArray(new MessageInfo[messagesToRetry.size()]);
         messagesToRetry.clear();
 
-        for(MessageInfo info: copy) {
+        for (MessageInfo info: copy) {
             LOG.debug("{}: Retrying message {}", shard.persistenceId(), info.message);
             info.retry(shard);
         }
@@ -72,7 +72,7 @@ class ShardTransactionMessageRetrySupport implements Closeable {
 
     @Override
     public void close() {
-        for(MessageInfo info: messagesToRetry) {
+        for (MessageInfo info: messagesToRetry) {
             info.timedOut(shard);
         }
 
@@ -97,7 +97,8 @@ class ShardTransactionMessageRetrySupport implements Closeable {
         }
 
         void timedOut(Shard shard) {
-            replyTo.tell(new Failure(new NoShardLeaderException(failureMessage, shard.persistenceId())), shard.getSelf());
+            replyTo.tell(new Failure(new NoShardLeaderException(failureMessage, shard.persistenceId())),
+                    shard.getSelf());
         }
     }
 }

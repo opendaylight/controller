@@ -23,7 +23,7 @@ public class AbortTransaction extends AbstractThreePhaseCommitMessage {
 
     public static AbortTransaction fromSerializable(Object serializable) {
         Preconditions.checkArgument(serializable instanceof AbortTransaction);
-            return (AbortTransaction)serializable;
+        return (AbortTransaction)serializable;
     }
 
     public static boolean isSerializedType(Object message) {

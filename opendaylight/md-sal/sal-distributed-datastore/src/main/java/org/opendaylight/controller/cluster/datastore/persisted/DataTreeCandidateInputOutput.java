@@ -80,20 +80,20 @@ public final class DataTreeCandidateInputOutput {
     private static DataTreeCandidateNode readNode(final NormalizedNodeDataInput in) throws IOException {
         final byte type = in.readByte();
         switch (type) {
-        case APPEARED:
-            return readModifiedNode(ModificationType.APPEARED, in);
-        case DELETE:
-            return DeletedDataTreeCandidateNode.create(in.readPathArgument());
-        case DISAPPEARED:
-            return readModifiedNode(ModificationType.DISAPPEARED, in);
-        case SUBTREE_MODIFIED:
-            return readModifiedNode(ModificationType.SUBTREE_MODIFIED, in);
-        case UNMODIFIED:
-            return null;
-        case WRITE:
-            return DataTreeCandidateNodes.fromNormalizedNode(in.readNormalizedNode());
-        default:
-            throw new IllegalArgumentException("Unhandled node type " + type);
+            case APPEARED:
+                return readModifiedNode(ModificationType.APPEARED, in);
+            case DELETE:
+                return DeletedDataTreeCandidateNode.create(in.readPathArgument());
+            case DISAPPEARED:
+                return readModifiedNode(ModificationType.DISAPPEARED, in);
+            case SUBTREE_MODIFIED:
+                return readModifiedNode(ModificationType.SUBTREE_MODIFIED, in);
+            case UNMODIFIED:
+                return null;
+            case WRITE:
+                return DataTreeCandidateNodes.fromNormalizedNode(in.readNormalizedNode());
+            default:
+                throw new IllegalArgumentException("Unhandled node type " + type);
         }
     }
 
@@ -104,17 +104,17 @@ public final class DataTreeCandidateInputOutput {
 
         final DataTreeCandidateNode rootNode;
         switch (type) {
-        case DELETE:
-            rootNode = DeletedDataTreeCandidateNode.create();
-            break;
-        case SUBTREE_MODIFIED:
-            rootNode = ModifiedDataTreeCandidateNode.create(readChildren(reader));
-            break;
-        case WRITE:
-            rootNode = DataTreeCandidateNodes.fromNormalizedNode(reader.readNormalizedNode());
-            break;
-        default:
-            throw new IllegalArgumentException("Unhandled node type " + type);
+            case DELETE:
+                rootNode = DeletedDataTreeCandidateNode.create();
+                break;
+            case SUBTREE_MODIFIED:
+                rootNode = ModifiedDataTreeCandidateNode.create(readChildren(reader));
+                break;
+            case WRITE:
+                rootNode = DataTreeCandidateNodes.fromNormalizedNode(reader.readNormalizedNode());
+                break;
+            default:
+                throw new IllegalArgumentException("Unhandled node type " + type);
         }
 
         return DataTreeCandidates.newDataTreeCandidate(rootPath, rootNode);
@@ -132,34 +132,34 @@ public final class DataTreeCandidateInputOutput {
     private static void writeNode(final NormalizedNodeDataOutput out, final DataTreeCandidateNode node)
             throws IOException {
         switch (node.getModificationType()) {
-        case APPEARED:
-            out.writeByte(APPEARED);
-            out.writePathArgument(node.getIdentifier());
-            writeChildren(out, node.getChildNodes());
-            break;
-        case DELETE:
-            out.writeByte(DELETE);
-            out.writePathArgument(node.getIdentifier());
-            break;
-        case DISAPPEARED:
-            out.writeByte(DISAPPEARED);
-            out.writePathArgument(node.getIdentifier());
-            writeChildren(out, node.getChildNodes());
-            break;
-        case SUBTREE_MODIFIED:
-            out.writeByte(SUBTREE_MODIFIED);
-            out.writePathArgument(node.getIdentifier());
-            writeChildren(out, node.getChildNodes());
-            break;
-        case WRITE:
-            out.writeByte(WRITE);
-            out.writeNormalizedNode(node.getDataAfter().get());
-            break;
-        case UNMODIFIED:
-            out.writeByte(UNMODIFIED);
-            break;
-        default:
-            throw new IllegalArgumentException("Unhandled node type " + node.getModificationType());
+            case APPEARED:
+                out.writeByte(APPEARED);
+                out.writePathArgument(node.getIdentifier());
+                writeChildren(out, node.getChildNodes());
+                break;
+            case DELETE:
+                out.writeByte(DELETE);
+                out.writePathArgument(node.getIdentifier());
+                break;
+            case DISAPPEARED:
+                out.writeByte(DISAPPEARED);
+                out.writePathArgument(node.getIdentifier());
+                writeChildren(out, node.getChildNodes());
+                break;
+            case SUBTREE_MODIFIED:
+                out.writeByte(SUBTREE_MODIFIED);
+                out.writePathArgument(node.getIdentifier());
+                writeChildren(out, node.getChildNodes());
+                break;
+            case WRITE:
+                out.writeByte(WRITE);
+                out.writeNormalizedNode(node.getDataAfter().get());
+                break;
+            case UNMODIFIED:
+                out.writeByte(UNMODIFIED);
+                break;
+            default:
+                throw new IllegalArgumentException("Unhandled node type " + node.getModificationType());
         }
     }
 
@@ -169,30 +169,30 @@ public final class DataTreeCandidateInputOutput {
 
             final DataTreeCandidateNode node = candidate.getRootNode();
             switch (node.getModificationType()) {
-            case APPEARED:
-                writer.writeByte(APPEARED);
-                writeChildren(writer, node.getChildNodes());
-                break;
-            case DELETE:
-                writer.writeByte(DELETE);
-                break;
-            case DISAPPEARED:
-                writer.writeByte(DISAPPEARED);
-                writeChildren(writer, node.getChildNodes());
-                break;
-            case SUBTREE_MODIFIED:
-                writer.writeByte(SUBTREE_MODIFIED);
-                writeChildren(writer, node.getChildNodes());
-                break;
-            case UNMODIFIED:
-                writer.writeByte(UNMODIFIED);
-                break;
-            case WRITE:
-                writer.writeByte(WRITE);
-                writer.writeNormalizedNode(node.getDataAfter().get());
-                break;
-            default:
-                throw new IllegalArgumentException("Unhandled node type " + node.getModificationType());
+                case APPEARED:
+                    writer.writeByte(APPEARED);
+                    writeChildren(writer, node.getChildNodes());
+                    break;
+                case DELETE:
+                    writer.writeByte(DELETE);
+                    break;
+                case DISAPPEARED:
+                    writer.writeByte(DISAPPEARED);
+                    writeChildren(writer, node.getChildNodes());
+                    break;
+                case SUBTREE_MODIFIED:
+                    writer.writeByte(SUBTREE_MODIFIED);
+                    writeChildren(writer, node.getChildNodes());
+                    break;
+                case UNMODIFIED:
+                    writer.writeByte(UNMODIFIED);
+                    break;
+                case WRITE:
+                    writer.writeByte(WRITE);
+                    writer.writeNormalizedNode(node.getDataAfter().get());
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unhandled node type " + node.getModificationType());
             }
         }
     }

@@ -17,7 +17,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 
 /**
- * MergeModification stores all the parameters required to merge data into the specified path
+ * MergeModification stores all the parameters required to merge data into the specified path.
  */
 public class MergeModification extends WriteModification {
     private static final long serialVersionUID = 1L;

@@ -36,7 +36,7 @@ public class ShardStrategyFactory {
 
     public static ShardStrategy newShardStrategyInstance(String moduleName, String strategyName,
             Configuration configuration) {
-        if(ModuleShardStrategy.NAME.equals(strategyName)){
+        if (ModuleShardStrategy.NAME.equals(strategyName)) {
             return new ModuleShardStrategy(moduleName, configuration);
         }
 

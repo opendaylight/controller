@@ -45,7 +45,7 @@ final class ShardedDOMStoreWriteTransaction extends AbstractShardedTransaction i
     }
 
     @Override
-    public final void close() {
+    public void close() {
         transaction().abort();
     }
 }

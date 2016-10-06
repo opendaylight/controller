@@ -39,12 +39,12 @@ abstract class AbstractDataListenerSupport<L extends EventListener, R extends Li
         log.debug("{}: onLeadershipChange, isLeader: {}, hasLeader : {}", persistenceId(), isLeader, hasLeader);
 
         final EnableNotification msg = new EnableNotification(isLeader);
-        for(ActorSelection dataChangeListener : actors) {
+        for (ActorSelection dataChangeListener : actors) {
             dataChangeListener.tell(msg, getSelf());
         }
 
-        if(hasLeader) {
-            for(D reg : delayedListenerOnAllRegistrations) {
+        if (hasLeader) {
+            for (D reg : delayedListenerOnAllRegistrations) {
                 reg.createDelegate(this);
             }
 
@@ -52,8 +52,8 @@ abstract class AbstractDataListenerSupport<L extends EventListener, R extends Li
             delayedListenerOnAllRegistrations.trimToSize();
         }
 
-        if(isLeader) {
-            for(D reg : delayedListenerRegistrations) {
+        if (isLeader) {
+            for (D reg : delayedListenerRegistrations) {
                 reg.createDelegate(this);
             }
 
@@ -67,14 +67,14 @@ abstract class AbstractDataListenerSupport<L extends EventListener, R extends Li
         log.debug("{}: {} for {}, leader: {}", persistenceId(), logName(), message.getPath(), isLeader);
 
         final ListenerRegistration<L> registration;
-        if((hasLeader && message.isRegisterOnAllInstances()) || isLeader) {
+        if (hasLeader && message.isRegisterOnAllInstances() || isLeader) {
             final Entry<LR, Optional<DataTreeCandidate>> res = createDelegate(message);
             registration = res.getKey();
         } else {
             log.debug("{}: Shard is not the leader - delaying registration", persistenceId());
 
             D delayedReg = newDelayedListenerRegistration(message);
-            if(message.isRegisterOnAllInstances()) {
+            if (message.isRegisterOnAllInstances()) {
                 delayedListenerOnAllRegistrations.add(delayedReg);
             } else {
                 delayedListenerRegistrations.add(delayedReg);

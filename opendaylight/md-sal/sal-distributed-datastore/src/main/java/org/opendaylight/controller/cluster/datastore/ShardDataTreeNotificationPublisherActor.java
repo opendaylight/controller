@@ -29,7 +29,7 @@ public class ShardDataTreeNotificationPublisherActor extends AbstractUntypedActo
 
     @Override
     protected void handleReceive(Object message) {
-        if(message instanceof PublishNotifications) {
+        if (message instanceof PublishNotifications) {
             PublishNotifications publisher = (PublishNotifications)message;
             timer.start();
 
@@ -38,7 +38,7 @@ public class ShardDataTreeNotificationPublisherActor extends AbstractUntypedActo
             } finally {
                 long elapsedTime = timer.elapsed(TimeUnit.MILLISECONDS);
 
-                if(elapsedTime >= ShardDataTreeNotificationPublisher.PUBLISH_DELAY_THRESHOLD_IN_MS) {
+                if (elapsedTime >= ShardDataTreeNotificationPublisher.PUBLISH_DELAY_THRESHOLD_IN_MS) {
                     LOG.warn("{}: Generation of change events for {} took longer than expected. Elapsed time: {}",
                             publisher.logContext, name, timer);
                 } else {

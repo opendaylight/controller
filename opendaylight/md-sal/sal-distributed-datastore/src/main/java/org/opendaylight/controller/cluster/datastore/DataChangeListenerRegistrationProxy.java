@@ -49,8 +49,7 @@ public class DataChangeListenerRegistrationProxy implements ListenerRegistration
     private boolean closed = false;
 
     public <L extends AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>>
-                                                              DataChangeListenerRegistrationProxy (
-            String shardName, ActorContext actorContext, L listener) {
+            DataChangeListenerRegistrationProxy(String shardName, ActorContext actorContext, L listener) {
         this.shardName = shardName;
         this.actorContext = actorContext;
         this.listener = listener;
@@ -72,20 +71,20 @@ public class DataChangeListenerRegistrationProxy implements ListenerRegistration
     }
 
     private void setListenerRegistrationActor(ActorSelection listenerRegistrationActor) {
-        if(listenerRegistrationActor == null) {
+        if (listenerRegistrationActor == null) {
             return;
         }
 
         boolean sendCloseMessage = false;
-        synchronized(this) {
-            if(closed) {
+        synchronized (this) {
+            if (closed) {
                 sendCloseMessage = true;
             } else {
                 this.listenerRegistrationActor = listenerRegistrationActor;
             }
         }
 
-        if(sendCloseMessage) {
+        if (sendCloseMessage) {
             listenerRegistrationActor.tell(CloseDataChangeListenerRegistration.INSTANCE, null);
         }
     }
@@ -99,12 +98,12 @@ public class DataChangeListenerRegistrationProxy implements ListenerRegistration
         findFuture.onComplete(new OnComplete<ActorRef>() {
             @Override
             public void onComplete(Throwable failure, ActorRef shard) {
-                if(failure instanceof LocalShardNotFoundException) {
-                    LOG.debug("No local shard found for {} - DataChangeListener {} at path {} " +
-                            "cannot be registered", shardName, listener, path);
-                } else if(failure != null) {
-                    LOG.error("Failed to find local shard {} - DataChangeListener {} at path {} " +
-                            "cannot be registered: {}", shardName, listener, path, failure);
+                if (failure instanceof LocalShardNotFoundException) {
+                    LOG.debug("No local shard found for {} - DataChangeListener {} at path {} "
+                            + "cannot be registered", shardName, listener, path);
+                } else if (failure != null) {
+                    LOG.error("Failed to find local shard {} - DataChangeListener {} at path {} "
+                            + "cannot be registered: {}", shardName, listener, path, failure);
                 } else {
                     doRegistration(shard, path, scope);
                 }
@@ -120,10 +119,10 @@ public class DataChangeListenerRegistrationProxy implements ListenerRegistration
                     listener instanceof ClusteredDOMDataChangeListener),
                 actorContext.getDatastoreContext().getShardInitializationTimeout());
 
-        future.onComplete(new OnComplete<Object>(){
+        future.onComplete(new OnComplete<Object>() {
             @Override
             public void onComplete(Throwable failure, Object result) {
-                if(failure != null) {
+                if (failure != null) {
                     LOG.error("Failed to register DataChangeListener {} at path {}",
                             listener, path.toString(), failure);
                 } else {
@@ -139,17 +138,17 @@ public class DataChangeListenerRegistrationProxy implements ListenerRegistration
     public void close() {
 
         boolean sendCloseMessage;
-        synchronized(this) {
+        synchronized (this) {
             sendCloseMessage = !closed && listenerRegistrationActor != null;
             closed = true;
         }
 
-        if(sendCloseMessage) {
+        if (sendCloseMessage) {
             listenerRegistrationActor.tell(CloseDataChangeListenerRegistration.INSTANCE, ActorRef.noSender());
             listenerRegistrationActor = null;
         }
 
-        if(dataChangeListenerActor != null) {
+        if (dataChangeListenerActor != null) {
             dataChangeListenerActor.tell(PoisonPill.getInstance(), ActorRef.noSender());
             dataChangeListenerActor = null;
         }

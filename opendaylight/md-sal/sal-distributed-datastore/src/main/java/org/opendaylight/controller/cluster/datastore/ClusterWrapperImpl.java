@@ -21,24 +21,23 @@ public class ClusterWrapperImpl implements ClusterWrapper {
     private final MemberName currentMemberName;
     private final Address selfAddress;
 
-    public ClusterWrapperImpl(ActorSystem actorSystem){
+    public ClusterWrapperImpl(ActorSystem actorSystem) {
         Preconditions.checkNotNull(actorSystem, "actorSystem should not be null");
 
         cluster = Cluster.get(actorSystem);
 
         Preconditions.checkState(cluster.getSelfRoles().size() > 0,
-            "No akka roles were specified\n" +
-                "One way to specify the member name is to pass a property on the command line like so\n" +
-                "   -Dakka.cluster.roles.0=member-3\n" +
-                "member-3 here would be the name of the member"
-        );
+            "No akka roles were specified.\n"
+            + "One way to specify the member name is to pass a property on the command line like so\n"
+            + "   -Dakka.cluster.roles.0=member-3\n"
+            + "member-3 here would be the name of the member");
 
         currentMemberName = MemberName.forName(cluster.getSelfRoles().iterator().next());
         selfAddress = cluster.selfAddress();
     }
 
     @Override
-    public void subscribeToMemberEvents(ActorRef actorRef){
+    public void subscribeToMemberEvents(ActorRef actorRef) {
         Preconditions.checkNotNull(actorRef, "actorRef should not be null");
 
         cluster.subscribe(actorRef, ClusterEvent.initialStateAsEvents(),

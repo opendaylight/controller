@@ -35,14 +35,16 @@ final class DefaultShardDataChangeListenerPublisher implements ShardDataChangeLi
     private final ListenerTree dataChangeListenerTree = ListenerTree.create();
 
     @Override
-    public void submitNotification(final DataChangeListenerRegistration<?> listener, final DOMImmutableDataChangeEvent notification) {
+    public void submitNotification(final DataChangeListenerRegistration<?> listener,
+            final DOMImmutableDataChangeEvent notification) {
         LOG.debug("Notifying listener {} about {}", listener.getInstance(), notification);
 
         listener.getInstance().onDataChanged(notification);
     }
 
     @Override
-    public void submitNotifications(final DataChangeListenerRegistration<?> listener, final Iterable<DOMImmutableDataChangeEvent> notifications) {
+    public void submitNotifications(final DataChangeListenerRegistration<?> listener,
+            final Iterable<DOMImmutableDataChangeEvent> notifications) {
         final AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>> instance = listener.getInstance();
         LOG.debug("Notifying listener {} about {}", instance, notifications);
 
@@ -57,8 +59,9 @@ final class DefaultShardDataChangeListenerPublisher implements ShardDataChangeLi
     }
 
     @Override
-    public <L extends AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>> DataChangeListenerRegistration<L>
-            registerDataChangeListener(YangInstanceIdentifier path, L listener, DataChangeScope scope) {
+    public <L extends AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>>
+            DataChangeListenerRegistration<L> registerDataChangeListener(YangInstanceIdentifier path, L listener,
+                    DataChangeScope scope) {
         return dataChangeListenerTree.registerDataChangeListener(path, listener, scope);
     }
 

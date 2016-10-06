@@ -76,7 +76,7 @@ import scala.concurrent.duration.Duration;
  * Internal shard state, similar to a DOMStore, but optimized for use in the actor system,
  * e.g. it does not expose public interfaces and assumes it is only ever called from a
  * single thread.
- *
+ * <p/>
  * This class is not part of the API contract and is subject to change at any time.
  */
 @NotThreadSafe
@@ -146,9 +146,9 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         return schemaContext;
     }
 
-    void updateSchemaContext(final SchemaContext schemaContext) {
-        dataTree.setSchemaContext(schemaContext);
-        this.schemaContext = Preconditions.checkNotNull(schemaContext);
+    void updateSchemaContext(final SchemaContext newSchemaContext) {
+        dataTree.setSchemaContext(newSchemaContext);
+        this.schemaContext = Preconditions.checkNotNull(newSchemaContext);
     }
 
     /**
@@ -171,7 +171,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         return new MetadataShardDataTreeSnapshot(rootNode, metaBuilder.build());
     }
 
-    private void applySnapshot(final @Nonnull ShardDataTreeSnapshot snapshot,
+    private void applySnapshot(@Nonnull final ShardDataTreeSnapshot snapshot,
             final UnaryOperator<DataTreeModification> wrapper) throws DataValidationFailedException {
         final Stopwatch elapsed = Stopwatch.createStarted();
 
@@ -215,6 +215,17 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         LOG.debug("{}: state snapshot applied in %s", logContext, elapsed);
     }
 
+    /**
+     * Apply a snapshot coming from the leader. This method assumes the leader and follower SchemaContexts match and
+     * does not perform any pruning.
+     *
+     * @param snapshot Snapshot that needs to be applied
+     * @throws DataValidationFailedException when the snapshot fails to apply
+     */
+    void applySnapshot(@Nonnull final ShardDataTreeSnapshot snapshot) throws DataValidationFailedException {
+        applySnapshot(snapshot, UnaryOperator.identity());
+    }
+
     private PruningDataTreeModification wrapWithPruning(final DataTreeModification delegate) {
         return new PruningDataTreeModification(delegate, dataTree, schemaContext);
     }
@@ -237,18 +248,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         applySnapshot(snapshot, this::wrapWithPruning);
     }
 
-
-    /**
-     * Apply a snapshot coming from the leader. This method assumes the leader and follower SchemaContexts match and
-     * does not perform any pruning.
-     *
-     * @param snapshot Snapshot that needs to be applied
-     * @throws DataValidationFailedException when the snapshot fails to apply
-     */
-    void applySnapshot(final @Nonnull ShardDataTreeSnapshot snapshot) throws DataValidationFailedException {
-        applySnapshot(snapshot, UnaryOperator.identity());
-    }
-
+    @SuppressWarnings("checkstyle:IllegalCatch")
     private void applyRecoveryCandidate(final DataTreeCandidate candidate) throws DataValidationFailedException {
         final PruningDataTreeModification mod = wrapWithPruning(dataTree.takeSnapshot().newModification());
         DataTreeCandidates.applyToModification(mod, candidate);
@@ -280,7 +280,8 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
      */
     void applyRecoveryPayload(final @Nonnull Payload payload) throws IOException, DataValidationFailedException {
         if (payload instanceof CommitTransactionPayload) {
-            final Entry<TransactionIdentifier, DataTreeCandidate> e = ((CommitTransactionPayload) payload).getCandidate();
+            final Entry<TransactionIdentifier, DataTreeCandidate> e =
+                    ((CommitTransactionPayload) payload).getCandidate();
             applyRecoveryCandidate(e.getValue());
             allMetadataCommittedTransaction(e.getKey());
         } else if (payload instanceof DataTreeCandidatePayload) {
@@ -330,7 +331,8 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
          */
         if (payload instanceof CommitTransactionPayload) {
             if (identifier == null) {
-                final Entry<TransactionIdentifier, DataTreeCandidate> e = ((CommitTransactionPayload) payload).getCandidate();
+                final Entry<TransactionIdentifier, DataTreeCandidate> e =
+                        ((CommitTransactionPayload) payload).getCandidate();
                 applyReplicatedCandidate(e.getKey(), e.getValue());
                 allMetadataCommittedTransaction(e.getKey());
             } else {
@@ -437,22 +439,23 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
             Optional<DataTreeCandidate>> registerChangeListener(final YangInstanceIdentifier path,
                     final AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>> listener,
                     final DataChangeScope scope) {
-        final DataChangeListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>> reg =
+        DataChangeListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>> reg =
                 dataChangeListenerPublisher.registerDataChangeListener(path, listener, scope);
 
         return new SimpleEntry<>(reg, readCurrentData());
     }
 
     private Optional<DataTreeCandidate> readCurrentData() {
-        final Optional<NormalizedNode<?, ?>> currentState = dataTree.takeSnapshot().readNode(YangInstanceIdentifier.EMPTY);
+        final Optional<NormalizedNode<?, ?>> currentState =
+                dataTree.takeSnapshot().readNode(YangInstanceIdentifier.EMPTY);
         return currentState.isPresent() ? Optional.of(DataTreeCandidates.fromNormalizedNode(
             YangInstanceIdentifier.EMPTY, currentState.get())) : Optional.<DataTreeCandidate>absent();
     }
 
-    public Entry<ListenerRegistration<DOMDataTreeChangeListener>, Optional<DataTreeCandidate>> registerTreeChangeListener(
-            final YangInstanceIdentifier path, final DOMDataTreeChangeListener listener) {
-        final ListenerRegistration<DOMDataTreeChangeListener> reg = treeChangeListenerPublisher.registerTreeChangeListener(
-                path, listener);
+    public Entry<ListenerRegistration<DOMDataTreeChangeListener>, Optional<DataTreeCandidate>>
+            registerTreeChangeListener(final YangInstanceIdentifier path, final DOMDataTreeChangeListener listener) {
+        final ListenerRegistration<DOMDataTreeChangeListener> reg =
+                treeChangeListenerPublisher.registerTreeChangeListener(path, listener);
 
         return new SimpleEntry<>(reg, readCurrentData());
     }
@@ -488,6 +491,8 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     }
 
     /**
+     * Commits a modification.
+     *
      * @deprecated This method violates DataTree containment and will be removed.
      */
     @VisibleForTesting
@@ -502,7 +507,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
 
     public Collection<ShardDataTreeCohort> getAndClearPendingTransactions() {
         Collection<ShardDataTreeCohort> ret = new ArrayList<>(pendingTransactions.size());
-        for(CommitEntry entry: pendingTransactions) {
+        for (CommitEntry entry: pendingTransactions) {
             ret.add(entry.cohort);
         }
 
@@ -510,13 +515,14 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         return ret;
     }
 
+    @SuppressWarnings("checkstyle:IllegalCatch")
     private void processNextTransaction() {
         while (!pendingTransactions.isEmpty()) {
             final CommitEntry entry = pendingTransactions.peek();
             final SimpleShardDataTreeCohort cohort = entry.cohort;
             final DataTreeModification modification = cohort.getDataTreeModification();
 
-            if(cohort.getState() != State.CAN_COMMIT_PENDING) {
+            if (cohort.getState() != State.CAN_COMMIT_PENDING) {
                 break;
             }
 
@@ -538,7 +544,8 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
 
                 // For debugging purposes, allow dumping of the modification. Coupled with the above
                 // precondition log, it should allow us to understand what went on.
-                LOG.debug("{}: Store Tx {}: modifications: {} tree: {}", cohort.getIdentifier(), modification, dataTree);
+                LOG.debug("{}: Store Tx {}: modifications: {} tree: {}", cohort.getIdentifier(), modification,
+                        dataTree);
                 cause = new TransactionCommitFailedException("Data did not pass validation.", e);
             } catch (Exception e) {
                 LOG.warn("{}: Unexpected failure in validation phase", logContext, e);
@@ -568,6 +575,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         processNextTransaction();
     }
 
+    @SuppressWarnings("checkstyle:IllegalCatch")
     void startPreCommit(final SimpleShardDataTreeCohort cohort) {
         final CommitEntry entry = pendingTransactions.peek();
         Preconditions.checkState(entry != null, "Attempted to pre-commit of %s when no transactions pending", cohort);
@@ -599,6 +607,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         processNextTransaction();
     }
 
+    @SuppressWarnings("checkstyle:IllegalCatch")
     private void finishCommit(final SimpleShardDataTreeCohort cohort) {
         final TransactionIdentifier txId = cohort.getIdentifier();
         final DataTreeCandidate candidate = cohort.getCandidate();
@@ -764,12 +773,12 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     }
 
     private void maybeRunOperationOnPendingTransactionsComplete() {
-      if (runOnPendingTransactionsComplete != null && pendingTransactions.isEmpty()) {
-          LOG.debug("{}: Pending transactions complete - running operation {}", logContext,
-                  runOnPendingTransactionsComplete);
+        if (runOnPendingTransactionsComplete != null && pendingTransactions.isEmpty()) {
+            LOG.debug("{}: Pending transactions complete - running operation {}", logContext,
+                    runOnPendingTransactionsComplete);
 
-          runOnPendingTransactionsComplete.run();
-          runOnPendingTransactionsComplete = null;
-      }
-  }
+            runOnPendingTransactionsComplete.run();
+            runOnPendingTransactionsComplete = null;
+        }
+    }
 }

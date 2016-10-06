@@ -48,7 +48,7 @@ class DataTreeCohortActorRegistry extends AbstractRegistrationTree<ActorRef> {
 
     private final Map<ActorRef, RegistrationTreeNode<ActorRef>> cohortToNode = new HashMap<>();
 
-
+    @SuppressWarnings("checkstyle:IllegalCatch")
     void registerCohort(final ActorRef sender, final RegisterCohort cohort) {
         takeLock();
         try {
@@ -92,7 +92,7 @@ class DataTreeCohortActorRegistry extends AbstractRegistrationTree<ActorRef> {
         }
     }
 
-    static abstract class CohortRegistryCommand {
+    abstract static class CohortRegistryCommand {
 
         private final ActorRef cohort;
 
@@ -137,7 +137,8 @@ class DataTreeCohortActorRegistry extends AbstractRegistrationTree<ActorRef> {
         private final Collection<DataTreeCohortActor.CanCommit> messages =
                 new ArrayList<>();
 
-        CanCommitMessageBuilder(final TransactionIdentifier txId, final DataTreeCandidate candidate, final SchemaContext schema) {
+        CanCommitMessageBuilder(final TransactionIdentifier txId, final DataTreeCandidate candidate,
+                final SchemaContext schema) {
             this.txId = Preconditions.checkNotNull(txId);
             this.candidate = Preconditions.checkNotNull(candidate);
             this.schema = schema;
@@ -160,8 +161,8 @@ class DataTreeCohortActorRegistry extends AbstractRegistrationTree<ActorRef> {
             }
         }
 
-        private void lookupAndCreateCanCommits(final YangInstanceIdentifier path, final RegistrationTreeNode<ActorRef> regNode,
-                final DataTreeCandidateNode candNode) {
+        private void lookupAndCreateCanCommits(final YangInstanceIdentifier path,
+                final RegistrationTreeNode<ActorRef> regNode, final DataTreeCandidateNode candNode) {
             if (candNode.getModificationType() == ModificationType.UNMODIFIED) {
                 LOG.debug("Skipping unmodified candidate {}", path);
                 return;
@@ -189,9 +190,9 @@ class DataTreeCohortActorRegistry extends AbstractRegistrationTree<ActorRef> {
 
         private void createCanCommits(final Collection<ActorRef> regs, final YangInstanceIdentifier path,
                 final DataTreeCandidateNode node) {
-            final DOMDataTreeCandidate candidate = DOMDataTreeCandidateTO.create(treeIdentifier(path), node);
+            final DOMDataTreeCandidate domCandidate = DOMDataTreeCandidateTO.create(treeIdentifier(path), node);
             for (final ActorRef reg : regs) {
-                final CanCommit message = new DataTreeCohortActor.CanCommit(txId, candidate, schema, reg);
+                final CanCommit message = new DataTreeCohortActor.CanCommit(txId, domCandidate, schema, reg);
                 messages.add(message);
             }
         }

@@ -14,18 +14,18 @@ import javax.annotation.concurrent.GuardedBy;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 
-abstract class DelayedListenerRegistration<L extends EventListener, R> implements ListenerRegistration<L> {
-    private final R registrationMessage;
+abstract class DelayedListenerRegistration<L extends EventListener, M> implements ListenerRegistration<L> {
+    private final M registrationMessage;
     private volatile ListenerRegistration<L> delegate;
 
     @GuardedBy("this")
     private boolean closed;
 
-    protected DelayedListenerRegistration(R registrationMessage) {
+    protected DelayedListenerRegistration(M registrationMessage) {
         this.registrationMessage = registrationMessage;
     }
 
-    R getRegistrationMessage() {
+    M getRegistrationMessage() {
         return registrationMessage;
     }
 
@@ -33,10 +33,10 @@ abstract class DelayedListenerRegistration<L extends EventListener, R> implement
         return delegate;
     }
 
-    synchronized <LR extends ListenerRegistration<L>> void createDelegate(
-            final LeaderLocalDelegateFactory<R, LR, Optional<DataTreeCandidate>> factory) {
+    synchronized <R extends ListenerRegistration<L>> void createDelegate(
+            final LeaderLocalDelegateFactory<M, R, Optional<DataTreeCandidate>> factory) {
         if (!closed) {
-            final Entry<LR, Optional<DataTreeCandidate>> res = factory.createDelegate(registrationMessage);
+            final Entry<R, Optional<DataTreeCandidate>> res = factory.createDelegate(registrationMessage);
             this.delegate = res.getKey();
         }
     }

@@ -9,6 +9,7 @@
 package org.opendaylight.controller.cluster.databroker;
 
 import static com.google.common.base.Preconditions.checkState;
+
 import com.google.common.collect.ImmutableMap;
 import java.util.Collections;
 import java.util.EnumMap;
@@ -53,13 +54,15 @@ abstract class AbstractDOMBroker extends AbstractDOMTransactionFactory<DOMStore>
         }
 
         if (treeChange) {
-            extensions = ImmutableMap.<Class<? extends DOMDataBrokerExtension>, DOMDataBrokerExtension>of(DOMDataTreeChangeService.class, new DOMDataTreeChangeService() {
+            extensions = ImmutableMap.of(DOMDataTreeChangeService.class, new DOMDataTreeChangeService() {
                 @Override
-                public <L extends DOMDataTreeChangeListener> ListenerRegistration<L> registerDataTreeChangeListener(final DOMDataTreeIdentifier treeId, final L listener) {
+                public <L extends DOMDataTreeChangeListener> ListenerRegistration<L> registerDataTreeChangeListener(
+                        final DOMDataTreeIdentifier treeId, final L listener) {
                     DOMStore publisher = getTxFactories().get(treeId.getDatastoreType());
                     checkState(publisher != null, "Requested logical data store is not available.");
 
-                    return ((DOMStoreTreeChangePublisher) publisher).registerTreeChangeListener(treeId.getRootIdentifier(), listener);
+                    return ((DOMStoreTreeChangePublisher) publisher).registerTreeChangeListener(
+                            treeId.getRootIdentifier(), listener);
                 }
             });
         } else {
@@ -72,6 +75,7 @@ abstract class AbstractDOMBroker extends AbstractDOMTransactionFactory<DOMStore>
     }
 
     @Override
+    @SuppressWarnings("checkstyle:IllegalCatch")
     public void close() {
         super.close();
 
@@ -91,8 +95,8 @@ abstract class AbstractDOMBroker extends AbstractDOMTransactionFactory<DOMStore>
 
     @Override
     public ListenerRegistration<DOMDataChangeListener> registerDataChangeListener(final LogicalDatastoreType store,
-                                                                                  final YangInstanceIdentifier path, final DOMDataChangeListener listener, final DataChangeScope triggeringScope) {
-
+            final YangInstanceIdentifier path, final DOMDataChangeListener listener,
+            final DataChangeScope triggeringScope) {
         DOMStore potentialStore = getTxFactories().get(store);
         checkState(potentialStore != null, "Requested logical data store is not available.");
         return potentialStore.registerChangeListener(path, listener, triggeringScope);
@@ -107,7 +111,8 @@ abstract class AbstractDOMBroker extends AbstractDOMTransactionFactory<DOMStore>
     public DOMTransactionChain createTransactionChain(final TransactionChainListener listener) {
         checkNotClosed();
 
-        final Map<LogicalDatastoreType, DOMStoreTransactionChain> backingChains = new EnumMap<>(LogicalDatastoreType.class);
+        final Map<LogicalDatastoreType, DOMStoreTransactionChain> backingChains =
+                new EnumMap<>(LogicalDatastoreType.class);
         for (Map.Entry<LogicalDatastoreType, DOMStore> entry : getTxFactories().entrySet()) {
             backingChains.put(entry.getKey(), entry.getValue().createTransactionChain());
         }

@@ -97,7 +97,6 @@ final class ShardCommitCoordinator {
      * @param ready the ForwardedReadyTransaction message to process
      * @param sender the sender of the message
      * @param shard the transaction's shard actor
-     * @param schema
      */
     void handleForwardedReadyTransaction(final ForwardedReadyTransaction ready, final ActorRef sender,
             final Shard shard) {
@@ -217,8 +216,8 @@ final class ShardCommitCoordinator {
         cohortEntry.getTransaction().getSnapshot().applyToCursor(new AbstractBatchedModificationsCursor() {
             @Override
             protected BatchedModifications getModifications() {
-                if (newModifications.isEmpty() ||
-                        newModifications.getLast().getModifications().size() >= maxModificationsPerBatch) {
+                if (newModifications.isEmpty()
+                        || newModifications.getLast().getModifications().size() >= maxModificationsPerBatch) {
                     newModifications.add(new BatchedModifications(from.getTransactionID(), from.getVersion()));
                 }
 
@@ -249,12 +248,12 @@ final class ShardCommitCoordinator {
             }
 
             @Override
-            public void onFailure(final Throwable t) {
+            public void onFailure(final Throwable failure) {
                 log.debug("{}: An exception occurred during canCommit for {}: {}", name,
-                        cohortEntry.getTransactionID(), t);
+                        cohortEntry.getTransactionID(), failure);
 
                 cohortCache.remove(cohortEntry.getTransactionID());
-                cohortEntry.getReplySender().tell(new Failure(t), cohortEntry.getShard().self());
+                cohortEntry.getReplySender().tell(new Failure(failure), cohortEntry.getShard().self());
             }
         });
     }
@@ -300,12 +299,12 @@ final class ShardCommitCoordinator {
             }
 
             @Override
-            public void onFailure(final Throwable t) {
+            public void onFailure(final Throwable failure) {
                 log.error("{} An exception occurred while preCommitting transaction {}", name,
-                        cohortEntry.getTransactionID(), t);
+                        cohortEntry.getTransactionID(), failure);
 
                 cohortCache.remove(cohortEntry.getTransactionID());
-                cohortEntry.getReplySender().tell(new Failure(t), cohortEntry.getShard().self());
+                cohortEntry.getReplySender().tell(new Failure(failure), cohortEntry.getShard().self());
             }
         });
     }
@@ -326,12 +325,12 @@ final class ShardCommitCoordinator {
             }
 
             @Override
-            public void onFailure(final Throwable t) {
+            public void onFailure(final Throwable failure) {
                 log.error("{}, An exception occurred while committing transaction {}", persistenceId(),
-                        cohortEntry.getTransactionID(), t);
+                        cohortEntry.getTransactionID(), failure);
 
                 cohortCache.remove(cohortEntry.getTransactionID());
-                sender.tell(new Failure(t), cohortEntry.getShard().self());
+                sender.tell(new Failure(failure), cohortEntry.getShard().self());
             }
         });
     }
@@ -359,6 +358,7 @@ final class ShardCommitCoordinator {
         doCommit(cohortEntry);
     }
 
+    @SuppressWarnings("checkstyle:IllegalCatch")
     void handleAbort(final Identifier transactionID, final ActorRef sender, final Shard shard) {
         CohortEntry cohortEntry = cohortCache.remove(transactionID);
         if (cohortEntry == null) {
@@ -389,7 +389,7 @@ final class ShardCommitCoordinator {
         Iterator<CohortEntry> iter = cohortCache.values().iterator();
         while (iter.hasNext()) {
             CohortEntry cohortEntry = iter.next();
-            if(cohortEntry.isFailed()) {
+            if (cohortEntry.isFailed()) {
                 iter.remove();
             }
         }

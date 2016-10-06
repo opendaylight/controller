@@ -80,16 +80,17 @@ final class CohortEntry {
         return lastBatchedModificationsException;
     }
 
+    @SuppressWarnings("checkstyle:IllegalCatch")
     void applyModifications(final Iterable<Modification> modifications) {
         totalBatchedModificationsReceived++;
-        if(lastBatchedModificationsException == null) {
+        if (lastBatchedModificationsException == null) {
             for (Modification modification : modifications) {
-                    try {
-                        modification.apply(transaction.getSnapshot());
-                    } catch (RuntimeException e) {
-                        lastBatchedModificationsException = e;
-                        throw e;
-                    }
+                try {
+                    modification.apply(transaction.getSnapshot());
+                } catch (RuntimeException e) {
+                    lastBatchedModificationsException = e;
+                    throw e;
+                }
             }
         }
     }
@@ -115,7 +116,7 @@ final class CohortEntry {
 
         cohort = transaction.ready();
 
-        if(cohortDecorator != null) {
+        if (cohortDecorator != null) {
             // Call the hook for unit tests.
             cohort = cohortDecorator.decorate(transactionID, cohort);
         }

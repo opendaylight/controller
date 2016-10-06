@@ -50,6 +50,7 @@ final class DOMBrokerTransactionChain extends AbstractDOMTransactionFactory<DOMS
     private volatile int counter = 0;
 
     /**
+     * Constructs an instance.
      *
      * @param chainId
      *            ID of transaction chain
@@ -60,9 +61,8 @@ final class DOMBrokerTransactionChain extends AbstractDOMTransactionFactory<DOMS
      * @throws NullPointerException
      *             If any of arguments is null.
      */
-    public DOMBrokerTransactionChain(final long chainId,
-                                     final Map<LogicalDatastoreType, DOMStoreTransactionChain> chains,
-                                     AbstractDOMBroker broker, final TransactionChainListener listener) {
+    DOMBrokerTransactionChain(final long chainId, final Map<LogicalDatastoreType, DOMStoreTransactionChain> chains,
+            AbstractDOMBroker broker, final TransactionChainListener listener) {
         super(chains);
         this.chainId = chainId;
         this.broker = Preconditions.checkNotNull(broker);
@@ -94,8 +94,8 @@ final class DOMBrokerTransactionChain extends AbstractDOMTransactionFactory<DOMS
             }
 
             @Override
-            public void onFailure(final Throwable t) {
-                transactionFailed(transaction, t);
+            public void onFailure(final Throwable failure) {
+                transactionFailed(transaction, failure);
             }
         });
 

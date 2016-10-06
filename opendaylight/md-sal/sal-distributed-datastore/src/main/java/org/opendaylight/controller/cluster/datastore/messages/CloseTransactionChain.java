@@ -15,7 +15,8 @@ import java.io.ObjectOutput;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.yangtools.concepts.Identifiable;
 
-public class CloseTransactionChain extends VersionedExternalizableMessage implements Identifiable<LocalHistoryIdentifier> {
+public class CloseTransactionChain extends VersionedExternalizableMessage
+        implements Identifiable<LocalHistoryIdentifier> {
     private static final long serialVersionUID = 1L;
 
     private LocalHistoryIdentifier transactionChainId;
@@ -45,7 +46,7 @@ public class CloseTransactionChain extends VersionedExternalizableMessage implem
         transactionChainId.writeTo(out);
     }
 
-    public static CloseTransactionChain fromSerializable(final Object serializable){
+    public static CloseTransactionChain fromSerializable(final Object serializable) {
         Preconditions.checkArgument(serializable instanceof CloseTransactionChain);
         return (CloseTransactionChain)serializable;
     }

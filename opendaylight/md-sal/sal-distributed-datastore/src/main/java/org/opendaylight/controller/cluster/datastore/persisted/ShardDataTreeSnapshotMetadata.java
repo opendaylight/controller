@@ -16,17 +16,18 @@ import javax.annotation.Nonnull;
  * Base class for various bits of metadata attached to a {@link MetadataShardDataTreeSnapshot}. This class is not
  * an interface because we want to make sure all subclasses implement the externalizable proxy pattern, for which
  * we need to force {@link #readResolve()} to be abstract.
- *
+ * <p/>
  * All concrete subclasses of this class should be final so as to form a distinct set of possible metadata. Since
  * metadata is serialized along with {@link MetadataShardDataTreeSnapshot}, this set is part of the serialization format
  * guarded by {@link PayloadVersion}.
- *
+ * <p/>
  * If a new metadata type is introduced or a type is removed, {@link PayloadVersion} needs to be bumped to ensure
  * compatibility.
  *
  * @author Robert Varga
  */
-public abstract class ShardDataTreeSnapshotMetadata<T extends ShardDataTreeSnapshotMetadata<T>> implements Serializable {
+public abstract class ShardDataTreeSnapshotMetadata<T extends ShardDataTreeSnapshotMetadata<T>>
+        implements Serializable {
     private static final long serialVersionUID = 1L;
 
     ShardDataTreeSnapshotMetadata() {
@@ -38,7 +39,7 @@ public abstract class ShardDataTreeSnapshotMetadata<T extends ShardDataTreeSnaps
     }
 
     /**
-     * Return an Externalizable proxy
+     * Return an Externalizable proxy.
      *
      * @return Externalizable proxy, may not be null
      */

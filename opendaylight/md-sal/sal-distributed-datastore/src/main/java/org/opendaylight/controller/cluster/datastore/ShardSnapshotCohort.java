@@ -62,6 +62,7 @@ class ShardSnapshotCohort implements RaftActorSnapshotCohort {
     }
 
     @Override
+    @SuppressWarnings("checkstyle:IllegalCatch")
     public void applySnapshot(final byte[] snapshotBytes) {
         // Since this will be done only on Recovery or when this actor is a Follower
         // we can safely commit everything in here. We not need to worry about event notifications

@@ -26,7 +26,8 @@ import org.opendaylight.yangtools.concepts.Identifier;
  *
  * @author Robert Varga
  */
-public abstract class AbstractIdentifiablePayload<T extends Identifier> extends Payload implements Identifiable<T>, Serializable {
+public abstract class AbstractIdentifiablePayload<T extends Identifier>
+        extends Payload implements Identifiable<T>, Serializable {
     protected abstract static class AbstractProxy<T extends Identifier> implements Externalizable {
         private static final long serialVersionUID = 1L;
         private byte[] serialized;
@@ -58,15 +59,18 @@ public abstract class AbstractIdentifiablePayload<T extends Identifier> extends 
             return Verify.verifyNotNull(createObject(identifier, serialized));
         }
 
-        protected abstract @Nonnull T readIdentifier(@Nonnull DataInput in) throws IOException;
-        protected abstract @Nonnull Identifiable<T> createObject(@Nonnull T identifier, @Nonnull byte[] serialized);
+        @Nonnull
+        protected abstract T readIdentifier(@Nonnull DataInput in) throws IOException;
+
+        @Nonnull
+        protected abstract Identifiable<T> createObject(@Nonnull T identifier, @Nonnull byte[] serialized);
     }
 
     private static final long serialVersionUID = 1L;
     private final byte[] serialized;
     private final T identifier;
 
-    AbstractIdentifiablePayload(final @Nonnull T identifier, final @Nonnull byte[] serialized) {
+    AbstractIdentifiablePayload(@Nonnull final T identifier, @Nonnull final byte[] serialized) {
         this.identifier = Preconditions.checkNotNull(identifier);
         this.serialized = Preconditions.checkNotNull(serialized);
     }
@@ -85,5 +89,6 @@ public abstract class AbstractIdentifiablePayload<T extends Identifier> extends 
         return Verify.verifyNotNull(externalizableProxy(serialized));
     }
 
-    protected abstract @Nonnull AbstractProxy<T> externalizableProxy(@Nonnull byte[] serialized);
+    @Nonnull
+    protected abstract AbstractProxy<T> externalizableProxy(@Nonnull byte[] serialized);
 }

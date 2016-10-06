@@ -25,8 +25,9 @@ public class NormalizedNodeAggregator {
     private final List<Optional<NormalizedNode<?, ?>>> nodes;
     private final DataTree dataTree;
 
-    private NormalizedNodeAggregator(final YangInstanceIdentifier rootIdentifier, final List<Optional<NormalizedNode<?, ?>>> nodes,
-                             final SchemaContext schemaContext, LogicalDatastoreType logicalDatastoreType) {
+    private NormalizedNodeAggregator(final YangInstanceIdentifier rootIdentifier,
+            final List<Optional<NormalizedNode<?, ?>>> nodes, final SchemaContext schemaContext,
+            LogicalDatastoreType logicalDatastoreType) {
         this.rootIdentifier = rootIdentifier;
         this.nodes = nodes;
         this.dataTree = InMemoryDataTreeFactory.getInstance().create(
@@ -36,18 +37,11 @@ public class NormalizedNodeAggregator {
     }
 
     /**
-     * Combine data from all the nodes in the list into a tree with root as rootIdentifier
-     *
-     * @param nodes
-     * @param schemaContext
-     * @param logicalDatastoreType
-     * @return
-     * @throws DataValidationFailedException
+     * Combine data from all the nodes in the list into a tree with root as rootIdentifier.
      */
     public static Optional<NormalizedNode<?,?>> aggregate(final YangInstanceIdentifier rootIdentifier,
-                                                          final List<Optional<NormalizedNode<?, ?>>> nodes,
-                                                          final SchemaContext schemaContext,
-                                                          LogicalDatastoreType logicalDatastoreType) throws DataValidationFailedException {
+            final List<Optional<NormalizedNode<?, ?>>> nodes, final SchemaContext schemaContext,
+            LogicalDatastoreType logicalDatastoreType) throws DataValidationFailedException {
         return new NormalizedNodeAggregator(rootIdentifier, nodes, schemaContext, logicalDatastoreType).aggregate();
     }
 

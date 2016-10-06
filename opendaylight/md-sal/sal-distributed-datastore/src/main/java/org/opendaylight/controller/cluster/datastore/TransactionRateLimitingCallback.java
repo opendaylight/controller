@@ -17,9 +17,9 @@ import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 
 /**
  * TransactionRateLimitingCallback computes the new transaction rate limit on the successful completion of a
- * transaction
+ * transaction.
  */
-public class TransactionRateLimitingCallback implements OperationCallback{
+public class TransactionRateLimitingCallback implements OperationCallback {
     private static Ticker TICKER = Ticker.systemTicker();
 
     private enum State {
@@ -33,7 +33,7 @@ public class TransactionRateLimitingCallback implements OperationCallback{
     private long elapsedTime;
     private volatile State state = State.STOPPED;
 
-    TransactionRateLimitingCallback(ActorContext actorContext){
+    TransactionRateLimitingCallback(ActorContext actorContext) {
         commitTimer = actorContext.getOperationTimer(ActorContext.COMMIT);
     }
 
@@ -45,7 +45,7 @@ public class TransactionRateLimitingCallback implements OperationCallback{
 
     @Override
     public void pause() {
-        if(state == State.RUNNING) {
+        if (state == State.RUNNING) {
             elapsedTime += TICKER.read() - startTime;
             state = State.PAUSED;
         }
@@ -53,7 +53,7 @@ public class TransactionRateLimitingCallback implements OperationCallback{
 
     @Override
     public void resume() {
-        if(state != State.RUNNING) {
+        if (state != State.RUNNING) {
             startTime = TICKER.read();
             state = State.RUNNING;
         }

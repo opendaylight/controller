@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import javanet.staxutils.IndentingXMLStreamWriter;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
@@ -20,7 +21,6 @@ import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeWrit
 import org.opendaylight.yangtools.yang.data.impl.codec.xml.XMLStreamNormalizedNodeStreamWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import javanet.staxutils.IndentingXMLStreamWriter;
 
 /**
  * Utility class to output NormalizedNodes as XML.
@@ -40,7 +40,7 @@ public final class NormalizedNodeXMLOutput {
         XMLStreamWriter xmlWriter = xmlFactory.createXMLStreamWriter(outStream);
 
         IndentingXMLStreamWriter indenting = new IndentingXMLStreamWriter(xmlWriter);
-        try(NormalizedNodeStreamWriter streamWriter = XMLStreamNormalizedNodeStreamWriter.createSchemaless(
+        try (NormalizedNodeStreamWriter streamWriter = XMLStreamNormalizedNodeStreamWriter.createSchemaless(
                 indenting)) {
             NormalizedNodeWriter nodeWriter = NormalizedNodeWriter.forStreamWriter(streamWriter);
             nodeWriter.write(node);
@@ -49,9 +49,9 @@ public final class NormalizedNodeXMLOutput {
     }
 
     public static void toFile(File file, NormalizedNode<?, ?> node) {
-        try(FileOutputStream outStream = new FileOutputStream(file)) {
+        try (FileOutputStream outStream = new FileOutputStream(file)) {
             toStream(outStream, node);
-        } catch(IOException | XMLStreamException e) {
+        } catch (IOException | XMLStreamException e) {
             LOG.error("Error writing NormalizedNode to file {}", file, e);
         }
     }

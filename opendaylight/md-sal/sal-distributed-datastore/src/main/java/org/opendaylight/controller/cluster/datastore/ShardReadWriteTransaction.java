@@ -14,8 +14,9 @@ import org.opendaylight.controller.cluster.datastore.messages.DataExists;
 import org.opendaylight.controller.cluster.datastore.messages.ReadData;
 
 /**
+ * Actor for a shard read/write transaction.
+ *
  * @author: syedbahm
- * Date: 8/6/14
  */
 public class ShardReadWriteTransaction extends ShardWriteTransaction {
     public ShardReadWriteTransaction(ReadWriteShardDataTreeTransaction transaction, ActorRef shardActor,
@@ -25,9 +26,9 @@ public class ShardReadWriteTransaction extends ShardWriteTransaction {
 
     @Override
     public void handleReceive(Object message) {
-        if(ReadData.isSerializedType(message)) {
+        if (ReadData.isSerializedType(message)) {
             readData(ReadData.fromSerializable(message));
-        } else if(DataExists.isSerializedType(message)) {
+        } else if (DataExists.isSerializedType(message)) {
             dataExists((DataExists) message);
         } else {
             super.handleReceive(message);

@@ -15,15 +15,12 @@ import org.opendaylight.controller.cluster.datastore.messages.DataTreeChanged;
 import org.opendaylight.controller.cluster.datastore.messages.DataTreeChangedReply;
 import org.opendaylight.controller.cluster.datastore.messages.EnableNotification;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeListener;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Proxy actor which acts as a facade to the user-provided listener. Responsible for decapsulating
  * DataTreeChanged messages and dispatching their context to the user.
  */
 final class DataTreeChangeListenerActor extends AbstractUntypedActor {
-    private static final Logger LOG = LoggerFactory.getLogger(DataTreeChangeListenerActor.class);
     private final DOMDataTreeChangeListener listener;
     private boolean notificationsEnabled = false;
 
@@ -42,6 +39,7 @@ final class DataTreeChangeListenerActor extends AbstractUntypedActor {
         }
     }
 
+    @SuppressWarnings("checkstyle:IllegalCatch")
     private void dataChanged(final DataTreeChanged message) {
         // Do nothing if notifications are not enabled
         if (!notificationsEnabled) {
@@ -67,7 +65,7 @@ final class DataTreeChangeListenerActor extends AbstractUntypedActor {
 
     private void enableNotification(final EnableNotification message) {
         notificationsEnabled = message.isEnabled();
-        LOG.debug("{} notifications for listener {}", (notificationsEnabled ? "Enabled" : "Disabled"),
+        LOG.debug("{} notifications for listener {}", notificationsEnabled ? "Enabled" : "Disabled",
                 listener);
     }
 
