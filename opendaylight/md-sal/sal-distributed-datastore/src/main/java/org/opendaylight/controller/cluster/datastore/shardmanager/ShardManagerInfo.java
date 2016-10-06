@@ -42,7 +42,7 @@ final class ShardManagerInfo extends AbstractMXBean implements ShardManagerInfoM
         this.memberName = Preconditions.checkNotNull(memberName);
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "checkstyle:IllegalCatch"})
     @Override
     public List<String> getLocalShards() {
         try {
@@ -67,6 +67,7 @@ final class ShardManagerInfo extends AbstractMXBean implements ShardManagerInfoM
         return memberName.getName();
     }
 
+    @SuppressWarnings("checkstyle:IllegalCatch")
     private void requestSwitchShardState(final ShardIdentifier shardId, final String newState, final long term) {
         // Validates strings argument
         final RaftState state = RaftState.valueOf(newState);

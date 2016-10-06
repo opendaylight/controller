@@ -12,6 +12,8 @@ import akka.actor.ActorSystem;
 import com.google.common.collect.ForwardingObject;
 import org.opendaylight.controller.cluster.ActorSystemProvider;
 import org.opendaylight.controller.cluster.ActorSystemProviderListener;
+import org.opendaylight.controller.config.api.DependencyResolver;
+import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.config.api.osgi.WaitingServiceTracker;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.osgi.framework.BundleContext;
@@ -19,11 +21,12 @@ import org.osgi.framework.BundleContext;
 public class ActorSystemProviderModule extends AbstractActorSystemProviderModule {
     private BundleContext bundleContext;
 
-    public ActorSystemProviderModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier, org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
+    public ActorSystemProviderModule(ModuleIdentifier identifier, DependencyResolver dependencyResolver) {
         super(identifier, dependencyResolver);
     }
 
-    public ActorSystemProviderModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier, org.opendaylight.controller.config.api.DependencyResolver dependencyResolver, ActorSystemProviderModule oldModule, java.lang.AutoCloseable oldInstance) {
+    public ActorSystemProviderModule(ModuleIdentifier identifier, DependencyResolver dependencyResolver,
+            ActorSystemProviderModule oldModule, AutoCloseable oldInstance) {
         super(identifier, dependencyResolver, oldModule, oldInstance);
     }
 

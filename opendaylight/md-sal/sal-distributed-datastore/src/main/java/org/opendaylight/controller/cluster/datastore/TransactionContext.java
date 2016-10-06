@@ -32,15 +32,16 @@ interface TransactionContext {
      * Invoked by {@link TransactionContextWrapper} when it has finished handing
      * off operations to this context. From this point on, the context is responsible
      * for throttling operations.
-     *
+     * <p/>
      * Implementations can rely on the wrapper calling this operation in a synchronized
      * block, so they do not need to ensure visibility of this state transition themselves.
      */
     void operationHandOffComplete();
 
     /**
-     * A TransactionContext that uses Operation limiting should return true else false
-     * @return
+     * A TransactionContext that uses operation limiting should return true else false.
+     *
+     * @return true if operation limiting is used, false otherwise
      */
     boolean usesOperationLimiting();
 

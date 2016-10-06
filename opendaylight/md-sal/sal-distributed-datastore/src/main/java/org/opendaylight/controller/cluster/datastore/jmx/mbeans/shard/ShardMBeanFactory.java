@@ -9,8 +9,9 @@ package org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard;
 
 
 /**
- * @author Basheeruddin syedbahm@cisco.com
+ * Factory for creating ShardStats mbeans.
  *
+ * @author Basheeruddin syedbahm@cisco.com
  */
 public class ShardMBeanFactory {
 

@@ -12,7 +12,8 @@ import java.io.Serializable;
 
 public final class CloseDataTreeChangeListenerRegistrationReply implements Serializable {
     private static final long serialVersionUID = 1L;
-    private static final CloseDataTreeChangeListenerRegistrationReply INSTANCE = new CloseDataTreeChangeListenerRegistrationReply();
+    private static final CloseDataTreeChangeListenerRegistrationReply INSTANCE =
+            new CloseDataTreeChangeListenerRegistrationReply();
 
     private CloseDataTreeChangeListenerRegistrationReply() {
         // Use getInstance() instead

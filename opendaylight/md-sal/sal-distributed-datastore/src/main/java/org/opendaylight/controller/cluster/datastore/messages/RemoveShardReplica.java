@@ -26,12 +26,12 @@ public class RemoveShardReplica {
      *
      * @param shardName name of the local shard that is to be dynamically removed.
      */
-    public RemoveShardReplica (@Nonnull String shardName, @Nonnull MemberName memberName) {
+    public RemoveShardReplica(@Nonnull String shardName, @Nonnull MemberName memberName) {
         this.shardName = Preconditions.checkNotNull(shardName, "shardName should not be null");
         this.memberName = Preconditions.checkNotNull(memberName, "memberName should not be null");
     }
 
-    public String getShardName(){
+    public String getShardName() {
         return shardName;
     }
 

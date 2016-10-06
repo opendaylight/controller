@@ -35,24 +35,26 @@ public abstract class AbstractDOMTransactionFactory<T extends DOMStoreTransactio
 
     /**
      * Implementations must return unique identifier for each and every call of
-     * this method;
+     * this method.
      *
      * @return new Unique transaction identifier.
      */
     protected abstract Object newTransactionIdentifier();
 
     /**
+     * Submits a transaction asynchronously for commit.
      *
-     * @param transaction
-     * @param cohorts
-     * @return
+     * @param transaction the transaction to submit
+     * @param cohorts the associated cohorts
+     * @return a resulting Future
      */
-    protected abstract CheckedFuture<Void,TransactionCommitFailedException> submit(final DOMDataWriteTransaction transaction,
-                                                                                   final Collection<DOMStoreThreePhaseCommitCohort> cohorts);
+    protected abstract CheckedFuture<Void,TransactionCommitFailedException> submit(DOMDataWriteTransaction transaction,
+            Collection<DOMStoreThreePhaseCommitCohort> cohorts);
 
     /**
+     * Creates a new read-only transaction.
      *
-     * @return
+     * @return the transaction instance
      */
     public final DOMDataReadOnlyTransaction newReadOnlyTransaction() {
         checkNotClosed();
@@ -62,8 +64,9 @@ public abstract class AbstractDOMTransactionFactory<T extends DOMStoreTransactio
 
 
     /**
+     * Creates a new write-only transaction.
      *
-     * @return
+     * @return the transaction instance
      */
     public final DOMDataWriteTransaction newWriteOnlyTransaction() {
         checkNotClosed();
@@ -73,8 +76,9 @@ public abstract class AbstractDOMTransactionFactory<T extends DOMStoreTransactio
 
 
     /**
+     * Creates a new read-write transaction.
      *
-     * @return
+     * @return the transaction instance
      */
     public final DOMDataReadWriteTransaction newReadWriteTransaction() {
         checkNotClosed();

@@ -14,12 +14,12 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionFactory;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 
 public class DOMBrokerWriteOnlyTransaction extends AbstractDOMBrokerWriteTransaction<DOMStoreWriteTransaction> {
+
     /**
-     * Creates new composite Transactions.
+     * Constructs an instance.
      *
-     * @param identifier
-     *            Identifier of transaction.
-     * @param storeTxFactories
+     * @param identifier identifier of transaction.
+     * @param storeTxFactories the backing transaction store factories
      */
     public DOMBrokerWriteOnlyTransaction(Object identifier,
             Map<LogicalDatastoreType, ? extends DOMStoreTransactionFactory> storeTxFactories,

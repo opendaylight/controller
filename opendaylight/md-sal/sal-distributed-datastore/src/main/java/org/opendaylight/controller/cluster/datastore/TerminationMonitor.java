@@ -14,20 +14,20 @@ import org.opendaylight.controller.cluster.common.actor.Monitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TerminationMonitor extends UntypedActor{
+public class TerminationMonitor extends UntypedActor {
     private static final Logger LOG = LoggerFactory.getLogger(TerminationMonitor.class);
     public static final String ADDRESS = "termination-monitor";
 
-    public TerminationMonitor(){
+    public TerminationMonitor() {
         LOG.debug("Created TerminationMonitor");
     }
 
     @Override
     public void onReceive(Object message) throws Exception {
-        if(message instanceof Terminated){
+        if (message instanceof Terminated) {
             Terminated terminated = (Terminated) message;
             LOG.debug("Actor terminated : {}", terminated.actor());
-        } else if(message instanceof Monitor){
+        } else if (message instanceof Monitor) {
             Monitor monitor = (Monitor) message;
             getContext().watch(monitor.getActorRef());
         }

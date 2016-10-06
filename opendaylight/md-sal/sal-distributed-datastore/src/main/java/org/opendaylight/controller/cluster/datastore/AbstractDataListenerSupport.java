@@ -21,9 +21,9 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-abstract class AbstractDataListenerSupport<L extends EventListener, R extends ListenerRegistrationMessage,
-        D extends DelayedListenerRegistration<L, R>, LR extends ListenerRegistration<L>>
-                extends LeaderLocalDelegateFactory<R, LR, Optional<DataTreeCandidate>> {
+abstract class AbstractDataListenerSupport<L extends EventListener, M extends ListenerRegistrationMessage,
+        D extends DelayedListenerRegistration<L, M>, R extends ListenerRegistration<L>>
+                extends LeaderLocalDelegateFactory<M, R, Optional<DataTreeCandidate>> {
     private final Logger log = LoggerFactory.getLogger(getClass());
 
     private final ArrayList<D> delayedListenerRegistrations = new ArrayList<>();
@@ -39,12 +39,12 @@ abstract class AbstractDataListenerSupport<L extends EventListener, R extends Li
         log.debug("{}: onLeadershipChange, isLeader: {}, hasLeader : {}", persistenceId(), isLeader, hasLeader);
 
         final EnableNotification msg = new EnableNotification(isLeader);
-        for(ActorSelection dataChangeListener : actors) {
+        for (ActorSelection dataChangeListener : actors) {
             dataChangeListener.tell(msg, getSelf());
         }
 
-        if(hasLeader) {
-            for(D reg : delayedListenerOnAllRegistrations) {
+        if (hasLeader) {
+            for (D reg : delayedListenerOnAllRegistrations) {
                 reg.createDelegate(this);
             }
 
@@ -52,8 +52,8 @@ abstract class AbstractDataListenerSupport<L extends EventListener, R extends Li
             delayedListenerOnAllRegistrations.trimToSize();
         }
 
-        if(isLeader) {
-            for(D reg : delayedListenerRegistrations) {
+        if (isLeader) {
+            for (D reg : delayedListenerRegistrations) {
                 reg.createDelegate(this);
             }
 
@@ -63,18 +63,18 @@ abstract class AbstractDataListenerSupport<L extends EventListener, R extends Li
     }
 
     @Override
-    void onMessage(R message, boolean isLeader, boolean hasLeader) {
+    void onMessage(M message, boolean isLeader, boolean hasLeader) {
         log.debug("{}: {} for {}, leader: {}", persistenceId(), logName(), message.getPath(), isLeader);
 
         final ListenerRegistration<L> registration;
-        if((hasLeader && message.isRegisterOnAllInstances()) || isLeader) {
-            final Entry<LR, Optional<DataTreeCandidate>> res = createDelegate(message);
+        if (hasLeader && message.isRegisterOnAllInstances() || isLeader) {
+            final Entry<R, Optional<DataTreeCandidate>> res = createDelegate(message);
             registration = res.getKey();
         } else {
             log.debug("{}: Shard is not the leader - delaying registration", persistenceId());
 
             D delayedReg = newDelayedListenerRegistration(message);
-            if(message.isRegisterOnAllInstances()) {
+            if (message.isRegisterOnAllInstances()) {
                 delayedListenerOnAllRegistrations.add(delayedReg);
             } else {
                 delayedListenerRegistrations.add(delayedReg);
@@ -99,7 +99,7 @@ abstract class AbstractDataListenerSupport<L extends EventListener, R extends Li
         actors.add(actor);
     }
 
-    protected abstract D newDelayedListenerRegistration(R message);
+    protected abstract D newDelayedListenerRegistration(M message);
 
     protected abstract ActorRef newRegistrationActor(ListenerRegistration<L> registration);
 

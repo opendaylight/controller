@@ -42,7 +42,7 @@ public class FileModuleShardConfigProvider implements ModuleShardConfigProvider 
         File modulesFile = new File("./configuration/initial/" + modulesConfigPath);
 
         Config moduleShardsConfig = null;
-        if(moduleShardsFile.exists()) {
+        if (moduleShardsFile.exists()) {
             LOG.info("module shards config file exists - reading config from it");
             moduleShardsConfig = ConfigFactory.parseFile(moduleShardsFile);
         } else {
@@ -51,7 +51,7 @@ public class FileModuleShardConfigProvider implements ModuleShardConfigProvider 
         }
 
         Config modulesConfig = null;
-        if(modulesFile.exists()) {
+        if (modulesFile.exists()) {
             LOG.info("modules config file exists - reading config from it");
             modulesConfig = ConfigFactory.parseFile(modulesFile);
         } else {
@@ -69,19 +69,19 @@ public class FileModuleShardConfigProvider implements ModuleShardConfigProvider 
             Configuration configuration) {
         List<? extends ConfigObject> modulesConfigObjectList = modulesConfig.getObjectList("modules");
 
-        for(ConfigObject o : modulesConfigObjectList){
-            ConfigObjectWrapper w = new ConfigObjectWrapper(o);
+        for (ConfigObject o : modulesConfigObjectList) {
+            ConfigObjectWrapper wrapper = new ConfigObjectWrapper(o);
 
-            String moduleName = w.stringValue("name");
+            String moduleName = wrapper.stringValue("name");
             ModuleConfig.Builder builder = moduleConfigMap.get(moduleName);
-            if(builder == null) {
+            if (builder == null) {
                 builder = ModuleConfig.builder(moduleName);
                 moduleConfigMap.put(moduleName, builder);
             }
 
-            builder.nameSpace(w.stringValue("namespace"));
+            builder.nameSpace(wrapper.stringValue("namespace"));
             builder.shardStrategy(ShardStrategyFactory.newShardStrategyInstance(moduleName,
-                    w.stringValue("shard-strategy"), configuration));
+                    wrapper.stringValue("shard-strategy"), configuration));
         }
     }
 
@@ -90,14 +90,14 @@ public class FileModuleShardConfigProvider implements ModuleShardConfigProvider 
             moduleShardsConfig.getObjectList("module-shards");
 
         Map<String, ModuleConfig.Builder> moduleConfigMap = new HashMap<>();
-        for(ConfigObject moduleShardConfigObject : moduleShardsConfigObjectList){
+        for (ConfigObject moduleShardConfigObject : moduleShardsConfigObjectList) {
             String moduleName = moduleShardConfigObject.get("name").unwrapped().toString();
             ModuleConfig.Builder builder = ModuleConfig.builder(moduleName);
 
             List<? extends ConfigObject> shardsConfigObjectList =
                 moduleShardConfigObject.toConfig().getObjectList("shards");
 
-            for(ConfigObject shard : shardsConfigObjectList){
+            for (ConfigObject shard : shardsConfigObjectList) {
                 String shardName = shard.get("name").unwrapped().toString();
                 List<MemberName> replicas = shard.toConfig().getStringList("replicas").stream()
                         .map(MemberName::forName).collect(Collectors.toList());
@@ -110,15 +110,15 @@ public class FileModuleShardConfigProvider implements ModuleShardConfigProvider 
         return moduleConfigMap;
     }
 
-    private static class ConfigObjectWrapper{
+    private static class ConfigObjectWrapper {
 
         private final ConfigObject configObject;
 
-        ConfigObjectWrapper(final ConfigObject configObject){
+        ConfigObjectWrapper(final ConfigObject configObject) {
             this.configObject = configObject;
         }
 
-        public String stringValue(final String name){
+        public String stringValue(final String name) {
             return configObject.get(name).unwrapped().toString();
         }
     }

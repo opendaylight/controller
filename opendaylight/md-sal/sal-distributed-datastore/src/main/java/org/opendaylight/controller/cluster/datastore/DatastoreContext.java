@@ -39,7 +39,8 @@ public class DatastoreContext {
     public static final int DEFAULT_JOURNAL_RECOVERY_BATCH_SIZE = 1;
     public static final int DEFAULT_SNAPSHOT_BATCH_COUNT = 20000;
     public static final int DEFAULT_HEARTBEAT_INTERVAL_IN_MILLIS = 500;
-    public static final int DEFAULT_ISOLATED_LEADER_CHECK_INTERVAL_IN_MILLIS = DEFAULT_HEARTBEAT_INTERVAL_IN_MILLIS * 10;
+    public static final int DEFAULT_ISOLATED_LEADER_CHECK_INTERVAL_IN_MILLIS =
+            DEFAULT_HEARTBEAT_INTERVAL_IN_MILLIS * 10;
     public static final int DEFAULT_SHARD_TX_COMMIT_QUEUE_CAPACITY = 50000;
     public static final Timeout DEFAULT_SHARD_INITIALIZATION_TIMEOUT = new Timeout(5, TimeUnit.MINUTES);
     public static final Timeout DEFAULT_SHARD_LEADER_ELECTION_TIMEOUT = new Timeout(30, TimeUnit.SECONDS);
@@ -50,10 +51,11 @@ public class DatastoreContext {
     public static final int DEFAULT_TX_CREATION_INITIAL_RATE_LIMIT = 100;
     public static final String UNKNOWN_DATA_STORE_TYPE = "unknown";
     public static final int DEFAULT_SHARD_BATCHED_MODIFICATION_COUNT = 1000;
-    public static final long DEFAULT_SHARD_COMMIT_QUEUE_EXPIRY_TIMEOUT_IN_MS = TimeUnit.MILLISECONDS.convert(2, TimeUnit.MINUTES);
+    public static final long DEFAULT_SHARD_COMMIT_QUEUE_EXPIRY_TIMEOUT_IN_MS =
+            TimeUnit.MILLISECONDS.convert(2, TimeUnit.MINUTES);
     public static final int DEFAULT_SHARD_SNAPSHOT_CHUNK_SIZE = 2048000;
 
-    private static final Set<String> globalDatastoreNames = Sets.newConcurrentHashSet();
+    private static final Set<String> GLOBAL_DATASTORE_NAMES = Sets.newConcurrentHashSet();
 
     private InMemoryDOMDataStoreConfigProperties dataStoreProperties;
     private Duration shardTransactionIdleTimeout = DatastoreContext.DEFAULT_SHARD_TRANSACTION_IDLE_TIMEOUT;
@@ -76,7 +78,7 @@ public class DatastoreContext {
     private String shardManagerPersistenceId;
 
     public static Set<String> getGlobalDatastoreNames() {
-        return globalDatastoreNames;
+        return GLOBAL_DATASTORE_NAMES;
     }
 
     private DatastoreContext() {
@@ -172,11 +174,11 @@ public class DatastoreContext {
         return configurationReader;
     }
 
-    public long getShardElectionTimeoutFactor(){
+    public long getShardElectionTimeoutFactor() {
         return raftConfig.getElectionTimeoutFactor();
     }
 
-    public String getDataStoreName(){
+    public String getDataStoreName() {
         return dataStoreName;
     }
 
@@ -196,12 +198,12 @@ public class DatastoreContext {
         raftConfig.setPeerAddressResolver(resolver);
     }
 
-    private void setHeartbeatInterval(long shardHeartbeatIntervalInMillis){
+    private void setHeartbeatInterval(long shardHeartbeatIntervalInMillis) {
         raftConfig.setHeartBeatInterval(new FiniteDuration(shardHeartbeatIntervalInMillis,
                 TimeUnit.MILLISECONDS));
     }
 
-    private void setShardJournalRecoveryLogBatchSize(int shardJournalRecoveryLogBatchSize){
+    private void setShardJournalRecoveryLogBatchSize(int shardJournalRecoveryLogBatchSize) {
         raftConfig.setJournalRecoveryLogBatchSize(shardJournalRecoveryLogBatchSize);
     }
 
@@ -267,7 +269,7 @@ public class DatastoreContext {
         private Builder(DatastoreContext datastoreContext) {
             this.datastoreContext = datastoreContext;
 
-            if(datastoreContext.getDataStoreProperties() != null) {
+            if (datastoreContext.getDataStoreProperties() != null) {
                 maxShardDataChangeExecutorPoolSize =
                         datastoreContext.getDataStoreProperties().getMaxDataChangeExecutorPoolSize();
                 maxShardDataChangeExecutorQueueSize =
@@ -362,12 +364,12 @@ public class DatastoreContext {
             return shardLeaderElectionTimeout(timeout, TimeUnit.SECONDS);
         }
 
-        public Builder configurationReader(AkkaConfigurationReader configurationReader){
+        public Builder configurationReader(AkkaConfigurationReader configurationReader) {
             datastoreContext.configurationReader = configurationReader;
             return this;
         }
 
-        public Builder persistent(boolean persistent){
+        public Builder persistent(boolean persistent) {
             datastoreContext.persistent = persistent;
             return this;
         }
@@ -377,35 +379,35 @@ public class DatastoreContext {
             return this;
         }
 
-        public Builder shardElectionTimeoutFactor(long shardElectionTimeoutFactor){
+        public Builder shardElectionTimeoutFactor(long shardElectionTimeoutFactor) {
             datastoreContext.setElectionTimeoutFactor(shardElectionTimeoutFactor);
             return this;
         }
 
-        public Builder transactionCreationInitialRateLimit(long initialRateLimit){
+        public Builder transactionCreationInitialRateLimit(long initialRateLimit) {
             datastoreContext.transactionCreationInitialRateLimit = initialRateLimit;
             return this;
         }
 
-        public Builder logicalStoreType(LogicalDatastoreType logicalStoreType){
+        public Builder logicalStoreType(LogicalDatastoreType logicalStoreType) {
             datastoreContext.logicalStoreType = Preconditions.checkNotNull(logicalStoreType);
 
             // Retain compatible naming
             switch (logicalStoreType) {
-            case CONFIGURATION:
-                dataStoreName("config");
-                break;
-            case OPERATIONAL:
-                dataStoreName("operational");
-                break;
-            default:
-                dataStoreName(logicalStoreType.name());
+                case CONFIGURATION:
+                    dataStoreName("config");
+                    break;
+                case OPERATIONAL:
+                    dataStoreName("operational");
+                    break;
+                default:
+                    dataStoreName(logicalStoreType.name());
             }
 
             return this;
         }
 
-        public Builder dataStoreName(String dataStoreName){
+        public Builder dataStoreName(String dataStoreName) {
             datastoreContext.dataStoreName = Preconditions.checkNotNull(dataStoreName);
             datastoreContext.dataStoreMXBeanType = "Distributed" + WordUtils.capitalize(dataStoreName) + "Datastore";
             return this;
@@ -471,8 +473,8 @@ public class DatastoreContext {
                     maxShardDataChangeExecutorPoolSize, maxShardDataChangeExecutorQueueSize,
                     maxShardDataChangeListenerQueueSize, maxShardDataStoreExecutorQueueSize);
 
-            if(datastoreContext.dataStoreName != null) {
-                globalDatastoreNames.add(datastoreContext.dataStoreName);
+            if (datastoreContext.dataStoreName != null) {
+                GLOBAL_DATASTORE_NAMES.add(datastoreContext.dataStoreName);
             }
 
             return datastoreContext;

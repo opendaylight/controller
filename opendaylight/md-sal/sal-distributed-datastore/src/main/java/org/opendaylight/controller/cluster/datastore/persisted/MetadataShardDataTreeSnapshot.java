@@ -29,7 +29,8 @@ import org.slf4j.LoggerFactory;
  * @author Robert Varga
  */
 @Beta
-public final class MetadataShardDataTreeSnapshot extends AbstractVersionedShardDataTreeSnapshot implements Serializable {
+public final class MetadataShardDataTreeSnapshot extends AbstractVersionedShardDataTreeSnapshot
+        implements Serializable {
     private static final class Proxy implements Externalizable {
         private static final long serialVersionUID = 1L;
         private static final Logger LOG = LoggerFactory.getLogger(MetadataShardDataTreeSnapshot.class);
@@ -37,6 +38,9 @@ public final class MetadataShardDataTreeSnapshot extends AbstractVersionedShardD
         private Map<Class<? extends ShardDataTreeSnapshotMetadata<?>>, ShardDataTreeSnapshotMetadata<?>> metadata;
         private NormalizedNode<?, ?> rootNode;
 
+        // checkstyle flags the public modifier as redundant which really doesn't make sense since it clearly isn't
+        // redundant. It is explicitly needed for Java serialization to be able to create instances via reflection.
+        @SuppressWarnings("checkstyle:RedundantModifier")
         public Proxy() {
             // For Externalizable
         }
@@ -62,8 +66,8 @@ public final class MetadataShardDataTreeSnapshot extends AbstractVersionedShardD
             Preconditions.checkArgument(metaSize >= 0, "Invalid negative metadata map length %s", metaSize);
 
             // Default pre-allocate is 4, which should be fine
-            final Builder<Class<? extends ShardDataTreeSnapshotMetadata<?>>, ShardDataTreeSnapshotMetadata<?>> metaBuilder =
-                    ImmutableMap.builder();
+            final Builder<Class<? extends ShardDataTreeSnapshotMetadata<?>>, ShardDataTreeSnapshotMetadata<?>>
+                    metaBuilder = ImmutableMap.builder();
             for (int i = 0; i < metaSize; ++i) {
                 final ShardDataTreeSnapshotMetadata<?> m = (ShardDataTreeSnapshotMetadata<?>) in.readObject();
                 if (m != null) {

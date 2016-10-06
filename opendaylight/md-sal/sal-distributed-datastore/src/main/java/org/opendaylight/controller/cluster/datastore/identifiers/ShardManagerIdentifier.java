@@ -16,15 +16,15 @@ public class ShardManagerIdentifier {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) {
+    public boolean equals(Object obj) {
+        if (this == obj) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
 
-        ShardManagerIdentifier that = (ShardManagerIdentifier) o;
+        ShardManagerIdentifier that = (ShardManagerIdentifier) obj;
 
         if (!type.equals(that.type)) {
             return false;
@@ -44,19 +44,19 @@ public class ShardManagerIdentifier {
         return builder.toString();
     }
 
-    public static Builder builder(){
+    public static Builder builder() {
         return new Builder();
     }
 
     public static class Builder {
         private String type;
 
-        public Builder type(String type){
-            this.type = type;
+        public Builder type(String newType) {
+            this.type = newType;
             return this;
         }
 
-        public ShardManagerIdentifier build(){
+        public ShardManagerIdentifier build() {
             return new ShardManagerIdentifier(this.type);
         }
 

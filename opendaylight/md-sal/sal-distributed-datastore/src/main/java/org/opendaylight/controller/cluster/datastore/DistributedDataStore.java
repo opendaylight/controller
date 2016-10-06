@@ -51,10 +51,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * Implements a distributed DOMStore.
  */
 public class DistributedDataStore implements DistributedDataStoreInterface, SchemaContextListener,
-        DatastoreContextConfigAdminOverlay.Listener, DOMStoreTreeChangePublisher, DOMDataTreeCommitCohortRegistry, AutoCloseable {
+        DatastoreContextConfigAdminOverlay.Listener, DOMStoreTreeChangePublisher,
+        DOMDataTreeCommitCohortRegistry, AutoCloseable {
 
     private static final Logger LOG = LoggerFactory.getLogger(DistributedDataStore.class);
 
@@ -76,6 +77,7 @@ public class DistributedDataStore implements DistributedDataStoreInterface, Sche
 
     private final TransactionContextFactory txContextFactory;
 
+    @SuppressWarnings("checkstyle:IllegalCatch")
     public DistributedDataStore(final ActorSystem actorSystem, final ClusterWrapper cluster,
             final Configuration configuration, final DatastoreContextFactory datastoreContextFactory,
             final DatastoreSnapshot restoreFromSnapshot) {
@@ -94,12 +96,15 @@ public class DistributedDataStore implements DistributedDataStoreInterface, Sche
 
         PrimaryShardInfoFutureCache primaryShardInfoCache = new PrimaryShardInfoFutureCache();
 
-        ShardManagerCreator creator = new ShardManagerCreator().cluster(cluster).configuration(configuration).
-                datastoreContextFactory(datastoreContextFactory).waitTillReadyCountdownLatch(waitTillReadyCountDownLatch).
-                primaryShardInfoCache(primaryShardInfoCache).restoreFromSnapshot(restoreFromSnapshot);
+        ShardManagerCreator creator = new ShardManagerCreator().cluster(cluster).configuration(configuration)
+                .datastoreContextFactory(datastoreContextFactory)
+                .waitTillReadyCountdownLatch(waitTillReadyCountDownLatch)
+                .primaryShardInfoCache(primaryShardInfoCache)
+                .restoreFromSnapshot(restoreFromSnapshot);
 
         actorContext = new ActorContext(actorSystem, createShardManager(actorSystem, creator, shardDispatcher,
-                shardManagerId), cluster, configuration, datastoreContextFactory.getBaseDatastoreContext(), primaryShardInfoCache);
+                shardManagerId), cluster, configuration, datastoreContextFactory.getBaseDatastoreContext(),
+                primaryShardInfoCache);
 
         final Props clientProps = DistributedDataStoreClientActor.props(cluster.getCurrentMemberName(),
             datastoreContextFactory.getBaseDatastoreContext().getDataStoreName(), actorContext);
@@ -115,8 +120,8 @@ public class DistributedDataStore implements DistributedDataStoreInterface, Sche
         identifier = client.getIdentifier();
         LOG.debug("Distributed data store client {} started", identifier);
 
-        this.waitTillReadyTimeInMillis =
-                actorContext.getDatastoreContext().getShardLeaderElectionTimeout().duration().toMillis() * READY_WAIT_FACTOR;
+        this.waitTillReadyTimeInMillis = actorContext.getDatastoreContext().getShardLeaderElectionTimeout()
+                .duration().toMillis() * READY_WAIT_FACTOR;
 
         this.txContextFactory = new TransactionContextFactory(actorContext, identifier);
 
@@ -125,8 +130,8 @@ public class DistributedDataStore implements DistributedDataStoreInterface, Sche
         datastoreConfigMXBean.setContext(datastoreContextFactory.getBaseDatastoreContext());
         datastoreConfigMXBean.registerMBean();
 
-        datastoreInfoMXBean = new DatastoreInfoMXBeanImpl(datastoreContextFactory.getBaseDatastoreContext().
-                getDataStoreMXBeanType(), actorContext);
+        datastoreInfoMXBean = new DatastoreInfoMXBeanImpl(datastoreContextFactory.getBaseDatastoreContext()
+                .getDataStoreMXBeanType(), actorContext);
         datastoreInfoMXBean.registerMBean();
     }
 
@@ -136,8 +141,8 @@ public class DistributedDataStore implements DistributedDataStoreInterface, Sche
         this.client = null;
         this.identifier = Preconditions.checkNotNull(identifier);
         this.txContextFactory = new TransactionContextFactory(actorContext, identifier);
-        this.waitTillReadyTimeInMillis =
-                actorContext.getDatastoreContext().getShardLeaderElectionTimeout().duration().toMillis() * READY_WAIT_FACTOR;
+        this.waitTillReadyTimeInMillis = actorContext.getDatastoreContext().getShardLeaderElectionTimeout()
+                .duration().toMillis() * READY_WAIT_FACTOR;
     }
 
     public void setCloseable(final AutoCloseable closeable) {
@@ -166,7 +171,8 @@ public class DistributedDataStore implements DistributedDataStoreInterface, Sche
     }
 
     @Override
-    public <L extends DOMDataTreeChangeListener> ListenerRegistration<L> registerTreeChangeListener(final YangInstanceIdentifier treeId, final L listener) {
+    public <L extends DOMDataTreeChangeListener> ListenerRegistration<L> registerTreeChangeListener(
+            final YangInstanceIdentifier treeId, final L listener) {
         Preconditions.checkNotNull(treeId, "treeId should not be null");
         Preconditions.checkNotNull(listener, "listener should not be null");
 
@@ -205,7 +211,7 @@ public class DistributedDataStore implements DistributedDataStoreInterface, Sche
 
     @Override
     public DOMStoreReadTransaction newReadOnlyTransaction() {
-       return new TransactionProxy(txContextFactory, TransactionType.READ_ONLY);
+        return new TransactionProxy(txContextFactory, TransactionType.READ_ONLY);
     }
 
     @Override
@@ -234,6 +240,7 @@ public class DistributedDataStore implements DistributedDataStoreInterface, Sche
     }
 
     @Override
+    @SuppressWarnings("checkstyle:IllegalCatch")
     public void close() {
         LOG.info("Closing data store {}", identifier);
 
@@ -265,33 +272,35 @@ public class DistributedDataStore implements DistributedDataStoreInterface, Sche
         return actorContext;
     }
 
-    public void waitTillReady(){
+    public void waitTillReady() {
         LOG.info("Beginning to wait for data store to become ready : {}", identifier);
 
         try {
             if (waitTillReadyCountDownLatch.await(waitTillReadyTimeInMillis, TimeUnit.MILLISECONDS)) {
                 LOG.debug("Data store {} is now ready", identifier);
             } else {
-                LOG.error("Shared leaders failed to settle in {} seconds, giving up", TimeUnit.MILLISECONDS.toSeconds(waitTillReadyTimeInMillis));
+                LOG.error("Shard leaders failed to settle in {} seconds, giving up",
+                        TimeUnit.MILLISECONDS.toSeconds(waitTillReadyTimeInMillis));
             }
         } catch (InterruptedException e) {
             LOG.error("Interrupted while waiting for shards to settle", e);
         }
     }
 
+    @SuppressWarnings("checkstyle:IllegalCatch")
     private static ActorRef createShardManager(final ActorSystem actorSystem, final ShardManagerCreator creator,
             final String shardDispatcher, final String shardManagerId) {
         Exception lastException = null;
 
-        for(int i=0;i<100;i++) {
+        for (int i = 0; i < 100; i++) {
             try {
                 return actorSystem.actorOf(creator.props().withDispatcher(shardDispatcher).withMailbox(
                         ActorContext.BOUNDED_MAILBOX), shardManagerId);
-            } catch (Exception e){
+            } catch (Exception e) {
                 lastException = e;
                 Uninterruptibles.sleepUninterruptibly(100, TimeUnit.MILLISECONDS);
-                LOG.debug("Could not create actor {} because of {} - waiting for sometime before retrying (retry count = {})",
-                    shardManagerId, e.getMessage(), i);
+                LOG.debug("Could not create actor {} because of {} - waiting for sometime before retrying "
+                        + "(retry count = {})", shardManagerId, e.getMessage(), i);
             }
         }
 

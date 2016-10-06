@@ -22,7 +22,8 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.ModificationType;
 abstract class ModifiedDataTreeCandidateNode extends AbstractDataTreeCandidateNode {
     private final Collection<DataTreeCandidateNode> children;
 
-    private ModifiedDataTreeCandidateNode(final ModificationType type, final Collection<DataTreeCandidateNode> children) {
+    private ModifiedDataTreeCandidateNode(final ModificationType type,
+            final Collection<DataTreeCandidateNode> children) {
         super(type);
         this.children = Preconditions.checkNotNull(children);
     }
@@ -36,10 +37,11 @@ abstract class ModifiedDataTreeCandidateNode extends AbstractDataTreeCandidateNo
         };
     }
 
-    static DataTreeCandidateNode create(final PathArgument identifier, final ModificationType type, final Collection<DataTreeCandidateNode> children) {
+    static DataTreeCandidateNode create(final PathArgument identifier, final ModificationType type,
+            final Collection<DataTreeCandidateNode> children) {
         return new ModifiedDataTreeCandidateNode(type, children) {
             @Override
-            public final PathArgument getIdentifier() {
+            public PathArgument getIdentifier() {
                 return identifier;
             }
         };

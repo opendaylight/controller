@@ -19,8 +19,8 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
  *
  * @author Robert Varga
  */
-final class ShardedDOMStoreReadWriteTransaction extends ShardedDOMStoreReadTransaction implements DOMStoreReadWriteTransaction {
-
+final class ShardedDOMStoreReadWriteTransaction extends ShardedDOMStoreReadTransaction
+       implements DOMStoreReadWriteTransaction {
     ShardedDOMStoreReadWriteTransaction(final ClientTransaction tx) {
         super(tx);
     }

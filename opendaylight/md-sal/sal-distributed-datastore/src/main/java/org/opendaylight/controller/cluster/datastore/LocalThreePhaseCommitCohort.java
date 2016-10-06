@@ -40,7 +40,8 @@ class LocalThreePhaseCommitCohort implements DOMStoreThreePhaseCommitCohort {
     private final Exception operationError;
 
     protected LocalThreePhaseCommitCohort(final ActorContext actorContext, final ActorSelection leader,
-            final SnapshotBackedWriteTransaction<TransactionIdentifier> transaction, final DataTreeModification modification) {
+            final SnapshotBackedWriteTransaction<TransactionIdentifier> transaction,
+            final DataTreeModification modification) {
         this.actorContext = Preconditions.checkNotNull(actorContext);
         this.leader = Preconditions.checkNotNull(leader);
         this.transaction = Preconditions.checkNotNull(transaction);
@@ -58,7 +59,7 @@ class LocalThreePhaseCommitCohort implements DOMStoreThreePhaseCommitCohort {
     }
 
     private Future<Object> initiateCommit(final boolean immediate) {
-        if(operationError != null) {
+        if (operationError != null) {
             return Futures.failed(operationError);
         }
 
@@ -132,9 +133,9 @@ class LocalThreePhaseCommitCohort implements DOMStoreThreePhaseCommitCohort {
         throw new UnsupportedOperationException();
     }
 
-    protected void transactionAborted(SnapshotBackedWriteTransaction<TransactionIdentifier> transaction) {
+    protected void transactionAborted(SnapshotBackedWriteTransaction<TransactionIdentifier> aborted) {
     }
 
-    protected void transactionCommitted(SnapshotBackedWriteTransaction<TransactionIdentifier> transaction) {
+    protected void transactionCommitted(SnapshotBackedWriteTransaction<TransactionIdentifier> comitted) {
     }
 }

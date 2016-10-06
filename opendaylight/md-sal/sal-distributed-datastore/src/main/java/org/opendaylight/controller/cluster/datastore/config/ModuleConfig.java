@@ -52,8 +52,8 @@ public class ModuleConfig {
     }
 
     @Nullable
-    public ShardConfig getShardConfig(String name) {
-        return shardConfigs.get(name);
+    public ShardConfig getShardConfig(String forName) {
+        return shardConfigs.get(forName);
     }
 
     @Nonnull
@@ -93,23 +93,23 @@ public class ModuleConfig {
             }
         }
 
-        public Builder name(String name) {
-            this.name = name;
+        public Builder name(String newName) {
+            this.name = newName;
             return this;
         }
 
-        public Builder nameSpace(String nameSpace) {
-            this.nameSpace = nameSpace;
+        public Builder nameSpace(String newNameSpace) {
+            this.nameSpace = newNameSpace;
             return this;
         }
 
-        public Builder shardStrategy(ShardStrategy shardStrategy) {
-            this.shardStrategy = shardStrategy;
+        public Builder shardStrategy(ShardStrategy newShardStrategy) {
+            this.shardStrategy = newShardStrategy;
             return this;
         }
 
-        public Builder shardConfig(String name, Collection<MemberName> replicas) {
-            shardConfigs.put(name, new ShardConfig(name, replicas));
+        public Builder shardConfig(String shardName, Collection<MemberName> replicas) {
+            shardConfigs.put(shardName, new ShardConfig(shardName, replicas));
             return this;
         }
 

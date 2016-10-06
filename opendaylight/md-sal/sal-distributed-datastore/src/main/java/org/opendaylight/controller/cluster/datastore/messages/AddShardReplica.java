@@ -8,8 +8,8 @@
 
 package org.opendaylight.controller.cluster.datastore.messages;
 
-import javax.annotation.Nonnull;
 import com.google.common.base.Preconditions;
+import javax.annotation.Nonnull;
 
 /**
  * A message sent to the ShardManager to dynamically add a new local shard
@@ -27,16 +27,16 @@ public class AddShardReplica {
      * @param shardName name of the shard that is to be locally replicated.
      */
 
-    public AddShardReplica (@Nonnull String shardName){
+    public AddShardReplica(@Nonnull String shardName) {
         this.shardName = Preconditions.checkNotNull(shardName, "ShardName should not be null");
     }
 
-    public String getShardName(){
+    public String getShardName() {
         return this.shardName;
     }
 
     @Override
-    public String toString(){
+    public String toString() {
         return "AddShardReplica[ShardName=" + shardName + "]";
     }
 }

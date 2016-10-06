@@ -32,7 +32,7 @@ public final class DataTreeChangeListenerRegistrationActor extends AbstractUntyp
     protected void handleReceive(Object message) throws Exception {
         if (message instanceof CloseDataTreeChangeListenerRegistration) {
             registration.close();
-            if(isValidSender(getSender())) {
+            if (isValidSender(getSender())) {
                 getSender().tell(CloseDataTreeChangeListenerRegistrationReply.getInstance(), getSelf());
             }
 
@@ -46,7 +46,8 @@ public final class DataTreeChangeListenerRegistrationActor extends AbstractUntyp
         return Props.create(new DataTreeChangeListenerRegistrationCreator(registration));
     }
 
-    private static final class DataTreeChangeListenerRegistrationCreator implements Creator<DataTreeChangeListenerRegistrationActor> {
+    private static final class DataTreeChangeListenerRegistrationCreator
+            implements Creator<DataTreeChangeListenerRegistrationActor> {
         private static final long serialVersionUID = 1L;
         final ListenerRegistration<DOMDataTreeChangeListener> registration;
 

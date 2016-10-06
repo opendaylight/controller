@@ -33,7 +33,7 @@ class ShardPeerAddressResolver implements PeerAddressResolver {
     private final String shardManagerType;
     private final MemberName localMemberName;
 
-    public ShardPeerAddressResolver(String shardManagerType, MemberName localMemberName) {
+    ShardPeerAddressResolver(String shardManagerType, MemberName localMemberName) {
         this.shardManagerIdentifier = ShardManagerIdentifier.builder().type(shardManagerType).build().toString();
         this.shardManagerType = shardManagerType;
         this.localMemberName = Preconditions.checkNotNull(localMemberName);
@@ -53,8 +53,8 @@ class ShardPeerAddressResolver implements PeerAddressResolver {
 
     Collection<String> getShardManagerPeerActorAddresses() {
         Collection<String> peerAddresses = new ArrayList<>();
-        for(Map.Entry<MemberName, Address> entry: memberNameToAddress.entrySet()) {
-            if(!localMemberName.equals(entry.getKey())) {
+        for (Map.Entry<MemberName, Address> entry: memberNameToAddress.entrySet()) {
+            if (!localMemberName.equals(entry.getKey())) {
                 peerAddresses.add(getShardManagerActorPathBuilder(entry.getValue()).toString());
             }
         }
@@ -68,7 +68,7 @@ class ShardPeerAddressResolver implements PeerAddressResolver {
 
     String getShardActorAddress(String shardName, MemberName memberName) {
         Address memberAddress = memberNameToAddress.get(memberName);
-        if(memberAddress != null) {
+        if (memberAddress != null) {
             return getShardManagerActorPathBuilder(memberAddress).append("/").append(
                     getShardIdentifier(memberName, shardName)).toString();
         }

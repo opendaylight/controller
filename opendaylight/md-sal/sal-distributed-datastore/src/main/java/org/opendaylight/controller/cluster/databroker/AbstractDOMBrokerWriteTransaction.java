@@ -36,11 +36,13 @@ public abstract class AbstractDOMBrokerWriteTransaction<T extends DOMStoreWriteT
         extends AbstractDOMBrokerTransaction<T> implements DOMDataWriteTransaction {
 
     @SuppressWarnings("rawtypes")
-    private static final AtomicReferenceFieldUpdater<AbstractDOMBrokerWriteTransaction, AbstractDOMTransactionFactory> IMPL_UPDATER =
-            AtomicReferenceFieldUpdater.newUpdater(AbstractDOMBrokerWriteTransaction.class, AbstractDOMTransactionFactory.class, "commitImpl");
+    private static final AtomicReferenceFieldUpdater<AbstractDOMBrokerWriteTransaction, AbstractDOMTransactionFactory>
+            IMPL_UPDATER = AtomicReferenceFieldUpdater.newUpdater(AbstractDOMBrokerWriteTransaction.class,
+                    AbstractDOMTransactionFactory.class, "commitImpl");
     @SuppressWarnings("rawtypes")
     private static final AtomicReferenceFieldUpdater<AbstractDOMBrokerWriteTransaction, Future> FUTURE_UPDATER =
-            AtomicReferenceFieldUpdater.newUpdater(AbstractDOMBrokerWriteTransaction.class, Future.class, "commitFuture");
+            AtomicReferenceFieldUpdater.newUpdater(AbstractDOMBrokerWriteTransaction.class, Future.class,
+                    "commitFuture");
     private static final Logger LOG = LoggerFactory.getLogger(AbstractDOMBrokerWriteTransaction.class);
     private static final Future<?> CANCELLED_FUTURE = Futures.immediateCancelledFuture();
 
@@ -55,7 +57,7 @@ public abstract class AbstractDOMBrokerWriteTransaction<T extends DOMStoreWriteT
      * Future task of transaction commit. It starts off as null, but is
      * set appropriately on {@link #submit()} and {@link #cancel()} via
      * {@link AtomicReferenceFieldUpdater#lazySet(Object, Object)}.
-     *
+     * <p/>
      * Lazy set is safe for use because it is only referenced to in the
      * {@link #cancel()} slow path, where we will busy-wait for it. The
      * fast path gets the benefit of a store-store barrier instead of the
@@ -64,13 +66,15 @@ public abstract class AbstractDOMBrokerWriteTransaction<T extends DOMStoreWriteT
     private volatile Future<?> commitFuture;
 
     protected AbstractDOMBrokerWriteTransaction(final Object identifier,
-                                            final Map<LogicalDatastoreType, ? extends DOMStoreTransactionFactory> storeTxFactories, final AbstractDOMTransactionFactory<?> commitImpl) {
+            final Map<LogicalDatastoreType, ? extends DOMStoreTransactionFactory> storeTxFactories,
+            final AbstractDOMTransactionFactory<?> commitImpl) {
         super(identifier, storeTxFactories);
         this.commitImpl = Preconditions.checkNotNull(commitImpl, "commitImpl must not be null.");
     }
 
     @Override
-    public void put(final LogicalDatastoreType store, final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
+    public void put(final LogicalDatastoreType store, final YangInstanceIdentifier path,
+            final NormalizedNode<?, ?> data) {
         checkRunning(commitImpl);
         checkInstanceIdentifierReferencesData(path,data);
         getSubtransaction(store).write(path, data);
@@ -80,7 +84,7 @@ public abstract class AbstractDOMBrokerWriteTransaction<T extends DOMStoreWriteT
             final NormalizedNode<?, ?> data) {
         final PathArgument lastArg = path.getLastPathArgument();
         Preconditions.checkArgument(
-                (lastArg == data.getIdentifier()) || (lastArg != null && lastArg.equals(data.getIdentifier())),
+                lastArg == data.getIdentifier() || lastArg != null && lastArg.equals(data.getIdentifier()),
                 "Instance identifier references %s but data identifier is %s", lastArg, data);
     }
 
@@ -91,7 +95,8 @@ public abstract class AbstractDOMBrokerWriteTransaction<T extends DOMStoreWriteT
     }
 
     @Override
-    public void merge(final LogicalDatastoreType store, final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
+    public void merge(final LogicalDatastoreType store, final YangInstanceIdentifier path,
+            final NormalizedNode<?, ?> data) {
         checkRunning(commitImpl);
         checkInstanceIdentifierReferencesData(path, data);
         getSubtransaction(store).merge(path, data);

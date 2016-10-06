@@ -46,19 +46,21 @@ public class DatastoreSnapshotRestore {
 
     // synchronize this method so that, in case of concurrent access to getAndRemove(),
     // no one ends up with partially initialized data
+    @SuppressWarnings("checkstyle:IllegalCatch")
     private synchronized void initialize() {
 
         File restoreDirectoryFile = new File(restoreDirectoryPath);
 
         String[] files = restoreDirectoryFile.list();
-        if(files == null || files.length == 0) {
+        if (files == null || files.length == 0) {
             LOG.debug("Restore directory {} does not exist or is empty", restoreDirectoryFile);
             return;
         }
 
-        if(files.length > 1) {
-            LOG.error("Found {} files in clustered datastore restore directory {} - expected 1. No restore will be attempted",
-                    files.length, restoreDirectoryFile);
+        if (files.length > 1) {
+            LOG.error(
+                "Found {} files in clustered datastore restore directory {} - expected 1. No restore will be attempted",
+                files.length, restoreDirectoryFile);
             return;
         }
 
@@ -66,24 +68,25 @@ public class DatastoreSnapshotRestore {
 
         LOG.info("Clustered datastore will be restored from file {}", restoreFile);
 
-        try(FileInputStream fis = new FileInputStream(restoreFile)) {
+        try (FileInputStream fis = new FileInputStream(restoreFile)) {
             DatastoreSnapshotList snapshots = deserialize(fis);
             LOG.debug("Deserialized {} snapshots", snapshots.size());
 
-            for(DatastoreSnapshot snapshot: snapshots) {
+            for (DatastoreSnapshot snapshot: snapshots) {
                 datastoreSnapshots.put(snapshot.getType(), snapshot);
             }
         } catch (Exception e) {
             LOG.error("Error reading clustered datastore restore file {}", restoreFile, e);
         } finally {
-            if(!restoreFile.delete()) {
+            if (!restoreFile.delete()) {
                 LOG.error("Could not delete clustered datastore restore file {}", restoreFile);
             }
         }
     }
 
-    private static DatastoreSnapshotList deserialize(InputStream inputStream) throws IOException, ClassNotFoundException {
-        try(ObjectInputStream ois = new ObjectInputStream(inputStream)) {
+    private static DatastoreSnapshotList deserialize(InputStream inputStream)
+            throws IOException, ClassNotFoundException {
+        try (ObjectInputStream ois = new ObjectInputStream(inputStream)) {
             return (DatastoreSnapshotList) ois.readObject();
         }
     }

@@ -20,6 +20,8 @@ import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payloa
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 
 /**
+ * Payload wrapper for a DataTreeCandidatePayload.
+ *
  * @deprecated Deprecated in Boron in favor of CommitTransactionPayload
  */
 @Deprecated
@@ -28,6 +30,9 @@ final class DataTreeCandidatePayload extends Payload implements Externalizable, 
 
     private transient byte[] serialized;
 
+    // checkstyle flags the public modifier as redundant which really doesn't make sense since it clearly isn't
+    // redundant. It is explicitly needed for Java serialization to be able to create instances via reflection.
+    @SuppressWarnings("checkstyle:RedundantModifier")
     public DataTreeCandidatePayload() {
         // Required by Externalizable
     }
@@ -37,6 +42,8 @@ final class DataTreeCandidatePayload extends Payload implements Externalizable, 
     }
 
     /**
+     * Creates a DataTreeCandidatePayload.
+     *
      * @deprecated Use CommitTransactionPayload instead
      */
     @Deprecated

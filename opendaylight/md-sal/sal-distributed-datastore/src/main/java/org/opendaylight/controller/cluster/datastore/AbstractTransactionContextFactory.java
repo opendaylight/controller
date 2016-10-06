@@ -62,7 +62,9 @@ abstract class AbstractTransactionContextFactory<F extends LocalTransactionFacto
         return historyId;
     }
 
-    private TransactionContext maybeCreateLocalTransactionContext(final TransactionProxy parent, final String shardName) {
+    @SuppressWarnings("checkstyle:IllegalCatch")
+    private TransactionContext maybeCreateLocalTransactionContext(final TransactionProxy parent,
+            final String shardName) {
         final LocalTransactionFactory local = knownLocal.get(shardName);
         if (local != null) {
             LOG.debug("Tx {} - Creating local component for shard {} using factory {}", parent.getIdentifier(),
@@ -70,7 +72,7 @@ abstract class AbstractTransactionContextFactory<F extends LocalTransactionFacto
 
             try {
                 return createLocalTransactionContext(local, parent);
-            } catch(Exception e) {
+            } catch (Exception e) {
                 return new NoOpTransactionContext(e, parent.getIdentifier());
             }
         }
@@ -80,16 +82,14 @@ abstract class AbstractTransactionContextFactory<F extends LocalTransactionFacto
 
     private void onFindPrimaryShardSuccess(PrimaryShardInfo primaryShardInfo, TransactionProxy parent,
             String shardName, TransactionContextWrapper transactionContextWrapper) {
-        if(LOG.isDebugEnabled()) {
-            LOG.debug("Tx {}: Found primary {} for shard {}", parent.getIdentifier(),
-                    primaryShardInfo.getPrimaryShardActor(), shardName);
-        }
+        LOG.debug("Tx {}: Found primary {} for shard {}", parent.getIdentifier(),
+                primaryShardInfo.getPrimaryShardActor(), shardName);
 
         updateShardInfo(shardName, primaryShardInfo);
 
         try {
             TransactionContext localContext = maybeCreateLocalTransactionContext(parent, shardName);
-            if(localContext != null) {
+            if (localContext != null) {
                 transactionContextWrapper.executePriorTransactionOperations(localContext);
             } else {
                 RemoteTransactionContextSupport remote = new RemoteTransactionContextSupport(transactionContextWrapper,
@@ -113,14 +113,15 @@ abstract class AbstractTransactionContextFactory<F extends LocalTransactionFacto
         }
     }
 
-    final TransactionContextWrapper newTransactionContextWrapper(final TransactionProxy parent, final String shardName) {
+    final TransactionContextWrapper newTransactionContextWrapper(final TransactionProxy parent,
+            final String shardName) {
         final TransactionContextWrapper transactionContextWrapper =
                 new TransactionContextWrapper(parent.getIdentifier(), actorContext);
 
         Future<PrimaryShardInfo> findPrimaryFuture = findPrimaryShard(shardName, parent.getIdentifier());
-        if(findPrimaryFuture.isCompleted()) {
+        if (findPrimaryFuture.isCompleted()) {
             Try<PrimaryShardInfo> maybe = findPrimaryFuture.value().get();
-            if(maybe.isSuccess()) {
+            if (maybe.isSuccess()) {
                 onFindPrimaryShardSuccess(maybe.get(), parent, shardName, transactionContextWrapper);
             } else {
                 onFindPrimaryShardFailure(maybe.failed().get(), parent, shardName, transactionContextWrapper);
@@ -144,13 +145,13 @@ abstract class AbstractTransactionContextFactory<F extends LocalTransactionFacto
     private void updateShardInfo(final String shardName, final PrimaryShardInfo primaryShardInfo) {
         final Optional<DataTree> maybeDataTree = primaryShardInfo.getLocalShardDataTree();
         if (maybeDataTree.isPresent()) {
-            if(!knownLocal.containsKey(shardName)) {
+            if (!knownLocal.containsKey(shardName)) {
                 LOG.debug("Shard {} resolved to local data tree - adding local factory", shardName);
 
                 F factory = factoryForShard(shardName, primaryShardInfo.getPrimaryShardActor(), maybeDataTree.get());
                 knownLocal.putIfAbsent(shardName, factory);
             }
-        } else if(knownLocal.containsKey(shardName)) {
+        } else if (knownLocal.containsKey(shardName)) {
             LOG.debug("Shard {} invalidating local data tree", shardName);
 
             knownLocal.remove(shardName);
@@ -183,8 +184,8 @@ abstract class AbstractTransactionContextFactory<F extends LocalTransactionFacto
      * Create local transaction factory for specified shard, backed by specified shard leader
      * and data tree instance.
      *
-     * @param shardName
-     * @param shardLeader
+     * @param shardName the shard name
+     * @param shardLeader the shard leader
      * @param dataTree Backing data tree instance. The data tree may only be accessed in
      *                 read-only manner.
      * @return Transaction factory for local use.
@@ -196,7 +197,8 @@ abstract class AbstractTransactionContextFactory<F extends LocalTransactionFacto
      * be waited for before the next transaction is allocated.
      * @param cohortFutures Collection of futures
      */
-    protected abstract <T> void onTransactionReady(@Nonnull TransactionIdentifier transaction, @Nonnull Collection<Future<T>> cohortFutures);
+    protected abstract <T> void onTransactionReady(@Nonnull TransactionIdentifier transaction,
+            @Nonnull Collection<Future<T>> cohortFutures);
 
     /**
      * Callback invoked when the internal TransactionContext has been created for a transaction.
@@ -208,7 +210,7 @@ abstract class AbstractTransactionContextFactory<F extends LocalTransactionFacto
     private static TransactionContext createLocalTransactionContext(final LocalTransactionFactory factory,
                                                                     final TransactionProxy parent) {
 
-        switch(parent.getType()) {
+        switch (parent.getType()) {
             case READ_ONLY:
                 final DOMStoreReadTransaction readOnly = factory.newReadOnlyTransaction(parent.getIdentifier());
                 return new LocalTransactionContext(readOnly, parent.getIdentifier(), factory) {
@@ -248,8 +250,8 @@ abstract class AbstractTransactionContextFactory<F extends LocalTransactionFacto
                         throw new UnsupportedOperationException();
                     }
                 };
-             default:
-                 throw new IllegalArgumentException("Invalid transaction type: " + parent.getType());
+            default:
+                throw new IllegalArgumentException("Invalid transaction type: " + parent.getType());
         }
     }
 }

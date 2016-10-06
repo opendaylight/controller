@@ -29,21 +29,22 @@ public class TransactionRateLimiter {
 
     private volatile long pollOnCount = 1;
 
-    public TransactionRateLimiter(ActorContext actorContext){
+    public TransactionRateLimiter(ActorContext actorContext) {
         this.actorContext = actorContext;
         this.commitTimeoutInSeconds = actorContext.getDatastoreContext().getShardTransactionCommitTimeoutInSeconds();
         this.dataStoreName = actorContext.getDataStoreName();
-        this.txRateLimiter = RateLimiter.create(actorContext.getDatastoreContext().getTransactionCreationInitialRateLimit());
+        this.txRateLimiter = RateLimiter.create(actorContext.getDatastoreContext()
+                .getTransactionCreationInitialRateLimit());
     }
 
-    public void acquire(){
+    public void acquire() {
         adjustRateLimit();
         txRateLimiter.acquire();
     }
 
     private void adjustRateLimit() {
         final long count = acquireCount.incrementAndGet();
-        if(count >= pollOnCount) {
+        if (count >= pollOnCount) {
             final Timer commitTimer = actorContext.getOperationTimer(ActorContext.COMMIT);
             double newRateLimit = calculateNewRateLimit(commitTimer, commitTimeoutInSeconds);
 
@@ -53,26 +54,26 @@ public class TransactionRateLimiter {
 
             if (newRateLimit >= 1.0) {
                 txRateLimiter.setRate(newRateLimit);
-                pollOnCount = count + ((long) newRateLimit/2);
+                pollOnCount = count + (long) newRateLimit / 2;
             }
         }
     }
 
-    public double getTxCreationLimit(){
+    public double getTxCreationLimit() {
         return txRateLimiter.getRate();
     }
 
-    private double getRateLimitFromOtherDataStores(){
+    private double getRateLimitFromOtherDataStores() {
         // Since we have no rate data for unused Tx's data store, adjust to the rate from another
         // data store that does have rate data.
-        for(String name: DatastoreContext.getGlobalDatastoreNames()) {
-            if(name.equals(this.dataStoreName)) {
+        for (String name: DatastoreContext.getGlobalDatastoreNames()) {
+            if (name.equals(this.dataStoreName)) {
                 continue;
             }
 
             double newRateLimit = calculateNewRateLimit(actorContext.getOperationTimer(name, ActorContext.COMMIT),
                     this.commitTimeoutInSeconds);
-            if(newRateLimit > 0.0) {
+            if (newRateLimit > 0.0) {
                 LOG.debug("On unused Tx - data Store {} commit rateLimit adjusted to {}",
                         this.dataStoreName, newRateLimit);
 
@@ -84,7 +85,7 @@ public class TransactionRateLimiter {
     }
 
     private static double calculateNewRateLimit(Timer commitTimer, long commitTimeoutInSeconds) {
-        if(commitTimer == null) {
+        if (commitTimer == null) {
             // This can happen in unit tests.
             return 0;
         }
@@ -96,13 +97,13 @@ public class TransactionRateLimiter {
 
         // Find the time that it takes for transactions to get executed in every 10th percentile
         // Compute the rate limit for that percentile and sum it up
-        for(int i=1;i<=10;i++){
+        for (int i = 1; i <= 10; i++) {
             // Get the amount of time transactions take in the i*10th percentile
             double percentileTimeInNanos = timerSnapshot.getValue(i * 0.1D);
 
-            if(percentileTimeInNanos > 0) {
+            if (percentileTimeInNanos > 0) {
                 // Figure out the rate limit for the i*10th percentile in nanos
-                double percentileRateLimit = (commitTimeoutInNanos / percentileTimeInNanos);
+                double percentileRateLimit = commitTimeoutInNanos / percentileTimeInNanos;
 
                 // Add the percentileRateLimit to the total rate limit
                 newRateLimit += percentileRateLimit;
@@ -110,7 +111,7 @@ public class TransactionRateLimiter {
         }
 
         // Compute the rate limit per second
-        return newRateLimit/(commitTimeoutInSeconds*10);
+        return newRateLimit / (commitTimeoutInSeconds * 10);
     }
 
     @VisibleForTesting
@@ -119,13 +120,12 @@ public class TransactionRateLimiter {
     }
 
     @VisibleForTesting
-    void setPollOnCount(long value){
+    void setPollOnCount(long value) {
         pollOnCount = value;
     }
 
     @VisibleForTesting
-    void setAcquireCount(long value){
+    void setAcquireCount(long value) {
         acquireCount.set(value);
     }
-
 }

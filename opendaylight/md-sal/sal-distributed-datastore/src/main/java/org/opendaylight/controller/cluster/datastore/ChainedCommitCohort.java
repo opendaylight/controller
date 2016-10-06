@@ -24,7 +24,8 @@ final class ChainedCommitCohort extends ShardDataTreeCohort {
     private final ShardDataTreeTransactionChain chain;
     private final ShardDataTreeCohort delegate;
 
-    ChainedCommitCohort(final ShardDataTreeTransactionChain chain, final ReadWriteShardDataTreeTransaction transaction, final ShardDataTreeCohort delegate) {
+    ChainedCommitCohort(final ShardDataTreeTransactionChain chain, final ReadWriteShardDataTreeTransaction transaction,
+            final ShardDataTreeCohort delegate) {
         this.transaction = Preconditions.checkNotNull(transaction);
         this.delegate = Preconditions.checkNotNull(delegate);
         this.chain = Preconditions.checkNotNull(chain);
@@ -41,9 +42,9 @@ final class ChainedCommitCohort extends ShardDataTreeCohort {
             }
 
             @Override
-            public void onFailure(final Throwable t) {
-                LOG.error("Transaction {} commit failed, cannot recover", transaction, t);
-                callback.onFailure(t);
+            public void onFailure(final Throwable failure) {
+                LOG.error("Transaction {} commit failed, cannot recover", transaction, failure);
+                callback.onFailure(failure);
             }
         });
     }

@@ -18,7 +18,6 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
-import java.util.function.Function;
 import javax.annotation.Nonnull;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
@@ -40,8 +39,9 @@ import scala.concurrent.Promise;
  * at a time. For remote transactions, it also tracks the outstanding readiness requests
  * towards the shard and unblocks operations only after all have completed.
  */
-final class TransactionChainProxy extends AbstractTransactionContextFactory<LocalTransactionChain> implements DOMStoreTransactionChain {
-    private static abstract class State {
+final class TransactionChainProxy extends AbstractTransactionContextFactory<LocalTransactionChain>
+        implements DOMStoreTransactionChain {
+    private abstract static class State {
         /**
          * Check if it is okay to allocate a new transaction.
          * @throws IllegalStateException if a transaction may not be allocated.
@@ -56,7 +56,7 @@ final class TransactionChainProxy extends AbstractTransactionContextFactory<Loca
         abstract Future<?> previousFuture();
     }
 
-    private static abstract class Pending extends State {
+    private abstract static class Pending extends State {
         private final TransactionIdentifier transaction;
         private final Future<?> previousFuture;
 
@@ -97,7 +97,7 @@ final class TransactionChainProxy extends AbstractTransactionContextFactory<Loca
         }
     }
 
-    private static abstract class DefaultState extends State {
+    private abstract static class DefaultState extends State {
         @Override
         final Future<?> previousFuture() {
             return null;
@@ -129,22 +129,23 @@ final class TransactionChainProxy extends AbstractTransactionContextFactory<Loca
      * This map holds Promise instances for each read-only tx. It is used to maintain ordering of tx creates
      * wrt to read-only tx's between this class and a LocalTransactionChain since they're bridged by
      * asynchronous futures. Otherwise, in the following scenario, eg:
-     *
+     * <p/>
      *   1) Create write tx1 on chain
      *   2) do write and submit
      *   3) Create read-only tx2 on chain and issue read
      *   4) Create write tx3 on chain, do write but do not submit
-     *
+     * <p/>
      * if the sequence/timing is right, tx3 may create its local tx on the LocalTransactionChain before tx2,
      * which results in tx2 failing b/c tx3 isn't ready yet. So maintaining ordering prevents this issue
      * (see Bug 4774).
-     * <p>
+     * <p/>
      * A Promise is added via newReadOnlyTransaction. When the parent class completes the primary shard
      * lookup and creates the TransactionContext (either success or failure), onTransactionContextCreated is
      * called which completes the Promise. A write tx that is created prior to completion will wait on the
      * Promise's Future via findPrimaryShard.
      */
-    private final ConcurrentMap<TransactionIdentifier, Promise<Object>> priorReadOnlyTxPromises = new ConcurrentHashMap<>();
+    private final ConcurrentMap<TransactionIdentifier, Promise<Object>> priorReadOnlyTxPromises =
+            new ConcurrentHashMap<>();
 
     TransactionChainProxy(final TransactionContextFactory parent, final LocalHistoryIdentifier historyId) {
         super(parent.getActorContext(), historyId);
@@ -177,12 +178,8 @@ final class TransactionChainProxy extends AbstractTransactionContextFactory<Loca
 
         // Send a close transaction chain request to each and every shard
 
-        getActorContext().broadcast(new Function<Short, Object>() {
-            @Override
-            public Object apply(Short version) {
-                return new CloseTransactionChain(getHistoryId(), version).toSerializable();
-            }
-        }, CloseTransactionChain.class);
+        getActorContext().broadcast(version -> new CloseTransactionChain(getHistoryId(), version).toSerializable(),
+                CloseTransactionChain.class);
     }
 
     private TransactionProxy allocateWriteTransaction(final TransactionType type) {
@@ -195,7 +192,8 @@ final class TransactionChainProxy extends AbstractTransactionContextFactory<Loca
     }
 
     @Override
-    protected LocalTransactionChain factoryForShard(final String shardName, final ActorSelection shardLeader, final DataTree dataTree) {
+    protected LocalTransactionChain factoryForShard(final String shardName, final ActorSelection shardLeader,
+            final DataTree dataTree) {
         final LocalTransactionChain ret = new LocalTransactionChain(this, shardLeader, dataTree);
         LOG.debug("Allocated transaction chain {} for shard {} leader {}", ret, shardName, shardLeader);
         return ret;
@@ -220,7 +218,7 @@ final class TransactionChainProxy extends AbstractTransactionContextFactory<Loca
 
         final String previousTransactionId;
 
-        if(localState instanceof Pending){
+        if (localState instanceof Pending) {
             previousTransactionId = ((Pending) localState).getIdentifier().toString();
             LOG.debug("Tx: {} - waiting for ready futures with pending Tx {}", txId, previousTransactionId);
         } else {
@@ -257,15 +255,15 @@ final class TransactionChainProxy extends AbstractTransactionContextFactory<Loca
 
     private <T> Future<T> combineFutureWithPossiblePriorReadOnlyTxFutures(final Future<T> future,
             final TransactionIdentifier txId) {
-        if(!priorReadOnlyTxPromises.containsKey(txId) && !priorReadOnlyTxPromises.isEmpty()) {
+        if (!priorReadOnlyTxPromises.containsKey(txId) && !priorReadOnlyTxPromises.isEmpty()) {
             Collection<Entry<TransactionIdentifier, Promise<Object>>> priorReadOnlyTxPromiseEntries =
                     new ArrayList<>(priorReadOnlyTxPromises.entrySet());
-            if(priorReadOnlyTxPromiseEntries.isEmpty()) {
+            if (priorReadOnlyTxPromiseEntries.isEmpty()) {
                 return future;
             }
 
             List<Future<Object>> priorReadOnlyTxFutures = new ArrayList<>(priorReadOnlyTxPromiseEntries.size());
-            for(Entry<TransactionIdentifier, Promise<Object>> entry: priorReadOnlyTxPromiseEntries) {
+            for (Entry<TransactionIdentifier, Promise<Object>> entry: priorReadOnlyTxPromiseEntries) {
                 LOG.debug("Tx: {} - waiting on future for prior read-only Tx {}", txId, entry.getKey());
                 priorReadOnlyTxFutures.add(entry.getValue().future());
             }
@@ -292,11 +290,14 @@ final class TransactionChainProxy extends AbstractTransactionContextFactory<Loca
     }
 
     @Override
-    protected <T> void onTransactionReady(final TransactionIdentifier transaction, final Collection<Future<T>> cohortFutures) {
+    protected <T> void onTransactionReady(final TransactionIdentifier transaction,
+            final Collection<Future<T>> cohortFutures) {
         final State localState = currentState;
-        Preconditions.checkState(localState instanceof Allocated, "Readying transaction %s while state is %s", transaction, localState);
+        Preconditions.checkState(localState instanceof Allocated, "Readying transaction %s while state is %s",
+                transaction, localState);
         final TransactionIdentifier currentTx = ((Allocated)localState).getIdentifier();
-        Preconditions.checkState(transaction.equals(currentTx), "Readying transaction %s while %s is allocated", transaction, currentTx);
+        Preconditions.checkState(transaction.equals(currentTx), "Readying transaction %s while %s is allocated",
+                transaction, currentTx);
 
         // Transaction ready and we are not waiting for futures -- go to idle
         if (cohortFutures.isEmpty()) {
@@ -324,7 +325,7 @@ final class TransactionChainProxy extends AbstractTransactionContextFactory<Loca
     @Override
     protected void onTransactionContextCreated(@Nonnull TransactionIdentifier transactionId) {
         Promise<Object> promise = priorReadOnlyTxPromises.remove(transactionId);
-        if(promise != null) {
+        if (promise != null) {
             promise.success(null);
         }
     }

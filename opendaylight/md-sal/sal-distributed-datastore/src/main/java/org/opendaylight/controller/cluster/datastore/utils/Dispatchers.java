@@ -27,34 +27,35 @@ public class Dispatchers {
         Notification(NOTIFICATION_DISPATCHER_PATH);
 
         private final String path;
-        DispatcherType(String path){
+        DispatcherType(String path) {
             this.path = path;
         }
-        private String path(akka.dispatch.Dispatchers dispatchers){
-            if(dispatchers.hasDispatcher(path)){
+
+        private String path(akka.dispatch.Dispatchers dispatchers) {
+            if (dispatchers.hasDispatcher(path)) {
                 return path;
             }
             return DEFAULT_DISPATCHER_PATH;
         }
 
-        private ExecutionContext dispatcher(akka.dispatch.Dispatchers dispatchers){
-            if(dispatchers.hasDispatcher(path)){
+        private ExecutionContext dispatcher(akka.dispatch.Dispatchers dispatchers) {
+            if (dispatchers.hasDispatcher(path)) {
                 return dispatchers.lookup(path);
             }
             return dispatchers.defaultGlobalDispatcher();
         }
     }
 
-    public Dispatchers(akka.dispatch.Dispatchers dispatchers){
+    public Dispatchers(akka.dispatch.Dispatchers dispatchers) {
         Preconditions.checkNotNull(dispatchers, "dispatchers should not be null");
         this.dispatchers = dispatchers;
     }
 
-    public ExecutionContext getDispatcher(DispatcherType dispatcherType){
+    public ExecutionContext getDispatcher(DispatcherType dispatcherType) {
         return dispatcherType.dispatcher(this.dispatchers);
     }
 
-    public String getDispatcherPath(DispatcherType dispatcherType){
+    public String getDispatcherPath(DispatcherType dispatcherType) {
         return dispatcherType.path(this.dispatchers);
     }
 }

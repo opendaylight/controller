@@ -9,5 +9,6 @@ package org.opendaylight.controller.cluster.datastore;
 
 abstract class ShardDataTreeTransactionParent {
     abstract void abortTransaction(AbstractShardDataTreeTransaction<?> transaction);
+
     abstract ShardDataTreeCohort finishTransaction(ReadWriteShardDataTreeTransaction transaction);
 }

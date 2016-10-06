@@ -51,7 +51,8 @@ class TransactionContextWrapper {
     TransactionContextWrapper(final TransactionIdentifier identifier, final ActorContext actorContext) {
         this.identifier = Preconditions.checkNotNull(identifier);
         this.limiter = new OperationLimiter(identifier,
-                actorContext.getDatastoreContext().getShardBatchedModificationCount() + 1, // 1 extra permit for the ready operation
+                // 1 extra permit for the ready operation
+                actorContext.getDatastoreContext().getShardBatchedModificationCount() + 1,
                 TimeUnit.MILLISECONDS.toSeconds(actorContext.getDatastoreContext().getOperationTimeoutInMillis()));
     }
 
@@ -98,7 +99,7 @@ class TransactionContextWrapper {
     }
 
     void executePriorTransactionOperations(final TransactionContext localTransactionContext) {
-        while(true) {
+        while (true) {
             // Access to queuedTxOperations and transactionContext must be protected and atomic
             // (ie synchronized) with respect to #addTxOperationOnComplete to handle timing
             // issues and ensure no TransactionOperation is missed and that they are processed
@@ -114,7 +115,7 @@ class TransactionContextWrapper {
                     // We're done invoking the TransactionOperations so we can now publish the
                     // TransactionContext.
                     localTransactionContext.operationHandOffComplete();
-                    if(!localTransactionContext.usesOperationLimiting()){
+                    if (!localTransactionContext.usesOperationLimiting()){
                         limiter.releaseAll();
                     }
                     transactionContext = localTransactionContext;
@@ -143,8 +144,8 @@ class TransactionContextWrapper {
         final Promise<ActorSelection> promise = Futures.promise();
         enqueueTransactionOperation(new TransactionOperation() {
             @Override
-            public void invoke(TransactionContext transactionContext) {
-                promise.completeWith(transactionContext.readyTransaction());
+            public void invoke(TransactionContext newTransactionContext) {
+                promise.completeWith(newTransactionContext.readyTransaction());
             }
         });
 
