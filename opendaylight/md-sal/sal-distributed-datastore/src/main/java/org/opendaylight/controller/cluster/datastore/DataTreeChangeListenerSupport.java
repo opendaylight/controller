@@ -19,7 +19,8 @@ import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 
 final class DataTreeChangeListenerSupport extends AbstractDataListenerSupport<DOMDataTreeChangeListener,
-        RegisterDataTreeChangeListener, DelayedDataTreeListenerRegistration, ListenerRegistration<DOMDataTreeChangeListener>> {
+        RegisterDataTreeChangeListener, DelayedDataTreeListenerRegistration,
+        ListenerRegistration<DOMDataTreeChangeListener>> {
     DataTreeChangeListenerSupport(final Shard shard) {
         super(shard);
     }
@@ -36,7 +37,7 @@ final class DataTreeChangeListenerSupport extends AbstractDataListenerSupport<DO
 
         // Now store a reference to the data change listener so it can be notified
         // at a later point if notifications should be enabled or disabled
-        if(!message.isRegisterOnAllInstances()) {
+        if (!message.isRegisterOnAllInstances()) {
             addListenerActor(dataChangeListenerPath);
         }
 
@@ -54,7 +55,8 @@ final class DataTreeChangeListenerSupport extends AbstractDataListenerSupport<DO
     }
 
     @Override
-    protected DelayedDataTreeListenerRegistration newDelayedListenerRegistration(RegisterDataTreeChangeListener message) {
+    protected DelayedDataTreeListenerRegistration newDelayedListenerRegistration(
+            RegisterDataTreeChangeListener message) {
         return new DelayedDataTreeListenerRegistration(message);
     }
 

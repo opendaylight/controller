@@ -14,6 +14,8 @@ import org.opendaylight.controller.cluster.access.concepts.MemberName;
 
 public interface ClusterWrapper {
     void subscribeToMemberEvents(ActorRef actorRef);
+
     MemberName getCurrentMemberName();
+
     Address getSelfAddress();
 }

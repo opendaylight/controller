@@ -20,6 +20,8 @@ import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payloa
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 
 /**
+ * Payload wrapper for a DataTreeCandidatePayload.
+ *
  * @deprecated Deprecated in Boron in favor of CommitTransactionPayload
  */
 @Deprecated
@@ -28,7 +30,7 @@ final class DataTreeCandidatePayload extends Payload implements Externalizable, 
 
     private transient byte[] serialized;
 
-    public DataTreeCandidatePayload() {
+    DataTreeCandidatePayload() {
         // Required by Externalizable
     }
 
@@ -37,6 +39,8 @@ final class DataTreeCandidatePayload extends Payload implements Externalizable, 
     }
 
     /**
+     * Creates a DataTreeCandidatePayload.
+     *
      * @deprecated Use CommitTransactionPayload instead
      */
     @Deprecated

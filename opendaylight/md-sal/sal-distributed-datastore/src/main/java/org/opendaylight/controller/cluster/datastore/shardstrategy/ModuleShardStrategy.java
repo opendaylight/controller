@@ -18,7 +18,7 @@ public class ModuleShardStrategy implements ShardStrategy {
     private final String moduleName;
     private final Configuration configuration;
 
-    public ModuleShardStrategy(String moduleName, Configuration configuration){
+    public ModuleShardStrategy(String moduleName, Configuration configuration) {
         this.moduleName = moduleName;
         this.configuration = configuration;
     }

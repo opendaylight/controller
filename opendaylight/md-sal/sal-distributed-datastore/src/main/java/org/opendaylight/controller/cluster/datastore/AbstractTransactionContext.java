@@ -50,7 +50,7 @@ abstract class AbstractTransactionContext implements TransactionContext {
         handOffComplete = true;
     }
 
-    protected boolean isOperationHandOffComplete(){
+    protected boolean isOperationHandOffComplete() {
         return handOffComplete;
     }
 

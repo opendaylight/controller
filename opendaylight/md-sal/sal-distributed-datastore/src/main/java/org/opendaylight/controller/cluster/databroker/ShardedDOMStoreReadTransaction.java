@@ -33,7 +33,8 @@ class ShardedDOMStoreReadTransaction extends AbstractShardedTransaction implemen
     }
 
     @Override
-    public final CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> read(final YangInstanceIdentifier path) {
+    public final CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> read(
+            final YangInstanceIdentifier path) {
         return transaction().read(path);
     }
 

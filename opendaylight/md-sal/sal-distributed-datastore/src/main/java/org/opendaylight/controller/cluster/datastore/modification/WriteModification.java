@@ -20,7 +20,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 
 /**
- * WriteModification stores all the parameters required to write data to the specified path
+ * WriteModification stores all the parameters required to write data to the specified path.
  */
 public class WriteModification extends AbstractModification {
     private static final long serialVersionUID = 1L;
@@ -76,12 +76,8 @@ public class WriteModification extends AbstractModification {
         return mod;
     }
 
-    private static final Applier<WriteModification> APPLIER = new Applier<WriteModification>() {
-        @Override
-        public void apply(WriteModification instance, YangInstanceIdentifier path,
-                NormalizedNode<?, ?> node) {
-            instance.setPath(path);
-            instance.data = node;
-        }
+    private static final Applier<WriteModification> APPLIER = (instance, path, node) -> {
+        instance.setPath(path);
+        instance.data = node;
     };
 }

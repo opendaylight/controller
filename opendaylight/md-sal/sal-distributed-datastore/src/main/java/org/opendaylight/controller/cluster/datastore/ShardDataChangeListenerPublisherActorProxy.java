@@ -36,8 +36,9 @@ class ShardDataChangeListenerPublisherActorProxy extends AbstractShardDataTreeNo
     }
 
     @Override
-    public <L extends AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>> DataChangeListenerRegistration<L> registerDataChangeListener(
-            YangInstanceIdentifier path, L listener, DataChangeScope scope) {
+    public <L extends AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>>
+            DataChangeListenerRegistration<L> registerDataChangeListener(YangInstanceIdentifier path, L listener,
+                    DataChangeScope scope) {
         return delegatePublisher.registerDataChangeListener(path, listener, scope);
     }
 

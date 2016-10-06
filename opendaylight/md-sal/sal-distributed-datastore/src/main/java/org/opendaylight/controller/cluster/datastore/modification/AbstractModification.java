@@ -12,7 +12,7 @@ package org.opendaylight.controller.cluster.datastore.modification;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 /**
- * Base class to be used for all simple modifications that can be applied to a DOMStoreTransaction
+ * Base class to be used for all simple modifications that can be applied to a DOMStoreTransaction.
  */
 public abstract class AbstractModification implements Modification {
 

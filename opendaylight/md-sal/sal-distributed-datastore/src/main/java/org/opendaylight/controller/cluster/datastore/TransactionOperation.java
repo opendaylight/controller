@@ -15,7 +15,7 @@ abstract class TransactionOperation {
     /**
      * Execute the delayed operation.
      *
-     * @param transactionContext
+     * @param transactionContext the TransactionContext
      */
     protected abstract void invoke(TransactionContext transactionContext);
 }

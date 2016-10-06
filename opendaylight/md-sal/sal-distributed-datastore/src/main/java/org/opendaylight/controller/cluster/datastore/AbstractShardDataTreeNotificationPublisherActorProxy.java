@@ -23,7 +23,8 @@ import org.slf4j.LoggerFactory;
  */
 @NotThreadSafe
 abstract class AbstractShardDataTreeNotificationPublisherActorProxy implements ShardDataTreeNotificationPublisher {
-    private static final Logger LOG = LoggerFactory.getLogger(AbstractShardDataTreeNotificationPublisherActorProxy.class);
+    private static final Logger LOG = LoggerFactory.getLogger(
+            AbstractShardDataTreeNotificationPublisherActorProxy.class);
 
     private final ActorContext actorContext;
     private final String actorName;
@@ -50,14 +51,15 @@ abstract class AbstractShardDataTreeNotificationPublisherActorProxy implements S
     }
 
     private ActorRef getNotifierActor() {
-        if(notifierActor == null) {
+        if (notifierActor == null) {
             LOG.debug("Creating actor {}", actorName);
 
             String dispatcher = new Dispatchers(actorContext.system().dispatchers()).getDispatcherPath(
                     Dispatchers.DispatcherType.Notification);
             notifierActor = actorContext.actorOf(ShardDataTreeNotificationPublisherActor.props(actorName)
                     .withDispatcher(dispatcher).withMailbox(
-                            org.opendaylight.controller.cluster.datastore.utils.ActorContext.BOUNDED_MAILBOX), actorName);
+                            org.opendaylight.controller.cluster.datastore.utils.ActorContext.BOUNDED_MAILBOX),
+                    actorName);
         }
 
         return notifierActor;

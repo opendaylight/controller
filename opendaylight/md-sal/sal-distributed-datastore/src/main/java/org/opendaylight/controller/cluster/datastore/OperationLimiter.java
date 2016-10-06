@@ -71,14 +71,14 @@ public class OperationLimiter extends OnComplete<Object> {
     }
 
     @VisibleForTesting
-    int availablePermits(){
+    int availablePermits() {
         return semaphore.availablePermits();
     }
 
     /**
-     * Release all the permits
+     * Release all the permits.
      */
     public void releaseAll() {
-        this.semaphore.release(maxPermits-availablePermits());
+        this.semaphore.release(maxPermits - availablePermits());
     }
 }

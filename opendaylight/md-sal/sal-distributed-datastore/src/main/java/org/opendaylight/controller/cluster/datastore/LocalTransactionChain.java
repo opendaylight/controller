@@ -80,11 +80,11 @@ final class LocalTransactionChain extends AbstractSnapshotBackedTransactionChain
         return super.newWriteOnlyTransaction(identifier);
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "checkstyle:IllegalCatch"})
     @Override
     public LocalThreePhaseCommitCohort onTransactionReady(@Nonnull DOMStoreWriteTransaction tx,
             @Nullable Exception operationError) {
-        if(operationError != null) {
+        if (operationError != null) {
             return new LocalChainThreePhaseCommitCohort((SnapshotBackedWriteTransaction<TransactionIdentifier>)tx,
                     operationError);
         }

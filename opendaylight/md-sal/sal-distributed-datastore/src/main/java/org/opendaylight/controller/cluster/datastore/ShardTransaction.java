@@ -29,16 +29,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 /**
- * The ShardTransaction Actor represents a remote transaction
- * <p>
- * The ShardTransaction Actor delegates all actions to DOMDataReadWriteTransaction
- * </p>
- * <p>
- * Handles Messages <br/>
- * ---------------- <br/>
- * <li> {@link org.opendaylight.controller.cluster.datastore.messages.ReadData}
- * <li> {@link org.opendaylight.controller.cluster.datastore.messages.CloseTransaction}
- * </p>
+ * The ShardTransaction Actor represents a remote transaction that delegates all actions to DOMDataReadWriteTransaction.
  */
 public abstract class ShardTransaction extends AbstractUntypedActorWithMetering {
     private final ActorRef shardActor;
@@ -52,8 +43,8 @@ public abstract class ShardTransaction extends AbstractUntypedActorWithMetering 
         this.transactionID = Preconditions.checkNotNull(transactionID);
     }
 
-    public static Props props(TransactionType type, AbstractShardDataTreeTransaction<?> transaction, ActorRef shardActor,
-            DatastoreContext datastoreContext, ShardStats shardStats) {
+    public static Props props(TransactionType type, AbstractShardDataTreeTransaction<?> transaction,
+            ActorRef shardActor, DatastoreContext datastoreContext, ShardStats shardStats) {
         return Props.create(new ShardTransactionCreator(type, transaction, shardActor, datastoreContext, shardStats));
     }
 
@@ -86,7 +77,7 @@ public abstract class ShardTransaction extends AbstractUntypedActorWithMetering 
     private void closeTransaction(boolean sendReply) {
         getDOMStoreTransaction().abort();
 
-        if(sendReply && returnCloseTransactionReply()) {
+        if (sendReply && returnCloseTransactionReply()) {
             getSender().tell(new CloseTransactionReply(), getSelf());
         }
 
@@ -97,7 +88,8 @@ public abstract class ShardTransaction extends AbstractUntypedActorWithMetering 
         final boolean ret = transaction.isClosed();
         if (ret) {
             shardStats.incrementFailedReadTransactionsCount();
-            getSender().tell(new akka.actor.Status.Failure(new ReadFailedException("Transaction is closed")), getSelf());
+            getSender().tell(new akka.actor.Status.Failure(new ReadFailedException("Transaction is closed")),
+                    getSelf());
         }
         return ret;
     }
@@ -133,8 +125,8 @@ public abstract class ShardTransaction extends AbstractUntypedActorWithMetering 
         final ShardStats shardStats;
         final TransactionType type;
 
-        ShardTransactionCreator(TransactionType type, AbstractShardDataTreeTransaction<?> transaction, ActorRef shardActor,
-                DatastoreContext datastoreContext, ShardStats shardStats) {
+        ShardTransactionCreator(TransactionType type, AbstractShardDataTreeTransaction<?> transaction,
+                ActorRef shardActor, DatastoreContext datastoreContext, ShardStats shardStats) {
             this.transaction = Preconditions.checkNotNull(transaction);
             this.shardActor = shardActor;
             this.shardStats = shardStats;
@@ -146,17 +138,19 @@ public abstract class ShardTransaction extends AbstractUntypedActorWithMetering 
         public ShardTransaction create() throws Exception {
             final ShardTransaction tx;
             switch (type) {
-            case READ_ONLY:
-                tx = new ShardReadTransaction(transaction, shardActor, shardStats);
-                break;
-            case READ_WRITE:
-                tx = new ShardReadWriteTransaction((ReadWriteShardDataTreeTransaction)transaction, shardActor, shardStats);
-                break;
-            case WRITE_ONLY:
-                tx = new ShardWriteTransaction((ReadWriteShardDataTreeTransaction)transaction, shardActor, shardStats);
-                break;
-            default:
-                throw new IllegalArgumentException("Unhandled transaction type " + type);
+                case READ_ONLY:
+                    tx = new ShardReadTransaction(transaction, shardActor, shardStats);
+                    break;
+                case READ_WRITE:
+                    tx = new ShardReadWriteTransaction((ReadWriteShardDataTreeTransaction)transaction, shardActor,
+                            shardStats);
+                    break;
+                case WRITE_ONLY:
+                    tx = new ShardWriteTransaction((ReadWriteShardDataTreeTransaction)transaction, shardActor,
+                            shardStats);
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unhandled transaction type " + type);
             }
 
             tx.getContext().setReceiveTimeout(datastoreContext.getShardTransactionIdleTimeout());

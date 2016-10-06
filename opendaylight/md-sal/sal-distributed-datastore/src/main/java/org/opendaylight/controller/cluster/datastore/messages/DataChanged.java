@@ -54,7 +54,7 @@ public class DataChanged implements Externalizable {
         // Read created data
 
         int size = in.readInt();
-        for(int i = 0; i < size; i++) {
+        for (int i = 0; i < size; i++) {
             YangInstanceIdentifier path = streamReader.readYangInstanceIdentifier();
             NormalizedNode<?, ?> node = streamReader.readNormalizedNode();
             builder.addCreated(path, node);
@@ -63,7 +63,7 @@ public class DataChanged implements Externalizable {
         // Read updated data
 
         size = in.readInt();
-        for(int i = 0; i < size; i++) {
+        for (int i = 0; i < size; i++) {
             YangInstanceIdentifier path = streamReader.readYangInstanceIdentifier();
             NormalizedNode<?, ?> before = streamReader.readNormalizedNode();
             NormalizedNode<?, ?> after = streamReader.readNormalizedNode();
@@ -73,7 +73,7 @@ public class DataChanged implements Externalizable {
         // Read removed data
 
         size = in.readInt();
-        for(int i = 0; i < size; i++) {
+        for (int i = 0; i < size; i++) {
             YangInstanceIdentifier path = streamReader.readYangInstanceIdentifier();
             NormalizedNode<?, ?> node = streamReader.readNormalizedNode();
             builder.addRemoved(path, node);
@@ -82,14 +82,14 @@ public class DataChanged implements Externalizable {
         // Read original subtree
 
         boolean present = in.readBoolean();
-        if(present) {
+        if (present) {
             builder.setBefore(streamReader.readNormalizedNode());
         }
 
         // Read updated subtree
 
         present = in.readBoolean();
-        if(present) {
+        if (present) {
             builder.setAfter(streamReader.readNormalizedNode());
         }
 
@@ -106,7 +106,7 @@ public class DataChanged implements Externalizable {
 
         Map<YangInstanceIdentifier, NormalizedNode<?, ?>> createdData = change.getCreatedData();
         out.writeInt(createdData.size());
-        for(Map.Entry<YangInstanceIdentifier, NormalizedNode<?, ?>> e: createdData.entrySet()) {
+        for (Map.Entry<YangInstanceIdentifier, NormalizedNode<?, ?>> e: createdData.entrySet()) {
             streamWriter.writeYangInstanceIdentifier(e.getKey());
             streamWriter.writeNormalizedNode(e.getValue());
         }
@@ -116,7 +116,7 @@ public class DataChanged implements Externalizable {
         Map<YangInstanceIdentifier, NormalizedNode<?, ?>> originalData = change.getOriginalData();
         Map<YangInstanceIdentifier, NormalizedNode<?, ?>> updatedData = change.getUpdatedData();
         out.writeInt(updatedData.size());
-        for(Map.Entry<YangInstanceIdentifier, NormalizedNode<?, ?>> e: updatedData.entrySet()) {
+        for (Map.Entry<YangInstanceIdentifier, NormalizedNode<?, ?>> e: updatedData.entrySet()) {
             streamWriter.writeYangInstanceIdentifier(e.getKey());
             streamWriter.writeNormalizedNode(originalData.get(e.getKey()));
             streamWriter.writeNormalizedNode(e.getValue());
@@ -126,7 +126,7 @@ public class DataChanged implements Externalizable {
 
         Set<YangInstanceIdentifier> removed = change.getRemovedPaths();
         out.writeInt(removed.size());
-        for(YangInstanceIdentifier path: removed) {
+        for (YangInstanceIdentifier path: removed) {
             streamWriter.writeYangInstanceIdentifier(path);
             streamWriter.writeNormalizedNode(originalData.get(path));
         }
@@ -135,7 +135,7 @@ public class DataChanged implements Externalizable {
 
         NormalizedNode<?, ?> originalSubtree = change.getOriginalSubtree();
         out.writeBoolean(originalSubtree != null);
-        if(originalSubtree != null) {
+        if (originalSubtree != null) {
             streamWriter.writeNormalizedNode(originalSubtree);
         }
 
@@ -143,7 +143,7 @@ public class DataChanged implements Externalizable {
 
         NormalizedNode<?, ?> updatedSubtree = change.getUpdatedSubtree();
         out.writeBoolean(updatedSubtree != null);
-        if(updatedSubtree != null) {
+        if (updatedSubtree != null) {
             streamWriter.writeNormalizedNode(updatedSubtree);
         }
     }

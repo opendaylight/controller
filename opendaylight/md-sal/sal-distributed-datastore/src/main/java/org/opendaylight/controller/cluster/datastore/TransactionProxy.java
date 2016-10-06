@@ -50,12 +50,14 @@ import scala.concurrent.Promise;
 /**
  * A transaction potentially spanning multiple backend shards.
  */
-public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIdentifier> implements DOMStoreReadWriteTransaction {
+public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIdentifier>
+        implements DOMStoreReadWriteTransaction {
     private enum TransactionState {
         OPEN,
         READY,
         CLOSED,
     }
+
     private static final Logger LOG = LoggerFactory.getLogger(TransactionProxy.class);
 
     private final Map<String, TransactionContextWrapper> txContextWrappers = new HashMap<>();
@@ -79,11 +81,10 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
     }
 
     private <T> CheckedFuture<T, ReadFailedException> executeRead(String shardName, final AbstractRead<T> readCmd) {
-        Preconditions.checkState(type != TransactionType.WRITE_ONLY, "Reads from write-only transactions are not allowed");
+        Preconditions.checkState(type != TransactionType.WRITE_ONLY,
+                "Reads from write-only transactions are not allowed");
 
-        if(LOG.isDebugEnabled()) {
-            LOG.debug("Tx {} {} {}", getIdentifier(), readCmd.getClass().getSimpleName(), readCmd.getPath());
-        }
+        LOG.debug("Tx {} {} {}", getIdentifier(), readCmd.getClass().getSimpleName(), readCmd.getPath());
 
         final SettableFuture<T> proxyFuture = SettableFuture.create();
         TransactionContextWrapper contextWrapper = getContextWrapper(shardName);
@@ -99,7 +100,8 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
 
     @Override
     public CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> read(final YangInstanceIdentifier path) {
-        Preconditions.checkState(type != TransactionType.WRITE_ONLY, "Reads from write-only transactions are not allowed");
+        Preconditions.checkState(type != TransactionType.WRITE_ONLY,
+                "Reads from write-only transactions are not allowed");
 
         LOG.debug("Tx {} read {}", getIdentifier(), path);
 
@@ -117,7 +119,8 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
 
     private CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> readAllData() {
         final Set<String> allShardNames = txContextFactory.getActorContext().getConfiguration().getAllShardNames();
-        final Collection<CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException>> futures = new ArrayList<>(allShardNames.size());
+        final Collection<CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException>> futures =
+                new ArrayList<>(allShardNames.size());
 
         for (String shardName : allShardNames) {
             futures.add(singleShardRead(shardName, YangInstanceIdentifier.EMPTY));
@@ -126,9 +129,8 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
         final ListenableFuture<List<Optional<NormalizedNode<?, ?>>>> listFuture = Futures.allAsList(futures);
         final ListenableFuture<Optional<NormalizedNode<?, ?>>> aggregateFuture;
 
-        aggregateFuture = Futures.transform(listFuture, new Function<List<Optional<NormalizedNode<?, ?>>>, Optional<NormalizedNode<?, ?>>>() {
-            @Override
-            public Optional<NormalizedNode<?, ?>> apply(final List<Optional<NormalizedNode<?, ?>>> input) {
+        aggregateFuture = Futures.transform(listFuture,
+            (Function<List<Optional<NormalizedNode<?, ?>>>, Optional<NormalizedNode<?, ?>>>) input -> {
                 try {
                     return NormalizedNodeAggregator.aggregate(YangInstanceIdentifier.EMPTY, input,
                             txContextFactory.getActorContext().getSchemaContext(),
@@ -136,8 +138,7 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
                 } catch (DataValidationFailedException e) {
                     throw new IllegalArgumentException("Failed to aggregate", e);
                 }
-            }
-        });
+            });
 
         return MappingCheckedFuture.create(aggregateFuture, ReadFailedException.MAPPER);
     }
@@ -160,10 +161,8 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
     private void executeModification(final AbstractModification modification) {
         checkModificationState();
 
-        if(LOG.isDebugEnabled()) {
-            LOG.debug("Tx {} executeModification {} {}", getIdentifier(), modification.getClass().getSimpleName(),
-                    modification.getPath());
-        }
+        LOG.debug("Tx {} executeModification {} {}", getIdentifier(), modification.getClass().getSimpleName(),
+                modification.getPath());
 
         TransactionContextWrapper contextWrapper = getContextWrapper(modification.getPath());
         contextWrapper.maybeExecuteTransactionOperation(new TransactionOperation() {
@@ -223,15 +222,16 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
 
         final AbstractThreePhaseCommitCohort<?> ret;
         switch (txContextWrappers.size()) {
-        case 0:
-            ret = NoOpDOMStoreThreePhaseCommitCohort.INSTANCE;
-            break;
-        case 1:
-            final Entry<String, TransactionContextWrapper> e = Iterables.getOnlyElement(txContextWrappers.entrySet());
-            ret = createSingleCommitCohort(e.getKey(), e.getValue());
-            break;
-        default:
-            ret = createMultiCommitCohort(txContextWrappers.entrySet());
+            case 0:
+                ret = NoOpDOMStoreThreePhaseCommitCohort.INSTANCE;
+                break;
+            case 1:
+                final Entry<String, TransactionContextWrapper> e = Iterables.getOnlyElement(
+                        txContextWrappers.entrySet());
+                ret = createSingleCommitCohort(e.getKey(), e.getValue());
+                break;
+            default:
+                ret = createMultiCommitCohort(txContextWrappers.entrySet());
         }
 
         txContextFactory.onTransactionReady(getIdentifier(), ret.getCohortFutures());
@@ -255,8 +255,8 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
             final Promise promise = akka.dispatch.Futures.promise();
             contextWrapper.maybeExecuteTransactionOperation(new TransactionOperation() {
                 @Override
-                public void invoke(TransactionContext transactionContext) {
-                    promise.completeWith(getDirectCommitFuture(transactionContext, operationCallbackRef));
+                public void invoke(TransactionContext newTransactionContext) {
+                    promise.completeWith(getDirectCommitFuture(newTransactionContext, operationCallbackRef));
                 }
             });
             future = promise.future();
@@ -290,12 +290,7 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
             // The remote tx version is obtained the via TransactionContext which may not be available yet so
             // we pass a Supplier to dynamically obtain it. Once the ready Future is resolved the
             // TransactionContext is available.
-            Supplier<Short> txVersionSupplier = new Supplier<Short>() {
-                @Override
-                public Short get() {
-                    return wrapper.getTransactionContext().getTransactionVersion();
-                }
-            };
+            Supplier<Short> txVersionSupplier = () -> wrapper.getTransactionContext().getTransactionVersion();
 
             cohorts.add(new ThreePhaseCommitCohortProxy.CohortInfo(wrapper.readyTransaction(), txVersionSupplier));
         }

@@ -50,8 +50,8 @@ class ForwardingDistributedDataStore extends ForwardingObject implements Distrib
     }
 
     @Override
-    public <L extends AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>> ListenerRegistration<L> registerChangeListener(
-            YangInstanceIdentifier path, L listener, DataChangeScope scope) {
+    public <L extends AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>> ListenerRegistration<L>
+            registerChangeListener(YangInstanceIdentifier path, L listener, DataChangeScope scope) {
         return delegate().registerChangeListener(path, listener, scope);
     }
 

@@ -15,7 +15,8 @@ import org.opendaylight.controller.cluster.datastore.persisted.FrontendHistoryMe
 import org.opendaylight.yangtools.concepts.Builder;
 import org.opendaylight.yangtools.concepts.Identifiable;
 
-final class FrontendHistoryMetadataBuilder implements Builder<FrontendHistoryMetadata>, Identifiable<LocalHistoryIdentifier> {
+final class FrontendHistoryMetadataBuilder implements Builder<FrontendHistoryMetadata>,
+        Identifiable<LocalHistoryIdentifier> {
     private final LocalHistoryIdentifier identifier;
 
     private long nextTransaction;

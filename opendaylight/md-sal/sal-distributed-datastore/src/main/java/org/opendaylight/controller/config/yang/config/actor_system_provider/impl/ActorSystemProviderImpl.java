@@ -9,7 +9,6 @@ package org.opendaylight.controller.config.yang.config.actor_system_provider.imp
 
 import akka.actor.ActorSystem;
 import akka.actor.Props;
-import akka.japi.Effect;
 import akka.osgi.BundleDelegatingClassLoader;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
@@ -51,15 +50,11 @@ public class ActorSystemProviderImpl implements ActorSystemProvider, AutoCloseab
 
         actorSystem.actorOf(Props.create(TerminationMonitor.class), TerminationMonitor.ADDRESS);
 
-        actorSystem.actorOf(QuarantinedMonitorActor.props(new Effect() {
-
-            @Override
-            public void apply() throws Exception {
-                // restart the entire karaf container
-                LOG.warn("Restarting karaf container");
-                System.setProperty("karaf.restart", "true");
-                bundleContext.getBundle(0).stop();
-            }
+        actorSystem.actorOf(QuarantinedMonitorActor.props(() -> {
+            // restart the entire karaf container
+            LOG.warn("Restarting karaf container");
+            System.setProperty("karaf.restart", "true");
+            bundleContext.getBundle(0).stop();
         }), QuarantinedMonitorActor.ADDRESS);
 
     }
@@ -76,6 +71,7 @@ public class ActorSystemProviderImpl implements ActorSystemProvider, AutoCloseab
     }
 
     @Override
+    @SuppressWarnings("checkstyle:IllegalCatch")
     public void close() {
         LOG.info("Shutting down ActorSystem");
 

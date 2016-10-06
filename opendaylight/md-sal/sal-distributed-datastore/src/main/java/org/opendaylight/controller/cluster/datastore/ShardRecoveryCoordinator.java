@@ -34,7 +34,8 @@ class ShardRecoveryCoordinator implements RaftActorRecoveryCohort {
 
     private boolean open;
 
-    ShardRecoveryCoordinator(final ShardDataTree store,  final byte[] restoreFromSnapshot, final String shardName, final Logger log) {
+    ShardRecoveryCoordinator(final ShardDataTree store,  final byte[] restoreFromSnapshot, final String shardName,
+            final Logger log) {
         this.store = Preconditions.checkNotNull(store);
         this.shardName = Preconditions.checkNotNull(shardName);
         this.log = Preconditions.checkNotNull(log);
@@ -49,6 +50,7 @@ class ShardRecoveryCoordinator implements RaftActorRecoveryCohort {
     }
 
     @Override
+    @SuppressWarnings("checkstyle:IllegalCatch")
     public void appendRecoveredLogEntry(final Payload payload) {
         Preconditions.checkState(open, "call startLogRecovery before calling appendRecoveredLogEntry");
 
@@ -83,6 +85,7 @@ class ShardRecoveryCoordinator implements RaftActorRecoveryCohort {
      * @param snapshotBytes the serialized snapshot
      */
     @Override
+    @SuppressWarnings("checkstyle:IllegalCatch")
     public void applyRecoverySnapshot(final byte[] snapshotBytes) {
         log.debug("{}: Applying recovered snapshot", shardName);
 

@@ -66,16 +66,16 @@ final class LocalTransactionFactoryImpl extends TransactionReadyPrototype<Transa
     }
 
     @Override
-    protected DOMStoreThreePhaseCommitCohort transactionReady(final SnapshotBackedWriteTransaction<TransactionIdentifier> tx,
-            final DataTreeModification tree) {
+    protected DOMStoreThreePhaseCommitCohort transactionReady(
+            final SnapshotBackedWriteTransaction<TransactionIdentifier> tx, final DataTreeModification tree) {
         return new LocalThreePhaseCommitCohort(actorContext, leader, tx, tree);
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "checkstyle:IllegalCatch"})
     @Override
     public LocalThreePhaseCommitCohort onTransactionReady(@Nonnull DOMStoreWriteTransaction tx,
             @Nullable Exception operationError) {
-        if(operationError != null) {
+        if (operationError != null) {
             return new LocalThreePhaseCommitCohort(actorContext, leader,
                     (SnapshotBackedWriteTransaction<TransactionIdentifier>)tx, operationError);
         }

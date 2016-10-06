@@ -41,7 +41,7 @@ public final class SerializationUtils {
 
     private static NormalizedNodeDataOutput streamWriter(DataOutput out) throws IOException {
         NormalizedNodeDataOutput streamWriter = REUSABLE_WRITER_TL.get();
-        if(streamWriter == null) {
+        if (streamWriter == null) {
             streamWriter = NormalizedNodeInputOutput.newDataOutput(out);
         }
 
@@ -50,7 +50,7 @@ public final class SerializationUtils {
 
     private static NormalizedNodeDataInput streamReader(DataInput in) throws IOException {
         NormalizedNodeDataInput streamReader = REUSABLE_READER_TL.get();
-        if(streamReader == null) {
+        if (streamReader == null) {
             streamReader = new NormalizedNodeInputStreamReader(in);
         }
 
@@ -82,17 +82,14 @@ public final class SerializationUtils {
         }
     }
 
-    public static void serializeNormalizedNode(NormalizedNode<?, ?> node, DataOutput out) {
-        try {
-            out.writeBoolean(node != null);
-            if(node != null) {
-                NormalizedNodeDataOutput streamWriter = streamWriter(out);
-                streamWriter.writeNormalizedNode(node);
-            }
-        } catch (IOException e) {
-            throw new IllegalArgumentException(String.format("Error serializing NormalizedNode %s",
-                    node), e);
+    private static NormalizedNode<?, ?> tryDeserializeNormalizedNode(DataInput in) throws IOException {
+        boolean present = in.readBoolean();
+        if (present) {
+            NormalizedNodeDataInput streamReader = streamReader(in);
+            return streamReader.readNormalizedNode();
         }
+
+        return null;
     }
 
     public static NormalizedNode<?, ?> deserializeNormalizedNode(DataInput in) {
@@ -103,20 +100,10 @@ public final class SerializationUtils {
         }
     }
 
-    private static NormalizedNode<?, ?> tryDeserializeNormalizedNode(DataInput in) throws IOException {
-        boolean present = in.readBoolean();
-        if(present) {
-            NormalizedNodeDataInput streamReader = streamReader(in);
-            return streamReader.readNormalizedNode();
-        }
-
-        return null;
-    }
-
     public static NormalizedNode<?, ?> deserializeNormalizedNode(byte [] bytes) {
         try {
             return tryDeserializeNormalizedNode(new DataInputStream(new ByteArrayInputStream(bytes)));
-        } catch(InvalidNormalizedNodeStreamException e) {
+        } catch (InvalidNormalizedNodeStreamException e) {
             // Probably from legacy protobuf serialization - try that.
             try {
                 NormalizedNodeMessages.Node serializedNode = NormalizedNodeMessages.Node.parseFrom(bytes);
@@ -126,6 +113,19 @@ public final class SerializationUtils {
             }
         } catch (IOException e) {
             throw new IllegalArgumentException("Error deserializing NormalizedNode", e);
+        }
+    }
+
+    public static void serializeNormalizedNode(NormalizedNode<?, ?> node, DataOutput out) {
+        try {
+            out.writeBoolean(node != null);
+            if (node != null) {
+                NormalizedNodeDataOutput streamWriter = streamWriter(out);
+                streamWriter.writeNormalizedNode(node);
+            }
+        } catch (IOException e) {
+            throw new IllegalArgumentException(String.format("Error serializing NormalizedNode %s",
+                    node), e);
         }
     }
 

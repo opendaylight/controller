@@ -51,18 +51,18 @@ class ShardManagerGetSnapshotReplyActor extends UntypedActor {
 
     @Override
     public void onReceive(Object message) {
-        if(message instanceof GetSnapshotReply) {
+        if (message instanceof GetSnapshotReply) {
             onGetSnapshotReply((GetSnapshotReply)message);
-        } else if(message instanceof Failure) {
+        } else if (message instanceof Failure) {
             LOG.debug("{}: Received {}", params.id, message);
 
             params.replyToActor.tell(message, getSelf());
             getSelf().tell(PoisonPill.getInstance(), getSelf());
         } else if (message instanceof ReceiveTimeout) {
             String msg = String.format(
-                    "Timed out after %s ms while waiting for snapshot replies from %d shard(s). %d shard(s) %s did not respond.",
-                        params.receiveTimeout.toMillis(), params.shardNames.size(), remainingShardNames.size(),
-                        remainingShardNames);
+                    "Timed out after %s ms while waiting for snapshot replies from %d shard(s). %d shard(s) %s "
+                    + "did not respond.", params.receiveTimeout.toMillis(), params.shardNames.size(),
+                    remainingShardNames.size(), remainingShardNames);
             LOG.warn("{}: {}", params.id, msg);
             params.replyToActor.tell(new Failure(new TimeoutException(msg)), getSelf());
             getSelf().tell(PoisonPill.getInstance(), getSelf());
@@ -76,11 +76,11 @@ class ShardManagerGetSnapshotReplyActor extends UntypedActor {
         shardSnapshots.add(new ShardSnapshot(shardId.getShardName(), getSnapshotReply.getSnapshot()));
 
         remainingShardNames.remove(shardId.getShardName());
-        if(remainingShardNames.isEmpty()) {
+        if (remainingShardNames.isEmpty()) {
             LOG.debug("{}: All shard snapshots received", params.id);
 
-            DatastoreSnapshot datastoreSnapshot = new DatastoreSnapshot(params.datastoreType, params.shardManagerSnapshot,
-                    shardSnapshots);
+            DatastoreSnapshot datastoreSnapshot = new DatastoreSnapshot(params.datastoreType,
+                    params.shardManagerSnapshot, shardSnapshots);
             params.replyToActor.tell(datastoreSnapshot, getSelf());
             getSelf().tell(PoisonPill.getInstance(), getSelf());
         }

@@ -43,15 +43,15 @@ public class ShardIdentifier {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) {
+    public boolean equals(Object obj) {
+        if (this == obj) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
 
-        ShardIdentifier that = (ShardIdentifier) o;
+        ShardIdentifier that = (ShardIdentifier) obj;
 
         if (!memberName.equals(that.memberName)) {
             return false;
@@ -97,26 +97,26 @@ public class ShardIdentifier {
         private MemberName memberName;
         private String type;
 
-        public ShardIdentifier build(){
+        public ShardIdentifier build() {
             return new ShardIdentifier(shardName, memberName, type);
         }
 
-        public Builder shardName(String shardName){
-            this.shardName = shardName;
+        public Builder shardName(String newShardName) {
+            this.shardName = newShardName;
             return this;
         }
 
-        public Builder memberName(MemberName memberName){
-            this.memberName = memberName;
+        public Builder memberName(MemberName newMemberName) {
+            this.memberName = newMemberName;
             return this;
         }
 
-        public Builder type(String type){
-            this.type = type;
+        public Builder type(String newType) {
+            this.type = newType;
             return this;
         }
 
-        public Builder fromShardIdString(String shardId){
+        public Builder fromShardIdString(String shardId) {
             Matcher matcher = PATTERN.matcher(shardId);
 
             if (matcher.matches()) {

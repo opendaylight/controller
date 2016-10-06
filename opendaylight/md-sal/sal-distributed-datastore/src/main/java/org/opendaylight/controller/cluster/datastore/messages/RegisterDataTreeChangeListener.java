@@ -17,8 +17,8 @@ import org.opendaylight.controller.cluster.datastore.utils.SerializationUtils;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 /**
- * Request a {@link org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeListener} registration be made on the shard
- * leader.
+ * Request a {@link org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeListener} registration be made on the
+ * shard leader.
  */
 public final class RegisterDataTreeChangeListener implements Externalizable, ListenerRegistrationMessage {
     private static final long serialVersionUID = 1L;

@@ -24,7 +24,7 @@ final class NoOpTransactionContext extends AbstractTransactionContext {
 
     private final Throwable failure;
 
-    public NoOpTransactionContext(Throwable failure, TransactionIdentifier identifier) {
+    NoOpTransactionContext(Throwable failure, TransactionIdentifier identifier) {
         super(identifier);
         this.failure = failure;
     }
@@ -48,8 +48,8 @@ final class NoOpTransactionContext extends AbstractTransactionContext {
 
     @Override
     public void executeModification(AbstractModification modification) {
-        LOG.debug("Tx {} executeModification {} called path = {}", getIdentifier(), modification.getClass().getSimpleName(),
-                modification.getPath());
+        LOG.debug("Tx {} executeModification {} called path = {}", getIdentifier(),
+                modification.getClass().getSimpleName(), modification.getPath());
     }
 
     @Override

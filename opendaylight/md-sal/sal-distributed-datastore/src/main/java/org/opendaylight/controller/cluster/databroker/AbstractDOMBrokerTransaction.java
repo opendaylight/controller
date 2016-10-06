@@ -22,28 +22,28 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 public abstract class AbstractDOMBrokerTransaction<T extends DOMStoreTransaction> implements
         AsyncTransaction<YangInstanceIdentifier, NormalizedNode<?, ?>> {
 
-    private EnumMap<LogicalDatastoreType, T> backingTxs;
+    private final EnumMap<LogicalDatastoreType, T> backingTxs;
     private final Object identifier;
     private final Map<LogicalDatastoreType, ? extends DOMStoreTransactionFactory> storeTxFactories;
 
     /**
-     *
      * Creates new composite Transactions.
      *
-     * @param identifier
-     *            Identifier of transaction.
+     * @param identifier Identifier of transaction.
      */
-    protected AbstractDOMBrokerTransaction(final Object identifier, Map<LogicalDatastoreType, ? extends DOMStoreTransactionFactory> storeTxFactories) {
+    protected AbstractDOMBrokerTransaction(final Object identifier,
+            Map<LogicalDatastoreType, ? extends DOMStoreTransactionFactory> storeTxFactories) {
         this.identifier = Preconditions.checkNotNull(identifier, "Identifier should not be null");
-        this.storeTxFactories = Preconditions.checkNotNull(storeTxFactories, "Store Transaction Factories should not be null");
+        this.storeTxFactories = Preconditions.checkNotNull(storeTxFactories,
+                "Store Transaction Factories should not be null");
         this.backingTxs = new EnumMap<>(LogicalDatastoreType.class);
     }
 
     /**
      * Returns subtransaction associated with supplied key.
      *
-     * @param key
-     * @return
+     * @param key the data store type key
+     * @return the subtransaction
      * @throws NullPointerException
      *             if key is null
      * @throws IllegalArgumentException
@@ -53,7 +53,7 @@ public abstract class AbstractDOMBrokerTransaction<T extends DOMStoreTransaction
         Preconditions.checkNotNull(key, "key must not be null.");
 
         T ret = backingTxs.get(key);
-        if(ret == null){
+        if (ret == null) {
             ret = createTransaction(key);
             backingTxs.put(key, ret);
         }
@@ -76,6 +76,7 @@ public abstract class AbstractDOMBrokerTransaction<T extends DOMStoreTransaction
         return identifier;
     }
 
+    @SuppressWarnings("checkstyle:IllegalCatch")
     protected void closeSubtransactions() {
         /*
          * We share one exception for all failures, which are added
@@ -101,7 +102,7 @@ public abstract class AbstractDOMBrokerTransaction<T extends DOMStoreTransaction
         }
     }
 
-    protected DOMStoreTransactionFactory getTxFactory(LogicalDatastoreType type){
+    protected DOMStoreTransactionFactory getTxFactory(LogicalDatastoreType type) {
         return storeTxFactories.get(type);
     }
 }

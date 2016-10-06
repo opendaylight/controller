@@ -72,8 +72,8 @@ final class ShardInformation {
 
     Props newProps(SchemaContext schemaContext) {
         Preconditions.checkNotNull(builder);
-        Props props = builder.id(shardId).peerAddresses(initialPeerAddresses).datastoreContext(datastoreContext).
-                schemaContext(schemaContext).props();
+        Props props = builder.id(shardId).peerAddresses(initialPeerAddresses).datastoreContext(datastoreContext)
+                .schemaContext(schemaContext).props();
         builder = null;
         return props;
     }
@@ -83,7 +83,7 @@ final class ShardInformation {
     }
 
     @Nullable
-    ActorRef getActor(){
+    ActorRef getActor() {
         return actor;
     }
 
@@ -115,14 +115,12 @@ final class ShardInformation {
         }
     }
 
-    void updatePeerAddress(String peerId, String peerAddress, ActorRef sender){
+    void updatePeerAddress(String peerId, String peerAddress, ActorRef sender) {
         LOG.info("updatePeerAddress for peer {} with address {}", peerId, peerAddress);
 
-        if(actor != null) {
-            if(LOG.isDebugEnabled()) {
-                LOG.debug("Sending PeerAddressResolved for peer {} with address {} to {}",
-                        peerId, peerAddress, actor.path());
-            }
+        if (actor != null) {
+            LOG.debug("Sending PeerAddressResolved for peer {} with address {} to {}", peerId,
+                    peerAddress, actor.path());
 
             actor.tell(new PeerAddressResolved(peerId, peerAddress), sender);
         }
@@ -131,13 +129,13 @@ final class ShardInformation {
     }
 
     void peerDown(MemberName memberName, String peerId, ActorRef sender) {
-        if(actor != null) {
+        if (actor != null) {
             actor.tell(new PeerDown(memberName, peerId), sender);
         }
     }
 
     void peerUp(MemberName memberName, String peerId, ActorRef sender) {
-        if(actor != null) {
+        if (actor != null) {
             actor.tell(new PeerUp(memberName, peerId), sender);
         }
     }
@@ -147,9 +145,9 @@ final class ShardInformation {
     }
 
     boolean isShardReadyWithLeaderId() {
-        return leaderAvailable && isShardReady() && !RaftState.IsolatedLeader.name().equals(role) &&
-                !RaftState.PreLeader.name().equals(role) &&
-                    (isLeader() || addressResolver.resolve(leaderId) != null);
+        return leaderAvailable && isShardReady() && !RaftState.IsolatedLeader.name().equals(role)
+                && !RaftState.PreLeader.name().equals(role)
+                && (isLeader() || addressResolver.resolve(leaderId) != null);
     }
 
     boolean isShardInitialized() {
@@ -161,7 +159,7 @@ final class ShardInformation {
     }
 
     String getSerializedLeaderActor() {
-        if(isLeader()) {
+        if (isLeader()) {
             return Serialization.serializedActorPath(getActor());
         } else {
             return addressResolver.resolve(leaderId);
@@ -177,7 +175,7 @@ final class ShardInformation {
     }
 
     private void notifyOnShardInitializedCallbacks() {
-        if(onShardInitializedSet.isEmpty()) {
+        if (onShardInitializedSet.isEmpty()) {
             return;
         }
 
@@ -187,7 +185,7 @@ final class ShardInformation {
             ready ? "ready" : "initialized", onShardInitializedSet.size());
 
         Iterator<OnShardInitialized> iter = onShardInitializedSet.iterator();
-        while(iter.hasNext()) {
+        while (iter.hasNext()) {
             OnShardInitialized onShardInitialized = iter.next();
             if (!(onShardInitialized instanceof OnShardReady) || ready) {
                 iter.remove();
@@ -211,14 +209,14 @@ final class ShardInformation {
         notifyOnShardInitializedCallbacks();
     }
 
-    void setFollowerSyncStatus(boolean syncStatus){
+    void setFollowerSyncStatus(boolean syncStatus) {
         this.followerSyncStatus = syncStatus;
     }
 
-    boolean isInSync(){
-        if(RaftState.Follower.name().equals(this.role)){
+    boolean isInSync() {
+        if (RaftState.Follower.name().equals(this.role)) {
             return followerSyncStatus;
-        } else if(RaftState.Leader.name().equals(this.role)){
+        } else if (RaftState.Leader.name().equals(this.role)) {
             return true;
         }
 
@@ -226,9 +224,9 @@ final class ShardInformation {
     }
 
     boolean setLeaderId(String leaderId) {
-        boolean changed = !Objects.equals(this.leaderId, leaderId);
+        final boolean changed = !Objects.equals(this.leaderId, leaderId);
         this.leaderId = leaderId;
-        if(leaderId != null) {
+        if (leaderId != null) {
             this.leaderAvailable = true;
         }
         notifyOnShardInitializedCallbacks();
@@ -243,7 +241,7 @@ final class ShardInformation {
     void setLeaderAvailable(boolean leaderAvailable) {
         this.leaderAvailable = leaderAvailable;
 
-        if(leaderAvailable) {
+        if (leaderAvailable) {
             notifyOnShardInitializedCallbacks();
         }
     }

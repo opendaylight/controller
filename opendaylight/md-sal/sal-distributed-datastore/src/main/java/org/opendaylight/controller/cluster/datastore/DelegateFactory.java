@@ -12,9 +12,9 @@ import java.util.Map.Entry;
 /**
  * Base class for factories instantiating delegates.
  *
- * <D> delegate type
- * <M> message type
- * <I> initial state type
+ * @param <M> message type
+ * @param <D> delegate type
+ * @param <I> initial state type
  */
 abstract class DelegateFactory<M, D, I> {
     abstract Entry<D, I> createDelegate(M message);

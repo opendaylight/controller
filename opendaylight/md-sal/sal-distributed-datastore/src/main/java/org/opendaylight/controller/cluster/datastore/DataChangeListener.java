@@ -20,16 +20,14 @@ import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
+ * Actor for a DataChangeListener.
+ *
  * @Deprecated Replaced by {@link DataTreeChangeListener}
  */
 @Deprecated
 public class DataChangeListener extends AbstractUntypedActor {
-    private static final Logger LOG = LoggerFactory.getLogger(DataChangeListener.class);
-
     private final AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>> listener;
     private boolean notificationsEnabled = false;
 
@@ -39,9 +37,9 @@ public class DataChangeListener extends AbstractUntypedActor {
 
     @Override
     public void handleReceive(Object message) {
-        if (message instanceof DataChanged){
+        if (message instanceof DataChanged) {
             dataChanged(message);
-        } else if (message instanceof EnableNotification){
+        } else if (message instanceof EnableNotification) {
             enableNotification((EnableNotification) message);
         } else {
             unknownMessage(message);
@@ -50,14 +48,15 @@ public class DataChangeListener extends AbstractUntypedActor {
 
     private void enableNotification(EnableNotification message) {
         notificationsEnabled = message.isEnabled();
-        LOG.debug("{} notifications for listener {}", (notificationsEnabled ? "Enabled" : "Disabled"),
+        LOG.debug("{} notifications for listener {}", notificationsEnabled ? "Enabled" : "Disabled",
                 listener);
     }
 
+    @SuppressWarnings("checkstyle:IllegalCatch")
     private void dataChanged(Object message) {
 
         // Do nothing if notifications are not enabled
-        if(!notificationsEnabled) {
+        if (!notificationsEnabled) {
             LOG.debug("Notifications not enabled for listener {} - dropping change notification", listener);
             return;
         }
@@ -73,7 +72,7 @@ public class DataChangeListener extends AbstractUntypedActor {
             LOG.error( String.format( "Error notifying listener %s", this.listener ), e );
         }
 
-        if(isValidSender(getSender())) {
+        if (isValidSender(getSender())) {
             getSender().tell(DataChangedReply.INSTANCE, getSelf());
         }
     }
