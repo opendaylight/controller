@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "7a6b29fe_ead6c1c2",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/base/messages/SwitchBehavior.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-10-06T21:32:45Z",
+      "side": 1,
+      "message": "Actually string concat is better. Let the compiler do it. We\u0027ve been going with string concat.",
+      "parentUuid": "7a6b29fe_0a533d6d",
+      "range": {
+        "startLine": 32,
+        "startChar": 9,
+        "endLine": 32,
+        "endChar": 10
+      },
+      "revId": "fee4cf65d837ce0e88681f7d1340694ed3f69822",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a6b29fe_ea4fe1bc",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractRaftActorBehavior.java",
         "patchSetId": 2
@@ -36,6 +60,24 @@
       "writtenOn": "2016-10-06T21:17:12Z",
       "side": 1,
       "message": "ODL widely uses upper-case LOG instead of lower case log by convention.  Let\u0027s thus keep that as-is here?  I\u0027ll be adding a Checkstyle rule to enforce this when I get a chance some time.",
+      "revId": "fee4cf65d837ce0e88681f7d1340694ed3f69822",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_4ae415ac",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractRaftActorBehavior.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-10-06T21:32:45Z",
+      "side": 1,
+      "message": "LOG should be used if static. This isn\u0027t static so CS complains - only static vars should be capitalized.",
+      "parentUuid": "7a6b29fe_ea4fe1bc",
       "revId": "fee4cf65d837ce0e88681f7d1340694ed3f69822",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -59,6 +101,24 @@
     },
     {
       "key": {
+        "uuid": "7a6b29fe_aaecc990",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/messages/AppendEntries.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-10-06T21:32:45Z",
+      "side": 1,
+      "message": "Not motivated at this moment :) I think what it\u0027s really trying indicate is that \u0027public \u0027 isn\u0027t needed since it\u0027s a private inner class. I think the use of RedundantModifier warning is incorrect/misleading. But, you\u0027re right, it could be smarter to detect that it implements Externalizable and thus public is needed regardless of class scope.",
+      "parentUuid": "7a6b29fe_2a4a79ac",
+      "revId": "fee4cf65d837ce0e88681f7d1340694ed3f69822",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a6b29fe_8ac62d15",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/messages/RequestVoteReply.java",
         "patchSetId": 2
@@ -70,6 +130,24 @@
       "writtenOn": "2016-10-06T21:17:12Z",
       "side": 1,
       "message": "as before, why change this? How about using a toString helper, such as e.g. https://github.com/google/guava/wiki/CommonObjectUtilitiesExplained#tostring ?",
+      "revId": "fee4cf65d837ce0e88681f7d1340694ed3f69822",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_0a017d39",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/messages/RequestVoteReply.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-10-06T21:32:45Z",
+      "side": 1,
+      "message": "I don\u0027t use toString helpers. I\u0027m kinda lazy when it comes to toString methods - I\u0027d rather save time and let the IDE generate the code rather than hand-writing toString.",
+      "parentUuid": "7a6b29fe_8ac62d15",
       "revId": "fee4cf65d837ce0e88681f7d1340694ed3f69822",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

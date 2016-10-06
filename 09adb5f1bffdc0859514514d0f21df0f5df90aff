@@ -16,6 +16,24 @@
       "revId": "09adb5f1bffdc0859514514d0f21df0f5df90aff",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_6af2b170",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 559,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-10-06T21:32:45Z",
+      "side": 0,
+      "message": "I pondered about that. It\u0027s either remove it or add SuppressWarning. I chose to remove it b/c this catch isn\u0027t really needed since only InvalidChunkException can be thrown in the try block. There is nobody else that knows this code - I\u0027m the only one left :)",
+      "parentUuid": "7a6b29fe_4a4d35c4",
+      "revId": "09adb5f1bffdc0859514514d0f21df0f5df90aff",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
