@@ -1,0 +1,165 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a6b29fe_e766fded",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/DataStoreAppConfigMetadata.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 255,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-10-06T02:40:46Z",
+      "side": 1,
+      "message": "fix comment as per a new behavior",
+      "range": {
+        "startLine": 255,
+        "startChar": 20,
+        "endLine": 255,
+        "endChar": 91
+      },
+      "revId": "8c4b4d200dc0b722ad61dfe3c740102fadf4eb0f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_8772a9ab",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/DataStoreAppConfigMetadata.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 262,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-10-06T02:40:46Z",
+      "side": 1,
+      "message": "likewise",
+      "range": {
+        "startLine": 262,
+        "startChar": 16,
+        "endLine": 262,
+        "endChar": 87
+      },
+      "revId": "8c4b4d200dc0b722ad61dfe3c740102fadf4eb0f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_c76301dc",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/OpendaylightNamespaceHandler.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-10-06T02:40:46Z",
+      "side": 1,
+      "message": "how about UPDATE_STRATEGY_ATTR to be consistent with the attribute definition, as the one right above.",
+      "range": {
+        "startLine": 57,
+        "startChar": 24,
+        "endLine": 57,
+        "endChar": 39
+      },
+      "revId": "8c4b4d200dc0b722ad61dfe3c740102fadf4eb0f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_67730db5",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/OpendaylightNamespaceHandler.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-10-06T02:40:46Z",
+      "side": 1,
+      "message": "unused",
+      "range": {
+        "startLine": 58,
+        "startChar": 4,
+        "endLine": 58,
+        "endChar": 58
+      },
+      "revId": "8c4b4d200dc0b722ad61dfe3c740102fadf4eb0f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_274ab555",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/OpendaylightNamespaceHandler.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 366,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-10-06T02:40:46Z",
+      "side": 1,
+      "message": "I would mentioned the two current supported strategies, so I would have a LOG similar as\n\nupdate-strategy {} not supported; using \"reload\". Currently supported strategies are \"reload\" and \"none\".\n\nthoughts?",
+      "range": {
+        "startLine": 366,
+        "startChar": 56,
+        "endLine": 366,
+        "endChar": 68
+      },
+      "revId": "8c4b4d200dc0b722ad61dfe3c740102fadf4eb0f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_a76d25cf",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/UpdateStrategy.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-10-06T02:40:46Z",
+      "side": 1,
+      "message": "Wondering if this could be defined within OpendaylightNamespaceHandler. Thoughts?",
+      "range": {
+        "startLine": 13,
+        "startChar": 12,
+        "endLine": 13,
+        "endChar": 26
+      },
+      "revId": "8c4b4d200dc0b722ad61dfe3c740102fadf4eb0f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_0747b94c",
+        "filename": "opendaylight/blueprint/src/main/resources/opendaylight-blueprint-ext-1.0.0.xsd",
+        "patchSetId": 3
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-10-06T02:40:46Z",
+      "side": 1,
+      "message": "how about using TupdateStrategy as TupdateStrategyType is redundant, as T stands for Type",
+      "range": {
+        "startLine": 44,
+        "startChar": 48,
+        "endLine": 44,
+        "endChar": 67
+      },
+      "revId": "8c4b4d200dc0b722ad61dfe3c740102fadf4eb0f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
