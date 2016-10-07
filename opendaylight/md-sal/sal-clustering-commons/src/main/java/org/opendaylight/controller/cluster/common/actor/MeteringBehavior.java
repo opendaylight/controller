@@ -12,6 +12,7 @@ import akka.japi.Procedure;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Throwables;
 import org.opendaylight.controller.cluster.reporting.MetricsReporter;
 
 /**
@@ -40,7 +41,7 @@ public class MeteringBehavior implements Procedure<Object> {
      *
      * @param actor whose behaviour needs to be metered
      */
-    public MeteringBehavior(AbstractUntypedActorWithMetering actor){
+    public MeteringBehavior(final AbstractUntypedActorWithMetering actor) {
         Preconditions.checkArgument(actor != null, "actor must not be null");
         this.meteredActor = actor;
 
@@ -49,7 +50,7 @@ public class MeteringBehavior implements Procedure<Object> {
         init(actorName);
     }
 
-    public MeteringBehavior(UntypedActor actor){
+    public MeteringBehavior(final UntypedActor actor) {
         Preconditions.checkArgument(actor != null, "actor must not be null");
         this.meteredActor = actor;
 
@@ -57,7 +58,7 @@ public class MeteringBehavior implements Procedure<Object> {
         init(actorName);
     }
 
-    private void init(String actorName){
+    private void init(final String actorName) {
         actorQualifiedName = new StringBuilder(meteredActor.getSelf().path().parent().toStringWithoutAddress()).
                 append("/").append(actorName).toString();
 
@@ -82,7 +83,7 @@ public class MeteringBehavior implements Procedure<Object> {
      * @throws Exception
      */
     @Override
-    public void apply(Object message) throws Exception {
+    public void apply(final Object message) throws Exception {
         final String messageType = message.getClass().getSimpleName();
 
         final String msgProcessingTimeByMsgType =
@@ -94,7 +95,12 @@ public class MeteringBehavior implements Procedure<Object> {
         final Timer.Context context = msgProcessingTimer.time();
         final Timer.Context contextByMsgType = msgProcessingTimerByMsgType.time();
 
-        meteredActor.onReceive(message);
+        try {
+            meteredActor.onReceive(message);
+        } catch (Throwable t) {
+            Throwables.propagateIfPossible(t, Exception.class);
+            throw Throwables.propagate(t);
+        }
 
         //stop timers
         contextByMsgType.stop();
