@@ -13,10 +13,11 @@ import javax.annotation.Nullable;
 
 /**
  * An EntityOwnerSelectionStrategy is to be used by the EntityOwnershipShard to select a new owner from a collection
- * of candidates
+ * of candidates.
  */
 public interface EntityOwnerSelectionStrategy {
     /**
+     * Returns the time in millis owner selection should be delayed.
      *
      * @return the time in millis owner selection should be delayed
      */
@@ -24,6 +25,8 @@ public interface EntityOwnerSelectionStrategy {
 
 
     /**
+     * Selects a new owner from the list of viable candidates.
+     *
      * @param currentOwner the current owner of the entity if any, null otherwise
      * @param viableCandidates the available candidates from which to choose the new owner
      * @return the new owner

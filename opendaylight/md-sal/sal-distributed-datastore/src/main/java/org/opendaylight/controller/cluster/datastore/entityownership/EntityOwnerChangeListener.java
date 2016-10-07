@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.datastore.entityownership;
 
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.createEntity;
+
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
@@ -41,17 +42,18 @@ class EntityOwnerChangeListener extends AbstractEntityOwnerChangeListener {
 
     @Override
     public void onDataTreeChanged(final Collection<DataTreeCandidate> changes) {
-        for(DataTreeCandidate change: changes) {
+        for (DataTreeCandidate change: changes) {
             DataTreeCandidateNode changeRoot = change.getRootNode();
             LeafNode<?> ownerLeaf = (LeafNode<?>) changeRoot.getDataAfter().get();
 
-            LOG.debug("{}: Entity node changed: {}, {}", logId(), changeRoot.getModificationType(), change.getRootPath());
+            LOG.debug("{}: Entity node changed: {}, {}", logId(), changeRoot.getModificationType(),
+                    change.getRootPath());
 
             String newOwner = extractOwner(ownerLeaf);
 
             String origOwner = null;
             Optional<NormalizedNode<?, ?>> dataBefore = changeRoot.getDataBefore();
-            if(dataBefore.isPresent()) {
+            if (dataBefore.isPresent()) {
                 origOwner = extractOwner((LeafNode<?>) changeRoot.getDataBefore().get());
             }
 
@@ -64,8 +66,9 @@ class EntityOwnerChangeListener extends AbstractEntityOwnerChangeListener {
 
                 DOMEntity entity = createEntity(change.getRootPath());
 
-                LOG.debug("{}: Calling notifyEntityOwnershipListeners: entity: {}, wasOwner: {}, isOwner: {}, hasOwner: {}",
-                        logId(), entity, wasOwner, isOwner, hasOwner);
+                LOG.debug(
+                    "{}: Calling notifyEntityOwnershipListeners: entity: {}, wasOwner: {}, isOwner: {}, hasOwner: {}",
+                    logId(), entity, wasOwner, isOwner, hasOwner);
 
                 listenerSupport.notifyEntityOwnershipListeners(entity, wasOwner, isOwner, hasOwner);
             }

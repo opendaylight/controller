@@ -14,11 +14,12 @@ import java.util.Collections;
 import java.util.Map;
 
 /**
- * The FirstCandidateSelectionStrategy always selects the first viable candidate from the list of candidates
+ * The FirstCandidateSelectionStrategy always selects the first viable candidate from the list of candidates.
  */
 public class FirstCandidateSelectionStrategy extends AbstractEntityOwnerSelectionStrategy {
 
-    public static final FirstCandidateSelectionStrategy INSTANCE = new FirstCandidateSelectionStrategy(0L, Collections.emptyMap());
+    public static final FirstCandidateSelectionStrategy INSTANCE =
+            new FirstCandidateSelectionStrategy(0L, Collections.emptyMap());
 
     public FirstCandidateSelectionStrategy(long selectionDelayInMillis, Map<String, Long> initialStatistics) {
         super(selectionDelayInMillis, initialStatistics);
