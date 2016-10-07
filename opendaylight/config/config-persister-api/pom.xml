@@ -2,11 +2,14 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.opendaylight.controller</groupId>
-    <artifactId>config-subsystem</artifactId>
-    <version>0.6.0-SNAPSHOT</version>
-    <relativePath>..</relativePath>
+    <groupId>org.opendaylight.odlparent</groupId>
+    <artifactId>odlparent</artifactId>
+    <version>1.8.0-SNAPSHOT</version>
+    <relativePath/>
   </parent>
+
+  <groupId>org.opendaylight.controller</groupId>
+  <version>0.6.0-SNAPSHOT</version>
   <artifactId>config-persister-api</artifactId>
   <packaging>bundle</packaging>
   <name>${project.artifactId}</name>
@@ -15,6 +18,7 @@
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>config-util</artifactId>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>com.google.guava</groupId>
@@ -28,9 +32,18 @@
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
       </plugin>
+      <!-- test jar -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>test-jar</goal>
+            </goals>
+            <phase>package</phase>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>
