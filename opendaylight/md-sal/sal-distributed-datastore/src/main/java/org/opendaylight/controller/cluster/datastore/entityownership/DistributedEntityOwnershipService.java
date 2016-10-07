@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.datastore.entityownership;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.CANDIDATE_NODE_ID;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.ENTITY_OWNER_NODE_ID;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.entityPath;
+
 import akka.actor.ActorRef;
 import akka.dispatch.OnComplete;
 import akka.pattern.Patterns;
@@ -109,7 +110,7 @@ public class DistributedEntityOwnershipService implements DOMEntityOwnershipServ
         future.onComplete(new OnComplete<Object>() {
             @Override
             public void onComplete(final Throwable failure, final Object response) {
-                if(failure != null) {
+                if (failure != null) {
                     LOG.debug("Error sending message {} to {}", message, shardActor, failure);
                 } else {
                     LOG.debug("{} message to {} succeeded", message, shardActor, failure);
@@ -120,12 +121,12 @@ public class DistributedEntityOwnershipService implements DOMEntityOwnershipServ
 
     @VisibleForTesting
     void executeLocalEntityOwnershipShardOperation(final Object message) {
-        if(localEntityOwnershipShard == null) {
+        if (localEntityOwnershipShard == null) {
             Future<ActorRef> future = context.findLocalShardAsync(ENTITY_OWNERSHIP_SHARD_NAME);
             future.onComplete(new OnComplete<ActorRef>() {
                 @Override
                 public void onComplete(final Throwable failure, final ActorRef shardActor) {
-                    if(failure != null) {
+                    if (failure != null) {
                         LOG.error("Failed to find local {} shard", ENTITY_OWNERSHIP_SHARD_NAME, failure);
                     } else {
                         localEntityOwnershipShard = shardActor;
@@ -144,7 +145,7 @@ public class DistributedEntityOwnershipService implements DOMEntityOwnershipServ
             throws CandidateAlreadyRegisteredException {
         Preconditions.checkNotNull(entity, "entity cannot be null");
 
-        if(registeredEntities.putIfAbsent(entity, entity) != null) {
+        if (registeredEntities.putIfAbsent(entity, entity) != null) {
             throw new CandidateAlreadyRegisteredException(entity);
         }
 
@@ -194,9 +195,11 @@ public class DistributedEntityOwnershipService implements DOMEntityOwnershipServ
 
         // Check if there are any candidates, if there are none we do not really have ownership state
         final MapEntryNode entity = (MapEntryNode) entityNode.get();
-        final Optional<DataContainerChild<? extends PathArgument, ?>> optionalCandidates = entity.getChild(CANDIDATE_NODE_ID);
-        final boolean hasCandidates = optionalCandidates.isPresent() && ((MapNode) optionalCandidates.get()).getValue().size() > 0;
-        if(!hasCandidates){
+        final Optional<DataContainerChild<? extends PathArgument, ?>> optionalCandidates =
+                entity.getChild(CANDIDATE_NODE_ID);
+        final boolean hasCandidates = optionalCandidates.isPresent()
+                && ((MapNode) optionalCandidates.get()).getValue().size() > 0;
+        if (!hasCandidates) {
             return Optional.absent();
         }
 
@@ -215,10 +218,11 @@ public class DistributedEntityOwnershipService implements DOMEntityOwnershipServ
     }
 
     @VisibleForTesting
+    @SuppressWarnings("checkstyle:IllegalCatch")
     DataTree getLocalEntityOwnershipShardDataTree() {
         if (localEntityOwnershipShardDataTree == null) {
             try {
-                if(localEntityOwnershipShard == null) {
+                if (localEntityOwnershipShard == null) {
                     localEntityOwnershipShard = Await.result(context.findLocalShardAsync(
                             ENTITY_OWNERSHIP_SHARD_NAME), Duration.Inf());
                 }

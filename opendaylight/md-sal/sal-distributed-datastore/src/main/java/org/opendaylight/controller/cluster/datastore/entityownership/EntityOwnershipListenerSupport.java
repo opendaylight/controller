@@ -96,7 +96,7 @@ class EntityOwnershipListenerSupport {
 
     private void notifyListeners(DOMEntity entity, String mapKey, boolean wasOwner, boolean isOwner, boolean hasOwner) {
         Collection<DOMEntityOwnershipListener> listeners = entityTypeListenerMap.get(mapKey);
-        if(!listeners.isEmpty()) {
+        if (!listeners.isEmpty()) {
             notifyListeners(entity, wasOwner, isOwner, hasOwner, listeners);
         }
     }
@@ -105,7 +105,7 @@ class EntityOwnershipListenerSupport {
             Collection<DOMEntityOwnershipListener> listeners) {
         DOMEntityOwnershipChange changed = new DOMEntityOwnershipChange(entity,
                 EntityOwnershipChangeState.from(wasOwner, isOwner, hasOwner), inJeopardy);
-        for(DOMEntityOwnershipListener listener: listeners) {
+        for (DOMEntityOwnershipListener listener: listeners) {
             ActorRef listenerActor = listenerActorFor(listener);
 
             LOG.debug("{}: Notifying EntityOwnershipListenerActor {} with {}", logId, listenerActor, changed);
@@ -117,7 +117,7 @@ class EntityOwnershipListenerSupport {
     private void addListener(DOMEntityOwnershipListener listener, String mapKey) {
         if (entityTypeListenerMap.put(mapKey, listener)) {
             ListenerActorRefEntry listenerEntry = listenerActorMap.get(listener);
-            if(listenerEntry == null) {
+            if (listenerEntry == null) {
                 listenerActorMap.put(listener, new ListenerActorRefEntry());
             } else {
                 listenerEntry.referenceCount++;
@@ -132,10 +132,10 @@ class EntityOwnershipListenerSupport {
             LOG.debug("{}: Found {}", logId, listenerEntry);
 
             listenerEntry.referenceCount--;
-            if(listenerEntry.referenceCount <= 0) {
+            if (listenerEntry.referenceCount <= 0) {
                 listenerActorMap.remove(listener);
 
-                if(listenerEntry.actorRef != null) {
+                if (listenerEntry.actorRef != null) {
                     LOG.debug("Killing EntityOwnershipListenerActor {}", listenerEntry.actorRef);
                     listenerEntry.actorRef.tell(PoisonPill.getInstance(), ActorRef.noSender());
                 }
@@ -152,7 +152,7 @@ class EntityOwnershipListenerSupport {
         int referenceCount = 1;
 
         ActorRef actorFor(DOMEntityOwnershipListener listener) {
-            if(actorRef == null) {
+            if (actorRef == null) {
                 actorRef = actorContext.actorOf(EntityOwnershipListenerActor.props(listener));
 
                 LOG.debug("{}: Created EntityOwnershipListenerActor {} for listener {}", logId, actorRef, listener);

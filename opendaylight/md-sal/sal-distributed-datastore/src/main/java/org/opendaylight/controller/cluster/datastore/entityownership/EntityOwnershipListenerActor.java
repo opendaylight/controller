@@ -13,8 +13,6 @@ import com.google.common.base.Preconditions;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActor;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipChange;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipListener;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * An actor which is responsible for notifying an EntityOwnershipListener of changes.
@@ -22,8 +20,6 @@ import org.slf4j.LoggerFactory;
  * @author Thomas Pantelis
  */
 class EntityOwnershipListenerActor extends AbstractUntypedActor {
-    private static final Logger LOG = LoggerFactory.getLogger(EntityOwnershipListenerActor.class);
-
     private final DOMEntityOwnershipListener listener;
 
     private EntityOwnershipListenerActor(DOMEntityOwnershipListener listener) {
@@ -39,6 +35,7 @@ class EntityOwnershipListenerActor extends AbstractUntypedActor {
         }
     }
 
+    @SuppressWarnings("checkstyle:IllegalCatch")
     private void onEntityOwnershipChanged(DOMEntityOwnershipChange change) {
         LOG.debug("Notifying EntityOwnershipListener {}: {}", listener, change);
 

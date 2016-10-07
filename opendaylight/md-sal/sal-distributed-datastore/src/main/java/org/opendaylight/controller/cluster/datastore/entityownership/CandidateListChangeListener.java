@@ -12,6 +12,7 @@ import static org.opendaylight.controller.cluster.datastore.entityownership.Enti
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.ENTITY_ID_QNAME;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.ENTITY_OWNERS_PATH;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.ENTITY_QNAME;
+
 import akka.actor.ActorRef;
 import com.google.common.base.Preconditions;
 import java.util.ArrayList;
@@ -57,14 +58,14 @@ class CandidateListChangeListener implements DOMDataTreeChangeListener {
     }
 
     void init(ShardDataTree shardDataTree) {
-        shardDataTree.registerTreeChangeListener(YangInstanceIdentifier.builder(ENTITY_OWNERS_PATH).
-                node(EntityType.QNAME).node(EntityType.QNAME).node(ENTITY_QNAME).node(ENTITY_QNAME).
-                        node(Candidate.QNAME).node(Candidate.QNAME).build(), this);
+        shardDataTree.registerTreeChangeListener(YangInstanceIdentifier.builder(ENTITY_OWNERS_PATH)
+                .node(EntityType.QNAME).node(EntityType.QNAME).node(ENTITY_QNAME).node(ENTITY_QNAME)
+                    .node(Candidate.QNAME).node(Candidate.QNAME).build(), this);
     }
 
     @Override
     public void onDataTreeChanged(Collection<DataTreeCandidate> changes) {
-        for(DataTreeCandidate change: changes) {
+        for (DataTreeCandidate change: changes) {
             DataTreeCandidateNode changeRoot = change.getRootNode();
             ModificationType type = changeRoot.getModificationType();
 
@@ -76,23 +77,23 @@ class CandidateListChangeListener implements DOMDataTreeChangeListener {
 
             YangInstanceIdentifier entityId = extractEntityPath(change.getRootPath());
 
-            if(type == ModificationType.WRITE || type == ModificationType.APPEARED) {
+            if (type == ModificationType.WRITE || type == ModificationType.APPEARED) {
                 LOG.debug("{}: Candidate {} was added for entity {}", logId, candidate, entityId);
 
-                Collection<String> currentCandidates = addToCurrentCandidates(entityId, candidate);
-                shard.tell(new CandidateAdded(entityId, candidate, new ArrayList<>(currentCandidates)), shard);
-            } else if(type == ModificationType.DELETE || type == ModificationType.DISAPPEARED) {
+                Collection<String> newCandidates = addToCurrentCandidates(entityId, candidate);
+                shard.tell(new CandidateAdded(entityId, candidate, new ArrayList<>(newCandidates)), shard);
+            } else if (type == ModificationType.DELETE || type == ModificationType.DISAPPEARED) {
                 LOG.debug("{}: Candidate {} was removed for entity {}", logId, candidate, entityId);
 
-                Collection<String> currentCandidates = removeFromCurrentCandidates(entityId, candidate);
-                shard.tell(new CandidateRemoved(entityId, candidate, new ArrayList<>(currentCandidates)), shard);
+                Collection<String> newCandidates = removeFromCurrentCandidates(entityId, candidate);
+                shard.tell(new CandidateRemoved(entityId, candidate, new ArrayList<>(newCandidates)), shard);
             }
         }
     }
 
     private Collection<String> addToCurrentCandidates(YangInstanceIdentifier entityId, String newCandidate) {
         Collection<String> candidates = currentCandidates.get(entityId);
-        if(candidates == null) {
+        if (candidates == null) {
             candidates = new LinkedHashSet<>();
             currentCandidates.put(entityId, candidates);
         }
@@ -103,7 +104,7 @@ class CandidateListChangeListener implements DOMDataTreeChangeListener {
 
     private Collection<String> removeFromCurrentCandidates(YangInstanceIdentifier entityId, String candidateToRemove) {
         Collection<String> candidates = currentCandidates.get(entityId);
-        if(candidates != null) {
+        if (candidates != null) {
             candidates.remove(candidateToRemove);
             return candidates;
         }
@@ -114,12 +115,12 @@ class CandidateListChangeListener implements DOMDataTreeChangeListener {
 
     private static YangInstanceIdentifier extractEntityPath(YangInstanceIdentifier candidatePath) {
         List<PathArgument> newPathArgs = new ArrayList<>();
-        for(PathArgument pathArg: candidatePath.getPathArguments()) {
+        for (PathArgument pathArg: candidatePath.getPathArguments()) {
             newPathArgs.add(pathArg);
-            if(pathArg instanceof NodeIdentifierWithPredicates) {
+            if (pathArg instanceof NodeIdentifierWithPredicates) {
                 NodeIdentifierWithPredicates nodeKey = (NodeIdentifierWithPredicates) pathArg;
                 Entry<QName, Object> key = nodeKey.getKeyValues().entrySet().iterator().next();
-                if(ENTITY_ID_QNAME.equals(key.getKey())) {
+                if (ENTITY_ID_QNAME.equals(key.getKey())) {
                     break;
                 }
             }

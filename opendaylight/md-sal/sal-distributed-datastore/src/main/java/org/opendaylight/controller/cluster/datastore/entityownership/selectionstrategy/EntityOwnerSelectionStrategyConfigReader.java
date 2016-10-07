@@ -21,6 +21,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * Reads the entity owner selection strategy config.
+ *
  * @deprecated FIXME: Service injection class. This class needs to be eliminated in favor of proper service injection,
  *             which can be any of OSGi (which this class uses internally), java.util.ServiceLoader, or config
  *             subsystem.
@@ -36,6 +38,7 @@ public final class EntityOwnerSelectionStrategyConfigReader {
         // Hidden on purpose
     }
 
+    @SuppressWarnings("checkstyle:IllegalCatch")
     public static EntityOwnerSelectionStrategyConfig loadStrategyWithConfig(final BundleContext bundleContext) {
         final EntityOwnerSelectionStrategyConfig.Builder builder = EntityOwnerSelectionStrategyConfig.newBuilder();
 
@@ -74,7 +77,8 @@ public final class EntityOwnerSelectionStrategyConfigReader {
         return builder.build();
     }
 
-    private static EntityOwnerSelectionStrategyConfig parseConfiguration(final Builder builder, final Configuration config) {
+    private static EntityOwnerSelectionStrategyConfig parseConfiguration(final Builder builder,
+            final Configuration config) {
         // Historic note: java.util.Dictionary since introduction of java.util.Map in Java 1.2
         final Dictionary<String, Object> properties = config.getProperties();
         if (properties == null) {
@@ -121,7 +125,7 @@ public final class EntityOwnerSelectionStrategyConfigReader {
             throws ClassNotFoundException {
         final Class<?> clazz;
         try {
-           clazz = EntityOwnerSelectionStrategyConfigReader.class.getClassLoader().loadClass(strategyClassAndDelay);
+            clazz = EntityOwnerSelectionStrategyConfigReader.class.getClassLoader().loadClass(strategyClassAndDelay);
         } catch (ClassNotFoundException e) {
             throw new IllegalArgumentException("Failed to load strategy " + strategyClassAndDelay);
         }

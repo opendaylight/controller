@@ -11,6 +11,7 @@ import java.util.Map.Entry;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntity;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.entity.owners.rev150804.EntityOwners;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.entity.owners.rev150804.entity.owners.EntityType;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.entity.owners.rev150804.entity.owners.entity.type.Entity;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.entity.owners.rev150804.entity.owners.entity.type.entity.Candidate;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -31,8 +32,7 @@ import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableOr
  * @author Thomas Pantelis
  */
 public final class EntityOwnersModel {
-    static final  QName ENTITY_QNAME = org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.
-            md.sal.clustering.entity.owners.rev150804.entity.owners.entity.type.Entity.QNAME;
+    static final QName ENTITY_QNAME = Entity.QNAME;
     static final QName CANDIDATE_NAME_QNAME = QName.create(Candidate.QNAME, "name");
     static final QName ENTITY_ID_QNAME = QName.create(ENTITY_QNAME, "id");
     static final QName ENTITY_OWNER_QNAME = QName.create(ENTITY_QNAME, "owner");
@@ -50,18 +50,18 @@ public final class EntityOwnersModel {
             YangInstanceIdentifier.of(EntityOwners.QNAME).node(EntityType.QNAME);
 
     static YangInstanceIdentifier entityPath(String entityType, YangInstanceIdentifier entityId) {
-        return YangInstanceIdentifier.builder(ENTITY_OWNERS_PATH).node(EntityType.QNAME).
-                nodeWithKey(EntityType.QNAME, ENTITY_TYPE_QNAME, entityType).node(ENTITY_QNAME).
-                        nodeWithKey(ENTITY_QNAME, ENTITY_ID_QNAME, entityId).build();
+        return YangInstanceIdentifier.builder(ENTITY_OWNERS_PATH).node(EntityType.QNAME)
+                .nodeWithKey(EntityType.QNAME, ENTITY_TYPE_QNAME, entityType).node(ENTITY_QNAME)
+                        .nodeWithKey(ENTITY_QNAME, ENTITY_ID_QNAME, entityId).build();
 
     }
 
     static YangInstanceIdentifier candidatePath(String entityType, YangInstanceIdentifier entityId,
             String candidateName) {
-        return YangInstanceIdentifier.builder(ENTITY_OWNERS_PATH).node(EntityType.QNAME).
-                nodeWithKey(EntityType.QNAME, ENTITY_TYPE_QNAME, entityType).node(ENTITY_QNAME).
-                        nodeWithKey(ENTITY_QNAME, ENTITY_ID_QNAME, entityId).node(Candidate.QNAME).
-                                nodeWithKey(Candidate.QNAME, CANDIDATE_NAME_QNAME, candidateName).build();
+        return YangInstanceIdentifier.builder(ENTITY_OWNERS_PATH).node(EntityType.QNAME)
+                .nodeWithKey(EntityType.QNAME, ENTITY_TYPE_QNAME, entityType).node(ENTITY_QNAME)
+                        .nodeWithKey(ENTITY_QNAME, ENTITY_ID_QNAME, entityId).node(Candidate.QNAME)
+                                .nodeWithKey(Candidate.QNAME, CANDIDATE_NAME_QNAME, candidateName).build();
 
     }
 
@@ -82,8 +82,8 @@ public final class EntityOwnersModel {
 
     static ContainerNode entityOwnersWithEntityTypeEntry(MapEntryNode entityTypeNode) {
         return ImmutableContainerNodeBuilder.create().withNodeIdentifier(
-                ENTITY_OWNERS_NODE_ID).addChild(ImmutableNodes.mapNodeBuilder(EntityType.QNAME).
-                        addChild(entityTypeNode).build()).build();
+                ENTITY_OWNERS_NODE_ID).addChild(ImmutableNodes.mapNodeBuilder(EntityType.QNAME)
+                        .addChild(entityTypeNode).build()).build();
     }
 
     static MapEntryNode entityTypeEntryWithEntityEntry(String entityType, MapEntryNode entityNode) {
@@ -98,8 +98,8 @@ public final class EntityOwnersModel {
     }
 
     static MapNode candidateEntry(String candidateName) {
-        return ImmutableOrderedMapNodeBuilder.create().withNodeIdentifier(new NodeIdentifier(Candidate.QNAME)).
-                addChild(candidateMapEntry(candidateName)).build();
+        return ImmutableOrderedMapNodeBuilder.create().withNodeIdentifier(new NodeIdentifier(Candidate.QNAME))
+                .addChild(candidateMapEntry(candidateName)).build();
     }
 
     static MapEntryNode candidateMapEntry(String candidateName) {
@@ -111,11 +111,12 @@ public final class EntityOwnersModel {
                 ImmutableNodes.leafNode(ENTITY_OWNER_QNAME, owner)).build();
     }
 
-    public static String entityTypeFromEntityPath(YangInstanceIdentifier entityPath){
+    public static String entityTypeFromEntityPath(YangInstanceIdentifier entityPath) {
         YangInstanceIdentifier parent = entityPath;
-        while(!parent.isEmpty()) {
+        while (!parent.isEmpty()) {
             if (EntityType.QNAME.equals(parent.getLastPathArgument().getNodeType())) {
-                YangInstanceIdentifier.NodeIdentifierWithPredicates entityTypeLastPathArgument = (YangInstanceIdentifier.NodeIdentifierWithPredicates) parent.getLastPathArgument();
+                YangInstanceIdentifier.NodeIdentifierWithPredicates entityTypeLastPathArgument =
+                        (YangInstanceIdentifier.NodeIdentifierWithPredicates) parent.getLastPathArgument();
                 return (String) entityTypeLastPathArgument.getKeyValues().get(ENTITY_TYPE_QNAME);
             }
             parent = parent.getParent();
@@ -126,13 +127,13 @@ public final class EntityOwnersModel {
     static DOMEntity createEntity(YangInstanceIdentifier entityPath) {
         String entityType = null;
         YangInstanceIdentifier entityId = null;
-        for(PathArgument pathArg: entityPath.getPathArguments()) {
-            if(pathArg instanceof NodeIdentifierWithPredicates) {
+        for (PathArgument pathArg: entityPath.getPathArguments()) {
+            if (pathArg instanceof NodeIdentifierWithPredicates) {
                 NodeIdentifierWithPredicates nodeKey = (NodeIdentifierWithPredicates) pathArg;
                 Entry<QName, Object> key = nodeKey.getKeyValues().entrySet().iterator().next();
-                if(ENTITY_TYPE_QNAME.equals(key.getKey())) {
+                if (ENTITY_TYPE_QNAME.equals(key.getKey())) {
                     entityType = key.getValue().toString();
-                } else if(ENTITY_ID_QNAME.equals(key.getKey())) {
+                } else if (ENTITY_ID_QNAME.equals(key.getKey())) {
                     entityId = (YangInstanceIdentifier) key.getValue();
                 }
             }

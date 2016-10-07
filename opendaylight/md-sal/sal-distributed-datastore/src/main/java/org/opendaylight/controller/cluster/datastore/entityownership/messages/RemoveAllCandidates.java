@@ -11,7 +11,7 @@ import java.io.Serializable;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 
 /**
- * Message sent by an EntityOwnershipShard to its leader on startup to remove all its candidates.                                                                               .
+ * Message sent by an EntityOwnershipShard to its leader on startup to remove all its candidates.
  *
  * @author Thomas Pantelis
  */

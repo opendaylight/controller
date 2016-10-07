@@ -9,6 +9,7 @@
 package org.opendaylight.controller.cluster.datastore.entityownership;
 
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.entityTypeFromEntityPath;
+
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.romix.scala.collection.concurrent.TrieMap;
@@ -24,13 +25,13 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidateNod
 /**
  * EntityOwnershipStatistics is a utility class that keeps track of ownership statistics for the candidates and
  * caches it for quick count queries.
- * <p>
+ * <p/>
  * While the entity ownership model does maintain the information about which entity is owned by which candidate
  * finding out how many entities of a given type are owned by a given candidate is not an efficient query.
  */
 class EntityOwnershipStatistics extends AbstractEntityOwnerChangeListener {
 
-    private TrieMap<String, TrieMap<String, Long>> statistics = new TrieMap<>();
+    private final TrieMap<String, TrieMap<String, Long>> statistics = new TrieMap<>();
 
     EntityOwnershipStatistics(){
     }
@@ -42,14 +43,14 @@ class EntityOwnershipStatistics extends AbstractEntityOwnerChangeListener {
             LeafNode<?> ownerLeaf = (LeafNode<?>) changeRoot.getDataAfter().get();
             String entityType = entityTypeFromEntityPath(change.getRootPath());
             String newOwner = extractOwner(ownerLeaf);
-            if(!Strings.isNullOrEmpty(newOwner)) {
+            if (!Strings.isNullOrEmpty(newOwner)) {
                 updateStatistics(entityType, newOwner, 1);
             }
 
             Optional<NormalizedNode<?, ?>> dataBefore = changeRoot.getDataBefore();
             if (dataBefore.isPresent()) {
                 String origOwner = extractOwner((LeafNode<?>) changeRoot.getDataBefore().get());
-                if(!Strings.isNullOrEmpty(origOwner)) {
+                if (!Strings.isNullOrEmpty(origOwner)) {
                     updateStatistics(entityType, origOwner, -1);
                 }
             }
@@ -64,25 +65,25 @@ class EntityOwnershipStatistics extends AbstractEntityOwnerChangeListener {
         return snapshot;
     }
 
-    Map<String, Long> byEntityType(String entityType){
-        if(statistics.get(entityType) != null) {
+    Map<String, Long> byEntityType(String entityType) {
+        if (statistics.get(entityType) != null) {
             return statistics.get(entityType).readOnlySnapshot();
         }
         return new HashMap<>();
     }
 
-    private void updateStatistics(String entityType, String candidateName, long count){
-        Map<String, Long> m = statistics.get(entityType);
-        if(m == null){
-            m = new TrieMap<>();
-            m.put(candidateName, count);
-            statistics.put(entityType, m);
+    private void updateStatistics(String entityType, String candidateName, long count) {
+        Map<String, Long> map = statistics.get(entityType);
+        if (map == null) {
+            map = new TrieMap<>();
+            map.put(candidateName, count);
+            statistics.put(entityType, map);
         } else {
-            Long candidateOwnedEntities = m.get(candidateName);
-            if(candidateOwnedEntities == null){
-                m.put(candidateName, count);
+            Long candidateOwnedEntities = map.get(candidateName);
+            if (candidateOwnedEntities == null) {
+                map.put(candidateName, count);
             } else {
-                m.put(candidateName, candidateOwnedEntities + count);
+                map.put(candidateName, candidateOwnedEntities + count);
             }
         }
     }

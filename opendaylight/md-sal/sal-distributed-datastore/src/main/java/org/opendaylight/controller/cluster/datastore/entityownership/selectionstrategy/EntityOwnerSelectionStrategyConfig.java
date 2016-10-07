@@ -30,14 +30,14 @@ public final class EntityOwnerSelectionStrategyConfig {
         return entityTypeToStrategyInfo.get(entityType) != null;
     }
 
-    public EntityOwnerSelectionStrategy createStrategy(String entityType, Map<String, Long> initialStatistics){
+    public EntityOwnerSelectionStrategy createStrategy(String entityType, Map<String, Long> initialStatistics) {
         final EntityOwnerSelectionStrategy strategy;
         final EntityOwnerSelectionStrategy existingStrategy = entityTypeToOwnerSelectionStrategy.get(entityType);
-        if(existingStrategy != null){
+        if (existingStrategy != null) {
             strategy = existingStrategy;
         } else {
             EntityOwnerSelectionStrategyConfig.StrategyInfo strategyInfo = entityTypeToStrategyInfo.get(entityType);
-            if(strategyInfo == null){
+            if (strategyInfo == null) {
                 strategy = FirstCandidateSelectionStrategy.INSTANCE;
             } else {
                 strategy = strategyInfo.createStrategy(initialStatistics);
@@ -48,14 +48,13 @@ public final class EntityOwnerSelectionStrategyConfig {
     }
 
     /**
-     * @deprecated FIXME: THIS IS CONFIGURATION FOR A CUSTOM-LOADED CLASS CONSTRUCTOR
-     *
      * This class should not exist. It contains a single long, which is passed to the constructor (via reflection).
      * We are getting that information from a BundleContext. We are running in OSGi environment, hence this class
      * needs to be deployed in its own bundle, with its own configuration.
-     *
      * If this is used internally, it needs to be relocated into a separate package along with the implementation
      * using it.
+     *
+     * @deprecated FIXME: THIS IS CONFIGURATION FOR A CUSTOM-LOADED CLASS CONSTRUCTOR
      */
     @Deprecated
     public void clearStrategies() {
@@ -71,10 +70,12 @@ public final class EntityOwnerSelectionStrategyConfig {
             this.delay = delay;
         }
 
-        public EntityOwnerSelectionStrategy createStrategy(Map<String, Long> initialStatistics){
+        public EntityOwnerSelectionStrategy createStrategy(Map<String, Long> initialStatistics) {
             try {
-                return strategyClass.getDeclaredConstructor(long.class, Map.class).newInstance(delay, initialStatistics);
-            } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                return strategyClass.getDeclaredConstructor(long.class, Map.class)
+                        .newInstance(delay, initialStatistics);
+            } catch (InstantiationException | IllegalAccessException | InvocationTargetException
+                    | NoSuchMethodException e) {
                 LOG.warn("could not create custom strategy", e);
             }
             return FirstCandidateSelectionStrategy.INSTANCE;
@@ -88,16 +89,17 @@ public final class EntityOwnerSelectionStrategyConfig {
     public static class Builder {
         private final EntityOwnerSelectionStrategyConfig config;
 
-        private Builder(final EntityOwnerSelectionStrategyConfig config){
+        private Builder(final EntityOwnerSelectionStrategyConfig config) {
             this.config = config;
         }
 
-        public Builder addStrategy(final String entityType, final Class<? extends EntityOwnerSelectionStrategy> strategy, final long delay){
+        public Builder addStrategy(final String entityType,
+                final Class<? extends EntityOwnerSelectionStrategy> strategy, final long delay) {
             config.entityTypeToStrategyInfo.put(entityType, new StrategyInfo(strategy, delay));
             return this;
         }
 
-        public EntityOwnerSelectionStrategyConfig build(){
+        public EntityOwnerSelectionStrategyConfig build() {
             return this.config;
         }
     }

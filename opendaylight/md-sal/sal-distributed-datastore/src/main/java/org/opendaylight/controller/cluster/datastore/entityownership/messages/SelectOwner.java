@@ -14,7 +14,7 @@ import org.opendaylight.controller.cluster.datastore.entityownership.selectionst
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 /**
- * Message sent when a new owner needs to be selected
+ * Message sent when a new owner needs to be selected.
  */
 public class SelectOwner {
     private final YangInstanceIdentifier entityPath;
@@ -44,10 +44,7 @@ public class SelectOwner {
 
     @Override
     public String toString() {
-        return "SelectOwner{" +
-                "entityPath=" + entityPath +
-                ", allCandidates=" + allCandidates +
-                ", ownerSelectionStrategy=" + ownerSelectionStrategy +
-                '}';
+        return "SelectOwner [entityPath=" + entityPath + ", allCandidates=" + allCandidates
+                + ", ownerSelectionStrategy=" + ownerSelectionStrategy + "]";
     }
 }

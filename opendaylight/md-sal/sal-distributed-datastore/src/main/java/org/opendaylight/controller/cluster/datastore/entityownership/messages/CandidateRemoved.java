@@ -22,7 +22,8 @@ public class CandidateRemoved {
     private final String removedCandidate;
     private final Collection<String> remainingCandidates;
 
-    public CandidateRemoved(YangInstanceIdentifier entityPath, String removedCandidate, Collection<String> remainingCandidates) {
+    public CandidateRemoved(YangInstanceIdentifier entityPath, String removedCandidate,
+            Collection<String> remainingCandidates) {
         this.entityPath = entityPath;
         this.removedCandidate = removedCandidate;
         this.remainingCandidates = remainingCandidates;

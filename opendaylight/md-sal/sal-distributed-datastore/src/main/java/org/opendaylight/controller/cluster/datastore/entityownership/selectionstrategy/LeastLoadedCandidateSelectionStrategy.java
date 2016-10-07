@@ -15,17 +15,13 @@ import com.google.common.base.Strings;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * The LeastLoadedCandidateSelectionStrategy assigns ownership for an entity to the candidate which owns the least
  * number of entities.
  */
 public class LeastLoadedCandidateSelectionStrategy extends AbstractEntityOwnerSelectionStrategy {
-    private static final Logger LOG = LoggerFactory.getLogger(LeastLoadedCandidateSelectionStrategy.class);
-
-    private Map<String, Long> localStatistics = new HashMap<>();
+    private final Map<String, Long> localStatistics = new HashMap<>();
 
     protected LeastLoadedCandidateSelectionStrategy(long selectionDelayInMillis, Map<String, Long> initialStatistics) {
         super(selectionDelayInMillis, initialStatistics);
@@ -39,20 +35,20 @@ public class LeastLoadedCandidateSelectionStrategy extends AbstractEntityOwnerSe
         String leastLoadedCandidate = null;
         long leastLoadedCount = Long.MAX_VALUE;
 
-        if(!Strings.isNullOrEmpty(currentOwner)){
+        if (!Strings.isNullOrEmpty(currentOwner)) {
             long localVal = MoreObjects.firstNonNull(localStatistics.get(currentOwner), 0L);
             localStatistics.put(currentOwner, localVal - 1);
         }
 
-        for(String candidateName : viableCandidates){
+        for (String candidateName : viableCandidates) {
             long val = MoreObjects.firstNonNull(localStatistics.get(candidateName), 0L);
-            if(val < leastLoadedCount){
+            if (val < leastLoadedCount) {
                 leastLoadedCount = val;
                 leastLoadedCandidate = candidateName;
             }
         }
 
-        if(leastLoadedCandidate == null){
+        if (leastLoadedCandidate == null) {
             leastLoadedCandidate = viableCandidates.iterator().next();
         }
 
@@ -61,7 +57,7 @@ public class LeastLoadedCandidateSelectionStrategy extends AbstractEntityOwnerSe
     }
 
     @VisibleForTesting
-    Map<String, Long> getLocalStatistics(){
+    Map<String, Long> getLocalStatistics() {
         return localStatistics;
     }
 }
