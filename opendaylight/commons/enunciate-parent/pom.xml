@@ -11,12 +11,13 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <parent>
-        <groupId>org.opendaylight.controller</groupId>
-        <artifactId>commons.opendaylight</artifactId>
+        <groupId>org.opendaylight.odlparent</groupId>
+        <artifactId>odlparent</artifactId>
         <version>1.8.0-SNAPSHOT</version>
-        <relativePath>../opendaylight</relativePath>
+        <relativePath/>
     </parent>
 
+    <groupId>org.opendaylight.controller</groupId>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>enunciate-parent</artifactId>
     <packaging>pom</packaging>
