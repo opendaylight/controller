@@ -3,10 +3,10 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>org.opendaylight.controller</groupId>
-    <artifactId>commons.opendaylight</artifactId>
+    <groupId>org.opendaylight.odlparent</groupId>
+    <artifactId>odlparent-lite</artifactId>
     <version>1.8.0-SNAPSHOT</version>
-    <relativePath>../commons/opendaylight</relativePath>
+    <relativePath/>
   </parent>
 
   <groupId>org.opendaylight.controller.archetypes</groupId>
@@ -50,10 +50,6 @@
   </build>
 
   <modules>
-    <module>odl-model-project</module>
-    <module>opendaylight-configfile-archetype</module>
-    <module>opendaylight-karaf-distro-archetype</module>
-    <module>opendaylight-karaf-features</module>
     <module>opendaylight-startup</module>
   </modules>
 </project>
