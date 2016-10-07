@@ -2,11 +2,14 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.opendaylight.controller</groupId>
-    <artifactId>config-subsystem</artifactId>
-    <version>0.6.0-SNAPSHOT</version>
-    <relativePath>..</relativePath>
+    <groupId>org.opendaylight.odlparent</groupId>
+    <artifactId>bundle-parent</artifactId>
+    <version>1.8.0-SNAPSHOT</version>
+    <relativePath/>
   </parent>
+
+  <groupId>org.opendaylight.controller</groupId>
+  <version>0.6.0-SNAPSHOT</version>
   <artifactId>yang-jmx-generator-plugin</artifactId>
 
   <dependencies>
@@ -14,6 +17,7 @@
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>config-api</artifactId>
+      <version>${project.version}</version>
     </dependency>
 
     <dependency>
@@ -29,25 +33,30 @@
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>yang-jmx-generator</artifactId>
+      <version>${project.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.opendaylight.mdsal</groupId>
       <artifactId>mdsal-binding-generator-impl</artifactId>
+      <version>0.10.0-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>org.opendaylight.yangtools</groupId>
       <artifactId>mockito-configuration</artifactId>
+      <version> 1.1.0-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>org.opendaylight.yangtools</groupId>
       <artifactId>yang-maven-plugin-spi</artifactId>
+      <version>1.1.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-core</artifactId>
+      <version>3.3.9</version>
     </dependency>
 
     <dependency>
@@ -58,6 +67,7 @@
     <dependency>
       <groupId>net.sourceforge.pmd</groupId>
       <artifactId>pmd</artifactId>
+      <version>5.1.0</version>
       <scope>test</scope>
     </dependency>
 
@@ -71,6 +81,7 @@
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>yang-jmx-generator</artifactId>
+      <version>${project.version}</version>
       <type>test-jar</type>
       <scope>test</scope>
     </dependency>
