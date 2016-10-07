@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "7a6b29fe_cdb5df7f",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/base/messages/SwitchBehavior.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-10-07T07:44:40Z",
+      "side": 1,
+      "message": "+1, String concatenation is now better than StringBuilder \u0026 co.",
+      "parentUuid": "7a6b29fe_ead6c1c2",
+      "range": {
+        "startLine": 32,
+        "startChar": 9,
+        "endLine": 32,
+        "endChar": 10
+      },
+      "revId": "fee4cf65d837ce0e88681f7d1340694ed3f69822",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a6b29fe_ea4fe1bc",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractRaftActorBehavior.java",
         "patchSetId": 2
@@ -78,6 +102,24 @@
       "side": 1,
       "message": "LOG should be used if static. This isn\u0027t static so CS complains - only static vars should be capitalized.",
       "parentUuid": "7a6b29fe_ea4fe1bc",
+      "revId": "fee4cf65d837ce0e88681f7d1340694ed3f69822",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_2da61354",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractRaftActorBehavior.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-10-07T07:44:40Z",
+      "side": 1,
+      "message": "+1, the rule is that static final members are capitalised, not loggers. (But most loggers are static final.)",
+      "parentUuid": "7a6b29fe_4ae415ac",
       "revId": "fee4cf65d837ce0e88681f7d1340694ed3f69822",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
