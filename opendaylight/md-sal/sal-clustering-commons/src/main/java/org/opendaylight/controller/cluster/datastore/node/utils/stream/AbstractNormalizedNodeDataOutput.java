@@ -11,10 +11,16 @@ import com.google.common.base.Preconditions;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.TransformerFactoryConfigurationError;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.AugmentationIdentifier;
@@ -273,11 +279,17 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
     @Override
     public void anyxmlNode(final NodeIdentifier name, final Object value) throws IOException, IllegalArgumentException {
         Preconditions.checkNotNull(name, "Node identifier should not be null");
-        LOG.debug("Writing a new xml node");
+        LOG.debug("Writing any xml node");
 
         startNode(name.getNodeType(), NodeTypes.ANY_XML_NODE);
 
-        writeObject(value);
+        try {
+            StreamResult xmlOutput = new StreamResult(new StringWriter());
+            TransformerFactory.newInstance().newTransformer().transform((DOMSource)value, xmlOutput);
+            writeObject(xmlOutput.getWriter().toString());
+        } catch (TransformerException | TransformerFactoryConfigurationError e) {
+            throw new IOException("Error writing anyXml", e);
+        }
     }
 
     @Override
