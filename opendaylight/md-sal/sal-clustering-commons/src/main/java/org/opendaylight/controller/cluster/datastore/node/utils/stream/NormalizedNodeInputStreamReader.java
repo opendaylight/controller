@@ -12,6 +12,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import java.io.DataInput;
 import java.io.IOException;
+import java.io.StringReader;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
@@ -21,6 +22,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.dom.DOMSource;
 import org.opendaylight.controller.cluster.datastore.node.utils.QNameFactory;
 import org.opendaylight.yangtools.yang.common.QName;
@@ -38,6 +41,9 @@ import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.NormalizedNo
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.NormalizedNodeContainerBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Element;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 /**
  * NormalizedNodeInputStreamReader reads the byte stream and constructs the normalized node including its children nodes.
@@ -178,7 +184,7 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput 
 
             case NodeTypes.ANY_XML_NODE :
                 LOG.debug("Read xml node");
-                return Builders.anyXmlBuilder().withValue((DOMSource) readObject()).build();
+                return Builders.anyXmlBuilder().withNodeIdentifier(identifier).withValue(readDOMSource()).build();
 
             case NodeTypes.MAP_NODE :
                 LOG.debug("Read map node {}", identifier);
@@ -224,6 +230,19 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput 
 
             default :
                 return null;
+        }
+    }
+
+    private DOMSource readDOMSource() throws IOException {
+        String xml = readObject().toString();
+        try {
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            factory.setNamespaceAware(true);
+            Element node = factory.newDocumentBuilder().parse(
+                    new InputSource(new StringReader(xml))).getDocumentElement();
+            return new DOMSource(node);
+        } catch (SAXException | ParserConfigurationException e) {
+            throw new IOException("Error parsing XML: " + xml, e);
         }
     }
 

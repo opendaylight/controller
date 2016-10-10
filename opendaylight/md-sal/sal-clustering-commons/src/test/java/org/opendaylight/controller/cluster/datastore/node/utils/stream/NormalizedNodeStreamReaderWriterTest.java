@@ -8,9 +8,20 @@
 
 package org.opendaylight.controller.cluster.datastore.node.utils.stream;
 
+import static org.junit.Assert.assertEquals;
+
+import com.google.common.base.Optional;
 import com.google.common.io.ByteStreams;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.StringReader;
+import java.io.StringWriter;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 import org.apache.commons.lang.SerializationUtils;
 import org.junit.Assert;
 import org.junit.Test;
@@ -20,14 +31,21 @@ import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeWithValue;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
+import org.opendaylight.yangtools.yang.data.api.schema.AnyXmlNode;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
+import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
 import org.opendaylight.yangtools.yang.data.api.schema.LeafSetEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableLeafSetEntryNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableLeafSetNodeBuilder;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.xml.sax.InputSource;
 
 public class NormalizedNodeStreamReaderWriterTest {
 
@@ -78,7 +96,6 @@ public class NormalizedNodeStreamReaderWriterTest {
 
         LeafSetEntryNode<Object> entry3 = ImmutableLeafSetEntryNodeBuilder.create().withNodeIdentifier(
                 new NodeWithValue<>(TestModel.BINARY_LEAF_LIST_QNAME, null)).withValue(null).build();
-
 
         return TestModel.createBaseTestContainerBuilder().
                 withChild(ImmutableLeafSetNodeBuilder.create().withNodeIdentifier(
@@ -168,6 +185,48 @@ public class NormalizedNodeStreamReaderWriterTest {
 
         Assert.assertEquals(input, clone.getInput());
 
+    }
+
+    @Test
+    public void testAnyXmlStreaming() throws Exception {
+        String xml = "<foo xmlns=\"http://www.w3.org/TR/html4/\" x=\"123\"><bar>one</bar><bar>two</bar></foo>";
+        final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        factory.setNamespaceAware(true);
+
+        Node xmlNode = factory.newDocumentBuilder().parse(
+                new InputSource(new StringReader(xml))).getDocumentElement();
+
+        assertEquals("http://www.w3.org/TR/html4/", xmlNode.getNamespaceURI());
+
+        NormalizedNode<?, ?> anyXmlContainer = ImmutableContainerNodeBuilder.create().withNodeIdentifier(
+                new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME)).withChild(
+                        Builders.anyXmlBuilder().withNodeIdentifier(new NodeIdentifier(TestModel.ANY_XML_QNAME))
+                            .withValue(new DOMSource(xmlNode)).build()).build();
+
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        NormalizedNodeOutputStreamWriter writer = new NormalizedNodeOutputStreamWriter(
+            ByteStreams.newDataOutput(byteArrayOutputStream));
+
+        writer.writeNormalizedNode(anyXmlContainer);
+
+        NormalizedNodeInputStreamReader reader = new NormalizedNodeInputStreamReader(
+                ByteStreams.newDataInput(byteArrayOutputStream.toByteArray()));
+
+        ContainerNode deserialized = (ContainerNode)reader.readNormalizedNode();
+
+        Optional<DataContainerChild<? extends PathArgument, ?>> child =
+                deserialized.getChild(new NodeIdentifier(TestModel.ANY_XML_QNAME));
+        assertEquals("AnyXml child present", true, child.isPresent());
+
+        StreamResult xmlOutput = new StreamResult(new StringWriter());
+        Transformer transformer = TransformerFactory.newInstance().newTransformer();
+        transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+        transformer.transform(((AnyXmlNode)child.get()).getValue(), xmlOutput);
+
+        assertEquals("XML", xml, xmlOutput.getWriter().toString());
+        assertEquals("http://www.w3.org/TR/html4/", ((AnyXmlNode)child.get()).getValue().getNode().getNamespaceURI());
+
+        writer.close();
     }
 
     private static String largeString(final int pow){
