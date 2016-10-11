@@ -179,6 +179,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     }
 
     @VisibleForTesting
+    @SuppressWarnings("checkstyle:IllegalCatch")
     protected void changeCurrentBehavior(RaftActorBehavior newBehavior) {
         final RaftActorBehavior currentBehavior = getCurrentBehavior();
         if (currentBehavior != null) {
@@ -206,6 +207,8 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     }
 
     /**
+     * Handles a message.
+     *
      * @deprecated This method is not final for testing purposes. DO NOT OVERRIDE IT, override
      * {@link #handleNonRaftCommand(Object)} instead.
      */
@@ -461,7 +464,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     private void handleBehaviorChange(BehaviorState oldBehaviorState, RaftActorBehavior currentBehavior) {
         RaftActorBehavior oldBehavior = oldBehaviorState.getBehavior();
 
-        if (oldBehavior != currentBehavior){
+        if (oldBehavior != currentBehavior) {
             onStateChanged();
         }
 

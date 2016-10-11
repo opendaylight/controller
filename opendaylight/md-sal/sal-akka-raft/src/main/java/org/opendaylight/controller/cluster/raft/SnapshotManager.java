@@ -27,8 +27,13 @@ import org.slf4j.Logger;
  */
 public class SnapshotManager implements SnapshotState {
 
+    @SuppressWarnings("checkstyle:MemberName")
     private final SnapshotState IDLE = new Idle();
+
+    @SuppressWarnings({"checkstyle:MemberName", "checkstyle:AbbreviationAsWordInName"})
     private final SnapshotState PERSISTING = new Persisting();
+
+    @SuppressWarnings({"checkstyle:MemberName", "checkstyle:AbbreviationAsWordInName"})
     private final SnapshotState CREATING = new Creating();
 
     private final Logger log;
@@ -159,8 +164,8 @@ public class SnapshotManager implements SnapshotState {
             lastLogEntryIndex = lastLogEntry.getIndex();
             lastLogEntryTerm = lastLogEntry.getTerm();
         } else {
-            log.debug("{}: Capturing Snapshot : lastLogEntry is null. Using lastAppliedIndex {} and lastAppliedTerm {} instead.",
-                    persistenceId(), lastAppliedIndex, lastAppliedTerm);
+            log.debug("{}: Capturing Snapshot : lastLogEntry is null. Using lastAppliedIndex {} and "
+                    + "lastAppliedTerm {} instead.", persistenceId(), lastAppliedIndex, lastAppliedTerm);
         }
 
         return new CaptureSnapshot(lastLogEntryIndex, lastLogEntryTerm, lastAppliedIndex, lastAppliedTerm,
@@ -254,6 +259,7 @@ public class SnapshotManager implements SnapshotState {
             return false;
         }
 
+        @SuppressWarnings("checkstyle:IllegalCatch")
         private boolean capture(ReplicatedLogEntry lastLogEntry, long replicatedToAllIndex, String targetFollower) {
             captureSnapshot = newCaptureSnapshot(lastLogEntry, replicatedToAllIndex, targetFollower != null);
 
@@ -344,12 +350,12 @@ public class SnapshotManager implements SnapshotState {
             if (dataSizeThresholdExceeded || logSizeExceededSnapshotBatchCount) {
                 if (log.isDebugEnabled()) {
                     if (dataSizeThresholdExceeded) {
-                        log.debug("{}: log data size {} exceeds the memory threshold {} - doing snapshotPreCommit with index {}",
-                                context.getId(), context.getReplicatedLog().dataSize(), dataThreshold,
-                                captureSnapshot.getLastAppliedIndex());
+                        log.debug("{}: log data size {} exceeds the memory threshold {} - doing snapshotPreCommit "
+                                + "with index {}", context.getId(), context.getReplicatedLog().dataSize(),
+                                dataThreshold, captureSnapshot.getLastAppliedIndex());
                     } else {
-                        log.debug("{}: log size {} exceeds the snapshot batch count {} - doing snapshotPreCommit with index {}",
-                                context.getId(), context.getReplicatedLog().size(),
+                        log.debug("{}: log size {} exceeds the snapshot batch count {} - doing snapshotPreCommit with "
+                                + "index {}", context.getId(), context.getReplicatedLog().size(),
                                 context.getConfigParams().getSnapshotBatchCount(),
                                 captureSnapshot.getLastAppliedIndex());
                     }
@@ -407,6 +413,7 @@ public class SnapshotManager implements SnapshotState {
     private class Persisting extends AbstractSnapshotState {
 
         @Override
+        @SuppressWarnings("checkstyle:IllegalCatch")
         public void commit(final long sequenceNumber, long timeStamp) {
             log.debug("{}: Snapshot success -  sequence number: {}", persistenceId(), sequenceNumber);
 

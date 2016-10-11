@@ -20,9 +20,7 @@ import org.slf4j.LoggerFactory;
 import scala.concurrent.duration.FiniteDuration;
 
 /**
- * Default implementation of the ConfigParams
- *
- * If no implementation is provided for ConfigParams, then this will be used.
+ * Default implementation of the ConfigParams.
  */
 public class DefaultConfigParamsImpl implements ConfigParams {
 
@@ -33,7 +31,7 @@ public class DefaultConfigParamsImpl implements ConfigParams {
     private static final int JOURNAL_RECOVERY_LOG_BATCH_SIZE = 1000;
 
     /**
-     * The maximum election time variance
+     * The maximum election time variance.
      */
     private static final int ELECTION_TIME_MAX_VARIANCE = 100;
 
@@ -42,7 +40,7 @@ public class DefaultConfigParamsImpl implements ConfigParams {
 
     /**
      * The interval at which a heart beat message will be sent to the remote
-     * RaftActor
+     * RaftActor.
      * <p/>
      * Since this is set to 100 milliseconds the Election timeout should be
      * at least 200 milliseconds
@@ -78,7 +76,7 @@ public class DefaultConfigParamsImpl implements ConfigParams {
         this.snapshotBatchCount = snapshotBatchCount;
     }
 
-    public void setSnapshotDataThresholdPercentage(int snapshotDataThresholdPercentage){
+    public void setSnapshotDataThresholdPercentage(int snapshotDataThresholdPercentage) {
         this.snapshotDataThresholdPercentage = snapshotDataThresholdPercentage;
     }
 
@@ -94,12 +92,12 @@ public class DefaultConfigParamsImpl implements ConfigParams {
         this.isolatedLeaderCheckInterval = isolatedLeaderCheckInterval.toMillis();
     }
 
-    public void setElectionTimeoutFactor(long electionTimeoutFactor){
+    public void setElectionTimeoutFactor(long electionTimeoutFactor) {
         this.electionTimeoutFactor = electionTimeoutFactor;
         electionTimeOutInterval = null;
     }
 
-    public void setCustomRaftPolicyImplementationClass(String customRaftPolicyImplementationClass){
+    public void setCustomRaftPolicyImplementationClass(String customRaftPolicyImplementationClass) {
         this.customRaftPolicyImplementationClass = customRaftPolicyImplementationClass;
     }
 
@@ -126,7 +124,7 @@ public class DefaultConfigParamsImpl implements ConfigParams {
 
     @Override
     public FiniteDuration getElectionTimeOutInterval() {
-        if(electionTimeOutInterval == null) {
+        if (electionTimeOutInterval == null) {
             electionTimeOutInterval = getHeartBeatInterval().$times(electionTimeoutFactor);
         }
 
@@ -163,23 +161,25 @@ public class DefaultConfigParamsImpl implements ConfigParams {
         return policySupplier.get();
     }
 
-    private class PolicySupplier implements Supplier<RaftPolicy>{
+    private class PolicySupplier implements Supplier<RaftPolicy> {
         @Override
+        @SuppressWarnings("checkstyle:IllegalCatch")
         public RaftPolicy get() {
-            if(Strings.isNullOrEmpty(DefaultConfigParamsImpl.this.customRaftPolicyImplementationClass)){
+            if (Strings.isNullOrEmpty(DefaultConfigParamsImpl.this.customRaftPolicyImplementationClass)) {
                 LOG.debug("No custom RaftPolicy specified. Using DefaultRaftPolicy");
                 return DefaultRaftPolicy.INSTANCE;
             }
+
             try {
                 String className = DefaultConfigParamsImpl.this.customRaftPolicyImplementationClass;
                 LOG.info("Trying to use custom RaftPolicy {}", className);
-                Class<?> c = Class.forName(className);
-                return (RaftPolicy)c.newInstance();
+                return (RaftPolicy)Class.forName(className).newInstance();
             } catch (Exception e) {
-                if(LOG.isDebugEnabled()) {
+                if (LOG.isDebugEnabled()) {
                     LOG.error("Could not create custom raft policy, will stick with default", e);
                 } else {
-                    LOG.error("Could not create custom raft policy, will stick with default : cause = {}", e.getMessage());
+                    LOG.error("Could not create custom raft policy, will stick with default : cause = {}",
+                            e.getMessage());
                 }
             }
             return DefaultRaftPolicy.INSTANCE;

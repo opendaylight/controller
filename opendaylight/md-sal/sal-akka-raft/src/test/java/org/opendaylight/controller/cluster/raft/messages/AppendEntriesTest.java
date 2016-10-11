@@ -50,7 +50,7 @@ public class AppendEntriesTest {
 
         assertEquals("getEntries size", expected.getEntries().size(), actual.getEntries().size());
         Iterator<ReplicatedLogEntry> iter = expected.getEntries().iterator();
-        for(ReplicatedLogEntry e: actual.getEntries()) {
+        for (ReplicatedLogEntry e: actual.getEntries()) {
             verifyReplicatedLogEntry(iter.next(), e);
         }
     }
