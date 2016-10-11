@@ -9,6 +9,7 @@
 package org.opendaylight.controller.cluster.raft.behaviors;
 
 import static org.junit.Assert.assertEquals;
+
 import com.google.common.base.Optional;
 import com.google.protobuf.ByteString;
 import java.io.ByteArrayOutputStream;
@@ -34,7 +35,7 @@ public class SnapshotTrackerTest {
     byte[] chunk3;
 
     @Before
-    public void setup(){
+    public void setup() {
         data = new HashMap<>();
         data.put("key1", "value1");
         data.put("key2", "value2");
@@ -63,7 +64,7 @@ public class SnapshotTrackerTest {
         try {
             tracker2.addChunk(3, chunk3, Optional.<Integer>absent());
             Assert.fail();
-        } catch(SnapshotTracker.InvalidChunkException e){
+        } catch (SnapshotTracker.InvalidChunkException e) {
             e.getMessage().startsWith("Invalid chunk");
         }
 
@@ -73,8 +74,8 @@ public class SnapshotTrackerTest {
         try {
             tracker3.addChunk(LeaderInstallSnapshotState.FIRST_CHUNK_INDEX - 1, chunk1, Optional.<Integer>absent());
             Assert.fail();
-        } catch(SnapshotTracker.InvalidChunkException e){
-
+        } catch (SnapshotTracker.InvalidChunkException e) {
+            // expected
         }
 
         // Out of sequence chunk indexes won't work
@@ -83,10 +84,10 @@ public class SnapshotTrackerTest {
         tracker4.addChunk(LeaderInstallSnapshotState.FIRST_CHUNK_INDEX, chunk1, Optional.<Integer>absent());
 
         try {
-            tracker4.addChunk(LeaderInstallSnapshotState.FIRST_CHUNK_INDEX+2, chunk2, Optional.<Integer>absent());
+            tracker4.addChunk(LeaderInstallSnapshotState.FIRST_CHUNK_INDEX + 2, chunk2, Optional.<Integer>absent());
             Assert.fail();
-        } catch(SnapshotTracker.InvalidChunkException e){
-
+        } catch (SnapshotTracker.InvalidChunkException e) {
+            // expected
         }
 
         // No exceptions will be thrown when invalid chunk is added with the right sequence
@@ -107,8 +108,8 @@ public class SnapshotTrackerTest {
             // Here we add a second chunk and tell addChunk that the previous chunk had a hash code 777
             tracker6.addChunk(LeaderInstallSnapshotState.FIRST_CHUNK_INDEX + 1, chunk2, Optional.of(777));
             Assert.fail();
-        }catch(SnapshotTracker.InvalidChunkException e){
-
+        } catch (SnapshotTracker.InvalidChunkException e) {
+            // expected
         }
 
     }
@@ -123,8 +124,8 @@ public class SnapshotTrackerTest {
         try {
             tracker1.getSnapshot();
             Assert.fail();
-        } catch(IllegalStateException e){
-
+        } catch (IllegalStateException e) {
+            // expected
         }
 
         SnapshotTracker tracker2 = new SnapshotTracker(logger, 3, "leader");
@@ -150,7 +151,7 @@ public class SnapshotTrackerTest {
         assertEquals(chunks, tracker1.getCollectedChunks());
     }
 
-    public byte[] getNextChunk (ByteString bs, int offset, int size){
+    public byte[] getNextChunk(ByteString bs, int offset, int size) {
         int snapshotLength = bs.size();
         int start = offset;
         if (size > snapshotLength) {
@@ -167,22 +168,22 @@ public class SnapshotTrackerTest {
     }
 
     private static ByteString toByteString(Map<String, String> state) {
-        ByteArrayOutputStream b = null;
-        ObjectOutputStream o = null;
+        ByteArrayOutputStream bos = null;
+        ObjectOutputStream os = null;
         try {
             try {
-                b = new ByteArrayOutputStream();
-                o = new ObjectOutputStream(b);
-                o.writeObject(state);
-                byte[] snapshotBytes = b.toByteArray();
+                bos = new ByteArrayOutputStream();
+                os = new ObjectOutputStream(bos);
+                os.writeObject(state);
+                byte[] snapshotBytes = bos.toByteArray();
                 return ByteString.copyFrom(snapshotBytes);
             } finally {
-                if (o != null) {
-                    o.flush();
-                    o.close();
+                if (os != null) {
+                    os.flush();
+                    os.close();
                 }
-                if (b != null) {
-                    b.close();
+                if (bos != null) {
+                    bos.close();
                 }
             }
         } catch (IOException e) {

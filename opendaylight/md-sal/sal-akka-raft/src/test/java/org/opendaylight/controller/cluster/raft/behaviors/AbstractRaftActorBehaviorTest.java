@@ -11,6 +11,7 @@ package org.opendaylight.controller.cluster.raft.behaviors;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.testkit.TestActorRef;
@@ -51,7 +52,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
 
     @After
     public void tearDown() throws Exception {
-        if(behavior != null) {
+        if (behavior != null) {
             behavior.close();
         }
 
@@ -61,8 +62,6 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
     /**
      * This test checks that when a new Raft RPC message is received with a newer
      * term the RaftActor gets into the Follower state.
-     *
-     * @throws Exception
      */
     @Test
     public void testHandleRaftRPCWithNewerTerm() throws Exception {
@@ -85,9 +84,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
     /**
      * This test verifies that when an AppendEntries is received with a term that
      * is less that the currentTerm of the RaftActor then the RaftActor does not
-     * change it's state and it responds back with a failure
-     *
-     * @throws Exception
+     * change it's state and it responds back with a failure.
      */
     @Test
     public void testHandleAppendEntriesSenderTermLessThanReceiverTerm() throws Exception {
@@ -131,7 +128,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
         List<ReplicatedLogEntry> entries = new ArrayList<>();
         entries.add(new MockRaftActorContext.MockReplicatedLogEntry(2, 0, payload));
 
-        AppendEntries appendEntries = new AppendEntries(2, "leader-1", -1, -1, entries, 2, -1, (short)0);
+        final AppendEntries appendEntries = new AppendEntries(2, "leader-1", -1, -1, entries, 2, -1, (short)0);
 
         behavior = createBehavior(context);
 
@@ -181,7 +178,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
     /**
      * This test verifies that when a RaftActor receives a RequestVote message
      * with a term that is greater than it's currentTerm but a less up-to-date
-     * log then the receiving RaftActor will not grant the vote to the sender
+     * log then the receiving RaftActor will not grant the vote to the sender.
      */
     @Test
     public void testHandleRequestVoteWhenSenderLogLessUptoDate() {
@@ -209,7 +206,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
     /**
      * This test verifies that the receiving RaftActor will not grant a vote
      * to a sender if the sender's term is lesser than the currentTerm of the
-     * recipient RaftActor
+     * recipient RaftActor.
      */
     @Test
     public void testHandleRequestVoteWhenSenderTermLessThanCurrentTerm() {
@@ -257,7 +254,8 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
         assertEquals(0, abstractBehavior.getReplicatedToAllIndex());
         assertEquals(1, context.getReplicatedLog().size());
 
-        //5 entries, lastApplied =2 and replicatedIndex = 3, but since we want to keep the lastapplied, indices 0 and 1 will only get purged
+        // 5 entries, lastApplied =2 and replicatedIndex = 3, but since we want to keep the lastapplied, indices 0 and
+        // 1 will only get purged
         context.setReplicatedLog(new MockRaftActorContext.MockReplicatedLogBuilder().createEntries(0, 5, 1).build());
         context.setLastApplied(2);
         abstractBehavior.performSnapshotWithoutCapture(3);
@@ -276,8 +274,8 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
     protected void assertStateChangesToFollowerWhenRaftRPCHasNewerTerm(MockRaftActorContext actorContext,
             ActorRef actorRef, RaftRPC rpc) throws Exception {
 
-        Payload p = new MockRaftActorContext.MockPayload("");
-        setLastLogEntry(actorContext, 1, 0, p);
+        Payload payload = new MockRaftActorContext.MockPayload("");
+        setLastLogEntry(actorContext, 1, 0, payload);
         actorContext.getTermInformation().update(1, "test");
 
         RaftActorBehavior origBehavior = createBehavior(actorContext);
@@ -343,7 +341,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
 
     protected ByteString toByteString(Map<String, String> state) {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        try(ObjectOutputStream oos = new ObjectOutputStream(bos)) {
+        try (ObjectOutputStream oos = new ObjectOutputStream(bos)) {
             oos.writeObject(state);
             return ByteString.copyFrom(bos.toByteArray());
         } catch (IOException e) {
@@ -356,7 +354,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
     }
 
     protected RaftPolicy createRaftPolicy(final boolean automaticElectionsEnabled,
-                                          final boolean applyModificationToStateBeforeConsensus){
+                                          final boolean applyModificationToStateBeforeConsensus) {
         return new RaftPolicy() {
             @Override
             public boolean automaticElectionsEnabled() {

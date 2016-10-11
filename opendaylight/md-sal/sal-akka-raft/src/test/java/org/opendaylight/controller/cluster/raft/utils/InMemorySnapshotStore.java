@@ -37,14 +37,14 @@ public class InMemorySnapshotStore extends SnapshotStore {
 
     static final Logger LOG = LoggerFactory.getLogger(InMemorySnapshotStore.class);
 
+    private static final Map<String, CountDownLatch> SNAPSHOT_SAVED_LATCHES = new ConcurrentHashMap<>();
+    private static final Map<String, CountDownLatch> SNAPSHOT_DELETED_LATCHES = new ConcurrentHashMap<>();
     private static Map<String, List<StoredSnapshot>> snapshots = new ConcurrentHashMap<>();
-    private static final Map<String, CountDownLatch> snapshotSavedLatches = new ConcurrentHashMap<>();
-    private static final Map<String, CountDownLatch> snapshotDeletedLatches = new ConcurrentHashMap<>();
 
     public static void addSnapshot(String persistentId, Object snapshot) {
         List<StoredSnapshot> snapshotList = snapshots.get(persistentId);
 
-        if(snapshotList == null) {
+        if (snapshotList == null) {
             snapshotList = new ArrayList<>();
             snapshots.put(persistentId, snapshotList);
         }
@@ -58,15 +58,15 @@ public class InMemorySnapshotStore extends SnapshotStore {
     @SuppressWarnings("unchecked")
     public static <T> List<T> getSnapshots(String persistentId, Class<T> type) {
         List<StoredSnapshot> stored = snapshots.get(persistentId);
-        if(stored == null) {
+        if (stored == null) {
             return Collections.emptyList();
         }
 
         List<T> retList;
         synchronized (stored) {
             retList = Lists.newArrayListWithCapacity(stored.size());
-            for(StoredSnapshot s: stored) {
-                if(type.isInstance(s.data)) {
+            for (StoredSnapshot s: stored) {
+                if (type.isInstance(s.data)) {
                     retList.add((T) s.data);
                 }
             }
@@ -80,15 +80,15 @@ public class InMemorySnapshotStore extends SnapshotStore {
     }
 
     public static void addSnapshotSavedLatch(String persistenceId) {
-        snapshotSavedLatches.put(persistenceId, new CountDownLatch(1));
+        SNAPSHOT_SAVED_LATCHES.put(persistenceId, new CountDownLatch(1));
     }
 
     public static void addSnapshotDeletedLatch(String persistenceId) {
-        snapshotDeletedLatches.put(persistenceId, new CountDownLatch(1));
+        SNAPSHOT_DELETED_LATCHES.put(persistenceId, new CountDownLatch(1));
     }
 
     public static <T> T waitForSavedSnapshot(String persistenceId, Class<T> type) {
-        if(!Uninterruptibles.awaitUninterruptibly(snapshotSavedLatches.get(persistenceId), 5, TimeUnit.SECONDS)) {
+        if (!Uninterruptibles.awaitUninterruptibly(SNAPSHOT_SAVED_LATCHES.get(persistenceId), 5, TimeUnit.SECONDS)) {
             throw new AssertionError("Snapshot was not saved");
         }
 
@@ -96,7 +96,7 @@ public class InMemorySnapshotStore extends SnapshotStore {
     }
 
     public static void waitForDeletedSnapshot(String persistenceId) {
-        if(!Uninterruptibles.awaitUninterruptibly(snapshotDeletedLatches.get(persistenceId), 5, TimeUnit.SECONDS)) {
+        if (!Uninterruptibles.awaitUninterruptibly(SNAPSHOT_DELETED_LATCHES.get(persistenceId), 5, TimeUnit.SECONDS)) {
             throw new AssertionError("Snapshot was not deleted");
         }
     }
@@ -105,14 +105,14 @@ public class InMemorySnapshotStore extends SnapshotStore {
     public Future<Optional<SelectedSnapshot>> doLoadAsync(String persistenceId,
             SnapshotSelectionCriteria snapshotSelectionCriteria) {
         List<StoredSnapshot> snapshotList = snapshots.get(persistenceId);
-        if(snapshotList == null){
+        if (snapshotList == null) {
             return Futures.successful(Optional.<SelectedSnapshot>empty());
         }
 
-        synchronized(snapshotList) {
-            for(int i = snapshotList.size() - 1; i >= 0; i--) {
+        synchronized (snapshotList) {
+            for (int i = snapshotList.size() - 1; i >= 0; i--) {
                 StoredSnapshot snapshot = snapshotList.get(i);
-                if(matches(snapshot, snapshotSelectionCriteria)) {
+                if (matches(snapshot, snapshotSelectionCriteria)) {
                     return Futures.successful(Optional.of(new SelectedSnapshot(snapshot.metadata,
                             snapshot.data)));
                 }
@@ -123,27 +123,27 @@ public class InMemorySnapshotStore extends SnapshotStore {
     }
 
     private static boolean matches(StoredSnapshot snapshot, SnapshotSelectionCriteria criteria) {
-        return snapshot.metadata.sequenceNr() <= criteria.maxSequenceNr() &&
-                snapshot.metadata.timestamp() <= criteria.maxTimestamp();
+        return snapshot.metadata.sequenceNr() <= criteria.maxSequenceNr()
+                && snapshot.metadata.timestamp() <= criteria.maxTimestamp();
     }
 
     @Override
-    public Future<Void> doSaveAsync(SnapshotMetadata snapshotMetadata, Object o) {
+    public Future<Void> doSaveAsync(SnapshotMetadata snapshotMetadata, Object obj) {
         List<StoredSnapshot> snapshotList = snapshots.get(snapshotMetadata.persistenceId());
 
         LOG.trace("doSaveAsync: persistentId {}: sequenceNr: {}: timestamp {}: {}", snapshotMetadata.persistenceId(),
-                snapshotMetadata.sequenceNr(), snapshotMetadata.timestamp(), o);
+                snapshotMetadata.sequenceNr(), snapshotMetadata.timestamp(), obj);
 
-        if(snapshotList == null){
+        if (snapshotList == null) {
             snapshotList = new ArrayList<>();
             snapshots.put(snapshotMetadata.persistenceId(), snapshotList);
         }
         synchronized (snapshotList) {
-            snapshotList.add(new StoredSnapshot(snapshotMetadata, o));
+            snapshotList.add(new StoredSnapshot(snapshotMetadata, obj));
         }
 
-        CountDownLatch latch = snapshotSavedLatches.get(snapshotMetadata.persistenceId());
-        if(latch != null) {
+        CountDownLatch latch = SNAPSHOT_SAVED_LATCHES.get(snapshotMetadata.persistenceId());
+        if (latch != null) {
             latch.countDown();
         }
 
@@ -156,9 +156,9 @@ public class InMemorySnapshotStore extends SnapshotStore {
 
         if (snapshotList != null) {
             synchronized (snapshotList) {
-                for(int i=0;i<snapshotList.size(); i++){
+                for (int i = 0; i < snapshotList.size(); i++) {
                     StoredSnapshot snapshot = snapshotList.get(i);
-                    if(metadata.equals(snapshot.metadata)){
+                    if (metadata.equals(snapshot.metadata)) {
                         snapshotList.remove(i);
                         break;
                     }
@@ -175,14 +175,14 @@ public class InMemorySnapshotStore extends SnapshotStore {
             criteria.maxSequenceNr(), criteria.maxTimestamp());
 
         List<StoredSnapshot> snapshotList = snapshots.get(persistenceId);
-        if(snapshotList != null){
+        if (snapshotList != null) {
             synchronized (snapshotList) {
                 Iterator<StoredSnapshot> iter = snapshotList.iterator();
-                while(iter.hasNext()) {
-                    StoredSnapshot s = iter.next();
-                    if(matches(s, criteria)) {
+                while (iter.hasNext()) {
+                    StoredSnapshot stored = iter.next();
+                    if (matches(stored, criteria)) {
                         LOG.trace("Deleting snapshot for sequenceNr: {}, timestamp: {}: {}",
-                                s.metadata.sequenceNr(), s.metadata.timestamp(), s.data);
+                                stored.metadata.sequenceNr(), stored.metadata.timestamp(), stored.data);
 
                         iter.remove();
                     }
@@ -190,8 +190,8 @@ public class InMemorySnapshotStore extends SnapshotStore {
             }
         }
 
-        CountDownLatch latch = snapshotDeletedLatches.get(persistenceId);
-        if(latch != null) {
+        CountDownLatch latch = SNAPSHOT_DELETED_LATCHES.get(persistenceId);
+        if (latch != null) {
             latch.countDown();
         }
 

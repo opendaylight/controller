@@ -14,6 +14,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+
 import akka.actor.Props;
 import akka.testkit.TestActorRef;
 import org.junit.After;
@@ -30,7 +31,7 @@ public class SyncStatusTrackerTest extends AbstractActorTest {
             Props.create(MessageCollectorActor.class), actorFactory.generateActorId("listener"));
 
     @After
-    public void tearDown(){
+    public void tearDown() {
         actorFactory.close();
     }
 
@@ -111,33 +112,32 @@ public class SyncStatusTrackerTest extends AbstractActorTest {
     }
 
     @Test
-    public void testConstructorActorShouldNotBeNull(){
+    public void testConstructorActorShouldNotBeNull() {
         try {
             new SyncStatusTracker(null, "commit-tracker", 10);
             fail("A NullPointerException was expected");
-        } catch(NullPointerException e){
+        } catch (NullPointerException e) {
             assertTrue("Invalid error message :" + e.getMessage(), e.getMessage().contains("actor "));
         }
     }
 
     @Test
-    public void testConstructorIdShouldNotBeNull(){
+    public void testConstructorIdShouldNotBeNull() {
         try {
             new SyncStatusTracker(listener, null, 10);
             fail("A NullPointerException was expected");
-        } catch(NullPointerException e){
+        } catch (NullPointerException e) {
             assertTrue("Invalid error message :" + e.getMessage(), e.getMessage().contains("id "));
         }
     }
 
     @Test
-    public void testConstructorSyncThresholdShouldNotBeNegative(){
+    public void testConstructorSyncThresholdShouldNotBeNegative() {
         try {
             new SyncStatusTracker(listener, "commit-tracker", -1);
             fail("An IllegalArgumentException was expected");
-        } catch(IllegalArgumentException e){
+        } catch (IllegalArgumentException e) {
             assertTrue("Invalid error message :" + e.getMessage(), e.getMessage().contains("syncThreshold "));
         }
     }
-
 }
