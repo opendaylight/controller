@@ -58,8 +58,7 @@ public interface RaftActorContext {
     /**
      * Returns the reference to the RaftActor.
      *
-     * @return A reference to the RaftActor itself. This could be used to send messages
-     * to the RaftActor
+     * @return the reference to the RaftActor itself. This can be used to send messages to the RaftActor
      */
     ActorRef getActor();
 
@@ -173,8 +172,8 @@ public interface RaftActorContext {
     /**
      * Returns the PeerInfo for the given peer.
      *
-     * @param peerId
-     * @return the PeerInfo or null if not found.
+     * @param peerId the id of the peer
+     * @return the PeerInfo or null if not found
      */
     @Nullable
     PeerInfo getPeerInfo(String peerId);

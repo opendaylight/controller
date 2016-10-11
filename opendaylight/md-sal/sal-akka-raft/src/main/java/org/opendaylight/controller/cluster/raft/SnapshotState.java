@@ -18,27 +18,27 @@ import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
  */
 public interface SnapshotState {
     /**
-     * @return true when a snapshot is being captured
+     * Returns whether or not a capture is in progress.
+     *
+     * @return true when a snapshot is being captured, false otherwise
      */
     boolean isCapturing();
 
     /**
-     * Initiate capture snapshot
+     * Initiates a capture snapshot.
      *
      * @param lastLogEntry the last entry in the replicated log
      * @param replicatedToAllIndex the current replicatedToAllIndex
-     *
      * @return true if capture was started
      */
     boolean capture(ReplicatedLogEntry lastLogEntry, long replicatedToAllIndex);
 
     /**
-     * Initiate capture snapshot for the purposing of installing that snapshot
+     * Initiates a capture snapshot for the purposing of installing the snapshot on a follower.
      *
-     * @param lastLogEntry
-     * @param replicatedToAllIndex
-     * @param targetFollower
-     *
+     * @param lastLogEntry the last entry in the replicated log
+     * @param replicatedToAllIndex the current replicatedToAllIndex
+     * @param targetFollower the id of the follower on which to install
      * @return true if capture was started
      */
     boolean captureToInstall(ReplicatedLogEntry lastLogEntry, long replicatedToAllIndex, String targetFollower);
@@ -51,31 +51,30 @@ public interface SnapshotState {
     void apply(ApplySnapshot snapshot);
 
     /**
-     * Persist the snapshot
+     * Persists a snapshot.
      *
-     * @param snapshotBytes
-     * @param currentBehavior
-     * @param totalMemory
+     * @param snapshotBytes the snapshot bytes
+     * @param totalMemory the total memory threshold
      */
     void persist(byte[] snapshotBytes, long totalMemory);
 
     /**
-     * Commit the snapshot by trimming the log
+     * Commit the snapshot by trimming the log.
      *
-     * @param sequenceNumber
-     * @param timeStamp
+     * @param sequenceNumber the sequence number of the persisted snapshot
+     * @param timeStamp the time stamp of the persisted snapshot
      */
     void commit(long sequenceNumber, long timeStamp);
 
     /**
-     * Rollback the snapshot
+     * Rolls back the snapshot on failure.
      */
     void rollback();
 
     /**
-     * Trim the log
+     * Trims the in-memory log.
      *
-     * @param desiredTrimIndex
+     * @param desiredTrimIndex the desired index to trim from
      * @return the actual trim index
      */
     long trimLog(long desiredTrimIndex);

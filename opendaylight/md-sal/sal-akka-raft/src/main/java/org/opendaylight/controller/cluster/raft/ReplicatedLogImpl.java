@@ -24,7 +24,8 @@ class ReplicatedLogImpl extends AbstractReplicatedLogImpl {
     private final RaftActorContext context;
     private long dataSizeSinceLastSnapshot = 0L;
 
-    private ReplicatedLogImpl(final long snapshotIndex, final long snapshotTerm, final List<ReplicatedLogEntry> unAppliedEntries,
+    private ReplicatedLogImpl(final long snapshotIndex, final long snapshotTerm,
+            final List<ReplicatedLogEntry> unAppliedEntries,
             final RaftActorContext context) {
         super(snapshotIndex, snapshotTerm, unAppliedEntries, context.getId());
         this.context = Preconditions.checkNotNull(context);
@@ -43,17 +44,12 @@ class ReplicatedLogImpl extends AbstractReplicatedLogImpl {
     public boolean removeFromAndPersist(final long logEntryIndex) {
         // FIXME: Maybe this should be done after the command is saved
         long adjustedIndex = removeFrom(logEntryIndex);
-        if(adjustedIndex >= 0) {
+        if (adjustedIndex >= 0) {
             context.getPersistenceProvider().persist(new DeleteEntries(adjustedIndex), deleteProcedure);
             return true;
         }
 
         return false;
-    }
-
-    @Override
-    public void appendAndPersist(final ReplicatedLogEntry replicatedLogEntry) {
-        appendAndPersist(replicatedLogEntry, null);
     }
 
     @Override
@@ -91,13 +87,19 @@ class ReplicatedLogImpl extends AbstractReplicatedLogImpl {
     }
 
     @Override
+    public void appendAndPersist(final ReplicatedLogEntry replicatedLogEntry) {
+        appendAndPersist(replicatedLogEntry, null);
+    }
+
+    @Override
     public void appendAndPersist(final ReplicatedLogEntry replicatedLogEntry,
             final Procedure<ReplicatedLogEntry> callback)  {
 
         context.getLogger().debug("{}: Append log entry and persist {} ", context.getId(), replicatedLogEntry);
 
-        // FIXME : By adding the replicated log entry to the in-memory journal we are not truly ensuring durability of the logs
-        if(!append(replicatedLogEntry)) {
+        // FIXME : By adding the replicated log entry to the in-memory journal we are not truly ensuring durability
+        // of the logs
+        if (!append(replicatedLogEntry)) {
             return;
         }
 

@@ -22,12 +22,12 @@ import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPay
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.PersistentPayload;
 import org.slf4j.Logger;
+
 /**
  * Support class that handles persistence recovery for a RaftActor.
  *
  * @author Thomas Pantelis
  */
-
 class RaftActorRecoverySupport {
     private final RaftActorContext context;
     private final RaftActorRecoveryCohort cohort;
@@ -77,6 +77,7 @@ class RaftActorRecoverySupport {
         return recoveryComplete;
     }
 
+    @SuppressWarnings("checkstyle:IllegalCatch")
     private void possiblyRestoreFromSnapshot() {
         byte[] restoreFromSnapshot = cohort.getRestoreFromSnapshot();
         if (restoreFromSnapshot == null) {

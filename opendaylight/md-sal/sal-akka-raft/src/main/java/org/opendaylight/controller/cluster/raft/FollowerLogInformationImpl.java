@@ -157,7 +157,7 @@ public class FollowerLogInformationImpl implements FollowerLogInformation {
         return true;
     }
 
-    private void resetLastReplicated(){
+    private void resetLastReplicated() {
         lastReplicatedIndex = getNextIndex();
         if (lastReplicatedStopwatch.isRunning()) {
             lastReplicatedStopwatch.reset();

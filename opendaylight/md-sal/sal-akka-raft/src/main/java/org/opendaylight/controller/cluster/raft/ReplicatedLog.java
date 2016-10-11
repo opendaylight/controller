@@ -14,7 +14,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /**
- * Represents the ReplicatedLog that needs to be kept in sync by the RaftActor
+ * Represents the ReplicatedLog that needs to be kept in sync by the RaftActor.
  */
 public interface ReplicatedLog {
     long NO_MAX_SIZE = -1;
@@ -24,7 +24,7 @@ public interface ReplicatedLog {
      *
      * @param index the index of the log entry
      * @return the ReplicatedLogEntry if found, otherwise null if the adjusted index less than 0 or
-     * greater than the size of the in-memory journal.
+     *         greater than the size of the in-memory journal
      */
     @Nullable
     ReplicatedLogEntry get(long index);
@@ -60,13 +60,13 @@ public interface ReplicatedLog {
     long removeFrom(long index);
 
     /**
-     * Removes entries from the in-memory log a nd the persisted log starting at the given index.
-     * <p>
+     * Removes entries from the in-memory log and the persisted log starting at the given index.
+     * <p/>
      * The persisted information would then be used during recovery to properly
      * reconstruct the state of the in-memory replicated log
      *
      * @param index the index of the first log entry to remove
-     * @return
+     * @return true if entries were removed, false otherwise
      */
     boolean removeFromAndPersist(long index);
 
@@ -121,13 +121,14 @@ public interface ReplicatedLog {
     @Nonnull List<ReplicatedLogEntry> getFrom(long index, int maxEntries, long maxDataSize);
 
     /**
+     * Returns the number of entries in the journal.
      *
-     * @return the number of entries in the journal
+     * @return the number of entries
      */
     long size();
 
     /**
-     * Checks if the entry at the specified index is present or not
+     * Checks if the entry at the specified index is present or not.
      *
      * @param index the index of the log entry
      * @return true if the entry is present in the in-memory journal
@@ -135,53 +136,55 @@ public interface ReplicatedLog {
     boolean isPresent(long index);
 
     /**
-     * Checks if the entry is present in a snapshot
+     * Checks if the entry is present in a snapshot.
      *
      * @param index the index of the log entry
-     * @return true if the entry is in the snapshot. false if the entry is not
-     * in the snapshot even if the entry may be present in the replicated log
+     * @return true if the entry is in the snapshot. false if the entry is not in the snapshot even if the entry may
+     *         be present in the replicated log
      */
     boolean isInSnapshot(long index);
 
     /**
-     * Get the index of the snapshot
+     * Returns the index of the snapshot.
      *
      * @return the index from which the snapshot was created. -1 otherwise.
      */
     long getSnapshotIndex();
 
     /**
-     * Get the term of the snapshot
+     * Returns the term of the snapshot.
      *
-     * @return the term of the index from which the snapshot was created. -1
-     * otherwise
+     * @return the term of the index from which the snapshot was created. -1 otherwise
      */
     long getSnapshotTerm();
 
     /**
-     * sets the snapshot index in the replicated log
-     * @param snapshotIndex
+     * Sets the snapshot index in the replicated log.
+     *
+     * @param snapshotIndex the index to set
      */
     void setSnapshotIndex(long snapshotIndex);
 
     /**
-     * sets snapshot term
-     * @param snapshotTerm
+     * Sets snapshot term.
+     *
+     * @param snapshotTerm the term to set
      */
     void setSnapshotTerm(long snapshotTerm);
 
     /**
-     * Clears the journal entries with startIndex(inclusive) and endIndex (exclusive)
-     * @param startIndex
-     * @param endIndex
+     * Clears the journal entries with startIndex (inclusive) and endIndex (exclusive).
+     *
+     * @param startIndex the start index (inclusive)
+     * @param endIndex the end index (exclusive)
      */
     void clear(int startIndex, int endIndex);
 
     /**
-     * Handles all the bookkeeping in order to perform a rollback in the
-     * event of SaveSnapshotFailure
-     * @param snapshotCapturedIndex
-     * @param snapshotCapturedTerm
+     * Handles all the bookkeeping in order to perform a rollback in the event of SaveSnapshotFailure.
+     *
+     * @param snapshotCapturedIndex the new snapshot index
+     * @param snapshotCapturedTerm the new snapshot term
      */
     void snapshotPreCommit(long snapshotCapturedIndex, long snapshotCapturedTerm);
 
@@ -191,14 +194,14 @@ public interface ReplicatedLog {
     void snapshotCommit();
 
     /**
-     * Restores the replicated log to a state in the event of a save snapshot failure
+     * Restores the replicated log to a state in the event of a save snapshot failure.
      */
     void snapshotRollback();
 
     /**
-     * Returns the size of the data in the log (in bytes)
+     * Returns the size of the data in the log (in bytes).
      *
-     * @return the size of the data in the log (in bytes).
+     * @return the size of the data in the log (in bytes)
      */
     int dataSize();
 
