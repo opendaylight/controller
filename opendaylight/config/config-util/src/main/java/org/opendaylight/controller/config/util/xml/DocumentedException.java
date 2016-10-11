@@ -71,7 +71,7 @@ public class DocumentedException extends Exception {
 
         public static ErrorType from( String text ) {
             try {
-                return valueOf( text );
+                return valueOf( text.toUpperCase() );
             }
             catch( Exception e ) {
                 return APPLICATION;
@@ -131,7 +131,7 @@ public class DocumentedException extends Exception {
 
         public static ErrorSeverity from( String text ) {
             try {
-                return valueOf( text );
+                return valueOf( text.toUpperCase() );
             }
             catch( Exception e ) {
                 return ERROR;
