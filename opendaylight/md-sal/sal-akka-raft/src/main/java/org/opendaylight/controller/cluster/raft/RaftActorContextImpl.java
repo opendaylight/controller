@@ -95,7 +95,7 @@ public class RaftActorContextImpl implements RaftActorContext {
         this.persistenceProvider = persistenceProvider;
         this.log = logger;
 
-        for(Map.Entry<String, String> e: peerAddresses.entrySet()) {
+        for (Map.Entry<String, String> e: peerAddresses.entrySet()) {
             peerInfoMap.put(e.getKey(), new PeerInfo(e.getKey(), e.getValue(), VotingState.VOTING));
         }
     }
@@ -115,12 +115,12 @@ public class RaftActorContextImpl implements RaftActorContext {
     }
 
     @Override
-    public ActorRef actorOf(Props props){
+    public ActorRef actorOf(Props props) {
         return context.actorOf(props);
     }
 
     @Override
-    public ActorSelection actorSelection(String path){
+    public ActorSelection actorSelection(String path) {
         return context.actorSelection(path);
     }
 
@@ -135,11 +135,12 @@ public class RaftActorContextImpl implements RaftActorContext {
     }
 
     @Override
+    @SuppressWarnings("checkstyle:IllegalCatch")
     public Optional<Cluster> getCluster() {
-        if(cluster == null) {
+        if (cluster == null) {
             try {
                 cluster = Optional.of(Cluster.get(getActorSystem()));
-            } catch(Exception e) {
+            } catch (Exception e) {
                 // An exception means there's no cluster configured. This will only happen in unit tests.
                 log.debug("{}: Could not obtain Cluster: {}", getId(), e);
                 cluster = Optional.empty();
@@ -210,9 +211,9 @@ public class RaftActorContextImpl implements RaftActorContext {
     public String getPeerAddress(String peerId) {
         String peerAddress;
         PeerInfo peerInfo = peerInfoMap.get(peerId);
-        if(peerInfo != null) {
+        if (peerInfo != null) {
             peerAddress = peerInfo.getAddress();
-            if(peerAddress == null) {
+            if (peerAddress == null) {
                 peerAddress = configParams.getPeerAddressResolver().resolve(peerId);
                 peerInfo.setAddress(peerAddress);
             }
@@ -224,19 +225,19 @@ public class RaftActorContextImpl implements RaftActorContext {
     }
 
     @Override
-    public void updatePeerIds(ServerConfigurationPayload serverConfig){
+    public void updatePeerIds(ServerConfigurationPayload serverConfig) {
         votingMember = true;
         boolean foundSelf = false;
         Set<String> currentPeers = new HashSet<>(this.getPeerIds());
-        for(ServerInfo server: serverConfig.getServerConfig()) {
-            if(getId().equals(server.getId())) {
+        for (ServerInfo server : serverConfig.getServerConfig()) {
+            if (getId().equals(server.getId())) {
                 foundSelf = true;
-                if(!server.isVoting()) {
+                if (!server.isVoting()) {
                     votingMember = false;
                 }
             } else {
-                VotingState votingState = server.isVoting() ? VotingState.VOTING: VotingState.NON_VOTING;
-                if(!currentPeers.contains(server.getId())) {
+                VotingState votingState = server.isVoting() ? VotingState.VOTING : VotingState.NON_VOTING;
+                if (!currentPeers.contains(server.getId())) {
                     this.addToPeers(server.getId(), null, votingState);
                 } else {
                     this.getPeerInfo(server.getId()).setVotingState(votingState);
@@ -245,11 +246,11 @@ public class RaftActorContextImpl implements RaftActorContext {
             }
         }
 
-        for(String peerIdToRemove: currentPeers) {
+        for (String peerIdToRemove : currentPeers) {
             this.removePeer(peerIdToRemove);
         }
 
-        if(!foundSelf) {
+        if (!foundSelf) {
             votingMember = false;
         }
 
@@ -270,7 +271,7 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     @Override
     public void removePeer(String name) {
-        if(getId().equals(name)) {
+        if (getId().equals(name)) {
             votingMember = false;
         } else {
             peerInfoMap.remove(name);
@@ -280,7 +281,7 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     @Override public ActorSelection getPeerActorSelection(String peerId) {
         String peerAddress = getPeerAddress(peerId);
-        if(peerAddress != null){
+        if (peerAddress != null) {
             return actorSelection(peerAddress);
         }
         return null;
@@ -289,7 +290,7 @@ public class RaftActorContextImpl implements RaftActorContext {
     @Override
     public void setPeerAddress(String peerId, String peerAddress) {
         PeerInfo peerInfo = peerInfoMap.get(peerId);
-        if(peerInfo != null) {
+        if (peerInfo != null) {
             log.info("Peer address for peer {} set to {}", peerId, peerAddress);
             peerInfo.setAddress(peerAddress);
         }
@@ -297,7 +298,7 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     @Override
     public SnapshotManager getSnapshotManager() {
-        if(snapshotManager == null){
+        if (snapshotManager == null) {
             snapshotManager = new SnapshotManager(this, log);
         }
         return snapshotManager;
@@ -346,11 +347,11 @@ public class RaftActorContextImpl implements RaftActorContext {
         }
         Collection<PeerInfo> peers = getPeers();
         List<ServerInfo> newConfig = new ArrayList<>(peers.size() + 1);
-        for(PeerInfo peer: peers) {
+        for (PeerInfo peer: peers) {
             newConfig.add(new ServerInfo(peer.getId(), peer.isVoting()));
         }
 
-        if(includeSelf) {
+        if (includeSelf) {
             newConfig.add(new ServerInfo(getId(), votingMember));
         }
 
@@ -364,10 +365,10 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     @Override
     public boolean anyVotingPeers() {
-        if(numVotingPeers < 0) {
+        if (numVotingPeers < 0) {
             numVotingPeers = 0;
-            for(PeerInfo info: getPeers()) {
-                if(info.isVoting()) {
+            for (PeerInfo info: getPeers()) {
+                if (info.isVoting()) {
                     numVotingPeers++;
                 }
             }
@@ -385,6 +386,7 @@ public class RaftActorContextImpl implements RaftActorContext {
         this.currentBehavior = Preconditions.checkNotNull(behavior);
     }
 
+    @SuppressWarnings("checkstyle:IllegalCatch")
     void close() {
         if (currentBehavior != null) {
             try {

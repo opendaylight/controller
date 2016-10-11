@@ -16,7 +16,7 @@ import scala.concurrent.duration.FiniteDuration;
  * <p/>
  * Any component using this implementation might want to provide an implementation of
  * this interface to configure
- *
+ * <p/>
  * A default implementation will be used if none is provided.
  *
  * @author Kamal Rameshan
@@ -51,7 +51,8 @@ public interface ConfigParams {
     FiniteDuration getElectionTimeOutInterval();
 
     /**
-     * Returns the maximum election time variance. The election is scheduled using both the election timeout and variance.
+     * Returns the maximum election time variance. The election is scheduled using both the election timeout
+     * and variance.
      *
      * @return the election time variance.
      */
@@ -91,8 +92,7 @@ public interface ConfigParams {
     /**
      * Returns the RaftPolicy used to determine certain Raft behaviors.
      *
-     * @return an instance of org.opendaylight.controller.cluster.raft.policy.RaftPolicy, if set,  or an instance of the
-     * DefaultRaftPolicy.
+     * @return an instance of RaftPolicy, if set, or an instance of the DefaultRaftPolicy.
      */
     @Nonnull
     RaftPolicy getRaftPolicy();

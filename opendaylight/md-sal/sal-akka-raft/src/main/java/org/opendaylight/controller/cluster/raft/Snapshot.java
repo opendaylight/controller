@@ -103,7 +103,7 @@ public class Snapshot implements Serializable {
     public String toString() {
         return "Snapshot [lastIndex=" + lastIndex + ", lastTerm=" + lastTerm + ", lastAppliedIndex=" + lastAppliedIndex
                 + ", lastAppliedTerm=" + lastAppliedTerm + ", unAppliedEntries size=" + unAppliedEntries.size()
-                + ", state size=" + state.length + ", electionTerm=" + electionTerm + ", electionVotedFor=" + electionVotedFor
-                + ", ServerConfigPayload="  + serverConfig + "]";
+                + ", state size=" + state.length + ", electionTerm=" + electionTerm + ", electionVotedFor="
+                + electionVotedFor + ", ServerConfigPayload="  + serverConfig + "]";
     }
 }

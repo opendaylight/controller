@@ -50,13 +50,13 @@ public final class LeaderInstallSnapshotState {
     }
 
     void setSnapshotBytes(ByteString snapshotBytes) {
-        if(this.snapshotBytes != null) {
+        if (this.snapshotBytes != null) {
             return;
         }
 
         this.snapshotBytes = snapshotBytes;
         int size = snapshotBytes.size();
-        totalChunks = (size / snapshotChunkSize) + (size % snapshotChunkSize > 0 ? 1 : 0);
+        totalChunks = size / snapshotChunkSize + (size % snapshotChunkSize > 0 ? 1 : 0);
 
         LOG.debug("{}: Snapshot {} bytes, total chunks to send: {}", logName, size, totalChunks);
 
@@ -65,7 +65,7 @@ public final class LeaderInstallSnapshotState {
     }
 
     int incrementOffset() {
-        if(replyStatus) {
+        if (replyStatus) {
             // if prev chunk failed, we would want to sent the same chunk again
             offset = offset + snapshotChunkSize;
         }
@@ -116,7 +116,7 @@ public final class LeaderInstallSnapshotState {
         int size = snapshotChunkSize;
         if (snapshotChunkSize > snapshotLength) {
             size = snapshotLength;
-        } else if ((start + snapshotChunkSize) > snapshotLength) {
+        } else if (start + snapshotChunkSize > snapshotLength) {
             size = snapshotLength - start;
         }
 
@@ -130,9 +130,9 @@ public final class LeaderInstallSnapshotState {
     }
 
     /**
-     * reset should be called when the Follower needs to be sent the snapshot from the beginning
+     * Reset should be called when the Follower needs to be sent the snapshot from the beginning.
      */
-    void reset(){
+    void reset() {
         offset = 0;
         replyStatus = false;
         replyReceivedForOffset = offset;
