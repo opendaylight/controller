@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.raft.behaviors;
 
 import static org.junit.Assert.assertEquals;
+
 import akka.actor.ActorRef;
 import com.google.common.collect.ImmutableMap;
 import org.junit.Test;
@@ -111,7 +112,7 @@ public class PartitionedCandidateOnStartupElectionScenarioTest extends AbstractL
         // term and return a RequestVoteReply but should not grant the vote.
 
         candidateElectionTerm += 2;
-        for(int i = 0; i < 2; i++) {
+        for (int i = 0; i < 2; i++) {
             member1Actor.clear();
             member1Actor.expectMessageClass(RequestVote.class, 1);
             member2Actor.clear();
@@ -154,9 +155,9 @@ public class PartitionedCandidateOnStartupElectionScenarioTest extends AbstractL
         // Create member 3's behavior initially as a Candidate.
 
         member3Context = newRaftActorContext("member3", member3ActorRef,
-                ImmutableMap.<String,String>builder().
-                    put("member1", member1ActorRef.path().toString()).
-                    put("member2", member2ActorRef.path().toString()).build());
+                ImmutableMap.<String,String>builder()
+                    .put("member1", member1ActorRef.path().toString())
+                    .put("member2", member2ActorRef.path().toString()).build());
 
         DefaultConfigParamsImpl member3ConfigParams = newConfigParams();
         member3Context.setConfigParams(member3ConfigParams);
@@ -189,7 +190,7 @@ public class PartitionedCandidateOnStartupElectionScenarioTest extends AbstractL
         // start a new term so Candidate member 3's current term will be greater than the leader's
         // current term.
 
-        for(int i = 0; i < numCandidateElections - 1; i++) {
+        for (int i = 0; i < numCandidateElections - 1; i++) {
             member3ActorRef.tell(ElectionTimeout.INSTANCE, ActorRef.noSender());
         }
 
@@ -221,9 +222,9 @@ public class PartitionedCandidateOnStartupElectionScenarioTest extends AbstractL
         // Create member 2's behavior as Follower.
 
         member2Context = newRaftActorContext("member2", member2ActorRef,
-                ImmutableMap.<String,String>builder().
-                    put("member1", member1ActorRef.path().toString()).
-                    put("member3", member3ActorRef.path().toString()).build());
+                ImmutableMap.<String,String>builder()
+                    .put("member1", member1ActorRef.path().toString())
+                    .put("member3", member3ActorRef.path().toString()).build());
 
         DefaultConfigParamsImpl member2ConfigParams = newConfigParams();
         member2Context.setConfigParams(member2ConfigParams);
@@ -239,9 +240,9 @@ public class PartitionedCandidateOnStartupElectionScenarioTest extends AbstractL
         // Create member 1's behavior as Leader.
 
         member1Context = newRaftActorContext("member1", member1ActorRef,
-                ImmutableMap.<String,String>builder().
-                    put("member2", member2ActorRef.path().toString()).
-                    put("member3", member3ActorRef.path().toString()).build());
+                ImmutableMap.<String,String>builder()
+                    .put("member2", member2ActorRef.path().toString())
+                    .put("member3", member3ActorRef.path().toString()).build());
 
         DefaultConfigParamsImpl member1ConfigParams = newConfigParams();
         member1Context.setConfigParams(member1ConfigParams);

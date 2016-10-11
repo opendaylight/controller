@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.raft;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.verify;
+
 import akka.japi.Procedure;
 import org.junit.Before;
 import org.junit.Test;

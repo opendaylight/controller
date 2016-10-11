@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.raft.behaviors;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.testkit.TestActorRef;
@@ -60,7 +61,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
     @Override
     @After
     public void tearDown() throws Exception {
-        if(candidate != null) {
+        if (candidate != null) {
             candidate.close();
         }
 
@@ -68,27 +69,27 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
     }
 
     @Test
-    public void testWhenACandidateIsCreatedItIncrementsTheCurrentTermAndVotesForItself(){
+    public void testWhenACandidateIsCreatedItIncrementsTheCurrentTermAndVotesForItself() {
         RaftActorContext raftActorContext = createActorContext();
         long expectedTerm = raftActorContext.getTermInformation().getCurrentTerm();
 
         candidate = new Candidate(raftActorContext);
 
-        assertEquals("getCurrentTerm", expectedTerm+1, raftActorContext.getTermInformation().getCurrentTerm());
+        assertEquals("getCurrentTerm", expectedTerm + 1, raftActorContext.getTermInformation().getCurrentTerm());
         assertEquals("getVotedFor", raftActorContext.getId(), raftActorContext.getTermInformation().getVotedFor());
     }
 
     @Test
-    public void testThatAnElectionTimeoutIsTriggered(){
-         MockRaftActorContext actorContext = createActorContext();
-         candidate = new Candidate(actorContext);
+    public void testThatAnElectionTimeoutIsTriggered() {
+        MockRaftActorContext actorContext = createActorContext();
+        candidate = new Candidate(actorContext);
 
-         MessageCollectorActor.expectFirstMatching(candidateActor, ElectionTimeout.class,
-                 actorContext.getConfigParams().getElectionTimeOutInterval().$times(6).toMillis());
+        MessageCollectorActor.expectFirstMatching(candidateActor, ElectionTimeout.class,
+                actorContext.getConfigParams().getElectionTimeOutInterval().$times(6).toMillis());
     }
 
     @Test
-    public void testHandleElectionTimeoutWhenThereAreZeroPeers(){
+    public void testHandleElectionTimeoutWhenThereAreZeroPeers() {
         RaftActorContext raftActorContext = createActorContext();
         candidate = new Candidate(raftActorContext);
 
@@ -99,7 +100,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
     }
 
     @Test
-    public void testHandleElectionTimeoutWhenThereAreTwoNodeCluster(){
+    public void testHandleElectionTimeoutWhenThereAreTwoNodeCluster() {
         MockRaftActorContext raftActorContext = createActorContext();
         raftActorContext.setPeerAddresses(setupPeers(1));
         candidate = new Candidate(raftActorContext);
@@ -110,7 +111,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
     }
 
     @Test
-    public void testBecomeLeaderOnReceivingMajorityVotesInThreeNodeCluster(){
+    public void testBecomeLeaderOnReceivingMajorityVotesInThreeNodeCluster() {
         MockRaftActorContext raftActorContext = createActorContext();
         raftActorContext.setLastApplied(raftActorContext.getReplicatedLog().lastIndex());
         raftActorContext.setPeerAddresses(setupPeers(2));
@@ -122,7 +123,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
     }
 
     @Test
-    public void testBecomePreLeaderOnReceivingMajorityVotesInThreeNodeCluster(){
+    public void testBecomePreLeaderOnReceivingMajorityVotesInThreeNodeCluster() {
         MockRaftActorContext raftActorContext = createActorContext();
         raftActorContext.setLastApplied(-1);
         raftActorContext.setPeerAddresses(setupPeers(2));
@@ -135,11 +136,11 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
     }
 
     @Test
-    public void testBecomeLeaderOnReceivingMajorityVotesInFiveNodeCluster(){
+    public void testBecomeLeaderOnReceivingMajorityVotesInFiveNodeCluster() {
         MockRaftActorContext raftActorContext = createActorContext();
         raftActorContext.getTermInformation().update(2L, "other");
-        raftActorContext.setReplicatedLog(new MockRaftActorContext.MockReplicatedLogBuilder().
-                createEntries(0, 5, 1).build());
+        raftActorContext.setReplicatedLog(new MockRaftActorContext.MockReplicatedLogBuilder()
+                .createEntries(0, 5, 1).build());
         raftActorContext.setCommitIndex(raftActorContext.getReplicatedLog().lastIndex());
         raftActorContext.setLastApplied(raftActorContext.getReplicatedLog().lastIndex());
         raftActorContext.setPeerAddresses(setupPeers(4));
@@ -170,7 +171,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
     }
 
     @Test
-    public void testBecomeLeaderOnReceivingMajorityVotesWithNonVotingPeers(){
+    public void testBecomeLeaderOnReceivingMajorityVotesWithNonVotingPeers() {
         ElectionTerm mockElectionTerm = Mockito.mock(ElectionTerm.class);
         Mockito.doReturn(1L).when(mockElectionTerm).getCurrentTerm();
         RaftActorContext raftActorContext = new RaftActorContextImpl(candidateActor, candidateActor.actorContext(),
@@ -289,7 +290,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
     }
 
     @Test
-    public void testCandidateSchedulesElectionTimeoutImmediatelyWhenItHasNoPeers(){
+    public void testCandidateSchedulesElectionTimeoutImmediatelyWhenItHasNoPeers() {
         MockRaftActorContext context = createActorContext();
 
         Stopwatch stopwatch = Stopwatch.createStarted();
@@ -317,7 +318,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
         List<ReplicatedLogEntry> entries = new ArrayList<>();
         entries.add(new MockRaftActorContext.MockReplicatedLogEntry(2, 0, payload));
 
-        AppendEntries appendEntries = new AppendEntries(2, "leader-1", -1, -1, entries, 2, -1, (short)0);
+        final AppendEntries appendEntries = new AppendEntries(2, "leader-1", -1, -1, entries, 2, -1, (short)0);
 
         behavior = createBehavior(context);
 
@@ -353,10 +354,10 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
     private Map<String, String> setupPeers(final int count) {
         Map<String, String> peerMap = new HashMap<>();
         peerActors = new TestActorRef[count];
-        for(int i = 0; i < count; i++) {
+        for (int i = 0; i < count; i++) {
             peerActors[i] = actorFactory.createTestActor(Props.create(MessageCollectorActor.class),
                     actorFactory.generateActorId("peer"));
-            peerMap.put("peer" + (i+1), peerActors[i].path().toString());
+            peerMap.put("peer" + (i + 1), peerActors[i].path().toString());
         }
 
         return peerMap;
@@ -366,8 +367,9 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
     protected void assertStateChangesToFollowerWhenRaftRPCHasNewerTerm(final MockRaftActorContext actorContext,
             final ActorRef actorRef, final RaftRPC rpc) throws Exception {
         super.assertStateChangesToFollowerWhenRaftRPCHasNewerTerm(actorContext, actorRef, rpc);
-        if(rpc instanceof RequestVote) {
-            assertEquals("New votedFor", ((RequestVote)rpc).getCandidateId(), actorContext.getTermInformation().getVotedFor());
+        if (rpc instanceof RequestVote) {
+            assertEquals("New votedFor", ((RequestVote)rpc).getCandidateId(),
+                    actorContext.getTermInformation().getVotedFor());
         } else {
             assertEquals("New votedFor", null, actorContext.getTermInformation().getVotedFor());
         }

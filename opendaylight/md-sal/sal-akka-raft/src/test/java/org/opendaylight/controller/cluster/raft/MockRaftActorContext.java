@@ -13,6 +13,7 @@ import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.japi.Procedure;
+import com.google.common.base.Throwables;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
@@ -45,27 +46,26 @@ public class MockRaftActorContext extends RaftActorContextImpl {
             }
 
             @Override
-            public void update(long currentTerm, String votedFor){
-                this.currentTerm = currentTerm;
-                this.votedFor = votedFor;
+            public void update(long newTerm, String newVotedFor) {
+                this.currentTerm = newTerm;
+                this.votedFor = newVotedFor;
 
                 // TODO : Write to some persistent state
             }
 
-            @Override public void updateAndPersist(long currentTerm,
-                String votedFor) {
-                update(currentTerm, votedFor);
+            @Override public void updateAndPersist(long newTerm, String newVotedFor) {
+                update(newTerm, newVotedFor);
             }
         };
     }
 
-    public MockRaftActorContext(){
+    public MockRaftActorContext() {
         super(null, null, "test", newElectionTerm(), -1, -1, new HashMap<>(),
                 new DefaultConfigParamsImpl(), new NonPersistentDataProvider(), LOG);
         setReplicatedLog(new MockReplicatedLogBuilder().build());
     }
 
-    public MockRaftActorContext(String id, ActorSystem system, ActorRef actor){
+    public MockRaftActorContext(String id, ActorSystem system, ActorRef actor) {
         super(actor, null, id, newElectionTerm(), -1, -1, new HashMap<>(),
                 new DefaultConfigParamsImpl(), new NonPersistentDataProvider(), LOG);
 
@@ -75,7 +75,7 @@ public class MockRaftActorContext extends RaftActorContextImpl {
     }
 
 
-    public void initReplicatedLog(){
+    public void initReplicatedLog() {
         SimpleReplicatedLog replicatedLog = new SimpleReplicatedLog();
         long term = getTermInformation().getCurrentTerm();
         replicatedLog.append(new MockReplicatedLogEntry(term, 0, new MockPayload("1")));
@@ -99,18 +99,18 @@ public class MockRaftActorContext extends RaftActorContextImpl {
 
     @Override public ActorSelection getPeerActorSelection(String peerId) {
         String peerAddress = getPeerAddress(peerId);
-        if(peerAddress != null){
+        if (peerAddress != null) {
             return actorSelection(peerAddress);
         }
         return null;
     }
 
     public void setPeerAddresses(Map<String, String> peerAddresses) {
-        for(String id: getPeerIds()) {
+        for (String id: getPeerIds()) {
             removePeer(id);
         }
 
-        for(Map.Entry<String, String> e: peerAddresses.entrySet()) {
+        for (Map.Entry<String, String> e: peerAddresses.entrySet()) {
             addToPeers(e.getKey(), e.getValue(), VotingState.VOTING);
         }
     }
@@ -133,12 +133,6 @@ public class MockRaftActorContext extends RaftActorContextImpl {
 
     public static class SimpleReplicatedLog extends AbstractReplicatedLogImpl {
         @Override
-        public void appendAndPersist(
-            ReplicatedLogEntry replicatedLogEntry) {
-            append(replicatedLogEntry);
-        }
-
-        @Override
         public int dataSize() {
             return -1;
         }
@@ -153,14 +147,21 @@ public class MockRaftActorContext extends RaftActorContextImpl {
         }
 
         @Override
+        public void appendAndPersist(
+            ReplicatedLogEntry replicatedLogEntry) {
+            append(replicatedLogEntry);
+        }
+
+        @Override
+        @SuppressWarnings("checkstyle:IllegalCatch")
         public void appendAndPersist(ReplicatedLogEntry replicatedLogEntry, Procedure<ReplicatedLogEntry> callback) {
             append(replicatedLogEntry);
 
-            if(callback != null) {
+            if (callback != null) {
                 try {
                     callback.apply(replicatedLogEntry);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Throwables.propagate(e);
                 }
             }
         }
@@ -174,13 +175,13 @@ public class MockRaftActorContext extends RaftActorContextImpl {
         public MockPayload() {
         }
 
-        public MockPayload(String s) {
-            this.value = s;
+        public MockPayload(String data) {
+            this.value = data;
             size = value.length();
         }
 
-        public MockPayload(String s, int size) {
-            this(s);
+        public MockPayload(String data, int size) {
+            this(data);
             this.size = size;
         }
 
@@ -198,7 +199,7 @@ public class MockRaftActorContext extends RaftActorContextImpl {
         public int hashCode() {
             final int prime = 31;
             int result = 1;
-            result = prime * result + ((value == null) ? 0 : value.hashCode());
+            result = prime * result + (value == null ? 0 : value.hashCode());
             return result;
         }
 
@@ -232,7 +233,7 @@ public class MockRaftActorContext extends RaftActorContextImpl {
         private final long index;
         private final Payload data;
 
-        public MockReplicatedLogEntry(long term, long index, Payload data){
+        public MockReplicatedLogEntry(long term, long index, Payload data) {
 
             this.term = term;
             this.index = index;
@@ -260,9 +261,9 @@ public class MockRaftActorContext extends RaftActorContextImpl {
         public int hashCode() {
             final int prime = 31;
             int result = 1;
-            result = prime * result + ((data == null) ? 0 : data.hashCode());
-            result = prime * result + (int) (index ^ (index >>> 32));
-            result = prime * result + (int) (term ^ (term >>> 32));
+            result = prime * result + (data == null ? 0 : data.hashCode());
+            result = prime * result + (int) (index ^ index >>> 32);
+            result = prime * result + (int) (term ^ term >>> 32);
             return result;
         }
 
@@ -307,8 +308,9 @@ public class MockRaftActorContext extends RaftActorContextImpl {
         private final ReplicatedLog mockLog = new SimpleReplicatedLog();
 
         public  MockReplicatedLogBuilder createEntries(int start, int end, int term) {
-            for (int i=start; i<end; i++) {
-                this.mockLog.append(new ReplicatedLogImplEntry(i, term, new MockRaftActorContext.MockPayload(Integer.toString(i))));
+            for (int i = start; i < end; i++) {
+                this.mockLog.append(new ReplicatedLogImplEntry(i, term,
+                        new MockRaftActorContext.MockPayload(Integer.toString(i))));
             }
             return this;
         }

@@ -15,7 +15,6 @@ import akka.util.Timeout;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import org.junit.Assert;
 import org.opendaylight.controller.cluster.raft.client.messages.FindLeader;
 import org.opendaylight.controller.cluster.raft.client.messages.FindLeaderReply;
@@ -42,7 +41,7 @@ public class RaftActorTestKit extends JavaTestKit {
         return raftActor;
     }
 
-    public boolean waitForLogMessage(final Class<?> logEventClass, String message){
+    public boolean waitForLogMessage(final Class<?> logEventClass, String message) {
         // Wait for a specific log message to show up
         return
             new JavaTestKit.EventFilter<Boolean>(logEventClass
@@ -58,21 +57,21 @@ public class RaftActorTestKit extends JavaTestKit {
 
     }
 
-    protected void waitUntilLeader(){
+    protected void waitUntilLeader() {
         waitUntilLeader(raftActor);
     }
 
+    @SuppressWarnings("checkstyle:IllegalCatch")
     public static void waitUntilLeader(ActorRef actorRef) {
         FiniteDuration duration = Duration.create(100, TimeUnit.MILLISECONDS);
-        for(int i = 0; i < 20 * 5; i++) {
+        for (int i = 0; i < 20 * 5; i++) {
             Future<Object> future = Patterns.ask(actorRef, FindLeader.INSTANCE, new Timeout(duration));
             try {
                 final Optional<String> maybeLeader = ((FindLeaderReply)Await.result(future, duration)).getLeaderActor();
                 if (maybeLeader.isPresent()) {
                     return;
                 }
-            } catch(TimeoutException e) {
-            } catch(Exception e) {
+            } catch (Exception e) {
                 LOG.error("FindLeader failed", e);
             }
 

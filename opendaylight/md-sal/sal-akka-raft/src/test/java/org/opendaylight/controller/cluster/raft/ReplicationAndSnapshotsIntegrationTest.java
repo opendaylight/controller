@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.raft;
 
 import static org.junit.Assert.assertEquals;
+
 import akka.persistence.SaveSnapshotSuccess;
 import com.google.common.collect.ImmutableMap;
 import java.util.List;
@@ -70,9 +71,9 @@ public class ReplicationAndSnapshotsIntegrationTest extends AbstractRaftActorInt
         follower2Actor = newTestRaftActor(follower2Id, ImmutableMap.of(leaderId, testActorPath(leaderId),
                 follower1Id, testActorPath(follower1Id)), followerConfigParams);
 
-        peerAddresses = ImmutableMap.<String, String>builder().
-                put(follower1Id, follower1Actor.path().toString()).
-                put(follower2Id, follower2Actor.path().toString()).build();
+        peerAddresses = ImmutableMap.<String, String>builder()
+                .put(follower1Id, follower1Actor.path().toString())
+                .put(follower2Id, follower2Actor.path().toString()).build();
 
         leaderConfigParams = newLeaderConfigParams();
         leaderActor = newTestRaftActor(leaderId, peerAddresses, leaderConfigParams);
@@ -159,7 +160,6 @@ public class ReplicationAndSnapshotsIntegrationTest extends AbstractRaftActorInt
      * 4 and we already have 3 entries in the journal log, this should initiate a snapshot. In this
      * scenario, the follower consensus and application of state is delayed until after the snapshot
      * completes.
-     * @throws Exception
      */
     private void testFirstSnapshot() throws Exception {
         testLog.info("testFirstSnapshot starting");
@@ -195,7 +195,8 @@ public class ReplicationAndSnapshotsIntegrationTest extends AbstractRaftActorInt
         verifyReplicatedLogEntry(unAppliedEntry.get(0), currentTerm, 3, payload3);
 
         // The leader's persisted journal log should be cleared since we snapshotted.
-        List<ReplicatedLogImplEntry> persistedLeaderJournal = InMemoryJournal.get(leaderId, ReplicatedLogImplEntry.class);
+        List<ReplicatedLogImplEntry> persistedLeaderJournal =
+                InMemoryJournal.get(leaderId, ReplicatedLogImplEntry.class);
         assertEquals("Persisted journal log size", 0, persistedLeaderJournal.size());
 
         // Allow AppendEntries to both followers to proceed. This should catch up the followers and cause a
@@ -302,7 +303,6 @@ public class ReplicationAndSnapshotsIntegrationTest extends AbstractRaftActorInt
     /**
      * Send one more payload to trigger another snapshot. In this scenario, we delay the snapshot until
      * consensus occurs and the leader applies the state.
-     * @throws Exception
      */
     private void testSecondSnapshot() throws Exception {
         testLog.info("testSecondSnapshot starting");
@@ -319,8 +319,8 @@ public class ReplicationAndSnapshotsIntegrationTest extends AbstractRaftActorInt
         payload7 = sendPayloadData(leaderActor, "seven");
 
         // Capture the CaptureSnapshotReply message so we can send it later.
-        CaptureSnapshotReply captureSnapshotReply = MessageCollectorActor.expectFirstMatching(leaderCollectorActor,
-                CaptureSnapshotReply.class);
+        final CaptureSnapshotReply captureSnapshotReply = MessageCollectorActor.expectFirstMatching(
+                leaderCollectorActor, CaptureSnapshotReply.class);
 
         // Wait for the state to be applied in the leader.
         ApplyState applyState = MessageCollectorActor.expectFirstMatching(leaderCollectorActor, ApplyState.class);
@@ -373,7 +373,8 @@ public class ReplicationAndSnapshotsIntegrationTest extends AbstractRaftActorInt
         assertEquals("Persisted journal log size", 0, persistedLeaderJournal.size());
 
         // Verify the followers apply all 4 new log entries.
-        List<ApplyState> applyStates = MessageCollectorActor.expectMatching(follower1CollectorActor, ApplyState.class, 4);
+        List<ApplyState> applyStates = MessageCollectorActor.expectMatching(follower1CollectorActor,
+                ApplyState.class, 4);
         verifyApplyState(applyStates.get(0), null, null, currentTerm, 4, payload4);
         verifyApplyState(applyStates.get(1), null, null, currentTerm, 5, payload5);
         verifyApplyState(applyStates.get(2), null, null, currentTerm, 6, payload6);
@@ -390,7 +391,7 @@ public class ReplicationAndSnapshotsIntegrationTest extends AbstractRaftActorInt
 
         MessageCollectorActor.clearMessages(follower1CollectorActor);
         MessageCollectorActor.expectFirstMatching(follower1CollectorActor, AppendEntries.class);
-        RaftActorContext follower1Context = follower1Actor.underlyingActor().getRaftActorContext();
+        follower1Context = follower1Actor.underlyingActor().getRaftActorContext();
         assertEquals("Follower 1 snapshot term", currentTerm, follower1Context.getReplicatedLog().getSnapshotTerm());
         assertEquals("Follower 1 snapshot index", 6, follower1Context.getReplicatedLog().getSnapshotIndex());
         assertEquals("Follower 1 journal log size", 1, follower1Context.getReplicatedLog().size());
@@ -399,7 +400,7 @@ public class ReplicationAndSnapshotsIntegrationTest extends AbstractRaftActorInt
 
         MessageCollectorActor.clearMessages(follower2CollectorActor);
         MessageCollectorActor.expectFirstMatching(follower2CollectorActor, AppendEntries.class);
-        RaftActorContext follower2Context = follower2Actor.underlyingActor().getRaftActorContext();
+        follower2Context = follower2Actor.underlyingActor().getRaftActorContext();
         assertEquals("Follower 2 snapshot term", currentTerm, follower2Context.getReplicatedLog().getSnapshotTerm());
         assertEquals("Follower 2 snapshot index", 6, follower2Context.getReplicatedLog().getSnapshotIndex());
         assertEquals("Follower 2 journal log size", 1, follower2Context.getReplicatedLog().size());

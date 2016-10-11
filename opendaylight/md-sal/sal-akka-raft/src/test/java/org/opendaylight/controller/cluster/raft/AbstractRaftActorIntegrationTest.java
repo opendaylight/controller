@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.raft;
 import static akka.pattern.Patterns.ask;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+
 import akka.actor.ActorRef;
 import akka.actor.InvalidActorNameException;
 import akka.actor.PoisonPill;
@@ -19,6 +20,7 @@ import akka.testkit.JavaTestKit;
 import akka.testkit.TestActorRef;
 import akka.util.Timeout;
 import com.google.common.base.Stopwatch;
+import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.ArrayList;
@@ -109,21 +111,21 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
             getRaftActorContext().setTotalMemoryRetriever(mockTotalMemory > 0 ? () -> mockTotalMemory : null);
         }
 
-        @SuppressWarnings({ "rawtypes", "unchecked" })
+        @SuppressWarnings({ "rawtypes", "unchecked", "checkstyle:IllegalCatch" })
         @Override
         public void handleCommand(Object message) {
-            if(message instanceof MockPayload) {
-                MockPayload payload = (MockPayload)message;
+            if (message instanceof MockPayload) {
+                MockPayload payload = (MockPayload) message;
                 super.persistData(collectorActor, new MockIdentifier(payload.toString()), payload);
                 return;
             }
 
-            if(message instanceof ServerConfigurationPayload) {
-                super.persistData(collectorActor, new MockIdentifier("serverConfig"), (Payload)message);
+            if (message instanceof ServerConfigurationPayload) {
+                super.persistData(collectorActor, new MockIdentifier("serverConfig"), (Payload) message);
                 return;
             }
 
-            if(message instanceof SetPeerAddress) {
+            if (message instanceof SetPeerAddress) {
                 setPeerAddress(((SetPeerAddress) message).getPeerId().toString(),
                         ((SetPeerAddress) message).getPeerAddress());
                 return;
@@ -131,11 +133,11 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
 
             try {
                 Predicate drop = dropMessages.get(message.getClass());
-                if(drop == null || !drop.test(message)) {
+                if (drop == null || !drop.test(message)) {
                     super.handleCommand(message);
                 }
             } finally {
-                if(!(message instanceof SendHeartBeat)) {
+                if (!(message instanceof SendHeartBeat)) {
                     try {
                         collectorActor.tell(message, ActorRef.noSender());
                     } catch (Exception e) {
@@ -146,11 +148,12 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
         }
 
         @Override
+        @SuppressWarnings("checkstyle:IllegalCatch")
         public void createSnapshot(ActorRef actorRef) {
             try {
                 actorRef.tell(new CaptureSnapshotReply(RaftActorTest.fromObject(getState()).toByteArray()), actorRef);
             } catch (Exception e) {
-                e.printStackTrace();
+                Throwables.propagate(e);
             }
         }
 
@@ -165,8 +168,8 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
         public static class Builder extends AbstractBuilder<Builder, TestRaftActor> {
             private TestActorRef<MessageCollectorActor> collectorActor;
 
-            public Builder collectorActor(TestActorRef<MessageCollectorActor> collectorActor) {
-                this.collectorActor = collectorActor;
+            public Builder collectorActor(TestActorRef<MessageCollectorActor> newCollectorActor) {
+                this.collectorActor = newCollectorActor;
                 return this;
             }
 
@@ -239,10 +242,10 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
         RaftActorTestKit.waitUntilLeader(actorRef);
     }
 
-    protected TestActorRef<TestRaftActor> newTestRaftActor(String id, Map<String, String> peerAddresses,
+    protected TestActorRef<TestRaftActor> newTestRaftActor(String id, Map<String, String> newPeerAddresses,
             ConfigParams configParams) {
-        return newTestRaftActor(id, TestRaftActor.newBuilder().peerAddresses(peerAddresses != null ? peerAddresses :
-            Collections.<String, String>emptyMap()).config(configParams));
+        return newTestRaftActor(id, TestRaftActor.newBuilder().peerAddresses(newPeerAddresses != null
+                ? newPeerAddresses : Collections.<String, String>emptyMap()).config(configParams));
     }
 
     protected TestActorRef<TestRaftActor> newTestRaftActor(String id, TestRaftActor.Builder builder) {
@@ -251,7 +254,7 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
                         factory.generateActorId(id + "-collector"))).id(id);
 
         InvalidActorNameException lastEx = null;
-        for(int i = 0; i < 10; i++) {
+        for (int i = 0; i < 10; i++) {
             try {
                 return factory.createTestActor(builder.props().withDispatcher(Dispatchers.DefaultDispatcherId()), id);
             } catch (InvalidActorNameException e) {
@@ -264,18 +267,19 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
         throw lastEx;
     }
 
-    protected void killActor(TestActorRef<TestRaftActor> leaderActor) {
+    protected void killActor(TestActorRef<TestRaftActor> actor) {
         JavaTestKit testkit = new JavaTestKit(getSystem());
-        testkit.watch(leaderActor);
+        testkit.watch(actor);
 
-        leaderActor.tell(PoisonPill.getInstance(), null);
+        actor.tell(PoisonPill.getInstance(), null);
         testkit.expectMsgClass(JavaTestKit.duration("5 seconds"), Terminated.class);
 
-        testkit.unwatch(leaderActor);
+        testkit.unwatch(actor);
     }
 
     protected void verifyApplyJournalEntries(ActorRef actor, final long expIndex) {
-        MessageCollectorActor.expectFirstMatching(actor, ApplyJournalEntries.class, msg -> msg.getToIndex() == expIndex);
+        MessageCollectorActor.expectFirstMatching(actor, ApplyJournalEntries.class,
+            msg -> msg.getToIndex() == expIndex);
     }
 
     @SuppressWarnings("unchecked")
@@ -290,7 +294,7 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
         List<Object> actualState = (List<Object>)MockRaftActor.toObject(snapshot.getState());
         assertEquals(String.format("%s Snapshot getState size. Expected %s: . Actual: %s", prefix, expSnapshotState,
                 actualState), expSnapshotState.size(), actualState.size());
-        for(int i = 0; i < expSnapshotState.size(); i++) {
+        for (int i = 0; i < expSnapshotState.size(); i++) {
             assertEquals(prefix + " Snapshot state " + i, expSnapshotState.get(i), actualState.get(i));
         }
     }
@@ -298,26 +302,26 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
     protected void verifyPersistedJournal(String persistenceId, List<? extends ReplicatedLogEntry> expJournal) {
         List<ReplicatedLogEntry> journal = InMemoryJournal.get(persistenceId, ReplicatedLogEntry.class);
         assertEquals("Journal ReplicatedLogEntry count", expJournal.size(), journal.size());
-        for(int i = 0; i < expJournal.size(); i++) {
+        for (int i = 0; i < expJournal.size(); i++) {
             ReplicatedLogEntry expected = expJournal.get(i);
             ReplicatedLogEntry actual = journal.get(i);
             verifyReplicatedLogEntry(expected, actual.getTerm(), actual.getIndex(), actual.getData());
         }
     }
 
-    protected MockPayload sendPayloadData(ActorRef leaderActor, String data) {
-        return sendPayloadData(leaderActor, data, 0);
+    protected MockPayload sendPayloadData(ActorRef actor, String data) {
+        return sendPayloadData(actor, data, 0);
     }
 
-    protected MockPayload sendPayloadData(ActorRef leaderActor, String data, int size) {
+    protected MockPayload sendPayloadData(ActorRef actor, String data, int size) {
         MockPayload payload;
-        if(size > 0) {
+        if (size > 0) {
             payload = new MockPayload(data, size);
         } else {
             payload = new MockPayload(data);
         }
 
-        leaderActor.tell(payload, ActorRef.noSender());
+        actor.tell(payload, ActorRef.noSender());
         return payload;
     }
 
@@ -338,7 +342,7 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
         assertEquals("ReplicatedLogEntry getData", payload, replicatedLogEntry.getData());
     }
 
-    protected String testActorPath(String id){
+    protected String testActorPath(String id) {
         return factory.createTestActorPath(id);
     }
 
@@ -370,11 +374,12 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
                 actor.getCurrentBehavior().getReplicatedToAllIndex());
     }
 
+    @SuppressWarnings("checkstyle:IllegalCatch")
     static void verifyRaftState(ActorRef raftActor, Consumer<OnDemandRaftState> verifier) {
         Timeout timeout = new Timeout(500, TimeUnit.MILLISECONDS);
         AssertionError lastError = null;
         Stopwatch sw = Stopwatch.createStarted();
-        while(sw.elapsed(TimeUnit.SECONDS) <= 5) {
+        while (sw.elapsed(TimeUnit.SECONDS) <= 5) {
             try {
                 OnDemandRaftState raftState = (OnDemandRaftState)Await.result(ask(raftActor,
                         GetOnDemandRaftState.INSTANCE, timeout), timeout.duration());

@@ -11,6 +11,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
+
 import akka.dispatch.Dispatchers;
 import com.google.common.base.Function;
 import org.junit.After;
@@ -38,8 +39,8 @@ public class RaftActorLeadershipTransferCohortTest extends AbstractActorTest {
 
     private void setup(String testName) {
         String persistenceId = factory.generateActorId(testName + "-leader-");
-        mockRaftActor = factory.<MockRaftActor>createTestActor(MockRaftActor.builder().id(persistenceId).config(
-                config).pauseLeaderFunction(pauseLeaderFunction).props().withDispatcher(Dispatchers.DefaultDispatcherId()),
+        mockRaftActor = factory.<MockRaftActor>createTestActor(MockRaftActor.builder().id(persistenceId).config(config)
+                .pauseLeaderFunction(pauseLeaderFunction).props().withDispatcher(Dispatchers.DefaultDispatcherId()),
                 persistenceId).underlyingActor();
         cohort = new RaftActorLeadershipTransferCohort(mockRaftActor);
         cohort.addOnComplete(onComplete);
@@ -88,12 +89,7 @@ public class RaftActorLeadershipTransferCohortTest extends AbstractActorTest {
 
     @Test
     public void testPauseLeaderTimeout() {
-        pauseLeaderFunction = new Function<Runnable, Void>() {
-            @Override
-            public Void apply(Runnable input) {
-                return null;
-            }
-        };
+        pauseLeaderFunction = input -> null;
 
         setup("testPauseLeaderTimeout");
         cohort.init();

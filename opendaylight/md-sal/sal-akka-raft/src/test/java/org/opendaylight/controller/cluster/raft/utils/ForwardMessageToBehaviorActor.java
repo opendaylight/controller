@@ -9,6 +9,7 @@
 package org.opendaylight.controller.cluster.raft.utils;
 
 import static org.junit.Assert.assertTrue;
+
 import akka.actor.Props;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +21,7 @@ public class ForwardMessageToBehaviorActor extends MessageCollectorActor {
 
     @Override
     public void onReceive(Object message) throws Exception {
-        if(behavior != null) {
+        if (behavior != null) {
             behaviorChanges.add(behavior.handleMessage(sender(), message));
         }
         super.onReceive(message);
@@ -30,7 +31,7 @@ public class ForwardMessageToBehaviorActor extends MessageCollectorActor {
         return Props.create(ForwardMessageToBehaviorActor.class);
     }
 
-    public void setBehavior(RaftActorBehavior behavior){
+    public void setBehavior(RaftActorBehavior behavior) {
         this.behavior = behavior;
     }
 
@@ -44,7 +45,7 @@ public class ForwardMessageToBehaviorActor extends MessageCollectorActor {
         return behaviorChanges.get(behaviorChanges.size() - 1);
     }
 
-    public List<RaftActorBehavior> getBehaviorChanges(){
+    public List<RaftActorBehavior> getBehaviorChanges() {
         return behaviorChanges;
     }
 

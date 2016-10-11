@@ -18,6 +18,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+
 import akka.persistence.RecoveryCompleted;
 import akka.persistence.SnapshotMetadata;
 import akka.persistence.SnapshotOffer;
@@ -74,8 +75,8 @@ public class RaftActorRecoverySupportTest {
     public void setup() {
         MockitoAnnotations.initMocks(this);
 
-        context = new RaftActorContextImpl(null, null, localId, new ElectionTermImpl(mockPersistentProvider, "test", LOG),
-                -1, -1, Collections.<String,String>emptyMap(), configParams, mockPersistence, LOG);
+        context = new RaftActorContextImpl(null, null, localId, new ElectionTermImpl(mockPersistentProvider, "test",
+                LOG), -1, -1, Collections.<String,String>emptyMap(), configParams, mockPersistence, LOG);
 
         support = new RaftActorRecoverySupport(context, mockCohort);
 
@@ -148,7 +149,7 @@ public class RaftActorRecoverySupportTest {
         InOrder inOrder = Mockito.inOrder(mockCohort);
         inOrder.verify(mockCohort).startLogRecoveryBatch(5);
 
-        for(int i = 0; i < replicatedLog.size() - 1; i++) {
+        for (int i = 0; i < replicatedLog.size() - 1; i++) {
             inOrder.verify(mockCohort).appendRecoveredLogEntry(replicatedLog.get(i).getData());
         }
 
@@ -223,7 +224,7 @@ public class RaftActorRecoverySupportTest {
         InOrder inOrder = Mockito.inOrder(mockCohort);
         inOrder.verify(mockCohort).startLogRecoveryBatch(anyInt());
 
-        for(int i = 0; i < replicatedLog.size(); i++) {
+        for (int i = 0; i < replicatedLog.size(); i++) {
             inOrder.verify(mockCohort).appendRecoveredLogEntry(replicatedLog.get(i).getData());
         }
 
@@ -265,7 +266,6 @@ public class RaftActorRecoverySupportTest {
         assertEquals("Voted For", "member2", context.getTermInformation().getVotedFor());
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testDataRecoveredWithPersistenceDisabled() {
         doNothing().when(mockCohort).applyRecoverySnapshot(aryEq(new byte[0]));
