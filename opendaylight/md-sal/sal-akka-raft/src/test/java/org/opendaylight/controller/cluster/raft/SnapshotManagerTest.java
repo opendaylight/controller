@@ -21,6 +21,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+
 import akka.actor.ActorRef;
 import akka.persistence.SnapshotSelectionCriteria;
 import akka.testkit.TestActorRef;
@@ -70,7 +71,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
     private TestActorRef<MessageCollectorActor> actorRef;
 
     @Before
-    public void setUp(){
+    public void setUp() {
         MockitoAnnotations.initMocks(this);
 
         doReturn(false).when(mockRaftActorContext).hasFollowers();
@@ -97,12 +98,12 @@ public class SnapshotManagerTest extends AbstractActorTest {
     }
 
     @After
-    public void tearDown(){
+    public void tearDown() {
         factory.close();
     }
 
     @Test
-    public void testConstruction(){
+    public void testConstruction() {
         assertEquals(false, snapshotManager.isCapturing());
     }
 
@@ -174,8 +175,6 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
         CaptureSnapshot captureSnapshot = snapshotManager.getCaptureSnapshot();
 
-        System.out.println(captureSnapshot);
-
         // LastIndex and LastTerm are picked up from the lastLogEntry
         assertEquals(-1L, captureSnapshot.getLastIndex());
         assertEquals(-1L, captureSnapshot.getLastTerm());
@@ -192,7 +191,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
     }
 
     @Test
-    public void testCaptureWithCreateProcedureError () throws Exception {
+    public void testCaptureWithCreateProcedureError() throws Exception {
         doThrow(new RuntimeException("mock")).when(mockProcedure).run();
 
         boolean capture = snapshotManager.capture(new MockRaftActorContext.MockReplicatedLogEntry(1,9,
@@ -226,7 +225,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
     }
 
     @Test
-    public void testPersistWhenReplicatedToAllIndexMinusOne(){
+    public void testPersistWhenReplicatedToAllIndexMinusOne() {
         doReturn(7L).when(mockReplicatedLog).getSnapshotIndex();
         doReturn(1L).when(mockReplicatedLog).getSnapshotTerm();
 
@@ -267,7 +266,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
     }
 
     @Test
-    public void testPersistWhenReplicatedToAllIndexNotMinus(){
+    public void testPersistWhenReplicatedToAllIndexNotMinus() {
         doReturn(45L).when(mockReplicatedLog).getSnapshotIndex();
         doReturn(6L).when(mockReplicatedLog).getSnapshotTerm();
         ReplicatedLogEntry replicatedLogEntry = mock(ReplicatedLogEntry.class);
@@ -300,7 +299,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
     }
 
     @Test
-    public void testPersistWhenReplicatedLogDataSizeGreaterThanThreshold(){
+    public void testPersistWhenReplicatedLogDataSizeGreaterThanThreshold() {
         doReturn(Integer.MAX_VALUE).when(mockReplicatedLog).dataSize();
 
         // when replicatedToAllIndex = -1
@@ -343,7 +342,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
     }
 
     @Test
-    public void testPersistSendInstallSnapshot(){
+    public void testPersistSendInstallSnapshot() {
         doReturn(Integer.MAX_VALUE).when(mockReplicatedLog).dataSize();
 
         // when replicatedToAllIndex = -1
@@ -373,7 +372,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
     }
 
     @Test
-    public void testCallingPersistWithoutCaptureWillDoNothing(){
+    public void testCallingPersistWithoutCaptureWillDoNothing() {
         snapshotManager.persist(new byte[]{}, Runtime.getRuntime().totalMemory());
 
         verify(mockDataPersistenceProvider, never()).saveSnapshot(any(Snapshot.class));
@@ -382,8 +381,9 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
         verify(mockRaftActorBehavior, never()).handleMessage(any(ActorRef.class), any(SendInstallSnapshot.class));
     }
+
     @Test
-    public void testCallingPersistTwiceWillDoNoHarm(){
+    public void testCallingPersistTwiceWillDoNoHarm() {
         doReturn(Integer.MAX_VALUE).when(mockReplicatedLog).dataSize();
 
         // when replicatedToAllIndex = -1
@@ -402,7 +402,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
     }
 
     @Test
-    public void testCommit(){
+    public void testCommit() {
         doReturn(50L).when(mockDataPersistenceProvider).getLastSequenceNumber();
 
         // when replicatedToAllIndex = -1
@@ -421,7 +421,8 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
         verify(mockDataPersistenceProvider).deleteMessages(50L);
 
-        ArgumentCaptor<SnapshotSelectionCriteria> criteriaCaptor = ArgumentCaptor.forClass(SnapshotSelectionCriteria.class);
+        ArgumentCaptor<SnapshotSelectionCriteria> criteriaCaptor =
+                ArgumentCaptor.forClass(SnapshotSelectionCriteria.class);
 
         verify(mockDataPersistenceProvider).deleteSnapshots(criteriaCaptor.capture());
 
@@ -432,7 +433,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
     }
 
     @Test
-    public void testCommitBeforePersist(){
+    public void testCommitBeforePersist() {
         // when replicatedToAllIndex = -1
         snapshotManager.captureToInstall(new MockRaftActorContext.MockReplicatedLogEntry(6, 9,
                 new MockRaftActorContext.MockPayload()), -1, "follower-1");
@@ -448,7 +449,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
     }
 
     @Test
-    public void testCommitBeforeCapture(){
+    public void testCommitBeforeCapture() {
         snapshotManager.commit(100L, 0);
 
         verify(mockReplicatedLog, never()).snapshotCommit();
@@ -460,7 +461,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
     }
 
     @Test
-    public void testCallingCommitMultipleTimesCausesNoHarm(){
+    public void testCallingCommitMultipleTimesCausesNoHarm() {
         doReturn(50L).when(mockDataPersistenceProvider).getLastSequenceNumber();
 
         // when replicatedToAllIndex = -1
@@ -481,7 +482,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
     }
 
     @Test
-    public void testRollback(){
+    public void testRollback() {
         // when replicatedToAllIndex = -1
         snapshotManager.captureToInstall(new MockRaftActorContext.MockReplicatedLogEntry(6, 9,
                 new MockRaftActorContext.MockPayload()), -1, "follower-1");
@@ -497,7 +498,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
 
     @Test
-    public void testRollbackBeforePersist(){
+    public void testRollbackBeforePersist() {
         // when replicatedToAllIndex = -1
         snapshotManager.captureToInstall(new MockRaftActorContext.MockReplicatedLogEntry(6, 9,
                 new MockRaftActorContext.MockPayload()), -1, "follower-1");
@@ -508,14 +509,14 @@ public class SnapshotManagerTest extends AbstractActorTest {
     }
 
     @Test
-    public void testRollbackBeforeCapture(){
+    public void testRollbackBeforeCapture() {
         snapshotManager.rollback();
 
         verify(mockReplicatedLog, never()).snapshotRollback();
     }
 
     @Test
-    public void testCallingRollbackMultipleTimesCausesNoHarm(){
+    public void testCallingRollbackMultipleTimesCausesNoHarm() {
         // when replicatedToAllIndex = -1
         snapshotManager.captureToInstall(new MockRaftActorContext.MockReplicatedLogEntry(6, 9,
                 new MockRaftActorContext.MockPayload()), -1, "follower-1");
@@ -535,7 +536,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
         ReplicatedLogEntry replicatedLogEntry = mock(ReplicatedLogEntry.class);
         doReturn(true).when(mockReplicatedLog).isPresent(10);
-        doReturn(replicatedLogEntry).when((mockReplicatedLog)).get(10);
+        doReturn(replicatedLogEntry).when(mockReplicatedLog).get(10);
         doReturn(5L).when(replicatedLogEntry).getTerm();
 
         long retIndex = snapshotManager.trimLog(10);
@@ -553,7 +554,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
         ReplicatedLogEntry replicatedLogEntry = mock(ReplicatedLogEntry.class);
         doReturn(true).when(mockReplicatedLog).isPresent(10);
-        doReturn(replicatedLogEntry).when((mockReplicatedLog)).get(10);
+        doReturn(replicatedLogEntry).when(mockReplicatedLog).get(10);
         doReturn(5L).when(replicatedLogEntry).getTerm();
 
         long retIndex = snapshotManager.trimLog(10);
@@ -571,7 +572,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
         ReplicatedLogEntry replicatedLogEntry = mock(ReplicatedLogEntry.class);
         doReturn(true).when(mockReplicatedLog).isPresent(10);
-        doReturn(replicatedLogEntry).when((mockReplicatedLog)).get(10);
+        doReturn(replicatedLogEntry).when(mockReplicatedLog).get(10);
         doReturn(5L).when(replicatedLogEntry).getTerm();
 
         long retIndex = snapshotManager.trimLog(10);
@@ -600,7 +601,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
     }
 
     @Test
-    public void testTrimLogAfterCapture(){
+    public void testTrimLogAfterCapture() {
         boolean capture = snapshotManager.capture(new MockRaftActorContext.MockReplicatedLogEntry(1,9,
                 new MockRaftActorContext.MockPayload()), 9);
 
@@ -611,7 +612,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
         ReplicatedLogEntry replicatedLogEntry = mock(ReplicatedLogEntry.class);
         doReturn(20L).when(mockRaftActorContext).getLastApplied();
         doReturn(true).when(mockReplicatedLog).isPresent(10);
-        doReturn(replicatedLogEntry).when((mockReplicatedLog)).get(10);
+        doReturn(replicatedLogEntry).when(mockReplicatedLog).get(10);
         doReturn(5L).when(replicatedLogEntry).getTerm();
 
         snapshotManager.trimLog(10);
@@ -622,7 +623,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
     }
 
     @Test
-    public void testTrimLogAfterCaptureToInstall(){
+    public void testTrimLogAfterCaptureToInstall() {
         boolean capture = snapshotManager.captureToInstall(new MockRaftActorContext.MockReplicatedLogEntry(1,9,
                 new MockRaftActorContext.MockPayload()), 9, "follower-1");
 
@@ -633,7 +634,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
         ReplicatedLogEntry replicatedLogEntry = mock(ReplicatedLogEntry.class);
         doReturn(20L).when(mockRaftActorContext).getLastApplied();
         doReturn(true).when(mockReplicatedLog).isPresent(10);
-        doReturn(replicatedLogEntry).when((mockReplicatedLog)).get(10);
+        doReturn(replicatedLogEntry).when(mockReplicatedLog).get(10);
         doReturn(5L).when(replicatedLogEntry).getTerm();
 
         snapshotManager.trimLog(10);

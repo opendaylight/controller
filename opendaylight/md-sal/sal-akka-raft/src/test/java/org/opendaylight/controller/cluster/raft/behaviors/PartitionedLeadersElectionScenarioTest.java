@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.raft.behaviors;
 
 import static org.junit.Assert.assertEquals;
+
 import akka.actor.ActorRef;
 import com.google.common.collect.ImmutableMap;
 import org.junit.Test;
@@ -280,9 +281,9 @@ public class PartitionedLeadersElectionScenarioTest extends AbstractLeaderElecti
         // Create member 2's behavior initially as Follower
 
         member2Context = newRaftActorContext("member2", member2ActorRef,
-                ImmutableMap.<String,String>builder().
-                    put("member1", member1ActorRef.path().toString()).
-                    put("member3", member3ActorRef.path().toString()).build());
+                ImmutableMap.<String,String>builder()
+                    .put("member1", member1ActorRef.path().toString())
+                    .put("member3", member3ActorRef.path().toString()).build());
 
         DefaultConfigParamsImpl member2ConfigParams = newConfigParams();
         member2Context.setConfigParams(member2ConfigParams);
@@ -293,9 +294,9 @@ public class PartitionedLeadersElectionScenarioTest extends AbstractLeaderElecti
         // Create member 3's behavior initially as Follower
 
         member3Context = newRaftActorContext("member3", member3ActorRef,
-                ImmutableMap.<String,String>builder().
-                    put("member1", member1ActorRef.path().toString()).
-                    put("member2", member2ActorRef.path().toString()).build());
+                ImmutableMap.<String,String>builder()
+                    .put("member1", member1ActorRef.path().toString())
+                    .put("member2", member2ActorRef.path().toString()).build());
 
         DefaultConfigParamsImpl member3ConfigParams = newConfigParams();
         member3Context.setConfigParams(member3ConfigParams);
@@ -306,9 +307,9 @@ public class PartitionedLeadersElectionScenarioTest extends AbstractLeaderElecti
         // Create member 1's behavior initially as Leader
 
         member1Context = newRaftActorContext("member1", member1ActorRef,
-                ImmutableMap.<String,String>builder().
-                    put("member2", member2ActorRef.path().toString()).
-                    put("member3", member3ActorRef.path().toString()).build());
+                ImmutableMap.<String,String>builder()
+                    .put("member2", member2ActorRef.path().toString())
+                    .put("member3", member3ActorRef.path().toString()).build());
 
         DefaultConfigParamsImpl member1ConfigParams = newConfigParams();
         member1Context.setConfigParams(member1ConfigParams);

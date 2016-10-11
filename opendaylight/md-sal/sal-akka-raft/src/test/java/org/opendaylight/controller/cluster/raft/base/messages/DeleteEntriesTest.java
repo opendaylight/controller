@@ -23,7 +23,8 @@ public class DeleteEntriesTest {
     public void testSerialization() {
         DeleteEntries deleteEntries = new DeleteEntries(11);
         org.opendaylight.controller.cluster.raft.persisted.DeleteEntries clone =
-                (org.opendaylight.controller.cluster.raft.persisted.DeleteEntries) SerializationUtils.clone(deleteEntries);
+                (org.opendaylight.controller.cluster.raft.persisted.DeleteEntries)
+                    SerializationUtils.clone(deleteEntries);
 
         Assert.assertEquals("getFromIndex", 11, clone.getFromIndex());
         Assert.assertEquals("isMigrated", true, clone.isMigrated());

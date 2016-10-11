@@ -28,7 +28,7 @@ public class ReplicatedLogImplEntryTest {
         int expIndex = 1;
         int expTerm = 2;
 
-        try(FileInputStream fis = new FileInputStream("src/test/resources/helium-serialized-ReplicatedLogImplEntry")) {
+        try (FileInputStream fis = new FileInputStream("src/test/resources/helium-serialized-ReplicatedLogImplEntry")) {
             ObjectInputStream ois = new ObjectInputStream(fis);
 
             ReplicatedLogImplEntry entry = (ReplicatedLogImplEntry) ois.readObject();
@@ -46,6 +46,7 @@ public class ReplicatedLogImplEntryTest {
      * Use this method to generate a file with a serialized ReplicatedLogImplEntry instance to be
      * used in tests that verify backwards compatible de-serialization.
      */
+    @SuppressWarnings("unused")
     private static void generateSerializedFile() throws IOException {
         String expPayloadData = "This is a test";
         int expIndex = 1;

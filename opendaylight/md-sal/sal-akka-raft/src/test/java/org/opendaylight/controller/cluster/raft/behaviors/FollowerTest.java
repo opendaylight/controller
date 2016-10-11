@@ -18,6 +18,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.testkit.TestActorRef;
@@ -69,7 +70,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
     @Override
     @After
     public void tearDown() throws Exception {
-        if(follower != null) {
+        if (follower != null) {
             follower.close();
         }
 
@@ -87,14 +88,14 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
     }
 
     @Override
-    protected  MockRaftActorContext createActorContext(ActorRef actorRef){
+    protected  MockRaftActorContext createActorContext(ActorRef actorRef) {
         MockRaftActorContext context = new MockRaftActorContext("follower", getSystem(), actorRef);
         context.setPayloadVersion(payloadVersion );
         return context;
     }
 
     @Test
-    public void testThatAnElectionTimeoutIsTriggered(){
+    public void testThatAnElectionTimeoutIsTriggered() {
         MockRaftActorContext actorContext = createActorContext();
         follower = new Follower(actorContext);
 
@@ -121,15 +122,15 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         logStart("testHandleElectionTimeoutWhenLeaderMessageReceived");
 
         MockRaftActorContext context = createActorContext();
-        ((DefaultConfigParamsImpl) context.getConfigParams()).
-                setHeartBeatInterval(new FiniteDuration(100, TimeUnit.MILLISECONDS));
+        ((DefaultConfigParamsImpl) context.getConfigParams())
+                .setHeartBeatInterval(new FiniteDuration(100, TimeUnit.MILLISECONDS));
         ((DefaultConfigParamsImpl) context.getConfigParams()).setElectionTimeoutFactor(4);
 
         follower = new Follower(context);
         context.setCurrentBehavior(follower);
 
-        Uninterruptibles.sleepUninterruptibly(context.getConfigParams().
-                getElectionTimeOutInterval().toMillis() - 100, TimeUnit.MILLISECONDS);
+        Uninterruptibles.sleepUninterruptibly(context.getConfigParams()
+                .getElectionTimeOutInterval().toMillis() - 100, TimeUnit.MILLISECONDS);
         follower.handleMessage(leaderActor, new AppendEntries(1, "leader", -1, -1, Collections.emptyList(),
                 -1, -1, (short) 1));
 
@@ -137,8 +138,8 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         RaftActorBehavior raftBehavior = follower.handleMessage(leaderActor, ElectionTimeout.INSTANCE);
         assertTrue(raftBehavior instanceof Follower);
 
-        Uninterruptibles.sleepUninterruptibly(context.getConfigParams().
-                getElectionTimeOutInterval().toMillis() - 150, TimeUnit.MILLISECONDS);
+        Uninterruptibles.sleepUninterruptibly(context.getConfigParams()
+                .getElectionTimeOutInterval().toMillis() - 150, TimeUnit.MILLISECONDS);
         follower.handleMessage(leaderActor, new AppendEntries(1, "leader", -1, -1, Collections.emptyList(),
                 -1, -1, (short) 1));
 
@@ -167,7 +168,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
     }
 
     @Test
-    public void testHandleRequestVoteWhenSenderTermEqualToCurrentTermAndVotedForIsNotTheSameAsCandidateId(){
+    public void testHandleRequestVoteWhenSenderTermEqualToCurrentTermAndVotedForIsNotTheSameAsCandidateId() {
         logStart("testHandleRequestVoteWhenSenderTermEqualToCurrentTermAndVotedForIsNotTheSameAsCandidateId");
 
         MockRaftActorContext context = createActorContext();
@@ -205,7 +206,8 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         follower = createBehavior(context);
         follower.handleMessage(leaderActor, appendEntries);
 
-        FollowerInitialSyncUpStatus syncStatus = MessageCollectorActor.expectFirstMatching(followerActor, FollowerInitialSyncUpStatus.class);
+        FollowerInitialSyncUpStatus syncStatus = MessageCollectorActor.expectFirstMatching(followerActor,
+                FollowerInitialSyncUpStatus.class);
         AppendEntriesReply reply = MessageCollectorActor.expectFirstMatching(leaderActor, AppendEntriesReply.class);
 
         assertFalse(syncStatus.isInitialSyncDone());
@@ -227,7 +229,8 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         follower = createBehavior(context);
         follower.handleMessage(leaderActor, appendEntries);
 
-        FollowerInitialSyncUpStatus syncStatus = MessageCollectorActor.expectFirstMatching(followerActor, FollowerInitialSyncUpStatus.class);
+        FollowerInitialSyncUpStatus syncStatus = MessageCollectorActor.expectFirstMatching(followerActor,
+                FollowerInitialSyncUpStatus.class);
         AppendEntriesReply reply = MessageCollectorActor.expectFirstMatching(leaderActor, AppendEntriesReply.class);
 
         assertFalse(syncStatus.isInitialSyncDone());
@@ -235,7 +238,8 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
     }
 
     @Test
-    public void testHandleFirstAppendEntriesWithPrevIndexMinusOneAndReplicatedToAllIndexPresentInLog() throws Exception {
+    public void testHandleFirstAppendEntriesWithPrevIndexMinusOneAndReplicatedToAllIndexPresentInLog()
+            throws Exception {
         logStart("testHandleFirstAppendEntries");
 
         MockRaftActorContext context = createActorContext();
@@ -252,7 +256,8 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         follower = createBehavior(context);
         follower.handleMessage(leaderActor, appendEntries);
 
-        FollowerInitialSyncUpStatus syncStatus = MessageCollectorActor.expectFirstMatching(followerActor, FollowerInitialSyncUpStatus.class);
+        FollowerInitialSyncUpStatus syncStatus = MessageCollectorActor.expectFirstMatching(followerActor,
+                FollowerInitialSyncUpStatus.class);
         AppendEntriesReply reply = MessageCollectorActor.expectFirstMatching(leaderActor, AppendEntriesReply.class);
 
         assertFalse(syncStatus.isInitialSyncDone());
@@ -260,7 +265,8 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
     }
 
     @Test
-    public void testHandleFirstAppendEntriesWithPrevIndexMinusOneAndReplicatedToAllIndexPresentInSnapshot() throws Exception {
+    public void testHandleFirstAppendEntriesWithPrevIndexMinusOneAndReplicatedToAllIndexPresentInSnapshot()
+            throws Exception {
         logStart("testHandleFirstAppendEntries");
 
         MockRaftActorContext context = createActorContext();
@@ -276,7 +282,8 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         follower = createBehavior(context);
         follower.handleMessage(leaderActor, appendEntries);
 
-        FollowerInitialSyncUpStatus syncStatus = MessageCollectorActor.expectFirstMatching(followerActor, FollowerInitialSyncUpStatus.class);
+        FollowerInitialSyncUpStatus syncStatus = MessageCollectorActor.expectFirstMatching(followerActor,
+                FollowerInitialSyncUpStatus.class);
         AppendEntriesReply reply = MessageCollectorActor.expectFirstMatching(leaderActor, AppendEntriesReply.class);
 
         assertFalse(syncStatus.isInitialSyncDone());
@@ -284,8 +291,10 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
     }
 
     @Test
-    public void testHandleFirstAppendEntriesWithPrevIndexMinusOneAndReplicatedToAllIndexPresentInSnapshotButCalculatedPreviousEntryMissing() throws Exception {
-        logStart("testHandleFirstAppendEntries");
+    public void testFirstAppendEntriesWithNoPrevIndexAndReplicatedToAllPresentInSnapshotButCalculatedPrevEntryMissing()
+            throws Exception {
+        logStart(
+               "testFirstAppendEntriesWithNoPrevIndexAndReplicatedToAllPresentInSnapshotButCalculatedPrevEntryMissing");
 
         MockRaftActorContext context = createActorContext();
         context.getReplicatedLog().clear(0,2);
@@ -300,7 +309,8 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         follower = createBehavior(context);
         follower.handleMessage(leaderActor, appendEntries);
 
-        FollowerInitialSyncUpStatus syncStatus = MessageCollectorActor.expectFirstMatching(followerActor, FollowerInitialSyncUpStatus.class);
+        FollowerInitialSyncUpStatus syncStatus = MessageCollectorActor.expectFirstMatching(followerActor,
+                FollowerInitialSyncUpStatus.class);
         AppendEntriesReply reply = MessageCollectorActor.expectFirstMatching(leaderActor, AppendEntriesReply.class);
 
         assertFalse(syncStatus.isInitialSyncDone());
@@ -322,7 +332,8 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         follower = createBehavior(context);
         follower.handleMessage(leaderActor, appendEntries);
 
-        FollowerInitialSyncUpStatus syncStatus = MessageCollectorActor.expectFirstMatching(followerActor, FollowerInitialSyncUpStatus.class);
+        FollowerInitialSyncUpStatus syncStatus = MessageCollectorActor.expectFirstMatching(followerActor,
+                FollowerInitialSyncUpStatus.class);
 
         assertFalse(syncStatus.isInitialSyncDone());
 
@@ -372,7 +383,8 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         follower = createBehavior(context);
         follower.handleMessage(leaderActor, appendEntries);
 
-        FollowerInitialSyncUpStatus syncStatus = MessageCollectorActor.expectFirstMatching(followerActor, FollowerInitialSyncUpStatus.class);
+        FollowerInitialSyncUpStatus syncStatus = MessageCollectorActor.expectFirstMatching(followerActor,
+                FollowerInitialSyncUpStatus.class);
 
         assertFalse(syncStatus.isInitialSyncDone());
 
@@ -413,7 +425,8 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         follower = createBehavior(context);
         follower.handleMessage(leaderActor, appendEntries);
 
-        FollowerInitialSyncUpStatus syncStatus = MessageCollectorActor.expectFirstMatching(followerActor, FollowerInitialSyncUpStatus.class);
+        FollowerInitialSyncUpStatus syncStatus = MessageCollectorActor.expectFirstMatching(followerActor,
+                FollowerInitialSyncUpStatus.class);
 
         assertFalse(syncStatus.isInitialSyncDone());
 
@@ -463,8 +476,6 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
      * with a commitIndex that is greater than what has been applied to the
      * state machine of the RaftActor, the RaftActor applies the state and
      * sets it current applied state to the commitIndex of the sender.
-     *
-     * @throws Exception
      */
     @Test
     public void testHandleAppendEntriesWithNewerCommitIndex() throws Exception {
@@ -493,8 +504,6 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
      * This test verifies that when an AppendEntries is received a specific prevLogTerm
      * which does not match the term that is in RaftActors log entry at prevLogIndex
      * then the RaftActor does not change it's state and it returns a failure.
-     *
-     * @throws Exception
      */
     @Test
     public void testHandleAppendEntriesSenderPrevLogTermNotSameAsReceiverPrevLogTerm() {
@@ -525,9 +534,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
      * This test verifies that when a new AppendEntries message is received with
      * new entries and the logs of the sender and receiver match that the new
      * entries get added to the log and the log is incremented by the number of
-     * entries received in appendEntries
-     *
-     * @throws Exception
+     * entries received in appendEntries.
      */
     @Test
     public void testHandleAppendEntriesAddNewEntries() {
@@ -579,7 +586,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
      * This test verifies that when a new AppendEntries message is received with
      * new entries and the logs of the sender and receiver are out-of-sync that
      * the log is first corrected by removing the out of sync entries from the
-     * log and then adding in the new entries sent with the AppendEntries message
+     * log and then adding in the new entries sent with the AppendEntries message.
      */
     @Test
     public void testHandleAppendEntriesCorrectReceiverLogEntries() {
@@ -671,10 +678,10 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
     }
 
     @Test
-    public void testHandleAppendEntriesPreviousLogEntryMissing(){
+    public void testHandleAppendEntriesPreviousLogEntryMissing() {
         logStart("testHandleAppendEntriesPreviousLogEntryMissing");
 
-        MockRaftActorContext context = createActorContext();
+        final MockRaftActorContext context = createActorContext();
 
         // Prepare the receivers log
         MockRaftActorContext.SimpleReplicatedLog log = new MockRaftActorContext.SimpleReplicatedLog();
@@ -741,7 +748,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
     }
 
     @Test
-    public void testHandleAppendEntriesAfterInstallingSnapshot(){
+    public void testHandleAppendEntriesAfterInstallingSnapshot() {
         logStart("testHandleAppendAfterInstallingSnapshot");
 
         MockRaftActorContext context = createActorContext();
@@ -774,8 +781,6 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
     /**
      * This test verifies that when InstallSnapshot is received by
      * the follower its applied correctly.
-     *
-     * @throws Exception
      */
     @Test
     public void testHandleInstallSnapshot() throws Exception {
@@ -795,7 +800,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         int chunkIndex = 1;
         InstallSnapshot lastInstallSnapshot = null;
 
-        for(int i = 0; i < totalChunks; i++) {
+        for (int i = 0; i < totalChunks; i++) {
             byte[] chunkData = getNextChunk(bsSnapshot, offset, chunkSize);
             lastInstallSnapshot = new InstallSnapshot(1, "leader", lastIncludedIndex, 1,
                     chunkData, chunkIndex, totalChunks);
@@ -825,7 +830,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         assertEquals("InstallSnapshotReply count", totalChunks, replies.size());
 
         chunkIndex = 1;
-        for(InstallSnapshotReply reply: replies) {
+        for (InstallSnapshotReply reply: replies) {
             assertEquals("getChunkIndex", chunkIndex++, reply.getChunkIndex());
             assertEquals("getTerm", 1, reply.getTerm());
             assertEquals("isSuccess", true, reply.isSuccess());
@@ -839,8 +844,6 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
     /**
      * Verify that when an AppendEntries is sent to a follower during a snapshot install
      * the Follower short-circuits the processing of the AppendEntries message.
-     *
-     * @throws Exception
      */
     @Test
     public void testReceivingAppendEntriesDuringInstallSnapshot() throws Exception {
@@ -946,7 +949,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         int chunkIndex = 1;
         InstallSnapshot lastInstallSnapshot = null;
 
-        for(int i = 0; i < totalChunks; i++) {
+        for (int i = 0; i < totalChunks; i++) {
             byte[] chunkData = getNextChunk(bsSnapshot, offset, chunkSize);
             lastInstallSnapshot = new InstallSnapshot(1, "leader", lastIncludedIndex, 1,
                     chunkData, chunkIndex, totalChunks);
@@ -1007,7 +1010,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
     }
 
     @Test
-    public void testFollowerSchedulesElectionTimeoutImmediatelyWhenItHasNoPeers(){
+    public void testFollowerSchedulesElectionTimeoutImmediatelyWhenItHasNoPeers() {
         MockRaftActorContext context = createActorContext();
 
         Stopwatch stopwatch = Stopwatch.createStarted();
@@ -1025,9 +1028,9 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
     }
 
     @Test
-    public void testFollowerSchedulesElectionIfAutomaticElectionsAreDisabled(){
+    public void testFollowerSchedulesElectionIfAutomaticElectionsAreDisabled() {
         MockRaftActorContext context = createActorContext();
-        context.setConfigParams(new DefaultConfigParamsImpl(){
+        context.setConfigParams(new DefaultConfigParamsImpl() {
             @Override
             public FiniteDuration getElectionTimeOutInterval() {
                 return FiniteDuration.apply(100, TimeUnit.MILLISECONDS);
@@ -1044,7 +1047,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
     }
 
     @Test
-    public void testFollowerSchedulesElectionIfNonVoting(){
+    public void testFollowerSchedulesElectionIfNonVoting() {
         MockRaftActorContext context = createActorContext();
         context.updatePeerIds(new ServerConfigurationPayload(Arrays.asList(new ServerInfo(context.getId(), false))));
         ((DefaultConfigParamsImpl)context.getConfigParams()).setHeartBeatInterval(
@@ -1061,7 +1064,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
     }
 
     @Test
-    public void testElectionScheduledWhenAnyRaftRPCReceived(){
+    public void testElectionScheduledWhenAnyRaftRPCReceived() {
         MockRaftActorContext context = createActorContext();
         follower = createBehavior(context);
         follower.handleMessage(leaderActor, new RaftRPC() {
@@ -1076,14 +1079,14 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
     }
 
     @Test
-    public void testElectionNotScheduledWhenNonRaftRPCMessageReceived(){
+    public void testElectionNotScheduledWhenNonRaftRPCMessageReceived() {
         MockRaftActorContext context = createActorContext();
         follower = createBehavior(context);
         follower.handleMessage(leaderActor, "non-raft-rpc");
         verify(follower, never()).scheduleElection(any(FiniteDuration.class));
     }
 
-    public byte[] getNextChunk (ByteString bs, int offset, int chunkSize){
+    public byte[] getNextChunk(ByteString bs, int offset, int chunkSize) {
         int snapshotLength = bs.size();
         int start = offset;
         int size = chunkSize;
@@ -1127,7 +1130,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
                 new MockRaftActorContext.MockPayload(data));
     }
 
-    private ByteString createSnapshot(){
+    private ByteString createSnapshot() {
         HashMap<String, String> followerSnapshot = new HashMap<>();
         followerSnapshot.put("1", "A");
         followerSnapshot.put("2", "B");

@@ -8,6 +8,11 @@
 package org.opendaylight.controller.cluster.raft;
 
 import static org.junit.Assert.assertEquals;
+
+import akka.actor.ActorRef;
+import akka.dispatch.Dispatchers;
+import akka.testkit.JavaTestKit;
+import akka.testkit.TestActorRef;
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.Arrays;
@@ -27,10 +32,6 @@ import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import akka.actor.ActorRef;
-import akka.dispatch.Dispatchers;
-import akka.testkit.JavaTestKit;
-import akka.testkit.TestActorRef;
 
 /**
  * Unit tests for migrated messages on recovery.
@@ -43,7 +44,7 @@ public class MigratedMessagesTest extends AbstractActorTest {
     private TestActorFactory factory;
 
     @Before
-    public void setUp(){
+    public void setUp() {
         factory = new TestActorFactory(getSystem());
     }
 
@@ -72,8 +73,8 @@ public class MigratedMessagesTest extends AbstractActorTest {
 
         factory.killActor(actor, new JavaTestKit(getSystem()));
 
-        actor = factory.createTestActor(MockRaftActor.builder().id(id).config(config).persistent(Optional.of(false)).props().
-                    withDispatcher(Dispatchers.DefaultDispatcherId()), id);
+        actor = factory.createTestActor(MockRaftActor.builder().id(id).config(config)
+                .persistent(Optional.of(false)).props().withDispatcher(Dispatchers.DefaultDispatcherId()), id);
         mockRaftActor = actor.underlyingActor();
         mockRaftActor.waitForRecoveryComplete();
 
@@ -163,9 +164,9 @@ public class MigratedMessagesTest extends AbstractActorTest {
             }
         };
 
-        TestActorRef<MockRaftActor> raftActorRef = factory.createTestActor(MockRaftActor.builder().id(id).
-                config(config).snapshotCohort(snapshotCohort).persistent(Optional.of(true)).props().
-                    withDispatcher(Dispatchers.DefaultDispatcherId()), id);
+        TestActorRef<MockRaftActor> raftActorRef = factory.createTestActor(MockRaftActor.builder().id(id)
+                .config(config).snapshotCohort(snapshotCohort).persistent(Optional.of(true)).props()
+                    .withDispatcher(Dispatchers.DefaultDispatcherId()), id);
         MockRaftActor mockRaftActor = raftActorRef.underlyingActor();
 
         mockRaftActor.waitForRecoveryComplete();
@@ -193,17 +194,17 @@ public class MigratedMessagesTest extends AbstractActorTest {
         InMemoryJournal.addEntry(persistenceId, 3, new ReplicatedLogImplEntry(0, 1, persistedServerConfig));
 
         TestActorRef<MockRaftActor> actor = doTestSnapshotAfterStartupWithMigratedMessage(persistenceId,
-                persistent, snapshot -> {
-            assertEquals("getElectionVotedFor", persistenceId, snapshot.getElectionVotedFor());
-            assertEquals("getElectionTerm", 1, snapshot.getElectionTerm());
-            assertEquals("getServerConfiguration", new HashSet<>(expectedServerConfig.getServerConfig()),
-                    new HashSet<>(snapshot.getServerConfiguration().getServerConfig()));
-        });
+            persistent, snapshot -> {
+                assertEquals("getElectionVotedFor", persistenceId, snapshot.getElectionVotedFor());
+                assertEquals("getElectionTerm", 1, snapshot.getElectionTerm());
+                assertEquals("getServerConfiguration", new HashSet<>(expectedServerConfig.getServerConfig()),
+                        new HashSet<>(snapshot.getServerConfiguration().getServerConfig()));
+            });
 
         return actor;
     }
 
-
+    @SuppressWarnings("checkstyle:IllegalCatch")
     private TestActorRef<MockRaftActor> doTestSnapshotAfterStartupWithMigratedMessage(String id, boolean persistent,
             Consumer<Snapshot> snapshotVerifier) {
         InMemorySnapshotStore.addSnapshotSavedLatch(id);
@@ -222,9 +223,9 @@ public class MigratedMessagesTest extends AbstractActorTest {
             }
         };
 
-        TestActorRef<MockRaftActor> raftActorRef = factory.createTestActor(MockRaftActor.builder().id(id).
-                config(config).snapshotCohort(snapshotCohort).persistent(Optional.of(persistent)).props().
-                    withDispatcher(Dispatchers.DefaultDispatcherId()), id);
+        TestActorRef<MockRaftActor> raftActorRef = factory.createTestActor(MockRaftActor.builder().id(id)
+                .config(config).snapshotCohort(snapshotCohort).persistent(Optional.of(persistent)).props()
+                    .withDispatcher(Dispatchers.DefaultDispatcherId()), id);
         MockRaftActor mockRaftActor = raftActorRef.underlyingActor();
 
         mockRaftActor.waitForRecoveryComplete();

@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.raft.persisted;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+
 import java.util.Arrays;
 import org.apache.commons.lang.SerializationUtils;
 import org.junit.Test;

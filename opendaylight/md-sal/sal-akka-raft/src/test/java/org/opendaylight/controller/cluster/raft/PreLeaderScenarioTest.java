@@ -11,6 +11,7 @@ import static org.junit.Assert.assertEquals;
 import static org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor.clearMessages;
 import static org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor.expectFirstMatching;
 import static org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor.expectMatching;
+
 import akka.actor.Actor;
 import akka.actor.ActorRef;
 import akka.actor.Props;
@@ -81,7 +82,7 @@ public class PreLeaderScenarioTest extends AbstractRaftActorIntegrationTest {
         assertEquals("Role change 2", RaftState.PreLeader.name(), roleChange.get(1).getNewRole());
         assertEquals("Role change 3", RaftState.Leader.name(), roleChange.get(2).getNewRole());
 
-        long previousTerm = currentTerm;
+        final long previousTerm = currentTerm;
         currentTerm = follower1Context.getTermInformation().getCurrentTerm();
 
         // Since it went to Leader, it should've appended and successfully replicated a NoopPaylod with the
@@ -110,8 +111,8 @@ public class PreLeaderScenarioTest extends AbstractRaftActorIntegrationTest {
         killActor(follower1Actor);
 
         follower1Actor = newTestRaftActor(follower1Id, TestRaftActor.newBuilder().peerAddresses(
-                ImmutableMap.of(leaderId, testActorPath(leaderId), follower2Id, testActorPath(follower2Id))).
-                config(followerConfigParams));
+                ImmutableMap.of(leaderId, testActorPath(leaderId), follower2Id, testActorPath(follower2Id)))
+                .config(followerConfigParams));
         follower1Actor.underlyingActor().waitForRecoveryComplete();
         follower1Context = follower1Actor.underlyingActor().getRaftActorContext();
 
@@ -136,15 +137,15 @@ public class PreLeaderScenarioTest extends AbstractRaftActorIntegrationTest {
         followerConfigParams.setHeartBeatInterval(new FiniteDuration(100, TimeUnit.MILLISECONDS));
         followerConfigParams.setSnapshotBatchCount(snapshotBatchCount);
         follower1Actor = newTestRaftActor(follower1Id, TestRaftActor.newBuilder().peerAddresses(
-                ImmutableMap.of(leaderId, testActorPath(leaderId), follower2Id, testActorPath(follower2Id))).
-                config(followerConfigParams).roleChangeNotifier(follower1NotifierActor));
+                ImmutableMap.of(leaderId, testActorPath(leaderId), follower2Id, testActorPath(follower2Id)))
+                .config(followerConfigParams).roleChangeNotifier(follower1NotifierActor));
 
         follower2Actor = newTestRaftActor(follower2Id, ImmutableMap.of(leaderId, testActorPath(leaderId),
                 follower1Id, testActorPath(follower1Id)), followerConfigParams);
 
-        peerAddresses = ImmutableMap.<String, String>builder().
-                put(follower1Id, follower1Actor.path().toString()).
-                put(follower2Id, follower2Actor.path().toString()).build();
+        peerAddresses = ImmutableMap.<String, String>builder()
+                .put(follower1Id, follower1Actor.path().toString())
+                .put(follower2Id, follower2Actor.path().toString()).build();
 
         leaderConfigParams = newLeaderConfigParams();
         leaderConfigParams.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));

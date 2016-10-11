@@ -12,6 +12,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+
 import akka.japi.Procedure;
 import java.util.HashMap;
 import java.util.List;
@@ -23,7 +24,7 @@ import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockReplicatedLogEntry;
 
 /**
-*
+* Unit tests for AbstractReplicatedLogImplTest.
 */
 public class AbstractReplicatedLogImplTest {
 
@@ -303,7 +304,7 @@ public class AbstractReplicatedLogImplTest {
 
         long lastIndex = 0;
         long lastTerm = 0;
-        for(int i = 0; i < numEntries; i++) {
+        for (int i = 0; i < numEntries; i++) {
             ReplicatedLogEntry entry = replicatedLogImpl.getAtPhysicalIndex(i);
             map.put(entry.getIndex(), entry.getData().toString());
             lastIndex = entry.getIndex();
@@ -316,11 +317,8 @@ public class AbstractReplicatedLogImplTest {
         return map;
 
     }
-    class MockAbstractReplicatedLogImpl extends AbstractReplicatedLogImpl {
-        @Override
-        public void appendAndPersist(final ReplicatedLogEntry replicatedLogEntry) {
-        }
 
+    class MockAbstractReplicatedLogImpl extends AbstractReplicatedLogImpl {
         @Override
         public boolean removeFromAndPersist(final long index) {
             return true;
@@ -328,6 +326,10 @@ public class AbstractReplicatedLogImplTest {
 
         @Override
         public void appendAndPersist(ReplicatedLogEntry replicatedLogEntry, Procedure<ReplicatedLogEntry> callback) {
+        }
+
+        @Override
+        public void appendAndPersist(final ReplicatedLogEntry replicatedLogEntry) {
         }
 
         @Override

@@ -13,6 +13,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+
 import akka.japi.Procedure;
 import java.util.Collections;
 import org.hamcrest.BaseMatcher;
@@ -129,8 +130,8 @@ public class ReplicatedLogImplTest {
 
         ReplicatedLog log = ReplicatedLogImpl.newInstance(context);
 
-        MockReplicatedLogEntry logEntry1 = new MockReplicatedLogEntry(1, 2, new MockPayload("2"));
-        MockReplicatedLogEntry logEntry2 = new MockReplicatedLogEntry(1, 3, new MockPayload("3"));
+        final MockReplicatedLogEntry logEntry1 = new MockReplicatedLogEntry(1, 2, new MockPayload("2"));
+        final MockReplicatedLogEntry logEntry2 = new MockReplicatedLogEntry(1, 3, new MockPayload("3"));
 
         log.appendAndPersist(logEntry1);
         verifyPersist(logEntry1);
@@ -191,11 +192,11 @@ public class ReplicatedLogImplTest {
         verifyNoMoreInteractions(mockPersistence);
     }
 
-    public Matcher<DeleteEntries> match(final DeleteEntries actual){
+    public Matcher<DeleteEntries> match(final DeleteEntries actual) {
         return new BaseMatcher<DeleteEntries>() {
             @Override
-            public boolean matches(Object o) {
-                DeleteEntries other = (DeleteEntries) o;
+            public boolean matches(Object obj) {
+                DeleteEntries other = (DeleteEntries) obj;
                 return actual.getFromIndex() == other.getFromIndex();
             }
 

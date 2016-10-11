@@ -11,7 +11,7 @@ package org.opendaylight.controller.cluster.raft.utils;
 import akka.actor.UntypedActor;
 
 /**
- * The EchoActor simply responds back with the same message that it receives
+ * The EchoActor simply responds back with the same message that it receives.
  */
 public class EchoActor extends UntypedActor {
 

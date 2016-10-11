@@ -8,6 +8,9 @@
 package org.opendaylight.controller.cluster.raft;
 
 import static org.junit.Assert.assertEquals;
+
+import akka.actor.ActorRef;
+import akka.dispatch.Dispatchers;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
@@ -26,8 +29,6 @@ import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
-import akka.actor.ActorRef;
-import akka.dispatch.Dispatchers;
 import scala.concurrent.duration.FiniteDuration;
 
 /**
@@ -304,8 +305,8 @@ public class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrati
         DefaultConfigParamsImpl follower2ConfigParams = newFollowerConfigParams();
         follower2ConfigParams.setCustomRaftPolicyImplementationClass(DisableElectionsRaftPolicy.class.getName());
         follower2Actor = newTestRaftActor(follower2Id, TestRaftActor.newBuilder().peerAddresses(
-                ImmutableMap.of(leaderId, testActorPath(leaderId), follower1Id, follower1Actor.path().toString())).
-                    config(follower2ConfigParams).persistent(Optional.of(false)));
+                ImmutableMap.of(leaderId, testActorPath(leaderId), follower1Id, follower1Actor.path().toString()))
+                    .config(follower2ConfigParams).persistent(Optional.of(false)));
         TestRaftActor follower2Instance = follower2Actor.underlyingActor();
         follower2Instance.waitForRecoveryComplete();
         follower2CollectorActor = follower2Instance.collectorActor();
@@ -364,8 +365,8 @@ public class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrati
         setupLeaderAndNonVotingFollower();
 
         ((DefaultConfigParamsImpl)follower1Context.getConfigParams()).setElectionTimeoutFactor(2);
-        ((DefaultConfigParamsImpl)follower1Context.getConfigParams()).
-                setHeartBeatInterval(FiniteDuration.apply(100, TimeUnit.MILLISECONDS));
+        ((DefaultConfigParamsImpl)follower1Context.getConfigParams())
+                .setHeartBeatInterval(FiniteDuration.apply(100, TimeUnit.MILLISECONDS));
 
         MessageCollectorActor.clearMessages(roleChangeNotifier);
         follower1Actor.tell(ElectionTimeout.INSTANCE, ActorRef.noSender());
@@ -385,8 +386,8 @@ public class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrati
 
     private void createNewLeaderActor() {
         expSnapshotState.clear();
-        leaderActor = newTestRaftActor(leaderId, TestRaftActor.newBuilder().peerAddresses(peerAddresses).
-                config(leaderConfigParams).persistent(Optional.of(false)));
+        leaderActor = newTestRaftActor(leaderId, TestRaftActor.newBuilder().peerAddresses(peerAddresses)
+                .config(leaderConfigParams).persistent(Optional.of(false)));
         leaderInstance = leaderActor.underlyingActor();
         leaderCollectorActor = leaderInstance.collectorActor();
         waitUntilLeader(leaderActor);
@@ -395,31 +396,31 @@ public class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrati
 
     private void setupLeaderAndNonVotingFollower() {
         snapshotBatchCount = 100;
-        int initialTerm = 1;
+        int persistedTerm = 1;
 
         // Set up a persisted ServerConfigurationPayload with the leader voting and the follower non-voting.
 
         ServerConfigurationPayload persistedServerConfig = new ServerConfigurationPayload(Arrays.asList(
                 new ServerInfo(leaderId, true), new ServerInfo(follower1Id, false)));
-        ReplicatedLogImplEntry persistedServerConfigEntry = new ReplicatedLogImplEntry(0, initialTerm,
+        ReplicatedLogImplEntry persistedServerConfigEntry = new ReplicatedLogImplEntry(0, persistedTerm,
                 persistedServerConfig);
 
-        InMemoryJournal.addEntry(leaderId, 1, new UpdateElectionTerm(initialTerm, leaderId));
+        InMemoryJournal.addEntry(leaderId, 1, new UpdateElectionTerm(persistedTerm, leaderId));
         InMemoryJournal.addEntry(leaderId, 2, persistedServerConfigEntry);
-        InMemoryJournal.addEntry(follower1Id, 1, new UpdateElectionTerm(initialTerm, leaderId));
+        InMemoryJournal.addEntry(follower1Id, 1, new UpdateElectionTerm(persistedTerm, leaderId));
         InMemoryJournal.addEntry(follower1Id, 2, persistedServerConfigEntry);
 
         DefaultConfigParamsImpl followerConfigParams = newFollowerConfigParams();
         follower1Actor = newTestRaftActor(follower1Id, follower1Builder.peerAddresses(
-                ImmutableMap.of(leaderId, testActorPath(leaderId))).config(followerConfigParams).
-                    persistent(Optional.of(false)));
+                ImmutableMap.of(leaderId, testActorPath(leaderId))).config(followerConfigParams)
+                    .persistent(Optional.of(false)));
 
-        peerAddresses = ImmutableMap.<String, String>builder().
-                put(follower1Id, follower1Actor.path().toString()).build();
+        peerAddresses = ImmutableMap.<String, String>builder()
+                .put(follower1Id, follower1Actor.path().toString()).build();
 
         leaderConfigParams = newLeaderConfigParams();
-        leaderActor = newTestRaftActor(leaderId, TestRaftActor.newBuilder().peerAddresses(peerAddresses).
-                config(leaderConfigParams).persistent(Optional.of(false)));
+        leaderActor = newTestRaftActor(leaderId, TestRaftActor.newBuilder().peerAddresses(peerAddresses)
+                .config(leaderConfigParams).persistent(Optional.of(false)));
 
         followerInstance = follower1Actor.underlyingActor();
         follower1CollectorActor = followerInstance.collectorActor();
@@ -434,7 +435,7 @@ public class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrati
 
         // Verify leader's context after startup
 
-        currentTerm = initialTerm + 1;
+        currentTerm = persistedTerm + 1;
         assertEquals("Leader term", currentTerm, leaderContext.getTermInformation().getCurrentTerm());
         assertEquals("Leader server config", Sets.newHashSet(persistedServerConfig.getServerConfig()),
                 Sets.newHashSet(leaderContext.getPeerServerInfo(true).getServerConfig()));

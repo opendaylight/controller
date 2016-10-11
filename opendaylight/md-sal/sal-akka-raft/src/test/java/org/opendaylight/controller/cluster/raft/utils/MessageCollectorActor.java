@@ -15,6 +15,7 @@ import akka.pattern.Patterns;
 import akka.util.Timeout;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
+import com.google.common.base.Throwables;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.Uninterruptibles;
@@ -29,7 +30,6 @@ import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
 import scala.concurrent.duration.FiniteDuration;
 
-
 public class MessageCollectorActor extends UntypedActor {
     private static final String ARE_YOU_READY = "ARE_YOU_READY";
     public static final String GET_ALL_MESSAGES = "messages";
@@ -38,16 +38,16 @@ public class MessageCollectorActor extends UntypedActor {
     private final List<Object> messages = new ArrayList<>();
 
     @Override public void onReceive(Object message) throws Exception {
-        if(message.equals(ARE_YOU_READY)) {
+        if (message.equals(ARE_YOU_READY)) {
             getSender().tell("yes", getSelf());
             return;
         }
 
-        if(GET_ALL_MESSAGES.equals(message)) {
+        if (GET_ALL_MESSAGES.equals(message)) {
             getSender().tell(new ArrayList<>(messages), getSelf());
-        } else if(CLEAR_MESSAGES.equals(message)) {
+        } else if (CLEAR_MESSAGES.equals(message)) {
             clear();
-        } else if(message != null) {
+        } else if (message != null) {
             messages.add(message);
         }
     }
@@ -56,6 +56,7 @@ public class MessageCollectorActor extends UntypedActor {
         messages.clear();
     }
 
+    @SuppressWarnings("unchecked")
     private static List<Object> getAllMessages(ActorRef actor) throws Exception {
         FiniteDuration operationDuration = Duration.create(5, TimeUnit.SECONDS);
         Timeout operationTimeout = new Timeout(operationDuration);
@@ -69,16 +70,17 @@ public class MessageCollectorActor extends UntypedActor {
     }
 
     /**
-     * Get the first message that matches the specified class
-     * @param actor
-     * @param clazz
-     * @return
+     * Get the first message that matches the specified class.
+     *
+     * @param actor the MessageCollectorActor reference
+     * @param clazz the class to match
+     * @return the first matching message
      */
     public static <T> T getFirstMatching(ActorRef actor, Class<T> clazz) throws Exception {
         List<Object> allMessages = getAllMessages(actor);
 
-        for(Object message : allMessages){
-            if(message.getClass().equals(clazz)){
+        for (Object message : allMessages) {
+            if (message.getClass().equals(clazz)) {
                 return clazz.cast(message);
             }
         }
@@ -86,91 +88,117 @@ public class MessageCollectorActor extends UntypedActor {
         return null;
     }
 
+    @SuppressWarnings("checkstyle:IllegalCatch")
     public static <T> List<T> expectMatching(ActorRef actor, Class<T> clazz, int count) {
         return expectMatching(actor, clazz, count, msg -> true);
     }
 
+    @SuppressWarnings("checkstyle:IllegalCatch")
     public static <T> List<T> expectMatching(ActorRef actor, Class<T> clazz, int count,
             Predicate<T> matcher) {
         int timeout = 5000;
+        Exception lastEx = null;
         List<T> messages = Collections.emptyList();
-        for(int i = 0; i < timeout / 50; i++) {
+        for (int i = 0; i < timeout / 50; i++) {
             try {
                 messages = getAllMatching(actor, clazz);
                 Iterables.removeIf(messages, Predicates.not(matcher));
-                if(messages.size() >= count) {
+                if (messages.size() >= count) {
                     return messages;
                 }
-            } catch (Exception e) {}
+
+                lastEx = null;
+            } catch (Exception e)  {
+                lastEx = e;
+            }
 
             Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
         }
 
-        Assert.fail(String.format("Expected %d messages of type %s. Actual received was %d: %s", count, clazz,
-                messages.size(), messages));
-        return null;
+        throw new AssertionError(String.format("Expected %d messages of type %s. Actual received was %d: %s", count,
+                clazz, messages.size(), messages), lastEx);
     }
 
     public static <T> T expectFirstMatching(ActorRef actor, Class<T> clazz) {
         return expectFirstMatching(actor, clazz, 5000);
     }
 
-
+    @SuppressWarnings("checkstyle:IllegalCatch")
     public static <T> T expectFirstMatching(ActorRef actor, Class<T> clazz, long timeout) {
+        Exception lastEx = null;
         int count = (int) (timeout / 50);
-        for(int i = 0; i < count; i++) {
+        for (int i = 0; i < count; i++) {
             try {
                 T message = getFirstMatching(actor, clazz);
-                if(message != null) {
+                if (message != null) {
                     return message;
                 }
-            } catch (Exception e) {}
+
+                lastEx = null;
+            } catch (Exception e) {
+                lastEx = e;
+            }
 
             Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
         }
 
-        Assert.fail("Did not receive message of type " + clazz);
-        return null;
+        throw new AssertionError("Did not receive message of type " + clazz, lastEx);
     }
 
+    @SuppressWarnings("checkstyle:IllegalCatch")
     public static <T> T expectFirstMatching(ActorRef actor, Class<T> clazz, Predicate<T> matcher) {
         int timeout = 5000;
+        Exception lastEx = null;
         T lastMessage = null;
-        for(int i = 0; i < timeout / 50; i++) {
+        for (int i = 0; i < timeout / 50; i++) {
             try {
                 List<T> messages = getAllMatching(actor, clazz);
-                for(T msg: messages) {
-                    if(matcher.apply(msg)) {
+                for (T msg : messages) {
+                    if (matcher.apply(msg)) {
                         return msg;
                     }
 
                     lastMessage = msg;
                 }
-            } catch (Exception e) {}
+
+                lastEx = null;
+            } catch (Exception e) {
+                lastEx = e;
+            }
 
             Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
         }
 
-        Assert.fail(String.format("Expected specific message of type %s. Last message received was: %s", clazz, lastMessage));
-        return null;
+        throw new AssertionError(String.format("Expected specific message of type %s. Last message received was: %s",
+                clazz, lastMessage), lastEx);
     }
 
     public static <T> void assertNoneMatching(ActorRef actor, Class<T> clazz) {
         assertNoneMatching(actor, clazz, 5000);
     }
 
+    @SuppressWarnings("checkstyle:IllegalCatch")
     public static <T> void assertNoneMatching(ActorRef actor, Class<T> clazz, long timeout) {
+        Exception lastEx = null;
         int count = (int) (timeout / 50);
-        for(int i = 0; i < count; i++) {
+        for (int i = 0; i < count; i++) {
             try {
                 T message = getFirstMatching(actor, clazz);
-                if(message != null) {
+                if (message != null) {
                     Assert.fail("Unexpected message received" +  message.toString());
                     return;
                 }
-            } catch (Exception e) {}
+
+                lastEx = null;
+            } catch (Exception e) {
+                lastEx = e;
+            }
 
             Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
+        }
+
+        if (lastEx != null) {
+            Throwables.propagate(lastEx);
         }
 
         return;
@@ -182,8 +210,8 @@ public class MessageCollectorActor extends UntypedActor {
 
         List<T> output = Lists.newArrayList();
 
-        for(Object message : allMessages){
-            if(message.getClass().equals(clazz)){
+        for (Object message : allMessages) {
+            if (message.getClass().equals(clazz)) {
                 output.add(clazz.cast(message));
             }
         }
@@ -194,11 +222,12 @@ public class MessageCollectorActor extends UntypedActor {
     public static void waitUntilReady(ActorRef actor) throws Exception {
         long timeout = 500;
         FiniteDuration duration = Duration.create(timeout, TimeUnit.MILLISECONDS);
-        for(int i = 0; i < 10; i++) {
+        for (int i = 0; i < 10; i++) {
             try {
                 Await.ready(Patterns.ask(actor, ARE_YOU_READY, timeout), duration);
                 return;
             } catch (TimeoutException e) {
+                // will fall through below
             }
         }
 

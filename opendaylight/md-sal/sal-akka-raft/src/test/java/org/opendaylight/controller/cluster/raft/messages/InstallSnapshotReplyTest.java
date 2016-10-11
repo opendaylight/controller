@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.raft.messages;
 
 import static org.junit.Assert.assertEquals;
+
 import org.apache.commons.lang.SerializationUtils;
 import org.junit.Test;
 

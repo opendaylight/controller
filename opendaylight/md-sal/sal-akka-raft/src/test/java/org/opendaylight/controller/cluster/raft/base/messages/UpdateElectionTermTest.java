@@ -23,7 +23,8 @@ public class UpdateElectionTermTest {
     public void testSerialization() {
         UpdateElectionTerm expected = new UpdateElectionTerm(5, "member1");
         org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm clone =
-                (org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm) SerializationUtils.clone(expected);
+                (org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm)
+                    SerializationUtils.clone(expected);
 
         Assert.assertEquals("getCurrentTerm", 5, clone.getCurrentTerm());
         Assert.assertEquals("getVotedFor", "member1", clone.getVotedFor());

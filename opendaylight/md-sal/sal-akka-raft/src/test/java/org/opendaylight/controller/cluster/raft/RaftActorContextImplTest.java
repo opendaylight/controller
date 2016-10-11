@@ -16,6 +16,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
+
 import akka.actor.Props;
 import akka.testkit.TestActorRef;
 import com.google.common.collect.ImmutableMap;
@@ -121,10 +122,10 @@ public class RaftActorContextImplTest extends AbstractActorTest {
 
     private static void verifyPeerInfo(RaftActorContextImpl context, String peerId, Boolean voting) {
         PeerInfo peerInfo = context.getPeerInfo(peerId);
-        if(voting != null) {
+        if (voting != null) {
             assertNotNull("Expected peer " + peerId, peerInfo);
-            assertEquals("getVotingState for " + peerId, voting.booleanValue() ? VotingState.VOTING : VotingState.NON_VOTING,
-                    peerInfo.getVotingState());
+            assertEquals("getVotingState for " + peerId, voting.booleanValue()
+                    ? VotingState.VOTING : VotingState.NON_VOTING, peerInfo.getVotingState());
         } else {
             assertNull("Unexpected peer " + peerId, peerInfo);
         }
