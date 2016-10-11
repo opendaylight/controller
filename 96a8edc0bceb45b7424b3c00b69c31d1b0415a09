@@ -16,6 +16,24 @@
       "revId": "96a8edc0bceb45b7424b3c00b69c31d1b0415a09",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_4402410c",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/test/java/org/opendaylight/controller/md/sal/binding/test/tests/DataBrokerTestModuleTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2016-10-11T12:19:37Z",
+      "side": 1,
+      "message": "Actually... I am the original @author of DataBrokerTestModuleTest, intro. in https://git.opendaylight.org/gerrit/#/c/43645/ - remember? ;-) Will you +1 this based on that? Let me know if I can do anything else.",
+      "parentUuid": "7a6b29fe_1ec41f5e",
+      "revId": "96a8edc0bceb45b7424b3c00b69c31d1b0415a09",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
