@@ -22,6 +22,30 @@
       "revId": "59a1a4980727529ef361f862c8c1f63572ba2ba9",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_e49eed06",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/utils/MessageCollectorActor.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-10-11T15:14:40Z",
+      "side": 1,
+      "message": "done",
+      "parentUuid": "7a6b29fe_843bb99b",
+      "range": {
+        "startLine": 99,
+        "startChar": 0,
+        "endLine": 104,
+        "endChar": 17
+      },
+      "revId": "59a1a4980727529ef361f862c8c1f63572ba2ba9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
