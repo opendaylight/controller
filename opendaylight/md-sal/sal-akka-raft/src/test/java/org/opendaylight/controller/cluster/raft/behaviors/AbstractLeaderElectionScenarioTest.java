@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.raft.behaviors;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
@@ -56,17 +57,17 @@ public class AbstractLeaderElectionScenarioTest {
         @Override
         public void onReceive(Object message) throws Exception {
             // Ignore scheduled SendHeartBeat messages.
-            if(message instanceof SendHeartBeat) {
+            if (message instanceof SendHeartBeat) {
                 return;
             }
 
             try {
-                if(behavior != null && !dropMessagesToBehavior.containsKey(message.getClass())) {
+                if (behavior != null && !dropMessagesToBehavior.containsKey(message.getClass())) {
                     final RaftActorBehavior nextBehavior = behavior.handleMessage(getSender(), message);
                     if (nextBehavior != null) {
                         RaftActorBehavior oldBehavior = behavior;
                         behavior = nextBehavior;
-                        if(behavior != oldBehavior && behaviorStateChangeLatch != null) {
+                        if (behavior != oldBehavior && behaviorStateChangeLatch != null) {
                             behaviorStateChangeLatch.countDown();
                         }
                     }
@@ -75,7 +76,7 @@ public class AbstractLeaderElectionScenarioTest {
                 super.onReceive(message);
 
                 CountDownLatch latch = messagesReceivedLatches.get(message.getClass());
-                if(latch != null) {
+                if (latch != null) {
                     latch.countDown();
                 }
             }
@@ -129,7 +130,7 @@ public class AbstractLeaderElectionScenarioTest {
         }
 
         void forwardCapturedMessagesToBehavior(Class<?> msgClass, ActorRef sender) throws Exception {
-            for(Object m: getAllMatching(getSelf(), msgClass)) {
+            for (Object m: getAllMatching(getSelf(), msgClass)) {
                 getSelf().tell(m, sender);
             }
         }
@@ -201,7 +202,8 @@ public class AbstractLeaderElectionScenarioTest {
         assertEquals(name + " behavior state", expState, actor.behavior.state());
     }
 
-    void initializeLeaderBehavior(MemberActor actor, MockRaftActorContext context, int numActiveFollowers) throws Exception {
+    void initializeLeaderBehavior(MemberActor actor, MockRaftActorContext context, int numActiveFollowers)
+            throws Exception {
         // Leader sends immediate heartbeats - we don't care about it so ignore it.
         // Sometimes the initial AppendEntries messages go to dead letters, probably b/c the follower actors
         // haven't been fully created/initialized by akka. So we try up to 3 times to create the Leader as
@@ -209,7 +211,7 @@ public class AbstractLeaderElectionScenarioTest {
 
         Leader leader = null;
         AssertionError lastAssertError = null;
-        for(int i = 1; i <= 3; i++) {
+        for (int i = 1; i <= 3; i++) {
             actor.expectMessageClass(AppendEntriesReply.class, numActiveFollowers);
 
             leader = new Leader(context);
@@ -222,7 +224,7 @@ public class AbstractLeaderElectionScenarioTest {
             }
         }
 
-        if(lastAssertError != null) {
+        if (lastAssertError != null) {
             throw lastAssertError;
         }
 
@@ -237,8 +239,8 @@ public class AbstractLeaderElectionScenarioTest {
     }
 
     TestActorRef<MemberActor> newMemberActor(String name) throws Exception {
-        TestActorRef<MemberActor> actor = factory.createTestActor(MemberActor.props().
-                withDispatcher(Dispatchers.DefaultDispatcherId()), name);
+        TestActorRef<MemberActor> actor = factory.createTestActor(MemberActor.props()
+                .withDispatcher(Dispatchers.DefaultDispatcherId()), name);
         MessageCollectorActor.waitUntilReady(actor);
         return actor;
     }

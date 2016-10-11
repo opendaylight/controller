@@ -11,6 +11,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor.clearMessages;
 import static org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor.expectFirstMatching;
+
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.pattern.Patterns;
@@ -44,7 +45,7 @@ public class LeadershipTransferIntegrationTest extends AbstractRaftActorIntegrat
     private ActorRef follower3CollectorActor;
 
     @Test
-    public void testLeaderTransferOnShutDown() throws Throwable {
+    public void testLeaderTransferOnShutDown() throws Exception {
         testLog.info("testLeaderTransferOnShutDown starting");
 
         createRaftActors();
@@ -70,7 +71,7 @@ public class LeadershipTransferIntegrationTest extends AbstractRaftActorIntegrat
         testLog.info("sendShutDown for {} ending", actor.path());
     }
 
-    private void sendShutDownToLeaderAndVerifyLeadershipTransferToFollower1() throws Throwable {
+    private void sendShutDownToLeaderAndVerifyLeadershipTransferToFollower1() throws Exception {
         testLog.info("sendShutDownToLeaderAndVerifyLeadershipTransferToFollower1 starting");
 
         clearMessages(leaderNotifierActor);
@@ -79,7 +80,7 @@ public class LeadershipTransferIntegrationTest extends AbstractRaftActorIntegrat
         clearMessages(follower3NotifierActor);
 
         FiniteDuration duration = FiniteDuration.create(5, TimeUnit.SECONDS);
-        Future<Boolean> stopFuture = Patterns.gracefulStop(leaderActor, duration, Shutdown.INSTANCE);
+        final Future<Boolean> stopFuture = Patterns.gracefulStop(leaderActor, duration, Shutdown.INSTANCE);
 
         assertNullLeaderIdChange(leaderNotifierActor);
         assertNullLeaderIdChange(follower1NotifierActor);
@@ -119,34 +120,34 @@ public class LeadershipTransferIntegrationTest extends AbstractRaftActorIntegrat
                 factory.generateActorId(follower1Id + "-notifier"));
         follower1Actor = newTestRaftActor(follower1Id, TestRaftActor.newBuilder().peerAddresses(
                 ImmutableMap.of(leaderId, testActorPath(leaderId), follower2Id, testActorPath(follower2Id),
-                        follower3Id, testActorPath(follower3Id))).
-                config(newFollowerConfigParams()).roleChangeNotifier(follower1NotifierActor));
+                        follower3Id, testActorPath(follower3Id)))
+                .config(newFollowerConfigParams()).roleChangeNotifier(follower1NotifierActor));
 
         follower2NotifierActor = factory.createTestActor(Props.create(MessageCollectorActor.class),
                 factory.generateActorId(follower2Id + "-notifier"));
         follower2Actor = newTestRaftActor(follower2Id,TestRaftActor.newBuilder().peerAddresses(
                 ImmutableMap.of(leaderId, testActorPath(leaderId), follower1Id, follower1Actor.path().toString(),
-                        follower3Id, testActorPath(follower3Id))).
-                config(newFollowerConfigParams()).roleChangeNotifier(follower2NotifierActor));
+                        follower3Id, testActorPath(follower3Id)))
+                .config(newFollowerConfigParams()).roleChangeNotifier(follower2NotifierActor));
 
         follower3NotifierActor = factory.createTestActor(Props.create(MessageCollectorActor.class),
                 factory.generateActorId(follower3Id + "-notifier"));
         follower3Actor = newTestRaftActor(follower3Id,TestRaftActor.newBuilder().peerAddresses(
                 ImmutableMap.of(leaderId, testActorPath(leaderId), follower1Id, follower1Actor.path().toString(),
-                        follower2Id, follower2Actor.path().toString())).
-                config(newFollowerConfigParams()).roleChangeNotifier(follower3NotifierActor));
+                        follower2Id, follower2Actor.path().toString()))
+                .config(newFollowerConfigParams()).roleChangeNotifier(follower3NotifierActor));
 
-        peerAddresses = ImmutableMap.<String, String>builder().
-                put(follower1Id, follower1Actor.path().toString()).
-                put(follower2Id, follower2Actor.path().toString()).
-                put(follower3Id, follower3Actor.path().toString()).build();
+        peerAddresses = ImmutableMap.<String, String>builder()
+                .put(follower1Id, follower1Actor.path().toString())
+                .put(follower2Id, follower2Actor.path().toString())
+                .put(follower3Id, follower3Actor.path().toString()).build();
 
         leaderConfigParams = newLeaderConfigParams();
         leaderConfigParams.setElectionTimeoutFactor(3);
         leaderNotifierActor = factory.createTestActor(Props.create(MessageCollectorActor.class),
                 factory.generateActorId(leaderId + "-notifier"));
-        leaderActor = newTestRaftActor(leaderId, TestRaftActor.newBuilder().peerAddresses(peerAddresses).
-                config(leaderConfigParams).roleChangeNotifier(leaderNotifierActor));
+        leaderActor = newTestRaftActor(leaderId, TestRaftActor.newBuilder().peerAddresses(peerAddresses)
+                .config(leaderConfigParams).roleChangeNotifier(leaderNotifierActor));
 
         follower1CollectorActor = follower1Actor.underlyingActor().collectorActor();
         follower2CollectorActor = follower2Actor.underlyingActor().collectorActor();
@@ -171,7 +172,7 @@ public class LeadershipTransferIntegrationTest extends AbstractRaftActorIntegrat
     }
 
     @Test
-    public void testLeaderTransferAborted() throws Throwable {
+    public void testLeaderTransferAborted() throws Exception {
         testLog.info("testLeaderTransferAborted starting");
 
         createRaftActors();
@@ -188,7 +189,7 @@ public class LeadershipTransferIntegrationTest extends AbstractRaftActorIntegrat
     }
 
     @Test
-    public void testLeaderTransferSkippedOnShutdownWithNoFollowers() throws Throwable {
+    public void testLeaderTransferSkippedOnShutdownWithNoFollowers() throws Exception {
         testLog.info("testLeaderTransferSkippedOnShutdownWithNoFollowers starting");
 
         leaderActor = newTestRaftActor(leaderId, TestRaftActor.newBuilder().config(newLeaderConfigParams()));

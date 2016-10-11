@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.raft.messages;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+
 import com.google.common.base.Optional;
 import java.io.Serializable;
 import java.util.Arrays;
@@ -28,10 +29,9 @@ public class InstallSnapshotTest {
     @Test
     public void testSerialization() {
         byte[] data = new byte[1000];
-        int j = 0;
-        for(int i = 0; i < data.length; i++) {
+        for (int i = 0, j = 0; i < data.length; i++) {
             data[i] = (byte)j;
-            if(++j >= 255) {
+            if (++j >= 255) {
                 j = 0;
             }
         }
@@ -48,7 +48,8 @@ public class InstallSnapshotTest {
         verifyInstallSnapshot(expected, actual);
 
         expected = new InstallSnapshot(3L, "leaderId", 11L, 2L, data, 5, 6);
-        actual = (InstallSnapshot) SerializationUtils.clone((Serializable) expected.toSerializable(RaftVersions.CURRENT_VERSION));
+        actual = (InstallSnapshot) SerializationUtils.clone((Serializable) expected.toSerializable(
+                RaftVersions.CURRENT_VERSION));
         verifyInstallSnapshot(expected, actual);
     }
 
@@ -64,14 +65,14 @@ public class InstallSnapshotTest {
 
         assertEquals("getLastChunkHashCode present", expected.getLastChunkHashCode().isPresent(),
                 actual.getLastChunkHashCode().isPresent());
-        if(expected.getLastChunkHashCode().isPresent()) {
+        if (expected.getLastChunkHashCode().isPresent()) {
             assertEquals("getLastChunkHashCode", expected.getLastChunkHashCode().get(),
                     actual.getLastChunkHashCode().get());
         }
 
         assertEquals("getServerConfig present", expected.getServerConfig().isPresent(),
                 actual.getServerConfig().isPresent());
-        if(expected.getServerConfig().isPresent()) {
+        if (expected.getServerConfig().isPresent()) {
             assertEquals("getServerConfig", expected.getServerConfig().get().getServerConfig(),
                     actual.getServerConfig().get().getServerConfig());
         }

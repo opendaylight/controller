@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.raft;
 
 import static org.junit.Assert.assertEquals;
+
 import akka.actor.ActorRef;
 import akka.persistence.SaveSnapshotSuccess;
 import com.google.common.collect.ImmutableMap;
@@ -40,12 +41,12 @@ public class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
         follower1Actor = newTestRaftActor(follower1Id, ImmutableMap.of(leaderId, testActorPath(leaderId)),
                 newFollowerConfigParams());
 
-        Map<String, String> peerAddresses = new HashMap<>();
-        peerAddresses.put(follower1Id, follower1Actor.path().toString());
-        peerAddresses.put(follower2Id, "");
+        Map<String, String> leaderPeerAddresses = new HashMap<>();
+        leaderPeerAddresses.put(follower1Id, follower1Actor.path().toString());
+        leaderPeerAddresses.put(follower2Id, "");
 
         leaderConfigParams = newLeaderConfigParams();
-        leaderActor = newTestRaftActor(leaderId, peerAddresses, leaderConfigParams);
+        leaderActor = newTestRaftActor(leaderId, leaderPeerAddresses, leaderConfigParams);
 
         follower1CollectorActor = follower1Actor.underlyingActor().collectorActor();
         leaderCollectorActor = leaderActor.underlyingActor().collectorActor();
@@ -62,15 +63,15 @@ public class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
         leaderActor.underlyingActor().startDropMessages(CaptureSnapshotReply.class);
         follower1Actor.underlyingActor().startDropMessages(AppendEntries.class);
 
-        MockPayload payload2 = sendPayloadData(leaderActor, "two");
+        final MockPayload payload2 = sendPayloadData(leaderActor, "two");
 
         // This should trigger a snapshot.
-        MockPayload payload3 = sendPayloadData(leaderActor, "three");
+        final MockPayload payload3 = sendPayloadData(leaderActor, "three");
 
         MessageCollectorActor.expectMatching(follower1CollectorActor, AppendEntries.class, 3);
 
         // Send another payload.
-        MockPayload payload4 = sendPayloadData(leaderActor, "four");
+        final MockPayload payload4 = sendPayloadData(leaderActor, "four");
 
         // Now deliver the AppendEntries to the follower
         follower1Actor.underlyingActor().stopDropMessages(AppendEntries.class);
@@ -107,13 +108,13 @@ public class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
         // Block these messages initially so we can control the sequence.
         follower1Actor.underlyingActor().startDropMessages(AppendEntries.class);
 
-        MockPayload payload2 = sendPayloadData(leaderActor, "two");
+        final MockPayload payload2 = sendPayloadData(leaderActor, "two");
 
         // This should trigger a snapshot.
-        MockPayload payload3 = sendPayloadData(leaderActor, "three");
+        final MockPayload payload3 = sendPayloadData(leaderActor, "three");
 
         // Send another payload.
-        MockPayload payload4 = sendPayloadData(leaderActor, "four");
+        final MockPayload payload4 = sendPayloadData(leaderActor, "four");
 
         MessageCollectorActor.expectMatching(follower1CollectorActor, AppendEntries.class, 3);
 
@@ -151,7 +152,7 @@ public class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
 
         leaderActor.tell(new SetPeerAddress(follower2Id, follower2Actor.path().toString()), ActorRef.noSender());
 
-        MockPayload payload2 = sendPayloadData(leaderActor, "two");
+        final MockPayload payload2 = sendPayloadData(leaderActor, "two");
 
         // Verify the leader applies the 3rd payload state.
         MessageCollectorActor.expectMatching(leaderCollectorActor, ApplyJournalEntries.class, 1);
@@ -181,7 +182,7 @@ public class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
         // Wait for the follower to persist the snapshot.
         MessageCollectorActor.expectFirstMatching(follower2CollectorActor, SaveSnapshotSuccess.class);
 
-        List<MockPayload> expFollowerState = Arrays.asList(payload0, payload1, payload2);
+        final List<MockPayload> expFollowerState = Arrays.asList(payload0, payload1, payload2);
 
         assertEquals("Follower commit index", 2, follower2Context.getCommitIndex());
         assertEquals("Follower last applied", 2, follower2Context.getLastApplied());

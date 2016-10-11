@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.raft;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+
 import com.google.common.base.Stopwatch;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.concurrent.TimeUnit;
@@ -62,7 +63,7 @@ public class FollowerLogInformationImplTest {
     }
 
     @Test
-    public void testOkToReplicate(){
+    public void testOkToReplicate() {
         MockRaftActorContext context = new MockRaftActorContext();
         context.setCommitIndex(0);
         FollowerLogInformation followerLogInformation =
