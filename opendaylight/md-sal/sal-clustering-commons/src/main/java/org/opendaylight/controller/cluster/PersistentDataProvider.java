@@ -29,13 +29,13 @@ public class PersistentDataProvider implements DataPersistenceProvider {
     }
 
     @Override
-    public <T> void persist(T o, Procedure<T> procedure) {
-        persistentActor.persist(o, procedure);
+    public <T> void persist(T entry, Procedure<T> procedure) {
+        persistentActor.persist(entry, procedure);
     }
 
     @Override
-    public void saveSnapshot(Object o) {
-        persistentActor.saveSnapshot(o);
+    public void saveSnapshot(Object snapshot) {
+        persistentActor.saveSnapshot(snapshot);
     }
 
     @Override

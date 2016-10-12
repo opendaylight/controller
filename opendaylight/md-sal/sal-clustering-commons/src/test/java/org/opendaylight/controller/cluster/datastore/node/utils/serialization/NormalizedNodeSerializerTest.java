@@ -8,6 +8,10 @@
 
 package org.opendaylight.controller.cluster.datastore.node.utils.serialization;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import com.google.common.base.Optional;
 import org.junit.Rule;
 import org.junit.Test;
@@ -19,18 +23,17 @@ import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class NormalizedNodeSerializerTest {
+    private static final Logger LOG = LoggerFactory.getLogger(NormalizedNodeSerializerTest.class);
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
 
     @Test
-    public void testSerializeDeSerialize(){
+    public void testSerializeDeSerialize() {
 
         // This test basically serializes and deSerializes a largish document
         // which contains most of the types of nodes that go into a normalized
@@ -45,25 +48,25 @@ public class NormalizedNodeSerializerTest {
         NormalizedNodeMessages.Node expected = NormalizedNodeSerializer
             .serialize(expectedNode);
 
-        System.out.println("Serialize Time = " + (System.nanoTime() - start)/1000000);
+        LOG.info("Serialize Time = {}", (System.nanoTime() - start) / 1000000);
 
-        System.out.println("Serialized Size = " + expected.getSerializedSize());
+        LOG.info("Serialized Size = {}", expected.getSerializedSize());
 
-        System.out.println(expected.toString());
+        LOG.info(expected.toString());
 
         start = System.nanoTime();
 
         NormalizedNode<?, ?> actualNode =
             NormalizedNodeSerializer.deSerialize(expected);
 
-        System.out.println("DeSerialize Time = " + (System.nanoTime() - start)/1000000);
+        LOG.info("DeSerialize Time = {}", (System.nanoTime() - start) / 1000000);
 
         // Compare the original normalized node to the normalized node that was
         // created by serializing the original node and deSerializing it back.
         assertEquals(expectedNode, actualNode);
 
         byte[] binaryData = new byte[5];
-        for(byte i=0;i<5;i++){
+        for (byte i = 0; i < 5; i++) {
             binaryData[i] = i;
         }
 
@@ -81,7 +84,8 @@ public class NormalizedNodeSerializerTest {
         // FIXME: This will not work due to BUG 2326. Once that is fixed we can uncomment this assertion
         // assertEquals(node1, node2);
 
-        Optional<DataContainerChild<? extends YangInstanceIdentifier.PathArgument, ?>> child = node2.getChild(new YangInstanceIdentifier.NodeIdentifier(TestModel.SOME_BINARY_DATA_QNAME));
+        Optional<DataContainerChild<? extends YangInstanceIdentifier.PathArgument, ?>> child =
+                node2.getChild(new YangInstanceIdentifier.NodeIdentifier(TestModel.SOME_BINARY_DATA_QNAME));
 
         Object value = child.get().getValue();
 
@@ -89,19 +93,19 @@ public class NormalizedNodeSerializerTest {
 
         byte[] bytesValue = (byte[]) value;
 
-        for(byte i=0;i<5;i++){
+        for (byte i = 0; i < 5; i++) {
             assertEquals(i, bytesValue[i]);
         }
 
     }
 
     @Test(expected = NullPointerException.class)
-    public void testSerializeNullNormalizedNode(){
+    public void testSerializeNullNormalizedNode() {
         assertNotNull(NormalizedNodeSerializer.serialize(null));
     }
 
     @Test
-    public void testDeSerializeNullProtocolBufferNode(){
+    public void testDeSerializeNullProtocolBufferNode() {
         expectedException.expect(NullPointerException.class);
         expectedException.expectMessage("node should not be null");
 
@@ -109,7 +113,7 @@ public class NormalizedNodeSerializerTest {
     }
 
     @Test
-    public void testDeSerializePathArgumentNullNode(){
+    public void testDeSerializePathArgumentNullNode() {
         expectedException.expect(NullPointerException.class);
         expectedException.expectMessage("node should not be null");
 
@@ -118,7 +122,7 @@ public class NormalizedNodeSerializerTest {
     }
 
     @Test
-    public void testDeSerializePathArgumentNullPathArgument(){
+    public void testDeSerializePathArgumentNullPathArgument() {
         expectedException.expect(NullPointerException.class);
         expectedException.expectMessage("pathArgument should not be null");
 
@@ -126,7 +130,7 @@ public class NormalizedNodeSerializerTest {
     }
 
     @Test
-    public void testDeSerializePathArgument(){
+    public void testDeSerializePathArgument() {
 
         NormalizedNodeMessages.Node.Builder nodeBuilder = NormalizedNodeMessages.Node.newBuilder();
 
@@ -149,12 +153,12 @@ public class NormalizedNodeSerializerTest {
 
         pathBuilder.setIntType(PathArgumentType.NODE_IDENTIFIER.ordinal());
 
-        NormalizedNodeMessages.QName.Builder qNameBuilder = NormalizedNodeMessages.QName.newBuilder();
-        qNameBuilder.setNamespace(1);
-        qNameBuilder.setRevision(4);
-        qNameBuilder.setLocalName(8);
+        NormalizedNodeMessages.QName.Builder qnameBuilder = NormalizedNodeMessages.QName.newBuilder();
+        qnameBuilder.setNamespace(1);
+        qnameBuilder.setRevision(4);
+        qnameBuilder.setLocalName(8);
 
-        pathBuilder.setNodeType(qNameBuilder);
+        pathBuilder.setNodeType(qnameBuilder);
 
         YangInstanceIdentifier.PathArgument pathArgument =
             NormalizedNodeSerializer
@@ -162,10 +166,9 @@ public class NormalizedNodeSerializerTest {
 
         assertNotNull(pathArgument);
 
-        assertEquals("urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test", pathArgument.getNodeType().getNamespace().toString());
+        assertEquals("urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test",
+                pathArgument.getNodeType().getNamespace().toString());
         assertEquals("2014-03-13", pathArgument.getNodeType().getFormattedRevision());
         assertEquals("capability", pathArgument.getNodeType().getLocalName());
     }
-
-
 }

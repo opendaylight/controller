@@ -12,15 +12,13 @@ import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 public class NodeIdentifierGenerator {
-    private final String id;
-    private final QName qName;
+    private final QName qname;
 
-    public NodeIdentifierGenerator(String id){
-        this.id = id;
-        this.qName = QNameFactory.create(id);
+    public NodeIdentifierGenerator(String id) {
+        this.qname = QNameFactory.create(id);
     }
 
-    public YangInstanceIdentifier.PathArgument getArgument(){
-        return new YangInstanceIdentifier.NodeIdentifier(qName);
+    public YangInstanceIdentifier.PathArgument getArgument() {
+        return new YangInstanceIdentifier.NodeIdentifier(qname);
     }
 }

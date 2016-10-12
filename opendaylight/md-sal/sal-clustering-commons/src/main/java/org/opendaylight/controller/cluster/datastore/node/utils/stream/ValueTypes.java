@@ -59,14 +59,14 @@ final class ValueTypes {
         throw new UnsupportedOperationException("Utility class");
     }
 
-    public static final byte getSerializableType(Object node) {
-        if(node == null){
+    public static byte getSerializableType(Object node) {
+        if (node == null) {
             return NULL_TYPE;
         }
 
         final Byte type = TYPES.get(node.getClass());
         if (type != null) {
-            if(type == STRING_TYPE && ((String) node).length() >= STRING_BYTES_LENGTH_THRESHOLD ){
+            if (type == STRING_TYPE && ((String) node).length() >= STRING_BYTES_LENGTH_THRESHOLD) {
                 return STRING_BYTES_TYPE;
             }
             return type;

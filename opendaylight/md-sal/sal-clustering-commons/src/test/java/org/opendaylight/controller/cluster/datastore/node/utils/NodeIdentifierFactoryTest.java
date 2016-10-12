@@ -9,20 +9,19 @@
 package org.opendaylight.controller.cluster.datastore.node.utils;
 
 import static org.junit.Assert.assertTrue;
+
 import org.junit.Test;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 public class NodeIdentifierFactoryTest {
 
-  @Test
-  public void validateAugmentationIdentifier() {
-    YangInstanceIdentifier.PathArgument argument =
-        NodeIdentifierFactory
-            .getArgument("AugmentationIdentifier{childNames=[(urn:opendaylight:flow:table:statistics?revision=2013-12-15)flow-table-statistics]}");
+    @Test
+    public void validateAugmentationIdentifier() {
+        YangInstanceIdentifier.PathArgument argument = NodeIdentifierFactory.getArgument(
+                "AugmentationIdentifier{childNames=[(urn:opendaylight:flow:table:statistics?revision=2013-12-15)"
+                + "flow-table-statistics]}");
 
-    assertTrue(argument instanceof YangInstanceIdentifier.AugmentationIdentifier);
+        assertTrue(argument instanceof YangInstanceIdentifier.AugmentationIdentifier);
 
-
-  }
-
+    }
 }

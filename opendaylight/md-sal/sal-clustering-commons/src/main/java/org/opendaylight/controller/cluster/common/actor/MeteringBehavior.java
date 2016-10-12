@@ -12,7 +12,6 @@ import akka.japi.Procedure;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Throwables;
 import org.opendaylight.controller.cluster.reporting.MetricsReporter;
 
 /**
@@ -23,21 +22,22 @@ import org.opendaylight.controller.cluster.reporting.MetricsReporter;
  *     <li>message processing rate of actor's receive block</li>
  *     <li>message processing rate by message type</li>
  * </ul>
- *
  * The information is reported to {@link org.opendaylight.controller.cluster.reporting.MetricsReporter}
  */
 public class MeteringBehavior implements Procedure<Object> {
     public static final String DOMAIN = "org.opendaylight.controller.actor.metric";
 
+    private static final String MSG_PROCESSING_RATE = "msg-rate";
+
     private final UntypedActor meteredActor;
 
-    private final MetricRegistry METRICREGISTRY = MetricsReporter.getInstance(DOMAIN).getMetricsRegistry();
-    private final String MSG_PROCESSING_RATE = "msg-rate";
+    private final MetricRegistry metricRegistry = MetricsReporter.getInstance(DOMAIN).getMetricsRegistry();
 
     private String actorQualifiedName;
     private Timer msgProcessingTimer;
 
     /**
+     * Constructs an instance.
      *
      * @param actor whose behaviour needs to be metered
      */
@@ -59,11 +59,11 @@ public class MeteringBehavior implements Procedure<Object> {
     }
 
     private void init(final String actorName) {
-        actorQualifiedName = new StringBuilder(meteredActor.getSelf().path().parent().toStringWithoutAddress()).
-                append("/").append(actorName).toString();
+        actorQualifiedName = new StringBuilder(meteredActor.getSelf().path().parent().toStringWithoutAddress())
+                .append("/").append(actorName).toString();
 
         final String msgProcessingTime = MetricRegistry.name(actorQualifiedName, MSG_PROCESSING_RATE);
-        msgProcessingTimer = METRICREGISTRY.timer(msgProcessingTime);
+        msgProcessingTimer = metricRegistry.timer(msgProcessingTime);
     }
 
     /**
@@ -79,8 +79,8 @@ public class MeteringBehavior implements Procedure<Object> {
      * @see <a href="http://dropwizard.github.io/metrics/manual/core/#timers">
      *     http://dropwizard.github.io/metrics/manual/core/#timers</a>
      *
-     * @param message
-     * @throws Exception
+     * @param message the message to process
+     * @throws Exception on message failure
      */
     @Override
     public void apply(final Object message) throws Exception {
@@ -89,18 +89,13 @@ public class MeteringBehavior implements Procedure<Object> {
         final String msgProcessingTimeByMsgType =
                 MetricRegistry.name(actorQualifiedName, MSG_PROCESSING_RATE, messageType);
 
-        final Timer msgProcessingTimerByMsgType = METRICREGISTRY.timer(msgProcessingTimeByMsgType);
+        final Timer msgProcessingTimerByMsgType = metricRegistry.timer(msgProcessingTimeByMsgType);
 
         //start timers
         final Timer.Context context = msgProcessingTimer.time();
         final Timer.Context contextByMsgType = msgProcessingTimerByMsgType.time();
 
-        try {
-            meteredActor.onReceive(message);
-        } catch (Throwable t) {
-            Throwables.propagateIfPossible(t, Exception.class);
-            throw Throwables.propagate(t);
-        }
+        meteredActor.onReceive(message);
 
         //stop timers
         contextByMsgType.stop();

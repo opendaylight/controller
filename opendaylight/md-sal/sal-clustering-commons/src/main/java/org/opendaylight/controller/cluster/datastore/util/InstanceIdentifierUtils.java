@@ -8,6 +8,12 @@
 
 package org.opendaylight.controller.cluster.datastore.util;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.opendaylight.controller.cluster.datastore.node.utils.NodeIdentifierFactory;
 import org.opendaylight.controller.cluster.datastore.node.utils.QNameFactory;
 import org.opendaylight.controller.cluster.datastore.node.utils.serialization.PathArgumentSerializer;
@@ -25,17 +31,11 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeWithV
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * This class contains utility methods for converting an MD-SAL
  * YangInstanceIdentifier to and from other representations.
- * <p>
+ * <p/>
  * The representations convered for now are,
  *
  * <ul>
@@ -44,12 +44,10 @@ import java.util.Set;
  * </ul>
  */
 public class InstanceIdentifierUtils {
-
-    protected static final Logger logger = LoggerFactory
-        .getLogger(InstanceIdentifierUtils.class);
+    private static final Logger LOG = LoggerFactory.getLogger(InstanceIdentifierUtils.class);
 
     /**
-     * Convert an MD-SAL YangInstanceIdentifier into a protocol buffer version of it
+     * Convert an MD-SAL YangInstanceIdentifier into a protocol buffer version of it.
      *
      * @param path an MD-SAL YangInstanceIdentifier
      * @return a protocol buffer version of the MD-SAL YangInstanceIdentifier
@@ -65,6 +63,7 @@ public class InstanceIdentifierUtils {
         return toSerializableBuilder(path, context).build();
     }
 
+    @SuppressWarnings("checkstyle:IllegalCatch")
     private static NormalizedNodeMessages.InstanceIdentifier.Builder toSerializableBuilder(
             YangInstanceIdentifier path, QNameSerializationContext context) {
         NormalizedNodeMessages.InstanceIdentifier.Builder builder =
@@ -73,7 +72,7 @@ public class InstanceIdentifierUtils {
         try {
             for (PathArgument pathArgument : path.getPathArguments()) {
                 NormalizedNodeMessages.PathArgument serializablePathArgument;
-                if(context == null) {
+                if (context == null) {
                     String nodeType = "";
                     if (!(pathArgument instanceof AugmentationIdentifier)) {
                         nodeType = pathArgument.getNodeType().toString();
@@ -90,8 +89,8 @@ public class InstanceIdentifierUtils {
 
                 builder.addArguments(serializablePathArgument);
             }
-        } catch(Exception e){
-            logger.error("An exception occurred", e);
+        } catch (Exception e) {
+            LOG.error("An exception occurred", e);
         }
 
         return builder;
@@ -100,7 +99,7 @@ public class InstanceIdentifierUtils {
 
     /**
      * Convert a protocol buffer version of the MD-SAL YangInstanceIdentifier into
-     * the MD-SAL version of the YangInstanceIdentifier
+     * the MD-SAL version of the YangInstanceIdentifier.
      *
      * @param path a protocol buffer version of the MD-SAL YangInstanceIdentifier
      * @return  an MD-SAL YangInstanceIdentifier
@@ -114,8 +113,8 @@ public class InstanceIdentifierUtils {
 
         List<PathArgument> pathArguments = new ArrayList<>();
 
-        for(NormalizedNodeMessages.PathArgument pathArgument : path.getArgumentsList()) {
-            if(context == null || pathArgument.hasType()) {
+        for (NormalizedNodeMessages.PathArgument pathArgument : path.getArgumentsList()) {
+            if (context == null || pathArgument.hasType()) {
                 pathArguments.add(parsePathArgument(pathArgument));
             } else {
                 pathArguments.add(PathArgumentSerializer.deSerialize(context, pathArgument));
@@ -128,8 +127,7 @@ public class InstanceIdentifierUtils {
     /**
      * Take the various attributes of a PathArgument and package them up as
      * protocol buffer attributes.
-     * <p>
-     *
+     * <p/>
      * PathArguments have 4 subtypes and each of the various subtypes have
      * different attributes
      * <ul>
@@ -154,8 +152,6 @@ public class InstanceIdentifierUtils {
      *         an augmentation entry.
      *     </li>
      * </ul>
-     * @param pathArgument
-     * @return
      */
     private static Iterable<? extends NormalizedNodeMessages.Attribute> getPathArgumentAttributes(
         PathArgument pathArgument) {
@@ -188,7 +184,7 @@ public class InstanceIdentifierUtils {
 
             }
 
-        } else if(pathArgument instanceof AugmentationIdentifier) {
+        } else if (pathArgument instanceof AugmentationIdentifier) {
             AugmentationIdentifier identifier = (AugmentationIdentifier) pathArgument;
 
             for (QName key : identifier.getPossibleChildNames()) {
@@ -210,7 +206,7 @@ public class InstanceIdentifierUtils {
 
 
     /**
-     * Parse a protocol buffer PathArgument and return an MD-SAL PathArgument
+     * Parse a protocol buffer PathArgument and return an MD-SAL PathArgument.
      *
      * @param pathArgument protocol buffer PathArgument
      * @return MD-SAL PathArgument
@@ -225,23 +221,23 @@ public class InstanceIdentifierUtils {
 
             return nodeWithValue;
 
-        } else if(NodeIdentifierWithPredicates.class.getSimpleName().equals(pathArgument.getType())){
+        } else if (NodeIdentifierWithPredicates.class.getSimpleName().equals(pathArgument.getType())) {
 
             NodeIdentifierWithPredicates nodeIdentifierWithPredicates =
-                new NodeIdentifierWithPredicates(
-                    QNameFactory.create(pathArgument.getNodeType().getValue()), toAttributesMap(pathArgument.getAttributesList()));
+                    new NodeIdentifierWithPredicates(QNameFactory.create(pathArgument.getNodeType().getValue()),
+                            toAttributesMap(pathArgument.getAttributesList()));
 
             return nodeIdentifierWithPredicates;
 
-        } else if(AugmentationIdentifier.class.getSimpleName().equals(pathArgument.getType())){
+        } else if (AugmentationIdentifier.class.getSimpleName().equals(pathArgument.getType())) {
 
-            Set<QName> qNameSet = new HashSet<>();
+            Set<QName> qnameSet = new HashSet<>();
 
-            for(NormalizedNodeMessages.Attribute attribute : pathArgument.getAttributesList()){
-                qNameSet.add(QNameFactory.create(attribute.getValue()));
+            for (NormalizedNodeMessages.Attribute attribute : pathArgument.getAttributesList()) {
+                qnameSet.add(QNameFactory.create(attribute.getValue()));
             }
 
-            return new AugmentationIdentifier(qNameSet);
+            return new AugmentationIdentifier(qnameSet);
         }
 
         return NodeIdentifierFactory.getArgument(pathArgument.getValue());
@@ -252,7 +248,7 @@ public class InstanceIdentifierUtils {
 
         Map<QName, Object> map = new HashMap<>();
 
-        for(NormalizedNodeMessages.Attribute attribute : attributesList){
+        for (NormalizedNodeMessages.Attribute attribute : attributesList) {
             String name = attribute.getName();
             Object value = parseAttribute(attribute);
 
@@ -263,19 +259,16 @@ public class InstanceIdentifierUtils {
     }
 
     /**
-     * FIXME: This method only covers a subset of values that may go in an InstanceIdentifier
-     *
-     * @param attribute
-     * @return
+     * FIXME: This method only covers a subset of values that may go in an InstanceIdentifier.
      */
-    private static Object parseAttribute(NormalizedNodeMessages.Attribute attribute){
-        if(Short.class.getSimpleName().equals(attribute.getType())) {
+    private static Object parseAttribute(NormalizedNodeMessages.Attribute attribute) {
+        if (Short.class.getSimpleName().equals(attribute.getType())) {
             return Short.parseShort(attribute.getValue());
-        } else if(Long.class.getSimpleName().equals(attribute.getType())){
+        } else if (Long.class.getSimpleName().equals(attribute.getType())) {
             return Long.parseLong(attribute.getValue());
-        } else if(Boolean.class.getSimpleName().equals(attribute.getType())){
+        } else if (Boolean.class.getSimpleName().equals(attribute.getType())) {
             return Boolean.parseBoolean(attribute.getValue());
-        } else if(Integer.class.getSimpleName().equals(attribute.getType())){
+        } else if (Integer.class.getSimpleName().equals(attribute.getType())) {
             return Integer.parseInt(attribute.getValue());
         }
 

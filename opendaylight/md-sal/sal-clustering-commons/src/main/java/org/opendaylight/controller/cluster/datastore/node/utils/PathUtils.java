@@ -25,11 +25,26 @@ public class PathUtils {
     private static final Splitter SLASH_SPLITTER = Splitter.on('/').omitEmptyStrings();
 
     /**
-     * Given a YangInstanceIdentifier return a serialized version of the same
-     * as a String
+     * Given a serialized string version of a YangInstanceIdentifier convert
+     * to a YangInstanceIdentifier.
      *
-     * @param path
-     * @return
+     * @param path the path
+     * @return a YangInstanceIdentifier
+     */
+    public static YangInstanceIdentifier toYangInstanceIdentifier(String path) {
+        List<PathArgument> pathArguments = new ArrayList<>();
+        for (String segment : SLASH_SPLITTER.split(path)) {
+            pathArguments.add(NodeIdentifierFactory.getArgument(segment));
+        }
+        return YangInstanceIdentifier.create(pathArguments);
+    }
+
+    /**
+     * Given a YangInstanceIdentifier return a serialized version of the same
+     * as a String.
+     *
+     * @param path the path
+     * @return the path as a String
      */
     public static String toString(YangInstanceIdentifier path) {
         final Iterator<PathArgument> it = path.getPathArguments().iterator();
@@ -51,45 +66,30 @@ public class PathUtils {
 
     /**
      * Given a YangInstanceIdentifier.PathArgument return a serialized version
-     * of the same as a String
+     * of the same as a String.
      *
-     * @param pathArgument
-     * @return
+     * @param pathArgument the path argument
+     * @return the path argument as a String
      */
-    public static String toString(PathArgument pathArgument){
-        if(pathArgument instanceof NodeIdentifier){
+    public static String toString(PathArgument pathArgument) {
+        if (pathArgument instanceof NodeIdentifier) {
             return toString((NodeIdentifier) pathArgument);
-        } else if(pathArgument instanceof AugmentationIdentifier){
+        } else if (pathArgument instanceof AugmentationIdentifier) {
             return toString((AugmentationIdentifier) pathArgument);
-        } else if(pathArgument instanceof NodeWithValue){
+        } else if (pathArgument instanceof NodeWithValue) {
             return toString((NodeWithValue<?>) pathArgument);
-        } else if(pathArgument instanceof NodeIdentifierWithPredicates){
+        } else if (pathArgument instanceof NodeIdentifierWithPredicates) {
             return toString((NodeIdentifierWithPredicates) pathArgument);
         }
 
         return pathArgument.toString();
     }
 
-    /**
-     * Given a serialized string version of a YangInstanceIdentifier convert
-     * to a YangInstanceIdentifier
-     *
-     * @param path
-     * @return
-     */
-    public static YangInstanceIdentifier toYangInstanceIdentifier(String path){
-        List<PathArgument> pathArguments = new ArrayList<>();
-        for (String segment : SLASH_SPLITTER.split(path)) {
-            pathArguments.add(NodeIdentifierFactory.getArgument(segment));
-        }
-        return YangInstanceIdentifier.create(pathArguments);
-    }
-
-    private static String toString(NodeIdentifier pathArgument){
+    private static String toString(NodeIdentifier pathArgument) {
         return pathArgument.getNodeType().toString();
     }
 
-    private static String toString(AugmentationIdentifier pathArgument){
+    private static String toString(AugmentationIdentifier pathArgument) {
         Set<QName> childNames = pathArgument.getPossibleChildNames();
         final StringBuilder sb = new StringBuilder("AugmentationIdentifier{");
         sb.append("childNames=").append(childNames).append('}');
@@ -101,8 +101,7 @@ public class PathUtils {
         return pathArgument.getNodeType().toString() + "[" + pathArgument.getValue() + "]";
     }
 
-    private static String toString(NodeIdentifierWithPredicates pathArgument){
+    private static String toString(NodeIdentifierWithPredicates pathArgument) {
         return pathArgument.getNodeType().toString() + '[' + pathArgument.getKeyValues() + ']';
     }
-
 }

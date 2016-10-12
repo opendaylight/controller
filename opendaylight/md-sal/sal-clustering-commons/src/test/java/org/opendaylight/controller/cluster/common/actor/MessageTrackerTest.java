@@ -11,6 +11,7 @@ package org.opendaylight.controller.cluster.common.actor;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+
 import java.util.List;
 import org.junit.Assert;
 import org.junit.Before;
@@ -23,7 +24,7 @@ public class MessageTrackerTest {
         // Intentionally empty
     }
 
-    private final static Logger LOG = LoggerFactory.getLogger(MessageTrackerTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(MessageTrackerTest.class);
 
     private TestTicker ticker;
     private MessageTracker messageTracker;
@@ -68,11 +69,11 @@ public class MessageTrackerTest {
 
         messageTracker.received("A").close();
         messageTracker.received(10L).close();
-        MessageTracker.Context c = messageTracker.received(100);
+        MessageTracker.Context context = messageTracker.received(100);
 
         ticker.increment(MILLISECONDS.toNanos(20));
 
-        c.close();
+        context.close();
 
         MessageTracker.Context context2 = messageTracker.received(new Foo());
 
@@ -119,8 +120,8 @@ public class MessageTrackerTest {
         try {
             messageTracker.received(new Foo());
             fail("Expected an IllegalStateException");
-        } catch (IllegalStateException e){
-
+        } catch (IllegalStateException e) {
+            // expected
         }
     }
 
@@ -131,7 +132,7 @@ public class MessageTrackerTest {
     }
 
     @Test
-    public void testDelayInFirstExpectedMessageArrival(){
+    public void testDelayInFirstExpectedMessageArrival() {
         messageTracker.begin();
 
         ticker.increment(MILLISECONDS.toNanos(20));

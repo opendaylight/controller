@@ -24,24 +24,28 @@ public class NonPersistentDataProvider implements DataPersistenceProvider {
     }
 
     @Override
-    public <T> void persist(T o, Procedure<T> procedure) {
+    @SuppressWarnings("checkstyle:IllegalCatch")
+    public <T> void persist(T entry, Procedure<T> procedure) {
         try {
-            procedure.apply(o);
+            procedure.apply(entry);
         } catch (Exception e) {
             LOG.error("An unexpected error occurred", e);
         }
     }
 
     @Override
-    public void saveSnapshot(Object o) {
+    public void saveSnapshot(Object snapshot) {
+        // no-op
     }
 
     @Override
     public void deleteSnapshots(SnapshotSelectionCriteria criteria) {
+        // no-op
     }
 
     @Override
     public void deleteMessages(long sequenceNumber) {
+        // no-op
     }
 
     @Override

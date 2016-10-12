@@ -38,7 +38,7 @@ public class PreLithiumShardTest extends AbstractShardTest {
         TestActorRef<Shard> shard = TestActorRef.create(getSystem(), newShardProps(),
                 "testApplyHelium2VersionSnapshot");
 
-        NormalizedNodeToNodeCodec codec = new NormalizedNodeToNodeCodec(SCHEMA_CONTEXT);
+        NormalizedNodeToNodeCodec codec = new NormalizedNodeToNodeCodec();
 
         DataTree store = InMemoryDataTreeFactory.getInstance().create(TreeType.OPERATIONAL);
         store.setSchemaContext(SCHEMA_CONTEXT);

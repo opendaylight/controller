@@ -15,6 +15,7 @@ import static org.mockito.Mockito.mock;
 import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapEntry;
 import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapEntryBuilder;
 import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapNodeBuilder;
+
 import com.google.common.collect.Sets;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -47,7 +48,7 @@ public class NormalizedNodePrunerTest {
     private static final SchemaContext FULL_SCHEMA = TestModel.createTestContext();
 
     @Before
-    public void setUp(){
+    public void setUp() {
         MockitoAnnotations.initMocks(this);
     }
 
@@ -139,13 +140,13 @@ public class NormalizedNodePrunerTest {
 
     }
 
-    private static int countNodes(NormalizedNode<?,?> normalizedNode, final String namespaceFilter){
-        if(normalizedNode == null){
+    private static int countNodes(NormalizedNode<?,?> normalizedNode, final String namespaceFilter) {
+        if (normalizedNode == null) {
             return 0;
         }
         final AtomicInteger count = new AtomicInteger();
         new NormalizedNodeNavigator((level, parentPath, normalizedNode1) -> {
-            if(!(normalizedNode1.getIdentifier() instanceof AugmentationIdentifier)) {
+            if (!(normalizedNode1.getIdentifier() instanceof AugmentationIdentifier)) {
                 if (normalizedNode1.getIdentifier().getNodeType().getNamespace().toString().contains(namespaceFilter)) {
                     count.incrementAndGet();
                 }
@@ -169,9 +170,9 @@ public class NormalizedNodePrunerTest {
     @Test
     public void testLeafNodePrunedWhenHasAugmentationParentAndSchemaMissing() throws IOException {
         AugmentationIdentifier augId = new AugmentationIdentifier(Sets.newHashSet(TestModel.AUG_CONT_QNAME));
-        NormalizedNodePruner pruner = prunerFullSchema(YangInstanceIdentifier.builder().
-                node(TestModel.TEST_QNAME).node(TestModel.AUGMENTED_LIST_QNAME).
-                        node(TestModel.AUGMENTED_LIST_QNAME).node(augId).build());
+        NormalizedNodePruner pruner = prunerFullSchema(YangInstanceIdentifier.builder()
+                .node(TestModel.TEST_QNAME).node(TestModel.AUGMENTED_LIST_QNAME)
+                        .node(TestModel.AUGMENTED_LIST_QNAME).node(augId).build());
         LeafNode<Object> child = Builders.leafBuilder().withNodeIdentifier(
                 new NodeIdentifier(TestModel.INVALID_QNAME)).withValue("test").build();
         NormalizedNode<?, ?> input = Builders.augmentationBuilder().withNodeIdentifier(augId).withChild(child).build();
@@ -279,10 +280,10 @@ public class NormalizedNodePrunerTest {
 
     @Test
     public void testInnerContainerNodeWithFullPathPathNotPruned() throws IOException {
-        YangInstanceIdentifier path = YangInstanceIdentifier.builder().node(TestModel.TEST_QNAME).
-                node(TestModel.OUTER_LIST_QNAME).nodeWithKey(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1).
-                    node(TestModel.INNER_LIST_QNAME).nodeWithKey(TestModel.INNER_LIST_QNAME, TestModel.NAME_QNAME, "one").
-                        node(TestModel.INNER_CONTAINER_QNAME).build();
+        YangInstanceIdentifier path = YangInstanceIdentifier.builder().node(TestModel.TEST_QNAME)
+                .node(TestModel.OUTER_LIST_QNAME).nodeWithKey(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1)
+                .node(TestModel.INNER_LIST_QNAME).nodeWithKey(TestModel.INNER_LIST_QNAME, TestModel.NAME_QNAME, "one")
+                .node(TestModel.INNER_CONTAINER_QNAME).build();
         NormalizedNodePruner pruner = prunerFullSchema(path);
 
         NormalizedNode<?, ?> input = ImmutableNodes.containerNode(TestModel.INNER_CONTAINER_QNAME);
@@ -294,10 +295,10 @@ public class NormalizedNodePrunerTest {
 
     @Test
     public void testInnerContainerNodeWithFullPathPrunedWhenSchemaMissing() throws IOException {
-        YangInstanceIdentifier path = YangInstanceIdentifier.builder().node(TestModel.TEST_QNAME).
-                node(TestModel.OUTER_LIST_QNAME).nodeWithKey(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1).
-                    node(TestModel.INNER_LIST_QNAME).nodeWithKey(TestModel.INNER_LIST_QNAME, TestModel.NAME_QNAME, "one").
-                        node(TestModel.INVALID_QNAME).build();
+        YangInstanceIdentifier path = YangInstanceIdentifier.builder().node(TestModel.TEST_QNAME)
+                .node(TestModel.OUTER_LIST_QNAME).nodeWithKey(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1)
+                .node(TestModel.INNER_LIST_QNAME).nodeWithKey(TestModel.INNER_LIST_QNAME, TestModel.NAME_QNAME, "one")
+                .node(TestModel.INVALID_QNAME).build();
         NormalizedNodePruner pruner = prunerFullSchema(path);
 
         NormalizedNode<?, ?> input = ImmutableNodes.containerNode(TestModel.INVALID_QNAME);
@@ -309,29 +310,30 @@ public class NormalizedNodePrunerTest {
 
     @Test
     public void testInnerContainerNodeWithParentPathPrunedWhenSchemaMissing() throws IOException {
-        YangInstanceIdentifier path = YangInstanceIdentifier.builder().node(TestModel.TEST_QNAME).
-                node(TestModel.OUTER_LIST_QNAME).nodeWithKey(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1).build();
+        YangInstanceIdentifier path = YangInstanceIdentifier.builder().node(TestModel.TEST_QNAME)
+                .node(TestModel.OUTER_LIST_QNAME).nodeWithKey(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1)
+                .build();
         NormalizedNodePruner pruner = prunerFullSchema(path);
 
         MapNode innerList = mapNodeBuilder(TestModel.INNER_LIST_QNAME).withChild(mapEntryBuilder(
                 TestModel.INNER_LIST_QNAME, TestModel.NAME_QNAME, "one").withChild(
                         ImmutableNodes.containerNode(TestModel.INVALID_QNAME)).build()).build();
-        NormalizedNode<?, ?> input = mapEntryBuilder(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1).
-                withChild(innerList).build();
+        NormalizedNode<?, ?> input = mapEntryBuilder(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1)
+                .withChild(innerList).build();
         NormalizedNodeWriter.forStreamWriter(pruner).write(input);
 
-        NormalizedNode<?, ?> expected = mapEntryBuilder(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1).
-                withChild(mapNodeBuilder(TestModel.INNER_LIST_QNAME).withChild(mapEntryBuilder(
-                TestModel.INNER_LIST_QNAME, TestModel.NAME_QNAME, "one").build()).build()).build();
+        NormalizedNode<?, ?> expected = mapEntryBuilder(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1)
+                .withChild(mapNodeBuilder(TestModel.INNER_LIST_QNAME).withChild(mapEntryBuilder(
+                    TestModel.INNER_LIST_QNAME, TestModel.NAME_QNAME, "one").build()).build()).build();
         NormalizedNode<?, ?> actual = pruner.normalizedNode();
         assertEquals("normalizedNode", expected, actual);
     }
 
     @Test
     public void testInnerListNodeWithFullPathNotPruned() throws IOException {
-        YangInstanceIdentifier path = YangInstanceIdentifier.builder().node(TestModel.TEST_QNAME).
-                node(TestModel.OUTER_LIST_QNAME).nodeWithKey(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1).
-                    node(TestModel.INNER_LIST_QNAME).build();
+        YangInstanceIdentifier path = YangInstanceIdentifier.builder().node(TestModel.TEST_QNAME)
+                .node(TestModel.OUTER_LIST_QNAME).nodeWithKey(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1)
+                .node(TestModel.INNER_LIST_QNAME).build();
         NormalizedNodePruner pruner = prunerFullSchema(path);
 
         MapNode input = mapNodeBuilder(TestModel.INNER_LIST_QNAME).withChild(mapEntryBuilder(
@@ -345,9 +347,9 @@ public class NormalizedNodePrunerTest {
 
     @Test
     public void testInnerListNodeWithFullPathPrunedWhenSchemaMissing() throws IOException {
-        YangInstanceIdentifier path = YangInstanceIdentifier.builder().node(TestModel.TEST_QNAME).
-                node(TestModel.OUTER_LIST_QNAME).nodeWithKey(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1).
-                    node(TestModel.INVALID_QNAME).build();
+        YangInstanceIdentifier path = YangInstanceIdentifier.builder().node(TestModel.TEST_QNAME)
+                .node(TestModel.OUTER_LIST_QNAME).nodeWithKey(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1)
+                .node(TestModel.INVALID_QNAME).build();
         NormalizedNodePruner pruner = prunerFullSchema(path);
 
         MapNode input = mapNodeBuilder(TestModel.INVALID_QNAME).withChild(mapEntryBuilder(
@@ -361,15 +363,16 @@ public class NormalizedNodePrunerTest {
 
     @Test
     public void testInnerListNodeWithParentPathPrunedWhenSchemaMissing() throws IOException {
-        YangInstanceIdentifier path = YangInstanceIdentifier.builder().node(TestModel.TEST_QNAME).
-                node(TestModel.OUTER_LIST_QNAME).nodeWithKey(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1).build();
+        YangInstanceIdentifier path = YangInstanceIdentifier.builder().node(TestModel.TEST_QNAME)
+                .node(TestModel.OUTER_LIST_QNAME).nodeWithKey(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1)
+                .build();
         NormalizedNodePruner pruner = prunerFullSchema(path);
 
         MapNode innerList = mapNodeBuilder(TestModel.INVALID_QNAME).withChild(mapEntryBuilder(
                 TestModel.INVALID_QNAME, TestModel.NAME_QNAME, "one").withChild(
                         ImmutableNodes.containerNode(TestModel.INNER_CONTAINER_QNAME)).build()).build();
-        NormalizedNode<?, ?> input = mapEntryBuilder(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1).
-                withChild(innerList).build();
+        NormalizedNode<?, ?> input = mapEntryBuilder(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1)
+                .withChild(innerList).build();
         NormalizedNodeWriter.forStreamWriter(pruner).write(input);
 
         NormalizedNode<?, ?> expected = mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1);
@@ -380,23 +383,21 @@ public class NormalizedNodePrunerTest {
     private static NormalizedNode<?, ?> createTestContainer() {
         byte[] bytes1 = {1,2,3};
         LeafSetEntryNode<Object> entry1 = ImmutableLeafSetEntryNodeBuilder.create().withNodeIdentifier(
-                new NodeWithValue<>(TestModel.BINARY_LEAF_LIST_QNAME, bytes1)).
-                withValue(bytes1).build();
+                new NodeWithValue<>(TestModel.BINARY_LEAF_LIST_QNAME, bytes1)).withValue(bytes1).build();
 
         byte[] bytes2 = {};
         LeafSetEntryNode<Object> entry2 = ImmutableLeafSetEntryNodeBuilder.create().withNodeIdentifier(
-                new NodeWithValue<>(TestModel.BINARY_LEAF_LIST_QNAME, bytes2)).
-                withValue(bytes2).build();
+                new NodeWithValue<>(TestModel.BINARY_LEAF_LIST_QNAME, bytes2)).withValue(bytes2).build();
 
         LeafSetEntryNode<Object> entry3 = ImmutableLeafSetEntryNodeBuilder.create().withNodeIdentifier(
                 new NodeWithValue<>(TestModel.BINARY_LEAF_LIST_QNAME, null)).withValue(null).build();
 
 
-        return TestModel.createBaseTestContainerBuilder().
-                withChild(ImmutableLeafSetNodeBuilder.create().withNodeIdentifier(
-                        new NodeIdentifier(TestModel.BINARY_LEAF_LIST_QNAME)).
-                        withChild(entry1).withChild(entry2).withChild(entry3).build()).
-                withChild(ImmutableNodes.leafNode(TestModel.SOME_BINARY_DATA_QNAME, new byte[]{1, 2, 3, 4})).
-                build();
+        return TestModel.createBaseTestContainerBuilder()
+                .withChild(ImmutableLeafSetNodeBuilder.create().withNodeIdentifier(
+                        new NodeIdentifier(TestModel.BINARY_LEAF_LIST_QNAME))
+                        .withChild(entry1).withChild(entry2).withChild(entry3).build())
+                .withChild(ImmutableNodes.leafNode(TestModel.SOME_BINARY_DATA_QNAME, new byte[]{1, 2, 3, 4}))
+                .build();
     }
 }

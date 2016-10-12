@@ -30,7 +30,7 @@ public class QNameFactory {
         );
 
 
-    public static QName create(String name){
+    public static QName create(String name) {
         return CACHE.getUnchecked(name);
     }
 }

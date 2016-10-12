@@ -13,7 +13,6 @@ import akka.actor.DeadLetter;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
 import akka.testkit.JavaTestKit;
-import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
@@ -30,12 +29,7 @@ public class MeteredBoundedMailboxTest {
 
     @BeforeClass
     public static void setUp() throws Exception {
-        config = new CommonConfig.Builder<>("testsystem").withConfigReader(new AkkaConfigurationReader() {
-            @Override
-            public Config read() {
-                return ConfigFactory.load();
-            }
-        }).build();
+        config = new CommonConfig.Builder<>("testsystem").withConfigReader(() -> ConfigFactory.load()).build();
         actorSystem = ActorSystem.create("testsystem", config.get());
     }
 
@@ -52,8 +46,7 @@ public class MeteredBoundedMailboxTest {
         final JavaTestKit mockReceiver = new JavaTestKit(actorSystem);
         actorSystem.eventStream().subscribe(mockReceiver.getRef(), DeadLetter.class);
 
-
-        final FiniteDuration TWENTY_SEC = new FiniteDuration(20, TimeUnit.SECONDS);
+        final FiniteDuration twentySeconds = new FiniteDuration(20, TimeUnit.SECONDS);
 
         ActorRef pingPongActor = actorSystem.actorOf(PingPongActor.props(lock).withMailbox(config.getMailBoxName()),
                                                      "pingpongactor");
@@ -64,29 +57,29 @@ public class MeteredBoundedMailboxTest {
         //need to send 12 messages; 1 message is dequeued and actor waits on lock,
         //2nd to 11th messages are put on the queue
         //12th message is sent to dead letter.
-        for (int i=0;i<12;i++){
+        for (int i = 0; i < 12; i++) {
             pingPongActor.tell("ping", mockReceiver.getRef());
         }
 
-        mockReceiver.expectMsgClass(TWENTY_SEC, DeadLetter.class);
+        mockReceiver.expectMsgClass(twentySeconds, DeadLetter.class);
 
         lock.unlock();
 
-        Object[] eleven = mockReceiver.receiveN(11, TWENTY_SEC);
+        mockReceiver.receiveN(11, twentySeconds);
     }
 
     /**
-     * For testing
+     * For testing.
      */
-    public static class PingPongActor extends UntypedActor{
+    public static class PingPongActor extends UntypedActor {
 
         ReentrantLock lock;
 
-        private PingPongActor(final ReentrantLock lock){
+        private PingPongActor(final ReentrantLock lock) {
             this.lock = lock;
         }
 
-        public static Props props(final ReentrantLock lock){
+        public static Props props(final ReentrantLock lock) {
             return Props.create(PingPongActor.class, lock);
         }
 

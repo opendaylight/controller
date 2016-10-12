@@ -11,17 +11,15 @@ package org.opendaylight.controller.cluster.notifications;
 import java.io.Serializable;
 
 /**
- * Notification message representing a Role change of a cluster member
- *
- * Roles generally are Leader, Follower and Candidate. But can be based on the consensus strategy/implementation
- *
- * The Listener could be in a separate ActorSystem and hence this message needs to be Serializable
+ * Notification message representing a Role change of a cluster member.
+ * Roles generally are Leader, Follower and Candidate. But can be based on the consensus strategy/implementation.
+ * The Listener could be in a separate ActorSystem and hence this message needs to be Serializable.
  */
 public class RoleChangeNotification implements Serializable {
     private static final long serialVersionUID = -2873869509490117116L;
-    private String memberId;
-    private String oldRole;
-    private String newRole;
+    private final String memberId;
+    private final String oldRole;
+    private final String newRole;
 
     public RoleChangeNotification(String memberId, String oldRole, String newRole) {
         this.memberId = memberId;
