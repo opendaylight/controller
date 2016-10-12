@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a6b29fe_d09e0b07",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/MockRaftActor.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-10-12T10:23:50Z",
+      "side": 1,
+      "message": "This just swallows the exception while pretending to try to do something... I\u0027d rather have an honest comment and a @SuppressWarnings if necessary!",
+      "revId": "6662d160d1a65ecaef159b37bd922117d06168ad",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_108883c5",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/MockRaftActor.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-10-12T10:23:50Z",
+      "side": 1,
+      "message": "As above.",
+      "revId": "6662d160d1a65ecaef159b37bd922117d06168ad",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
