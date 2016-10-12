@@ -16,17 +16,19 @@ public abstract class AbstractUntypedActorWithMetering extends AbstractUntypedAc
     private String actorNameOverride;
 
     public AbstractUntypedActorWithMetering() {
-        if (isMetricsCaptureEnabled())
+        if (isMetricsCaptureEnabled()) {
             getContext().become(new MeteringBehavior(this));
+        }
     }
 
-    public AbstractUntypedActorWithMetering(String actorNameOverride){
+    public AbstractUntypedActorWithMetering(String actorNameOverride) {
         this.actorNameOverride = actorNameOverride;
-        if (isMetricsCaptureEnabled())
+        if (isMetricsCaptureEnabled()) {
             getContext().become(new MeteringBehavior(this));
+        }
     }
 
-    private boolean isMetricsCaptureEnabled(){
+    private boolean isMetricsCaptureEnabled() {
         CommonConfig config = new CommonConfig(getContext().system().settings().config());
         return config.isMetricCaptureEnabled();
     }

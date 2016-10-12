@@ -13,11 +13,12 @@ package org.opendaylight.controller.cluster.common.actor;
 public abstract class AbstractUntypedPersistentActorWithMetering extends AbstractUntypedPersistentActor {
 
     public AbstractUntypedPersistentActorWithMetering() {
-        if (isMetricsCaptureEnabled())
+        if (isMetricsCaptureEnabled()) {
             getContext().become(new MeteringBehavior(this));
+        }
     }
 
-    private boolean isMetricsCaptureEnabled(){
+    private boolean isMetricsCaptureEnabled() {
         CommonConfig config = new CommonConfig(getContext().system().settings().config());
         return config.isMetricCaptureEnabled();
     }

@@ -105,8 +105,8 @@ public class TestModel {
 
 
     public static final YangInstanceIdentifier TEST_PATH = YangInstanceIdentifier.of(TEST_QNAME);
-    public static final YangInstanceIdentifier DESC_PATH = YangInstanceIdentifier.
-            builder(TEST_PATH).node(DESC_QNAME).build();
+    public static final YangInstanceIdentifier DESC_PATH = YangInstanceIdentifier
+            .builder(TEST_PATH).node(DESC_QNAME).build();
     public static final YangInstanceIdentifier OUTER_LIST_PATH =
             YangInstanceIdentifier.builder(TEST_PATH).node(OUTER_LIST_QNAME).build();
     public static final QName TWO_THREE_QNAME = QName.create(TEST_QNAME, "two");
@@ -118,13 +118,12 @@ public class TestModel {
     private static final String TWO_ONE_NAME = "one";
     private static final String TWO_TWO_NAME = "two";
     private static final String DESC = "Hello there";
-    private static final Long LONG_ID = 1L;
     private static final Boolean ENABLED = true;
     private static final Short SHORT_ID = 1;
     private static final Byte BYTE_ID = 1;
     // Family specific constants
     public static final QName FAMILY_QNAME = QName.create(
-            "urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:notification-test", "2014-04-17", "family");
+        "urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:notification-test", "2014-04-17", "family");
     public static final QName CHILDREN_QNAME = QName.create(FAMILY_QNAME, "children");
     public static final QName GRAND_CHILDREN_QNAME = QName.create(FAMILY_QNAME, "grand-children");
     public static final QName CHILD_NUMBER_QNAME = QName.create(FAMILY_QNAME, "child-number");
@@ -212,7 +211,7 @@ public class TestModel {
     }
 
     /**
-     * Returns a test document
+     * Returns a test document.
      * <p/>
      * <p/>
      * <pre>
@@ -227,8 +226,6 @@ public class TestModel {
      *                  name "two"
      *
      * </pre>
-     *
-     * @return
      */
     public static NormalizedNode<?, ?> createDocumentOne(
             SchemaContext schemaContext) {
@@ -280,14 +277,14 @@ public class TestModel {
                 ImmutableLeafSetEntryNodeBuilder
                         .create()
                         .withNodeIdentifier(
-                                (new NodeWithValue<>(QName.create(
-                                        TEST_QNAME, "number"), 5))).withValue(5).build();
+                                new NodeWithValue<>(QName.create(
+                                        TEST_QNAME, "number"), 5)).withValue(5).build();
         final LeafSetEntryNode<Object> fifteen =
                 ImmutableLeafSetEntryNodeBuilder
                         .create()
                         .withNodeIdentifier(
-                                (new NodeWithValue<>(QName.create(
-                                        TEST_QNAME, "number"), 15))).withValue(15).build();
+                                new NodeWithValue<>(QName.create(
+                                        TEST_QNAME, "number"), 15)).withValue(15).build();
         final LeafSetNode<Object> numbers =
                 ImmutableLeafSetNodeBuilder
                         .create()
@@ -308,8 +305,8 @@ public class TestModel {
 
         // Create unkeyed list entry
         UnkeyedListEntryNode unkeyedListEntry =
-                Builders.unkeyedListEntryBuilder().withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(UNKEYED_LIST_QNAME)).
-                        withChild(ImmutableNodes.leafNode(NAME_QNAME, "unkeyed-entry-name")).build();
+                Builders.unkeyedListEntryBuilder().withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(
+                    UNKEYED_LIST_QNAME)).withChild(ImmutableNodes.leafNode(NAME_QNAME, "unkeyed-entry-name")).build();
 
         // Create YangInstanceIdentifier with all path arg types.
         YangInstanceIdentifier instanceID = YangInstanceIdentifier.create(
@@ -343,11 +340,12 @@ public class TestModel {
                 .withChild(Builders.choiceBuilder()
                         .withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(TWO_THREE_QNAME))
                         .withChild(ImmutableNodes.leafNode(TWO_QNAME, "two")).build())
-                .withChild(Builders.orderedMapBuilder().
-                        withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(ORDERED_LIST_QNAME)).
-                        withValue(ImmutableList.<MapEntryNode>builder().add(
+                .withChild(Builders.orderedMapBuilder()
+                        .withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(ORDERED_LIST_QNAME))
+                        .withValue(ImmutableList.<MapEntryNode>builder().add(
                                 mapEntryBuilder(ORDERED_LIST_QNAME, ORDERED_LIST_ENTRY_QNAME, "1").build(),
-                                mapEntryBuilder(ORDERED_LIST_QNAME, ORDERED_LIST_ENTRY_QNAME, "2").build()).build()).build())
+                                mapEntryBuilder(ORDERED_LIST_QNAME, ORDERED_LIST_ENTRY_QNAME, "2").build()).build())
+                        .build())
                 .withChild(shoes)
                 .withChild(numbers)
                 .withChild(switchFeatures)
@@ -394,24 +392,24 @@ public class TestModel {
 
 
     public static ContainerNode createFamily() {
-        final DataContainerNodeAttrBuilder<YangInstanceIdentifier.NodeIdentifier, ContainerNode> familyContainerBuilder =
-                ImmutableContainerNodeBuilder.create().withNodeIdentifier(
+        final DataContainerNodeAttrBuilder<YangInstanceIdentifier.NodeIdentifier, ContainerNode>
+            familyContainerBuilder = ImmutableContainerNodeBuilder.create().withNodeIdentifier(
                         new YangInstanceIdentifier.NodeIdentifier(FAMILY_QNAME));
 
         final CollectionNodeBuilder<MapEntryNode, MapNode> childrenBuilder =
                 mapNodeBuilder(CHILDREN_QNAME);
 
-        final DataContainerNodeBuilder<YangInstanceIdentifier.NodeIdentifierWithPredicates, MapEntryNode> firstChildBuilder =
-                mapEntryBuilder(CHILDREN_QNAME, CHILD_NUMBER_QNAME, FIRST_CHILD_ID);
-        final DataContainerNodeBuilder<YangInstanceIdentifier.NodeIdentifierWithPredicates, MapEntryNode> secondChildBuilder =
-                mapEntryBuilder(CHILDREN_QNAME, CHILD_NUMBER_QNAME, SECOND_CHILD_ID);
+        final DataContainerNodeBuilder<YangInstanceIdentifier.NodeIdentifierWithPredicates, MapEntryNode>
+            firstChildBuilder = mapEntryBuilder(CHILDREN_QNAME, CHILD_NUMBER_QNAME, FIRST_CHILD_ID);
+        final DataContainerNodeBuilder<YangInstanceIdentifier.NodeIdentifierWithPredicates, MapEntryNode>
+            secondChildBuilder = mapEntryBuilder(CHILDREN_QNAME, CHILD_NUMBER_QNAME, SECOND_CHILD_ID);
 
-        final DataContainerNodeBuilder<YangInstanceIdentifier.NodeIdentifierWithPredicates, MapEntryNode> firstGrandChildBuilder =
-                mapEntryBuilder(GRAND_CHILDREN_QNAME, GRAND_CHILD_NUMBER_QNAME,
-                        FIRST_GRAND_CHILD_ID);
-        final DataContainerNodeBuilder<YangInstanceIdentifier.NodeIdentifierWithPredicates, MapEntryNode> secondGrandChildBuilder =
-                mapEntryBuilder(GRAND_CHILDREN_QNAME, GRAND_CHILD_NUMBER_QNAME,
-                        SECOND_GRAND_CHILD_ID);
+        final DataContainerNodeBuilder<YangInstanceIdentifier.NodeIdentifierWithPredicates, MapEntryNode>
+            firstGrandChildBuilder = mapEntryBuilder(GRAND_CHILDREN_QNAME, GRAND_CHILD_NUMBER_QNAME,
+                    FIRST_GRAND_CHILD_ID);
+        final DataContainerNodeBuilder<YangInstanceIdentifier.NodeIdentifierWithPredicates, MapEntryNode>
+            secondGrandChildBuilder = mapEntryBuilder(GRAND_CHILDREN_QNAME, GRAND_CHILD_NUMBER_QNAME,
+                    SECOND_GRAND_CHILD_ID);
 
         firstGrandChildBuilder
                 .withChild(

@@ -23,7 +23,7 @@ public class FileAkkaConfigurationReader implements AkkaConfigurationReader {
         Preconditions.checkState(customConfigFile.exists(), "%s is missing", customConfigFile);
 
         File factoryConfigFile = new File(FACTORY_AKKA_CONF_PATH);
-        if(factoryConfigFile.exists()) {
+        if (factoryConfigFile.exists()) {
             return ConfigFactory.parseFile(customConfigFile).withFallback(ConfigFactory.parseFile(factoryConfigFile));
         }
 

@@ -9,6 +9,9 @@
 package org.opendaylight.controller.cluster.datastore.util;
 
 import com.google.common.collect.ImmutableSet;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.node.utils.serialization.QNameDeSerializationContext;
@@ -17,9 +20,6 @@ import org.opendaylight.controller.cluster.datastore.node.utils.serialization.QN
 import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 public class InstanceIdentifierUtilsTest {
 

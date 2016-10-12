@@ -9,22 +9,23 @@
 package org.opendaylight.controller.cluster.datastore.node.utils.serialization;
 
 import static org.junit.Assert.assertEquals;
+
 import org.junit.Test;
 
 public class ValueTypeTest {
 
     @Test
-    public void testGetSerializableType(){
-        byte[] b = new byte[10];
-        b[0] = 1;
-        b[2] = 2;
+    public void testGetSerializableType() {
+        byte[] bytes = new byte[10];
+        bytes[0] = 1;
+        bytes[2] = 2;
 
-        ValueType serializableType = ValueType.getSerializableType(b);
+        ValueType serializableType = ValueType.getSerializableType(bytes);
         assertEquals(ValueType.BINARY_TYPE, serializableType);
     }
 
     @Test
-    public void testNullType(){
+    public void testNullType() {
         ValueType serializableType = ValueType.getSerializableType(null);
         assertEquals(ValueType.NULL_TYPE, serializableType);
 
