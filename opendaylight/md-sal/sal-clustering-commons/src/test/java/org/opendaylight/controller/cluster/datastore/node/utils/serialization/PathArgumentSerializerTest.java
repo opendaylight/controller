@@ -8,8 +8,18 @@
 
 package org.opendaylight.controller.cluster.datastore.node.utils.serialization;
 
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import java.net.URI;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -21,24 +31,14 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdent
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeWithValue;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
-import java.net.URI;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-public class PathArgumentSerializerTest{
+public class PathArgumentSerializerTest {
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
 
     @Test
-    public void testSerializeNullContext(){
+    public void testSerializeNullContext() {
         expectedException.expect(NullPointerException.class);
         expectedException.expectMessage("context should not be null");
 
@@ -46,7 +46,7 @@ public class PathArgumentSerializerTest{
     }
 
     @Test
-    public void testSerializeNullPathArgument(){
+    public void testSerializeNullPathArgument() {
         expectedException.expect(NullPointerException.class);
         expectedException.expectMessage("pathArgument should not be null");
 
@@ -55,7 +55,7 @@ public class PathArgumentSerializerTest{
     }
 
     @Test
-    public void testDeSerializeNullContext(){
+    public void testDeSerializeNullContext() {
         expectedException.expect(NullPointerException.class);
         expectedException.expectMessage("context should not be null");
 
@@ -64,7 +64,7 @@ public class PathArgumentSerializerTest{
     }
 
     @Test
-    public void testDeSerializeNullPathArgument(){
+    public void testDeSerializeNullPathArgument() {
         expectedException.expect(NullPointerException.class);
         expectedException.expectMessage("pathArgument should not be null");
 
@@ -73,7 +73,7 @@ public class PathArgumentSerializerTest{
     }
 
     @Test
-    public void testSerializeNodeIdentifier(){
+    public void testSerializeNodeIdentifier() {
         QNameSerializationContext serializationContext = mock(QNameSerializationContext.class);
 
         when(serializationContext.addLocalName(anyString())).thenReturn(5);
@@ -94,7 +94,7 @@ public class PathArgumentSerializerTest{
     }
 
     @Test
-    public void testSerializeNodeIdentifierWithValue(){
+    public void testSerializeNodeIdentifierWithValue() {
         QNameSerializationContext serializationContext = mock(QNameSerializationContext.class);
 
         when(serializationContext.addLocalName(anyString())).thenReturn(5);
@@ -116,7 +116,7 @@ public class PathArgumentSerializerTest{
     }
 
     @Test
-    public void testSerializeNodeIdentifierWithPredicates(){
+    public void testSerializeNodeIdentifierWithPredicates() {
         QNameSerializationContext serializationContext = mock(QNameSerializationContext.class);
 
         when(serializationContext.addLocalName("test")).thenReturn(5);
@@ -153,7 +153,7 @@ public class PathArgumentSerializerTest{
     }
 
     @Test
-    public void testSerializeAugmentationIdentifier(){
+    public void testSerializeAugmentationIdentifier() {
         QNameSerializationContext serializationContext = mock(QNameSerializationContext.class);
 
         when(serializationContext.addLocalName(anyString())).thenReturn(55);
@@ -173,11 +173,11 @@ public class PathArgumentSerializerTest{
     }
 
     @Test
-    public void testDeSerializeNodeIdentifier(){
-
-        NormalizedNodeMessages.Node.Builder nodeBuilder = NormalizedNodeMessages.Node.newBuilder();
-        NormalizedNodeMessages.PathArgument.Builder pathBuilder = NormalizedNodeMessages.PathArgument.newBuilder();
-        NormalizedNodeMessages.QName.Builder qNameBuilder = NormalizedNodeMessages.QName.newBuilder();
+    public void testDeSerializeNodeIdentifier() {
+        final NormalizedNodeMessages.Node.Builder nodeBuilder = NormalizedNodeMessages.Node.newBuilder();
+        final NormalizedNodeMessages.PathArgument.Builder pathBuilder =
+                NormalizedNodeMessages.PathArgument.newBuilder();
+        final NormalizedNodeMessages.QName.Builder qNameBuilder = NormalizedNodeMessages.QName.newBuilder();
 
         qNameBuilder.setNamespace(0);
         qNameBuilder.setRevision(1);
@@ -197,10 +197,11 @@ public class PathArgumentSerializerTest{
     }
 
     @Test
-    public void testDeSerializeNodeWithValue(){
-        NormalizedNodeMessages.Node.Builder nodeBuilder = NormalizedNodeMessages.Node.newBuilder();
-        NormalizedNodeMessages.PathArgument.Builder pathBuilder = NormalizedNodeMessages.PathArgument.newBuilder();
-        NormalizedNodeMessages.QName.Builder qNameBuilder = NormalizedNodeMessages.QName.newBuilder();
+    public void testDeSerializeNodeWithValue() {
+        final NormalizedNodeMessages.Node.Builder nodeBuilder = NormalizedNodeMessages.Node.newBuilder();
+        final NormalizedNodeMessages.PathArgument.Builder pathBuilder =
+                NormalizedNodeMessages.PathArgument.newBuilder();
+        final NormalizedNodeMessages.QName.Builder qNameBuilder = NormalizedNodeMessages.QName.newBuilder();
 
         qNameBuilder.setNamespace(0);
         qNameBuilder.setRevision(1);
@@ -221,11 +222,13 @@ public class PathArgumentSerializerTest{
         assertEquals(new NodeWithValue<>(TestModel.TEST_QNAME, "foo"), pathArgument);
 
     }
+
     @Test
-    public void testDeSerializeNodeIdentifierWithPredicates(){
-        NormalizedNodeMessages.Node.Builder nodeBuilder = NormalizedNodeMessages.Node.newBuilder();
-        NormalizedNodeMessages.PathArgument.Builder pathBuilder = NormalizedNodeMessages.PathArgument.newBuilder();
-        NormalizedNodeMessages.QName.Builder qNameBuilder = NormalizedNodeMessages.QName.newBuilder();
+    public void testDeSerializeNodeIdentifierWithPredicates() {
+        final NormalizedNodeMessages.Node.Builder nodeBuilder = NormalizedNodeMessages.Node.newBuilder();
+        final NormalizedNodeMessages.PathArgument.Builder pathBuilder =
+                NormalizedNodeMessages.PathArgument.newBuilder();
+        final NormalizedNodeMessages.QName.Builder qNameBuilder = NormalizedNodeMessages.QName.newBuilder();
 
         qNameBuilder.setNamespace(0);
         qNameBuilder.setRevision(1);
@@ -233,8 +236,8 @@ public class PathArgumentSerializerTest{
 
         pathBuilder.setNodeType(qNameBuilder);
         pathBuilder.setIntType(PathArgumentType.NODE_IDENTIFIER_WITH_PREDICATES.ordinal());
-        pathBuilder.addAttribute(NormalizedNodeMessages.PathArgumentAttribute.newBuilder().setName(qNameBuilder).setValue(
-            "foo").setType(ValueType.STRING_TYPE.ordinal()));
+        pathBuilder.addAttribute(NormalizedNodeMessages.PathArgumentAttribute.newBuilder().setName(qNameBuilder)
+                .setValue("foo").setType(ValueType.STRING_TYPE.ordinal()));
 
         nodeBuilder.addCode(TestModel.TEST_QNAME.getNamespace().toString());
         nodeBuilder.addCode(TestModel.TEST_QNAME.getFormattedRevision());
@@ -246,18 +249,21 @@ public class PathArgumentSerializerTest{
             ImmutableMap.<QName, Object>of(TestModel.TEST_QNAME, "foo")), pathArgument);
 
     }
+
     @Test
-    public void testDeSerializeNodeAugmentationIdentifier(){
-        NormalizedNodeMessages.Node.Builder nodeBuilder = NormalizedNodeMessages.Node.newBuilder();
-        NormalizedNodeMessages.PathArgument.Builder pathBuilder = NormalizedNodeMessages.PathArgument.newBuilder();
-        NormalizedNodeMessages.QName.Builder qNameBuilder = NormalizedNodeMessages.QName.newBuilder();
+    public void testDeSerializeNodeAugmentationIdentifier() {
+        final NormalizedNodeMessages.Node.Builder nodeBuilder = NormalizedNodeMessages.Node.newBuilder();
+        final NormalizedNodeMessages.PathArgument.Builder pathBuilder =
+                NormalizedNodeMessages.PathArgument.newBuilder();
+        final NormalizedNodeMessages.QName.Builder qNameBuilder = NormalizedNodeMessages.QName.newBuilder();
 
         qNameBuilder.setNamespace(0);
         qNameBuilder.setRevision(1);
         qNameBuilder.setLocalName(2);
 
         pathBuilder.setIntType(PathArgumentType.AUGMENTATION_IDENTIFIER.ordinal());
-        pathBuilder.addAttribute(NormalizedNodeMessages.PathArgumentAttribute.newBuilder().setName(qNameBuilder).setType(ValueType.STRING_TYPE.ordinal()));
+        pathBuilder.addAttribute(NormalizedNodeMessages.PathArgumentAttribute.newBuilder().setName(qNameBuilder)
+                .setType(ValueType.STRING_TYPE.ordinal()));
 
         nodeBuilder.addCode(TestModel.TEST_QNAME.getNamespace().toString());
         nodeBuilder.addCode(TestModel.TEST_QNAME.getFormattedRevision());

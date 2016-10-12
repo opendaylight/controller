@@ -26,15 +26,16 @@ public class NormalizedNodeBuilderWrapper {
         this.schemaNode = schemaNode;
     }
 
-    public NormalizedNodeContainerBuilder builder(){
+    @SuppressWarnings("rawtypes")
+    public NormalizedNodeContainerBuilder builder() {
         return builder;
     }
 
-    public QName nodeType(){
+    public QName nodeType() {
         return identifier.getNodeType();
     }
 
-    public YangInstanceIdentifier.PathArgument identifier(){
+    public YangInstanceIdentifier.PathArgument identifier() {
         return identifier;
     }
 

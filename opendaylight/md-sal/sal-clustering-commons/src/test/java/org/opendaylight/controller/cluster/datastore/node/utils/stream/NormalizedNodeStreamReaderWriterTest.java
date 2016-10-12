@@ -43,12 +43,12 @@ import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableCo
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableLeafSetEntryNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableLeafSetNodeBuilder;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
 
 public class NormalizedNodeStreamReaderWriterTest {
 
+    @SuppressWarnings("deprecation")
     @Test
     public void testNormalizedNodeStreaming() throws IOException {
 
@@ -62,15 +62,12 @@ public class NormalizedNodeStreamReaderWriterTest {
         QName toaster = QName.create("http://netconfcentral.org/ns/toaster","2009-11-20","toaster");
         QName darknessFactor = QName.create("http://netconfcentral.org/ns/toaster","2009-11-20","darknessFactor");
         QName description = QName.create("http://netconfcentral.org/ns/toaster","2009-11-20","description");
-        ContainerNode toasterNode = Builders.containerBuilder().
-                withNodeIdentifier(new NodeIdentifier(toaster)).
-                withChild(ImmutableNodes.leafNode(darknessFactor, "1000")).
-                withChild(ImmutableNodes.leafNode(description, largeString(20)))
-                .build();
+        ContainerNode toasterNode = Builders.containerBuilder().withNodeIdentifier(new NodeIdentifier(toaster))
+                .withChild(ImmutableNodes.leafNode(darknessFactor, "1000"))
+                .withChild(ImmutableNodes.leafNode(description, largeString(20))).build();
 
-        ContainerNode toasterContainer = Builders.containerBuilder().
-                withNodeIdentifier(new NodeIdentifier(SchemaContext.NAME)).
-                withChild(toasterNode).build();
+        ContainerNode toasterContainer = Builders.containerBuilder()
+                .withNodeIdentifier(new NodeIdentifier(SchemaContext.NAME)).withChild(toasterNode).build();
         writer.writeNormalizedNode(toasterContainer);
 
         NormalizedNodeInputStreamReader reader = new NormalizedNodeInputStreamReader(
@@ -97,22 +94,22 @@ public class NormalizedNodeStreamReaderWriterTest {
         LeafSetEntryNode<Object> entry3 = ImmutableLeafSetEntryNodeBuilder.create().withNodeIdentifier(
                 new NodeWithValue<>(TestModel.BINARY_LEAF_LIST_QNAME, null)).withValue(null).build();
 
-        return TestModel.createBaseTestContainerBuilder().
-                withChild(ImmutableLeafSetNodeBuilder.create().withNodeIdentifier(
-                        new NodeIdentifier(TestModel.BINARY_LEAF_LIST_QNAME)).
-                        withChild(entry1).withChild(entry2).withChild(entry3).build()).
-                withChild(ImmutableNodes.leafNode(TestModel.SOME_BINARY_DATA_QNAME, new byte[]{1,2,3,4})).
-                withChild(Builders.orderedMapBuilder().
-                      withNodeIdentifier(new NodeIdentifier(TestModel.ORDERED_LIST_QNAME)).
-                      withChild(ImmutableNodes.mapEntry(TestModel.ORDERED_LIST_ENTRY_QNAME,
-                              TestModel.ID_QNAME, 11)).build()).
-                build();
+        return TestModel.createBaseTestContainerBuilder()
+                .withChild(ImmutableLeafSetNodeBuilder.create().withNodeIdentifier(
+                        new NodeIdentifier(TestModel.BINARY_LEAF_LIST_QNAME))
+                        .withChild(entry1).withChild(entry2).withChild(entry3).build())
+                .withChild(ImmutableNodes.leafNode(TestModel.SOME_BINARY_DATA_QNAME, new byte[]{1,2,3,4}))
+                .withChild(Builders.orderedMapBuilder()
+                      .withNodeIdentifier(new NodeIdentifier(TestModel.ORDERED_LIST_QNAME))
+                      .withChild(ImmutableNodes.mapEntry(TestModel.ORDERED_LIST_ENTRY_QNAME,
+                              TestModel.ID_QNAME, 11)).build()).build();
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     public void testYangInstanceIdentifierStreaming() throws IOException  {
-        YangInstanceIdentifier path = YangInstanceIdentifier.builder(TestModel.TEST_PATH).
-                node(TestModel.OUTER_LIST_QNAME).nodeWithKey(
+        YangInstanceIdentifier path = YangInstanceIdentifier.builder(TestModel.TEST_PATH)
+                .node(TestModel.OUTER_LIST_QNAME).nodeWithKey(
                         TestModel.INNER_LIST_QNAME, TestModel.ID_QNAME, 10).build();
 
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
@@ -129,6 +126,7 @@ public class NormalizedNodeStreamReaderWriterTest {
         writer.close();
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     public void testNormalizedNodeAndYangInstanceIdentifierStreaming() throws IOException {
 
@@ -139,8 +137,8 @@ public class NormalizedNodeStreamReaderWriterTest {
         NormalizedNode<?, ?> testContainer = TestModel.createBaseTestContainerBuilder().build();
         writer.writeNormalizedNode(testContainer);
 
-        YangInstanceIdentifier path = YangInstanceIdentifier.builder(TestModel.TEST_PATH).
-                node(TestModel.OUTER_LIST_QNAME).nodeWithKey(
+        YangInstanceIdentifier path = YangInstanceIdentifier.builder(TestModel.TEST_PATH)
+                .node(TestModel.OUTER_LIST_QNAME).nodeWithKey(
                         TestModel.INNER_LIST_QNAME, TestModel.ID_QNAME, 10).build();
 
         writer.writeYangInstanceIdentifier(path);
@@ -157,9 +155,10 @@ public class NormalizedNodeStreamReaderWriterTest {
         writer.close();
     }
 
-    @Test(expected=InvalidNormalizedNodeStreamException.class, timeout=10000)
+    @SuppressWarnings("deprecation")
+    @Test(expected = InvalidNormalizedNodeStreamException.class, timeout = 10000)
     public void testInvalidNormalizedNodeStream() throws IOException {
-        byte[] protobufBytes = new NormalizedNodeToNodeCodec(null).encode(
+        byte[] protobufBytes = new NormalizedNodeToNodeCodec().encode(
                 TestModel.createBaseTestContainerBuilder().build()).getNormalizedNode().toByteArray();
 
         NormalizedNodeInputStreamReader reader = new NormalizedNodeInputStreamReader(
@@ -168,7 +167,8 @@ public class NormalizedNodeStreamReaderWriterTest {
         reader.readNormalizedNode();
     }
 
-    @Test(expected=InvalidNormalizedNodeStreamException.class, timeout=10000)
+    @SuppressWarnings("deprecation")
+    @Test(expected = InvalidNormalizedNodeStreamException.class, timeout = 10000)
     public void testInvalidYangInstanceIdentifierStream() throws IOException {
         byte[] protobufBytes = {1,2,3};
         NormalizedNodeInputStreamReader reader = new NormalizedNodeInputStreamReader(
@@ -181,12 +181,14 @@ public class NormalizedNodeStreamReaderWriterTest {
     public void testWithSerializable() {
         NormalizedNode<?, ?> input = TestModel.createTestContainer();
         SampleNormalizedNodeSerializable serializable = new SampleNormalizedNodeSerializable(input );
-        SampleNormalizedNodeSerializable clone = (SampleNormalizedNodeSerializable)SerializationUtils.clone(serializable);
+        SampleNormalizedNodeSerializable clone =
+                (SampleNormalizedNodeSerializable)SerializationUtils.clone(serializable);
 
         Assert.assertEquals(input, clone.getInput());
 
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     public void testAnyXmlStreaming() throws Exception {
         String xml = "<foo xmlns=\"http://www.w3.org/TR/html4/\" x=\"123\"><bar>one</bar><bar>two</bar></foo>";
@@ -229,13 +231,13 @@ public class NormalizedNodeStreamReaderWriterTest {
         writer.close();
     }
 
-    private static String largeString(final int pow){
-        String s = "X";
-        for(int i=0;i<pow;i++){
-            StringBuilder b = new StringBuilder();
-            b.append(s).append(s);
-            s = b.toString();
+    private static String largeString(final int pow) {
+        String str = "X";
+        for (int i = 0; i < pow; i++) {
+            StringBuilder buf = new StringBuilder();
+            buf.append(str).append(str);
+            str = buf.toString();
         }
-        return s;
+        return str;
     }
 }

@@ -39,34 +39,34 @@ public enum NormalizedNodeType {
     UNKEYED_LIST_ENTRY_NODE_TYPE,
     ANY_XML_NODE_TYPE;
 
-    public static NormalizedNodeType getSerializableNodeType(NormalizedNode<?, ?> node){
+    public static NormalizedNodeType getSerializableNodeType(NormalizedNode<?, ?> node) {
         Preconditions.checkNotNull(node, "node should not be null");
 
-        if(node instanceof LeafNode){
+        if (node instanceof LeafNode) {
             return LEAF_NODE_TYPE;
-        } else if(node instanceof LeafSetEntryNode){
+        } else if (node instanceof LeafSetEntryNode) {
             return LEAF_SET_ENTRY_NODE_TYPE;
-        } else if(node instanceof MapEntryNode){
+        } else if (node instanceof MapEntryNode) {
             return MAP_ENTRY_NODE_TYPE;
-        } else if(node instanceof ContainerNode){
+        } else if (node instanceof ContainerNode) {
             return CONTAINER_NODE_TYPE;
-        } else if(node instanceof AugmentationNode){
+        } else if (node instanceof AugmentationNode) {
             return AUGMENTATION_NODE_TYPE;
-        } else if(node instanceof ChoiceNode){
+        } else if (node instanceof ChoiceNode) {
             return CHOICE_NODE_TYPE;
-        } else if(node instanceof OrderedLeafSetNode){
+        } else if (node instanceof OrderedLeafSetNode) {
             return ORDERED_LEAF_SET_NODE_TYPE;
-        } else if(node instanceof OrderedMapNode){
+        } else if (node instanceof OrderedMapNode) {
             return ORDERED_MAP_NODE_TYPE;
-        } else if(node instanceof MapNode){
+        } else if (node instanceof MapNode) {
             return MAP_NODE_TYPE;
-        } else if(node instanceof LeafSetNode){
+        } else if (node instanceof LeafSetNode) {
             return LEAF_SET_NODE_TYPE;
-        } else if(node instanceof UnkeyedListNode){
+        } else if (node instanceof UnkeyedListNode) {
             return UNKEYED_LIST_NODE_TYPE;
-        } else if(node instanceof UnkeyedListEntryNode){
+        } else if (node instanceof UnkeyedListEntryNode) {
             return UNKEYED_LIST_ENTRY_NODE_TYPE;
-        } else if(node instanceof AnyXmlNode){
+        } else if (node instanceof AnyXmlNode) {
             return ANY_XML_NODE_TYPE;
         }
 

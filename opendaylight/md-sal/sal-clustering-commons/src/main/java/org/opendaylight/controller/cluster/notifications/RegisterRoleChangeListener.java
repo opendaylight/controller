@@ -11,9 +11,8 @@ package org.opendaylight.controller.cluster.notifications;
 import java.io.Serializable;
 
 /**
- * Message sent from the listener of Role Change messages to register itself to the Role Change Notifier
- *
- * The Listener could be in a separate ActorSystem and hence this message needs to be Serializable
+ * Message sent from the listener of Role Change messages to register itself to the Role Change Notifier.
+ * The Listener could be in a separate ActorSystem and hence this message needs to be Serializable.
  */
 public class RegisterRoleChangeListener implements Serializable {
     private static final long serialVersionUID = 8370459011119791506L;

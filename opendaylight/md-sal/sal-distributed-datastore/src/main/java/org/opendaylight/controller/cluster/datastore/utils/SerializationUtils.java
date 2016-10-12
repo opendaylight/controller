@@ -107,7 +107,7 @@ public final class SerializationUtils {
             // Probably from legacy protobuf serialization - try that.
             try {
                 NormalizedNodeMessages.Node serializedNode = NormalizedNodeMessages.Node.parseFrom(bytes);
-                return new NormalizedNodeToNodeCodec(null).decode(serializedNode);
+                return new NormalizedNodeToNodeCodec().decode(serializedNode);
             } catch (InvalidProtocolBufferException e2) {
                 throw new IllegalArgumentException("Error deserializing NormalizedNode", e);
             }

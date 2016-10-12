@@ -16,7 +16,6 @@ import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessa
 import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 public class NormalizedNodeToNodeCodec {
     public interface Encoded {
@@ -31,13 +30,10 @@ public class NormalizedNodeToNodeCodec {
         YangInstanceIdentifier getDecodedPath();
     }
 
-    private final SchemaContext ctx;
-
-    public NormalizedNodeToNodeCodec(final SchemaContext ctx){
-        this.ctx = ctx;
+    public NormalizedNodeToNodeCodec() {
     }
 
-    public NormalizedNodeMessages.Container encode(NormalizedNode<?,?> node){
+    public NormalizedNodeMessages.Container encode(NormalizedNode<?,?> node) {
         return encode(null, node).getEncodedNode();
     }
 
@@ -50,8 +46,8 @@ public class NormalizedNodeToNodeCodec {
         // Note: parent path is no longer used
         builder.setParentPath("");
 
-        if(node != null) {
-            if(path == null) {
+        if (node != null) {
+            if (path == null) {
                 builder.setNormalizedNode(NormalizedNodeSerializer.serialize(node));
             } else {
                 Serializer serializer = NormalizedNodeSerializer.newSerializer(node);
@@ -64,13 +60,13 @@ public class NormalizedNodeToNodeCodec {
     }
 
 
-    public NormalizedNode<?,?> decode(NormalizedNodeMessages.Node node){
+    public NormalizedNode<?,?> decode(NormalizedNodeMessages.Node node) {
         return decode(null, node).getDecodedNode();
     }
 
     public Decoded decode(NormalizedNodeMessages.InstanceIdentifier path,
             NormalizedNodeMessages.Node node) {
-        if(node.getIntType() < 0 || node.getSerializedSize() == 0){
+        if (node.getIntType() < 0 || node.getSerializedSize() == 0) {
             return new DecodedImpl(null, null);
         }
 
@@ -84,7 +80,7 @@ public class NormalizedNodeToNodeCodec {
         private final NormalizedNode<?, ?> decodedNode;
         private final YangInstanceIdentifier decodedPath;
 
-        public DecodedImpl(NormalizedNode<?, ?> decodedNode, YangInstanceIdentifier decodedPath) {
+        DecodedImpl(NormalizedNode<?, ?> decodedNode, YangInstanceIdentifier decodedPath) {
             this.decodedNode = decodedNode;
             this.decodedPath = decodedPath;
         }

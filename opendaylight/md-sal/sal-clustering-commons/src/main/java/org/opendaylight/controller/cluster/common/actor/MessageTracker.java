@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.common.actor;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
+
 import com.google.common.annotations.Beta;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
@@ -56,7 +57,7 @@ import org.slf4j.LoggerFactory;
 @Beta
 @NotThreadSafe
 public final class MessageTracker {
-    public static abstract class Context implements AutoCloseable {
+    public abstract static class Context implements AutoCloseable {
         Context() {
             // Hidden to prevent outside instantiation
         }
@@ -69,7 +70,9 @@ public final class MessageTracker {
 
     public interface Error {
         Object getLastExpectedMessage();
+
         Object getCurrentExpectedMessage();
+
         List<MessageProcessingTime> getMessageProcessingTimesSinceLastExpectedMessage();
     }
 
@@ -85,11 +88,10 @@ public final class MessageTracker {
 
         @Override
         public String toString() {
-            return "MessageProcessingTime{" +
-                    "messageClass=" + messageClass.getSimpleName() +
-                    ", elapsedTimeInMillis=" + NANOSECONDS.toMillis(elapsedTimeInNanos) +
-                    '}';
+            return "MessageProcessingTime [messageClass=" + messageClass + ", elapsedTimeInMillis="
+                   + NANOSECONDS.toMillis(elapsedTimeInNanos) + "]";
         }
+
 
         public Class<?> getMessageClass() {
             return messageClass;
@@ -139,9 +141,10 @@ public final class MessageTracker {
     }
 
     /**
+     * Constructs an instance.
      *
-     * @param expectedMessageClass The class of the message to track
-     * @param expectedArrivalIntervalInMillis The expected arrival interval between two instances of the expected
+     * @param expectedMessageClass the class of the message to track
+     * @param expectedArrivalIntervalInMillis the expected arrival interval between two instances of the expected
      *                                        message
      */
     public MessageTracker(final Class<?> expectedMessageClass, final long expectedArrivalIntervalInMillis) {
@@ -234,6 +237,7 @@ public final class MessageTracker {
 
     private abstract class AbstractTimedContext extends Context {
         abstract Object message();
+
         abstract Stopwatch stopTimer();
 
         @Override
@@ -246,10 +250,10 @@ public final class MessageTracker {
         private final Stopwatch stopwatch = Stopwatch.createUnstarted(ticker);
         private Object message;
 
-        void reset(final Object message) {
-            this.message = Preconditions.checkNotNull(message);
+        void reset(final Object newMessage) {
+            this.message = Preconditions.checkNotNull(newMessage);
             Preconditions.checkState(!stopwatch.isRunning(),
-                "Trying to reset a context that is not done (%s). currentMessage = %s", this, message);
+                "Trying to reset a context that is not done (%s). currentMessage = %s", this, newMessage);
             stopwatch.start();
         }
 

@@ -17,8 +17,11 @@ import org.opendaylight.yangtools.concepts.ListenerRegistration;
  * @author Thomas Pantelis
  */
 public interface ActorSystemProvider {
+
     /**
-     * @return the current ActorSystem.
+     * Returns the ActorSystem.
+     *
+     * @return the ActorSystem.
      */
     @Nonnull
     ActorSystem getActorSystem();

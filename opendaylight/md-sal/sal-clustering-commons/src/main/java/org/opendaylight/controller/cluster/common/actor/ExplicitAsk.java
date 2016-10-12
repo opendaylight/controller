@@ -53,7 +53,8 @@ public final class ExplicitAsk {
         return ASK_SUPPORT.ask(actor, (Function1<ActorRef, Object>)function, timeout);
     }
 
-    public static Future<Object> ask(final ActorRef actor, final Function<ActorRef, ?> function, final Timeout timeout) {
+    public static Future<Object> ask(final ActorRef actor, final Function<ActorRef, ?> function,
+            final Timeout timeout) {
         return ask(actor, toScala(function), timeout);
     }
 

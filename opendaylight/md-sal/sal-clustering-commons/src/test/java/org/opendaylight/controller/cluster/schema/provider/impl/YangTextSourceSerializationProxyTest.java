@@ -21,7 +21,7 @@ import java.io.ObjectOutputStream;
 import java.nio.charset.StandardCharsets;
 import org.junit.Before;
 import org.junit.Test;
-import org.opendaylight.yangtools.yang.model.repo.api.SourceIdentifier;
+import org.opendaylight.yangtools.yang.model.repo.api.RevisionSourceIdentifier;
 import org.opendaylight.yangtools.yang.model.repo.api.YangTextSchemaSource;
 
 public class YangTextSourceSerializationProxyTest {
@@ -32,7 +32,7 @@ public class YangTextSourceSerializationProxyTest {
     public void setUp() {
         String source = "Test source.";
         schemaSource = YangTextSchemaSource.delegateForByteSource(
-                SourceIdentifier.create("test", Optional.of("2015-10-30")),
+                RevisionSourceIdentifier.create("test", Optional.of("2015-10-30")),
                 ByteSource.wrap(source.getBytes(StandardCharsets.UTF_8)));
     }
 
@@ -47,7 +47,8 @@ public class YangTextSourceSerializationProxyTest {
 
         ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(bos.toByteArray()));
 
-        YangTextSchemaSourceSerializationProxy deserializedProxy =  (YangTextSchemaSourceSerializationProxy) ois.readObject();
+        YangTextSchemaSourceSerializationProxy deserializedProxy =
+                (YangTextSchemaSourceSerializationProxy) ois.readObject();
 
         assertEquals(deserializedProxy.getRepresentation().getIdentifier(), proxy.getRepresentation().getIdentifier());
         assertArrayEquals(deserializedProxy.getRepresentation().read(), proxy.getRepresentation().read());
@@ -55,7 +56,8 @@ public class YangTextSourceSerializationProxyTest {
 
     @Test
     public void testProxyEqualsBackingYangTextSource() throws IOException {
-        YangTextSchemaSourceSerializationProxy serializationProxy = new YangTextSchemaSourceSerializationProxy(schemaSource);
+        YangTextSchemaSourceSerializationProxy serializationProxy =
+                new YangTextSchemaSourceSerializationProxy(schemaSource);
 
         assertEquals(serializationProxy.getRepresentation().getIdentifier(), schemaSource.getIdentifier());
         assertArrayEquals(serializationProxy.getRepresentation().read(), schemaSource.read());

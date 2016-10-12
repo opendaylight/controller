@@ -38,8 +38,8 @@ public class RemoteSchemaProvider implements SchemaSourceProvider<YangTextSchema
     private static final ExceptionMapper<SchemaSourceException> MAPPER = new ExceptionMapper<SchemaSourceException>(
             "schemaDownload", SchemaSourceException.class) {
         @Override
-        protected SchemaSourceException newWithCause(final String s, final Throwable throwable) {
-            return new SchemaSourceException(s, throwable);
+        protected SchemaSourceException newWithCause(final String message, final Throwable throwable) {
+            return new SchemaSourceException(message, throwable);
         }
     };
 
@@ -57,11 +57,12 @@ public class RemoteSchemaProvider implements SchemaSourceProvider<YangTextSchema
         final SettableFuture<YangTextSchemaSource> res = SettableFuture.create();
         result.onComplete(new OnComplete<YangTextSchemaSourceSerializationProxy>() {
             @Override
-            public void onComplete(Throwable throwable, YangTextSchemaSourceSerializationProxy yangTextSchemaSourceSerializationProxy) {
-                if(yangTextSchemaSourceSerializationProxy != null) {
+            public void onComplete(Throwable throwable,
+                    YangTextSchemaSourceSerializationProxy yangTextSchemaSourceSerializationProxy) {
+                if (yangTextSchemaSourceSerializationProxy != null) {
                     res.set(yangTextSchemaSourceSerializationProxy.getRepresentation());
                 }
-                if(throwable != null) {
+                if (throwable != null) {
                     res.setException(throwable);
                 }
             }

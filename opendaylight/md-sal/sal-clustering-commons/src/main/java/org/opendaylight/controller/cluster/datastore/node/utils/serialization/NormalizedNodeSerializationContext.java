@@ -10,7 +10,7 @@ package org.opendaylight.controller.cluster.datastore.node.utils.serialization;
 
 /**
  * NormalizedNodeSerializationContext provides methods which help in encoding
- * certain components of a NormalizedNode properly
+ * certain components of a NormalizedNode properly.
  */
 public interface NormalizedNodeSerializationContext {
 }

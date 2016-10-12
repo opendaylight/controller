@@ -8,19 +8,18 @@
 
 package org.opendaylight.controller.cluster.common.actor;
 
-import org.junit.Test;
-import scala.concurrent.duration.FiniteDuration;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.concurrent.TimeUnit;
-
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import org.junit.Test;
+import scala.concurrent.duration.FiniteDuration;
 
 public class CommonConfigTest {
 
     @Test
-    public void testCommonConfigDefaults(){
+    public void testCommonConfigDefaults() {
         CommonConfig config = new CommonConfig.Builder<>("testsystem").build();
 
         assertNotNull(config.getActorSystemName());
@@ -31,7 +30,7 @@ public class CommonConfigTest {
     }
 
     @Test
-    public void testCommonConfigOverride(){
+    public void testCommonConfigOverride() {
 
         int expectedCapacity = 123;
         String timeoutValue = "1000ms";

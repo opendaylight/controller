@@ -8,9 +8,9 @@
 
 package org.opendaylight.controller.cluster.datastore.node.utils.serialization;
 
+import com.google.common.collect.ImmutableMap;
 import java.util.Map;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-import com.google.common.collect.ImmutableMap;
 
 public enum PathArgumentType {
     AUGMENTATION_IDENTIFIER,
@@ -19,20 +19,19 @@ public enum PathArgumentType {
     NODE_IDENTIFIER_WITH_PREDICATES;
 
     private static Map<Class<?>, PathArgumentType> CLASS_TO_ENUM_MAP =
-            ImmutableMap.<Class<?>, PathArgumentType>builder().
-                put(YangInstanceIdentifier.AugmentationIdentifier.class, AUGMENTATION_IDENTIFIER).
-                put(YangInstanceIdentifier.NodeIdentifier.class, NODE_IDENTIFIER).
-                put(YangInstanceIdentifier.NodeIdentifierWithPredicates.class, NODE_IDENTIFIER_WITH_PREDICATES).
-                put(YangInstanceIdentifier.NodeWithValue.class, NODE_IDENTIFIER_WITH_VALUE).build();
+            ImmutableMap.<Class<?>, PathArgumentType>builder()
+                .put(YangInstanceIdentifier.AugmentationIdentifier.class, AUGMENTATION_IDENTIFIER)
+                .put(YangInstanceIdentifier.NodeIdentifier.class, NODE_IDENTIFIER)
+                .put(YangInstanceIdentifier.NodeIdentifierWithPredicates.class, NODE_IDENTIFIER_WITH_PREDICATES)
+                .put(YangInstanceIdentifier.NodeWithValue.class, NODE_IDENTIFIER_WITH_VALUE).build();
 
-    public static int getSerializablePathArgumentType(YangInstanceIdentifier.PathArgument pathArgument){
+    public static int getSerializablePathArgumentType(YangInstanceIdentifier.PathArgument pathArgument) {
 
         PathArgumentType type = CLASS_TO_ENUM_MAP.get(pathArgument.getClass());
-        if(type == null) {
+        if (type == null) {
             throw new IllegalArgumentException("Unknown type of PathArgument = " + pathArgument);
         }
 
         return type.ordinal();
     }
-
 }

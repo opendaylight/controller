@@ -14,6 +14,8 @@ import org.slf4j.LoggerFactory;
 
 public abstract class AbstractUntypedPersistentActor extends UntypedPersistentActor {
 
+    // The member name should be lower case but it's referenced in many subclasses. Suppressing the CS warning for now.
+    @SuppressWarnings("checkstyle:MemberName")
     protected final Logger LOG = LoggerFactory.getLogger(getClass());
 
     protected AbstractUntypedPersistentActor() {

@@ -120,7 +120,7 @@ public enum ValueType {
     abstract Object deserialize(String str);
 
     public static final ValueType getSerializableType(Object node) {
-        if(node == null){
+        if (node == null) {
             return NULL_TYPE;
         }
 

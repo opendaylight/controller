@@ -24,7 +24,7 @@ import org.opendaylight.yangtools.yang.common.QName;
  * then will call
  * {@link #leafNode(org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier, Object)} twice
  * and then, {@link #endNode()} to end container node.
- *
+ * <p/>
  * Based on the each node, the node type is also written to the stream, that helps in reconstructing the object,
  * while reading.
  */
@@ -36,7 +36,7 @@ final class NormalizedNodeOutputStreamWriter extends AbstractNormalizedNodeDataO
     }
 
     @Override
-    protected final short streamVersion() {
+    protected short streamVersion() {
         return TokenTypes.LITHIUM_VERSION;
     }
 
