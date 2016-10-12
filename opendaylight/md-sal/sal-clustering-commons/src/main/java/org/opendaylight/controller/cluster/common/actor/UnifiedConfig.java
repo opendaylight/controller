@@ -17,14 +17,14 @@ import com.typesafe.config.Config;
  *     <li>Config subsystem</li>
  *     <li>Akka configuration files</li>
  * </ul>
- *
  * Configurations defined in config subsystem takes precedence.
  */
 public interface UnifiedConfig {
 
     /**
-     * Returns an immutable instance of unified configuration
-     * @return
+     * Returns an immutable instance of unified configuration.
+     *
+     * @return a Config instance
      */
     Config get();
 }

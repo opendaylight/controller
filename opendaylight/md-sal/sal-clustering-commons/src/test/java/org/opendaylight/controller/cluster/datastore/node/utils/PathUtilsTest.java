@@ -8,7 +8,12 @@
 
 package org.opendaylight.controller.cluster.datastore.node.utils;
 
+import static junit.framework.TestCase.assertEquals;
+
 import com.google.common.collect.ImmutableSet;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.util.TestModel;
 import org.opendaylight.yangtools.yang.common.QName;
@@ -18,25 +23,24 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdent
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeWithValue;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import static junit.framework.TestCase.assertEquals;
 
 public class PathUtilsTest {
 
     @Test
-    public void toStringNodeIdentifier(){
+    public void toStringNodeIdentifier() {
         PathArgument pathArgument = nodeIdentifier();
 
-        String expected = "(urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test?revision=2014-03-13)test";
+        String expected =
+            "(urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test?revision=2014-03-13)test";
 
         assertEquals(expected , PathUtils.toString(pathArgument));
     }
 
     @Test
-    public void toStringAugmentationIdentifier(){
-        String expected = "AugmentationIdentifier{childNames=[(urn:opendaylight:flow:table:statistics?revision=2013-12-15)flow-table-statistics]}";
+    public void toStringAugmentationIdentifier() {
+        String expected =
+            "AugmentationIdentifier{childNames=[(urn:opendaylight:flow:table:statistics?revision=2013-12-15)"
+            + "flow-table-statistics]}";
 
         PathArgument pathArgument = augmentationIdentifier();
 
@@ -44,28 +48,31 @@ public class PathUtilsTest {
     }
 
     @Test
-    public void toStringNodeWithValue(){
+    public void toStringNodeWithValue() {
 
         PathArgument pathArgument = nodeWithValue();
 
-        String expected = "(urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test?revision=2014-03-13)test[100]";
+        String expected =
+                "(urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test?revision=2014-03-13)test[100]";
 
         assertEquals(expected, PathUtils.toString(pathArgument));
     }
 
 
     @Test
-    public void toStringNodeIdentifierWithPredicates(){
+    public void toStringNodeIdentifierWithPredicates() {
 
         PathArgument pathArgument = nodeIdentifierWithPredicates();
 
-        String expected = "(urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test?revision=2014-03-13)test[{(urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test?revision=2014-03-13)id=100}]";
+        String expected =
+                "(urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test?revision=2014-03-13)test["
+                + "{(urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test?revision=2014-03-13)id=100}]";
 
         assertEquals(expected, PathUtils.toString(pathArgument));
     }
 
     @Test
-    public void toStringYangInstanceIdentifier(){
+    public void toStringYangInstanceIdentifier() {
 
         YangInstanceIdentifier path =
             YangInstanceIdentifier.create(nodeIdentifier())
@@ -73,21 +80,27 @@ public class PathUtilsTest {
                 .node(augmentationIdentifier()).node(nodeWithValue());
 
 
-        String expected = "(urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test?revision=2014-03-13)test/" +
-            "(urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test?revision=2014-03-13)test[{(urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test?revision=2014-03-13)id=100}]/" +
-            "AugmentationIdentifier{childNames=[(urn:opendaylight:flow:table:statistics?revision=2013-12-15)flow-table-statistics]}/" +
-            "(urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test?revision=2014-03-13)test[100]";
+        String expected =
+            "(urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test?revision=2014-03-13)test/"
+            + "(urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test?revision=2014-03-13)test["
+            + "{(urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test?revision=2014-03-13)id=100}]/"
+            + "AugmentationIdentifier{childNames=[(urn:opendaylight:flow:table:statistics?revision=2013-12-15)"
+            + "flow-table-statistics]}/"
+            + "(urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test?revision=2014-03-13)test[100]";
 
         assertEquals(expected, PathUtils.toString(path));
 
     }
 
     @Test
-    public void toYangInstanceIdentifier(){
-        String expected = "(urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test?revision=2014-03-13)test/" +
-            "(urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test?revision=2014-03-13)test[{(urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test?revision=2014-03-13)id=100}]/" +
-            "AugmentationIdentifier{childNames=[(urn:opendaylight:flow:table:statistics?revision=2013-12-15)flow-table-statistics]}/" +
-            "(urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test?revision=2014-03-13)test[100]";
+    public void toYangInstanceIdentifier() {
+        String expected =
+            "(urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test?revision=2014-03-13)test/"
+            + "(urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test?revision=2014-03-13)test["
+            + "{(urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test?revision=2014-03-13)id=100}]/"
+            + "AugmentationIdentifier{childNames=[(urn:opendaylight:flow:table:statistics?revision=2013-12-15)"
+            + "flow-table-statistics]}/"
+            + "(urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test?revision=2014-03-13)test[100]";
 
         YangInstanceIdentifier yangInstanceIdentifier =
             PathUtils.toYangInstanceIdentifier(expected);
@@ -98,21 +111,22 @@ public class PathUtilsTest {
 
     }
 
-    private static NodeIdentifier nodeIdentifier(){
+    private static NodeIdentifier nodeIdentifier() {
         return new NodeIdentifier(TestModel.TEST_QNAME);
     }
 
-    private static AugmentationIdentifier augmentationIdentifier(){
-        Set<QName> childNames = ImmutableSet.of(QNameFactory.create("(urn:opendaylight:flow:table:statistics?revision=2013-12-15)flow-table-statistics"));
+    private static AugmentationIdentifier augmentationIdentifier() {
+        Set<QName> childNames = ImmutableSet.of(QNameFactory.create(
+                "(urn:opendaylight:flow:table:statistics?revision=2013-12-15)flow-table-statistics"));
 
         return new AugmentationIdentifier(childNames);
     }
 
-    private static NodeWithValue<?> nodeWithValue(){
+    private static NodeWithValue<?> nodeWithValue() {
         return new NodeWithValue<>(TestModel.TEST_QNAME, Integer.valueOf(100));
     }
 
-    private static NodeIdentifierWithPredicates nodeIdentifierWithPredicates(){
+    private static NodeIdentifierWithPredicates nodeIdentifierWithPredicates() {
         Map<QName, Object> keys = new HashMap<>();
 
         keys.put(TestModel.ID_QNAME, Integer.valueOf(100));

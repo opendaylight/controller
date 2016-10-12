@@ -23,12 +23,12 @@ import org.slf4j.LoggerFactory;
  * quarantined by another. Once this node gets quarantined, restart the ActorSystem to allow this
  * node to rejoin the cluster.
  *
- * @author Gary Wu <gary.wu1@huawei.com>
+ * @author Gary Wu gary.wu1@huawei.com
  *
  */
 public class QuarantinedMonitorActor extends UntypedActor {
 
-    private final Logger LOG = LoggerFactory.getLogger(QuarantinedMonitorActor.class);
+    private static final Logger LOG = LoggerFactory.getLogger(QuarantinedMonitorActor.class);
 
     public static final String ADDRESS = "quarantined-monitor";
 
@@ -55,7 +55,7 @@ public class QuarantinedMonitorActor extends UntypedActor {
 
         // check to see if we got quarantined by another node
 
-        if(quarantined) {
+        if (quarantined) {
             return;
         }
 

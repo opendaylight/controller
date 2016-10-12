@@ -20,7 +20,9 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 @Beta
 public interface NormalizedNodeDataOutput extends AutoCloseable, DataOutput {
     void writeNormalizedNode(NormalizedNode<?, ?> normalizedNode) throws IOException;
+
     void writePathArgument(PathArgument pathArgument) throws IOException;
+
     void writeYangInstanceIdentifier(YangInstanceIdentifier identifier) throws IOException;
 
     @Override

@@ -20,6 +20,7 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.opendaylight.yangtools.yang.model.repo.api.RevisionSourceIdentifier;
 import org.opendaylight.yangtools.yang.model.repo.api.SchemaRepository;
 import org.opendaylight.yangtools.yang.model.repo.api.SchemaSourceException;
 import org.opendaylight.yangtools.yang.model.repo.api.SourceIdentifier;
@@ -30,11 +31,11 @@ import scala.concurrent.duration.Duration;
 
 public class RemoteYangTextSourceProviderImplTest {
 
-    private static final SourceIdentifier ID = SourceIdentifier.create("Test", Optional.of("2015-10-30"));
+    private static final SourceIdentifier ID = RevisionSourceIdentifier.create("Test", Optional.of("2015-10-30"));
 
     private RemoteYangTextSourceProviderImpl remoteRepository;
     private SchemaRepository mockedLocalRepository;
-    private Set<SourceIdentifier> providedSources = Collections.singleton(ID);
+    private final Set<SourceIdentifier> providedSources = Collections.singleton(ID);
 
     @Before
     public void setUp() {
@@ -46,13 +47,16 @@ public class RemoteYangTextSourceProviderImplTest {
     @Test
     public void testGetExistingYangTextSchemaSource() throws Exception {
         String source = "Test source.";
-        YangTextSchemaSource schemaSource = YangTextSchemaSource.delegateForByteSource(ID, ByteSource.wrap(source.getBytes()));
+        YangTextSchemaSource schemaSource = YangTextSchemaSource.delegateForByteSource(
+                ID, ByteSource.wrap(source.getBytes()));
         Mockito.when(mockedLocalRepository.getSchemaSource(ID, YangTextSchemaSource.class)).thenReturn(
                 Futures.<YangTextSchemaSource, SchemaSourceException>immediateCheckedFuture(schemaSource));
 
-        Future<YangTextSchemaSourceSerializationProxy> retrievedSourceFuture = remoteRepository.getYangTextSchemaSource(ID);
+        Future<YangTextSchemaSourceSerializationProxy> retrievedSourceFuture =
+                remoteRepository.getYangTextSchemaSource(ID);
         assertTrue(retrievedSourceFuture.isCompleted());
-        YangTextSchemaSource resultSchemaSource = Await.result(retrievedSourceFuture, Duration.Zero()).getRepresentation();
+        YangTextSchemaSource resultSchemaSource = Await.result(retrievedSourceFuture,
+                Duration.Zero()).getRepresentation();
         assertEquals(resultSchemaSource.getIdentifier(), schemaSource.getIdentifier());
         assertArrayEquals(resultSchemaSource.read(), schemaSource.read());
     }
@@ -63,15 +67,16 @@ public class RemoteYangTextSourceProviderImplTest {
                 Futures.<YangTextSchemaSource, SchemaSourceException>immediateFailedCheckedFuture(
                         new SchemaSourceException("Source is not provided")));
 
-
-        Future<YangTextSchemaSourceSerializationProxy> retrievedSourceFuture = remoteRepository.getYangTextSchemaSource(ID);
+        Future<YangTextSchemaSourceSerializationProxy> retrievedSourceFuture =
+                remoteRepository.getYangTextSchemaSource(ID);
         assertTrue(retrievedSourceFuture.isCompleted());
         Await.result(retrievedSourceFuture, Duration.Zero());
     }
 
     @Test
     public void testGetProvidedSources() throws Exception {
-        Set<SourceIdentifier> remoteProvidedSources = Await.result(remoteRepository.getProvidedSources(), Duration.Zero());
+        Set<SourceIdentifier> remoteProvidedSources = Await.result(remoteRepository
+                .getProvidedSources(), Duration.Zero());
         assertEquals(providedSources, remoteProvidedSources);
     }
 

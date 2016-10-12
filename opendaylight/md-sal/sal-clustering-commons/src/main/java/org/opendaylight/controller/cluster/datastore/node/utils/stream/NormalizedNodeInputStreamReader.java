@@ -46,12 +46,10 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 /**
- * NormalizedNodeInputStreamReader reads the byte stream and constructs the normalized node including its children nodes.
- * This process goes in recursive manner, where each NodeTypes object signifies the start of the object, except END_NODE.
- * If a node can have children, then that node's end is calculated based on appearance of END_NODE.
- *
+ * NormalizedNodeInputStreamReader reads the byte stream and constructs the normalized node including its children
+ * nodes. This process goes in recursive manner, where each NodeTypes object signifies the start of the object, except
+ * END_NODE. If a node can have children, then that node's end is calculated based on appearance of END_NODE.
  */
-
 public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput {
 
     private static final Logger LOG = LoggerFactory.getLogger(NormalizedNodeInputStreamReader.class);
@@ -67,6 +65,7 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput 
     private NormalizedNodeAttrBuilder<YangInstanceIdentifier.NodeIdentifier,
                                       Object, LeafNode<Object>> leafBuilder;
 
+    @SuppressWarnings("rawtypes")
     private NormalizedNodeAttrBuilder<NodeWithValue, Object, LeafSetEntryNode<Object>> leafSetEntryBuilder;
 
     private final StringBuilder reusableStringBuilder = new StringBuilder(50);
@@ -74,6 +73,8 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput 
     private boolean readSignatureMarker = true;
 
     /**
+     * Constructs an instance.
+     *
      * @deprecated Use {@link NormalizedNodeInputOutput#newDataInput(DataInput)} instead.
      */
     @Deprecated
@@ -93,7 +94,7 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput 
     }
 
     private void readSignatureMarkerAndVersionIfNeeded() throws IOException {
-        if(readSignatureMarker) {
+        if (readSignatureMarker) {
             readSignatureMarker = false;
 
             final byte marker = input.readByte();
@@ -113,24 +114,24 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput 
         // each node should start with a byte
         byte nodeType = input.readByte();
 
-        if(nodeType == NodeTypes.END_NODE) {
+        if (nodeType == NodeTypes.END_NODE) {
             LOG.debug("End node reached. return");
             return null;
         }
 
-        switch(nodeType) {
+        switch (nodeType) {
             case NodeTypes.AUGMENTATION_NODE :
                 YangInstanceIdentifier.AugmentationIdentifier augIdentifier =
                     new YangInstanceIdentifier.AugmentationIdentifier(readQNameSet());
 
                 LOG.debug("Reading augmentation node {} ", augIdentifier);
 
-                return addDataContainerChildren(Builders.augmentationBuilder().
-                        withNodeIdentifier(augIdentifier)).build();
+                return addDataContainerChildren(Builders.augmentationBuilder()
+                        .withNodeIdentifier(augIdentifier)).build();
 
             case NodeTypes.LEAF_SET_ENTRY_NODE :
                 QName name = lastLeafSetQName;
-                if(name == null) {
+                if (name == null) {
                     name = readQName();
                 }
 
@@ -147,8 +148,8 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput 
 
                 LOG.debug("Reading map entry node {} ", entryIdentifier);
 
-                return addDataContainerChildren(Builders.mapEntryBuilder().
-                        withNodeIdentifier(entryIdentifier)).build();
+                return addDataContainerChildren(Builders.mapEntryBuilder()
+                        .withNodeIdentifier(entryIdentifier)).build();
 
             default :
                 return readNodeIdentifierDependentNode(nodeType, new NodeIdentifier(readQName()));
@@ -157,16 +158,17 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput 
 
     private NormalizedNodeAttrBuilder<YangInstanceIdentifier.NodeIdentifier,
                                       Object, LeafNode<Object>> leafBuilder() {
-        if(leafBuilder == null) {
+        if (leafBuilder == null) {
             leafBuilder = Builders.leafBuilder();
         }
 
         return leafBuilder;
     }
 
+    @SuppressWarnings("rawtypes")
     private NormalizedNodeAttrBuilder<NodeWithValue, Object,
                                       LeafSetEntryNode<Object>> leafSetEntryBuilder() {
-        if(leafSetEntryBuilder == null) {
+        if (leafSetEntryBuilder == null) {
             leafSetEntryBuilder = Builders.leafSetEntryBuilder();
         }
 
@@ -176,7 +178,7 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput 
     private NormalizedNode<?, ?> readNodeIdentifierDependentNode(final byte nodeType, final NodeIdentifier identifier)
         throws IOException {
 
-        switch(nodeType) {
+        switch (nodeType) {
             case NodeTypes.LEAF_NODE :
                 LOG.debug("Read leaf node {}", identifier);
                 // Read the object value
@@ -188,33 +190,28 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput 
 
             case NodeTypes.MAP_NODE :
                 LOG.debug("Read map node {}", identifier);
-                return addDataContainerChildren(Builders.mapBuilder().
-                        withNodeIdentifier(identifier)).build();
+                return addDataContainerChildren(Builders.mapBuilder().withNodeIdentifier(identifier)).build();
 
-            case NodeTypes.CHOICE_NODE :
+            case NodeTypes.CHOICE_NODE:
                 LOG.debug("Read choice node {}", identifier);
-                return addDataContainerChildren(Builders.choiceBuilder().
-                        withNodeIdentifier(identifier)).build();
+                return addDataContainerChildren(Builders.choiceBuilder().withNodeIdentifier(identifier)).build();
 
-            case NodeTypes.ORDERED_MAP_NODE :
+            case NodeTypes.ORDERED_MAP_NODE:
                 LOG.debug("Reading ordered map node {}", identifier);
-                return addDataContainerChildren(Builders.orderedMapBuilder().
-                        withNodeIdentifier(identifier)).build();
+                return addDataContainerChildren(Builders.orderedMapBuilder().withNodeIdentifier(identifier)).build();
 
-            case NodeTypes.UNKEYED_LIST :
+            case NodeTypes.UNKEYED_LIST:
                 LOG.debug("Read unkeyed list node {}", identifier);
-                return addDataContainerChildren(Builders.unkeyedListBuilder().
-                        withNodeIdentifier(identifier)).build();
+                return addDataContainerChildren(Builders.unkeyedListBuilder().withNodeIdentifier(identifier)).build();
 
-            case NodeTypes.UNKEYED_LIST_ITEM :
+            case NodeTypes.UNKEYED_LIST_ITEM:
                 LOG.debug("Read unkeyed list item node {}", identifier);
-                return addDataContainerChildren(Builders.unkeyedListEntryBuilder().
-                        withNodeIdentifier(identifier)).build();
+                return addDataContainerChildren(Builders.unkeyedListEntryBuilder()
+                        .withNodeIdentifier(identifier)).build();
 
-            case NodeTypes.CONTAINER_NODE :
+            case NodeTypes.CONTAINER_NODE:
                 LOG.debug("Read container node {}", identifier);
-                return addDataContainerChildren(Builders.containerBuilder().
-                        withNodeIdentifier(identifier)).build();
+                return addDataContainerChildren(Builders.containerBuilder().withNodeIdentifier(identifier)).build();
 
             case NodeTypes.LEAF_SET :
                 LOG.debug("Read leaf set node {}", identifier);
@@ -252,25 +249,24 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput 
         String namespace = readCodedString();
         String revision = readCodedString();
 
-        String qName;
-        if(!Strings.isNullOrEmpty(revision)) {
-            qName = reusableStringBuilder.append('(').append(namespace).append(REVISION_ARG).
-                        append(revision).append(')').append(localName).toString();
+        String qname;
+        if (!Strings.isNullOrEmpty(revision)) {
+            qname = reusableStringBuilder.append('(').append(namespace).append(REVISION_ARG).append(revision)
+                    .append(')').append(localName).toString();
         } else {
-            qName = reusableStringBuilder.append('(').append(namespace).append(')').
-                        append(localName).toString();
+            qname = reusableStringBuilder.append('(').append(namespace).append(')').append(localName).toString();
         }
 
         reusableStringBuilder.delete(0, reusableStringBuilder.length());
-        return QNameFactory.create(qName);
+        return QNameFactory.create(qname);
     }
 
 
     private String readCodedString() throws IOException {
         byte valueType = input.readByte();
-        if(valueType == TokenTypes.IS_CODE_VALUE) {
+        if (valueType == TokenTypes.IS_CODE_VALUE) {
             return codedStringMap.get(input.readInt());
-        } else if(valueType == TokenTypes.IS_STRING_VALUE) {
+        } else if (valueType == TokenTypes.IS_STRING_VALUE) {
             String value = input.readUTF().intern();
             codedStringMap.put(Integer.valueOf(codedStringMap.size()), value);
             return value;
@@ -279,11 +275,11 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput 
         return null;
     }
 
-    private Set<QName> readQNameSet() throws IOException{
+    private Set<QName> readQNameSet() throws IOException {
         // Read the children count
         int count = input.readInt();
         Set<QName> children = new HashSet<>(count);
-        for(int i = 0; i < count; i++) {
+        for (int i = 0; i < count; i++) {
             children.add(readQName());
         }
         return children;
@@ -293,7 +289,7 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput 
         int count = input.readInt();
         Map<QName, Object> keyValueMap = new HashMap<>(count);
 
-        for(int i = 0; i < count; i++) {
+        for (int i = 0; i < count; i++) {
             keyValueMap.put(readQName(), readObject());
         }
 
@@ -302,7 +298,7 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput 
 
     private Object readObject() throws IOException {
         byte objectType = input.readByte();
-        switch(objectType) {
+        switch (objectType) {
             case ValueTypes.BITS_TYPE:
                 return readObjSet();
 
@@ -366,7 +362,7 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput 
 
         List<PathArgument> pathArguments = new ArrayList<>(size);
 
-        for(int i = 0; i < size; i++) {
+        for (int i = 0; i < size; i++) {
             pathArguments.add(readPathArgument());
         }
         return YangInstanceIdentifier.create(pathArguments);
@@ -375,7 +371,7 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput 
     private Set<String> readObjSet() throws IOException {
         int count = input.readInt();
         Set<String> children = new HashSet<>(count);
-        for(int i = 0; i < count; i++) {
+        for (int i = 0; i < count; i++) {
             children.add(readCodedString());
         }
         return children;
@@ -386,7 +382,7 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput 
         // read Type
         int type = input.readByte();
 
-        switch(type) {
+        switch (type) {
 
             case PathArgumentTypes.AUGMENTATION_IDENTIFIER :
                 return new YangInstanceIdentifier.AugmentationIdentifier(readQNameSet());
@@ -415,7 +411,7 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput 
 
         LeafSetEntryNode<Object> child = (LeafSetEntryNode<Object>)readNormalizedNodeInternal();
 
-        while(child != null) {
+        while (child != null) {
             builder.withChild(child);
             child = (LeafSetEntryNode<Object>)readNormalizedNodeInternal();
         }
@@ -429,7 +425,7 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput 
 
         NormalizedNode<?, ?> child = readNormalizedNodeInternal();
 
-        while(child != null) {
+        while (child != null) {
             builder.addChild(child);
             child = readNormalizedNodeInternal();
         }
@@ -437,21 +433,21 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput 
     }
 
     @Override
-    public void readFully(final byte[] b) throws IOException {
+    public void readFully(final byte[] value) throws IOException {
         readSignatureMarkerAndVersionIfNeeded();
-        input.readFully(b);
+        input.readFully(value);
     }
 
     @Override
-    public void readFully(final byte[] b, final int off, final int len) throws IOException {
+    public void readFully(final byte[] str, final int off, final int len) throws IOException {
         readSignatureMarkerAndVersionIfNeeded();
-        input.readFully(b, off, len);
+        input.readFully(str, off, len);
     }
 
     @Override
-    public int skipBytes(final int n) throws IOException {
+    public int skipBytes(final int num) throws IOException {
         readSignatureMarkerAndVersionIfNeeded();
-        return input.skipBytes(n);
+        return input.skipBytes(num);
     }
 
     @Override

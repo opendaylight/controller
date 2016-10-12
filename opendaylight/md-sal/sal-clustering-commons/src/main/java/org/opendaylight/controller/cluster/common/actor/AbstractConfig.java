@@ -18,7 +18,7 @@ public abstract class AbstractConfig implements UnifiedConfig {
 
     private final Config config;
 
-    public AbstractConfig(Config config){
+    public AbstractConfig(Config config) {
         this.config = config;
     }
 
@@ -27,19 +27,20 @@ public abstract class AbstractConfig implements UnifiedConfig {
         return config;
     }
 
-    public static abstract class Builder<T extends Builder<T>> {
+    public abstract static class Builder<T extends Builder<T>> {
         protected Map<String, Object> configHolder;
         protected Config fallback;
 
         private final String actorSystemName;
 
-        public Builder(String actorSystemName){
+        public Builder(String actorSystemName) {
             Preconditions.checkArgument(actorSystemName != null, "Actor system name must not be null");
             this.actorSystemName = actorSystemName;
             configHolder = new HashMap<>();
         }
 
-        public T withConfigReader(AkkaConfigurationReader reader){
+        @SuppressWarnings("unchecked")
+        public T withConfigReader(AkkaConfigurationReader reader) {
             fallback = reader.read().getConfig(actorSystemName);
             return (T)this;
         }

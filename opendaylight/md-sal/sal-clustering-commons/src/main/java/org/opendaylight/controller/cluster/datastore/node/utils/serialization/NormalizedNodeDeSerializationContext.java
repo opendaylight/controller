@@ -10,11 +10,13 @@ package org.opendaylight.controller.cluster.datastore.node.utils.serialization;
 
 /**
  * NormalizedNodeDeSerializationContext provides methods which help in decoding
- * certain components of a NormalizedNode properly
+ * certain components of a NormalizedNode properly.
  */
 
 public interface NormalizedNodeDeSerializationContext {
     String getNamespace(int namespace);
+
     String getRevision(int revision);
+
     String getLocalName(int localName);
 }

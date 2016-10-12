@@ -63,7 +63,7 @@ public class RoleChangeNotifier extends AbstractUntypedActor implements AutoClos
 
             getSender().tell(new RegisterRoleChangeListenerReply(), getSelf());
 
-            if(latestLeaderStateChanged != null) {
+            if (latestLeaderStateChanged != null) {
                 getSender().tell(latestLeaderStateChanged, getSelf());
             }
 

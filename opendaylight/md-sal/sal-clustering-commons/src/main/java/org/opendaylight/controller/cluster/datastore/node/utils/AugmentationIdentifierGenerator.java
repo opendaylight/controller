@@ -17,7 +17,8 @@ import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 public class AugmentationIdentifierGenerator {
-    private static final Pattern PATTERN = Pattern.compile("AugmentationIdentifier\\Q{\\EchildNames=\\Q[\\E(.*)\\Q]}\\E");
+    private static final Pattern PATTERN =
+            Pattern.compile("AugmentationIdentifier\\Q{\\EchildNames=\\Q[\\E(.*)\\Q]}\\E");
     private static final Splitter COMMA_SPLITTER = Splitter.on(',').trimResults();
 
     private final String id;
@@ -44,5 +45,4 @@ public class AugmentationIdentifierGenerator {
 
         return new YangInstanceIdentifier.AugmentationIdentifier(childNames);
     }
-
 }

@@ -7,15 +7,13 @@
  */
 package org.opendaylight.controller.cluster.common.actor;
 
-
 import com.google.common.base.Preconditions;
 import com.typesafe.config.Config;
-import scala.concurrent.duration.Duration;
-import scala.concurrent.duration.FiniteDuration;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import scala.concurrent.duration.Duration;
+import scala.concurrent.duration.FiniteDuration;
 
 public class CommonConfig extends AbstractConfig {
 
@@ -43,8 +41,8 @@ public class CommonConfig extends AbstractConfig {
         return get().getString(TAG_ACTOR_SYSTEM_NAME);
     }
 
-    public boolean isMetricCaptureEnabled(){
-        if (cachedMetricCaptureEnableFlag != null){
+    public boolean isMetricCaptureEnabled() {
+        if (cachedMetricCaptureEnableFlag != null) {
             return cachedMetricCaptureEnableFlag;
         }
 
@@ -89,7 +87,7 @@ public class CommonConfig extends AbstractConfig {
         return cachedMailBoxPushTimeout;
     }
 
-    public static class Builder<T extends Builder<T>> extends AbstractConfig.Builder<T>{
+    public static class Builder<T extends Builder<T>> extends AbstractConfig.Builder<T> {
 
         public Builder(String actorSystemName) {
             super(actorSystemName);
@@ -101,11 +99,13 @@ public class CommonConfig extends AbstractConfig {
             configHolder.put(TAG_MAILBOX, new HashMap<String, Object>());
         }
 
+        @SuppressWarnings("unchecked")
         public T metricCaptureEnabled(boolean enabled) {
             configHolder.put(TAG_METRIC_CAPTURE_ENABLED, String.valueOf(enabled));
             return (T)this;
         }
 
+        @SuppressWarnings("unchecked")
         public T mailboxCapacity(int capacity) {
             Preconditions.checkArgument(capacity > 0, "mailbox capacity must be >0");
 
@@ -114,7 +114,8 @@ public class CommonConfig extends AbstractConfig {
             return (T)this;
         }
 
-        public T mailboxPushTimeout(String timeout){
+        @SuppressWarnings("unchecked")
+        public T mailboxPushTimeout(String timeout) {
             Duration pushTimeout = Duration.create(timeout);
             Preconditions.checkArgument(pushTimeout.isFinite(), "invalid value for mailbox push timeout");
 

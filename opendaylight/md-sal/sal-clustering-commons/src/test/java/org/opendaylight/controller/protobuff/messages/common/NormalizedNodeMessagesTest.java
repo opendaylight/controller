@@ -28,31 +28,28 @@ import org.opendaylight.controller.protobuff.messages.AbstractMessagesTest;
 
 public class NormalizedNodeMessagesTest extends AbstractMessagesTest {
 
-  @Override
-  @Test
-  public void verifySerialization() throws Exception {
-    NormalizedNodeMessages.Attribute.Builder builder =
-        NormalizedNodeMessages.Attribute.newBuilder();
-    builder.setName("test");
-    builder.setType("fake");
-    builder.setValue("testValue");
-    writeToFile(builder);
+    @Override
+    @Test
+    public void verifySerialization() throws Exception {
+        NormalizedNodeMessages.Attribute.Builder builder = NormalizedNodeMessages.Attribute.newBuilder();
+        builder.setName("test");
+        builder.setType("fake");
+        builder.setValue("testValue");
+        writeToFile(builder);
 
-    NormalizedNodeMessages.Attribute attributeNew =
-        (NormalizedNodeMessages.Attribute) readFromFile(NormalizedNodeMessages.Attribute.PARSER);
-    Assert.assertEquals("test", attributeNew.getName());
-    Assert.assertEquals("fake", attributeNew.getType());
-    Assert.assertEquals("testValue", attributeNew.getValue());
+        NormalizedNodeMessages.Attribute attributeNew = (NormalizedNodeMessages.Attribute) readFromFile(
+                NormalizedNodeMessages.Attribute.PARSER);
+        Assert.assertEquals("test", attributeNew.getName());
+        Assert.assertEquals("fake", attributeNew.getType());
+        Assert.assertEquals("testValue", attributeNew.getValue());
 
-    NormalizedNodeMessages.Attribute attributeOriginal =
-        (NormalizedNodeMessages.Attribute) readFromTestDataFile(NormalizedNodeMessages.Attribute.PARSER);
-    Assert.assertEquals(attributeNew.getName(), attributeOriginal.getName());
-  }
+        NormalizedNodeMessages.Attribute attributeOriginal = (NormalizedNodeMessages.Attribute) readFromTestDataFile(
+                NormalizedNodeMessages.Attribute.PARSER);
+        Assert.assertEquals(attributeNew.getName(), attributeOriginal.getName());
+    }
 
-  @Override
-  public String getTestFileName() {
-    return NormalizedNodeMessagesTest.class.getSimpleName();
-  }
-
-
+    @Override
+    public String getTestFileName() {
+        return NormalizedNodeMessagesTest.class.getSimpleName();
+    }
 }

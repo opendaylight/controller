@@ -23,13 +23,14 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.opendaylight.controller.cluster.schema.provider.RemoteYangTextSourceProvider;
+import org.opendaylight.yangtools.yang.model.repo.api.RevisionSourceIdentifier;
 import org.opendaylight.yangtools.yang.model.repo.api.SchemaSourceException;
 import org.opendaylight.yangtools.yang.model.repo.api.SourceIdentifier;
 import org.opendaylight.yangtools.yang.model.repo.api.YangTextSchemaSource;
 
 public class RemoteSchemaProviderTest {
 
-    private static final SourceIdentifier ID = SourceIdentifier.create("Test", Optional.of("2015-10-30"));
+    private static final SourceIdentifier ID = RevisionSourceIdentifier.create("Test", Optional.of("2015-10-30"));
 
     private RemoteSchemaProvider remoteSchemaProvider;
     private RemoteYangTextSourceProvider mockedRemoteSchemaRepository;
@@ -45,9 +46,11 @@ public class RemoteSchemaProviderTest {
     @Test
     public void getExistingYangTextSchemaSource() throws IOException, SchemaSourceException {
         String source = "Test";
-        YangTextSchemaSource schemaSource = YangTextSchemaSource.delegateForByteSource(ID, ByteSource.wrap(source.getBytes()));
+        YangTextSchemaSource schemaSource = YangTextSchemaSource.delegateForByteSource(
+                ID, ByteSource.wrap(source.getBytes()));
         YangTextSchemaSourceSerializationProxy sourceProxy = new YangTextSchemaSourceSerializationProxy(schemaSource);
-        Mockito.when(mockedRemoteSchemaRepository.getYangTextSchemaSource(ID)).thenReturn(Futures.successful(sourceProxy));
+        Mockito.when(mockedRemoteSchemaRepository.getYangTextSchemaSource(ID))
+            .thenReturn(Futures.successful(sourceProxy));
 
         YangTextSchemaSource providedSource = remoteSchemaProvider.getSource(ID).checkedGet();
         assertEquals(providedSource.getIdentifier(), ID);
@@ -59,7 +62,8 @@ public class RemoteSchemaProviderTest {
         Futures.failed(new Exception("halo"));
 
         Mockito.when(mockedRemoteSchemaRepository.getYangTextSchemaSource(ID)).thenReturn(
-                Futures.<YangTextSchemaSourceSerializationProxy>failed(new SchemaSourceException("Source not provided")));
+                Futures.<YangTextSchemaSourceSerializationProxy>failed(
+                        new SchemaSourceException("Source not provided")));
 
         CheckedFuture<?, ?> sourceFuture = remoteSchemaProvider.getSource(ID);
         assertTrue(sourceFuture.isDone());

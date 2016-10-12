@@ -220,6 +220,14 @@
                   </execution>
               </executions>
           </plugin>
+          <plugin>
+             <groupId>org.apache.maven.plugins</groupId>
+             <artifactId>maven-checkstyle-plugin</artifactId>
+             <configuration>
+                <excludes>**/protobuff/**</excludes>
+                <propertyExpansion>checkstyle.violationSeverity=error</propertyExpansion>
+             </configuration>
+          </plugin>
       </plugins>
   </build>
 </project>

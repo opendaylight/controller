@@ -12,7 +12,6 @@ import java.io.Serializable;
 
 /**
  * Reply message sent from a RoleChangeNotifier to the Role Change Listener
- *
  * Can be sent to a separate actor system and hence should be made serializable.
  */
 public class RegisterRoleChangeListenerReply implements Serializable {

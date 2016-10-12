@@ -21,16 +21,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.duration.FiniteDuration;
 
-public class MeteredBoundedMailbox implements MailboxType, ProducesMessageQueue<MeteredBoundedMailbox.MeteredMessageQueue> {
-
-    private final Logger LOG = LoggerFactory.getLogger(MeteredBoundedMailbox.class);
+public class MeteredBoundedMailbox implements MailboxType,
+        ProducesMessageQueue<MeteredBoundedMailbox.MeteredMessageQueue> {
+    private static final Logger LOG = LoggerFactory.getLogger(MeteredBoundedMailbox.class);
+    private static final String QUEUE_SIZE = "q-size";
 
     private MeteredMessageQueue queue;
     private final Integer capacity;
     private final FiniteDuration pushTimeOut;
     private final MetricRegistry registry;
-
-    private final String QUEUE_SIZE = "q-size";
 
     public MeteredBoundedMailbox(ActorSystem.Settings settings, Config config) {
 
@@ -57,8 +56,7 @@ public class MeteredBoundedMailbox implements MailboxType, ProducesMessageQueue<
         String actorName = owner.get().path().toStringWithoutAddress();
         String metricName = MetricRegistry.name(actorName, QUEUE_SIZE);
 
-        if (registry.getMetrics().containsKey(metricName))
-        {
+        if (registry.getMetrics().containsKey(metricName)) {
             return; //already registered
         }
 
@@ -75,16 +73,11 @@ public class MeteredBoundedMailbox implements MailboxType, ProducesMessageQueue<
         }
     }
 
-    private static Gauge<Integer> getQueueSizeGuage(final MeteredMessageQueue monitoredQueue ){
-        return new Gauge<Integer>() {
-            @Override
-            public Integer getValue() {
-                return monitoredQueue.size();
-            }
-        };
+    private static Gauge<Integer> getQueueSizeGuage(final MeteredMessageQueue monitoredQueue ) {
+        return () -> monitoredQueue.size();
     }
 
-    private void registerQueueSizeMetric(String metricName, Gauge<Integer> metric){
+    private void registerQueueSizeMetric(String metricName, Gauge<Integer> metric) {
         try {
             registry.register(metricName,metric);
         } catch (IllegalArgumentException e) {

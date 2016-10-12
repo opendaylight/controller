@@ -21,13 +21,13 @@ public class SampleModelsTest {
 
 
         final NormalizedNodeMessages.Container node =
-            new NormalizedNodeToNodeCodec(SchemaContextHelper.full())
+            new NormalizedNodeToNodeCodec()
                 .encode(expected);
 
         final NormalizedNodeMessages.Node normalizedNode =
             node.getNormalizedNode();
 
-        final NormalizedNode<?,?> actual = new NormalizedNodeToNodeCodec(SchemaContextHelper.full()).decode(normalizedNode);
+        final NormalizedNode<?,?> actual = new NormalizedNodeToNodeCodec().decode(normalizedNode);
 
 
         Assert.assertEquals(expected, actual);
@@ -41,13 +41,13 @@ public class SampleModelsTest {
 
 
         final NormalizedNodeMessages.Container node =
-            new NormalizedNodeToNodeCodec(SchemaContextHelper.full())
+            new NormalizedNodeToNodeCodec()
                 .encode(expected);
 
         final NormalizedNodeMessages.Node normalizedNode =
             node.getNormalizedNode();
 
-        final NormalizedNode<?,?> actual = new NormalizedNodeToNodeCodec(SchemaContextHelper.full()).decode(
+        final NormalizedNode<?,?> actual = new NormalizedNodeToNodeCodec().decode(
             normalizedNode);
 
 

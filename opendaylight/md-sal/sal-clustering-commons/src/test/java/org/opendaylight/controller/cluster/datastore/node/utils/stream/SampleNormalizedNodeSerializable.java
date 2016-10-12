@@ -30,7 +30,8 @@ public class SampleNormalizedNodeSerializable implements Serializable {
         return input;
     }
 
-    private void readObject(final ObjectInputStream stream) throws IOException, ClassNotFoundException, URISyntaxException {
+    private void readObject(final ObjectInputStream stream)
+            throws IOException, ClassNotFoundException, URISyntaxException {
         NormalizedNodeDataInput reader = new NormalizedNodeInputStreamReader(stream);
         this.input = reader.readNormalizedNode();
     }

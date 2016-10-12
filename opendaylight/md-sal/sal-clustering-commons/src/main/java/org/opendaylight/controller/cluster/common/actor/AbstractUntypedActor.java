@@ -14,6 +14,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public abstract class AbstractUntypedActor extends UntypedActor {
+    // The member name should be lower case but it's referenced in many subclasses. Suppressing the CS warning for now.
+    @SuppressWarnings("checkstyle:MemberName")
     protected final Logger LOG = LoggerFactory.getLogger(getClass());
 
     protected AbstractUntypedActor() {
@@ -30,8 +32,8 @@ public abstract class AbstractUntypedActor extends UntypedActor {
      * Receive and handle an incoming message. If the implementation does not handle this particular message,
      * it should call {@link #ignoreMessage(Object)} or {@link #unknownMessage(Object)}.
      *
-     * @param message Incoming message
-     * @throws Exception
+     * @param message the incoming message
+     * @throws Exception on message failure
      */
     protected abstract void handleReceive(Object message) throws Exception;
 
