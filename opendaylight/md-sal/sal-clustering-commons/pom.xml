@@ -135,6 +135,11 @@
       <artifactId>config-api</artifactId>
     </dependency>
 
+    <dependency>
+      <groupId>com.google.code.findbugs</groupId>
+      <artifactId>annotations</artifactId>
+    </dependency>
+
   </dependencies>
 
   <build>
@@ -226,6 +231,13 @@
              <configuration>
                 <propertyExpansion>checkstyle.violationSeverity=error</propertyExpansion>
              </configuration>
+          </plugin>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>findbugs-maven-plugin</artifactId>
+            <configuration>
+              <failOnError>true</failOnError>
+            </configuration>
           </plugin>
       </plugins>
   </build>
