@@ -2,6 +2,52 @@
   "comments": [
     {
       "key": {
+        "uuid": "7a6b29fe_6ee63318",
+        "filename": "opendaylight/blueprint/pom.xml",
+        "patchSetId": 6
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-10-13T09:03:08Z",
+      "side": 1,
+      "message": "import config-artifacts and remove version declaration",
+      "range": {
+        "startLine": 35,
+        "startChar": 6,
+        "endLine": 35,
+        "endChar": 43
+      },
+      "revId": "5a2dcd7bae6206f9b15f2f8c3b45b3be397081e0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_0ee21f03",
+        "filename": "opendaylight/blueprint/pom.xml",
+        "patchSetId": 6
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-10-13T09:03:08Z",
+      "side": 1,
+      "message": "import mdsal-artifacts and remove version declaration",
+      "range": {
+        "startLine": 40,
+        "startChar": 6,
+        "endLine": 40,
+        "endChar": 39
+      },
+      "revId": "5a2dcd7bae6206f9b15f2f8c3b45b3be397081e0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a6b29fe_c3676024",
         "filename": "opendaylight/commons/protocol-framework/pom.xml",
         "patchSetId": 6
