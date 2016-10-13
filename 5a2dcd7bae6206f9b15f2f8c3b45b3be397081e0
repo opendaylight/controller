@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "7a6b29fe_afe68542",
+        "filename": "opendaylight/blueprint/pom.xml",
+        "patchSetId": 6
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-10-13T19:09:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a6b29fe_6ee63318",
+      "range": {
+        "startLine": 35,
+        "startChar": 6,
+        "endLine": 35,
+        "endChar": 43
+      },
+      "revId": "5a2dcd7bae6206f9b15f2f8c3b45b3be397081e0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a6b29fe_0ee21f03",
         "filename": "opendaylight/blueprint/pom.xml",
         "patchSetId": 6
@@ -36,6 +60,30 @@
       "writtenOn": "2016-10-13T09:03:08Z",
       "side": 1,
       "message": "import mdsal-artifacts and remove version declaration",
+      "range": {
+        "startLine": 40,
+        "startChar": 6,
+        "endLine": 40,
+        "endChar": 39
+      },
+      "revId": "5a2dcd7bae6206f9b15f2f8c3b45b3be397081e0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_8fe3c932",
+        "filename": "opendaylight/blueprint/pom.xml",
+        "patchSetId": 6
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-10-13T19:09:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a6b29fe_0ee21f03",
       "range": {
         "startLine": 40,
         "startChar": 6,
@@ -65,6 +113,24 @@
     },
     {
       "key": {
+        "uuid": "7a6b29fe_34580cfa",
+        "filename": "opendaylight/commons/protocol-framework/pom.xml",
+        "patchSetId": 6
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-10-13T19:09:35Z",
+      "side": 1,
+      "message": "Yes, they are.",
+      "parentUuid": "7a6b29fe_c3676024",
+      "revId": "5a2dcd7bae6206f9b15f2f8c3b45b3be397081e0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a6b29fe_aef04bca",
         "filename": "opendaylight/md-sal/pom.xml",
         "patchSetId": 6
@@ -76,6 +142,30 @@
       "writtenOn": "2016-10-13T09:04:29Z",
       "side": 1,
       "message": "This is an aggregator, should be odlparent-lite",
+      "range": {
+        "startLine": 7,
+        "startChar": 15,
+        "endLine": 7,
+        "endChar": 25
+      },
+      "revId": "5a2dcd7bae6206f9b15f2f8c3b45b3be397081e0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_944ac0aa",
+        "filename": "opendaylight/md-sal/pom.xml",
+        "patchSetId": 6
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-10-13T19:09:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a6b29fe_aef04bca",
       "range": {
         "startLine": 7,
         "startChar": 15,
