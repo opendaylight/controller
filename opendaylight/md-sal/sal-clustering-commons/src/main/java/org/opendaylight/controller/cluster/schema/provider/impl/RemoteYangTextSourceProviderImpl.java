@@ -14,6 +14,7 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import java.io.IOException;
 import java.util.Set;
+import javax.annotation.Nonnull;
 import org.opendaylight.controller.cluster.schema.provider.RemoteYangTextSourceProvider;
 import org.opendaylight.yangtools.yang.model.repo.api.SchemaRepository;
 import org.opendaylight.yangtools.yang.model.repo.api.SourceIdentifier;
@@ -53,7 +54,7 @@ public class RemoteYangTextSourceProviderImpl implements RemoteYangTextSourcePro
 
         Futures.addCallback(future, new FutureCallback<YangTextSchemaSource>() {
             @Override
-            public void onSuccess(YangTextSchemaSource result) {
+            public void onSuccess(@Nonnull YangTextSchemaSource result) {
                 try {
                     promise.success(new YangTextSchemaSourceSerializationProxy(result));
                 } catch (IOException e) {

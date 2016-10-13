@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.datastore.node.utils.stream;
 
 import com.google.common.base.Preconditions;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -362,6 +363,7 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
     }
 
     @Override
+    @SuppressFBWarnings("BC_UNCONFIRMED_CAST")
     public void writePathArgument(final PathArgument pathArgument) throws IOException {
 
         byte type = PathArgumentTypes.getSerializablePathArgumentType(pathArgument);
@@ -410,9 +412,9 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
         if (keyValueMap != null && !keyValueMap.isEmpty()) {
             output.writeInt(keyValueMap.size());
 
-            for (QName qname : keyValueMap.keySet()) {
-                writeQName(qname);
-                writeObject(keyValueMap.get(qname));
+            for (Map.Entry<QName, Object> entry : keyValueMap.entrySet()) {
+                writeQName(entry.getKey());
+                writeObject(entry.getValue());
             }
         } else {
             output.writeInt(0);

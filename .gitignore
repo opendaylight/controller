@@ -32,3 +32,4 @@ opendaylight/md-sal/sal-distributed-datastore/journal
 .checkstyle
 .factorypath
 maven-metadata-local.xml
+.fbExcludeFilterFile
