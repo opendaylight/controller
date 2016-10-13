@@ -87,12 +87,12 @@ public class ClusterAdminRpcService implements ClusterAdminService {
     @Override
     public Future<RpcResult<Void>> addShardReplica(final AddShardReplicaInput input) {
         final String shardName = input.getShardName();
-        if(Strings.isNullOrEmpty(shardName)) {
+        if (Strings.isNullOrEmpty(shardName)) {
             return newFailedRpcResultFuture("A valid shard name must be specified");
         }
 
         DataStoreType dataStoreType = input.getDataStoreType();
-        if(dataStoreType == null) {
+        if (dataStoreType == null) {
             return newFailedRpcResultFuture("A valid DataStoreType must be specified");
         }
 
@@ -120,17 +120,17 @@ public class ClusterAdminRpcService implements ClusterAdminService {
     @Override
     public Future<RpcResult<Void>> removeShardReplica(RemoveShardReplicaInput input) {
         final String shardName = input.getShardName();
-        if(Strings.isNullOrEmpty(shardName)) {
+        if (Strings.isNullOrEmpty(shardName)) {
             return newFailedRpcResultFuture("A valid shard name must be specified");
         }
 
         DataStoreType dataStoreType = input.getDataStoreType();
-        if(dataStoreType == null) {
+        if (dataStoreType == null) {
             return newFailedRpcResultFuture("A valid DataStoreType must be specified");
         }
 
         final String memberName = input.getMemberName();
-        if(Strings.isNullOrEmpty(memberName)) {
+        if (Strings.isNullOrEmpty(memberName)) {
             return newFailedRpcResultFuture("A valid member name must be specified");
         }
 
@@ -177,7 +177,7 @@ public class ClusterAdminRpcService implements ClusterAdminService {
         LOG.info("Removing replicas for all shards");
 
         final String memberName = input.getMemberName();
-        if(Strings.isNullOrEmpty(memberName)) {
+        if (Strings.isNullOrEmpty(memberName)) {
             return newFailedRpcResultFuture("A valid member name must be specified");
         }
 
@@ -196,17 +196,17 @@ public class ClusterAdminRpcService implements ClusterAdminService {
     @Override
     public Future<RpcResult<Void>> changeMemberVotingStatesForShard(ChangeMemberVotingStatesForShardInput input) {
         final String shardName = input.getShardName();
-        if(Strings.isNullOrEmpty(shardName)) {
+        if (Strings.isNullOrEmpty(shardName)) {
             return newFailedRpcResultFuture("A valid shard name must be specified");
         }
 
         DataStoreType dataStoreType = input.getDataStoreType();
-        if(dataStoreType == null) {
+        if (dataStoreType == null) {
             return newFailedRpcResultFuture("A valid DataStoreType must be specified");
         }
 
         List<MemberVotingState> memberVotingStates = input.getMemberVotingState();
-        if(memberVotingStates == null || memberVotingStates.isEmpty()) {
+        if (memberVotingStates == null || memberVotingStates.isEmpty()) {
             return newFailedRpcResultFuture("No member voting state input was specified");
         }
 
@@ -239,7 +239,7 @@ public class ClusterAdminRpcService implements ClusterAdminService {
     public Future<RpcResult<ChangeMemberVotingStatesForAllShardsOutput>> changeMemberVotingStatesForAllShards(
             final ChangeMemberVotingStatesForAllShardsInput input) {
         List<MemberVotingState> memberVotingStates = input.getMemberVotingState();
-        if(memberVotingStates == null || memberVotingStates.isEmpty()) {
+        if (memberVotingStates == null || memberVotingStates.isEmpty()) {
             return newFailedRpcResultFuture("No member voting state input was specified");
         }
 
@@ -277,7 +277,7 @@ public class ClusterAdminRpcService implements ClusterAdminService {
     public Future<RpcResult<Void>> backupDatastore(final BackupDatastoreInput input) {
         LOG.debug("backupDatastore: {}", input);
 
-        if(Strings.isNullOrEmpty(input.getFilePath())) {
+        if (Strings.isNullOrEmpty(input.getFilePath())) {
             return newFailedRpcResultFuture("A valid file path must be specified");
         }
 
@@ -301,7 +301,7 @@ public class ClusterAdminRpcService implements ClusterAdminService {
     private ChangeShardMembersVotingStatus toChangeShardMembersVotingStatus(final String shardName,
             List<MemberVotingState> memberVotingStatus) {
         Map<String, Boolean> serverVotingStatusMap = new HashMap<>();
-        for(MemberVotingState memberStatus: memberVotingStatus) {
+        for (MemberVotingState memberStatus: memberVotingStatus) {
             serverVotingStatusMap.put(memberStatus.getMemberName(), memberStatus.isVoting());
         }
 
@@ -316,11 +316,11 @@ public class ClusterAdminRpcService implements ClusterAdminService {
             final String failureLogMsgPrefix) {
         final SettableFuture<RpcResult<T>> returnFuture = SettableFuture.create();
         final List<ShardResult> shardResults = new ArrayList<>();
-        for(final Entry<ListenableFuture<Success>, ShardResultBuilder> entry: shardResultData) {
+        for (final Entry<ListenableFuture<Success>, ShardResultBuilder> entry : shardResultData) {
             Futures.addCallback(entry.getKey(), new FutureCallback<Success>() {
                 @Override
                 public void onSuccess(Success result) {
-                    synchronized(shardResults) {
+                    synchronized (shardResults) {
                         ShardResultBuilder shardResult = entry.getValue();
                         LOG.debug("onSuccess for shard {}, type {}", shardResult.getShardName(),
                                 shardResult.getDataStoreType());
@@ -330,20 +330,20 @@ public class ClusterAdminRpcService implements ClusterAdminService {
                 }
 
                 @Override
-                public void onFailure(Throwable t) {
-                    synchronized(shardResults) {
+                public void onFailure(Throwable failure) {
+                    synchronized (shardResults) {
                         ShardResultBuilder shardResult = entry.getValue();
                         LOG.warn("{} for shard {}, type {}", failureLogMsgPrefix, shardResult.getShardName(),
-                                shardResult.getDataStoreType(), t);
+                                shardResult.getDataStoreType(), failure);
                         shardResults.add(shardResult.setSucceeded(false).setErrorMessage(
-                                Throwables.getRootCause(t).getMessage()).build());
+                                Throwables.getRootCause(failure).getMessage()).build());
                         checkIfComplete();
                     }
                 }
 
                 void checkIfComplete() {
                     LOG.debug("checkIfComplete: expected {}, actual {}", shardResultData.size(), shardResults.size());
-                    if(shardResults.size() == shardResultData.size()) {
+                    if (shardResults.size() == shardResultData.size()) {
                         returnFuture.set(newSuccessfulResult(resultDataSupplier.apply(shardResults)));
                     }
                 }
@@ -355,13 +355,13 @@ public class ClusterAdminRpcService implements ClusterAdminService {
     private <T> void sendMessageToManagerForConfiguredShards(DataStoreType dataStoreType,
             List<Entry<ListenableFuture<T>, ShardResultBuilder>> shardResultData,
             Function<String, Object> messageSupplier) {
-        ActorContext actorContext = dataStoreType == DataStoreType.Config ?
-                configDataStore.getActorContext() : operDataStore.getActorContext();
+        ActorContext actorContext = dataStoreType == DataStoreType.Config ? configDataStore.getActorContext()
+                : operDataStore.getActorContext();
         Set<String> allShardNames = actorContext.getConfiguration().getAllShardNames();
 
         LOG.debug("Sending message to all shards {} for data store {}", allShardNames, actorContext.getDataStoreName());
 
-        for(String shardName: allShardNames) {
+        for (String shardName: allShardNames) {
             ListenableFuture<T> future = this.<T>ask(actorContext.getShardManager(), messageSupplier.apply(shardName),
                     SHARD_MGR_TIMEOUT);
             shardResultData.add(new SimpleEntry<>(future,
@@ -379,19 +379,21 @@ public class ClusterAdminRpcService implements ClusterAdminService {
     }
 
     private <T> ListenableFuture<T> sendMessageToShardManager(DataStoreType dataStoreType, Object message) {
-        ActorRef shardManager = dataStoreType == DataStoreType.Config ?
-                configDataStore.getActorContext().getShardManager() : operDataStore.getActorContext().getShardManager();
+        ActorRef shardManager = dataStoreType == DataStoreType.Config
+                ? configDataStore.getActorContext().getShardManager()
+                        : operDataStore.getActorContext().getShardManager();
         return ask(shardManager, message, SHARD_MGR_TIMEOUT);
     }
 
+    @SuppressWarnings("checkstyle:IllegalCatch")
     private static void saveSnapshotsToFile(DatastoreSnapshotList snapshots, String fileName,
             SettableFuture<RpcResult<Void>> returnFuture) {
-        try(FileOutputStream fos = new FileOutputStream(fileName)) {
+        try (FileOutputStream fos = new FileOutputStream(fileName)) {
             SerializationUtils.serialize(snapshots, fos);
 
             returnFuture.set(newSuccessfulResult());
             LOG.info("Successfully backed up datastore to file {}", fileName);
-        } catch(Exception e) {
+        } catch (Exception e) {
             onDatastoreBackupFailure(fileName, returnFuture, e);
         }
     }
@@ -416,7 +418,7 @@ public class ClusterAdminRpcService implements ClusterAdminService {
         askFuture.onComplete(new OnComplete<T>() {
             @Override
             public void onComplete(Throwable failure, T resp) {
-                if(failure != null) {
+                if (failure != null) {
                     returnFuture.setException(failure);
                 } else {
                     returnFuture.set(resp);
