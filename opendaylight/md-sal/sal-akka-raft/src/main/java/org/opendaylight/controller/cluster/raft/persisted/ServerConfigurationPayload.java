@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.raft.persisted;
 
 import com.google.common.collect.ImmutableList;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.ByteArrayOutputStream;
 import java.io.Externalizable;
 import java.io.IOException;
@@ -72,6 +73,10 @@ public final class ServerConfigurationPayload extends Payload implements Persist
     private static final Logger LOG = LoggerFactory.getLogger(ServerConfigurationPayload.class);
     private static final long serialVersionUID = 1L;
 
+    // Suppresses the FindBugs warning about about a non-primitive, non-Serializable field that isn't serialized via
+    // readObject. It apparently isn't smart enough to know that this class implements writeReplace to delegate
+    // serialization to the internal Proxy class and thus instances of this class aren't serialized.
+    @SuppressFBWarnings("SE_BAD_FIELD")
     private final List<ServerInfo> serverConfig;
     private final boolean migrated;
     private int serializedSize = -1;

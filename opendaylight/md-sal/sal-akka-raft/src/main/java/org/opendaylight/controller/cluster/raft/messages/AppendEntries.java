@@ -35,7 +35,7 @@ public class AppendEntries extends AbstractRaftRPC {
     private final long prevLogTerm;
 
     // log entries to store (empty for heart beat - may send more than one for efficiency)
-    private transient List<ReplicatedLogEntry> entries;
+    private final List<ReplicatedLogEntry> entries;
 
     // leader's commitIndex
     private final long leaderCommit;
