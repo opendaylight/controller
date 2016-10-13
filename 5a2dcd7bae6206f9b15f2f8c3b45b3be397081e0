@@ -62,6 +62,29 @@
       "revId": "5a2dcd7bae6206f9b15f2f8c3b45b3be397081e0",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_aef04bca",
+        "filename": "opendaylight/md-sal/pom.xml",
+        "patchSetId": 6
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-10-13T09:04:29Z",
+      "side": 1,
+      "message": "This is an aggregator, should be odlparent-lite",
+      "range": {
+        "startLine": 7,
+        "startChar": 15,
+        "endLine": 7,
+        "endChar": 25
+      },
+      "revId": "5a2dcd7bae6206f9b15f2f8c3b45b3be397081e0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
