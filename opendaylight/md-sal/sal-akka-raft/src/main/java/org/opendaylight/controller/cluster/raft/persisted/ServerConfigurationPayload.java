@@ -72,7 +72,10 @@ public final class ServerConfigurationPayload extends Payload implements Persist
     private static final Logger LOG = LoggerFactory.getLogger(ServerConfigurationPayload.class);
     private static final long serialVersionUID = 1L;
 
-    private final List<ServerInfo> serverConfig;
+    // This field is set as transient to avoid a FindBugs warning where a non-primitive, non-Serializable field isn't
+    // serialized via readObject. It apparently isn't smart enough to know that this class implements writeReplace and
+    // thus instances of this class aren't serialized.
+    private final transient List<ServerInfo> serverConfig;
     private final boolean migrated;
     private int serializedSize = -1;
 
@@ -88,6 +91,13 @@ public final class ServerConfigurationPayload extends Payload implements Persist
     @Deprecated
     public static ServerConfigurationPayload createMigrated(final @Nonnull List<ServerInfo> serverConfig) {
         return new ServerConfigurationPayload(serverConfig, true);
+    }
+
+    // This method exists to avoid the FindBugs warning regarding transient fields not being set by
+    // de-serialization. It expects such fields to be set via readObject or readResolve. It apparently isn't smart
+    // enough to know that this class implements writeReplace and thus instances of this class aren't serialized.
+    private Object readResolve() {
+        throw new UnsupportedOperationException("Objects of this class can never be serialized");
     }
 
     @Deprecated
