@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.raft.persisted;
 
 import com.google.common.collect.ImmutableList;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.ByteArrayOutputStream;
 import java.io.Externalizable;
 import java.io.IOException;
@@ -72,21 +73,24 @@ public final class ServerConfigurationPayload extends Payload implements Persist
     private static final Logger LOG = LoggerFactory.getLogger(ServerConfigurationPayload.class);
     private static final long serialVersionUID = 1L;
 
+    @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "This field is not Serializable but this class "
+            + "implements writeReplace to delegate serialization to a Proxy class and thus instances of this class "
+            + "aren't serialized. FindBugs does not recognize this.")
     private final List<ServerInfo> serverConfig;
     private final boolean migrated;
     private int serializedSize = -1;
 
-    private ServerConfigurationPayload(final @Nonnull List<ServerInfo> serverConfig, boolean migrated) {
+    private ServerConfigurationPayload(@Nonnull final List<ServerInfo> serverConfig, boolean migrated) {
         this.serverConfig = ImmutableList.copyOf(serverConfig);
         this.migrated = migrated;
     }
 
-    public ServerConfigurationPayload(final @Nonnull List<ServerInfo> serverConfig) {
+    public ServerConfigurationPayload(@Nonnull final List<ServerInfo> serverConfig) {
         this(serverConfig, false);
     }
 
     @Deprecated
-    public static ServerConfigurationPayload createMigrated(final @Nonnull List<ServerInfo> serverConfig) {
+    public static ServerConfigurationPayload createMigrated(@Nonnull final List<ServerInfo> serverConfig) {
         return new ServerConfigurationPayload(serverConfig, true);
     }
 
@@ -96,7 +100,8 @@ public final class ServerConfigurationPayload extends Payload implements Persist
         return migrated;
     }
 
-    public @Nonnull List<ServerInfo> getServerConfig() {
+    @Nonnull
+    public List<ServerInfo> getServerConfig() {
         return serverConfig;
     }
 

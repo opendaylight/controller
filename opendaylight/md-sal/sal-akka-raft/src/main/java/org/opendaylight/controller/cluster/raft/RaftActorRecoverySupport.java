@@ -11,6 +11,7 @@ import akka.persistence.RecoveryCompleted;
 import akka.persistence.SnapshotOffer;
 import com.google.common.base.Stopwatch;
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.Collections;
 import org.opendaylight.controller.cluster.PersistentDataProvider;
@@ -96,7 +97,7 @@ class RaftActorRecoverySupport {
             log.debug("{}: Deserialized restore snapshot: {}", context.getId(), snapshot);
 
             context.getSnapshotManager().apply(new ApplySnapshot(snapshot));
-        } catch (Exception e) {
+        } catch (RuntimeException | ClassNotFoundException | IOException e) {
             log.error("{}: Error deserializing snapshot restore", context.getId(), e);
         }
     }

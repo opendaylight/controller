@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.raft.client.messages;
 
 import com.google.common.base.Preconditions;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import javax.annotation.Nonnull;
 
 /**
@@ -29,6 +30,9 @@ public class GetSnapshotReply {
         return id;
     }
 
+    @SuppressFBWarnings(value = "EI_EXPOSE_REP", justification = "Exposes a mutable object stored in a field but "
+            + "this is OK since this class is merely a DTO and does not process the byte[] internally. "
+            + "Also it would be inefficient to create a return copy as the byte[] could be large.")
     @Nonnull
     public byte[] getSnapshot() {
         return snapshot;

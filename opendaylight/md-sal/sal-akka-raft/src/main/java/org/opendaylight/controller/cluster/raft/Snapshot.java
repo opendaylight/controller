@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.Serializable;
 import java.util.List;
 import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload;
@@ -62,6 +63,9 @@ public class Snapshot implements Serializable {
                 electionTerm, electionVotedFor, serverConfig);
     }
 
+    @SuppressFBWarnings(value = "EI_EXPOSE_REP", justification = "Exposes a mutable object stored in a field but "
+            + "this is OK since this class is merely a DTO and does not process the byte[] internally. "
+            + "Also it would be inefficient to create a return copy as the byte[] could be large.")
     public byte[] getState() {
         return state;
     }
