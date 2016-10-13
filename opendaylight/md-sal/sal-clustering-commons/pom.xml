@@ -134,7 +134,6 @@
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>config-api</artifactId>
     </dependency>
-
   </dependencies>
 
   <build>
@@ -226,6 +225,13 @@
              <configuration>
                 <propertyExpansion>checkstyle.violationSeverity=error</propertyExpansion>
              </configuration>
+          </plugin>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>findbugs-maven-plugin</artifactId>
+            <configuration>
+              <failOnError>true</failOnError>
+            </configuration>
           </plugin>
       </plugins>
   </build>
