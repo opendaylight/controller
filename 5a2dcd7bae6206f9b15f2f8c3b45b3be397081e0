@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a6b29fe_c3676024",
+        "filename": "opendaylight/commons/protocol-framework/pom.xml",
+        "patchSetId": 6
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-10-13T08:43:07Z",
+      "side": 1,
+      "message": "Why is this needed? Are there Javadoc errors otherwise?",
+      "revId": "5a2dcd7bae6206f9b15f2f8c3b45b3be397081e0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
