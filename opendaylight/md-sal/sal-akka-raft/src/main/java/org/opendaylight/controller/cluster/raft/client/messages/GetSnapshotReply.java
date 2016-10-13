@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.raft.client.messages;
 
 import com.google.common.base.Preconditions;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import javax.annotation.Nonnull;
 
 /**
@@ -29,6 +30,10 @@ public class GetSnapshotReply {
         return id;
     }
 
+    // Suppresses the FindBugs warning about exposing the internal representation of a mutable object value stored in
+    // a field. This is fine in this case since this class is merely a DTO message and does not process 'snapshot'
+    // internally. Also it would be inefficient to create a return copy as the byte[] could be large.
+    @SuppressFBWarnings("EI_EXPOSE_REP")
     @Nonnull
     public byte[] getSnapshot() {
         return snapshot;

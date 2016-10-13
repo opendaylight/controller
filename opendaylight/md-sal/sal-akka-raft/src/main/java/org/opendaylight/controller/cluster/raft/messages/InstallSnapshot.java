@@ -9,6 +9,7 @@
 package org.opendaylight.controller.cluster.raft.messages;
 
 import com.google.common.base.Optional;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
@@ -30,6 +31,10 @@ public class InstallSnapshot extends AbstractRaftRPC {
     private final Optional<Integer> lastChunkHashCode;
     private final Optional<ServerConfigurationPayload> serverConfig;
 
+    // Suppresses the FindBugs warning about storing a reference to an externally mutable object into the internal
+    // representation of this object. This is fine in this case since this class is merely a DTO message and does not
+    // process 'data' internally. Also it would be inefficient to create a copy as the byte[] could be large.
+    @SuppressFBWarnings("EI_EXPOSE_REP2")
     public InstallSnapshot(long term, String leaderId, long lastIncludedIndex, long lastIncludedTerm, byte[] data,
             int chunkIndex, int totalChunks, Optional<Integer> lastChunkHashCode,
             Optional<ServerConfigurationPayload> serverConfig) {
@@ -62,6 +67,10 @@ public class InstallSnapshot extends AbstractRaftRPC {
         return lastIncludedTerm;
     }
 
+    // Suppresses the FindBugs warning about exposing the internal representation of a mutable object value stored in
+    // a field. This is fine in this case since this class is merely a DTO message and does not process 'data'
+    // internally. Also it would be inefficient to create a return copy as the byte[] could be large.
+    @SuppressFBWarnings("EI_EXPOSE_REP")
     public byte[] getData() {
         return data;
     }
