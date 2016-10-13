@@ -65,7 +65,7 @@ public class SnapshotTrackerTest {
             tracker2.addChunk(3, chunk3, Optional.<Integer>absent());
             Assert.fail();
         } catch (SnapshotTracker.InvalidChunkException e) {
-            e.getMessage().startsWith("Invalid chunk");
+            // expected
         }
 
         // The first chunk's index must at least be FIRST_CHUNK_INDEX
