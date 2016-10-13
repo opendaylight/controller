@@ -25,7 +25,7 @@ public class NormalizedNodeGetter implements
     public void visitNode(int level, String parentPath, NormalizedNode<?, ?> normalizedNode) {
         String nodePath = parentPath + "/" + PathUtils.toString(normalizedNode.getIdentifier());
 
-        if (nodePath.toString().equals(path)) {
+        if (nodePath.equals(path)) {
             output = normalizedNode;
         }
     }

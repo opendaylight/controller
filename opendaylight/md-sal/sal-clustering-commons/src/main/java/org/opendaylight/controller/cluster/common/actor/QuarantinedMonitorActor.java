@@ -10,7 +10,6 @@ package org.opendaylight.controller.cluster.common.actor;
 
 import akka.actor.Props;
 import akka.actor.UntypedActor;
-import akka.japi.Creator;
 import akka.japi.Effect;
 import akka.remote.AssociationErrorEvent;
 import akka.remote.InvalidAssociation;
@@ -83,14 +82,6 @@ public class QuarantinedMonitorActor extends UntypedActor {
     }
 
     public static Props props(final Effect callback) {
-        return Props.create(new Creator<QuarantinedMonitorActor>() {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public QuarantinedMonitorActor create() throws Exception {
-                return new QuarantinedMonitorActor(callback);
-            }
-        });
+        return Props.create(QuarantinedMonitorActor.class, callback);
     }
-
 }
