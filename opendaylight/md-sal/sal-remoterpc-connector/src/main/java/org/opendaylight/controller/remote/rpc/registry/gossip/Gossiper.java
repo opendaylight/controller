@@ -80,7 +80,7 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
 
     private final RemoteRpcProviderConfig config;
 
-    public Gossiper(RemoteRpcProviderConfig config){
+    public Gossiper(final RemoteRpcProviderConfig config){
         this.config = Preconditions.checkNotNull(config);
     }
 
@@ -89,14 +89,14 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
      * @param autoStartGossipTicks used for turning off gossip ticks during testing.
      *                             Gossip tick can be manually sent.
      */
-    public Gossiper(Boolean autoStartGossipTicks, RemoteRpcProviderConfig config){
+    public Gossiper(final Boolean autoStartGossipTicks, final RemoteRpcProviderConfig config){
         this(config);
         this.autoStartGossipTicks = autoStartGossipTicks;
     }
 
     @Override
     public void preStart(){
-        ActorRefProvider provider = getContext().provider();
+        final ActorRefProvider provider = getContext().provider();
         selfAddress = provider.getDefaultAddress();
 
         if ( provider instanceof ClusterActorRefProvider ) {
@@ -130,7 +130,7 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
     }
 
     @Override
-    protected void handleReceive(Object message) throws Exception {
+    protected void handleReceive(final Object message) throws Exception {
         //Usually sent by self via gossip task defined above. But its not enforced.
         //These ticks can be sent by another actor as well which is esp. useful while testing
         if (message instanceof GossipTick) {
@@ -162,7 +162,7 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
      *
      * @param member who went down
      */
-    void receiveMemberRemoveOrUnreachable(Member member) {
+    void receiveMemberRemoveOrUnreachable(final Member member) {
         //if its self, then stop itself
         if (selfAddress.equals(member.address())){
             getContext().stop(getSelf());
@@ -179,7 +179,7 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
      * Add member to the local copy of member list if it doesnt already
      * @param member
      */
-    void receiveMemberUp(Member member) {
+    void receiveMemberUp(final Member member) {
 
         if (selfAddress.equals(member.address())) {
             return; //ignore up notification for self
@@ -189,7 +189,7 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
             clusterMembers.add(member.address());
         }
         if(log.isDebugEnabled()) {
-            log.debug("Added member [{}], Active member list [{}]", member.address(), clusterMembers);
+            log.debug("{} Added member [{}], Active member list [{}]", selfAddress, member.address(), clusterMembers);
         }
     }
 
@@ -209,11 +209,11 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
         if (clusterMembers.size() == 1) {
             remoteMemberToGossipTo = clusterMembers.get(0);
         } else {
-            Integer randomIndex = ThreadLocalRandom.current().nextInt(0, clusterMembers.size());
+            final Integer randomIndex = ThreadLocalRandom.current().nextInt(0, clusterMembers.size());
             remoteMemberToGossipTo = clusterMembers.get(randomIndex);
         }
         if(log.isTraceEnabled()) {
-            log.trace("Gossiping to [{}]", remoteMemberToGossipTo);
+            log.trace("{} Gossiping to [{}]", selfAddress, remoteMemberToGossipTo);
         }
         getLocalStatusAndSendTo(remoteMemberToGossipTo);
     }
@@ -231,14 +231,14 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
      *
      * @param status bucket versions from a remote member
      */
-    void receiveGossipStatus(GossipStatus status){
+    void receiveGossipStatus(final GossipStatus status){
         //Don't accept messages from non-members
         if (!clusterMembers.contains(status.from())) {
             return;
         }
 
         final ActorRef sender = getSender();
-        Future<Object> futureReply =
+        final Future<Object> futureReply =
                 Patterns.ask(getContext().parent(), new GetBucketVersions(), config.getAskDuration());
 
         futureReply.map(getMapperToProcessRemoteStatus(sender, status), getContext().dispatcher());
@@ -250,11 +250,12 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
      *
      * @param envelope contains buckets from a remote gossiper
      */
-    void receiveGossip(GossipEnvelope envelope){
+    void receiveGossip(final GossipEnvelope envelope){
         //TODO: Add more validations
         if (!selfAddress.equals(envelope.to())) {
             if(log.isTraceEnabled()) {
-                log.trace("Ignoring message intended for someone else. From [{}] to [{}]", envelope.from(), envelope.to());
+                log.trace("{} Ignoring message intended for someone else. From [{}] to [{}]", selfAddress,
+                        envelope.from(), envelope.to());
             }
             return;
         }
@@ -268,9 +269,9 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
      *
      * @param buckets
      */
-    void updateRemoteBuckets(Map<Address, Bucket> buckets) {
+    void updateRemoteBuckets(final Map<Address, Bucket> buckets) {
 
-        UpdateRemoteBuckets updateRemoteBuckets = new UpdateRemoteBuckets(buckets);
+        final UpdateRemoteBuckets updateRemoteBuckets = new UpdateRemoteBuckets(buckets);
         getContext().parent().tell(updateRemoteBuckets, getSelf());
     }
 
@@ -282,7 +283,7 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
      */
     void sendGossipTo(final ActorRef remote, final Set<Address> addresses){
 
-        Future<Object> futureReply =
+        final Future<Object> futureReply =
                 Patterns.ask(getContext().parent(), new GetBucketsByMembers(addresses), config.getAskDuration());
         futureReply.map(getMapperToSendGossip(remote), getContext().dispatcher());
     }
@@ -292,18 +293,18 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
      *
      * @param remoteActorSystemAddress remote gossiper to send to
      */
-    void getLocalStatusAndSendTo(Address remoteActorSystemAddress){
+    void getLocalStatusAndSendTo(final Address remoteActorSystemAddress){
 
         //Get local status from bucket store and send to remote
-        Future<Object> futureReply =
+        final Future<Object> futureReply =
                 Patterns.ask(getContext().parent(), new GetBucketVersions(), config.getAskDuration());
 
         //Find gossiper on remote system
-        ActorSelection remoteRef = getContext().system().actorSelection(
+        final ActorSelection remoteRef = getContext().system().actorSelection(
                 remoteActorSystemAddress.toString() + getSelf().path().toStringWithoutAddress());
 
-        if(log.isTraceEnabled()) {
-            log.trace("Sending bucket versions to [{}]", remoteRef);
+        if (log.isDebugEnabled()) {
+            log.debug("{} Sending bucket versions to [{}]", selfAddress, remoteRef);
         }
 
         futureReply.map(getMapperToSendLocalStatus(remoteRef), getContext().dispatcher());
@@ -315,15 +316,15 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
      * @param remote        remote gossiper to send versions to
      * @param localVersions bucket versions received from local store
      */
-    void sendGossipStatusTo(ActorRef remote, Map<Address, Long> localVersions){
+    void sendGossipStatusTo(final ActorRef remote, final Map<Address, Long> localVersions){
 
-        GossipStatus status = new GossipStatus(selfAddress, localVersions);
+        final GossipStatus status = new GossipStatus(selfAddress, localVersions);
         remote.tell(status, getSelf());
     }
 
-    void sendGossipStatusTo(ActorSelection remote, Map<Address, Long> localVersions){
+    void sendGossipStatusTo(final ActorSelection remote, final Map<Address, Long> localVersions){
 
-        GossipStatus status = new GossipStatus(selfAddress, localVersions);
+        final GossipStatus status = new GossipStatus(selfAddress, localVersions);
         remote.tell(status, getSelf());
     }
 
@@ -335,10 +336,10 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
 
         return new Mapper<Object, Void>() {
             @Override
-            public Void apply(Object replyMessage) {
+            public Void apply(final Object replyMessage) {
                 if (replyMessage instanceof GetBucketVersionsReply) {
-                    GetBucketVersionsReply reply = (GetBucketVersionsReply) replyMessage;
-                    Map<Address, Long> localVersions = reply.getVersions();
+                    final GetBucketVersionsReply reply = (GetBucketVersionsReply) replyMessage;
+                    final Map<Address, Long> localVersions = reply.getVersions();
 
                     sendGossipStatusTo(remote, localVersions);
 
@@ -372,23 +373,23 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
 
         return new Mapper<Object, Void>() {
             @Override
-            public Void apply(Object replyMessage) {
+            public Void apply(final Object replyMessage) {
                 if (replyMessage instanceof GetBucketVersionsReply) {
-                    GetBucketVersionsReply reply = (GetBucketVersionsReply) replyMessage;
-                    Map<Address, Long> localVersions = reply.getVersions();
+                    final GetBucketVersionsReply reply = (GetBucketVersionsReply) replyMessage;
+                    final Map<Address, Long> localVersions = reply.getVersions();
 
                     //diff between remote list and local
-                    Set<Address> localIsOlder = new HashSet<>();
+                    final Set<Address> localIsOlder = new HashSet<>();
                     localIsOlder.addAll(remoteVersions.keySet());
                     localIsOlder.removeAll(localVersions.keySet());
 
                     //diff between local list and remote
-                    Set<Address> localIsNewer = new HashSet<>();
+                    final Set<Address> localIsNewer = new HashSet<>();
                     localIsNewer.addAll(localVersions.keySet());
                     localIsNewer.removeAll(remoteVersions.keySet());
 
 
-                    for (Address address : remoteVersions.keySet()){
+                    for (final Address address : remoteVersions.keySet()){
 
                         if (localVersions.get(address) == null || remoteVersions.get(address) == null) {
                             continue; //this condition is taken care of by above diffs
@@ -430,13 +431,13 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
 
         return new Mapper<Object, Void>() {
             @Override
-            public Void apply(Object msg) {
+            public Void apply(final Object msg) {
                 if (msg instanceof GetBucketsByMembersReply) {
-                    Map<Address, Bucket> buckets = ((GetBucketsByMembersReply) msg).getBuckets();
+                    final Map<Address, Bucket> buckets = ((GetBucketsByMembersReply) msg).getBuckets();
                     if(log.isTraceEnabled()) {
                         log.trace("Buckets to send from {}: {}", selfAddress, buckets);
                     }
-                    GossipEnvelope envelope = new GossipEnvelope(selfAddress, sender.path().address(), buckets);
+                    final GossipEnvelope envelope = new GossipEnvelope(selfAddress, sender.path().address(), buckets);
                     sender.tell(envelope, getSelf());
                 }
                 return null;
@@ -451,7 +452,7 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
         return clusterMembers;
     }
 
-    void setClusterMembers(List<Address> clusterMembers) {
+    void setClusterMembers(final List<Address> clusterMembers) {
         this.clusterMembers = clusterMembers;
     }
 
@@ -459,7 +460,7 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
         return selfAddress;
     }
 
-    void setSelfAddress(Address selfAddress) {
+    void setSelfAddress(final Address selfAddress) {
         this.selfAddress = selfAddress;
     }
 }

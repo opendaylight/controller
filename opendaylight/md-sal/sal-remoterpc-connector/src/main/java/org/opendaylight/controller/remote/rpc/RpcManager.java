@@ -13,11 +13,13 @@ import akka.actor.ActorRef;
 import akka.actor.OneForOneStrategy;
 import akka.actor.Props;
 import akka.actor.SupervisorStrategy;
+import akka.actor.SupervisorStrategy.Directive;
 import akka.japi.Function;
 import com.google.common.base.Preconditions;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActor;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcIdentifier;
@@ -26,8 +28,6 @@ import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
 import org.opendaylight.controller.md.sal.dom.broker.spi.rpc.RpcRoutingStrategy;
 import org.opendaylight.controller.remote.rpc.messages.UpdateSchemaContext;
 import org.opendaylight.controller.remote.rpc.registry.RpcRegistry;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.RpcDefinition;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.slf4j.Logger;
@@ -67,14 +67,14 @@ public class RpcManager extends AbstractUntypedActor {
     }
 
 
-      public static Props props(final SchemaContext schemaContext,
-              final DOMRpcProviderService rpcProvisionRegistry, final DOMRpcService rpcServices,
-              final RemoteRpcProviderConfig config) {
-          Preconditions.checkNotNull(schemaContext, "SchemaContext can not be null!");
-          Preconditions.checkNotNull(rpcProvisionRegistry, "RpcProviderService can not be null!");
-          Preconditions.checkNotNull(rpcServices, "RpcService can not be null!");
-          return Props.create(RpcManager.class, schemaContext, rpcProvisionRegistry, rpcServices, config);
-      }
+    public static Props props(final SchemaContext schemaContext,
+            final DOMRpcProviderService rpcProvisionRegistry, final DOMRpcService rpcServices,
+            final RemoteRpcProviderConfig config) {
+        Preconditions.checkNotNull(schemaContext, "SchemaContext can not be null!");
+        Preconditions.checkNotNull(rpcProvisionRegistry, "RpcProviderService can not be null!");
+        Preconditions.checkNotNull(rpcServices, "RpcService can not be null!");
+        return Props.create(RpcManager.class, schemaContext, rpcProvisionRegistry, rpcServices, config);
+    }
 
     private void createRpcActors() {
         LOG.debug("Create rpc registry and broker actors");
@@ -99,22 +99,7 @@ public class RpcManager extends AbstractUntypedActor {
 
         rpcServices.registerRpcListener(rpcListener);
 
-        registerRoutedRpcDelegate();
         announceSupportedRpcs();
-    }
-
-    private void registerRoutedRpcDelegate() {
-        final Set<DOMRpcIdentifier> rpcIdentifiers = new HashSet<>();
-        final Set<Module> modules = schemaContext.getModules();
-        for(final Module module : modules){
-            for(final RpcDefinition rpcDefinition : module.getRpcs()){
-                if(RpcRoutingStrategy.from(rpcDefinition).isContextBasedRouted()) {
-                    LOG.debug("Adding routed rpcDefinition for path {}", rpcDefinition.getPath());
-                    rpcIdentifiers.add(DOMRpcIdentifier.create(rpcDefinition.getPath(), YangInstanceIdentifier.EMPTY));
-                }
-            }
-        }
-        rpcProvisionRegistry.registerRpcImplementation(rpcImplementation, rpcIdentifiers);
     }
 
     /**
@@ -124,40 +109,69 @@ public class RpcManager extends AbstractUntypedActor {
         LOG.debug("Adding all supported rpcs to routing table");
         final Set<RpcDefinition> currentlySupportedRpc = schemaContext.getOperations();
         final List<DOMRpcIdentifier> rpcs = new ArrayList<>();
+        final Map<String, DOMRpcIdentifier> mapGlobalRpcs = new HashMap<>(currentlySupportedRpc.size());
         for (final RpcDefinition rpcDef : currentlySupportedRpc) {
+            if (!RpcRoutingStrategy.from(rpcDef).isContextBasedRouted()) {
+                // its a global rpc
+                final DOMRpcIdentifier globalRpcIdentifier = DOMRpcIdentifier.create(rpcDef.getPath());
+                mapGlobalRpcs.put(globalRpcIdentifier.getType().getLastComponent().toString(), globalRpcIdentifier);
+                LOG.debug("Found global rpcDefinition for path {}", rpcDef.toString());
+            }
             rpcs.add(DOMRpcIdentifier.create(rpcDef.getPath()));
         }
-        if(!rpcs.isEmpty()) {
-            rpcListener.onRpcAvailable(rpcs);
+        LOG.debug("Adding all supported rpcs to routing table, rpcs.size:{}", rpcs.size());
+
+        rpcListener.onRpcAvailable(rpcs);
+        if (!mapGlobalRpcs.isEmpty()) {
+            rpcRegistry.tell(new RpcRegistry.Messages.StoreGlobalRpcsFound(mapGlobalRpcs), self());
         }
     }
 
 
     @Override
     protected void handleReceive(final Object message) throws Exception {
-      if(message instanceof UpdateSchemaContext) {
-        updateSchemaContext((UpdateSchemaContext) message);
-      }
+        if (message instanceof UpdateSchemaContext) {
+            updateSchemaContext((UpdateSchemaContext) message);
+
+        } else if (message instanceof Messages.RegisterRpcImplementation) {
+            final Messages.RegisterRpcImplementation rpcImplementationMsg = (Messages.RegisterRpcImplementation) message;
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Received RegisterRpcImplementation registering {}:",
+                        rpcImplementationMsg.getDomRpcIdentifierSet().size());
+            }
+            rpcProvisionRegistry.registerRpcImplementation(rpcImplementation,
+                    rpcImplementationMsg.getDomRpcIdentifierSet());
+        }
 
     }
 
     private void updateSchemaContext(final UpdateSchemaContext message) {
       schemaContext = message.getSchemaContext();
-      registerRoutedRpcDelegate();
+        announceSupportedRpcs();
       rpcBroker.tell(message, ActorRef.noSender());
     }
 
     @Override
     public SupervisorStrategy supervisorStrategy() {
-      return new OneForOneStrategy(10, Duration.create("1 minute"),
-          new Function<Throwable, SupervisorStrategy.Directive>() {
-            @Override
-            public SupervisorStrategy.Directive apply(final Throwable t) {
-              LOG.error("An exception happened actor will be resumed", t);
+        return new OneForOneStrategy(10, Duration.create("1 minute"),
+                (Function<Throwable, Directive>) t -> {
+                    LOG.error("An exception happened actor will be resumed", t);
 
-              return SupervisorStrategy.resume();
+                    return SupervisorStrategy.resume();
+                });
+    }
+
+    public static class Messages {
+        public static class RegisterRpcImplementation {
+            private final Set<DOMRpcIdentifier> domRpcIdentifierSet;
+
+            public RegisterRpcImplementation(final Set<DOMRpcIdentifier> domRpcIdentifierSet) {
+                this.domRpcIdentifierSet = domRpcIdentifierSet;
             }
-          }
-      );
+
+            public Set<DOMRpcIdentifier> getDomRpcIdentifierSet() {
+                return domRpcIdentifierSet;
+            }
+        }
     }
 }
