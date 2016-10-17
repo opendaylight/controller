@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a6b29fe_8680cb8c",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/common/actor/AbstractUntypedPersistentActor.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2016-10-17T11:03:37Z",
+      "side": 1,
+      "message": "Tom FYI some day I\u0027m going to find the time to properly port those (already writte) Checkstyle checks for slf4j, at which point this (mis)naming will be flagged up... so we should, eventually, fix these - but I \u0027won\u0027t -1; just FYI.",
+      "revId": "b97a80fcc4505b31b6d13837ba3c07fbc84ff31c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_662bef94",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/NormalizedNodePrinter.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2016-10-17T11:03:37Z",
+      "side": 1,
+      "message": "CHEAT code!! ;-) Let\u0027s try https://git.opendaylight.org/gerrit/#/c/47005/ ?",
+      "revId": "b97a80fcc4505b31b6d13837ba3c07fbc84ff31c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_c83011eb",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/notifications/RegisterRoleChangeListenerReply.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2016-10-17T11:03:37Z",
+      "side": 1,
+      "message": ". at end of line missing, for full sentence?",
+      "revId": "b97a80fcc4505b31b6d13837ba3c07fbc84ff31c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_6820dd9b",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/notifications/RoleChangeNotification.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2016-10-17T11:03:37Z",
+      "side": 1,
+      "message": ". at end of line missing, for full sentence?",
+      "revId": "b97a80fcc4505b31b6d13837ba3c07fbc84ff31c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
