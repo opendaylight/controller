@@ -20,11 +20,6 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNodeContainer;
  * NormalizedNodeNavigator walks a {@link NormalizedNodeVisitor} through the NormalizedNode
  *
  * {@link NormalizedNode } is a tree like structure that provides a generic structure for a yang data model
- *
- * For examples of visitors
- * @see NormalizedNodePrinter
- *
- *
  */
 public class NormalizedNodeNavigator {
 
