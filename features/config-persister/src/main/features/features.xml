@@ -22,7 +22,6 @@
     <bundle>mvn:org.opendaylight.controller/config-persister-impl/{{VERSION}}</bundle>
     <bundle>mvn:org.opendaylight.controller/config-persister-feature-adapter/{{VERSION}}</bundle>
 
-    <bundle>mvn:com.google.guava/guava/{{VERSION}}</bundle>
     <bundle>mvn:commons-io/commons-io/{{VERSION}}</bundle>
     <bundle>mvn:org.apache.commons/commons-lang3/{{VERSION}}</bundle>
     <bundle>wrap:mvn:javax.validation/validation-api/{{VERSION}}</bundle>
