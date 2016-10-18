@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a6b29fe_9cdadbe7",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/test/java/org/opendaylight/controller/cluster/datastore/node/utils/NormalizedNodePrinter.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-10-18T12:58:33Z",
+      "side": 1,
+      "message": "Even though this is test code, we can still use SLF4J — especially now that slf4j-simple is always included for tests ;-).",
+      "revId": "e7c82f1ea4e29064c019c7e9871b54c677979214",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
