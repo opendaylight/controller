@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "7a6b29fe_45997f6d",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/common/actor/AbstractUntypedPersistentActor.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-10-19T13:14:11Z",
+      "side": 1,
+      "message": "Separate patch. This patch is already large.",
+      "parentUuid": "7a6b29fe_8680cb8c",
+      "revId": "b97a80fcc4505b31b6d13837ba3c07fbc84ff31c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a6b29fe_662bef94",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/NormalizedNodePrinter.java",
         "patchSetId": 2
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "7a6b29fe_25b563cd",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/NormalizedNodePrinter.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-10-19T13:14:11Z",
+      "side": 1,
+      "message": "yeah but this class and associated code is legacy and I\u0027m going to remove it all soon anyway. I realized I probably should\u0027ve done that before this patch but it\u0027s fine either way.",
+      "parentUuid": "7a6b29fe_662bef94",
+      "revId": "b97a80fcc4505b31b6d13837ba3c07fbc84ff31c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a6b29fe_c83011eb",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/notifications/RegisterRoleChangeListenerReply.java",
         "patchSetId": 2
@@ -47,6 +83,24 @@
       "writtenOn": "2016-10-17T11:03:37Z",
       "side": 1,
       "message": ". at end of line missing, for full sentence?",
+      "revId": "b97a80fcc4505b31b6d13837ba3c07fbc84ff31c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_a5a9737d",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/notifications/RegisterRoleChangeListenerReply.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-10-19T13:14:11Z",
+      "side": 1,
+      "message": "yeah but why didn\u0027t CS flag it? Probably b/c of the next sentence...",
+      "parentUuid": "7a6b29fe_c83011eb",
       "revId": "b97a80fcc4505b31b6d13837ba3c07fbc84ff31c",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
