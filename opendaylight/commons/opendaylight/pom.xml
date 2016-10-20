@@ -84,7 +84,7 @@
     <jdepend.maven.plugin.version>2.0-beta-2</jdepend.maven.plugin.version>
 
     <!-- Path prefix where we generate configuration subsystem bindings -->
-    <jmxGeneratorPath>target/generated-sources/config-binding</jmxGeneratorPath>
+    <jmxGeneratorPath>${project.build.directory}/generated-sources/config-binding</jmxGeneratorPath>
 
     <jolokia-bridge.version>0.4.0-SNAPSHOT</jolokia-bridge.version>
     <karaf.branding.version>1.8.0-SNAPSHOT</karaf.branding.version>
@@ -113,7 +113,7 @@
 
     <!-- Path prefix where we generate YANG Java Bindings. This really should be inherited
          from mdsal's binding-parent -->
-    <salGeneratorPath>target/generated-sources/mdsal-binding</salGeneratorPath>
+    <salGeneratorPath>${project.build.directory}/generated-sources/mdsal-binding</salGeneratorPath>
 
     <samples.loadbalancer>0.9.0-SNAPSHOT</samples.loadbalancer>
     <samples.loadbalancer.northbound.version>0.8.0-SNAPSHOT</samples.loadbalancer.northbound.version>
@@ -127,8 +127,8 @@
     <sonar-jacoco-listeners.version>2.4</sonar-jacoco-listeners.version>
     <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
     <sonar.language>java</sonar.language>
-    <sonar.jacoco.reportPath>target/code-coverage/jacoco.exec</sonar.jacoco.reportPath>
-    <sonar.jacoco.itReportPath>target/code-coverage/jacoco-it.exec</sonar.jacoco.itReportPath>
+    <sonar.jacoco.reportPath>${project.build.directory}/code-coverage/jacoco.exec</sonar.jacoco.reportPath>
+    <sonar.jacoco.itReportPath>${project.build.directory}/code-coverage/jacoco-it.exec</sonar.jacoco.itReportPath>
     <sonar.skippedModules>org.openflow.openflowj,net.sf.jung2,org.opendaylight.controller.protobuff.messages</sonar.skippedModules>
     <statistics.northbound.version>0.8.0-SNAPSHOT</statistics.northbound.version>
     <statisticsmanager.implementation.version>0.8.0-SNAPSHOT</statisticsmanager.implementation.version>
@@ -796,7 +796,7 @@
           <configuration>
             <aggregate>true</aggregate>
             <linkJavadoc>true</linkJavadoc>
-            <javadocDir>target/apidocs</javadocDir>
+            <javadocDir>${project.build.directory}/apidocs</javadocDir>
           </configuration>
         </plugin>
         <plugin>
