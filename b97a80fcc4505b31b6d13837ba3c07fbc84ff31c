@@ -72,6 +72,24 @@
     },
     {
       "key": {
+        "uuid": "7a6b29fe_8d04557f",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/NormalizedNodePrinter.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-10-21T00:00:11Z",
+      "side": 1,
+      "message": "Removed this class",
+      "parentUuid": "7a6b29fe_25b563cd",
+      "revId": "b97a80fcc4505b31b6d13837ba3c07fbc84ff31c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a6b29fe_c83011eb",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/notifications/RegisterRoleChangeListenerReply.java",
         "patchSetId": 2
