@@ -31,6 +31,9 @@ public final class TransactionIdentifier implements WritableIdentifier {
         private LocalHistoryIdentifier historyId;
         private long transactionId;
 
+        // checkstyle flags the public modifier as redundant however it is explicitly needed for Java serialization to
+        // be able to create instances via reflection.
+        @SuppressWarnings("checkstyle:RedundantModifier")
         public Proxy() {
             // For Externalizable
         }
@@ -62,7 +65,7 @@ public final class TransactionIdentifier implements WritableIdentifier {
     private final long transactionId;
     private transient String shortString;
 
-    public TransactionIdentifier(final @Nonnull LocalHistoryIdentifier historyId, final long transactionId) {
+    public TransactionIdentifier(@Nonnull final LocalHistoryIdentifier historyId, final long transactionId) {
         this.historyId = Preconditions.checkNotNull(historyId);
         this.transactionId = transactionId;
     }
@@ -92,24 +95,24 @@ public final class TransactionIdentifier implements WritableIdentifier {
     }
 
     @Override
-    public boolean equals(final Object o) {
-        if (this == o) {
+    public boolean equals(final Object obj) {
+        if (this == obj) {
             return true;
         }
-        if (!(o instanceof TransactionIdentifier)) {
+        if (!(obj instanceof TransactionIdentifier)) {
             return false;
         }
 
-        final TransactionIdentifier other = (TransactionIdentifier) o;
+        final TransactionIdentifier other = (TransactionIdentifier) obj;
         return transactionId == other.transactionId && historyId.equals(other.historyId);
     }
 
     public String toShortString() {
-        if(shortString == null) {
+        if (shortString == null) {
             String histStr = historyId.getHistoryId() == 0 ? "" : "-chn-" + historyId.getHistoryId();
-            shortString = historyId.getClientId().getFrontendId().getMemberName().getName() + "-" +
-                    historyId.getClientId().getFrontendId().getClientType().getName() + "-fe-" +
-                    historyId.getClientId().getGeneration() + histStr + "-txn-" + transactionId;
+            shortString = historyId.getClientId().getFrontendId().getMemberName().getName() + "-"
+                    + historyId.getClientId().getFrontendId().getClientType().getName() + "-fe-"
+                    + historyId.getClientId().getGeneration() + histStr + "-txn-" + transactionId;
         }
 
         return shortString;

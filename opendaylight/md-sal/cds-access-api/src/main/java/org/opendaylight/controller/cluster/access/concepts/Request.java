@@ -29,12 +29,12 @@ public abstract class Request<T extends WritableIdentifier, C extends Request<T,
     private static final long serialVersionUID = 1L;
     private final ActorRef replyTo;
 
-    protected Request(final @Nonnull T target, final long sequence, final @Nonnull ActorRef replyTo) {
+    protected Request(@Nonnull final T target, final long sequence, @Nonnull final ActorRef replyTo) {
         super(target, sequence);
         this.replyTo = Preconditions.checkNotNull(replyTo);
     }
 
-    protected Request(final @Nonnull C request, final @Nonnull ABIVersion version) {
+    protected Request(@Nonnull final C request, @Nonnull final ABIVersion version) {
         super(request, version);
         this.replyTo = Preconditions.checkNotNull(request.getReplyTo());
     }
@@ -44,7 +44,8 @@ public abstract class Request<T extends WritableIdentifier, C extends Request<T,
      *
      * @return Original requestor
      */
-    public final @Nonnull ActorRef getReplyTo() {
+    @Nonnull
+    public final ActorRef getReplyTo() {
         return replyTo;
     }
 
@@ -54,7 +55,8 @@ public abstract class Request<T extends WritableIdentifier, C extends Request<T,
      * @param cause Failure cause
      * @return {@link RequestFailure} corresponding to this request
      */
-    public abstract @Nonnull RequestFailure<T, ?> toRequestFailure(final @Nonnull RequestException cause);
+    @Nonnull
+    public abstract RequestFailure<T, ?> toRequestFailure(@Nonnull final RequestException cause);
 
     @Override
     protected ToStringHelper addToStringAttributes(final ToStringHelper toStringHelper) {

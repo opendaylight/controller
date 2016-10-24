@@ -20,6 +20,9 @@ import org.opendaylight.controller.cluster.access.concepts.RequestException;
  * @author Robert Varga
  */
 final class ConnectClientFailureProxyV1 extends AbstractRequestFailureProxy<ClientIdentifier, ConnectClientFailure> {
+    // checkstyle flags the public modifier as redundant however it is explicitly needed for Java serialization to
+    // be able to create instances via reflection.
+    @SuppressWarnings("checkstyle:RedundantModifier")
     public ConnectClientFailureProxyV1() {
         // For Externalizable
     }

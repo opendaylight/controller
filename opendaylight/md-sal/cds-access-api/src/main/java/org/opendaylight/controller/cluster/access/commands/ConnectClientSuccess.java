@@ -47,9 +47,9 @@ public final class ConnectClientSuccess extends RequestSuccess<ClientIdentifier,
         this.maxMessages = maxMessages;
     }
 
-    public ConnectClientSuccess(final @Nonnull ClientIdentifier target, final long sequence,
-            final @Nonnull ActorRef backend, final @Nonnull List<ActorSelection> alternates,
-            final @Nonnull DataTree dataTree, final int maxMessages) {
+    public ConnectClientSuccess(@Nonnull final ClientIdentifier target, final long sequence,
+            @Nonnull final ActorRef backend, @Nonnull final List<ActorSelection> alternates,
+            @Nonnull final DataTree dataTree, final int maxMessages) {
         this(target, sequence, backend, alternates, Optional.of(dataTree), maxMessages);
     }
 
@@ -58,11 +58,13 @@ public final class ConnectClientSuccess extends RequestSuccess<ClientIdentifier,
      *
      * @return a list of known backend alternates
      */
-    public @Nonnull List<ActorSelection> getAlternates() {
+    @Nonnull
+    public List<ActorSelection> getAlternates() {
         return alternates;
     }
 
-    public @Nonnull ActorRef getBackend() {
+    @Nonnull
+    public ActorRef getBackend() {
         return backend;
     }
 
