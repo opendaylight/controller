@@ -20,7 +20,10 @@ import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifie
 final class LocalHistorySuccessProxyV1 extends AbstractSuccessProxy<LocalHistoryIdentifier, LocalHistorySuccess> {
     private static final long serialVersionUID = 1L;
 
-    LocalHistorySuccessProxyV1() {
+    // checkstyle flags the public modifier as redundant however it is explicitly needed for Java serialization to
+    // be able to create instances via reflection.
+    @SuppressWarnings("checkstyle:RedundantModifier")
+    public LocalHistorySuccessProxyV1() {
         // For Externalizable
     }
 
@@ -29,7 +32,7 @@ final class LocalHistorySuccessProxyV1 extends AbstractSuccessProxy<LocalHistory
     }
 
     @Override
-    protected final LocalHistoryIdentifier readTarget(final DataInput in) throws IOException {
+    protected LocalHistoryIdentifier readTarget(final DataInput in) throws IOException {
         return LocalHistoryIdentifier.readFrom(in);
     }
 

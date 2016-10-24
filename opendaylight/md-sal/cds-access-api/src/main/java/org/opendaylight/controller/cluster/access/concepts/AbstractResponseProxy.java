@@ -22,11 +22,11 @@ abstract class AbstractResponseProxy<T extends WritableIdentifier, C extends Res
         extends AbstractMessageProxy<T, C> {
     private static final long serialVersionUID = 1L;
 
-    AbstractResponseProxy() {
+    protected AbstractResponseProxy() {
         // for Externalizable
     }
 
-    AbstractResponseProxy(final @Nonnull C response) {
+    AbstractResponseProxy(@Nonnull final C response) {
         super(response);
     }
 
@@ -35,5 +35,6 @@ abstract class AbstractResponseProxy<T extends WritableIdentifier, C extends Res
         return createResponse(target, sequence);
     }
 
-    abstract @Nonnull C createResponse(@Nonnull T target, long sequence);
+    @Nonnull
+    abstract C createResponse(@Nonnull T target, long sequence);
 }

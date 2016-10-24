@@ -42,6 +42,9 @@ public final class LocalHistoryIdentifier implements WritableIdentifier {
         private long historyId;
         private long cookie;
 
+        // checkstyle flags the public modifier as redundant however it is explicitly needed for Java serialization to
+        // be able to create instances via reflection.
+        @SuppressWarnings("checkstyle:RedundantModifier")
         public Proxy() {
             // For Externalizable
         }
@@ -122,15 +125,15 @@ public final class LocalHistoryIdentifier implements WritableIdentifier {
     }
 
     @Override
-    public boolean equals(final Object o) {
-        if (this == o) {
+    public boolean equals(final Object obj) {
+        if (this == obj) {
             return true;
         }
-        if (!(o instanceof LocalHistoryIdentifier)) {
+        if (!(obj instanceof LocalHistoryIdentifier)) {
             return false;
         }
 
-        final LocalHistoryIdentifier other = (LocalHistoryIdentifier) o;
+        final LocalHistoryIdentifier other = (LocalHistoryIdentifier) obj;
         return historyId == other.historyId && cookie == other.cookie && clientId.equals(other.clientId);
     }
 

@@ -19,10 +19,11 @@ import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifie
  *
  * @param <T> Message type
  */
-abstract class AbstractLocalHistoryRequestProxy<T extends LocalHistoryRequest<T>> extends AbstractRequestProxy<LocalHistoryIdentifier, T> {
+abstract class AbstractLocalHistoryRequestProxy<T extends LocalHistoryRequest<T>>
+        extends AbstractRequestProxy<LocalHistoryIdentifier, T> {
     private static final long serialVersionUID = 1L;
 
-    AbstractLocalHistoryRequestProxy() {
+    protected AbstractLocalHistoryRequestProxy() {
         // For Externalizable
     }
 

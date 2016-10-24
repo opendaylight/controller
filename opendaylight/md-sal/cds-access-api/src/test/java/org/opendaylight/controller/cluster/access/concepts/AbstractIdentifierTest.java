@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.access.concepts;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -20,7 +21,9 @@ import org.opendaylight.yangtools.concepts.Identifier;
 
 public abstract class AbstractIdentifierTest<T extends Identifier> {
     abstract T object();
+
     abstract T differentObject();
+
     abstract T equalObject();
 
     @Test
@@ -38,10 +41,10 @@ public abstract class AbstractIdentifierTest<T extends Identifier> {
     }
 
     @SuppressWarnings("unchecked")
-    private static <T> T copy(T o) throws IOException, ClassNotFoundException {
+    private static <T> T copy(T obj) throws IOException, ClassNotFoundException {
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
         try (ObjectOutputStream oos = new ObjectOutputStream(bos)) {
-            oos.writeObject(o);
+            oos.writeObject(obj);
         }
 
         try (ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(bos.toByteArray()))) {

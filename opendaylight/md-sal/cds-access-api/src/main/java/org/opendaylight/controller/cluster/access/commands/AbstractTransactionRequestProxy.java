@@ -19,10 +19,11 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
  *
  * @param <T> Message type
  */
-abstract class AbstractTransactionRequestProxy<T extends TransactionRequest<T>> extends AbstractRequestProxy<TransactionIdentifier, T> {
+abstract class AbstractTransactionRequestProxy<T extends TransactionRequest<T>>
+        extends AbstractRequestProxy<TransactionIdentifier, T> {
     private static final long serialVersionUID = 1L;
 
-    AbstractTransactionRequestProxy() {
+    protected AbstractTransactionRequestProxy() {
         // For Externalizable
     }
 

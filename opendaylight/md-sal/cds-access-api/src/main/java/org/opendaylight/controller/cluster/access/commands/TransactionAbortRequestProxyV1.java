@@ -19,6 +19,9 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
 final class TransactionAbortRequestProxyV1 extends AbstractTransactionRequestProxy<TransactionAbortRequest> {
     private static final long serialVersionUID = 1L;
 
+    // checkstyle flags the public modifier as redundant however it is explicitly needed for Java serialization to
+    // be able to create instances via reflection.
+    @SuppressWarnings("checkstyle:RedundantModifier")
     public TransactionAbortRequestProxyV1() {
         // For Externalizable
     }

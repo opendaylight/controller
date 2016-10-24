@@ -20,7 +20,7 @@ abstract class AbstractEnvelopeProxy<T extends Message<?, ?>> implements Externa
     private long sessionId;
     private long txSequence;
 
-    public AbstractEnvelopeProxy() {
+    protected AbstractEnvelopeProxy() {
         // for Externalizable
     }
 
@@ -45,7 +45,7 @@ abstract class AbstractEnvelopeProxy<T extends Message<?, ?>> implements Externa
         message = (T) in.readObject();
     }
 
-    abstract Envelope<T> createEnvelope(T message, long sessionId, long txSequence);
+    abstract Envelope<T> createEnvelope(T wrappedNessage, long envSessionId, long envTxSequence);
 
     final Object readResolve() {
         return createEnvelope(message, sessionId, txSequence);

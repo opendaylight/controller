@@ -23,8 +23,8 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 public final class ExistsTransactionRequest extends AbstractReadTransactionRequest<ExistsTransactionRequest> {
     private static final long serialVersionUID = 1L;
 
-    public ExistsTransactionRequest(final @Nonnull TransactionIdentifier identifier, final long sequence,
-            final @Nonnull ActorRef replyTo, final @Nonnull YangInstanceIdentifier path) {
+    public ExistsTransactionRequest(@Nonnull final TransactionIdentifier identifier, final long sequence,
+            @Nonnull final ActorRef replyTo, @Nonnull final YangInstanceIdentifier path) {
         super(identifier, sequence, replyTo, path);
     }
 

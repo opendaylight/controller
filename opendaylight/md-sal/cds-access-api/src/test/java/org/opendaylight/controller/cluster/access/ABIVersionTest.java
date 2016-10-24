@@ -12,6 +12,7 @@ import static org.junit.Assert.assertTrue;
 import static org.opendaylight.controller.cluster.access.ABIVersion.BORON;
 import static org.opendaylight.controller.cluster.access.ABIVersion.TEST_FUTURE_VERSION;
 import static org.opendaylight.controller.cluster.access.ABIVersion.TEST_PAST_VERSION;
+
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import java.io.IOException;
@@ -32,12 +33,12 @@ public class ABIVersionTest {
         assertEquals(BORON, ABIVersion.readFrom(ByteStreams.newDataInput(writeVersion(BORON))));
     }
 
-    @Test(expected=PastVersionException.class)
+    @Test(expected = PastVersionException.class)
     public void testInvalidPastVersion() throws Exception {
         ABIVersion.valueOf(TEST_PAST_VERSION.shortValue());
     }
 
-    @Test(expected=FutureVersionException.class)
+    @Test(expected = FutureVersionException.class)
     public void testInvalidFutureVersion() throws Exception {
         ABIVersion.valueOf(TEST_FUTURE_VERSION.shortValue());
     }
@@ -48,7 +49,7 @@ public class ABIVersionTest {
         return bado.toByteArray();
     }
 
-    @Test(expected=IOException.class)
+    @Test(expected = IOException.class)
     public void testBadRead() throws IOException {
         ABIVersion.readFrom(ByteStreams.newDataInput(writeVersion(TEST_PAST_VERSION)));
     }
