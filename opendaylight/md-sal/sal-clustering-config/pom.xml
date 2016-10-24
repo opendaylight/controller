@@ -11,13 +11,9 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.opendaylight.controller</groupId>
-    <artifactId>config-parent</artifactId>
-    <version>0.6.0-SNAPSHOT</version>
-    <relativePath>../../config/config-parent</relativePath>
+    <artifactId>sal-parent</artifactId>
+    <version>1.5.0-SNAPSHOT</version>
   </parent>
-
-  <groupId>org.opendaylight.controller</groupId>
-  <version>1.5.0-SNAPSHOT</version>
   <artifactId>sal-clustering-config</artifactId>
   <description>Configuration files for md-sal clustering</description>
   <packaging>jar</packaging>
