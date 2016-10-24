@@ -15,7 +15,8 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 /**
- * Successful reply to an {@link ReadTransactionRequest}. It indicates presence of requested data via {@link #getData()}.
+ * Successful reply to an {@link ReadTransactionRequest}. It indicates presence of requested data via
+ * {@link #getData()}.
  *
  * @author Robert Varga
  */

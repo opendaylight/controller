@@ -26,7 +26,7 @@ public abstract class Envelope<T extends Message<?, ?>> implements Immutable, Se
     }
 
     /**
-     * Get the enclosed message
+     * Get the enclosed message.
      *
      * @return enclose message
      */

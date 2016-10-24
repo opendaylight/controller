@@ -34,7 +34,7 @@ abstract class AbstractMessageProxy<T extends WritableIdentifier, C extends Mess
         // For Externalizable
     }
 
-    AbstractMessageProxy(final @Nonnull C message) {
+    AbstractMessageProxy(@Nonnull final C message) {
         this.target = message.getTarget();
         this.sequence = message.getSequence();
     }
@@ -55,6 +55,9 @@ abstract class AbstractMessageProxy<T extends WritableIdentifier, C extends Mess
         return Verify.verifyNotNull(createMessage(target, sequence));
     }
 
-    protected abstract @Nonnull T readTarget(@Nonnull DataInput in) throws IOException;
-    abstract @Nonnull C createMessage(@Nonnull T target, long sequence);
+    @Nonnull
+    protected abstract T readTarget(@Nonnull DataInput in) throws IOException;
+
+    @Nonnull
+    abstract C createMessage(@Nonnull T msgTarget, long msgSequence);
 }

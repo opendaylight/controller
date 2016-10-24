@@ -42,7 +42,8 @@ public abstract class AbstractVersionException extends Exception {
      *
      * @return Closest supported {@link ABIVersion}
      */
-    public final @Nonnull ABIVersion getClosestVersion() {
+    @Nonnull
+    public final ABIVersion getClosestVersion() {
         return closestVersion;
     }
 

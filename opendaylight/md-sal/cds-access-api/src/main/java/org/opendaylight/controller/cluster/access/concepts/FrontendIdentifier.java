@@ -30,6 +30,9 @@ public final class FrontendIdentifier implements WritableIdentifier {
         private MemberName memberName;
         private FrontendType clientType;
 
+        // checkstyle flags the public modifier as redundant however it is explicitly needed for Java serialization to
+        // be able to create instances via reflection.
+        @SuppressWarnings("checkstyle:RedundantModifier")
         public Proxy() {
             // Needed for Externalizable
         }
@@ -95,15 +98,15 @@ public final class FrontendIdentifier implements WritableIdentifier {
     }
 
     @Override
-    public boolean equals(final Object o) {
-        if (this == o) {
+    public boolean equals(final Object obj) {
+        if (this == obj) {
             return true;
         }
-        if (!(o instanceof FrontendIdentifier)) {
+        if (!(obj instanceof FrontendIdentifier)) {
             return false;
         }
 
-        final FrontendIdentifier other = (FrontendIdentifier) o;
+        final FrontendIdentifier other = (FrontendIdentifier) obj;
         return memberName.equals(other.memberName) && clientType.equals(other.clientType);
     }
 

@@ -26,11 +26,11 @@ import org.opendaylight.yangtools.concepts.WritableIdentifier;
 public abstract class Response<T extends WritableIdentifier, C extends Response<T, C>> extends Message<T, C> {
     private static final long serialVersionUID = 1L;
 
-    Response(final @Nonnull T target, final long sequence) {
+    Response(@Nonnull final T target, final long sequence) {
         super(target, sequence);
     }
 
-    Response(final @Nonnull C response, final @Nonnull ABIVersion version) {
+    Response(@Nonnull final C response, @Nonnull final ABIVersion version) {
         super(response, version);
     }
 

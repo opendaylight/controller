@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
  */
 @Beta
 public enum ABIVersion implements WritableObject {
-    // NOTE: enumeration values need to be sorted in asceding order of their version to keep Comparable working
+    // NOTE: enumeration values need to be sorted in ascending order of their version to keep Comparable working
 
     /**
      * Version which is older than any other version. This version exists purely for testing purposes.
@@ -69,7 +69,8 @@ public enum ABIVersion implements WritableObject {
      *
      * @return Current {@link ABIVersion}
      */
-    public static @Nonnull ABIVersion current() {
+    @Nonnull
+    public static ABIVersion current() {
         return BORON;
     }
 
@@ -77,23 +78,24 @@ public enum ABIVersion implements WritableObject {
      * Return the {@link ABIVersion} corresponding to an unsigned short integer. This method is provided for callers
      * which provide their own recovery strategy in case of version incompatibility.
      *
-     * @param s Short integer as returned from {@link #shortValue()}
+     * @param value Short integer as returned from {@link #shortValue()}
      * @return {@link ABIVersion}
      * @throws FutureVersionException if the specified integer identifies a future version
      * @throws PastVersionException if the specified integer identifies a past version which is no longer supported
      */
-    public static @Nonnull ABIVersion valueOf(final short s) throws FutureVersionException, PastVersionException {
-        switch (Short.toUnsignedInt(s)) {
+    @Nonnull
+    public static ABIVersion valueOf(final short value) throws FutureVersionException, PastVersionException {
+        switch (Short.toUnsignedInt(value)) {
             case 0:
             case 1:
             case 2:
             case 3:
             case 4:
-                throw new PastVersionException(s, BORON);
+                throw new PastVersionException(value, BORON);
             case 5:
                 return BORON;
             default:
-                throw new FutureVersionException(s, BORON);
+                throw new FutureVersionException(value, BORON);
         }
     }
 
@@ -110,7 +112,8 @@ public enum ABIVersion implements WritableObject {
      * @return An {@link ABIVersion}
      * @throws IOException If read fails or an unsupported version is encountered
      */
-    public static @Nonnull ABIVersion readFrom(final @Nonnull DataInput in) throws IOException {
+    @Nonnull
+    public static ABIVersion readFrom(@Nonnull final DataInput in) throws IOException {
         final short s = in.readShort();
         try {
             return valueOf(s);
@@ -119,7 +122,7 @@ public enum ABIVersion implements WritableObject {
         }
     }
 
-    public static ABIVersion inexactReadFrom(final @Nonnull DataInput in) throws IOException {
+    public static ABIVersion inexactReadFrom(@Nonnull final DataInput in) throws IOException {
         final short onWire = in.readShort();
         try {
             return ABIVersion.valueOf(onWire);

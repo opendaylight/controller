@@ -24,6 +24,7 @@ import org.opendaylight.controller.cluster.access.concepts.RequestException;
  * - its minimum supported ABI version
  * - its maximum supported ABI version
  *
+ * <p>
  * It also includes request stream sequencing information.
  *
  * @author Robert Varga
@@ -62,12 +63,13 @@ public final class ConnectClientRequest extends Request<ClientIdentifier, Connec
     }
 
     @Override
-    public final ConnectClientFailure toRequestFailure(final RequestException cause) {
+    public ConnectClientFailure toRequestFailure(final RequestException cause) {
         return new ConnectClientFailure(getTarget(), getSequence(), cause);
     }
 
     @Override
-    protected AbstractRequestProxy<ClientIdentifier, ConnectClientRequest> externalizableProxy(final ABIVersion version) {
+    protected AbstractRequestProxy<ClientIdentifier, ConnectClientRequest> externalizableProxy(
+            final ABIVersion version) {
         return new ConnectClientRequestProxyV1(this);
     }
 
@@ -77,7 +79,8 @@ public final class ConnectClientRequest extends Request<ClientIdentifier, Connec
     }
 
     @Override
-    protected @Nonnull ToStringHelper addToStringAttributes(final @Nonnull ToStringHelper toStringHelper) {
+    @Nonnull
+    protected ToStringHelper addToStringAttributes(@Nonnull final ToStringHelper toStringHelper) {
         return super.addToStringAttributes(toStringHelper).add("minVersion", minVersion).add("maxVersion", maxVersion);
     }
 }

@@ -37,6 +37,9 @@ public final class FrontendType implements Comparable<FrontendType>, WritableIde
         private static final long serialVersionUID = 1L;
         private byte[] serialized;
 
+        // checkstyle flags the public modifier as redundant however it is explicitly needed for Java serialization to
+        // be able to create instances via reflection.
+        @SuppressWarnings("checkstyle:RedundantModifier")
         public Proxy() {
             // For Externalizable
         }
@@ -85,6 +88,7 @@ public final class FrontendType implements Comparable<FrontendType>, WritableIde
      * - US-ASCII letters and numbers
      * - special characters: -_.*+:=,!~';
      *
+     * @param name the input name
      * @return A {@link FrontendType} instance
      * @throws IllegalArgumentException if the string is null, empty or contains invalid characters
      */
@@ -103,9 +107,9 @@ public final class FrontendType implements Comparable<FrontendType>, WritableIde
 
     @Override
     public void writeTo(final DataOutput out) throws IOException {
-        final byte[] serialized = getSerialized();
-        out.writeInt(serialized.length);
-        out.write(serialized);
+        final byte[] local = getSerialized();
+        out.writeInt(local.length);
+        out.write(local);
     }
 
     public String getName() {
@@ -118,13 +122,13 @@ public final class FrontendType implements Comparable<FrontendType>, WritableIde
     }
 
     @Override
-    public boolean equals(final Object o) {
-        return this == o || (o instanceof FrontendType && name.equals(((FrontendType)o).name));
+    public boolean equals(final Object obj) {
+        return this == obj || obj instanceof FrontendType && name.equals(((FrontendType)obj).name);
     }
 
     @Override
-    public int compareTo(final FrontendType o) {
-        return this == o ? 0 : name.compareTo(o.name);
+    public int compareTo(final FrontendType obj) {
+        return this == obj ? 0 : name.compareTo(obj.name);
     }
 
     @Override

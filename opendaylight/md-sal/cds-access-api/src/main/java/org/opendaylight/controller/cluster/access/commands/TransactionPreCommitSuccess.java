@@ -23,7 +23,8 @@ public final class TransactionPreCommitSuccess extends TransactionSuccess<Transa
     }
 
     @Override
-    protected AbstractTransactionSuccessProxy<TransactionPreCommitSuccess> externalizableProxy(final ABIVersion version) {
+    protected AbstractTransactionSuccessProxy<TransactionPreCommitSuccess> externalizableProxy(
+            final ABIVersion version) {
         return new TransactionPreCommitSuccessProxyV1(this);
     }
 

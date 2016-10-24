@@ -21,7 +21,8 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
  * @param <T> Message type
  */
 @Beta
-public abstract class TransactionSuccess<T extends TransactionSuccess<T>> extends RequestSuccess<TransactionIdentifier, T> {
+public abstract class TransactionSuccess<T extends TransactionSuccess<T>>
+        extends RequestSuccess<TransactionIdentifier, T> {
     private static final long serialVersionUID = 1L;
 
     TransactionSuccess(final TransactionIdentifier identifier, final long sequence) {

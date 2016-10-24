@@ -23,8 +23,8 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
 public final class AbortLocalTransactionRequest extends AbstractLocalTransactionRequest<AbortLocalTransactionRequest> {
     private static final long serialVersionUID = 1L;
 
-    public AbortLocalTransactionRequest(final @Nonnull TransactionIdentifier identifier,
-            final @Nonnull ActorRef replyTo) {
+    public AbortLocalTransactionRequest(@Nonnull final TransactionIdentifier identifier,
+            @Nonnull final ActorRef replyTo) {
         super(identifier, 0, replyTo);
     }
 }

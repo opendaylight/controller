@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.access.concepts;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+
 import org.junit.Test;
 
 public class MemberNameTest extends AbstractIdentifierTest<MemberName> {

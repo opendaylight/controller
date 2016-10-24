@@ -10,7 +10,7 @@ package org.opendaylight.controller.cluster.access.concepts;
 abstract class AbstractResponseEnvelopeProxy<T extends Response<?, ?>> extends AbstractEnvelopeProxy<T> {
     private static final long serialVersionUID = 1L;
 
-    public AbstractResponseEnvelopeProxy() {
+    protected AbstractResponseEnvelopeProxy() {
         // for Externalizable
     }
 

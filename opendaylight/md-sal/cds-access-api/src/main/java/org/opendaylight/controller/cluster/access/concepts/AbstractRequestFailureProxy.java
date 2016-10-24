@@ -31,7 +31,7 @@ public abstract class AbstractRequestFailureProxy<T extends WritableIdentifier, 
         // For Externalizable
     }
 
-    protected AbstractRequestFailureProxy(final @Nonnull C failure) {
+    protected AbstractRequestFailureProxy(@Nonnull final C failure) {
         super(failure);
         this.cause = failure.getCause();
     }
@@ -53,5 +53,6 @@ public abstract class AbstractRequestFailureProxy<T extends WritableIdentifier, 
         return createFailure(target, sequence, cause);
     }
 
-    protected abstract @Nonnull C createFailure(@Nonnull T target, long sequence, @Nonnull RequestException cause);
+    @Nonnull
+    protected abstract C createFailure(@Nonnull T target, long sequence, @Nonnull RequestException failureCause);
 }
