@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a682502_09fcf93d",
+        "filename": "opendaylight/md-sal/sal-dom-config/pom.xml",
+        "patchSetId": 12
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-10-24T13:30:24Z",
+      "side": 1,
+      "message": "I missed the groupId. Pushing a fix.",
+      "revId": "8a637013c102c11323230dae08fa4407863945d6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
