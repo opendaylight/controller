@@ -24,11 +24,12 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
  *
  * @param <T> Message type
  */
-abstract class AbstractReadTransactionRequestProxyV1<T extends AbstractReadTransactionRequest<T>> extends AbstractTransactionRequestProxy<T> {
+abstract class AbstractReadTransactionRequestProxyV1<T extends AbstractReadTransactionRequest<T>>
+        extends AbstractTransactionRequestProxy<T> {
     private static final long serialVersionUID = 1L;
     private YangInstanceIdentifier path;
 
-    AbstractReadTransactionRequestProxyV1() {
+    protected AbstractReadTransactionRequestProxyV1() {
         // For Externalizable
     }
 
@@ -56,5 +57,5 @@ abstract class AbstractReadTransactionRequestProxyV1<T extends AbstractReadTrans
     }
 
     abstract T createReadRequest(TransactionIdentifier target, long sequence, ActorRef replyTo,
-            YangInstanceIdentifier path);
+            YangInstanceIdentifier requestPath);
 }

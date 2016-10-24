@@ -28,7 +28,7 @@ public abstract class AbstractSuccessProxy<T extends WritableIdentifier, C exten
         // For Externalizable
     }
 
-    protected AbstractSuccessProxy(final @Nonnull C success) {
+    protected AbstractSuccessProxy(@Nonnull final C success) {
         super(success);
     }
 
@@ -37,5 +37,6 @@ public abstract class AbstractSuccessProxy<T extends WritableIdentifier, C exten
         return createSuccess(target, sequence);
     }
 
-    protected abstract @Nonnull C createSuccess(@Nonnull T target, long sequence);
+    @Nonnull
+    protected abstract C createSuccess(@Nonnull T target, long sequence);
 }

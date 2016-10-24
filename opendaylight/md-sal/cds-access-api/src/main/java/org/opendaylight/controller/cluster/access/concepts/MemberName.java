@@ -32,6 +32,9 @@ public final class MemberName implements Comparable<MemberName>, WritableIdentif
         private static final long serialVersionUID = 1L;
         private byte[] serialized;
 
+        // checkstyle flags the public modifier as redundant however it is explicitly needed for Java serialization to
+        // be able to create instances via reflection.
+        @SuppressWarnings("checkstyle:RedundantModifier")
         public Proxy() {
             // For Externalizable
         }
@@ -85,9 +88,9 @@ public final class MemberName implements Comparable<MemberName>, WritableIdentif
 
     @Override
     public void writeTo(final DataOutput out) throws IOException {
-        final byte[] serialized = getSerialized();
-        out.writeInt(serialized.length);
-        out.write(serialized);
+        final byte[] local = getSerialized();
+        out.writeInt(local.length);
+        out.write(local);
     }
 
     public String getName() {
@@ -100,13 +103,13 @@ public final class MemberName implements Comparable<MemberName>, WritableIdentif
     }
 
     @Override
-    public boolean equals(final Object o) {
-        return this == o || (o instanceof MemberName && name.equals(((MemberName)o).name));
+    public boolean equals(final Object obj) {
+        return this == obj || obj instanceof MemberName && name.equals(((MemberName)obj).name);
     }
 
     @Override
-    public int compareTo(final MemberName o) {
-        return this == o ? 0 : name.compareTo(o.name);
+    public int compareTo(final MemberName obj) {
+        return this == obj ? 0 : name.compareTo(obj.name);
     }
 
     @Override

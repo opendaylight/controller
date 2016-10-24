@@ -32,6 +32,9 @@ final class ModifyTransactionRequestProxyV1 extends AbstractTransactionRequestPr
     private List<TransactionModification> modifications;
     private Optional<PersistenceProtocol> protocol;
 
+    // checkstyle flags the public modifier as redundant however it is explicitly needed for Java serialization to
+    // be able to create instances via reflection.
+    @SuppressWarnings("checkstyle:RedundantModifier")
     public ModifyTransactionRequestProxyV1() {
         // For Externalizable
     }

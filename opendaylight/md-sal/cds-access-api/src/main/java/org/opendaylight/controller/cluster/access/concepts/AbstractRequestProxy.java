@@ -34,7 +34,7 @@ public abstract class AbstractRequestProxy<T extends WritableIdentifier, C exten
         // For Externalizable
     }
 
-    protected AbstractRequestProxy(final @Nonnull C request) {
+    protected AbstractRequestProxy(@Nonnull final C request) {
         super(request);
         this.replyTo = request.getReplyTo();
     }
@@ -52,9 +52,11 @@ public abstract class AbstractRequestProxy<T extends WritableIdentifier, C exten
     }
 
     @Override
-    final @Nonnull C createMessage(@Nonnull final T target, final long sequence) {
+    @Nonnull
+    final C createMessage(@Nonnull final T target, final long sequence) {
         return createRequest(target, sequence, replyTo);
     }
 
-    protected abstract @Nonnull C createRequest(@Nonnull T target, long sequence, @Nonnull ActorRef replyTo);
+    @Nonnull
+    protected abstract C createRequest(@Nonnull T target, long sequence, @Nonnull ActorRef replyToActor);
 }

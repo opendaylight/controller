@@ -26,6 +26,9 @@ final class ConnectClientRequestProxyV1 extends AbstractRequestProxy<ClientIdent
     private ABIVersion minVersion;
     private ABIVersion maxVersion;
 
+    // checkstyle flags the public modifier as redundant however it is explicitly needed for Java serialization to
+    // be able to create instances via reflection.
+    @SuppressWarnings("checkstyle:RedundantModifier")
     public ConnectClientRequestProxyV1() {
         // for Externalizable
     }

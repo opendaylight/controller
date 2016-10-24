@@ -20,6 +20,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
  * Abstract base class for {@link TransactionRequest}s accessing data as visible in the isolated context of a particular
  * transaction. The path of the data being accessed is returned via {@link #getPath()}.
  *
+ * <p>
  * This class is visible outside of this package for the purpose of allowing common instanceof checks
  * and simplified codepaths.
  *
@@ -28,7 +29,8 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
  * @param <T> Message type
  */
 @Beta
-public abstract class AbstractReadTransactionRequest<T extends AbstractReadTransactionRequest<T>> extends TransactionRequest<T> {
+public abstract class AbstractReadTransactionRequest<T extends AbstractReadTransactionRequest<T>>
+        extends TransactionRequest<T> {
     private static final long serialVersionUID = 1L;
     private final YangInstanceIdentifier path;
 
@@ -43,7 +45,8 @@ public abstract class AbstractReadTransactionRequest<T extends AbstractReadTrans
         this.path = request.getPath();
     }
 
-    public final @Nonnull YangInstanceIdentifier getPath() {
+    @Nonnull
+    public final YangInstanceIdentifier getPath() {
         return path;
     }
 

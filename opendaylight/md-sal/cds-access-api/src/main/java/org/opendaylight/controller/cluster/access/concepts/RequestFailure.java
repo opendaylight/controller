@@ -23,16 +23,17 @@ import org.opendaylight.yangtools.concepts.WritableIdentifier;
  * @param <C> Message class
  */
 @Beta
-public abstract class RequestFailure<T extends WritableIdentifier, C extends RequestFailure<T, C>> extends Response<T, C> {
+public abstract class RequestFailure<T extends WritableIdentifier, C extends RequestFailure<T, C>>
+        extends Response<T, C> {
     private static final long serialVersionUID = 1L;
     private final RequestException cause;
 
-    protected RequestFailure(final @Nonnull C failure, final @Nonnull ABIVersion version) {
+    protected RequestFailure(@Nonnull final C failure, @Nonnull final ABIVersion version) {
         super(failure, version);
         this.cause = Preconditions.checkNotNull(failure.getCause());
     }
 
-    protected RequestFailure(final @Nonnull T target, final long sequence, final @Nonnull RequestException cause) {
+    protected RequestFailure(@Nonnull final T target, final long sequence, @Nonnull final RequestException cause) {
         super(target, sequence);
         this.cause = Preconditions.checkNotNull(cause);
     }
@@ -42,7 +43,8 @@ public abstract class RequestFailure<T extends WritableIdentifier, C extends Req
      *
      * @return Failure cause.
      */
-    public final @Nonnull RequestException getCause() {
+    @Nonnull
+    public final RequestException getCause() {
         return cause;
     }
 

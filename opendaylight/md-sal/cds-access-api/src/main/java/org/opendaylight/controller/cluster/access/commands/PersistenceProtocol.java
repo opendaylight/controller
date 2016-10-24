@@ -58,18 +58,18 @@ public enum PersistenceProtocol implements WritableObject {
         out.writeByte(byteValue());
     }
 
-    abstract byte byteValue();
-
     public static PersistenceProtocol readFrom(final DataInput in) throws IOException {
         return valueOf(in.readByte());
     }
+
+    abstract byte byteValue();
 
     static int byteValue(final PersistenceProtocol finish) {
         return finish == null ? 0 : finish.byteValue();
     }
 
-    static PersistenceProtocol valueOf(final byte b) {
-        switch (b) {
+    static PersistenceProtocol valueOf(final byte value) {
+        switch (value) {
             case 0:
                 return null;
             case 1:
@@ -79,7 +79,7 @@ public enum PersistenceProtocol implements WritableObject {
             case 3:
                 return THREE_PHASE;
             default:
-                throw new IllegalArgumentException("Unhandled byte value " + b);
+                throw new IllegalArgumentException("Unhandled byte value " + value);
         }
     }
 }

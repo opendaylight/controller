@@ -20,6 +20,9 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 final class ReadTransactionRequestProxyV1 extends AbstractReadTransactionRequestProxyV1<ReadTransactionRequest> {
     private static final long serialVersionUID = 1L;
 
+    // checkstyle flags the public modifier as redundant however it is explicitly needed for Java serialization to
+    // be able to create instances via reflection.
+    @SuppressWarnings("checkstyle:RedundantModifier")
     public ReadTransactionRequestProxyV1() {
         // For Externalizable
     }

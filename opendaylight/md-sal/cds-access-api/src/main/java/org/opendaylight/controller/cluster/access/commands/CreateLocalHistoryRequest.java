@@ -34,7 +34,8 @@ public final class CreateLocalHistoryRequest extends LocalHistoryRequest<CreateL
     }
 
     @Override
-    protected AbstractLocalHistoryRequestProxy<CreateLocalHistoryRequest> externalizableProxy(final ABIVersion version) {
+    protected AbstractLocalHistoryRequestProxy<CreateLocalHistoryRequest> externalizableProxy(
+            final ABIVersion version) {
         return new CreateLocalHistoryRequestProxyV1(this);
     }
 

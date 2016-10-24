@@ -19,6 +19,9 @@ import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifie
 final class CreateLocalHistoryRequestProxyV1 extends AbstractLocalHistoryRequestProxy<CreateLocalHistoryRequest> {
     private static final long serialVersionUID = 1L;
 
+    // checkstyle flags the public modifier as redundant however it is explicitly needed for Java serialization to
+    // be able to create instances via reflection.
+    @SuppressWarnings("checkstyle:RedundantModifier")
     public CreateLocalHistoryRequestProxyV1() {
         // For Externalizable
     }

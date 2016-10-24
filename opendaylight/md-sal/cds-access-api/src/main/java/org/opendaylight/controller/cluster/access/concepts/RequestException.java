@@ -20,11 +20,11 @@ import javax.annotation.Nonnull;
 public abstract class RequestException extends Exception {
     private static final long serialVersionUID = 1L;
 
-    protected RequestException(final @Nonnull String message) {
+    protected RequestException(@Nonnull final String message) {
         super(Preconditions.checkNotNull(message));
     }
 
-    protected RequestException(final @Nonnull String message, final @Nonnull Exception cause) {
+    protected RequestException(@Nonnull final String message, @Nonnull final Exception cause) {
         super(Preconditions.checkNotNull(message), Preconditions.checkNotNull(cause));
     }
 

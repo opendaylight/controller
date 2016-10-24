@@ -24,11 +24,11 @@ public abstract class RequestSuccess<T extends WritableIdentifier, C extends Req
         Response<T, C> {
     private static final long serialVersionUID = 1L;
 
-    protected RequestSuccess(final @Nonnull C success, final @Nonnull ABIVersion version) {
+    protected RequestSuccess(@Nonnull final C success, @Nonnull final ABIVersion version) {
         super(success, version);
     }
 
-    protected RequestSuccess(final @Nonnull T target, final long sequence) {
+    protected RequestSuccess(@Nonnull final T target, final long sequence) {
         super(target, sequence);
     }
 
