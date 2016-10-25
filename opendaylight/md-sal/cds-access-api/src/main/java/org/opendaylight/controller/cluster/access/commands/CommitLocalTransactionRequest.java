@@ -11,6 +11,7 @@ import akka.actor.ActorRef;
 import com.google.common.annotations.Beta;
 import com.google.common.base.MoreObjects.ToStringHelper;
 import com.google.common.base.Preconditions;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import javax.annotation.Nonnull;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
@@ -25,6 +26,10 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification
 public final class CommitLocalTransactionRequest
         extends AbstractLocalTransactionRequest<CommitLocalTransactionRequest> {
     private static final long serialVersionUID = 1L;
+
+    @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "This field is not Serializable but this class "
+            + "implements writeReplace to delegate serialization to a Proxy class and thus instances of this class "
+            + "aren't serialized. FindBugs does not recognize this.")
     private final DataTreeModification mod;
     private final boolean coordinated;
 

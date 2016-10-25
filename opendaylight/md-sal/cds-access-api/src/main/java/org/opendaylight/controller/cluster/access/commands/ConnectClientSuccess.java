@@ -13,6 +13,7 @@ import com.google.common.annotations.Beta;
 import com.google.common.base.MoreObjects.ToStringHelper;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.List;
 import java.util.Optional;
 import javax.annotation.Nonnull;
@@ -32,7 +33,12 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
 public final class ConnectClientSuccess extends RequestSuccess<ClientIdentifier, ConnectClientSuccess> {
     private static final long serialVersionUID = 1L;
 
+    @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "This field is not Serializable but this class "
+            + "implements writeReplace to delegate serialization to a Proxy class and thus instances of this class "
+            + "aren't serialized. FindBugs does not recognize this.")
     private final List<ActorSelection> alternates;
+
+    @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "See justification above.")
     private final DataTree dataTree;
     private final ActorRef backend;
     private final int maxMessages;
