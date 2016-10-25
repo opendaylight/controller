@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.datastore.compat;
 
 import static org.junit.Assert.assertEquals;
+
 import akka.actor.ActorRef;
 import akka.actor.PoisonPill;
 import akka.testkit.TestActorRef;

@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.datastore.shardmanager;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+
 import akka.actor.ActorRef;
 import akka.actor.Status.Failure;
 import akka.actor.Terminated;

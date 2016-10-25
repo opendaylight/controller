@@ -13,6 +13,7 @@ import static org.mockito.Matchers.anyLong;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+
 import com.codahale.metrics.Timer;
 import com.google.common.base.Ticker;
 import java.util.concurrent.TimeUnit;
@@ -41,7 +42,7 @@ public class TransactionRateLimitingCallbackTest {
     TransactionRateLimitingCallback callback;
 
     @Before
-    public void setUp(){
+    public void setUp() {
         MockitoAnnotations.initMocks(this);
         doReturn(mockTimer).when(mockContext).getOperationTimer(ActorContext.COMMIT);
         callback = new TransactionRateLimitingCallback(mockContext);
@@ -83,12 +84,12 @@ public class TransactionRateLimitingCallbackTest {
     }
 
     @Test
-    public void testSuccessWithoutRun(){
+    public void testSuccessWithoutRun() {
         try {
             callback.success();
             fail("Expected IllegalStateException");
-        } catch(IllegalStateException e){
-
+        } catch (IllegalStateException e) {
+            // expected
         }
 
         verify(mockTimer, never()).update(anyLong(), any(TimeUnit.class));

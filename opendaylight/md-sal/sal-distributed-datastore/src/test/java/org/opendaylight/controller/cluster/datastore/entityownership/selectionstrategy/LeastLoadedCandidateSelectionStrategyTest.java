@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.datastore.entityownership.selectionstrategy;
 
 import static org.junit.Assert.assertEquals;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -18,8 +19,9 @@ import org.junit.Test;
 public class LeastLoadedCandidateSelectionStrategyTest {
 
     @Test
-    public void testLeastLoadedStrategy(){
-        LeastLoadedCandidateSelectionStrategy strategy = new LeastLoadedCandidateSelectionStrategy(0L, Collections.<String, Long>emptyMap());
+    public void testLeastLoadedStrategy() {
+        LeastLoadedCandidateSelectionStrategy strategy = new LeastLoadedCandidateSelectionStrategy(
+                0L, Collections.<String, Long>emptyMap());
 
         String owner = strategy.newOwner(null, prepareViableCandidates(3));
         assertEquals("member-1", owner);
@@ -63,25 +65,25 @@ public class LeastLoadedCandidateSelectionStrategyTest {
 
     }
 
-    private static Map<String, Long> prepareStatistics(long... count){
+    private static Map<String, Long> prepareStatistics(long... count) {
         Map<String, Long> statistics = new HashMap<>();
-        for(int i=0;i<count.length;i++){
-            statistics.put("member-" + (i+1), count[i]);
+        for (int i = 0; i < count.length; i++) {
+            statistics.put("member-" + (i + 1), count[i]);
         }
         return statistics;
     }
 
-    private static Collection<String> prepareViableCandidates(int count){
+    private static Collection<String> prepareViableCandidates(int count) {
         Collection<String> viableCandidates = new ArrayList<>();
-        for(int i=0;i<count;i++){
-            viableCandidates.add("member-" + (i+1));
+        for (int i = 0; i < count; i++) {
+            viableCandidates.add("member-" + (i + 1));
         }
         return viableCandidates;
     }
 
-    private static void assertStatistics(Map<String, Long> statistics, long... count){
-        for(int i=0;i<count.length;i++){
-            assertEquals(count[i], (long) statistics.get("member-" + (i+1)));
+    private static void assertStatistics(Map<String, Long> statistics, long... count) {
+        for (int i = 0; i < count.length; i++) {
+            assertEquals(count[i], (long) statistics.get("member-" + (i + 1)));
         }
     }
 }

@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.datastore.messages;
 
 import static org.junit.Assert.assertEquals;
+
 import org.apache.commons.lang.SerializationUtils;
 import org.junit.Test;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
@@ -26,22 +27,23 @@ public class DataChangedTest {
 
     @Test
     public void testSerialization() {
-        DOMImmutableDataChangeEvent change = DOMImmutableDataChangeEvent.builder(DataChangeScope.SUBTREE).
-                addCreated(TestModel.TEST_PATH, ImmutableContainerNodeBuilder.create().withNodeIdentifier(
-                        new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME)).
-                        withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo")).build()).
-                addUpdated(TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME),
-                        ImmutableContainerNodeBuilder.create().withNodeIdentifier(
-                            new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME)).
-                            withChild(ImmutableNodes.leafNode(TestModel.NAME_QNAME, "bar")).build())
-.
-                addRemoved(TestModel.OUTER_LIST_PATH,
-                       ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME).build()).
-                setBefore(ImmutableNodes.containerNode(TestModel.TEST_QNAME)).
-                setAfter(ImmutableContainerNodeBuilder.create().withNodeIdentifier(
-                        new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME)).
-                        withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo")).
-                        withChild(ImmutableNodes.leafNode(TestModel.NAME_QNAME, "bar")).build()).build();
+        DOMImmutableDataChangeEvent change = DOMImmutableDataChangeEvent.builder(DataChangeScope.SUBTREE)
+                .addCreated(TestModel.TEST_PATH,
+                        ImmutableContainerNodeBuilder.create()
+                                .withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME))
+                                .withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo")).build())
+                .addUpdated(TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME),
+                        ImmutableContainerNodeBuilder.create()
+                                .withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME))
+                                .withChild(ImmutableNodes.leafNode(TestModel.NAME_QNAME, "bar")).build())
+                .addRemoved(TestModel.OUTER_LIST_PATH,
+                        ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME).build())
+                .setBefore(ImmutableNodes.containerNode(TestModel.TEST_QNAME))
+                .setAfter(ImmutableContainerNodeBuilder.create()
+                        .withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME))
+                        .withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo"))
+                        .withChild(ImmutableNodes.leafNode(TestModel.NAME_QNAME, "bar")).build())
+                .build();
 
         DataChanged expected = new DataChanged(change);
 

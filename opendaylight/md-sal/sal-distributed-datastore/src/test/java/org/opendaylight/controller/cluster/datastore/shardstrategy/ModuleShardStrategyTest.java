@@ -9,6 +9,7 @@
 package org.opendaylight.controller.cluster.datastore.shardstrategy;
 
 import static org.junit.Assert.assertEquals;
+
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
@@ -26,7 +27,7 @@ public class ModuleShardStrategyTest {
     private static Configuration configuration;
 
     @BeforeClass
-    public static void setUpClass(){
+    public static void setUpClass() {
         configuration = new ConfigurationImpl("module-shards.conf", "modules.conf");
     }
 
@@ -43,11 +44,11 @@ public class ModuleShardStrategyTest {
 
     @Test
     public void testFindShardWhenModuleConfigurationPresentInModulesButMissingInModuleShards() {
+        final QName baseQName = QName.create(
+                "urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test:missing", "2014-03-13",
+                "missing");
 
-        final QName BASE_QNAME = QName.create("urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test:missing", "2014-03-13",
-            "missing");
-
-        final YangInstanceIdentifier BASE_PATH = YangInstanceIdentifier.of(BASE_QNAME);
+        final YangInstanceIdentifier BASE_PATH = YangInstanceIdentifier.of(baseQName);
 
         ModuleShardStrategy moduleShardStrategy =
             new ModuleShardStrategy("missing", configuration);

@@ -22,23 +22,23 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 public abstract class AbstractModificationTest {
 
-  protected InMemoryDOMDataStore store;
+    protected InMemoryDOMDataStore store;
 
-  @Before
-  public void setUp(){
-    store = new InMemoryDOMDataStore("test", MoreExecutors.newDirectExecutorService());
-    store.onGlobalContextUpdated(TestModel.createTestContext());
-  }
+    @Before
+    public void setUp() {
+        store = new InMemoryDOMDataStore("test", MoreExecutors.newDirectExecutorService());
+        store.onGlobalContextUpdated(TestModel.createTestContext());
+    }
 
-  protected void commitTransaction(final DOMStoreWriteTransaction transaction){
-    DOMStoreThreePhaseCommitCohort cohort = transaction.ready();
-    cohort.preCommit();
-    cohort.commit();
-  }
+    protected void commitTransaction(final DOMStoreWriteTransaction transaction) {
+        DOMStoreThreePhaseCommitCohort cohort = transaction.ready();
+        cohort.preCommit();
+        cohort.commit();
+    }
 
-  protected Optional<NormalizedNode<?,?>> readData(final YangInstanceIdentifier path) throws Exception{
-    DOMStoreReadTransaction transaction = store.newReadOnlyTransaction();
-    ListenableFuture<Optional<NormalizedNode<?, ?>>> future = transaction.read(path);
-    return future.get();
-  }
+    protected Optional<NormalizedNode<?, ?>> readData(final YangInstanceIdentifier path) throws Exception {
+        DOMStoreReadTransaction transaction = store.newReadOnlyTransaction();
+        ListenableFuture<Optional<NormalizedNode<?, ?>>> future = transaction.read(path);
+        return future.get();
+    }
 }

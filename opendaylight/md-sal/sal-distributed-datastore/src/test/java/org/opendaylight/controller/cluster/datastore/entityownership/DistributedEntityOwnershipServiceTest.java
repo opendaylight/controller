@@ -27,6 +27,7 @@ import static org.opendaylight.controller.cluster.datastore.entityownership.Enti
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.entityOwnersWithEntityTypeEntry;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.entityPath;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.entityTypeEntryWithEntityEntry;
+
 import akka.actor.ActorRef;
 import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
@@ -83,8 +84,8 @@ public class DistributedEntityOwnershipServiceTest extends AbstractEntityOwnersh
 
     @Before
     public void setUp() {
-        DatastoreContext datastoreContext = DatastoreContext.newBuilder().dataStoreName(dataStoreName).
-                shardInitializationTimeout(10, TimeUnit.SECONDS).build();
+        DatastoreContext datastoreContext = DatastoreContext.newBuilder().dataStoreName(dataStoreName)
+                .shardInitializationTimeout(10, TimeUnit.SECONDS).build();
 
         Configuration configuration = new ConfigurationImpl(new EmptyModuleShardConfigProvider()) {
             @Override
@@ -97,7 +98,8 @@ public class DistributedEntityOwnershipServiceTest extends AbstractEntityOwnersh
         Mockito.doReturn(datastoreContext).when(mockContextFactory).getBaseDatastoreContext();
         Mockito.doReturn(datastoreContext).when(mockContextFactory).getShardDatastoreContext(Mockito.anyString());
 
-        dataStore = new DistributedDataStore(getSystem(), new MockClusterWrapper(), configuration, mockContextFactory, null);
+        dataStore = new DistributedDataStore(getSystem(), new MockClusterWrapper(), configuration,
+                mockContextFactory, null);
 
         dataStore.onGlobalContextUpdated(SchemaContextHelper.entityOwners());
     }
@@ -145,7 +147,7 @@ public class DistributedEntityOwnershipServiceTest extends AbstractEntityOwnersh
         try {
             service.registerCandidate(entity);
             fail("Expected CandidateAlreadyRegisteredException");
-        } catch(CandidateAlreadyRegisteredException e) {
+        } catch (CandidateAlreadyRegisteredException e) {
             // expected
             assertEquals("getEntity", entity, e.getEntity());
         }
@@ -228,7 +230,8 @@ public class DistributedEntityOwnershipServiceTest extends AbstractEntityOwnersh
         when(service.getLocalEntityOwnershipShardDataTree()).thenReturn(shardDataTree.getDataTree());
 
         DOMEntity entity1 = new DOMEntity(ENTITY_TYPE, "one");
-        writeNode(ENTITY_OWNERS_PATH, entityOwnersWithCandidate(ENTITY_TYPE, entity1.getIdentifier(), "member-1"), shardDataTree);
+        writeNode(ENTITY_OWNERS_PATH, entityOwnersWithCandidate(ENTITY_TYPE, entity1.getIdentifier(), "member-1"),
+                shardDataTree);
         writeNode(ENTITY_OWNERS_PATH, entityOwnersWithEntityTypeEntry(entityTypeEntryWithEntityEntry(entity1.getType(),
                 entityEntryWithOwner(entity1.getIdentifier(), "member-1"))), shardDataTree);
         verifyGetOwnershipState(service, entity1, EntityOwnershipState.IS_OWNER);
@@ -239,8 +242,8 @@ public class DistributedEntityOwnershipServiceTest extends AbstractEntityOwnersh
                 entityEntryWithOwner(entity1.getIdentifier(), "member-2"), shardDataTree);
         verifyGetOwnershipState(service, entity1, EntityOwnershipState.OWNED_BY_OTHER);
 
-        writeNode(entityPath(entity1.getType(), entity1.getIdentifier()), entityEntryWithOwner(entity1.getIdentifier(), ""),
-                shardDataTree);
+        writeNode(entityPath(entity1.getType(), entity1.getIdentifier()), entityEntryWithOwner(entity1.getIdentifier(),
+                ""), shardDataTree);
         verifyGetOwnershipState(service, entity1, EntityOwnershipState.NO_OWNER);
 
         DOMEntity entity2 = new DOMEntity(ENTITY_TYPE, "two");
@@ -282,19 +285,20 @@ public class DistributedEntityOwnershipServiceTest extends AbstractEntityOwnersh
         assertEquals("EntityOwnershipState", expState, state.get());
     }
 
+    @SuppressWarnings("checkstyle:IllegalCatch")
     private void verifyEntityCandidate(final ActorRef entityOwnershipShard, final String entityType,
             final YangInstanceIdentifier entityId, final String candidateName) {
-        verifyEntityCandidate(entityType, entityId, candidateName,
-                path -> {
-                    try {
-                        return dataStore.newReadOnlyTransaction().read(path).get(5, TimeUnit.SECONDS).get();
-                    } catch (Exception e) {
-                        return null;
-                    }
-                });
+        verifyEntityCandidate(entityType, entityId, candidateName, path -> {
+            try {
+                return dataStore.newReadOnlyTransaction().read(path).get(5, TimeUnit.SECONDS).get();
+            } catch (Exception e) {
+                return null;
+            }
+        });
     }
 
-    private static void verifyRegisterCandidateLocal(final DistributedEntityOwnershipService service, final DOMEntity entity) {
+    private static void verifyRegisterCandidateLocal(final DistributedEntityOwnershipService service,
+            final DOMEntity entity) {
         RegisterCandidateLocal regCandidate = verifyMessage(service, RegisterCandidateLocal.class);
         assertEquals("getEntity", entity, regCandidate.getEntity());
     }

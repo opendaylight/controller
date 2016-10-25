@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.datastore;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+
 import com.google.common.base.Optional;
 import java.io.IOException;
 import org.junit.Before;
@@ -39,7 +40,7 @@ public class ShardRecoveryCoordinatorTest extends AbstractTest {
     private SchemaContext carsSchemaContext;
 
     @Before
-    public void setUp(){
+    public void setUp() {
         peopleSchemaContext = SchemaContextHelper.select(SchemaContextHelper.PEOPLE_YANG);
         carsSchemaContext = SchemaContextHelper.select(SchemaContextHelper.CARS_YANG);
 
@@ -50,13 +51,13 @@ public class ShardRecoveryCoordinatorTest extends AbstractTest {
 
     @Deprecated
     @Test
-    public void testAppendRecoveredLogEntryDataTreeCandidatePayload(){
+    public void testAppendRecoveredLogEntryDataTreeCandidatePayload() {
         final ShardRecoveryCoordinator coordinator = new ShardRecoveryCoordinator(peopleDataTree,
                 null, "foobar", LoggerFactory.getLogger("foo"));
         coordinator.startLogRecoveryBatch(10);
         try {
             coordinator.appendRecoveredLogEntry(DataTreeCandidatePayload.create(createCar()));
-        } catch(final SchemaValidationFailedException e){
+        } catch (final SchemaValidationFailedException e) {
             fail("SchemaValidationFailedException should not happen if pruning is done");
         }
 
@@ -70,7 +71,7 @@ public class ShardRecoveryCoordinatorTest extends AbstractTest {
         coordinator.startLogRecoveryBatch(10);
         try {
             coordinator.appendRecoveredLogEntry(CommitTransactionPayload.create(nextTransactionId(), createCar()));
-        } catch(final SchemaValidationFailedException e){
+        } catch (final SchemaValidationFailedException e) {
             fail("SchemaValidationFailedException should not happen if pruning is done");
         }
 
@@ -78,7 +79,7 @@ public class ShardRecoveryCoordinatorTest extends AbstractTest {
     }
 
     @Test
-    public void testApplyRecoverySnapshot(){
+    public void testApplyRecoverySnapshot() {
         final ShardRecoveryCoordinator coordinator = new ShardRecoveryCoordinator(peopleDataTree,
                 null, "foobar", LoggerFactory.getLogger("foo"));
         coordinator.startLogRecoveryBatch(10);
@@ -91,19 +92,19 @@ public class ShardRecoveryCoordinatorTest extends AbstractTest {
 
 
     @Test
-    public void testApplyCurrentLogRecoveryBatch(){
+    public void testApplyCurrentLogRecoveryBatch() {
         final ShardRecoveryCoordinator coordinator = new ShardRecoveryCoordinator(peopleDataTree,
                 null, "foobar", LoggerFactory.getLogger("foo"));
         coordinator.startLogRecoveryBatch(10);
 
         try {
             coordinator.applyCurrentLogRecoveryBatch();
-        } catch(final IllegalArgumentException e){
+        } catch (final IllegalArgumentException e) {
             fail("IllegalArgumentException should not happen - if the pruning modification delegate is passed");
         }
     }
 
-    private DataTreeCandidateTip createCar(){
+    private DataTreeCandidateTip createCar() {
         final TipProducingDataTree dataTree = InMemoryDataTreeFactory.getInstance().create(TreeType.OPERATIONAL);
         dataTree.setSchemaContext(carsSchemaContext);
 
@@ -116,7 +117,7 @@ public class ShardRecoveryCoordinatorTest extends AbstractTest {
         return dataTree.prepare(modification);
     }
 
-    private Optional<NormalizedNode<?,?>> readCars(final ShardDataTree shardDataTree){
+    private Optional<NormalizedNode<?,?>> readCars(final ShardDataTree shardDataTree) {
         final TipProducingDataTree dataTree = shardDataTree.getDataTree();
         // FIXME: this should not be called here
         dataTree.setSchemaContext(peopleSchemaContext);
@@ -124,7 +125,7 @@ public class ShardRecoveryCoordinatorTest extends AbstractTest {
         return shardDataTree.readNode(CarsModel.BASE_PATH);
     }
 
-    private Optional<NormalizedNode<?,?>> readPeople(final ShardDataTree shardDataTree){
+    private Optional<NormalizedNode<?,?>> readPeople(final ShardDataTree shardDataTree) {
         final TipProducingDataTree dataTree = shardDataTree.getDataTree();
         // FIXME: this should not be called here
         dataTree.setSchemaContext(peopleSchemaContext);
@@ -132,9 +133,10 @@ public class ShardRecoveryCoordinatorTest extends AbstractTest {
         return shardDataTree.readNode(PeopleModel.BASE_PATH);
     }
 
-    private static byte[] createSnapshot(){
+    private static byte[] createSnapshot() {
         final TipProducingDataTree dataTree = InMemoryDataTreeFactory.getInstance().create(TreeType.OPERATIONAL);
-        dataTree.setSchemaContext(SchemaContextHelper.select(SchemaContextHelper.CARS_YANG, SchemaContextHelper.PEOPLE_YANG));
+        dataTree.setSchemaContext(SchemaContextHelper.select(SchemaContextHelper.CARS_YANG,
+                SchemaContextHelper.PEOPLE_YANG));
 
         DataTreeSnapshot snapshot = dataTree.takeSnapshot();
 

@@ -33,7 +33,7 @@ public class ShardTestKit extends JavaTestKit {
         super(actorSystem);
     }
 
-    public void waitForLogMessage(final Class<?> logLevel, ActorRef subject, String logMessage){
+    public void waitForLogMessage(final Class<?> logLevel, ActorRef subject, String logMessage) {
         // Wait for a specific log message to show up
         final boolean result =
             new JavaTestKit.EventFilter<Boolean>(logLevel
@@ -50,18 +50,20 @@ public class ShardTestKit extends JavaTestKit {
 
     }
 
+    @SuppressWarnings("checkstyle:IllegalCatch")
     public static String waitUntilLeader(ActorRef shard) {
         FiniteDuration duration = Duration.create(100, TimeUnit.MILLISECONDS);
-        for(int i = 0; i < 20 * 5; i++) {
+        for (int i = 0; i < 20 * 5; i++) {
             Future<Object> future = Patterns.ask(shard, FindLeader.INSTANCE, new Timeout(duration));
             try {
-                final Optional<String> maybeLeader = ((FindLeaderReply)Await.result(future, duration)).getLeaderActor();
+                final Optional<String> maybeLeader = ((FindLeaderReply) Await.result(future, duration))
+                        .getLeaderActor();
                 if (maybeLeader.isPresent()) {
                     return maybeLeader.get();
                 }
-            } catch(TimeoutException e) {
+            } catch (TimeoutException e) {
                 LOG.trace("FindLeader timed out", e);
-            } catch(Exception e) {
+            } catch (Exception e) {
                 LOG.error("FindLeader failed", e);
             }
 
@@ -72,21 +74,23 @@ public class ShardTestKit extends JavaTestKit {
         return null;
     }
 
+    @SuppressWarnings("checkstyle:IllegalCatch")
     public void waitUntilNoLeader(ActorRef shard) {
         FiniteDuration duration = Duration.create(100, TimeUnit.MILLISECONDS);
         Object lastResponse = null;
-        for(int i = 0; i < 20 * 5; i++) {
+        for (int i = 0; i < 20 * 5; i++) {
             Future<Object> future = Patterns.ask(shard, FindLeader.INSTANCE, new Timeout(duration));
             try {
-                final Optional<String> maybeLeader = ((FindLeaderReply)Await.result(future, duration)).getLeaderActor();
+                final Optional<String> maybeLeader = ((FindLeaderReply) Await.result(future, duration))
+                        .getLeaderActor();
                 if (!maybeLeader.isPresent()) {
                     return;
                 }
 
                 lastResponse = maybeLeader.get();
-            } catch(TimeoutException e) {
+            } catch (TimeoutException e) {
                 lastResponse = e;
-            } catch(Exception e) {
+            } catch (Exception e) {
                 LOG.error("FindLeader failed", e);
                 lastResponse = e;
             }
@@ -94,10 +98,10 @@ public class ShardTestKit extends JavaTestKit {
             Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
         }
 
-        if(lastResponse instanceof Throwable) {
+        if (lastResponse instanceof Throwable) {
             throw (AssertionError)new AssertionError(
-                    String.format("Unexpected error occurred from FindLeader for shard %s", shard.path())).
-                            initCause((Throwable)lastResponse);
+                    String.format("Unexpected error occurred from FindLeader for shard %s", shard.path()))
+                            .initCause((Throwable)lastResponse);
         }
 
         Assert.fail(String.format("Unexpected leader %s found for shard %s", lastResponse, shard.path()));

@@ -20,25 +20,28 @@ import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 
 public class DataTreeChangeListenerRegistrationActorTest extends AbstractActorTest {
-    private static final InMemoryDOMDataStore store = new InMemoryDOMDataStore("OPER", MoreExecutors.newDirectExecutorService());
+    private static final InMemoryDOMDataStore STORE = new InMemoryDOMDataStore("OPER",
+            MoreExecutors.newDirectExecutorService());
 
     static {
-        store.onGlobalContextUpdated(TestModel.createTestContext());
+        STORE.onGlobalContextUpdated(TestModel.createTestContext());
     }
 
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     @Test
     public void testOnReceiveCloseListenerRegistration() throws Exception {
-        new JavaTestKit(getSystem()) {{
-            final ListenerRegistration mockListenerReg = Mockito.mock(ListenerRegistration.class);
-            final Props props = DataTreeChangeListenerRegistrationActor.props(mockListenerReg);
-            final ActorRef subject = getSystem().actorOf(props, "testCloseListenerRegistration");
+        new JavaTestKit(getSystem()) {
+            {
+                final ListenerRegistration mockListenerReg = Mockito.mock(ListenerRegistration.class);
+                final Props props = DataTreeChangeListenerRegistrationActor.props(mockListenerReg);
+                final ActorRef subject = getSystem().actorOf(props, "testCloseListenerRegistration");
 
-            subject.tell(CloseDataTreeChangeListenerRegistration.getInstance(), getRef());
+                subject.tell(CloseDataTreeChangeListenerRegistration.getInstance(), getRef());
 
-            expectMsgClass(duration("1 second"), CloseDataTreeChangeListenerRegistrationReply.class);
+                expectMsgClass(duration("1 second"), CloseDataTreeChangeListenerRegistrationReply.class);
 
-            Mockito.verify(mockListenerReg).close();
-        }};
+                Mockito.verify(mockListenerReg).close();
+            }
+        };
     }
 }

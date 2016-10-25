@@ -12,6 +12,7 @@ import static org.opendaylight.controller.cluster.datastore.entityownership.Enti
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.candidatePath;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.entityOwnersWithCandidate;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.entityPath;
+
 import akka.testkit.JavaTestKit;
 import com.google.common.collect.ImmutableSet;
 import java.util.concurrent.TimeUnit;
@@ -107,7 +108,8 @@ public class CandidateListChangeListenerTest extends AbstractActorTest {
                 ImmutableSet.copyOf(candidateRemoved.getRemainingCandidates()));
     }
 
-    private void writeNode(final YangInstanceIdentifier path, final NormalizedNode<?, ?> node) throws DataValidationFailedException {
+    private void writeNode(final YangInstanceIdentifier path, final NormalizedNode<?, ?> node)
+            throws DataValidationFailedException {
         AbstractEntityOwnershipTest.writeNode(path, node, shardDataTree);
     }
 

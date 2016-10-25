@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.datastore.utils;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.CheckedFuture;
@@ -37,7 +38,8 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 public class NormalizedNodeAggregatorTest {
 
     @Test
-    public void testAggregate() throws InterruptedException, ExecutionException, ReadFailedException, DataValidationFailedException {
+    public void testAggregate() throws InterruptedException, ExecutionException, ReadFailedException,
+            DataValidationFailedException {
         SchemaContext schemaContext = SchemaContextHelper.full();
         NormalizedNode<?, ?> expectedNode1 = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
         NormalizedNode<?, ?> expectedNode2 = ImmutableNodes.containerNode(CarsModel.CARS_QNAME);
@@ -53,9 +55,10 @@ public class NormalizedNodeAggregatorTest {
 
         assertTrue("Expect value to be a Collection", normalizedNode.getValue() instanceof Collection);
 
+        @SuppressWarnings("unchecked")
         Collection<NormalizedNode<?,?>> collection = (Collection<NormalizedNode<?,?>>) normalizedNode.getValue();
 
-        for(NormalizedNode<?,?> node : collection){
+        for (NormalizedNode<?,?> node : collection) {
             assertTrue("Expected " + node + " to be a ContainerNode", node instanceof ContainerNode);
         }
 
@@ -97,14 +100,13 @@ public class NormalizedNodeAggregatorTest {
         }
     }
 
-    public static NormalizedNode<?,?> findChildWithQName(Collection<NormalizedNode<?, ?>> collection, QName qName) {
-        for(NormalizedNode<?,?> node : collection){
-            if(node.getNodeType().equals(qName)){
+    public static NormalizedNode<?,?> findChildWithQName(Collection<NormalizedNode<?, ?>> collection, QName qname) {
+        for (NormalizedNode<?, ?> node : collection) {
+            if (node.getNodeType().equals(qname)) {
                 return node;
             }
         }
 
         return null;
     }
-
 }

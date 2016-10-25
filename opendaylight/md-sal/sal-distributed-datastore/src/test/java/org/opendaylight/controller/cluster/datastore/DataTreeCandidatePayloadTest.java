@@ -11,6 +11,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
+
 import java.io.IOException;
 import java.util.Collection;
 import org.apache.commons.lang3.SerializationUtils;
@@ -36,7 +37,8 @@ public class DataTreeCandidatePayloadTest {
 
     private DataTreeCandidate candidate;
 
-    private static DataTreeCandidateNode findNode(final Collection<DataTreeCandidateNode> nodes, final PathArgument arg) {
+    private static DataTreeCandidateNode findNode(final Collection<DataTreeCandidateNode> nodes,
+            final PathArgument arg) {
         for (DataTreeCandidateNode node : nodes) {
             if (arg.equals(node.getIdentifier())) {
                 return node;
@@ -68,36 +70,37 @@ public class DataTreeCandidatePayloadTest {
         assertEquals("root type", expRoot.getModificationType(), actRoot.getModificationType());
 
         switch (actRoot.getModificationType()) {
-        case DELETE:
-        case WRITE:
-            assertEquals("root data", expRoot.getDataAfter(), actRoot.getDataAfter());
-            break;
-        case SUBTREE_MODIFIED:
-            assertChildrenEquals(expRoot.getChildNodes(), actRoot.getChildNodes());
-            break;
-        default:
-            fail("Unexpect root type " + actRoot.getModificationType());
-            break;
+            case DELETE:
+            case WRITE:
+                assertEquals("root data", expRoot.getDataAfter(), actRoot.getDataAfter());
+                break;
+            case SUBTREE_MODIFIED:
+                assertChildrenEquals(expRoot.getChildNodes(), actRoot.getChildNodes());
+                break;
+            default:
+                fail("Unexpect root type " + actRoot.getModificationType());
+                break;
         }
 
         assertCandidateNodeEquals(expected.getRootNode(), actual.getRootNode());
     }
 
-    private static void assertCandidateNodeEquals(final DataTreeCandidateNode expected, final DataTreeCandidateNode actual) {
+    private static void assertCandidateNodeEquals(final DataTreeCandidateNode expected,
+            final DataTreeCandidateNode actual) {
         assertEquals("child type", expected.getModificationType(), actual.getModificationType());
         assertEquals("child identifier", expected.getIdentifier(), actual.getIdentifier());
 
         switch (actual.getModificationType()) {
-        case DELETE:
-        case WRITE:
-            assertEquals("child data", expected.getDataAfter(), actual.getDataAfter());
-            break;
-        case SUBTREE_MODIFIED:
-            assertChildrenEquals(expected.getChildNodes(), actual.getChildNodes());
-            break;
-        default:
-            fail("Unexpect root type " + actual.getModificationType());
-            break;
+            case DELETE:
+            case WRITE:
+                assertEquals("child data", expected.getDataAfter(), actual.getDataAfter());
+                break;
+            case SUBTREE_MODIFIED:
+                assertChildrenEquals(expected.getChildNodes(), actual.getChildNodes());
+                break;
+            default:
+                fail("Unexpect root type " + actual.getModificationType());
+                break;
         }
     }
 
@@ -105,8 +108,8 @@ public class DataTreeCandidatePayloadTest {
     public void setUp() {
         final YangInstanceIdentifier writePath = TestModel.TEST_PATH;
         final NormalizedNode<?, ?> writeData = ImmutableContainerNodeBuilder.create().withNodeIdentifier(
-                new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME)).
-                withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo")).build();
+                new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME))
+                    .withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo")).build();
         candidate = DataTreeCandidates.fromNormalizedNode(writePath, writeData);
     }
 
@@ -135,10 +138,10 @@ public class DataTreeCandidatePayloadTest {
         YangInstanceIdentifier leafSetEntryPath = YangInstanceIdentifier.builder(TestModel.TEST_PATH).node(LEAF_SET)
                 .node(entryPathArg).build();
 
-        NormalizedNode<?, ?> leafSetEntryNode = Builders.leafSetEntryBuilder().
-                withNodeIdentifier(entryPathArg).withValue("one").build();
+        NormalizedNode<?, ?> leafSetEntryNode = Builders.leafSetEntryBuilder()
+                .withNodeIdentifier(entryPathArg).withValue("one").build();
 
-        DataTreeCandidate candidate = DataTreeCandidates.fromNormalizedNode(leafSetEntryPath, leafSetEntryNode);
+        candidate = DataTreeCandidates.fromNormalizedNode(leafSetEntryPath, leafSetEntryNode);
         DataTreeCandidatePayload payload = DataTreeCandidatePayload.create(candidate);
         assertCandidateEquals(candidate, payload.getCandidate());
     }
@@ -149,8 +152,8 @@ public class DataTreeCandidatePayloadTest {
         YangInstanceIdentifier.NodeWithValue entryPathArg = new YangInstanceIdentifier.NodeWithValue(LEAF_SET, "one");
         YangInstanceIdentifier leafSetPath = YangInstanceIdentifier.builder(TestModel.TEST_PATH).node(LEAF_SET).build();
 
-        LeafSetEntryNode leafSetEntryNode = Builders.leafSetEntryBuilder().
-                withNodeIdentifier(entryPathArg).withValue("one").build();
+        LeafSetEntryNode leafSetEntryNode = Builders.leafSetEntryBuilder()
+                .withNodeIdentifier(entryPathArg).withValue("one").build();
         NormalizedNode<?, ?> leafSetNode = Builders.leafSetBuilder().withNodeIdentifier(
                 new YangInstanceIdentifier.NodeIdentifier(LEAF_SET)).withChild(leafSetEntryNode).build();
 
@@ -165,23 +168,24 @@ public class DataTreeCandidatePayloadTest {
         YangInstanceIdentifier.NodeWithValue entryPathArg = new YangInstanceIdentifier.NodeWithValue(LEAF_SET, "one");
         YangInstanceIdentifier leafSetPath = YangInstanceIdentifier.builder(TestModel.TEST_PATH).node(LEAF_SET).build();
 
-        LeafSetEntryNode leafSetEntryNode = Builders.leafSetEntryBuilder().
-                withNodeIdentifier(entryPathArg).withValue("one").build();
+        LeafSetEntryNode leafSetEntryNode = Builders.leafSetEntryBuilder()
+                .withNodeIdentifier(entryPathArg).withValue("one").build();
         NormalizedNode<?, ?> leafSetNode = Builders.orderedLeafSetBuilder().withNodeIdentifier(
                 new YangInstanceIdentifier.NodeIdentifier(LEAF_SET)).withChild(leafSetEntryNode).build();
 
-        DataTreeCandidate candidate = DataTreeCandidates.fromNormalizedNode(leafSetPath, leafSetNode);
+        candidate = DataTreeCandidates.fromNormalizedNode(leafSetPath, leafSetNode);
         DataTreeCandidatePayload payload = DataTreeCandidatePayload.create(candidate);
         assertCandidateEquals(candidate, payload.getCandidate());
     }
 
     @Test
     public void testLeafNodeCandidate() throws Exception {
-        YangInstanceIdentifier leafPath = YangInstanceIdentifier.builder(TestModel.TEST_PATH).node(TestModel.DESC_QNAME).build();
+        YangInstanceIdentifier leafPath = YangInstanceIdentifier.builder(TestModel.TEST_PATH)
+                .node(TestModel.DESC_QNAME).build();
         LeafNode<Object> leafNode = Builders.leafBuilder().withNodeIdentifier(
                 new YangInstanceIdentifier.NodeIdentifier(TestModel.DESC_QNAME)).withValue("test").build();
 
-        DataTreeCandidate candidate = DataTreeCandidates.fromNormalizedNode(leafPath, leafNode);
+        candidate = DataTreeCandidates.fromNormalizedNode(leafPath, leafNode);
         DataTreeCandidatePayload payload = DataTreeCandidatePayload.create(candidate);
         assertCandidateEquals(candidate, payload.getCandidate());
     }

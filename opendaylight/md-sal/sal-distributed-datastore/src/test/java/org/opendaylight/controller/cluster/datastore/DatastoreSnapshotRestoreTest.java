@@ -13,6 +13,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
@@ -48,7 +49,7 @@ public class DatastoreSnapshotRestoreTest {
         List<ShardSnapshot> shardSnapshots = new ArrayList<>();
         shardSnapshots.add(new ShardSnapshot("cars", new byte[]{1,2}));
         shardSnapshots.add(new ShardSnapshot("people", new byte[]{3,4}));
-        DatastoreSnapshot configSnapshot = new DatastoreSnapshot("config", null, shardSnapshots );
+        final DatastoreSnapshot configSnapshot = new DatastoreSnapshot("config", null, shardSnapshots );
 
         shardSnapshots = new ArrayList<>();
         shardSnapshots.add(new ShardSnapshot("cars", new byte[]{5,6}));
@@ -60,8 +61,7 @@ public class DatastoreSnapshotRestoreTest {
         snapshotList.add(configSnapshot);
         snapshotList.add(operSnapshot);
 
-        File backupFile = new File(restoreDirectoryFile, "backup");
-        try(FileOutputStream fos = new FileOutputStream(backupFile)) {
+        try (FileOutputStream fos = new FileOutputStream(backupFile)) {
             SerializationUtils.serialize(snapshotList, fos);
         }
 
@@ -85,11 +85,11 @@ public class DatastoreSnapshotRestoreTest {
         assertTrue("ShardManager snapshots don't match", Objects.deepEquals(expected.getShardManagerSnapshot(),
                 actual.getShardManagerSnapshot()));
         assertEquals("ShardSnapshots size", expected.getShardSnapshots().size(), actual.getShardSnapshots().size());
-        for(int i = 0; i < expected.getShardSnapshots().size(); i++) {
+        for (int i = 0; i < expected.getShardSnapshots().size(); i++) {
             assertEquals("ShardSnapshot " + (i + 1) + " name", expected.getShardSnapshots().get(i).getName(),
                     actual.getShardSnapshots().get(i).getName());
-            assertArrayEquals("ShardSnapshot " + (i + 1) + " snapshot", expected.getShardSnapshots().get(i).getSnapshot(),
-                    actual.getShardSnapshots().get(i).getSnapshot());
+            assertArrayEquals("ShardSnapshot " + (i + 1) + " snapshot",
+                    expected.getShardSnapshots().get(i).getSnapshot(), actual.getShardSnapshots().get(i).getSnapshot());
         }
     }
 }

@@ -13,6 +13,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doThrow;
+
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.actor.Status.Failure;
@@ -20,6 +21,7 @@ import akka.actor.Terminated;
 import akka.dispatch.Dispatchers;
 import akka.testkit.JavaTestKit;
 import akka.testkit.TestActorRef;
+import com.google.common.base.Throwables;
 import java.util.concurrent.TimeUnit;
 import org.junit.Before;
 import org.junit.Test;
@@ -67,14 +69,17 @@ public class ShardTransactionTest extends AbstractActorTest {
 
     @Before
     public void setUp() {
-        shard = actorFactory.createTestActor(Shard.builder().id(SHARD_IDENTIFIER).datastoreContext(datastoreContext).
-                schemaContext(TestModel.createTestContext()).props().withDispatcher(Dispatchers.DefaultDispatcherId()));
+        shard = actorFactory.createTestActor(Shard.builder().id(SHARD_IDENTIFIER).datastoreContext(datastoreContext)
+                .schemaContext(TestModel.createTestContext()).props()
+                .withDispatcher(Dispatchers.DefaultDispatcherId()));
         ShardTestKit.waitUntilLeader(shard);
         store = shard.underlyingActor().getDataStore();
     }
 
-    private ActorRef newTransactionActor(final TransactionType type, final AbstractShardDataTreeTransaction<?> transaction, final String name) {
-        Props props = ShardTransaction.props(type, transaction, shard, datastoreContext, shard.underlyingActor().getShardMBean());
+    private ActorRef newTransactionActor(final TransactionType type,
+            final AbstractShardDataTreeTransaction<?> transaction, final String name) {
+        Props props = ShardTransaction.props(type, transaction, shard, datastoreContext,
+                shard.underlyingActor().getShardMBean());
         return actorFactory.createActor(props, name);
     }
 
@@ -88,302 +93,333 @@ public class ShardTransactionTest extends AbstractActorTest {
 
     @Test
     public void testOnReceiveReadData() throws Exception {
-        new JavaTestKit(getSystem()) {{
-            testOnReceiveReadData(newTransactionActor(RO, readOnlyTransaction(), "testReadDataRO"));
+        new JavaTestKit(getSystem()) {
+            {
+                testOnReceiveReadData(newTransactionActor(RO, readOnlyTransaction(), "testReadDataRO"));
 
-            testOnReceiveReadData(newTransactionActor(RW, readWriteTransaction(), "testReadDataRW"));
-        }
+                testOnReceiveReadData(newTransactionActor(RW, readWriteTransaction(), "testReadDataRW"));
+            }
 
-        private void testOnReceiveReadData(final ActorRef transaction) {
-            transaction.tell(new ReadData(YangInstanceIdentifier.EMPTY,
-                    DataStoreVersions.CURRENT_VERSION), getRef());
+            private void testOnReceiveReadData(final ActorRef transaction) {
+                transaction.tell(new ReadData(YangInstanceIdentifier.EMPTY, DataStoreVersions.CURRENT_VERSION),
+                        getRef());
 
-            ReadDataReply reply = expectMsgClass(duration("5 seconds"), ReadDataReply.class);
+                ReadDataReply reply = expectMsgClass(duration("5 seconds"), ReadDataReply.class);
 
-            assertNotNull(reply.getNormalizedNode());
-        }};
+                assertNotNull(reply.getNormalizedNode());
+            }
+        };
     }
 
     @Test
     public void testOnReceiveReadDataWhenDataNotFound() throws Exception {
-        new JavaTestKit(getSystem()) {{
-            testOnReceiveReadDataWhenDataNotFound(newTransactionActor(
-                    RO, readOnlyTransaction(), "testReadDataWhenDataNotFoundRO"));
+        new JavaTestKit(getSystem()) {
+            {
+                testOnReceiveReadDataWhenDataNotFound(
+                        newTransactionActor(RO, readOnlyTransaction(), "testReadDataWhenDataNotFoundRO"));
 
-            testOnReceiveReadDataWhenDataNotFound(newTransactionActor(
-                    RW, readWriteTransaction(), "testReadDataWhenDataNotFoundRW"));
-        }
+                testOnReceiveReadDataWhenDataNotFound(
+                        newTransactionActor(RW, readWriteTransaction(), "testReadDataWhenDataNotFoundRW"));
+            }
 
-        private void testOnReceiveReadDataWhenDataNotFound(final ActorRef transaction) {
-            transaction.tell(new ReadData(TestModel.TEST_PATH, DataStoreVersions.CURRENT_VERSION),getRef());
+            private void testOnReceiveReadDataWhenDataNotFound(final ActorRef transaction) {
+                transaction.tell(new ReadData(TestModel.TEST_PATH, DataStoreVersions.CURRENT_VERSION), getRef());
 
-            ReadDataReply reply = expectMsgClass(duration("5 seconds"), ReadDataReply.class);
+                ReadDataReply reply = expectMsgClass(duration("5 seconds"), ReadDataReply.class);
 
-            assertTrue(reply.getNormalizedNode() == null);
-        }};
+                assertTrue(reply.getNormalizedNode() == null);
+            }
+        };
     }
 
     @Test
     public void testOnReceiveDataExistsPositive() throws Exception {
-        new JavaTestKit(getSystem()) {{
-            testOnReceiveDataExistsPositive(newTransactionActor(RO, readOnlyTransaction(),
-                    "testDataExistsPositiveRO"));
+        new JavaTestKit(getSystem()) {
+            {
+                testOnReceiveDataExistsPositive(
+                        newTransactionActor(RO, readOnlyTransaction(), "testDataExistsPositiveRO"));
 
-            testOnReceiveDataExistsPositive(newTransactionActor(RW, readWriteTransaction(),
-                    "testDataExistsPositiveRW"));
-        }
+                testOnReceiveDataExistsPositive(
+                        newTransactionActor(RW, readWriteTransaction(), "testDataExistsPositiveRW"));
+            }
 
-        private void testOnReceiveDataExistsPositive(final ActorRef transaction) {
-            transaction.tell(new DataExists(YangInstanceIdentifier.EMPTY,
-                    DataStoreVersions.CURRENT_VERSION), getRef());
+            private void testOnReceiveDataExistsPositive(final ActorRef transaction) {
+                transaction.tell(new DataExists(YangInstanceIdentifier.EMPTY, DataStoreVersions.CURRENT_VERSION),
+                        getRef());
 
-            DataExistsReply reply = expectMsgClass(duration("5 seconds"), DataExistsReply.class);
+                DataExistsReply reply = expectMsgClass(duration("5 seconds"), DataExistsReply.class);
 
-            assertTrue(reply.exists());
-        }};
+                assertTrue(reply.exists());
+            }
+        };
     }
 
     @Test
     public void testOnReceiveDataExistsNegative() throws Exception {
-        new JavaTestKit(getSystem()) {{
-            testOnReceiveDataExistsNegative(newTransactionActor(RO, readOnlyTransaction(),
-                    "testDataExistsNegativeRO"));
+        new JavaTestKit(getSystem()) {
+            {
+                testOnReceiveDataExistsNegative(
+                        newTransactionActor(RO, readOnlyTransaction(), "testDataExistsNegativeRO"));
 
-            testOnReceiveDataExistsNegative(newTransactionActor(RW, readWriteTransaction(),
-                    "testDataExistsNegativeRW"));
-        }
+                testOnReceiveDataExistsNegative(
+                        newTransactionActor(RW, readWriteTransaction(), "testDataExistsNegativeRW"));
+            }
 
-        private void testOnReceiveDataExistsNegative(final ActorRef transaction) {
-            transaction.tell(new DataExists(TestModel.TEST_PATH, DataStoreVersions.CURRENT_VERSION),getRef());
+            private void testOnReceiveDataExistsNegative(final ActorRef transaction) {
+                transaction.tell(new DataExists(TestModel.TEST_PATH, DataStoreVersions.CURRENT_VERSION), getRef());
 
-            DataExistsReply reply = expectMsgClass(duration("5 seconds"), DataExistsReply.class);
+                DataExistsReply reply = expectMsgClass(duration("5 seconds"), DataExistsReply.class);
 
-            assertFalse(reply.exists());
-        }};
+                assertFalse(reply.exists());
+            }
+        };
     }
 
     @Test
     public void testOnReceiveBatchedModifications() throws Exception {
-        new JavaTestKit(getSystem()) {{
+        new JavaTestKit(getSystem()) {
+            {
+                ShardDataTreeTransactionParent parent = Mockito.mock(ShardDataTreeTransactionParent.class);
+                DataTreeModification mockModification = Mockito.mock(DataTreeModification.class);
+                ReadWriteShardDataTreeTransaction mockWriteTx = new ReadWriteShardDataTreeTransaction(parent,
+                        nextTransactionId(), mockModification);
+                final ActorRef transaction = newTransactionActor(RW, mockWriteTx, "testOnReceiveBatchedModifications");
 
-            ShardDataTreeTransactionParent parent = Mockito.mock(ShardDataTreeTransactionParent.class);
-            DataTreeModification mockModification = Mockito.mock(DataTreeModification.class);
-            ReadWriteShardDataTreeTransaction mockWriteTx = new ReadWriteShardDataTreeTransaction(parent,
-                nextTransactionId(), mockModification);
-            final ActorRef transaction = newTransactionActor(RW, mockWriteTx, "testOnReceiveBatchedModifications");
+                YangInstanceIdentifier writePath = TestModel.TEST_PATH;
+                NormalizedNode<?, ?> writeData = ImmutableContainerNodeBuilder.create()
+                        .withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME))
+                        .withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo")).build();
 
-            YangInstanceIdentifier writePath = TestModel.TEST_PATH;
-            NormalizedNode<?, ?> writeData = ImmutableContainerNodeBuilder.create().withNodeIdentifier(
-                    new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME)).
-                    withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo")).build();
+                YangInstanceIdentifier mergePath = TestModel.OUTER_LIST_PATH;
+                NormalizedNode<?, ?> mergeData = ImmutableContainerNodeBuilder.create()
+                        .withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(TestModel.OUTER_LIST_QNAME))
+                        .build();
 
-            YangInstanceIdentifier mergePath = TestModel.OUTER_LIST_PATH;
-            NormalizedNode<?, ?> mergeData = ImmutableContainerNodeBuilder.create().withNodeIdentifier(
-                    new YangInstanceIdentifier.NodeIdentifier(TestModel.OUTER_LIST_QNAME)).build();
+                YangInstanceIdentifier deletePath = TestModel.TEST_PATH;
 
-            YangInstanceIdentifier deletePath = TestModel.TEST_PATH;
+                BatchedModifications batched = new BatchedModifications(nextTransactionId(),
+                        DataStoreVersions.CURRENT_VERSION);
+                batched.addModification(new WriteModification(writePath, writeData));
+                batched.addModification(new MergeModification(mergePath, mergeData));
+                batched.addModification(new DeleteModification(deletePath));
 
-            BatchedModifications batched = new BatchedModifications(nextTransactionId(), DataStoreVersions.CURRENT_VERSION);
-            batched.addModification(new WriteModification(writePath, writeData));
-            batched.addModification(new MergeModification(mergePath, mergeData));
-            batched.addModification(new DeleteModification(deletePath));
+                transaction.tell(batched, getRef());
 
-            transaction.tell(batched, getRef());
+                BatchedModificationsReply reply = expectMsgClass(duration("5 seconds"),
+                        BatchedModificationsReply.class);
+                assertEquals("getNumBatched", 3, reply.getNumBatched());
 
-            BatchedModificationsReply reply = expectMsgClass(duration("5 seconds"), BatchedModificationsReply.class);
-            assertEquals("getNumBatched", 3, reply.getNumBatched());
-
-            InOrder inOrder = Mockito.inOrder(mockModification);
-            inOrder.verify(mockModification).write(writePath, writeData);
-            inOrder.verify(mockModification).merge(mergePath, mergeData);
-            inOrder.verify(mockModification).delete(deletePath);
-        }};
+                InOrder inOrder = Mockito.inOrder(mockModification);
+                inOrder.verify(mockModification).write(writePath, writeData);
+                inOrder.verify(mockModification).merge(mergePath, mergeData);
+                inOrder.verify(mockModification).delete(deletePath);
+            }
+        };
     }
 
     @Test
     public void testOnReceiveBatchedModificationsReadyWithoutImmediateCommit() throws Exception {
-        new JavaTestKit(getSystem()) {{
+        new JavaTestKit(getSystem()) {
+            {
+                final ActorRef transaction = newTransactionActor(WO, readWriteTransaction(),
+                        "testOnReceiveBatchedModificationsReadyWithoutImmediateCommit");
 
-            final ActorRef transaction = newTransactionActor(WO, readWriteTransaction(),
-                    "testOnReceiveBatchedModificationsReadyWithoutImmediateCommit");
+                JavaTestKit watcher = new JavaTestKit(getSystem());
+                watcher.watch(transaction);
 
-            JavaTestKit watcher = new JavaTestKit(getSystem());
-            watcher.watch(transaction);
+                YangInstanceIdentifier writePath = TestModel.TEST_PATH;
+                NormalizedNode<?, ?> writeData = ImmutableContainerNodeBuilder.create()
+                        .withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME))
+                        .withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo")).build();
 
-            YangInstanceIdentifier writePath = TestModel.TEST_PATH;
-            NormalizedNode<?, ?> writeData = ImmutableContainerNodeBuilder.create().withNodeIdentifier(
-                    new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME)).
-                    withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo")).build();
+                final TransactionIdentifier tx1 = nextTransactionId();
+                BatchedModifications batched = new BatchedModifications(tx1, DataStoreVersions.CURRENT_VERSION);
+                batched.addModification(new WriteModification(writePath, writeData));
 
-            final TransactionIdentifier tx1 = nextTransactionId();
-            BatchedModifications batched = new BatchedModifications(tx1, DataStoreVersions.CURRENT_VERSION);
-            batched.addModification(new WriteModification(writePath, writeData));
+                transaction.tell(batched, getRef());
+                BatchedModificationsReply reply = expectMsgClass(duration("5 seconds"),
+                        BatchedModificationsReply.class);
+                assertEquals("getNumBatched", 1, reply.getNumBatched());
 
-            transaction.tell(batched, getRef());
-            BatchedModificationsReply reply = expectMsgClass(duration("5 seconds"), BatchedModificationsReply.class);
-            assertEquals("getNumBatched", 1, reply.getNumBatched());
+                batched = new BatchedModifications(tx1, DataStoreVersions.CURRENT_VERSION);
+                batched.setReady(true);
+                batched.setTotalMessagesSent(2);
 
-            batched = new BatchedModifications(tx1, DataStoreVersions.CURRENT_VERSION);
-            batched.setReady(true);
-            batched.setTotalMessagesSent(2);
-
-            transaction.tell(batched, getRef());
-            expectMsgClass(duration("5 seconds"), ReadyTransactionReply.class);
-            watcher.expectMsgClass(duration("5 seconds"), Terminated.class);
-        }};
+                transaction.tell(batched, getRef());
+                expectMsgClass(duration("5 seconds"), ReadyTransactionReply.class);
+                watcher.expectMsgClass(duration("5 seconds"), Terminated.class);
+            }
+        };
     }
 
     @Test
     public void testOnReceiveBatchedModificationsReadyWithImmediateCommit() throws Exception {
-        new JavaTestKit(getSystem()) {{
+        new JavaTestKit(getSystem()) {
+            {
+                final ActorRef transaction = newTransactionActor(WO, readWriteTransaction(),
+                        "testOnReceiveBatchedModificationsReadyWithImmediateCommit");
 
-            final ActorRef transaction = newTransactionActor(WO, readWriteTransaction(),
-                    "testOnReceiveBatchedModificationsReadyWithImmediateCommit");
+                JavaTestKit watcher = new JavaTestKit(getSystem());
+                watcher.watch(transaction);
 
-            JavaTestKit watcher = new JavaTestKit(getSystem());
-            watcher.watch(transaction);
+                YangInstanceIdentifier writePath = TestModel.TEST_PATH;
+                NormalizedNode<?, ?> writeData = ImmutableContainerNodeBuilder.create()
+                        .withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME))
+                        .withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo")).build();
 
-            YangInstanceIdentifier writePath = TestModel.TEST_PATH;
-            NormalizedNode<?, ?> writeData = ImmutableContainerNodeBuilder.create().withNodeIdentifier(
-                    new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME)).
-                    withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo")).build();
+                BatchedModifications batched = new BatchedModifications(nextTransactionId(),
+                        DataStoreVersions.CURRENT_VERSION);
+                batched.addModification(new WriteModification(writePath, writeData));
+                batched.setReady(true);
+                batched.setDoCommitOnReady(true);
+                batched.setTotalMessagesSent(1);
 
-            BatchedModifications batched = new BatchedModifications(nextTransactionId(), DataStoreVersions.CURRENT_VERSION);
-            batched.addModification(new WriteModification(writePath, writeData));
-            batched.setReady(true);
-            batched.setDoCommitOnReady(true);
-            batched.setTotalMessagesSent(1);
-
-            transaction.tell(batched, getRef());
-            expectMsgClass(duration("5 seconds"), CommitTransactionReply.class);
-            watcher.expectMsgClass(duration("5 seconds"), Terminated.class);
-        }};
+                transaction.tell(batched, getRef());
+                expectMsgClass(duration("5 seconds"), CommitTransactionReply.class);
+                watcher.expectMsgClass(duration("5 seconds"), Terminated.class);
+            }
+        };
     }
 
-    @Test(expected=TestException.class)
-    public void testOnReceiveBatchedModificationsFailure() throws Throwable {
-        new JavaTestKit(getSystem()) {{
+    @Test(expected = TestException.class)
+    public void testOnReceiveBatchedModificationsFailure() throws Exception {
+        new JavaTestKit(getSystem()) {
+            {
 
-            ShardDataTreeTransactionParent parent = Mockito.mock(ShardDataTreeTransactionParent.class);
-            DataTreeModification mockModification = Mockito.mock(DataTreeModification.class);
-            ReadWriteShardDataTreeTransaction mockWriteTx = new ReadWriteShardDataTreeTransaction(parent,
-                nextTransactionId(), mockModification);
-            final ActorRef transaction = newTransactionActor(RW, mockWriteTx,
-                    "testOnReceiveBatchedModificationsFailure");
+                ShardDataTreeTransactionParent parent = Mockito.mock(ShardDataTreeTransactionParent.class);
+                DataTreeModification mockModification = Mockito.mock(DataTreeModification.class);
+                ReadWriteShardDataTreeTransaction mockWriteTx = new ReadWriteShardDataTreeTransaction(parent,
+                        nextTransactionId(), mockModification);
+                final ActorRef transaction = newTransactionActor(RW, mockWriteTx,
+                        "testOnReceiveBatchedModificationsFailure");
 
-            JavaTestKit watcher = new JavaTestKit(getSystem());
-            watcher.watch(transaction);
+                JavaTestKit watcher = new JavaTestKit(getSystem());
+                watcher.watch(transaction);
 
-            YangInstanceIdentifier path = TestModel.TEST_PATH;
-            ContainerNode node = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+                YangInstanceIdentifier path = TestModel.TEST_PATH;
+                ContainerNode node = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
-            doThrow(new TestException()).when(mockModification).write(path, node);
+                doThrow(new TestException()).when(mockModification).write(path, node);
 
-            final TransactionIdentifier tx1 = nextTransactionId();
-            BatchedModifications batched = new BatchedModifications(tx1, DataStoreVersions.CURRENT_VERSION);
-            batched.addModification(new WriteModification(path, node));
+                final TransactionIdentifier tx1 = nextTransactionId();
+                BatchedModifications batched = new BatchedModifications(tx1, DataStoreVersions.CURRENT_VERSION);
+                batched.addModification(new WriteModification(path, node));
 
-            transaction.tell(batched, getRef());
-            expectMsgClass(duration("5 seconds"), akka.actor.Status.Failure.class);
+                transaction.tell(batched, getRef());
+                expectMsgClass(duration("5 seconds"), akka.actor.Status.Failure.class);
 
-            batched = new BatchedModifications(tx1, DataStoreVersions.CURRENT_VERSION);
-            batched.setReady(true);
-            batched.setTotalMessagesSent(2);
+                batched = new BatchedModifications(tx1, DataStoreVersions.CURRENT_VERSION);
+                batched.setReady(true);
+                batched.setTotalMessagesSent(2);
 
-            transaction.tell(batched, getRef());
-            Failure failure = expectMsgClass(duration("5 seconds"), akka.actor.Status.Failure.class);
-            watcher.expectMsgClass(duration("5 seconds"), Terminated.class);
+                transaction.tell(batched, getRef());
+                Failure failure = expectMsgClass(duration("5 seconds"), akka.actor.Status.Failure.class);
+                watcher.expectMsgClass(duration("5 seconds"), Terminated.class);
 
-            if(failure != null) {
-                throw failure.cause();
+                if (failure != null) {
+                    Throwables.propagateIfInstanceOf(failure.cause(), Exception.class);
+                    Throwables.propagate(failure.cause());
+                }
             }
-        }};
+        };
     }
 
-    @Test(expected=IllegalStateException.class)
-    public void testOnReceiveBatchedModificationsReadyWithIncorrectTotalMessageCount() throws Throwable {
-        new JavaTestKit(getSystem()) {{
+    @Test(expected = IllegalStateException.class)
+    public void testOnReceiveBatchedModificationsReadyWithIncorrectTotalMessageCount() throws Exception {
+        new JavaTestKit(getSystem()) {
+            {
 
-            final ActorRef transaction = newTransactionActor(WO, readWriteTransaction(),
-                    "testOnReceiveBatchedModificationsReadyWithIncorrectTotalMessageCount");
+                final ActorRef transaction = newTransactionActor(WO, readWriteTransaction(),
+                        "testOnReceiveBatchedModificationsReadyWithIncorrectTotalMessageCount");
 
-            JavaTestKit watcher = new JavaTestKit(getSystem());
-            watcher.watch(transaction);
+                JavaTestKit watcher = new JavaTestKit(getSystem());
+                watcher.watch(transaction);
 
-            BatchedModifications batched = new BatchedModifications(nextTransactionId(), DataStoreVersions.CURRENT_VERSION);
-            batched.setReady(true);
-            batched.setTotalMessagesSent(2);
+                BatchedModifications batched = new BatchedModifications(nextTransactionId(),
+                        DataStoreVersions.CURRENT_VERSION);
+                batched.setReady(true);
+                batched.setTotalMessagesSent(2);
 
-            transaction.tell(batched, getRef());
+                transaction.tell(batched, getRef());
 
-            Failure failure = expectMsgClass(duration("5 seconds"), akka.actor.Status.Failure.class);
-            watcher.expectMsgClass(duration("5 seconds"), Terminated.class);
+                Failure failure = expectMsgClass(duration("5 seconds"), akka.actor.Status.Failure.class);
+                watcher.expectMsgClass(duration("5 seconds"), Terminated.class);
 
-            if(failure != null) {
-                throw failure.cause();
+                if (failure != null) {
+                    Throwables.propagateIfInstanceOf(failure.cause(), Exception.class);
+                    Throwables.propagate(failure.cause());
+                }
             }
-        }};
+        };
     }
 
     @Test
     public void testReadWriteTxOnReceiveCloseTransaction() throws Exception {
-        new JavaTestKit(getSystem()) {{
-            final ActorRef transaction = newTransactionActor(RW, readWriteTransaction(),
-                    "testReadWriteTxOnReceiveCloseTransaction");
+        new JavaTestKit(getSystem()) {
+            {
+                final ActorRef transaction = newTransactionActor(RW, readWriteTransaction(),
+                        "testReadWriteTxOnReceiveCloseTransaction");
 
-            watch(transaction);
+                watch(transaction);
 
-            transaction.tell(new CloseTransaction().toSerializable(), getRef());
+                transaction.tell(new CloseTransaction().toSerializable(), getRef());
 
-            expectMsgClass(duration("3 seconds"), CloseTransactionReply.class);
-            expectTerminated(duration("3 seconds"), transaction);
-        }};
+                expectMsgClass(duration("3 seconds"), CloseTransactionReply.class);
+                expectTerminated(duration("3 seconds"), transaction);
+            }
+        };
     }
 
     @Test
     public void testWriteOnlyTxOnReceiveCloseTransaction() throws Exception {
-        new JavaTestKit(getSystem()) {{
-            final ActorRef transaction = newTransactionActor(WO, readWriteTransaction(),
-                    "testWriteTxOnReceiveCloseTransaction");
+        new JavaTestKit(getSystem()) {
+            {
+                final ActorRef transaction = newTransactionActor(WO, readWriteTransaction(),
+                        "testWriteTxOnReceiveCloseTransaction");
 
-            watch(transaction);
+                watch(transaction);
 
-            transaction.tell(new CloseTransaction().toSerializable(), getRef());
+                transaction.tell(new CloseTransaction().toSerializable(), getRef());
 
-            expectMsgClass(duration("3 seconds"), CloseTransactionReply.class);
-            expectTerminated(duration("3 seconds"), transaction);
-        }};
+                expectMsgClass(duration("3 seconds"), CloseTransactionReply.class);
+                expectTerminated(duration("3 seconds"), transaction);
+            }
+        };
     }
 
     @Test
     public void testReadOnlyTxOnReceiveCloseTransaction() throws Exception {
-        new JavaTestKit(getSystem()) {{
-            final ActorRef transaction = newTransactionActor(TransactionType.READ_ONLY, readOnlyTransaction(),
-                    "testReadOnlyTxOnReceiveCloseTransaction");
+        new JavaTestKit(getSystem()) {
+            {
+                final ActorRef transaction = newTransactionActor(TransactionType.READ_ONLY, readOnlyTransaction(),
+                        "testReadOnlyTxOnReceiveCloseTransaction");
 
-            watch(transaction);
+                watch(transaction);
 
-            transaction.tell(new CloseTransaction().toSerializable(), getRef());
+                transaction.tell(new CloseTransaction().toSerializable(), getRef());
 
-            expectMsgClass(duration("3 seconds"), Terminated.class);
-        }};
+                expectMsgClass(duration("3 seconds"), Terminated.class);
+            }
+        };
     }
 
     @Test
     public void testShardTransactionInactivity() {
-
         datastoreContext = DatastoreContext.newBuilder().shardTransactionIdleTimeout(
                 500, TimeUnit.MILLISECONDS).build();
 
-        new JavaTestKit(getSystem()) {{
-            final ActorRef transaction = newTransactionActor(RW, readWriteTransaction(),
-                    "testShardTransactionInactivity");
+        new JavaTestKit(getSystem()) {
+            {
+                final ActorRef transaction = newTransactionActor(RW, readWriteTransaction(),
+                        "testShardTransactionInactivity");
 
-            watch(transaction);
+                watch(transaction);
 
-            expectMsgClass(duration("3 seconds"), Terminated.class);
-        }};
+                expectMsgClass(duration("3 seconds"), Terminated.class);
+            }
+        };
     }
+
     public static class TestException extends RuntimeException {
         private static final long serialVersionUID = 1L;
     }

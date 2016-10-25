@@ -14,18 +14,17 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
+
 import akka.actor.ActorSystem;
 import akka.actor.Address;
 import akka.actor.AddressFromURIString;
 import akka.cluster.Cluster;
 import akka.testkit.JavaTestKit;
-import akka.util.Timeout;
 import com.google.common.base.Throwables;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
 import com.typesafe.config.ConfigFactory;
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
@@ -46,7 +45,6 @@ import org.opendaylight.yangtools.concepts.ObjectRegistration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-import scala.concurrent.duration.Duration;
 
 public class DataTreeCohortIntegrationTest {
 
@@ -57,8 +55,6 @@ public class DataTreeCohortIntegrationTest {
 
     private static final DOMDataTreeIdentifier TEST_ID =
             new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, TestModel.TEST_PATH);
-
-    private static final Timeout TIMEOUT = new Timeout(Duration.create(5, TimeUnit.SECONDS));
 
     private static ActorSystem system;
 
@@ -90,20 +86,23 @@ public class DataTreeCohortIntegrationTest {
         ArgumentCaptor<DOMDataTreeCandidate> candidateCapt = ArgumentCaptor.forClass(DOMDataTreeCandidate.class);
         new IntegrationTestKit(getSystem(), datastoreContextBuilder) {
             {
-                try (final DistributedDataStore dataStore = setupDistributedDataStore("transactionIntegrationTest", "test-1")) {
-                    final ObjectRegistration<DOMDataTreeCommitCohort> cohortReg = dataStore.registerCommitCohort(TEST_ID, cohort);
+                try (final DistributedDataStore dataStore = setupDistributedDataStore("transactionIntegrationTest",
+                        "test-1")) {
+                    final ObjectRegistration<DOMDataTreeCommitCohort> cohortReg =
+                            dataStore.registerCommitCohort(TEST_ID, cohort);
                     Thread.sleep(1000); // Registration is asynchronous
                     assertNotNull(cohortReg);
                     testWriteTransaction(dataStore, TestModel.TEST_PATH,
                         ImmutableNodes.containerNode(TestModel.TEST_QNAME));
-                    Mockito.verify(cohort).canCommit(any(Object.class), candidateCapt.capture(), any(SchemaContext.class));
+                    Mockito.verify(cohort).canCommit(any(Object.class), candidateCapt.capture(),
+                            any(SchemaContext.class));
                     DOMDataTreeCandidate candidate = candidateCapt.getValue();
                     assertNotNull(candidate);
                     assertEquals(TEST_ID, candidate.getRootPath());
                     testWriteTransaction(dataStore, TestModel.OUTER_LIST_PATH,
                         ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME).build());
-                    Mockito.verify(cohort, Mockito.times(2)).canCommit(any(Object.class), any(DOMDataTreeCandidate.class),
-                        any(SchemaContext.class));
+                    Mockito.verify(cohort, Mockito.times(2)).canCommit(any(Object.class),
+                            any(DOMDataTreeCandidate.class), any(SchemaContext.class));
                     cohortReg.close();
                     testWriteTransaction(dataStore, TestModel.TEST_PATH,
                         ImmutableNodes.containerNode(TestModel.TEST_QNAME));
@@ -114,6 +113,7 @@ public class DataTreeCohortIntegrationTest {
     }
 
     @Test
+    @SuppressWarnings("checkstyle:IllegalCatch")
     public void failCanCommitTest() throws Exception {
         final DOMDataTreeCommitCohort failedCohort = mock(DOMDataTreeCommitCohort.class);
 
@@ -144,10 +144,8 @@ public class DataTreeCohortIntegrationTest {
     }
 
     /**
-     *
      * FIXME: Weird thing is that invoking canCommit on front-end invokes also preCommit on backend
      * so we can not test abort after can commit.
-     *
      */
     @Test
     @Ignore

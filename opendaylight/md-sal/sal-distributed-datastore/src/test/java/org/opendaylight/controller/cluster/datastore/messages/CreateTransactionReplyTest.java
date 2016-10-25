@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.datastore.messages;
 
 import static org.junit.Assert.assertEquals;
+
 import java.io.Serializable;
 import org.apache.commons.lang.SerializationUtils;
 import org.junit.Test;
@@ -23,7 +24,8 @@ public class CreateTransactionReplyTest extends AbstractTest {
 
     @Test
     public void testSerialization() {
-        CreateTransactionReply expected = new CreateTransactionReply("txPath", nextTransactionId(), DataStoreVersions.CURRENT_VERSION);
+        CreateTransactionReply expected = new CreateTransactionReply("txPath", nextTransactionId(),
+                DataStoreVersions.CURRENT_VERSION);
 
         Object serialized = expected.toSerializable();
         assertEquals("Serialized type", CreateTransactionReply.class, serialized.getClass());

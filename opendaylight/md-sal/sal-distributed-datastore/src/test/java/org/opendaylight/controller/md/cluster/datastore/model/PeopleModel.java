@@ -19,8 +19,8 @@ import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableCo
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableMapNodeBuilder;
 
 public class PeopleModel {
-    public static final QName BASE_QNAME = QName.create("urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test:people", "2014-03-13",
-        "people");
+    public static final QName BASE_QNAME = QName.create(
+            "urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test:people", "2014-03-13", "people");
 
     public static final QName PEOPLE_QNAME = QName.create(BASE_QNAME, "people");
     public static final QName PERSON_QNAME = QName.create(PEOPLE_QNAME, "person");
@@ -30,7 +30,7 @@ public class PeopleModel {
     public static final YangInstanceIdentifier BASE_PATH = YangInstanceIdentifier.of(BASE_QNAME);
     public static final YangInstanceIdentifier PERSON_LIST_PATH = BASE_PATH.node(PERSON_QNAME);
 
-    public static NormalizedNode<?, ?> create(){
+    public static NormalizedNode<?, ?> create() {
 
         // Create a list builder
         CollectionNodeBuilder<MapEntryNode, MapNode> cars =
@@ -62,7 +62,7 @@ public class PeopleModel {
 
     }
 
-    public static NormalizedNode<?, ?> emptyContainer(){
+    public static NormalizedNode<?, ?> emptyContainer() {
         return ImmutableContainerNodeBuilder.create()
             .withNodeIdentifier(
                 new YangInstanceIdentifier.NodeIdentifier(BASE_QNAME))
@@ -79,6 +79,7 @@ public class PeopleModel {
     }
 
     public static YangInstanceIdentifier newPersonPath(String name) {
-        return YangInstanceIdentifier.builder(PERSON_LIST_PATH).nodeWithKey(PERSON_QNAME, PERSON_NAME_QNAME, name).build();
+        return YangInstanceIdentifier.builder(PERSON_LIST_PATH)
+                .nodeWithKey(PERSON_QNAME, PERSON_NAME_QNAME, name).build();
     }
 }

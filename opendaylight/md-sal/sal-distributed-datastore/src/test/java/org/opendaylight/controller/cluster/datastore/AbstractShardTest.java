@@ -19,6 +19,7 @@ import static org.opendaylight.controller.cluster.datastore.DataStoreVersions.CU
 import static org.opendaylight.controller.cluster.datastore.ShardDataTreeMocking.successfulCanCommit;
 import static org.opendaylight.controller.cluster.datastore.ShardDataTreeMocking.successfulCommit;
 import static org.opendaylight.controller.cluster.datastore.ShardDataTreeMocking.successfulPreCommit;
+
 import akka.actor.ActorRef;
 import akka.actor.PoisonPill;
 import akka.actor.Props;
@@ -63,7 +64,6 @@ import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
 import org.opendaylight.controller.md.cluster.datastore.model.CarsModel;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
-import org.opendaylight.yangtools.concepts.Identifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
@@ -90,7 +90,7 @@ import scala.concurrent.duration.Duration;
  *
  * @author Thomas Pantelis
  */
-public abstract class AbstractShardTest extends AbstractActorTest{
+public abstract class AbstractShardTest extends AbstractActorTest {
     protected static final SchemaContext SCHEMA_CONTEXT = TestModel.createTestContext();
 
     private static final AtomicInteger NEXT_SHARD_NUM = new AtomicInteger();
@@ -98,9 +98,8 @@ public abstract class AbstractShardTest extends AbstractActorTest{
     protected final ShardIdentifier shardID = ShardIdentifier.create("inventory", MemberName.forName("member-1"),
         "config" + NEXT_SHARD_NUM.getAndIncrement());
 
-    protected final Builder dataStoreContextBuilder = DatastoreContext.newBuilder().
-            shardJournalRecoveryLogBatchSize(3).shardSnapshotBatchCount(5000).
-            shardHeartbeatIntervalInMillis(100);
+    protected final Builder dataStoreContextBuilder = DatastoreContext.newBuilder()
+            .shardJournalRecoveryLogBatchSize(3).shardSnapshotBatchCount(5000).shardHeartbeatIntervalInMillis(100);
 
     protected final TestActorFactory actorFactory = new TestActorFactory(getSystem());
 
@@ -136,25 +135,20 @@ public abstract class AbstractShardTest extends AbstractActorTest{
 
         final CountDownLatch recoveryComplete = new CountDownLatch(1);
 
-        @SuppressWarnings("serial")
-        final Creator<Shard> creator = new Creator<Shard>() {
+        final Creator<Shard> creator = () -> new Shard(newShardBuilder()) {
             @Override
-            public Shard create() throws Exception {
-                return new Shard(newShardBuilder()) {
-                    @Override
-                    protected void onRecoveryComplete() {
-                        try {
-                            super.onRecoveryComplete();
-                        } finally {
-                            recoveryComplete.countDown();
-                        }
-                    }
-                };
+            protected void onRecoveryComplete() {
+                try {
+                    super.onRecoveryComplete();
+                } finally {
+                    recoveryComplete.countDown();
+                }
             }
         };
 
         final TestActorRef<Shard> shard = TestActorRef.create(getSystem(),
-                Props.create(new DelegatingShardCreator(creator)).withDispatcher(Dispatchers.DefaultDispatcherId()), "testRecovery");
+                Props.create(new DelegatingShardCreator(creator)).withDispatcher(Dispatchers.DefaultDispatcherId()),
+                "testRecovery");
 
         assertEquals("Recovery complete", true, recoveryComplete.await(5, TimeUnit.SECONDS));
 
@@ -164,7 +158,7 @@ public abstract class AbstractShardTest extends AbstractActorTest{
         assertNotNull(TestModel.OUTER_LIST_QNAME.getLocalName() + " not found", outerList);
         assertTrue(TestModel.OUTER_LIST_QNAME.getLocalName() + " value is not Iterable",
                 outerList.getValue() instanceof Iterable);
-        for(final Object entry: (Iterable<?>) outerList.getValue()) {
+        for (final Object entry: (Iterable<?>) outerList.getValue()) {
             assertTrue(TestModel.OUTER_LIST_QNAME.getLocalName() + " entry is not MapEntryNode",
                     entry instanceof MapEntryNode);
             final MapEntryNode mapEntry = (MapEntryNode)entry;
@@ -172,13 +166,12 @@ public abstract class AbstractShardTest extends AbstractActorTest{
                     mapEntry.getChild(new YangInstanceIdentifier.NodeIdentifier(TestModel.ID_QNAME));
             assertTrue("Missing leaf " + TestModel.ID_QNAME.getLocalName(), idLeaf.isPresent());
             final Object value = idLeaf.get().getValue();
-            assertTrue("Unexpected value for leaf "+ TestModel.ID_QNAME.getLocalName() + ": " + value,
+            assertTrue("Unexpected value for leaf " + TestModel.ID_QNAME.getLocalName() + ": " + value,
                     listEntryKeys.remove(value));
         }
 
-        if(!listEntryKeys.isEmpty()) {
-            fail("Missing " + TestModel.OUTER_LIST_QNAME.getLocalName() + " entries with keys: " +
-                    listEntryKeys);
+        if (!listEntryKeys.isEmpty()) {
+            fail("Missing " + TestModel.OUTER_LIST_QNAME.getLocalName() + " entries with keys: " + listEntryKeys);
         }
 
         assertEquals("Last log index", nListEntries,
@@ -193,9 +186,9 @@ public abstract class AbstractShardTest extends AbstractActorTest{
 
     protected void verifyLastApplied(final TestActorRef<Shard> shard, final long expectedValue) {
         long lastApplied = -1;
-        for(int i = 0; i < 20 * 5; i++) {
+        for (int i = 0; i < 20 * 5; i++) {
             lastApplied = shard.underlyingActor().getShardMBean().getLastApplied();
-            if(lastApplied == expectedValue) {
+            if (lastApplied == expectedValue) {
                 return;
             }
             Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
@@ -251,17 +244,14 @@ public abstract class AbstractShardTest extends AbstractActorTest{
     protected Map<TransactionIdentifier, CapturingShardDataTreeCohort> setupCohortDecorator(final Shard shard,
             final TransactionIdentifier... transactionIDs) {
         final Map<TransactionIdentifier, CapturingShardDataTreeCohort> cohortMap = new HashMap<>();
-        for(TransactionIdentifier id: transactionIDs) {
+        for (TransactionIdentifier id: transactionIDs) {
             cohortMap.put(id, new CapturingShardDataTreeCohort());
         }
 
-        shard.getCommitCoordinator().setCohortDecorator(new ShardCommitCoordinator.CohortDecorator() {
-            @Override
-            public ShardDataTreeCohort decorate(final Identifier transactionID, final ShardDataTreeCohort actual) {
-                CapturingShardDataTreeCohort cohort = cohortMap.get(transactionID);
-                cohort.setDelegate(actual);
-                return cohort;
-            }
+        shard.getCommitCoordinator().setCohortDecorator((transactionID, actual) -> {
+            CapturingShardDataTreeCohort cohort = cohortMap.get(transactionID);
+            cohort.setDelegate(actual);
+            return cohort;
         });
 
         return cohortMap;
@@ -293,14 +283,14 @@ public abstract class AbstractShardTest extends AbstractActorTest{
     protected static ForwardedReadyTransaction prepareForwardedReadyTransaction(final TestActorRef<Shard> shard,
             final TransactionIdentifier transactionID, final YangInstanceIdentifier path,
             final NormalizedNode<?, ?> data, final boolean doCommitOnReady) {
-        ReadWriteShardDataTreeTransaction rwTx = shard.underlyingActor().getDataStore().
-                newReadWriteTransaction(transactionID);
+        ReadWriteShardDataTreeTransaction rwTx = shard.underlyingActor().getDataStore()
+                .newReadWriteTransaction(transactionID);
         rwTx.getSnapshot().write(path, data);
         return new ForwardedReadyTransaction(transactionID, CURRENT_VERSION, rwTx, doCommitOnReady);
     }
 
-    public static NormalizedNode<?,?> readStore(final TestActorRef<? extends Shard> shard, final YangInstanceIdentifier id)
-            throws ExecutionException, InterruptedException {
+    public static NormalizedNode<?,?> readStore(final TestActorRef<? extends Shard> shard,
+            final YangInstanceIdentifier id) throws ExecutionException, InterruptedException {
         return shard.underlyingActor().getDataStore().readNode(id).orNull();
     }
 
@@ -310,11 +300,11 @@ public abstract class AbstractShardTest extends AbstractActorTest{
 
     public void writeToStore(final TestActorRef<Shard> shard, final YangInstanceIdentifier id,
             final NormalizedNode<?,?> node) throws InterruptedException, ExecutionException {
-        Future<Object> future = Patterns.ask(shard, newBatchedModifications(nextTransactionId(), id, node, true, true, 1),
-                new Timeout(5, TimeUnit.SECONDS));
+        Future<Object> future = Patterns.ask(shard, newBatchedModifications(nextTransactionId(),
+                id, node, true, true, 1), new Timeout(5, TimeUnit.SECONDS));
         try {
             Await.ready(future, Duration.create(5, TimeUnit.SECONDS));
-        } catch(TimeoutException e) {
+        } catch (TimeoutException e) {
             throw new ExecutionException(e);
         }
     }
@@ -322,19 +312,6 @@ public abstract class AbstractShardTest extends AbstractActorTest{
     public static void writeToStore(final ShardDataTree store, final YangInstanceIdentifier id,
             final NormalizedNode<?,?> node) throws Exception {
         BatchedModifications batched = newBatchedModifications(nextTransactionId(), id, node, true, true, 1);
-        DataTreeModification modification = store.getDataTree().takeSnapshot().newModification();
-        batched.apply(modification);
-        store.commit(modification);
-    }
-
-    public void mergeToStore(final ShardDataTree store, final YangInstanceIdentifier id,
-            final NormalizedNode<?,?> node) throws Exception {
-        final BatchedModifications batched = new BatchedModifications(nextTransactionId(), CURRENT_VERSION);
-        batched.addModification(new MergeModification(id, node));
-        batched.setReady(true);
-        batched.setDoCommitOnReady(true);
-        batched.setTotalMessagesSent(1);
-
         DataTreeModification modification = store.getDataTree().takeSnapshot().newModification();
         batched.apply(modification);
         store.commit(modification);
@@ -349,6 +326,19 @@ public abstract class AbstractShardTest extends AbstractActorTest{
         store.validate(transaction);
         final DataTreeCandidate candidate = store.prepare(transaction);
         store.commit(candidate);
+    }
+
+    public void mergeToStore(final ShardDataTree store, final YangInstanceIdentifier id,
+            final NormalizedNode<?,?> node) throws Exception {
+        final BatchedModifications batched = new BatchedModifications(nextTransactionId(), CURRENT_VERSION);
+        batched.addModification(new MergeModification(id, node));
+        batched.setReady(true);
+        batched.setDoCommitOnReady(true);
+        batched.setTotalMessagesSent(1);
+
+        DataTreeModification modification = store.getDataTree().takeSnapshot().newModification();
+        batched.apply(modification);
+        store.commit(modification);
     }
 
     DataTree setupInMemorySnapshotStore() throws DataValidationFailedException {
@@ -374,8 +364,8 @@ public abstract class AbstractShardTest extends AbstractActorTest{
     }
 
     static BatchedModifications newBatchedModifications(final TransactionIdentifier transactionID,
-            final YangInstanceIdentifier path, final NormalizedNode<?, ?> data, final boolean ready, final boolean doCommitOnReady,
-            final int messagesSent) {
+            final YangInstanceIdentifier path, final NormalizedNode<?, ?> data, final boolean ready,
+            final boolean doCommitOnReady, final int messagesSent) {
         final BatchedModifications batched = new BatchedModifications(transactionID, CURRENT_VERSION);
         batched.addModification(new WriteModification(path, data));
         batched.setReady(ready);
@@ -404,7 +394,8 @@ public abstract class AbstractShardTest extends AbstractActorTest{
         final DataTreeCandidateTip mockCandidate = mock(DataTreeCandidateTip.class, name);
         final DataTreeCandidateNode mockCandidateNode = mock(DataTreeCandidateNode.class, name + "-node");
         doReturn(ModificationType.WRITE).when(mockCandidateNode).getModificationType();
-        doReturn(Optional.of(ImmutableNodes.containerNode(CarsModel.CARS_QNAME))).when(mockCandidateNode).getDataAfter();
+        doReturn(Optional.of(ImmutableNodes.containerNode(CarsModel.CARS_QNAME)))
+                .when(mockCandidateNode).getDataAfter();
         doReturn(CarsModel.BASE_PATH).when(mockCandidate).getRootPath();
         doReturn(mockCandidateNode).when(mockCandidate).getRootNode();
         return mockCandidate;
@@ -419,7 +410,8 @@ public abstract class AbstractShardTest extends AbstractActorTest{
         return mockCandidate;
     }
 
-    static void commitTransaction(final DataTree store, final DataTreeModification modification) throws DataValidationFailedException {
+    static void commitTransaction(final DataTree store, final DataTreeModification modification)
+            throws DataValidationFailedException {
         modification.ready();
         store.validate(modification);
         store.commit(store.prepare(modification));
