@@ -33,7 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 abstract class AbstractDOMBroker extends AbstractDOMTransactionFactory<DOMStore>
-        implements DOMDataBroker, AutoCloseable {
+        implements DOMDataBroker {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractDOMBroker.class);
 

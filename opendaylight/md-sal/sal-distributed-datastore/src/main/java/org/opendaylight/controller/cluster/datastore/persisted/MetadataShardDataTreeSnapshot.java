@@ -12,6 +12,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Verify;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
@@ -88,7 +89,12 @@ public final class MetadataShardDataTreeSnapshot extends AbstractVersionedShardD
 
     private static final long serialVersionUID = 1L;
 
+    @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "This field is not Serializable but this class "
+            + "implements writeReplace to delegate serialization to a Proxy class and thus instances of this class "
+            + "aren't serialized. FindBugs does not recognize this.")
     private final Map<Class<? extends ShardDataTreeSnapshotMetadata<?>>, ShardDataTreeSnapshotMetadata<?>> metadata;
+
+    @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "See above justification.")
     private final NormalizedNode<?, ?> rootNode;
 
     public MetadataShardDataTreeSnapshot(final NormalizedNode<?, ?> rootNode) {

@@ -87,11 +87,12 @@ public class ThreePhaseCommitCohortProxy extends AbstractThreePhaseCommitCohort<
         }
 
         final AtomicInteger completed = new AtomicInteger(cohorts.size());
+        final Object lock = new Object();
         for (final CohortInfo info: cohorts) {
             info.getActorFuture().onComplete(new OnComplete<ActorSelection>() {
                 @Override
                 public void onComplete(Throwable failure, ActorSelection actor)  {
-                    synchronized (completed) {
+                    synchronized (lock) {
                         boolean done = completed.decrementAndGet() == 0;
                         if (failure != null) {
                             LOG.debug("Tx {}: a cohort Future failed", transactionId, failure);

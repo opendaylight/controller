@@ -11,6 +11,7 @@ package org.opendaylight.controller.cluster.datastore;
 import akka.actor.PoisonPill;
 import akka.actor.Props;
 import akka.japi.Creator;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActor;
 import org.opendaylight.controller.cluster.datastore.messages.CloseDataChangeListenerRegistration;
 import org.opendaylight.controller.cluster.datastore.messages.CloseDataChangeListenerRegistrationReply;
@@ -56,6 +57,9 @@ public class DataChangeListenerRegistrationActor extends AbstractUntypedActor {
     private static class DataChangeListenerRegistrationCreator
                                             implements Creator<DataChangeListenerRegistrationActor> {
         private static final long serialVersionUID = 1L;
+
+        @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "This field is not Serializable but we don't "
+                + "create remote instances of this actor and thus don't need it to be Serializable.")
         final ListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier,
                                                            NormalizedNode<?, ?>>> registration;
 

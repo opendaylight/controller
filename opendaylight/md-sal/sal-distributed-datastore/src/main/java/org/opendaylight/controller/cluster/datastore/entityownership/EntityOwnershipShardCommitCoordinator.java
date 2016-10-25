@@ -84,7 +84,7 @@ class EntityOwnershipShardCommitCoordinator {
         }
 
         if (shard.hasLeader()) {
-            log.debug("Retrying commit for BatchedModifications {}", inflightCommit.getTransactionID());
+            log.debug("Retrying commit for BatchedModifications {}", inflightCommit.getTransactionId());
 
             shard.tryCommitModifications(inflightCommit);
         } else {
@@ -98,7 +98,7 @@ class EntityOwnershipShardCommitCoordinator {
             return;
         }
 
-        log.debug("Inflight BatchedModifications {} commit failed", inflightCommit.getTransactionID(), cause);
+        log.debug("Inflight BatchedModifications {} commit failed", inflightCommit.getTransactionId(), cause);
 
         if (!(cause instanceof NoShardLeaderException)) {
             // If the failure is other than NoShardLeaderException the commit may have been partially
@@ -113,7 +113,7 @@ class EntityOwnershipShardCommitCoordinator {
         FiniteDuration duration = shard.getDatastoreContext().getShardRaftConfig().getElectionTimeOutInterval();
 
         log.debug("Scheduling retry for BatchedModifications commit {} in {}",
-                inflightCommit.getTransactionID(), duration);
+                inflightCommit.getTransactionId(), duration);
 
         retryCommitSchedule = shard.getContext().system().scheduler().scheduleOnce(duration, shard.getSelf(),
                 COMMIT_RETRY_MESSAGE, shard.getContext().dispatcher(), ActorRef.noSender());
@@ -129,7 +129,7 @@ class EntityOwnershipShardCommitCoordinator {
             retryCommitSchedule.cancel();
         }
 
-        log.debug("BatchedModifications commit {} succeeded", inflightCommit.getTransactionID());
+        log.debug("BatchedModifications commit {} succeeded", inflightCommit.getTransactionId());
 
         inflightCommit = null;
         commitNextBatch(shard);
@@ -151,7 +151,7 @@ class EntityOwnershipShardCommitCoordinator {
             }
         }
 
-        log.debug("Committing next BatchedModifications {}, size {}", inflightCommit.getTransactionID(),
+        log.debug("Committing next BatchedModifications {}, size {}", inflightCommit.getTransactionId(),
                 inflightCommit.getModifications().size());
 
         shard.tryCommitModifications(inflightCommit);
@@ -233,7 +233,7 @@ class EntityOwnershipShardCommitCoordinator {
 
     @Nullable
     private BatchedModifications pruneModifications(BatchedModifications toPrune) {
-        BatchedModifications prunedModifications = new BatchedModifications(toPrune.getTransactionID(),
+        BatchedModifications prunedModifications = new BatchedModifications(toPrune.getTransactionId(),
                 toPrune.getVersion());
         prunedModifications.setDoCommitOnReady(toPrune.isDoCommitOnReady());
         prunedModifications.setReady(toPrune.isReady());

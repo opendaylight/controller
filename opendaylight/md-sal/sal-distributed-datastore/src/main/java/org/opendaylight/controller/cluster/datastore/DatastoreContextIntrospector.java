@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.annotation.concurrent.GuardedBy;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.WordUtils;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext.Builder;
@@ -182,14 +183,16 @@ public class DatastoreContextIntrospector {
                 propertyName, type));
     }
 
+    @GuardedBy(value = "this")
     private DatastoreContext context;
+    @GuardedBy(value = "this")
     private Map<String, Object> currentProperties;
 
     public DatastoreContextIntrospector(DatastoreContext context) {
         this.context = context;
     }
 
-    public DatastoreContext getContext() {
+    public synchronized DatastoreContext getContext() {
         return context;
     }
 

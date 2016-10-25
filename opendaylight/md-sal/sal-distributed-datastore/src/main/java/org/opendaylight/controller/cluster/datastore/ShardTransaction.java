@@ -15,6 +15,7 @@ import akka.actor.ReceiveTimeout;
 import akka.japi.Creator;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActorWithMetering;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStats;
@@ -34,13 +35,13 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 public abstract class ShardTransaction extends AbstractUntypedActorWithMetering {
     private final ActorRef shardActor;
     private final ShardStats shardStats;
-    private final TransactionIdentifier transactionID;
+    private final TransactionIdentifier transactionId;
 
-    protected ShardTransaction(ActorRef shardActor, ShardStats shardStats, TransactionIdentifier transactionID) {
+    protected ShardTransaction(ActorRef shardActor, ShardStats shardStats, TransactionIdentifier transactionId) {
         super("shard-tx"); //actor name override used for metering. This does not change the "real" actor name
         this.shardActor = shardActor;
         this.shardStats = shardStats;
-        this.transactionID = Preconditions.checkNotNull(transactionID);
+        this.transactionId = Preconditions.checkNotNull(transactionId);
     }
 
     public static Props props(TransactionType type, AbstractShardDataTreeTransaction<?> transaction,
@@ -54,8 +55,8 @@ public abstract class ShardTransaction extends AbstractUntypedActorWithMetering 
         return shardActor;
     }
 
-    protected final TransactionIdentifier getTransactionID() {
-        return transactionID;
+    protected final TransactionIdentifier getTransactionId() {
+        return transactionId;
     }
 
     @Override
@@ -63,7 +64,7 @@ public abstract class ShardTransaction extends AbstractUntypedActorWithMetering 
         if (CloseTransaction.isSerializedType(message)) {
             closeTransaction(true);
         } else if (message instanceof ReceiveTimeout) {
-            LOG.debug("Got ReceiveTimeout for inactivity - closing transaction {}", transactionID);
+            LOG.debug("Got ReceiveTimeout for inactivity - closing transaction {}", transactionId);
             closeTransaction(false);
         } else {
             unknownMessage(message);
@@ -115,6 +116,8 @@ public abstract class ShardTransaction extends AbstractUntypedActorWithMetering 
         getSender().tell(new DataExistsReply(exists, message.getVersion()).toSerializable(), getSelf());
     }
 
+    @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "Some fields are not Serializable but we don't "
+            + "create remote instances of this actor and thus don't need it to be Serializable.")
     private static class ShardTransactionCreator implements Creator<ShardTransaction> {
 
         private static final long serialVersionUID = 1L;
