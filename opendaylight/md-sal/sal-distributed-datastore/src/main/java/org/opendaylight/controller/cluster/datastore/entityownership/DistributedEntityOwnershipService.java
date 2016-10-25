@@ -113,7 +113,7 @@ public class DistributedEntityOwnershipService implements DOMEntityOwnershipServ
                 if (failure != null) {
                     LOG.debug("Error sending message {} to {}", message, shardActor, failure);
                 } else {
-                    LOG.debug("{} message to {} succeeded", message, shardActor, failure);
+                    LOG.debug("{} message to {} succeeded", message, shardActor);
                 }
             }
         }, context.getClientDispatcher());

@@ -110,7 +110,7 @@ public class ShardWriteTransaction extends ShardTransaction {
     }
 
     private void readyTransaction(boolean returnSerialized, boolean doImmediateCommit, short clientTxVersion) {
-        TransactionIdentifier transactionID = getTransactionID();
+        TransactionIdentifier transactionID = getTransactionId();
 
         LOG.debug("readyTransaction : {}", transactionID);
 

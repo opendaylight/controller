@@ -59,8 +59,8 @@ public class ConfigurationImpl implements Configuration {
     private static Map<String, String> createNamespaceToModuleName(Iterable<ModuleConfig> moduleConfigs) {
         final ImmutableMap.Builder<String, String> builder = ImmutableMap.builder();
         for (ModuleConfig moduleConfig : moduleConfigs) {
-            if (moduleConfig.getNameSpace() != null) {
-                builder.put(moduleConfig.getNameSpace(), moduleConfig.getName());
+            if (moduleConfig.getNamespace() != null) {
+                builder.put(moduleConfig.getNamespace(), moduleConfig.getName());
             }
         }
 
@@ -149,7 +149,7 @@ public class ConfigurationImpl implements Configuration {
         updateModuleConfigMap(moduleConfig);
 
         namespaceToModuleName = ImmutableMap.<String, String>builder().putAll(namespaceToModuleName)
-                .put(moduleConfig.getNameSpace(), moduleConfig.getName()).build();
+                .put(moduleConfig.getNamespace(), moduleConfig.getName()).build();
         allShardNames = ImmutableSet.<String>builder().addAll(allShardNames).add(config.getShardName()).build();
     }
 

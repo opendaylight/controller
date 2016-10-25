@@ -57,7 +57,7 @@ public class ReadyLocalTransactionSerializerTest extends AbstractTest {
         assertNotNull("fromBinary returned null", deserialized);
         assertEquals("fromBinary return type", BatchedModifications.class, deserialized.getClass());
         BatchedModifications batched = (BatchedModifications)deserialized;
-        assertEquals("getTransactionID", txId, batched.getTransactionID());
+        assertEquals("getTransactionID", txId, batched.getTransactionId());
         assertEquals("getVersion", DataStoreVersions.CURRENT_VERSION, batched.getVersion());
 
         List<Modification> batchedMods = batched.getModifications();

@@ -21,7 +21,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification
 
 final class CohortEntry {
     private final ReadWriteShardDataTreeTransaction transaction;
-    private final TransactionIdentifier transactionID;
+    private final TransactionIdentifier transactionId;
     private final short clientVersion;
 
     private RuntimeException lastBatchedModificationsException;
@@ -33,13 +33,13 @@ final class CohortEntry {
 
     private CohortEntry(final ReadWriteShardDataTreeTransaction transaction, final short clientVersion) {
         this.transaction = Preconditions.checkNotNull(transaction);
-        this.transactionID = transaction.getId();
+        this.transactionId = transaction.getId();
         this.clientVersion = clientVersion;
     }
 
     private CohortEntry(final ShardDataTreeCohort cohort, final short clientVersion) {
         this.cohort = Preconditions.checkNotNull(cohort);
-        this.transactionID = cohort.getIdentifier();
+        this.transactionId = cohort.getIdentifier();
         this.transaction = null;
         this.clientVersion = clientVersion;
     }
@@ -52,8 +52,8 @@ final class CohortEntry {
         return new CohortEntry(cohort, clientVersion);
     }
 
-    TransactionIdentifier getTransactionID() {
-        return transactionID;
+    TransactionIdentifier getTransactionId() {
+        return transactionId;
     }
 
     short getClientVersion() {
@@ -118,7 +118,7 @@ final class CohortEntry {
 
         if (cohortDecorator != null) {
             // Call the hook for unit tests.
-            cohort = cohortDecorator.decorate(transactionID, cohort);
+            cohort = cohortDecorator.decorate(transactionId, cohort);
         }
     }
 
@@ -149,7 +149,7 @@ final class CohortEntry {
     @Override
     public String toString() {
         final StringBuilder builder = new StringBuilder();
-        builder.append("CohortEntry [transactionID=").append(transactionID).append(", doImmediateCommit=")
+        builder.append("CohortEntry [transactionID=").append(transactionId).append(", doImmediateCommit=")
                 .append(doImmediateCommit).append("]");
         return builder.toString();
     }

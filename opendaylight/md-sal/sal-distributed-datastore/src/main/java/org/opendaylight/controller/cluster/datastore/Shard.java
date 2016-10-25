@@ -154,9 +154,7 @@ public class Shard extends RaftActor {
                     treeChangeListenerPublisher, dataChangeListenerPublisher, name);
         }
 
-        shardMBean = ShardMBeanFactory.getShardStatsMBean(name.toString(),
-                datastoreContext.getDataStoreMXBeanType());
-        shardMBean.setShard(this);
+        shardMBean = ShardMBeanFactory.getShardStatsMBean(name, datastoreContext.getDataStoreMXBeanType(), this);
 
         if (isMetricsCaptureEnabled()) {
             getContext().become(new MeteringBehavior(this));
@@ -167,7 +165,7 @@ public class Shard extends RaftActor {
         setTransactionCommitTimeout();
 
         // create a notifier actor for each cluster member
-        roleChangeNotifier = createRoleChangeNotifier(name.toString());
+        roleChangeNotifier = createRoleChangeNotifier(name);
 
         appendEntriesReplyTracker = new MessageTracker(AppendEntriesReply.class,
                 getRaftActorContext().getConfigParams().getIsolatedCheckIntervalInMillis());
@@ -254,8 +252,7 @@ public class Shard extends RaftActor {
                 updateSchemaContext((UpdateSchemaContext) message);
             } else if (message instanceof PeerAddressResolved) {
                 PeerAddressResolved resolved = (PeerAddressResolved) message;
-                setPeerAddress(resolved.getPeerId().toString(),
-                        resolved.getPeerAddress());
+                setPeerAddress(resolved.getPeerId(), resolved.getPeerAddress());
             } else if (TX_COMMIT_TIMEOUT_CHECK_MESSAGE.equals(message)) {
                 store.checkForExpiredTransactions(transactionCommitTimeout);
                 commitCoordinator.checkForExpiredTransactions(transactionCommitTimeout, this);
@@ -331,12 +328,12 @@ public class Shard extends RaftActor {
 
     private void handleCommitTransaction(final CommitTransaction commit) {
         if (isLeader()) {
-            commitCoordinator.handleCommit(commit.getTransactionID(), getSender(), this);
+            commitCoordinator.handleCommit(commit.getTransactionId(), getSender(), this);
         } else {
             ActorSelection leader = getLeader();
             if (leader == null) {
                 messageRetrySupport.addMessageToRetry(commit, getSender(),
-                        "Could not commit transaction " + commit.getTransactionID());
+                        "Could not commit transaction " + commit.getTransactionId());
             } else {
                 LOG.debug("{}: Forwarding CommitTransaction to leader {}", persistenceId(), leader);
                 leader.forward(commit, getContext());
@@ -345,15 +342,15 @@ public class Shard extends RaftActor {
     }
 
     private void handleCanCommitTransaction(final CanCommitTransaction canCommit) {
-        LOG.debug("{}: Can committing transaction {}", persistenceId(), canCommit.getTransactionID());
+        LOG.debug("{}: Can committing transaction {}", persistenceId(), canCommit.getTransactionId());
 
         if (isLeader()) {
-            commitCoordinator.handleCanCommit(canCommit.getTransactionID(), getSender(), this);
+            commitCoordinator.handleCanCommit(canCommit.getTransactionId(), getSender(), this);
         } else {
             ActorSelection leader = getLeader();
             if (leader == null) {
                 messageRetrySupport.addMessageToRetry(canCommit, getSender(),
-                        "Could not canCommit transaction " + canCommit.getTransactionID());
+                        "Could not canCommit transaction " + canCommit.getTransactionId());
             } else {
                 LOG.debug("{}: Forwarding CanCommitTransaction to leader {}", persistenceId(), leader);
                 leader.forward(canCommit, getContext());
@@ -367,7 +364,7 @@ public class Shard extends RaftActor {
             commitCoordinator.handleBatchedModifications(batched, sender, this);
         } catch (Exception e) {
             LOG.error("{}: Error handling BatchedModifications for Tx {}", persistenceId(),
-                    batched.getTransactionID(), e);
+                    batched.getTransactionId(), e);
             sender.tell(new akka.actor.Status.Failure(e), getSelf());
         }
     }
@@ -392,7 +389,7 @@ public class Shard extends RaftActor {
             ActorSelection leader = getLeader();
             if (!isLeaderActive || leader == null) {
                 messageRetrySupport.addMessageToRetry(batched, getSender(),
-                        "Could not commit transaction " + batched.getTransactionID());
+                        "Could not commit transaction " + batched.getTransactionId());
             } else {
                 // If this is not the first batch and leadership changed in between batched messages,
                 // we need to reconstruct previous BatchedModifications from the transaction
@@ -430,7 +427,7 @@ public class Shard extends RaftActor {
 
     @SuppressWarnings("checkstyle:IllegalCatch")
     private void handleReadyLocalTransaction(final ReadyLocalTransaction message) {
-        LOG.debug("{}: handleReadyLocalTransaction for {}", persistenceId(), message.getTransactionID());
+        LOG.debug("{}: handleReadyLocalTransaction for {}", persistenceId(), message.getTransactionId());
 
         boolean isLeaderActive = isLeaderActive();
         if (isLeader() && isLeaderActive) {
@@ -438,14 +435,14 @@ public class Shard extends RaftActor {
                 commitCoordinator.handleReadyLocalTransaction(message, getSender(), this);
             } catch (Exception e) {
                 LOG.error("{}: Error handling ReadyLocalTransaction for Tx {}", persistenceId(),
-                        message.getTransactionID(), e);
+                        message.getTransactionId(), e);
                 getSender().tell(new akka.actor.Status.Failure(e), getSelf());
             }
         } else {
             ActorSelection leader = getLeader();
             if (!isLeaderActive || leader == null) {
                 messageRetrySupport.addMessageToRetry(message, getSender(),
-                        "Could not commit transaction " + message.getTransactionID());
+                        "Could not commit transaction " + message.getTransactionId());
             } else {
                 LOG.debug("{}: Forwarding ReadyLocalTransaction to leader {}", persistenceId(), leader);
                 message.setRemoteVersion(getCurrentBehavior().getLeaderPayloadVersion());
@@ -455,7 +452,7 @@ public class Shard extends RaftActor {
     }
 
     private void handleForwardedReadyTransaction(final ForwardedReadyTransaction forwardedReady) {
-        LOG.debug("{}: handleForwardedReadyTransaction for {}", persistenceId(), forwardedReady.getTransactionID());
+        LOG.debug("{}: handleForwardedReadyTransaction for {}", persistenceId(), forwardedReady.getTransactionId());
 
         boolean isLeaderActive = isLeaderActive();
         if (isLeader() && isLeaderActive) {
@@ -464,11 +461,11 @@ public class Shard extends RaftActor {
             ActorSelection leader = getLeader();
             if (!isLeaderActive || leader == null) {
                 messageRetrySupport.addMessageToRetry(forwardedReady, getSender(),
-                        "Could not commit transaction " + forwardedReady.getTransactionID());
+                        "Could not commit transaction " + forwardedReady.getTransactionId());
             } else {
                 LOG.debug("{}: Forwarding ForwardedReadyTransaction to leader {}", persistenceId(), leader);
 
-                ReadyLocalTransaction readyLocal = new ReadyLocalTransaction(forwardedReady.getTransactionID(),
+                ReadyLocalTransaction readyLocal = new ReadyLocalTransaction(forwardedReady.getTransactionId(),
                         forwardedReady.getTransaction().getSnapshot(), forwardedReady.isDoImmediateCommit());
                 readyLocal.setRemoteVersion(getCurrentBehavior().getLeaderPayloadVersion());
                 leader.forward(readyLocal, getContext());
@@ -477,7 +474,7 @@ public class Shard extends RaftActor {
     }
 
     private void handleAbortTransaction(final AbortTransaction abort) {
-        doAbortTransaction(abort.getTransactionID(), getSender());
+        doAbortTransaction(abort.getTransactionId(), getSender());
     }
 
     void doAbortTransaction(final TransactionIdentifier transactionID, final ActorRef sender) {

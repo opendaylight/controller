@@ -343,7 +343,7 @@ public class ThreePhaseCommitCohortProxyTest extends AbstractActorTest {
             try {
                 assertNotNull("Unexpected " + name, expType);
                 assertEquals(name + " type", expType, rawMessage.getClass());
-                assertEquals(name + " transactionId", builder.transactionId, actualMessage.getTransactionID());
+                assertEquals(name + " transactionId", builder.transactionId, actualMessage.getTransactionId());
 
                 if (reply instanceof Throwable) {
                     getSender().tell(new akka.actor.Status.Failure((Throwable)reply), self());
