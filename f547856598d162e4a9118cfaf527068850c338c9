@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "5a682502_12effdb1",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/AbstractClientHistory.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-10-25T16:47:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a6b29fe_a7408508",
+      "revId": "f547856598d162e4a9118cfaf527068850c338c9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a6b29fe_c7466121",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/ClientTransactionCommitCohort.java",
         "patchSetId": 11
@@ -30,6 +48,24 @@
       "writtenOn": "2016-10-06T04:26:36Z",
       "side": 1,
       "message": "Should be indented 4 more spaces.",
+      "revId": "f547856598d162e4a9118cfaf527068850c338c9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a682502_12d89d1c",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/ClientTransactionCommitCohort.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-10-25T16:47:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a6b29fe_c7466121",
       "revId": "f547856598d162e4a9118cfaf527068850c338c9",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
