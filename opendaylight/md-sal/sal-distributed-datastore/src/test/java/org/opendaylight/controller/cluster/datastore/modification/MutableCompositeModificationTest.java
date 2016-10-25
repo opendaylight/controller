@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.datastore.modification;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+
 import com.google.common.base.Optional;
 import org.apache.commons.lang.SerializationUtils;
 import org.junit.Test;
@@ -43,9 +44,9 @@ public class MutableCompositeModificationTest extends AbstractModificationTest {
     @Test
     public void testSerialization() {
         YangInstanceIdentifier writePath = TestModel.TEST_PATH;
-        NormalizedNode<?, ?> writeData = ImmutableContainerNodeBuilder.create().withNodeIdentifier(
-                new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME)).
-                withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo")).build();
+        NormalizedNode<?, ?> writeData = ImmutableContainerNodeBuilder.create()
+                .withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME))
+                .withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo")).build();
 
         YangInstanceIdentifier mergePath = TestModel.OUTER_LIST_PATH;
         NormalizedNode<?, ?> mergeData = ImmutableContainerNodeBuilder.create().withNodeIdentifier(
@@ -58,7 +59,8 @@ public class MutableCompositeModificationTest extends AbstractModificationTest {
         compositeModification.addModification(new MergeModification(mergePath, mergeData));
         compositeModification.addModification(new DeleteModification(deletePath));
 
-        MutableCompositeModification clone = (MutableCompositeModification) SerializationUtils.clone(compositeModification);
+        MutableCompositeModification clone = (MutableCompositeModification)
+                SerializationUtils.clone(compositeModification);
 
         assertEquals("getVersion", DataStoreVersions.CURRENT_VERSION, clone.getVersion());
 

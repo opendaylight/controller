@@ -51,10 +51,10 @@ public class TestModel {
     public static final YangInstanceIdentifier TEST_PATH = YangInstanceIdentifier.of(TEST_QNAME);
     public static final YangInstanceIdentifier TEST2_PATH = YangInstanceIdentifier.of(TEST2_QNAME);
     public static final YangInstanceIdentifier JUNK_PATH = YangInstanceIdentifier.of(JUNK_QNAME);
-    public static final YangInstanceIdentifier OUTER_LIST_PATH = YangInstanceIdentifier.builder(TEST_PATH).
-            node(OUTER_LIST_QNAME).build();
-    public static final YangInstanceIdentifier INNER_LIST_PATH = YangInstanceIdentifier.builder(TEST_PATH).
-            node(OUTER_LIST_QNAME).node(INNER_LIST_QNAME).build();
+    public static final YangInstanceIdentifier OUTER_LIST_PATH = YangInstanceIdentifier.builder(TEST_PATH)
+            .node(OUTER_LIST_QNAME).build();
+    public static final YangInstanceIdentifier INNER_LIST_PATH = YangInstanceIdentifier.builder(TEST_PATH)
+            .node(OUTER_LIST_QNAME).node(INNER_LIST_QNAME).build();
     public static final YangInstanceIdentifier OUTER_CONTAINER_PATH = TEST_PATH.node(OUTER_CONTAINER_QNAME);
     public static final QName TWO_QNAME = QName.create(TEST_QNAME,"two");
     public static final QName THREE_QNAME = QName.create(TEST_QNAME,"three");
@@ -62,8 +62,8 @@ public class TestModel {
     public static SchemaContext createTestContext() {
         final CrossSourceStatementReactor.BuildAction reactor = YangInferencePipeline.RFC6020_REACTOR.newBuild();
         final SchemaContext schemaContext;
-        final Set<ByteSource> sources = Collections.singleton(Resources.asByteSource(TestModel.class.getResource
-                (DATASTORE_TEST_YANG)));
+        final Set<ByteSource> sources = Collections
+                .singleton(Resources.asByteSource(TestModel.class.getResource(DATASTORE_TEST_YANG)));
 
         try {
             schemaContext = reactor.buildEffective(sources);
@@ -77,7 +77,7 @@ public class TestModel {
 
     public static DataContainerChild<?, ?> outerNode(int... ids) {
         CollectionNodeBuilder<MapEntryNode, MapNode> outer = ImmutableNodes.mapNodeBuilder(OUTER_LIST_QNAME);
-        for(int id: ids) {
+        for (int id: ids) {
             outer.addChild(ImmutableNodes.mapEntry(OUTER_LIST_QNAME, ID_QNAME, id));
         }
 
@@ -86,7 +86,7 @@ public class TestModel {
 
     public static DataContainerChild<?, ?> outerNode(MapEntryNode... entries) {
         CollectionNodeBuilder<MapEntryNode, MapNode> outer = ImmutableNodes.mapNodeBuilder(OUTER_LIST_QNAME);
-        for(MapEntryNode e: entries) {
+        for (MapEntryNode e: entries) {
             outer.addChild(e);
         }
 
@@ -95,7 +95,7 @@ public class TestModel {
 
     public static DataContainerChild<?, ?> innerNode(String... names) {
         CollectionNodeBuilder<MapEntryNode, MapNode> outer = ImmutableNodes.mapNodeBuilder(INNER_LIST_QNAME);
-        for(String name: names) {
+        for (String name: names) {
             outer.addChild(ImmutableNodes.mapEntry(INNER_LIST_QNAME, NAME_QNAME, name));
         }
 

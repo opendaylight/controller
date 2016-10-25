@@ -29,20 +29,18 @@ import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
 
 /**
- * Covers negative test cases
+ * Covers negative test cases.
  *
- * @author Basheeruddin Ahmed <syedbahm@cisco.com>
+ * @author Basheeruddin Ahmed
  */
 public class ShardTransactionFailureTest extends AbstractActorTest {
-    private static final SchemaContext testSchemaContext =
-            TestModel.createTestContext();
+    private static final SchemaContext TEST_SCHEMA_CONTEXT = TestModel.createTestContext();
     private static final TransactionType RO = TransactionType.READ_ONLY;
     private static final TransactionType RW = TransactionType.READ_WRITE;
-    private static final TransactionType WO = TransactionType.WRITE_ONLY;
 
-    private static final Shard mockShard = Mockito.mock(Shard.class);
+    private static final Shard MOCK_SHARD = Mockito.mock(Shard.class);
 
-    private static final ShardDataTree store = new ShardDataTree(mockShard, testSchemaContext, TreeType.OPERATIONAL);
+    private static final ShardDataTree STORE = new ShardDataTree(MOCK_SHARD, TEST_SCHEMA_CONTEXT, TreeType.OPERATIONAL);
 
     private static final ShardIdentifier SHARD_IDENTIFIER =
         ShardIdentifier.create("inventory", MemberName.forName("member-1"), "operational");
@@ -51,18 +49,18 @@ public class ShardTransactionFailureTest extends AbstractActorTest {
 
     private final ShardStats shardStats = new ShardStats(SHARD_IDENTIFIER.toString(), "DataStore");
 
-    private ActorRef createShard(){
-        ActorRef shard = getSystem().actorOf(Shard.builder().id(SHARD_IDENTIFIER).datastoreContext(datastoreContext).
-                schemaContext(TestModel.createTestContext()).props());
+    private ActorRef createShard() {
+        ActorRef shard = getSystem().actorOf(Shard.builder().id(SHARD_IDENTIFIER).datastoreContext(datastoreContext)
+                .schemaContext(TestModel.createTestContext()).props());
         ShardTestKit.waitUntilLeader(shard);
         return shard;
     }
 
     @Test(expected = ReadFailedException.class)
-    public void testNegativeReadWithReadOnlyTransactionClosed() throws Throwable {
+    public void testNegativeReadWithReadOnlyTransactionClosed() throws Exception {
 
         final ActorRef shard = createShard();
-        final Props props = ShardTransaction.props(RO, store.newReadOnlyTransaction(nextTransactionId()), shard,
+        final Props props = ShardTransaction.props(RO, STORE.newReadOnlyTransaction(nextTransactionId()), shard,
                 datastoreContext, shardStats);
 
         final TestActorRef<ShardTransaction> subject = TestActorRef.create(getSystem(), props,
@@ -81,10 +79,10 @@ public class ShardTransactionFailureTest extends AbstractActorTest {
 
 
     @Test(expected = ReadFailedException.class)
-    public void testNegativeReadWithReadWriteTransactionClosed() throws Throwable {
+    public void testNegativeReadWithReadWriteTransactionClosed() throws Exception {
 
         final ActorRef shard = createShard();
-        final Props props = ShardTransaction.props(RW, store.newReadWriteTransaction(nextTransactionId()), shard,
+        final Props props = ShardTransaction.props(RW, STORE.newReadWriteTransaction(nextTransactionId()), shard,
                 datastoreContext, shardStats);
 
         final TestActorRef<ShardTransaction> subject = TestActorRef.create(getSystem(), props,
@@ -102,10 +100,10 @@ public class ShardTransactionFailureTest extends AbstractActorTest {
     }
 
     @Test(expected = ReadFailedException.class)
-    public void testNegativeExistsWithReadWriteTransactionClosed() throws Throwable {
+    public void testNegativeExistsWithReadWriteTransactionClosed() throws Exception {
 
         final ActorRef shard = createShard();
-        final Props props = ShardTransaction.props(RW, store.newReadWriteTransaction(nextTransactionId()), shard,
+        final Props props = ShardTransaction.props(RW, STORE.newReadWriteTransaction(nextTransactionId()), shard,
                 datastoreContext, shardStats);
 
         final TestActorRef<ShardTransaction> subject = TestActorRef.create(getSystem(), props,

@@ -9,20 +9,21 @@
 package org.opendaylight.controller.cluster.datastore.identifiers;
 
 import static org.junit.Assert.assertEquals;
+
 import org.junit.Test;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 
 public class ShardIdentifierTest {
 
     @Test
-    public void testBasic(){
+    public void testBasic() {
         ShardIdentifier id = ShardIdentifier.create("inventory", MemberName.forName("member-1"), "config");
 
         assertEquals("member-1-shard-inventory-config", id.toString());
     }
 
     @Test
-    public void testFromShardIdString(){
+    public void testFromShardIdString() {
         String shardIdStr = "member-1-shard-inventory-config";
 
         ShardIdentifier id = ShardIdentifier.fromShardIdString(shardIdStr);

@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.datastore.persisted;
 
 import static org.junit.Assert.assertEquals;
+
 import com.google.common.collect.ImmutableMap;
 import java.io.Externalizable;
 import java.io.IOException;
@@ -31,9 +32,9 @@ public class ShardDataTreeSnapshotTest {
 
     @Test
     public void testShardDataTreeSnapshotWithNoMetadata() throws Exception {
-        NormalizedNode<?, ?> expectedNode = ImmutableContainerNodeBuilder.create().withNodeIdentifier(
-                new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME)).
-                withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo")).build();
+        NormalizedNode<?, ?> expectedNode = ImmutableContainerNodeBuilder.create()
+                .withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME))
+                .withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo")).build();
 
         MetadataShardDataTreeSnapshot snapshot = new MetadataShardDataTreeSnapshot(expectedNode);
         byte[] serialized = snapshot.serialize();
@@ -49,9 +50,9 @@ public class ShardDataTreeSnapshotTest {
 
     @Test
     public void testShardDataTreeSnapshotWithMetadata() throws Exception {
-        NormalizedNode<?, ?> expectedNode = ImmutableContainerNodeBuilder.create().withNodeIdentifier(
-                new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME)).
-                withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo")).build();
+        NormalizedNode<?, ?> expectedNode = ImmutableContainerNodeBuilder.create()
+                .withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME))
+                .withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo")).build();
 
         Map<Class<? extends ShardDataTreeSnapshotMetadata<?>>, ShardDataTreeSnapshotMetadata<?>> expMetadata =
                 ImmutableMap.of(TestShardDataTreeSnapshotMetadata.class, new TestShardDataTreeSnapshotMetadata("test"));
@@ -69,9 +70,9 @@ public class ShardDataTreeSnapshotTest {
 
     @Test
     public void testPreBoronShardDataTreeSnapshot() throws Exception {
-        NormalizedNode<?, ?> expectedNode = ImmutableContainerNodeBuilder.create().withNodeIdentifier(
-                new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME)).
-                withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo")).build();
+        NormalizedNode<?, ?> expectedNode = ImmutableContainerNodeBuilder.create()
+                .withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME))
+                .withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo")).build();
 
         PreBoronShardDataTreeSnapshot snapshot = new PreBoronShardDataTreeSnapshot(expectedNode);
         byte[] serialized = snapshot.serialize();
@@ -84,7 +85,8 @@ public class ShardDataTreeSnapshotTest {
         assertEquals("Deserialized type", PreBoronShardDataTreeSnapshot.class, deserialized.getClass());
     }
 
-    static class TestShardDataTreeSnapshotMetadata extends ShardDataTreeSnapshotMetadata<TestShardDataTreeSnapshotMetadata> {
+    static class TestShardDataTreeSnapshotMetadata
+            extends ShardDataTreeSnapshotMetadata<TestShardDataTreeSnapshotMetadata> {
         private static final long serialVersionUID = 1L;
 
         private final String data;
@@ -110,12 +112,14 @@ public class ShardDataTreeSnapshotTest {
 
         @Override
         public boolean equals(Object obj) {
-            return data.equals(((TestShardDataTreeSnapshotMetadata)obj).data);
+            return obj instanceof TestShardDataTreeSnapshotMetadata
+                    && data.equals(((TestShardDataTreeSnapshotMetadata)obj).data);
         }
 
         private static class Proxy implements Externalizable {
             private String data;
 
+            @SuppressWarnings("checkstyle:RedundantModifier")
             public Proxy() {
             }
 

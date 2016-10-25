@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.datastore.utils;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.fail;
+
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.Arrays;
@@ -36,17 +37,17 @@ public class MockDataTreeChangeListener implements DOMDataTreeChangeListener {
         reset(expChangeEventCount);
     }
 
-    public void reset(int expChangeEventCount) {
-        changeLatch = new CountDownLatch(expChangeEventCount);
-        this.expChangeEventCount = expChangeEventCount;
-        synchronized(changeList) {
+    public void reset(int newExpChangeEventCount) {
+        changeLatch = new CountDownLatch(newExpChangeEventCount);
+        this.expChangeEventCount = newExpChangeEventCount;
+        synchronized (changeList) {
             changeList.clear();
         }
     }
 
     @Override
     public void onDataTreeChanged(@Nonnull final Collection<DataTreeCandidate> changes) {
-        synchronized(changeList) {
+        synchronized (changeList) {
             changeList.add(changes);
         }
         changeLatch.countDown();
@@ -54,39 +55,39 @@ public class MockDataTreeChangeListener implements DOMDataTreeChangeListener {
 
     public void waitForChangeEvents() {
         boolean done = Uninterruptibles.awaitUninterruptibly(changeLatch, 5, TimeUnit.SECONDS);
-        if(!done) {
+        if (!done) {
             fail(String.format("Missing change notifications. Expected: %d. Actual: %d",
-                    expChangeEventCount, (expChangeEventCount - changeLatch.getCount())));
+                    expChangeEventCount, expChangeEventCount - changeLatch.getCount()));
         }
     }
 
     public void verifyNotifiedData(YangInstanceIdentifier... paths) {
         Set<YangInstanceIdentifier> pathSet = new HashSet<>(Arrays.asList(paths));
-        synchronized(changeList) {
-            for(Collection<DataTreeCandidate> list: changeList) {
-                for(DataTreeCandidate c: list) {
+        synchronized (changeList) {
+            for (Collection<DataTreeCandidate> list : changeList) {
+                for (DataTreeCandidate c : list) {
                     pathSet.remove(c.getRootPath());
                 }
             }
         }
 
-        if(!pathSet.isEmpty()) {
+        if (!pathSet.isEmpty()) {
             fail(pathSet + " not present in " + changeList);
         }
     }
 
     public void expectNoMoreChanges(String assertMsg) {
         Uninterruptibles.sleepUninterruptibly(500, TimeUnit.MILLISECONDS);
-        synchronized(changeList) {
+        synchronized (changeList) {
             assertEquals(assertMsg, expChangeEventCount, changeList.size());
         }
     }
 
     public void verifyNoNotifiedData(YangInstanceIdentifier... paths) {
         Set<YangInstanceIdentifier> pathSet = new HashSet<>(Arrays.asList(paths));
-        synchronized(changeList) {
-            for(Collection<DataTreeCandidate> list: changeList) {
-                for(DataTreeCandidate c: list) {
+        synchronized (changeList) {
+            for (Collection<DataTreeCandidate> list : changeList) {
+                for (DataTreeCandidate c : list) {
                     assertFalse("Unexpected " + c.getRootPath() + " present in DataTreeCandidate",
                             pathSet.contains(c.getRootPath()));
                 }

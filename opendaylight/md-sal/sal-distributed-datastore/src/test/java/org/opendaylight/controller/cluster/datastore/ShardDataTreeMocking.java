@@ -15,6 +15,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+
 import com.google.common.primitives.UnsignedLong;
 import com.google.common.util.concurrent.FutureCallback;
 import org.mockito.InOrder;
@@ -111,7 +112,8 @@ public final class ShardDataTreeMocking {
     }
 
     @SuppressWarnings("unchecked")
-    public static ShardDataTreeCohort successfulPreCommit(final ShardDataTreeCohort mock, final DataTreeCandidate candidate) {
+    public static ShardDataTreeCohort successfulPreCommit(final ShardDataTreeCohort mock,
+            final DataTreeCandidate candidate) {
         doAnswer(invocation -> {
             return invokeSuccess(invocation, candidate);
         }).when(mock).preCommit(any(FutureCallback.class));

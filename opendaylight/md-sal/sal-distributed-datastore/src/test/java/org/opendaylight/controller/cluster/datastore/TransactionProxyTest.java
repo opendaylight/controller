@@ -22,6 +22,7 @@ import static org.mockito.Mockito.verify;
 import static org.opendaylight.controller.cluster.datastore.TransactionType.READ_ONLY;
 import static org.opendaylight.controller.cluster.datastore.TransactionType.READ_WRITE;
 import static org.opendaylight.controller.cluster.datastore.TransactionType.WRITE_ONLY;
+
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
@@ -29,6 +30,7 @@ import akka.actor.Props;
 import akka.dispatch.Futures;
 import akka.util.Timeout;
 import com.google.common.base.Optional;
+import com.google.common.base.Throwables;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.FutureCallback;
@@ -116,8 +118,8 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
     public void testReadWithInvalidReplyMessageType() throws Exception {
         ActorRef actorRef = setupActorContextWithInitialCreateTransaction(getSystem(), READ_ONLY);
 
-        doReturn(Futures.successful(new Object())).when(mockActorContext).
-                executeOperationAsync(eq(actorSelection(actorRef)), eqReadData(), any(Timeout.class));
+        doReturn(Futures.successful(new Object())).when(mockActorContext)
+                .executeOperationAsync(eq(actorSelection(actorRef)), eqReadData(), any(Timeout.class));
 
         TransactionProxy transactionProxy = new TransactionProxy(mockComponentFactory, READ_ONLY);
 
@@ -125,26 +127,25 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
     }
 
     @Test(expected = TestException.class)
-    public void testReadWithAsyncRemoteOperatonFailure() throws Throwable {
+    public void testReadWithAsyncRemoteOperatonFailure() throws Exception {
         ActorRef actorRef = setupActorContextWithInitialCreateTransaction(getSystem(), READ_ONLY);
 
-        doReturn(Futures.failed(new TestException())).when(mockActorContext).
-                executeOperationAsync(eq(actorSelection(actorRef)), eqReadData(), any(Timeout.class));
+        doReturn(Futures.failed(new TestException())).when(mockActorContext)
+                .executeOperationAsync(eq(actorSelection(actorRef)), eqReadData(), any(Timeout.class));
 
         TransactionProxy transactionProxy = new TransactionProxy(mockComponentFactory, READ_ONLY);
 
         propagateReadFailedExceptionCause(transactionProxy.read(TestModel.TEST_PATH));
     }
 
-    private void testExceptionOnInitialCreateTransaction(Exception exToThrow, Invoker invoker)
-            throws Throwable {
+    private void testExceptionOnInitialCreateTransaction(Exception exToThrow, Invoker invoker) throws Exception {
         ActorRef actorRef = getSystem().actorOf(Props.create(DoNothingActor.class));
 
         if (exToThrow instanceof PrimaryNotFoundException) {
             doReturn(Futures.failed(exToThrow)).when(mockActorContext).findPrimaryShardAsync(anyString());
         } else {
-            doReturn(primaryShardInfoReply(getSystem(), actorRef)).
-                    when(mockActorContext).findPrimaryShardAsync(anyString());
+            doReturn(primaryShardInfoReply(getSystem(), actorRef)).when(mockActorContext)
+                    .findPrimaryShardAsync(anyString());
         }
 
         doReturn(Futures.failed(exToThrow)).when(mockActorContext).executeOperationAsync(
@@ -155,33 +156,28 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
         propagateReadFailedExceptionCause(invoker.invoke(transactionProxy));
     }
 
-    private void testReadWithExceptionOnInitialCreateTransaction(Exception exToThrow) throws Throwable {
-        testExceptionOnInitialCreateTransaction(exToThrow, new Invoker() {
-            @Override
-            public CheckedFuture<?, ReadFailedException> invoke(TransactionProxy proxy) throws Exception {
-                return proxy.read(TestModel.TEST_PATH);
-            }
-        });
+    private void testReadWithExceptionOnInitialCreateTransaction(Exception exToThrow) throws Exception {
+        testExceptionOnInitialCreateTransaction(exToThrow, proxy -> proxy.read(TestModel.TEST_PATH));
     }
 
     @Test(expected = PrimaryNotFoundException.class)
-    public void testReadWhenAPrimaryNotFoundExceptionIsThrown() throws Throwable {
+    public void testReadWhenAPrimaryNotFoundExceptionIsThrown() throws Exception {
         testReadWithExceptionOnInitialCreateTransaction(new PrimaryNotFoundException("test"));
     }
 
     @Test(expected = TimeoutException.class)
-    public void testReadWhenATimeoutExceptionIsThrown() throws Throwable {
+    public void testReadWhenATimeoutExceptionIsThrown() throws Exception {
         testReadWithExceptionOnInitialCreateTransaction(new TimeoutException("test",
                 new Exception("reason")));
     }
 
     @Test(expected = TestException.class)
-    public void testReadWhenAnyOtherExceptionIsThrown() throws Throwable {
+    public void testReadWhenAnyOtherExceptionIsThrown() throws Exception {
         testReadWithExceptionOnInitialCreateTransaction(new TestException());
     }
 
     @Test
-    public void testReadWithPriorRecordingOperationSuccessful() throws Throwable {
+    public void testReadWithPriorRecordingOperationSuccessful() throws Exception {
         ActorRef actorRef = setupActorContextWithInitialCreateTransaction(getSystem(), READ_WRITE);
 
         NormalizedNode<?, ?> expectedNode = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
@@ -209,21 +205,21 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
                 eq(actorSelection(actorRef)), eqReadData(), any(Timeout.class));
     }
 
-    @Test(expected=IllegalStateException.class)
+    @Test(expected = IllegalStateException.class)
     public void testReadPreConditionCheck() {
         TransactionProxy transactionProxy = new TransactionProxy(mockComponentFactory, WRITE_ONLY);
         transactionProxy.read(TestModel.TEST_PATH);
     }
 
-    @Test(expected=IllegalArgumentException.class)
-    public void testInvalidCreateTransactionReply() throws Throwable {
+    @Test(expected = IllegalArgumentException.class)
+    public void testInvalidCreateTransactionReply() throws Exception {
         ActorRef actorRef = getSystem().actorOf(Props.create(DoNothingActor.class));
 
-        doReturn(getSystem().actorSelection(actorRef.path())).when(mockActorContext).
-            actorSelection(actorRef.path().toString());
+        doReturn(getSystem().actorSelection(actorRef.path())).when(mockActorContext)
+                .actorSelection(actorRef.path().toString());
 
-        doReturn(primaryShardInfoReply(getSystem(), actorRef)).
-            when(mockActorContext).findPrimaryShardAsync(eq(DefaultShardStrategy.DEFAULT_SHARD));
+        doReturn(primaryShardInfoReply(getSystem(), actorRef)).when(mockActorContext)
+                .findPrimaryShardAsync(eq(DefaultShardStrategy.DEFAULT_SHARD));
 
         doReturn(Futures.successful(new Object())).when(mockActorContext).executeOperationAsync(
             eq(getSystem().actorSelection(actorRef.path())), eqCreateTransaction(memberName, READ_ONLY),
@@ -256,21 +252,17 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
     }
 
     @Test(expected = PrimaryNotFoundException.class)
-    public void testExistsWhenAPrimaryNotFoundExceptionIsThrown() throws Throwable {
-        testExceptionOnInitialCreateTransaction(new PrimaryNotFoundException("test"), new Invoker() {
-            @Override
-            public CheckedFuture<?, ReadFailedException> invoke(TransactionProxy proxy) throws Exception {
-                return proxy.exists(TestModel.TEST_PATH);
-            }
-        });
+    public void testExistsWhenAPrimaryNotFoundExceptionIsThrown() throws Exception {
+        testExceptionOnInitialCreateTransaction(new PrimaryNotFoundException("test"),
+            proxy -> proxy.exists(TestModel.TEST_PATH));
     }
 
     @Test(expected = ReadFailedException.class)
     public void testExistsWithInvalidReplyMessageType() throws Exception {
         ActorRef actorRef = setupActorContextWithInitialCreateTransaction(getSystem(), READ_ONLY);
 
-        doReturn(Futures.successful(new Object())).when(mockActorContext).
-                executeOperationAsync(eq(actorSelection(actorRef)), eqDataExists(), any(Timeout.class));
+        doReturn(Futures.successful(new Object())).when(mockActorContext)
+                .executeOperationAsync(eq(actorSelection(actorRef)), eqDataExists(), any(Timeout.class));
 
         TransactionProxy transactionProxy = new TransactionProxy(mockComponentFactory, READ_ONLY);
 
@@ -278,11 +270,11 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
     }
 
     @Test(expected = TestException.class)
-    public void testExistsWithAsyncRemoteOperatonFailure() throws Throwable {
+    public void testExistsWithAsyncRemoteOperatonFailure() throws Exception {
         ActorRef actorRef = setupActorContextWithInitialCreateTransaction(getSystem(), READ_ONLY);
 
-        doReturn(Futures.failed(new TestException())).when(mockActorContext).
-                executeOperationAsync(eq(actorSelection(actorRef)), eqDataExists(), any(Timeout.class));
+        doReturn(Futures.failed(new TestException())).when(mockActorContext)
+                .executeOperationAsync(eq(actorSelection(actorRef)), eqDataExists(), any(Timeout.class));
 
         TransactionProxy transactionProxy = new TransactionProxy(mockComponentFactory, READ_ONLY);
 
@@ -290,7 +282,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
     }
 
     @Test
-    public void testExistsWithPriorRecordingOperationSuccessful() throws Throwable {
+    public void testExistsWithPriorRecordingOperationSuccessful() throws Exception {
         ActorRef actorRef = setupActorContextWithInitialCreateTransaction(getSystem(), READ_WRITE);
 
         NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
@@ -316,7 +308,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
                 eq(actorSelection(actorRef)), eqDataExists(), any(Timeout.class));
     }
 
-    @Test(expected=IllegalStateException.class)
+    @Test(expected = IllegalStateException.class)
     public void testExistsPreConditionCheck() {
         TransactionProxy transactionProxy = new TransactionProxy(mockComponentFactory, WRITE_ONLY);
         transactionProxy.exists(TestModel.TEST_PATH);
@@ -339,8 +331,10 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
     }
 
     @Test
-    public void testWriteAfterAsyncRead() throws Throwable {
-        ActorRef actorRef = setupActorContextWithoutInitialCreateTransaction(getSystem(), DefaultShardStrategy.DEFAULT_SHARD);
+    @SuppressWarnings("checkstyle:IllegalCatch")
+    public void testWriteAfterAsyncRead() throws Exception {
+        ActorRef actorRef = setupActorContextWithoutInitialCreateTransaction(getSystem(),
+                DefaultShardStrategy.DEFAULT_SHARD);
 
         Promise<Object> createTxPromise = akka.dispatch.Futures.promise();
         doReturn(createTxPromise).when(mockActorContext).executeOperationAsync(
@@ -372,8 +366,8 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
                     }
 
                     @Override
-                    public void onFailure(Throwable t) {
-                        caughtEx.set(t);
+                    public void onFailure(Throwable failure) {
+                        caughtEx.set(failure);
                         readComplete.countDown();
                     }
                 });
@@ -382,8 +376,9 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
 
         Uninterruptibles.awaitUninterruptibly(readComplete, 5, TimeUnit.SECONDS);
 
-        if(caughtEx.get() != null) {
-            throw caughtEx.get();
+        if (caughtEx.get() != null) {
+            Throwables.propagateIfInstanceOf(caughtEx.get(), Exception.class);
+            Throwables.propagate(caughtEx.get());
         }
 
         // This sends the batched modification.
@@ -392,13 +387,13 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
         verifyOneBatchedModification(actorRef, new WriteModification(TestModel.TEST_PATH, nodeToWrite), true);
     }
 
-    @Test(expected=IllegalStateException.class)
+    @Test(expected = IllegalStateException.class)
     public void testWritePreConditionCheck() {
         TransactionProxy transactionProxy = new TransactionProxy(mockComponentFactory, READ_ONLY);
         transactionProxy.write(TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
     }
 
-    @Test(expected=IllegalStateException.class)
+    @Test(expected = IllegalStateException.class)
     public void testWriteAfterReadyPreConditionCheck() {
         TransactionProxy transactionProxy = new TransactionProxy(mockComponentFactory, WRITE_ONLY);
 
@@ -441,7 +436,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
     public void testReadWrite() throws Exception {
         ActorRef actorRef = setupActorContextWithInitialCreateTransaction(getSystem(), READ_WRITE);
 
-        NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+        final NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
         doReturn(readDataReply(null)).when(mockActorContext).executeOperationAsync(
                 eq(actorSelection(actorRef)), eqReadData(), any(Timeout.class));
@@ -469,7 +464,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
     public void testReadyWithReadWrite() throws Exception {
         ActorRef actorRef = setupActorContextWithInitialCreateTransaction(getSystem(), READ_WRITE);
 
-        NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+        final NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
         doReturn(readDataReply(null)).when(mockActorContext).executeOperationAsync(
                 eq(actorSelection(actorRef)), eqReadData(), any(Timeout.class));
@@ -643,11 +638,11 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
     public void testReadyWithLocalTransaction() throws Exception {
         ActorRef shardActorRef = getSystem().actorOf(Props.create(DoNothingActor.class));
 
-        doReturn(getSystem().actorSelection(shardActorRef.path())).
-                when(mockActorContext).actorSelection(shardActorRef.path().toString());
+        doReturn(getSystem().actorSelection(shardActorRef.path())).when(mockActorContext)
+                .actorSelection(shardActorRef.path().toString());
 
-        doReturn(Futures.successful(newPrimaryShardInfo(shardActorRef, createDataTree()))).
-                when(mockActorContext).findPrimaryShardAsync(eq(DefaultShardStrategy.DEFAULT_SHARD));
+        doReturn(Futures.successful(newPrimaryShardInfo(shardActorRef, createDataTree()))).when(mockActorContext)
+                .findPrimaryShardAsync(eq(DefaultShardStrategy.DEFAULT_SHARD));
 
         TransactionProxy transactionProxy = new TransactionProxy(mockComponentFactory, WRITE_ONLY);
 
@@ -665,15 +660,15 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
     public void testReadyWithLocalTransactionWithFailure() throws Exception {
         ActorRef shardActorRef = getSystem().actorOf(Props.create(DoNothingActor.class));
 
-        doReturn(getSystem().actorSelection(shardActorRef.path())).
-                when(mockActorContext).actorSelection(shardActorRef.path().toString());
+        doReturn(getSystem().actorSelection(shardActorRef.path())).when(mockActorContext)
+                .actorSelection(shardActorRef.path().toString());
 
         DataTree mockDataTree = createDataTree();
         DataTreeModification mockModification = mockDataTree.takeSnapshot().newModification();
         doThrow(new RuntimeException("mock")).when(mockModification).ready();
 
-        doReturn(Futures.successful(newPrimaryShardInfo(shardActorRef, mockDataTree))).
-                when(mockActorContext).findPrimaryShardAsync(eq(DefaultShardStrategy.DEFAULT_SHARD));
+        doReturn(Futures.successful(newPrimaryShardInfo(shardActorRef, mockDataTree))).when(mockActorContext)
+                .findPrimaryShardAsync(eq(DefaultShardStrategy.DEFAULT_SHARD));
 
         TransactionProxy transactionProxy = new TransactionProxy(mockComponentFactory, WRITE_ONLY);
 
@@ -729,9 +724,8 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
 
         ActorRef actorRef2 = setupActorContextWithInitialCreateTransaction(getSystem(), WRITE_ONLY, "junk");
 
-        doReturn(Futures.successful(new Object())).when(mockActorContext).
-                executeOperationAsync(eq(actorSelection(actorRef1)), isA(BatchedModifications.class),
-                        any(Timeout.class));
+        doReturn(Futures.successful(new Object())).when(mockActorContext).executeOperationAsync(
+                eq(actorSelection(actorRef1)), isA(BatchedModifications.class), any(Timeout.class));
 
         expectBatchedModificationsReady(actorRef2);
 
@@ -759,7 +753,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
     }
 
     @Test
-    public void testClose() throws Exception{
+    public void testClose() throws Exception {
         ActorRef actorRef = setupActorContextWithInitialCreateTransaction(getSystem(), READ_WRITE);
 
         doReturn(readDataReply(null)).when(mockActorContext).executeOperationAsync(
@@ -779,53 +773,52 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
         void run(TransactionProxy transactionProxy);
     }
 
-    private void throttleOperation(TransactionProxyOperation operation) {
-        throttleOperation(operation, 1, true);
-    }
-
-    private void throttleOperation(TransactionProxyOperation operation, int outstandingOpsLimit, boolean shardFound){
-        throttleOperation(operation, outstandingOpsLimit, shardFound, TimeUnit.MILLISECONDS.toNanos(
-                mockActorContext.getDatastoreContext().getOperationTimeoutInMillis()));
-    }
-
-    private PrimaryShardInfo newPrimaryShardInfo(ActorRef actorRef){
+    private PrimaryShardInfo newPrimaryShardInfo(ActorRef actorRef) {
         return new PrimaryShardInfo(getSystem().actorSelection(actorRef.path()), DataStoreVersions.CURRENT_VERSION);
     }
 
-    private PrimaryShardInfo newPrimaryShardInfo(ActorRef actorRef, DataTree dataTree){
+    private PrimaryShardInfo newPrimaryShardInfo(ActorRef actorRef, DataTree dataTree) {
         return new PrimaryShardInfo(getSystem().actorSelection(actorRef.path()), DataStoreVersions.CURRENT_VERSION,
                 dataTree);
     }
 
+    private void throttleOperation(TransactionProxyOperation operation) {
+        throttleOperation(operation, 1, true);
+    }
 
-    private void throttleOperation(TransactionProxyOperation operation, int outstandingOpsLimit, boolean shardFound, long expectedCompletionTime){
+    private void throttleOperation(TransactionProxyOperation operation, int outstandingOpsLimit, boolean shardFound) {
+        throttleOperation(operation, outstandingOpsLimit, shardFound, TimeUnit.MILLISECONDS.toNanos(
+                mockActorContext.getDatastoreContext().getOperationTimeoutInMillis()));
+    }
+
+    private void throttleOperation(TransactionProxyOperation operation, int outstandingOpsLimit, boolean shardFound,
+            long expectedCompletionTime) {
         ActorSystem actorSystem = getSystem();
         ActorRef shardActorRef = actorSystem.actorOf(Props.create(DoNothingActor.class));
 
         // Note that we setting batchedModificationCount to one less than what we need because in TransactionProxy
         // we now allow one extra permit to be allowed for ready
-        doReturn(dataStoreContextBuilder.operationTimeoutInSeconds(2).
-                shardBatchedModificationCount(outstandingOpsLimit-1).build()).when(mockActorContext).getDatastoreContext();
+        doReturn(dataStoreContextBuilder.operationTimeoutInSeconds(2)
+                .shardBatchedModificationCount(outstandingOpsLimit - 1).build()).when(mockActorContext)
+                        .getDatastoreContext();
 
-        doReturn(actorSystem.actorSelection(shardActorRef.path())).
-                when(mockActorContext).actorSelection(shardActorRef.path().toString());
+        doReturn(actorSystem.actorSelection(shardActorRef.path())).when(mockActorContext)
+                .actorSelection(shardActorRef.path().toString());
 
-        if(shardFound) {
-            doReturn(Futures.successful(newPrimaryShardInfo(shardActorRef))).
-                    when(mockActorContext).findPrimaryShardAsync(eq(DefaultShardStrategy.DEFAULT_SHARD));
-            doReturn(Futures.successful(newPrimaryShardInfo(shardActorRef))).
-                    when(mockActorContext).findPrimaryShardAsync(eq("cars"));
+        if (shardFound) {
+            doReturn(Futures.successful(newPrimaryShardInfo(shardActorRef))).when(mockActorContext)
+                    .findPrimaryShardAsync(eq(DefaultShardStrategy.DEFAULT_SHARD));
+            doReturn(Futures.successful(newPrimaryShardInfo(shardActorRef))).when(mockActorContext)
+                    .findPrimaryShardAsync(eq("cars"));
 
         } else {
             doReturn(Futures.failed(new Exception("not found")))
                     .when(mockActorContext).findPrimaryShardAsync(eq(DefaultShardStrategy.DEFAULT_SHARD));
         }
 
-        String actorPath = "akka.tcp://system@127.0.0.1:2550/user/tx-actor";
-
-        doReturn(incompleteFuture()).when(mockActorContext).
-        executeOperationAsync(eq(actorSystem.actorSelection(shardActorRef.path())),
-                 eqCreateTransaction(memberName, READ_WRITE), any(Timeout.class));
+        doReturn(incompleteFuture()).when(mockActorContext).executeOperationAsync(
+                eq(actorSystem.actorSelection(shardActorRef.path())), eqCreateTransaction(memberName, READ_WRITE),
+                any(Timeout.class));
 
         TransactionProxy transactionProxy = new TransactionProxy(mockComponentFactory, READ_WRITE);
 
@@ -836,28 +829,28 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
         long end = System.nanoTime();
 
         Assert.assertTrue(String.format("Expected elapsed time: %s. Actual: %s",
-                expectedCompletionTime, (end-start)),
-                ((end - start) > expectedCompletionTime) && ((end - start) < expectedCompletionTime*2));
+                expectedCompletionTime, end - start),
+                end - start > expectedCompletionTime && end - start < expectedCompletionTime * 2);
 
     }
 
-    private void completeOperation(TransactionProxyOperation operation){
+    private void completeOperation(TransactionProxyOperation operation) {
         completeOperation(operation, true);
     }
 
-    private void completeOperation(TransactionProxyOperation operation, boolean shardFound){
+    private void completeOperation(TransactionProxyOperation operation, boolean shardFound) {
         ActorSystem actorSystem = getSystem();
         ActorRef shardActorRef = actorSystem.actorOf(Props.create(DoNothingActor.class));
 
-        doReturn(actorSystem.actorSelection(shardActorRef.path())).
-                when(mockActorContext).actorSelection(shardActorRef.path().toString());
+        doReturn(actorSystem.actorSelection(shardActorRef.path())).when(mockActorContext)
+                .actorSelection(shardActorRef.path().toString());
 
-        if(shardFound) {
-            doReturn(Futures.successful(newPrimaryShardInfo(shardActorRef))).
-                    when(mockActorContext).findPrimaryShardAsync(eq(DefaultShardStrategy.DEFAULT_SHARD));
+        if (shardFound) {
+            doReturn(Futures.successful(newPrimaryShardInfo(shardActorRef))).when(mockActorContext)
+                    .findPrimaryShardAsync(eq(DefaultShardStrategy.DEFAULT_SHARD));
         } else {
-            doReturn(Futures.failed(new PrimaryNotFoundException("test")))
-                    .when(mockActorContext).findPrimaryShardAsync(eq(DefaultShardStrategy.DEFAULT_SHARD));
+            doReturn(Futures.failed(new PrimaryNotFoundException("test"))).when(mockActorContext)
+                    .findPrimaryShardAsync(eq(DefaultShardStrategy.DEFAULT_SHARD));
         }
 
         ActorRef txActorRef = actorSystem.actorOf(Props.create(DoNothingActor.class));
@@ -867,9 +860,9 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
 
         doReturn(actorSystem.actorSelection(actorPath)).when(mockActorContext).actorSelection(actorPath);
 
-        doReturn(Futures.successful(createTransactionReply)).when(mockActorContext).
-                executeOperationAsync(eq(actorSystem.actorSelection(shardActorRef.path())),
-                        eqCreateTransaction(memberName, READ_WRITE), any(Timeout.class));
+        doReturn(Futures.successful(createTransactionReply)).when(mockActorContext).executeOperationAsync(
+                eq(actorSystem.actorSelection(shardActorRef.path())), eqCreateTransaction(memberName, READ_WRITE),
+                any(Timeout.class));
 
         TransactionProxy transactionProxy = new TransactionProxy(mockComponentFactory, READ_WRITE);
 
@@ -879,20 +872,21 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
 
         long end = System.nanoTime();
 
-        long expected = TimeUnit.MILLISECONDS.toNanos(mockActorContext.getDatastoreContext().getOperationTimeoutInMillis());
+        long expected = TimeUnit.MILLISECONDS.toNanos(mockActorContext.getDatastoreContext()
+                .getOperationTimeoutInMillis());
         Assert.assertTrue(String.format("Expected elapsed time: %s. Actual: %s",
-                expected, (end-start)), (end - start) <= expected);
+                expected, end - start), end - start <= expected);
     }
 
-    private void completeOperationLocal(TransactionProxyOperation operation, DataTree dataTree){
+    private void completeOperationLocal(TransactionProxyOperation operation, DataTree dataTree) {
         ActorSystem actorSystem = getSystem();
         ActorRef shardActorRef = actorSystem.actorOf(Props.create(DoNothingActor.class));
 
-        doReturn(actorSystem.actorSelection(shardActorRef.path())).
-                when(mockActorContext).actorSelection(shardActorRef.path().toString());
+        doReturn(actorSystem.actorSelection(shardActorRef.path())).when(mockActorContext)
+                .actorSelection(shardActorRef.path().toString());
 
-        doReturn(Futures.successful(newPrimaryShardInfo(shardActorRef, dataTree))).
-                when(mockActorContext).findPrimaryShardAsync(eq(DefaultShardStrategy.DEFAULT_SHARD));
+        doReturn(Futures.successful(newPrimaryShardInfo(shardActorRef, dataTree))).when(mockActorContext)
+                .findPrimaryShardAsync(eq(DefaultShardStrategy.DEFAULT_SHARD));
 
         TransactionProxy transactionProxy = new TransactionProxy(mockComponentFactory, READ_WRITE);
 
@@ -902,12 +896,13 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
 
         long end = System.nanoTime();
 
-        long expected = TimeUnit.MILLISECONDS.toNanos(mockActorContext.getDatastoreContext().getOperationTimeoutInMillis());
-        Assert.assertTrue(String.format("Expected elapsed time: %s. Actual: %s",
-                expected, (end-start)), (end - start) <= expected);
+        long expected = TimeUnit.MILLISECONDS.toNanos(mockActorContext.getDatastoreContext()
+                .getOperationTimeoutInMillis());
+        Assert.assertTrue(String.format("Expected elapsed time: %s. Actual: %s", expected, end - start),
+                end - start <= expected);
     }
 
-    private static DataTree createDataTree(){
+    private static DataTree createDataTree() {
         DataTree dataTree = mock(DataTree.class);
         DataTreeSnapshot dataTreeSnapshot = mock(DataTreeSnapshot.class);
         DataTreeModification dataTreeModification = mock(DataTreeModification.class);
@@ -918,7 +913,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
         return dataTree;
     }
 
-    private static DataTree createDataTree(NormalizedNode<?, ?> readResponse){
+    private static DataTree createDataTree(NormalizedNode<?, ?> readResponse) {
         DataTree dataTree = mock(DataTree.class);
         DataTreeSnapshot dataTreeSnapshot = mock(DataTreeSnapshot.class);
         DataTreeModification dataTreeModification = mock(DataTreeModification.class);
@@ -932,385 +927,315 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
 
 
     @Test
-    public void testWriteCompletionForLocalShard(){
-        completeOperationLocal(new TransactionProxyOperation() {
-            @Override
-            public void run(TransactionProxy transactionProxy) {
-                NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+    public void testWriteCompletionForLocalShard() {
+        completeOperationLocal(transactionProxy -> {
+            NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
-                transactionProxy.write(TestModel.TEST_PATH, nodeToWrite);
+            transactionProxy.write(TestModel.TEST_PATH, nodeToWrite);
 
-                transactionProxy.write(TestModel.TEST_PATH, nodeToWrite);
+            transactionProxy.write(TestModel.TEST_PATH, nodeToWrite);
 
-            }
         }, createDataTree());
     }
 
     @Test
-    public void testWriteThrottlingWhenShardFound(){
-        throttleOperation(new TransactionProxyOperation() {
-            @Override
-            public void run(TransactionProxy transactionProxy) {
-                NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+    public void testWriteThrottlingWhenShardFound() {
+        throttleOperation(transactionProxy -> {
+            NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
-                expectIncompleteBatchedModifications();
+            expectIncompleteBatchedModifications();
 
-                transactionProxy.write(TestModel.TEST_PATH, nodeToWrite);
+            transactionProxy.write(TestModel.TEST_PATH, nodeToWrite);
 
-                transactionProxy.write(TestModel.TEST_PATH, nodeToWrite);
-            }
+            transactionProxy.write(TestModel.TEST_PATH, nodeToWrite);
         });
     }
 
     @Test
-    public void testWriteThrottlingWhenShardNotFound(){
+    public void testWriteThrottlingWhenShardNotFound() {
         // Confirm that there is no throttling when the Shard is not found
-        completeOperation(new TransactionProxyOperation() {
-            @Override
-            public void run(TransactionProxy transactionProxy) {
-                NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+        completeOperation(transactionProxy -> {
+            NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
-                expectBatchedModifications(2);
+            expectBatchedModifications(2);
 
-                transactionProxy.write(TestModel.TEST_PATH, nodeToWrite);
+            transactionProxy.write(TestModel.TEST_PATH, nodeToWrite);
 
-                transactionProxy.write(TestModel.TEST_PATH, nodeToWrite);
-            }
+            transactionProxy.write(TestModel.TEST_PATH, nodeToWrite);
         }, false);
 
     }
 
 
     @Test
-    public void testWriteCompletion(){
-        completeOperation(new TransactionProxyOperation() {
-            @Override
-            public void run(TransactionProxy transactionProxy) {
-                NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+    public void testWriteCompletion() {
+        completeOperation(transactionProxy -> {
+            NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
-                expectBatchedModifications(2);
+            expectBatchedModifications(2);
 
-                transactionProxy.write(TestModel.TEST_PATH, nodeToWrite);
+            transactionProxy.write(TestModel.TEST_PATH, nodeToWrite);
 
-                transactionProxy.write(TestModel.TEST_PATH, nodeToWrite);
-            }
+            transactionProxy.write(TestModel.TEST_PATH, nodeToWrite);
         });
     }
 
     @Test
-    public void testMergeThrottlingWhenShardFound(){
-        throttleOperation(new TransactionProxyOperation() {
-            @Override
-            public void run(TransactionProxy transactionProxy) {
-                NormalizedNode<?, ?> nodeToMerge = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+    public void testMergeThrottlingWhenShardFound() {
+        throttleOperation(transactionProxy -> {
+            NormalizedNode<?, ?> nodeToMerge = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
-                expectIncompleteBatchedModifications();
+            expectIncompleteBatchedModifications();
 
-                transactionProxy.merge(TestModel.TEST_PATH, nodeToMerge);
+            transactionProxy.merge(TestModel.TEST_PATH, nodeToMerge);
 
-                transactionProxy.merge(TestModel.TEST_PATH, nodeToMerge);
-            }
+            transactionProxy.merge(TestModel.TEST_PATH, nodeToMerge);
         });
     }
 
     @Test
-    public void testMergeThrottlingWhenShardNotFound(){
-        completeOperation(new TransactionProxyOperation() {
-            @Override
-            public void run(TransactionProxy transactionProxy) {
-                NormalizedNode<?, ?> nodeToMerge = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+    public void testMergeThrottlingWhenShardNotFound() {
+        completeOperation(transactionProxy -> {
+            NormalizedNode<?, ?> nodeToMerge = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
-                expectBatchedModifications(2);
+            expectBatchedModifications(2);
 
-                transactionProxy.merge(TestModel.TEST_PATH, nodeToMerge);
+            transactionProxy.merge(TestModel.TEST_PATH, nodeToMerge);
 
-                transactionProxy.merge(TestModel.TEST_PATH, nodeToMerge);
-            }
+            transactionProxy.merge(TestModel.TEST_PATH, nodeToMerge);
         }, false);
     }
 
     @Test
-    public void testMergeCompletion(){
-        completeOperation(new TransactionProxyOperation() {
-            @Override
-            public void run(TransactionProxy transactionProxy) {
-                NormalizedNode<?, ?> nodeToMerge = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+    public void testMergeCompletion() {
+        completeOperation(transactionProxy -> {
+            NormalizedNode<?, ?> nodeToMerge = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
-                expectBatchedModifications(2);
+            expectBatchedModifications(2);
 
-                transactionProxy.merge(TestModel.TEST_PATH, nodeToMerge);
+            transactionProxy.merge(TestModel.TEST_PATH, nodeToMerge);
 
-                transactionProxy.merge(TestModel.TEST_PATH, nodeToMerge);
-            }
+            transactionProxy.merge(TestModel.TEST_PATH, nodeToMerge);
         });
 
     }
 
     @Test
-    public void testMergeCompletionForLocalShard(){
-        completeOperationLocal(new TransactionProxyOperation() {
-            @Override
-            public void run(TransactionProxy transactionProxy) {
-                NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+    public void testMergeCompletionForLocalShard() {
+        completeOperationLocal(transactionProxy -> {
+            NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
-                transactionProxy.merge(TestModel.TEST_PATH, nodeToWrite);
+            transactionProxy.merge(TestModel.TEST_PATH, nodeToWrite);
 
-                transactionProxy.merge(TestModel.TEST_PATH, nodeToWrite);
+            transactionProxy.merge(TestModel.TEST_PATH, nodeToWrite);
 
-            }
         }, createDataTree());
     }
 
 
     @Test
-    public void testDeleteThrottlingWhenShardFound(){
+    public void testDeleteThrottlingWhenShardFound() {
 
-        throttleOperation(new TransactionProxyOperation() {
-            @Override
-            public void run(TransactionProxy transactionProxy) {
-                expectIncompleteBatchedModifications();
+        throttleOperation(transactionProxy -> {
+            expectIncompleteBatchedModifications();
 
-                transactionProxy.delete(TestModel.TEST_PATH);
+            transactionProxy.delete(TestModel.TEST_PATH);
 
-                transactionProxy.delete(TestModel.TEST_PATH);
-            }
+            transactionProxy.delete(TestModel.TEST_PATH);
         });
     }
 
 
     @Test
-    public void testDeleteThrottlingWhenShardNotFound(){
+    public void testDeleteThrottlingWhenShardNotFound() {
 
-        completeOperation(new TransactionProxyOperation() {
-            @Override
-            public void run(TransactionProxy transactionProxy) {
-                expectBatchedModifications(2);
+        completeOperation(transactionProxy -> {
+            expectBatchedModifications(2);
 
-                transactionProxy.delete(TestModel.TEST_PATH);
+            transactionProxy.delete(TestModel.TEST_PATH);
 
-                transactionProxy.delete(TestModel.TEST_PATH);
-            }
+            transactionProxy.delete(TestModel.TEST_PATH);
         }, false);
     }
 
     @Test
-    public void testDeleteCompletionForLocalShard(){
-        completeOperationLocal(new TransactionProxyOperation() {
-            @Override
-            public void run(TransactionProxy transactionProxy) {
+    public void testDeleteCompletionForLocalShard() {
+        completeOperationLocal(transactionProxy -> {
 
-                transactionProxy.delete(TestModel.TEST_PATH);
+            transactionProxy.delete(TestModel.TEST_PATH);
 
-                transactionProxy.delete(TestModel.TEST_PATH);
-            }
+            transactionProxy.delete(TestModel.TEST_PATH);
         }, createDataTree());
 
     }
 
     @Test
-    public void testDeleteCompletion(){
-        completeOperation(new TransactionProxyOperation() {
-            @Override
-            public void run(TransactionProxy transactionProxy) {
-                expectBatchedModifications(2);
+    public void testDeleteCompletion() {
+        completeOperation(transactionProxy -> {
+            expectBatchedModifications(2);
 
-                transactionProxy.delete(TestModel.TEST_PATH);
+            transactionProxy.delete(TestModel.TEST_PATH);
 
-                transactionProxy.delete(TestModel.TEST_PATH);
-            }
+            transactionProxy.delete(TestModel.TEST_PATH);
         });
 
     }
 
     @Test
-    public void testReadThrottlingWhenShardFound(){
+    public void testReadThrottlingWhenShardFound() {
 
-        throttleOperation(new TransactionProxyOperation() {
-            @Override
-            public void run(TransactionProxy transactionProxy) {
-                doReturn(incompleteFuture()).when(mockActorContext).executeOperationAsync(
-                        any(ActorSelection.class), eqReadData());
+        throttleOperation(transactionProxy -> {
+            doReturn(incompleteFuture()).when(mockActorContext).executeOperationAsync(
+                    any(ActorSelection.class), eqReadData());
 
-                transactionProxy.read(TestModel.TEST_PATH);
+            transactionProxy.read(TestModel.TEST_PATH);
 
-                transactionProxy.read(TestModel.TEST_PATH);
-            }
+            transactionProxy.read(TestModel.TEST_PATH);
         });
     }
 
     @Test
-    public void testReadThrottlingWhenShardNotFound(){
+    public void testReadThrottlingWhenShardNotFound() {
 
-        completeOperation(new TransactionProxyOperation() {
-            @Override
-            public void run(TransactionProxy transactionProxy) {
-                doReturn(incompleteFuture()).when(mockActorContext).executeOperationAsync(
-                        any(ActorSelection.class), eqReadData());
+        completeOperation(transactionProxy -> {
+            doReturn(incompleteFuture()).when(mockActorContext).executeOperationAsync(
+                    any(ActorSelection.class), eqReadData());
 
-                transactionProxy.read(TestModel.TEST_PATH);
+            transactionProxy.read(TestModel.TEST_PATH);
 
-                transactionProxy.read(TestModel.TEST_PATH);
-            }
+            transactionProxy.read(TestModel.TEST_PATH);
         }, false);
     }
 
 
     @Test
-    public void testReadCompletion(){
-        completeOperation(new TransactionProxyOperation() {
-            @Override
-            public void run(TransactionProxy transactionProxy) {
-                NormalizedNode<?, ?> nodeToRead = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+    public void testReadCompletion() {
+        completeOperation(transactionProxy -> {
+            NormalizedNode<?, ?> nodeToRead = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
-                doReturn(readDataReply(nodeToRead)).when(mockActorContext).executeOperationAsync(
-                        any(ActorSelection.class), eqReadData(), any(Timeout.class));
+            doReturn(readDataReply(nodeToRead)).when(mockActorContext).executeOperationAsync(
+                    any(ActorSelection.class), eqReadData(), any(Timeout.class));
 
-                transactionProxy.read(TestModel.TEST_PATH);
+            transactionProxy.read(TestModel.TEST_PATH);
 
-                transactionProxy.read(TestModel.TEST_PATH);
-            }
+            transactionProxy.read(TestModel.TEST_PATH);
         });
 
     }
 
     @Test
-    public void testReadCompletionForLocalShard(){
+    public void testReadCompletionForLocalShard() {
         final NormalizedNode<?, ?> nodeToRead = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
-        completeOperationLocal(new TransactionProxyOperation() {
-            @Override
-            public void run(TransactionProxy transactionProxy) {
-                transactionProxy.read(TestModel.TEST_PATH);
+        completeOperationLocal(transactionProxy -> {
+            transactionProxy.read(TestModel.TEST_PATH);
 
-                transactionProxy.read(TestModel.TEST_PATH);
-            }
+            transactionProxy.read(TestModel.TEST_PATH);
         }, createDataTree(nodeToRead));
 
     }
 
     @Test
-    public void testReadCompletionForLocalShardWhenExceptionOccurs(){
-        completeOperationLocal(new TransactionProxyOperation() {
-            @Override
-            public void run(TransactionProxy transactionProxy) {
-                transactionProxy.read(TestModel.TEST_PATH);
+    public void testReadCompletionForLocalShardWhenExceptionOccurs() {
+        completeOperationLocal(transactionProxy -> {
+            transactionProxy.read(TestModel.TEST_PATH);
 
-                transactionProxy.read(TestModel.TEST_PATH);
-            }
+            transactionProxy.read(TestModel.TEST_PATH);
         }, createDataTree());
 
     }
 
     @Test
-    public void testExistsThrottlingWhenShardFound(){
+    public void testExistsThrottlingWhenShardFound() {
 
-        throttleOperation(new TransactionProxyOperation() {
-            @Override
-            public void run(TransactionProxy transactionProxy) {
-                doReturn(incompleteFuture()).when(mockActorContext).executeOperationAsync(
-                        any(ActorSelection.class), eqDataExists());
+        throttleOperation(transactionProxy -> {
+            doReturn(incompleteFuture()).when(mockActorContext).executeOperationAsync(
+                    any(ActorSelection.class), eqDataExists());
 
-                transactionProxy.exists(TestModel.TEST_PATH);
+            transactionProxy.exists(TestModel.TEST_PATH);
 
-                transactionProxy.exists(TestModel.TEST_PATH);
-            }
+            transactionProxy.exists(TestModel.TEST_PATH);
         });
     }
 
     @Test
-    public void testExistsThrottlingWhenShardNotFound(){
+    public void testExistsThrottlingWhenShardNotFound() {
 
-        completeOperation(new TransactionProxyOperation() {
-            @Override
-            public void run(TransactionProxy transactionProxy) {
-                doReturn(incompleteFuture()).when(mockActorContext).executeOperationAsync(
-                        any(ActorSelection.class), eqDataExists());
+        completeOperation(transactionProxy -> {
+            doReturn(incompleteFuture()).when(mockActorContext).executeOperationAsync(
+                    any(ActorSelection.class), eqDataExists());
 
-                transactionProxy.exists(TestModel.TEST_PATH);
+            transactionProxy.exists(TestModel.TEST_PATH);
 
-                transactionProxy.exists(TestModel.TEST_PATH);
-            }
+            transactionProxy.exists(TestModel.TEST_PATH);
         }, false);
     }
 
 
     @Test
-    public void testExistsCompletion(){
-        completeOperation(new TransactionProxyOperation() {
-            @Override
-            public void run(TransactionProxy transactionProxy) {
-                doReturn(dataExistsReply(true)).when(mockActorContext).executeOperationAsync(
-                        any(ActorSelection.class), eqDataExists(), any(Timeout.class));
+    public void testExistsCompletion() {
+        completeOperation(transactionProxy -> {
+            doReturn(dataExistsReply(true)).when(mockActorContext).executeOperationAsync(
+                    any(ActorSelection.class), eqDataExists(), any(Timeout.class));
 
-                transactionProxy.exists(TestModel.TEST_PATH);
+            transactionProxy.exists(TestModel.TEST_PATH);
 
-                transactionProxy.exists(TestModel.TEST_PATH);
-            }
+            transactionProxy.exists(TestModel.TEST_PATH);
         });
 
     }
 
     @Test
-    public void testExistsCompletionForLocalShard(){
+    public void testExistsCompletionForLocalShard() {
         final NormalizedNode<?, ?> nodeToRead = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
-        completeOperationLocal(new TransactionProxyOperation() {
-            @Override
-            public void run(TransactionProxy transactionProxy) {
-                transactionProxy.exists(TestModel.TEST_PATH);
+        completeOperationLocal(transactionProxy -> {
+            transactionProxy.exists(TestModel.TEST_PATH);
 
-                transactionProxy.exists(TestModel.TEST_PATH);
-            }
+            transactionProxy.exists(TestModel.TEST_PATH);
         }, createDataTree(nodeToRead));
 
     }
 
     @Test
-    public void testExistsCompletionForLocalShardWhenExceptionOccurs(){
-        completeOperationLocal(new TransactionProxyOperation() {
-            @Override
-            public void run(TransactionProxy transactionProxy) {
-                transactionProxy.exists(TestModel.TEST_PATH);
+    public void testExistsCompletionForLocalShardWhenExceptionOccurs() {
+        completeOperationLocal(transactionProxy -> {
+            transactionProxy.exists(TestModel.TEST_PATH);
 
-                transactionProxy.exists(TestModel.TEST_PATH);
-            }
+            transactionProxy.exists(TestModel.TEST_PATH);
         }, createDataTree());
 
     }
+
     @Test
-    public void testReadyThrottling(){
+    public void testReadyThrottling() {
 
-        throttleOperation(new TransactionProxyOperation() {
-            @Override
-            public void run(TransactionProxy transactionProxy) {
-                NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+        throttleOperation(transactionProxy -> {
+            NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
-                expectBatchedModifications(1);
+            expectBatchedModifications(1);
 
-                transactionProxy.write(TestModel.TEST_PATH, nodeToWrite);
+            transactionProxy.write(TestModel.TEST_PATH, nodeToWrite);
 
-                transactionProxy.ready();
-            }
+            transactionProxy.ready();
         });
     }
 
     @Test
-    public void testReadyThrottlingWithTwoTransactionContexts(){
-        throttleOperation(new TransactionProxyOperation() {
-            @Override
-            public void run(TransactionProxy transactionProxy) {
-                NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
-                NormalizedNode<?, ?> carsNode = ImmutableNodes.containerNode(CarsModel.BASE_QNAME);
+    public void testReadyThrottlingWithTwoTransactionContexts() {
+        throttleOperation(transactionProxy -> {
+            NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+            NormalizedNode<?, ?> carsNode = ImmutableNodes.containerNode(CarsModel.BASE_QNAME);
 
-                expectBatchedModifications(2);
+            expectBatchedModifications(2);
 
-                transactionProxy.write(TestModel.TEST_PATH, nodeToWrite);
+            transactionProxy.write(TestModel.TEST_PATH, nodeToWrite);
 
-                // Trying to write to Cars will cause another transaction context to get created
-                transactionProxy.write(CarsModel.BASE_PATH, carsNode);
+            // Trying to write to Cars will cause another transaction context to get created
+            transactionProxy.write(CarsModel.BASE_PATH, carsNode);
 
-                // Now ready should block for both transaction contexts
-                transactionProxy.ready();
-            }
-        }, 1, true, TimeUnit.MILLISECONDS.toNanos(mockActorContext.getDatastoreContext().getOperationTimeoutInMillis()) * 2);
+            // Now ready should block for both transaction contexts
+            transactionProxy.ready();
+        }, 1, true, TimeUnit.MILLISECONDS.toNanos(mockActorContext.getDatastoreContext()
+                .getOperationTimeoutInMillis()) * 2);
     }
 
     private void testModificationOperationBatching(TransactionType type) throws Exception {
@@ -1372,23 +1297,23 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
     }
 
     @Test
-    public void testReadWriteModificationOperationBatching() throws Throwable {
+    public void testReadWriteModificationOperationBatching() throws Exception {
         testModificationOperationBatching(READ_WRITE);
     }
 
     @Test
-    public void testWriteOnlyModificationOperationBatching() throws Throwable {
+    public void testWriteOnlyModificationOperationBatching() throws Exception {
         testModificationOperationBatching(WRITE_ONLY);
     }
 
     @Test
-    public void testOptimizedWriteOnlyModificationOperationBatching() throws Throwable {
+    public void testOptimizedWriteOnlyModificationOperationBatching() throws Exception {
         dataStoreContextBuilder.writeOnlyTransactionOptimizationsEnabled(true);
         testModificationOperationBatching(WRITE_ONLY);
     }
 
     @Test
-    public void testModificationOperationBatchingWithInterleavedReads() throws Throwable {
+    public void testModificationOperationBatchingWithInterleavedReads() throws Exception {
 
         int shardBatchedModificationCount = 10;
         dataStoreContextBuilder.shardBatchedModificationCount(shardBatchedModificationCount);
@@ -1397,19 +1322,19 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
 
         expectBatchedModifications(actorRef, shardBatchedModificationCount);
 
-        YangInstanceIdentifier writePath1 = TestModel.TEST_PATH;
-        NormalizedNode<?, ?> writeNode1 = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+        final YangInstanceIdentifier writePath1 = TestModel.TEST_PATH;
+        final NormalizedNode<?, ?> writeNode1 = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
         YangInstanceIdentifier writePath2 = TestModel.OUTER_LIST_PATH;
         NormalizedNode<?, ?> writeNode2 = ImmutableNodes.containerNode(TestModel.OUTER_LIST_QNAME);
 
-        YangInstanceIdentifier mergePath1 = TestModel.TEST_PATH;
-        NormalizedNode<?, ?> mergeNode1 = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+        final YangInstanceIdentifier mergePath1 = TestModel.TEST_PATH;
+        final NormalizedNode<?, ?> mergeNode1 = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
         YangInstanceIdentifier mergePath2 = TestModel.INNER_LIST_PATH;
         NormalizedNode<?, ?> mergeNode2 = ImmutableNodes.containerNode(TestModel.INNER_LIST_QNAME);
 
-        YangInstanceIdentifier deletePath = TestModel.OUTER_LIST_PATH;
+        final YangInstanceIdentifier deletePath = TestModel.OUTER_LIST_PATH;
 
         doReturn(readDataReply(writeNode2)).when(mockActorContext).executeOperationAsync(
                 eq(actorSelection(actorRef)), eqReadData(writePath2), any(Timeout.class));
@@ -1425,8 +1350,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
         transactionProxy.write(writePath1, writeNode1);
         transactionProxy.write(writePath2, writeNode2);
 
-        Optional<NormalizedNode<?, ?>> readOptional = transactionProxy.read(writePath2).
-                get(5, TimeUnit.SECONDS);
+        Optional<NormalizedNode<?, ?>> readOptional = transactionProxy.read(writePath2).get(5, TimeUnit.SECONDS);
 
         assertEquals("NormalizedNode isPresent", true, readOptional.isPresent());
         assertEquals("Response NormalizedNode", writeNode2, readOptional.get());
@@ -1476,8 +1400,8 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
     }
 
     @Test
-    public void testReadRoot() throws ReadFailedException, InterruptedException, ExecutionException, java.util.concurrent.TimeoutException {
-
+    public void testReadRoot() throws ReadFailedException, InterruptedException, ExecutionException,
+            java.util.concurrent.TimeoutException {
         SchemaContext schemaContext = SchemaContextHelper.full();
         Configuration configuration = mock(Configuration.class);
         doReturn(configuration).when(mockActorContext).getConfiguration();
@@ -1508,7 +1432,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
         @SuppressWarnings("unchecked")
         Collection<NormalizedNode<?,?>> collection = (Collection<NormalizedNode<?,?>>) normalizedNode.getValue();
 
-        for(NormalizedNode<?,?> node : collection){
+        for (NormalizedNode<?,?> node : collection) {
             assertTrue("Expected " + node + " to be a ContainerNode", node instanceof ContainerNode);
         }
 
@@ -1528,19 +1452,19 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
         ActorSystem actorSystem = getSystem();
         ActorRef shardActorRef = getSystem().actorOf(Props.create(DoNothingActor.class));
 
-        doReturn(getSystem().actorSelection(shardActorRef.path())).
-                when(mockActorContext).actorSelection(shardActorRef.path().toString());
+        doReturn(getSystem().actorSelection(shardActorRef.path())).when(mockActorContext)
+                .actorSelection(shardActorRef.path().toString());
 
-        doReturn(primaryShardInfoReply(getSystem(), shardActorRef)).
-                when(mockActorContext).findPrimaryShardAsync(eq(shardName));
+        doReturn(primaryShardInfoReply(getSystem(), shardActorRef)).when(mockActorContext)
+                .findPrimaryShardAsync(eq(shardName));
 
         ActorRef txActorRef = actorSystem.actorOf(Props.create(DoNothingActor.class));
 
-        doReturn(actorSystem.actorSelection(txActorRef.path())).
-                when(mockActorContext).actorSelection(txActorRef.path().toString());
+        doReturn(actorSystem.actorSelection(txActorRef.path())).when(mockActorContext)
+                .actorSelection(txActorRef.path().toString());
 
-        doReturn(Futures.successful(createTransactionReply(txActorRef, DataStoreVersions.CURRENT_VERSION))).when(mockActorContext).
-                executeOperationAsync(eq(actorSystem.actorSelection(shardActorRef.path())),
+        doReturn(Futures.successful(createTransactionReply(txActorRef, DataStoreVersions.CURRENT_VERSION)))
+                .when(mockActorContext).executeOperationAsync(eq(actorSystem.actorSelection(shardActorRef.path())),
                         eqCreateTransaction(memberName, TransactionType.READ_ONLY), any(Timeout.class));
 
         doReturn(readDataReply(expectedNode)).when(mockActorContext).executeOperationAsync(

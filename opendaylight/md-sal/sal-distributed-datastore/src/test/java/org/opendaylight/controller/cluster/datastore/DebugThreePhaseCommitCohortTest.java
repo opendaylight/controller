@@ -16,6 +16,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
+
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import java.util.ArrayList;
@@ -50,7 +51,7 @@ public class DebugThreePhaseCommitCohortTest {
         doReturn(expCohortFutures).when(mockDelegate).getCohortFutures();
 
         Throwable debugContext = new RuntimeException("mock");
-        DebugThreePhaseCommitCohort cohort = new DebugThreePhaseCommitCohort(transactionId , mockDelegate , debugContext);
+        DebugThreePhaseCommitCohort cohort = new DebugThreePhaseCommitCohort(transactionId, mockDelegate, debugContext);
 
         Logger mockLogger = mock(Logger.class);
         cohort.setLogger(mockLogger);

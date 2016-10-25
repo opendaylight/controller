@@ -16,6 +16,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+
 import com.google.common.primitives.UnsignedLong;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -142,8 +143,7 @@ public class SimpleShardDataTreeCohortTest extends AbstractTest {
         }).when(mockShardDataTree).startCommit(cohort, candidate);
 
         @SuppressWarnings("unchecked")
-        final
-        FutureCallback<UnsignedLong> mockCommitCallback = mock(FutureCallback.class);
+        final FutureCallback<UnsignedLong> mockCommitCallback = mock(FutureCallback.class);
         cohort.commit(mockCommitCallback);
 
         verify(mockCommitCallback).onSuccess(any(UnsignedLong.class));
@@ -153,7 +153,7 @@ public class SimpleShardDataTreeCohortTest extends AbstractTest {
     }
 
     @Test
-    public void testPreCommitWithIllegalArgumentEx() throws Throwable {
+    public void testPreCommitWithIllegalArgumentEx() throws Exception {
         canCommitSuccess();
 
         final Exception cause = new IllegalArgumentException("mock");
@@ -173,7 +173,7 @@ public class SimpleShardDataTreeCohortTest extends AbstractTest {
     }
 
     @Test
-    public void testPreCommitWithReportedFailure() throws Throwable {
+    public void testPreCommitWithReportedFailure() throws Exception {
         canCommitSuccess();
 
         final Exception cause = new IllegalArgumentException("mock");

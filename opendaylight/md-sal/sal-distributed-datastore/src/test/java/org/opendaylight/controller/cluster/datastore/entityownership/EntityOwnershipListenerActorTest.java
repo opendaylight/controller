@@ -12,6 +12,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
+
 import akka.actor.ActorRef;
 import akka.testkit.TestActorRef;
 import org.junit.After;
@@ -59,7 +60,8 @@ public class EntityOwnershipListenerActorTest extends AbstractEntityOwnershipTes
         DOMEntityOwnershipListener mockListener = mock(DOMEntityOwnershipListener.class);
 
         DOMEntity entity1 = new DOMEntity("test", YangInstanceIdentifier.of(QName.create("test", "id1")));
-        doThrow(new RuntimeException("mock")).when(mockListener).ownershipChanged(ownershipChange(entity1, false, true, true));
+        doThrow(new RuntimeException("mock")).when(mockListener).ownershipChanged(
+                ownershipChange(entity1, false, true, true));
         DOMEntity entity2 = new DOMEntity("test", YangInstanceIdentifier.of(QName.create("test", "id2")));
         doNothing().when(mockListener).ownershipChanged(ownershipChange(entity2, true, false, false));
 

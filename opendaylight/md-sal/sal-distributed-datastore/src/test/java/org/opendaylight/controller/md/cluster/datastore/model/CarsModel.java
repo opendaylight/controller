@@ -21,8 +21,8 @@ import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableCo
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableMapNodeBuilder;
 
 public class CarsModel {
-    public static final QName BASE_QNAME = QName.create("urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test:cars", "2014-03-13",
-        "cars");
+    public static final QName BASE_QNAME = QName.create(
+            "urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test:cars", "2014-03-13", "cars");
 
     public static final QName CARS_QNAME = QName.create(BASE_QNAME, "cars");
     public static final QName CAR_QNAME = QName.create(CARS_QNAME, "car");
@@ -32,7 +32,7 @@ public class CarsModel {
     public static final YangInstanceIdentifier BASE_PATH = YangInstanceIdentifier.of(BASE_QNAME);
     public static final YangInstanceIdentifier CAR_LIST_PATH = BASE_PATH.node(CAR_QNAME);
 
-    public static NormalizedNode<?, ?> create(){
+    public static NormalizedNode<?, ?> create() {
 
         // Create a list builder
         CollectionNodeBuilder<MapEntryNode, MapNode> cars =
@@ -64,7 +64,7 @@ public class CarsModel {
 
     }
 
-    public static NormalizedNode<?, ?> createEmptyCarsList(){
+    public static NormalizedNode<?, ?> createEmptyCarsList() {
         return newCarsNode(newCarsMapNode());
     }
 
@@ -74,16 +74,16 @@ public class CarsModel {
     }
 
     public static MapNode newCarsMapNode(MapEntryNode... carEntries) {
-        CollectionNodeBuilder<MapEntryNode, MapNode> builder = ImmutableMapNodeBuilder.create().
-                withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(CAR_QNAME));
-        for(MapEntryNode e: carEntries) {
+        CollectionNodeBuilder<MapEntryNode, MapNode> builder = ImmutableMapNodeBuilder.create()
+                .withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(CAR_QNAME));
+        for (MapEntryNode e : carEntries) {
             builder.withChild(e);
         }
 
         return builder.build();
     }
 
-    public static NormalizedNode<?, ?> emptyContainer(){
+    public static NormalizedNode<?, ?> emptyContainer() {
         return ImmutableContainerNodeBuilder.create()
             .withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(BASE_QNAME))
             .build();

@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.datastore.shardmanager;
 
 import static org.junit.Assert.assertEquals;
+
 import akka.actor.Address;
 import com.google.common.collect.Sets;
 import java.util.Collection;
@@ -39,23 +40,23 @@ public class ShardPeerAddressResolverTest {
         resolver.addPeerAddress(MEMBER_3, address3);
         assertEquals("getPeerAddress", address3, resolver.getPeerAddress(MEMBER_3));
 
-        assertEquals("getShardActorAddress", address2.toString() +
-                "/user/shardmanager-config/member-2-shard-default-config",
+        assertEquals("getShardActorAddress",
+                address2.toString() + "/user/shardmanager-config/member-2-shard-default-config",
                 resolver.getShardActorAddress("default", MEMBER_2));
 
-        assertEquals("getShardActorAddress", address3.toString() +
-                "/user/shardmanager-config/member-3-shard-default-config",
+        assertEquals("getShardActorAddress",
+                address3.toString() + "/user/shardmanager-config/member-3-shard-default-config",
                 resolver.getShardActorAddress("default", MEMBER_3));
 
-        assertEquals("getShardActorAddress", address2.toString() +
-                "/user/shardmanager-config/member-2-shard-topology-config",
+        assertEquals("getShardActorAddress",
+                address2.toString() + "/user/shardmanager-config/member-2-shard-topology-config",
                 resolver.getShardActorAddress("topology", MEMBER_2));
 
         resolver.removePeerAddress(MEMBER_2);
         assertEquals("getShardActorAddress", null, resolver.getShardActorAddress("default", MEMBER_2));
         assertEquals("getShardActorAddress", null, resolver.getShardActorAddress("topology", MEMBER_2));
-        assertEquals("getShardActorAddress", address3.toString() +
-                "/user/shardmanager-config/member-3-shard-default-config",
+        assertEquals("getShardActorAddress",
+                address3.toString() + "/user/shardmanager-config/member-3-shard-default-config",
                 resolver.getShardActorAddress("default", MEMBER_3));
     }
 
@@ -73,8 +74,8 @@ public class ShardPeerAddressResolverTest {
         resolver.addPeerAddress(memberName, address);
 
         String shardAddress = resolver.getShardActorAddress("default", memberName);
-        assertEquals("getShardActorAddress", address.toString() +
-                "/user/shardmanager-" + type + "/" + memberName.getName() + "-shard-default-" + type, shardAddress);
+        assertEquals("getShardActorAddress", address.toString() + "/user/shardmanager-" + type + "/"
+                + memberName.getName() + "-shard-default-" + type, shardAddress);
 
         assertEquals("resolve", shardAddress, resolver.resolve(peerId));
     }
