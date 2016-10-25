@@ -8,11 +8,14 @@
 package org.opendaylight.controller.cluster.access.client;
 
 /**
+ * Abstract base class class for a behavior whose actor has recovered from persistence.
+ *
  * @param <C> Concrete context type
  *
  * @author Robert Varga
  */
-abstract class RecoveredClientActorBehavior<C extends AbstractClientActorContext> extends AbstractClientActorBehavior<C> {
+abstract class RecoveredClientActorBehavior<C extends AbstractClientActorContext>
+        extends AbstractClientActorBehavior<C> {
 
     RecoveredClientActorBehavior(final C context) {
         super(context);

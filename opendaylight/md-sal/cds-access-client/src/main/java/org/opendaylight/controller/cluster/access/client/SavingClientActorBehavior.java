@@ -46,7 +46,8 @@ final class SavingClientActorBehavior extends RecoveredClientActorBehavior<Initi
             LOG.debug("{}: got command: {}", persistenceId(), command);
         } else if (command instanceof DeleteSnapshotsFailure) {
             // Not treating this as a fatal error.
-            LOG.warn("{}: failed to delete prior snapshots", persistenceId(), ((DeleteSnapshotsFailure) command).cause());
+            LOG.warn("{}: failed to delete prior snapshots", persistenceId(),
+                    ((DeleteSnapshotsFailure) command).cause());
         } else {
             LOG.debug("{}: stashing command {}", persistenceId(), command);
             context().stash();

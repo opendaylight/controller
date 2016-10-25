@@ -15,6 +15,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
+
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.testkit.TestProbe;
@@ -54,7 +55,8 @@ public class SequencedQueueEntryTest {
         }
 
         @Override
-        protected AbstractRequestFailureProxy<WritableIdentifier, MockFailure> externalizableProxy(final ABIVersion version) {
+        protected AbstractRequestFailureProxy<WritableIdentifier, MockFailure> externalizableProxy(
+                final ABIVersion version) {
             return null;
         }
 
@@ -193,12 +195,12 @@ public class SequencedQueueEntryTest {
         assertRequestEquals(mockRequest, mockActor.receiveOne(Duration.apply(5, TimeUnit.SECONDS)));
     }
 
-     private static void assertRequestEquals(final Request<?, ?> expected, final Object o) {
-         assertTrue(o instanceof RequestEnvelope);
+    private static void assertRequestEquals(final Request<?, ?> expected, final Object obj) {
+        assertTrue(obj instanceof RequestEnvelope);
 
-         final RequestEnvelope actual = (RequestEnvelope) o;
-         assertEquals(0, actual.getSessionId());
-         assertEquals(0, actual.getTxSequence());
-         assertEquals(expected.getTarget(), actual.getMessage().getTarget());
+        final RequestEnvelope actual = (RequestEnvelope) obj;
+        assertEquals(0, actual.getSessionId());
+        assertEquals(0, actual.getTxSequence());
+        assertEquals(expected.getTarget(), actual.getMessage().getTarget());
     }
 }
