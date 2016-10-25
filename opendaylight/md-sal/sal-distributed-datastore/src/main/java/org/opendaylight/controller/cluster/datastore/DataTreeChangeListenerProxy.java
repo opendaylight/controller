@@ -117,7 +117,7 @@ final class DataTreeChangeListenerProxy<T extends DOMDataTreeChangeListener> ext
     }
 
     @VisibleForTesting
-    ActorSelection getListenerRegistrationActor() {
+    synchronized ActorSelection getListenerRegistrationActor() {
         return listenerRegistrationActor;
     }
 

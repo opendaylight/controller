@@ -26,6 +26,10 @@ public final class RegisterDataTreeChangeListener implements Externalizable, Lis
     private YangInstanceIdentifier path;
     private boolean registerOnAllInstances;
 
+    public RegisterDataTreeChangeListener() {
+        // For Externalizable
+    }
+
     public RegisterDataTreeChangeListener(final YangInstanceIdentifier path, final ActorRef dataTreeChangeListenerPath,
             final boolean registerOnAllInstances) {
         this.path = Preconditions.checkNotNull(path);

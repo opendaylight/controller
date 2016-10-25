@@ -12,6 +12,7 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import javax.xml.stream.XMLStreamException;
 import org.opendaylight.controller.cluster.datastore.util.AbstractDataTreeModificationCursor;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
@@ -35,7 +36,7 @@ public final class DataTreeModificationOutput {
     public static void toFile(File file, DataTreeModification modification) {
         try (FileOutputStream outStream = new FileOutputStream(file)) {
             modification.applyToCursor(new DataTreeModificationOutputCursor(new DataOutputStream(outStream)));
-        } catch (Exception e) {
+        } catch (IOException | RuntimeException e) {
             LOG.error("Error writing DataTreeModification to file {}", file, e);
         }
     }
@@ -50,8 +51,8 @@ public final class DataTreeModificationOutput {
         @Override
         public void delete(PathArgument child) {
             try {
-                output.write("\nDELETE -> ".getBytes());
-                output.write(current().node(child).toString().getBytes());
+                output.write("\nDELETE -> ".getBytes(StandardCharsets.UTF_8));
+                output.write(current().node(child).toString().getBytes(StandardCharsets.UTF_8));
                 output.writeByte('\n');
             } catch (IOException e) {
                 Throwables.propagate(e);
@@ -71,10 +72,10 @@ public final class DataTreeModificationOutput {
         private void outputPathAndNode(String name, PathArgument child, NormalizedNode<?, ?> data) {
             try {
                 output.writeByte('\n');
-                output.write(name.getBytes());
-                output.write(" -> ".getBytes());
-                output.write(current().node(child).toString().getBytes());
-                output.write(": \n".getBytes());
+                output.write(name.getBytes(StandardCharsets.UTF_8));
+                output.write(" -> ".getBytes(StandardCharsets.UTF_8));
+                output.write(current().node(child).toString().getBytes(StandardCharsets.UTF_8));
+                output.write(": \n".getBytes(StandardCharsets.UTF_8));
                 NormalizedNodeXMLOutput.toStream(output, data);
                 output.writeByte('\n');
             } catch (IOException | XMLStreamException e) {

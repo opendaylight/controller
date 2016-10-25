@@ -47,7 +47,7 @@ public class ShardTransactionFailureTest extends AbstractActorTest {
 
     private final DatastoreContext datastoreContext = DatastoreContext.newBuilder().build();
 
-    private final ShardStats shardStats = new ShardStats(SHARD_IDENTIFIER.toString(), "DataStore");
+    private final ShardStats shardStats = new ShardStats(SHARD_IDENTIFIER.toString(), "DataStore", null);
 
     private ActorRef createShard() {
         ActorRef shard = getSystem().actorOf(Shard.builder().id(SHARD_IDENTIFIER).datastoreContext(datastoreContext)

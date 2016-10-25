@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.datastore.entityownership;
 import akka.actor.Props;
 import akka.japi.Creator;
 import com.google.common.base.Preconditions;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActor;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipChange;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipListener;
@@ -53,6 +54,8 @@ class EntityOwnershipListenerActor extends AbstractUntypedActor {
     private static final class EntityOwnershipListenerCreator implements Creator<EntityOwnershipListenerActor> {
         private static final long serialVersionUID = 1L;
 
+        @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "This field is not Serializable but we don't "
+                + "create remote instances of this actor and thus don't need it to be Serializable.")
         private final DOMEntityOwnershipListener listener;
 
         EntityOwnershipListenerCreator(DOMEntityOwnershipListener listener) {
