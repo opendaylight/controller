@@ -75,7 +75,7 @@ public class DatastoreSnapshotRestore {
             for (DatastoreSnapshot snapshot: snapshots) {
                 datastoreSnapshots.put(snapshot.getType(), snapshot);
             }
-        } catch (Exception e) {
+        } catch (ClassNotFoundException | IOException e) {
             LOG.error("Error reading clustered datastore restore file {}", restoreFile, e);
         } finally {
             if (!restoreFile.delete()) {

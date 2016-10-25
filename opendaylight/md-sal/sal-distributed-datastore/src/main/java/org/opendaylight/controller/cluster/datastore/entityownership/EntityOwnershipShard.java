@@ -235,7 +235,7 @@ class EntityOwnershipShard extends Shard {
     void tryCommitModifications(final BatchedModifications modifications) {
         if (isLeader()) {
             LOG.debug("{}: Committing BatchedModifications {} locally", persistenceId(),
-                    modifications.getTransactionID());
+                    modifications.getTransactionId());
 
             // Note that it's possible the commit won't get consensus and will timeout and not be applied
             // to the state. However we don't need to retry it in that case b/c it will be committed to
@@ -248,7 +248,7 @@ class EntityOwnershipShard extends Shard {
                 possiblyRemoveAllInitialCandidates(leader);
 
                 LOG.debug("{}: Sending BatchedModifications {} to leader {}", persistenceId(),
-                        modifications.getTransactionID(), leader);
+                        modifications.getTransactionId(), leader);
 
                 Future<Object> future = Patterns.ask(leader, modifications, TimeUnit.SECONDS.toMillis(
                         getDatastoreContext().getShardTransactionCommitTimeoutInSeconds()));

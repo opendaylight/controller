@@ -25,14 +25,14 @@ public class BatchedModifications extends MutableCompositeModification {
     private boolean ready;
     private boolean doCommitOnReady;
     private int totalMessagesSent;
-    private TransactionIdentifier transactionID;
+    private TransactionIdentifier transactionId;
 
     public BatchedModifications() {
     }
 
-    public BatchedModifications(TransactionIdentifier transactionID, short version) {
+    public BatchedModifications(TransactionIdentifier transactionId, short version) {
         super(version);
-        this.transactionID = Preconditions.checkNotNull(transactionID, "transactionID can't be null");
+        this.transactionId = Preconditions.checkNotNull(transactionId, "transactionID can't be null");
     }
 
     public boolean isReady() {
@@ -59,15 +59,15 @@ public class BatchedModifications extends MutableCompositeModification {
         this.totalMessagesSent = totalMessagesSent;
     }
 
-    public TransactionIdentifier getTransactionID() {
-        return transactionID;
+    public TransactionIdentifier getTransactionId() {
+        return transactionId;
     }
 
 
     @Override
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         super.readExternal(in);
-        transactionID = TransactionIdentifier.readFrom(in);
+        transactionId = TransactionIdentifier.readFrom(in);
         ready = in.readBoolean();
         totalMessagesSent = in.readInt();
         doCommitOnReady = in.readBoolean();
@@ -76,7 +76,7 @@ public class BatchedModifications extends MutableCompositeModification {
     @Override
     public void writeExternal(ObjectOutput out) throws IOException {
         super.writeExternal(out);
-        transactionID.writeTo(out);
+        transactionId.writeTo(out);
         out.writeBoolean(ready);
         out.writeInt(totalMessagesSent);
         out.writeBoolean(doCommitOnReady);
@@ -85,7 +85,7 @@ public class BatchedModifications extends MutableCompositeModification {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("BatchedModifications [transactionID=").append(transactionID).append(", ready=").append(ready)
+        builder.append("BatchedModifications [transactionId=").append(transactionId).append(", ready=").append(ready)
             .append(", totalMessagesSent=").append(totalMessagesSent).append(", modifications size=")
             .append(getModifications().size()).append("]");
         return builder.toString();

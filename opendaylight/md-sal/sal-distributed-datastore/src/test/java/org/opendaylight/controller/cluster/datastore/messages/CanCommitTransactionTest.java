@@ -32,7 +32,7 @@ public class CanCommitTransactionTest extends AbstractTest {
 
         CanCommitTransaction actual = CanCommitTransaction.fromSerializable(
                 SerializationUtils.clone((Serializable) serialized));
-        assertEquals("getTransactionID", expected.getTransactionID(), actual.getTransactionID());
+        assertEquals("getTransactionID", expected.getTransactionId(), actual.getTransactionId());
         assertEquals("getVersion", DataStoreVersions.CURRENT_VERSION, actual.getVersion());
     }
 

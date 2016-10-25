@@ -24,14 +24,14 @@ import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategy
  */
 public class ModuleConfig {
     private final String name;
-    private final String nameSpace;
+    private final String namespace;
     private final ShardStrategy shardStrategy;
     private final Map<String, ShardConfig> shardConfigs;
 
-    private ModuleConfig(String name, String nameSpace, ShardStrategy shardStrategy,
+    private ModuleConfig(String name, String namespace, ShardStrategy shardStrategy,
             Map<String, ShardConfig> shardConfigs) {
         this.name = name;
-        this.nameSpace = nameSpace;
+        this.namespace = namespace;
         this.shardStrategy = shardStrategy;
         this.shardConfigs = shardConfigs;
     }
@@ -42,8 +42,8 @@ public class ModuleConfig {
     }
 
     @Nullable
-    public String getNameSpace() {
-        return nameSpace;
+    public String getNamespace() {
+        return namespace;
     }
 
     @Nullable
@@ -86,7 +86,7 @@ public class ModuleConfig {
 
         private Builder(ModuleConfig moduleConfig) {
             this.name = moduleConfig.getName();
-            this.nameSpace = moduleConfig.getNameSpace();
+            this.nameSpace = moduleConfig.getNamespace();
             this.shardStrategy = moduleConfig.getShardStrategy();
             for (ShardConfig shardConfig : moduleConfig.getShardConfigs()) {
                 shardConfigs.put(shardConfig.getName(), shardConfig);

@@ -56,7 +56,7 @@ public class BatchedModificationsTest extends AbstractTest {
                 (Serializable) batched.toSerializable());
 
         assertEquals("getVersion", DataStoreVersions.CURRENT_VERSION, clone.getVersion());
-        assertEquals("getTransactionID", tx1, clone.getTransactionID());
+        assertEquals("getTransactionID", tx1, clone.getTransactionId());
         assertEquals("isReady", true, clone.isReady());
         assertEquals("getTotalMessagesSent", 5, clone.getTotalMessagesSent());
 
@@ -83,7 +83,7 @@ public class BatchedModificationsTest extends AbstractTest {
         clone = (BatchedModifications) SerializationUtils.clone((Serializable) batched.toSerializable());
 
         assertEquals("getVersion", DataStoreVersions.CURRENT_VERSION, clone.getVersion());
-        assertEquals("getTransactionID", tx2, clone.getTransactionID());
+        assertEquals("getTransactionID", tx2, clone.getTransactionId());
         assertEquals("isReady", false, clone.isReady());
 
         assertEquals("getModifications size", 0, clone.getModifications().size());
