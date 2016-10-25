@@ -34,12 +34,13 @@ public abstract class ClientActorBehavior extends RecoveredClientActorBehavior<C
         implements Identifiable<ClientIdentifier> {
     private static final Logger LOG = LoggerFactory.getLogger(ClientActorBehavior.class);
 
-    protected ClientActorBehavior(final @Nonnull ClientActorContext context) {
+    protected ClientActorBehavior(@Nonnull final ClientActorContext context) {
         super(context);
     }
 
     @Override
-    public final @Nonnull ClientIdentifier getIdentifier() {
+    @Nonnull
+    public final ClientIdentifier getIdentifier() {
         return context().getIdentifier();
     }
 
@@ -145,6 +146,7 @@ public abstract class ClientActorBehavior extends RecoveredClientActorBehavior<C
             needBackend = queue.runTimeout();
         } catch (NoProgressException e) {
             // Uh-oh, no progress. The queue has already killed itself, now we need to remove it
+            LOG.debug("{}: No progress made - removing queue", persistenceId(), e);
             context().removeQueue(queue);
             return this;
         }
@@ -157,10 +159,9 @@ public abstract class ClientActorBehavior extends RecoveredClientActorBehavior<C
     }
 
     /**
-     * Halt And Catch Fire.
-     *
-     * Halt processing on this client. Implementations need to ensure they initiate state flush procedures. No attempt
-     * to use this instance should be made after this method returns. Any such use may result in undefined behavior.
+     * Halt And Catch Fire. Halt processing on this client. Implementations need to ensure they initiate state flush
+     * procedures. No attempt to use this instance should be made after this method returns. Any such use may result
+     * in undefined behavior.
      *
      * @param cause Failure cause
      */
@@ -169,17 +170,19 @@ public abstract class ClientActorBehavior extends RecoveredClientActorBehavior<C
     /**
      * Override this method to handle any command which is not handled by the base behavior.
      *
-     * @param command
+     * @param command the command to process
      * @return Next behavior to use, null if this actor should shut down.
      */
-    protected abstract @Nullable ClientActorBehavior onCommand(@Nonnull Object command);
+    @Nullable
+    protected abstract ClientActorBehavior onCommand(@Nonnull Object command);
 
     /**
      * Override this method to provide a backend resolver instance.
      *
-     * @return
+     * @return a backend resolver instance
      */
-    protected abstract @Nonnull BackendInfoResolver<?> resolver();
+    @Nonnull
+    protected abstract BackendInfoResolver<?> resolver();
 
     /**
      * Send a request to the backend and invoke a specified callback when it finishes. This method is safe to invoke

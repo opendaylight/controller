@@ -13,8 +13,8 @@ import javax.annotation.Nonnull;
 import org.opendaylight.yangtools.concepts.Mutable;
 
 /**
- * Common, externally-invisible superclass of contexts associated with a {@link AbstractClientActor}. End users pass this
- * object via opaque {@link ClientActorContext}.
+ * Common, externally-invisible superclass of contexts associated with a {@link AbstractClientActor}. End users pass
+ * this object via opaque {@link ClientActorContext}.
  *
  * @author Robert Varga
  */
@@ -22,16 +22,18 @@ abstract class AbstractClientActorContext implements Mutable {
     private final String persistenceId;
     private final ActorRef self;
 
-    AbstractClientActorContext(final @Nonnull ActorRef self, final @Nonnull String persistenceId) {
+    AbstractClientActorContext(@Nonnull final ActorRef self, @Nonnull final String persistenceId) {
         this.persistenceId = Preconditions.checkNotNull(persistenceId);
         this.self = Preconditions.checkNotNull(self);
     }
 
-    final @Nonnull String persistenceId() {
+    @Nonnull
+    final String persistenceId() {
         return persistenceId;
     }
 
-    public final @Nonnull ActorRef self() {
+    @Nonnull
+    public final ActorRef self() {
         return self;
     }
 }

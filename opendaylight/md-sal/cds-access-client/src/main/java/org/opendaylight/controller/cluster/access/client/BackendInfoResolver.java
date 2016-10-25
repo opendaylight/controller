@@ -61,7 +61,7 @@ public abstract class BackendInfoResolver<T extends BackendInfo> {
      * @param cookie Backend cookie
      * @param info Previous information to be invalidated
      */
-    public final void invalidateBackend(final long cookie, final @Nonnull CompletionStage<? extends BackendInfo> info) {
+    public final void invalidateBackend(final long cookie, @Nonnull final CompletionStage<? extends BackendInfo> info) {
         if (backends.remove(cookie, Preconditions.checkNotNull(info))) {
             LOG.trace("Invalidated cache %s -> %s", Long.toUnsignedString(cookie), info);
             invalidateBackendInfo(info);
@@ -75,7 +75,8 @@ public abstract class BackendInfoResolver<T extends BackendInfo> {
      * @param cookie Backend cookie
      * @return A {@link CompletableFuture} resulting in information about the backend
      */
-    protected abstract @Nonnull CompletableFuture<T> resolveBackendInfo(final @Nonnull Long cookie);
+    @Nonnull
+    protected abstract CompletableFuture<T> resolveBackendInfo(@Nonnull final Long cookie);
 
     /**
      * Invalidate previously-resolved shard information. This method is invoked when a timeout is detected

@@ -36,7 +36,7 @@ public final class EmptyQueue<E> extends AbstractQueue<E> {
     }
 
     @Override
-    public boolean offer(final E e) {
+    public boolean offer(final E entry) {
         return false;
     }
 

@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.access.client;
 
 import static org.junit.Assert.assertSame;
+
 import akka.actor.ActorRef;
 import akka.actor.Scheduler;
 import akka.dispatch.Dispatcher;
@@ -23,7 +24,8 @@ import org.opendaylight.controller.cluster.access.concepts.MemberName;
 
 public class ClientActorContextTest {
     private static final MemberName MEMBER_NAME = MemberName.forName("member-1");
-    private static final FrontendType FRONTEND_TYPE = FrontendType.forName(ClientActorContextTest.class.getSimpleName());
+    private static final FrontendType FRONTEND_TYPE =
+            FrontendType.forName(ClientActorContextTest.class.getSimpleName());
     private static final FrontendIdentifier FRONTEND_ID = FrontendIdentifier.create(MEMBER_NAME, FRONTEND_TYPE);
     private static final ClientIdentifier CLIENT_ID = ClientIdentifier.create(FRONTEND_ID, 0);
     private static final String PERSISTENCE_ID = ClientActorContextTest.class.getSimpleName();
@@ -44,7 +46,8 @@ public class ClientActorContextTest {
 
     @Test
     public void testMockingControl() {
-        ClientActorContext ctx = new ClientActorContext(mockSelf, mockScheduler, mockDispatcher, PERSISTENCE_ID, CLIENT_ID);
+        ClientActorContext ctx = new ClientActorContext(mockSelf, mockScheduler, mockDispatcher,
+                PERSISTENCE_ID, CLIENT_ID);
         assertSame(CLIENT_ID, ctx.getIdentifier());
         assertSame(PERSISTENCE_ID, ctx.persistenceId());
         assertSame(mockSelf, ctx.self());
@@ -52,7 +55,8 @@ public class ClientActorContextTest {
 
     @Test
     public void testTicker() {
-        ClientActorContext ctx = new ClientActorContext(mockSelf, mockScheduler, mockDispatcher, PERSISTENCE_ID, CLIENT_ID);
+        ClientActorContext ctx = new ClientActorContext(mockSelf, mockScheduler, mockDispatcher,
+                PERSISTENCE_ID, CLIENT_ID);
         assertSame(Ticker.systemTicker(), ctx.ticker());
     }
 }
