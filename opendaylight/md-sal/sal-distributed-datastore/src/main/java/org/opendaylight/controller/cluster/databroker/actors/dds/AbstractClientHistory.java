@@ -82,7 +82,7 @@ abstract class AbstractClientHistory extends LocalAbortable implements Identifia
     }
 
     /**
-     * Callback invoked from {@link ClientTransaction} when a transaction has been sub
+     * Callback invoked from {@link ClientTransaction} when a transaction has been submitted.
      *
      * @param transaction Transaction handle
      */

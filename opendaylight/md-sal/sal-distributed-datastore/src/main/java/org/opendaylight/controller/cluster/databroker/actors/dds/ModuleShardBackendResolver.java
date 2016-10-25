@@ -93,10 +93,10 @@ final class ModuleShardBackendResolver extends BackendInfoResolver<ShardBackendI
                 if (cookie == null) {
                     cookie = nextShard++;
 
-                    Builder<String, Long> b = ImmutableBiMap.builder();
-                    b.putAll(shards);
-                    b.put(shardName, cookie);
-                    shards = b.build();
+                    Builder<String, Long> builder = ImmutableBiMap.builder();
+                    builder.putAll(shards);
+                    builder.put(shardName, cookie);
+                    shards = builder.build();
                 }
             }
         }
@@ -132,9 +132,9 @@ final class ModuleShardBackendResolver extends BackendInfoResolver<ShardBackendI
             return new ShardBackendInfo(success.getBackend(),
                 nextSessionId.getAndIncrement(), success.getVersion(), shardName, UnsignedLong.fromLongBits(cookie),
                 success.getDataTree(), success.getMaxMessages());
-        }).whenComplete((info, t) -> {
-            if (t != null) {
-                ret.completeExceptionally(t);
+        }).whenComplete((info, throwablw) -> {
+            if (throwablw != null) {
+                ret.completeExceptionally(throwablw);
             } else {
                 ret.complete(info);
             }

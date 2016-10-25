@@ -14,6 +14,7 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCoh
  * An {@link AbstractTransactionCommitCohort} for use with empty transactions. This relies on the fact that no backends
  * have been touched, hence all state book-keeping needs to happen only locally and shares fate with the coordinator.
  *
+ * <p>
  * Therefore all methods can finish immediately without any effects.
  *
  * @author Robert Varga

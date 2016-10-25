@@ -33,7 +33,8 @@ abstract class AbstractProxyHistory implements Identifiable<LocalHistoryIdentifi
     static AbstractProxyHistory create(final DistributedDataStoreClientBehavior client,
             final Optional<ShardBackendInfo> backendInfo, final LocalHistoryIdentifier identifier) {
         final Optional<DataTree> dataTree = backendInfo.flatMap(ShardBackendInfo::getDataTree);
-        return dataTree.isPresent() ? new LocalProxyHistory(client, identifier, dataTree.get()) : new RemoteProxyHistory(client, identifier);
+        return dataTree.isPresent() ? new LocalProxyHistory(client, identifier, dataTree.get())
+                : new RemoteProxyHistory(client, identifier);
     }
 
     @Override
@@ -49,6 +50,6 @@ abstract class AbstractProxyHistory implements Identifiable<LocalHistoryIdentifi
         return doCreateTransactionProxy(client, new TransactionIdentifier(identifier, txId.getTransactionId()));
     }
 
-    abstract AbstractProxyTransaction doCreateTransactionProxy(DistributedDataStoreClientBehavior client,
+    abstract AbstractProxyTransaction doCreateTransactionProxy(DistributedDataStoreClientBehavior clientBehavior,
             TransactionIdentifier txId);
 }

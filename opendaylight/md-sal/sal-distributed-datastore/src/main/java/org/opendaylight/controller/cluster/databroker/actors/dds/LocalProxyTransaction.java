@@ -29,10 +29,12 @@ import org.slf4j.LoggerFactory;
  * An {@link AbstractProxyTransaction} for dispatching a transaction towards a shard leader which is co-located with
  * the client instance.
  *
+ * <p>
  * It requires a {@link DataTreeSnapshot}, which is used to instantiated a new {@link DataTreeModification}. Operations
  * are then performed on this modification and once the transaction is submitted, the modification is sent to the shard
  * leader.
  *
+ * <p>
  * This class is not thread-safe as usual with transactions. Since it does not interact with the backend until the
  * transaction is submitted, at which point this class gets out of the picture, this is not a cause for concern.
  *
