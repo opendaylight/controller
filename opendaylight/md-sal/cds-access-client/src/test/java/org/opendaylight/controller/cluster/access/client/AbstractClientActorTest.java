@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.access.client;
 
 import static org.mockito.Mockito.doReturn;
+
 import akka.actor.ActorRef;
 import org.junit.Before;
 import org.mockito.Mock;

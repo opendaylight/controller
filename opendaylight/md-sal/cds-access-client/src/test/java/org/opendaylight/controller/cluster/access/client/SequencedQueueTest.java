@@ -17,6 +17,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.testkit.TestProbe;
@@ -58,7 +59,8 @@ public class SequencedQueueTest {
         }
 
         @Override
-        protected AbstractRequestFailureProxy<WritableIdentifier, MockFailure> externalizableProxy(final ABIVersion version) {
+        protected AbstractRequestFailureProxy<WritableIdentifier, MockFailure> externalizableProxy(
+                final ABIVersion version) {
             return null;
         }
 
@@ -162,7 +164,7 @@ public class SequencedQueueTest {
         assertTrue(queue.hasCompleted());
     }
 
-    @Test(expected=IllegalStateException.class)
+    @Test(expected = IllegalStateException.class)
     public void testClosedEnqueueRequest() {
         queue.close();
 
@@ -186,7 +188,7 @@ public class SequencedQueueTest {
         assertSame(mockCause, captor.getValue().getCause());
     }
 
-    @Test(expected=IllegalStateException.class)
+    @Test(expected = IllegalStateException.class)
     public void testPoisonPerformsClose() {
         // Implies close()
         queue.poison(mockCause);
@@ -216,7 +218,7 @@ public class SequencedQueueTest {
         assertFalse(queue.expectProof(proof));
     }
 
-    @Test(expected=NullPointerException.class)
+    @Test(expected = NullPointerException.class)
     public void testSetBackendNull() {
         final CompletableFuture<BackendInfo> proof = new CompletableFuture<>();
         assertTrue(queue.expectProof(proof));
@@ -339,7 +341,7 @@ public class SequencedQueueTest {
         assertTrue(ret);
     }
 
-    @Test(expected=NoProgressException.class)
+    @Test(expected = NoProgressException.class)
     public void testRunTimeoutWithoutProgressExact() throws NoProgressException {
         queue.enqueueRequest(mockRequest, mockCallback);
 
@@ -349,7 +351,7 @@ public class SequencedQueueTest {
         queue.runTimeout();
     }
 
-    @Test(expected=NoProgressException.class)
+    @Test(expected = NoProgressException.class)
     public void testRunTimeoutWithoutProgressMore() throws NoProgressException {
         queue.enqueueRequest(mockRequest, mockCallback);
 
@@ -440,10 +442,10 @@ public class SequencedQueueTest {
         assertRequestEquals(expected, sequence, mockActor.receiveOne(FiniteDuration.apply(5, TimeUnit.SECONDS)));
     }
 
-    private static void assertRequestEquals(final Request<?, ?> expected, final long sequence, final Object o) {
-        assertTrue(o instanceof RequestEnvelope);
+    private static void assertRequestEquals(final Request<?, ?> expected, final long sequence, final Object obj) {
+        assertTrue(obj instanceof RequestEnvelope);
 
-        final RequestEnvelope actual = (RequestEnvelope) o;
+        final RequestEnvelope actual = (RequestEnvelope) obj;
         assertEquals(0, actual.getSessionId());
         assertEquals(sequence, actual.getTxSequence());
         assertSame(expected, actual.getMessage());

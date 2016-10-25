@@ -31,6 +31,7 @@ import scala.concurrent.duration.FiniteDuration;
 /**
  * An actor context associated with this {@link AbstractClientActor}.
  *
+ * <p>
  * Time-keeping in a client actor is based on monotonic time. The precision of this time can be expected to be the
  * same as {@link System#nanoTime()}, but it is not tied to that particular clock. Actor clock is exposed as
  * a {@link Ticker}, which can be obtained via {@link #ticker()}.
@@ -57,7 +58,8 @@ public class ClientActorContext extends AbstractClientActorContext implements Id
     }
 
     @Override
-    public @Nonnull ClientIdentifier getIdentifier() {
+    @Nonnull
+    public ClientIdentifier getIdentifier() {
         return identifier;
     }
 
@@ -68,7 +70,8 @@ public class ClientActorContext extends AbstractClientActorContext implements Id
      *
      * @return Client actor time source
      */
-    public @Nonnull Ticker ticker() {
+    @Nonnull
+    public Ticker ticker() {
         return Ticker.systemTicker();
     }
 
@@ -77,11 +80,11 @@ public class ClientActorContext extends AbstractClientActorContext implements Id
      *
      * @param command Block of code which needs to be execute
      */
-    public void executeInActor(final @Nonnull InternalCommand command) {
+    public void executeInActor(@Nonnull final InternalCommand command) {
         self().tell(Preconditions.checkNotNull(command), ActorRef.noSender());
     }
 
-    public Cancellable executeInActor(final @Nonnull InternalCommand command, final FiniteDuration delay) {
+    public Cancellable executeInActor(@Nonnull final InternalCommand command, final FiniteDuration delay) {
         return scheduler.scheduleOnce(Preconditions.checkNotNull(delay), self(), Preconditions.checkNotNull(command),
             executionContext, ActorRef.noSender());
     }

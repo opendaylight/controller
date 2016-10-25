@@ -28,6 +28,8 @@ import org.slf4j.LoggerFactory;
 import scala.concurrent.duration.FiniteDuration;
 
 /*
+ * A queue that processes entries in sequence.
+ *
  * TODO: make this class and its users thread-safe. This will require some atomic state-keeping so that timeouts,
  *       retries and enqueues work as expected.
  */
@@ -118,7 +120,7 @@ final class SequencedQueue {
      * 2) The request has been enqueued and transmitted, but the caller needs to schedule a new timer
      * 3) The request has been enqueued, but the caller needs to request resolution of backend information and that
      *    process needs to complete before transmission occurs
-     *
+     * <p/>
      * These options are covered via returning an {@link Optional}. The caller needs to examine it and decode
      * the scenarios above according to the following rules:
      * - if is null, the first case applies
@@ -271,7 +273,8 @@ final class SequencedQueue {
         transmitEntries(pending, toSend);
     }
 
-    Optional<FiniteDuration> setBackendInfo(final CompletionStage<? extends BackendInfo> proof, final BackendInfo backend) {
+    Optional<FiniteDuration> setBackendInfo(final CompletionStage<? extends BackendInfo> proof,
+            final BackendInfo backend) {
         Preconditions.checkNotNull(backend);
         if (!proof.equals(backendProof)) {
             LOG.debug("Ignoring resolution {} while waiting for {}", proof, this.backendProof);

@@ -13,6 +13,7 @@ import com.google.common.base.Preconditions;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 
 /**
+ * The initial context for an actor.
  *
  * @author Robert Varga
  */
