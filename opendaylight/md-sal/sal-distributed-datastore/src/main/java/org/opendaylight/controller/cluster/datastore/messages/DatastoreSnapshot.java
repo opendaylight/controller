@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.datastore.messages;
 
 import com.google.common.base.Preconditions;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.Serializable;
 import java.util.List;
 import javax.annotation.Nonnull;
@@ -25,6 +26,9 @@ public class DatastoreSnapshot implements Serializable {
     private final byte[] shardManagerSnapshot;
     private final List<ShardSnapshot> shardSnapshots;
 
+    @SuppressFBWarnings(value = "EI_EXPOSE_REP2", justification = "Stores a reference to an externally mutable byte[] "
+            + "object but this is OK since this class is merely a DTO and does not process byte[] internally. "
+            + "Also it would be inefficient to create a return copy as the byte[] could be large.")
     public DatastoreSnapshot(@Nonnull String type, @Nullable byte[] shardManagerSnapshot,
             @Nonnull List<ShardSnapshot> shardSnapshots) {
         this.type = Preconditions.checkNotNull(type);
@@ -37,6 +41,9 @@ public class DatastoreSnapshot implements Serializable {
         return type;
     }
 
+    @SuppressFBWarnings(value = "EI_EXPOSE_REP", justification = "Exposes a mutable object stored in a field but "
+            + "this is OK since this class is merely a DTO and does not process byte[] internally. "
+            + "Also it would be inefficient to create a return copy as the byte[] could be large.")
     @Nullable
     public byte[] getShardManagerSnapshot() {
         return shardManagerSnapshot;
@@ -63,6 +70,9 @@ public class DatastoreSnapshot implements Serializable {
             return name;
         }
 
+        @SuppressFBWarnings(value = "EI_EXPOSE_REP", justification = "Exposes a mutable object stored in a field but "
+                + "this is OK since this class is merely a DTO and does not process byte[] internally. "
+                + "Also it would be inefficient to create a return copy as the byte[] could be large.")
         @Nonnull
         public byte[] getSnapshot() {
             return snapshot;

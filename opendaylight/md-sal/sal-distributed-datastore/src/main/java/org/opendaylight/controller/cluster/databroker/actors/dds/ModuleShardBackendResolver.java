@@ -15,6 +15,7 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableBiMap.Builder;
 import com.google.common.primitives.UnsignedLong;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.TimeUnit;
@@ -43,6 +44,8 @@ import scala.compat.java8.FutureConverters;
  *
  * @author Robert Varga
  */
+@SuppressFBWarnings(value = "NP_NONNULL_PARAM_VIOLATION",
+                    justification = "Pertains to the NULL_FUTURE field below. Null is allowed and is intended")
 final class ModuleShardBackendResolver extends BackendInfoResolver<ShardBackendInfo> {
     private static final CompletableFuture<ShardBackendInfo> NULL_FUTURE = CompletableFuture.completedFuture(null);
     private static final Logger LOG = LoggerFactory.getLogger(ModuleShardBackendResolver.class);

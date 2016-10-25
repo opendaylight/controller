@@ -98,7 +98,7 @@ public class DistributedDataStore implements DistributedDataStoreInterface, Sche
 
         ShardManagerCreator creator = new ShardManagerCreator().cluster(cluster).configuration(configuration)
                 .datastoreContextFactory(datastoreContextFactory)
-                .waitTillReadyCountdownLatch(waitTillReadyCountDownLatch)
+                .waitTillReadyCountDownLatch(waitTillReadyCountDownLatch)
                 .primaryShardInfoCache(primaryShardInfoCache)
                 .restoreFromSnapshot(restoreFromSnapshot);
 

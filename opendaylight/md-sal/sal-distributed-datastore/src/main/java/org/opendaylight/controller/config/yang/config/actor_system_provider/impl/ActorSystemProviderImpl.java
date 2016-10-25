@@ -12,6 +12,8 @@ import akka.actor.Props;
 import akka.osgi.BundleDelegatingClassLoader;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.ActorSystemProvider;
 import org.opendaylight.controller.cluster.ActorSystemProviderListener;
@@ -40,8 +42,9 @@ public class ActorSystemProviderImpl implements ActorSystemProvider, AutoCloseab
 
         final Bundle bundle = bundleContext.getBundle();
 
-        final BundleDelegatingClassLoader classLoader = new BundleDelegatingClassLoader(bundle, Thread.currentThread()
-                .getContextClassLoader());
+        final BundleDelegatingClassLoader classLoader = AccessController.doPrivileged(
+            (PrivilegedAction<BundleDelegatingClassLoader>) () ->
+                new BundleDelegatingClassLoader(bundle, Thread.currentThread().getContextClassLoader()));
 
         final AkkaConfigurationReader configurationReader = new FileAkkaConfigurationReader();
         final Config akkaConfig = ConfigFactory.load(configurationReader.read()).getConfig(CONFIGURATION_NAME);

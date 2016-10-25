@@ -12,6 +12,7 @@ import akka.actor.ActorRef;
 import akka.pattern.Patterns;
 import akka.util.Timeout;
 import com.google.common.base.Joiner;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Stopwatch;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -21,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
+import javax.annotation.Nonnull;
 import org.opendaylight.controller.cluster.datastore.Shard;
 import org.opendaylight.controller.cluster.raft.base.messages.InitiateCaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.client.messages.FollowerInfo;
@@ -35,7 +37,7 @@ import scala.concurrent.Await;
  * @author  Basheeruddin syedbahm@cisco.com
  */
 public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
-    public static String JMX_CATEGORY_SHARD = "Shards";
+    public static final String JMX_CATEGORY_SHARD = "Shards";
 
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 
@@ -60,7 +62,7 @@ public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
 
     private boolean followerInitialSyncStatus = false;
 
-    private Shard shard;
+    private final Shard shard;
 
     private String statRetrievalError;
 
@@ -70,12 +72,9 @@ public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
 
     private long lastLeadershipChangeTime;
 
-    public ShardStats(final String shardName, final String mxBeanType) {
+    public ShardStats(final String shardName, final String mxBeanType, @Nonnull final Shard shard) {
         super(shardName, mxBeanType, JMX_CATEGORY_SHARD);
-    }
-
-    public void setShard(Shard shard) {
-        this.shard = shard;
+        this.shard = Preconditions.checkNotNull(shard);
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
@@ -214,7 +213,9 @@ public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
 
     @Override
     public String getLastCommittedTransactionTime() {
-        return DATE_FORMAT.format(new Date(lastCommittedTransactionTime));
+        synchronized (DATE_FORMAT) {
+            return DATE_FORMAT.format(new Date(lastCommittedTransactionTime));
+        }
     }
 
     @Override
@@ -344,7 +345,9 @@ public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
 
     @Override
     public String getLastLeadershipChangeTime() {
-        return DATE_FORMAT.format(new Date(lastLeadershipChangeTime));
+        synchronized (DATE_FORMAT) {
+            return DATE_FORMAT.format(new Date(lastLeadershipChangeTime));
+        }
     }
 
     @Override

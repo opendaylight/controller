@@ -11,6 +11,7 @@ import akka.actor.PoisonPill;
 import akka.actor.Props;
 import akka.japi.Creator;
 import com.google.common.base.Preconditions;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActor;
 import org.opendaylight.controller.cluster.datastore.messages.CloseDataTreeChangeListenerRegistration;
 import org.opendaylight.controller.cluster.datastore.messages.CloseDataTreeChangeListenerRegistrationReply;
@@ -49,6 +50,9 @@ public final class DataTreeChangeListenerRegistrationActor extends AbstractUntyp
     private static final class DataTreeChangeListenerRegistrationCreator
             implements Creator<DataTreeChangeListenerRegistrationActor> {
         private static final long serialVersionUID = 1L;
+
+        @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "This field is not Serializable but we don't "
+                + "create remote instances of this actor and thus don't need it to be Serializable.")
         final ListenerRegistration<DOMDataTreeChangeListener> registration;
 
         DataTreeChangeListenerRegistrationCreator(ListenerRegistration<DOMDataTreeChangeListener> registration) {
