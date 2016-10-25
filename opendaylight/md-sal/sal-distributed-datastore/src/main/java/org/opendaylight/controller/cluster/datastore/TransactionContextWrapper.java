@@ -109,13 +109,13 @@ class TransactionContextWrapper {
             // in case a TransactionOperation results in another transaction operation being
             // queued (eg a put operation from a client read Future callback that is notified
             // synchronously).
-            Collection<TransactionOperation> operationsBatch = null;
+            final Collection<TransactionOperation> operationsBatch;
             synchronized (queuedTxOperations) {
                 if (queuedTxOperations.isEmpty()) {
                     // We're done invoking the TransactionOperations so we can now publish the
                     // TransactionContext.
                     localTransactionContext.operationHandOffComplete();
-                    if (!localTransactionContext.usesOperationLimiting()){
+                    if (!localTransactionContext.usesOperationLimiting()) {
                         limiter.releaseAll();
                     }
                     transactionContext = localTransactionContext;

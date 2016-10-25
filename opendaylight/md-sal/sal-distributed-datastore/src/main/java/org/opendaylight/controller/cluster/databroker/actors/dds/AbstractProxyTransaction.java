@@ -34,9 +34,11 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 /**
  * Class translating transaction operations towards a particular backend shard.
  *
+ * <p>
  * This class is not safe to access from multiple application threads, as is usual for transactions. Internal state
  * transitions coming from interactions with backend are expected to be thread-safe.
  *
+ * <p>
  * This class interacts with the queueing mechanism in ClientActorBehavior, hence once we arrive at a decision
  * to use either a local or remote implementation, we are stuck with it. We can re-evaluate on the next transaction.
  *
@@ -90,7 +92,7 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
     }
 
     /**
-     * Seal this transaction before it is either
+     * Seals this transaction when ready.
      */
     final void seal() {
         checkSealed();
@@ -109,6 +111,20 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
     final void abort() {
         checkSealed();
         doAbort();
+    }
+
+    void abort(final VotingFuture<Void> ret) {
+        checkSealed();
+
+        sendRequest(new TransactionAbortRequest(getIdentifier(), nextSequence(), localActor()), t -> {
+            if (t instanceof TransactionAbortSuccess) {
+                ret.voteYes();
+            } else if (t instanceof RequestFailure) {
+                ret.voteNo(((RequestFailure<?, ?>) t).getCause());
+            } else {
+                ret.voteNo(new IllegalStateException("Unhandled response " + t.getClass()));
+            }
+        });
     }
 
     /**
@@ -133,20 +149,6 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
         return ret;
     }
 
-    void abort(final VotingFuture<Void> ret) {
-        checkSealed();
-
-        sendRequest(new TransactionAbortRequest(getIdentifier(), nextSequence(), localActor()), t -> {
-            if (t instanceof TransactionAbortSuccess) {
-                ret.voteYes();
-            } else if (t instanceof RequestFailure) {
-                ret.voteNo(((RequestFailure<?, ?>) t).getCause());
-            } else {
-                ret.voteNo(new IllegalStateException("Unhandled response " + t.getClass()));
-            }
-        });
-    }
-
     void canCommit(final VotingFuture<?> ret) {
         checkSealed();
 
@@ -164,7 +166,7 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
     void preCommit(final VotingFuture<?> ret) {
         checkSealed();
 
-        sendRequest(new TransactionPreCommitRequest(getIdentifier(), nextSequence(), localActor()), t-> {
+        sendRequest(new TransactionPreCommitRequest(getIdentifier(), nextSequence(), localActor()), t -> {
             if (t instanceof TransactionPreCommitSuccess) {
                 ret.voteYes();
             } else if (t instanceof RequestFailure) {
@@ -178,7 +180,7 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
     void doCommit(final VotingFuture<?> ret) {
         checkSealed();
 
-        sendRequest(new TransactionDoCommitRequest(getIdentifier(), nextSequence(), localActor()), t-> {
+        sendRequest(new TransactionDoCommitRequest(getIdentifier(), nextSequence(), localActor()), t -> {
             if (t instanceof TransactionCommitSuccess) {
                 ret.voteYes();
             } else if (t instanceof RequestFailure) {
@@ -189,6 +191,8 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
         });
     }
 
+    abstract TransactionRequest<?> doCommit(boolean coordinated);
+
     abstract void doDelete(final YangInstanceIdentifier path);
 
     abstract void doMerge(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data);
@@ -197,11 +201,10 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
 
     abstract CheckedFuture<Boolean, ReadFailedException> doExists(final YangInstanceIdentifier path);
 
-    abstract CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> doRead(final YangInstanceIdentifier path);
+    abstract CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> doRead(
+            final YangInstanceIdentifier path);
 
     abstract void doSeal();
 
     abstract void doAbort();
-
-    abstract TransactionRequest<?> doCommit(boolean coordinated);
 }

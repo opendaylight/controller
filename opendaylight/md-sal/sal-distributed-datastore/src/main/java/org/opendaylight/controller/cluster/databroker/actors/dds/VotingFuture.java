@@ -22,6 +22,7 @@ import javax.annotation.concurrent.GuardedBy;
  * an exception. This exception corresponds to the cause reported by the first 'no' vote, with all subsequent votes
  * added as suppressed exceptions.
  *
+ * <p>
  * Implementation is geared toward positive votes. Negative votes have to synchronize and therefore are more likely
  * to see contention.
  *
@@ -53,7 +54,7 @@ class VotingFuture<T> extends AbstractFuture<T> {
         if (castVote()) {
             synchronized (failures) {
                 resolveResult();
-             }
+            }
         }
     }
 

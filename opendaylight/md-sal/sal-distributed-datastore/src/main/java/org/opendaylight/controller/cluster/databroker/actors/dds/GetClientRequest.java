@@ -18,7 +18,7 @@ import com.google.common.base.Preconditions;
 final class GetClientRequest {
     private final ActorRef replyTo;
 
-    public GetClientRequest(final ActorRef replyTo) {
+    GetClientRequest(final ActorRef replyTo) {
         this.replyTo = Preconditions.checkNotNull(replyTo);
     }
 

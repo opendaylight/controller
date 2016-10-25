@@ -19,9 +19,6 @@ import com.google.common.util.concurrent.ListenableFuture;
 final class DirectTransactionCommitCohort extends AbstractTransactionCommitCohort {
     private final AbstractProxyTransaction proxy;
 
-    /**
-     * @param clientTransaction
-     */
     DirectTransactionCommitCohort(final AbstractProxyTransaction proxy) {
         this.proxy = Preconditions.checkNotNull(proxy);
     }

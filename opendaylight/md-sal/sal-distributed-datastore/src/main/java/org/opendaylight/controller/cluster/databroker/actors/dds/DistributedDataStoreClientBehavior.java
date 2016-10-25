@@ -29,21 +29,26 @@ import org.slf4j.LoggerFactory;
  * {@link ClientActorBehavior} acting as an intermediary between the backend actors and the DistributedDataStore
  * frontend.
  *
+ * <p>
  * This class is not visible outside of this package because it breaks the actor containment. Services provided to
  * Java world outside of actor containment are captured in {@link DistributedDataStoreClient}.
  *
+ * <p>
  * IMPORTANT: this class breaks actor containment via methods implementing {@link DistributedDataStoreClient} contract.
  *            When touching internal state, be mindful of the execution context from which execution context, Actor
  *            or POJO, is the state being accessed or modified.
  *
+ * <p>
  * THREAD SAFETY: this class must always be kept thread-safe, so that both the Actor System thread and the application
  *                threads can run concurrently. All state transitions must be made in a thread-safe manner. When in
  *                doubt, feel free to synchronize on this object.
  *
+ * <p>
  * PERFORMANCE: this class lies in a performance-critical fast path. All code needs to be concise and efficient, but
  *              performance must not come at the price of correctness. Any optimizations need to be carefully analyzed
  *              for correctness and performance impact.
  *
+ * <p>
  * TRADE-OFFS: part of the functionality runs in application threads without switching contexts, which makes it ideal
  *             for performing work and charging applications for it. That has two positive effects:
  *             - CPU usage is distributed across applications, minimizing work done in the actor thread
@@ -123,6 +128,7 @@ final class DistributedDataStoreClientBehavior extends ClientActorBehavior imple
     //
     //
 
+    @SuppressWarnings("checkstyle:IllegalCatch")
     private static <K, V extends LocalAbortable> V returnIfOperational(final Map<K , V> map, final K key, final V value,
             final Throwable aborted) {
         Verify.verify(map.put(key, value) == null);
