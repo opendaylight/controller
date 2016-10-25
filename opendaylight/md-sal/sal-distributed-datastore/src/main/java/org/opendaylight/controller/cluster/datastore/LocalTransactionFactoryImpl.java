@@ -75,6 +75,7 @@ final class LocalTransactionFactoryImpl extends TransactionReadyPrototype<Transa
     @Override
     public LocalThreePhaseCommitCohort onTransactionReady(@Nonnull DOMStoreWriteTransaction tx,
             @Nullable Exception operationError) {
+        Preconditions.checkArgument(tx instanceof SnapshotBackedWriteTransaction);
         if (operationError != null) {
             return new LocalThreePhaseCommitCohort(actorContext, leader,
                     (SnapshotBackedWriteTransaction<TransactionIdentifier>)tx, operationError);

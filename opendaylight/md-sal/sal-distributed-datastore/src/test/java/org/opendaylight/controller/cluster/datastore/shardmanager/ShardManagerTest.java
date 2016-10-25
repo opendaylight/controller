@@ -2313,7 +2313,7 @@ public class ShardManagerTest extends AbstractActorTest {
 
         AbstractGenericCreator(Class<C> shardManagerClass) {
             this.shardManagerClass = shardManagerClass;
-            cluster(new MockClusterWrapper()).configuration(new MockConfiguration()).waitTillReadyCountdownLatch(ready)
+            cluster(new MockClusterWrapper()).configuration(new MockConfiguration()).waitTillReadyCountDownLatch(ready)
                     .primaryShardInfoCache(new PrimaryShardInfoFutureCache());
         }
 

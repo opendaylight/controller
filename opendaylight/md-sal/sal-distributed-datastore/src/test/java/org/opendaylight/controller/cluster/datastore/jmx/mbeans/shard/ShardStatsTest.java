@@ -26,7 +26,7 @@ public class ShardStatsTest {
     @Before
     public void setUp() throws Exception {
 
-        shardStats = new ShardStats("shard-1", "DataStore");
+        shardStats = new ShardStats("shard-1", "DataStore", null);
         shardStats.registerMBean();
         mbeanServer = ManagementFactory.getPlatformMBeanServer();
         String objectName = AbstractMXBean.BASE_JMX_PREFIX + "type=" + shardStats.getMBeanType() + ",Category="

@@ -18,6 +18,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
 import com.google.common.primitives.UnsignedLong;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.File;
 import java.io.IOException;
 import java.util.AbstractMap.SimpleEntry;
@@ -675,6 +676,8 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         return cohort;
     }
 
+    @SuppressFBWarnings(value = {"RV_RETURN_VALUE_IGNORED", "DB_DUPLICATE_SWITCH_CLAUSES"},
+            justification = "See inline comments below.")
     void checkForExpiredTransactions(final long transactionCommitTimeoutMillis) {
         final long timeout = TimeUnit.MILLISECONDS.toNanos(transactionCommitTimeoutMillis);
         final long now = shard.ticker().read();
@@ -688,6 +691,9 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
                     pendingTransactions.poll().cohort.failedCanCommit(new TimeoutException());
                     break;
                 case CAN_COMMIT_COMPLETE:
+                    // The suppression of the FindBugs "DB_DUPLICATE_SWITCH_CLAUSES" warning pertains to this clause
+                    // whose code is duplicated with PRE_COMMIT_COMPLETE. The clauses aren't combined in case the code
+                    // in PRE_COMMIT_COMPLETE is changed.
                     pendingTransactions.poll().cohort.reportFailure(new TimeoutException());
                     break;
                 case PRE_COMMIT_PENDING:
@@ -724,6 +730,9 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
                 case FAILED:
                 case READY:
                 default:
+                    // The suppression of the FindBugs "RV_RETURN_VALUE_IGNORED" warning pertains to this line. In
+                    // this case, we just want to drop the current entry that expired and thus ignore the return value.
+                    // In fact we really shouldn't hit this case but we handle all enums for completeness.
                     pendingTransactions.poll();
             }
 
@@ -733,6 +742,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         }
     }
 
+    @SuppressFBWarnings(value = "RV_RETURN_VALUE_IGNORED", justification = "See inline comment below.")
     void startAbort(final SimpleShardDataTreeCohort cohort) {
         final Iterator<CommitEntry> it = pendingTransactions.iterator();
         if (!it.hasNext()) {
@@ -746,6 +756,10 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
             if (cohort.getState() != State.COMMIT_PENDING) {
                 LOG.debug("{}: aborted head of queue {} in state {}", logContext, cohort.getIdentifier(),
                     cohort.getIdentifier());
+
+                // The suppression of the FindBugs "RV_RETURN_VALUE_IGNORED" warning pertains to this line. In
+                // this case, we've already obtained the head of the queue above via the Iterator and we just want to
+                // remove it here.
                 pendingTransactions.poll();
                 processNextTransaction();
             } else {

@@ -33,7 +33,7 @@ public final class ReadyLocalTransactionSerializer extends JSerializer {
     public byte[] toBinary(final Object obj) {
         Preconditions.checkArgument(obj instanceof ReadyLocalTransaction, "Unsupported object type %s", obj.getClass());
         final ReadyLocalTransaction readyLocal = (ReadyLocalTransaction) obj;
-        final BatchedModifications batched = new BatchedModifications(readyLocal.getTransactionID(),
+        final BatchedModifications batched = new BatchedModifications(readyLocal.getTransactionId(),
                 readyLocal.getRemoteVersion());
         batched.setDoCommitOnReady(readyLocal.isDoCommitOnReady());
         batched.setTotalMessagesSent(1);

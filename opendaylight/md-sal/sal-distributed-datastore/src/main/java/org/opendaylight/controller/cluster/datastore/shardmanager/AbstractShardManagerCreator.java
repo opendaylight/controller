@@ -20,7 +20,7 @@ public abstract class AbstractShardManagerCreator<T extends AbstractShardManager
     private ClusterWrapper cluster;
     private Configuration configuration;
     private DatastoreContextFactory datastoreContextFactory;
-    private CountDownLatch waitTillReadyCountdownLatch;
+    private CountDownLatch waitTillReadyCountDownLatch;
     private PrimaryShardInfoFutureCache primaryShardInfoCache;
     private DatastoreSnapshot restoreFromSnapshot;
     private volatile boolean sealed;
@@ -68,13 +68,13 @@ public abstract class AbstractShardManagerCreator<T extends AbstractShardManager
         return self();
     }
 
-    CountDownLatch getWaitTillReadyCountdownLatch() {
-        return waitTillReadyCountdownLatch;
+    CountDownLatch getWaitTillReadyCountDownLatch() {
+        return waitTillReadyCountDownLatch;
     }
 
-    public T waitTillReadyCountdownLatch(CountDownLatch newWaitTillReadyCountdownLatch) {
+    public T waitTillReadyCountDownLatch(CountDownLatch newWaitTillReadyCountDownLatch) {
         checkSealed();
-        this.waitTillReadyCountdownLatch = newWaitTillReadyCountdownLatch;
+        this.waitTillReadyCountDownLatch = newWaitTillReadyCountDownLatch;
         return self();
     }
 
@@ -103,7 +103,7 @@ public abstract class AbstractShardManagerCreator<T extends AbstractShardManager
         Preconditions.checkNotNull(cluster, "cluster should not be null");
         Preconditions.checkNotNull(configuration, "configuration should not be null");
         Preconditions.checkNotNull(datastoreContextFactory, "datastoreContextFactory should not be null");
-        Preconditions.checkNotNull(waitTillReadyCountdownLatch, "waitTillReadyCountdownLatch should not be null");
+        Preconditions.checkNotNull(waitTillReadyCountDownLatch, "waitTillReadyCountdownLatch should not be null");
         Preconditions.checkNotNull(primaryShardInfoCache, "primaryShardInfoCache should not be null");
     }
 
