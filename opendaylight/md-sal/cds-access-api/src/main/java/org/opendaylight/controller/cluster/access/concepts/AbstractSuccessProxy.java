@@ -8,7 +8,6 @@
 package org.opendaylight.controller.cluster.access.concepts;
 
 import com.google.common.annotations.Beta;
-import java.io.Externalizable;
 import javax.annotation.Nonnull;
 import org.opendaylight.yangtools.concepts.WritableIdentifier;
 
@@ -21,7 +20,7 @@ import org.opendaylight.yangtools.concepts.WritableIdentifier;
  */
 @Beta
 public abstract class AbstractSuccessProxy<T extends WritableIdentifier, C extends RequestSuccess<T, C>>
-        extends AbstractResponseProxy<T, C> implements Externalizable {
+        extends AbstractResponseProxy<T, C> {
     private static final long serialVersionUID = 1L;
 
     protected AbstractSuccessProxy() {
