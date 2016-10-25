@@ -12,6 +12,7 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.base.Verify;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.Externalizable;
@@ -63,6 +64,9 @@ public final class MemberName implements Comparable<MemberName>, WritableIdentif
 
     private static final long serialVersionUID = 1L;
     private final String name;
+
+    // Suppress the FindBugs warning re: the array elements are non-volatile since we don't access the array elements.
+    @SuppressFBWarnings("VO_VOLATILE_REFERENCE_TO_ARRAY")
     private volatile byte[] serialized;
 
     private MemberName(final String name) {

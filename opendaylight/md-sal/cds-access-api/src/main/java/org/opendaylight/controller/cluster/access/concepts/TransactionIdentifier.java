@@ -63,7 +63,7 @@ public final class TransactionIdentifier implements WritableIdentifier {
     private static final long serialVersionUID = 1L;
     private final LocalHistoryIdentifier historyId;
     private final long transactionId;
-    private transient String shortString;
+    private String shortString;
 
     public TransactionIdentifier(@Nonnull final LocalHistoryIdentifier historyId, final long transactionId) {
         this.historyId = Preconditions.checkNotNull(historyId);

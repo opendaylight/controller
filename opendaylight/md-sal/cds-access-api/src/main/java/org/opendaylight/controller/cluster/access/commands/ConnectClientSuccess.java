@@ -13,6 +13,7 @@ import com.google.common.annotations.Beta;
 import com.google.common.base.MoreObjects.ToStringHelper;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.List;
 import java.util.Optional;
 import javax.annotation.Nonnull;
@@ -32,7 +33,12 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
 public final class ConnectClientSuccess extends RequestSuccess<ClientIdentifier, ConnectClientSuccess> {
     private static final long serialVersionUID = 1L;
 
+    // Suppresses the FindBugs warning about about a non-primitive, non-Serializable field that isn't serialized via
+    // readObject. It apparently isn't smart enough to know that this class implements writeReplace to delegate
+    // serialization to a Proxy class and thus instances of this class aren't serialized.
+    @SuppressFBWarnings("SE_BAD_FIELD")
     private final List<ActorSelection> alternates;
+    @SuppressFBWarnings("SE_BAD_FIELD")
     private final DataTree dataTree;
     private final ActorRef backend;
     private final int maxMessages;
