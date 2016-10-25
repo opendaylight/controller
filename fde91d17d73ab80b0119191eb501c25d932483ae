@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a682502_2dbe1800",
+        "filename": "opendaylight/config/config-persister-impl/src/main/java/org/opendaylight/controller/config/persist/impl/PersisterAggregator.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-10-25T19:08:40Z",
+      "side": 1,
+      "message": "storageAdapterClass.isEmpty()",
+      "range": {
+        "startLine": 104,
+        "startChar": 43,
+        "endLine": 104,
+        "endChar": 73
+      },
+      "revId": "fde91d17d73ab80b0119191eb501c25d932483ae",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
