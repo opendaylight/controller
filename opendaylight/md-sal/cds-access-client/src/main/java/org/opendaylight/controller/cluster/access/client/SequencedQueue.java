@@ -11,6 +11,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Ticker;
 import com.google.common.base.Verify;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.ArrayDeque;
 import java.util.Iterator;
 import java.util.Optional;
@@ -154,8 +155,14 @@ final class SequencedQueue {
         }
 
         // Ready to transmit
-        currentInflight.offer(e);
-        LOG.debug("Enqueued request {} to queue {}", request, this);
+
+        if (currentInflight.offer(e)) {
+            LOG.debug("Enqueued request {} to queue {}", request, this);
+        } else {
+            // This shouldn't happen since the queue has unlimited capacity but check anyway to avoid FindBugs warning
+            // about checking return value.
+            LOG.warn("Fail to enqueued request {} to queue {}", request, this);
+        }
 
         e.retransmit(backend, nextTxSequence(), now);
         if (expectingTimer == null) {
@@ -172,6 +179,7 @@ final class SequencedQueue {
      * - if a matching entry is not found, but it makes sense to keep looking at other queues, return null
      * - if a conflicting entry is encountered, indicating we should ignore this request, return an empty Optional
      */
+    @SuppressFBWarnings("NP_OPTIONAL_RETURN_NULL")
     private static Optional<SequencedQueueEntry> findMatchingEntry(final Queue<SequencedQueueEntry> queue,
             final ResponseEnvelope<?> envelope) {
         // Try to find the request in a queue. Responses may legally come back in a different order, hence we need
