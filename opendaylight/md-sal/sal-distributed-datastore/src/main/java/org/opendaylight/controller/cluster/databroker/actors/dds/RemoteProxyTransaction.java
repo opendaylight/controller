@@ -39,9 +39,11 @@ import org.slf4j.LoggerFactory;
  * An {@link AbstractProxyTransaction} for dispatching a transaction towards a shard leader whose location is currently
  * not known or is known to be not co-located with the client.
  *
+ * <p>
  * It packages operations and sends them via the client actor queue to the shard leader. That queue is responsible for
  * maintaining any submitted operations until the leader is discovered.
  *
+ * <p>
  * This class is not safe to access from multiple application threads, as is usual for transactions. Its internal state
  * transitions based on backend responses are thread-safe.
  *
@@ -193,7 +195,8 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
         }
     }
 
-    private void completeRead(final SettableFuture<Optional<NormalizedNode<?, ?>>> future, final Response<?, ?> response) {
+    private void completeRead(final SettableFuture<Optional<NormalizedNode<?, ?>>> future,
+            final Response<?, ?> response) {
         LOG.debug("Read request completed with {}", response);
 
         if (response instanceof ReadTransactionSuccess) {

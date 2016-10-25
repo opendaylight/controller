@@ -64,5 +64,6 @@ abstract class LeaderLocalDelegateFactory<M, D, I> extends DelegateFactory<M, D,
      * @param hasLeader true if the shard knows about leader ID
      */
     abstract void onLeadershipChange(boolean isLeader, boolean hasLeader);
+
     abstract void onMessage(M message, boolean isLeader, boolean hasLeader);
 }

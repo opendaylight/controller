@@ -15,9 +15,6 @@ import java.util.List;
 final class ClientTransactionCommitCohort extends AbstractTransactionCommitCohort {
     private final List<AbstractProxyTransaction> proxies;
 
-    /**
-     * @param clientTransaction
-     */
     ClientTransactionCommitCohort(final Collection<AbstractProxyTransaction> proxies) {
         this.proxies = ImmutableList.copyOf(proxies);
     }

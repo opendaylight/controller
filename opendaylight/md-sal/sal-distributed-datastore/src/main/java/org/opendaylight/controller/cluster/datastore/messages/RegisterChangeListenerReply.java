@@ -11,7 +11,7 @@ package org.opendaylight.controller.cluster.datastore.messages;
 import akka.actor.ActorPath;
 import akka.actor.ActorRef;
 
-public class RegisterChangeListenerReply{
+public class RegisterChangeListenerReply {
     private final ActorRef listenerRegistration;
 
     public RegisterChangeListenerReply(final ActorRef listenerRegistration) {
