@@ -20,7 +20,7 @@ import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.ClusterWrapper;
 import scala.collection.JavaConversions;
 
-public class MockClusterWrapper implements ClusterWrapper{
+public class MockClusterWrapper implements ClusterWrapper {
 
     private Address selfAddress = new Address("akka.tcp", "test", "127.0.0.1", 2550);
     private final MemberName currentMemberName;
@@ -51,11 +51,11 @@ public class MockClusterWrapper implements ClusterWrapper{
         this.selfAddress = selfAddress;
     }
 
-    public static void sendMemberUp(ActorRef to, String memberName, String address){
+    public static void sendMemberUp(ActorRef to, String memberName, String address) {
         to.tell(createMemberUp(memberName, address), null);
     }
 
-    public static void sendMemberRemoved(ActorRef to, String memberName, String address){
+    public static void sendMemberRemoved(ActorRef to, String memberName, String address) {
         to.tell(createMemberRemoved(memberName, address), null);
     }
 

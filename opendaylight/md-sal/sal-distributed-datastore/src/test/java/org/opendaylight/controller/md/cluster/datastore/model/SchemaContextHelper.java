@@ -32,16 +32,16 @@ public class SchemaContextHelper {
         return SchemaContextHelper.class.getResourceAsStream(yangFileName);
     }
 
-    public static SchemaContext full(){
+    public static SchemaContext full() {
         return select(ODL_DATASTORE_TEST_YANG, PEOPLE_YANG, CARS_YANG);
     }
 
-    public static SchemaContext select(String... schemaFiles){
+    public static SchemaContext select(String... schemaFiles) {
         final CrossSourceStatementReactor.BuildAction reactor = YangInferencePipeline.RFC6020_REACTOR.newBuild();
         final SchemaContext schemaContext;
         List<InputStream> streams = new ArrayList<>();
 
-        for(String schemaFile : schemaFiles){
+        for (String schemaFile : schemaFiles) {
             streams.add(getInputStream(schemaFile));
         }
 

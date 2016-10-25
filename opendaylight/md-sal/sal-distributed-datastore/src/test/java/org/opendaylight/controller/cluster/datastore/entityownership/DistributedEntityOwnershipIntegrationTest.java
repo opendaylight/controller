@@ -21,6 +21,7 @@ import static org.opendaylight.controller.cluster.datastore.entityownership.Abst
 import static org.opendaylight.controller.cluster.datastore.entityownership.DistributedEntityOwnershipService.ENTITY_OWNERSHIP_SHARD_NAME;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.CANDIDATE_NAME_NODE_ID;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.entityPath;
+
 import akka.actor.ActorRef;
 import akka.actor.Status.Failure;
 import akka.actor.Status.Success;
@@ -86,8 +87,8 @@ public class DistributedEntityOwnershipIntegrationTest {
     private static final SchemaContext SCHEMA_CONTEXT = SchemaContextHelper.entityOwners();
 
     private final DatastoreContext.Builder leaderDatastoreContextBuilder =
-            DatastoreContext.newBuilder().shardHeartbeatIntervalInMillis(100).shardElectionTimeoutFactor(5).
-                    shardIsolatedLeaderCheckIntervalInMillis(1000000);
+            DatastoreContext.newBuilder().shardHeartbeatIntervalInMillis(100).shardElectionTimeoutFactor(5)
+                    .shardIsolatedLeaderCheckIntervalInMillis(1000000);
 
     private final DatastoreContext.Builder followerDatastoreContextBuilder =
             DatastoreContext.newBuilder().shardHeartbeatIntervalInMillis(100).shardElectionTimeoutFactor(10000);
@@ -129,17 +130,17 @@ public class DistributedEntityOwnershipIntegrationTest {
     @Test
     public void testFunctionalityWithThreeNodes() throws Exception {
         String name = "test";
-        MemberNode leaderNode = MemberNode.builder(memberNodes).akkaConfig("Member1").testName(name ).
-                moduleShardsConfig(MODULE_SHARDS_CONFIG).schemaContext(SCHEMA_CONTEXT).createOperDatastore(false).
-                datastoreContextBuilder(leaderDatastoreContextBuilder).build();
+        MemberNode leaderNode = MemberNode.builder(memberNodes).akkaConfig("Member1").testName(name)
+                .moduleShardsConfig(MODULE_SHARDS_CONFIG).schemaContext(SCHEMA_CONTEXT).createOperDatastore(false)
+                .datastoreContextBuilder(leaderDatastoreContextBuilder).build();
 
-        MemberNode follower1Node = MemberNode.builder(memberNodes).akkaConfig("Member2").testName(name ).
-                moduleShardsConfig(MODULE_SHARDS_CONFIG).schemaContext(SCHEMA_CONTEXT).createOperDatastore(false).
-                datastoreContextBuilder(followerDatastoreContextBuilder).build();
+        MemberNode follower1Node = MemberNode.builder(memberNodes).akkaConfig("Member2").testName(name)
+                .moduleShardsConfig(MODULE_SHARDS_CONFIG).schemaContext(SCHEMA_CONTEXT).createOperDatastore(false)
+                .datastoreContextBuilder(followerDatastoreContextBuilder).build();
 
-        MemberNode follower2Node = MemberNode.builder(memberNodes).akkaConfig("Member3").testName(name ).
-                moduleShardsConfig(MODULE_SHARDS_CONFIG).schemaContext(SCHEMA_CONTEXT).createOperDatastore(false).
-                datastoreContextBuilder(followerDatastoreContextBuilder).build();
+        MemberNode follower2Node = MemberNode.builder(memberNodes).akkaConfig("Member3").testName(name)
+                .moduleShardsConfig(MODULE_SHARDS_CONFIG).schemaContext(SCHEMA_CONTEXT).createOperDatastore(false)
+                .datastoreContextBuilder(followerDatastoreContextBuilder).build();
 
         DistributedDataStore leaderDistributedDataStore = leaderNode.configDataStore();
 
@@ -147,9 +148,11 @@ public class DistributedEntityOwnershipIntegrationTest {
         follower1Node.configDataStore().waitTillReady();
         follower2Node.configDataStore().waitTillReady();
 
-        DOMEntityOwnershipService leaderEntityOwnershipService = newOwnershipService(leaderDistributedDataStore);
-        DOMEntityOwnershipService follower1EntityOwnershipService = newOwnershipService(follower1Node.configDataStore());
-        DOMEntityOwnershipService follower2EntityOwnershipService = newOwnershipService(follower2Node.configDataStore());
+        final DOMEntityOwnershipService leaderEntityOwnershipService = newOwnershipService(leaderDistributedDataStore);
+        final DOMEntityOwnershipService follower1EntityOwnershipService =
+                newOwnershipService(follower1Node.configDataStore());
+        final DOMEntityOwnershipService follower2EntityOwnershipService =
+                newOwnershipService(follower2Node.configDataStore());
 
         leaderNode.kit().waitUntilLeader(leaderNode.configDataStore().getActorContext(), ENTITY_OWNERSHIP_SHARD_NAME);
 
@@ -186,7 +189,8 @@ public class DistributedEntityOwnershipIntegrationTest {
 
         // Register follower1 candidate for entity2 and verify it becomes owner
 
-        DOMEntityOwnershipCandidateRegistration follower1Entity2Reg = follower1EntityOwnershipService.registerCandidate(ENTITY2);
+        final DOMEntityOwnershipCandidateRegistration follower1Entity2Reg =
+                follower1EntityOwnershipService.registerCandidate(ENTITY2);
         verify(follower1MockListener, timeout(5000)).ownershipChanged(ownershipChange(ENTITY2, false, true, true));
         verify(leaderMockListener, timeout(5000)).ownershipChanged(ownershipChange(ENTITY2, false, false, true));
         reset(leaderMockListener, follower1MockListener);
@@ -248,7 +252,8 @@ public class DistributedEntityOwnershipIntegrationTest {
 
         // Register leader candidate for entity2 and verify it becomes owner
 
-        DOMEntityOwnershipCandidateRegistration leaderEntity2Reg = leaderEntityOwnershipService.registerCandidate(ENTITY2);
+        DOMEntityOwnershipCandidateRegistration leaderEntity2Reg =
+                leaderEntityOwnershipService.registerCandidate(ENTITY2);
         verifyOwner(leaderDistributedDataStore, ENTITY2, "member-1");
         verify(leaderMockListener, timeout(5000)).ownershipChanged(ownershipChange(ENTITY2, false, true, true));
 
@@ -262,21 +267,21 @@ public class DistributedEntityOwnershipIntegrationTest {
 
     @Test
     public void testLeaderEntityOwnersReassignedAfterShutdown() throws Exception {
-        followerDatastoreContextBuilder.shardElectionTimeoutFactor(5).
-                    customRaftPolicyImplementation(DisableElectionsRaftPolicy.class.getName());
+        followerDatastoreContextBuilder.shardElectionTimeoutFactor(5)
+                    .customRaftPolicyImplementation(DisableElectionsRaftPolicy.class.getName());
 
         String name = "test";
-        MemberNode leaderNode = MemberNode.builder(memberNodes).akkaConfig("Member1").testName(name ).
-                moduleShardsConfig(MODULE_SHARDS_CONFIG).schemaContext(SCHEMA_CONTEXT).createOperDatastore(false).
-                datastoreContextBuilder(leaderDatastoreContextBuilder).build();
+        MemberNode leaderNode = MemberNode.builder(memberNodes).akkaConfig("Member1").testName(name)
+                .moduleShardsConfig(MODULE_SHARDS_CONFIG).schemaContext(SCHEMA_CONTEXT).createOperDatastore(false)
+                .datastoreContextBuilder(leaderDatastoreContextBuilder).build();
 
-        MemberNode follower1Node = MemberNode.builder(memberNodes).akkaConfig("Member2").testName(name ).
-                moduleShardsConfig(MODULE_SHARDS_CONFIG).schemaContext(SCHEMA_CONTEXT).createOperDatastore(false).
-                datastoreContextBuilder(followerDatastoreContextBuilder).build();
+        MemberNode follower1Node = MemberNode.builder(memberNodes).akkaConfig("Member2").testName(name)
+                .moduleShardsConfig(MODULE_SHARDS_CONFIG).schemaContext(SCHEMA_CONTEXT).createOperDatastore(false)
+                .datastoreContextBuilder(followerDatastoreContextBuilder).build();
 
-        MemberNode follower2Node = MemberNode.builder(memberNodes).akkaConfig("Member3").testName(name ).
-                moduleShardsConfig(MODULE_SHARDS_CONFIG).schemaContext(SCHEMA_CONTEXT).createOperDatastore(false).
-                datastoreContextBuilder(followerDatastoreContextBuilder).build();
+        MemberNode follower2Node = MemberNode.builder(memberNodes).akkaConfig("Member3").testName(name)
+                .moduleShardsConfig(MODULE_SHARDS_CONFIG).schemaContext(SCHEMA_CONTEXT).createOperDatastore(false)
+                .datastoreContextBuilder(followerDatastoreContextBuilder).build();
 
         DistributedDataStore leaderDistributedDataStore = leaderNode.configDataStore();
 
@@ -284,9 +289,11 @@ public class DistributedEntityOwnershipIntegrationTest {
         follower1Node.configDataStore().waitTillReady();
         follower2Node.configDataStore().waitTillReady();
 
-        DOMEntityOwnershipService leaderEntityOwnershipService = newOwnershipService(leaderDistributedDataStore);
-        DOMEntityOwnershipService follower1EntityOwnershipService = newOwnershipService(follower1Node.configDataStore());
-        DOMEntityOwnershipService follower2EntityOwnershipService = newOwnershipService(follower2Node.configDataStore());
+        final DOMEntityOwnershipService leaderEntityOwnershipService = newOwnershipService(leaderDistributedDataStore);
+        final DOMEntityOwnershipService follower1EntityOwnershipService =
+                newOwnershipService(follower1Node.configDataStore());
+        final DOMEntityOwnershipService follower2EntityOwnershipService =
+                newOwnershipService(follower2Node.configDataStore());
 
         leaderNode.kit().waitUntilLeader(leaderNode.configDataStore().getActorContext(), ENTITY_OWNERSHIP_SHARD_NAME);
 
@@ -319,10 +326,10 @@ public class DistributedEntityOwnershipIntegrationTest {
 
         // Re-enable elections on follower1 so it becomes the leader
 
-        ActorRef follower1Shard = IntegrationTestKit.findLocalShard(follower1Node.configDataStore().
-                getActorContext(), ENTITY_OWNERSHIP_SHARD_NAME);
-        follower1Shard.tell(DatastoreContext.newBuilderFrom(followerDatastoreContextBuilder.build()).
-                customRaftPolicyImplementation(null).build(), ActorRef.noSender());
+        ActorRef follower1Shard = IntegrationTestKit.findLocalShard(follower1Node.configDataStore().getActorContext(),
+                ENTITY_OWNERSHIP_SHARD_NAME);
+        follower1Shard.tell(DatastoreContext.newBuilderFrom(followerDatastoreContextBuilder.build())
+                .customRaftPolicyImplementation(null).build(), ActorRef.noSender());
 
         MemberNode.verifyRaftState(follower1Node.configDataStore(), ENTITY_OWNERSHIP_SHARD_NAME,
             raftState -> assertEquals("Raft state", RaftState.Leader.toString(), raftState.getRaftState()));
@@ -337,29 +344,29 @@ public class DistributedEntityOwnershipIntegrationTest {
 
     @Test
     public void testLeaderAndFollowerEntityOwnersReassignedAfterShutdown() throws Exception {
-        followerDatastoreContextBuilder.shardElectionTimeoutFactor(5).
-                customRaftPolicyImplementation(DisableElectionsRaftPolicy.class.getName());
+        followerDatastoreContextBuilder.shardElectionTimeoutFactor(5)
+                .customRaftPolicyImplementation(DisableElectionsRaftPolicy.class.getName());
 
         String name = "test";
-        MemberNode leaderNode = MemberNode.builder(memberNodes).akkaConfig("Member1").testName(name ).
-                moduleShardsConfig(MODULE_SHARDS_5_NODE_CONFIG).schemaContext(SCHEMA_CONTEXT).createOperDatastore(false).
-                datastoreContextBuilder(leaderDatastoreContextBuilder).build();
+        final MemberNode leaderNode = MemberNode.builder(memberNodes).akkaConfig("Member1").testName(name)
+                .moduleShardsConfig(MODULE_SHARDS_5_NODE_CONFIG).schemaContext(SCHEMA_CONTEXT)
+                .createOperDatastore(false).datastoreContextBuilder(leaderDatastoreContextBuilder).build();
 
-        MemberNode follower1Node = MemberNode.builder(memberNodes).akkaConfig("Member2").testName(name ).
-                moduleShardsConfig(MODULE_SHARDS_5_NODE_CONFIG).schemaContext(SCHEMA_CONTEXT).createOperDatastore(false).
-                datastoreContextBuilder(followerDatastoreContextBuilder).build();
+        final MemberNode follower1Node = MemberNode.builder(memberNodes).akkaConfig("Member2").testName(name)
+                .moduleShardsConfig(MODULE_SHARDS_5_NODE_CONFIG).schemaContext(SCHEMA_CONTEXT)
+                .createOperDatastore(false).datastoreContextBuilder(followerDatastoreContextBuilder).build();
 
-        MemberNode follower2Node = MemberNode.builder(memberNodes).akkaConfig("Member3").testName(name ).
-                moduleShardsConfig(MODULE_SHARDS_5_NODE_CONFIG).schemaContext(SCHEMA_CONTEXT).createOperDatastore(false).
-                datastoreContextBuilder(followerDatastoreContextBuilder).build();
+        final MemberNode follower2Node = MemberNode.builder(memberNodes).akkaConfig("Member3").testName(name)
+                .moduleShardsConfig(MODULE_SHARDS_5_NODE_CONFIG).schemaContext(SCHEMA_CONTEXT)
+                .createOperDatastore(false).datastoreContextBuilder(followerDatastoreContextBuilder).build();
 
-        MemberNode follower3Node = MemberNode.builder(memberNodes).akkaConfig("Member4").testName(name ).
-                moduleShardsConfig(MODULE_SHARDS_5_NODE_CONFIG).schemaContext(SCHEMA_CONTEXT).createOperDatastore(false).
-                datastoreContextBuilder(followerDatastoreContextBuilder).build();
+        final MemberNode follower3Node = MemberNode.builder(memberNodes).akkaConfig("Member4").testName(name)
+                .moduleShardsConfig(MODULE_SHARDS_5_NODE_CONFIG).schemaContext(SCHEMA_CONTEXT)
+                .createOperDatastore(false).datastoreContextBuilder(followerDatastoreContextBuilder).build();
 
-        MemberNode follower4Node = MemberNode.builder(memberNodes).akkaConfig("Member5").testName(name ).
-                moduleShardsConfig(MODULE_SHARDS_5_NODE_CONFIG).schemaContext(SCHEMA_CONTEXT).createOperDatastore(false).
-                datastoreContextBuilder(followerDatastoreContextBuilder).build();
+        final MemberNode follower4Node = MemberNode.builder(memberNodes).akkaConfig("Member5").testName(name)
+                .moduleShardsConfig(MODULE_SHARDS_5_NODE_CONFIG).schemaContext(SCHEMA_CONTEXT)
+                .createOperDatastore(false).datastoreContextBuilder(followerDatastoreContextBuilder).build();
 
         DistributedDataStore leaderDistributedDataStore = leaderNode.configDataStore();
 
@@ -367,10 +374,13 @@ public class DistributedEntityOwnershipIntegrationTest {
         follower1Node.configDataStore().waitTillReady();
         follower2Node.configDataStore().waitTillReady();
 
-        DOMEntityOwnershipService leaderEntityOwnershipService = newOwnershipService(leaderDistributedDataStore);
-        DOMEntityOwnershipService follower1EntityOwnershipService = newOwnershipService(follower1Node.configDataStore());
-        DOMEntityOwnershipService follower2EntityOwnershipService = newOwnershipService(follower2Node.configDataStore());
-        DOMEntityOwnershipService follower3EntityOwnershipService = newOwnershipService(follower3Node.configDataStore());
+        final DOMEntityOwnershipService leaderEntityOwnershipService = newOwnershipService(leaderDistributedDataStore);
+        final DOMEntityOwnershipService follower1EntityOwnershipService =
+                newOwnershipService(follower1Node.configDataStore());
+        final DOMEntityOwnershipService follower2EntityOwnershipService =
+                newOwnershipService(follower2Node.configDataStore());
+        final DOMEntityOwnershipService follower3EntityOwnershipService =
+                newOwnershipService(follower3Node.configDataStore());
         newOwnershipService(follower4Node.configDataStore());
 
         leaderNode.kit().waitUntilLeader(leaderNode.configDataStore().getActorContext(), ENTITY_OWNERSHIP_SHARD_NAME);
@@ -413,13 +423,13 @@ public class DistributedEntityOwnershipIntegrationTest {
 
         // Re-enable elections on follower1 so it becomes the leader
 
-        ActorRef follower1Shard = IntegrationTestKit.findLocalShard(follower1Node.configDataStore().
-                getActorContext(), ENTITY_OWNERSHIP_SHARD_NAME);
-        follower1Shard.tell(DatastoreContext.newBuilderFrom(followerDatastoreContextBuilder.build()).
-                customRaftPolicyImplementation(null).build(), ActorRef.noSender());
+        ActorRef follower1Shard = IntegrationTestKit.findLocalShard(follower1Node.configDataStore().getActorContext(),
+                ENTITY_OWNERSHIP_SHARD_NAME);
+        follower1Shard.tell(DatastoreContext.newBuilderFrom(followerDatastoreContextBuilder.build())
+                .customRaftPolicyImplementation(null).build(), ActorRef.noSender());
 
         MemberNode.verifyRaftState(follower1Node.configDataStore(), ENTITY_OWNERSHIP_SHARD_NAME,
-                raftState -> assertEquals("Raft state", RaftState.Leader.toString(), raftState.getRaftState()));
+            raftState -> assertEquals("Raft state", RaftState.Leader.toString(), raftState.getRaftState()));
 
         // Verify the prior leader's and follower3 entity owners are re-assigned.
 
@@ -430,24 +440,22 @@ public class DistributedEntityOwnershipIntegrationTest {
     }
 
     /**
-     * Reproduces bug <a href="https://bugs.opendaylight.org/show_bug.cgi?id=4554">4554</a>
-     *
-     * @throws CandidateAlreadyRegisteredException
+     * Reproduces bug <a href="https://bugs.opendaylight.org/show_bug.cgi?id=4554">4554</a>.
      */
     @Test
     public void testCloseCandidateRegistrationInQuickSuccession() throws CandidateAlreadyRegisteredException {
         String name = "testCloseCandidateRegistrationInQuickSuccession";
-        MemberNode leaderNode = MemberNode.builder(memberNodes).akkaConfig("Member1").testName(name ).
-                moduleShardsConfig(MODULE_SHARDS_CONFIG).schemaContext(SCHEMA_CONTEXT).createOperDatastore(false).
-                datastoreContextBuilder(leaderDatastoreContextBuilder).build();
+        MemberNode leaderNode = MemberNode.builder(memberNodes).akkaConfig("Member1").testName(name)
+                .moduleShardsConfig(MODULE_SHARDS_CONFIG).schemaContext(SCHEMA_CONTEXT).createOperDatastore(false)
+                .datastoreContextBuilder(leaderDatastoreContextBuilder).build();
 
-        MemberNode follower1Node = MemberNode.builder(memberNodes).akkaConfig("Member2").testName(name ).
-                moduleShardsConfig(MODULE_SHARDS_CONFIG).schemaContext(SCHEMA_CONTEXT).createOperDatastore(false).
-                datastoreContextBuilder(followerDatastoreContextBuilder).build();
+        MemberNode follower1Node = MemberNode.builder(memberNodes).akkaConfig("Member2").testName(name)
+                .moduleShardsConfig(MODULE_SHARDS_CONFIG).schemaContext(SCHEMA_CONTEXT).createOperDatastore(false)
+                .datastoreContextBuilder(followerDatastoreContextBuilder).build();
 
-        MemberNode follower2Node = MemberNode.builder(memberNodes).akkaConfig("Member3").testName(name ).
-                moduleShardsConfig(MODULE_SHARDS_CONFIG).schemaContext(SCHEMA_CONTEXT).createOperDatastore(false).
-                datastoreContextBuilder(followerDatastoreContextBuilder).build();
+        MemberNode follower2Node = MemberNode.builder(memberNodes).akkaConfig("Member3").testName(name)
+                .moduleShardsConfig(MODULE_SHARDS_CONFIG).schemaContext(SCHEMA_CONTEXT).createOperDatastore(false)
+                .datastoreContextBuilder(followerDatastoreContextBuilder).build();
 
         DistributedDataStore leaderDistributedDataStore = leaderNode.configDataStore();
 
@@ -455,9 +463,11 @@ public class DistributedEntityOwnershipIntegrationTest {
         follower1Node.configDataStore().waitTillReady();
         follower2Node.configDataStore().waitTillReady();
 
-        DOMEntityOwnershipService leaderEntityOwnershipService = newOwnershipService(leaderDistributedDataStore);
-        DOMEntityOwnershipService follower1EntityOwnershipService = newOwnershipService(follower1Node.configDataStore());
-        DOMEntityOwnershipService follower2EntityOwnershipService = newOwnershipService(follower2Node.configDataStore());
+        final DOMEntityOwnershipService leaderEntityOwnershipService = newOwnershipService(leaderDistributedDataStore);
+        final DOMEntityOwnershipService follower1EntityOwnershipService =
+                newOwnershipService(follower1Node.configDataStore());
+        final DOMEntityOwnershipService follower2EntityOwnershipService =
+                newOwnershipService(follower2Node.configDataStore());
 
         leaderNode.kit().waitUntilLeader(leaderNode.configDataStore().getActorContext(), ENTITY_OWNERSHIP_SHARD_NAME);
 
@@ -465,17 +475,23 @@ public class DistributedEntityOwnershipIntegrationTest {
         follower1EntityOwnershipService.registerListener(ENTITY_TYPE1, follower1MockListener);
         follower2EntityOwnershipService.registerListener(ENTITY_TYPE1, follower2MockListener);
 
-        final DOMEntityOwnershipCandidateRegistration candidate1 = leaderEntityOwnershipService.registerCandidate(ENTITY1);
+        final DOMEntityOwnershipCandidateRegistration candidate1 =
+                leaderEntityOwnershipService.registerCandidate(ENTITY1);
         verify(leaderMockListener, timeout(5000)).ownershipChanged(ownershipChange(ENTITY1, false, true, true));
 
-        final DOMEntityOwnershipCandidateRegistration candidate2 = follower1EntityOwnershipService.registerCandidate(ENTITY1);
-        final DOMEntityOwnershipCandidateRegistration candidate3 = follower2EntityOwnershipService.registerCandidate(ENTITY1);
+        final DOMEntityOwnershipCandidateRegistration candidate2 =
+                follower1EntityOwnershipService.registerCandidate(ENTITY1);
+        final DOMEntityOwnershipCandidateRegistration candidate3 =
+                follower2EntityOwnershipService.registerCandidate(ENTITY1);
 
         Mockito.reset(leaderMockListener);
 
-        ArgumentCaptor<DOMEntityOwnershipChange> leaderChangeCaptor = ArgumentCaptor.forClass(DOMEntityOwnershipChange.class);
-        ArgumentCaptor<DOMEntityOwnershipChange> follower1ChangeCaptor = ArgumentCaptor.forClass(DOMEntityOwnershipChange.class);
-        ArgumentCaptor<DOMEntityOwnershipChange> follower2ChangeCaptor = ArgumentCaptor.forClass(DOMEntityOwnershipChange.class);
+        ArgumentCaptor<DOMEntityOwnershipChange> leaderChangeCaptor =
+                ArgumentCaptor.forClass(DOMEntityOwnershipChange.class);
+        ArgumentCaptor<DOMEntityOwnershipChange> follower1ChangeCaptor =
+                ArgumentCaptor.forClass(DOMEntityOwnershipChange.class);
+        ArgumentCaptor<DOMEntityOwnershipChange> follower2ChangeCaptor =
+                ArgumentCaptor.forClass(DOMEntityOwnershipChange.class);
         doNothing().when(leaderMockListener).ownershipChanged(leaderChangeCaptor.capture());
         doNothing().when(follower1MockListener).ownershipChanged(follower1ChangeCaptor.capture());
         doNothing().when(follower2MockListener).ownershipChanged(follower2ChangeCaptor.capture());
@@ -485,17 +501,22 @@ public class DistributedEntityOwnershipIntegrationTest {
         candidate3.close();
 
         boolean passed = false;
-        for(int i=0;i<100;i++) {
+        for (int i = 0; i < 100; i++) {
             Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
-            if(!leaderEntityOwnershipService.getOwnershipState(ENTITY1).isPresent() ||
-                    leaderEntityOwnershipService.getOwnershipState(ENTITY1).get() == EntityOwnershipState.NO_OWNER &&
-                    follower1EntityOwnershipService.getOwnershipState(ENTITY1).isPresent() &&
-                    follower1EntityOwnershipService.getOwnershipState(ENTITY1).get() == EntityOwnershipState.NO_OWNER &&
-                    follower2EntityOwnershipService.getOwnershipState(ENTITY1).isPresent() &&
-                    follower2EntityOwnershipService.getOwnershipState(ENTITY1).get() == EntityOwnershipState.NO_OWNER &&
-                    leaderChangeCaptor.getAllValues().size() > 0 && !leaderChangeCaptor.getValue().getState().hasOwner() &&
-                    leaderChangeCaptor.getAllValues().size() > 0 && !follower1ChangeCaptor.getValue().getState().hasOwner() &&
-                    leaderChangeCaptor.getAllValues().size() > 0 && !follower2ChangeCaptor.getValue().getState().hasOwner()) {
+            if (!leaderEntityOwnershipService.getOwnershipState(ENTITY1).isPresent()
+                    || leaderEntityOwnershipService.getOwnershipState(ENTITY1).get() == EntityOwnershipState.NO_OWNER
+                            && follower1EntityOwnershipService.getOwnershipState(ENTITY1).isPresent()
+                            && follower1EntityOwnershipService.getOwnershipState(ENTITY1)
+                                    .get() == EntityOwnershipState.NO_OWNER
+                            && follower2EntityOwnershipService.getOwnershipState(ENTITY1).isPresent()
+                            && follower2EntityOwnershipService.getOwnershipState(ENTITY1)
+                                    .get() == EntityOwnershipState.NO_OWNER
+                            && leaderChangeCaptor.getAllValues().size() > 0
+                            && !leaderChangeCaptor.getValue().getState().hasOwner()
+                            && leaderChangeCaptor.getAllValues().size() > 0
+                            && !follower1ChangeCaptor.getValue().getState().hasOwner()
+                            && leaderChangeCaptor.getAllValues().size() > 0
+                            && !follower2ChangeCaptor.getValue().getState().hasOwner()) {
                 passed = true;
                 break;
             }
@@ -510,21 +531,21 @@ public class DistributedEntityOwnershipIntegrationTest {
      * an AddShardReplica request to join it to an existing leader.
      */
     @Test
-    public void testEntityOwnershipShardBootstrapping() throws Throwable {
+    public void testEntityOwnershipShardBootstrapping() throws Exception {
         String name = "testEntityOwnershipShardBootstrapping";
         String moduleShardsConfig = MODULE_SHARDS_MEMBER_1_CONFIG;
-        MemberNode leaderNode = MemberNode.builder(memberNodes).akkaConfig("Member1").testName(name ).
-                moduleShardsConfig(moduleShardsConfig).schemaContext(SCHEMA_CONTEXT).createOperDatastore(false).
-                datastoreContextBuilder(leaderDatastoreContextBuilder).build();
+        MemberNode leaderNode = MemberNode.builder(memberNodes).akkaConfig("Member1").testName(name)
+                .moduleShardsConfig(moduleShardsConfig).schemaContext(SCHEMA_CONTEXT).createOperDatastore(false)
+                .datastoreContextBuilder(leaderDatastoreContextBuilder).build();
 
         DistributedDataStore leaderDistributedDataStore = leaderNode.configDataStore();
-        DOMEntityOwnershipService leaderEntityOwnershipService = newOwnershipService(leaderDistributedDataStore);
+        final DOMEntityOwnershipService leaderEntityOwnershipService = newOwnershipService(leaderDistributedDataStore);
 
         leaderNode.kit().waitUntilLeader(leaderNode.configDataStore().getActorContext(), ENTITY_OWNERSHIP_SHARD_NAME);
 
-        MemberNode follower1Node = MemberNode.builder(memberNodes).akkaConfig("Member2").testName(name ).
-                moduleShardsConfig(moduleShardsConfig).schemaContext(SCHEMA_CONTEXT).createOperDatastore(false).
-                datastoreContextBuilder(followerDatastoreContextBuilder).build();
+        MemberNode follower1Node = MemberNode.builder(memberNodes).akkaConfig("Member2").testName(name)
+                .moduleShardsConfig(moduleShardsConfig).schemaContext(SCHEMA_CONTEXT).createOperDatastore(false)
+                .datastoreContextBuilder(followerDatastoreContextBuilder).build();
 
         DistributedDataStore follower1DistributedDataStore = follower1Node.configDataStore();
         follower1DistributedDataStore.waitTillReady();
@@ -537,15 +558,18 @@ public class DistributedEntityOwnershipIntegrationTest {
         leaderEntityOwnershipService.registerListener(ENTITY_TYPE1, leaderMockListener);
 
         // Register a candidate for follower1 - should get queued since follower1 has no leader
-        DOMEntityOwnershipCandidateRegistration candidateReg = follower1EntityOwnershipService.registerCandidate(ENTITY1);
+        final DOMEntityOwnershipCandidateRegistration candidateReg =
+                follower1EntityOwnershipService.registerCandidate(ENTITY1);
         Uninterruptibles.sleepUninterruptibly(300, TimeUnit.MILLISECONDS);
         verify(leaderMockListener, never()).ownershipChanged(ownershipChange(ENTITY1));
 
         // Add replica in follower1
         AddShardReplica addReplica = new AddShardReplica(ENTITY_OWNERSHIP_SHARD_NAME);
-        follower1DistributedDataStore.getActorContext().getShardManager().tell(addReplica , follower1Node.kit().getRef());
-        Object reply = follower1Node.kit().expectMsgAnyClassOf(JavaTestKit.duration("5 sec"), Success.class, Failure.class);
-        if(reply instanceof Failure) {
+        follower1DistributedDataStore.getActorContext().getShardManager().tell(addReplica,
+                follower1Node.kit().getRef());
+        Object reply = follower1Node.kit().expectMsgAnyClassOf(JavaTestKit.duration("5 sec"),
+                Success.class, Failure.class);
+        if (reply instanceof Failure) {
             throw new AssertionError("AddShardReplica failed", ((Failure)reply).cause());
         }
 
@@ -561,9 +585,9 @@ public class DistributedEntityOwnershipIntegrationTest {
         Cluster.get(leaderNode.kit().getSystem()).down(Cluster.get(follower1Node.kit().getSystem()).selfAddress());
         follower1Node.cleanup();
 
-        follower1Node = MemberNode.builder(memberNodes).akkaConfig("Member2").testName(name ).
-                moduleShardsConfig(moduleShardsConfig).schemaContext(SCHEMA_CONTEXT).createOperDatastore(false).
-                datastoreContextBuilder(followerDatastoreContextBuilder).build();
+        follower1Node = MemberNode.builder(memberNodes).akkaConfig("Member2").testName(name)
+                .moduleShardsConfig(moduleShardsConfig).schemaContext(SCHEMA_CONTEXT).createOperDatastore(false)
+                .datastoreContextBuilder(followerDatastoreContextBuilder).build();
         follower1EntityOwnershipService = newOwnershipService(follower1Node.configDataStore());
 
         follower1EntityOwnershipService.registerCandidate(ENTITY1);
@@ -580,17 +604,17 @@ public class DistributedEntityOwnershipIntegrationTest {
     @Test
     public void testOwnerSelectedOnRapidUnregisteringAndRegisteringOfCandidates() throws Exception {
         String name = "test";
-        MemberNode leaderNode = MemberNode.builder(memberNodes).akkaConfig("Member1").testName(name ).
-                moduleShardsConfig(MODULE_SHARDS_CONFIG).schemaContext(SCHEMA_CONTEXT).createOperDatastore(false).
-                datastoreContextBuilder(leaderDatastoreContextBuilder).build();
+        MemberNode leaderNode = MemberNode.builder(memberNodes).akkaConfig("Member1").testName(name)
+                .moduleShardsConfig(MODULE_SHARDS_CONFIG).schemaContext(SCHEMA_CONTEXT).createOperDatastore(false)
+                .datastoreContextBuilder(leaderDatastoreContextBuilder).build();
 
-        MemberNode follower1Node = MemberNode.builder(memberNodes).akkaConfig("Member2").testName(name ).
-                moduleShardsConfig(MODULE_SHARDS_CONFIG).schemaContext(SCHEMA_CONTEXT).createOperDatastore(false).
-                datastoreContextBuilder(followerDatastoreContextBuilder).build();
+        MemberNode follower1Node = MemberNode.builder(memberNodes).akkaConfig("Member2").testName(name)
+                .moduleShardsConfig(MODULE_SHARDS_CONFIG).schemaContext(SCHEMA_CONTEXT).createOperDatastore(false)
+                .datastoreContextBuilder(followerDatastoreContextBuilder).build();
 
-        MemberNode follower2Node = MemberNode.builder(memberNodes).akkaConfig("Member3").testName(name ).
-                moduleShardsConfig(MODULE_SHARDS_CONFIG).schemaContext(SCHEMA_CONTEXT).createOperDatastore(false).
-                datastoreContextBuilder(followerDatastoreContextBuilder).build();
+        MemberNode follower2Node = MemberNode.builder(memberNodes).akkaConfig("Member3").testName(name)
+                .moduleShardsConfig(MODULE_SHARDS_CONFIG).schemaContext(SCHEMA_CONTEXT).createOperDatastore(false)
+                .datastoreContextBuilder(followerDatastoreContextBuilder).build();
 
         DistributedDataStore leaderDistributedDataStore = leaderNode.configDataStore();
 
@@ -598,15 +622,17 @@ public class DistributedEntityOwnershipIntegrationTest {
         follower1Node.configDataStore().waitTillReady();
         follower2Node.configDataStore().waitTillReady();
 
-        DOMEntityOwnershipService leaderEntityOwnershipService = newOwnershipService(leaderDistributedDataStore);
-        DOMEntityOwnershipService follower1EntityOwnershipService = newOwnershipService(follower1Node.configDataStore());
-        DOMEntityOwnershipService follower2EntityOwnershipService = newOwnershipService(follower2Node.configDataStore());
+        final DOMEntityOwnershipService leaderEntityOwnershipService = newOwnershipService(leaderDistributedDataStore);
+        final DOMEntityOwnershipService follower1EntityOwnershipService =
+                newOwnershipService(follower1Node.configDataStore());
+        newOwnershipService(follower2Node.configDataStore());
 
         leaderNode.kit().waitUntilLeader(leaderNode.configDataStore().getActorContext(), ENTITY_OWNERSHIP_SHARD_NAME);
 
         // Register leader candidate for entity1 and verify it becomes owner
 
-        DOMEntityOwnershipCandidateRegistration leaderEntity1Reg = leaderEntityOwnershipService.registerCandidate(ENTITY1);
+        DOMEntityOwnershipCandidateRegistration leaderEntity1Reg =
+                leaderEntityOwnershipService.registerCandidate(ENTITY1);
 
         verifyCandidates(leaderDistributedDataStore, ENTITY1, "member-1");
         verifyOwner(leaderDistributedDataStore, ENTITY1, "member-1");
@@ -621,17 +647,17 @@ public class DistributedEntityOwnershipIntegrationTest {
     @Test
     public void testOwnerSelectedOnRapidRegisteringAndUnregisteringOfCandidates() throws Exception {
         String name = "test";
-        MemberNode leaderNode = MemberNode.builder(memberNodes).akkaConfig("Member1").testName(name ).
-                moduleShardsConfig(MODULE_SHARDS_CONFIG).schemaContext(SCHEMA_CONTEXT).createOperDatastore(false).
-                datastoreContextBuilder(leaderDatastoreContextBuilder).build();
+        MemberNode leaderNode = MemberNode.builder(memberNodes).akkaConfig("Member1").testName(name)
+                .moduleShardsConfig(MODULE_SHARDS_CONFIG).schemaContext(SCHEMA_CONTEXT).createOperDatastore(false)
+                .datastoreContextBuilder(leaderDatastoreContextBuilder).build();
 
-        MemberNode follower1Node = MemberNode.builder(memberNodes).akkaConfig("Member2").testName(name ).
-                moduleShardsConfig(MODULE_SHARDS_CONFIG).schemaContext(SCHEMA_CONTEXT).createOperDatastore(false).
-                datastoreContextBuilder(followerDatastoreContextBuilder).build();
+        MemberNode follower1Node = MemberNode.builder(memberNodes).akkaConfig("Member2").testName(name)
+                .moduleShardsConfig(MODULE_SHARDS_CONFIG).schemaContext(SCHEMA_CONTEXT).createOperDatastore(false)
+                .datastoreContextBuilder(followerDatastoreContextBuilder).build();
 
-        MemberNode follower2Node = MemberNode.builder(memberNodes).akkaConfig("Member3").testName(name ).
-                moduleShardsConfig(MODULE_SHARDS_CONFIG).schemaContext(SCHEMA_CONTEXT).createOperDatastore(false).
-                datastoreContextBuilder(followerDatastoreContextBuilder).build();
+        MemberNode follower2Node = MemberNode.builder(memberNodes).akkaConfig("Member3").testName(name)
+                .moduleShardsConfig(MODULE_SHARDS_CONFIG).schemaContext(SCHEMA_CONTEXT).createOperDatastore(false)
+                .datastoreContextBuilder(followerDatastoreContextBuilder).build();
 
         DistributedDataStore leaderDistributedDataStore = leaderNode.configDataStore();
 
@@ -639,15 +665,17 @@ public class DistributedEntityOwnershipIntegrationTest {
         follower1Node.configDataStore().waitTillReady();
         follower2Node.configDataStore().waitTillReady();
 
-        DOMEntityOwnershipService leaderEntityOwnershipService = newOwnershipService(leaderDistributedDataStore);
-        DOMEntityOwnershipService follower1EntityOwnershipService = newOwnershipService(follower1Node.configDataStore());
-        DOMEntityOwnershipService follower2EntityOwnershipService = newOwnershipService(follower2Node.configDataStore());
+        final DOMEntityOwnershipService leaderEntityOwnershipService = newOwnershipService(leaderDistributedDataStore);
+        final DOMEntityOwnershipService follower1EntityOwnershipService =
+                newOwnershipService(follower1Node.configDataStore());
+        newOwnershipService(follower2Node.configDataStore());
 
         leaderNode.kit().waitUntilLeader(leaderNode.configDataStore().getActorContext(), ENTITY_OWNERSHIP_SHARD_NAME);
 
         // Register leader candidate for entity1 and verify it becomes owner
 
-        DOMEntityOwnershipCandidateRegistration leaderEntity1Reg = leaderEntityOwnershipService.registerCandidate(ENTITY1);
+        final DOMEntityOwnershipCandidateRegistration leaderEntity1Reg =
+                leaderEntityOwnershipService.registerCandidate(ENTITY1);
 
         verifyCandidates(leaderDistributedDataStore, ENTITY1, "member-1");
         verifyOwner(leaderDistributedDataStore, ENTITY1, "member-1");
@@ -666,16 +694,18 @@ public class DistributedEntityOwnershipIntegrationTest {
         assertEquals("EntityOwnershipState", expState, state.get());
     }
 
-    private static void verifyCandidates(final DistributedDataStore dataStore, final DOMEntity entity, final String... expCandidates) throws Exception {
+    private static void verifyCandidates(final DistributedDataStore dataStore, final DOMEntity entity,
+            final String... expCandidates) throws Exception {
         AssertionError lastError = null;
         Stopwatch sw = Stopwatch.createStarted();
-        while(sw.elapsed(TimeUnit.MILLISECONDS) <= 10000) {
-            Optional<NormalizedNode<?, ?>> possible = dataStore.newReadOnlyTransaction().read(
-                    entityPath(entity.getType(), entity.getIdentifier()).node(Candidate.QNAME)).get(5, TimeUnit.SECONDS);
+        while (sw.elapsed(TimeUnit.MILLISECONDS) <= 10000) {
+            Optional<NormalizedNode<?, ?>> possible = dataStore.newReadOnlyTransaction()
+                    .read(entityPath(entity.getType(), entity.getIdentifier()).node(Candidate.QNAME))
+                    .get(5, TimeUnit.SECONDS);
             try {
                 assertEquals("Candidates not found for " + entity, true, possible.isPresent());
                 Collection<String> actual = new ArrayList<>();
-                for(MapEntryNode candidate: ((MapNode)possible.get()).getValue()) {
+                for (MapEntryNode candidate: ((MapNode)possible.get()).getValue()) {
                     actual.add(candidate.getChild(CANDIDATE_NAME_NODE_ID).get().getValue().toString());
                 }
 
@@ -690,14 +720,15 @@ public class DistributedEntityOwnershipIntegrationTest {
         throw lastError;
     }
 
-    private static void verifyOwner(final DistributedDataStore dataStore, final DOMEntity entity, final String expOwner) {
-        AbstractEntityOwnershipTest.verifyOwner(expOwner, entity.getType(), entity.getIdentifier(),
-                path -> {
-                    try {
-                        return dataStore.newReadOnlyTransaction().read(path).get(5, TimeUnit.SECONDS).get();
-                    } catch (Exception e) {
-                        return null;
-                    }
-                });
+    @SuppressWarnings("checkstyle:IllegalCatch")
+    private static void verifyOwner(final DistributedDataStore dataStore, final DOMEntity entity,
+            final String expOwner) {
+        AbstractEntityOwnershipTest.verifyOwner(expOwner, entity.getType(), entity.getIdentifier(), path -> {
+            try {
+                return dataStore.newReadOnlyTransaction().read(path).get(5, TimeUnit.SECONDS).get();
+            } catch (Exception e) {
+                return null;
+            }
+        });
     }
 }

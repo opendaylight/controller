@@ -19,13 +19,14 @@ import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEF
 import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_SHARD_ELECTION_TIMEOUT_FACTOR;
 import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_SHARD_INITIALIZATION_TIMEOUT;
 import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_SHARD_LEADER_ELECTION_TIMEOUT;
+import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_SHARD_SNAPSHOT_CHUNK_SIZE;
 import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_SHARD_SNAPSHOT_DATA_THRESHOLD_PERCENTAGE;
 import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_SHARD_TRANSACTION_IDLE_TIMEOUT;
 import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_SHARD_TX_COMMIT_QUEUE_CAPACITY;
 import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_SHARD_TX_COMMIT_TIMEOUT_IN_SECONDS;
 import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_SNAPSHOT_BATCH_COUNT;
 import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_TX_CREATION_INITIAL_RATE_LIMIT;
-import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_SHARD_SNAPSHOT_CHUNK_SIZE;
+
 import java.util.concurrent.TimeUnit;
 import org.junit.Assert;
 import org.junit.Test;
@@ -40,9 +41,11 @@ public class DatastoreContextTest {
         assertEquals(DEFAULT_SHARD_TRANSACTION_IDLE_TIMEOUT, context.getShardTransactionIdleTimeout());
         assertEquals(DEFAULT_OPERATION_TIMEOUT_IN_MS, context.getOperationTimeoutInMillis());
         assertEquals(DEFAULT_SHARD_TX_COMMIT_TIMEOUT_IN_SECONDS, context.getShardTransactionCommitTimeoutInSeconds());
-        assertEquals(DEFAULT_JOURNAL_RECOVERY_BATCH_SIZE, context.getShardRaftConfig().getJournalRecoveryLogBatchSize());
+        assertEquals(DEFAULT_JOURNAL_RECOVERY_BATCH_SIZE,
+                context.getShardRaftConfig().getJournalRecoveryLogBatchSize());
         assertEquals(DEFAULT_SNAPSHOT_BATCH_COUNT, context.getShardRaftConfig().getSnapshotBatchCount());
-        assertEquals(DEFAULT_HEARTBEAT_INTERVAL_IN_MILLIS, context.getShardRaftConfig().getHeartBeatInterval().length());
+        assertEquals(DEFAULT_HEARTBEAT_INTERVAL_IN_MILLIS,
+                context.getShardRaftConfig().getHeartBeatInterval().length());
         assertEquals(DEFAULT_SHARD_TX_COMMIT_QUEUE_CAPACITY, context.getShardTransactionCommitQueueCapacity());
         assertEquals(DEFAULT_SHARD_INITIALIZATION_TIMEOUT.duration().toMillis(),
                 context.getShardInitializationTimeout().duration().toMillis());
@@ -50,11 +53,14 @@ public class DatastoreContextTest {
                 context.getShardLeaderElectionTimeout().duration().toMillis());
         assertEquals(DEFAULT_PERSISTENT, context.isPersistent());
         assertEquals(DEFAULT_CONFIGURATION_READER, context.getConfigurationReader());
-        assertEquals(DEFAULT_ISOLATED_LEADER_CHECK_INTERVAL_IN_MILLIS, context.getShardRaftConfig().getIsolatedCheckIntervalInMillis());
-        assertEquals(DEFAULT_SHARD_SNAPSHOT_DATA_THRESHOLD_PERCENTAGE, context.getShardRaftConfig().getSnapshotDataThresholdPercentage());
+        assertEquals(DEFAULT_ISOLATED_LEADER_CHECK_INTERVAL_IN_MILLIS,
+                context.getShardRaftConfig().getIsolatedCheckIntervalInMillis());
+        assertEquals(DEFAULT_SHARD_SNAPSHOT_DATA_THRESHOLD_PERCENTAGE,
+                context.getShardRaftConfig().getSnapshotDataThresholdPercentage());
         assertEquals(DEFAULT_SHARD_ELECTION_TIMEOUT_FACTOR, context.getShardRaftConfig().getElectionTimeoutFactor());
         assertEquals(DEFAULT_TX_CREATION_INITIAL_RATE_LIMIT, context.getTransactionCreationInitialRateLimit());
-        assertEquals(DatastoreContext.DEFAULT_SHARD_BATCHED_MODIFICATION_COUNT, context.getShardBatchedModificationCount());
+        assertEquals(DatastoreContext.DEFAULT_SHARD_BATCHED_MODIFICATION_COUNT,
+                context.getShardBatchedModificationCount());
         assertEquals(InMemoryDOMDataStoreConfigProperties.DEFAULT_MAX_DATA_CHANGE_EXECUTOR_POOL_SIZE,
                 context.getDataStoreProperties().getMaxDataChangeExecutorPoolSize());
         assertEquals(InMemoryDOMDataStoreConfigProperties.DEFAULT_MAX_DATA_CHANGE_EXECUTOR_QUEUE_SIZE,
@@ -78,8 +84,8 @@ public class DatastoreContextTest {
         builder.shardSnapshotBatchCount(DEFAULT_SNAPSHOT_BATCH_COUNT + 1);
         builder.shardHeartbeatIntervalInMillis(DEFAULT_HEARTBEAT_INTERVAL_IN_MILLIS + 1);
         builder.shardTransactionCommitQueueCapacity(DEFAULT_SHARD_TX_COMMIT_QUEUE_CAPACITY + 1);
-        builder.shardInitializationTimeout(DEFAULT_SHARD_INITIALIZATION_TIMEOUT.
-                duration().toMillis() + 1, TimeUnit.MILLISECONDS);
+        builder.shardInitializationTimeout(DEFAULT_SHARD_INITIALIZATION_TIMEOUT
+                .duration().toMillis() + 1, TimeUnit.MILLISECONDS);
         builder.shardInitializationTimeout(DEFAULT_SHARD_INITIALIZATION_TIMEOUT.duration().toMillis() + 1,
                 TimeUnit.MILLISECONDS);
         builder.shardLeaderElectionTimeout(DEFAULT_SHARD_LEADER_ELECTION_TIMEOUT.duration().toMillis() + 1,
@@ -98,7 +104,7 @@ public class DatastoreContextTest {
                 InMemoryDOMDataStoreConfigProperties.DEFAULT_MAX_DATA_CHANGE_LISTENER_QUEUE_SIZE + 1);
         builder.maxShardDataStoreExecutorQueueSize(
                 InMemoryDOMDataStoreConfigProperties.DEFAULT_MAX_DATA_STORE_EXECUTOR_QUEUE_SIZE + 1);
-        builder.shardSnapshotChunkSize(DEFAULT_SHARD_SNAPSHOT_CHUNK_SIZE+1);
+        builder.shardSnapshotChunkSize(DEFAULT_SHARD_SNAPSHOT_CHUNK_SIZE + 1);
 
         DatastoreContext context = builder.build();
 
@@ -136,7 +142,8 @@ public class DatastoreContextTest {
                 context.getShardRaftConfig().getIsolatedCheckIntervalInMillis());
         assertEquals(DEFAULT_SHARD_SNAPSHOT_DATA_THRESHOLD_PERCENTAGE + 1,
                 context.getShardRaftConfig().getSnapshotDataThresholdPercentage());
-        assertEquals(DEFAULT_SHARD_ELECTION_TIMEOUT_FACTOR + 1, context.getShardRaftConfig().getElectionTimeoutFactor());
+        assertEquals(DEFAULT_SHARD_ELECTION_TIMEOUT_FACTOR + 1,
+                context.getShardRaftConfig().getElectionTimeoutFactor());
         assertEquals(DEFAULT_TX_CREATION_INITIAL_RATE_LIMIT + 1, context.getTransactionCreationInitialRateLimit());
         assertEquals(DatastoreContext.DEFAULT_SHARD_BATCHED_MODIFICATION_COUNT + 1,
                 context.getShardBatchedModificationCount());

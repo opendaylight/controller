@@ -13,6 +13,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doReturn;
 import static org.opendaylight.controller.cluster.datastore.DataStoreVersions.CURRENT_VERSION;
+
 import akka.actor.ActorSelection;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
@@ -22,7 +23,7 @@ import akka.testkit.TestActorRef;
 import com.codahale.metrics.Snapshot;
 import com.codahale.metrics.Timer;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Supplier;
+import com.google.common.base.Throwables;
 import com.google.common.util.concurrent.ListenableFuture;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -78,22 +79,22 @@ public class ThreePhaseCommitCohortProxyTest extends AbstractActorTest {
         MockitoAnnotations.initMocks(this);
 
         actorContext = new ActorContext(getSystem(), actorFactory.createActor(Props.create(DoNothingActor.class)),
-                new MockClusterWrapper(), new MockConfiguration(),
-                DatastoreContext.newBuilder().build(), new PrimaryShardInfoFutureCache()) {
-                    @Override
-                    public Timer getOperationTimer(String operationName) {
-                        return commitTimer;
-                    }
+                new MockClusterWrapper(), new MockConfiguration(), DatastoreContext.newBuilder().build(),
+                new PrimaryShardInfoFutureCache()) {
+            @Override
+            public Timer getOperationTimer(String operationName) {
+                return commitTimer;
+            }
 
-                    @Override
-                    public double getTxCreationLimit() {
-                        return 10.0;
-                    }
-                };
+            @Override
+            public double getTxCreationLimit() {
+                return 10.0;
+            }
+        };
 
         doReturn(commitTimerContext).when(commitTimer).time();
         doReturn(commitSnapshot).when(commitTimer).getSnapshot();
-        for(int i=1;i<11;i++){
+        for (int i = 1; i < 11; i++) {
             // Keep on increasing the amount of time it takes to complete transaction for each tenth of a
             // percentile. Essentially this would be 1ms for the 10th percentile, 2ms for 20th percentile and so on.
             doReturn(TimeUnit.MILLISECONDS.toNanos(i) * 1D).when(commitSnapshot).getValue(i * 0.1);
@@ -148,7 +149,7 @@ public class ThreePhaseCommitCohortProxyTest extends AbstractActorTest {
     }
 
     @Test(expected = TestException.class)
-    public void testCanCommitWithExceptionFailure() throws Throwable {
+    public void testCanCommitWithExceptionFailure() throws Exception {
         ThreePhaseCommitCohortProxy proxy = new ThreePhaseCommitCohortProxy(actorContext, Arrays.asList(
                 newCohortInfo(new CohortActor.Builder(tx).expectCanCommit(new TestException()))), tx);
 
@@ -156,7 +157,7 @@ public class ThreePhaseCommitCohortProxyTest extends AbstractActorTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testCanCommitWithInvalidResponseType() throws Throwable {
+    public void testCanCommitWithInvalidResponseType() throws Exception {
         ThreePhaseCommitCohortProxy proxy = new ThreePhaseCommitCohortProxy(actorContext, Arrays.asList(
                 newCohortInfo(new CohortActor.Builder(tx).expectCanCommit("invalid"))), tx);
 
@@ -164,7 +165,7 @@ public class ThreePhaseCommitCohortProxyTest extends AbstractActorTest {
     }
 
     @Test(expected = TestException.class)
-    public void testCanCommitWithFailedCohortFuture() throws Throwable {
+    public void testCanCommitWithFailedCohortFuture() throws Exception {
         List<CohortInfo> cohorts = Arrays.asList(
                 newCohortInfo(new CohortActor.Builder(tx)),
                 newCohortInfoWithFailedFuture(new TestException()),
@@ -177,12 +178,12 @@ public class ThreePhaseCommitCohortProxyTest extends AbstractActorTest {
     @Test
     public void testAllThreePhasesSuccessful() throws Exception {
         List<CohortInfo> cohorts = Arrays.asList(
-                newCohortInfo(new CohortActor.Builder(tx).
-                        expectCanCommit(CanCommitTransactionReply.yes(CURRENT_VERSION)).
-                        expectCommit(CommitTransactionReply.instance(CURRENT_VERSION))),
-                newCohortInfo(new CohortActor.Builder(tx).
-                        expectCanCommit(CanCommitTransactionReply.yes(CURRENT_VERSION)).
-                        expectCommit(CommitTransactionReply.instance(CURRENT_VERSION))));
+                newCohortInfo(
+                        new CohortActor.Builder(tx).expectCanCommit(CanCommitTransactionReply.yes(CURRENT_VERSION))
+                                .expectCommit(CommitTransactionReply.instance(CURRENT_VERSION))),
+                newCohortInfo(
+                        new CohortActor.Builder(tx).expectCanCommit(CanCommitTransactionReply.yes(CURRENT_VERSION))
+                                .expectCommit(CommitTransactionReply.instance(CURRENT_VERSION))));
         ThreePhaseCommitCohortProxy proxy = new ThreePhaseCommitCohortProxy(actorContext, cohorts, tx);
 
         verifyCanCommit(proxy.canCommit(), true);
@@ -192,14 +193,14 @@ public class ThreePhaseCommitCohortProxyTest extends AbstractActorTest {
     }
 
     @Test(expected = TestException.class)
-    public void testCommitWithExceptionFailure() throws Throwable {
+    public void testCommitWithExceptionFailure() throws Exception {
         List<CohortInfo> cohorts = Arrays.asList(
-                newCohortInfo(new CohortActor.Builder(tx).
-                        expectCanCommit(CanCommitTransactionReply.yes(CURRENT_VERSION)).
-                        expectCommit(CommitTransactionReply.instance(CURRENT_VERSION))),
-                newCohortInfo(new CohortActor.Builder(tx).
-                        expectCanCommit(CanCommitTransactionReply.yes(CURRENT_VERSION)).
-                        expectCommit(new TestException())));
+                newCohortInfo(
+                        new CohortActor.Builder(tx).expectCanCommit(CanCommitTransactionReply.yes(CURRENT_VERSION))
+                                .expectCommit(CommitTransactionReply.instance(CURRENT_VERSION))),
+                newCohortInfo(
+                        new CohortActor.Builder(tx).expectCanCommit(CanCommitTransactionReply.yes(CURRENT_VERSION))
+                                .expectCommit(new TestException())));
         ThreePhaseCommitCohortProxy proxy = new ThreePhaseCommitCohortProxy(actorContext, cohorts, tx);
 
         verifyCanCommit(proxy.canCommit(), true);
@@ -208,11 +209,10 @@ public class ThreePhaseCommitCohortProxyTest extends AbstractActorTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testCommitWithInvalidResponseType() throws Throwable {
-        ThreePhaseCommitCohortProxy proxy = new ThreePhaseCommitCohortProxy(actorContext, Arrays.asList(
-                newCohortInfo(new CohortActor.Builder(tx).
-                        expectCanCommit(CanCommitTransactionReply.yes(CURRENT_VERSION)).
-                        expectCommit("invalid"))), tx);
+    public void testCommitWithInvalidResponseType() throws Exception {
+        ThreePhaseCommitCohortProxy proxy = new ThreePhaseCommitCohortProxy(actorContext,
+                Arrays.asList(newCohortInfo(new CohortActor.Builder(tx)
+                        .expectCanCommit(CanCommitTransactionReply.yes(CURRENT_VERSION)).expectCommit("invalid"))), tx);
 
         verifyCanCommit(proxy.canCommit(), true);
         verifySuccessfulFuture(proxy.preCommit());
@@ -240,7 +240,7 @@ public class ThreePhaseCommitCohortProxyTest extends AbstractActorTest {
     }
 
     @Test
-    public void testAbortWithFailedCohortFuture() throws Throwable {
+    public void testAbortWithFailedCohortFuture() throws Exception {
         List<CohortInfo> cohorts = Arrays.asList(
                 newCohortInfoWithFailedFuture(new TestException()), newCohortInfo(new CohortActor.Builder(tx)));
         ThreePhaseCommitCohortProxy proxy = new ThreePhaseCommitCohortProxy(actorContext, cohorts, tx);
@@ -260,52 +260,44 @@ public class ThreePhaseCommitCohortProxyTest extends AbstractActorTest {
         verifyCohortActors();
     }
 
-    private void propagateExecutionExceptionCause(ListenableFuture<?> future) throws Throwable {
+    private void propagateExecutionExceptionCause(ListenableFuture<?> future) throws Exception {
 
         try {
             future.get(5, TimeUnit.SECONDS);
             fail("Expected ExecutionException");
-        } catch(ExecutionException e) {
+        } catch (ExecutionException e) {
             verifyCohortActors();
-            throw e.getCause();
+            Throwables.propagateIfInstanceOf(e.getCause(), Exception.class);
+            Throwables.propagate(e.getCause());
         }
     }
 
     private CohortInfo newCohortInfo(CohortActor.Builder builder, final short version) {
-        TestActorRef<CohortActor> actor = actorFactory.createTestActor(builder.props().
-                withDispatcher(Dispatchers.DefaultDispatcherId()), actorFactory.generateActorId("cohort"));
+        TestActorRef<CohortActor> actor = actorFactory.createTestActor(builder.props()
+                .withDispatcher(Dispatchers.DefaultDispatcherId()), actorFactory.generateActorId("cohort"));
         cohortActors.add(actor);
-        return new CohortInfo(Futures.successful(getSystem().actorSelection(actor.path())), new Supplier<Short>() {
-            @Override
-            public Short get() {
-                return version;
-            }
-        });
-    }
-
-    private static CohortInfo newCohortInfoWithFailedFuture(Exception failure) {
-        return new CohortInfo(Futures.<ActorSelection>failed(failure), new Supplier<Short>() {
-            @Override
-            public Short get() {
-                return CURRENT_VERSION;
-            }
-        });
+        return new CohortInfo(Futures.successful(getSystem().actorSelection(actor.path())), () -> version);
     }
 
     private CohortInfo newCohortInfo(CohortActor.Builder builder) {
         return newCohortInfo(builder, CURRENT_VERSION);
     }
 
+    private static CohortInfo newCohortInfoWithFailedFuture(Exception failure) {
+        return new CohortInfo(Futures.<ActorSelection>failed(failure), () -> CURRENT_VERSION);
+    }
+
     private void verifyCohortActors() {
-        for(TestActorRef<CohortActor> actor: cohortActors) {
+        for (TestActorRef<CohortActor> actor: cohortActors) {
             actor.underlyingActor().verify();
         }
     }
 
+    @SuppressWarnings("checkstyle:IllegalCatch")
     private <T> T verifySuccessfulFuture(ListenableFuture<T> future) throws Exception {
         try {
             return future.get(5, TimeUnit.SECONDS);
-        } catch(Exception e) {
+        } catch (Exception e) {
             verifyCohortActors();
             throw e;
         }
@@ -329,15 +321,15 @@ public class ThreePhaseCommitCohortProxyTest extends AbstractActorTest {
 
         @Override
         public void onReceive(Object message) {
-            if(CanCommitTransaction.isSerializedType(message)) {
+            if (CanCommitTransaction.isSerializedType(message)) {
                 canCommitCount.incrementAndGet();
                 onMessage("CanCommitTransaction", message, CanCommitTransaction.fromSerializable(message),
                         builder.expCanCommitType, builder.canCommitReply);
-            } else if(CommitTransaction.isSerializedType(message)) {
+            } else if (CommitTransaction.isSerializedType(message)) {
                 commitCount.incrementAndGet();
                 onMessage("CommitTransaction", message, CommitTransaction.fromSerializable(message),
                         builder.expCommitType, builder.commitReply);
-            } else if(AbortTransaction.isSerializedType(message)) {
+            } else if (AbortTransaction.isSerializedType(message)) {
                 abortCount.incrementAndGet();
                 onMessage("AbortTransaction", message, AbortTransaction.fromSerializable(message),
                         builder.expAbortType, builder.abortReply);
@@ -353,30 +345,30 @@ public class ThreePhaseCommitCohortProxyTest extends AbstractActorTest {
                 assertEquals(name + " type", expType, rawMessage.getClass());
                 assertEquals(name + " transactionId", builder.transactionId, actualMessage.getTransactionID());
 
-                if(reply instanceof Throwable) {
+                if (reply instanceof Throwable) {
                     getSender().tell(new akka.actor.Status.Failure((Throwable)reply), self());
                 } else {
                     getSender().tell(reply, self());
                 }
-            } catch(AssertionError e) {
+            } catch (AssertionError e) {
                 assertionError = e;
             }
         }
 
         void verify() {
-            if(assertionError != null) {
+            if (assertionError != null) {
                 throw assertionError;
             }
 
-            if(builder.expCanCommitType != null) {
+            if (builder.expCanCommitType != null) {
                 assertEquals("CanCommitTransaction count", 1, canCommitCount.get());
             }
 
-            if(builder.expCommitType != null) {
+            if (builder.expCommitType != null) {
                 assertEquals("CommitTransaction count", 1, commitCount.get());
             }
 
-            if(builder.expAbortType != null) {
+            if (builder.expAbortType != null) {
                 assertEquals("AbortTransaction count", 1, abortCount.get());
             }
         }
@@ -394,34 +386,34 @@ public class ThreePhaseCommitCohortProxyTest extends AbstractActorTest {
                 this.transactionId = Preconditions.checkNotNull(transactionId);
             }
 
-            Builder expectCanCommit(Class<?> expCanCommitType, Object canCommitReply) {
-                this.expCanCommitType = expCanCommitType;
-                this.canCommitReply = canCommitReply;
+            Builder expectCanCommit(Class<?> newExpCanCommitType, Object newCanCommitReply) {
+                this.expCanCommitType = newExpCanCommitType;
+                this.canCommitReply = newCanCommitReply;
                 return this;
             }
 
-            Builder expectCanCommit(Object canCommitReply) {
-                return expectCanCommit(CanCommitTransaction.class, canCommitReply);
+            Builder expectCanCommit(Object newCanCommitReply) {
+                return expectCanCommit(CanCommitTransaction.class, newCanCommitReply);
             }
 
-            Builder expectCommit(Class<?> expCommitType, Object commitReply) {
-                this.expCommitType = expCommitType;
-                this.commitReply = commitReply;
+            Builder expectCommit(Class<?> newExpCommitType, Object newCommitReply) {
+                this.expCommitType = newExpCommitType;
+                this.commitReply = newCommitReply;
                 return this;
             }
 
-            Builder expectCommit(Object commitReply) {
-                return expectCommit(CommitTransaction.class, commitReply);
+            Builder expectCommit(Object newCommitReply) {
+                return expectCommit(CommitTransaction.class, newCommitReply);
             }
 
-            Builder expectAbort(Class<?> expAbortType, Object abortReply) {
-                this.expAbortType = expAbortType;
-                this.abortReply = abortReply;
+            Builder expectAbort(Class<?> newExpAbortType, Object newAbortReply) {
+                this.expAbortType = newExpAbortType;
+                this.abortReply = newAbortReply;
                 return this;
             }
 
-            Builder expectAbort(Object abortReply) {
-                return expectAbort(AbortTransaction.class, abortReply);
+            Builder expectAbort(Object newAbortReply) {
+                return expectAbort(AbortTransaction.class, newAbortReply);
             }
 
             Props props() {

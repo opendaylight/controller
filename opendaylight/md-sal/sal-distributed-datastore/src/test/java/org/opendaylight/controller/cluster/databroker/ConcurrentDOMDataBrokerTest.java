@@ -19,6 +19,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+
+import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.FutureCallback;
@@ -42,7 +44,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InOrder;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
 import org.opendaylight.controller.md.sal.common.api.data.DataStoreUnavailableException;
@@ -84,7 +85,8 @@ public class ConcurrentDOMDataBrokerTest {
         DOMStore store = new InMemoryDOMDataStore("OPER",
             MoreExecutors.newDirectExecutorService());
 
-        coordinator = new ConcurrentDOMDataBroker(ImmutableMap.of(LogicalDatastoreType.OPERATIONAL, store), futureExecutor);
+        coordinator = new ConcurrentDOMDataBroker(ImmutableMap.of(LogicalDatastoreType.OPERATIONAL, store),
+                futureExecutor);
     }
 
     @After
@@ -93,36 +95,33 @@ public class ConcurrentDOMDataBrokerTest {
     }
 
     @Test
-    public void testSuccessfulSubmitAsync() throws Throwable {
+    public void testSuccessfulSubmitAsync() throws Exception {
         testSuccessfulSubmit(true);
     }
 
     @Test
-    public void testSuccessfulSubmitSync() throws Throwable {
+    public void testSuccessfulSubmitSync() throws Exception {
         testSuccessfulSubmit(false);
     }
 
-    private void testSuccessfulSubmit(final boolean doAsync) throws Throwable {
+    private void testSuccessfulSubmit(final boolean doAsync) throws InterruptedException {
         final CountDownLatch asyncCanCommitContinue = new CountDownLatch(1);
-        Answer<ListenableFuture<Boolean>> asyncCanCommit = new Answer<ListenableFuture<Boolean>>() {
-            @Override
-            public ListenableFuture<Boolean> answer(final InvocationOnMock invocation) {
-                final SettableFuture<Boolean> future = SettableFuture.create();
-                if(doAsync) {
-                    new Thread() {
-                        @Override
-                        public void run() {
-                            Uninterruptibles.awaitUninterruptibly(asyncCanCommitContinue,
-                                    10, TimeUnit.SECONDS);
-                            future.set(true);
-                        }
-                    }.start();
-                } else {
-                    future.set(true);
-                }
-
-                return future;
+        Answer<ListenableFuture<Boolean>> asyncCanCommit = invocation -> {
+            final SettableFuture<Boolean> future = SettableFuture.create();
+            if (doAsync) {
+                new Thread() {
+                    @Override
+                    public void run() {
+                        Uninterruptibles.awaitUninterruptibly(asyncCanCommitContinue,
+                                10, TimeUnit.SECONDS);
+                        future.set(true);
+                    }
+                }.start();
+            } else {
+                future.set(true);
             }
+
+            return future;
         };
 
         doAnswer(asyncCanCommit).when(mockCohort1).canCommit();
@@ -145,8 +144,8 @@ public class ConcurrentDOMDataBrokerTest {
             }
 
             @Override
-            public void onFailure(final Throwable t) {
-                caughtEx.set(t);
+            public void onFailure(final Throwable failure) {
+                caughtEx.set(failure);
                 doneLatch.countDown();
             }
         });
@@ -155,8 +154,8 @@ public class ConcurrentDOMDataBrokerTest {
 
         assertEquals("Submit complete", true, doneLatch.await(5, TimeUnit.SECONDS));
 
-        if(caughtEx.get() != null) {
-            throw caughtEx.get();
+        if (caughtEx.get() != null) {
+            Throwables.propagate(caughtEx.get());
         }
 
         assertEquals("Task count", doAsync ? 1 : 0, futureExecutor.getTaskCount());
@@ -195,12 +194,12 @@ public class ConcurrentDOMDataBrokerTest {
             future.checkedGet(5, TimeUnit.SECONDS);
             fail("Expected TransactionCommitFailedException");
         } catch (TransactionCommitFailedException e) {
-            if(expCause != null) {
+            if (expCause != null) {
                 assertSame("Expected cause", expCause.getClass(), e.getCause().getClass());
             }
 
             InOrder inOrder = inOrder((Object[])mockCohorts);
-            for(DOMStoreThreePhaseCommitCohort c: mockCohorts) {
+            for (DOMStoreThreePhaseCommitCohort c: mockCohorts) {
                 inOrder.verify(c).abort();
             }
         } catch (TimeoutException e) {
@@ -251,8 +250,8 @@ public class ConcurrentDOMDataBrokerTest {
 
         DOMStoreThreePhaseCommitCohort mockCohort3 = mock(DOMStoreThreePhaseCommitCohort.class);
         doReturn(Futures.immediateFuture(true)).when(mockCohort3).canCommit();
-        doReturn(Futures.immediateFailedFuture(new IllegalStateException("mock2"))).
-                when(mockCohort3).preCommit();
+        doReturn(Futures.immediateFailedFuture(new IllegalStateException("mock2")))
+                .when(mockCohort3).preCommit();
         doReturn(Futures.immediateFuture(null)).when(mockCohort3).abort();
 
         CheckedFuture<Void, TransactionCommitFailedException> future = coordinator.submit(
@@ -277,8 +276,8 @@ public class ConcurrentDOMDataBrokerTest {
         DOMStoreThreePhaseCommitCohort mockCohort3 = mock(DOMStoreThreePhaseCommitCohort.class);
         doReturn(Futures.immediateFuture(true)).when(mockCohort3).canCommit();
         doReturn(Futures.immediateFuture(null)).when(mockCohort3).preCommit();
-        doReturn(Futures.immediateFailedFuture(new IllegalStateException("mock2"))).
-                when(mockCohort3).commit();
+        doReturn(Futures.immediateFailedFuture(new IllegalStateException("mock2")))
+                .when(mockCohort3).commit();
         doReturn(Futures.immediateFuture(null)).when(mockCohort3).abort();
 
         CheckedFuture<Void, TransactionCommitFailedException> future = coordinator.submit(
@@ -290,8 +289,8 @@ public class ConcurrentDOMDataBrokerTest {
     @Test
     public void testSubmitWithAbortException() throws Exception {
         doReturn(Futures.immediateFuture(true)).when(mockCohort1).canCommit();
-        doReturn(Futures.immediateFailedFuture(new IllegalStateException("mock abort error"))).
-                when(mockCohort1).abort();
+        doReturn(Futures.immediateFailedFuture(new IllegalStateException("mock abort error")))
+                .when(mockCohort1).abort();
 
         IllegalStateException cause = new IllegalStateException("mock canCommit error");
         doReturn(Futures.immediateFailedFuture(cause)).when(mockCohort2).canCommit();
@@ -304,7 +303,7 @@ public class ConcurrentDOMDataBrokerTest {
     }
 
     @Test
-    public void testCreateReadWriteTransaction(){
+    public void testCreateReadWriteTransaction() {
         DOMStore domStore = mock(DOMStore.class);
         try (ConcurrentDOMDataBroker dataBroker = new ConcurrentDOMDataBroker(ImmutableMap.of(
                 LogicalDatastoreType.OPERATIONAL, domStore, LogicalDatastoreType.CONFIGURATION, domStore),
@@ -316,7 +315,7 @@ public class ConcurrentDOMDataBrokerTest {
     }
 
     @Test
-    public void testCreateWriteOnlyTransaction(){
+    public void testCreateWriteOnlyTransaction() {
         DOMStore domStore = mock(DOMStore.class);
         try (ConcurrentDOMDataBroker dataBroker = new ConcurrentDOMDataBroker(ImmutableMap.of(
                 LogicalDatastoreType.OPERATIONAL, domStore, LogicalDatastoreType.CONFIGURATION, domStore),
@@ -328,7 +327,7 @@ public class ConcurrentDOMDataBrokerTest {
     }
 
     @Test
-    public void testCreateReadOnlyTransaction(){
+    public void testCreateReadOnlyTransaction() {
         DOMStore domStore = mock(DOMStore.class);
         try (ConcurrentDOMDataBroker dataBroker = new ConcurrentDOMDataBroker(ImmutableMap.of(
                 LogicalDatastoreType.OPERATIONAL, domStore, LogicalDatastoreType.CONFIGURATION, domStore),
@@ -340,7 +339,7 @@ public class ConcurrentDOMDataBrokerTest {
     }
 
     @Test
-    public void testLazySubTransactionCreationForReadWriteTransactions(){
+    public void testLazySubTransactionCreationForReadWriteTransactions() {
         DOMStore configDomStore = mock(DOMStore.class);
         DOMStore operationalDomStore = mock(DOMStore.class);
         DOMStoreReadWriteTransaction storeTxn = mock(DOMStoreReadWriteTransaction.class);
@@ -369,7 +368,7 @@ public class ConcurrentDOMDataBrokerTest {
     }
 
     @Test
-    public void testLazySubTransactionCreationForWriteOnlyTransactions(){
+    public void testLazySubTransactionCreationForWriteOnlyTransactions() {
         DOMStore configDomStore = mock(DOMStore.class);
         DOMStore operationalDomStore = mock(DOMStore.class);
         DOMStoreWriteTransaction storeTxn = mock(DOMStoreWriteTransaction.class);
@@ -396,7 +395,7 @@ public class ConcurrentDOMDataBrokerTest {
     }
 
     @Test
-    public void testLazySubTransactionCreationForReadOnlyTransactions(){
+    public void testLazySubTransactionCreationForReadOnlyTransactions() {
         DOMStore configDomStore = mock(DOMStore.class);
         DOMStore operationalDomStore = mock(DOMStore.class);
         DOMStoreReadTransaction storeTxn = mock(DOMStoreReadTransaction.class);
@@ -441,10 +440,11 @@ public class ConcurrentDOMDataBrokerTest {
                 LogicalDatastoreType.OPERATIONAL, operationalDomStore, LogicalDatastoreType.CONFIGURATION,
                 configDomStore), futureExecutor) {
             @Override
-            public CheckedFuture<Void, TransactionCommitFailedException> submit(DOMDataWriteTransaction transaction, Collection<DOMStoreThreePhaseCommitCohort> cohorts) {
+            public CheckedFuture<Void, TransactionCommitFailedException> submit(DOMDataWriteTransaction writeTx,
+                    Collection<DOMStoreThreePhaseCommitCohort> cohorts) {
                 commitCohorts.addAll(cohorts);
                 latch.countDown();
-                return super.submit(transaction, cohorts);
+                return super.submit(writeTx, cohorts);
             }
         }) {
             DOMDataReadWriteTransaction domDataReadWriteTransaction = dataBroker.newReadWriteTransaction();
@@ -453,7 +453,7 @@ public class ConcurrentDOMDataBrokerTest {
 
             domDataReadWriteTransaction.submit();
 
-            latch.await(10, TimeUnit.SECONDS);
+            assertTrue(latch.await(10, TimeUnit.SECONDS));
 
             assertTrue(commitCohorts.size() == 1);
         }
@@ -486,7 +486,8 @@ public class ConcurrentDOMDataBrokerTest {
                 LogicalDatastoreType.OPERATIONAL, operationalDomStore, LogicalDatastoreType.CONFIGURATION,
                 configDomStore), futureExecutor) {
             @Override
-            public CheckedFuture<Void, TransactionCommitFailedException> submit(DOMDataWriteTransaction transaction, Collection<DOMStoreThreePhaseCommitCohort> cohorts) {
+            public CheckedFuture<Void, TransactionCommitFailedException> submit(DOMDataWriteTransaction transaction,
+                    Collection<DOMStoreThreePhaseCommitCohort> cohorts) {
                 commitCohorts.addAll(cohorts);
                 latch.countDown();
                 return super.submit(transaction, cohorts);
@@ -494,19 +495,21 @@ public class ConcurrentDOMDataBrokerTest {
         }) {
             DOMDataReadWriteTransaction domDataReadWriteTransaction = dataBroker.newReadWriteTransaction();
 
-            domDataReadWriteTransaction.put(LogicalDatastoreType.OPERATIONAL, YangInstanceIdentifier.EMPTY, mock(NormalizedNode.class));
-            domDataReadWriteTransaction.merge(LogicalDatastoreType.CONFIGURATION, YangInstanceIdentifier.EMPTY, mock(NormalizedNode.class));
+            domDataReadWriteTransaction.put(LogicalDatastoreType.OPERATIONAL, YangInstanceIdentifier.EMPTY,
+                    mock(NormalizedNode.class));
+            domDataReadWriteTransaction.merge(LogicalDatastoreType.CONFIGURATION, YangInstanceIdentifier.EMPTY,
+                    mock(NormalizedNode.class));
 
             domDataReadWriteTransaction.submit();
 
-            latch.await(10, TimeUnit.SECONDS);
+            assertTrue(latch.await(10, TimeUnit.SECONDS));
 
             assertTrue(commitCohorts.size() == 2);
         }
     }
 
     @Test
-    public void testCreateTransactionChain(){
+    public void testCreateTransactionChain() {
         DOMStore domStore = mock(DOMStore.class);
         try (ConcurrentDOMDataBroker dataBroker = new ConcurrentDOMDataBroker(ImmutableMap.of(
                 LogicalDatastoreType.OPERATIONAL, domStore, LogicalDatastoreType.CONFIGURATION, domStore),
@@ -520,7 +523,7 @@ public class ConcurrentDOMDataBrokerTest {
     }
 
     @Test
-    public void testCreateTransactionOnChain(){
+    public void testCreateTransactionOnChain() {
         DOMStore domStore = mock(DOMStore.class);
         try (ConcurrentDOMDataBroker dataBroker = new ConcurrentDOMDataBroker(ImmutableMap.of(
                 LogicalDatastoreType.OPERATIONAL, domStore, LogicalDatastoreType.CONFIGURATION, domStore),
@@ -532,13 +535,15 @@ public class ConcurrentDOMDataBrokerTest {
             doReturn(mockChain).when(domStore).createTransactionChain();
             doReturn(operationalTransaction).when(mockChain).newWriteOnlyTransaction();
 
-            DOMTransactionChain transactionChain = dataBroker.createTransactionChain(mock(TransactionChainListener.class));
+            DOMTransactionChain transactionChain = dataBroker.createTransactionChain(
+                    mock(TransactionChainListener.class));
 
             DOMDataWriteTransaction domDataWriteTransaction = transactionChain.newWriteOnlyTransaction();
 
             verify(mockChain, never()).newWriteOnlyTransaction();
 
-            domDataWriteTransaction.put(LogicalDatastoreType.OPERATIONAL, YangInstanceIdentifier.EMPTY, mock(NormalizedNode.class));
+            domDataWriteTransaction.put(LogicalDatastoreType.OPERATIONAL, YangInstanceIdentifier.EMPTY,
+                    mock(NormalizedNode.class));
         }
     }
 
@@ -549,13 +554,15 @@ public class ConcurrentDOMDataBrokerTest {
                 LogicalDatastoreType.OPERATIONAL, domStore, LogicalDatastoreType.CONFIGURATION, domStore),
                 futureExecutor)) {
 
-            CheckedFuture<Void, TransactionCommitFailedException> submit1 = dataBroker.newWriteOnlyTransaction().submit();
+            CheckedFuture<Void, TransactionCommitFailedException> submit1 =
+                    dataBroker.newWriteOnlyTransaction().submit();
 
             assertNotNull(submit1);
 
             submit1.get();
 
-            CheckedFuture<Void, TransactionCommitFailedException> submit2 = dataBroker.newReadWriteTransaction().submit();
+            CheckedFuture<Void, TransactionCommitFailedException> submit2 =
+                    dataBroker.newReadWriteTransaction().submit();
 
             assertNotNull(submit2);
 

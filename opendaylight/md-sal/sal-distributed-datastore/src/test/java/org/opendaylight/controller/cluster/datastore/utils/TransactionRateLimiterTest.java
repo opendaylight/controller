@@ -15,6 +15,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+
 import com.codahale.metrics.Snapshot;
 import com.codahale.metrics.Timer;
 import java.util.concurrent.TimeUnit;
@@ -46,7 +47,7 @@ public class TransactionRateLimiterTest {
     private Snapshot commitSnapshot;
 
     @Before
-    public void setUp(){
+    public void setUp() {
         MockitoAnnotations.initMocks(this);
         doReturn(datastoreContext).when(actorContext).getDatastoreContext();
         doReturn(30).when(datastoreContext).getShardTransactionCommitTimeoutInSeconds();
@@ -57,8 +58,8 @@ public class TransactionRateLimiterTest {
     }
 
     @Test
-    public void testAcquireRateLimitChanged(){
-        for(int i=1;i<11;i++){
+    public void testAcquireRateLimitChanged() {
+        for (int i = 1; i < 11; i++) {
             // Keep on increasing the amount of time it takes to complete transaction for each tenth of a
             // percentile. Essentially this would be 1ms for the 10th percentile, 2ms for 20th percentile and so on.
             doReturn(TimeUnit.MILLISECONDS.toNanos(i) * 1D).when(commitSnapshot).getValue(i * 0.1);
@@ -75,9 +76,9 @@ public class TransactionRateLimiterTest {
 
 
     @Test
-    public void testAcquirePercentileValueZero(){
+    public void testAcquirePercentileValueZero() {
 
-        for(int i=1;i<11;i++){
+        for (int i = 1; i < 11; i++) {
             // Keep on increasing the amount of time it takes to complete transaction for each tenth of a
             // percentile. Essentially this would be 1ms for the 10th percentile, 2ms for 20th percentile and so on.
             doReturn(TimeUnit.MILLISECONDS.toNanos(i) * 1D).when(commitSnapshot).getValue(i * 0.1);
@@ -95,9 +96,9 @@ public class TransactionRateLimiterTest {
     }
 
     @Test
-    public void testAcquireOnePercentileValueVeryHigh(){
+    public void testAcquireOnePercentileValueVeryHigh() {
 
-        for(int i=1;i<11;i++){
+        for (int i = 1; i < 11; i++) {
             // Keep on increasing the amount of time it takes to complete transaction for each tenth of a
             // percentile. Essentially this would be 1ms for the 10th percentile, 2ms for 20th percentile and so on.
             doReturn(TimeUnit.MILLISECONDS.toNanos(i) * 1D).when(commitSnapshot).getValue(i * 0.1);
@@ -116,9 +117,9 @@ public class TransactionRateLimiterTest {
     }
 
     @Test
-    public void testAcquireWithAllPercentileValueVeryHigh(){
+    public void testAcquireWithAllPercentileValueVeryHigh() {
 
-        for(int i=1;i<11;i++){
+        for (int i = 1; i < 11; i++) {
             // Keep on increasing the amount of time it takes to complete transaction for each tenth of a
             // percentile. Essentially this would be 1ms for the 10th percentile, 2ms for 20th percentile and so on.
             doReturn(TimeUnit.MILLISECONDS.toNanos(10000) * 1D).when(commitSnapshot).getValue(i * 0.1);
@@ -135,9 +136,9 @@ public class TransactionRateLimiterTest {
     }
 
     @Test
-    public void testAcquireWithRealPercentileValues(){
+    public void testAcquireWithRealPercentileValues() {
 
-        for(int i=1;i<11;i++){
+        for (int i = 1; i < 11; i++) {
             // Keep on increasing the amount of time it takes to complete transaction for each tenth of a
             // percentile. Essentially this would be 1ms for the 10th percentile, 2ms for 20th percentile and so on.
             doReturn(TimeUnit.MILLISECONDS.toNanos(8) * 1D).when(commitSnapshot).getValue(i * 0.1);
@@ -156,11 +157,9 @@ public class TransactionRateLimiterTest {
         assertEquals(51, rateLimiter.getPollOnCount());
     }
 
-
-
     @Test
-    public void testAcquireGetRateLimitFromOtherDataStores(){
-        for(int i=1;i<11;i++){
+    public void testAcquireGetRateLimitFromOtherDataStores() {
+        for (int i = 1; i < 11; i++) {
             // Keep on increasing the amount of time it takes to complete transaction for each tenth of a
             // percentile. Essentially this would be 1ms for the 10th percentile, 2ms for 20th percentile and so on.
             doReturn(0.0D).when(commitSnapshot).getValue(i * 0.1);
@@ -174,7 +173,7 @@ public class TransactionRateLimiterTest {
         doReturn(operationalCommitTimerContext).when(operationalCommitTimer).time();
         doReturn(operationalCommitSnapshot).when(operationalCommitTimer).getSnapshot();
 
-        for(int i=1;i<11;i++){
+        for (int i = 1; i < 11; i++) {
             // Keep on increasing the amount of time it takes to complete transaction for each tenth of a
             // percentile. Essentially this would be 1ms for the 10th percentile, 2ms for 20th percentile and so on.
             doReturn(TimeUnit.MILLISECONDS.toNanos(i) * 1D).when(operationalCommitSnapshot).getValue(i * 0.1);
@@ -194,9 +193,9 @@ public class TransactionRateLimiterTest {
     }
 
     @Test
-    public void testRateLimiting(){
+    public void testRateLimiting() {
 
-        for(int i=1;i<11;i++){
+        for (int i = 1; i < 11; i++) {
             doReturn(TimeUnit.SECONDS.toNanos(1) * 1D).when(commitSnapshot).getValue(i * 0.1);
         }
 
@@ -217,9 +216,9 @@ public class TransactionRateLimiterTest {
     }
 
     @Test
-    public void testRateLimitNotCalculatedUntilPollCountReached(){
+    public void testRateLimitNotCalculatedUntilPollCountReached() {
 
-        for(int i=1;i<11;i++){
+        for (int i = 1; i < 11; i++) {
             // Keep on increasing the amount of time it takes to complete transaction for each tenth of a
             // percentile. Essentially this would be 1ms for the 10th percentile, 2ms for 20th percentile and so on.
             doReturn(TimeUnit.MILLISECONDS.toNanos(8) * 1D).when(commitSnapshot).getValue(i * 0.1);
@@ -237,7 +236,7 @@ public class TransactionRateLimiterTest {
 
         assertEquals(51, rateLimiter.getPollOnCount());
 
-        for(int i=0;i<49;i++){
+        for (int i = 0; i < 49; i++) {
             rateLimiter.acquire();
         }
 
@@ -250,9 +249,9 @@ public class TransactionRateLimiterTest {
     }
 
     @Test
-    public void testAcquireNegativeAcquireAndPollOnCount(){
+    public void testAcquireNegativeAcquireAndPollOnCount() {
 
-        for(int i=1;i<11;i++){
+        for (int i = 1; i < 11; i++) {
             // Keep on increasing the amount of time it takes to complete transaction for each tenth of a
             // percentile. Essentially this would be 1ms for the 10th percentile, 2ms for 20th percentile and so on.
             doReturn(TimeUnit.MILLISECONDS.toNanos(8) * 1D).when(commitSnapshot).getValue(i * 0.1);
@@ -263,7 +262,7 @@ public class TransactionRateLimiterTest {
         doReturn(TimeUnit.MILLISECONDS.toNanos(200) * 1D).when(commitSnapshot).getValue(1.0);
 
         TransactionRateLimiter rateLimiter = new TransactionRateLimiter(actorContext);
-        rateLimiter.setAcquireCount(Long.MAX_VALUE-1);
+        rateLimiter.setAcquireCount(Long.MAX_VALUE - 1);
         rateLimiter.setPollOnCount(Long.MAX_VALUE);
 
         rateLimiter.acquire();
@@ -272,7 +271,7 @@ public class TransactionRateLimiterTest {
 
         assertEquals(-9223372036854775759L, rateLimiter.getPollOnCount());
 
-        for(int i=0;i<50;i++){
+        for (int i = 0; i < 50; i++) {
             rateLimiter.acquire();
         }
 
@@ -280,17 +279,17 @@ public class TransactionRateLimiterTest {
 
     }
 
-    public Matcher<Double> approximately(final double val){
+    public Matcher<Double> approximately(final double val) {
         return new BaseMatcher<Double>() {
             @Override
-            public boolean matches(Object o) {
-                Double aDouble = (Double) o;
-                return aDouble >= val && aDouble <= val+1;
+            public boolean matches(Object obj) {
+                Double value = (Double) obj;
+                return value >= val && value <= val + 1;
             }
 
             @Override
             public void describeTo(Description description) {
-                description.appendText("> " + val +" < " + (val+1));
+                description.appendText("> " + val + " < " + (val + 1));
             }
         };
     }

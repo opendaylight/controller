@@ -11,6 +11,7 @@ package org.opendaylight.controller.cluster.datastore;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -27,7 +28,7 @@ public class TransactionContextWrapperTest {
     private TransactionContextWrapper transactionContextWrapper;
 
     @Before
-    public void setUp(){
+    public void setUp() {
         MockitoAnnotations.initMocks(this);
         doReturn(DatastoreContext.newBuilder().build()).when(actorContext).getDatastoreContext();
         transactionContextWrapper = new TransactionContextWrapper(MockIdentifiers.transactionIdentifier(
@@ -35,8 +36,8 @@ public class TransactionContextWrapperTest {
     }
 
     @Test
-    public void testExecutePriorTransactionOperations(){
-        for(int i=0;i<100;i++) {
+    public void testExecutePriorTransactionOperations() {
+        for (int i = 0; i < 100; i++) {
             transactionContextWrapper.maybeExecuteTransactionOperation(mock(TransactionOperation.class));
         }
         assertEquals(901, transactionContextWrapper.getLimiter().availablePermits());

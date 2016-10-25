@@ -26,7 +26,7 @@ public class MockConfiguration extends ConfigurationImpl {
     public MockConfiguration(final Map<String, List<String>> shardMembers) {
         super(configuration -> {
             Map<String, ModuleConfig.Builder> retMap = new HashMap<>();
-            for(Map.Entry<String, List<String>> e : shardMembers.entrySet()) {
+            for (Map.Entry<String, List<String>> e : shardMembers.entrySet()) {
                 String shardName = e.getKey();
                 retMap.put(shardName,
                     ModuleConfig.builder(shardName).shardConfig(

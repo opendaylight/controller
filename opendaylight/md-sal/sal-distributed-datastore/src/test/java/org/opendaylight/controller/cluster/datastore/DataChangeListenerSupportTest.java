@@ -21,6 +21,7 @@ import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.o
 import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.outerNode;
 import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.outerNodeEntry;
 import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.testNodeWithOuter;
+
 import akka.actor.ActorRef;
 import akka.dispatch.Dispatchers;
 import akka.testkit.TestActorRef;
@@ -55,7 +56,8 @@ public class DataChangeListenerSupportTest extends AbstractShardTest {
                 final ActorRef dclActor = actorFactory.createActor(DataChangeListener.props(listener),
                         "testChangeListenerWithNoInitialData-DataChangeListener");
                 final DataChangeListenerSupport support = new DataChangeListenerSupport(shard);
-                support.onMessage(new RegisterChangeListener(TEST_PATH, dclActor, DataChangeScope.ONE, false),true,true);
+                support.onMessage(new RegisterChangeListener(TEST_PATH, dclActor, DataChangeScope.ONE, false),
+                        true,true);
 
                 listener.expectNoMoreChanges("Unexpected initial change event");
             }
@@ -80,7 +82,8 @@ public class DataChangeListenerSupportTest extends AbstractShardTest {
                 final ActorRef dclActor = actorFactory.createActor(DataChangeListener.props(listener),
                         "testInitialChangeListenerEventWithContainerPath-DataChangeListener");
                 final DataChangeListenerSupport support = new DataChangeListenerSupport(shard);
-                support.onMessage(new RegisterChangeListener(TEST_PATH, dclActor, DataChangeScope.ONE, false),true,true);
+                support.onMessage(new RegisterChangeListener(TEST_PATH, dclActor, DataChangeScope.ONE, false),
+                        true,true);
 
                 listener.waitForChangeEvents(TEST_PATH);
             }
@@ -169,8 +172,9 @@ public class DataChangeListenerSupportTest extends AbstractShardTest {
                 final ActorRef dclActor = actorFactory.createActor(DataChangeListener.props(listener),
                         "testInitialChangeListenerEventWithNestedWildcardedListsPath-DataChangeListener");
                 final DataChangeListenerSupport support = new DataChangeListenerSupport(shard);
-                support.onMessage(new RegisterChangeListener(OUTER_LIST_PATH.node(OUTER_LIST_QNAME).node(INNER_LIST_QNAME).node(INNER_LIST_QNAME), dclActor,
-                        DataChangeScope.ONE, false), true, true);
+                support.onMessage(new RegisterChangeListener(OUTER_LIST_PATH.node(OUTER_LIST_QNAME)
+                        .node(INNER_LIST_QNAME).node(INNER_LIST_QNAME), dclActor, DataChangeScope.ONE, false),
+                            true, true);
 
 
                 listener.waitForChangeEvents();
@@ -234,6 +238,5 @@ public class DataChangeListenerSupportTest extends AbstractShardTest {
                 listener.verifyCreatedData(0, innerEntryPath(2, "four"));
             }
         };
-
     }
 }

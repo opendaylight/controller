@@ -19,6 +19,7 @@ import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.o
 import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.outerNode;
 import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.outerNodeEntry;
 import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.testNodeWithOuter;
+
 import akka.actor.ActorRef;
 import akka.testkit.TestActorRef;
 import org.junit.After;
@@ -26,7 +27,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterDataTreeChangeListener;
 import org.opendaylight.controller.cluster.datastore.utils.MockDataTreeChangeListener;
-import org.opendaylight.controller.cluster.raft.TestActorFactory;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 
@@ -36,8 +36,6 @@ import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
  * @author Thomas Pantelis
  */
 public class DataTreeChangeListenerSupportTest extends AbstractShardTest {
-    private final TestActorFactory actorFactory = new TestActorFactory(getSystem());
-
     private Shard shard;
     private DataTreeChangeListenerSupport support;
 

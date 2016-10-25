@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.datastore;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Address;
@@ -89,16 +90,16 @@ public class MemberNode {
 
     public void waitForMemberDown(String member) {
         Stopwatch sw = Stopwatch.createStarted();
-        while(sw.elapsed(TimeUnit.SECONDS) <= 10) {
+        while (sw.elapsed(TimeUnit.SECONDS) <= 10) {
             CurrentClusterState state = Cluster.get(kit.getSystem()).state();
-            for(Member m: state.getUnreachable()) {
-                if(member.equals(m.getRoles().iterator().next())) {
+            for (Member m : state.getUnreachable()) {
+                if (member.equals(m.getRoles().iterator().next())) {
                     return;
                 }
             }
 
-            for(Member m: state.getMembers()) {
-                if(m.status() != MemberStatus.up() && member.equals(m.getRoles().iterator().next())) {
+            for (Member m : state.getMembers()) {
+                if (m.status() != MemberStatus.up() && member.equals(m.getRoles().iterator().next())) {
                     return;
                 }
             }
@@ -110,7 +111,7 @@ public class MemberNode {
     }
 
     public void cleanup() {
-        if(!cleanedUp) {
+        if (!cleanedUp) {
             cleanedUp = true;
             if (configDataStore != null) {
                 configDataStore.close();
@@ -132,9 +133,9 @@ public class MemberNode {
 
         AssertionError lastError = null;
         Stopwatch sw = Stopwatch.createStarted();
-        while(sw.elapsed(TimeUnit.SECONDS) <= 5) {
-            OnDemandRaftState raftState = (OnDemandRaftState)actorContext.
-                    executeOperation(shardActor, GetOnDemandRaftState.INSTANCE);
+        while (sw.elapsed(TimeUnit.SECONDS) <= 5) {
+            OnDemandRaftState raftState = (OnDemandRaftState)actorContext
+                    .executeOperation(shardActor, GetOnDemandRaftState.INSTANCE);
 
             try {
                 verifier.verify(raftState);
@@ -151,7 +152,7 @@ public class MemberNode {
     public static void verifyRaftPeersPresent(DistributedDataStore datastore, final String shardName,
             String... peerMemberNames) throws Exception {
         final Set<String> peerIds = Sets.newHashSet();
-        for(String p: peerMemberNames) {
+        for (String p: peerMemberNames) {
             peerIds.add(ShardIdentifier.create(shardName, MemberName.forName(p),
                 datastore.getActorContext().getDataStoreName()).toString());
         }
@@ -162,9 +163,9 @@ public class MemberNode {
 
     public static void verifyNoShardPresent(DistributedDataStore datastore, String shardName) {
         Stopwatch sw = Stopwatch.createStarted();
-        while(sw.elapsed(TimeUnit.SECONDS) <= 5) {
+        while (sw.elapsed(TimeUnit.SECONDS) <= 5) {
             Optional<ActorRef> shardReply = datastore.getActorContext().findLocalShard(shardName);
-            if(!shardReply.isPresent()) {
+            if (!shardReply.isPresent()) {
                 return;
             }
 
@@ -182,8 +183,8 @@ public class MemberNode {
         private String testName;
         private SchemaContext schemaContext;
         private boolean createOperDatastore = true;
-        private DatastoreContext.Builder datastoreContextBuilder = DatastoreContext.newBuilder().
-                shardHeartbeatIntervalInMillis(300).shardElectionTimeoutFactor(30);
+        private DatastoreContext.Builder datastoreContextBuilder = DatastoreContext.newBuilder()
+                .shardHeartbeatIntervalInMillis(300).shardElectionTimeoutFactor(30);
 
         Builder(List<MemberNode> members) {
             this.members = members;
@@ -194,8 +195,8 @@ public class MemberNode {
          *
          * @return this Builder
          */
-        public Builder moduleShardsConfig(String moduleShardsConfig) {
-            this.moduleShardsConfig = moduleShardsConfig;
+        public Builder moduleShardsConfig(String newModuleShardsConfig) {
+            this.moduleShardsConfig = newModuleShardsConfig;
             return this;
         }
 
@@ -204,8 +205,8 @@ public class MemberNode {
          *
          * @return this Builder
          */
-        public Builder akkaConfig(String akkaConfig) {
-            this.akkaConfig = akkaConfig;
+        public Builder akkaConfig(String newAkkaConfig) {
+            this.akkaConfig = newAkkaConfig;
             return this;
         }
 
@@ -214,8 +215,8 @@ public class MemberNode {
          *
          * @return this Builder
          */
-        public Builder testName(String testName) {
-            this.testName = testName;
+        public Builder testName(String newTestName) {
+            this.testName = newTestName;
             return this;
         }
 
@@ -244,8 +245,8 @@ public class MemberNode {
          *
          * @return this Builder
          */
-        public Builder schemaContext(SchemaContext schemaContext) {
-            this.schemaContext = schemaContext;
+        public Builder schemaContext(SchemaContext newSchemaContext) {
+            this.schemaContext = newSchemaContext;
             return this;
         }
 
@@ -264,7 +265,7 @@ public class MemberNode {
             Preconditions.checkNotNull(akkaConfig, "akkaConfig must be specified");
             Preconditions.checkNotNull(testName, "testName must be specified");
 
-            if(schemaContext == null) {
+            if (schemaContext == null) {
                 schemaContext = SchemaContextHelper.full();
             }
 
@@ -281,7 +282,7 @@ public class MemberNode {
             node.configDataStore = node.kit.setupDistributedDataStore("config_" + testName, moduleShardsConfig,
                     true, schemaContext, waitForshardLeader);
 
-            if(createOperDatastore) {
+            if (createOperDatastore) {
                 node.kit.getDatastoreContextBuilder().shardManagerPersistenceId("shard-manager-oper-" + memberName);
                 node.operDataStore = node.kit.setupDistributedDataStore("oper_" + testName, moduleShardsConfig,
                         true, schemaContext, waitForshardLeader);

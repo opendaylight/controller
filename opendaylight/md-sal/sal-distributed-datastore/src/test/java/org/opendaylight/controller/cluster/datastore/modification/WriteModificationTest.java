@@ -9,6 +9,7 @@
 package org.opendaylight.controller.cluster.datastore.modification;
 
 import static org.junit.Assert.assertEquals;
+
 import com.google.common.base.Optional;
 import org.apache.commons.lang.SerializationUtils;
 import org.junit.Assert;
@@ -39,9 +40,9 @@ public class WriteModificationTest extends AbstractModificationTest {
     @Test
     public void testSerialization() {
         YangInstanceIdentifier path = TestModel.TEST_PATH;
-        NormalizedNode<?, ?> data = ImmutableContainerNodeBuilder.create().withNodeIdentifier(
-                new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME)).
-                withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo")).build();
+        NormalizedNode<?, ?> data = ImmutableContainerNodeBuilder.create()
+                .withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME))
+                .withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo")).build();
 
         WriteModification expected = new WriteModification(path, data);
 

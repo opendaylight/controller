@@ -11,6 +11,7 @@ package org.opendaylight.controller.cluster.datastore.config;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Sets;
 import java.net.URI;
@@ -34,17 +35,17 @@ public class ConfigurationImplTest {
     private ConfigurationImpl configuration;
 
     @Before
-    public void setup(){
+    public void setup() {
         configuration = new ConfigurationImpl("module-shards.conf", "modules.conf");
     }
 
     @Test
-    public void testConstructor(){
+    public void testConstructor() {
         Assert.assertNotNull(configuration);
     }
 
     @Test
-    public void testGetMemberShardNames(){
+    public void testGetMemberShardNames() {
         Collection<String> memberShardNames = configuration.getMemberShardNames(MEMBER_1);
         assertEquals("getMemberShardNames", ImmutableSortedSet.of("people-1", "cars-1", "test-1", "default"),
                 ImmutableSortedSet.copyOf(memberShardNames));
@@ -58,7 +59,7 @@ public class ConfigurationImplTest {
     }
 
     @Test
-    public void testGetMembersFromShardName(){
+    public void testGetMembersFromShardName() {
         Collection<MemberName> members = configuration.getMembersFromShardName("default");
         assertEquals("getMembersFromShardName", ImmutableSortedSet.of(MEMBER_1, MEMBER_2, MEMBER_3),
                 ImmutableSortedSet.copyOf(members));
@@ -74,7 +75,7 @@ public class ConfigurationImplTest {
     }
 
     @Test
-    public void testGetAllShardNames(){
+    public void testGetAllShardNames() {
         Set<String> allShardNames = configuration.getAllShardNames();
         assertEquals("getAllShardNames", ImmutableSortedSet.of("people-1", "cars-1", "test-1", "default"),
                 ImmutableSortedSet.copyOf(allShardNames));

@@ -22,11 +22,10 @@ import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.T
 import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.innerNode;
 import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.outerNode;
 import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.outerNodeEntry;
+
 import com.google.common.base.Optional;
 import com.google.common.reflect.Reflection;
-import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -73,22 +72,19 @@ public class PruningDataTreeModificationTest {
     private PruningDataTreeModification pruningDataTreeModification;
 
     @Before
-    public void setUp(){
+    public void setUp() {
         MockitoAnnotations.initMocks(this);
 
         dataTree = InMemoryDataTreeFactory.getInstance().create(TreeType.CONFIGURATION);
         dataTree.setSchemaContext(SCHEMA_CONTEXT);
 
         realModification = dataTree.takeSnapshot().newModification();
-        proxyModification = Reflection.newProxy(DataTreeModification.class, new InvocationHandler() {
-            @Override
-            public Object invoke(final Object proxy, final Method method, final Object[] args) throws Throwable {
-                try {
-                    method.invoke(mockModification, args);
-                    return method.invoke(realModification, args);
-                } catch (InvocationTargetException e) {
-                    throw e.getCause();
-                }
+        proxyModification = Reflection.newProxy(DataTreeModification.class, (proxy, method, args) -> {
+            try {
+                method.invoke(mockModification, args);
+                return method.invoke(realModification, args);
+            } catch (InvocationTargetException e) {
+                throw e.getCause();
             }
         });
 
@@ -96,14 +92,14 @@ public class PruningDataTreeModificationTest {
     }
 
     @Test
-    public void testDelete(){
+    public void testDelete() {
         pruningDataTreeModification.delete(CarsModel.BASE_PATH);
 
         verify(mockModification, times(1)).delete(CarsModel.BASE_PATH);
     }
 
     @Test
-    public void testDeleteOnException(){
+    public void testDeleteOnException() {
         YangInstanceIdentifier path = CarsModel.BASE_PATH;
         doThrow(SchemaValidationFailedException.class).when(mockModification).delete(path);
 
@@ -114,7 +110,7 @@ public class PruningDataTreeModificationTest {
 
 
     @Test
-    public void testMerge(){
+    public void testMerge() {
         NormalizedNode<?, ?> normalizedNode = CarsModel.create();
         YangInstanceIdentifier path = CarsModel.BASE_PATH;
         pruningDataTreeModification.merge(path, normalizedNode);
@@ -123,7 +119,7 @@ public class PruningDataTreeModificationTest {
     }
 
     @Test
-    public void testMergeWithInvalidNamespace() throws DataValidationFailedException{
+    public void testMergeWithInvalidNamespace() throws DataValidationFailedException {
         NormalizedNode<?, ?> normalizedNode = PeopleModel.emptyContainer();
         YangInstanceIdentifier path = PeopleModel.BASE_PATH;
 
@@ -136,15 +132,15 @@ public class PruningDataTreeModificationTest {
     }
 
     @Test
-    public void testMergeWithInvalidChildNodeNames() throws DataValidationFailedException{
+    public void testMergeWithInvalidChildNodeNames() throws DataValidationFailedException {
         ContainerNode augContainer = ImmutableContainerNodeBuilder.create().withNodeIdentifier(
                 new YangInstanceIdentifier.NodeIdentifier(AUG_CONTAINER)).withChild(
                         ImmutableNodes.containerNode(AUG_INNER_CONTAINER)).build();
 
         DataContainerChild<?, ?> outerNode = outerNode(outerNodeEntry(1, innerNode("one", "two")));
-        ContainerNode normalizedNode = ImmutableContainerNodeBuilder.create().withNodeIdentifier(
-                new YangInstanceIdentifier.NodeIdentifier(TEST_QNAME)).withChild(outerNode).withChild(augContainer).
-                            withChild(ImmutableNodes.leafNode(AUG_QNAME, "aug")).build();
+        ContainerNode normalizedNode = ImmutableContainerNodeBuilder.create()
+                .withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(TEST_QNAME)).withChild(outerNode)
+                .withChild(augContainer).withChild(ImmutableNodes.leafNode(AUG_QNAME, "aug")).build();
 
         YangInstanceIdentifier path = TestModel.TEST_PATH;
 
@@ -161,7 +157,7 @@ public class PruningDataTreeModificationTest {
     }
 
     @Test
-    public void testMergeWithValidNamespaceAndInvalidNodeName() throws DataValidationFailedException{
+    public void testMergeWithValidNamespaceAndInvalidNodeName() throws DataValidationFailedException {
         NormalizedNode<?, ?> normalizedNode = ImmutableNodes.containerNode(INVALID_TEST_QNAME);
         YangInstanceIdentifier path = INVALID_TEST_PATH;
 
@@ -174,7 +170,7 @@ public class PruningDataTreeModificationTest {
     }
 
     @Test
-    public void testWrite(){
+    public void testWrite() {
         NormalizedNode<?, ?> normalizedNode = CarsModel.create();
         YangInstanceIdentifier path = CarsModel.BASE_PATH;
         pruningDataTreeModification.write(path, normalizedNode);
@@ -222,7 +218,7 @@ public class PruningDataTreeModificationTest {
     }
 
     @Test
-    public void testWriteWithInvalidNamespace() throws DataValidationFailedException{
+    public void testWriteWithInvalidNamespace() throws DataValidationFailedException {
         NormalizedNode<?, ?> normalizedNode = PeopleModel.emptyContainer();
         YangInstanceIdentifier path = PeopleModel.BASE_PATH;
 
@@ -235,16 +231,16 @@ public class PruningDataTreeModificationTest {
     }
 
     @Test
-    public void testWriteWithInvalidChildNodeNames() throws DataValidationFailedException{
+    public void testWriteWithInvalidChildNodeNames() throws DataValidationFailedException {
         ContainerNode augContainer = ImmutableContainerNodeBuilder.create().withNodeIdentifier(
                 new YangInstanceIdentifier.NodeIdentifier(AUG_CONTAINER)).withChild(
                         ImmutableNodes.containerNode(AUG_INNER_CONTAINER)).build();
 
         DataContainerChild<?, ?> outerNode = outerNode(outerNodeEntry(1, innerNode("one", "two")));
-        ContainerNode normalizedNode = ImmutableContainerNodeBuilder.create().withNodeIdentifier(
-                new YangInstanceIdentifier.NodeIdentifier(TEST_QNAME)).withChild(outerNode).withChild(augContainer).
-                            withChild(ImmutableNodes.leafNode(AUG_QNAME, "aug")).
-                                withChild(ImmutableNodes.leafNode(NAME_QNAME, "name")).build();
+        ContainerNode normalizedNode = ImmutableContainerNodeBuilder.create()
+                .withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(TEST_QNAME)).withChild(outerNode)
+                .withChild(augContainer).withChild(ImmutableNodes.leafNode(AUG_QNAME, "aug"))
+                .withChild(ImmutableNodes.leafNode(NAME_QNAME, "name")).build();
 
         YangInstanceIdentifier path = TestModel.TEST_PATH;
 
@@ -252,9 +248,9 @@ public class PruningDataTreeModificationTest {
 
         dataTree.commit(getCandidate());
 
-        ContainerNode prunedNode = ImmutableContainerNodeBuilder.create().withNodeIdentifier(
-                new YangInstanceIdentifier.NodeIdentifier(TEST_QNAME)).withChild(outerNode).
-                        withChild(ImmutableNodes.leafNode(NAME_QNAME, "name")).build();
+        ContainerNode prunedNode = ImmutableContainerNodeBuilder.create()
+                .withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(TEST_QNAME)).withChild(outerNode)
+                .withChild(ImmutableNodes.leafNode(NAME_QNAME, "name")).build();
 
         Optional<NormalizedNode<?, ?>> actual = dataTree.takeSnapshot().readNode(path);
         assertEquals("After pruning present", true, actual.isPresent());
@@ -262,14 +258,14 @@ public class PruningDataTreeModificationTest {
     }
 
     @Test
-    public void testReady(){
+    public void testReady() {
         pruningDataTreeModification.ready();
 
         verify(mockModification).ready();
     }
 
     @Test
-    public void testApplyToCursor(){
+    public void testApplyToCursor() {
         DataTreeModificationCursor dataTreeModificationCursor = mock(DataTreeModificationCursor.class);
         pruningDataTreeModification.applyToCursor(dataTreeModificationCursor);
 
@@ -277,18 +273,19 @@ public class PruningDataTreeModificationTest {
     }
 
     @Test
-    public void testReadNode(){
+    public void testReadNode() {
         pruningDataTreeModification.readNode(CarsModel.BASE_PATH);
 
         verify(mockModification).readNode(CarsModel.BASE_PATH);
     }
 
     @Test
-    public void testNewModification(){
+    public void testNewModification() {
         realModification.ready();
         DataTreeModification dataTreeModification = pruningDataTreeModification.newModification();
 
-        assertTrue("new modification not of type PruningDataTreeModification", dataTreeModification instanceof PruningDataTreeModification);
+        assertTrue("new modification not of type PruningDataTreeModification",
+                dataTreeModification instanceof PruningDataTreeModification);
     }
 
     private DataTreeCandidateTip getCandidate() throws DataValidationFailedException {

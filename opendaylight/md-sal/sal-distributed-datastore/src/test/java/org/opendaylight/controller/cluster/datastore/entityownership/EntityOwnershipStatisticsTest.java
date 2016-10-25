@@ -13,6 +13,7 @@ import static org.opendaylight.controller.cluster.datastore.entityownership.Enti
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.entityEntryWithOwner;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.entityOwnersWithCandidate;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.entityPath;
+
 import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
@@ -51,7 +52,6 @@ public class EntityOwnershipStatisticsTest extends AbstractActorTest {
 
     @Test
     public void testOnDataTreeChanged() throws Exception {
-        Map<String, Map<String, Long>> statistics = null;
         writeNode(ENTITY_OWNERS_PATH, entityOwnersWithCandidate(ENTITY_TYPE, ENTITY_ID1, LOCAL_MEMBER_NAME));
         writeNode(ENTITY_OWNERS_PATH, entityOwnersWithCandidate(ENTITY_TYPE, ENTITY_ID2, LOCAL_MEMBER_NAME));
 
@@ -68,7 +68,7 @@ public class EntityOwnershipStatisticsTest extends AbstractActorTest {
         // Change owner to remote member 1 for entity 1
 
         writeNode(entityPath(ENTITY_TYPE, ENTITY_ID1), entityEntryWithOwner(ENTITY_ID1, REMOTE_MEMBER_NAME1));
-        statistics = ownershipStatistics.all();
+        Map<String, Map<String, Long>> statistics = ownershipStatistics.all();
         assertStatistics(statistics, LOCAL_MEMBER_NAME, 0L);
         assertStatistics(statistics, REMOTE_MEMBER_NAME1, 1L);
 
@@ -136,11 +136,13 @@ public class EntityOwnershipStatisticsTest extends AbstractActorTest {
 
     }
 
-    private static void assertStatistics(final Map<String, Map<String, Long>> statistics, final String memberName, final long val) {
+    private static void assertStatistics(final Map<String, Map<String, Long>> statistics, final String memberName,
+            final long val) {
         assertEquals(val, statistics.get(ENTITY_TYPE).get(memberName).longValue());
     }
 
-    private void writeNode(final YangInstanceIdentifier path, final NormalizedNode<?, ?> node) throws DataValidationFailedException {
+    private void writeNode(final YangInstanceIdentifier path, final NormalizedNode<?, ?> node)
+            throws DataValidationFailedException {
         AbstractEntityOwnershipTest.writeNode(path, node, shardDataTree);
     }
 }

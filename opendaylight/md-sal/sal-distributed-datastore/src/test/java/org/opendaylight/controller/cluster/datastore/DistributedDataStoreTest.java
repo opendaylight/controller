@@ -12,6 +12,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+
 import akka.util.Timeout;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.concurrent.Executors;
@@ -55,7 +56,7 @@ public class DistributedDataStoreTest extends AbstractActorTest {
     }
 
     @Test
-    public void testRateLimitingUsedInReadWriteTxCreation(){
+    public void testRateLimitingUsedInReadWriteTxCreation() {
         try (DistributedDataStore distributedDataStore = new DistributedDataStore(actorContext, UNKNOWN_ID)) {
 
             distributedDataStore.newReadWriteTransaction();
@@ -65,7 +66,7 @@ public class DistributedDataStoreTest extends AbstractActorTest {
     }
 
     @Test
-    public void testRateLimitingUsedInWriteOnlyTxCreation(){
+    public void testRateLimitingUsedInWriteOnlyTxCreation() {
         try (DistributedDataStore distributedDataStore = new DistributedDataStore(actorContext, UNKNOWN_ID)) {
 
             distributedDataStore.newWriteOnlyTransaction();
@@ -75,7 +76,7 @@ public class DistributedDataStoreTest extends AbstractActorTest {
     }
 
     @Test
-    public void testRateLimitingNotUsedInReadOnlyTxCreation(){
+    public void testRateLimitingNotUsedInReadOnlyTxCreation() {
         try (DistributedDataStore distributedDataStore = new DistributedDataStore(actorContext, UNKNOWN_ID)) {
 
             distributedDataStore.newReadOnlyTransaction();
@@ -87,7 +88,7 @@ public class DistributedDataStoreTest extends AbstractActorTest {
     }
 
     @Test
-    public void testWaitTillReadyBlocking(){
+    public void testWaitTillReadyBlocking() {
         doReturn(datastoreContext).when(actorContext).getDatastoreContext();
         doReturn(shardElectionTimeout).when(datastoreContext).getShardLeaderElectionTimeout();
         doReturn(FiniteDuration.apply(50, TimeUnit.MILLISECONDS)).when(shardElectionTimeout).duration();
@@ -99,12 +100,12 @@ public class DistributedDataStoreTest extends AbstractActorTest {
 
             long end = System.currentTimeMillis();
 
-            assertTrue("Expected to be blocked for 50 millis", (end - start) >= 50);
+            assertTrue("Expected to be blocked for 50 millis", end - start >= 50);
         }
     }
 
     @Test
-    public void testWaitTillReadyCountDown(){
+    public void testWaitTillReadyCountDown() {
         try (final DistributedDataStore distributedDataStore = new DistributedDataStore(actorContext, UNKNOWN_ID)) {
             doReturn(datastoreContext).when(actorContext).getDatastoreContext();
             doReturn(shardElectionTimeout).when(datastoreContext).getShardLeaderElectionTimeout();
@@ -121,8 +122,7 @@ public class DistributedDataStoreTest extends AbstractActorTest {
 
             long end = System.currentTimeMillis();
 
-            assertTrue("Expected to be released in 500 millis", (end - start) < 5000);
+            assertTrue("Expected to be released in 500 millis", end - start < 5000);
         }
     }
-
 }

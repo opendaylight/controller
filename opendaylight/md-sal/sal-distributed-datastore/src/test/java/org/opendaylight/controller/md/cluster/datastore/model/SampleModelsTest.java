@@ -16,7 +16,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 public class SampleModelsTest {
     @Test
-    public void testPeopleModel(){
+    public void testPeopleModel() {
         final NormalizedNode<?, ?> expected = PeopleModel.create();
 
 
@@ -36,7 +36,7 @@ public class SampleModelsTest {
 
 
     @Test
-    public void testCarsModel(){
+    public void testCarsModel() {
         final NormalizedNode<?, ?> expected = CarsModel.create();
 
 

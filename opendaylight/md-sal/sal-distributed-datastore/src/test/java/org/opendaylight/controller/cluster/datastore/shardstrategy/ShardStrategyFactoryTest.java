@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.datastore.shardstrategy;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -51,5 +52,4 @@ public class ShardStrategyFactoryTest {
 
         factory.getStrategy(null);
     }
-
 }

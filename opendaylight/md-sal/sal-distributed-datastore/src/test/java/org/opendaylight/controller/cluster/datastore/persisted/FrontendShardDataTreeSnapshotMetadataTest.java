@@ -11,6 +11,7 @@ package org.opendaylight.controller.cluster.datastore.persisted;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+
 import com.google.common.collect.Range;
 import com.google.common.collect.RangeSet;
 import com.google.common.collect.TreeRangeSet;
@@ -85,7 +86,7 @@ public class FrontendShardDataTreeSnapshotMetadataTest {
     }
 
     private static FrontendShardDataTreeSnapshotMetadata createEmptyMetadataSnapshot() {
-        return new FrontendShardDataTreeSnapshotMetadata(Collections.<FrontendClientMetadata> emptyList());
+        return new FrontendShardDataTreeSnapshotMetadata(Collections.<FrontendClientMetadata>emptyList());
     }
 
     private static FrontendShardDataTreeSnapshotMetadata createMetadataSnapshot(final int size) {
@@ -96,23 +97,23 @@ public class FrontendShardDataTreeSnapshotMetadataTest {
         return new FrontendShardDataTreeSnapshotMetadata(clients);
     }
 
-    private static FrontendClientMetadata createFrontedClientMetadata(final long i) {
-        final String index = String.valueOf(i);
+    private static FrontendClientMetadata createFrontedClientMetadata(final long num) {
+        final String index = String.valueOf(num);
         final String indexName = "test_" + index;
         final FrontendIdentifier frontendIdentifier = FrontendIdentifier.create(MemberName.forName(indexName),
                 FrontendType.forName(index));
-        final ClientIdentifier clientIdentifier = ClientIdentifier.create(frontendIdentifier, i);
+        final ClientIdentifier clientIdentifier = ClientIdentifier.create(frontendIdentifier, num);
 
         final RangeSet<UnsignedLong> purgedHistories = TreeRangeSet.create();
         purgedHistories.add(Range.closed(UnsignedLong.ZERO, UnsignedLong.ONE));
 
         final Collection<FrontendHistoryMetadata> currentHistories = Collections
-                .singleton(new FrontendHistoryMetadata(i, i, i, true));
+                .singleton(new FrontendHistoryMetadata(num, num, num, true));
 
         return new FrontendClientMetadata(clientIdentifier, purgedHistories, currentHistories);
     }
 
-    private static final <T> void testObject(final T object, final T equalObject) {
+    private static <T> void testObject(final T object, final T equalObject) {
         assertEquals(object.hashCode(), equalObject.hashCode());
         assertTrue(object.equals(object));
         assertTrue(object.equals(equalObject));
@@ -121,10 +122,10 @@ public class FrontendShardDataTreeSnapshotMetadataTest {
     }
 
     @SuppressWarnings("unchecked")
-    private static <T> T copy(final T o) throws IOException, ClassNotFoundException {
+    private static <T> T copy(final T obj) throws IOException, ClassNotFoundException {
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
         try (ObjectOutputStream oos = new ObjectOutputStream(bos)) {
-            oos.writeObject(o);
+            oos.writeObject(obj);
         }
 
         try (ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(bos.toByteArray()))) {

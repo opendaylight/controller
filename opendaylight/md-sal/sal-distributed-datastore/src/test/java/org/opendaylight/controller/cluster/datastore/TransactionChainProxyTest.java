@@ -20,6 +20,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.opendaylight.controller.cluster.datastore.TransactionType.READ_WRITE;
 import static org.opendaylight.controller.cluster.datastore.TransactionType.WRITE_ONLY;
+
 import akka.actor.ActorRef;
 import akka.util.Timeout;
 import java.util.concurrent.CountDownLatch;
@@ -75,6 +76,7 @@ public class TransactionChainProxyTest extends AbstractTransactionProxyTest {
 
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void testClose() {
         new TransactionChainProxy(mockComponentFactory, historyId).close();
@@ -117,6 +119,7 @@ public class TransactionChainProxyTest extends AbstractTransactionProxyTest {
      * initiated until the first one completes its read future.
      */
     @Test
+    @SuppressWarnings("checkstyle:IllegalCatch")
     public void testChainedWriteOnlyTransactions() throws Exception {
         dataStoreContextBuilder.writeOnlyTransactionOptimizationsEnabled(true);
 
@@ -187,6 +190,7 @@ public class TransactionChainProxyTest extends AbstractTransactionProxyTest {
      * initiated until the first one completes its read future.
      */
     @Test
+    @SuppressWarnings("checkstyle:IllegalCatch")
     public void testChainedReadWriteTransactions() throws Exception {
         try (TransactionChainProxy txChainProxy = new TransactionChainProxy(mockComponentFactory, historyId)) {
 
@@ -267,8 +271,6 @@ public class TransactionChainProxyTest extends AbstractTransactionProxyTest {
 
             NormalizedNode<?, ?> writeNode1 = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
             writeTx1.write(TestModel.TEST_PATH, writeNode1);
-
-            NormalizedNode<?, ?> writeNode2 = ImmutableNodes.containerNode(TestModel.OUTER_LIST_QNAME);
 
             txChainProxy.newWriteOnlyTransaction();
         }
