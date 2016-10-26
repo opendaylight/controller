@@ -25,7 +25,6 @@ import javax.xml.transform.stream.StreamResult;
 import org.apache.commons.lang.SerializationUtils;
 import org.junit.Assert;
 import org.junit.Test;
-import org.opendaylight.controller.cluster.datastore.node.NormalizedNodeToNodeCodec;
 import org.opendaylight.controller.cluster.datastore.util.TestModel;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -126,7 +125,6 @@ public class NormalizedNodeStreamReaderWriterTest {
         writer.close();
     }
 
-    @SuppressWarnings("deprecation")
     @Test
     public void testNormalizedNodeAndYangInstanceIdentifierStreaming() throws IOException {
 
@@ -143,7 +141,7 @@ public class NormalizedNodeStreamReaderWriterTest {
 
         writer.writeYangInstanceIdentifier(path);
 
-        NormalizedNodeInputStreamReader reader = new NormalizedNodeInputStreamReader(
+        NormalizedNodeDataInput reader = NormalizedNodeInputOutput.newDataInput(
             ByteStreams.newDataInput(byteArrayOutputStream.toByteArray()));
 
         NormalizedNode<?,?> node = reader.readNormalizedNode();
@@ -155,24 +153,20 @@ public class NormalizedNodeStreamReaderWriterTest {
         writer.close();
     }
 
-    @SuppressWarnings("deprecation")
     @Test(expected = InvalidNormalizedNodeStreamException.class, timeout = 10000)
     public void testInvalidNormalizedNodeStream() throws IOException {
-        byte[] protobufBytes = new NormalizedNodeToNodeCodec().encode(
-                TestModel.createBaseTestContainerBuilder().build()).getNormalizedNode().toByteArray();
-
-        NormalizedNodeInputStreamReader reader = new NormalizedNodeInputStreamReader(
-            ByteStreams.newDataInput(protobufBytes));
+        byte[] invalidBytes = {1,2,3};
+        NormalizedNodeDataInput reader = NormalizedNodeInputOutput.newDataInput(
+                ByteStreams.newDataInput(invalidBytes));
 
         reader.readNormalizedNode();
     }
 
-    @SuppressWarnings("deprecation")
     @Test(expected = InvalidNormalizedNodeStreamException.class, timeout = 10000)
     public void testInvalidYangInstanceIdentifierStream() throws IOException {
-        byte[] protobufBytes = {1,2,3};
-        NormalizedNodeInputStreamReader reader = new NormalizedNodeInputStreamReader(
-            ByteStreams.newDataInput(protobufBytes));
+        byte[] invalidBytes = {1,2,3};
+        NormalizedNodeDataInput reader = NormalizedNodeInputOutput.newDataInput(
+            ByteStreams.newDataInput(invalidBytes));
 
         reader.readYangInstanceIdentifier();
     }
