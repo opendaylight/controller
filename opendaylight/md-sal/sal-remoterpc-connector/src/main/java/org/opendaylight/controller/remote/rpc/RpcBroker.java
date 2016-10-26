@@ -19,11 +19,9 @@ import com.google.common.util.concurrent.Futures;
 import java.util.Arrays;
 import java.util.Collection;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActor;
-import org.opendaylight.controller.cluster.datastore.node.utils.serialization.NormalizedNodeSerializer;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcException;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcResult;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
-import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node;
 import org.opendaylight.controller.remote.rpc.messages.ExecuteRpc;
 import org.opendaylight.controller.remote.rpc.messages.RpcResponse;
 import org.opendaylight.yangtools.yang.common.RpcError;
@@ -72,7 +70,7 @@ public class RpcBroker extends AbstractUntypedActor {
             Futures.addCallback(future, new FutureCallback<DOMRpcResult>() {
                 @Override
                 public void onSuccess(final DOMRpcResult result) {
-                    if (result.getErrors() != null && (!result.getErrors().isEmpty())) {
+                    if (result.getErrors() != null && !result.getErrors().isEmpty()) {
                         final String message = String.format("Execution of RPC %s failed", msg.getRpc());
                         Collection<RpcError> errors = result.getErrors();
                         if (errors == null || errors.size() == 0) {
@@ -81,16 +79,9 @@ public class RpcBroker extends AbstractUntypedActor {
 
                         sender.tell(new akka.actor.Status.Failure(new RpcErrorsException(message, errors)), self);
                     } else {
-                        final Node serializedResultNode;
-                        if (result.getResult() == null) {
-                            serializedResultNode = null;
-                        } else {
-                            serializedResultNode = NormalizedNodeSerializer.serialize(result.getResult());
-                        }
-
                         LOG.debug("Sending response for execute rpc : {}", msg.getRpc());
 
-                        sender.tell(new RpcResponse(serializedResultNode), self);
+                        sender.tell(new RpcResponse(result.getResult()), self);
                     }
                 }
 
