@@ -97,6 +97,7 @@ public class ActorContext {
     private Timeout operationTimeout;
     private final String selfAddressHostPort;
     private TransactionRateLimiter txRateLimiter;
+    private boolean txRateLimiterEnable = true;
     private Timeout transactionCommitOperationTimeout;
     private Timeout shardInitializationTimeout;
     private final Dispatchers dispatchers;
@@ -152,6 +153,14 @@ public class ActorContext {
                 datastoreContext.getShardTransactionCommitTimeoutInSeconds(), TimeUnit.SECONDS));
 
         shardInitializationTimeout = new Timeout(datastoreContext.getShardInitializationTimeout().duration().$times(2));
+    }
+
+    public void updateTxRateLimiterEnable(boolean flag) {
+        this.txRateLimiterEnable = flag;
+    }
+
+    public boolean getTxRateLimiterEnable() {
+        return this.txRateLimiterEnable;
     }
 
     public DatastoreContext getDatastoreContext() {
@@ -501,7 +510,9 @@ public class ActorContext {
      * Try to acquire a transaction creation permit. Will block if no permits are available.
      */
     public void acquireTxCreationPermit() {
-        txRateLimiter.acquire();
+        if (getTxRateLimiterEnable()) {
+            txRateLimiter.acquire();
+        }
     }
 
     /**

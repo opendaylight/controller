@@ -93,4 +93,12 @@ public interface ShardStatsMXBean {
     int getTxCohortCacheSize();
 
     void captureSnapshot();
+
+    void setPipelineProcessPolicy();
+
+    void resetPipelineProcessPolicy();
+
+    boolean getPipelineProcessPolicy();
+
+    int getPipelineQueueSize();
 }

@@ -29,4 +29,19 @@ public class DatastoreInfoMXBeanImpl extends AbstractMXBean implements Datastore
     public double getTransactionCreationRateLimit() {
         return actorContext.getTxCreationLimit();
     }
+
+    @Override
+    public boolean getTransactionRateLimiterEnable() {
+        return actorContext.getTxRateLimiterEnable();
+    }
+
+    @Override
+    public void setTransactionRateLimiterEnable() {
+        actorContext.updateTxRateLimiterEnable(true);
+    }
+
+    @Override
+    public void resetTransactionRateLimiterEnable() {
+        actorContext.updateTxRateLimiterEnable(false);
+    }
 }

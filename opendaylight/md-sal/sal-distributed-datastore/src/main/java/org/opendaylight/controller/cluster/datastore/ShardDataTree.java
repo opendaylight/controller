@@ -66,6 +66,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataValidationFailed
 import org.opendaylight.yangtools.yang.data.api.schema.tree.ModificationType;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.TipProducingDataTree;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.TreeType;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.spi.TreeNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.tree.InMemoryDataTreeFactory;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.slf4j.Logger;
@@ -97,6 +98,9 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     private final Map<LocalHistoryIdentifier, ShardDataTreeTransactionChain> transactionChains = new HashMap<>();
     private final DataTreeCohortActorRegistry cohortRegistry = new DataTreeCohortActorRegistry();
     private final Queue<CommitEntry> pendingTransactions = new ArrayDeque<>();
+    private final ArrayDeque<CommitEntry> pipelineTransactions = new ArrayDeque<>();
+    private boolean pipelineProcessPolicy = false;
+
     private final ShardDataTreeChangeListenerPublisher treeChangeListenerPublisher;
     private final ShardDataChangeListenerPublisher dataChangeListenerPublisher;
     private final Collection<ShardDataTreeMetadata<?>> metadata;
@@ -149,6 +153,24 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     void updateSchemaContext(final SchemaContext newSchemaContext) {
         dataTree.setSchemaContext(newSchemaContext);
         this.schemaContext = Preconditions.checkNotNull(newSchemaContext);
+    }
+
+
+    public boolean getPipelineProcessPolicy() {
+        return pipelineProcessPolicy;
+    }
+
+    public void updatePipelineProcessPolicy(boolean flag) {
+        pipelineProcessPolicy = flag;
+    }
+
+    public int getPipelineQueueSize() {
+        return pipelineTransactions.size();
+    }
+
+    public boolean isPipelineTailTranscation(final Identifier identifier) {
+        final CommitEntry pipelineEntry = pipelineTransactions.peekLast();
+        return pipelineEntry != null && pipelineEntry.cohort.getIdentifier().equals(identifier);
     }
 
     /**
@@ -345,7 +367,13 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     }
 
     private void payloadReplicationComplete(final TransactionIdentifier txId) {
-        final CommitEntry current = pendingTransactions.peek();
+        CommitEntry current = null;
+        if (getPipelineProcessPolicy()) {
+            current = pipelineTransactions.peek();
+        } else {
+            current = pendingTransactions.peek();
+        }
+
         if (current == null) {
             LOG.warn("{}: No outstanding transactions, ignoring consensus on transaction {}", logContext, txId);
             return;
@@ -506,7 +534,12 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     }
 
     public Collection<ShardDataTreeCohort> getAndClearPendingTransactions() {
-        Collection<ShardDataTreeCohort> ret = new ArrayList<>(pendingTransactions.size());
+        Collection<ShardDataTreeCohort> ret = new ArrayList<>(pipelineTransactions.size() + pendingTransactions.size());
+        for (CommitEntry entry: pipelineTransactions) {
+            ret.add(entry.cohort);
+        }
+        pipelineTransactions.clear();
+
         for (CommitEntry entry: pendingTransactions) {
             ret.add(entry.cohort);
         }
@@ -584,7 +617,14 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         Verify.verify(cohort.equals(current), "Attempted to pre-commit %s while %s is pending", cohort, current);
         final DataTreeCandidateTip candidate;
         try {
-            candidate = dataTree.prepare(cohort.getDataTreeModification());
+            // if support pileline process, the prepare need the last prepareRoot
+            if (getPipelineProcessPolicy() && (!pipelineTransactions.isEmpty())) {
+                final CommitEntry pipelineEntry = pipelineTransactions.peekLast();
+                final TreeNode lastPrepareRoot = pipelineEntry.cohort.getCandidate().getTipRoot();
+                candidate = dataTree.prepare(cohort.getDataTreeModification(), lastPrepareRoot);
+            } else {
+                candidate = dataTree.prepare(cohort.getDataTreeModification());
+            }
         } catch (Exception e) {
             failPreCommit(e);
             return;
@@ -626,7 +666,11 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         shard.getShardMBean().setLastCommittedTransactionTime(System.currentTimeMillis());
 
         // FIXME: propagate journal index
-        pendingTransactions.poll().cohort.successfulCommit(UnsignedLong.ZERO);
+        if (getPipelineProcessPolicy()) {
+            pipelineTransactions.poll().cohort.successfulCommit(UnsignedLong.ZERO);
+        } else {
+            pendingTransactions.poll().cohort.successfulCommit(UnsignedLong.ZERO);
+        }
 
         LOG.trace("{}: Transaction {} committed, proceeding to notify", logContext, txId);
         notifyListeners(candidate);
@@ -643,6 +687,10 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
 
         if (shard.canSkipPayload() || candidate.getRootNode().getModificationType() == ModificationType.UNMODIFIED) {
             LOG.debug("{}: No replication required, proceeding to finish commit", logContext);
+            if (getPipelineProcessPolicy()) {
+                pendingTransactions.poll();
+                pipelineTransactions.add(entry);
+            }
             finishCommit(cohort);
             return;
         }
@@ -660,6 +708,13 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         // Once completed, we will continue via payloadReplicationComplete
         entry.lastAccess = shard.ticker().read();
         shard.persistPayload(txId, payload);
+        // If support pipeline process, continue process next tx does not need to wait applystate
+        // that will be triggered by appendEntriesReply
+        if (getPipelineProcessPolicy()) {
+            pendingTransactions.poll();
+            pipelineTransactions.add(entry);
+            processNextTransaction();
+        }
         LOG.debug("{}: Transaction {} submitted to persistence", logContext, txId);
     }
 

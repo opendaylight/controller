@@ -363,4 +363,24 @@ public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
             shard.getSelf().tell(new InitiateCaptureSnapshot(), ActorRef.noSender());
         }
     }
+
+    @Override
+    public void setPipelineProcessPolicy() {
+        shard.setPipelineProcessPolicy();
+    }
+
+    @Override
+    public void resetPipelineProcessPolicy() {
+        shard.resetPipelineProcessPolicy();
+    }
+
+    @Override
+    public boolean getPipelineProcessPolicy() {
+        return shard.getPipelineProcessPolicy();
+    }
+
+    @Override
+    public int getPipelineQueueSize() {
+        return shard.getPipelineQueueSize();
+    }
 }

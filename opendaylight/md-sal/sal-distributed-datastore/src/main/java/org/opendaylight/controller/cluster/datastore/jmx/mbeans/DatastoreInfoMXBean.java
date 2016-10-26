@@ -14,4 +14,10 @@ package org.opendaylight.controller.cluster.datastore.jmx.mbeans;
  */
 public interface DatastoreInfoMXBean {
     double getTransactionCreationRateLimit();
+
+    boolean getTransactionRateLimiterEnable();
+
+    void setTransactionRateLimiterEnable();
+
+    void resetTransactionRateLimiterEnable();
 }
