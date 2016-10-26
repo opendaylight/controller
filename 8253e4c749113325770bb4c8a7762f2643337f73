@@ -1,0 +1,142 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a65312a_6314acf5",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/BlueprintContainerRestartServiceImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-10-26T21:49:57Z",
+      "side": 1,
+      "message": "Lists.reverse(containerBundles).forEach(bundle -\u003e\n    blueprintExtenderService.destroyContainer(bundle, blueprintExtenderService.getContainer(bundle)));\n\nShould result in a per-instance lambda, which is not that bad in this context...",
+      "range": {
+        "startLine": 113,
+        "startChar": 0,
+        "endLine": 115,
+        "endChar": 9
+      },
+      "revId": "8253e4c749113325770bb4c8a7762f2643337f73",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a65312a_432c104b",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/AbstractDependentComponentFactoryMetadata.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 220,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-10-26T21:49:57Z",
+      "side": 1,
+      "message": "if we throw here, we won\u0027t be leaking the serviceReference  obtained above?",
+      "range": {
+        "startLine": 220,
+        "startChar": 12,
+        "endLine": 220,
+        "endChar": 68
+      },
+      "revId": "8253e4c749113325770bb4c8a7762f2643337f73",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a65312a_233114a3",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/ComponentProcessor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-10-26T21:49:57Z",
+      "side": 1,
+      "message": "managedServiceRegs.forEach(AriesFrameworkUtil::safeUnregisterService);",
+      "range": {
+        "startLine": 67,
+        "startChar": 0,
+        "endLine": 69,
+        "endChar": 9
+      },
+      "revId": "8253e4c749113325770bb4c8a7762f2643337f73",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a65312a_a31c0415",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/NotificationListenerBean.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-10-26T21:49:57Z",
+      "side": 1,
+      "message": "add a:\n\nregistration \u003d null;\n\nto release the reference.",
+      "range": {
+        "startLine": 53,
+        "startChar": 0,
+        "endLine": 53,
+        "endChar": 33
+      },
+      "revId": "8253e4c749113325770bb4c8a7762f2643337f73",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a65312a_c3e66016",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/RoutedRpcMetadata.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-10-26T21:49:57Z",
+      "side": 1,
+      "message": "it would be useful to have something like: \n\nComponentDefinitionExceptions.throwIf(boolean, String, ...) throws ComponentDefinitionException;\n\nWhich would eliminate quite a bit of boiler-plate.",
+      "range": {
+        "startLine": 85,
+        "startChar": 16,
+        "endLine": 85,
+        "endChar": 54
+      },
+      "revId": "8253e4c749113325770bb4c8a7762f2643337f73",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a65312a_e3ed5cf1",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/RoutedRpcMetadata.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-10-26T21:49:57Z",
+      "side": 1,
+      "message": "log.debug() would be useful, to privde equivalent info as the throw below.",
+      "range": {
+        "startLine": 98,
+        "startChar": 0,
+        "endLine": 98,
+        "endChar": 20
+      },
+      "revId": "8253e4c749113325770bb4c8a7762f2643337f73",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
