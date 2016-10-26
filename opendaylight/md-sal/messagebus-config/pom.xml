@@ -12,62 +12,15 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
 
   <parent>
     <groupId>org.opendaylight.controller</groupId>
-    <artifactId>sal-parent</artifactId>
-    <version>1.5.0-SNAPSHOT</version>
+    <artifactId>config-parent</artifactId>
+    <version>0.6.0-SNAPSHOT</version>
+    <relativePath>../../config/config-parent</relativePath>
   </parent>
 
+  <groupId>org.opendaylight.controller</groupId>
+  <version>1.5.0-SNAPSHOT</version>
   <artifactId>messagebus-config</artifactId>
-  <packaging>jar</packaging>
+  <packaging>bundle</packaging>
   <description>Configuration files for message-bus</description>
 
-  <dependencies>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>config-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>messagebus-api</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>messagebus-impl</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-  </dependencies>
-
-  <build>
-    <plugins>
-        <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>build-helper-maven-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>attach-artifacts</id>
-            <goals>
-              <goal>attach-artifact</goal>
-            </goals>
-            <phase>package</phase>
-            <configuration>
-              <artifacts>
-                <artifact>
-                  <file>${project.build.directory}/classes/initial/05-message-bus.xml</file>
-                  <type>xml</type>
-                  <classifier>config</classifier>
-                </artifact>
-              </artifacts>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-    </plugins>
-  </build>
-
-  <scm>
-      <connection>scm:git:http://git.opendaylight.org/gerrit/controller.git</connection>
-      <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
-      <tag>HEAD</tag>
-      <url>https://git.opendaylight.org/gerrit/gitweb?p=controller.git;a=summary</url>
-   </scm>
 </project>
