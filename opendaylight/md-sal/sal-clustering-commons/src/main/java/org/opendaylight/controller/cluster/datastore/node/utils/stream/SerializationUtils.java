@@ -5,7 +5,7 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.cluster.datastore.utils;
+package org.opendaylight.controller.cluster.datastore.node.utils.stream;
 
 import com.google.common.base.Preconditions;
 import java.io.ByteArrayInputStream;
@@ -15,9 +15,6 @@ import java.io.DataInputStream;
 import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeDataInput;
-import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeDataOutput;
-import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeInputOutput;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
@@ -25,9 +22,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
  * Provides various utility methods for serialization and de-serialization.
  *
  * @author Thomas Pantelis
- * @deprecated use {@link org.opendaylight.controller.cluster.datastore.node.utils.stream.SerializationUtils} instead
  */
-@Deprecated
 public final class SerializationUtils {
     public static final ThreadLocal<NormalizedNodeDataOutput> REUSABLE_WRITER_TL = new ThreadLocal<>();
     public static final ThreadLocal<NormalizedNodeDataInput> REUSABLE_READER_TL = new ThreadLocal<>();
