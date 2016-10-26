@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a65312a_2363d4b2",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/BlueprintContainerRestartServiceImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-10-26T21:27:38Z",
+      "side": 1,
+      "message": "MIN can be confused. Can we call this CONTAINER_CREATE_TIMEOUT_MINUTES?\n\nIn performance critical parts, where nanosecond constants are helpful, I tend to call these _NANOS...",
+      "range": {
+        "startLine": 65,
+        "startChar": 54,
+        "endLine": 65,
+        "endChar": 60
+      },
+      "revId": "981c7e7c3b2224b6c650acaeac94a27654365200",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
