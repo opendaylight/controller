@@ -10,11 +10,15 @@ package org.opendaylight.controller.remote.rpc.messages;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.io.Serializable;
-import org.opendaylight.controller.cluster.datastore.node.utils.serialization.NormalizedNodeSerializer;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import org.opendaylight.controller.cluster.datastore.node.utils.stream.SerializationUtils;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcIdentifier;
-import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages;
-import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
@@ -25,32 +29,30 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 public class ExecuteRpc implements Serializable {
     private static final long serialVersionUID = 1128904894827335676L;
 
-    private final NormalizedNodeMessages.Node inputNormalizedNode;
+    private final NormalizedNode<?, ?> inputNormalizedNode;
     private final QName rpc;
 
-    private ExecuteRpc(final NormalizedNodeMessages.Node inputNormalizedNode, final QName rpc) {
-        Preconditions.checkNotNull(rpc, "rpc Qname should not be null");
-
+    private ExecuteRpc(@Nullable final NormalizedNode<?, ?> inputNormalizedNode, @Nonnull final QName rpc) {
+        this.rpc = Preconditions.checkNotNull(rpc, "rpc Qname should not be null");
         this.inputNormalizedNode = inputNormalizedNode;
-        this.rpc = rpc;
     }
 
-    public NormalizedNodeMessages.Node getInputNormalizedNode() {
+    public static ExecuteRpc from(@Nonnull final DOMRpcIdentifier rpc, @Nullable final NormalizedNode<?, ?> input) {
+        return new ExecuteRpc(input, rpc.getType().getLastComponent());
+    }
+
+    @Nullable
+    public NormalizedNode<?, ?> getInputNormalizedNode() {
         return inputNormalizedNode;
     }
 
+    @Nonnull
     public QName getRpc() {
         return rpc;
     }
 
-    public static ExecuteRpc from(final DOMRpcIdentifier rpc, final NormalizedNode<?, ?> input) {
-        final Node serializedInput;
-        if(input != null) {
-            serializedInput = NormalizedNodeSerializer.serialize(input);
-        } else {
-            serializedInput = null;
-        }
-        return new ExecuteRpc(serializedInput, rpc.getType().getLastComponent());
+    private Object writeReplace() {
+        return new Proxy(this);
     }
 
     @Override
@@ -59,5 +61,37 @@ public class ExecuteRpc implements Serializable {
                 .add("rpc", rpc)
                 .add("normalizedNode", inputNormalizedNode)
                 .toString();
+    }
+
+    private static class Proxy implements Externalizable {
+        private static final long serialVersionUID = 1L;
+
+        private ExecuteRpc executeRpc;
+
+        // checkstyle flags the public modifier as redundant which really doesn't make sense since it clearly isn't
+        // redundant. It is explicitly needed for Java serialization to be able to create instances via reflection.
+        @SuppressWarnings("checkstyle:RedundantModifier")
+        public Proxy() {
+        }
+
+        Proxy(ExecuteRpc executeRpc) {
+            this.executeRpc = executeRpc;
+        }
+
+        @Override
+        public void writeExternal(ObjectOutput out) throws IOException {
+            out.writeObject(executeRpc.getRpc());
+            SerializationUtils.serializeNormalizedNode(executeRpc.getInputNormalizedNode(), out);
+        }
+
+        @Override
+        public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+            QName qname = (QName) in.readObject();
+            executeRpc = new ExecuteRpc(SerializationUtils.deserializeNormalizedNode(in), qname);
+        }
+
+        private Object readResolve() {
+            return executeRpc;
+        }
     }
 }

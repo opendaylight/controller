@@ -10,8 +10,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import java.util.Collection;
 import java.util.Map;
-import org.opendaylight.controller.cluster.datastore.node.utils.serialization.NormalizedNodeSerializer;
-import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node;
+import javax.annotation.Nullable;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
@@ -28,13 +27,13 @@ class RemoteRpcInput implements ContainerNode {
         this.delegate = delegate;
     }
 
-    protected static RemoteRpcInput from(final Node node) {
+    protected static RemoteRpcInput from(@Nullable final NormalizedNode<?, ?> node) {
         if(node == null) {
             return null;
         }
-        final NormalizedNode<?, ?> deserialized = NormalizedNodeSerializer.deSerialize(node);
-        Preconditions.checkArgument(deserialized instanceof ContainerNode);
-        return new RemoteRpcInput((ContainerNode) deserialized);
+
+        Preconditions.checkArgument(node instanceof ContainerNode);
+        return new RemoteRpcInput((ContainerNode) node);
     }
 
     ContainerNode delegate() {

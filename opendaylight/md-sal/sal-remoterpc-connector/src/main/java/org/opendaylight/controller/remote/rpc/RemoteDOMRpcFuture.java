@@ -15,7 +15,6 @@ import com.google.common.util.concurrent.CheckedFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import org.opendaylight.controller.cluster.datastore.node.utils.serialization.NormalizedNodeSerializer;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcException;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcResult;
 import org.opendaylight.controller.md.sal.dom.spi.DefaultDOMRpcResult;
@@ -92,19 +91,17 @@ class RemoteDOMRpcFuture extends AbstractFuture<DOMRpcResult> implements Checked
                 RemoteDOMRpcFuture.this.failNow(error);
             } else if (reply instanceof RpcResponse) {
                 final RpcResponse rpcReply = (RpcResponse) reply;
-                final NormalizedNode<?, ?> result;
-                if (rpcReply.getResultNormalizedNode() == null) {
-                    result = null;
-                    LOG.debug("Received response for rpc {}: result is null", rpcName);
-                } else {
-                    result = NormalizedNodeSerializer.deSerialize(rpcReply.getResultNormalizedNode());
-                    LOG.debug("Received response for rpc {}: result is {}", rpcName, result);
-                }
+                final NormalizedNode<?, ?> result = rpcReply.getResultNormalizedNode();
+
+                LOG.debug("Received response for rpc {}: result is {}", rpcName, result);
+
                 RemoteDOMRpcFuture.this.set(new DefaultDOMRpcResult(result));
+
                 LOG.debug("Future {} for rpc {} successfully completed", RemoteDOMRpcFuture.this, rpcName);
+            } else {
+                RemoteDOMRpcFuture.this.failNow(new IllegalStateException("Incorrect reply type " + reply
+                        + "from Akka"));
             }
-            RemoteDOMRpcFuture.this.failNow(new IllegalStateException("Incorrect reply type " + reply
-                    + "from Akka"));
         }
     }
 
