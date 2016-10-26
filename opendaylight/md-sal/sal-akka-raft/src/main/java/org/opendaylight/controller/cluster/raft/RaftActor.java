@@ -34,6 +34,7 @@ import org.opendaylight.controller.cluster.common.actor.AbstractUntypedPersisten
 import org.opendaylight.controller.cluster.notifications.LeaderStateChanged;
 import org.opendaylight.controller.cluster.notifications.RoleChanged;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
+import org.opendaylight.controller.cluster.raft.base.messages.BatchedAppendEntries;
 import org.opendaylight.controller.cluster.raft.base.messages.InitiateCaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.LeaderTransitioning;
 import org.opendaylight.controller.cluster.raft.base.messages.Replicate;
@@ -119,6 +120,8 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     private RaftActorLeadershipTransferCohort leadershipTransferInProgress;
 
     private boolean shuttingDown;
+
+    protected long batchedAppendEntriesCount = 0;
 
     protected RaftActor(String id, Map<String, String> peerAddresses,
          Optional<ConfigParams> configParams, short payloadVersion) {
@@ -542,8 +545,16 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
                 context.getReplicatedLog().captureSnapshotIfReady(replicatedLogEntry1);
 
                 // Send message for replication
-                getCurrentBehavior().handleMessage(getSelf(),
+                if (getPipelineProcessPolicy()) {
+                    getCurrentBehavior().handleMessage(getSelf(),
+                        new Replicate(clientActor, identifier, replicatedLogEntry1, false));
+                    // Send Batched AppendEntries
+                    LOG.debug("{}: Persist data apply {} {}", persistenceId(), identifier);
+                    maybeSendBatchedAppendEntries(identifier);
+                } else {
+                    getCurrentBehavior().handleMessage(getSelf(),
                         new Replicate(clientActor, identifier, replicatedLogEntry1));
+                }
             }
         });
     }
@@ -707,6 +718,17 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
      */
     protected void setPeerAddress(String peerId, String peerAddress) {
         context.setPeerAddress(peerId, peerAddress);
+    }
+
+    public abstract boolean getPipelineProcessPolicy();
+
+    protected abstract boolean canSendBatchedAppendEntries(final Identifier identifier);
+
+    protected void maybeSendBatchedAppendEntries(final Identifier identifier) {
+        if (canSendBatchedAppendEntries(identifier)) {
+            getCurrentBehavior().handleMessage(getSelf(), new BatchedAppendEntries());
+            batchedAppendEntriesCount++;
+        }
     }
 
     /**

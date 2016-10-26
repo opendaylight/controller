@@ -35,6 +35,7 @@ import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.Snapshot;
 import org.opendaylight.controller.cluster.raft.VotingState;
+import org.opendaylight.controller.cluster.raft.base.messages.BatchedAppendEntries;
 import org.opendaylight.controller.cluster.raft.base.messages.Replicate;
 import org.opendaylight.controller.cluster.raft.base.messages.SendHeartBeat;
 import org.opendaylight.controller.cluster.raft.base.messages.SendInstallSnapshot;
@@ -447,6 +448,8 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
             replicate((Replicate) message);
         } else if (message instanceof InstallSnapshotReply) {
             handleInstallSnapshotReply((InstallSnapshotReply) message);
+        } else if (message instanceof BatchedAppendEntries) {
+            sendAppendEntries(0, false);
         } else {
             return super.handleMessage(sender, message);
         }
@@ -571,8 +574,10 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
             applyLogToStateMachine(logIndex);
         }
 
-        if (!followerToLog.isEmpty()) {
-            sendAppendEntries(0, false);
+        if (replicate.getSendImmediate()) {
+            if (!followerToLog.isEmpty()) {
+                sendAppendEntries(0, false);
+            }
         }
     }
 

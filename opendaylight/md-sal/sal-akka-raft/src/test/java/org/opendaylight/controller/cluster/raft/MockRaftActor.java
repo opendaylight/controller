@@ -362,4 +362,12 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
             super(MockRaftActor.class);
         }
     }
+
+    protected boolean canSendBatchedAppendEntries(final Identifier identifier) {
+        return false;
+    }
+
+    public boolean getPipelineProcessPolicy() {
+        return false;
+    }
 }
