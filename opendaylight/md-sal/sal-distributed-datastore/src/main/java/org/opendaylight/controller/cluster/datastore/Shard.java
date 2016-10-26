@@ -108,6 +108,8 @@ public class Shard extends RaftActor {
 
     private final ShardCommitCoordinator commitCoordinator;
 
+    private boolean pipelineProcessPolicy = false;
+
     private long transactionCommitTimeout;
 
     private Cancellable txCommitTimeoutCheckSchedule;
@@ -180,6 +182,22 @@ public class Shard extends RaftActor {
             this.name);
 
         messageRetrySupport = new ShardTransactionMessageRetrySupport(this);
+    }
+
+    public void setPipelineProcessPolicy() {
+        store.updatePipelineProcessPolicy(true);
+    }
+
+    public void resetPipelineProcessPolicy() {
+        store.updatePipelineProcessPolicy(false);
+    }
+
+    public boolean getPipelineProcessPolicy() {
+        return store.getPipelineProcessPolicy();
+    }
+
+    public int getPipelineQueueSize() {
+        return store.getPipelineQueueSize();
     }
 
     private void setTransactionCommitTimeout() {
@@ -566,6 +584,11 @@ public class Shard extends RaftActor {
                     period, period, getSelf(),
                     TX_COMMIT_TIMEOUT_CHECK_MESSAGE, getContext().dispatcher(), ActorRef.noSender());
         }
+    }
+
+    @Override
+    protected boolean canSendBatchedAppendEntries(final Identifier identifier ) {
+        return store.isPipelineTailTranscation(identifier);
     }
 
     @Override

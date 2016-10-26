@@ -31,6 +31,10 @@ final class CohortEntry {
     private ActorRef replySender;
     private Shard shard;
 
+    private boolean wasInBatchedQueue = false;
+    private boolean wasRecvApplyState = false;
+    private boolean commited = false;
+
     private CohortEntry(final ReadWriteShardDataTreeTransaction transaction, final short clientVersion) {
         this.transaction = Preconditions.checkNotNull(transaction);
         this.transactionID = transaction.getId();
@@ -42,6 +46,30 @@ final class CohortEntry {
         this.transactionID = cohort.getIdentifier();
         this.transaction = null;
         this.clientVersion = clientVersion;
+    }
+
+    void setInBatchedQueue() {
+        this.wasInBatchedQueue = true;
+    }
+
+    void resetInBatchedQueue() {
+        this.wasInBatchedQueue = false;
+    }
+
+    boolean getWasInBatchedQueue() {
+        return this.wasInBatchedQueue;
+    }
+
+    void setRecvApplyState() {
+        this.wasRecvApplyState = true;
+    }
+
+    boolean getWasRecvApplyState() {
+        return this.wasRecvApplyState;
+    }
+
+    void setCommited() {
+        this.commited = true;
     }
 
     static CohortEntry createOpen(final ReadWriteShardDataTreeTransaction transaction, final short clientVersion) {
