@@ -62,6 +62,7 @@ import org.w3c.dom.Element;
  */
 class BlueprintContainerRestartServiceImpl implements AutoCloseable, BlueprintContainerRestartService {
     private static final Logger LOG = LoggerFactory.getLogger(BlueprintContainerRestartServiceImpl.class);
+    private static final int CONTAINER_CREATE_TIMEOUT_IN_MINUTES = 5;
     private static final String CONFIG_MODULE_NAMESPACE_PROP = "config-module-namespace";
     private static final String CONFIG_MODULE_NAME_PROP = "config-module-name";
     private static final String CONFIG_INSTANCE_NAME_PROP = "config-instance-name";
@@ -136,7 +137,12 @@ class BlueprintContainerRestartServiceImpl implements AutoCloseable, BlueprintCo
         }
 
         try {
-            containerCreationComplete.await(5, TimeUnit.MINUTES);
+            if (!containerCreationComplete.await(CONTAINER_CREATE_TIMEOUT_IN_MINUTES, TimeUnit.MINUTES)) {
+                LOG.warn("Failed to restart all blueprint containers within {} minutes. Attempted to restart {} {} "
+                        + "but only {} completed restart", CONTAINER_CREATE_TIMEOUT_IN_MINUTES, containerBundles.size(),
+                        containerBundles, containerBundles.size() - containerCreationComplete.getCount());
+                return;
+            }
         } catch (InterruptedException e) {
             LOG.debug("CountDownLatch await was interrupted - returning");
             return;
