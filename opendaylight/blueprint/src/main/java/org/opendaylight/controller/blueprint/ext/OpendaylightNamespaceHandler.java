@@ -51,7 +51,7 @@ import org.xml.sax.SAXException;
  *
  * @author Thomas Pantelis
  */
-public class OpendaylightNamespaceHandler implements NamespaceHandler {
+public final class OpendaylightNamespaceHandler implements NamespaceHandler {
     public static final String NAMESPACE_1_0_0 = "http://opendaylight.org/xmlns/blueprint/v1.0.0";
     static final String ROUTED_RPC_REG_CONVERTER_NAME = "org.opendaylight.blueprint.RoutedRpcRegConverter";
     static final String RPC_REGISTRY_NAME = "org.opendaylight.blueprint.RpcRegistry";
