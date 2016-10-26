@@ -32,6 +32,7 @@ public class NotificationListenerBean {
     public void setNotificationService(NotificationService notificationService) {
         this.notificationService = notificationService;
     }
+
     public void setNotificationListener(NotificationListener notificationListener) {
         this.notificationListener = notificationListener;
     }
@@ -47,7 +48,7 @@ public class NotificationListenerBean {
     }
 
     public void destroy() {
-        if(registration != null) {
+        if (registration != null) {
             LOG.debug("{}: destroy - closing ListenerRegistration {}", bundle.getSymbolicName(), notificationListener);
             registration.close();
         } else {

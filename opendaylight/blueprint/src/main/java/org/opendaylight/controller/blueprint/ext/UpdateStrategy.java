@@ -8,7 +8,7 @@
 package org.opendaylight.controller.blueprint.ext;
 
 /**
- * Enumerates possible strategies when a component is updated
+ * Enumerates possible strategies when a component is updated.
  *
  * @author Vishal Thapar
  */

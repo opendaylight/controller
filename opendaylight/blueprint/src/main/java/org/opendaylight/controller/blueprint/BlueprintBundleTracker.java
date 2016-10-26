@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashSet;
@@ -146,7 +145,7 @@ public class BlueprintBundleTracker implements BundleActivator, BundleTrackerCus
     public void bundleChanged(BundleEvent event) {
         // If the system bundle (id 0) is stopping, do an orderly shutdown of all blueprint containers. On
         // shutdown the system bundle is stopped first.
-        if(event.getBundle().getBundleId() == SYSTEM_BUNDLE_ID && event.getType() == BundleEvent.STOPPING) {
+        if (event.getBundle().getBundleId() == SYSTEM_BUNDLE_ID && event.getType() == BundleEvent.STOPPING) {
             shutdownAllContainers();
         }
     }
@@ -165,14 +164,14 @@ public class BlueprintBundleTracker implements BundleActivator, BundleTrackerCus
      */
     @Override
     public void modifiedBundle(Bundle bundle, BundleEvent event, Bundle object) {
-        if(shuttingDown) {
+        if (shuttingDown) {
             return;
         }
 
-        if(bundle.getState() == Bundle.ACTIVE) {
+        if (bundle.getState() == Bundle.ACTIVE) {
             List<Object> paths = findBlueprintPaths(bundle);
 
-            if(!paths.isEmpty()) {
+            if (!paths.isEmpty()) {
                 LOG.info("Creating blueprint container for bundle {} with paths {}", bundle, paths);
 
                 blueprintExtenderService.createContainer(bundle, paths);
@@ -191,23 +190,23 @@ public class BlueprintBundleTracker implements BundleActivator, BundleTrackerCus
     /**
      * Implemented from EventHandler to listen for blueprint events.
      *
-     * @param event
+     * @param event the event to handle
      */
     @Override
     public void handleEvent(Event event) {
-        if(EventConstants.TOPIC_CREATED.equals(event.getTopic())) {
+        if (EventConstants.TOPIC_CREATED.equals(event.getTopic())) {
             LOG.info("Blueprint container for bundle {} was successfully created",
                     event.getProperty(EventConstants.BUNDLE));
-        } else if(EventConstants.TOPIC_FAILURE.equals(event.getTopic())) {
+        } else if (EventConstants.TOPIC_FAILURE.equals(event.getTopic())) {
             // If the container timed out waiting for dependencies, we'll destroy it and start it again. This
             // is indicated via a non-null DEPENDENCIES property containing the missing dependencies. The
             // default timeout is 5 min and ideally we would set this to infinite but the timeout can only
             // be set at the bundle level in the manifest - there's no way to set it globally.
-            if(event.getProperty(EventConstants.DEPENDENCIES) != null) {
+            if (event.getProperty(EventConstants.DEPENDENCIES) != null) {
                 Bundle bundle = (Bundle) event.getProperty(EventConstants.BUNDLE);
 
                 List<Object> paths = findBlueprintPaths(bundle);
-                if(!paths.isEmpty()) {
+                if (!paths.isEmpty()) {
                     LOG.warn("Blueprint container for bundle {} timed out waiting for dependencies - restarting it",
                             event.getProperty(EventConstants.BUNDLE));
 
@@ -219,11 +218,11 @@ public class BlueprintBundleTracker implements BundleActivator, BundleTrackerCus
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     static List<Object> findBlueprintPaths(Bundle bundle) {
-        Enumeration<?> e = bundle.findEntries(BLUEPRINT_FILE_PATH, BLUEPRINT_FLE_PATTERN, false);
-        if(e == null) {
+        Enumeration<?> rntries = bundle.findEntries(BLUEPRINT_FILE_PATH, BLUEPRINT_FLE_PATTERN, false);
+        if (rntries == null) {
             return Collections.emptyList();
         } else {
-            return Collections.list((Enumeration)e);
+            return Collections.list((Enumeration)rntries);
         }
     }
 
@@ -234,20 +233,20 @@ public class BlueprintBundleTracker implements BundleActivator, BundleTrackerCus
 
         // Close all CSS modules first.
         ConfigSystemService configSystem = getOSGiService(ConfigSystemService.class);
-        if(configSystem != null) {
+        if (configSystem != null) {
             configSystem.closeAllConfigModules();
         }
 
         LOG.info("Shutting down all blueprint containers...");
 
         Collection<Bundle> containerBundles = new HashSet<>(Arrays.asList(bundleContext.getBundles()));
-        while(!containerBundles.isEmpty()) {
+        while (!containerBundles.isEmpty()) {
             // For each iteration of getBundlesToDestroy, as containers are destroyed, other containers become
             // eligible to be destroyed. We loop until we've destroyed them all.
-            for(Bundle bundle : getBundlesToDestroy(containerBundles)) {
+            for (Bundle bundle : getBundlesToDestroy(containerBundles)) {
                 containerBundles.remove(bundle);
                 BlueprintContainer container = blueprintExtenderService.getContainer(bundle);
-                if(container != null) {
+                if (container != null) {
                     blueprintExtenderService.destroyContainer(bundle, container);
                 }
             }
@@ -261,28 +260,23 @@ public class BlueprintBundleTracker implements BundleActivator, BundleTrackerCus
 
         // Find all container bundles that either have no registered services or whose services are no
         // longer in use.
-        for(Bundle bundle : containerBundles) {
+        for (Bundle bundle : containerBundles) {
             ServiceReference<?>[] references = bundle.getRegisteredServices();
             int usage = 0;
-            if(references != null) {
-                for(ServiceReference<?> reference : references) {
+            if (references != null) {
+                for (ServiceReference<?> reference : references) {
                     usage += getServiceUsage(reference);
                 }
             }
 
             LOG.debug("Usage for bundle {} is {}", bundle, usage);
-            if(usage == 0) {
+            if (usage == 0) {
                 bundlesToDestroy.add(bundle);
             }
         }
 
-        if(!bundlesToDestroy.isEmpty()) {
-            Collections.sort(bundlesToDestroy, new Comparator<Bundle>() {
-                @Override
-                public int compare(Bundle b1, Bundle b2) {
-                    return (int) (b2.getLastModified() - b1.getLastModified());
-                }
-            });
+        if (!bundlesToDestroy.isEmpty()) {
+            Collections.sort(bundlesToDestroy, (b1, b2) -> (int) (b2.getLastModified() - b1.getLastModified()));
 
             LOG.debug("Selected bundles {} for destroy (no services in use)", bundlesToDestroy);
         } else {
@@ -295,30 +289,30 @@ public class BlueprintBundleTracker implements BundleActivator, BundleTrackerCus
             // is likely the safest to destroy at this point.
 
             ServiceReference<?> ref = null;
-            for(Bundle bundle : containerBundles) {
+            for (Bundle bundle : containerBundles) {
                 ServiceReference<?>[] references = bundle.getRegisteredServices();
-                if(references == null) {
+                if (references == null) {
                     continue;
                 }
 
-                for(ServiceReference<?> reference : references) {
+                for (ServiceReference<?> reference : references) {
                     // We did check the service usage above but it's possible the usage has changed since
                     // then,
-                    if(getServiceUsage(reference) == 0) {
+                    if (getServiceUsage(reference) == 0) {
                         continue;
                     }
 
                     // Choose 'reference' if it has a lower service ranking or, if the rankings are equal
                     // which is usually the case, if it has a higher service ID. For the latter the < 0
                     // check looks backwards but that's how ServiceReference#compareTo is documented to work.
-                    if(ref == null || reference.compareTo(ref) < 0) {
+                    if (ref == null || reference.compareTo(ref) < 0) {
                         LOG.debug("Currently selecting bundle {} for destroy (with reference {})", bundle, reference);
                         ref = reference;
                     }
                 }
             }
 
-            if(ref != null) {
+            if (ref != null) {
                 bundlesToDestroy.add(ref.getBundle());
             }
 
@@ -337,19 +331,19 @@ public class BlueprintBundleTracker implements BundleActivator, BundleTrackerCus
     private <T> T getOSGiService(Class<T> serviceInterface) {
         try {
             ServiceReference<T> serviceReference = bundleContext.getServiceReference(serviceInterface);
-            if(serviceReference == null) {
+            if (serviceReference == null) {
                 LOG.warn("{} service reference not found", serviceInterface.getSimpleName());
                 return null;
             }
 
             T service = bundleContext.getService(serviceReference);
-            if(service == null) {
+            if (service == null) {
                 // This could happen on shutdown if the service was already unregistered so we log as debug.
                 LOG.debug("{} service instance was not found", serviceInterface.getSimpleName());
             }
 
             return service;
-        } catch(IllegalStateException e) {
+        } catch (IllegalStateException e) {
             // This is thrown if the BundleContext is no longer valid which is possible on shutdown so we
             // log as debug.
             LOG.debug("Error obtaining OSGi service {}", serviceInterface.getSimpleName(), e);

@@ -48,20 +48,22 @@ class RpcServiceMetadata extends AbstractDependentComponentFactoryMetadata {
         this.interfaceName = interfaceName;
     }
 
+    @SuppressWarnings({ "checkstyle:IllegalCatch", "unchecked" })
     @Override
-    @SuppressWarnings("unchecked")
     public void init(ExtendedBlueprintContainer container) {
         super.init(container);
 
         try {
             Class<?> interfaceClass = container().getBundleContext().getBundle().loadClass(interfaceName);
-            if(!RpcService.class.isAssignableFrom(interfaceClass)) {
+            if (!RpcService.class.isAssignableFrom(interfaceClass)) {
                 throw new ComponentDefinitionException(String.format(
                         "%s: The specified interface %s is not an RpcService", logName(), interfaceName));
             }
 
             rpcInterface = (Class<RpcService>)interfaceClass;
-        } catch(Exception e) {
+        } catch (ComponentDefinitionException e) {
+            throw e;
+        } catch (Exception e) {
             throw new ComponentDefinitionException(String.format("%s: Error obtaining interface class %s",
                     logName(), interfaceName), e);
         }
@@ -72,19 +74,20 @@ class RpcServiceMetadata extends AbstractDependentComponentFactoryMetadata {
         // First get the SchemaContext. This will be used to get the RPC SchemaPaths.
 
         retrieveService("SchemaService", SchemaService.class,
-                service -> retrievedSchemaContext(((SchemaService)service).getGlobalContext()));
+            service -> retrievedSchemaContext(((SchemaService)service).getGlobalContext()));
     }
 
     private void retrievedSchemaContext(SchemaContext schemaContext) {
         LOG.debug("{}: retrievedSchemaContext", logName());
 
         QNameModule moduleName = BindingReflections.getQNameModule(rpcInterface);
-        Module module = schemaContext.findModuleByNamespaceAndRevision(moduleName.getNamespace(), moduleName.getRevision());
+        Module module = schemaContext.findModuleByNamespaceAndRevision(moduleName.getNamespace(),
+                moduleName.getRevision());
 
         LOG.debug("{}: Got Module: {}", logName(), module);
 
         rpcSchemaPaths = new HashSet<>();
-        for(RpcDefinition rpcDef : module.getRpcs()) {
+        for (RpcDefinition rpcDef : module.getRpcs()) {
             rpcSchemaPaths.add(rpcDef.getPath());
         }
 
@@ -93,7 +96,8 @@ class RpcServiceMetadata extends AbstractDependentComponentFactoryMetadata {
         // First get the DOMRpcService OSGi service. This will be used to register a listener to be notified
         // when the underlying DOM RPC service is available.
 
-        retrieveService("DOMRpcService", DOMRpcService.class, service -> retrievedDOMRpcService((DOMRpcService)service));
+        retrieveService("DOMRpcService", DOMRpcService.class,
+            service -> retrievedDOMRpcService((DOMRpcService)service));
     }
 
     private void retrievedDOMRpcService(DOMRpcService domRpcService) {
@@ -113,8 +117,8 @@ class RpcServiceMetadata extends AbstractDependentComponentFactoryMetadata {
     }
 
     protected void onRpcsAvailable(Collection<DOMRpcIdentifier> rpcs) {
-        for(DOMRpcIdentifier identifier: rpcs) {
-            if(rpcSchemaPaths.contains(identifier.getType())) {
+        for (DOMRpcIdentifier identifier : rpcs) {
+            if (rpcSchemaPaths.contains(identifier.getType())) {
                 LOG.debug("{}: onRpcsAvailable - found SchemaPath {}", logName(), identifier.getType());
 
                 retrieveService("RpcProviderRegistry", RpcProviderRegistry.class, service -> {
@@ -127,6 +131,7 @@ class RpcServiceMetadata extends AbstractDependentComponentFactoryMetadata {
         }
     }
 
+    @SuppressWarnings("checkstyle:IllegalCatch")
     @Override
     public Object create() throws ComponentDefinitionException {
         LOG.debug("{}: In create: interfaceName: {}", logName(), interfaceName);
@@ -139,7 +144,7 @@ class RpcServiceMetadata extends AbstractDependentComponentFactoryMetadata {
             LOG.debug("{}: create returning service {}", logName(), rpcService);
 
             return rpcService;
-        } catch(Exception e) {
+        } catch (RuntimeException e) {
             throw new ComponentDefinitionException("Error getting RPC service for " + interfaceName, e);
         }
     }
@@ -151,7 +156,7 @@ class RpcServiceMetadata extends AbstractDependentComponentFactoryMetadata {
     }
 
     private void closeRpcListenerReg() {
-        if(rpcListenerReg != null) {
+        if (rpcListenerReg != null) {
             rpcListenerReg.close();
             rpcListenerReg = null;
         }

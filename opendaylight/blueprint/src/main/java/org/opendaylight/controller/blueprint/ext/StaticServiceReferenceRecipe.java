@@ -11,7 +11,6 @@ import com.google.common.base.Preconditions;
 import java.util.Collections;
 import java.util.function.Consumer;
 import org.apache.aries.blueprint.container.AbstractServiceReferenceRecipe;
-import org.apache.aries.blueprint.container.SatisfiableRecipe;
 import org.apache.aries.blueprint.services.ExtendedBlueprintContainer;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.blueprint.container.ComponentDefinitionException;
@@ -28,11 +27,8 @@ import org.slf4j.LoggerFactory;
 class StaticServiceReferenceRecipe extends AbstractServiceReferenceRecipe {
     private static final Logger LOG = LoggerFactory.getLogger(StaticServiceReferenceRecipe.class);
 
-    private static final SatisfactionListener NOOP_LISTENER = new SatisfactionListener() {
-        @Override
-        public void notifySatisfaction(SatisfiableRecipe satisfiable) {
+    private static final SatisfactionListener NOOP_LISTENER = satisfiable -> {
 
-        }
     };
 
     private volatile ServiceReference<?> trackedServiceReference;
@@ -45,8 +41,8 @@ class StaticServiceReferenceRecipe extends AbstractServiceReferenceRecipe {
                 Collections.emptyList());
     }
 
-    void startTracking(Consumer<Object> serviceSatisfiedCallback) {
-        this.serviceSatisfiedCallback = serviceSatisfiedCallback;
+    void startTracking(Consumer<Object> newServiceSatisfiedCallback) {
+        this.serviceSatisfiedCallback = newServiceSatisfiedCallback;
         super.start(NOOP_LISTENER);
     }
 
@@ -61,7 +57,7 @@ class StaticServiceReferenceRecipe extends AbstractServiceReferenceRecipe {
     protected void untrack(ServiceReference reference) {
         LOG.debug("{}: In untrack {}", getName(), reference);
 
-        if(trackedServiceReference == reference) {
+        if (trackedServiceReference == reference) {
             LOG.debug("{}: Current reference has been untracked", getName(), trackedServiceReference);
         }
     }
@@ -70,12 +66,12 @@ class StaticServiceReferenceRecipe extends AbstractServiceReferenceRecipe {
     protected void retrack() {
         LOG.debug("{}: In retrack", getName());
 
-        if(trackedServiceReference == null) {
+        if (trackedServiceReference == null) {
             trackedServiceReference = getBestServiceReference();
 
             LOG.debug("{}: getBestServiceReference: {}", getName(), trackedServiceReference);
 
-            if(trackedServiceReference != null && serviceSatisfiedCallback != null) {
+            if (trackedServiceReference != null && serviceSatisfiedCallback != null) {
                 serviceSatisfiedCallback.accept(internalCreate());
             }
         }
@@ -85,10 +81,10 @@ class StaticServiceReferenceRecipe extends AbstractServiceReferenceRecipe {
     protected void doStop() {
         LOG.debug("{}: In doStop", getName());
 
-        if(trackedServiceReference != null && trackedService != null) {
+        if (trackedServiceReference != null && trackedService != null) {
             try {
                 getBundleContextForServiceLookup().ungetService(trackedServiceReference);
-            } catch(IllegalStateException e) {
+            } catch (IllegalStateException e) {
                 // In case the service no longer exists, ignore.
             }
 
@@ -104,7 +100,7 @@ class StaticServiceReferenceRecipe extends AbstractServiceReferenceRecipe {
         LOG.debug("{}: In internalCreate: trackedServiceReference: {}", getName(), localTrackedServiceReference);
 
         // being paranoid - internalCreate should only get called once
-        if(trackedService != null) {
+        if (trackedService != null) {
             return trackedService;
         }
 

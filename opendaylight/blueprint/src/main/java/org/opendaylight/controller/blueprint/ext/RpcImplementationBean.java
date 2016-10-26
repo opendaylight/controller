@@ -51,6 +51,7 @@ public class RpcImplementationBean {
         this.implementation = implementation;
     }
 
+    @SuppressWarnings("checkstyle:IllegalCatch")
     public void init() {
         try {
             List<Class<RpcService>> rpcInterfaces = getImplementedRpcServiceInterfaces(interfaceName,
@@ -59,19 +60,19 @@ public class RpcImplementationBean {
             LOG.debug("{}: init - adding implementation {} for RpcService interface(s) {}", bundle.getSymbolicName(),
                     implementation, rpcInterfaces);
 
-            for(Class<RpcService> rpcInterface: rpcInterfaces) {
+            for (Class<RpcService> rpcInterface : rpcInterfaces) {
                 rpcRegistrations.add(rpcRegistry.addRpcImplementation(rpcInterface, implementation));
             }
-        } catch(ComponentDefinitionException e) {
+        } catch (ComponentDefinitionException e) {
             throw e;
-        } catch(Exception e) {
+        } catch (Exception e) {
             throw new ComponentDefinitionException(String.format(
                     "Error processing \"%s\" for %s", RPC_IMPLEMENTATION, implementation.getClass()), e);
         }
     }
 
     public void destroy() {
-        for(RpcRegistration<RpcService> reg: rpcRegistrations) {
+        for (RpcRegistration<RpcService> reg: rpcRegistrations) {
             reg.close();
         }
     }
@@ -79,10 +80,10 @@ public class RpcImplementationBean {
     @SuppressWarnings("unchecked")
     static List<Class<RpcService>> getImplementedRpcServiceInterfaces(String interfaceName,
             Class<?> implementationClass, Bundle bundle, String logName) throws ClassNotFoundException {
-        if(!Strings.isNullOrEmpty(interfaceName)) {
+        if (!Strings.isNullOrEmpty(interfaceName)) {
             Class<?> rpcInterface = bundle.loadClass(interfaceName);
 
-            if(!rpcInterface.isAssignableFrom(implementationClass)) {
+            if (!rpcInterface.isAssignableFrom(implementationClass)) {
                 throw new ComponentDefinitionException(String.format(
                         "The specified \"interface\" %s for \"%s\" is not implemented by RpcService \"ref\" %s",
                         interfaceName, logName, implementationClass));
@@ -92,13 +93,13 @@ public class RpcImplementationBean {
         }
 
         List<Class<RpcService>> rpcInterfaces = new ArrayList<>();
-        for(Class<?> intface: implementationClass.getInterfaces()) {
-            if(RpcService.class.isAssignableFrom(intface)) {
+        for (Class<?> intface : implementationClass.getInterfaces()) {
+            if (RpcService.class.isAssignableFrom(intface)) {
                 rpcInterfaces.add((Class<RpcService>) intface);
             }
         }
 
-        if(rpcInterfaces.isEmpty()) {
+        if (rpcInterfaces.isEmpty()) {
             throw new ComponentDefinitionException(String.format(
                     "The \"ref\" instance %s for \"%s\" does not implemented any RpcService interfaces",
                     implementationClass, logName));

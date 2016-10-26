@@ -8,11 +8,13 @@
 package org.opendaylight.controller.blueprint.ext;
 
 import com.google.common.base.Strings;
+import java.io.IOException;
 import java.io.StringReader;
 import java.net.URL;
 import java.util.Collections;
 import java.util.Set;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import org.apache.aries.blueprint.ComponentDefinitionRegistry;
 import org.apache.aries.blueprint.NamespaceHandler;
 import org.apache.aries.blueprint.ParserContext;
@@ -42,6 +44,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 /**
  * The NamespaceHandler for Opendaylight blueprint extensions.
@@ -76,7 +79,7 @@ public class OpendaylightNamespaceHandler implements NamespaceHandler {
 
     @Override
     public URL getSchemaLocation(String namespace) {
-        if(NAMESPACE_1_0_0.equals(namespace)) {
+        if (NAMESPACE_1_0_0.equals(namespace)) {
             URL url = getClass().getResource("/opendaylight-blueprint-ext-1.0.0.xsd");
             LOG.debug("getSchemaLocation for {} returning URL {}", namespace, url);
             return url;
@@ -110,20 +113,20 @@ public class OpendaylightNamespaceHandler implements NamespaceHandler {
 
     @Override
     public ComponentMetadata decorate(Node node, ComponentMetadata component, ParserContext context) {
-        if(node instanceof Attr) {
+        if (node instanceof Attr) {
             if (nodeNameEquals(node, RESTART_DEPENDENTS_ON_UPDATES)) {
-                return decorateRestartDependentsOnUpdates((Attr)node, component, context);
+                return decorateRestartDependentsOnUpdates((Attr) node, component, context);
             } else if (nodeNameEquals(node, USE_DEFAULT_FOR_REFERENCE_TYPES)) {
-                return decorateUseDefaultForReferenceTypes((Attr)node, component, context);
+                return decorateUseDefaultForReferenceTypes((Attr) node, component, context);
             } else if (nodeNameEquals(node, TYPE_ATTR)) {
-                if(component instanceof ServiceReferenceMetadata) {
-                    return decorateServiceReferenceType((Attr)node, component, context);
-                } else if(component instanceof ServiceMetadata) {
+                if (component instanceof ServiceReferenceMetadata) {
+                    return decorateServiceReferenceType((Attr) node, component, context);
+                } else if (component instanceof ServiceMetadata) {
                     return decorateServiceType((Attr)node, component, context);
                 }
 
-                throw new ComponentDefinitionException("Attribute " + node.getNodeName() +
-                        " can only be used on a <reference>, <reference-list> or <service> element");
+                throw new ComponentDefinitionException("Attribute " + node.getNodeName()
+                        + " can only be used on a <reference>, <reference-list> or <service> element");
             }
 
             throw new ComponentDefinitionException("Unsupported attribute: " + node.getNodeName());
@@ -145,7 +148,8 @@ public class OpendaylightNamespaceHandler implements NamespaceHandler {
         return component;
     }
 
-    private ComponentMetadata decorateServiceReferenceType(Attr attr, ComponentMetadata component, ParserContext context) {
+    private ComponentMetadata decorateServiceReferenceType(Attr attr, ComponentMetadata component,
+            ParserContext context) {
         if (!(component instanceof MutableServiceReferenceMetadata)) {
             throw new ComponentDefinitionException("Expected an instanceof MutableServiceReferenceMetadata");
         }
@@ -163,7 +167,7 @@ public class OpendaylightNamespaceHandler implements NamespaceHandler {
             serviceRef.getExtendedFilter().getStringValue();
 
         String filter;
-        if(Strings.isNullOrEmpty(oldFilter)) {
+        if (Strings.isNullOrEmpty(oldFilter)) {
             filter = String.format("(type=%s)", attr.getValue());
         } else {
             filter = String.format("(&(%s)(type=%s))", oldFilter, attr.getValue());
@@ -188,14 +192,14 @@ public class OpendaylightNamespaceHandler implements NamespaceHandler {
 
     private static ComponentMetadata enableComponentProcessorProperty(Attr attr, ComponentMetadata component,
             ParserContext context, String propertyName) {
-        if(component != null) {
-            throw new ComponentDefinitionException("Attribute " + attr.getNodeName() +
-                    " can only be used on the root <blueprint> element");
+        if (component != null) {
+            throw new ComponentDefinitionException("Attribute " + attr.getNodeName()
+                    + " can only be used on the root <blueprint> element");
         }
 
         LOG.debug("{}: {}", propertyName, attr.getValue());
 
-        if(!Boolean.parseBoolean(attr.getValue())) {
+        if (!Boolean.parseBoolean(attr.getValue())) {
             return component;
         }
 
@@ -208,7 +212,7 @@ public class OpendaylightNamespaceHandler implements NamespaceHandler {
     private static MutableBeanMetadata registerComponentProcessor(ParserContext context) {
         ComponentDefinitionRegistry registry = context.getComponentDefinitionRegistry();
         MutableBeanMetadata metadata = (MutableBeanMetadata) registry.getComponentDefinition(COMPONENT_PROCESSOR_NAME);
-        if(metadata == null) {
+        if (metadata == null) {
             metadata = context.createMetadata(MutableBeanMetadata.class);
             metadata.setProcessor(true);
             metadata.setId(COMPONENT_PROCESSOR_NAME);
@@ -242,7 +246,7 @@ public class OpendaylightNamespaceHandler implements NamespaceHandler {
         metadata.addProperty("rpcRegistry", createRef(context, RPC_REGISTRY_NAME));
         metadata.addProperty("implementation", createRef(context, element.getAttribute(REF_ATTR)));
 
-        if(element.hasAttribute(INTERFACE)) {
+        if (element.hasAttribute(INTERFACE)) {
             metadata.addProperty("interfaceName", createValue(context, element.getAttribute(INTERFACE)));
         }
 
@@ -274,7 +278,7 @@ public class OpendaylightNamespaceHandler implements NamespaceHandler {
 
     private void registerRoutedRpcRegistrationConverter(ParserContext context) {
         ComponentDefinitionRegistry registry = context.getComponentDefinitionRegistry();
-        if(registry.getComponentDefinition(ROUTED_RPC_REG_CONVERTER_NAME) == null) {
+        if (registry.getComponentDefinition(ROUTED_RPC_REG_CONVERTER_NAME) == null) {
             MutableBeanMetadata metadata = context.createMetadata(MutableBeanMetadata.class);
             metadata.setId(ROUTED_RPC_REG_CONVERTER_NAME);
             metadata.setScope(BeanMetadata.SCOPE_SINGLETON);
@@ -286,7 +290,7 @@ public class OpendaylightNamespaceHandler implements NamespaceHandler {
 
     private void registerRpcRegistryServiceRefBean(ParserContext context) {
         ComponentDefinitionRegistry registry = context.getComponentDefinitionRegistry();
-        if(registry.getComponentDefinition(RPC_REGISTRY_NAME) == null) {
+        if (registry.getComponentDefinition(RPC_REGISTRY_NAME) == null) {
             MutableReferenceMetadata metadata = createServiceRef(context, RpcProviderRegistry.class, null);
             metadata.setId(RPC_REGISTRY_NAME);
             registry.registerComponentDefinition(metadata);
@@ -314,7 +318,7 @@ public class OpendaylightNamespaceHandler implements NamespaceHandler {
 
     private void registerNotificationServiceRefBean(ParserContext context) {
         ComponentDefinitionRegistry registry = context.getComponentDefinitionRegistry();
-        if(registry.getComponentDefinition(NOTIFICATION_SERVICE_NAME) == null) {
+        if (registry.getComponentDefinition(NOTIFICATION_SERVICE_NAME) == null) {
             MutableReferenceMetadata metadata = createServiceRef(context, NotificationService.class, null);
             metadata.setId(NOTIFICATION_SERVICE_NAME);
             registry.registerComponentDefinition(metadata);
@@ -327,22 +331,23 @@ public class OpendaylightNamespaceHandler implements NamespaceHandler {
         // Find the default-config child element representing the default app config XML, if present.
         Element defaultConfigElement = null;
         NodeList children = element.getChildNodes();
-        for(int i = 0; i < children.getLength(); i++) {
+        for (int i = 0; i < children.getLength(); i++) {
             Node child = children.item(i);
-            if(nodeNameEquals(child, DataStoreAppConfigMetadata.DEFAULT_CONFIG)) {
+            if (nodeNameEquals(child, DataStoreAppConfigMetadata.DEFAULT_CONFIG)) {
                 defaultConfigElement = (Element) child;
                 break;
             }
         }
 
         Element defaultAppConfigElement = null;
-        if(defaultConfigElement != null) {
+        if (defaultConfigElement != null) {
             // Find the CDATA element containing the default app config XML.
             children = defaultConfigElement.getChildNodes();
-            for(int i = 0; i < children.getLength(); i++) {
+            for (int i = 0; i < children.getLength(); i++) {
                 Node child = children.item(i);
-                if(child.getNodeType() == Node.CDATA_SECTION_NODE) {
-                    defaultAppConfigElement = parseXML(DataStoreAppConfigMetadata.DEFAULT_CONFIG, child.getTextContent());
+                if (child.getNodeType() == Node.CDATA_SECTION_NODE) {
+                    defaultAppConfigElement = parseXML(DataStoreAppConfigMetadata.DEFAULT_CONFIG,
+                            child.getTextContent());
                     break;
                 }
             }
@@ -356,10 +361,10 @@ public class OpendaylightNamespaceHandler implements NamespaceHandler {
     }
 
     private UpdateStrategy parseUpdateStrategy(String updateStrategyValue) {
-        if (Strings.isNullOrEmpty(updateStrategyValue) ||
-                updateStrategyValue.equalsIgnoreCase(UpdateStrategy.RELOAD.name())) {
+        if (Strings.isNullOrEmpty(updateStrategyValue)
+                || updateStrategyValue.equalsIgnoreCase(UpdateStrategy.RELOAD.name())) {
             return UpdateStrategy.RELOAD;
-        } else if(updateStrategyValue.equalsIgnoreCase(UpdateStrategy.NONE.name())){
+        } else if (updateStrategyValue.equalsIgnoreCase(UpdateStrategy.NONE.name())) {
             return UpdateStrategy.NONE;
         } else {
             LOG.warn("update-strategy {} not supported, using reload", updateStrategyValue);
@@ -393,30 +398,31 @@ public class OpendaylightNamespaceHandler implements NamespaceHandler {
         builderFactory.setIgnoringComments(true);
 
         try {
-            return builderFactory.newDocumentBuilder().parse(new InputSource(new StringReader(xml))).getDocumentElement();
-        } catch(Exception e) {
-            throw new ComponentDefinitionException(String.format("Error %s parsing XML: %s", name, xml));
+            return builderFactory.newDocumentBuilder().parse(new InputSource(
+                    new StringReader(xml))).getDocumentElement();
+        } catch (SAXException | IOException | ParserConfigurationException e) {
+            throw new ComponentDefinitionException(String.format("Error %s parsing XML: %s", name, xml), e);
         }
     }
 
     private static ValueMetadata createValue(ParserContext context, String value) {
-        MutableValueMetadata m = context.createMetadata(MutableValueMetadata.class);
-        m.setStringValue(value);
-        return m;
+        MutableValueMetadata metadata = context.createMetadata(MutableValueMetadata.class);
+        metadata.setStringValue(value);
+        return metadata;
     }
 
     private static MutableReferenceMetadata createServiceRef(ParserContext context, Class<?> cls, String filter) {
-        MutableReferenceMetadata m = context.createMetadata(MutableReferenceMetadata.class);
-        m.setRuntimeInterface(cls);
-        m.setInterface(cls.getName());
-        m.setActivation(ReferenceMetadata.ACTIVATION_EAGER);
-        m.setAvailability(ReferenceMetadata.AVAILABILITY_MANDATORY);
+        MutableReferenceMetadata metadata = context.createMetadata(MutableReferenceMetadata.class);
+        metadata.setRuntimeInterface(cls);
+        metadata.setInterface(cls.getName());
+        metadata.setActivation(ReferenceMetadata.ACTIVATION_EAGER);
+        metadata.setAvailability(ReferenceMetadata.AVAILABILITY_MANDATORY);
 
-        if(filter != null) {
-            m.setFilter(filter);
+        if (filter != null) {
+            metadata.setFilter(filter);
         }
 
-        return m;
+        return metadata;
     }
 
     private static RefMetadata createRef(ParserContext context, String id) {
@@ -426,7 +432,7 @@ public class OpendaylightNamespaceHandler implements NamespaceHandler {
     }
 
     private static String getId(ParserContext context, Element element) {
-        if(element.hasAttribute(ID_ATTR)) {
+        if (element.hasAttribute(ID_ATTR)) {
             return element.getAttribute(ID_ATTR);
         } else {
             return context.generateId();

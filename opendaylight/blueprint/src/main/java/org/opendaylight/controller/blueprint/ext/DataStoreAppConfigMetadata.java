@@ -15,6 +15,8 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -23,6 +25,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import org.apache.aries.blueprint.services.ExtendedBlueprintContainer;
 import org.opendaylight.controller.md.sal.binding.api.ClusteredDataTreeChangeListener;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
@@ -34,7 +37,7 @@ import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
-import org.opendaylight.yangtools.binding.data.codec.api.BindingNormalizedNodeSerializer;
+import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.Identifiable;
@@ -57,6 +60,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.xml.sax.SAXException;
 
 /**
  * Factory metadata corresponding to the "clustered-app-config" element that obtains an application's
@@ -74,9 +78,8 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
     static final String DEFAULT_CONFIG_FILE_NAME = "default-config-file-name";
     static final String LIST_KEY_VALUE = "list-key-value";
 
-    private static final String DEFAULT_APP_CONFIG_FILE_PATH = "etc" + File.separator +
-            "opendaylight" + File.separator + "datastore" + File.separator + "initial" +
-            File.separator + "config";
+    private static final String DEFAULT_APP_CONFIG_FILE_PATH = "etc" + File.separator + "opendaylight" + File.separator
+            + "datastore" + File.separator + "initial" + File.separator + "config";
 
     private static final DocumentBuilderFactory DOC_BUILDER_FACTORY;
 
@@ -124,21 +127,21 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
         Class<DataObject> appConfigBindingClass;
         try {
             Class<?> bindingClass = container.getBundleContext().getBundle().loadClass(appConfigBindingClassName);
-            if(!DataObject.class.isAssignableFrom(bindingClass)) {
+            if (!DataObject.class.isAssignableFrom(bindingClass)) {
                 throw new ComponentDefinitionException(String.format(
                         "%s: Specified app config binding class %s does not extend %s",
                         logName(), appConfigBindingClassName, DataObject.class.getName()));
             }
 
             appConfigBindingClass = (Class<DataObject>) bindingClass;
-        } catch(ClassNotFoundException e) {
+        } catch (ClassNotFoundException e) {
             throw new ComponentDefinitionException(String.format("%s: Error loading app config binding class %s",
                     logName(), appConfigBindingClassName), e);
         }
 
-        if(Identifiable.class.isAssignableFrom(appConfigBindingClass)) {
+        if (Identifiable.class.isAssignableFrom(appConfigBindingClass)) {
             // The binding class corresponds to a yang list.
-            if(Strings.isNullOrEmpty(appConfigListKeyValue)) {
+            if (Strings.isNullOrEmpty(appConfigListKeyValue)) {
                 throw new ComponentDefinitionException(String.format(
                         "%s: App config binding class %s represents a yang list therefore \"%s\" must be specified",
                         logName(), appConfigBindingClassName, LIST_KEY_VALUE));
@@ -146,7 +149,8 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
 
             try {
                 bindingContext = ListBindingContext.newInstance(appConfigBindingClass, appConfigListKeyValue);
-            } catch(Exception e) {
+            } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+                    | InvocationTargetException | NoSuchMethodException | SecurityException e) {
                 throw new ComponentDefinitionException(String.format(
                         "%s: Error initializing for app config list binding class %s",
                         logName(), appConfigBindingClassName), e);
@@ -198,12 +202,7 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
         DataTreeIdentifier<DataObject> dataTreeId = new DataTreeIdentifier<>(LogicalDatastoreType.CONFIGURATION,
                 bindingContext.appConfigPath);
         appConfigChangeListenerReg = dataBroker.registerDataTreeChangeListener(dataTreeId,
-                new ClusteredDataTreeChangeListener<DataObject>() {
-                    @Override
-                    public void onDataTreeChanged(Collection<DataTreeModification<DataObject>> changes) {
-                        onAppConfigChanged(changes);
-                    }
-                });
+                (ClusteredDataTreeChangeListener<DataObject>) changes -> onAppConfigChanged(changes));
 
         readInitialAppConfig(dataBroker);
     }
@@ -216,21 +215,21 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
         Futures.addCallback(future, new FutureCallback<Optional<DataObject>>() {
             @Override
             public void onSuccess(Optional<DataObject> possibleAppConfig) {
-                LOG.debug("{}: Read of app config {} succeeded: {}", logName(), bindingContext.appConfigBindingClass.getName(),
-                        possibleAppConfig);
+                LOG.debug("{}: Read of app config {} succeeded: {}", logName(), bindingContext
+                        .appConfigBindingClass.getName(), possibleAppConfig);
 
                 readOnlyTx.close();
                 setInitialAppConfig(possibleAppConfig);
             }
 
             @Override
-            public void onFailure(Throwable t) {
+            public void onFailure(Throwable failure) {
                 readOnlyTx.close();
 
                 // We may have gotten the app config via the data tree change listener so only retry if not.
-                if(readingInitialAppConfig.get()) {
+                if (readingInitialAppConfig.get()) {
                     LOG.warn("{}: Read of app config {} failed - retrying", logName(),
-                            bindingContext.appConfigBindingClass.getName(), t);
+                            bindingContext.appConfigBindingClass.getName(), failure);
 
                     readInitialAppConfig(dataBroker);
                 }
@@ -239,29 +238,29 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
     }
 
     private void onAppConfigChanged(Collection<DataTreeModification<DataObject>> changes) {
-        for(DataTreeModification<DataObject> change: changes) {
+        for (DataTreeModification<DataObject> change: changes) {
             DataObjectModification<DataObject> changeRoot = change.getRootNode();
             ModificationType type = changeRoot.getModificationType();
 
             LOG.debug("{}: onAppConfigChanged: {}, {}", logName(), type, change.getRootPath());
 
-            if(type == ModificationType.SUBTREE_MODIFIED || type == ModificationType.WRITE) {
+            if (type == ModificationType.SUBTREE_MODIFIED || type == ModificationType.WRITE) {
                 DataObject newAppConfig = changeRoot.getDataAfter();
 
                 LOG.debug("New app config instance: {}, previous: {}", newAppConfig, currentAppConfig);
 
-                if(!setInitialAppConfig(Optional.of(newAppConfig)) &&
-                        !Objects.equals(currentAppConfig, newAppConfig)) {
+                if (!setInitialAppConfig(Optional.of(newAppConfig))
+                        && !Objects.equals(currentAppConfig, newAppConfig)) {
                     LOG.debug("App config was updated");
 
-                    if(appConfigUpdateStrategy == UpdateStrategy.RELOAD) {
+                    if (appConfigUpdateStrategy == UpdateStrategy.RELOAD) {
                         restartContainer();
                     }
                 }
-            } else if(type == ModificationType.DELETE) {
+            } else if (type == ModificationType.DELETE) {
                 LOG.debug("App config was deleted");
 
-                if(appConfigUpdateStrategy == UpdateStrategy.RELOAD) {
+                if (appConfigUpdateStrategy == UpdateStrategy.RELOAD) {
                     restartContainer();
                 }
             }
@@ -270,9 +269,9 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
 
     private boolean setInitialAppConfig(Optional<DataObject> possibleAppConfig) {
         boolean result = readingInitialAppConfig.compareAndSet(true, false);
-        if(result) {
+        if (result) {
             DataObject localAppConfig;
-            if(possibleAppConfig.isPresent()) {
+            if (possibleAppConfig.isPresent()) {
                 localAppConfig = possibleAppConfig.get();
             } else {
                 // No app config data is present so create an empty instance via the bindingSerializer service.
@@ -294,10 +293,11 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
     private DataObject createDefaultInstance() {
         YangInstanceIdentifier yangPath = bindingSerializer.toYangInstanceIdentifier(bindingContext.appConfigPath);
 
-        LOG.debug("{}: Creating app config instance from path {}, Qname: {}", logName(), yangPath, bindingContext.bindingQName);
+        LOG.debug("{}: Creating app config instance from path {}, Qname: {}", logName(), yangPath,
+                bindingContext.bindingQName);
 
         SchemaService schemaService = getOSGiService(SchemaService.class);
-        if(schemaService == null) {
+        if (schemaService == null) {
             setFailureMessage(String.format("%s: Could not obtain the SchemaService OSGi service", logName()));
             return null;
         }
@@ -306,36 +306,37 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
 
         Module module = schemaContext.findModuleByNamespaceAndRevision(bindingContext.bindingQName.getNamespace(),
                 bindingContext.bindingQName.getRevision());
-        if(module == null) {
+        if (module == null) {
             setFailureMessage(String.format("%s: Could not obtain the module schema for namespace %s, revision %s",
                     logName(), bindingContext.bindingQName.getNamespace(), bindingContext.bindingQName.getRevision()));
             return null;
         }
 
         DataSchemaNode dataSchema = module.getDataChildByName(bindingContext.bindingQName);
-        if(dataSchema == null) {
-            setFailureMessage(String.format("%s: Could not obtain the schema for %s", logName(), bindingContext.bindingQName));
+        if (dataSchema == null) {
+            setFailureMessage(String.format("%s: Could not obtain the schema for %s", logName(),
+                    bindingContext.bindingQName));
             return null;
         }
 
-        if(!bindingContext.schemaType.isAssignableFrom(dataSchema.getClass())) {
+        if (!bindingContext.schemaType.isAssignableFrom(dataSchema.getClass())) {
             setFailureMessage(String.format("%s: Expected schema type %s for %s but actual type is %s", logName(),
                     bindingContext.schemaType, bindingContext.bindingQName, dataSchema.getClass()));
             return null;
         }
 
         NormalizedNode<?, ?> dataNode = parsePossibleDefaultAppConfigXMLFile(schemaContext, dataSchema);
-        if(dataNode == null) {
+        if (dataNode == null) {
             dataNode = parsePossibleDefaultAppConfigElement(schemaContext, dataSchema);
         }
 
-        if(dataNode == null) {
+        if (dataNode == null) {
             dataNode = bindingContext.newDefaultNode(dataSchema);
         }
 
         DataObject appConfig = bindingSerializer.fromNormalizedNode(yangPath, dataNode).getValue();
 
-        if(appConfig == null) {
+        if (appConfig == null) {
             // This shouldn't happen but need to handle it in case...
             setFailureMessage(String.format("%s: Could not create instance for app config binding %s",
                     logName(), bindingContext.appConfigBindingClass));
@@ -348,9 +349,9 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
             DataSchemaNode dataSchema) {
 
         String appConfigFileName = defaultAppConfigFileName;
-        if(Strings.isNullOrEmpty(appConfigFileName)) {
+        if (Strings.isNullOrEmpty(appConfigFileName)) {
             String moduleName = findYangModuleName(bindingContext.bindingQName, schemaContext);
-            if(moduleName == null) {
+            if (moduleName == null) {
                 return null;
             }
 
@@ -362,7 +363,7 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
         LOG.debug("{}: parsePossibleDefaultAppConfigXMLFile looking for file {}", logName(),
                 appConfigFile.getAbsolutePath());
 
-        if(!appConfigFile.exists()) {
+        if (!appConfigFile.exists()) {
             return null;
         }
 
@@ -371,7 +372,7 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
         DomToNormalizedNodeParserFactory parserFactory = DomToNormalizedNodeParserFactory.getInstance(
                 XmlUtils.DEFAULT_XML_CODEC_PROVIDER, schemaContext);
 
-        try(FileInputStream fis = new FileInputStream(appConfigFile)) {
+        try (FileInputStream fis = new FileInputStream(appConfigFile)) {
             Document root = DOC_BUILDER_FACTORY.newDocumentBuilder().parse(fis);
             NormalizedNode<?, ?> dataNode = bindingContext.parseDataElement(root.getDocumentElement(), dataSchema,
                     parserFactory);
@@ -379,16 +380,18 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
             LOG.debug("{}: Parsed data node: {}", logName(), dataNode);
 
             return dataNode;
-        } catch (Exception e) {
-            setFailureMessage(String.format("%s: Could not read/parse app config file %s", logName(), appConfigFile));
+        } catch (SAXException | IOException | ParserConfigurationException e) {
+            String msg = String.format("%s: Could not read/parse app config file %s", logName(), appConfigFile);
+            LOG.error(msg, e);
+            setFailureMessage(msg);
         }
 
         return null;
     }
 
     private String findYangModuleName(QName qname, SchemaContext schemaContext) {
-        for(Module m: schemaContext.getModules()) {
-            if(qname.getModule().equals(m.getQNameModule())) {
+        for (Module m : schemaContext.getModules()) {
+            if (qname.getModule().equals(m.getQNameModule())) {
                 return m.getName();
             }
         }
@@ -400,7 +403,7 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
     @Nullable
     private NormalizedNode<?, ?> parsePossibleDefaultAppConfigElement(SchemaContext schemaContext,
             DataSchemaNode dataSchema) {
-        if(defaultAppConfigElement == null) {
+        if (defaultAppConfigElement == null) {
             return null;
         }
 
@@ -425,7 +428,7 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
     public void destroy(Object instance) {
         super.destroy(instance);
 
-        if(appConfigChangeListenerReg != null) {
+        if (appConfigChangeListenerReg != null) {
             appConfigChangeListenerReg.close();
             appConfigChangeListenerReg = null;
         }
@@ -434,7 +437,7 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
     /**
      * Internal base class to abstract binding type-specific behavior.
      */
-    private static abstract class BindingContext {
+    private abstract static class BindingContext {
         final InstanceIdentifier<DataObject> appConfigPath;
         final Class<DataObject> appConfigBindingClass;
         final Class<? extends DataSchemaNode> schemaType;
@@ -490,10 +493,11 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
 
         @SuppressWarnings({ "rawtypes", "unchecked" })
         private static ListBindingContext newInstance(Class<DataObject> bindingClass, String listKeyValue)
-                throws Exception {
+                throws InstantiationException, IllegalAccessException, IllegalArgumentException,
+                       InvocationTargetException, NoSuchMethodException, SecurityException {
             // We assume the yang list key type is string.
-            Identifier keyInstance = (Identifier) bindingClass.getMethod("getKey").getReturnType().
-                    getConstructor(String.class).newInstance(listKeyValue);
+            Identifier keyInstance = (Identifier) bindingClass.getMethod("getKey").getReturnType()
+                    .getConstructor(String.class).newInstance(listKeyValue);
             InstanceIdentifier appConfigPath = InstanceIdentifier.builder((Class)bindingClass, keyInstance).build();
             return new ListBindingContext(bindingClass, appConfigPath, listKeyValue);
         }
