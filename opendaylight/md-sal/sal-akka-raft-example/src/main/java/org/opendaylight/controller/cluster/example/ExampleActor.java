@@ -236,4 +236,13 @@ public class ExampleActor extends RaftActor implements RaftActorRecoveryCohort, 
     public byte[] getRestoreFromSnapshot() {
         return null;
     }
+
+    @Override
+    protected boolean canSendBatchedAppendEntries(final Identifier identifier ){
+        return true;
+    }
+
+    public boolean getPipelineProcessPolicy(){
+        return false;
+    }
 }
