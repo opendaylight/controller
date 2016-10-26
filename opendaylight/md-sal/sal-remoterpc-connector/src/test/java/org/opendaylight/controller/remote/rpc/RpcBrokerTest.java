@@ -19,7 +19,6 @@ import com.google.common.util.concurrent.Futures;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
-import org.opendaylight.controller.cluster.datastore.node.utils.serialization.NormalizedNodeSerializer;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcException;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcImplementationNotAvailableException;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcResult;
@@ -47,8 +46,7 @@ public class RpcBrokerTest extends AbstractRpcTest {
 
                 final RpcResponse rpcResponse = expectMsgClass(duration("5 seconds"), RpcResponse.class);
 
-                assertEquals(rpcResult.getResult(),
-                        NormalizedNodeSerializer.deSerialize(rpcResponse.getResultNormalizedNode()));
+                assertEquals(rpcResult.getResult(), rpcResponse.getResultNormalizedNode());
             }
         };
     }

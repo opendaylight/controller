@@ -65,7 +65,7 @@ public class AbstractRpcTest {
 
     static final SchemaPath TEST_RPC_TYPE = SchemaPath.create(true, TEST_RPC);
     static final YangInstanceIdentifier TEST_PATH = YangInstanceIdentifier.create(new YangInstanceIdentifier.NodeIdentifier(TEST_RPC));
-    static final DOMRpcIdentifier TEST_RPC_ID = DOMRpcIdentifier.create(TEST_RPC_TYPE, TEST_PATH);
+    public static final DOMRpcIdentifier TEST_RPC_ID = DOMRpcIdentifier.create(TEST_RPC_TYPE, TEST_PATH);
 
     static ActorSystem node1;
     static ActorSystem node2;
@@ -149,13 +149,13 @@ public class AbstractRpcTest {
         assertEquals(exp, actual);
     }
 
-    static ContainerNode makeRPCInput(final String data) {
+    public static ContainerNode makeRPCInput(final String data) {
         return Builders.containerBuilder().withNodeIdentifier(new NodeIdentifier(TEST_RPC_INPUT))
             .withChild(ImmutableNodes.leafNode(TEST_RPC_INPUT_DATA, data)).build();
 
     }
 
-    static ContainerNode makeRPCOutput(final String data) {
+    public static ContainerNode makeRPCOutput(final String data) {
         return Builders.containerBuilder().withNodeIdentifier(new NodeIdentifier(TEST_RPC_OUTPUT))
                 .withChild(ImmutableNodes.leafNode(TEST_RPC_OUTPUT, data)).build();
     }
