@@ -20,6 +20,7 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -388,12 +389,14 @@ public class ClusterAdminRpcService implements ClusterAdminService {
     @SuppressWarnings("checkstyle:IllegalCatch")
     private static void saveSnapshotsToFile(DatastoreSnapshotList snapshots, String fileName,
             SettableFuture<RpcResult<Void>> returnFuture) {
-        try (FileOutputStream fos = new FileOutputStream(fileName)) {
-            SerializationUtils.serialize(snapshots, fos);
+        try {
+            try (FileOutputStream fos = new FileOutputStream(fileName)) {
+                SerializationUtils.serialize(snapshots, fos);
 
-            returnFuture.set(newSuccessfulResult());
-            LOG.info("Successfully backed up datastore to file {}", fileName);
-        } catch (Exception e) {
+                returnFuture.set(newSuccessfulResult());
+                LOG.info("Successfully backed up datastore to file {}", fileName);
+            }
+        } catch (IOException | RuntimeException e) {
             onDatastoreBackupFailure(fileName, returnFuture, e);
         }
     }
