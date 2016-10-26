@@ -10,7 +10,7 @@ package org.opendaylight.controller.cluster.datastore.persisted;
 import com.google.common.annotations.Beta;
 import java.util.Optional;
 import javax.annotation.Nullable;
-import org.opendaylight.controller.cluster.datastore.utils.SerializationUtils;
+import org.opendaylight.controller.cluster.datastore.node.utils.stream.SerializationUtils;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 /**

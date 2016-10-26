@@ -5,7 +5,7 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.cluster.datastore.utils;
+package org.opendaylight.controller.cluster.datastore.node.utils.stream;
 
 import com.google.common.base.Preconditions;
 import java.io.ByteArrayInputStream;
@@ -15,10 +15,6 @@ import java.io.DataInputStream;
 import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeDataInput;
-import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeDataOutput;
-import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeInputOutput;
-import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeInputStreamReader;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
@@ -47,7 +43,7 @@ public final class SerializationUtils {
     private static NormalizedNodeDataInput streamReader(DataInput in) throws IOException {
         NormalizedNodeDataInput streamReader = REUSABLE_READER_TL.get();
         if (streamReader == null) {
-            streamReader = new NormalizedNodeInputStreamReader(in);
+            streamReader = NormalizedNodeInputOutput.newDataInput(in);
         }
 
         return streamReader;
