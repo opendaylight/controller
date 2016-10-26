@@ -26,6 +26,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * Abstract base class for a DependentComponentFactoryMetadata implementation.
+ *
  * @author Thomas Pantelis
  */
 abstract class AbstractDependentComponentFactoryMetadata implements DependentComponentFactoryMetadata {
@@ -70,8 +72,6 @@ abstract class AbstractDependentComponentFactoryMetadata implements DependentCom
         return satisfied.get();
     }
 
-    protected abstract void startTracking();
-
     protected void setFailureMessage(String failureMessage) {
         setFailure(failureMessage, null);
     }
@@ -90,7 +90,7 @@ abstract class AbstractDependentComponentFactoryMetadata implements DependentCom
     }
 
     protected void setSatisfied() {
-        if(satisfied.compareAndSet(false, true)) {
+        if (satisfied.compareAndSet(false, true)) {
             satisfactionCallback.notifyChanged();
         }
     }
@@ -109,19 +109,18 @@ abstract class AbstractDependentComponentFactoryMetadata implements DependentCom
     }
 
     protected final String logName() {
-        return (container != null ? container.getBundleContext().getBundle().getSymbolicName() : "") +
-                " (" + id + ")";
+        return (container != null ? container.getBundleContext().getBundle().getSymbolicName() : "") + " (" + id + ")";
     }
 
     @Override
-    public void init(ExtendedBlueprintContainer container) {
-        this.container = container;
+    public void init(ExtendedBlueprintContainer newContainer) {
+        this.container = newContainer;
 
         log.debug("{}: In init", logName());
     }
 
     protected void onCreate() throws ComponentDefinitionException {
-        if(failureMessage != null) {
+        if (failureMessage != null) {
             throw new ComponentDefinitionException(failureMessage, failureCause);
         }
 
@@ -152,7 +151,7 @@ abstract class AbstractDependentComponentFactoryMetadata implements DependentCom
         executionContext.removePartialObject(id);
 
         Recipe myRecipe = executionContext.getRecipe(id);
-        if(myRecipe instanceof AbstractRecipe) {
+        if (myRecipe instanceof AbstractRecipe) {
             log.debug("{}: setPrototype to false", logName());
             ((AbstractRecipe)myRecipe).setPrototype(false);
         } else {
@@ -160,15 +159,17 @@ abstract class AbstractDependentComponentFactoryMetadata implements DependentCom
         }
     }
 
+    protected abstract void startTracking();
+
     @Override
-    public final void startTracking(final SatisfactionCallback satisfactionCallback) {
-        if(!started.compareAndSet(false, true)) {
+    public final void startTracking(final SatisfactionCallback newSatisfactionCallback) {
+        if (!started.compareAndSet(false, true)) {
             return;
         }
 
         log.debug("{}: In startTracking", logName());
 
-        this.satisfactionCallback = satisfactionCallback;
+        this.satisfactionCallback = newSatisfactionCallback;
 
         startTracking();
     }
@@ -188,7 +189,7 @@ abstract class AbstractDependentComponentFactoryMetadata implements DependentCom
     }
 
     private void stopServiceRecipes() {
-        for(StaticServiceReferenceRecipe recipe: serviceRecipes) {
+        for (StaticServiceReferenceRecipe recipe: serviceRecipes) {
             recipe.stop();
         }
 
@@ -196,9 +197,9 @@ abstract class AbstractDependentComponentFactoryMetadata implements DependentCom
     }
 
     protected void restartContainer() {
-        if(restarting.compareAndSet(false, true)) {
+        if (restarting.compareAndSet(false, true)) {
             BlueprintContainerRestartService restartService = getOSGiService(BlueprintContainerRestartService.class);
-            if(restartService != null) {
+            if (restartService != null) {
                 log.debug("{}: Restarting container", logName());
                 restartService.restartContainerAndDependents(container().getBundleContext().getBundle());
             }
@@ -211,19 +212,19 @@ abstract class AbstractDependentComponentFactoryMetadata implements DependentCom
         try {
             ServiceReference<T> serviceReference =
                     container().getBundleContext().getServiceReference(serviceInterface);
-            if(serviceReference == null) {
+            if (serviceReference == null) {
                 log.warn("{}: {} reference not found", logName(), serviceInterface.getSimpleName());
                 return null;
             }
 
             T service = (T)container().getService(serviceReference);
-            if(service == null) {
+            if (service == null) {
                 // This could happen on shutdown if the service was already unregistered so we log as debug.
                 log.debug("{}: {} was not found", logName(), serviceInterface.getSimpleName());
             }
 
             return service;
-        } catch(IllegalStateException e) {
+        } catch (IllegalStateException e) {
             // This is thrown if the BundleContext is no longer valid which is possible on shutdown so we
             // log as debug.
             log.debug("{}: Error obtaining {}", logName(), serviceInterface.getSimpleName(), e);

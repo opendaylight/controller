@@ -56,12 +56,13 @@ class RoutedRpcMetadata implements ComponentFactoryMetadata {
     }
 
     @Override
-    public void init(ExtendedBlueprintContainer container) {
-        this.container = container;
+    public void init(ExtendedBlueprintContainer newContainer) {
+        this.container = newContainer;
 
         LOG.debug("{}: In init", logName());
     }
 
+    @SuppressWarnings("checkstyle:IllegalCatch")
     @Override
     public Object create() throws ComponentDefinitionException {
         RpcProviderRegistry rpcRegistry = (RpcProviderRegistry) container.getComponentInstance(
@@ -70,7 +71,7 @@ class RoutedRpcMetadata implements ComponentFactoryMetadata {
         Object implementation = container.getComponentInstance(implementationRefId);
 
         try {
-            if(!RpcService.class.isAssignableFrom(implementation.getClass())) {
+            if (!RpcService.class.isAssignableFrom(implementation.getClass())) {
                 throw new ComponentDefinitionException(String.format(
                         "Implementation \"ref\" instance %s for \"%s\" is not an RpcService",
                         implementation.getClass(), ROUTED_RPC_IMPLEMENTATION));
@@ -80,10 +81,10 @@ class RoutedRpcMetadata implements ComponentFactoryMetadata {
                     interfaceName, implementation.getClass(), container.getBundleContext().getBundle(),
                     ROUTED_RPC_IMPLEMENTATION);
 
-            if(rpcInterfaces.size() > 1) {
+            if (rpcInterfaces.size() > 1) {
                 throw new ComponentDefinitionException(String.format(
-                        "Implementation \"ref\" instance %s for \"%s\" implements more than one RpcService " +
-                        "interface (%s). Please specify the exact \"interface\"", implementation.getClass(),
+                        "Implementation \"ref\" instance %s for \"%s\" implements more than one RpcService "
+                        + "interface (%s). Please specify the exact \"interface\"", implementation.getClass(),
                         ROUTED_RPC_IMPLEMENTATION, rpcInterfaces));
             }
 
@@ -93,9 +94,9 @@ class RoutedRpcMetadata implements ComponentFactoryMetadata {
                     implementation, rpcInterface);
 
             return rpcRegistry.addRoutedRpcImplementation(rpcInterface, (RpcService)implementation);
-        } catch(ComponentDefinitionException e) {
+        } catch (ComponentDefinitionException e) {
             throw e;
-        } catch(Exception e) {
+        } catch (Exception e) {
             throw new ComponentDefinitionException(String.format(
                     "Error processing \"%s\" for %s", ROUTED_RPC_IMPLEMENTATION, implementation.getClass()), e);
         }
@@ -109,7 +110,6 @@ class RoutedRpcMetadata implements ComponentFactoryMetadata {
     }
 
     private String logName() {
-        return (container != null ? container.getBundleContext().getBundle().getSymbolicName() : "") +
-                " (" + id + ")";
+        return (container != null ? container.getBundleContext().getBundle().getSymbolicName() : "") + " (" + id + ")";
     }
 }

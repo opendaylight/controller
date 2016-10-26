@@ -76,13 +76,13 @@ class SpecificReferenceListMetadata extends AbstractDependentComponentFactoryMet
             }
         };
 
-        bundleTracker = new BundleTracker<>(container().getBundleContext(), Bundle.RESOLVED | Bundle.STARTING |
-                Bundle.STOPPING | Bundle.ACTIVE, bundleListener);
+        bundleTracker = new BundleTracker<>(container().getBundleContext(), Bundle.RESOLVED | Bundle.STARTING
+                | Bundle.STOPPING | Bundle.ACTIVE, bundleListener);
 
         // This will get the list of all current RESOLVED+ bundles.
         bundleTracker.open();
 
-        if(expectedServiceTypes.isEmpty()) {
+        if (expectedServiceTypes.isEmpty()) {
             setSatisfied();
             return;
         }
@@ -111,21 +111,21 @@ class SpecificReferenceListMetadata extends AbstractDependentComponentFactoryMet
 
     private void bundleAdded(Bundle bundle) {
         URL resource = bundle.getEntry(serviceResourcePath);
-        if(resource == null) {
+        if (resource == null) {
             return;
         }
 
         LOG.debug("{}: Found {} resource in bundle {}", logName(), resource, bundle.getSymbolicName());
 
         try {
-            for(String line : Resources.readLines(resource, StandardCharsets.UTF_8)) {
+            for (String line : Resources.readLines(resource, StandardCharsets.UTF_8)) {
                 int ci = line.indexOf('#');
-                if(ci >= 0) {
+                if (ci >= 0) {
                     line = line.substring(0, ci);
                 }
 
                 line = line.trim();
-                if(line.isEmpty()) {
+                if (line.isEmpty()) {
                     continue;
                 }
 
@@ -133,7 +133,7 @@ class SpecificReferenceListMetadata extends AbstractDependentComponentFactoryMet
                 LOG.debug("{}: Retrieved service type {}", logName(), serviceType);
                 expectedServiceTypes.add(serviceType);
             }
-        } catch(IOException e) {
+        } catch (IOException e) {
             setFailure(String.format("%s: Error reading resource %s from bundle %s", logName(), resource,
                     bundle.getSymbolicName()), e);
         }
@@ -146,30 +146,30 @@ class SpecificReferenceListMetadata extends AbstractDependentComponentFactoryMet
         LOG.debug("{}: Service type {} added from bundle {}", logName(), serviceType,
                 reference.getBundle().getSymbolicName());
 
-        if(serviceType == null) {
+        if (serviceType == null) {
             LOG.error("{}: Missing OSGi service property '{}' for service interface {} in bundle {}", logName(),
                     OpendaylightNamespaceHandler.TYPE_ATTR, interfaceName,  reference.getBundle().getSymbolicName());
             return service;
         }
 
-        if(!expectedServiceTypes.contains(serviceType)) {
-            LOG.error("{}: OSGi service property '{}' for service interface {} in bundle {} was not found in the " +
-                    "expected service types {} obtained via {} bundle resources. Is the bundle resource missing or the service type misspelled?",
-                    logName(), OpendaylightNamespaceHandler.TYPE_ATTR, interfaceName, reference.getBundle().getSymbolicName(),
-                    expectedServiceTypes, serviceResourcePath);
+        if (!expectedServiceTypes.contains(serviceType)) {
+            LOG.error("{}: OSGi service property '{}' for service interface {} in bundle {} was not found in the "
+                    + "expected service types {} obtained via {} bundle resources. Is the bundle resource missing or "
+                    + "the service type misspelled?", logName(), OpendaylightNamespaceHandler.TYPE_ATTR, interfaceName,
+                    reference.getBundle().getSymbolicName(), expectedServiceTypes, serviceResourcePath);
             return service;
         }
 
         // If already satisfied, meaning we got all initial services, then a new bundle must've been
         // dynamically installed or a prior service's blueprint container was restarted, in which case we
         // restart our container.
-        if(isSatisfied()) {
+        if (isSatisfied()) {
             restartContainer();
         } else {
             retrievedServiceTypes.add(serviceType.toString());
             retrievedServices.add(service);
 
-            if(retrievedServiceTypes.equals(expectedServiceTypes)) {
+            if (retrievedServiceTypes.equals(expectedServiceTypes)) {
                 LOG.debug("{}: Got all expected service types", logName());
                 setSatisfied();
             } else {
@@ -190,7 +190,7 @@ class SpecificReferenceListMetadata extends AbstractDependentComponentFactoryMet
 
         LOG.debug("{}: create returning service list {}", logName(), retrievedServices);
 
-        synchronized(retrievedServices) {
+        synchronized (retrievedServices) {
             return ImmutableList.copyOf(retrievedServices);
         }
     }
@@ -199,12 +199,12 @@ class SpecificReferenceListMetadata extends AbstractDependentComponentFactoryMet
     public void destroy(Object instance) {
         super.destroy(instance);
 
-        if(bundleTracker != null) {
+        if (bundleTracker != null) {
             bundleTracker.close();
             bundleTracker = null;
         }
 
-        if(serviceTracker != null) {
+        if (serviceTracker != null) {
             serviceTracker.close();
             serviceTracker = null;
         }

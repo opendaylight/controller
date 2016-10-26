@@ -64,7 +64,7 @@ public class ComponentProcessor implements ComponentDefinitionRegistryProcessor 
     }
 
     public void destroy() {
-        for(ServiceRegistration<?> reg: managedServiceRegs) {
+        for (ServiceRegistration<?> reg: managedServiceRegs) {
             AriesFrameworkUtil.safeUnregisterService(reg);
         }
     }
@@ -73,18 +73,18 @@ public class ComponentProcessor implements ComponentDefinitionRegistryProcessor 
     public void process(ComponentDefinitionRegistry registry) {
         LOG.debug("{}: In process",  logName());
 
-        for(String name : registry.getComponentDefinitionNames()) {
+        for (String name : registry.getComponentDefinitionNames()) {
             ComponentMetadata component = registry.getComponentDefinition(name);
-            if(component instanceof MutableBeanMetadata) {
-                processMutableBeanMetadata((MutableBeanMetadata)component);
-            } else if(component instanceof MutableServiceReferenceMetadata) {
+            if (component instanceof MutableBeanMetadata) {
+                processMutableBeanMetadata((MutableBeanMetadata) component);
+            } else if (component instanceof MutableServiceReferenceMetadata) {
                 processServiceReferenceMetadata((MutableServiceReferenceMetadata)component);
             }
         }
     }
 
     private void processServiceReferenceMetadata(MutableServiceReferenceMetadata serviceRef) {
-        if(!useDefaultForReferenceTypes) {
+        if (!useDefaultForReferenceTypes) {
             return;
         }
 
@@ -95,7 +95,7 @@ public class ComponentProcessor implements ComponentDefinitionRegistryProcessor 
         LOG.debug("{}: processServiceReferenceMetadata for {}, filter: {}, ext filter: {}", logName(),
                 serviceRef.getId(), filter, extFilter);
 
-        if(Strings.isNullOrEmpty(filter) && Strings.isNullOrEmpty(extFilter)) {
+        if (Strings.isNullOrEmpty(filter) && Strings.isNullOrEmpty(extFilter)) {
             serviceRef.setFilter(DEFAULT_TYPE_FILTER);
 
             LOG.debug("{}: processServiceReferenceMetadata for {} set filter to {}", logName(),
@@ -104,14 +104,14 @@ public class ComponentProcessor implements ComponentDefinitionRegistryProcessor 
     }
 
     private void processMutableBeanMetadata(MutableBeanMetadata bean) {
-        if(restartDependentsOnUpdates && bean.getRuntimeClass() != null &&
-                AbstractPropertyPlaceholder.class.isAssignableFrom(bean.getRuntimeClass())) {
+        if (restartDependentsOnUpdates && bean.getRuntimeClass() != null
+                && AbstractPropertyPlaceholder.class.isAssignableFrom(bean.getRuntimeClass())) {
             LOG.debug("{}: Found PropertyPlaceholder bean: {}, runtime {}", logName(), bean.getId(),
                     bean.getRuntimeClass());
 
-            for(BeanProperty prop: bean.getProperties()) {
-                if(CM_PERSISTENT_ID_PROPERTY.equals(prop.getName())) {
-                    if(prop.getValue() instanceof ValueMetadata) {
+            for (BeanProperty prop : bean.getProperties()) {
+                if (CM_PERSISTENT_ID_PROPERTY.equals(prop.getName())) {
+                    if (prop.getValue() instanceof ValueMetadata) {
                         ValueMetadata persistentId = (ValueMetadata)prop.getValue();
 
                         LOG.debug("{}: Found {} property, value : {}", logName(),
@@ -132,7 +132,7 @@ public class ComponentProcessor implements ComponentDefinitionRegistryProcessor 
     private void registerManagedService(final String persistentId) {
         // Register a ManagedService so we get updates from the ConfigAdmin when the cfg file corresponding
         // to the persistentId changes.
-        ManagedService managedService = new ManagedService() {
+        final ManagedService managedService = new ManagedService() {
             private volatile boolean initialUpdate = true;
 
             @Override
@@ -143,7 +143,7 @@ public class ComponentProcessor implements ComponentDefinitionRegistryProcessor 
                 // The first update occurs when the service is registered so ignore it as we want subsequent
                 // updates when it changes. The ConfigAdmin will send an update even if the cfg file doesn't
                 // yet exist.
-                if(initialUpdate) {
+                if (initialUpdate) {
                     initialUpdate = false;
                 } else {
                     blueprintContainerRestartService.restartContainerAndDependents(bundle);
