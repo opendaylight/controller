@@ -15,29 +15,25 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 public abstract class AbstractSchemaAwareTest  {
 
-    private Iterable<YangModuleInfo> moduleInfos;
-    private SchemaContext schemaContext;
-
-
     protected Iterable<YangModuleInfo> getModuleInfos() throws Exception {
         return BindingReflections.loadModuleInfos();
     }
 
+    protected SchemaContext getSchemaContext() throws Exception {
+        Iterable<YangModuleInfo> moduleInfos = getModuleInfos();
+        ModuleInfoBackedContext moduleContext = ModuleInfoBackedContext.create();
+        moduleContext.addModuleInfos(moduleInfos);
+        return moduleContext.tryToCreateSchemaContext().get();
+    }
 
     @Before
     public final void setup() throws Exception {
-        moduleInfos = getModuleInfos();
-        ModuleInfoBackedContext moduleContext = ModuleInfoBackedContext.create();
-        moduleContext.addModuleInfos(moduleInfos);
-        schemaContext = moduleContext.tryToCreateSchemaContext().get();
-        setupWithSchema(schemaContext);
+        setupWithSchema(getSchemaContext());
     }
 
     /**
      * Setups test with Schema context.
      * This method is called before {@link #setupWithSchemaService(SchemaService)}
-     *
-     * @param context
      */
     protected abstract void setupWithSchema(SchemaContext context);
 
