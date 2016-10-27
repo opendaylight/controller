@@ -3,13 +3,13 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>org.opendaylight.controller</groupId>
-    <artifactId>commons.opendaylight</artifactId>
-    <version>1.8.0-SNAPSHOT</version>
-    <relativePath>../commons/opendaylight</relativePath>
+    <groupId>org.opendaylight.mdsal</groupId>
+    <artifactId>binding-parent</artifactId>
+    <version>0.10.0-SNAPSHOT</version>
   </parent>
-  <artifactId>config-subsystem</artifactId>
 
+  <groupId>org.opendaylight.controller</groupId>
+  <artifactId>config-subsystem</artifactId>
   <version>0.6.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>${project.artifactId}</name>
@@ -39,7 +39,6 @@
     <module>shutdown-impl</module>
     <module>config-module-archetype</module>
     <module>config-netty-config</module>
-
     <module>config-artifacts</module>
     <module>config-parent</module>
     <module>config-filtering-parent</module>
@@ -47,184 +46,17 @@
     <module>config-it-base</module>
   </modules>
 
-  <dependencies>
-    <dependency>
-      <groupId>org.osgi</groupId>
-      <artifactId>org.osgi.compendium</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.osgi</groupId>
-      <artifactId>org.osgi.core</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>ch.qos.logback</groupId>
-      <artifactId>logback-classic</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <scope>test</scope>
-    </dependency>
-  </dependencies>
-
-  <build>
-
-    <pluginManagement>
-      <plugins>
-        <plugin>
-          <groupId>org.apache.felix</groupId>
-          <artifactId>maven-bundle-plugin</artifactId>
-          <extensions>true</extensions>
-          <configuration>
-            <instructions>
-              <Bundle-Name>${project.groupId}.${project.artifactId}</Bundle-Name>
-            </instructions>
-          </configuration>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-antrun-plugin</artifactId>
-          <version>${maven.antrun.plugin.version}</version>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-jar-plugin</artifactId>
-          <executions>
-            <execution>
-              <goals>
-                <goal>test-jar</goal>
-              </goals>
-              <phase>package</phase>
-            </execution>
-          </executions>
-        </plugin>
-        <plugin>
-          <groupId>org.opendaylight.yangtools</groupId>
-          <artifactId>yang-maven-plugin</artifactId>
-          <version>${yangtools.version}</version>
-          <dependencies>
-            <dependency>
-              <groupId>org.opendaylight.mdsal</groupId>
-              <artifactId>maven-sal-api-gen-plugin</artifactId>
-              <version>${mdsal.model.version}</version>
-              <type>jar</type>
-            </dependency>
-          </dependencies>
-          <executions>
-            <execution>
-              <id>sal</id>
-              <goals>
-                <goal>generate-sources</goal>
-              </goals>
-              <configuration>
-                <yangFilesRootDir>src/main/yang</yangFilesRootDir>
-                <codeGenerators>
-                  <generator>
-                    <codeGeneratorClass>org.opendaylight.yangtools.maven.sal.api.gen.plugin.CodeGeneratorImpl</codeGeneratorClass>
-                    <outputBaseDir>${salGeneratorPath}</outputBaseDir>
-                  </generator>
-                  <generator>
-                    <codeGeneratorClass>org.opendaylight.yangtools.yang.unified.doc.generator.maven.DocumentationGeneratorImpl</codeGeneratorClass>
-                    <outputBaseDir>${project.build.directory}/site/models</outputBaseDir>
-                  </generator>
-                </codeGenerators>
-                <inspectDependencies>true</inspectDependencies>
-              </configuration>
-            </execution>
-          </executions>
-        </plugin>
-      </plugins>
-    </pluginManagement>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-checkstyle-plugin</artifactId>
-        <configuration>
-          <failsOnError>false</failsOnError>
-          <failOnViolation>true</failOnViolation>
-          <configLocation>checkstyle-logging.xml</configLocation>
-          <consoleOutput>true</consoleOutput>
-          <includeTestSourceDirectory>true</includeTestSourceDirectory>
-          <sourceDirectory>${project.basedir}</sourceDirectory>
-          <includes>**\/*.java,**\/*.xml,**\/*.ini,**\/*.sh,**\/*.bat,**\/*.yang</includes>
-          <!-- excluding logback-config, has several checkstyle warnings
-               regarding Logger/LoggerFactory, which couldn't be removed due necessity/intention
-               to use the particular implementation/library of Logger/LoggerFactory -->
-          <excludes>
-            **/yang-gen-config/**,
-            **\/config\/yang\/logback\/config\/**,
-            **\/target\/,
-            **\/bin\/,
-            **\/target-ide\/,
-            **\/${jmxGeneratorPath}\/,
-            **\/${salGeneratorPath}\/
-          </excludes>
-        </configuration>
-        <dependencies>
-          <dependency>
-            <groupId>org.opendaylight.yangtools</groupId>
-            <artifactId>checkstyle-logging</artifactId>
-            <version>${yangtools.version}</version>
-          </dependency>
-        </dependencies>
-        <executions>
-          <execution>
-            <goals>
-              <goal>check</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-      </plugin>
-      <plugin>
-        <groupId>org.jacoco</groupId>
-        <artifactId>jacoco-maven-plugin</artifactId>
-        <executions>
-          <execution>
-            <goals>
-              <goal>prepare-agent</goal>
-            </goals>
-          </execution>
-          <execution>
-            <id>report</id>
-            <goals>
-              <goal>check</goal>
-              <goal>report</goal>
-            </goals>
-            <phase>prepare-package</phase>
-            <configuration>
-              <outputDirectory>${project.build.directory}/jacoco</outputDirectory>
-              <haltOnFailure>false</haltOnFailure>
-              <rules>
-                <rule>
-                  <element>CLASS</element>
-                  <excludes>
-                    <exclude>*Test</exclude>
-                  </excludes>
-                  <limits>
-                    <limit>
-                      <counter>LINE</counter>
-                      <value>COVEREDRATIO</value>
-                      <minimum>0.50</minimum>
-                    </limit>
-                  </limits>
-                </rule>
-              </rules>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-
-    </plugins>
-  </build>
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>config-artifacts</artifactId>
+        <version>0.6.0-SNAPSHOT</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <profiles>
     <profile>
@@ -235,6 +67,24 @@
       <modules>
         <module>yang-jmx-generator-it</module>
       </modules>
+    </profile>
+    <!-- Turn off doclint. -->
+    <profile>
+      <id>jdk8</id>
+      <activation>
+        <jdk>[1.8,)</jdk>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <configuration>
+              <additionalparam>-Xdoclint:none</additionalparam>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
     </profile>
   </profiles>
 </project>
