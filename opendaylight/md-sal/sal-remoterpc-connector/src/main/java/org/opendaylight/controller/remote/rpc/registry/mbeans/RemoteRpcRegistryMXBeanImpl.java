@@ -12,6 +12,7 @@ import akka.actor.Address;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import org.opendaylight.controller.md.sal.common.util.jmx.AbstractMXBean;
 import org.opendaylight.controller.remote.rpc.registry.RoutingTable;
@@ -81,9 +82,9 @@ public class RemoteRpcRegistryMXBeanImpl extends AbstractMXBean implements Remot
 
         // Get all RPCs from remote bucket
         Map<Address, Bucket<RoutingTable>> buckets = rpcRegistry.getRemoteBuckets();
-        for (Address address : buckets.keySet()) {
-            RoutingTable table = buckets.get(address).getData();
-            rpcMap.putAll(getRpcMemberMapByName(table, name, address.toString()));
+        for (Entry<Address, Bucket<RoutingTable>> entry : buckets.entrySet()) {
+            RoutingTable table = entry.getValue().getData();
+            rpcMap.putAll(getRpcMemberMapByName(table, name, entry.getKey().toString()));
         }
 
         log.debug("list of RPCs {} searched by name {}", rpcMap, name);
@@ -96,10 +97,9 @@ public class RemoteRpcRegistryMXBeanImpl extends AbstractMXBean implements Remot
         Map<String, String> rpcMap = new HashMap<>(getRpcMemberMapByRoute(localTable, routeId, LOCAL_CONSTANT));
 
         Map<Address, Bucket<RoutingTable>> buckets = rpcRegistry.getRemoteBuckets();
-        for (Address address : buckets.keySet()) {
-            RoutingTable table = buckets.get(address).getData();
-            rpcMap.putAll(getRpcMemberMapByRoute(table, routeId, address.toString()));
-
+        for (Entry<Address, Bucket<RoutingTable>> entry : buckets.entrySet()) {
+            RoutingTable table = entry.getValue().getData();
+            rpcMap.putAll(getRpcMemberMapByRoute(table, routeId, entry.getKey().toString()));
         }
 
         log.debug("list of RPCs {} searched by route {}", rpcMap, routeId);
