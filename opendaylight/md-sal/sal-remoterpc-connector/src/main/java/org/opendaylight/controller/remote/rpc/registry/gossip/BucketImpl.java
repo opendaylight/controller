@@ -30,7 +30,7 @@ public class BucketImpl<T extends Copier<T>> implements Bucket<T>, Serializable 
 
     public void setData(T data) {
         this.data = data;
-        this.version = System.currentTimeMillis()+1;
+        this.version = System.currentTimeMillis() + 1;
     }
 
     @Override
@@ -45,9 +45,6 @@ public class BucketImpl<T extends Copier<T>> implements Bucket<T>, Serializable 
 
     @Override
     public String toString() {
-        return "BucketImpl{" +
-                "version=" + version +
-                ", data=" + data +
-                '}';
+        return "BucketImpl{" + "version=" + version + ", data=" + data + '}';
     }
 }

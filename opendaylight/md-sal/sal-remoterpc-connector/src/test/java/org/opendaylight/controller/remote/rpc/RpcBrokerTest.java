@@ -55,14 +55,11 @@ public class RpcBrokerTest extends AbstractRpcTest {
 
     @Test
     public void testExecuteRpcFailureWithException() {
-
         new JavaTestKit(node1) {
             {
-
                 when(domRpcService1.invokeRpc(eq(TEST_RPC_TYPE), Mockito.<NormalizedNode<?, ?>>any()))
-                        .thenReturn(
-                                Futures.<DOMRpcResult, DOMRpcException>immediateFailedCheckedFuture(new DOMRpcImplementationNotAvailableException(
-                                        "NOT FOUND")));
+                        .thenReturn(Futures.<DOMRpcResult, DOMRpcException>immediateFailedCheckedFuture(
+                                new DOMRpcImplementationNotAvailableException("NOT FOUND")));
 
                 final ExecuteRpc executeMsg = ExecuteRpc.from(TEST_RPC_ID, null);
 
@@ -73,7 +70,5 @@ public class RpcBrokerTest extends AbstractRpcTest {
                 Assert.assertTrue(rpcResponse.cause() instanceof DOMRpcException);
             }
         };
-
     }
-
 }

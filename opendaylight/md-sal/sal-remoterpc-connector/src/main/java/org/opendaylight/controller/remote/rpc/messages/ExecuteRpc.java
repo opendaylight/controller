@@ -18,10 +18,6 @@ import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessa
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
-/**
- * @author tony
- *
- */
 public class ExecuteRpc implements Serializable {
     private static final long serialVersionUID = 1128904894827335676L;
 

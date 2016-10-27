@@ -31,68 +31,66 @@ import org.slf4j.LoggerFactory;
  */
 public class RemoteRpcProvider implements AutoCloseable, Provider, SchemaContextListener {
 
-  private static final Logger LOG = LoggerFactory.getLogger(RemoteRpcProvider.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RemoteRpcProvider.class);
 
-  private final DOMRpcProviderService rpcProvisionRegistry;
+    private final DOMRpcProviderService rpcProvisionRegistry;
 
-  private ListenerRegistration<SchemaContextListener> schemaListenerRegistration;
-  private final ActorSystem actorSystem;
-  private SchemaService schemaService;
-  private DOMRpcService rpcService;
-  private SchemaContext schemaContext;
-  private ActorRef rpcManager;
-  private final RemoteRpcProviderConfig config;
+    private ListenerRegistration<SchemaContextListener> schemaListenerRegistration;
+    private final ActorSystem actorSystem;
+    private SchemaService schemaService;
+    private DOMRpcService rpcService;
+    private SchemaContext schemaContext;
+    private ActorRef rpcManager;
+    private final RemoteRpcProviderConfig config;
 
-
-  public RemoteRpcProvider(final ActorSystem actorSystem,
-                           final DOMRpcProviderService rpcProvisionRegistry,
-                           final RemoteRpcProviderConfig config) {
-    this.actorSystem = actorSystem;
-    this.rpcProvisionRegistry = rpcProvisionRegistry;
-    this.config = Preconditions.checkNotNull(config);
-  }
-
-  public void setRpcService(DOMRpcService rpcService) {
-      this.rpcService = rpcService;
-  }
-
-  public void setSchemaService(SchemaService schemaService) {
-      this.schemaService = schemaService;
-  }
-
-  @Override
-  public void close() throws Exception {
-    if (schemaListenerRegistration != null) {
-        schemaListenerRegistration.close();
-        schemaListenerRegistration = null;
+    public RemoteRpcProvider(final ActorSystem actorSystem, final DOMRpcProviderService rpcProvisionRegistry,
+            final RemoteRpcProviderConfig config) {
+        this.actorSystem = actorSystem;
+        this.rpcProvisionRegistry = rpcProvisionRegistry;
+        this.config = Preconditions.checkNotNull(config);
     }
-  }
 
-  @Override
-  public void onSessionInitiated(final Broker.ProviderSession session) {
-    schemaService = session.getService(SchemaService.class);
-    rpcService = session.getService(DOMRpcService.class);
-    start();
-  }
+    public void setRpcService(DOMRpcService rpcService) {
+        this.rpcService = rpcService;
+    }
 
-  @Override
-  public Collection<ProviderFunctionality> getProviderFunctionality() {
-    return null;
-  }
+    public void setSchemaService(SchemaService schemaService) {
+        this.schemaService = schemaService;
+    }
 
-  public void start() {
-    LOG.info("Starting remote rpc service...");
+    @Override
+    public void close() throws Exception {
+        if (schemaListenerRegistration != null) {
+            schemaListenerRegistration.close();
+            schemaListenerRegistration = null;
+        }
+    }
 
-    schemaContext = schemaService.getGlobalContext();
-    rpcManager = actorSystem.actorOf(RpcManager.props(schemaContext,
-            rpcProvisionRegistry, rpcService, config), config.getRpcManagerName());
-    schemaListenerRegistration = schemaService.registerSchemaContextListener(this);
-    LOG.debug("rpc manager started");
-  }
+    @Override
+    public void onSessionInitiated(final Broker.ProviderSession session) {
+        schemaService = session.getService(SchemaService.class);
+        rpcService = session.getService(DOMRpcService.class);
+        start();
+    }
 
-  @Override
-  public void onGlobalContextUpdated(final SchemaContext schemaContext) {
-    this.schemaContext = schemaContext;
-    rpcManager.tell(new UpdateSchemaContext(schemaContext), null);
-  }
+    @Override
+    public Collection<ProviderFunctionality> getProviderFunctionality() {
+        return null;
+    }
+
+    public void start() {
+        LOG.info("Starting remote rpc service...");
+
+        schemaContext = schemaService.getGlobalContext();
+        rpcManager = actorSystem.actorOf(RpcManager.props(schemaContext, rpcProvisionRegistry, rpcService, config),
+                config.getRpcManagerName());
+        schemaListenerRegistration = schemaService.registerSchemaContextListener(this);
+        LOG.debug("rpc manager started");
+    }
+
+    @Override
+    public void onGlobalContextUpdated(final SchemaContext newSchemaContext) {
+        this.schemaContext = newSchemaContext;
+        rpcManager.tell(new UpdateSchemaContext(newSchemaContext), null);
+    }
 }

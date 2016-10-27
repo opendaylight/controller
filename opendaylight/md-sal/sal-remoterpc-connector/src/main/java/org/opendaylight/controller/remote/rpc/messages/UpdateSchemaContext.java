@@ -11,14 +11,13 @@ package org.opendaylight.controller.remote.rpc.messages;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 public class UpdateSchemaContext {
+    private final SchemaContext schemaContext;
 
-  private final SchemaContext schemaContext;
+    public UpdateSchemaContext(final SchemaContext schemaContext) {
+        this.schemaContext = schemaContext;
+    }
 
-  public UpdateSchemaContext(final SchemaContext schemaContext) {
-    this.schemaContext = schemaContext;
-  }
-
-  public SchemaContext getSchemaContext() {
-    return schemaContext;
-  }
+    public SchemaContext getSchemaContext() {
+        return schemaContext;
+    }
 }

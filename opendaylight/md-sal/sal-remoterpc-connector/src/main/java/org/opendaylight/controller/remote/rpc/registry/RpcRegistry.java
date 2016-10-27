@@ -27,7 +27,6 @@ import org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.Remo
 import org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.SetLocalRouter;
 import org.opendaylight.controller.remote.rpc.registry.gossip.Bucket;
 import org.opendaylight.controller.remote.rpc.registry.gossip.BucketStore;
-import org.opendaylight.controller.remote.rpc.registry.mbeans.RemoteRpcRegistryMXBean;
 import org.opendaylight.controller.remote.rpc.registry.mbeans.RemoteRpcRegistryMXBeanImpl;
 import org.opendaylight.controller.sal.connector.api.RpcRouter;
 import org.opendaylight.controller.sal.connector.api.RpcRouter.RouteIdentifier;
@@ -73,7 +72,7 @@ public class RpcRegistry extends BucketStore<RoutingTable> {
     }
 
     /**
-     * Register's rpc broker
+     * Registers a rpc broker.
      *
      * @param message contains {@link akka.actor.ActorRef} for rpc broker
      */
@@ -81,15 +80,12 @@ public class RpcRegistry extends BucketStore<RoutingTable> {
         getLocalBucket().getData().setRouter(message.getRouter());
     }
 
-    /**
-     * @param msg
-     */
     private void receiveAddRoutes(AddOrUpdateRoutes msg) {
 
         log.debug("AddOrUpdateRoutes: {}", msg.getRouteIdentifiers());
 
         RoutingTable table = getLocalBucket().getData().copy();
-        for(RpcRouter.RouteIdentifier<?, ?, ?> routeId : msg.getRouteIdentifiers()) {
+        for (RpcRouter.RouteIdentifier<?, ?, ?> routeId : msg.getRouteIdentifiers()) {
             table.addRoute(routeId);
         }
 
@@ -99,6 +95,8 @@ public class RpcRegistry extends BucketStore<RoutingTable> {
     }
 
     /**
+     * Processes a RemoveRoutes message.
+     *
      * @param msg contains list of route ids to remove
      */
     private void receiveRemoveRoutes(RemoveRoutes msg) {
@@ -114,13 +112,13 @@ public class RpcRegistry extends BucketStore<RoutingTable> {
     /**
      * Finds routers for the given rpc.
      *
-     * @param findRouters
+     * @param findRouters the FindRouters request
      */
     private void receiveGetRouter(final FindRouters findRouters) {
         log.debug("receiveGetRouter for {}", findRouters.getRouteIdentifier());
 
         final ActorRef sender = getSender();
-        if(!findRouters(findRouters, sender)) {
+        if (!findRouters(findRouters, sender)) {
             log.debug("No routers found for {} - scheduling {} ms timer", findRouters.getRouteIdentifier(),
                     findRouterTimeout.toMillis());
 
@@ -128,7 +126,7 @@ public class RpcRegistry extends BucketStore<RoutingTable> {
             final Runnable routesUpdatedRunnable = new Runnable() {
                 @Override
                 public void run() {
-                    if(findRouters(findRouters, sender)) {
+                    if (findRouters(findRouters, sender)) {
                         routesUpdatedCallbacks.remove(this);
                         timer.get().cancel();
                     }
@@ -137,15 +135,12 @@ public class RpcRegistry extends BucketStore<RoutingTable> {
 
             routesUpdatedCallbacks.add(routesUpdatedRunnable);
 
-            Runnable timerRunnable = new Runnable() {
-                @Override
-                public void run() {
-                    log.warn("Timed out finding routers for {}", findRouters.getRouteIdentifier());
+            Runnable timerRunnable = () -> {
+                log.warn("Timed out finding routers for {}", findRouters.getRouteIdentifier());
 
-                    routesUpdatedCallbacks.remove(routesUpdatedRunnable);
-                    sender.tell(new Messages.FindRoutersReply(
-                            Collections.<Pair<ActorRef, Long>>emptyList()), self());
-                }
+                routesUpdatedCallbacks.remove(routesUpdatedRunnable);
+                sender.tell(new Messages.FindRoutersReply(
+                        Collections.<Pair<ActorRef, Long>>emptyList()), self());
             };
 
             timer.set(getContext().system().scheduler().scheduleOnce(findRouterTimeout, self(), timerRunnable,
@@ -159,14 +154,14 @@ public class RpcRegistry extends BucketStore<RoutingTable> {
         RouteIdentifier<?, ?, ?> routeId = findRouters.getRouteIdentifier();
         findRoutes(getLocalBucket().getData(), routeId, routers);
 
-        for(Bucket<RoutingTable> bucket : getRemoteBuckets().values()) {
+        for (Bucket<RoutingTable> bucket : getRemoteBuckets().values()) {
             findRoutes(bucket.getData(), routeId, routers);
         }
 
         log.debug("Found {} routers for {}", routers.size(), findRouters.getRouteIdentifier());
 
         boolean foundRouters = !routers.isEmpty();
-        if(foundRouters) {
+        if (foundRouters) {
             sender.tell(new Messages.FindRoutersReply(routers), getSelf());
         }
 
@@ -180,24 +175,24 @@ public class RpcRegistry extends BucketStore<RoutingTable> {
         }
 
         Option<Pair<ActorRef, Long>> routerWithUpdateTime = table.getRouterFor(routeId);
-        if(!routerWithUpdateTime.isEmpty()) {
+        if (!routerWithUpdateTime.isEmpty()) {
             routers.add(routerWithUpdateTime.get());
         }
     }
 
     @Override
     protected void onBucketsUpdated() {
-        if(routesUpdatedCallbacks.isEmpty()) {
+        if (routesUpdatedCallbacks.isEmpty()) {
             return;
         }
 
-        for(Runnable callBack: routesUpdatedCallbacks.toArray(new Runnable[routesUpdatedCallbacks.size()])) {
+        for (Runnable callBack: routesUpdatedCallbacks.toArray(new Runnable[routesUpdatedCallbacks.size()])) {
             callBack.run();
         }
     }
 
     /**
-     * All messages used by the RpcRegistry
+     * All messages used by the RpcRegistry.
      */
     public static class Messages {
 
@@ -206,9 +201,8 @@ public class RpcRegistry extends BucketStore<RoutingTable> {
             final List<RpcRouter.RouteIdentifier<?, ?, ?>> routeIdentifiers;
 
             public ContainsRoute(List<RpcRouter.RouteIdentifier<?, ?, ?>> routeIdentifiers) {
-                Preconditions.checkArgument(routeIdentifiers != null &&
-                                            !routeIdentifiers.isEmpty(),
-                                            "Route Identifiers must be supplied");
+                Preconditions.checkArgument(routeIdentifiers != null && !routeIdentifiers.isEmpty(),
+                        "Route Identifiers must be supplied");
                 this.routeIdentifiers = routeIdentifiers;
             }
 
@@ -218,9 +212,7 @@ public class RpcRegistry extends BucketStore<RoutingTable> {
 
             @Override
             public String toString() {
-                return "ContainsRoute{" +
-                        "routeIdentifiers=" + routeIdentifiers +
-                        '}';
+                return "ContainsRoute{" + "routeIdentifiers=" + routeIdentifiers + '}';
             }
         }
 
@@ -252,9 +244,7 @@ public class RpcRegistry extends BucketStore<RoutingTable> {
 
             @Override
             public String toString() {
-                return "SetLocalRouter{" +
-                        "router=" + router +
-                        '}';
+                return "SetLocalRouter{" + "router=" + router + '}';
             }
         }
 
@@ -272,9 +262,7 @@ public class RpcRegistry extends BucketStore<RoutingTable> {
 
             @Override
             public String toString() {
-                return "FindRouters{" +
-                        "routeIdentifier=" + routeIdentifier +
-                        '}';
+                return "FindRouters{" + "routeIdentifier=" + routeIdentifier + '}';
             }
         }
 
@@ -292,9 +280,7 @@ public class RpcRegistry extends BucketStore<RoutingTable> {
 
             @Override
             public String toString() {
-                return "FindRoutersReply{" +
-                        "routerWithUpdateTime=" + routerWithUpdateTime +
-                        '}';
+                return "FindRoutersReply{" + "routerWithUpdateTime=" + routerWithUpdateTime + '}';
             }
         }
     }
@@ -310,7 +296,7 @@ public class RpcRegistry extends BucketStore<RoutingTable> {
         @Override
         public RpcRegistry create() throws Exception {
             RpcRegistry registry =  new RpcRegistry(config);
-            RemoteRpcRegistryMXBean mxBean = new RemoteRpcRegistryMXBeanImpl(registry);
+            new RemoteRpcRegistryMXBeanImpl(registry);
             return registry;
         }
     }

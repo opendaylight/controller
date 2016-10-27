@@ -34,8 +34,9 @@ import org.slf4j.LoggerFactory;
  * A store that syncs its data across nodes in the cluster.
  * It maintains a {@link org.opendaylight.controller.remote.rpc.registry.gossip.Bucket} per node. Buckets are versioned.
  * A node can write ONLY to its bucket. This way, write conflicts are avoided.
+ *
  * <p>
- * Buckets are sync'ed across nodes using Gossip protocol (http://en.wikipedia.org/wiki/Gossip_protocol)<p>
+ * Buckets are sync'ed across nodes using Gossip protocol (http://en.wikipedia.org/wiki/Gossip_protocol).
  * This store uses a {@link org.opendaylight.controller.remote.rpc.registry.gossip.Gossiper}.
  *
  */
@@ -46,22 +47,22 @@ public class BucketStore<T extends Copier<T>> extends AbstractUntypedActorWithMe
     protected final Logger log = LoggerFactory.getLogger(getClass());
 
     /**
-     * Bucket owned by the node
+     * Bucket owned by the node.
      */
     private final BucketImpl<T> localBucket = new BucketImpl<>();
 
     /**
-     * Buckets ownded by other known nodes in the cluster
+     * Buckets ownded by other known nodes in the cluster.
      */
     private final Map<Address, Bucket<T>> remoteBuckets = new HashMap<>();
 
     /**
-     * Bucket version for every known node in the cluster including this node
+     * Bucket version for every known node in the cluster including this node.
      */
     private final Map<Address, Long> versions = new HashMap<>();
 
     /**
-     * Cluster address for this node
+     * Cluster address for this node.
      */
     private Address selfAddress;
 
@@ -69,12 +70,12 @@ public class BucketStore<T extends Copier<T>> extends AbstractUntypedActorWithMe
 
     private final RemoteRpcProviderConfig config;
 
-    public BucketStore(RemoteRpcProviderConfig config){
+    public BucketStore(RemoteRpcProviderConfig config) {
         this.config = Preconditions.checkNotNull(config);
     }
 
     @Override
-    public void preStart(){
+    public void preStart() {
         ActorRefProvider provider = getContext().provider();
         selfAddress = provider.getDefaultAddress();
 
@@ -83,6 +84,7 @@ public class BucketStore<T extends Copier<T>> extends AbstractUntypedActorWithMe
         }
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     protected void handleReceive(Object message) throws Exception {
         if (probe != null) {
@@ -104,9 +106,7 @@ public class BucketStore<T extends Copier<T>> extends AbstractUntypedActorWithMe
         } else if (message instanceof UpdateRemoteBuckets) {
             receiveUpdateRemoteBuckets(((UpdateRemoteBuckets<T>) message).getBuckets());
         } else {
-            if(log.isDebugEnabled()) {
-                log.debug("Unhandled message [{}]", message);
-            }
+            log.debug("Unhandled message [{}]", message);
             unhandled(message);
         }
     }
@@ -116,19 +116,19 @@ public class BucketStore<T extends Copier<T>> extends AbstractUntypedActorWithMe
     }
 
     /**
-     * Returns all the buckets the this node knows about, self owned + remote
+     * Returns all the buckets the this node knows about, self owned + remote.
      */
-    void receiveGetAllBuckets(){
+    void receiveGetAllBuckets() {
         final ActorRef sender = getSender();
         sender.tell(new GetAllBucketsReply<T>(getAllBuckets()), getSelf());
     }
 
     /**
-     * Helper to collect all known buckets
+     * Helper to collect all known buckets.
      *
      * @return self owned + remote buckets
      */
-    Map<Address, Bucket<T>> getAllBuckets(){
+    Map<Address, Bucket<T>> getAllBuckets() {
         Map<Address, Bucket<T>> all = new HashMap<>(remoteBuckets.size() + 1);
 
         //first add the local bucket
@@ -141,21 +141,21 @@ public class BucketStore<T extends Copier<T>> extends AbstractUntypedActorWithMe
     }
 
     /**
-     * Returns buckets for requested members that this node knows about
+     * Returns buckets for requested members that this node knows about.
      *
      * @param members requested members
      */
-    void receiveGetBucketsByMembers(Set<Address> members){
+    void receiveGetBucketsByMembers(Set<Address> members) {
         final ActorRef sender = getSender();
         Map<Address, Bucket<T>> buckets = getBucketsByMembers(members);
         sender.tell(new GetBucketsByMembersReply<T>(buckets), getSelf());
     }
 
     /**
-     * Helper to collect buckets for requested memebers
+     * Helper to collect buckets for requested members.
      *
      * @param members requested members
-     * @return buckets for requested memebers
+     * @return buckets for requested members
      */
     Map<Address, Bucket<T>> getBucketsByMembers(Set<Address> members) {
         Map<Address, Bucket<T>> buckets = new HashMap<>();
@@ -166,7 +166,7 @@ public class BucketStore<T extends Copier<T>> extends AbstractUntypedActorWithMe
         }
 
         //then get buckets for requested remote nodes
-        for (Address address : members){
+        for (Address address : members) {
             if (remoteBuckets.containsKey(address)) {
                 buckets.put(address, remoteBuckets.get(address));
             }
@@ -176,31 +176,30 @@ public class BucketStore<T extends Copier<T>> extends AbstractUntypedActorWithMe
     }
 
     /**
-     * Returns versions for all buckets known
+     * Returns versions for all buckets known.
      */
-    void receiveGetBucketVersions(){
+    void receiveGetBucketVersions() {
         final ActorRef sender = getSender();
         GetBucketVersionsReply reply = new GetBucketVersionsReply(versions);
         sender.tell(reply, getSelf());
     }
 
     /**
-     * Update local copy of remote buckets where local copy's version is older
+     * Update local copy of remote buckets where local copy's version is older.
      *
      * @param receivedBuckets buckets sent by remote
      *                        {@link org.opendaylight.controller.remote.rpc.registry.gossip.Gossiper}
      */
-    void receiveUpdateRemoteBuckets(Map<Address, Bucket<T>> receivedBuckets){
+    void receiveUpdateRemoteBuckets(Map<Address, Bucket<T>> receivedBuckets) {
         log.debug("{}: receiveUpdateRemoteBuckets: {}", selfAddress, receivedBuckets);
-        if (receivedBuckets == null || receivedBuckets.isEmpty())
-         {
+        if (receivedBuckets == null || receivedBuckets.isEmpty()) {
             return; //nothing to do
         }
 
         //Remote cant update self's bucket
         receivedBuckets.remove(selfAddress);
 
-        for (Map.Entry<Address, Bucket<T>> entry : receivedBuckets.entrySet()){
+        for (Map.Entry<Address, Bucket<T>> entry : receivedBuckets.entrySet()) {
 
             Long localVersion = versions.get(entry.getKey());
             if (localVersion == null) {
@@ -225,9 +224,7 @@ public class BucketStore<T extends Copier<T>> extends AbstractUntypedActorWithMe
             }
         }
 
-        if(log.isDebugEnabled()) {
-            log.debug("State after update - Local Bucket [{}], Remote Buckets [{}]", localBucket, remoteBuckets);
-        }
+        log.debug("State after update - Local Bucket [{}], Remote Buckets [{}]", localBucket, remoteBuckets);
 
         onBucketsUpdated();
     }

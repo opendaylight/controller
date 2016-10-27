@@ -10,6 +10,7 @@ package org.opendaylight.controller.remote.rpc.registry.gossip;
 import akka.actor.ActorSystem;
 import akka.actor.Address;
 import akka.actor.Props;
+import akka.testkit.JavaTestKit;
 import akka.testkit.TestActorRef;
 import com.typesafe.config.ConfigFactory;
 import java.util.HashMap;
@@ -40,24 +41,22 @@ public class BucketStoreTest {
 
     @BeforeClass
     public static void setup() {
-
         system = ActorSystem.create("opendaylight-rpc", ConfigFactory.load().getConfig("unit-test"));
         system.actorOf(Props.create(TerminationMonitor.class), "termination-monitor");
     }
 
     @AfterClass
     public static void teardown() {
-        system.shutdown();
+        JavaTestKit.shutdownActorSystem(system);
     }
 
     /**
-     * Given remote buckets
-     * Should merge with local copy of remote buckets
+     * Given remote buckets, should merge with local copy of remote buckets.
      */
     @Test
-    public void testReceiveUpdateRemoteBuckets(){
+    public void testReceiveUpdateRemoteBuckets() {
 
-        BucketStore<T> store = createStore();
+        final BucketStore<T> store = createStore();
 
         Address localAddress = system.provider().getDefaultAddress();
         Bucket<T> localBucket = new BucketImpl<>();
@@ -99,23 +98,23 @@ public class BucketStoreTest {
         Assert.assertTrue(remoteBucketsInStore.size() == 4);
 
         //Update a bucket
-        Bucket<T> b3_new = new BucketImpl<T>();
+        Bucket<T> b3New = new BucketImpl<>();
         remoteBuckets.clear();
-        remoteBuckets.put(a3, b3_new);
+        remoteBuckets.put(a3, b3New);
         remoteBuckets.put(a1, null);
         remoteBuckets.put(a2, null);
         store.receiveUpdateRemoteBuckets(remoteBuckets);
 
         //Should only update a3
         remoteBucketsInStore = store.getRemoteBuckets();
-        Bucket<T> b3_inStore = remoteBucketsInStore.get(a3);
-        Assert.assertEquals(b3_new.getVersion(), b3_inStore.getVersion());
+        Bucket<T> b3InStore = remoteBucketsInStore.get(a3);
+        Assert.assertEquals(b3New.getVersion(), b3InStore.getVersion());
 
         //Should NOT update a1 and a2
-        Bucket<T> b1_inStore = remoteBucketsInStore.get(a1);
-        Bucket<T> b2_inStore = remoteBucketsInStore.get(a2);
-        Assert.assertEquals(b1.getVersion(), b1_inStore.getVersion());
-        Assert.assertEquals(b2.getVersion(), b2_inStore.getVersion());
+        Bucket<T> b1InStore = remoteBucketsInStore.get(a1);
+        Bucket<T> b2InStore = remoteBucketsInStore.get(a2);
+        Assert.assertEquals(b1.getVersion(), b1InStore.getVersion());
+        Assert.assertEquals(b2.getVersion(), b2InStore.getVersion());
         Assert.assertTrue(remoteBucketsInStore.size() == 4);
 
         //Should update versions map
@@ -124,7 +123,7 @@ public class BucketStoreTest {
         Assert.assertEquals(4, versionsInStore.size());
         Assert.assertEquals(b1.getVersion(), versionsInStore.get(a1));
         Assert.assertEquals(b2.getVersion(), versionsInStore.get(a2));
-        Assert.assertEquals(b3_new.getVersion(), versionsInStore.get(a3));
+        Assert.assertEquals(b3New.getVersion(), versionsInStore.get(a3));
         Assert.assertEquals(b4.getVersion(), versionsInStore.get(a4));
 
         //Send older version of bucket
@@ -134,8 +133,8 @@ public class BucketStoreTest {
 
         //Should NOT update a3
         remoteBucketsInStore = store.getRemoteBuckets();
-        b3_inStore = remoteBucketsInStore.get(a3);
-        Assert.assertTrue(b3_inStore.getVersion().longValue() == b3_new.getVersion().longValue());
+        b3InStore = remoteBucketsInStore.get(a3);
+        Assert.assertTrue(b3InStore.getVersion().longValue() == b3New.getVersion().longValue());
 
     }
 
@@ -144,10 +143,9 @@ public class BucketStoreTest {
      *
      * @return instance of BucketStore class
      */
-    private static BucketStore<T> createStore(){
+    private static BucketStore<T> createStore() {
         final Props props = Props.create(BucketStore.class, new RemoteRpcProviderConfig(system.settings().config()));
         final TestActorRef<BucketStore<T>> testRef = TestActorRef.create(system, props, "testStore");
         return testRef.underlyingActor();
     }
-
 }

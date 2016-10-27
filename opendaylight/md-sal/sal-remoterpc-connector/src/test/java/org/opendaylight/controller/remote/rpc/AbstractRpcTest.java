@@ -64,7 +64,8 @@ public class AbstractRpcTest {
 
 
     static final SchemaPath TEST_RPC_TYPE = SchemaPath.create(true, TEST_RPC);
-    static final YangInstanceIdentifier TEST_PATH = YangInstanceIdentifier.create(new YangInstanceIdentifier.NodeIdentifier(TEST_RPC));
+    static final YangInstanceIdentifier TEST_PATH = YangInstanceIdentifier.create(
+            new YangInstanceIdentifier.NodeIdentifier(TEST_RPC));
     static final DOMRpcIdentifier TEST_RPC_ID = DOMRpcIdentifier.create(TEST_RPC_TYPE, TEST_PATH);
 
     static ActorSystem node1;
@@ -129,8 +130,8 @@ public class AbstractRpcTest {
     }
 
     static void assertRpcErrorEquals(final RpcError rpcError, final ErrorSeverity severity,
-            final ErrorType errorType, final String tag, final String message, final String applicationTag, final String info,
-            final String causeMsg) {
+            final ErrorType errorType, final String tag, final String message, final String applicationTag,
+            final String info, final String causeMsg) {
         assertEquals("getSeverity", severity, rpcError.getSeverity());
         assertEquals("getErrorType", errorType, rpcError.getErrorType());
         assertEquals("getTag", tag, rpcError.getTag());
@@ -138,14 +139,14 @@ public class AbstractRpcTest {
         assertEquals("getApplicationTag", applicationTag, rpcError.getApplicationTag());
         assertEquals("getInfo", info, rpcError.getInfo());
 
-        if(causeMsg == null) {
+        if (causeMsg == null) {
             assertNull("Unexpected cause " + rpcError.getCause(), rpcError.getCause());
         } else {
             assertEquals("Cause message", causeMsg, rpcError.getCause().getMessage());
         }
     }
 
-    static void assertCompositeNodeEquals(final NormalizedNode<? , ?> exp, final NormalizedNode<? , ? > actual) {
+    static void assertCompositeNodeEquals(final NormalizedNode<? , ?> exp, final NormalizedNode<? , ?> actual) {
         assertEquals(exp, actual);
     }
 
@@ -161,9 +162,8 @@ public class AbstractRpcTest {
     }
 
     static void assertFailedRpcResult(final DOMRpcResult rpcResult, final ErrorSeverity severity,
-            final ErrorType errorType, final String tag, final String message, final String applicationTag, final String info,
-            final String causeMsg) {
-
+            final ErrorType errorType, final String tag, final String message, final String applicationTag,
+            final String info, final String causeMsg) {
         assertNotNull("RpcResult was null", rpcResult);
         final Collection<RpcError> rpcErrors = rpcResult.getErrors();
         assertEquals("RpcErrors count", 1, rpcErrors.size());

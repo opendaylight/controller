@@ -25,17 +25,17 @@ import org.opendaylight.controller.remote.rpc.registry.gossip.Messages.BucketSto
  */
 public class Messages {
 
-    public static class BucketStoreMessages{
+    public static class BucketStoreMessages {
 
         public static class GetAllBuckets implements Serializable {
             private static final long serialVersionUID = 1L;
         }
 
-        public static class GetBucketsByMembers implements Serializable{
+        public static class GetBucketsByMembers implements Serializable {
             private static final long serialVersionUID = 1L;
             private final Set<Address> members;
 
-            public GetBucketsByMembers(Set<Address> members){
+            public GetBucketsByMembers(Set<Address> members) {
                 Preconditions.checkArgument(members != null, "members can not be null");
                 this.members = members;
             }
@@ -45,12 +45,12 @@ public class Messages {
             }
         }
 
-        public static class ContainsBuckets<T extends Copier<T>> implements Serializable{
+        public static class ContainsBuckets<T extends Copier<T>> implements Serializable {
             private static final long serialVersionUID = -4940160367495308286L;
 
             private final Map<Address, Bucket<T>> buckets;
 
-            public ContainsBuckets(Map<Address, Bucket<T>> buckets){
+            public ContainsBuckets(Map<Address, Bucket<T>> buckets) {
                 Preconditions.checkArgument(buckets != null, "buckets can not be null");
                 this.buckets = buckets;
             }
@@ -58,9 +58,9 @@ public class Messages {
             public Map<Address, Bucket<T>> getBuckets() {
                 Map<Address, Bucket<T>> copy = new HashMap<>(buckets.size());
 
-                for (Map.Entry<Address, Bucket<T>> entry : buckets.entrySet()){
+                for (Map.Entry<Address, Bucket<T>> entry : buckets.entrySet()) {
                     //ignore null entries
-                    if ( (entry.getKey() == null) || (entry.getValue() == null) ) {
+                    if ( entry.getKey() == null || entry.getValue() == null ) {
                         continue;
                     }
                     copy.put(entry.getKey(), entry.getValue());
@@ -69,15 +69,18 @@ public class Messages {
             }
         }
 
-        public static class GetAllBucketsReply<T extends Copier<T>> extends ContainsBuckets<T> implements Serializable{
+        public static class GetAllBucketsReply<T extends Copier<T>> extends ContainsBuckets<T> implements Serializable {
             private static final long serialVersionUID = 1L;
+
             public GetAllBucketsReply(Map<Address, Bucket<T>> buckets) {
                 super(buckets);
             }
         }
 
-        public static class GetBucketsByMembersReply<T extends Copier<T>> extends ContainsBuckets<T> implements Serializable{
+        public static class GetBucketsByMembersReply<T extends Copier<T>> extends ContainsBuckets<T>
+                implements Serializable {
             private static final long serialVersionUID = 1L;
+
             public GetBucketsByMembersReply(Map<Address, Bucket<T>> buckets) {
                 super(buckets);
             }
@@ -87,7 +90,7 @@ public class Messages {
             private static final long serialVersionUID = 1L;
         }
 
-        public static class ContainsBucketVersions implements Serializable{
+        public static class ContainsBucketVersions implements Serializable {
             private static final long serialVersionUID = -8172148925383801613L;
 
             Map<Address, Long> versions;
@@ -104,22 +107,25 @@ public class Messages {
 
         }
 
-        public static class GetBucketVersionsReply extends ContainsBucketVersions implements Serializable{
+        public static class GetBucketVersionsReply extends ContainsBucketVersions implements Serializable {
             private static final long serialVersionUID = 1L;
+
             public GetBucketVersionsReply(Map<Address, Long> versions) {
                 super(versions);
             }
         }
 
-        public static class UpdateRemoteBuckets<T extends Copier<T>> extends ContainsBuckets<T> implements Serializable{
+        public static class UpdateRemoteBuckets<T extends Copier<T>> extends ContainsBuckets<T>
+                implements Serializable {
             private static final long serialVersionUID = 1L;
+
             public UpdateRemoteBuckets(Map<Address, Bucket<T>> buckets) {
                 super(buckets);
             }
         }
     }
 
-    public static class GossiperMessages{
+    public static class GossiperMessages {
         public static class Tick implements Serializable {
             private static final long serialVersionUID = -4770935099506366773L;
         }
@@ -128,7 +134,7 @@ public class Messages {
             private static final long serialVersionUID = 5803354404380026143L;
         }
 
-        public static final class GossipStatus extends ContainsBucketVersions implements Serializable{
+        public static final class GossipStatus extends ContainsBucketVersions implements Serializable {
             private static final long serialVersionUID = -593037395143883265L;
 
             private final Address from;
@@ -143,7 +149,8 @@ public class Messages {
             }
         }
 
-        public static final class GossipEnvelope<T extends Copier<T>> extends ContainsBuckets<T> implements Serializable {
+        public static final class GossipEnvelope<T extends Copier<T>> extends ContainsBuckets<T>
+                implements Serializable {
             private static final long serialVersionUID = 8346634072582438818L;
 
             private final Address from;

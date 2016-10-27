@@ -13,8 +13,6 @@ import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.common.actor.CommonConfig;
 import scala.concurrent.duration.FiniteDuration;
 
-/**
- */
 public class RemoteRpcProviderConfig extends CommonConfig {
 
     protected static final String TAG_RPC_BROKER_NAME = "rpc-broker-name";
@@ -30,38 +28,37 @@ public class RemoteRpcProviderConfig extends CommonConfig {
     private Timeout cachedAskDuration;
     private FiniteDuration cachedGossipTickInterval;
 
-    public RemoteRpcProviderConfig(Config config){
+    public RemoteRpcProviderConfig(Config config) {
         super(config);
     }
 
-    public String getRpcBrokerName(){
+    public String getRpcBrokerName() {
         return get().getString(TAG_RPC_BROKER_NAME);
     }
 
-    public String getRpcRegistryName(){
+    public String getRpcRegistryName() {
         return get().getString(TAG_RPC_REGISTRY_NAME);
     }
 
-    public String getRpcManagerName(){
+    public String getRpcManagerName() {
         return get().getString(TAG_RPC_MGR_NAME);
     }
 
-    public String getRpcBrokerPath(){
+    public String getRpcBrokerPath() {
         return get().getString(TAG_RPC_BROKER_PATH);
     }
 
-    public String getRpcRegistryPath(){
+    public String getRpcRegistryPath() {
         return get().getString(TAG_RPC_REGISTRY_PATH);
 
     }
 
-    public String getRpcManagerPath(){
+    public String getRpcManagerPath() {
         return get().getString(TAG_RPC_MGR_PATH);
     }
 
-
-    public Timeout getAskDuration(){
-        if (cachedAskDuration != null){
+    public Timeout getAskDuration() {
+        if (cachedAskDuration != null) {
             return cachedAskDuration;
         }
 
@@ -71,7 +68,7 @@ public class RemoteRpcProviderConfig extends CommonConfig {
         return cachedAskDuration;
     }
 
-    public FiniteDuration getGossipTickInterval(){
+    public FiniteDuration getGossipTickInterval() {
         if (cachedGossipTickInterval != null) {
             return cachedGossipTickInterval;
         }
@@ -87,13 +84,13 @@ public class RemoteRpcProviderConfig extends CommonConfig {
      */
     public static RemoteRpcProviderConfig newInstance(String actorSystemName, boolean metricCaptureEnabled,
             int mailboxCapacity) {
-        return new Builder(actorSystemName).metricCaptureEnabled(metricCaptureEnabled).
-                mailboxCapacity(mailboxCapacity).build();
+        return new Builder(actorSystemName).metricCaptureEnabled(metricCaptureEnabled)
+                .mailboxCapacity(mailboxCapacity).build();
     }
 
-    public static class Builder extends CommonConfig.Builder<Builder>{
+    public static class Builder extends CommonConfig.Builder<Builder> {
 
-        public Builder(String actorSystemName){
+        public Builder(String actorSystemName) {
             super(actorSystemName);
 
             //Actor names
@@ -118,10 +115,8 @@ public class RemoteRpcProviderConfig extends CommonConfig {
         }
 
         @Override
-        public RemoteRpcProviderConfig build(){
+        public RemoteRpcProviderConfig build() {
             return new RemoteRpcProviderConfig(merge());
         }
     }
-
-
 }

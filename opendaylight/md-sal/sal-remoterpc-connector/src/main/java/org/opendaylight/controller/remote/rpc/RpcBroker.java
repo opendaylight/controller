@@ -31,16 +31,12 @@ import org.opendaylight.yangtools.yang.common.RpcError.ErrorType;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Actor to initiate execution of remote RPC on other nodes of the cluster.
  */
 
 public class RpcBroker extends AbstractUntypedActor {
-
-    private static final Logger LOG = LoggerFactory.getLogger(RpcBroker.class);
     private final DOMRpcService rpcService;
 
     private RpcBroker(final DOMRpcService rpcService) {
@@ -59,6 +55,7 @@ public class RpcBroker extends AbstractUntypedActor {
         }
     }
 
+    @SuppressWarnings("checkstyle:IllegalCatch")
     private void executeRpc(final ExecuteRpc msg) {
         LOG.debug("Executing rpc {}", msg.getRpc());
         final NormalizedNode<?, ?> input = RemoteRpcInput.from(msg.getInputNormalizedNode());
@@ -95,16 +92,17 @@ public class RpcBroker extends AbstractUntypedActor {
                 }
 
                 @Override
-                public void onFailure(final Throwable t) {
-                    LOG.error("executeRpc for {} failed with root cause: {}. For exception details, enable Debug logging.",
-                        msg.getRpc(), Throwables.getRootCause(t));
-                    if(LOG.isDebugEnabled()) {
-                        LOG.debug("Detailed exception for execute RPC failure :{}", t);
+                public void onFailure(final Throwable failure) {
+                    LOG.error(
+                        "executeRpc for {} failed with root cause: {}. For exception details, enable Debug logging.",
+                        msg.getRpc(), Throwables.getRootCause(failure));
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Detailed exception for execute RPC failure :{}", failure);
                     }
-                    sender.tell(new akka.actor.Status.Failure(t), self);
+                    sender.tell(new akka.actor.Status.Failure(failure), self);
                 }
             });
-        } catch (final Exception e) {
+        } catch (final RuntimeException e) {
             sender.tell(new akka.actor.Status.Failure(e), sender);
         }
     }

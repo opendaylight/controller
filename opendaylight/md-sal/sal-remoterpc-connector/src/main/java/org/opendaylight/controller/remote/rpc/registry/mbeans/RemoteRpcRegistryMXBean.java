@@ -13,9 +13,8 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * JMX bean to check remote rpc registry
+ * JMX bean to check remote rpc registry.
  */
-
 public interface RemoteRpcRegistryMXBean {
 
     Set<String> getGlobalRpc();

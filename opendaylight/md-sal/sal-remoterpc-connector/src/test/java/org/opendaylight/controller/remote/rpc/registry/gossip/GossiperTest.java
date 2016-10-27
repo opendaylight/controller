@@ -15,11 +15,11 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.opendaylight.controller.remote.rpc.registry.gossip.Messages.GossiperMessages.GossipEnvelope;
-import static org.opendaylight.controller.remote.rpc.registry.gossip.Messages.GossiperMessages.GossipStatus;
+
 import akka.actor.ActorSystem;
 import akka.actor.Address;
 import akka.actor.Props;
+import akka.testkit.JavaTestKit;
 import akka.testkit.TestActorRef;
 import com.typesafe.config.ConfigFactory;
 import java.util.ArrayList;
@@ -33,6 +33,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendaylight.controller.remote.rpc.RemoteRpcProviderConfig;
 import org.opendaylight.controller.remote.rpc.TerminationMonitor;
+import org.opendaylight.controller.remote.rpc.registry.gossip.Messages.GossiperMessages.GossipEnvelope;
+import org.opendaylight.controller.remote.rpc.registry.gossip.Messages.GossiperMessages.GossipStatus;
 
 
 public class GossiperTest {
@@ -52,23 +54,22 @@ public class GossiperTest {
 
     @AfterClass
     public static void teardown() {
-        if (system != null)
-            system.shutdown();
+        JavaTestKit.shutdownActorSystem(system);
     }
 
     @Before
-    public void createMocks(){
+    public void createMocks() {
         mockGossiper = spy(gossiper);
     }
 
     @After
-    public void resetMocks(){
+    public void resetMocks() {
         reset(mockGossiper);
 
     }
 
     @Test
-    public void testReceiveGossipTick_WhenNoRemoteMemberShouldIgnore(){
+    public void testReceiveGossipTick_WhenNoRemoteMemberShouldIgnore() {
 
         mockGossiper.setClusterMembers(Collections.<Address>emptyList());
         doNothing().when(mockGossiper).getLocalStatusAndSendTo(any(Address.class));
@@ -77,7 +78,7 @@ public class GossiperTest {
     }
 
     @Test
-    public void testReceiveGossipTick_WhenRemoteMemberExistsShouldSendStatus(){
+    public void testReceiveGossipTick_WhenRemoteMemberExistsShouldSendStatus() {
         List<Address> members = new ArrayList<>();
         Address remote = new Address("tcp", "member");
         members.add(remote);
@@ -88,8 +89,9 @@ public class GossiperTest {
         verify(mockGossiper, times(1)).getLocalStatusAndSendTo(any(Address.class));
     }
 
+    @SuppressWarnings("unchecked")
     @Test
-    public void testReceiveGossipStatus_WhenSenderIsNonMemberShouldIgnore(){
+    public void testReceiveGossipStatus_WhenSenderIsNonMemberShouldIgnore() {
 
         Address nonMember = new Address("tcp", "non-member");
         GossipStatus remoteStatus = new GossipStatus(nonMember, mock(Map.class));
@@ -103,8 +105,9 @@ public class GossiperTest {
         verify(mockGossiper, times(0)).getSender();
     }
 
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Test
-    public void testReceiveGossip_WhenNotAddressedToSelfShouldIgnore(){
+    public void testReceiveGossipWhenNotAddressedToSelfShouldIgnore() {
         Address notSelf = new Address("tcp", "not-self");
 
         GossipEnvelope envelope = new GossipEnvelope(notSelf, notSelf, mock(Map.class));
@@ -118,9 +121,9 @@ public class GossiperTest {
      *
      * @return instance of Gossiper class
      */
-    private static Gossiper createGossiper(){
-
-        final Props props = Props.create(Gossiper.class, false, new RemoteRpcProviderConfig(system.settings().config()));
+    private static Gossiper createGossiper() {
+        final Props props = Props.create(Gossiper.class, false,
+                new RemoteRpcProviderConfig(system.settings().config()));
         final TestActorRef<Gossiper> testRef = TestActorRef.create(system, props, "testGossiper");
 
         return testRef.underlyingActor();

@@ -67,7 +67,8 @@ public class RemoteRpcImplementation implements DOMRpcImplementation {
                     } else {
                         final ActorRef remoteImplRef = new LatestEntryRoutingLogic(routePairs).select();
                         final Object executeRpcMessage = ExecuteRpc.from(rpc, input);
-                        LOG.debug("Found remote actor {} for rpc {} - sending {}", remoteImplRef, rpc.getType(), executeRpcMessage);
+                        LOG.debug("Found remote actor {} for rpc {} - sending {}", remoteImplRef, rpc.getType(),
+                                executeRpcMessage);
                         frontEndFuture.completeWith(ask(remoteImplRef, executeRpcMessage, config.getAskDuration()));
                     }
                 }

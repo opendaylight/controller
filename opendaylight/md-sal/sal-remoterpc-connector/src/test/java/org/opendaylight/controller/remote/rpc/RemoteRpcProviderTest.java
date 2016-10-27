@@ -31,23 +31,22 @@ import scala.concurrent.Await;
 import scala.concurrent.duration.Duration;
 
 public class RemoteRpcProviderTest {
+    static ActorSystem system;
+    static RemoteRpcProviderConfig moduleConfig;
 
-  static ActorSystem system;
-  static RemoteRpcProviderConfig moduleConfig;
+    @BeforeClass
+    public static void setup() throws InterruptedException {
+        moduleConfig = new RemoteRpcProviderConfig.Builder("odl-cluster-rpc").build();
+        final Config config = moduleConfig.get();
+        system = ActorSystem.create("odl-cluster-rpc", config);
 
-  @BeforeClass
-  public static void setup() throws InterruptedException {
-    moduleConfig = new RemoteRpcProviderConfig.Builder("odl-cluster-rpc").build();
-    final Config config = moduleConfig.get();
-    system = ActorSystem.create("odl-cluster-rpc", config);
+    }
 
-  }
-
-  @AfterClass
-  public static void teardown() {
-    JavaTestKit.shutdownActorSystem(system);
-    system = null;
-  }
+    @AfterClass
+    public static void teardown() {
+        JavaTestKit.shutdownActorSystem(system);
+        system = null;
+    }
 
     @Test
     public void testRemoteRpcProvider() throws Exception {

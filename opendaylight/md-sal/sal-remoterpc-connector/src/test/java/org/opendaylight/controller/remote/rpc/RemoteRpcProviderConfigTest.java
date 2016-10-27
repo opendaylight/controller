@@ -13,20 +13,16 @@ import akka.actor.UntypedActor;
 import akka.testkit.TestActorRef;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
+import java.util.concurrent.TimeUnit;
 import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.common.actor.AkkaConfigurationReader;
 import scala.concurrent.duration.FiniteDuration;
 
-import java.io.File;
-import java.util.concurrent.TimeUnit;
-
 public class RemoteRpcProviderConfigTest {
 
     @Test
     public void testConfigDefaults() {
-
-        Config c = ConfigFactory.parseFile(new File("application.conf"));
         RemoteRpcProviderConfig config = new RemoteRpcProviderConfig.Builder("unit-test").build();
 
         //Assert on configurations from common config
@@ -45,9 +41,6 @@ public class RemoteRpcProviderConfigTest {
         Assert.assertNotNull(config.getRpcRegistryPath());
         Assert.assertNotNull(config.getAskDuration());
         Assert.assertNotNull(config.getGossipTickInterval());
-
-
-
     }
 
     @Test
@@ -87,7 +80,7 @@ public class RemoteRpcProviderConfigTest {
 
     public static class ConfigTestActor extends UntypedActor {
 
-        private Config actorSystemConfig;
+        private final Config actorSystemConfig;
 
         public ConfigTestActor() {
             this.actorSystemConfig = getContext().system().settings().config();
@@ -99,8 +92,6 @@ public class RemoteRpcProviderConfigTest {
 
         /**
          * Only for testing. NEVER expose actor's internal state like this.
-         *
-         * @return
          */
         public Config getConfig() {
             return actorSystemConfig;
