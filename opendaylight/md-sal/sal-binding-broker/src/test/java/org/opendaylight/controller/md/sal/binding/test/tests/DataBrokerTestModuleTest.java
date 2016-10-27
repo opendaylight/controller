@@ -9,6 +9,7 @@ package org.opendaylight.controller.md.sal.binding.test.tests;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.binding.test.DataBrokerTestModule;
 
@@ -22,5 +23,19 @@ public class DataBrokerTestModuleTest {
     @Test
     public void ensureDataBrokerTestModuleWorksWithoutException() {
         assertThat(DataBrokerTestModule.dataBroker()).isNotNull();
+    }
+
+    @Test
+    @Ignore // This test is flaky on build server VMs (although fine locally)
+    public void slowYangLoadingShouldOnlyHappenOnceAndNotDelayEachDataBroker() {
+        // TODO Write a lil' Timer utility class to make this kind of timing test code more readable
+        long startAtMs = System.currentTimeMillis();
+        DataBrokerTestModule.dataBroker();
+        long firstDataBrokerAtMs = System.currentTimeMillis();
+        long firstDataBrokerDurationMs = firstDataBrokerAtMs - startAtMs;
+        DataBrokerTestModule.dataBroker();
+        long secondDataBrokerDurationMs = System.currentTimeMillis() - firstDataBrokerAtMs;
+        assertThat(Math.abs(secondDataBrokerDurationMs - firstDataBrokerDurationMs))
+                .isLessThan(firstDataBrokerDurationMs / 4);
     }
 }
