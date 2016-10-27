@@ -37,8 +37,7 @@ public final class ServerInfo {
     @Override
     public int hashCode() {
         final int prime = 31;
-        int result = 1;
-        result = prime * result + Boolean.hashCode(isVoting);
+        int result = prime + Boolean.hashCode(isVoting);
         result = prime * result + id.hashCode();
         return result;
     }

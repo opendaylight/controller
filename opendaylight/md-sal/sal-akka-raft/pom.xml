@@ -9,6 +9,10 @@
   <artifactId>sal-akka-raft</artifactId>
   <packaging>bundle</packaging>
 
+  <properties>
+    <pmd.cpd.fail>true</pmd.cpd.fail>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
