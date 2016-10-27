@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "3a65312a_ae3d0bbe",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/CohortEntry.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-10-27T04:01:06Z",
+      "side": 1,
+      "message": "I don\u0027t even see these fields/methods used. What\u0027s the purpose?",
+      "parentUuid": "3a65312a_83358848",
+      "range": {
+        "startLine": 34,
+        "startChar": 0,
+        "endLine": 36,
+        "endChar": 37
+      },
+      "revId": "4e7cfa51ea78f99abb6e3eae9b3ca9f575c21cd2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a65312a_633aec37",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardDataTree.java",
         "patchSetId": 2
@@ -111,6 +135,57 @@
         "endLine": 624,
         "endChar": 96
       },
+      "revId": "4e7cfa51ea78f99abb6e3eae9b3ca9f575c21cd2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a65312a_0e34ffdc",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardDataTree.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 717,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-10-27T04:01:06Z",
+      "side": 1,
+      "message": "You add the entry to pipelineTransactions after persistPayload is called which means that the tx entry won\u0027t be in pipelineTransactions when isPipelineTailTranscation is called by the RaftActor. Therefore the RaftActor won\u0027t send the BatchedAppendEntries message to immediately replicate it. It will get replicated at the next heartbeat interval which doesn\u0027t seem right. In fact, I don\u0027t see how isPipelineTailTranscation is ever satisfied to cause BatchedAppendEntries to be sent. It seems replication will only occur at heartbeat intervals. Or am I missing something?",
+      "revId": "4e7cfa51ea78f99abb6e3eae9b3ca9f575c21cd2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a65312a_8e576f02",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/jmx/mbeans/DatastoreInfoMXBean.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-10-27T04:01:06Z",
+      "side": 1,
+      "message": "Why was this added?",
+      "revId": "4e7cfa51ea78f99abb6e3eae9b3ca9f575c21cd2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a65312a_6e5c9326",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/jmx/mbeans/shard/ShardStats.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 385,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-10-27T04:01:06Z",
+      "side": 1,
+      "message": "If we\u0027re going to have a setting to enable pipe-lining I\u0027d rather it be configured via DatastoreContext and the .cfg file.",
       "revId": "4e7cfa51ea78f99abb6e3eae9b3ca9f575c21cd2",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
