@@ -21,7 +21,7 @@ public class DataBrokerTestModule {
             // into this DataBrokerTestModule, and make AbstractDataBrokerTest
             // use it, instead of the way around it currently is (the opposite);
             // this is just for historical reasons... and works for now.
-            AbstractDataBrokerTest dataBrokerTest = new AbstractDataBrokerTest();
+            ConstantSchemaAbstractDataBrokerTest dataBrokerTest = new ConstantSchemaAbstractDataBrokerTest();
             dataBrokerTest.setup();
             return dataBrokerTest.getDataBroker();
         } catch (Exception e) {

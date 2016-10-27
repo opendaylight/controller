@@ -37,7 +37,7 @@ public class AbstractDataBrokerTest extends AbstractSchemaAwareTest {
         // Intentionally left No-op, subclasses may customize it
     }
 
-   protected DataBrokerTestCustomizer createDataBrokerTestCustomizer() {
+    protected DataBrokerTestCustomizer createDataBrokerTestCustomizer() {
         return new DataBrokerTestCustomizer();
     }
 
