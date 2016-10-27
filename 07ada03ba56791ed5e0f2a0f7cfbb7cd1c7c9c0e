@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "3a65312a_8e6e4fc8",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 725,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-10-27T04:04:00Z",
+      "side": 1,
+      "message": "I\u0027m not crazy about adding more abstract methods. Wed like to move away from this approach to reduce coupling.",
+      "revId": "07ada03ba56791ed5e0f2a0f7cfbb7cd1c7c9c0e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a65312a_432b70eb",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/base/messages/BatchedAppendEntries.java",
         "patchSetId": 1
