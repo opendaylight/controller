@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.remote.rpc.messages;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
@@ -19,6 +20,9 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 public class RpcResponse implements Serializable {
     private static final long serialVersionUID = -4211279498688989245L;
 
+    @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "This field is not Serializable but this class "
+            + "implements writeReplace to delegate serialization to a Proxy class and thus instances of this class "
+            + "aren't serialized. FindBugs does not recognize this.")
     private final NormalizedNode<?, ?> resultNormalizedNode;
 
     public RpcResponse(@Nullable final NormalizedNode<?, ?> inputNormalizedNode) {

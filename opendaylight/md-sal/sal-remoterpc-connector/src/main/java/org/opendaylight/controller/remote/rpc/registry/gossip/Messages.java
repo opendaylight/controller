@@ -69,7 +69,7 @@ public class Messages {
             }
         }
 
-        public static class GetAllBucketsReply<T extends Copier<T>> extends ContainsBuckets<T> implements Serializable {
+        public static class GetAllBucketsReply<T extends Copier<T>> extends ContainsBuckets<T> {
             private static final long serialVersionUID = 1L;
 
             public GetAllBucketsReply(Map<Address, Bucket<T>> buckets) {
@@ -77,8 +77,7 @@ public class Messages {
             }
         }
 
-        public static class GetBucketsByMembersReply<T extends Copier<T>> extends ContainsBuckets<T>
-                implements Serializable {
+        public static class GetBucketsByMembersReply<T extends Copier<T>> extends ContainsBuckets<T>  {
             private static final long serialVersionUID = 1L;
 
             public GetBucketsByMembersReply(Map<Address, Bucket<T>> buckets) {
@@ -107,7 +106,7 @@ public class Messages {
 
         }
 
-        public static class GetBucketVersionsReply extends ContainsBucketVersions implements Serializable {
+        public static class GetBucketVersionsReply extends ContainsBucketVersions {
             private static final long serialVersionUID = 1L;
 
             public GetBucketVersionsReply(Map<Address, Long> versions) {
@@ -115,8 +114,7 @@ public class Messages {
             }
         }
 
-        public static class UpdateRemoteBuckets<T extends Copier<T>> extends ContainsBuckets<T>
-                implements Serializable {
+        public static class UpdateRemoteBuckets<T extends Copier<T>> extends ContainsBuckets<T> {
             private static final long serialVersionUID = 1L;
 
             public UpdateRemoteBuckets(Map<Address, Bucket<T>> buckets) {
@@ -134,7 +132,7 @@ public class Messages {
             private static final long serialVersionUID = 5803354404380026143L;
         }
 
-        public static final class GossipStatus extends ContainsBucketVersions implements Serializable {
+        public static final class GossipStatus extends ContainsBucketVersions {
             private static final long serialVersionUID = -593037395143883265L;
 
             private final Address from;
@@ -149,8 +147,7 @@ public class Messages {
             }
         }
 
-        public static final class GossipEnvelope<T extends Copier<T>> extends ContainsBuckets<T>
-                implements Serializable {
+        public static final class GossipEnvelope<T extends Copier<T>> extends ContainsBuckets<T> {
             private static final long serialVersionUID = 8346634072582438818L;
 
             private final Address from;
