@@ -9,6 +9,7 @@
 package org.opendaylight.controller.remote.rpc.registry;
 
 import static org.junit.Assert.fail;
+
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Address;
@@ -23,7 +24,6 @@ import akka.testkit.JavaTestKit;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.Uninterruptibles;
-import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -56,10 +56,13 @@ import org.opendaylight.controller.remote.rpc.registry.gossip.Messages.BucketSto
 import org.opendaylight.controller.sal.connector.api.RpcRouter;
 import org.opendaylight.controller.sal.connector.api.RpcRouter.RouteIdentifier;
 import org.opendaylight.yangtools.yang.common.QName;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import scala.concurrent.duration.Duration;
 import scala.concurrent.duration.FiniteDuration;
 
 public class RpcRegistryTest {
+    private static final Logger LOG = LoggerFactory.getLogger(RpcRegistryTest.class);
 
     private static ActorSystem node1;
     private static ActorSystem node2;
@@ -73,15 +76,10 @@ public class RpcRegistryTest {
 
     @BeforeClass
     public static void staticSetup() throws InterruptedException {
-        AkkaConfigurationReader reader = new AkkaConfigurationReader() {
-            @Override
-            public Config read() {
-                return ConfigFactory.load();
-            }
-        };
+        AkkaConfigurationReader reader = () -> ConfigFactory.load();
 
-        RemoteRpcProviderConfig config1 = new RemoteRpcProviderConfig.Builder("memberA").gossipTickInterval("200ms").
-                withConfigReader(reader).build();
+        RemoteRpcProviderConfig config1 = new RemoteRpcProviderConfig.Builder("memberA").gossipTickInterval("200ms")
+                .withConfigReader(reader).build();
         RemoteRpcProviderConfig config2 = new RemoteRpcProviderConfig.Builder("memberB").gossipTickInterval("200ms")
                 .withConfigReader(reader).build();
         RemoteRpcProviderConfig config3 = new RemoteRpcProviderConfig.Builder("memberC").gossipTickInterval("200ms")
@@ -97,11 +95,11 @@ public class RpcRegistryTest {
     static void waitForMembersUp(ActorSystem node, UniqueAddress... addresses) {
         Set<UniqueAddress> otherMembersSet = Sets.newHashSet(addresses);
         Stopwatch sw = Stopwatch.createStarted();
-        while(sw.elapsed(TimeUnit.SECONDS) <= 10) {
+        while (sw.elapsed(TimeUnit.SECONDS) <= 10) {
             CurrentClusterState state = Cluster.get(node).state();
-            for(Member m: state.getMembers()) {
-                if(m.status() == MemberStatus.up() && otherMembersSet.remove(m.uniqueAddress()) &&
-                        otherMembersSet.isEmpty()) {
+            for (Member m : state.getMembers()) {
+                if (m.status() == MemberStatus.up() && otherMembersSet.remove(m.uniqueAddress())
+                        && otherMembersSet.isEmpty()) {
                     return;
                 }
             }
@@ -126,7 +124,7 @@ public class RpcRegistryTest {
         registry3 = node3.actorOf(Props.create(RpcRegistry.class, config(node3)));
     }
 
-    private RemoteRpcProviderConfig config(ActorSystem node){
+    private RemoteRpcProviderConfig config(ActorSystem node) {
         return new RemoteRpcProviderConfig(node.settings().config());
     }
 
@@ -146,14 +144,10 @@ public class RpcRegistryTest {
     /**
      * One node cluster. 1. Register rpc, ensure router can be found 2. Then remove rpc, ensure its
      * deleted
-     *
-     * @throws URISyntaxException
-     * @throws InterruptedException
      */
     @Test
     public void testAddRemoveRpcOnSameNode() throws Exception {
-
-        System.out.println("testAddRemoveRpcOnSameNode starting");
+        LOG.info("testAddRemoveRpcOnSameNode starting");
 
         final JavaTestKit mockBroker = new JavaTestKit(node1);
 
@@ -182,21 +176,18 @@ public class RpcRegistryTest {
 
         verifyEmptyBucket(mockBroker, registry1, nodeAddress);
 
-        System.out.println("testAddRemoveRpcOnSameNode ending");
+        LOG.info("testAddRemoveRpcOnSameNode ending");
 
     }
 
     /**
      * Three node cluster. 1. Register rpc on 1 node, ensure 2nd node gets updated 2. Remove rpc on
      * 1 node, ensure 2nd node gets updated
-     *
-     * @throws URISyntaxException
-     * @throws InterruptedException
      */
     @Test
     public void testRpcAddRemoveInCluster() throws Exception {
 
-        System.out.println("testRpcAddRemoveInCluster starting");
+        LOG.info("testRpcAddRemoveInCluster starting");
 
         final JavaTestKit mockBroker1 = new JavaTestKit(node1);
         final JavaTestKit mockBroker2 = new JavaTestKit(node2);
@@ -222,21 +213,21 @@ public class RpcRegistryTest {
 
         verifyEmptyBucket(mockBroker2, registry2, node1Address);
 
-        System.out.println("testRpcAddRemoveInCluster ending");
+        LOG.info("testRpcAddRemoveInCluster ending");
     }
 
     private void verifyEmptyBucket(JavaTestKit testKit, ActorRef registry, Address address)
             throws AssertionError {
         Map<Address, Bucket<RoutingTable>> buckets;
-        int nTries = 0;
-        while(true) {
+        int numTries = 0;
+        while (true) {
             buckets = retrieveBuckets(registry1, testKit, address);
 
             try {
                 verifyBucket(buckets.get(address), Collections.<RouteIdentifier<?, ?, ?>>emptyList());
                 break;
             } catch (AssertionError e) {
-                if(++nTries >= 50) {
+                if (++numTries >= 50) {
                     throw e;
                 }
             }
@@ -247,8 +238,6 @@ public class RpcRegistryTest {
 
     /**
      * Three node cluster. Register rpc on 2 nodes. Ensure 3rd gets updated.
-     *
-     * @throws Exception
      */
     @Test
     public void testRpcAddedOnMultiNodes() throws Exception {
@@ -307,8 +296,8 @@ public class RpcRegistryTest {
     private void verifyBucket(Bucket<RoutingTable> bucket, List<RouteIdentifier<?, ?, ?>> expRouteIds) {
         RoutingTable table = bucket.getData();
         Assert.assertNotNull("Bucket RoutingTable is null", table);
-        for(RouteIdentifier<?, ?, ?> r: expRouteIds) {
-            if(!table.contains(r)) {
+        for (RouteIdentifier<?, ?, ?> r : expRouteIds) {
+            if (!table.contains(r)) {
                 Assert.fail("RoutingTable does not contain " + r + ". Actual: " + table);
             }
         }
@@ -318,8 +307,8 @@ public class RpcRegistryTest {
 
     private Map<Address, Bucket<RoutingTable>> retrieveBuckets(ActorRef bucketStore, JavaTestKit testKit,
             Address... addresses) {
-        int nTries = 0;
-        while(true) {
+        int numTries = 0;
+        while (true) {
             bucketStore.tell(new GetAllBuckets(), testKit.getRef());
             @SuppressWarnings("unchecked")
             GetAllBucketsReply<RoutingTable> reply = testKit.expectMsgClass(Duration.create(3, TimeUnit.SECONDS),
@@ -327,19 +316,19 @@ public class RpcRegistryTest {
 
             Map<Address, Bucket<RoutingTable>> buckets = reply.getBuckets();
             boolean foundAll = true;
-            for(Address addr: addresses) {
+            for (Address addr : addresses) {
                 Bucket<RoutingTable> bucket = buckets.get(addr);
-                if(bucket  == null) {
+                if (bucket == null) {
                     foundAll = false;
                     break;
                 }
             }
 
-            if(foundAll) {
+            if (foundAll) {
                 return buckets;
             }
 
-            if(++nTries >= 50) {
+            if (++numTries >= 50) {
                 Assert.fail("Missing expected buckets for addresses: " + Arrays.toString(addresses)
                         + ", Actual: " + buckets);
             }
@@ -356,7 +345,7 @@ public class RpcRegistryTest {
 
         final int nRoutes = 500;
         final RouteIdentifier<?, ?, ?>[] added = new RouteIdentifier<?, ?, ?>[nRoutes];
-        for(int i = 0; i < nRoutes; i++) {
+        for (int i = 0; i < nRoutes; i++) {
             final RouteIdentifierImpl routeId = new RouteIdentifierImpl(null,
                     new QName(new URI("/mockrpc"), "type" + i), null);
             added[i] = routeId;
@@ -368,23 +357,23 @@ public class RpcRegistryTest {
 
         GetAllBuckets getAllBuckets = new GetAllBuckets();
         FiniteDuration duration = Duration.create(3, TimeUnit.SECONDS);
-        int nTries = 0;
-        while(true) {
+        int numTries = 0;
+        while (true) {
             registry1.tell(getAllBuckets, testKit.getRef());
             @SuppressWarnings("unchecked")
             GetAllBucketsReply<RoutingTable> reply = testKit.expectMsgClass(duration, GetAllBucketsReply.class);
 
             Bucket<RoutingTable> localBucket = reply.getBuckets().values().iterator().next();
             RoutingTable table = localBucket.getData();
-            if(table != null && table.size() == nRoutes) {
-                for(RouteIdentifier<?, ?, ?> r: added) {
+            if (table != null && table.size() == nRoutes) {
+                for (RouteIdentifier<?, ?, ?> r : added) {
                     Assert.assertEquals("RoutingTable contains " + r, true, table.contains(r));
                 }
 
                 break;
             }
 
-            if(++nTries >= 50) {
+            if (++numTries >= 50) {
                 Assert.fail("Expected # routes: " + nRoutes + ", Actual: " + table.size());
             }
 

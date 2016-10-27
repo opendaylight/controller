@@ -18,7 +18,6 @@ import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
-
 class RemoteRpcInput implements ContainerNode {
 
     private final ContainerNode delegate;
@@ -28,7 +27,7 @@ class RemoteRpcInput implements ContainerNode {
     }
 
     protected static RemoteRpcInput from(@Nullable final NormalizedNode<?, ?> node) {
-        if(node == null) {
+        if (node == null) {
             return null;
         }
 

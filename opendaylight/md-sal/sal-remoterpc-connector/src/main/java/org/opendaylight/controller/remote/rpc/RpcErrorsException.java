@@ -55,7 +55,7 @@ public class RpcErrorsException extends DOMRpcException {
     public RpcErrorsException(final String message, final Iterable<RpcError> rpcErrors) {
         super(message);
 
-        for(final RpcError rpcError: rpcErrors) {
+        for (final RpcError rpcError: rpcErrors) {
             rpcErrorDataList.add(new RpcErrorData(rpcError.getSeverity(), rpcError.getErrorType(),
                     rpcError.getTag(), rpcError.getApplicationTag(), rpcError.getMessage(),
                     rpcError.getInfo(), rpcError.getCause()));
@@ -64,11 +64,11 @@ public class RpcErrorsException extends DOMRpcException {
 
     public Collection<RpcError> getRpcErrors() {
         final Collection<RpcError> rpcErrors = new ArrayList<>();
-        for(final RpcErrorData ed: rpcErrorDataList) {
-            final RpcError rpcError = ed.severity == ErrorSeverity.ERROR ?
-                    RpcResultBuilder.newError(ed.errorType, ed.tag, ed.message, ed.applicationTag,
+        for (final RpcErrorData ed: rpcErrorDataList) {
+            final RpcError rpcError = ed.severity == ErrorSeverity.ERROR
+                    ? RpcResultBuilder.newError(ed.errorType, ed.tag, ed.message, ed.applicationTag,
                             ed.info, ed.cause) :
-                    RpcResultBuilder.newWarning(ed.errorType, ed.tag, ed.message, ed.applicationTag,
+                      RpcResultBuilder.newWarning(ed.errorType, ed.tag, ed.message, ed.applicationTag,
                             ed.info, ed.cause);
             rpcErrors.add(rpcError);
         }
