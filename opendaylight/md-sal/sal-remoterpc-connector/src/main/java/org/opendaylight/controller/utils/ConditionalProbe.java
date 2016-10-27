@@ -23,8 +23,8 @@ public class ConditionalProbe {
         this.predicate = predicate;
     }
 
-    public void tell(Object message, ActorRef sender){
-        if(predicate.apply(message)) {
+    public void tell(Object message, ActorRef sender) {
+        if (predicate.apply(message)) {
             log.info("sending message to probe {}", message);
             actorRef.tell(message, sender);
         }

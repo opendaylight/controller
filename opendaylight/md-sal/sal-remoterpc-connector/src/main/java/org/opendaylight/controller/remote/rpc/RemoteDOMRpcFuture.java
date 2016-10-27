@@ -9,7 +9,6 @@ package org.opendaylight.controller.remote.rpc;
 
 import akka.dispatch.OnComplete;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Throwables;
 import com.google.common.util.concurrent.AbstractFuture;
 import com.google.common.util.concurrent.CheckedFuture;
 import java.util.concurrent.ExecutionException;
@@ -26,10 +25,6 @@ import org.slf4j.LoggerFactory;
 import scala.concurrent.ExecutionContext;
 import scala.concurrent.Future;
 
-/**
- * @author tony
- *
- */
 class RemoteDOMRpcFuture extends AbstractFuture<DOMRpcResult> implements CheckedFuture<DOMRpcResult, DOMRpcException> {
 
     private static final Logger LOG = LoggerFactory.getLogger(RemoteDOMRpcFuture.class);
@@ -60,7 +55,7 @@ class RemoteDOMRpcFuture extends AbstractFuture<DOMRpcResult> implements Checked
         } catch (final ExecutionException e) {
             throw mapException(e);
         } catch (final InterruptedException e) {
-            throw Throwables.propagate(e);
+            throw new RemoteDOMRpcException("Interruped while invoking RPC", e);
         }
     }
 
@@ -71,16 +66,16 @@ class RemoteDOMRpcFuture extends AbstractFuture<DOMRpcResult> implements Checked
         } catch (final ExecutionException e) {
             throw mapException(e);
         } catch (final InterruptedException e) {
-            throw Throwables.propagate(e);
+            throw new RemoteDOMRpcException("Interruped while invoking RPC", e);
         }
     }
 
-    private DOMRpcException mapException(final ExecutionException e) {
-        final Throwable cause = e.getCause();
+    private DOMRpcException mapException(final ExecutionException ex) {
+        final Throwable cause = ex.getCause();
         if (cause instanceof DOMRpcException) {
             return (DOMRpcException) cause;
         }
-        return new RemoteDOMRpcException("Exception during invoking RPC", e);
+        return new RemoteDOMRpcException("Exception during invoking RPC", ex);
     }
 
     private final class FutureUpdater extends OnComplete<Object> {
