@@ -13,11 +13,9 @@ import akka.actor.ActorRef;
 /**
  * This Interface is added to abstract out the way rpc execution could be
  * routed, if more than one node in cluster is capable of executing the rpc.
- *
  * We can pick node randomly, round robin manner or based on last updated time etc.
  */
 
 public interface RoutingLogic {
-
-  ActorRef select();
+    ActorRef select();
 }

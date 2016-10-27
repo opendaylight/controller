@@ -13,7 +13,7 @@ class RemoteDOMRpcException extends DOMRpcException {
 
     private static final long serialVersionUID = 1L;
 
-    public RemoteDOMRpcException(final String message,final Throwable cause) {
+    RemoteDOMRpcException(final String message, final Throwable cause) {
         super(message,cause);
     }
 }

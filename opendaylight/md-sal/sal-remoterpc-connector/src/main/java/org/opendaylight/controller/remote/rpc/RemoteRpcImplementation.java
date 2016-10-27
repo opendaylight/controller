@@ -48,8 +48,8 @@ public class RemoteRpcImplementation implements DOMRpcImplementation {
             final NormalizedNode<?, ?> input) {
         if (input instanceof RemoteRpcInput) {
             LOG.warn("Rpc {} was removed during execution or there is loop present. Failing received rpc.", rpc);
-            return Futures
-                    .<DOMRpcResult, DOMRpcException>immediateFailedCheckedFuture(new DOMRpcImplementationNotAvailableException(
+            return Futures.<DOMRpcResult, DOMRpcException>immediateFailedCheckedFuture(
+                    new DOMRpcImplementationNotAvailableException(
                             "Rpc implementation for {} was removed during processing.", rpc));
         }
         final RemoteDOMRpcFuture frontEndFuture = RemoteDOMRpcFuture.create(rpc.getType().getLastComponent());
@@ -67,7 +67,8 @@ public class RemoteRpcImplementation implements DOMRpcImplementation {
                     } else {
                         final ActorRef remoteImplRef = new LatestEntryRoutingLogic(routePairs).select();
                         final Object executeRpcMessage = ExecuteRpc.from(rpc, input);
-                        LOG.debug("Found remote actor {} for rpc {} - sending {}", remoteImplRef, rpc.getType(), executeRpcMessage);
+                        LOG.debug("Found remote actor {} for rpc {} - sending {}", remoteImplRef, rpc.getType(),
+                                executeRpcMessage);
                         frontEndFuture.completeWith(ask(remoteImplRef, executeRpcMessage, config.getAskDuration()));
                     }
                 }
