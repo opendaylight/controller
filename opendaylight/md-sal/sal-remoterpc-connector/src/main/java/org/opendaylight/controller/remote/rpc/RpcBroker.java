@@ -10,14 +10,11 @@ package org.opendaylight.controller.remote.rpc;
 
 import akka.actor.ActorRef;
 import akka.actor.Props;
-import akka.japi.Creator;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
-import java.util.Arrays;
-import java.util.Collection;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActor;
 import org.opendaylight.controller.cluster.datastore.node.utils.serialization.NormalizedNodeSerializer;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcException;
@@ -26,9 +23,6 @@ import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
 import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node;
 import org.opendaylight.controller.remote.rpc.messages.ExecuteRpc;
 import org.opendaylight.controller.remote.rpc.messages.RpcResponse;
-import org.opendaylight.yangtools.yang.common.RpcError;
-import org.opendaylight.yangtools.yang.common.RpcError.ErrorType;
-import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 
@@ -45,7 +39,7 @@ public class RpcBroker extends AbstractUntypedActor {
 
     public static Props props(final DOMRpcService rpcService) {
         Preconditions.checkNotNull(rpcService, "DOMRpcService can not be null");
-        return Props.create(new RpcBrokerCreator(rpcService));
+        return Props.create(RpcBroker.class, rpcService);
     }
 
     @Override
@@ -69,14 +63,18 @@ public class RpcBroker extends AbstractUntypedActor {
             Futures.addCallback(future, new FutureCallback<DOMRpcResult>() {
                 @Override
                 public void onSuccess(final DOMRpcResult result) {
-                    if (result.getErrors() != null && (!result.getErrors().isEmpty())) {
-                        final String message = String.format("Execution of RPC %s failed", msg.getRpc());
-                        Collection<RpcError> errors = result.getErrors();
-                        if (errors == null || errors.size() == 0) {
-                            errors = Arrays.asList(RpcResultBuilder.newError(ErrorType.RPC, null, message));
-                        }
+                    if (result == null) {
+                        // This shouldn't happen but the FutureCallback annotates the result param with Nullable so
+                        // handle null here to avoid FindBugs warning.
+                        LOG.debug("Got null DOMRpcResult - sending null response for execute rpc : {}", msg.getRpc());
+                        sender.tell(new RpcResponse(null), self);
+                        return;
+                    }
 
-                        sender.tell(new akka.actor.Status.Failure(new RpcErrorsException(message, errors)), self);
+                    if (!result.getErrors().isEmpty()) {
+                        final String message = String.format("Execution of RPC %s failed", msg.getRpc());
+                        sender.tell(new akka.actor.Status.Failure(new RpcErrorsException(message,
+                                result.getErrors())), self);
                     } else {
                         final Node serializedResultNode;
                         if (result.getResult() == null) {
@@ -104,21 +102,6 @@ public class RpcBroker extends AbstractUntypedActor {
             });
         } catch (final RuntimeException e) {
             sender.tell(new akka.actor.Status.Failure(e), sender);
-        }
-    }
-
-    private static class RpcBrokerCreator implements Creator<RpcBroker> {
-        private static final long serialVersionUID = 1L;
-
-        final DOMRpcService rpcService;
-
-        RpcBrokerCreator(final DOMRpcService rpcService) {
-            this.rpcService = rpcService;
-        }
-
-        @Override
-        public RpcBroker create() throws Exception {
-            return new RpcBroker(rpcService);
         }
     }
 }

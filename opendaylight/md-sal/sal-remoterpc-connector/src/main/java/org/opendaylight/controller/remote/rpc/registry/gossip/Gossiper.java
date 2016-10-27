@@ -393,14 +393,17 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
                     localIsNewer.removeAll(remoteVersions.keySet());
 
 
-                    for (Address address : remoteVersions.keySet()) {
-
-                        if (localVersions.get(address) == null || remoteVersions.get(address) == null) {
+                    for (Map.Entry<Address, Long> entry : remoteVersions.entrySet()) {
+                        Address address = entry.getKey();
+                        Long remoteVersion = entry.getValue();
+                        Long localVersion = localVersions.get(address);
+                        if (localVersion == null || remoteVersion == null) {
                             continue; //this condition is taken care of by above diffs
                         }
-                        if (localVersions.get(address) <  remoteVersions.get(address)) {
+
+                        if (localVersion < remoteVersion) {
                             localIsOlder.add(address);
-                        } else if (localVersions.get(address) > remoteVersions.get(address)) {
+                        } else if (localVersion > remoteVersion) {
                             localIsNewer.add(address);
                         }
                     }
