@@ -11,6 +11,7 @@ package org.opendaylight.controller.remote.rpc.utils;
 import akka.actor.ActorRef;
 import akka.japi.Pair;
 import com.google.common.base.Preconditions;
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.SortedSet;
@@ -36,22 +37,28 @@ public class LatestEntryRoutingLogic implements RoutingLogic {
         return actorRefSet.last().first();
     }
 
-    private class LatestEntryComparator implements Comparator<Pair<ActorRef, Long>> {
+    private static class LatestEntryComparator implements Comparator<Pair<ActorRef, Long>>, Serializable {
+        private static final long serialVersionUID = 1L;
 
         @Override
         public int compare(Pair<ActorRef, Long> o1, Pair<ActorRef, Long> o2) {
             if (o1 == null && o2 == null) {
                 return 0;
             }
-            if (o1 == null && o2 != null) {
+
+            if (o1 != null && o2 != null && o1.second() == null && o2.second() == null) {
+                return 0;
+            }
+
+            if ((o1 == null || o1.second() == null) && o2 != null) {
                 return -1;
             }
-            if (o1 != null && o2 == null) {
+
+            if (o2 == null || o2.second() == null) {
                 return 1;
             }
 
             return o1.second().compareTo(o2.second());
-
         }
     }
 }

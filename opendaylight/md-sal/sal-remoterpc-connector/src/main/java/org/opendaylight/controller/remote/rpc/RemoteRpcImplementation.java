@@ -63,7 +63,7 @@ public class RemoteRpcImplementation implements DOMRpcImplementation {
                     final List<Pair<ActorRef, Long>> routePairs = routes.getRouterWithUpdateTime();
                     if (routePairs == null || routePairs.isEmpty()) {
                         frontEndFuture.failNow(new DOMRpcImplementationNotAvailableException(
-                                "No local or remote implementation available for rpc %s", rpc.getType(), error));
+                                "No local or remote implementation available for rpc %s", rpc.getType()));
                     } else {
                         final ActorRef remoteImplRef = new LatestEntryRoutingLogic(routePairs).select();
                         final Object executeRpcMessage = ExecuteRpc.from(rpc, input);
