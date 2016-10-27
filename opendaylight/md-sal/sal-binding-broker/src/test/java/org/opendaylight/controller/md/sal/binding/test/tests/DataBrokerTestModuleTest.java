@@ -23,4 +23,17 @@ public class DataBrokerTestModuleTest {
     public void ensureDataBrokerTestModuleWorksWithoutException() {
         assertThat(DataBrokerTestModule.dataBroker()).isNotNull();
     }
+
+    @Test
+    public void slowYangLoadingShouldOnlyHappenOnceAndNotDelayEachDataBroker() {
+        // TODO Write a lil' Timer utility class to make this kind of timing test code more readable
+        long startAtMs = System.currentTimeMillis();
+        DataBrokerTestModule.dataBroker();
+        long firstDataBrokerAtMs = System.currentTimeMillis();
+        long firstDataBrokerDurationMs = firstDataBrokerAtMs - startAtMs;
+        DataBrokerTestModule.dataBroker();
+        long secondDataBrokerDurationMs = System.currentTimeMillis() - firstDataBrokerAtMs;
+        assertThat(Math.abs(secondDataBrokerDurationMs - firstDataBrokerDurationMs))
+                .isLessThan(firstDataBrokerDurationMs / 4);
+    }
 }
