@@ -12,7 +12,6 @@
   <artifactId>yang-test</artifactId>
   <packaging>bundle</packaging>
   <name>${project.artifactId}</name>
-
   <description>Artifact that contains only generated code from yang files. Suitable for testing.</description>
 
   <dependencies>
@@ -87,73 +86,49 @@
     </pluginManagement>
 
     <plugins>
-
       <plugin>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>maven-bundle-plugin</artifactId>
-        <configuration>
-          <instructions></instructions>
-        </configuration>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <version>${checkstyle.version}</version>
+        <dependencies>
+          <dependency>
+            <groupId>org.opendaylight.odlparent</groupId>
+            <artifactId>checkstyle</artifactId>
+            <version>${odl.checkstyle.version}</version>
+          </dependency>
+          <dependency>
+            <groupId>org.opendaylight.odlparent</groupId>
+            <artifactId>odl-license</artifactId>
+            <version>0.2.0-SNAPSHOT</version>
+          </dependency>
+        </dependencies>
+        <executions>
+          <execution>
+            <id>check-license</id>
+            <goals>
+              <goal>check</goal>
+            </goals>
+            <phase>process-sources</phase>
+            <configuration>
+              <configLocation>check-license.xml</configLocation>
+              <includeResources>false</includeResources>
+              <includeTestResources>false</includeTestResources>
+              <sourceDirectory>${project.build.sourceDirectory}</sourceDirectory>
+              <excludes>
+                org/opendaylight/yang/gen/**,
+                **/protobuff/messages/**,
+                **/thrift/gen/*.java,
+                **/config/yang/test/**
+              </excludes>
+              <failsOnError>false</failsOnError>
+              <consoleOutput>true</consoleOutput>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
-
-
-        <plugin>
-          <artifactId>maven-checkstyle-plugin</artifactId>
-          <version>${checkstyle.version}</version>
-          <dependencies>
-            <dependency>
-              <groupId>org.opendaylight.odlparent</groupId>
-              <artifactId>checkstyle</artifactId>
-              <version>${odl.checkstyle.version}</version>
-            </dependency>
-            <dependency>
-              <groupId>org.opendaylight.odlparent</groupId>
-              <artifactId>odl-license</artifactId>
-              <version>0.2.0-SNAPSHOT</version>
-            </dependency>
-          </dependencies>
-          <configuration>
-            <configLocation>odl_checks.xml</configLocation>
-            <!-- <sourceDirectory> is needed so that checkstyle ignores the
-                 generated sources directory -->
-            <sourceDirectory>${project.build.sourceDirectory}</sourceDirectory>
-            <excludes>
-              org/opendaylight/yang/gen/**,
-              **/protobuff/messages/**,
-              **/thrift/gen/*.java
-            </excludes>
-            <failsOnError>false</failsOnError>
-            <consoleOutput>true</consoleOutput>
-          </configuration>
-          <executions>
-            <execution>
-              <id>check-license</id>
-              <goals>
-                <goal>check</goal>
-              </goals>
-              <phase>process-sources</phase>
-              <configuration>
-                <configLocation>check-license.xml</configLocation>
-                <includeResources>false</includeResources>
-                <includeTestResources>false</includeTestResources>
-                <sourceDirectory>${project.build.sourceDirectory}</sourceDirectory>
-                <excludes>
-                  org/opendaylight/yang/gen/**,
-                  **/protobuff/messages/**,
-                  **/thrift/gen/*.java,
-                  **/config/yang/test/**
-                </excludes>
-                <failsOnError>false</failsOnError>
-                <consoleOutput>true</consoleOutput>
-              </configuration>
-            </execution>
-          </executions>
-        </plugin>
-
       <plugin>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>yang-test-plugin</artifactId>
-        <version>${config.version}</version>
+        <version>0.6.0-SNAPSHOT</version>
         <executions>
           <execution>
             <goals>
@@ -163,10 +138,6 @@
             </goals>
           </execution>
         </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.opendaylight.yangtools</groupId>
-        <artifactId>yang-maven-plugin</artifactId>
       </plugin>
     </plugins>
   </build>
