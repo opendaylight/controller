@@ -10,7 +10,6 @@ package org.opendaylight.controller.remote.rpc.registry;
 import akka.actor.ActorRef;
 import akka.actor.Cancellable;
 import akka.actor.Props;
-import akka.japi.Creator;
 import akka.japi.Option;
 import akka.japi.Pair;
 import com.google.common.base.Preconditions;
@@ -27,7 +26,6 @@ import org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.Remo
 import org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.SetLocalRouter;
 import org.opendaylight.controller.remote.rpc.registry.gossip.Bucket;
 import org.opendaylight.controller.remote.rpc.registry.gossip.BucketStore;
-import org.opendaylight.controller.remote.rpc.registry.mbeans.RemoteRpcRegistryMXBeanImpl;
 import org.opendaylight.controller.sal.connector.api.RpcRouter;
 import org.opendaylight.controller.sal.connector.api.RpcRouter.RouteIdentifier;
 import scala.concurrent.duration.FiniteDuration;
@@ -49,7 +47,7 @@ public class RpcRegistry extends BucketStore<RoutingTable> {
     }
 
     public static Props props(RemoteRpcProviderConfig config) {
-        return Props.create(new RpcRegistryCreator(config));
+        return Props.create(RpcRegistry.class, config);
     }
 
     @Override
@@ -282,22 +280,6 @@ public class RpcRegistry extends BucketStore<RoutingTable> {
             public String toString() {
                 return "FindRoutersReply{" + "routerWithUpdateTime=" + routerWithUpdateTime + '}';
             }
-        }
-    }
-
-    private static class RpcRegistryCreator implements Creator<RpcRegistry> {
-        private static final long serialVersionUID = 1L;
-        private final RemoteRpcProviderConfig config;
-
-        private RpcRegistryCreator(RemoteRpcProviderConfig config) {
-            this.config = config;
-        }
-
-        @Override
-        public RpcRegistry create() throws Exception {
-            RpcRegistry registry =  new RpcRegistry(config);
-            new RemoteRpcRegistryMXBeanImpl(registry);
-            return registry;
         }
     }
 }
