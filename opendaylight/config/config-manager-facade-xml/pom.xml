@@ -4,13 +4,42 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <artifactId>config-subsystem</artifactId>
-        <groupId>org.opendaylight.controller</groupId>
-        <version>0.6.0-SNAPSHOT</version>
+        <groupId>org.opendaylight.odlparent</groupId>
+        <artifactId>bundle-parent</artifactId>
+        <version>1.8.0-SNAPSHOT</version>
     </parent>
+
+    <groupId>org.opendaylight.controller</groupId>
+    <version>0.6.0-SNAPSHOT</version>
     <artifactId>config-manager-facade-xml</artifactId>
     <name>${project.artifactId}</name>
     <packaging>bundle</packaging>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.opendaylight.controller</groupId>
+                <artifactId>config-artifacts</artifactId>
+                <version>0.6.0-SNAPSHOT</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.opendaylight.yangtools</groupId>
+                <artifactId>yangtools-artifacts</artifactId>
+                <version>1.1.0-SNAPSHOT</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.opendaylight.mdsal</groupId>
+                <artifactId>mdsal-artifacts</artifactId>
+                <version>2.2.0-SNAPSHOT</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <dependency>
@@ -55,4 +84,25 @@
         </plugins>
     </build>
 
+    <profiles>
+        <!-- Turn off doclint. -->
+        <profile>
+            <id>jdk8</id>
+            <activation>
+                <jdk>[1.8,)</jdk>
+            </activation>
+
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <configuration>
+                            <additionalparam>-Xdoclint:none</additionalparam>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

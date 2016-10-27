@@ -4,10 +4,13 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.opendaylight.controller</groupId>
-    <artifactId>config-plugin-parent</artifactId>
+    <artifactId>config-parent</artifactId>
     <version>0.6.0-SNAPSHOT</version>
-    <relativePath>../config-plugin-parent</relativePath>
+    <relativePath>../config-parent</relativePath>
   </parent>
+
+  <groupId>org.opendaylight.controller</groupId>
+  <version>0.6.0-SNAPSHOT</version>
   <artifactId>threadpool-config-api</artifactId>
   <packaging>bundle</packaging>
   <name>${project.artifactId}</name>
@@ -35,10 +38,6 @@
                      org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.threadpool.rev130409.*,</Export-Package>
           </instructions>
         </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.opendaylight.yangtools</groupId>
-        <artifactId>yang-maven-plugin</artifactId>
       </plugin>
     </plugins>
   </build>

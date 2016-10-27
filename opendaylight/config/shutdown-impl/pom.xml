@@ -45,17 +45,4 @@
     </dependency>
   </dependencies>
 
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>maven-bundle-plugin</artifactId>
-      </plugin>
-      <plugin>
-        <groupId>org.opendaylight.yangtools</groupId>
-        <artifactId>yang-maven-plugin</artifactId>
-      </plugin>
-    </plugins>
-  </build>
-
 </project>

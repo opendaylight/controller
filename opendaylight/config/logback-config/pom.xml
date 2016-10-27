@@ -4,17 +4,20 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.opendaylight.controller</groupId>
-    <artifactId>config-plugin-parent</artifactId>
+    <artifactId>config-parent</artifactId>
     <version>0.6.0-SNAPSHOT</version>
-    <relativePath>../config-plugin-parent</relativePath>
+    <relativePath>../config-parent</relativePath>
   </parent>
+
+  <groupId>org.opendaylight.controller</groupId>
+  <version>0.6.0-SNAPSHOT</version>
   <artifactId>logback-config</artifactId>
   <packaging>bundle</packaging>
   <name>${project.artifactId}</name>
 
   <dependencies>
     <dependency>
-      <groupId>${project.groupId}</groupId>
+      <groupId>org.opendaylight.controller</groupId>
       <artifactId>config-api</artifactId>
     </dependency>
     <dependency>
@@ -74,11 +77,6 @@
           </instructions>
         </configuration>
       </plugin>
-      <plugin>
-        <groupId>org.opendaylight.yangtools</groupId>
-        <artifactId>yang-maven-plugin</artifactId>
-      </plugin>
-
     </plugins>
   </build>
 </project>

@@ -39,7 +39,6 @@
     <module>shutdown-impl</module>
     <module>config-module-archetype</module>
     <module>config-netty-config</module>
-
     <module>config-artifacts</module>
     <module>config-parent</module>
     <module>config-filtering-parent</module>
