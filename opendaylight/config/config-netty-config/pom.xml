@@ -12,36 +12,11 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.opendaylight.controller</groupId>
-        <artifactId>config-subsystem</artifactId>
+        <artifactId>config-parent</artifactId>
         <version>0.6.0-SNAPSHOT</version>
+        <relativePath>../config-parent</relativePath>
     </parent>
     <artifactId>config-netty-config</artifactId>
     <description>Configuration files for sal-rest-connector</description>
-    <packaging>jar</packaging>
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>attach-artifacts</id>
-                        <goals>
-                            <goal>attach-artifact</goal>
-                        </goals>
-                        <phase>package</phase>
-                        <configuration>
-                            <artifacts>
-                                <artifact>
-                                    <file>${project.build.directory}/classes/initial/00-netty.xml</file>
-                                    <type>xml</type>
-                                    <classifier>config</classifier>
-                                </artifact>
-                            </artifacts>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
+    <packaging>bundle</packaging>
 </project>

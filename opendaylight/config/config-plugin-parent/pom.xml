@@ -12,6 +12,10 @@
   <packaging>pom</packaging>
   <name>${project.artifactId}</name>
 
+  <properties>
+    <jmxGeneratorPath>${project.build.directory}/generated-sources/config-binding</jmxGeneratorPath>
+  </properties>
+
   <build>
     <pluginManagement>
       <plugins>
@@ -22,7 +26,7 @@
             <dependency>
               <groupId>org.opendaylight.controller</groupId>
               <artifactId>yang-jmx-generator-plugin</artifactId>
-              <version>${config.version}</version>
+              <version>1.8.0-SNAPSHOT</version>
             </dependency>
           </dependencies>
           <executions>
