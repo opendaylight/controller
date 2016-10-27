@@ -37,7 +37,6 @@
     <module>yang-test-plugin</module>
     <module>shutdown-api</module>
     <module>shutdown-impl</module>
-    <module>config-module-archetype</module>
     <module>config-netty-config</module>
 
     <module>config-artifacts</module>
