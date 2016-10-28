@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a65312a_852585ad",
+        "filename": "opendaylight/config/pom.xml",
+        "patchSetId": 14
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-10-28T22:31:46Z",
+      "side": 1,
+      "message": "this should really be odlparent-lite. it this an interim step?",
+      "range": {
+        "startLine": 7,
+        "startChar": 5,
+        "endLine": 7,
+        "endChar": 43
+      },
+      "revId": "49bc901c986c673e89ff864b7603858c2769516a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
