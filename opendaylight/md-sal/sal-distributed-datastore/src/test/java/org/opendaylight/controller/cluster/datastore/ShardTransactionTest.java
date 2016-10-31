@@ -80,7 +80,7 @@ public class ShardTransactionTest extends AbstractActorTest {
             final AbstractShardDataTreeTransaction<?> transaction, final String name) {
         Props props = ShardTransaction.props(type, transaction, shard, datastoreContext,
                 shard.underlyingActor().getShardMBean());
-        return actorFactory.createActor(props, name);
+        return actorFactory.createActorNoVerify(props, name);
     }
 
     private ReadOnlyShardDataTreeTransaction readOnlyTransaction() {

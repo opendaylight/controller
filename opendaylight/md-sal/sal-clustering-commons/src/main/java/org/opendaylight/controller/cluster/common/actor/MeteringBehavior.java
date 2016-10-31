@@ -12,6 +12,7 @@ import akka.japi.Procedure;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Throwables;
 import org.opendaylight.controller.cluster.reporting.MetricsReporter;
 
 /**
@@ -82,6 +83,7 @@ public class MeteringBehavior implements Procedure<Object> {
      * @param message the message to process
      * @throws Exception on message failure
      */
+    @SuppressWarnings("checkstyle:IllegalCatch")
     @Override
     public void apply(final Object message) throws Exception {
         final String messageType = message.getClass().getSimpleName();
@@ -95,10 +97,15 @@ public class MeteringBehavior implements Procedure<Object> {
         final Timer.Context context = msgProcessingTimer.time();
         final Timer.Context contextByMsgType = msgProcessingTimerByMsgType.time();
 
-        meteredActor.onReceive(message);
-
-        //stop timers
-        contextByMsgType.stop();
-        context.stop();
+        try {
+            meteredActor.onReceive(message);
+        } catch (Throwable e) {
+            Throwables.propagateIfPossible(e, Exception.class);
+            throw Throwables.propagate(e);
+        } finally {
+            //stop timers
+            contextByMsgType.stop();
+            context.stop();
+        }
     }
 }
