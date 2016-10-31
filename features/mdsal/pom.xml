@@ -263,7 +263,12 @@
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
-      <artifactId>sal-cluster-admin</artifactId>
+      <artifactId>sal-cluster-admin-api</artifactId>
+      <version>${controller.mdsal.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>sal-cluster-admin-impl</artifactId>
       <version>${controller.mdsal.version}</version>
     </dependency>
     <dependency>

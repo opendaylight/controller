@@ -88,7 +88,8 @@
         <bundle>mvn:org.opendaylight.controller/cds-access-api/{{VERSION}}</bundle>
         <bundle>mvn:org.opendaylight.controller/cds-access-client/{{VERSION}}</bundle>
         <bundle>mvn:org.opendaylight.controller/sal-distributed-datastore/{{VERSION}}</bundle>
-        <bundle>mvn:org.opendaylight.controller/sal-cluster-admin/{{VERSION}}</bundle>
+        <bundle>mvn:org.opendaylight.controller/sal-cluster-admin-api/{{VERSION}}</bundle>
+        <bundle>mvn:org.opendaylight.controller/sal-cluster-admin-impl/{{VERSION}}</bundle>
     </feature>
     <feature name ='odl-mdsal-remoterpc-connector' version='${project.version}'>
         <feature version='${project.version}'>odl-mdsal-broker-local</feature>
