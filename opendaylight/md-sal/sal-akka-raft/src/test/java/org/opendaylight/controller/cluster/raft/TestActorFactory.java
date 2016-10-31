@@ -71,7 +71,7 @@ public class TestActorFactory implements AutoCloseable {
      */
     public ActorRef createActor(Props props) {
         ActorRef actorRef = system.actorOf(props);
-        return addActor(actorRef);
+        return addActor(actorRef, true);
     }
 
     /**
@@ -83,7 +83,19 @@ public class TestActorFactory implements AutoCloseable {
      */
     public ActorRef createActor(Props props, String actorId) {
         ActorRef actorRef = system.actorOf(props, actorId);
-        return addActor(actorRef);
+        return addActor(actorRef, true);
+    }
+
+    /**
+     * Create a normal actor with the passed in name w/o verifying that the actor is ready.
+     *
+     * @param props the actor Props
+     * @param actorId name of actor
+     * @return the ActorRef
+     */
+    public ActorRef createActorNoVerify(Props props, String actorId) {
+        ActorRef actorRef = system.actorOf(props, actorId);
+        return addActor(actorRef, false);
     }
 
     /**
@@ -97,7 +109,7 @@ public class TestActorFactory implements AutoCloseable {
     @SuppressWarnings("unchecked")
     public <T extends Actor> TestActorRef<T> createTestActor(Props props, String actorId) {
         TestActorRef<T> actorRef = TestActorRef.create(system, props, actorId);
-        return (TestActorRef<T>) addActor(actorRef);
+        return (TestActorRef<T>) addActor(actorRef, true);
     }
 
     /**
@@ -110,12 +122,15 @@ public class TestActorFactory implements AutoCloseable {
     @SuppressWarnings("unchecked")
     public <T extends Actor> TestActorRef<T> createTestActor(Props props) {
         TestActorRef<T> actorRef = TestActorRef.create(system, props);
-        return (TestActorRef<T>) addActor(actorRef);
+        return (TestActorRef<T>) addActor(actorRef, true);
     }
 
-    private <T extends ActorRef> ActorRef addActor(T actorRef) {
+    private <T extends ActorRef> ActorRef addActor(T actorRef, boolean verify) {
         createdActors.add(actorRef);
-        verifyActorReady(actorRef);
+        if (verify) {
+            verifyActorReady(actorRef);
+        }
+
         return actorRef;
     }
 
