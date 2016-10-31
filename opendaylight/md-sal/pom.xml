@@ -63,7 +63,8 @@
     <!-- sal-distributed-datastore -->
     <module>sal-distributed-datastore</module>
     <module>sal-dummy-distributed-datastore</module>
-    <module>sal-cluster-admin</module>
+    <module>sal-cluster-admin-api</module>
+    <module>sal-cluster-admin-impl</module>
 
     <!-- XSQL -->
     <module>sal-dom-xsql</module>
