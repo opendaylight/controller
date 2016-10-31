@@ -18,14 +18,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import org.junit.After;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.AbstractActorTest;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.DatastoreSnapshot;
 import org.opendaylight.controller.cluster.datastore.messages.DatastoreSnapshot.ShardSnapshot;
-import org.opendaylight.controller.cluster.raft.TestActorFactory;
 import org.opendaylight.controller.cluster.raft.client.messages.GetSnapshotReply;
 import scala.concurrent.duration.Duration;
 import scala.concurrent.duration.FiniteDuration;
@@ -38,22 +36,14 @@ import scala.concurrent.duration.FiniteDuration;
 public class ShardManagerGetSnapshotReplyActorTest extends AbstractActorTest {
     private static final MemberName MEMBER_1 = MemberName.forName("member-1");
 
-    private final TestActorFactory actorFactory = new TestActorFactory(getSystem());
-
-    @After
-    public void tearDown() {
-        actorFactory.close();
-    }
-
     @Test
     public void testSuccess() {
         JavaTestKit kit = new JavaTestKit(getSystem());
 
         byte[] shardManagerSnapshot = new byte[]{0,5,9};
-        ActorRef replyActor = actorFactory.createActor(ShardManagerGetSnapshotReplyActor.props(
-                Arrays.asList("shard1", "shard2", "shard3"), "config",
-                shardManagerSnapshot, kit.getRef(), "shard-manager", Duration.create(100, TimeUnit.SECONDS)),
-                    actorFactory.generateActorId("actor"));
+        ActorRef replyActor = getSystem().actorOf(ShardManagerGetSnapshotReplyActor.props(
+                Arrays.asList("shard1", "shard2", "shard3"), "config", shardManagerSnapshot, kit.getRef(),
+                "shard-manager", Duration.create(100, TimeUnit.SECONDS)), "testSuccess");
 
         kit.watch(replyActor);
 
@@ -92,10 +82,9 @@ public class ShardManagerGetSnapshotReplyActorTest extends AbstractActorTest {
         JavaTestKit kit = new JavaTestKit(getSystem());
 
         byte[] shardManagerSnapshot = new byte[]{0,5,9};
-        ActorRef replyActor = actorFactory.createActor(ShardManagerGetSnapshotReplyActor.props(
-                Arrays.asList("shard1", "shard2"), "config",
-                shardManagerSnapshot, kit.getRef(), "shard-manager", Duration.create(100, TimeUnit.SECONDS)),
-                    actorFactory.generateActorId("actor"));
+        ActorRef replyActor = getSystem().actorOf(ShardManagerGetSnapshotReplyActor.props(
+                Arrays.asList("shard1", "shard2"), "config", shardManagerSnapshot, kit.getRef(), "shard-manager",
+                Duration.create(100, TimeUnit.SECONDS)), "testGetSnapshotFailureReply");
 
         kit.watch(replyActor);
 
@@ -113,10 +102,9 @@ public class ShardManagerGetSnapshotReplyActorTest extends AbstractActorTest {
         JavaTestKit kit = new JavaTestKit(getSystem());
 
         byte[] shardManagerSnapshot = new byte[]{0,5,9};
-        ActorRef replyActor = actorFactory.createActor(ShardManagerGetSnapshotReplyActor.props(
-                Arrays.asList("shard1"), "config",
-                shardManagerSnapshot, kit.getRef(), "shard-manager", Duration.create(100, TimeUnit.MILLISECONDS)),
-                    actorFactory.generateActorId("actor"));
+        ActorRef replyActor = getSystem().actorOf(ShardManagerGetSnapshotReplyActor.props(
+                Arrays.asList("shard1"), "config", shardManagerSnapshot, kit.getRef(), "shard-manager",
+                Duration.create(100, TimeUnit.MILLISECONDS)), "testGetSnapshotTimeout");
 
         kit.watch(replyActor);
 
