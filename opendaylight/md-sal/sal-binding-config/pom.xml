@@ -66,6 +66,7 @@
                 <generator>
                   <codeGeneratorClass>org.opendaylight.yangtools.maven.sal.api.gen.plugin.CodeGeneratorImpl</codeGeneratorClass>
                   <outputBaseDir>${salGeneratorPath}</outputBaseDir>
+                  <resourceBaseDir>${project.build.directory}/generated-sources/spi</resourceBaseDir>
                 </generator>
                 <generator>
                   <codeGeneratorClass>org.opendaylight.controller.config.yangjmxgenerator.plugin.JMXGenerator</codeGeneratorClass>
