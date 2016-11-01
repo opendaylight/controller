@@ -70,6 +70,30 @@
       "revId": "2c0ee923c337f628fd0115f780c21868e6422c11",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a65312a_efc6d348",
+        "filename": "opendaylight/md-sal/mdsal-artifacts/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 212,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-11-01T14:30:39Z",
+      "side": 1,
+      "message": "Sorry I missed that. Thanks Alexis.",
+      "parentUuid": "3a65312a_ef1c1316",
+      "range": {
+        "startLine": 208,
+        "startChar": 0,
+        "endLine": 212,
+        "endChar": 25
+      },
+      "revId": "2c0ee923c337f628fd0115f780c21868e6422c11",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
