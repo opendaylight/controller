@@ -36,11 +36,6 @@
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>config-module-archetype</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
                 <artifactId>config-netty-config</artifactId>
                 <version>${project.version}</version>
             </dependency>
