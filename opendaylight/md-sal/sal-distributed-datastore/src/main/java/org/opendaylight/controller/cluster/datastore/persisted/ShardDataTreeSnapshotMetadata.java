@@ -15,7 +15,8 @@ import javax.annotation.Nonnull;
 /**
  * Base class for various bits of metadata attached to a {@link MetadataShardDataTreeSnapshot}. This class is not
  * an interface because we want to make sure all subclasses implement the externalizable proxy pattern, for which
- * we need to force {@link #readResolve()} to be abstract.
+ * we need to force {@link #writeReplace()} to be abstract. We do that by making it final and exposing a protected
+ * {@link #externalizableProxy()} method.
  * <p/>
  * All concrete subclasses of this class should be final so as to form a distinct set of possible metadata. Since
  * metadata is serialized along with {@link MetadataShardDataTreeSnapshot}, this set is part of the serialization format
