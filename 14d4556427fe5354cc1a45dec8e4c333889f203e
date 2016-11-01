@@ -94,6 +94,30 @@
       "revId": "14d4556427fe5354cc1a45dec8e4c333889f203e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a65312a_694f6393",
+        "filename": "opendaylight/md-sal/cds-access-api/src/main/java/org/opendaylight/controller/cluster/access/commands/CommitLocalTransactionRequest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-11-01T14:17:03Z",
+      "side": 1,
+      "message": "I filed bug https://sourceforge.net/p/findbugs/bugs/1473/",
+      "parentUuid": "3a65312a_2990cbeb",
+      "range": {
+        "startLine": 30,
+        "startChar": 0,
+        "endLine": 32,
+        "endChar": 69
+      },
+      "revId": "14d4556427fe5354cc1a45dec8e4c333889f203e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
