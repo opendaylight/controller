@@ -76,6 +76,7 @@ import org.opendaylight.controller.cluster.raft.utils.DoNothingActor;
 import org.opendaylight.controller.md.cluster.datastore.model.CarsModel;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -97,8 +98,28 @@ public abstract class AbstractTransactionProxyTest extends AbstractTest {
 
     private final Configuration configuration = new MockConfiguration() {
         Map<String, ShardStrategy> strategyMap = ImmutableMap.<String, ShardStrategy>builder().put(
-                "junk", path -> "junk").put(
-                "cars", path -> "cars").build();
+                "junk", new ShardStrategy() {
+                    @Override
+                    public String findShard(YangInstanceIdentifier path) {
+                        return "junk";
+                    }
+
+                    @Override
+                    public YangInstanceIdentifier getPrefixForPath(YangInstanceIdentifier path) {
+                        return YangInstanceIdentifier.EMPTY;
+                    }
+                }).put(
+                "cars", new ShardStrategy() {
+                    @Override
+                    public String findShard(YangInstanceIdentifier path) {
+                        return "cars";
+                    }
+
+                    @Override
+                    public YangInstanceIdentifier getPrefixForPath(YangInstanceIdentifier path) {
+                        return YangInstanceIdentifier.EMPTY;
+                    }
+                }).build();
 
         @Override
         public ShardStrategy getStrategyForModule(String moduleName) {
@@ -157,7 +178,8 @@ public abstract class AbstractTransactionProxyTest extends AbstractTest {
         doReturn(getSystem()).when(mockActorContext).getActorSystem();
         doReturn(getSystem().dispatchers().defaultGlobalDispatcher()).when(mockActorContext).getClientDispatcher();
         doReturn(MemberName.forName(memberName)).when(mockActorContext).getCurrentMemberName();
-        doReturn(new ShardStrategyFactory(configuration)).when(mockActorContext).getShardStrategyFactory();
+        doReturn(new ShardStrategyFactory(configuration,
+                LogicalDatastoreType.CONFIGURATION)).when(mockActorContext).getShardStrategyFactory();
         doReturn(schemaContext).when(mockActorContext).getSchemaContext();
         doReturn(new Timeout(operationTimeoutInSeconds, TimeUnit.SECONDS)).when(mockActorContext).getOperationTimeout();
         doReturn(mockClusterWrapper).when(mockActorContext).getClusterWrapper();
