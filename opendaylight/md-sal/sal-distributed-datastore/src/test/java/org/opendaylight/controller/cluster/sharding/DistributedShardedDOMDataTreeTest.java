@@ -106,6 +106,24 @@ public class DistributedShardedDOMDataTreeTest  extends AbstractTest {
     }
 
     @Test
+    public void testDefaultShards() throws Exception {
+        initEmptyDatastore("config");
+        leaderTestKit.waitUntilLeader(leaderDistributedDataStore.getActorContext(),
+                ClusterUtils.getCleanShardName(YangInstanceIdentifier.EMPTY));
+
+        LOG.debug("Got after waiting for nonleader");
+        final ActorRef leaderShardManager = leaderDistributedDataStore.getActorContext().getShardManager();
+
+        new JavaTestKit(leaderSystem) {{
+            leaderShardManager.tell(new FindLocalShard(ClusterUtils.getCleanShardName(YangInstanceIdentifier.EMPTY), true), getRef());
+            expectMsgClass(duration("5 seconds"), LocalShardFound.class);
+
+            leaderDistributedDataStore.getActorContext().getShardManager().tell(new FindPrimary(ClusterUtils.getCleanShardName(YangInstanceIdentifier.EMPTY), true), getRef());
+            expectMsgClass(duration("5 seconds"), LocalPrimaryShardFound.class);
+        }};
+    }
+
+    @Test
     @Ignore("The datastore client doesn't forward the requests to backend yet")
     public void testSingleNodeWrites() throws Exception {
         initEmptyDatastore("config");
@@ -224,5 +242,23 @@ public class DistributedShardedDOMDataTreeTest  extends AbstractTest {
         }
 
         return ret;
+    }
+
+    @Test
+    public void testDistributedData() throws Exception {
+        initEmptyDatastore("config");
+
+        leaderShardFactory.createDistributedShard(TEST_ID, Lists.newArrayList(AbstractTest.MEMBER_NAME));
+        leaderShardFactory.createDistributedShard(new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, TestModel.OUTER_CONTAINER_PATH), Lists.newArrayList(AbstractTest.MEMBER_NAME));
+        leaderShardFactory.createDistributedShard(new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, TestModel.INNER_LIST_PATH), Lists.newArrayList(AbstractTest.MEMBER_NAME));
+        leaderShardFactory.createDistributedShard(new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, TestModel.JUNK_PATH), Lists.newArrayList(AbstractTest.MEMBER_NAME));
+
+        leaderTestKit.waitUntilLeader(leaderDistributedDataStore.getActorContext(), ClusterUtils.getCleanShardName(TestModel.TEST_PATH));
+        leaderTestKit.waitUntilLeader(leaderDistributedDataStore.getActorContext(), ClusterUtils.getCleanShardName(TestModel.OUTER_CONTAINER_PATH));
+        leaderTestKit.waitUntilLeader(leaderDistributedDataStore.getActorContext(), ClusterUtils.getCleanShardName(TestModel.INNER_LIST_PATH));
+        leaderTestKit.waitUntilLeader(leaderDistributedDataStore.getActorContext(), ClusterUtils.getCleanShardName(TestModel.JUNK_PATH));
+
+
+        Thread.sleep(5000);
     }
 }

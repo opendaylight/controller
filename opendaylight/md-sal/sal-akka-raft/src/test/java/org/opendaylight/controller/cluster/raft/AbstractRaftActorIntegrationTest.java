@@ -116,12 +116,13 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
         public void handleCommand(Object message) {
             if (message instanceof MockPayload) {
                 MockPayload payload = (MockPayload) message;
-                super.persistData(collectorActor, new MockIdentifier(payload.toString()), payload);
+                super.persistData(collectorActor, new AbstractActorTest.MockIdentifier(payload.toString()), payload);
                 return;
             }
 
             if (message instanceof ServerConfigurationPayload) {
-                super.persistData(collectorActor, new MockIdentifier("serverConfig"), (Payload) message);
+                super.persistData(collectorActor,
+                        new AbstractActorTest.MockIdentifier("serverConfig"), (Payload) message);
                 return;
             }
 
