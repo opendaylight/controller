@@ -38,6 +38,8 @@ import org.opendaylight.controller.cluster.raft.messages.RaftRPC;
 import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The behavior of a RaftActor in the Follower raft state.
@@ -49,6 +51,8 @@ import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPay
  * </ul>
  */
 public class Follower extends AbstractRaftActorBehavior {
+    private static final Logger LOG = LoggerFactory.getLogger(Follower.class);
+
     private static final int SYNC_THRESHOLD = 10;
 
     private static final long MAX_ELECTION_TIMEOUT_FACTOR = 18;
@@ -365,6 +369,8 @@ public class Follower extends AbstractRaftActorBehavior {
 
     @Override
     public RaftActorBehavior handleMessage(ActorRef sender, Object message) {
+        LOG.debug("Follower received message: {} from: {}", message, sender);
+
         if (message instanceof ElectionTimeout || message instanceof TimeoutNow) {
             return handleElectionTimeout(message);
         }
@@ -380,7 +386,7 @@ public class Follower extends AbstractRaftActorBehavior {
         // This applies to all RPC messages and responses
         if (rpc.getTerm() > context.getTermInformation().getCurrentTerm()) {
             log.debug("{}: Term {} in \"{}\" message is greater than follower's term {} - updating term",
-                logName(), rpc.getTerm(), rpc, context.getTermInformation().getCurrentTerm());
+                    logName(), rpc.getTerm(), rpc, context.getTermInformation().getCurrentTerm());
 
             context.getTermInformation().updateAndPersist(rpc.getTerm(), null);
         }
