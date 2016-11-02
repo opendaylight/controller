@@ -19,16 +19,24 @@ public class PrefixShardStrategy implements ShardStrategy {
     public static final String NAME = "prefix";
 
     private final String shardName;
+    private final YangInstanceIdentifier prefix;
     private final Configuration configuration;
 
-    public PrefixShardStrategy(final String shardName, final Configuration configuration) {
+    public PrefixShardStrategy(final String shardName,
+                               final YangInstanceIdentifier prefix,
+                               final Configuration configuration) {
         this.shardName = shardName;
+        this.prefix = prefix;
         this.configuration = configuration;
     }
 
     @Override
     public String findShard(final YangInstanceIdentifier path) {
-        final String shardNameForPrefix = configuration.getShardNameForPrefix(path);
         return shardName != null ? shardName : DefaultShardStrategy.DEFAULT_SHARD;
+    }
+
+    @Override
+    public YangInstanceIdentifier getPrefixForPath(YangInstanceIdentifier path) {
+        return prefix;
     }
 }
