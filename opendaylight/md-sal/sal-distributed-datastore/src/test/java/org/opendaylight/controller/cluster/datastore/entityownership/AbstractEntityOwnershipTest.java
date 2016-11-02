@@ -35,7 +35,7 @@ import org.junit.Assert;
 import org.mockito.ArgumentMatcher;
 import org.mockito.Matchers;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
-import org.opendaylight.controller.cluster.datastore.AbstractActorTest;
+import org.opendaylight.controller.cluster.datastore.AbstractClusterRefActorTest;
 import org.opendaylight.controller.cluster.datastore.AbstractShardTest;
 import org.opendaylight.controller.cluster.datastore.ShardDataTree;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
@@ -72,7 +72,7 @@ import scala.concurrent.duration.FiniteDuration;
  *
  * @author Thomas Pantelis
  */
-public class AbstractEntityOwnershipTest extends AbstractActorTest {
+public class AbstractEntityOwnershipTest extends AbstractClusterRefActorTest {
     protected final Logger testLog = LoggerFactory.getLogger(getClass());
 
     private static final AtomicInteger NEXT_SHARD_NUM = new AtomicInteger();
