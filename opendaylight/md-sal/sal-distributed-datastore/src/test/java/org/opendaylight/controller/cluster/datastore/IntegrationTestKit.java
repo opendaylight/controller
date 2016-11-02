@@ -171,6 +171,18 @@ public class IntegrationTestKit extends ShardTestKit {
         return shard;
     }
 
+    public static void waitUntillShardIsDown(ActorContext actorContext, String shardName) {
+        for (int i = 0; i < 20 * 5 ; i++) {
+            Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
+            Optional<ActorRef> shardReply = actorContext.findLocalShard(shardName);
+            if (!shardReply.isPresent()) {
+                return;
+            }
+        }
+
+        throw new IllegalStateException("Shard[" + shardName + " did not shutdown in time");
+    }
+
     public static void verifyShardStats(DistributedDataStore datastore, String shardName, ShardStatsVerifier verifier)
             throws Exception {
         ActorContext actorContext = datastore.getActorContext();
