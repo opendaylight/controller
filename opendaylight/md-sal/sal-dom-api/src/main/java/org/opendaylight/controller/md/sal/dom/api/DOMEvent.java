@@ -8,6 +8,7 @@
 
 package org.opendaylight.controller.md.sal.dom.api;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 /**
@@ -20,5 +21,13 @@ public interface DOMEvent {
      *
      * @return the event time
      */
+    @Deprecated
     Date getEventTime();
+
+    /**
+     * Get the time of the event occurrence
+     *
+     * @return the event time
+     */
+    LocalDateTime getLocalEventTime();
 }
