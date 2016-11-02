@@ -75,6 +75,7 @@ class ShardProxyTransaction implements DOMDataTreeShardWriteTransaction {
 
     void cursorClosed() {
         cursor = null;
+        modification.cursorClosed();
     }
 
     private void checkAvailable(final DOMDataTreeIdentifier prefix) {

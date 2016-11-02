@@ -60,6 +60,7 @@ class DistributedShardFrontend implements ReadableWriteableDOMDataTreeShard {
 
     @Override
     public void onChildAttached(final DOMDataTreeIdentifier prefix, final DOMDataTreeShard child) {
+        LOG.debug("{} : Child shard attached at {}", shardRoot, prefix);
         Preconditions.checkArgument(child != this, "Attempted to attach child %s onto self", this);
         addChildShard(prefix, child);
         updateProducers();
@@ -67,6 +68,7 @@ class DistributedShardFrontend implements ReadableWriteableDOMDataTreeShard {
 
     @Override
     public void onChildDetached(final DOMDataTreeIdentifier prefix, final DOMDataTreeShard child) {
+        LOG.debug("{} : Child shard detached at {}", shardRoot, prefix);
         childShards.remove(prefix);
         updateProducers();
         // TODO we should grab the dataTreeSnapshot that's in the shard and apply it to this shard
