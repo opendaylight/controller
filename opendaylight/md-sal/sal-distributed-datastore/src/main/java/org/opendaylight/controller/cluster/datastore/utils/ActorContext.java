@@ -50,6 +50,7 @@ import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContex
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategyFactory;
 import org.opendaylight.controller.cluster.raft.client.messages.Shutdown;
 import org.opendaylight.controller.cluster.reporting.MetricsReporter;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.slf4j.Logger;
@@ -129,7 +130,10 @@ public class ActorContext {
         this.datastoreContext = datastoreContext;
         this.dispatchers = new Dispatchers(actorSystem.dispatchers());
         this.primaryShardInfoCache = primaryShardInfoCache;
-        this.shardStrategyFactory = new ShardStrategyFactory(configuration);
+
+        final LogicalDatastoreType convertedType =
+                LogicalDatastoreType.valueOf(datastoreContext.getLogicalStoreType().name());
+        this.shardStrategyFactory = new ShardStrategyFactory(configuration, convertedType);
 
         setCachedProperties();
 
