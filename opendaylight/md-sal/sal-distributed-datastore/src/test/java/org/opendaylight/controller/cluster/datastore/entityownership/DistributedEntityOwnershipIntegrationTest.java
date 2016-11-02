@@ -23,6 +23,7 @@ import static org.opendaylight.controller.cluster.datastore.entityownership.Enti
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.entityPath;
 
 import akka.actor.ActorRef;
+import akka.actor.ActorSystem;
 import akka.actor.Status.Failure;
 import akka.actor.Status.Success;
 import akka.cluster.Cluster;
@@ -32,13 +33,17 @@ import com.google.common.base.Stopwatch;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.Uninterruptibles;
+import com.typesafe.config.ConfigFactory;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
@@ -95,6 +100,8 @@ public class DistributedEntityOwnershipIntegrationTest {
 
     private final List<MemberNode> memberNodes = new ArrayList<>();
 
+    private static ActorSystem system;
+
     @Mock
     private DOMEntityOwnershipListener leaderMockListener;
 
@@ -120,6 +127,22 @@ public class DistributedEntityOwnershipIntegrationTest {
             m.cleanup();
         }
         memberNodes.clear();
+    }
+
+    @BeforeClass
+    public static void setUpClass() throws IOException {
+        System.setProperty("shard.persistent", "false");
+        system = ActorSystem.create("test", ConfigFactory.load().getConfig("test"));
+    }
+
+    @AfterClass
+    public static void tearDownClass() throws IOException {
+        JavaTestKit.shutdownActorSystem(system);
+        system = null;
+    }
+
+    public static ActorSystem getSystem() {
+        return system;
     }
 
     private static DistributedEntityOwnershipService newOwnershipService(final DistributedDataStore datastore) {
