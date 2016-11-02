@@ -104,7 +104,7 @@ public class DistributedShardFrontendTest {
     @Test
     public void testClientTransaction() throws Exception {
 
-        final DistributedShardFrontend rootShard = new DistributedShardFrontend(client, ROOT);
+        final DistributedShardFrontend rootShard = new DistributedShardFrontend(distributedDataStore, client, ROOT);
 
         try (final DOMDataTreeProducer producer = shardedDOMDataTree.createProducer(Collections.singletonList(ROOT))) {
             shardedDOMDataTree.registerDataTreeShard(ROOT, rootShard, producer);
@@ -124,7 +124,7 @@ public class DistributedShardFrontendTest {
         doNothing().when(outerListClient).close();
 
         final DistributedShardFrontend outerListShard = new DistributedShardFrontend(
-                outerListClient, OUTER_LIST_ID);
+                distributedDataStore, outerListClient, OUTER_LIST_ID);
         try (final DOMDataTreeProducer producer =
                      shardedDOMDataTree.createProducer(Collections.singletonList(OUTER_LIST_ID))) {
             shardedDOMDataTree.registerDataTreeShard(OUTER_LIST_ID, outerListShard, producer);

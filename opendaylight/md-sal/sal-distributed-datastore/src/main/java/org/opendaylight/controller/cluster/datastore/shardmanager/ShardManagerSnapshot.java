@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 import javax.annotation.Nonnull;
 import org.opendaylight.controller.cluster.datastore.config.PrefixShardConfiguration;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
 
 /**
  * Persisted data of the ShardManager.
@@ -26,10 +26,10 @@ public final class ShardManagerSnapshot implements Serializable {
     private static final long serialVersionUID = 1L;
     private final List<String> shardList;
 
-    private final Map<YangInstanceIdentifier, PrefixShardConfiguration> prefixShardConfiguration;
+    private final Map<DOMDataTreeIdentifier, PrefixShardConfiguration> prefixShardConfiguration;
 
     ShardManagerSnapshot(final @Nonnull List<String> shardList,
-                         final Map<YangInstanceIdentifier, PrefixShardConfiguration> prefixShardConfiguration) {
+                         final Map<DOMDataTreeIdentifier, PrefixShardConfiguration> prefixShardConfiguration) {
         this.shardList = ImmutableList.copyOf(shardList);
         this.prefixShardConfiguration = ImmutableMap.copyOf(prefixShardConfiguration);
     }
@@ -47,11 +47,10 @@ public final class ShardManagerSnapshot implements Serializable {
      */
     @Deprecated
     public static ShardManagerSnapshot forShardList(final @Nonnull List<String> shardList) {
-        //TODO can we put empty map here? how does the deprecated snapshot work?
         return new ShardManagerSnapshot(shardList, Collections.emptyMap());
     }
 
-    public Map<YangInstanceIdentifier, PrefixShardConfiguration> getPrefixShardConfiguration() {
+    public Map<DOMDataTreeIdentifier, PrefixShardConfiguration> getPrefixShardConfiguration() {
         return prefixShardConfiguration;
     }
 
