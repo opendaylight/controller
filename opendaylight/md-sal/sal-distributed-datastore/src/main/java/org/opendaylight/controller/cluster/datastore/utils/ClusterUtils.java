@@ -8,8 +8,12 @@
 
 package org.opendaylight.controller.cluster.datastore.utils;
 
+import akka.cluster.ddata.Key;
+import akka.cluster.ddata.ORSet;
+import akka.cluster.ddata.ORSetKey;
 import java.util.Map;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
+import org.opendaylight.controller.cluster.datastore.config.PrefixShardConfiguration;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
 import org.opendaylight.yangtools.yang.common.QName;
@@ -21,8 +25,23 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdent
  */
 public class ClusterUtils {
 
+    // key for replicated configuration key
+    public static final Key<ORSet<PrefixShardConfiguration>> CONFIGURATION_KEY = ORSetKey.create("prefix-shard-configuration");
+
     public static ShardIdentifier getShardIdentifier(final MemberName memberName, final DOMDataTreeIdentifier prefix) {
-        return ShardIdentifier.create(getCleanShardName(prefix.getRootIdentifier()), memberName, prefix.getDatastoreType().name());
+        final String type;
+        switch (prefix.getDatastoreType()){
+            case OPERATIONAL:
+                type = "operational";
+                break;
+            case CONFIGURATION:
+                type = "config";
+                break;
+            default:
+                type = prefix.getDatastoreType().name();
+        }
+
+        return ShardIdentifier.create(getCleanShardName(prefix.getRootIdentifier()), memberName, type);
     }
 
     /**
@@ -38,7 +57,7 @@ public class ClusterUtils {
         path.getPathArguments().forEach(p -> {
             builder.append(p.getNodeType().getLocalName());
             if (p instanceof NodeIdentifierWithPredicates) {
-                builder.append("$key=");
+                builder.append(":key=");
                 final Map<QName, Object> key = ((NodeIdentifierWithPredicates) p).getKeyValues();
                 key.entrySet().forEach(e -> {
                     builder.append(e.getKey().getLocalName());

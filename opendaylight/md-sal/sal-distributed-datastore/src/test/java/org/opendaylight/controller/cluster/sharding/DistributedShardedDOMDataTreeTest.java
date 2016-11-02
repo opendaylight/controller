@@ -225,4 +225,22 @@ public class DistributedShardedDOMDataTreeTest  extends AbstractTest {
 
         return ret;
     }
+
+    @Test
+    public void testDistributedData() throws Exception {
+        initEmptyDatastore("config");
+
+        leaderShardFactory.createDistributedShard(TEST_ID, Lists.newArrayList(AbstractTest.MEMBER_NAME));
+        leaderShardFactory.createDistributedShard(new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, TestModel.OUTER_CONTAINER_PATH), Lists.newArrayList(AbstractTest.MEMBER_NAME));
+        leaderShardFactory.createDistributedShard(new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, TestModel.INNER_LIST_PATH), Lists.newArrayList(AbstractTest.MEMBER_NAME));
+        leaderShardFactory.createDistributedShard(new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, TestModel.JUNK_PATH), Lists.newArrayList(AbstractTest.MEMBER_NAME));
+
+        leaderTestKit.waitUntilLeader(leaderDistributedDataStore.getActorContext(), ClusterUtils.getCleanShardName(TestModel.TEST_PATH));
+        leaderTestKit.waitUntilLeader(leaderDistributedDataStore.getActorContext(), ClusterUtils.getCleanShardName(TestModel.OUTER_CONTAINER_PATH));
+        leaderTestKit.waitUntilLeader(leaderDistributedDataStore.getActorContext(), ClusterUtils.getCleanShardName(TestModel.INNER_LIST_PATH));
+        leaderTestKit.waitUntilLeader(leaderDistributedDataStore.getActorContext(), ClusterUtils.getCleanShardName(TestModel.JUNK_PATH));
+
+
+        Thread.sleep(5000);
+    }
 }
