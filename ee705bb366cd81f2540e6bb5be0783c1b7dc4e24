@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a65312a_903c9795",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/test/java/org/opendaylight/controller/md/sal/binding/test/FasterDataBrokerTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-11-02T22:40:00Z",
+      "side": 1,
+      "message": "\u0027Faster\u0027 is not good naming. We can quickly get into UltraFastestL33test\u0027 as we run out of superlatives :)\n\nHow about \u0027ConstantSchema\u0027 instead?",
+      "range": {
+        "startLine": 17,
+        "startChar": 13,
+        "endLine": 17,
+        "endChar": 19
+      },
+      "revId": "ee705bb366cd81f2540e6bb5be0783c1b7dc4e24",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a65312a_f0418b0c",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/test/java/org/opendaylight/controller/md/sal/binding/test/FasterDataBrokerTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-11-02T22:40:00Z",
+      "side": 1,
+      "message": "Can we can declare a @BeforeClass method here, which will delegate to an abstract method, whose return will be a SchemaContext.\n\nThat way we\u0027ll now it is initialized by the time the first test runs and individual tests cannot trample over it.",
+      "range": {
+        "startLine": 22,
+        "startChar": 28,
+        "endLine": 22,
+        "endChar": 46
+      },
+      "revId": "ee705bb366cd81f2540e6bb5be0783c1b7dc4e24",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
