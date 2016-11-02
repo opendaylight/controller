@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import javax.annotation.Nonnull;
 import org.opendaylight.controller.cluster.databroker.actors.dds.DataStoreClient;
+import org.opendaylight.controller.cluster.datastore.DistributedDataStore;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeShard;
@@ -39,8 +40,12 @@ class DistributedShardFrontend implements ReadableWriteableDOMDataTreeShard {
     private final DOMDataTreeIdentifier shardRoot;
     private final Map<DOMDataTreeIdentifier, ChildShardContext> childShards = new HashMap<>();
     private final List<ShardProxyProducer> producers = new ArrayList<>();
+    private final DistributedDataStore distributedDataStore;
 
-    DistributedShardFrontend(final DataStoreClient client, final DOMDataTreeIdentifier shardRoot) {
+    DistributedShardFrontend(final DistributedDataStore distributedDataStore,
+                             final DataStoreClient client,
+                             final DOMDataTreeIdentifier shardRoot) {
+        this.distributedDataStore = Preconditions.checkNotNull(distributedDataStore);
         this.client = Preconditions.checkNotNull(client);
         this.shardRoot = Preconditions.checkNotNull(shardRoot);
     }
@@ -60,6 +65,7 @@ class DistributedShardFrontend implements ReadableWriteableDOMDataTreeShard {
 
     @Override
     public void onChildAttached(final DOMDataTreeIdentifier prefix, final DOMDataTreeShard child) {
+        LOG.debug("{} : Child shard attached at {}", shardRoot, prefix);
         Preconditions.checkArgument(child != this, "Attempted to attach child %s onto self", this);
         addChildShard(prefix, child);
         updateProducers();
@@ -67,6 +73,7 @@ class DistributedShardFrontend implements ReadableWriteableDOMDataTreeShard {
 
     @Override
     public void onChildDetached(final DOMDataTreeIdentifier prefix, final DOMDataTreeShard child) {
+        LOG.debug("{} : Child shard detached at {}", shardRoot, prefix);
         childShards.remove(prefix);
         updateProducers();
         // TODO we should grab the dataTreeSnapshot that's in the shard and apply it to this shard
@@ -124,6 +131,7 @@ class DistributedShardFrontend implements ReadableWriteableDOMDataTreeShard {
     @Override
     public <L extends DOMDataTreeChangeListener> ListenerRegistration<L> registerTreeChangeListener(
             final YangInstanceIdentifier treeId, final L listener) {
-        throw new UnsupportedOperationException("Registering data tree change listeners is not supported");
+        throw new UnsupportedOperationException("Listener registration not supported");
     }
+
 }
