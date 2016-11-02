@@ -8,10 +8,8 @@
 
 package org.opendaylight.controller.cluster.sharding;
 
-import com.google.common.collect.Iterables;
-import java.util.ArrayDeque;
-import java.util.Collections;
-import java.util.Deque;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Verify;
 import javax.annotation.Nonnull;
 import org.opendaylight.controller.cluster.databroker.actors.dds.ClientTransaction;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
@@ -25,38 +23,32 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
  */
 class ShardProxyCursor implements DOMDataTreeWriteCursor {
 
-    private final YangInstanceIdentifier root;
-    private final Deque<PathArgument> stack = new ArrayDeque<>();
+    private YangInstanceIdentifier current = YangInstanceIdentifier.EMPTY;
     private final ClientTransaction tx;
 
     ShardProxyCursor(final DOMDataTreeIdentifier prefix, final ClientTransaction tx) {
         //TODO migrate whole package to mdsal LogicalDatastoreType
-        root = prefix.getRootIdentifier();
-
         this.tx = tx;
     }
 
     @Override
     public void delete(final PathArgument child) {
-        tx.delete(YangInstanceIdentifier.create(
-                Iterables.concat(root.getPathArguments(), stack, Collections.singletonList(child))));
+        tx.delete(current.node(child));
     }
 
     @Override
     public void merge(final PathArgument child, final NormalizedNode<?, ?> data) {
-        tx.merge(YangInstanceIdentifier.create(
-                Iterables.concat(root.getPathArguments(), stack, Collections.singletonList(child))), data);
+        tx.merge(current.node(child), data);
     }
 
     @Override
     public void write(final PathArgument child, final NormalizedNode<?, ?> data) {
-        tx.write(YangInstanceIdentifier.create(
-                Iterables.concat(root.getPathArguments(), stack, Collections.singletonList(child))), data);
+        tx.write(current.node(child), data);
     }
 
     @Override
     public void enter(@Nonnull final PathArgument child) {
-        stack.push(child);
+        current = current.node(child);
     }
 
     @Override
@@ -72,19 +64,26 @@ class ShardProxyCursor implements DOMDataTreeWriteCursor {
     }
 
     @Override
-    public void exit() {
-        stack.pop();
+    public final void exit() {
+        Preconditions.checkState(!current.isEmpty());
+        current = Verify.verifyNotNull(current.getParent());
     }
 
     @Override
-    public void exit(final int depth) {
-        for (int i = 0; i < depth; i++) {
-            exit();
+    public final void exit(final int depth) {
+        Preconditions.checkArgument(depth >= 0);
+
+        YangInstanceIdentifier next = current;
+        for (int i = 0; i < depth; ++i) {
+            next = next.getParent();
+            Preconditions.checkState(next != null);
         }
+
+        current = next;
     }
 
     @Override
     public void close() {
-
+        current = YangInstanceIdentifier.EMPTY;
     }
 }

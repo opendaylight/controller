@@ -8,14 +8,19 @@
 
 package org.opendaylight.controller.cluster.sharding;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.opendaylight.controller.cluster.datastore.IntegrationTestKit.findLocalShard;
+import static org.opendaylight.controller.cluster.datastore.IntegrationTestKit.waitUntillShardIsDown;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Address;
 import akka.actor.AddressFromURIString;
+import akka.actor.PoisonPill;
 import akka.cluster.Cluster;
+import akka.cluster.ddata.DistributedData;
 import akka.testkit.JavaTestKit;
 import com.google.common.collect.Lists;
 import com.typesafe.config.ConfigFactory;
@@ -34,7 +39,6 @@ import org.opendaylight.controller.cluster.datastore.messages.FindLocalShard;
 import org.opendaylight.controller.cluster.datastore.messages.FindPrimary;
 import org.opendaylight.controller.cluster.datastore.messages.LocalPrimaryShardFound;
 import org.opendaylight.controller.cluster.datastore.messages.LocalShardFound;
-import org.opendaylight.controller.cluster.datastore.messages.RemotePrimaryShardFound;
 import org.opendaylight.controller.cluster.datastore.utils.ClusterUtils;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
 import org.opendaylight.controller.cluster.sharding.DistributedShardFactory.DistributedShardRegistration;
@@ -89,6 +93,7 @@ public class DistributedShardedDOMDataTreeRemotingTest extends AbstractTest {
 
         followerSystem = ActorSystem.create("cluster-test", ConfigFactory.load().getConfig("Member2"));
         Cluster.get(followerSystem).join(MEMBER_1_ADDRESS);
+
     }
 
     @After
@@ -99,6 +104,9 @@ public class DistributedShardedDOMDataTreeRemotingTest extends AbstractTest {
         if (leaderDistributedDataStore != null) {
             leaderDistributedDataStore.close();
         }
+
+        DistributedData.get(leaderSystem).replicator().tell(PoisonPill.getInstance(), ActorRef.noSender());
+        DistributedData.get(followerSystem).replicator().tell(PoisonPill.getInstance(), ActorRef.noSender());
 
         JavaTestKit.shutdownActorSystem(leaderSystem);
         JavaTestKit.shutdownActorSystem(followerSystem);
@@ -121,6 +129,9 @@ public class DistributedShardedDOMDataTreeRemotingTest extends AbstractTest {
         followerShardFactory = new DistributedShardedDOMDataTree(followerSystem,
                 followerDistributedDataStore,
                 followerDistributedDataStore);
+
+        leaderTestKit.waitUntilLeader(leaderDistributedDataStore.getActorContext(),
+                ClusterUtils.getCleanShardName(YangInstanceIdentifier.EMPTY));
     }
 
     @Test
@@ -139,21 +150,11 @@ public class DistributedShardedDOMDataTreeRemotingTest extends AbstractTest {
 
         final ActorRef leaderShardManager = leaderDistributedDataStore.getActorContext().getShardManager();
 
-        leaderShardManager.tell(
-                new FindLocalShard(ClusterUtils.getCleanShardName(TestModel.TEST_PATH), true), leaderTestKit.getRef());
-        leaderTestKit.expectMsgClass(JavaTestKit.duration("10 seconds"), LocalShardFound.class);
+        assertNotNull(findLocalShard(leaderDistributedDataStore.getActorContext(),
+                ClusterUtils.getCleanShardName(TEST_ID.getRootIdentifier())));
 
-        IntegrationTestKit.findLocalShard(followerDistributedDataStore.getActorContext(),
-                ClusterUtils.getCleanShardName(TEST_ID.getRootIdentifier()));
-
-        leaderShardManager.tell(
-                new FindPrimary(ClusterUtils.getCleanShardName(TestModel.TEST_PATH), true), leaderTestKit.getRef());
-        leaderTestKit.expectMsgClass(JavaTestKit.duration("10 seconds"), LocalPrimaryShardFound.class);
-
-        final ActorRef followerShardManager = followerDistributedDataStore.getActorContext().getShardManager();
-        followerShardManager.tell(
-                new FindPrimary(ClusterUtils.getCleanShardName(TestModel.TEST_PATH), true), followerTestKit.getRef());
-        followerTestKit.expectMsgClass(JavaTestKit.duration("10 seconds"), RemotePrimaryShardFound.class);
+        assertNotNull(findLocalShard(followerDistributedDataStore.getActorContext(),
+                ClusterUtils.getCleanShardName(TEST_ID.getRootIdentifier())));
 
         final DOMDataTreeProducer producer = leaderShardFactory.createProducer(Collections.singleton(TEST_ID));
         try {
@@ -199,7 +200,7 @@ public class DistributedShardedDOMDataTreeRemotingTest extends AbstractTest {
 
         leaderTestKit.waitUntilLeader(leaderDistributedDataStore.getActorContext(),
                 ClusterUtils.getCleanShardName(TEST_ID.getRootIdentifier()));
-        IntegrationTestKit.findLocalShard(followerDistributedDataStore.getActorContext(),
+        findLocalShard(followerDistributedDataStore.getActorContext(),
                 ClusterUtils.getCleanShardName(TEST_ID.getRootIdentifier()));
 
         LOG.warn("Got after waiting for nonleader");
@@ -239,7 +240,129 @@ public class DistributedShardedDOMDataTreeRemotingTest extends AbstractTest {
         LOG.warn("Got to pre submit");
 
         tx.submit();
+    }
+
+    @Test
+    public void testMultipleShardRegistrations() throws Exception {
+        initEmptyDatastores("config");
+
+        final DistributedShardRegistration reg1 = leaderShardFactory
+                .createDistributedShard(TEST_ID,
+                        Lists.newArrayList(AbstractTest.MEMBER_NAME, AbstractTest.MEMBER_2_NAME));
+
+        final DistributedShardRegistration reg2 = leaderShardFactory
+                .createDistributedShard(
+                        new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, TestModel.OUTER_CONTAINER_PATH),
+                        Lists.newArrayList(AbstractTest.MEMBER_NAME, AbstractTest.MEMBER_2_NAME));
+
+        final DistributedShardRegistration reg3 = leaderShardFactory
+                .createDistributedShard(
+                        new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, TestModel.INNER_LIST_PATH),
+                        Lists.newArrayList(AbstractTest.MEMBER_NAME, AbstractTest.MEMBER_2_NAME));
+
+        final DistributedShardRegistration reg4 = leaderShardFactory
+                .createDistributedShard(
+                        new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, TestModel.JUNK_PATH),
+                        Lists.newArrayList(AbstractTest.MEMBER_NAME, AbstractTest.MEMBER_2_NAME));
+
+        leaderTestKit.waitUntilLeader(leaderDistributedDataStore.getActorContext(),
+                ClusterUtils.getCleanShardName(TestModel.TEST_PATH));
+        leaderTestKit.waitUntilLeader(leaderDistributedDataStore.getActorContext(),
+                ClusterUtils.getCleanShardName(TestModel.OUTER_CONTAINER_PATH));
+        leaderTestKit.waitUntilLeader(leaderDistributedDataStore.getActorContext(),
+                ClusterUtils.getCleanShardName(TestModel.INNER_LIST_PATH));
+        leaderTestKit.waitUntilLeader(leaderDistributedDataStore.getActorContext(),
+                ClusterUtils.getCleanShardName(TestModel.JUNK_PATH));
+
+        // check leader has local shards
+        assertNotNull(findLocalShard(leaderDistributedDataStore.getActorContext(),
+                ClusterUtils.getCleanShardName(TestModel.TEST_PATH)));
+
+        assertNotNull(findLocalShard(leaderDistributedDataStore.getActorContext(),
+                ClusterUtils.getCleanShardName(TestModel.OUTER_CONTAINER_PATH)));
+
+        assertNotNull(findLocalShard(leaderDistributedDataStore.getActorContext(),
+                ClusterUtils.getCleanShardName(TestModel.INNER_LIST_PATH)));
+
+        assertNotNull(findLocalShard(leaderDistributedDataStore.getActorContext(),
+                ClusterUtils.getCleanShardName(TestModel.JUNK_PATH)));
+
+        // check follower has local shards
+        assertNotNull(findLocalShard(followerDistributedDataStore.getActorContext(),
+                ClusterUtils.getCleanShardName(TestModel.TEST_PATH)));
+
+        assertNotNull(findLocalShard(followerDistributedDataStore.getActorContext(),
+                ClusterUtils.getCleanShardName(TestModel.OUTER_CONTAINER_PATH)));
+
+        assertNotNull(findLocalShard(followerDistributedDataStore.getActorContext(),
+                ClusterUtils.getCleanShardName(TestModel.INNER_LIST_PATH)));
+
+        assertNotNull(findLocalShard(followerDistributedDataStore.getActorContext(),
+                ClusterUtils.getCleanShardName(TestModel.JUNK_PATH)));
 
 
+        LOG.debug("Closing registrations");
+
+        reg1.close();
+        reg2.close();
+        reg3.close();
+        reg4.close();
+
+        waitUntillShardIsDown(leaderDistributedDataStore.getActorContext(),
+                ClusterUtils.getCleanShardName(TestModel.TEST_PATH));
+
+        waitUntillShardIsDown(leaderDistributedDataStore.getActorContext(),
+                ClusterUtils.getCleanShardName(TestModel.OUTER_CONTAINER_PATH));
+
+        waitUntillShardIsDown(leaderDistributedDataStore.getActorContext(),
+                ClusterUtils.getCleanShardName(TestModel.INNER_LIST_PATH));
+
+        waitUntillShardIsDown(leaderDistributedDataStore.getActorContext(),
+                ClusterUtils.getCleanShardName(TestModel.JUNK_PATH));
+
+        LOG.debug("All leader shards gone");
+
+        waitUntillShardIsDown(followerDistributedDataStore.getActorContext(),
+                ClusterUtils.getCleanShardName(TestModel.TEST_PATH));
+
+        waitUntillShardIsDown(followerDistributedDataStore.getActorContext(),
+                ClusterUtils.getCleanShardName(TestModel.OUTER_CONTAINER_PATH));
+
+        waitUntillShardIsDown(followerDistributedDataStore.getActorContext(),
+                ClusterUtils.getCleanShardName(TestModel.INNER_LIST_PATH));
+
+        waitUntillShardIsDown(followerDistributedDataStore.getActorContext(),
+                ClusterUtils.getCleanShardName(TestModel.JUNK_PATH));
+
+        LOG.debug("All follower shards gone");
+    }
+
+    @Test
+    public void testMultipleRegistrationsAtOnePrefix() throws Exception {
+        initEmptyDatastores("config");
+
+        for (int i = 0; i < 10; i++) {
+            LOG.debug("Round {}", i);
+            final DistributedShardRegistration reg1 = leaderShardFactory
+                    .createDistributedShard(TEST_ID,
+                            Lists.newArrayList(AbstractTest.MEMBER_NAME, AbstractTest.MEMBER_2_NAME));
+
+            leaderTestKit.waitUntilLeader(leaderDistributedDataStore.getActorContext(),
+                    ClusterUtils.getCleanShardName(TestModel.TEST_PATH));
+
+            assertNotNull(findLocalShard(leaderDistributedDataStore.getActorContext(),
+                    ClusterUtils.getCleanShardName(TestModel.TEST_PATH)));
+
+            assertNotNull(findLocalShard(followerDistributedDataStore.getActorContext(),
+                    ClusterUtils.getCleanShardName(TestModel.TEST_PATH)));
+
+            reg1.close();
+
+            waitUntillShardIsDown(leaderDistributedDataStore.getActorContext(),
+                    ClusterUtils.getCleanShardName(TestModel.TEST_PATH));
+
+            waitUntillShardIsDown(followerDistributedDataStore.getActorContext(),
+                    ClusterUtils.getCleanShardName(TestModel.TEST_PATH));
+        }
     }
 }

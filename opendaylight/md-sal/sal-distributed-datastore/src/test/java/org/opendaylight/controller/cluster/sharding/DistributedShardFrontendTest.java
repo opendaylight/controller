@@ -27,6 +27,7 @@ import org.mockito.Captor;
 import org.opendaylight.controller.cluster.databroker.actors.dds.ClientLocalHistory;
 import org.opendaylight.controller.cluster.databroker.actors.dds.ClientTransaction;
 import org.opendaylight.controller.cluster.databroker.actors.dds.DataStoreClient;
+import org.opendaylight.controller.cluster.datastore.DistributedDataStore;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeCursorAwareTransaction;
@@ -104,7 +105,8 @@ public class DistributedShardFrontendTest {
     @Test
     public void testClientTransaction() throws Exception {
 
-        final DistributedShardFrontend rootShard = new DistributedShardFrontend(client, ROOT);
+        final DistributedDataStore distributedDataStore = mock(DistributedDataStore.class);
+        final DistributedShardFrontend rootShard = new DistributedShardFrontend(distributedDataStore, client, ROOT);
 
         try (final DOMDataTreeProducer producer = shardedDOMDataTree.createProducer(Collections.singletonList(ROOT))) {
             shardedDOMDataTree.registerDataTreeShard(ROOT, rootShard, producer);
@@ -124,7 +126,7 @@ public class DistributedShardFrontendTest {
         doNothing().when(outerListClient).close();
 
         final DistributedShardFrontend outerListShard = new DistributedShardFrontend(
-                outerListClient, OUTER_LIST_ID);
+                distributedDataStore, outerListClient, OUTER_LIST_ID);
         try (final DOMDataTreeProducer producer =
                      shardedDOMDataTree.createProducer(Collections.singletonList(OUTER_LIST_ID))) {
             shardedDOMDataTree.registerDataTreeShard(OUTER_LIST_ID, outerListShard, producer);
@@ -140,11 +142,14 @@ public class DistributedShardFrontendTest {
         //check the lower shard got the correct modification
         verify(outerListClientTransaction, times(2)).write(yidCaptor.capture(), nodeCaptor.capture());
 
-        final YangInstanceIdentifier expectedYid = OUTER_LIST_YID.node(TestModel.ID_QNAME);
+
+        final YangInstanceIdentifier expectedYid =
+                YangInstanceIdentifier.create(new NodeIdentifier(TestModel.ID_QNAME));
         final YangInstanceIdentifier actualIdYid = yidCaptor.getAllValues().get(0);
         assertEquals(expectedYid, actualIdYid);
 
-        final YangInstanceIdentifier expectedInnerYid = OUTER_LIST_YID.node(TestModel.INNER_LIST_QNAME);
+        final YangInstanceIdentifier expectedInnerYid =
+                YangInstanceIdentifier.create(new NodeIdentifier(TestModel.INNER_LIST_QNAME));
         final YangInstanceIdentifier actualInnerListYid = yidCaptor.getAllValues().get(1);
         assertEquals(expectedInnerYid, actualInnerListYid);
 

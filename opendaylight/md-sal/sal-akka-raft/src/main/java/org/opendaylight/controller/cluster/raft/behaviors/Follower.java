@@ -380,7 +380,7 @@ public class Follower extends AbstractRaftActorBehavior {
         // This applies to all RPC messages and responses
         if (rpc.getTerm() > context.getTermInformation().getCurrentTerm()) {
             log.debug("{}: Term {} in \"{}\" message is greater than follower's term {} - updating term",
-                logName(), rpc.getTerm(), rpc, context.getTermInformation().getCurrentTerm());
+                    logName(), rpc.getTerm(), rpc, context.getTermInformation().getCurrentTerm());
 
             context.getTermInformation().updateAndPersist(rpc.getTerm(), null);
         }
