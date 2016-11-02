@@ -48,6 +48,10 @@ public class DistributedShardModification extends WriteableNodeWithSubshard {
         };
     }
 
+    void cursorClosed() {
+        context.closeCursor();
+    }
+
     DOMStoreThreePhaseCommitCohort seal() {
         childShards.values().forEach(ForeignShardModificationContext::ready);
         return context.ready();
