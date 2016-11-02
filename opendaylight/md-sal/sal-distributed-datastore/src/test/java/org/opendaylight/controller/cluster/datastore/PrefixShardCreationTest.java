@@ -20,6 +20,7 @@ import com.google.common.collect.Lists;
 import com.typesafe.config.ConfigFactory;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.Shard.Builder;
@@ -94,6 +95,7 @@ public class PrefixShardCreationTest extends AbstractShardManagerTest {
     }
 
     @Test
+    @Ignore("Replicas now handled via distributed config")
     public void testPrefixShardReplicas() throws Exception {
         LOG.info("testPrefixShardReplicas starting");
         final String shardManagerID = ShardManagerIdentifier.builder().type(shardMrgIDSuffix).build().toString();
