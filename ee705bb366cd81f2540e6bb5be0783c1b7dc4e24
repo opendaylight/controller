@@ -69,6 +69,30 @@
       "revId": "ee705bb366cd81f2540e6bb5be0783c1b7dc4e24",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a65312a_dc574801",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/test/java/org/opendaylight/controller/md/sal/binding/test/FasterDataBrokerTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2016-11-03T18:40:24Z",
+      "side": 1,
+      "message": "Robert with the change with SchemaContextSingleton, do you think this would still be useful?  I\u0027m a) thinking that the code would be more difficult to understand then - because we would have then a static SchemaContext in both SchemaContextSingleton as well as in ConstantSchemaAbstractDataBrokerTest, and b) struggling to see exactly how you meant to do this.. a @BeforeClass method here in ConstantSchemaAbstractDataBrokerTest would have to be static, and couldn\u0027t delegate to an abstract method, like the @Override getSchemaContext() from the AbstractSchemaAwareTest, so... if you feel strongly about this, perhaps you\u0027d like to push an amendment to this Gerrit to illustrate?",
+      "parentUuid": "3a65312a_f0418b0c",
+      "range": {
+        "startLine": 22,
+        "startChar": 28,
+        "endLine": 22,
+        "endChar": 46
+      },
+      "revId": "ee705bb366cd81f2540e6bb5be0783c1b7dc4e24",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
