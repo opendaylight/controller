@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "3a65312a_e1125f61",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/test/java/org/opendaylight/controller/md/sal/binding/test/FasterDataBrokerTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2016-11-03T18:15:50Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3a65312a_903c9795",
+      "range": {
+        "startLine": 17,
+        "startChar": 13,
+        "endLine": 17,
+        "endChar": 19
+      },
+      "revId": "ee705bb366cd81f2540e6bb5be0783c1b7dc4e24",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a65312a_f0418b0c",
         "filename": "opendaylight/md-sal/sal-binding-broker/src/test/java/org/opendaylight/controller/md/sal/binding/test/FasterDataBrokerTest.java",
         "patchSetId": 2
