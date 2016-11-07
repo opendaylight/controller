@@ -304,6 +304,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         final DataTreeCandidate candidate = dataTree.prepare(mod);
         dataTree.commit(candidate);
 
+        LOG.trace("{}: Notifying listeners with {}", logContext, candidate);
         notifyListeners(candidate);
     }
 
