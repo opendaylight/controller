@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a65312a_cdd82320",
+        "filename": "opendaylight/config/config-filtering-parent/pom.xml",
+        "patchSetId": 5
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2016-11-08T20:43:13Z",
+      "side": 1,
+      "message": "must use ${project.build.directory} instead of \"target/\" here, see https://git.opendaylight.org/gerrit/#/q/topic:target-ide",
+      "revId": "d6e8fdcdbab2f72bd60c3f4f9c150af64748c28d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
