@@ -24,7 +24,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <config.dir>src/main/config</config.dir>
     <config.filename>default-config.xml</config.filename>
     <config.file>${config.dir}/${config.filename}</config.file>
-    <generated.config.dir>target/generated-config</generated.config.dir>
+    <generated.config.dir>${project.build.directory}/generated-config</generated.config.dir>
     <generated.config.file>${generated.config.dir}/${config.filename}</generated.config.file>
   </properties>
 
