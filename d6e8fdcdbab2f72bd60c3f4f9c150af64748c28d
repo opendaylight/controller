@@ -34,6 +34,24 @@
       "revId": "d6e8fdcdbab2f72bd60c3f4f9c150af64748c28d",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a65312a_9322c8b7",
+        "filename": "opendaylight/config/config-filtering-parent/pom.xml",
+        "patchSetId": 5
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2016-11-09T14:13:29Z",
+      "side": 1,
+      "message": "Oh! Misunderstanding.  Done as suggested in https://git.opendaylight.org/gerrit/#/c/48163/",
+      "parentUuid": "3a65312a_10506e31",
+      "revId": "d6e8fdcdbab2f72bd60c3f4f9c150af64748c28d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
