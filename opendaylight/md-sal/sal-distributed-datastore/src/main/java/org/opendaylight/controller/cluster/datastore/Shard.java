@@ -185,7 +185,8 @@ public class Shard extends RaftActor {
                     treeChangeListenerPublisher, dataChangeListenerPublisher, name);
         } else {
             store = new ShardDataTree(this, builder.getSchemaContext(), builder.getTreeType(),
-                    treeChangeListenerPublisher, dataChangeListenerPublisher, name);
+                    builder.getDatastoreContext().getStoreRoot(), treeChangeListenerPublisher,
+                    dataChangeListenerPublisher, name);
         }
 
         shardMBean = ShardMBeanFactory.getShardStatsMBean(name, datastoreContext.getDataStoreMXBeanType(), this);
