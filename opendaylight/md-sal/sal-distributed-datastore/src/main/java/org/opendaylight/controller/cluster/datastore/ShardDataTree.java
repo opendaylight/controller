@@ -124,15 +124,17 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     }
 
     public ShardDataTree(final Shard shard, final SchemaContext schemaContext, final TreeType treeType,
+            final YangInstanceIdentifier root,
             final ShardDataTreeChangeListenerPublisher treeChangeListenerPublisher,
             final ShardDataChangeListenerPublisher dataChangeListenerPublisher, final String logContext) {
-        this(shard, schemaContext, InMemoryDataTreeFactory.getInstance().create(treeType),
+        this(shard, schemaContext, InMemoryDataTreeFactory.getInstance().create(treeType, root),
                 treeChangeListenerPublisher, dataChangeListenerPublisher, logContext);
     }
 
     @VisibleForTesting
     public ShardDataTree(final Shard shard, final SchemaContext schemaContext, final TreeType treeType) {
-        this(shard, schemaContext, treeType, new DefaultShardDataTreeChangeListenerPublisher(),
+        this(shard, schemaContext, treeType, YangInstanceIdentifier.EMPTY,
+                new DefaultShardDataTreeChangeListenerPublisher(),
                 new DefaultShardDataChangeListenerPublisher(), "");
     }
 
