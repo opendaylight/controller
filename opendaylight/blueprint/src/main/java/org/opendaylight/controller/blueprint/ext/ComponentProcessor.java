@@ -40,6 +40,7 @@ public class ComponentProcessor implements ComponentDefinitionRegistryProcessor 
 
     private static final Logger LOG = LoggerFactory.getLogger(ComponentProcessor.class);
     private static final String CM_PERSISTENT_ID_PROPERTY = "persistentId";
+    private static final String CM_UPDATE_STRATEGY_PROPERTY = "updateStrategy";
 
     private final List<ServiceRegistration<?>> managedServiceRegs = new ArrayList<>();
     private Bundle bundle;
@@ -109,22 +110,42 @@ public class ComponentProcessor implements ComponentDefinitionRegistryProcessor 
             LOG.debug("{}: Found PropertyPlaceholder bean: {}, runtime {}", logName(), bean.getId(),
                     bean.getRuntimeClass());
 
+
+            String persistentId = null;
+            boolean isUpdateStrategyEnabled = true;
             for(BeanProperty prop: bean.getProperties()) {
-                if(CM_PERSISTENT_ID_PROPERTY.equals(prop.getName())) {
-                    if(prop.getValue() instanceof ValueMetadata) {
-                        ValueMetadata persistentId = (ValueMetadata)prop.getValue();
+                if (CM_PERSISTENT_ID_PROPERTY.equals(prop.getName())) {
+                    if (prop.getValue() instanceof ValueMetadata) {
+                        ValueMetadata persistentIdVM = (ValueMetadata) prop.getValue();
 
                         LOG.debug("{}: Found {} property, value : {}", logName(),
-                                CM_PERSISTENT_ID_PROPERTY, persistentId.getStringValue());
+                                CM_PERSISTENT_ID_PROPERTY, persistentIdVM.getStringValue());
 
-                        registerManagedService(persistentId.getStringValue());
+                        persistentId = persistentIdVM.getStringValue();
                     } else {
                         LOG.debug("{}: {} property metadata {} is not instanceof ValueMetadata",
                                 logName(), CM_PERSISTENT_ID_PROPERTY, prop.getValue());
                     }
-
-                    break;
                 }
+                else if (CM_UPDATE_STRATEGY_PROPERTY.equals(prop.getName())) {
+                    if (prop.getValue() instanceof ValueMetadata) {
+                        ValueMetadata updateStrategy = (ValueMetadata) prop.getValue();
+
+                        LOG.debug("{} Found {} property, value = {}", logName(),
+                                CM_UPDATE_STRATEGY_PROPERTY, updateStrategy.getStringValue());
+
+                        if (UpdateStrategy.NONE.name().equalsIgnoreCase(updateStrategy.getStringValue())) {
+                            isUpdateStrategyEnabled = false;
+                        }
+                    }
+                }
+            }
+
+            if (!Strings.isNullOrEmpty(persistentId) && isUpdateStrategyEnabled) {
+                registerManagedService(persistentId);
+            } else {
+                LOG.debug("{}: PropertyPlaceholder update-strategy set to none; not registering ManagedService for {}",
+                        logName(), persistentId);
             }
         }
     }
