@@ -63,27 +63,27 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
     }
 
     final void delete(final YangInstanceIdentifier path) {
-        checkSealed();
+        checkNotSealed();
         doDelete(path);
     }
 
     final void merge(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
-        checkSealed();
+        checkNotSealed();
         doMerge(path, data);
     }
 
     final void write(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
-        checkSealed();
+        checkNotSealed();
         doWrite(path, data);
     }
 
     final CheckedFuture<Boolean, ReadFailedException> exists(final YangInstanceIdentifier path) {
-        checkSealed();
+        checkNotSealed();
         return doExists(path);
     }
 
     final CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> read(final YangInstanceIdentifier path) {
-        checkSealed();
+        checkNotSealed();
         return doRead(path);
     }
 
@@ -104,12 +104,16 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
         Preconditions.checkState(sealed, "Transaction %s has not been sealed yet", getIdentifier());
     }
 
+    private void checkNotSealed() {
+        Preconditions.checkState(!sealed, "Transaction %s has already been sealed", getIdentifier());
+    }
+
     /**
      * Abort this transaction. This is invoked only for read-only transactions and will result in an explicit message
      * being sent to the backend.
      */
     final void abort() {
-        checkSealed();
+        checkNotSealed();
         doAbort();
     }
 
