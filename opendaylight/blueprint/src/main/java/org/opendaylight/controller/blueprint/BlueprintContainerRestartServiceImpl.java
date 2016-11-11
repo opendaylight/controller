@@ -8,6 +8,7 @@
 package org.opendaylight.controller.blueprint;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import java.lang.management.ManagementFactory;
@@ -28,6 +29,8 @@ import javax.management.InstanceNotFoundException;
 import javax.management.ObjectName;
 import javax.xml.parsers.ParserConfigurationException;
 import org.apache.aries.blueprint.services.BlueprintExtenderService;
+import org.apache.aries.quiesce.manager.QuiesceCallback;
+import org.apache.aries.quiesce.participant.QuiesceParticipant;
 import org.apache.aries.util.AriesFrameworkUtil;
 import org.opendaylight.controller.config.api.ConfigRegistry;
 import org.opendaylight.controller.config.api.ConflictingVersionException;
@@ -69,10 +72,16 @@ class BlueprintContainerRestartServiceImpl implements AutoCloseable, BlueprintCo
 
     private final ExecutorService restartExecutor = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder().
             setDaemon(true).setNameFormat("BlueprintContainerRestartService").build());
-    private final BlueprintExtenderService blueprintExtenderService;
 
-    BlueprintContainerRestartServiceImpl(BlueprintExtenderService blueprintExtenderService) {
+    private BlueprintExtenderService blueprintExtenderService;
+    private QuiesceParticipant quiesceParticipant;
+
+    void setBlueprintExtenderService(final BlueprintExtenderService blueprintExtenderService) {
         this.blueprintExtenderService = blueprintExtenderService;
+    }
+
+    void setQuiesceParticipant(final QuiesceParticipant quiesceParticipant) {
+        this.quiesceParticipant = quiesceParticipant;
     }
 
     public void restartContainer(final Bundle bundle, final List<Object> paths) {
@@ -109,6 +118,9 @@ class BlueprintContainerRestartServiceImpl implements AutoCloseable, BlueprintCo
     }
 
     private void restartContainerAndDependentsInternal(Bundle forBundle) {
+        Preconditions.checkNotNull(blueprintExtenderService);
+        Preconditions.checkNotNull(quiesceParticipant);
+
         // We use a LinkedHashSet to preserve insertion order as we walk the service usage hierarchy.
         Set<Bundle> containerBundlesSet = new LinkedHashSet<>();
         List<Entry<String, ModuleIdentifier>> configModules = new ArrayList<>();
@@ -119,9 +131,29 @@ class BlueprintContainerRestartServiceImpl implements AutoCloseable, BlueprintCo
         LOG.info("Restarting blueprint containers for bundle {} and its dependent bundles {}", forBundle,
                 containerBundles.subList(1, containerBundles.size()));
 
+        quiesceParticipant.quiesce(new QuiesceCallback() {
+            @Override
+            public void bundleQuiesced(Bundle... bundles) {
+                LOG.debug("Quiesce {} bundles - done", bundles.length);
+
+                for (Bundle b : bundles) {
+                    LOG.debug("Quiesced bundle {}", b);
+                }
+            }
+        }, containerBundles);
+
         // Destroy the containers in reverse order with 'forBundle' last, ie bottom-up in the service tree.
         for(Bundle bundle: Lists.reverse(containerBundles)) {
             blueprintExtenderService.destroyContainer(bundle, blueprintExtenderService.getContainer(bundle));
+        }
+
+        // Restart the containers top-down starting with 'forBundle'.
+        for(Bundle bundle: containerBundles) {
+            List<Object> paths = BlueprintBundleTracker.findBlueprintPaths(bundle);
+
+            LOG.info("Restarting blueprint container for bundle {} with paths {}", bundle, paths);
+
+            blueprintExtenderService.createContainer(bundle, paths);
         }
 
         // The blueprint containers are created asynchronously so we register a handler for blueprint events
@@ -138,15 +170,6 @@ class BlueprintContainerRestartServiceImpl implements AutoCloseable, BlueprintCo
                 }
             }
         });
-
-        // Restart the containers top-down starting with 'forBundle'.
-        for(Bundle bundle: containerBundles) {
-            List<Object> paths = BlueprintBundleTracker.findBlueprintPaths(bundle);
-
-            LOG.info("Restarting blueprint container for bundle {} with paths {}", bundle, paths);
-
-            blueprintExtenderService.createContainer(bundle, paths);
-        }
 
         try {
             containerCreationComplete.await(5, TimeUnit.MINUTES);
@@ -240,6 +263,7 @@ class BlueprintContainerRestartServiceImpl implements AutoCloseable, BlueprintCo
      *
      * @param bundle the bundle to traverse
      * @param containerBundles the current set of bundles containing blueprint containers
+     * @param configModules the current set of bundles containing config modules
      */
     private void findDependentContainersRecursively(Bundle bundle, Set<Bundle> containerBundles,
             List<Entry<String, ModuleIdentifier>> configModules) {
