@@ -8,6 +8,7 @@
 package org.opendaylight.controller.blueprint;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import java.lang.management.ManagementFactory;
@@ -28,6 +29,7 @@ import javax.management.InstanceNotFoundException;
 import javax.management.ObjectName;
 import javax.xml.parsers.ParserConfigurationException;
 import org.apache.aries.blueprint.services.BlueprintExtenderService;
+import org.apache.aries.quiesce.participant.QuiesceParticipant;
 import org.apache.aries.util.AriesFrameworkUtil;
 import org.opendaylight.controller.config.api.ConfigRegistry;
 import org.opendaylight.controller.config.api.ConflictingVersionException;
@@ -69,14 +71,20 @@ class BlueprintContainerRestartServiceImpl implements AutoCloseable, BlueprintCo
 
     private final ExecutorService restartExecutor = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder().
             setDaemon(true).setNameFormat("BlueprintContainerRestartService").build());
-    private final BlueprintExtenderService blueprintExtenderService;
 
-    BlueprintContainerRestartServiceImpl(BlueprintExtenderService blueprintExtenderService) {
+    private BlueprintExtenderService blueprintExtenderService;
+    private QuiesceParticipant quiesceParticipant;
+
+    void setBlueprintExtenderService(final BlueprintExtenderService blueprintExtenderService) {
         this.blueprintExtenderService = blueprintExtenderService;
     }
 
+    void setQuiesceParticipant(final QuiesceParticipant quiesceParticipant) {
+        this.quiesceParticipant = quiesceParticipant;
+    }
+
     public void restartContainer(final Bundle bundle, final List<Object> paths) {
-        if(restartExecutor.isShutdown()) {
+        if (restartExecutor.isShutdown()) {
             return;
         }
 
@@ -93,7 +101,7 @@ class BlueprintContainerRestartServiceImpl implements AutoCloseable, BlueprintCo
 
     @Override
     public void restartContainerAndDependents(final Bundle bundle) {
-        if(restartExecutor.isShutdown()) {
+        if (restartExecutor.isShutdown()) {
             return;
         }
 
@@ -109,6 +117,9 @@ class BlueprintContainerRestartServiceImpl implements AutoCloseable, BlueprintCo
     }
 
     private void restartContainerAndDependentsInternal(Bundle forBundle) {
+        Preconditions.checkNotNull(blueprintExtenderService);
+        Preconditions.checkNotNull(quiesceParticipant);
+
         // We use a LinkedHashSet to preserve insertion order as we walk the service usage hierarchy.
         Set<Bundle> containerBundlesSet = new LinkedHashSet<>();
         List<Entry<String, ModuleIdentifier>> configModules = new ArrayList<>();
@@ -119,11 +130,6 @@ class BlueprintContainerRestartServiceImpl implements AutoCloseable, BlueprintCo
         LOG.info("Restarting blueprint containers for bundle {} and its dependent bundles {}", forBundle,
                 containerBundles.subList(1, containerBundles.size()));
 
-        // Destroy the containers in reverse order with 'forBundle' last, ie bottom-up in the service tree.
-        for(Bundle bundle: Lists.reverse(containerBundles)) {
-            blueprintExtenderService.destroyContainer(bundle, blueprintExtenderService.getContainer(bundle));
-        }
-
         // The blueprint containers are created asynchronously so we register a handler for blueprint events
         // that are sent when a container is complete, successful or not. The CountDownLatch tells when all
         // containers are complete. This is done to ensure all blueprint containers are finished before we
@@ -133,24 +139,51 @@ class BlueprintContainerRestartServiceImpl implements AutoCloseable, BlueprintCo
             @Override
             public void handleEvent(Event event) {
                 LOG.debug("handleEvent {} for bundle {}", event.getTopic(), event.getProperty(EventConstants.BUNDLE));
-                if(containerBundles.contains(event.getProperty(EventConstants.BUNDLE))) {
+                if (containerBundles.contains(event.getProperty(EventConstants.BUNDLE))) {
                     containerCreationComplete.countDown();
                 }
             }
         });
 
-        // Restart the containers top-down starting with 'forBundle'.
-        for(Bundle bundle: containerBundles) {
-            List<Object> paths = BlueprintBundleTracker.findBlueprintPaths(bundle);
+        // The Quiesce capability is a like a soft-stop, clean-stop. In the case of the Blueprint extender, in flight
+        // service calls are allowed to finish; they 're counted in and counted out, and no new calls are allowed. When
+        // there are no in flight service calls, the bundle is told to stop.The Blueprint bundle itself doesn't know this
+        // is happening which is a key design point. In the case of Blueprint, the extender ensures no new Entity
+        // Managers(EMs) are created.Then when all those EMs are closed the quiesce operation reports that it is finished.
+        //
+        // To properly restart the blueprint containers, first we have to quiesce the list of bundles, and once done, it
+        // is safe to destroy their BlueprintContainer, so no reference is retained.
+        //
+        // Mail - thread explaining Quiesce API:
+        //      https://www.mail-archive.com/dev@aries.apache.org/msg08403.html
 
-            LOG.info("Restarting blueprint container for bundle {} with paths {}", bundle, paths);
+        quiesceParticipant.quiesce(bundles -> {
+            LOG.debug("Quiesced {} bundles", bundles.length);
 
-            blueprintExtenderService.createContainer(bundle, paths);
-        }
+            if (LOG.isTraceEnabled()) {
+                for (Bundle b : bundles) {
+                    LOG.trace("Quiesced bundle {}", b);
+                }
+            }
+
+            // Destroy the containers in reverse order with 'forBundle' last, ie bottom-up in the service tree.
+            for (Bundle bundle : Lists.reverse(containerBundles)) {
+                blueprintExtenderService.destroyContainer(bundle, blueprintExtenderService.getContainer(bundle));
+            }
+
+            // Restart the containers top-down starting with 'forBundle'.
+            for (Bundle bundle : containerBundles) {
+                List<Object> paths = BlueprintBundleTracker.findBlueprintPaths(bundle);
+
+                LOG.debug("Restarting blueprint container for bundle {} with paths {}", bundle, paths);
+
+                blueprintExtenderService.createContainer(bundle, paths);
+            }
+        }, containerBundles);
 
         try {
             containerCreationComplete.await(5, TimeUnit.MINUTES);
-        } catch(InterruptedException e) {
+        } catch (InterruptedException e) {
             LOG.debug("CountDownLatch await was interrupted - returning");
             return;
         }
@@ -162,19 +195,19 @@ class BlueprintContainerRestartServiceImpl implements AutoCloseable, BlueprintCo
     }
 
     private void restartConfigModules(BundleContext bundleContext, List<Entry<String, ModuleIdentifier>> configModules) {
-        if(configModules.isEmpty()) {
+        if (configModules.isEmpty()) {
             return;
         }
 
         ServiceReference<ConfigSubsystemFacadeFactory> configFacadeFactoryRef =
                 bundleContext.getServiceReference(ConfigSubsystemFacadeFactory.class);
-        if(configFacadeFactoryRef == null) {
+        if (configFacadeFactoryRef == null) {
             LOG.debug("ConfigSubsystemFacadeFactory service reference not found");
             return;
         }
 
         ConfigSubsystemFacadeFactory configFacadeFactory = bundleContext.getService(configFacadeFactoryRef);
-        if(configFacadeFactory == null) {
+        if (configFacadeFactory == null) {
             LOG.debug("ConfigSubsystemFacadeFactory service not found");
             return;
         }
@@ -182,7 +215,7 @@ class BlueprintContainerRestartServiceImpl implements AutoCloseable, BlueprintCo
         ConfigSubsystemFacade configFacade = configFacadeFactory.createFacade("BlueprintContainerRestartService");
         try {
             restartConfigModules(configModules, configFacade);
-        } catch(Exception e) {
+        } catch (Exception e) {
             LOG.error("Error restarting config modules", e);
         } finally {
             configFacade.close();
@@ -192,8 +225,8 @@ class BlueprintContainerRestartServiceImpl implements AutoCloseable, BlueprintCo
     }
 
     private void restartConfigModules(List<Entry<String, ModuleIdentifier>> configModules,
-            ConfigSubsystemFacade configFacade) throws ParserConfigurationException, DocumentedException,
-                    ValidationException, ConflictingVersionException {
+                                      ConfigSubsystemFacade configFacade) throws ParserConfigurationException, DocumentedException,
+            ValidationException, ConflictingVersionException {
 
         Document document = XmlUtil.newDocument();
         Element dataElement = XmlUtil.createElement(document, XmlMappingConstants.DATA_KEY, Optional.<String>absent());
@@ -204,7 +237,7 @@ class BlueprintContainerRestartServiceImpl implements AutoCloseable, BlueprintCo
         Config configMapping = configFacade.getConfigMapping();
 
         ConfigRegistry configRegistryClient = new ConfigRegistryJMXClient(ManagementFactory.getPlatformMBeanServer());
-        for(Entry<String, ModuleIdentifier> entry: configModules) {
+        for (Entry<String, ModuleIdentifier> entry : configModules) {
             String moduleNamespace = entry.getKey();
             ModuleIdentifier moduleId = entry.getValue();
             try {
@@ -216,13 +249,13 @@ class BlueprintContainerRestartServiceImpl implements AutoCloseable, BlueprintCo
                 Element moduleElement = configMapping.moduleToXml(moduleNamespace, moduleId.getFactoryName(),
                         moduleId.getInstanceName(), instanceON, document);
                 modulesElement.appendChild(moduleElement);
-            } catch(InstanceNotFoundException e) {
+            } catch (InstanceNotFoundException e) {
                 LOG.warn("Error looking up config module: namespace {}, module name {}, instance {}",
                         moduleNamespace, moduleId.getFactoryName(), moduleId.getInstanceName(), e);
             }
         }
 
-        if(LOG.isDebugEnabled()) {
+        if (LOG.isDebugEnabled()) {
             LOG.debug("Pushing config xml: {}", XmlUtil.toString(dataElement));
         }
 
@@ -238,12 +271,13 @@ class BlueprintContainerRestartServiceImpl implements AutoCloseable, BlueprintCo
      * if a registered service has an associated config system Module, as determined via the presence of
      * certain service properties, the ModuleIdentifier is added to the configModules list.
      *
-     * @param bundle the bundle to traverse
+     * @param bundle           the bundle to traverse
      * @param containerBundles the current set of bundles containing blueprint containers
+     * @param configModules    the current set of bundles containing config modules
      */
     private void findDependentContainersRecursively(Bundle bundle, Set<Bundle> containerBundles,
-            List<Entry<String, ModuleIdentifier>> configModules) {
-        if(!containerBundles.add(bundle)) {
+                                                    List<Entry<String, ModuleIdentifier>> configModules) {
+        if (!containerBundles.add(bundle)) {
             // Already seen this bundle...
             return;
         }
@@ -254,9 +288,9 @@ class BlueprintContainerRestartServiceImpl implements AutoCloseable, BlueprintCo
                 possiblyAddConfigModuleIdentifier(reference, configModules);
 
                 Bundle[] usingBundles = reference.getUsingBundles();
-                if(usingBundles != null) {
-                    for(Bundle usingBundle: usingBundles) {
-                        if(blueprintExtenderService.getContainer(usingBundle) != null) {
+                if (usingBundles != null) {
+                    for (Bundle usingBundle : usingBundles) {
+                        if (blueprintExtenderService.getContainer(usingBundle) != null) {
                             findDependentContainersRecursively(usingBundle, containerBundles, configModules);
                         }
                     }
@@ -266,9 +300,9 @@ class BlueprintContainerRestartServiceImpl implements AutoCloseable, BlueprintCo
     }
 
     private void possiblyAddConfigModuleIdentifier(ServiceReference<?> reference,
-            List<Entry<String, ModuleIdentifier>> configModules) {
+                                                   List<Entry<String, ModuleIdentifier>> configModules) {
         Object moduleNamespace = reference.getProperty(CONFIG_MODULE_NAMESPACE_PROP);
-        if(moduleNamespace == null) {
+        if (moduleNamespace == null) {
             return;
         }
 
@@ -276,7 +310,7 @@ class BlueprintContainerRestartServiceImpl implements AutoCloseable, BlueprintCo
                 reference);
         String instanceName = getRequiredConfigModuleProperty(CONFIG_INSTANCE_NAME_PROP, moduleNamespace,
                 reference);
-        if(moduleName == null || instanceName == null) {
+        if (moduleName == null || instanceName == null) {
             return;
         }
 
@@ -289,9 +323,9 @@ class BlueprintContainerRestartServiceImpl implements AutoCloseable, BlueprintCo
 
     @Nullable
     private String getRequiredConfigModuleProperty(String propName, Object moduleNamespace,
-            ServiceReference<?> reference) {
+                                                   ServiceReference<?> reference) {
         Object value = reference.getProperty(propName);
-        if(value == null) {
+        if (value == null) {
             LOG.warn("OSGi service with {} property is missing property {} therefore the config module can't be restarted",
                     CONFIG_MODULE_NAMESPACE_PROP, propName);
             return null;
