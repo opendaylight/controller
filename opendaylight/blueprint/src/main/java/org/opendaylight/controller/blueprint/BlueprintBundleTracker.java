@@ -7,11 +7,9 @@
  */
 package org.opendaylight.controller.blueprint;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashSet;
@@ -19,6 +17,7 @@ import java.util.Hashtable;
 import java.util.List;
 import org.apache.aries.blueprint.NamespaceHandler;
 import org.apache.aries.blueprint.services.BlueprintExtenderService;
+import org.apache.aries.quiesce.participant.QuiesceParticipant;
 import org.apache.aries.util.AriesFrameworkUtil;
 import org.opendaylight.controller.blueprint.ext.OpendaylightNamespaceHandler;
 import org.opendaylight.controller.config.api.ConfigSystemService;
@@ -55,10 +54,12 @@ public class BlueprintBundleTracker implements BundleActivator, BundleTrackerCus
     private static final String BLUEPRINT_FLE_PATTERN = "*.xml";
     private static final long SYSTEM_BUNDLE_ID = 0;
 
-    private ServiceTracker<BlueprintExtenderService, BlueprintExtenderService> serviceTracker;
+    private ServiceTracker<BlueprintExtenderService, BlueprintExtenderService> blueprintExtenderServiceTracker;
+    private ServiceTracker<QuiesceParticipant, QuiesceParticipant> quiesceParticipantTracker;
     private BundleTracker<Bundle> bundleTracker;
     private BundleContext bundleContext;
     private volatile BlueprintExtenderService blueprintExtenderService;
+    private volatile QuiesceParticipant quiesceParticipant;
     private volatile ServiceRegistration<?> blueprintContainerRestartReg;
     private volatile BlueprintContainerRestartServiceImpl restartService;
     private volatile boolean shuttingDown;
@@ -72,6 +73,8 @@ public class BlueprintBundleTracker implements BundleActivator, BundleTrackerCus
     public void start(BundleContext context) {
         LOG.info("Starting {}", getClass().getSimpleName());
 
+        restartService = new BlueprintContainerRestartServiceImpl();
+
         bundleContext = context;
 
         registerBlueprintEventHandler(context);
@@ -80,7 +83,7 @@ public class BlueprintBundleTracker implements BundleActivator, BundleTrackerCus
 
         bundleTracker = new BundleTracker<>(context, Bundle.ACTIVE, this);
 
-        serviceTracker = new ServiceTracker<>(context, BlueprintExtenderService.class.getName(),
+        blueprintExtenderServiceTracker = new ServiceTracker<>(context, BlueprintExtenderService.class.getName(),
                 new ServiceTrackerCustomizer<BlueprintExtenderService, BlueprintExtenderService>() {
                     @Override
                     public BlueprintExtenderService addingService(
@@ -92,7 +95,8 @@ public class BlueprintBundleTracker implements BundleActivator, BundleTrackerCus
 
                         LOG.debug("Got BlueprintExtenderService");
 
-                        restartService = new BlueprintContainerRestartServiceImpl(blueprintExtenderService);
+                        restartService.setBlueprintExtenderService(blueprintExtenderService);
+
                         blueprintContainerRestartReg = context.registerService(
                                 BlueprintContainerRestartService.class.getName(), restartService, new Hashtable<>());
 
@@ -109,7 +113,33 @@ public class BlueprintBundleTracker implements BundleActivator, BundleTrackerCus
                             BlueprintExtenderService service) {
                     }
                 });
-        serviceTracker.open();
+        blueprintExtenderServiceTracker.open();
+
+        quiesceParticipantTracker = new ServiceTracker<>(context, QuiesceParticipant.class.getName(),
+                new ServiceTrackerCustomizer<QuiesceParticipant, QuiesceParticipant>() {
+                    @Override
+                    public QuiesceParticipant addingService(
+                            ServiceReference<QuiesceParticipant> reference) {
+                        quiesceParticipant = reference.getBundle().getBundleContext().getService(reference);
+
+                        LOG.debug("Got QuiesceParticipant");
+
+                        restartService.setQuiesceParticipant(quiesceParticipant);
+
+                        return quiesceParticipant;
+                    }
+
+                    @Override
+                    public void modifiedService(ServiceReference<QuiesceParticipant> reference,
+                                                QuiesceParticipant service) {
+                    }
+
+                    @Override
+                    public void removedService(ServiceReference<QuiesceParticipant> reference,
+                                               QuiesceParticipant service) {
+                    }
+                });
+        quiesceParticipantTracker.open();
     }
 
     private void registerNamespaceHandler(BundleContext context) {
@@ -132,7 +162,8 @@ public class BlueprintBundleTracker implements BundleActivator, BundleTrackerCus
     @Override
     public void stop(BundleContext context) {
         bundleTracker.close();
-        serviceTracker.close();
+        blueprintExtenderServiceTracker.close();
+        quiesceParticipantTracker.close();
 
         AriesFrameworkUtil.safeUnregisterService(eventHandlerReg);
         AriesFrameworkUtil.safeUnregisterService(namespaceReg);
@@ -161,7 +192,7 @@ public class BlueprintBundleTracker implements BundleActivator, BundleTrackerCus
     }
 
     /**
-     * Implemented from BundleActivator.
+     * Implemented from BundleTrackerCustomizer.
      */
     @Override
     public void modifiedBundle(Bundle bundle, BundleEvent event, Bundle object) {
@@ -181,7 +212,7 @@ public class BlueprintBundleTracker implements BundleActivator, BundleTrackerCus
     }
 
     /**
-     * Implemented from BundleActivator.
+     * Implemented from BundleTrackerCustomizer.
      */
     @Override
     public void removedBundle(Bundle bundle, BundleEvent event, Bundle object) {
@@ -244,7 +275,7 @@ public class BlueprintBundleTracker implements BundleActivator, BundleTrackerCus
         while(!containerBundles.isEmpty()) {
             // For each iteration of getBundlesToDestroy, as containers are destroyed, other containers become
             // eligible to be destroyed. We loop until we've destroyed them all.
-            for(Bundle bundle : getBundlesToDestroy(containerBundles)) {
+            for(Bundle bundle : Bundles.getBundlesToDestroy(containerBundles)) {
                 containerBundles.remove(bundle);
                 BlueprintContainer container = blueprintExtenderService.getContainer(bundle);
                 if(container != null) {
@@ -254,84 +285,6 @@ public class BlueprintBundleTracker implements BundleActivator, BundleTrackerCus
         }
 
         LOG.info("Shutdown of blueprint containers complete");
-    }
-
-    private List<Bundle> getBundlesToDestroy(Collection<Bundle> containerBundles) {
-        List<Bundle> bundlesToDestroy = new ArrayList<>();
-
-        // Find all container bundles that either have no registered services or whose services are no
-        // longer in use.
-        for(Bundle bundle : containerBundles) {
-            ServiceReference<?>[] references = bundle.getRegisteredServices();
-            int usage = 0;
-            if(references != null) {
-                for(ServiceReference<?> reference : references) {
-                    usage += getServiceUsage(reference);
-                }
-            }
-
-            LOG.debug("Usage for bundle {} is {}", bundle, usage);
-            if(usage == 0) {
-                bundlesToDestroy.add(bundle);
-            }
-        }
-
-        if(!bundlesToDestroy.isEmpty()) {
-            Collections.sort(bundlesToDestroy, new Comparator<Bundle>() {
-                @Override
-                public int compare(Bundle b1, Bundle b2) {
-                    return (int) (b2.getLastModified() - b1.getLastModified());
-                }
-            });
-
-            LOG.debug("Selected bundles {} for destroy (no services in use)", bundlesToDestroy);
-        } else {
-            // There's either no more container bundles or they all have services being used. For
-            // the latter it means there's either circular service usage or a service is being used
-            // by a non-container bundle. But we need to make progress so we pick the bundle with a
-            // used service with the highest service ID. Each service is assigned a monotonically
-            // increasing ID as they are registered. By picking the bundle with the highest service
-            // ID, we're picking the bundle that was (likely) started after all the others and thus
-            // is likely the safest to destroy at this point.
-
-            ServiceReference<?> ref = null;
-            for(Bundle bundle : containerBundles) {
-                ServiceReference<?>[] references = bundle.getRegisteredServices();
-                if(references == null) {
-                    continue;
-                }
-
-                for(ServiceReference<?> reference : references) {
-                    // We did check the service usage above but it's possible the usage has changed since
-                    // then,
-                    if(getServiceUsage(reference) == 0) {
-                        continue;
-                    }
-
-                    // Choose 'reference' if it has a lower service ranking or, if the rankings are equal
-                    // which is usually the case, if it has a higher service ID. For the latter the < 0
-                    // check looks backwards but that's how ServiceReference#compareTo is documented to work.
-                    if(ref == null || reference.compareTo(ref) < 0) {
-                        LOG.debug("Currently selecting bundle {} for destroy (with reference {})", bundle, reference);
-                        ref = reference;
-                    }
-                }
-            }
-
-            if(ref != null) {
-                bundlesToDestroy.add(ref.getBundle());
-            }
-
-            LOG.debug("Selected bundle {} for destroy (lowest ranking service or highest service ID)",
-                    bundlesToDestroy);
-        }
-
-        return bundlesToDestroy;
-    }
-
-    private static int getServiceUsage(ServiceReference<?> ref) {
-        Bundle[] usingBundles = ref.getUsingBundles();
-        return usingBundles != null ? usingBundles.length : 0;
     }
 
     private <T> T getOSGiService(Class<T> serviceInterface) {
