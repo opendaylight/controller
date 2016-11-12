@@ -11,7 +11,7 @@ import akka.actor.ActorRef;
 import com.google.common.base.Preconditions;
 
 /**
- * Request the ClientIdentifier from a particular actor. Response is an instance of {@link DistributedDataStoreClient}.
+ * Request the ClientIdentifier from a particular actor. Response is an instance of {@link DataStoreClient}.
  *
  * @author Robert Varga
  */

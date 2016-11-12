@@ -8,6 +8,8 @@
 package org.opendaylight.controller.cluster.access.client;
 
 import com.google.common.annotations.Beta;
+import com.google.common.base.MoreObjects;
+import com.google.common.base.MoreObjects.ToStringHelper;
 import com.google.common.base.Preconditions;
 import java.util.function.Consumer;
 import org.opendaylight.controller.cluster.access.concepts.Request;
@@ -50,5 +52,14 @@ public class ConnectionEntry implements Immutable {
 
     final long getEnqueuedTicks() {
         return enqueuedTicks;
+    }
+
+    @Override
+    public final String toString() {
+        return addToStringAttributes(MoreObjects.toStringHelper(this)).toString();
+    }
+
+    ToStringHelper addToStringAttributes(final ToStringHelper toStringHelper) {
+        return toStringHelper.add("request", request);
     }
 }
