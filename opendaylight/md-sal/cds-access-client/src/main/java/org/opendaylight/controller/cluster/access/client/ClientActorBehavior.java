@@ -16,6 +16,7 @@ import javax.annotation.Nullable;
 import javax.annotation.concurrent.GuardedBy;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FailureEnvelope;
+import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.RequestException;
 import org.opendaylight.controller.cluster.access.concepts.RequestFailure;
 import org.opendaylight.controller.cluster.access.concepts.ResponseEnvelope;
@@ -100,14 +101,19 @@ public abstract class ClientActorBehavior<T extends BackendInfo> extends
         return onCommand(command);
     }
 
+    private static long extractCookie(final WritableIdentifier id) {
+        if (id instanceof TransactionIdentifier) {
+            return ((TransactionIdentifier) id).getHistoryId().getCookie();
+        } else if (id instanceof LocalHistoryIdentifier) {
+            return ((LocalHistoryIdentifier) id).getCookie();
+        } else {
+            throw new IllegalArgumentException("Unhandled identifier " + id);
+        }
+    }
+
     private void onResponse(final ResponseEnvelope<?> response) {
-        final WritableIdentifier id = response.getMessage().getTarget();
-
-        // FIXME: this will need to be updated for other Request/Response types to extract cookie
-        Preconditions.checkArgument(id instanceof TransactionIdentifier);
-        final TransactionIdentifier txId = (TransactionIdentifier) id;
-
-        final AbstractClientConnection<T> connection = connections.get(txId.getHistoryId().getCookie());
+        final long cookie = extractCookie(response.getMessage().getTarget());
+        final AbstractClientConnection<T> connection = connections.get(cookie);
         if (connection != null) {
             connection.receiveResponse(response);
         } else {
