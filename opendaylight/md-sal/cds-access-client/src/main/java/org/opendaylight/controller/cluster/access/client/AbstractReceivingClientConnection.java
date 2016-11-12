@@ -108,7 +108,10 @@ abstract class AbstractReceivingClientConnection<T extends BackendInfo> extends 
         }
 
         lastProgress = readTime();
-        maybeEntry.get().complete(envelope.getMessage());
+
+        final TransmittedConnectionEntry entry = maybeEntry.get();
+        LOG.debug("Completing {} with {}", entry, envelope);
+        entry.complete(envelope.getMessage());
 
         // We have freed up a slot, try to transmit something
         final int toSend = remoteMaxMessages() - inflight.size();
