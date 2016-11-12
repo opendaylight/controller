@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.cluster.access.client;
 
+import com.google.common.base.MoreObjects.ToStringHelper;
+
 /**
  * A {@link ConnectionEntry} which has been transmitted. It holds additional information about the last transmission.
  *
@@ -37,4 +39,8 @@ final class TransmittedConnectionEntry extends ConnectionEntry {
         return txTicks;
     }
 
+    @Override
+    ToStringHelper addToStringAttributes(final ToStringHelper toStringHelper) {
+        return super.addToStringAttributes(toStringHelper).add("sessionId", sessionId).add("txSequence", txSequence);
+    }
 }
