@@ -19,7 +19,7 @@ import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
-import org.opendaylight.controller.cluster.databroker.actors.dds.DistributedDataStoreClient;
+import org.opendaylight.controller.cluster.databroker.actors.dds.DataStoreClient;
 import org.opendaylight.controller.cluster.databroker.actors.dds.DistributedDataStoreClientActor;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardManagerIdentifier;
@@ -73,7 +73,7 @@ public class DistributedDataStore implements DistributedDataStoreInterface, Sche
     private final CountDownLatch waitTillReadyCountDownLatch = new CountDownLatch(1);
 
     private final ClientIdentifier identifier;
-    private final DistributedDataStoreClient client;
+    private final DataStoreClient client;
 
     private final TransactionContextFactory txContextFactory;
 
