@@ -22,7 +22,7 @@ import org.opendaylight.yangtools.concepts.Identifiable;
  * @author Robert Varga
  */
 @Beta
-public interface DistributedDataStoreClient extends Identifiable<ClientIdentifier>, AutoCloseable {
+public interface DataStoreClient extends Identifiable<ClientIdentifier>, AutoCloseable {
     @Override
     @Nonnull ClientIdentifier getIdentifier();
 
