@@ -157,11 +157,11 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
     }
 
     /**
-     * Check queue timeouts and return true if a timeout has occurred.
+     * Check this queue for timeout and initiate reconnection if that happened. If the queue has not made progress
+     * in {@link #NO_PROGRESS_TIMEOUT_NANOS} nanoseconds, it will be aborted.
      *
-     * @return True if a timeout occurred
-     * @throws NoProgressException if the queue failed to make progress for an extended
-     *                             time.
+     * @param current Current behavior
+     * @return Next behavior to use
      */
     @VisibleForTesting
     final ClientActorBehavior<T> runTimer(final ClientActorBehavior<T> current) {
