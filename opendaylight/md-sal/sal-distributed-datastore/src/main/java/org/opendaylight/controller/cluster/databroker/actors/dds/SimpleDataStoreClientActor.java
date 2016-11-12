@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
 import akka.actor.Props;
+import com.google.common.base.Preconditions;
 import javax.annotation.Nonnull;
 import org.opendaylight.controller.cluster.access.client.AbstractClientActor;
 import org.opendaylight.controller.cluster.access.client.ClientActorContext;
@@ -21,21 +22,25 @@ import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
  *
  * @author Robert Varga
  */
-public final class DistributedDataStoreClientActor extends AbstractDataStoreClientActor {
-    private DistributedDataStoreClientActor(final FrontendIdentifier frontendId, final ActorContext actorContext) {
+public final class SimpleDataStoreClientActor extends AbstractDataStoreClientActor {
+    private final String shardName;
+
+    private SimpleDataStoreClientActor(final FrontendIdentifier frontendId, final ActorContext actorContext,
+            final String shardName) {
         super(frontendId, actorContext);
+        this.shardName = Preconditions.checkNotNull(shardName);
     }
 
     @Override
     AbstractDataStoreClientBehavior initialBehavior(final ClientActorContext context, final ActorContext actorContext) {
-        return new DistributedDataStoreClientBehavior(context, actorContext);
+        return new SimpleDataStoreClientBehavior(context, actorContext, shardName);
     }
 
     public static Props props(@Nonnull final MemberName memberName, @Nonnull final String storeName,
-            final ActorContext ctx) {
+            final ActorContext ctx, final String shardName) {
         final String name = "datastore-" + storeName;
         final FrontendIdentifier frontendId = FrontendIdentifier.create(memberName, FrontendType.forName(name));
-        return Props.create(DistributedDataStoreClientActor.class,
-            () -> new DistributedDataStoreClientActor(frontendId, ctx));
+        return Props.create(SimpleDataStoreClientActor.class,
+            () -> new SimpleDataStoreClientActor(frontendId, ctx, shardName));
     }
 }
