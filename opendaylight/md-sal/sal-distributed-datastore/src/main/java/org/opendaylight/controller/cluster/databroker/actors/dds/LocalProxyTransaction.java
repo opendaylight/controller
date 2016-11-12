@@ -33,6 +33,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.CursorAwareDataTreeModification;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.CursorAwareDataTreeSnapshot;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModificationCursor;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
@@ -61,6 +62,7 @@ final class LocalProxyTransaction extends AbstractProxyTransaction {
     private final TransactionIdentifier identifier;
 
     private CursorAwareDataTreeModification modification;
+    private CursorAwareDataTreeSnapshot sealedModification;
 
     LocalProxyTransaction(final ProxyHistory parent, final TransactionIdentifier identifier,
         final CursorAwareDataTreeModification modification) {
@@ -125,10 +127,12 @@ final class LocalProxyTransaction extends AbstractProxyTransaction {
     @Override
     void doSeal() {
         modification.ready();
+        sealedModification = modification;
     }
 
     DataTreeSnapshot getSnapshot() {
-        return modification;
+        Preconditions.checkState(sealedModification != null, "Proxy %s is not sealed yet", identifier);
+        return sealedModification;
     }
 
     private void applyModifyTransactionRequest(final ModifyTransactionRequest request,
