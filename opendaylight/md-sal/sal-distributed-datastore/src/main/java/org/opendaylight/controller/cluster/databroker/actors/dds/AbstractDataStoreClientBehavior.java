@@ -33,10 +33,10 @@ import org.slf4j.LoggerFactory;
  *
  * <p>
  * This class is not visible outside of this package because it breaks the actor containment. Services provided to
- * Java world outside of actor containment are captured in {@link DistributedDataStoreClient}.
+ * Java world outside of actor containment are captured in {@link DataStoreClient}.
  *
  * <p>
- * IMPORTANT: this class breaks actor containment via methods implementing {@link DistributedDataStoreClient} contract.
+ * IMPORTANT: this class breaks actor containment via methods implementing {@link DataStoreClient} contract.
  *            When touching internal state, be mindful of the execution context from which execution context, Actor
  *            or POJO, is the state being accessed or modified.
  *
@@ -59,7 +59,7 @@ import org.slf4j.LoggerFactory;
  * @author Robert Varga
  */
 abstract class AbstractDataStoreClientBehavior extends ClientActorBehavior<ShardBackendInfo>
-        implements DistributedDataStoreClient {
+        implements DataStoreClient {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractDataStoreClientBehavior.class);
 
     private final Map<LocalHistoryIdentifier, ClientLocalHistory> histories = new ConcurrentHashMap<>();
