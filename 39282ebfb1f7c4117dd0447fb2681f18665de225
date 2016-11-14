@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "3a65312a_6bed6525",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/BlueprintContainerRestartServiceImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 149,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-11-14T18:22:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3a65312a_70ed5025",
+      "revId": "39282ebfb1f7c4117dd0447fb2681f18665de225",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a65312a_308c787f",
         "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/BlueprintContainerRestartServiceImpl.java",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2016-11-14T17:15:41Z",
       "side": 1,
       "message": "space after \"stop.\"",
+      "revId": "39282ebfb1f7c4117dd0447fb2681f18665de225",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a65312a_ebbfb5fa",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/BlueprintContainerRestartServiceImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 150,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-11-14T18:22:25Z",
+      "side": 1,
+      "message": "Crap, I missed that one. Will push a new patch set",
+      "parentUuid": "3a65312a_308c787f",
       "revId": "39282ebfb1f7c4117dd0447fb2681f18665de225",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "3a65312a_cbf479f4",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/BlueprintContainerRestartServiceImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 152,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-11-14T18:22:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3a65312a_90eaac0d",
+      "revId": "39282ebfb1f7c4117dd0447fb2681f18665de225",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a65312a_90bd8c6b",
         "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/BlueprintContainerRestartServiceImpl.java",
         "patchSetId": 2
@@ -64,6 +118,24 @@
       "writtenOn": "2016-11-14T17:15:41Z",
       "side": 1,
       "message": "From the API, there\u0027s no guarantee that this method is called once atomically for all requested bundles. In fact, the BlueprintQuiesceParticipant quiesces each bundle on separate threads and notifies the callback one bundle at a time. So I think what we need to do here is use an AtomicInteger to count down the expected bundles and then destroy them when it reaches 0. \n\nI set a breakpoint in BlueprintQuiesceParticipant, which is the backing QuiesceParticipant service created by the BlueprintExtender, but it\u0027s never called on karaf shutdown so it\u0027s not clear what the intent is. BlueprintContainerImpl#quiesce is called from the BlueprintQuiesceParticipant and it does some shut down but not everything that destroy does. Again, not clear what their intent is but it seems the user still needs to call destroy to fully clean everything. This will result in 2 BlueprintEvent.DESTROYING events generated which is probably benign. Also it\u0027s not clear why quiesce() unregisters the BlueprintContainer service but destroy doesn\u0027t - that\u0027s what causes the leak. It seems like an oversight/bug - we probably should file a bug for that. For now, it seems our only recourse is to invoke the quiesce stuff to workaround the leak.\n\nBTW - nice find on the QuiesceParticipant service.",
+      "revId": "39282ebfb1f7c4117dd0447fb2681f18665de225",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a65312a_0bc5d18d",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/BlueprintContainerRestartServiceImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 172,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-11-14T18:22:25Z",
+      "side": 1,
+      "message": "\u003e So I think what we need to do here is use an AtomicInteger to count down the expected bundles and then destroy them when it reaches 0. \n\nDone\n\n\u003e I set a breakpoint in BlueprintQuiesceParticipant, which is the backing QuiesceParticipant service created by the BlueprintExtender, but it\u0027s never called on karaf shutdown so it\u0027s not clear what the intent is.\n\nI think the intent is really reload/restart of bundle. Karaf shutdown will eventually finish the process, hence regardless some services aren\u0027t un-registered, they will get freed along with the process shutting down.\n\n\u003e BlueprintContainerImpl#quiesce is called from the BlueprintQuiesceParticipant and it does some shut down but not everything that destroy does. Again, not clear what their intent is but it seems the user still needs to call destroy to fully clean everything. This will result in 2 BlueprintEvent.DESTROYING events generated which is probably benign. Also it\u0027s not clear why quiesce() unregisters the BlueprintContainer service but destroy doesn\u0027t - that\u0027s what causes the leak.\n\nYea this is quite funky/weird. If you read the whole mail-thread I put in the comment, ppl who actually maintain the code aren\u0027t sure themselves about it. Mainly because that whole code-base is convoluted? (I cannot say, it took my a bit to catch the purpose of Quiesce API).\n\n\u003e It seems like an oversight/bug - we probably should file a bug for that. \n\nProbably, I cannot say. Although I can send a mail asking about it.\n\n\u003e For now, it seems our only recourse is to invoke the quiesce stuff to workaround the leak.\n\nYep, current implementation with QuiesceParticipant seems to freed the BlueprintContainer, hence removing it properly on shutdown.",
+      "parentUuid": "3a65312a_90bd8c6b",
       "revId": "39282ebfb1f7c4117dd0447fb2681f18665de225",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
