@@ -10,6 +10,8 @@ package org.opendaylight.controller.config.util.xml;
 
 import static org.opendaylight.controller.config.util.xml.XmlMappingConstants.RPC_REPLY_KEY;
 import static org.opendaylight.controller.config.util.xml.XmlMappingConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0;
+
+import com.google.common.base.Preconditions;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -63,19 +65,29 @@ public class DocumentedException extends Exception {
     }
 
     public enum ErrorType {
-        TRANSPORT, RPC, PROTOCOL, APPLICATION;
+        TRANSPORT("transport"),
+        RPC("rpc"),
+        PROTOCOL("protocol"),
+        APPLICATION("application");
 
-        public String getTypeValue() {
-            return name();
+        private final String typeValue;
+
+        ErrorType(String typeValue) {
+            this.typeValue = Preconditions.checkNotNull(typeValue);
         }
 
-        public static ErrorType from( String text ) {
-            try {
-                return valueOf( text.toUpperCase() );
+        public String getTypeValue() {
+            return this.typeValue;
+        }
+
+        public static ErrorType from(String text) {
+            for (ErrorType e : values()) {
+               if (e.getTypeValue().equals(text.toLowerCase())) {
+                   return e;
+               }
             }
-            catch( Exception e ) {
-                return APPLICATION;
-            }
+
+            return APPLICATION;
         }
     }
 
@@ -123,19 +135,27 @@ public class DocumentedException extends Exception {
     }
 
     public enum ErrorSeverity {
-        ERROR, WARNING;
+        ERROR("error"),
+        WARNING("warning");
 
-        public String getSeverityValue() {
-            return name();
+        private final String severityValue;
+
+        ErrorSeverity(String severityValue) {
+            this.severityValue = Preconditions.checkNotNull(severityValue);
         }
 
-        public static ErrorSeverity from( String text ) {
-            try {
-                return valueOf( text.toUpperCase() );
+        public String getSeverityValue() {
+            return this.severityValue;
+        }
+
+        public static ErrorSeverity from(String text) {
+            for (ErrorSeverity e : values()) {
+                if (e.getSeverityValue().equals(text.toLowerCase())) {
+                    return e;
+                }
             }
-            catch( Exception e ) {
-                return ERROR;
-            }
+
+            return ERROR;
         }
     }
 
