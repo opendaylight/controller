@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a65312a_2bc40d5e",
+        "filename": "opendaylight/config/config-util/src/main/java/org/opendaylight/controller/config/util/xml/DocumentedException.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-11-14T18:55:51Z",
+      "side": 1,
+      "message": "Preconditions.checkNotNull()",
+      "range": {
+        "startLine": 74,
+        "startChar": 26,
+        "endLine": 74,
+        "endChar": 30
+      },
+      "revId": "25a0f0a4c1d29e6f659cdaa79a091646f1b2eb55",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a65312a_6ba565b4",
+        "filename": "opendaylight/config/config-util/src/main/java/org/opendaylight/controller/config/util/xml/DocumentedException.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-11-14T18:55:51Z",
+      "side": 1,
+      "message": "missing space",
+      "range": {
+        "startLine": 82,
+        "startChar": 14,
+        "endLine": 82,
+        "endChar": 16
+      },
+      "revId": "25a0f0a4c1d29e6f659cdaa79a091646f1b2eb55",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a65312a_8ba281ac",
+        "filename": "opendaylight/config/config-util/src/main/java/org/opendaylight/controller/config/util/xml/DocumentedException.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-11-14T18:55:51Z",
+      "side": 1,
+      "message": "missing space",
+      "range": {
+        "startLine": 83,
+        "startChar": 16,
+        "endLine": 83,
+        "endChar": 18
+      },
+      "revId": "25a0f0a4c1d29e6f659cdaa79a091646f1b2eb55",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
