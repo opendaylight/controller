@@ -63,19 +63,29 @@ public class DocumentedException extends Exception {
     }
 
     public enum ErrorType {
-        TRANSPORT, RPC, PROTOCOL, APPLICATION;
+        TRANSPORT("transport"),
+        RPC("rpc"),
+        PROTOCOL("protocol"),
+        APPLICATION("application");
+
+        private final String typeValue;
+
+        ErrorType(String typeValue) {
+            this.typeValue = typeValue;
+        }
 
         public String getTypeValue() {
-            return name();
+            return this.typeValue;
         }
 
         public static ErrorType from( String text ) {
-            try {
-                return valueOf( text.toUpperCase() );
+            for(ErrorType e : values()) {
+               if(e.getTypeValue().equals(text)) {
+                   return e;
+               }
             }
-            catch( Exception e ) {
-                return APPLICATION;
-            }
+
+            return APPLICATION;
         }
     }
 
@@ -123,19 +133,27 @@ public class DocumentedException extends Exception {
     }
 
     public enum ErrorSeverity {
-        ERROR, WARNING;
+        ERROR("error"),
+        WARNING("warning");
+
+        private final String severityValue;
+
+        ErrorSeverity(String severityValue) {
+            this.severityValue = severityValue;
+        }
 
         public String getSeverityValue() {
-            return name();
+            return this.severityValue;
         }
 
         public static ErrorSeverity from( String text ) {
-            try {
-                return valueOf( text.toUpperCase() );
+            for(ErrorSeverity e : values()) {
+                if(e.getSeverityValue().equals(text)) {
+                    return e;
+                }
             }
-            catch( Exception e ) {
-                return ERROR;
-            }
+
+            return ERROR;
         }
     }
 
