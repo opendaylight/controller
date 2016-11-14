@@ -139,6 +139,24 @@
       "revId": "39282ebfb1f7c4117dd0447fb2681f18665de225",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a65312a_6be1e5cf",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/BlueprintContainerRestartServiceImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 172,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-11-14T19:27:46Z",
+      "side": 1,
+      "message": "yeah I read that mail chain - seems the Aries community is fuzzy on it.\n\nThe purpose of the quiesce stuff is clean stop of bundles which *should* include karaf shut down so I\u0027m confused as to why it doesn\u0027t get invoked. I wonder if it somehow gets invoked when updating a bundle in service...",
+      "parentUuid": "3a65312a_0bc5d18d",
+      "revId": "39282ebfb1f7c4117dd0447fb2681f18665de225",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
