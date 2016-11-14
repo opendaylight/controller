@@ -16,6 +16,24 @@
       "revId": "4ce282f9d5d4772449e4f2d615668fa077726e87",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a65312a_90890c29",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/AbstractProxyTransaction.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-11-14T16:03:16Z",
+      "side": 1,
+      "message": "no, the naming here is a bit confusing:\n- abort() is called instead of submit (from user)\n- abort(VotingFuture) is called during 3PC (from coordinator)",
+      "parentUuid": "3a65312a_c59aa862",
+      "revId": "4ce282f9d5d4772449e4f2d615668fa077726e87",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
