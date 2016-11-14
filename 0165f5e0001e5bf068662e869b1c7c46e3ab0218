@@ -16,6 +16,24 @@
       "revId": "0165f5e0001e5bf068662e869b1c7c46e3ab0218",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a65312a_0b6e712f",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/BlueprintContainerRestartServiceImpl.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 296,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-11-14T21:06:54Z",
+      "side": 1,
+      "message": "Sorry about that, I moved back to previous implementation. Got confused with on-going patch in Topoprocessing that is also the culprit for the reported bug: https://git.opendaylight.org/gerrit/#/c/48283/",
+      "parentUuid": "3a65312a_8b2c4104",
+      "revId": "0165f5e0001e5bf068662e869b1c7c46e3ab0218",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
