@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a65312a_c58468d6",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/ComponentProcessor.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-11-14T14:19:39Z",
+      "side": 1,
+      "message": "Minor thing but this should be \u0027else if\u0027.",
+      "revId": "5136245f42fece2607d14276f226a67d86f6973a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
