@@ -16,6 +16,24 @@
       "revId": "5136245f42fece2607d14276f226a67d86f6973a",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a65312a_454fb8bd",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/ComponentProcessor.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-11-14T14:23:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3a65312a_c58468d6",
+      "revId": "5136245f42fece2607d14276f226a67d86f6973a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
