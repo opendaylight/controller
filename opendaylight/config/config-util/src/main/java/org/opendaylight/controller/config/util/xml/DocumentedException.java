@@ -65,7 +65,7 @@ public class DocumentedException extends Exception {
     public enum ErrorType {
         TRANSPORT, RPC, PROTOCOL, APPLICATION;
 
-        public String getTagValue() {
+        public String getTypeValue() {
             return name();
         }
 
@@ -125,7 +125,7 @@ public class DocumentedException extends Exception {
     public enum ErrorSeverity {
         ERROR, WARNING;
 
-        public String getTagValue() {
+        public String getSeverityValue() {
             return name();
         }
 
@@ -285,9 +285,9 @@ public class DocumentedException extends Exception {
             Node rpcError = doc.createElementNS( URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0, RPC_ERROR );
             rpcReply.appendChild( rpcError );
 
-            rpcError.appendChild( createTextNode( doc, ERROR_TYPE, getErrorType().getTagValue() ) );
+            rpcError.appendChild( createTextNode( doc, ERROR_TYPE, getErrorType().getTypeValue() ) );
             rpcError.appendChild( createTextNode( doc, ERROR_TAG, getErrorTag().getTagValue() ) );
-            rpcError.appendChild( createTextNode( doc, ERROR_SEVERITY, getErrorSeverity().getTagValue() ) );
+            rpcError.appendChild( createTextNode( doc, ERROR_SEVERITY, getErrorSeverity().getSeverityValue() ) );
             rpcError.appendChild( createTextNode( doc, ERROR_MESSAGE, getLocalizedMessage() ) );
 
             Map<String, String> errorInfoMap = getErrorInfo();
