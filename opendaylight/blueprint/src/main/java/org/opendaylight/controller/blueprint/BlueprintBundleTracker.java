@@ -18,6 +18,7 @@ import java.util.Hashtable;
 import java.util.List;
 import org.apache.aries.blueprint.NamespaceHandler;
 import org.apache.aries.blueprint.services.BlueprintExtenderService;
+import org.apache.aries.quiesce.participant.QuiesceParticipant;
 import org.apache.aries.util.AriesFrameworkUtil;
 import org.opendaylight.controller.blueprint.ext.OpendaylightNamespaceHandler;
 import org.opendaylight.controller.config.api.ConfigSystemService;
@@ -54,10 +55,12 @@ public class BlueprintBundleTracker implements BundleActivator, BundleTrackerCus
     private static final String BLUEPRINT_FLE_PATTERN = "*.xml";
     private static final long SYSTEM_BUNDLE_ID = 0;
 
-    private ServiceTracker<BlueprintExtenderService, BlueprintExtenderService> serviceTracker;
+    private ServiceTracker<BlueprintExtenderService, BlueprintExtenderService> blueprintExtenderServiceTracker;
+    private ServiceTracker<QuiesceParticipant, QuiesceParticipant> quiesceParticipantTracker;
     private BundleTracker<Bundle> bundleTracker;
     private BundleContext bundleContext;
     private volatile BlueprintExtenderService blueprintExtenderService;
+    private volatile QuiesceParticipant quiesceParticipant;
     private volatile ServiceRegistration<?> blueprintContainerRestartReg;
     private volatile BlueprintContainerRestartServiceImpl restartService;
     private volatile boolean shuttingDown;
@@ -71,6 +74,8 @@ public class BlueprintBundleTracker implements BundleActivator, BundleTrackerCus
     public void start(BundleContext context) {
         LOG.info("Starting {}", getClass().getSimpleName());
 
+        restartService = new BlueprintContainerRestartServiceImpl();
+
         bundleContext = context;
 
         registerBlueprintEventHandler(context);
@@ -79,7 +84,7 @@ public class BlueprintBundleTracker implements BundleActivator, BundleTrackerCus
 
         bundleTracker = new BundleTracker<>(context, Bundle.ACTIVE, this);
 
-        serviceTracker = new ServiceTracker<>(context, BlueprintExtenderService.class.getName(),
+        blueprintExtenderServiceTracker = new ServiceTracker<>(context, BlueprintExtenderService.class.getName(),
                 new ServiceTrackerCustomizer<BlueprintExtenderService, BlueprintExtenderService>() {
                     @Override
                     public BlueprintExtenderService addingService(
@@ -91,7 +96,8 @@ public class BlueprintBundleTracker implements BundleActivator, BundleTrackerCus
 
                         LOG.debug("Got BlueprintExtenderService");
 
-                        restartService = new BlueprintContainerRestartServiceImpl(blueprintExtenderService);
+                        restartService.setBlueprintExtenderService(blueprintExtenderService);
+
                         blueprintContainerRestartReg = context.registerService(
                                 BlueprintContainerRestartService.class.getName(), restartService, new Hashtable<>());
 
@@ -108,7 +114,33 @@ public class BlueprintBundleTracker implements BundleActivator, BundleTrackerCus
                             BlueprintExtenderService service) {
                     }
                 });
-        serviceTracker.open();
+        blueprintExtenderServiceTracker.open();
+
+        quiesceParticipantTracker = new ServiceTracker<>(context, QuiesceParticipant.class.getName(),
+                new ServiceTrackerCustomizer<QuiesceParticipant, QuiesceParticipant>() {
+                    @Override
+                    public QuiesceParticipant addingService(
+                            ServiceReference<QuiesceParticipant> reference) {
+                        quiesceParticipant = reference.getBundle().getBundleContext().getService(reference);
+
+                        LOG.debug("Got QuiesceParticipant");
+
+                        restartService.setQuiesceParticipant(quiesceParticipant);
+
+                        return quiesceParticipant;
+                    }
+
+                    @Override
+                    public void modifiedService(ServiceReference<QuiesceParticipant> reference,
+                                                QuiesceParticipant service) {
+                    }
+
+                    @Override
+                    public void removedService(ServiceReference<QuiesceParticipant> reference,
+                                               QuiesceParticipant service) {
+                    }
+                });
+        quiesceParticipantTracker.open();
     }
 
     private void registerNamespaceHandler(BundleContext context) {
@@ -131,7 +163,8 @@ public class BlueprintBundleTracker implements BundleActivator, BundleTrackerCus
     @Override
     public void stop(BundleContext context) {
         bundleTracker.close();
-        serviceTracker.close();
+        blueprintExtenderServiceTracker.close();
+        quiesceParticipantTracker.close();
 
         AriesFrameworkUtil.safeUnregisterService(eventHandlerReg);
         AriesFrameworkUtil.safeUnregisterService(namespaceReg);
@@ -160,7 +193,7 @@ public class BlueprintBundleTracker implements BundleActivator, BundleTrackerCus
     }
 
     /**
-     * Implemented from BundleActivator.
+     * Implemented from BundleTrackerCustomizer.
      */
     @Override
     public void modifiedBundle(Bundle bundle, BundleEvent event, Bundle object) {
@@ -180,7 +213,7 @@ public class BlueprintBundleTracker implements BundleActivator, BundleTrackerCus
     }
 
     /**
-     * Implemented from BundleActivator.
+     * Implemented from BundleTrackerCustomizer.
      */
     @Override
     public void removedBundle(Bundle bundle, BundleEvent event, Bundle object) {
