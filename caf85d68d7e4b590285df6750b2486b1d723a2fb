@@ -210,6 +210,24 @@
     },
     {
       "key": {
+        "uuid": "3a65312a_467dfbb0",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/FrontendTransaction.java",
+        "patchSetId": 64
+      },
+      "lineNbr": 349,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-11-15T17:38:10Z",
+      "side": 1,
+      "message": "yeah I noticed that later. But I think it\u0027s better to explicitly wrap it in a RuntimeRequestException to honor the throws declaration in the method. Not a big deal though.",
+      "parentUuid": "3a65312a_263b9fd2",
+      "revId": "caf85d68d7e4b590285df6750b2486b1d723a2fb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a65312a_d1d266d1",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/LeaderFrontendState.java",
         "patchSetId": 64
