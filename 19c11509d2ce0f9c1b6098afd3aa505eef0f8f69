@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a65312a_a30681cc",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-11-15T13:30:15Z",
+      "side": 1,
+      "message": "you meant synchronized? You added a synchronized block around the access of DATE_FORMAT.",
+      "range": {
+        "startLine": 25,
+        "startChar": 3,
+        "endLine": 25,
+        "endChar": 17
+      },
+      "revId": "19c11509d2ce0f9c1b6098afd3aa505eef0f8f69",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a65312a_03f5b5ca",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-11-15T13:30:15Z",
+      "side": 1,
+      "message": "Right, that\u0027s the part I\u0027m the less sure about. Is Findbugs reporting this? Because to me it seems we\u0027re granting some permission although it is unused.",
+      "range": {
+        "startLine": 29,
+        "startChar": 0,
+        "endLine": 30,
+        "endChar": 50
+      },
+      "revId": "19c11509d2ce0f9c1b6098afd3aa505eef0f8f69",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a65312a_c3ce1db4",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/AbstractThreePhaseCommitMessage.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-11-15T13:30:15Z",
+      "side": 1,
+      "message": "I would rename the string as well, so it\u0027s consistent. Same applies everywhere in that patch. At many instances the transactionID was renamed, so it should be updated appropriately.",
+      "range": {
+        "startLine": 52,
+        "startChar": 59,
+        "endLine": 52,
+        "endChar": 60
+      },
+      "revId": "19c11509d2ce0f9c1b6098afd3aa505eef0f8f69",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a65312a_836265ab",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/config/yang/config/actor_system_provider/impl/ActorSystemProviderImpl.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-11-15T13:30:15Z",
+      "side": 1,
+      "message": "Any good reason to grant the BundleDelegatingClassLoader privileged? I don\u0027t see any use of AccessController.checkPermission() hence wondering if that pattern is fully there yet.",
+      "range": {
+        "startLine": 45,
+        "startChar": 56,
+        "endLine": 46,
+        "endChar": 65
+      },
+      "revId": "19c11509d2ce0f9c1b6098afd3aa505eef0f8f69",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
