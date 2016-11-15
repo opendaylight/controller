@@ -8,6 +8,7 @@
 package org.opendaylight.controller.blueprint;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import java.lang.management.ManagementFactory;
@@ -23,11 +24,13 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import javax.annotation.Nullable;
 import javax.management.InstanceNotFoundException;
 import javax.management.ObjectName;
 import javax.xml.parsers.ParserConfigurationException;
 import org.apache.aries.blueprint.services.BlueprintExtenderService;
+import org.apache.aries.quiesce.participant.QuiesceParticipant;
 import org.apache.aries.util.AriesFrameworkUtil;
 import org.opendaylight.controller.config.api.ConfigRegistry;
 import org.opendaylight.controller.config.api.ConflictingVersionException;
@@ -68,10 +71,16 @@ class BlueprintContainerRestartServiceImpl implements AutoCloseable, BlueprintCo
 
     private final ExecutorService restartExecutor = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder()
             .setDaemon(true).setNameFormat("BlueprintContainerRestartService").build());
-    private final BlueprintExtenderService blueprintExtenderService;
 
-    BlueprintContainerRestartServiceImpl(BlueprintExtenderService blueprintExtenderService) {
+    private BlueprintExtenderService blueprintExtenderService;
+    private QuiesceParticipant quiesceParticipant;
+
+    void setBlueprintExtenderService(final BlueprintExtenderService blueprintExtenderService) {
         this.blueprintExtenderService = blueprintExtenderService;
+    }
+
+    void setQuiesceParticipant(final QuiesceParticipant quiesceParticipant) {
+        this.quiesceParticipant = quiesceParticipant;
     }
 
     public void restartContainer(final Bundle bundle, final List<Object> paths) {
@@ -99,6 +108,9 @@ class BlueprintContainerRestartServiceImpl implements AutoCloseable, BlueprintCo
     }
 
     private void restartContainerAndDependentsInternal(Bundle forBundle) {
+        Preconditions.checkNotNull(blueprintExtenderService);
+        Preconditions.checkNotNull(quiesceParticipant);
+
         // We use a LinkedHashSet to preserve insertion order as we walk the service usage hierarchy.
         Set<Bundle> containerBundlesSet = new LinkedHashSet<>();
         List<Entry<String, ModuleIdentifier>> configModules = new ArrayList<>();
@@ -108,11 +120,6 @@ class BlueprintContainerRestartServiceImpl implements AutoCloseable, BlueprintCo
 
         LOG.info("Restarting blueprint containers for bundle {} and its dependent bundles {}", forBundle,
                 containerBundles.subList(1, containerBundles.size()));
-
-        // Destroy the containers in reverse order with 'forBundle' last, ie bottom-up in the service tree.
-        for (Bundle bundle: Lists.reverse(containerBundles)) {
-            blueprintExtenderService.destroyContainer(bundle, blueprintExtenderService.getContainer(bundle));
-        }
 
         // The blueprint containers are created asynchronously so we register a handler for blueprint events
         // that are sent when a container is complete, successful or not. The CountDownLatch tells when all
@@ -126,14 +133,28 @@ class BlueprintContainerRestartServiceImpl implements AutoCloseable, BlueprintCo
             }
         });
 
-        // Restart the containers top-down starting with 'forBundle'.
-        for (Bundle bundle: containerBundles) {
-            List<Object> paths = BlueprintBundleTracker.findBlueprintPaths(bundle);
+        // The Quiesce capability is a like a soft-stop, clean-stop. In the case of the Blueprint extender, in flight
+        // service calls are allowed to finish; they're counted in and counted out, and no new calls are allowed. When
+        // there are no in flight service calls, the bundle is told to stop. The Blueprint bundle itself doesn't know this
+        // is happening which is a key design point. In the case of Blueprint, the extender ensures no new Entity
+        // Managers(EMs) are created. Then when all those EMs are closed the quiesce operation reports that it is finished.
+        //
+        // To properly restart the blueprint containers, first we have to quiesce the list of bundles, and once done, it
+        // is safe to destroy their BlueprintContainer, so no reference is retained.
+        //
+        // Mail - thread explaining Quiesce API:
+        //      https://www.mail-archive.com/dev@aries.apache.org/msg08403.html
 
-            LOG.info("Restarting blueprint container for bundle {} with paths {}", bundle, paths);
-
-            blueprintExtenderService.createContainer(bundle, paths);
-        }
+        final AtomicInteger quiescedBundleCountDown = new AtomicInteger(containerBundles.size());
+        quiesceParticipant.quiesce(bundles -> {
+            for (Bundle b : bundles) {
+                LOG.debug("Quiesced bundle {}", b);
+                if (quiescedBundleCountDown.decrementAndGet() == 0) {
+                    LOG.debug("All Bundle were quiesced, destroying blueprint containers");
+                    restartContainers(containerBundles);
+                }
+            }
+        }, containerBundles);
 
         try {
             containerCreationComplete.await(5, TimeUnit.MINUTES);
@@ -146,6 +167,21 @@ class BlueprintContainerRestartServiceImpl implements AutoCloseable, BlueprintCo
 
         // Now restart any associated config system Modules.
         restartConfigModules(forBundle.getBundleContext(), configModules);
+    }
+
+    private void restartContainers(List<Bundle> containerBundles) {
+        // Destroy the containers in reverse order with 'forBundle' last, ie bottom-up in the service tree.
+        Lists.reverse(containerBundles).forEach(bundle ->
+                blueprintExtenderService.destroyContainer(bundle, blueprintExtenderService.getContainer(bundle)));
+
+        // Restart the containers top-down starting with 'forBundle'.
+        containerBundles.forEach(bundle -> {
+            List<Object> paths = BlueprintBundleTracker.findBlueprintPaths(bundle);
+
+            LOG.info("Restarting blueprint container for bundle {} with paths {}", bundle, paths);
+
+            blueprintExtenderService.createContainer(bundle, paths);
+        });
     }
 
     private void restartConfigModules(BundleContext bundleContext, List<Entry<String,
@@ -193,7 +229,7 @@ class BlueprintContainerRestartServiceImpl implements AutoCloseable, BlueprintCo
         Config configMapping = configFacade.getConfigMapping();
 
         ConfigRegistry configRegistryClient = new ConfigRegistryJMXClient(ManagementFactory.getPlatformMBeanServer());
-        for (Entry<String, ModuleIdentifier> entry: configModules) {
+        for (Entry<String, ModuleIdentifier> entry : configModules) {
             String moduleNamespace = entry.getKey();
             ModuleIdentifier moduleId = entry.getValue();
             try {
@@ -229,6 +265,7 @@ class BlueprintContainerRestartServiceImpl implements AutoCloseable, BlueprintCo
      *
      * @param bundle the bundle to traverse
      * @param containerBundles the current set of bundles containing blueprint containers
+     * @param configModules the current set of bundles containing config modules
      */
     private void findDependentContainersRecursively(Bundle bundle, Set<Bundle> containerBundles,
             List<Entry<String, ModuleIdentifier>> configModules) {
