@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a65312a_464a1bad",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/test/java/org/opendaylight/controller/md/sal/binding/test/AbstractSchemaAwareTest.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2016-11-15T16:37:15Z",
+      "side": 1,
+      "message": "This probably won\u0027t work as-is proposed here with https://git.opendaylight.org/gerrit/#/c/47770/ .. let\u0027s get that merged, then rebase and adjust this in function.",
+      "revId": "76027cb35e4849d31700874a0ddc198676f0891d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
