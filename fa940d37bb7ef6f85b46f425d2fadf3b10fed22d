@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a65312a_634c6971",
+        "filename": "opendaylight/config/config-util/src/main/java/org/opendaylight/controller/config/util/xml/DocumentedException.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-11-15T12:48:53Z",
+      "side": 1,
+      "message": "Not a big deal but, for efficiency, you could store text.toLowerCase() in a var outside the loop so it\u0027s only calculated once.",
+      "revId": "fa940d37bb7ef6f85b46f425d2fadf3b10fed22d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a65312a_4347ad4b",
+        "filename": "opendaylight/config/config-util/src/main/java/org/opendaylight/controller/config/util/xml/DocumentedException.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 170,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-11-15T12:48:53Z",
+      "side": 1,
+      "message": "Same as above.",
+      "revId": "fa940d37bb7ef6f85b46f425d2fadf3b10fed22d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
