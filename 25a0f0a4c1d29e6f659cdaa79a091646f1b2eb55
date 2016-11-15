@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "3a65312a_23143143",
+        "filename": "opendaylight/config/config-util/src/main/java/org/opendaylight/controller/config/util/xml/DocumentedException.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 2046
+      },
+      "writtenOn": "2016-11-15T12:33:04Z",
+      "side": 1,
+      "message": "Google told [0] me that \"You cannot invoke an enum constructor yourself.\"\nThat is why I do not require .toLowerCase() here.\n\n[0] https://docs.oracle.com/javase/tutorial/java/javaOO/enum.html",
+      "parentUuid": "3a65312a_912c6e04",
+      "range": {
+        "startLine": 74,
+        "startChar": 26,
+        "endLine": 74,
+        "endChar": 30
+      },
+      "revId": "25a0f0a4c1d29e6f659cdaa79a091646f1b2eb55",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a65312a_6ba565b4",
         "filename": "opendaylight/config/config-util/src/main/java/org/opendaylight/controller/config/util/xml/DocumentedException.java",
         "patchSetId": 1
