@@ -96,6 +96,75 @@
     },
     {
       "key": {
+        "uuid": "3a65312a_23271114",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/ConcurrentDOMDataBroker.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 204,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-11-15T14:26:21Z",
+      "side": 1,
+      "message": "u",
+      "range": {
+        "startLine": 204,
+        "startChar": 64,
+        "endLine": 204,
+        "endChar": 65
+      },
+      "revId": "19c11509d2ce0f9c1b6098afd3aa505eef0f8f69",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a65312a_0322d500",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/LocalTransactionChain.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-11-15T14:26:21Z",
+      "side": 1,
+      "message": "Argument",
+      "range": {
+        "startLine": 87,
+        "startChar": 27,
+        "endLine": 87,
+        "endChar": 32
+      },
+      "revId": "19c11509d2ce0f9c1b6098afd3aa505eef0f8f69",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a65312a_632109fb",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/LocalTransactionFactoryImpl.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-11-15T14:26:21Z",
+      "side": 1,
+      "message": "Argument",
+      "range": {
+        "startLine": 78,
+        "startChar": 27,
+        "endLine": 78,
+        "endChar": 32
+      },
+      "revId": "19c11509d2ce0f9c1b6098afd3aa505eef0f8f69",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a65312a_c3ce1db4",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/AbstractThreePhaseCommitMessage.java",
         "patchSetId": 4
@@ -178,6 +247,30 @@
       "side": 1,
       "message": "It would be necessary if a Security",
       "parentUuid": "3a65312a_836265ab",
+      "range": {
+        "startLine": 45,
+        "startChar": 56,
+        "endLine": 46,
+        "endChar": 65
+      },
+      "revId": "19c11509d2ce0f9c1b6098afd3aa505eef0f8f69",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a65312a_c3873dd6",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/config/yang/config/actor_system_provider/impl/ActorSystemProviderImpl.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-11-15T14:26:21Z",
+      "side": 1,
+      "message": "... Manager is enabled in the JVM",
+      "parentUuid": "3a65312a_a3d4c120",
       "range": {
         "startLine": 45,
         "startChar": 56,
