@@ -22,6 +22,30 @@
       "revId": "79748b468fbb8ffadb8d63f19850c56b2e88283e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a65312a_06aca334",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RemoteRpcImplementation.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-11-15T17:18:30Z",
+      "side": 0,
+      "message": "Actually \u0027error\u0027 is null in this code path - hence the FB warning about passing null.",
+      "parentUuid": "3a65312a_f2734be5",
+      "range": {
+        "startLine": 66,
+        "startChar": 104,
+        "endLine": 66,
+        "endChar": 110
+      },
+      "revId": "79748b468fbb8ffadb8d63f19850c56b2e88283e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
