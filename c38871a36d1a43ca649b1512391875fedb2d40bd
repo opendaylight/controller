@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a65312a_839f05b4",
+        "filename": "opendaylight/md-sal/cds-access-client/src/main/java/org/opendaylight/controller/cluster/access/client/AbstractClientConnection.java",
+        "patchSetId": 58
+      },
+      "lineNbr": 203,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-11-15T13:31:45Z",
+      "side": 1,
+      "message": "Document the condition to return null so we\u0027re not lying in the FB warning justification :)",
+      "revId": "c38871a36d1a43ca649b1512391875fedb2d40bd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
