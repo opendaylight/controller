@@ -22,6 +22,30 @@
       "revId": "981c7e7c3b2224b6c650acaeac94a27654365200",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a65312a_c3dae0e8",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/BlueprintContainerRestartServiceImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-11-15T12:07:46Z",
+      "side": 1,
+      "message": "I can change it.",
+      "parentUuid": "3a65312a_2363d4b2",
+      "range": {
+        "startLine": 65,
+        "startChar": 54,
+        "endLine": 65,
+        "endChar": 60
+      },
+      "revId": "981c7e7c3b2224b6c650acaeac94a27654365200",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
