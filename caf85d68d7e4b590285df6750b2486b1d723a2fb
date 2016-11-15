@@ -1,0 +1,191 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a65312a_71643249",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/FrontendTransaction.java",
+        "patchSetId": 64
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-11-15T11:56:33Z",
+      "side": 1,
+      "message": "Should at least have a message. Also throw specific exception to be consistent.",
+      "revId": "caf85d68d7e4b590285df6750b2486b1d723a2fb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a65312a_11a4dea4",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/FrontendTransaction.java",
+        "patchSetId": 64
+      },
+      "lineNbr": 216,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-11-15T11:56:33Z",
+      "side": 1,
+      "message": "Remove TODO. Don\u0027t we want to recordAndSendFailure?",
+      "revId": "caf85d68d7e4b590285df6750b2486b1d723a2fb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a65312a_11cb3e54",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/FrontendTransaction.java",
+        "patchSetId": 64
+      },
+      "lineNbr": 246,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-11-15T11:56:33Z",
+      "side": 1,
+      "message": "Why do we block on abort and why do we throw RuntimeException back to the caller instead of throwing RequestException as the method signature declares?",
+      "revId": "caf85d68d7e4b590285df6750b2486b1d723a2fb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a65312a_f12162fd",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/FrontendTransaction.java",
+        "patchSetId": 64
+      },
+      "lineNbr": 268,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-11-15T11:56:33Z",
+      "side": 1,
+      "message": "Shouldn\u0027t we null out readyCohort as we do in the other failed methods? Also don\u0027t we want to recordAndSendFailure?",
+      "revId": "caf85d68d7e4b590285df6750b2486b1d723a2fb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a65312a_11405ea4",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/FrontendTransaction.java",
+        "patchSetId": 64
+      },
+      "lineNbr": 287,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-11-15T11:56:33Z",
+      "side": 1,
+      "message": "Remove TODO",
+      "revId": "caf85d68d7e4b590285df6750b2486b1d723a2fb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a65312a_514ad6c5",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/FrontendTransaction.java",
+        "patchSetId": 64
+      },
+      "lineNbr": 306,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-11-15T11:56:33Z",
+      "side": 1,
+      "message": "Remove TODO",
+      "revId": "caf85d68d7e4b590285df6750b2486b1d723a2fb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a65312a_b1024a6d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/FrontendTransaction.java",
+        "patchSetId": 64
+      },
+      "lineNbr": 326,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-11-15T11:56:33Z",
+      "side": 1,
+      "message": "Remove TODO",
+      "revId": "caf85d68d7e4b590285df6750b2486b1d723a2fb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a65312a_f1ccc263",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/FrontendTransaction.java",
+        "patchSetId": 64
+      },
+      "lineNbr": 349,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-11-15T11:56:33Z",
+      "side": 1,
+      "message": "Shouldn\u0027t we return a failure response instead of throwing an unchecked exception?",
+      "revId": "caf85d68d7e4b590285df6750b2486b1d723a2fb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a65312a_d1d266d1",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/LeaderFrontendState.java",
+        "patchSetId": 64
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-11-15T11:56:33Z",
+      "side": 1,
+      "message": "\". this \" -\u003e \". This \"",
+      "revId": "caf85d68d7e4b590285df6750b2486b1d723a2fb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a65312a_11033e43",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/LocalFrontendHistory.java",
+        "patchSetId": 64
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-11-15T11:56:33Z",
+      "side": 1,
+      "message": "class javadoc?",
+      "revId": "caf85d68d7e4b590285df6750b2486b1d723a2fb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a65312a_318f5ace",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/StandaloneFrontendHistory.java",
+        "patchSetId": 64
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-11-15T11:56:33Z",
+      "side": 1,
+      "message": "This class isn\u0027t abstract...",
+      "revId": "caf85d68d7e4b590285df6750b2486b1d723a2fb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
