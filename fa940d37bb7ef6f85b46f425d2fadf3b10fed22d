@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "3a65312a_c33f3dd5",
+        "filename": "opendaylight/config/config-util/src/main/java/org/opendaylight/controller/config/util/xml/DocumentedException.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-11-15T14:57:05Z",
+      "side": 1,
+      "message": "There is also String.equalsIgnoreCase(), which I think would work.",
+      "parentUuid": "3a65312a_634c6971",
+      "revId": "fa940d37bb7ef6f85b46f425d2fadf3b10fed22d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a65312a_4347ad4b",
         "filename": "opendaylight/config/config-util/src/main/java/org/opendaylight/controller/config/util/xml/DocumentedException.java",
         "patchSetId": 4
