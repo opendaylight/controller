@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a65312a_972a9b7c",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/BlueprintContainerRestartServiceImpl.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 157,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-11-16T11:04:11Z",
+      "side": 1,
+      "message": "The intent is to destroy the bundles one at a time in reverse order, which we do via \"Lists.reverse(containerBundles).forEach...\" in restartContainers.  Unfortunately we\u0027re losing the ordering and synchronous behavior here. So we need to call quiesce and destroy  synchronously in reverse order.\n\nSorry I didn\u0027t realize that before - it\u0027s been a while since I\u0027ve looked at this code.",
+      "revId": "d8e1de46653ecf9bb82bdba89f47979460267fb9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
