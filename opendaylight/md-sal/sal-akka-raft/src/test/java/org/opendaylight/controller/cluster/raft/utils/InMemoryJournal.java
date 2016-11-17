@@ -109,7 +109,7 @@ public class InMemoryJournal extends AsyncWriteJournal {
         if (journalMap != null) {
             synchronized (journalMap) {
                 for (Map.Entry<Long, Object> e: journalMap.entrySet()) {
-                    builder.append("\n    ").append(e.getKey()).append(" = ").append(e.getValue());
+                    builder.append("\n    ").append(e.getKey()).append(" = ").append(deserialize(e.getValue()));
                 }
             }
         }

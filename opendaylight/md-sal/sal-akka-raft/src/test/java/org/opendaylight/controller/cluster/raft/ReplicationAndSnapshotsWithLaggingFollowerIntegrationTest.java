@@ -297,6 +297,10 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         // Configure follower 2 to drop messages and lag.
         follower2Actor.underlyingActor().startDropMessages(AppendEntries.class);
 
+        // Sleep for at least the election timeout interval so follower 2 is deemed inactive by the leader.
+        Uninterruptibles.sleepUninterruptibly(leaderConfigParams.getElectionTimeOutInterval().toMillis() + 5,
+                TimeUnit.MILLISECONDS);
+
         // Send 5 payloads - the second should cause a leader snapshot.
         final MockPayload payload2 = sendPayloadData(leaderActor, "two");
         final MockPayload payload3 = sendPayloadData(leaderActor, "three");
@@ -316,10 +320,6 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
 
         testLog.info("testLeaderSnapshotWithLaggingFollowerCaughtUpViaInstallSnapshot: "
                 + "sending 1 more payload to trigger second snapshot");
-
-        // Sleep for at least the election timeout interval so follower 2 is deemed inactive by the leader.
-        Uninterruptibles.sleepUninterruptibly(leaderConfigParams.getElectionTimeOutInterval().toMillis() + 5,
-                TimeUnit.MILLISECONDS);
 
         // Send another payload to trigger a second leader snapshot.
         MockPayload payload7 = sendPayloadData(leaderActor, "seven");
@@ -402,6 +402,10 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
 
         follower2Actor.underlyingActor().startDropMessages(AppendEntries.class);
 
+        // Sleep for at least the election timeout interval so follower 2 is deemed inactive by the leader.
+        Uninterruptibles.sleepUninterruptibly(leaderConfigParams.getElectionTimeOutInterval().toMillis() + 5,
+                TimeUnit.MILLISECONDS);
+
         // Send a payload with a large relative size but not enough to trigger a snapshot.
         MockPayload payload1 = sendPayloadData(leaderActor, "one", 500);
 
@@ -462,16 +466,12 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         verifyNoSubsequentSnapshotAfterMemoryThresholdExceededSnapshot();
 
         // Sends 3 payloads with indexes 4, 5 and 6.
-        verifyReplicationsAndSnapshotWithNoLaggingAfterInstallSnapshot();
+        long leadersSnapshotIndexOnRecovery = verifyReplicationsAndSnapshotWithNoLaggingAfterInstallSnapshot();
 
         // Recover the leader from persistence and verify.
         long leadersLastIndexOnRecovery = 6;
 
-        // The leader's last snapshot was triggered by index 4 so the last applied index in the snapshot was 3.
-        long leadersSnapshotIndexOnRecovery = 3;
-
-        // The recovered journal should have 3 entries starting at index 4.
-        long leadersFirstJournalEntryIndexOnRecovery = 4;
+        long leadersFirstJournalEntryIndexOnRecovery = leadersSnapshotIndexOnRecovery + 1;
 
         verifyLeaderRecoveryAfterReinstatement(leadersLastIndexOnRecovery, leadersSnapshotIndexOnRecovery,
                 leadersFirstJournalEntryIndexOnRecovery);
@@ -528,7 +528,7 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
      */
     private void verifyInstallSnapshotToLaggingFollower(long lastAppliedIndex,
             @Nullable ServerConfigurationPayload expServerConfig) throws Exception {
-        testLog.info("testInstallSnapshotToLaggingFollower starting");
+        testLog.info("verifyInstallSnapshotToLaggingFollower starting");
 
         MessageCollectorActor.clearMessages(leaderCollectorActor);
 
@@ -614,15 +614,16 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         MessageCollectorActor.clearMessages(follower1CollectorActor);
         MessageCollectorActor.clearMessages(follower2CollectorActor);
 
-        testLog.info("testInstallSnapshotToLaggingFollower complete");
+        testLog.info("verifyInstallSnapshotToLaggingFollower complete");
     }
 
     /**
      * Do another round of payloads and snapshot to verify replicatedToAllIndex gets back on track and
      * snapshots works as expected after doing a follower snapshot. In this step we don't lag a follower.
      */
-    private void verifyReplicationsAndSnapshotWithNoLaggingAfterInstallSnapshot() throws Exception {
-        testLog.info("testReplicationsAndSnapshotAfterInstallSnapshot starting: replicatedToAllIndex: {}",
+    private long verifyReplicationsAndSnapshotWithNoLaggingAfterInstallSnapshot() throws Exception {
+        testLog.info(
+                "verifyReplicationsAndSnapshotWithNoLaggingAfterInstallSnapshot starting: replicatedToAllIndex: {}",
                 leader.getReplicatedToAllIndex());
 
         // Send another payload - a snapshot should occur.
@@ -637,10 +638,21 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         // Verify the leader's last persisted snapshot (previous ones may not be purged yet).
         List<Snapshot> persistedSnapshots = InMemorySnapshotStore.getSnapshots(leaderId, Snapshot.class);
         Snapshot persistedSnapshot = persistedSnapshots.get(persistedSnapshots.size() - 1);
-        verifySnapshot("Persisted", persistedSnapshot, currentTerm, 3, currentTerm, 4);
+        // The last (fourth) payload may or may not have been applied when the snapshot is captured depending on the
+        // timing when the async persistence completes.
         List<ReplicatedLogEntry> unAppliedEntry = persistedSnapshot.getUnAppliedEntries();
-        assertEquals("Persisted Snapshot getUnAppliedEntries size", 1, unAppliedEntry.size());
-        verifyReplicatedLogEntry(unAppliedEntry.get(0), currentTerm, 4, payload4);
+        long leadersSnapshotIndex;
+        if (unAppliedEntry.isEmpty()) {
+            leadersSnapshotIndex = 4;
+            expSnapshotState.add(payload4);
+            verifySnapshot("Persisted", persistedSnapshot, currentTerm, 4, currentTerm, 4);
+        } else {
+            leadersSnapshotIndex = 3;
+            verifySnapshot("Persisted", persistedSnapshot, currentTerm, 3, currentTerm, 4);
+            assertEquals("Persisted Snapshot getUnAppliedEntries size", 1, unAppliedEntry.size());
+            verifyReplicatedLogEntry(unAppliedEntry.get(0), currentTerm, 4, payload4);
+            expSnapshotState.add(payload4);
+        }
 
         // Send a couple more payloads.
         MockPayload payload5 = sendPayloadData(leaderActor, "five");
@@ -701,11 +713,12 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         // Verify follower 2's log state.
         verifyFollowersTrimmedLog(2, follower2Actor, 6);
 
-        expSnapshotState.add(payload4);
         expSnapshotState.add(payload5);
         expSnapshotState.add(payload6);
 
-        testLog.info("testReplicationsAndSnapshotAfterInstallSnapshot ending");
+        testLog.info("verifyReplicationsAndSnapshotWithNoLaggingAfterInstallSnapshot ending");
+
+        return leadersSnapshotIndex;
     }
 
     /**
@@ -713,7 +726,8 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
      */
     private void verifyLeaderRecoveryAfterReinstatement(long lastIndex, long snapshotIndex,
             long firstJournalEntryIndex) {
-        testLog.info("testLeaderReinstatement starting");
+        testLog.info("verifyLeaderRecoveryAfterReinstatement starting: lastIndex: {}, snapshotIndex: {}, "
+            + "firstJournalEntryIndex: {}", lastIndex, snapshotIndex, firstJournalEntryIndex);
 
         killActor(leaderActor);
 
@@ -741,7 +755,7 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
 
         assertEquals("Leader applied state", expSnapshotState, testRaftActor.getState());
 
-        testLog.info("testLeaderReinstatement ending");
+        testLog.info("verifyLeaderRecoveryAfterReinstatement ending");
     }
 
     private void sendInitialPayloadsReplicatedToAllFollowers(String... data) {
