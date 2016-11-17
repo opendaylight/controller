@@ -15,12 +15,13 @@ import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payloa
 /**
  * A {@link ReplicatedLogEntry} implementation.
  */
-public final class ReplicatedLogImplEntry implements ReplicatedLogEntry, Serializable {
+public class ReplicatedLogImplEntry implements ReplicatedLogEntry, Serializable {
     private static final long serialVersionUID = -9085798014576489130L;
 
     private final long index;
     private final long term;
     private final Payload payload;
+    private transient boolean persistencePending = false;
 
     /**
      * Constructs an instance.
@@ -53,6 +54,60 @@ public final class ReplicatedLogImplEntry implements ReplicatedLogEntry, Seriali
     @Override
     public int size() {
         return getData().size();
+    }
+
+    @Override
+    public boolean isPersistencePending() {
+        return persistencePending;
+    }
+
+    @Override
+    public void setPersistencePending(boolean pending) {
+        persistencePending = pending;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + payload.hashCode();
+        result = prime * result + (int) (index ^ index >>> 32);
+        result = prime * result + (int) (term ^ term >>> 32);
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+
+        if (obj == null) {
+            return false;
+        }
+
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+
+        ReplicatedLogImplEntry other = (ReplicatedLogImplEntry) obj;
+        if (payload == null) {
+            if (other.payload != null) {
+                return false;
+            }
+        } else if (!payload.equals(other.payload)) {
+            return false;
+        }
+
+        if (index != other.index) {
+            return false;
+        }
+
+        if (term != other.term) {
+            return false;
+        }
+
+        return true;
     }
 
     @Override

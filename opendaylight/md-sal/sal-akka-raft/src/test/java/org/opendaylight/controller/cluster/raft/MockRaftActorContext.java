@@ -147,14 +147,9 @@ public class MockRaftActorContext extends RaftActorContextImpl {
         }
 
         @Override
-        public void appendAndPersist(
-            ReplicatedLogEntry replicatedLogEntry) {
-            append(replicatedLogEntry);
-        }
-
-        @Override
         @SuppressWarnings("checkstyle:IllegalCatch")
-        public void appendAndPersist(ReplicatedLogEntry replicatedLogEntry, Procedure<ReplicatedLogEntry> callback) {
+        public boolean appendAndPersist(ReplicatedLogEntry replicatedLogEntry, Procedure<ReplicatedLogEntry> callback,
+                boolean doAsync) {
             append(replicatedLogEntry);
 
             if (callback != null) {
@@ -164,6 +159,8 @@ public class MockRaftActorContext extends RaftActorContextImpl {
                     Throwables.propagate(e);
                 }
             }
+
+            return true;
         }
     }
 
@@ -226,81 +223,12 @@ public class MockRaftActorContext extends RaftActorContextImpl {
         }
     }
 
-    public static class MockReplicatedLogEntry implements ReplicatedLogEntry, Serializable {
+    // TODO - this class can be removed and use ReplicatedLogImplEntry directly.
+    public static class MockReplicatedLogEntry extends ReplicatedLogImplEntry {
         private static final long serialVersionUID = 1L;
 
-        private final long term;
-        private final long index;
-        private final Payload data;
-
         public MockReplicatedLogEntry(long term, long index, Payload data) {
-
-            this.term = term;
-            this.index = index;
-            this.data = data;
-        }
-
-        @Override public Payload getData() {
-            return data;
-        }
-
-        @Override public long getTerm() {
-            return term;
-        }
-
-        @Override public long getIndex() {
-            return index;
-        }
-
-        @Override
-        public int size() {
-            return getData().size();
-        }
-
-        @Override
-        public int hashCode() {
-            final int prime = 31;
-            int result = 1;
-            result = prime * result + (data == null ? 0 : data.hashCode());
-            result = prime * result + (int) (index ^ index >>> 32);
-            result = prime * result + (int) (term ^ term >>> 32);
-            return result;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (obj == null) {
-                return false;
-            }
-            if (getClass() != obj.getClass()) {
-                return false;
-            }
-            MockReplicatedLogEntry other = (MockReplicatedLogEntry) obj;
-            if (data == null) {
-                if (other.data != null) {
-                    return false;
-                }
-            } else if (!data.equals(other.data)) {
-                return false;
-            }
-            if (index != other.index) {
-                return false;
-            }
-            if (term != other.term) {
-                return false;
-            }
-            return true;
-        }
-
-        @Override
-        public String toString() {
-            StringBuilder builder = new StringBuilder();
-            builder.append("MockReplicatedLogEntry [term=").append(term).append(", index=").append(index)
-                    .append(", data=").append(data).append("]");
-            return builder.toString();
+            super(index, term, data);
         }
     }
 
