@@ -26,13 +26,22 @@ public interface DataPersistenceProvider {
     boolean isRecoveryApplicable();
 
     /**
-     * Persists an entry to he applicable synchronously.
+     * Persists an entry to the applicable journal synchronously.
      *
      * @param entry the journal entry to persist
      * @param procedure the callback when persistence is complete
      * @param <T> the type of the journal entry
      */
     <T> void persist(T entry, Procedure<T> procedure);
+
+    /**
+     * Persists an entry to the applicable journal asynchronously.
+     *
+     * @param entry the journal entry to persist
+     * @param procedure the callback when persistence is complete
+     * @param <T> the type of the journal entry
+     */
+    <T> void persistAsync(T entry, Procedure<T> procedure);
 
     /**
      * Saves a snapshot.

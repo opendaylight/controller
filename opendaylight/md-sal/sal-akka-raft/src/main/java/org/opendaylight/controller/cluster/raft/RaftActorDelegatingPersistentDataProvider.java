@@ -31,22 +31,43 @@ class RaftActorDelegatingPersistentDataProvider extends DelegatingPersistentData
     }
 
     @Override
-    public <T> void persist(final T object, final Procedure<T> procedure) {
+    public <T> void persist(final T entry, final Procedure<T> procedure) {
+        doPersist(entry, procedure, false);
+    }
+
+    @Override
+    public <T> void persistAsync(T entry, Procedure<T> procedure) {
+        doPersist(entry, procedure, true);
+    }
+
+    private <T> void doPersist(final T entry, final Procedure<T> procedure, final boolean async) {
         if (getDelegate().isRecoveryApplicable()) {
-            super.persist(object, procedure);
+            persistSuper(entry, procedure, async);
         } else {
-            if (object instanceof ReplicatedLogEntry) {
-                Payload payload = ((ReplicatedLogEntry)object).getData();
+            if (entry instanceof ReplicatedLogEntry) {
+                Payload payload = ((ReplicatedLogEntry)entry).getData();
                 if (payload instanceof PersistentPayload) {
                     // We persist the Payload but not the ReplicatedLogEntry to avoid gaps in the journal indexes
                     // on recovery if data persistence is later enabled.
-                    persistentProvider.persist(payload, p -> procedure.apply(object));
+                    if (async) {
+                        persistentProvider.persistAsync(payload, p -> procedure.apply(entry));
+                    } else {
+                        persistentProvider.persist(payload, p -> procedure.apply(entry));
+                    }
                 } else {
-                    super.persist(object, procedure);
+                    persistSuper(entry, procedure, async);
                 }
             } else {
-                super.persist(object, procedure);
+                persistSuper(entry, procedure, async);
             }
+        }
+    }
+
+    private <T> void persistSuper(final T object, final Procedure<T> procedure, final boolean async) {
+        if (async) {
+            super.persistAsync(object, procedure);
+        } else {
+            super.persist(object, procedure);
         }
     }
 }
