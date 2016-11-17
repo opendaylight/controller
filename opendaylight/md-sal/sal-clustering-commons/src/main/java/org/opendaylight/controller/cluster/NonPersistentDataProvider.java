@@ -34,6 +34,11 @@ public class NonPersistentDataProvider implements DataPersistenceProvider {
     }
 
     @Override
+    public <T> void persistAsync(T entry, Procedure<T> procedure) {
+        persist(entry, procedure);
+    }
+
+    @Override
     public void saveSnapshot(Object snapshot) {
         // no-op
     }

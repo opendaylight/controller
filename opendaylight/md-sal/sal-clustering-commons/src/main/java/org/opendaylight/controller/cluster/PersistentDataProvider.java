@@ -34,6 +34,11 @@ public class PersistentDataProvider implements DataPersistenceProvider {
     }
 
     @Override
+    public <T> void persistAsync(T entry, Procedure<T> procedure) {
+        persistentActor.persistAsync(entry, procedure);
+    }
+
+    @Override
     public void saveSnapshot(Object snapshot) {
         persistentActor.saveSnapshot(snapshot);
     }

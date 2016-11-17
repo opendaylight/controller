@@ -41,6 +41,11 @@ public class DelegatingPersistentDataProvider implements DataPersistenceProvider
     }
 
     @Override
+    public <T> void persistAsync(T entry, Procedure<T> procedure) {
+        delegate.persistAsync(entry, procedure);
+    }
+
+    @Override
     public void saveSnapshot(Object entry) {
         delegate.saveSnapshot(entry);
     }
