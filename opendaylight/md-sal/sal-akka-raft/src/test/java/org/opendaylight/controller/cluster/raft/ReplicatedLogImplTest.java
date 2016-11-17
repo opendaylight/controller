@@ -62,13 +62,17 @@ public class ReplicatedLogImplTest {
     }
 
     private void verifyPersist(Object message) throws Exception {
-        verifyPersist(message, new Same(message));
+        verifyPersist(message, new Same(message), true);
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    private void verifyPersist(Object message, Matcher<?> matcher) throws Exception {
+    private void verifyPersist(Object message, Matcher<?> matcher, boolean async) throws Exception {
         ArgumentCaptor<Procedure> procedure = ArgumentCaptor.forClass(Procedure.class);
-        verify(mockPersistence).persist(Matchers.argThat(matcher), procedure.capture());
+        if (async) {
+            verify(mockPersistence).persistAsync(Matchers.argThat(matcher), procedure.capture());
+        } else {
+            verify(mockPersistence).persist(Matchers.argThat(matcher), procedure.capture());
+        }
 
         procedure.getValue().apply(message);
     }
@@ -80,7 +84,7 @@ public class ReplicatedLogImplTest {
 
         MockReplicatedLogEntry logEntry1 = new MockReplicatedLogEntry(1, 1, new MockPayload("1"));
 
-        log.appendAndPersist(logEntry1);
+        log.appendAndPersist(logEntry1, null, true);
 
         verifyPersist(logEntry1);
 
@@ -90,7 +94,7 @@ public class ReplicatedLogImplTest {
 
         MockReplicatedLogEntry logEntry2 = new MockReplicatedLogEntry(1, 2, new MockPayload("2"));
         Procedure<ReplicatedLogEntry> mockCallback = Mockito.mock(Procedure.class);
-        log.appendAndPersist(logEntry2, mockCallback);
+        log.appendAndPersist(logEntry2, mockCallback, true);
 
         verifyPersist(logEntry2);
 
@@ -107,7 +111,7 @@ public class ReplicatedLogImplTest {
         Procedure<ReplicatedLogEntry> mockCallback = Mockito.mock(Procedure.class);
         MockReplicatedLogEntry logEntry = new MockReplicatedLogEntry(1, 1, new MockPayload("1"));
 
-        log.appendAndPersist(logEntry, mockCallback);
+        log.appendAndPersist(logEntry, mockCallback, true);
 
         verifyPersist(logEntry);
 
@@ -115,7 +119,7 @@ public class ReplicatedLogImplTest {
 
         reset(mockPersistence, mockCallback);
 
-        log.appendAndPersist(logEntry, mockCallback);
+        log.appendAndPersist(logEntry, mockCallback, true);
 
         verifyNoMoreInteractions(mockPersistence, mockCallback);
 
@@ -133,12 +137,12 @@ public class ReplicatedLogImplTest {
         final MockReplicatedLogEntry logEntry1 = new MockReplicatedLogEntry(1, 2, new MockPayload("2"));
         final MockReplicatedLogEntry logEntry2 = new MockReplicatedLogEntry(1, 3, new MockPayload("3"));
 
-        log.appendAndPersist(logEntry1);
+        log.appendAndPersist(logEntry1, null, true);
         verifyPersist(logEntry1);
 
         reset(mockPersistence);
 
-        log.appendAndPersist(logEntry2);
+        log.appendAndPersist(logEntry2, null, true);
         verifyPersist(logEntry2);
 
 
@@ -156,14 +160,14 @@ public class ReplicatedLogImplTest {
         int dataSize = 600;
         MockReplicatedLogEntry logEntry = new MockReplicatedLogEntry(1, 2, new MockPayload("2", dataSize));
 
-        log.appendAndPersist(logEntry);
+        log.appendAndPersist(logEntry, null, true);
         verifyPersist(logEntry);
 
         reset(mockPersistence);
 
         logEntry = new MockReplicatedLogEntry(1, 3, new MockPayload("3", 5));
 
-        log.appendAndPersist(logEntry);
+        log.appendAndPersist(logEntry, null, true);
         verifyPersist(logEntry);
 
         assertEquals("size", 2, log.size());
@@ -181,7 +185,7 @@ public class ReplicatedLogImplTest {
         log.removeFromAndPersist(1);
 
         DeleteEntries deleteEntries = new DeleteEntries(1);
-        verifyPersist(deleteEntries, match(deleteEntries));
+        verifyPersist(deleteEntries, match(deleteEntries), false);
 
         assertEquals("size", 1, log.size());
 

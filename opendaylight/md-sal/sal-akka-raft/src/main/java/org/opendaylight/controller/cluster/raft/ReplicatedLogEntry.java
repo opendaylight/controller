@@ -41,4 +41,18 @@ public interface ReplicatedLogEntry {
      * @return the size of the entry in bytes.
      */
     int size();
+
+    /**
+     * Checks if persistence is pending for this entry.
+     *
+     * @return true if persistence is pending, false otherwise.
+     */
+    boolean isPersistencePending();
+
+    /**
+     * Sets whether or not persistence is pending for this entry.
+     *
+     * @param pending the new setting.
+     */
+    void setPersistencePending(boolean pending);
 }

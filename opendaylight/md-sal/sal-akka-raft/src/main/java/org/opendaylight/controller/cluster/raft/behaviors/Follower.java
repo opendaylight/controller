@@ -242,7 +242,7 @@ public class Follower extends AbstractRaftActorBehavior {
 
                 log.debug("{}: Append entry to log {}", logName(), entry.getData());
 
-                context.getReplicatedLog().appendAndPersist(entry, appendAndPersistCallback);
+                context.getReplicatedLog().appendAndPersist(entry, appendAndPersistCallback, false);
 
                 if (entry.getData() instanceof ServerConfigurationPayload) {
                     context.updatePeerIds((ServerConfigurationPayload)entry.getData());
