@@ -11,6 +11,8 @@ import akka.japi.Procedure;
 import com.google.common.base.Preconditions;
 import java.util.Collections;
 import java.util.List;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.persisted.DeleteEntries;
 
 /**
@@ -18,8 +20,6 @@ import org.opendaylight.controller.cluster.raft.persisted.DeleteEntries;
  */
 class ReplicatedLogImpl extends AbstractReplicatedLogImpl {
     private static final int DATA_SIZE_DIVIDER = 5;
-
-    private final Procedure<DeleteEntries> deleteProcedure = NoopProcedure.instance();
 
     private final RaftActorContext context;
     private long dataSizeSinceLastSnapshot = 0L;
@@ -45,7 +45,7 @@ class ReplicatedLogImpl extends AbstractReplicatedLogImpl {
         // FIXME: Maybe this should be done after the command is saved
         long adjustedIndex = removeFrom(logEntryIndex);
         if (adjustedIndex >= 0) {
-            context.getPersistenceProvider().persist(new DeleteEntries(adjustedIndex), deleteProcedure);
+            context.getPersistenceProvider().persist(new DeleteEntries(adjustedIndex), NoopProcedure.instance());
             return true;
         }
 
@@ -87,38 +87,31 @@ class ReplicatedLogImpl extends AbstractReplicatedLogImpl {
     }
 
     @Override
-    public void appendAndPersist(final ReplicatedLogEntry replicatedLogEntry) {
-        appendAndPersist(replicatedLogEntry, null);
-    }
-
-    @Override
-    public void appendAndPersist(final ReplicatedLogEntry replicatedLogEntry,
-            final Procedure<ReplicatedLogEntry> callback)  {
+    public boolean appendAndPersist(@Nonnull final ReplicatedLogEntry replicatedLogEntry,
+            @Nullable final Procedure<ReplicatedLogEntry> callback, boolean doAsync)  {
 
         context.getLogger().debug("{}: Append log entry and persist {} ", context.getId(), replicatedLogEntry);
 
-        // FIXME : By adding the replicated log entry to the in-memory journal we are not truly ensuring durability
-        // of the logs
         if (!append(replicatedLogEntry)) {
-            return;
+            return false;
         }
 
-        // When persisting events with persist it is guaranteed that the
-        // persistent actor will not receive further commands between the
-        // persist call and the execution(s) of the associated event
-        // handler. This also holds for multiple persist calls in context
-        // of a single command.
-        context.getPersistenceProvider().persist(replicatedLogEntry,
-            param -> {
-                context.getLogger().debug("{}: persist complete {}", context.getId(), param);
+        Procedure<ReplicatedLogEntry> persistCallback = persistedLogEntry -> {
+            context.getLogger().debug("{}: persist complete {}", context.getId(), persistedLogEntry);
 
-                int logEntrySize = param.size();
-                dataSizeSinceLastSnapshot += logEntrySize;
+            dataSizeSinceLastSnapshot += persistedLogEntry.size();
 
-                if (callback != null) {
-                    callback.apply(param);
-                }
+            if (callback != null) {
+                callback.apply(persistedLogEntry);
             }
-        );
+        };
+
+        if (doAsync) {
+            context.getPersistenceProvider().persistAsync(replicatedLogEntry, persistCallback);
+        } else {
+            context.getPersistenceProvider().persist(replicatedLogEntry, persistCallback);
+        }
+
+        return true;
     }
 }

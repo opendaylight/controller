@@ -325,11 +325,9 @@ public class AbstractReplicatedLogImplTest {
         }
 
         @Override
-        public void appendAndPersist(ReplicatedLogEntry replicatedLogEntry, Procedure<ReplicatedLogEntry> callback) {
-        }
-
-        @Override
-        public void appendAndPersist(final ReplicatedLogEntry replicatedLogEntry) {
+        public boolean appendAndPersist(ReplicatedLogEntry replicatedLogEntry, Procedure<ReplicatedLogEntry> callback,
+                boolean doAsync) {
+            return true;
         }
 
         @Override

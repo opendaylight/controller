@@ -91,16 +91,14 @@ public interface ReplicatedLog {
      * Appends an entry to the in-memory log and persists it as well.
      *
      * @param replicatedLogEntry the entry to append
+     * @param callback the Procedure to be notified when persistence is complete (optional).
+     * @param doAsync if true, the persistent actor can receive subsequent messages to process in between the persist
+     *        call and the execution of the associated callback. If false, subsequent messages are stashed and get
+     *        delivered after persistence is complete and the associated callback is executed.
+     * @return true if the entry was successfully appended, false otherwise.
      */
-    void appendAndPersist(final ReplicatedLogEntry replicatedLogEntry);
-
-    /**
-     * Appends an entry to the in-memory log and persists it as well.
-     *
-     * @param replicatedLogEntry the entry to append
-     * @param callback the Procedure to be notified when persistence is complete.
-     */
-    void appendAndPersist(ReplicatedLogEntry replicatedLogEntry, Procedure<ReplicatedLogEntry> callback);
+    boolean appendAndPersist(@Nonnull ReplicatedLogEntry replicatedLogEntry,
+            @Nullable Procedure<ReplicatedLogEntry> callback, boolean doAsync);
 
     /**
      * Returns a list of log entries starting from the given index to the end of the log.
