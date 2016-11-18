@@ -158,6 +158,10 @@ public final class XmlElement {
         return element.getElementsByTagName(name);
     }
 
+    public NodeList getElementsByTagName(String name, String namespace) {
+        return element.getElementsByTagNameNS(namespace, name);
+    }
+
     public void appendChild(Element element) {
         this.element.appendChild(element);
     }

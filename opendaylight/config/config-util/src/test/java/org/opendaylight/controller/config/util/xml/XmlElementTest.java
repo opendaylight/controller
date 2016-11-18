@@ -18,11 +18,13 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Strings;
 import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
 public class XmlElementTest {
 
@@ -42,6 +44,55 @@ public class XmlElementTest {
         document = XmlUtil.readXmlToDocument(elementAsString);
         element = document.getDocumentElement();
         xmlElement = XmlElement.fromDomElement(element);
+    }
+
+    @Test
+    public void testBUG7176_withoutPrefix() throws Exception {
+        final String stringWithoutPrefix =
+                "<rpc xmlns:nc=\"urn:ietf:params:xml:ns:netconf:base:1.0\" message-id=\"0\">\n" +
+                "  <edit-config>\n" +
+                "    <target>\n" +
+                "      <candidate/>\n" +
+                "    </target>\n" +
+                "  </edit-config>\n" +
+                "</rpc>";
+        testBUG7176(stringWithoutPrefix);
+    }
+
+    @Test
+    public void testBUG7176_withPrefix() throws Exception {
+        final String stringWithPrefix =
+                "<nc:rpc xmlns:nc=\"urn:ietf:params:xml:ns:netconf:base:1.0\" message-id=\"0\">\n" +
+                "  <nc:edit-config>\n" +
+                "    <nc:target>\n" +
+                "      <nc:candidate/>\n" +
+                "    </nc:target>\n" +
+                "  </nc:edit-config>\n" +
+                "</nc:rpc>";
+        testBUG7176(stringWithPrefix);
+    }
+
+    private final void testBUG7176(String value) throws Exception {
+        Document d = XmlUtil.readXmlToDocument(value);
+        Element e = d.getDocumentElement();
+        XmlElement xe = XmlElement.fromDomElement(e);
+
+        NodeList elementsByTagName = getElementsByTagNameFromDocumentWithoutPrefix(xe, "target",
+                "urn:ietf:params:xml:ns:netconf:base:1.0");
+        XmlElement targetChildNode = XmlElement.fromDomElement((Element) elementsByTagName.item(0))
+                .getOnlyChildElement();
+
+        assertEquals(1, elementsByTagName.getLength());
+        assertEquals("candidate", targetChildNode.getName());
+    }
+
+    private final NodeList getElementsByTagNameFromDocumentWithoutPrefix(final XmlElement xe, final String tagName,
+                                                                         final String namespace) {
+        Element element = xe.getDomElement();
+        if (Strings.isNullOrEmpty(element.getPrefix())) {
+            return  element.getElementsByTagName(tagName);
+        }
+        return element.getElementsByTagNameNS(namespace, tagName);
     }
 
     @Test
