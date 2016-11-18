@@ -155,7 +155,14 @@ public final class XmlElement {
     }
 
     public NodeList getElementsByTagName(String name) {
-        return element.getElementsByTagName(name);
+        return element.getElementsByTagName(getTagNameWithPrefix(name));
+    }
+
+    private String getTagNameWithPrefix(final String name) {
+        if (!Strings.isNullOrEmpty(element.getPrefix())) {
+            return element.getPrefix() + ":" + name;
+        }
+        return name;
     }
 
     public void appendChild(Element element) {
