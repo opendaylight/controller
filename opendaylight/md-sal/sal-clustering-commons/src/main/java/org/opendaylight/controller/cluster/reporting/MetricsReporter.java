@@ -24,25 +24,25 @@ import com.google.common.cache.LoadingCache;
  */
 public class MetricsReporter implements AutoCloseable {
 
-    private static LoadingCache<String, MetricsReporter> METRIC_REPORTERS = CacheBuilder.newBuilder().build(
-            new CacheLoader<String, MetricsReporter>() {
-                @Override
-                public MetricsReporter load(String domainName) {
-                    return new MetricsReporter(domainName);
-                }
-            });
+    private static final LoadingCache<String, MetricsReporter> METRIC_REPORTERS = CacheBuilder.newBuilder().build(
+        new CacheLoader<String, MetricsReporter>() {
+            @Override
+            public MetricsReporter load(final String domainName) {
+                return new MetricsReporter(domainName);
+            }
+        });
 
     private final String domainName;
     private final JmxReporter jmxReporter;
     private final MetricRegistry metricRegistry = new MetricRegistry();
 
-    private MetricsReporter(String domainName) {
+    private MetricsReporter(final String domainName) {
         this.domainName = domainName;
         jmxReporter = JmxReporter.forRegistry(metricRegistry).inDomain(domainName).build();
         jmxReporter.start();
     }
 
-    public static MetricsReporter getInstance(String domainName) {
+    public static MetricsReporter getInstance(final String domainName) {
         return METRIC_REPORTERS.getUnchecked(domainName);
     }
 
