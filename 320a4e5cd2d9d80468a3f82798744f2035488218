@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a65312a_fa2ac48e",
+        "filename": "opendaylight/md-sal/cds-access-client/src/main/java/org/opendaylight/controller/cluster/access/client/AbstractClientConnection.java",
+        "patchSetId": 72
+      },
+      "lineNbr": 145,
+      "author": {
+        "id": 2046
+      },
+      "writtenOn": "2016-11-23T11:33:32Z",
+      "side": 1,
+      "message": "if (isEmpty()) {\n    lastProgress \u003d readTime();\n}\n\n// to invalidate the Gerrit comment at line 172.",
+      "range": {
+        "startLine": 145,
+        "startChar": 51,
+        "endLine": 145,
+        "endChar": 52
+      },
+      "revId": "320a4e5cd2d9d80468a3f82798744f2035488218",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a65312a_7a487487",
+        "filename": "opendaylight/md-sal/cds-access-client/src/main/java/org/opendaylight/controller/cluster/access/client/AbstractClientConnection.java",
+        "patchSetId": 72
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 2046
+      },
+      "writtenOn": "2016-11-23T11:33:32Z",
+      "side": 1,
+      "message": "This method returns a behavior.",
+      "range": {
+        "startLine": 160,
+        "startChar": 39,
+        "endLine": 160,
+        "endChar": 69
+      },
+      "revId": "320a4e5cd2d9d80468a3f82798744f2035488218",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a65312a_fa7c84b7",
+        "filename": "opendaylight/md-sal/cds-access-client/src/main/java/org/opendaylight/controller/cluster/access/client/AbstractClientConnection.java",
+        "patchSetId": 72
+      },
+      "lineNbr": 170,
+      "author": {
+        "id": 2046
+      },
+      "writtenOn": "2016-11-23T11:33:32Z",
+      "side": 1,
+      "message": "What is this branch good for? It seem to be detecting a scenario where reconnect is not desired, but there are no comments on what the scenario is.",
+      "range": {
+        "startLine": 170,
+        "startChar": 24,
+        "endLine": 170,
+        "endChar": 25
+      },
+      "revId": "320a4e5cd2d9d80468a3f82798744f2035488218",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a65312a_dab0a88d",
+        "filename": "opendaylight/md-sal/cds-access-client/src/main/java/org/opendaylight/controller/cluster/access/client/AbstractClientConnection.java",
+        "patchSetId": 72
+      },
+      "lineNbr": 172,
+      "author": {
+        "id": 2046
+      },
+      "writtenOn": "2016-11-23T11:33:32Z",
+      "side": 1,
+      "message": "This is brittle. Imagine this scenario:\n\n0. (some churn);\n1. last entry so far is dequed;\n2. nothing is pending for a long time;\n3. an entry is enqueued;\n4. line 168 gets executed;\n\nThe point is, there may be only few nanoseconds between 3 and 4, but the code evaluates the delay between 1 and 4. So this code detects false timeout, leading to occasional disconnect.\nThat may be fine in normal circumstances (assuming no data loss), but it would make things worse when the system is stressed.\n\nLine 216 does the right thing, but that only leads to reconnect.",
+      "range": {
+        "startLine": 172,
+        "startChar": 35,
+        "endLine": 172,
+        "endChar": 63
+      },
+      "revId": "320a4e5cd2d9d80468a3f82798744f2035488218",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
