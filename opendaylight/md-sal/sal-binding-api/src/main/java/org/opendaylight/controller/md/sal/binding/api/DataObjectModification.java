@@ -69,7 +69,6 @@ public interface DataObjectModification<T extends DataObject> extends org.openda
      * Returns before-state of top level container. Implementations are encouraged,
      * but not required to provide this state.
      *
-     * @param root Class representing data container
      * @return State of object before modification. Null if subtree was not present,
      *         or the implementation cannot provide the state.
      */
@@ -78,7 +77,6 @@ public interface DataObjectModification<T extends DataObject> extends org.openda
     /**
      * Returns after-state of top level container.
      *
-     * @param root Class representing data container
      * @return State of object after modification. Null if subtree is not present.
      */
     @Nullable T getDataAfter();

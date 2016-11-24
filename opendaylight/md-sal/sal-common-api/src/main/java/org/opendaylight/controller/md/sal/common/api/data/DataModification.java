@@ -85,11 +85,6 @@ public interface DataModification<P extends Path<P>, D> extends DataChange<P, D>
      * controller. It is assumed that Consumer has an understanding of this
      * changes.
      *
-     *
-     * @see DataCommitHandler for further information how two-phase commit is
-     *      processed.
-     * @param store
-     *            Identifier of the store, where commit should occur.
      * @return Result of the Commit, containing success information or list of
      *         encountered errors, if commit was not successful. The Future
      *         blocks until {@link TransactionStatus#COMMITED} or

@@ -60,7 +60,7 @@ public abstract class AbstractAttribute implements AttributeIfc {
      *
      * @return Yang name converted to cammel case, starting with a capital
      *         letter. For details see
-     *         {@link ModuleMXBeanEntry#findJavaNamePrefix(org.opendaylight.yangtools.yang.model.api.SchemaNode)}
+     *         {@link org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry#getJavaNamePrefix()}
      */
     @Override
     public String getUpperCaseCammelCase() {

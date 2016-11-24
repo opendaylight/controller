@@ -50,7 +50,8 @@ import scala.concurrent.duration.FiniteDuration;
 
 /**
  * The behavior of a RaftActor when it is in the Leader state
- * <p/>
+ *
+ * <p>
  * Leaders:
  * <ul>
  * <li> Upon election: send initial empty AppendEntries RPCs
@@ -64,7 +65,7 @@ import scala.concurrent.duration.FiniteDuration;
  * follower (§5.3)
  * <li> If AppendEntries fails because of log inconsistency:
  * decrement nextIndex and retry (§5.3)
- * <li> If there exists an N such that N > commitIndex, a majority
+ * <li> If there exists an N such that N &gt; commitIndex, a majority
  * of matchIndex[i] ≥ N, and log[N].term == currentTerm:
  * set commitIndex = N (§5.3, §5.4).
  * </ul>
@@ -699,7 +700,8 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
 
     /**
      * Initiates a snapshot capture to install on a follower.
-     * <p/>
+     *
+     * <p>
      * Install Snapshot works as follows
      *   1. Leader initiates the capture snapshot by calling createSnapshot on the RaftActor.
      *   2. On receipt of the CaptureSnapshotReply message, the RaftActor persists the snapshot and makes a call to

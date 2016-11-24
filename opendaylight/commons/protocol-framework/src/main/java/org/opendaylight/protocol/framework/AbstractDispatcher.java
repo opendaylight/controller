@@ -147,7 +147,7 @@ public abstract class AbstractDispatcher<S extends ProtocolSession<?>, L extends
      * Creates a client.
      *
      * @param address remote address
-     * @param connectStrategy Reconnection strategy to be used when initial connection fails
+     * @param strategy Reconnection strategy to be used when initial connection fails
      *
      * @return Future representing the connection process. Its result represents the combined success of TCP connection
      *         as well as session negotiation.
@@ -266,7 +266,7 @@ public abstract class AbstractDispatcher<S extends ProtocolSession<?>, L extends
     }
 
     /**
-     * @deprecated Should only be used with {@link AbstractDispatcher#AbstractDispatcher()}
+     * @deprecated Should only be used with AbstractDispatcher#AbstractDispatcher()
      */
     @Deprecated
     @Override

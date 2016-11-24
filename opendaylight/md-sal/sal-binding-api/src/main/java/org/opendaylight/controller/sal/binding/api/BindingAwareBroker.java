@@ -18,7 +18,7 @@ import org.osgi.framework.BundleContext;
  * Binding-aware core of the SAL layer responsible for wiring the SAL consumers.
  *
  * The responsibility of the broker is to maintain registration of SAL
- * functionality {@link Consumer}s and {@link Provider}s, store provider and
+ * functionality Consumers and Providers, store provider and
  * consumer specific context and functionality registration via
  * {@link ConsumerContext} and provide access to infrastructure services, which
  * removes direct dependencies between providers and consumers.
@@ -68,9 +68,9 @@ public interface BindingAwareBroker {
      * The consumer is required to use returned session for all communication
      * with broker or one of the broker services. The session is announced to
      * the consumer by invoking
-     * {@link Consumer#onSessionInitiated(ConsumerContext)}.
+     * {@link BindingAwareConsumer#onSessionInitialized(ConsumerContext)}.
      *
-     * @param cons
+     * @param consumer
      *            Consumer to be registered.
      * @return a session specific to consumer registration
      * @throws IllegalArgumentException
@@ -92,7 +92,7 @@ public interface BindingAwareBroker {
      * <p>
      * During the registration, the broker obtains the initial functionality
      * from consumer, using the
-     * {@link BindingAwareProvider#getImplementations()}, and register that
+     * BindingAwareProvider#getImplementations(), and register that
      * functionality into system and concrete infrastructure services.
      *
      * <p>
@@ -106,7 +106,7 @@ public interface BindingAwareBroker {
      * {@link BindingAwareProvider#onSessionInitiated(ProviderContext)}.
      *
      *
-     * @param prov
+     * @param provider
      *            Provider to be registered.
      * @return a session unique to the provider registration.
      * @throws IllegalArgumentException
@@ -127,7 +127,7 @@ public interface BindingAwareBroker {
      * The session serves to store SAL context (e.g. registration of
      * functionality) for the consumer and provides access to the SAL
      * infrastructure services and other functionality provided by
-     * {@link Provider}s.
+     * {@link BindingAwareProvider}s.
      */
     interface ConsumerContext extends RpcConsumerRegistry {
 
@@ -192,7 +192,7 @@ public interface BindingAwareBroker {
          * Register particular instance identifier to be processed by this
          * RpcService
          *
-         * Deprecated in favor of {@link RoutedRegistration#registerPath(Object, Object)}.
+         * Deprecated in favor of RoutedRegistration#registerPath(Object, Object).
          *
          * @param context
          * @param instance
@@ -204,7 +204,7 @@ public interface BindingAwareBroker {
          * Unregister particular instance identifier to be processed by this
          * RpcService
          *
-         * Deprecated in favor of {@link RoutedRegistration#unregisterPath(Object, Object)}.
+         * Deprecated in favor of RoutedRegistration#unregisterPath(Class, InstanceIdentifier).
          *
          * @param context
          * @param instance

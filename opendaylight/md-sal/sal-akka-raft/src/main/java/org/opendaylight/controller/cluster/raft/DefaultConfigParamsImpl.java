@@ -41,7 +41,8 @@ public class DefaultConfigParamsImpl implements ConfigParams {
     /**
      * The interval at which a heart beat message will be sent to the remote
      * RaftActor.
-     * <p/>
+     *
+     * <p>
      * Since this is set to 100 milliseconds the Election timeout should be
      * at least 200 milliseconds
      */

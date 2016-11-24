@@ -44,14 +44,14 @@ public interface DOMDataTreeProducer extends DOMDataTreeProducerFactory, AutoClo
      * previously allocated must have been either submitted or cancelled by the
      * time this method is invoked.
      *
-     * @param barrier Indicates whether this transaction should be a barrier. A barrier
+     * @param isolated Indicates whether this transaction should be a barrier. A barrier
      *                transaction is processed separately from any preceding transactions.
      *                Non-barrier transactions may be merged and processed in a batch,
      *                such that any observers see the modifications contained in them as
      *                if the modifications were made in a single transaction.
      * @return A new {@link DOMDataWriteTransaction}
-     * @throws {@link IllegalStateException} if a previous transaction was not closed.
-     * @throws {@link IllegalThreadStateException} if the calling thread context does not
+     * @throws IllegalStateException if a previous transaction was not closed.
+     * @throws IllegalThreadStateException if the calling thread context does not
      *         match the lifecycle rules enforced by the producer state (e.g. bound or unbound).
      *         This exception is thrown on a best effort basis and programs should not rely
      *         on it for correct operation.
@@ -73,10 +73,10 @@ public interface DOMDataTreeProducer extends DOMDataTreeProducerFactory, AutoClo
      * Once this method returns successfully, this (parent) producer loses the ability to
      * access the specified paths until the resulting (child) producer is shut down.
      *
-     * @throws {@link IllegalStateException} if there is an open transaction
-     * @throws {@link IllegalArgumentException} if subtrees contains a subtree which is not
+     * @throws IllegalStateException if there is an open transaction
+     * @throws IllegalArgumentException if subtrees contains a subtree which is not
      *         accessible by this producer
-     * @throws {@link IllegalThreadStateException} if the calling thread context does not
+     * @throws IllegalThreadStateException if the calling thread context does not
      *         match the lifecycle rules enforced by the producer state (e.g. bound or unbound).
      *         This exception is thrown on a best effort basis and programs should not rely
      *         on it for correct operation.

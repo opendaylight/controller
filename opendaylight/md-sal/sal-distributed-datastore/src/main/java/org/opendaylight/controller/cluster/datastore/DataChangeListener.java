@@ -25,7 +25,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 /**
  * Actor for a DataChangeListener.
  *
- * @Deprecated Replaced by {@link DataTreeChangeListener}
+ * @deprecated Replaced by {@link DataTreeChangeListener}
  */
 @Deprecated
 public class DataChangeListener extends AbstractUntypedActor {

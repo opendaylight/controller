@@ -18,7 +18,7 @@ public interface DOMStoreWriteTransaction extends DOMStoreTransaction {
      * specified path.
      *
      * If you need add or merge of current object with specified use
-     * {@link #merge(org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType, org.opendaylight.yangtools.concepts.Path, Object)}
+     * {@link #merge(YangInstanceIdentifier, NormalizedNode)}.
      *
      *
      * @param path
@@ -35,10 +35,6 @@ public interface DOMStoreWriteTransaction extends DOMStoreTransaction {
      * Store a provided data at specified path. This acts as a add / replace
      * operation, which is to say that whole subtree will be replaced by
      * specified path.
-     *
-     * If you need add or merge of current object with specified use
-     * {@link #merge(org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType, org.opendaylight.yangtools.concepts.Path, Object)}
-     *
      *
      * @param path
      * @param data

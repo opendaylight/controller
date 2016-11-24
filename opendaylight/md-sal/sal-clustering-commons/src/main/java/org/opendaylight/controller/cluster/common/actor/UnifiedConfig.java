@@ -11,7 +11,8 @@ import com.typesafe.config.Config;
 
 /**
  * Represents a unified view of configuration.
- * <p/>
+ *
+ * <p>
  * It merges configuration from:
  * <ul>
  *     <li>Config subsystem</li>

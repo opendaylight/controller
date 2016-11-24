@@ -19,6 +19,9 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
  */
 public interface DOMDataWriteTransaction extends AsyncWriteTransaction<YangInstanceIdentifier, NormalizedNode<?, ?>> {
 
+    @Override
+    void delete(LogicalDatastoreType store, YangInstanceIdentifier path);
+
     /**
      * Stores a piece of data at the specified path. This acts as an add / replace
      * operation, which is to say that whole subtree will be replaced by the specified data.

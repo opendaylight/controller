@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
  * expected to arrive in a given time interval does not arrive. It attempts to keep track of all the messages that
  * received between the arrival of two instances of the same message and the amount of time it took to process each
  * of those messages.
- * <br/>
+ * <br>
  * Usage of the API is as follows,
  * <pre>
  *

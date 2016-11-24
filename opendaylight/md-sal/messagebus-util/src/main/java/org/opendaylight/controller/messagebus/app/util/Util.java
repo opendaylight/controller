@@ -31,7 +31,7 @@ public final class Util {
      * Method filters qnames based on wildcard strings
      *
      * @param list
-     * @param patterh matching pattern
+     * @param pattern matching pattern
      * @return list of filtered qnames
      */
     public static List<SchemaPath> expandQname(final List<SchemaPath> list, final Pattern pattern) {

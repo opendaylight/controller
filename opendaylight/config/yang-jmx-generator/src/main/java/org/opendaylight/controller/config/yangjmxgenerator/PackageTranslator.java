@@ -13,9 +13,8 @@ import org.opendaylight.yangtools.binding.generator.util.BindingGeneratorUtil;
 import org.opendaylight.yangtools.yang.model.api.Module;
 
 /**
- * Maps from module namespaces to java package names using a Map<String,
- * String>, where key is namespace prefix and value is package that replaces
- * matched prefix.
+ * Maps from module namespaces to java package names using a Map&lt;String, String&gt;,
+ * where key is namespace prefix and value is package that replaces matched prefix.
  */
 public class PackageTranslator {
     private final Map<String, String> namespacePrefixToPackageMap;

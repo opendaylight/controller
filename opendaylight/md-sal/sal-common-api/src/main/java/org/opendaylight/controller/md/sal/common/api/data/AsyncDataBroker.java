@@ -97,8 +97,7 @@ public interface AsyncDataBroker<P extends Path<P>, D, L extends AsyncDataChange
      * </pre>
      *
      *
-     * @see http://www.idevelopment.info/data/LDAP/LDAP_Resources/
-     *      SEARCH_Setting_the_SCOPE_Parameter.shtml
+     * @see <a href="http://www.idevelopment.info/data/LDAP/LDAP_Resources/SEARCH_Setting_the_SCOPE_Parameter.shtml">LDAP</a>
      */
     enum DataChangeScope {
 

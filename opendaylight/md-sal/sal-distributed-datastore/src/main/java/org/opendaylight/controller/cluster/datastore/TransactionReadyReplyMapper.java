@@ -20,7 +20,8 @@ import scala.concurrent.Future;
 /**
  * A {@link Mapper} extracting the {@link ActorSelection} pointing to the actor which
  * is backing a particular transaction.
- * <p/>
+ *
+ * <p>
  * This class is not for general consumption. It is public only to support the pre-lithium compatibility
  * package.
  * TODO: once we remove compatibility, make this class package-private and final.

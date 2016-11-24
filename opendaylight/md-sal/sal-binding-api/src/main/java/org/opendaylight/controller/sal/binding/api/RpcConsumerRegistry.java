@@ -49,7 +49,7 @@ public interface RpcConsumerRegistry extends BindingAwareService, BindingService
      * to listen for Rpc Result. This will asynchronously listen for future result in executor and
      * will not block current thread.
      *
-     * <pre>
+     * {@code
      *   final Future<RpcResult<SomeRpcOutput>> future = someRpcService.someRpc( ... );
      *   Futures.addCallback(JdkFutureAdapters.listenInThreadPool(future), new FutureCallback<RpcResult<SomeRpcOutput>>() {
      *
@@ -61,7 +61,9 @@ public interface RpcConsumerRegistry extends BindingAwareService, BindingService
      *          // RPC failed
      *       }
      *   );
-     * </pre>
+     * }
+     * }
+     *
      * @param serviceInterface the interface of the RPC Service. Typically this is an interface generated
      *                         from a YANG model.
      * @return the proxy for the requested RPC service. This method never returns null.

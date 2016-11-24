@@ -14,8 +14,8 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 /**
  * A message about a DataTree having been changed. The message is not
  * serializable on purpose. For delegating the change across cluster nodes,
- * this needs to be intercepted by a local agent and forwarded as
- * a {@link DataTreeDelta}.
+ * this needs to be intercepted by a local agent and forwarded as reconstructed
+ * candidate.
  */
 public final class DataTreeChanged {
     private final Collection<DataTreeCandidate> changes;

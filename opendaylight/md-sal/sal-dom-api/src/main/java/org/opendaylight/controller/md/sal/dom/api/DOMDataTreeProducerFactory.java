@@ -20,7 +20,7 @@ public interface DOMDataTreeProducerFactory {
      *
      * @param subtrees The collection of subtrees the resulting producer should have access to.
      * @return A {@link DOMDataTreeProducer} instance.
-     * @throws {@link IllegalArgumentException} if subtrees is empty.
+     * @throws IllegalArgumentException if subtrees is empty.
      */
     @Nonnull DOMDataTreeProducer createProducer(@Nonnull Collection<DOMDataTreeIdentifier> subtrees);
 }

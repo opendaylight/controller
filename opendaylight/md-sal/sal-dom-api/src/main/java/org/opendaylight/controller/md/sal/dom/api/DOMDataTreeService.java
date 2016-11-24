@@ -58,5 +58,5 @@ public interface DOMDataTreeService extends DOMDataTreeProducerFactory, DOMServi
      *                                  feedback loop
      */
     @Nonnull <T extends DOMDataTreeListener> ListenerRegistration<T> registerListener(@Nonnull T listener,
-        @Nonnull Collection<DOMDataTreeIdentifier> subtrees, boolean allowRxMerges, @Nonnull Collection<DOMDataTreeProducer> producers);
+        @Nonnull Collection<DOMDataTreeIdentifier> subtrees, boolean allowRxMerges, @Nonnull Collection<DOMDataTreeProducer> producers) throws DOMDataTreeLoopException;
 }

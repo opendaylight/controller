@@ -121,7 +121,7 @@ public class LLDPTLV extends Packet {
     }
 
     /**
-     * @param byte - the type to set
+     * @param type the type to set
      * @return LLDPTLV
      */
     public LLDPTLV setType(byte type) {
@@ -131,7 +131,7 @@ public class LLDPTLV extends Packet {
     }
 
     /**
-     * @param short - the length to set
+     * @param length the length to set
      * @return LLDPTLV
      */
     public LLDPTLV setLength(short length) {
@@ -140,7 +140,7 @@ public class LLDPTLV extends Packet {
     }
 
     /**
-     * @param byte[] - the value to set
+     * @param value the value to set
      * @return LLDPTLV
      */
     public LLDPTLV setValue(byte[] value) {
@@ -266,10 +266,10 @@ public class LLDPTLV extends Packet {
     /**
      * Creates the custom TLV value including OUI, subtype and custom string
      *
-     * @param portId
+     * @param customString
      *            port identifier string
      * @return the custom TLV value in byte array
-     * @see {@link #createCustomTLVValue(byte,String)}
+     * @see #createCustomTLVValue(byte[],byte[])
      */
     static public byte[] createCustomTLVValue(String customString) {
         byte[] customByteArray = customString.getBytes(Charset.defaultCharset());
@@ -279,7 +279,7 @@ public class LLDPTLV extends Packet {
     /**
      * Creates the custom TLV value including OUI, subtype and custom string
      * @param subtype openflow subtype
-     * @param portId
+     * @param customByteArray
      *            port identifier string
      * @return the custom TLV value in byte array
      */
