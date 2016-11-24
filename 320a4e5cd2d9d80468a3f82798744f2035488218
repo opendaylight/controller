@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "3a65312a_34d56c1c",
+        "filename": "opendaylight/md-sal/cds-access-client/src/main/java/org/opendaylight/controller/cluster/access/client/AbstractClientConnection.java",
+        "patchSetId": 72
+      },
+      "lineNbr": 145,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-11-24T12:52:54Z",
+      "side": 1,
+      "message": "enqueue of request does not count as \u0027progress\u0027 -- only completion of requests does.",
+      "parentUuid": "3a65312a_fa2ac48e",
+      "range": {
+        "startLine": 145,
+        "startChar": 51,
+        "endLine": 145,
+        "endChar": 52
+      },
+      "revId": "320a4e5cd2d9d80468a3f82798744f2035488218",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a65312a_7a487487",
         "filename": "opendaylight/md-sal/cds-access-client/src/main/java/org/opendaylight/controller/cluster/access/client/AbstractClientConnection.java",
         "patchSetId": 72
@@ -36,6 +60,30 @@
       "writtenOn": "2016-11-23T11:33:32Z",
       "side": 1,
       "message": "This method returns a behavior.",
+      "range": {
+        "startLine": 160,
+        "startChar": 39,
+        "endLine": 160,
+        "endChar": 69
+      },
+      "revId": "320a4e5cd2d9d80468a3f82798744f2035488218",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a65312a_74dfe43b",
+        "filename": "opendaylight/md-sal/cds-access-client/src/main/java/org/opendaylight/controller/cluster/access/client/AbstractClientConnection.java",
+        "patchSetId": 72
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-11-24T12:52:54Z",
+      "side": 1,
+      "message": "yeah, copy\u0026paste. will correct it.",
+      "parentUuid": "3a65312a_7a487487",
       "range": {
         "startLine": 160,
         "startChar": 39,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "3a65312a_d416b8f0",
+        "filename": "opendaylight/md-sal/cds-access-client/src/main/java/org/opendaylight/controller/cluster/access/client/AbstractClientConnection.java",
+        "patchSetId": 72
+      },
+      "lineNbr": 170,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-11-24T12:52:54Z",
+      "side": 1,
+      "message": "empty queues do not timeout.",
+      "parentUuid": "3a65312a_fa7c84b7",
+      "range": {
+        "startLine": 170,
+        "startChar": 24,
+        "endLine": 170,
+        "endChar": 25
+      },
+      "revId": "320a4e5cd2d9d80468a3f82798744f2035488218",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a65312a_dab0a88d",
         "filename": "opendaylight/md-sal/cds-access-client/src/main/java/org/opendaylight/controller/cluster/access/client/AbstractClientConnection.java",
         "patchSetId": 72
@@ -82,6 +154,30 @@
       "writtenOn": "2016-11-23T11:33:32Z",
       "side": 1,
       "message": "This is brittle. Imagine this scenario:\n\n0. (some churn);\n1. last entry so far is dequed;\n2. nothing is pending for a long time;\n3. an entry is enqueued;\n4. line 168 gets executed;\n\nThe point is, there may be only few nanoseconds between 3 and 4, but the code evaluates the delay between 1 and 4. So this code detects false timeout, leading to occasional disconnect.\nThat may be fine in normal circumstances (assuming no data loss), but it would make things worse when the system is stressed.\n\nLine 216 does the right thing, but that only leads to reconnect.",
+      "range": {
+        "startLine": 172,
+        "startChar": 35,
+        "endLine": 172,
+        "endChar": 63
+      },
+      "revId": "320a4e5cd2d9d80468a3f82798744f2035488218",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a65312a_f4c93479",
+        "filename": "opendaylight/md-sal/cds-access-client/src/main/java/org/opendaylight/controller/cluster/access/client/AbstractClientConnection.java",
+        "patchSetId": 72
+      },
+      "lineNbr": 172,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-11-24T12:52:54Z",
+      "side": 1,
+      "message": "The value here is 15 minutes -- attempting to us in the last couple of nanoseconds does not make sense -- readTime() itself takes around 20ns.",
+      "parentUuid": "3a65312a_dab0a88d",
       "range": {
         "startLine": 172,
         "startChar": 35,
