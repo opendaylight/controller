@@ -11,7 +11,8 @@ package org.opendaylight.controller.cluster.raft.protobuff.client.messages;
 /**
  * An instance of a Payload class is meant to be used as the Payload for
  * AppendEntries.
- * <p/>
+ *
+ * <p>
  * When an actor which is derived from RaftActor attempts to persistData it
  * must pass an instance of the Payload class. Similarly when state needs to
  * be applied to the derived RaftActor it will be passed an instance of the

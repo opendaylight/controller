@@ -22,7 +22,7 @@ import javax.annotation.Nullable;
  *
  * It can optionally capture the context where it was allocated.
  *
- * <T> identifier type
+ * @param <T> identifier type
  */
 @Beta
 public abstract class AbstractDOMStoreTransaction<T> implements DOMStoreTransaction {

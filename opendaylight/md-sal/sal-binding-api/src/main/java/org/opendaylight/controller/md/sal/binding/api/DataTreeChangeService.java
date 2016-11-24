@@ -12,7 +12,7 @@ import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 
 /**
- * A {@link DOMService} which allows users to register for changes to a
+ * A {@link BindingService} which allows users to register for changes to a
  * subtree.
  */
 public interface DataTreeChangeService extends BindingService {

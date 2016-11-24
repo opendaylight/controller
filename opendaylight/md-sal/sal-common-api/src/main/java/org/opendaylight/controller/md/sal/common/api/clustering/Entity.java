@@ -15,10 +15,9 @@ import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 /**
- * <p></p>
  * A clustered Entity is something which is shared by multiple applications across a cluster. An Entity has a type
  * and an identifier.
- * </p>
+ *
  * <p>
  * The type describes the type of the Entity where examples of a type maybe "openflow" or "netconf"
  * etc. An Entity type could be tied to how exactly an application shares and "owns" an entity. For example we may want
@@ -26,16 +25,15 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
  * first served basis. On the other hand for netconf entity types we may want applications to gain ownership based on
  * a load balancing approach. While this mechanism of assigning a ownership acquisition strategy is not finalized the
  * intention is that the entity type will play a role in determining the strategy and thus should be put in place.
- * </p>
+ *
  * <p>
  * The identifier is a YangInstanceIdentifier. The reason for the choice of YangInstanceIdentifier is because it
  * can easily be used to represent a data node. For example an inventory node represents a shared entity and it is best
  * referenced by the YangInstanceIdentifier if the inventory node is stored in the data store.
- * </p>
+ *
+ * <p>
  * Note that an entity identifier must conform to a valid yang schema. If there is no existing yang schema to
  * represent an entity, the general-entity yang model can be used.
- * <p>
- * </p>
  */
 public final class Entity implements Serializable {
     private static final long serialVersionUID = 1L;

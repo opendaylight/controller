@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Base implementation of Module. This implementation contains base logic for Module reconfiguration with associated fields.
- * @param <M> Type of module implementation. Enables easier implementation for the {@link #isSame} method
+ * @param <M> Type of module implementation. Enables easier implementation for the <code>isSame()</code> method
  */
 public abstract class AbstractModule<M extends AbstractModule<M>> implements org.opendaylight.controller.config.spi.Module {
 

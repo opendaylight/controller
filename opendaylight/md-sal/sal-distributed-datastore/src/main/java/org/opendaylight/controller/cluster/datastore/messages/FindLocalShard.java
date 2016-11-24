@@ -10,14 +10,14 @@ package org.opendaylight.controller.cluster.datastore.messages;
 
 /**
  * FindLocalShard is a message that should be sent to the
- * {@link org.opendaylight.controller.cluster.datastore.shardmanager.ShardManager} when we need to find a reference
+ * org.opendaylight.controller.cluster.datastore.shardmanager.ShardManager when we need to find a reference
  * to a LocalShard.
  */
 public class FindLocalShard {
     private final String shardName;
     private final boolean waitUntilInitialized;
 
-    public FindLocalShard(String shardName, boolean waitUntilInitialized) {
+    public FindLocalShard(final String shardName, final boolean waitUntilInitialized) {
         this.shardName = shardName;
         this.waitUntilInitialized = waitUntilInitialized;
     }

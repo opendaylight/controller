@@ -26,7 +26,7 @@ import org.opendaylight.yangtools.concepts.Path;
  * t1.submit();
  *
  * AsyncReadTransaction t2 = broker.newReadOnlyTransaction();
- * Optional<?> maybeData = t2.read(id).get();
+ * Optional&lt;?&gt; maybeData = t2.read(id).get();
  *
  * it may happen, that it sees maybeData.isPresent() == false, simply because
  * t1 has not completed the processes of being applied and t2 is actually

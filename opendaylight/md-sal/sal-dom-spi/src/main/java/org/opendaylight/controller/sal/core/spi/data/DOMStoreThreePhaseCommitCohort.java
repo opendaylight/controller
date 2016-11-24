@@ -13,7 +13,7 @@ import com.google.common.util.concurrent.ListenableFuture;
  * Interface implemented by the {@link DOMStore} and exposed for each {@link DOMStoreWriteTransaction}
  * upon its transition to Ready state. The frontend (DOMStore user) uses this interface to drive the
  * commit procedure across potentially multiple DOMStores using the Three-Phase-Commit (3PC) Protocol,
- * as described in {@link https://en.wikipedia.org/wiki/Three-phase_commit}.
+ * as described in <a href="https://en.wikipedia.org/wiki/Three-phase_commit">Three-Phase-Commit Protocol</a>.
  */
 public interface DOMStoreThreePhaseCommitCohort {
 
@@ -29,6 +29,7 @@ public interface DOMStoreThreePhaseCommitCohort {
      *         true if transaction is approved by data store.
      *         <li>false if the transaction is not approved by data store and
      *         should be aborted.
+     *         </ul>
      */
     ListenableFuture<Boolean> canCommit();
 

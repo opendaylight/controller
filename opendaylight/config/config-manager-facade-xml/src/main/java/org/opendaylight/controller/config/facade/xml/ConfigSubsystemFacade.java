@@ -59,7 +59,7 @@ import org.w3c.dom.Element;
 
 /**
  * Config subsystem facade for xml format
- * <p/>
+ * <p>
  * TODO extract generic interface for config subsystem facades
  */
 public class ConfigSubsystemFacade implements Closeable {

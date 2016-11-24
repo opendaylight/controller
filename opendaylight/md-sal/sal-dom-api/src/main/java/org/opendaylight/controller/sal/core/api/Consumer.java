@@ -41,7 +41,7 @@ public interface Consumer {
      * @deprecated - no longer used or needed
      * *
      * Suggested implementation until removed:
-     * @code {
+     * {@code
      * public Collection<ConsumerFunctionality> getConsumerFunctionality() {
      *    return Collections.emptySet();
      * }

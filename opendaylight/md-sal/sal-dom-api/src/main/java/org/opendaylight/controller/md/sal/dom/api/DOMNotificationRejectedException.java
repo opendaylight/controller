@@ -11,10 +11,9 @@ package org.opendaylight.controller.md.sal.dom.api;
  * <p>
  * This exception indicates that given notification can not be processed by corresponding mechanism.
  * More info can be provided in message.
- * <p/>
+ *
  * <p>
  * Expected use: {@link DOMNotificationPublishService}
- * </p>
  */
 public class DOMNotificationRejectedException extends Exception {
     private static final long serialVersionUID = 1L;

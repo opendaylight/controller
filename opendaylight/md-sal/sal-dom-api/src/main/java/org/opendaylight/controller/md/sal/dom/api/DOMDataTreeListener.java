@@ -36,7 +36,7 @@ public interface DOMDataTreeListener extends EventListener {
      * a connection to external subtree source is broken. The listener will not receive any other
      * callbacks, but its registration still needs to be closed to prevent resource leak.
      *
-     * @param cause Collection of failure causes, may not be null or empty.
+     * @param causes Collection of failure causes, may not be null or empty.
      */
     void onDataTreeFailed(@Nonnull Collection<DOMDataTreeListeningException> causes);
 }

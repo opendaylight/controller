@@ -19,9 +19,12 @@ import org.opendaylight.yangtools.concepts.WritableObject;
 /**
  * Enumeration of all ABI versions supported by this implementation of persistence. An ABI version has to be bumped
  * whenever:
- * - a new event is defined
- * - serialization format is changed
- * <p/>
+ * <ul>
+ * <li>a new event is defined</li>
+ * <li>serialization format is changed</li>
+ * </ul>
+ *
+ * <p>
  * This version effectively defines the protocol version between actors participating on a particular shard. A shard
  * participant instance should oppose RAFT candidates which produce persistence of an unsupported version. If a follower
  * encounters an unsupported version it must not become fully-operational, as it does not have an accurate view

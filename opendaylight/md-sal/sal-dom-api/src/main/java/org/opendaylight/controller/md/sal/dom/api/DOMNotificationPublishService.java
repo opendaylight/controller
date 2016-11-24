@@ -41,12 +41,15 @@ public interface DOMNotificationPublishService extends DOMService, BrokerService
      * Abstract subclasses can refine the return type as returning a promise of a
      * more specific type, e.g.:
      *
+     * {@code
      *     public interface DeliveryStatus { int getListenerCount(); }
      *     ListenableFuture<? extends DeliveryStatus> putNotification(DOMNotification notification);
+     * }
      *
      * Once the Future succeeds, the resulting object can be queried for traits using
      * instanceof, e.g:
      *
+     * {@code
      *     // Can block when (for example) the implemention's ThreadPool queue is full
      *     Object o = service.putNotification(notif).get();
      *     if (o instanceof DeliveryStatus) {
@@ -83,7 +86,7 @@ public interface DOMNotificationPublishService extends DOMService, BrokerService
      * @param notification Notification to be published.
      * @return A listenable future which will report completion when the service
      *         has finished propagating the notification to its immediate registrants,
-     *         or {@value #REJECTED} if resource constraints prevent
+     *         or {@link #REJECTED} if resource constraints prevent
      *         the implementation from accepting the notification for delivery.
      * @throws NullPointerException if notification is null.
      */
@@ -102,7 +105,7 @@ public interface DOMNotificationPublishService extends DOMService, BrokerService
      * @param unit a TimeUnit determining how to interpret the timeout parameter
      * @return A listenable future which will report completion when the service
      *         has finished propagating the notification to its immediate registrants,
-     *         or {@value #REJECTED} if resource constraints prevent
+     *         or {@link #REJECTED} if resource constraints prevent
      *         the implementation from accepting the notification for delivery.
      * @throws InterruptedException if interrupted while waiting
      * @throws NullPointerException if notification or unit is null.
