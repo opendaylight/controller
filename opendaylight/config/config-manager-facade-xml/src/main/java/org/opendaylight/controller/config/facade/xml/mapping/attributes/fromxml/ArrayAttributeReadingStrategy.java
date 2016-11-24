@@ -18,10 +18,6 @@ public class ArrayAttributeReadingStrategy extends AbstractAttributeReadingStrat
 
     private final AttributeReadingStrategy innerStrategy;
 
-    /**
-     * @param attributeIfc
-     * @param innerStrategy
-     */
     public ArrayAttributeReadingStrategy(String nullableDefault, AttributeReadingStrategy innerStrategy) {
         super(nullableDefault);
         this.innerStrategy = innerStrategy;

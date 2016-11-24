@@ -93,7 +93,7 @@ import scala.concurrent.duration.FiniteDuration;
 
 /**
  * A Shard represents a portion of the logical data tree.
- * <p/>
+ * <p>
  * Our Shard uses InMemoryDataTree as it's internal representation and delegates all requests it
  */
 public class Shard extends RaftActor {

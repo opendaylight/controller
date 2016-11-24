@@ -61,7 +61,7 @@ public interface NotificationPublishService extends BindingService {
      * @param notification
      *            the notification to publish.
      * @return A listenable future which will report completion when the service has finished
-     * propagating the notification to its immediate registrants, or {@value #REJECTED} if resource
+     * propagating the notification to its immediate registrants, or {@link #REJECTED} if resource
      * constraints prevent
      * @throws NullPointerException if the notification is null
      */
@@ -80,7 +80,7 @@ public interface NotificationPublishService extends BindingService {
      * @param unit a TimeUnit determining how to interpret the
      *             timeout parameter
      * @return A listenable future which will report completion when the service has finished
-     * propagating the notification to its immediate registrants, or {@value #REJECTED} if resource
+     * propagating the notification to its immediate registrants, or {@link #REJECTED} if resource
      * constraints prevent
      * @throws InterruptedException if interrupted while waiting
      * @throws NullPointerException if the notification or unit is null

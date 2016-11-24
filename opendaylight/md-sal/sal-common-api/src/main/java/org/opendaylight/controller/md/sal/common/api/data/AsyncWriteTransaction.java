@@ -132,8 +132,6 @@ public interface AsyncWriteTransaction<P extends Path<P>, D> extends AsyncTransa
      * <p>
      * This call logically seals the transaction, which prevents the client from
      * further changing data tree using this transaction. Any subsequent calls to
-     * {@link #put(LogicalDatastoreType, Path, Object)},
-     * {@link #merge(LogicalDatastoreType, Path, Object)} or
      * {@link #delete(LogicalDatastoreType, Path)} will fail with
      * {@link IllegalStateException}.
      *
@@ -149,24 +147,24 @@ public interface AsyncWriteTransaction<P extends Path<P>, D> extends AsyncTransa
      * The effects of a successful commit of data depends on data change listeners
      * ({@link AsyncDataChangeListener}) and commit participants
      * ({@link AsyncConfigurationCommitHandler}) that are registered with the data broker.
-     * <p>
+     *
      * <h3>Example usage:</h3>
      * <pre>
      *  private void doWrite( final int tries ) {
      *      WriteTransaction writeTx = dataBroker.newWriteOnlyTransaction();
      *
      *      MyDataObject data = ...;
-     *      InstanceIdentifier<MyDataObject> path = ...;
+     *      InstanceIdentifier&lt;MyDataObject&gt; path = ...;
      *      writeTx.put( LogicalDatastoreType.OPERATIONAL, path, data );
      *
-     *      Futures.addCallback( writeTx.submit(), new FutureCallback<Void>() {
+     *      Futures.addCallback( writeTx.submit(), new FutureCallback&lt;Void&gt;() {
      *          public void onSuccess( Void result ) {
      *              // succeeded
      *          }
      *
      *          public void onFailure( Throwable t ) {
      *              if( t instanceof OptimisticLockFailedException ) {
-     *                  if( ( tries - 1 ) > 0 ) {
+     *                  if( ( tries - 1 ) &lt; 0 ) {
      *                      // do retry
      *                      doWrite( tries - 1 );
      *                  } else {
@@ -214,7 +212,7 @@ public interface AsyncWriteTransaction<P extends Path<P>, D> extends AsyncTransa
      * which are based on same initial state, Tx 1 completes successfully
      * before Tx 2 is submitted.
      *
-     * <table>
+     * <table summary="">
      * <tr><th>Initial state</th><th>Tx 1</th><th>Tx 2</th><th>Result</th></tr>
      * <tr><td>Empty</td><td>put(A,1)</td><td>put(A,2)</td><td>Tx 2 will fail, state is A=1</td></tr>
      * <tr><td>Empty</td><td>put(A,1)</td><td>merge(A,2)</td><td>A=2</td></tr>
@@ -238,7 +236,7 @@ public interface AsyncWriteTransaction<P extends Path<P>, D> extends AsyncTransa
      * which are based on same initial state, Tx 1 completes successfully
      * before Tx 2 is submitted.
      *
-     * <table>
+     * <table summary="">
      * <tr><th>Initial state</th><th>Tx 1</th><th>Tx 2</th><th>Result</th></tr>
      *
      * <tr><td>Empty</td><td>put(TOP,[])</td><td>put(TOP,[])</td><td>Tx 2 will fail, state is TOP=[]</td></tr>

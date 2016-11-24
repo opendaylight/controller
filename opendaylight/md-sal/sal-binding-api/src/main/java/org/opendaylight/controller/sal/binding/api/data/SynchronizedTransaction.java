@@ -26,10 +26,10 @@ import com.google.common.base.Preconditions;
  * To get instance of synchronized wrapper use {@link #from(DataModificationTransaction)}
  *
  * @deprecated Replaced by more specific transaction types. Please use
- *          {@link org.opendaylight.controller.md.sal.binding.api.DataBroker#newReadOnlyTransaction(),
- *          {@link org.opendaylight.controller.md.sal.binding.api.DataBroker#newReadWriteTransaction()
+ *          {@link org.opendaylight.controller.md.sal.binding.api.DataBroker#newReadOnlyTransaction()},
+ *          {@link org.opendaylight.controller.md.sal.binding.api.DataBroker#newReadWriteTransaction()}
  *          or
- *          {@link org.opendaylight.controller.md.sal.binding.api.DataBroker#newWriteOnlyTransaction().
+ *          {@link org.opendaylight.controller.md.sal.binding.api.DataBroker#newWriteOnlyTransaction()}.
  *
  */
 @Deprecated

@@ -37,7 +37,6 @@ public abstract class BitBufferHelper {
 
     /**
      * Returns the first byte from the byte array
-     * @param byte[] data
      * @return byte value
      */
     public static byte getByte(byte[] data) {
@@ -55,7 +54,6 @@ public abstract class BitBufferHelper {
     /**
      * Returns the short value for the byte array passed.
      * Size of byte array is restricted to Short.SIZE
-     * @param byte[] data
      * @return short value
      */
     public static short getShort(byte[] data) {
@@ -73,7 +71,6 @@ public abstract class BitBufferHelper {
     /**
      * Returns the int value for the byte array passed.
      * Size of byte array is restricted to Integer.SIZE
-     * @param byte[] data
      * @return int - the integer value of byte array
      */
     public static int getInt(byte[] data) {
@@ -91,7 +88,6 @@ public abstract class BitBufferHelper {
     /**
      * Returns the long value for the byte array passed.
      * Size of byte array is restricted to Long.SIZE
-     * @param byte[] data
      * @return long - the integer value of byte array
      */
     public static long getLong(byte[] data) {
@@ -109,8 +105,6 @@ public abstract class BitBufferHelper {
     /**
      * Returns the short value for the last numBits of the byte array passed.
      * Size of numBits is restricted to Short.SIZE
-     * @param byte[] data
-     * @param int - numBits
      * @return short - the short value of byte array
      */
     public static short getShort(byte[] data, int numBits) {
@@ -135,8 +129,6 @@ public abstract class BitBufferHelper {
     /**
      * Returns the int value for the last numBits of the byte array passed.
      * Size of numBits is restricted to Integer.SIZE
-     * @param byte[] data
-     * @param int - numBits
      * @return int - the integer value of byte array
      */
     public static int getInt(byte[] data, int numBits) {
@@ -161,8 +153,6 @@ public abstract class BitBufferHelper {
     /**
      * Returns the long value for the last numBits of the byte array passed.
      * Size of numBits is restricted to Long.SIZE
-     * @param byte[] data
-     * @param int - numBits
      * @return long - the integer value of byte array
      */
     public static long getLong(byte[] data, int numBits) {
@@ -205,9 +195,8 @@ public abstract class BitBufferHelper {
      * 0101000010 | 0000101 | 1111001010010101011
      * will be returned as {0,0,0,0,0,1,0,1}
      *
-     * @param byte[] data
-     * @param int startOffset - offset to start fetching bits from data from
-     * @param int numBits - number of bits to be fetched from data
+     * @param startOffset - offset to start fetching bits from data from
+     * @param numBits - number of bits to be fetched from data
      * @return byte [] - LSB aligned bits
      *
      * @throws BufferException
@@ -286,10 +275,10 @@ public abstract class BitBufferHelper {
 
     /**
      * Bits are expected to be stored in the input byte array from LSB
-     * @param byte[] - data to set the input byte
-     * @param byte - input byte to be inserted
-     * @param startOffset - offset of data[] to start inserting byte from
-     * @param numBits - number of bits of input to be inserted into data[]
+     * @param data to set the input byte
+     * @param input byte to be inserted
+     * @param startOffset offset of data[] to start inserting byte from
+     * @param numBits number of bits of input to be inserted into data[]
      *
      * @throws BufferException
      *             when the input, startOffset and numBits are not congruent
@@ -304,11 +293,10 @@ public abstract class BitBufferHelper {
 
     /**
      * Bits are expected to be stored in the input byte array from LSB
-     * @param byte[] - data to set the input byte
-     * @param byte[] - input bytes to be inserted
-     * @param startOffset - offset of data[] to start inserting byte from
-     * @param numBits - number of bits of input to be inserted into data[]
-     * @return void
+     * @param data to set the input byte
+     * @param input bytes to be inserted
+     * @param startOffset offset of data[] to start inserting byte from
+     * @param numBits number of bits of input to be inserted into data[]
      * @throws BufferException
      *             when the startOffset and numBits parameters are not congruent
      *             with data and input buffers' size
@@ -321,9 +309,6 @@ public abstract class BitBufferHelper {
 
     /**
      * Returns numBits 1's in the MSB position
-     *
-     * @param numBits
-     * @return
      */
     public static int getMSBMask(int numBits) {
         int mask = 0;
@@ -335,9 +320,6 @@ public abstract class BitBufferHelper {
 
     /**
      * Returns numBits 1's in the LSB position
-     *
-     * @param numBits
-     * @return
      */
     public static int getLSBMask(int numBits) {
         int mask = 0;
@@ -350,7 +332,6 @@ public abstract class BitBufferHelper {
     /**
      * Returns the numerical value of the byte array passed
      *
-     * @param byte[] - array
      * @return long - numerical value of byte array passed
      */
     static public long toNumber(byte[] array) {
@@ -372,8 +353,6 @@ public abstract class BitBufferHelper {
      * Returns the numerical value of the last numBits (LSB bits) of the byte
      * array passed
      *
-     * @param byte[] - array
-     * @param int - numBits
      * @return long - numerical value of byte array passed
      */
     static public long toNumber(byte[] array, int numBits) {
@@ -405,12 +384,7 @@ public abstract class BitBufferHelper {
      * Accepts a number as input and returns its value in byte form in LSB
      * aligned form example: input = 5000 [1001110001000] bytes = 19, -120
      * [00010011] [10001000]
-     *
-     * @param Number
-     * @return byte[]
-     *
      */
-
     public static byte[] toByteArray(Number input) {
         Class<? extends Number> dataType = input.getClass();
         short size = 0;
@@ -445,9 +419,7 @@ public abstract class BitBufferHelper {
      * aligned form example: input = 5000 [1001110001000] bytes = -114, 64
      * [10011100] [01000000]
      *
-     * @param Number
-     *            input
-     * @param int numBits - the number of bits to be returned
+     * @param numBits - the number of bits to be returned
      * @return byte[]
      *
      */
@@ -500,21 +472,15 @@ public abstract class BitBufferHelper {
 
     /**
      * Takes an LSB aligned byte array and returned the LSB numBits in a MSB
-     * aligned byte array
-     *
-     * @param inputbytes
-     * @param numBits
-     * @return
-     */
-    /**
+     * aligned byte array.
+     * <p>
      * It aligns the last numBits bits to the head of the byte array following
      * them with numBits % 8 zero bits.
      *
      * Example: For inputbytes = [00000111][01110001] and numBits = 12 it
      * returns: shiftedBytes = [01110111][00010000]
      *
-     * @param byte[] inputBytes
-     * @param int numBits - number of bits to be left aligned
+     * @param numBits - number of bits to be left aligned
      * @return byte[]
      */
     public static byte[] shiftBitsToMSB(byte[] inputBytes, int numBits) {
@@ -571,8 +537,8 @@ public abstract class BitBufferHelper {
      * Example: For inputbytes = [01110111][00010000] and numBits = 12 it
      * returns: shiftedBytes = [00000111][01110001]
      *
-     * @param byte[] inputBytes
-     * @param int numBits - number of bits to be right aligned
+     * @param inputBytes
+     * @param numBits - number of bits to be right aligned
      * @return byte[]
      */
     public static byte[] shiftBitsToLSB(byte[] inputBytes, int numBits) {
@@ -604,11 +570,6 @@ public abstract class BitBufferHelper {
      * Insert in the data buffer at position dictated by the offset the number
      * of bits specified from the input data byte array. The input byte array
      * has the bits stored starting from the LSB
-     *
-     * @param byte[] data
-     * @param byte[] inputdata
-     * @param int startOffset
-     * @param int numBits
      */
     public static void insertBits(byte[] data, byte[] inputdataLSB,
             int startOffset, int numBits) {
@@ -690,10 +651,7 @@ public abstract class BitBufferHelper {
 
     /**
      * Checks for overflow and underflow exceptions
-     * @param data
-     * @param startOffset
-     * @param numBits
-     * @throws PacketException when the startOffset and numBits parameters
+     * @throws BufferException when the startOffset and numBits parameters
      *                    are not congruent with the data buffer's size
      */
     public static void checkExceptions(byte[] data, int startOffset, int numBits)

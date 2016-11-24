@@ -21,7 +21,7 @@ import org.opendaylight.yangtools.yang.binding.NotificationListener;
  * are registered using {@link #registerNotificationListener(org.opendaylight.yangtools.yang.binding.NotificationListener)}
  * method.
  *
- * <h5>Dispatch Listener Example</h5>
+ * <h3>Dispatch Listener Example</h3>
  * <p>
  * Lets assume we have following YANG model:
  *
@@ -40,14 +40,14 @@ import org.opendaylight.yangtools.yang.binding.NotificationListener;
  * </pre>
  *
  * The generated interface will be:
- * <pre>
+ * {@code
  *  public interface ExampleListener extends NotificationListener {
  *      void onStart(Start notification);
  *      void onStop(Stop notification);
  *  }
- * </pre>
+ * }
  * The following defines an implementation of the generated interface:
- * <pre>
+ * {@code
  *  public class MyExampleListener implements ExampleListener {
  *      public void onStart(Start notification) {
  *          // do something
@@ -57,12 +57,12 @@ import org.opendaylight.yangtools.yang.binding.NotificationListener;
  *          // do something
  *      }
  *  }
- * </pre>
+ * }
  * The implementation is registered as follows:
- * <pre>
+ * {@code
  *  MyExampleListener listener = new MyExampleListener();
  *  ListenerRegistration<NotificationListener> reg = service.registerNotificationListener( listener );
- * </pre>
+ * }
  * The <code>onStart</code> method will be invoked when someone publishes a <code>Start</code> notification and
  * the <code>onStop</code> method will be invoked when someone publishes a <code>Stop</code> notification.
  */

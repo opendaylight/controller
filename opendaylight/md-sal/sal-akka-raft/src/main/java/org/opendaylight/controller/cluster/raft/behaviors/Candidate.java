@@ -24,7 +24,7 @@ import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 
 /**
  * The behavior of a RaftActor when it is in the Candidate raft state.
- * <p/>
+ * <p>
  * Candidates (§5.2):
  * <ul>
  * <li> On conversion to candidate, start election:

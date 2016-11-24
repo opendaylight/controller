@@ -22,7 +22,7 @@ import org.opendaylight.controller.cluster.raft.persisted.NoopPayload;
  * the log with the leader's current term. Once the no-op entry is committed, all prior entries are committed
  * indirectly. Once all entries are committed, ie commitIndex matches the last log index, it switches to the
  * normal Leader state.
- * <p/>
+ * <p>
  * The use of a no-op entry in this manner is outlined in the last paragraph in §8 of the
  * <a href="https://raft.github.io/raft.pdf">extended raft version</a>.
  *

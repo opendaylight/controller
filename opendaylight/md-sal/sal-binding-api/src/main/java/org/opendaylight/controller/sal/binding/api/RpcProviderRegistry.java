@@ -68,11 +68,11 @@ import org.opendaylight.yangtools.yang.binding.RpcService;
  *
  * <h3>Routed RPC example</h3>
  * <p>
- * <h5>1. Defining a Context Type</h5>
+ * <h4>1. Defining a Context Type</h4>
  * <p>
  * The following snippet declares a simple YANG <code>identity</code> named <code>example-context</code>:
  *
- * <pre>
+ * {@code
  * module example {
  *     ...
  *     identity example-context {
@@ -80,7 +80,7 @@ import org.opendaylight.yangtools.yang.binding.RpcService;
  *     }
  *     ...
  * }
- * </pre>
+ * }
  * <p>
  * We then use the declared identity to define a context type by using it in combination
  * with the <code>context-instance</code> YANG extension. We'll associate the context type
@@ -90,7 +90,7 @@ import org.opendaylight.yangtools.yang.binding.RpcService;
  * The following YANG snippet imports the <code>yang-ext</code> module and defines the list
  * element named <code>item</code> inside a container named <code>foo</code>:
  *
- * <pre>
+ * {@code
  * module foo {
  *     ...
  *     import yang-ext {prefix ext;}
@@ -104,7 +104,7 @@ import org.opendaylight.yangtools.yang.binding.RpcService;
  *     }
  *     ...
  * }
- * </pre>
+ * }
  * <p>
  * The statement <code>ext:context-instance "example-context";</code> inside the list element
  * declares that any instance identifier referencing <code>item</code> in the data
@@ -257,7 +257,7 @@ public interface RpcProviderRegistry extends //
      * @param serviceInterface the YANG-generated interface of the RPC Service for which to register.
      * @param implementation the implementation instance to register.
      * @return a RoutedRpcRegistration instance which can be used to register paths for the RPC
-     *         implementation via invoking {@link RoutedRpcRegistration#registerPath(....).
+     *         implementation via invoking RoutedRpcRegistration#registerPath(Class, InstanceIdentifer).
      *         {@link RoutedRpcRegistration#close()} should be called to unregister the implementation
      *         and all previously registered paths when no longer needed.
      *

@@ -64,9 +64,6 @@ import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ConsumerCo
 *      DataBroker databroker = session.getSALService(BindingDataBroker.class);
 * }
 * }
-* @see org.opendaylight.controller.md.sal.common.api.data.BindingDataBroker
-* for more info on using the DataBroker.
-*
 */
 public interface BindingAwareConsumer {
 

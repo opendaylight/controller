@@ -17,7 +17,7 @@ import javax.annotation.Nullable;
  * Reply to {@link FindLeader} message, containing the address of the leader actor, as known to the raft actor which
  * sent the message. If the responding actor does not have knowledge of the leader, {@link #getLeaderActor()} will
  * return {@link Optional#empty()}.
- * <p/>
+ * <p>
  * This message is intended for testing purposes only.
  */
 @VisibleForTesting

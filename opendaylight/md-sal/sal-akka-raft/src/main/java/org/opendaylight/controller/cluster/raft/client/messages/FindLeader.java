@@ -15,7 +15,7 @@ import java.io.Serializable;
  * Request to locate the leader raft actor. Each {@link org.opendaylight.controller.cluster.raft.RaftActor} must
  * respond with a {@link FindLeaderReply} containing the address of the leader, as it is known to that particular
  * actor.
- * <p/>
+ * <p>
  * This message is intended for testing purposes only.
  */
 @VisibleForTesting

@@ -16,7 +16,7 @@ import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
 
 /**
  * This subclass is used for registering readable module into JMX, it is also
- * used as underlying provider in {@link RuntimeBeanRegistratorImpl}. Closing
+ * used as underlying provider in RuntimeBeanRegistratorImpl. Closing
  * the instance thus unregisters all JMX beans related to the module excluding
  * currently open transactions.
  */

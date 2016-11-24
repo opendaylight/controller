@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
  * of {@link org.opendaylight.controller.config.spi.Module#validate()} and
  * {@link org.opendaylight.controller.config.spi.Module#getInstance()} is also
  * guaranteed by
- * {@link org.opendaylight.controller.config.manager.impl.ConfigTransactionControllerInternal}
+ * org.opendaylight.controller.config.manager.impl.ConfigTransactionControllerInternal
  * so the actual {@link org.opendaylight.controller.config.spi.Module} needs not
  * to be thread safe.
  * </p>

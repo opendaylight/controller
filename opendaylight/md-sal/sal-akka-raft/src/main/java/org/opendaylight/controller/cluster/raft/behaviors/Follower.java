@@ -41,7 +41,6 @@ import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPay
 
 /**
  * The behavior of a RaftActor in the Follower raft state.
- * <p/>
  * <ul>
  * <li> Respond to RPCs from candidates and leaders
  * <li> If election timeout elapses without receiving AppendEntries

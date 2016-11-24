@@ -44,8 +44,8 @@ public interface DOMRpcService extends DOMService {
      * to prevent this scenario from occurring.
      *
      * @param listener {@link DOMRpcAvailabilityListener} instance to register
-     * @return A {@link DOMRpcAvailabilityListenerRegistration} representing this registration. Performing
-     *         a {@link DOMRpcAvailabilityListenerRegistration#close()} will cancel it. Returned object
+     * @return A {@link ListenerRegistration} representing this registration. Performing
+     *         a {@link ListenerRegistration#close()} will cancel it. Returned object
      *         is guaranteed to be non-null.
      */
     @Nonnull <T extends DOMRpcAvailabilityListener> ListenerRegistration<T> registerRpcListener(@Nonnull T listener);

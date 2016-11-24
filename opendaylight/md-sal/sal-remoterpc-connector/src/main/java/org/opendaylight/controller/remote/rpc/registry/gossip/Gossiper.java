@@ -44,16 +44,16 @@ import scala.concurrent.duration.FiniteDuration;
 
 /**
  * Gossiper that syncs bucket store across nodes in the cluster.
- * <p/>
+ * <p>
  * It keeps a local scheduler that periodically sends Gossip ticks to
  * itself to send bucket store's bucket versions to a randomly selected remote
  * gossiper.
- * <p/>
+ * <p>
  * When bucket versions are received from a remote gossiper, it is compared
  * with bucket store's bucket versions. Which ever buckets are newer
  * locally, are sent to remote gossiper. If any bucket is older in bucket store,
  * a gossip status is sent to remote gossiper so that it can send the newer buckets.
- * <p/>
+ * <p>
  * When a bucket is received from a remote gossiper, its sent to the bucket store
  * for update.
  *

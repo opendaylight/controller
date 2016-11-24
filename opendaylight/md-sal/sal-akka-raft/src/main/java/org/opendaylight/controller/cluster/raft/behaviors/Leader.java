@@ -24,7 +24,7 @@ import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 
 /**
  * The behavior of a RaftActor when it is in the Leader state.
- * <p/>
+ * <p>
  * Leaders:
  * <ul>
  * <li> Upon election: send initial empty AppendEntries RPCs
@@ -38,7 +38,7 @@ import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
  * follower (§5.3)
  * <li> If AppendEntries fails because of log inconsistency:
  * decrement nextIndex and retry (§5.3)
- * <li> If there exists an N such that N > commitIndex, a majority
+ * <li> If there exists an N such that N &gt; commitIndex, a majority
  * of matchIndex[i] ≥ N, and log[N].term == currentTerm:
  * set commitIndex = N (§5.3, §5.4).
  * </ul>
@@ -107,14 +107,14 @@ public class Leader extends AbstractLeader {
      * <li>Start a timer (Stopwatch).</li>
      * <li>Send an initial AppendEntries heartbeat to all followers.</li>
      * <li>On AppendEntriesReply, check if the follower's new match Index matches the leader's last index</li>
-     * <li>If it matches, </li>
+     * <li>If it matches,
      *   <ul>
      *   <li>Send an additional AppendEntries to ensure the follower has applied all its log entries to its state.</li>
      *   <li>Send an ElectionTimeout to the follower to immediately start an election.</li>
      *   <li>Notify {@link RaftActorLeadershipTransferCohort#transferComplete}.</li>
-     *   </ul>
+     *   </ul></li>
      * <li>Otherwise if the election time out period elapses, notify
-     *     {@link RaftActorLeadershipTransferCohort#abortTtransfer}.</li>
+     *     {@link RaftActorLeadershipTransferCohort#abortTransfer}.</li>
      * </ul>
      *
      * @param leadershipTransferCohort the cohort participating in the leadership transfer

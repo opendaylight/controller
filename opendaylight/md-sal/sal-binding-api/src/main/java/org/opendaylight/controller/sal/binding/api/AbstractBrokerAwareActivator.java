@@ -78,7 +78,7 @@ public abstract class AbstractBrokerAwareActivator implements BundleActivator {
 
     /**
      * Called when this bundle is started (before
-     * {@link #onSessionInitiated(ProviderContext)} so the Framework can perform
+     * {@link BindingAwareProvider#onSessionInitiated(ProviderContext)} so the Framework can perform
      * the bundle-specific activities necessary to start this bundle. This
      * method can be used to register services or to allocate any resources that
      * this bundle needs.
@@ -88,7 +88,7 @@ public abstract class AbstractBrokerAwareActivator implements BundleActivator {
      *
      * @param context
      *            The execution context of the bundle being started.
-     * @throws Exception
+     * @throws RuntimeException
      *             If this method throws an exception, this bundle is marked as
      *             stopped and the Framework will remove this bundle's
      *             listeners, unregister all services registered by this bundle,
@@ -110,7 +110,7 @@ public abstract class AbstractBrokerAwareActivator implements BundleActivator {
      * This method must complete and return to its caller in a timely manner.
      *
      * @param context The execution context of the bundle being stopped.
-     * @throws Exception If this method throws an exception, the bundle is still
+     * @throws RuntimeException If this method throws an exception, the bundle is still
      *         marked as stopped, and the Framework will remove the bundle's
      *         listeners, unregister all services registered by the bundle, and
      *         release all services used by the bundle.

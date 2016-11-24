@@ -25,7 +25,7 @@ import com.google.common.base.Preconditions;
  * needing to provide only
  *
  * @param <M> Protocol message type
- * @param <S> Protocol session type, has to extend ProtocolSession<M>
+ * @param <S> Protocol session type, has to extend {@code ProtocolSession<M>}
  */
 @Deprecated
 public abstract class AbstractSessionNegotiator<M, S extends AbstractProtocolSession<?>> extends ChannelInboundHandlerAdapter implements SessionNegotiator<S> {

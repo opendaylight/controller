@@ -17,16 +17,15 @@ import java.lang.annotation.Target;
  * of a module. This annotation must be present for each dependency setter in
  * {@link org.opendaylight.controller.config.spi.Module} M(X)Bean interface.
  * Together with name of dependent bean the {@link #value()} will be used to get
- * {@link ObjectName} of dependency.
+ * {@link javax.management.ObjectName} of dependency.
  *
  * <p>
  * Example:<br>
  *
  * <code>
- *
- * @RequireInterface(value = ThreadPoolServiceInterface.class, optional =
- *                         false)<br/> void setThreadPool(ObjectName on);
- *                         </code>
+ * {@literal @}RequireInterface(value = ThreadPoolServiceInterface.class, optional = false)<br>
+ * void setThreadPool(ObjectName on);
+ * </code>
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)

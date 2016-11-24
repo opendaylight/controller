@@ -76,10 +76,10 @@ public abstract class Packet {
      * This method deserializes the data bits obtained from the wire into the
      * respective header and payload which are of type Packet
      *
-     * @param byte[] data - data from wire to deserialize
-     * @param int bitOffset bit position where packet header starts in data
+     * @param data - data from wire to deserialize
+     * @param bitOffset bit position where packet header starts in data
      *        array
-     * @param int size of packet in bits
+     * @param size size of packet in bits
      * @return Packet
      * @throws PacketException
      */
@@ -205,7 +205,7 @@ public abstract class Packet {
      * normal Packet.serialize() path. An example is the checksum computation
      * for IPv4
      *
-     * @param byte[] - serialized bytes
+     * @param myBytes serialized bytes
      * @throws PacketException
      */
     protected void postSerializeCustomOperation(byte[] myBytes)
@@ -220,8 +220,8 @@ public abstract class Packet {
      * Currently only IPv4 and ICMP do checksum computation and validation. TCP
      * and UDP need to implement these if required.
      *
-     * @param byte[] data The byte stream representing the Ethernet frame
-     * @param int startBitOffset The bit offset from where the byte array corresponding to this Packet starts in the frame
+     * @param data The byte stream representing the Ethernet frame
+     * @param startBitOffset The bit offset from where the byte array corresponding to this Packet starts in the frame
      * @throws PacketException
      */
     protected void postDeserializeCustomOperation(byte[] data, int startBitOffset)
@@ -255,8 +255,6 @@ public abstract class Packet {
      * 'fieldname'. The offset is present in the hdrFieldCoordMap of the
      * respective packet class
      *
-     * @param String
-     *            fieldName
      * @return Integer - startOffset of the requested field
      */
     public int getfieldOffset(String fieldName) {
@@ -268,8 +266,6 @@ public abstract class Packet {
      * 'fieldname'. The numBits are present in the hdrFieldCoordMap of the
      * respective packet class
      *
-     * @param String
-     *            fieldName
      * @return Integer - number of bits of the requested field
      */
     public int getfieldnumBits(String fieldName) {

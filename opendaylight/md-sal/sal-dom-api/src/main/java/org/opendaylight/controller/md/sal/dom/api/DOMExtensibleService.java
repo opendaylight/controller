@@ -16,8 +16,8 @@ import javax.annotation.Nonnull;
  * Aside for marking these, they also provide runtime query to detect whether
  * a particular trait is in fact available.
  *
- * <T> Base {@link DOMService}
- * <E> Extension type
+ * @param <T> Base {@link DOMService}
+ * @param <E> Extension type
  */
 @Beta
 public interface DOMExtensibleService<T extends DOMExtensibleService<T, E>, E extends DOMServiceExtension<T, E>> extends DOMService {

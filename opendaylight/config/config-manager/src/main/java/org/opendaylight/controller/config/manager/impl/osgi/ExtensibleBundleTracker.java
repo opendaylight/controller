@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
  *
  * Primary customizer may return tracking object,
  * which will be passed to it during invocation of
- * {@link BundleTrackerCustomizer#removedBundle(Bundle, BundleEvent, Future)}
+ * {@link BundleTrackerCustomizer#removedBundle(Bundle, BundleEvent, Object)}
  *
  *
  * This extender modifies behaviour to not leak platform thread

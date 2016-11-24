@@ -15,13 +15,13 @@ import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 
 /**
  * Leader which is termed as isolated.
- * <p/>
+ * <p>
  * If the reply from the majority of the followers  is not received then the leader changes its behavior
  * to IsolatedLeader. An isolated leader may have followers and they would continue to receive replicated messages.
- * <p/>
+ * <p>
  * A schedule is run, at an interval of (10 * Heartbeat-time-interval),  in the Leader
  * to check if its isolated or not.
- * <p/>
+ * <p>
  * In the Isolated Leader , on every AppendEntriesReply, we aggressively check if the leader is isolated.
  * If no, then the state is switched back to Leader.
  *
