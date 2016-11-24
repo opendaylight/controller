@@ -49,6 +49,7 @@ public interface AsyncConfigurationCommitHandler<P extends Path<P>, D> {
      * </li>
      * </ul>
      * </li>
+     * </ul>
      * @param request
      *            Commit Request submitted by client, which contains
      *            information about modifications and read-only view as

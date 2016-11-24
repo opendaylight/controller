@@ -12,10 +12,12 @@ import javax.annotation.Nullable;
 
 /**
  * ElectionTerm contains information about a RaftActors election term.
- * <p/>
+ *
+ * <p>
  * This information includes the last known current term of the RaftActor
  * and which candidate was voted for by the RaftActor in that term.
- * <p/>
+ *
+ * <p>
  * This class ensures that election term information is persisted.
  */
 public interface ElectionTerm {

@@ -52,8 +52,6 @@ public class EthernetAddress extends DataLinkAddress {
      *
      * @param macAddress A byte array in big endian format
      * representing the Ethernet MAC Address
-     *
-     * @return The constructed object if valid
      */
     public EthernetAddress(byte[] macAddress) throws ConstructionException {
         super(addressName);

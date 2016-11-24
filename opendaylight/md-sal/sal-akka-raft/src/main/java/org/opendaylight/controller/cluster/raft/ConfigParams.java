@@ -13,10 +13,12 @@ import scala.concurrent.duration.FiniteDuration;
 
 /**
  * Configuration Parameter interface for configuring the Raft consensus system
- * <p/>
+ *
+ * <p>
  * Any component using this implementation might want to provide an implementation of
  * this interface to configure
- * <p/>
+ *
+ * <p>
  * A default implementation will be used if none is provided.
  *
  * @author Kamal Rameshan

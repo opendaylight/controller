@@ -45,27 +45,28 @@ import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderCo
  *
  * To get a NotificationService:
  *
- * {code
+ * {@code
  * public void onSessionInitiated(ProviderContext session) {
  *      NotificationProviderService notificationService = session.getSALService(NotificationProviderService.class);
+ * }
  * }
  * For more information on sending notifications via the NotificationProviderService
  * @see org.opendaylight.controller.sal.binding.api.NotificationProviderService
  *
  * To register an RPC implementation:
  *
- * {code
+ * {@code
  * public void onSessionInitiated(ProviderContext session) {
  *    RpcRegistration<MyService> registration = session.addRpcImplementation(MyService.class, myImplementationInstance);
  * }
+ * }
  *
  * <p>
- *
  * Where MyService.class is a Service interface generated from a yang model with RPCs modeled in it and myImplementationInstance
  * is an instance of a class that implements MyService.
  *
  * To register a Routed RPC Implementation:
- * {code
+ * {@code
  * public void onSessionInitiated(ProviderContext session) {
  *   RoutedRpcRegistration<SalFlowService> flowRegistration = session.addRoutedRpcImplementation(SalFlowService.class, salFlowServiceImplementationInstance);
      flowRegistration.registerPath(NodeContext.class, nodeInstanceId);
@@ -76,7 +77,7 @@ import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderCo
  * of a class that implements SalFlowService.
  * <p>
  * The line:
- * {code
+ * {@code
  * flowRegistration.registerPath(NodeContext.class, nodeInstanceId);
  * }
  * Is indicating that the RPC implementation is registered to handle RPC invocations that have their NodeContext pointing to the node with instance id nodeInstanceId.
@@ -92,14 +93,11 @@ import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderCo
  *
  * To get a DataBroker to allow access to the data tree:
  *
- * {code
+ * {@code
  * public void onSessionInitiated(final ProviderContext session) {
  *      DataBroker databroker = session.getSALService(BindingDataBroker.class);
  * }
  * }
- * @see org.opendaylight.controller.md.sal.common.api.data.BindingDataBroker
- * for more info on using the DataBroker.
- *
  */
 public interface BindingAwareProvider {
 

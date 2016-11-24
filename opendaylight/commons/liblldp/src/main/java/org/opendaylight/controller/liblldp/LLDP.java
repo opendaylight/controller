@@ -90,7 +90,7 @@ public class LLDP extends Packet {
     }
 
     /**
-     * @param String
+     * @param type
      *            - description of the type of TLV
      * @return LLDPTLV - full TLV
      */
@@ -103,11 +103,10 @@ public class LLDP extends Packet {
     }
 
     /**
-     * @param String
+     * @param type
      *            - description of the type of TLV
-     * @param LLDPTLV
+     * @param tlv
      *            - tlv to set
-     * @return void
      */
     public void setTLV(String type, LLDPTLV tlv) {
         putToTLVs(getType(type), tlv);
@@ -121,7 +120,7 @@ public class LLDP extends Packet {
     }
 
     /**
-     * @param LLDPTLV
+     * @param chassisId
      *            - the chassisId to set
      */
     public LLDP setChassisId(LLDPTLV chassisId) {
@@ -137,8 +136,8 @@ public class LLDP extends Packet {
     }
 
     /**
-     * @param LLDPTLV
-     *            - the chassisId to set
+     * @param systemNameId
+     *            - the systemNameId to set
      */
     public LLDP setSystemNameId(LLDPTLV systemNameId) {
         setTLV(SYSTEMNAMEID, systemNameId);
@@ -153,7 +152,7 @@ public class LLDP extends Packet {
     }
 
     /**
-     * @param LLDPTLV
+     * @param portId
      *            - the portId to set
      * @return LLDP
      */
@@ -170,7 +169,7 @@ public class LLDP extends Packet {
     }
 
     /**
-     * @param LLDPTLV
+     * @param ttl
      *            - the ttl to set
      * @return LLDP
      */
@@ -206,7 +205,7 @@ public class LLDP extends Packet {
     }
 
     /**
-     * @param customTLVList
+     * @param customTLV
      *            the list of custom TLVs to set
      * @return this LLDP
      */

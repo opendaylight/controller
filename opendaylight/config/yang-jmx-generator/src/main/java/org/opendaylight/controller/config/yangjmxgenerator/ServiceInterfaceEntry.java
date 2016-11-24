@@ -43,7 +43,6 @@ import org.slf4j.LoggerFactory;
  * </pre>
  *
  * </blockquote>
- * </p>
  */
 public class ServiceInterfaceEntry extends AbstractEntry {
     private static final Logger LOG = LoggerFactory

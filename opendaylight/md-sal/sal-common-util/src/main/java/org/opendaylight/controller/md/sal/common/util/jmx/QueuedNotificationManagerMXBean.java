@@ -13,7 +13,7 @@ import java.util.List;
 import org.opendaylight.yangtools.util.concurrent.ListenerNotificationQueueStats;
 
 /**
- * MXBean interface for {@link QueuedNotificationManager} statistic metrics.
+ * MXBean interface for {@link org.opendaylight.yangtools.util.concurrent.QueuedNotificationManager} statistic metrics.
  *
  * @author Thomas Pantelis
  */

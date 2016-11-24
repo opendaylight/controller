@@ -160,7 +160,7 @@ public class Config {
     }
 
     /**
-     * return a map containing namespace -> moduleName -> instanceName map. Attribute parsing is omitted.
+     * return a map containing namespace -&gt; moduleName -&gt; instanceName map. Attribute parsing is omitted.
      */
     public Map<String, Multimap<String, ModuleElementDefinition>> fromXmlModulesMap(XmlElement xml,
             EditStrategyType defaultEditStrategyType, ServiceRegistryWrapper serviceTracker) throws DocumentedException {

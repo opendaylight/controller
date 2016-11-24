@@ -26,7 +26,7 @@ public interface DOMNotificationService extends DOMService, BrokerService {
      * @param listener Notification instance to register
      * @param types Notification types which should be delivered to the listener. Duplicate
      *              entries are processed only once, null entries are ignored.
-     * @return Registration handle. Invoking {@link DOMNotificationListenerRegistration#close()}
+     * @return Registration handle. Invoking {@link ListenerRegistration#close()}
      *         will stop the delivery of notifications to the listener
      * @throws IllegalArgumentException if types is empty or contains an invalid element, such as
      *         null or a SchemaPath which does not represent a valid {@link DOMNotification} type.
@@ -42,7 +42,7 @@ public interface DOMNotificationService extends DOMService, BrokerService {
      * @param listener Notification instance to register
      * @param types Notification types which should be delivered to the listener. Duplicate
      *              entries are processed only once, null entries are ignored.
-     * @return Registration handle. Invoking {@link DOMNotificationListenerRegistration#close()}
+     * @return Registration handle. Invoking {@link ListenerRegistration#close()}
      *         will stop the delivery of notifications to the listener
      * @throws IllegalArgumentException if types is empty or contains an invalid element, such as
      *         null or a SchemaPath which does not represent a valid {@link DOMNotification} type.

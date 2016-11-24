@@ -17,15 +17,11 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 
 /**
- *
- *
  * @deprecated Replaced by more specific transaction types. Please use
- *          {@link org.opendaylight.controller.md.sal.binding.api.DataBroker#newReadOnlyTransaction(),
- *          {@link org.opendaylight.controller.md.sal.binding.api.DataBroker#newReadWriteTransaction()
+ *          {@link org.opendaylight.controller.md.sal.binding.api.DataBroker#newReadOnlyTransaction()},
+ *          {@link org.opendaylight.controller.md.sal.binding.api.DataBroker#newReadWriteTransaction()}
  *          or
- *          {@link org.opendaylight.controller.md.sal.binding.api.DataBroker#newWriteOnlyTransaction().
- *
- *
+ *          {@link org.opendaylight.controller.md.sal.binding.api.DataBroker#newWriteOnlyTransaction()}.
  */
 @Deprecated
 public interface DataModificationTransaction extends
@@ -41,7 +37,7 @@ public interface DataModificationTransaction extends
      * Initiates a two-phase commit of candidate data.
      *
      * <p>
-     * The {@link Consumer} could initiate a commit of candidate data
+     * The Consumer could initiate a commit of candidate data
      *
      * <p>
      * The successful commit changes the state of the system and may affect
@@ -49,15 +45,11 @@ public interface DataModificationTransaction extends
      *
      * <p>
      * The effects of successful commit of data are described in the
-     * specifications and YANG models describing the {@link Provider} components
-     * of controller. It is assumed that {@link Consumer} has an understanding
+     * specifications and YANG models describing the Provider components
+     * of controller. It is assumed that the Consumer has an understanding
      * of this changes.
      *
      *
-     * @see org.opendaylight.controller.md.sal.common.api.data.DataCommitHandler for further information how two-phase commit is
-     *      processed.
-     * @param store
-     *            Identifier of the store, where commit should occur.
      * @return Result of the commit, containing success information or list of
      *         encountered errors, if commit was not successful.
      */

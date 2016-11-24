@@ -37,8 +37,6 @@ abstract public class DataLinkAddress implements Serializable {
      *
      * @param name Create a new DataLink, not for general use but
      * available only for sub classes
-     *
-     * @return constructed object
      */
     protected DataLinkAddress(String name) {
         this.name = name;

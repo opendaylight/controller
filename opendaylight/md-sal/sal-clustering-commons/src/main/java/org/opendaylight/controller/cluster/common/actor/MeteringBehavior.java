@@ -17,7 +17,8 @@ import org.opendaylight.controller.cluster.reporting.MetricsReporter;
 
 /**
  * Represents behaviour that can be exhibited by actors of type {@link akka.actor.UntypedActor}
- * <p/>
+ *
+ * <p>
  * This behaviour meters actor's default behaviour. It captures 2 metrics:
  * <ul>
  *     <li>message processing rate of actor's receive block</li>
@@ -70,11 +71,13 @@ public class MeteringBehavior implements Procedure<Object> {
     /**
      * Uses 2 timers to measure message processing rate. One for overall message processing rate and
      * another to measure rate by message type. The timers are re-used if they were previously created.
-     * <p/>
+     *
+     * <p>
      * {@link com.codahale.metrics.MetricRegistry} maintains a reservoir for different timers where
      * collected timings are kept. It exposes various metrics for each timer based on collected
      * data. Eg: count of messages, 99, 95, 50... percentiles, max, mean etc.
-     * <p/>
+     *
+     * <p>
      * These metrics are exposed as JMX bean.
      *
      * @see <a href="http://dropwizard.github.io/metrics/manual/core/#timers">

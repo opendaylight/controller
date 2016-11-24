@@ -15,7 +15,7 @@ import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 
 /**
  * Event source is a node in topology which is able to produces notifications.
- * To register event source you use {@link EventSourceRegistry#registerEventSource(EventSource)()}.
+ * To register event source you use {@link EventSourceRegistry#registerEventSource(EventSource)}.
  * EventSourceRegistry will request registered event source to publish notifications
  * whenever EventSourceRegistry has been asked to publish a certain type of notifications.
  * EventSourceRegistry will call method JoinTopic to request EventSource to publish notification.

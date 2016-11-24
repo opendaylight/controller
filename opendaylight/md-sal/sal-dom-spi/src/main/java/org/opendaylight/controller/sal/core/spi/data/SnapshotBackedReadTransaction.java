@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
  * Implementation of read-only transaction backed by {@link DataTreeSnapshot}
  * which delegates most of its calls to similar methods provided by underlying snapshot.
  *
- * <T> identifier type
+ * @param <T> identifier type
  */
 @Beta
 public final class SnapshotBackedReadTransaction<T> extends AbstractDOMStoreTransaction<T> implements DOMStoreReadTransaction {

@@ -49,9 +49,6 @@ public abstract class ConfigJMXNotification extends Notification {
      * Creates notification about successful commit execution.
      *
      * Intended for config-persister.
-     *
-     * @param transactionName
-     * @param cfgSnapshot
      */
     public static CommitJMXNotification afterCommit(NotificationBroadcasterSupport source, String messages) {
         return new CommitJMXNotification(source, messages);

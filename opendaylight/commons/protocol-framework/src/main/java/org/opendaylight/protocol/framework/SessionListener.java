@@ -19,7 +19,7 @@ public interface SessionListener<M, S extends ProtocolSession<?>, T extends Term
     /**
      * Fired when the session was established successfully.
      *
-     * @param remoteParams Peer address families which we accepted
+     * @param session New session
      */
     void onSessionUp(S session);
 

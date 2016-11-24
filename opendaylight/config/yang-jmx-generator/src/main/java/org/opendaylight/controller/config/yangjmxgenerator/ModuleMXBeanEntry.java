@@ -56,7 +56,6 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
  * </pre>
  *
  * </blockquote>
- * </p>
  */
 public class ModuleMXBeanEntry extends AbstractEntry {
 
