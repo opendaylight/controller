@@ -13,6 +13,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Stopwatch;
+import com.google.common.base.Ticker;
 import com.google.common.base.Verify;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -135,8 +136,12 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
                 new DefaultShardDataChangeListenerPublisher(), "");
     }
 
-    String logContext() {
+    final String logContext() {
         return logContext;
+    }
+
+    final Ticker ticker() {
+        return shard.ticker();
     }
 
     public TipProducingDataTree getDataTree() {
