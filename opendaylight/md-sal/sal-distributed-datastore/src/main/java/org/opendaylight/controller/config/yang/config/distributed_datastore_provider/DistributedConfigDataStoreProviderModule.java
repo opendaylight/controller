@@ -93,6 +93,7 @@ public class DistributedConfigDataStoreProviderModule extends AbstractDistribute
                 .transactionDebugContextEnabled(props.getTransactionDebugContextEnabled())
                 .customRaftPolicyImplementation(props.getCustomRaftPolicyImplementation())
                 .shardSnapshotChunkSize(props.getShardSnapshotChunkSize().getValue().intValue())
+                .useTellBasedProtocol(props.getUseTellBasedProtocol())
                 .build();
     }
 
