@@ -4,7 +4,7 @@ module test-rpc-service {
     prefix "rpc";
 
     revision "2014-08-28" {
-        description 
+        description
             "Initial revision";
     }
 
@@ -14,7 +14,7 @@ module test-rpc-service {
                 type string;
             }
         }
-        
+
         output {
             leaf output-data {
                 type string;
