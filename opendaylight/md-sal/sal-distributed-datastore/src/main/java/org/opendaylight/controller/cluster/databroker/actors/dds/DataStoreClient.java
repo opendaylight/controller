@@ -37,6 +37,13 @@ public interface DataStoreClient extends Identifiable<ClientIdentifier>, AutoClo
     @Nonnull ClientLocalHistory createLocalHistory();
 
     /**
+     * Create a new free-standing snapshot.
+     *
+     * @return Client snapshot handle
+     */
+    @Nonnull ClientSnapshot createSnapshot();
+
+    /**
      * Create a new free-standing transaction.
      *
      * @return Client transaction handle

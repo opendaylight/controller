@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Optional;
 import javax.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.commands.CommitLocalTransactionRequest;
+import org.opendaylight.controller.cluster.access.commands.CreateSnapshotRequest;
 import org.opendaylight.controller.cluster.access.commands.OutOfOrderRequestException;
 import org.opendaylight.controller.cluster.access.commands.TransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionSuccess;
@@ -70,6 +71,9 @@ abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdent
             if (request instanceof CommitLocalTransactionRequest) {
                 tx = createReadyTransaction(id, ((CommitLocalTransactionRequest) request).getModification());
                 LOG.debug("{}: allocated new ready transaction {}", persistenceId(), id);
+            } else if (request instanceof CreateSnapshotRequest) {
+                tx = createOpenSnapshot(id);
+                LOG.debug("{}: allocated new open snapshot {}", persistenceId(), id);
             } else {
                 tx = createOpenTransaction(id);
                 LOG.debug("{}: allocated new open transaction {}", persistenceId(), id);
@@ -87,6 +91,8 @@ abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdent
 
         return tx.handleRequest(request, envelope, now);
     }
+
+    abstract FrontendTransaction createOpenSnapshot(TransactionIdentifier id) throws RequestException;
 
     abstract FrontendTransaction createOpenTransaction(TransactionIdentifier id) throws RequestException;
 
