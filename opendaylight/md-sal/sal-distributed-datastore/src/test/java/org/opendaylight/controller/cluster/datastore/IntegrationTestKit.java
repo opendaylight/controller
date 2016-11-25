@@ -49,7 +49,7 @@ public class IntegrationTestKit extends ShardTestKit {
     protected DatastoreContext.Builder datastoreContextBuilder;
     protected DatastoreSnapshot restoreFromSnapshot;
 
-    public IntegrationTestKit(ActorSystem actorSystem, Builder datastoreContextBuilder) {
+    public IntegrationTestKit(final ActorSystem actorSystem, final Builder datastoreContextBuilder) {
         super(actorSystem);
         this.datastoreContextBuilder = datastoreContextBuilder;
     }
@@ -58,24 +58,24 @@ public class IntegrationTestKit extends ShardTestKit {
         return datastoreContextBuilder;
     }
 
-    public DistributedDataStore setupDistributedDataStore(String typeName, String... shardNames) {
+    public AbstractDataStore setupDistributedDataStore(final String typeName, final String... shardNames) {
         return setupDistributedDataStore(typeName, "module-shards.conf", true, SchemaContextHelper.full(), shardNames);
     }
 
-    public DistributedDataStore setupDistributedDataStore(String typeName, boolean waitUntilLeader,
-            String... shardNames) {
+    public AbstractDataStore setupDistributedDataStore(final String typeName, final boolean waitUntilLeader,
+            final String... shardNames) {
         return setupDistributedDataStore(typeName, "module-shards.conf", waitUntilLeader,
                 SchemaContextHelper.full(), shardNames);
     }
 
-    public DistributedDataStore setupDistributedDataStore(String typeName, String moduleShardsConfig,
-            boolean waitUntilLeader, String... shardNames) {
+    public AbstractDataStore setupDistributedDataStore(final String typeName, final String moduleShardsConfig,
+            final boolean waitUntilLeader, final String... shardNames) {
         return setupDistributedDataStore(typeName, moduleShardsConfig, waitUntilLeader,
                 SchemaContextHelper.full(), shardNames);
     }
 
-    public DistributedDataStore setupDistributedDataStore(String typeName, String moduleShardsConfig,
-            boolean waitUntilLeader, SchemaContext schemaContext, String... shardNames) {
+    public AbstractDataStore setupDistributedDataStore(final String typeName, final String moduleShardsConfig,
+            final boolean waitUntilLeader, final SchemaContext schemaContext, final String... shardNames) {
         final ClusterWrapper cluster = new ClusterWrapperImpl(getSystem());
         final Configuration config = new ConfigurationImpl(moduleShardsConfig, "modules.conf");
 
@@ -86,7 +86,7 @@ public class IntegrationTestKit extends ShardTestKit {
         Mockito.doReturn(datastoreContext).when(mockContextFactory).getBaseDatastoreContext();
         Mockito.doReturn(datastoreContext).when(mockContextFactory).getShardDatastoreContext(Mockito.anyString());
 
-        DistributedDataStore dataStore = new DistributedDataStore(getSystem(), cluster, config, mockContextFactory,
+        AbstractDataStore dataStore = new DistributedDataStore(getSystem(), cluster, config, mockContextFactory,
                 restoreFromSnapshot);
 
         dataStore.onGlobalContextUpdated(schemaContext);
@@ -99,7 +99,7 @@ public class IntegrationTestKit extends ShardTestKit {
         return dataStore;
     }
 
-    public void waitUntilLeader(ActorContext actorContext, String... shardNames) {
+    public void waitUntilLeader(final ActorContext actorContext, final String... shardNames) {
         for (String shardName: shardNames) {
             ActorRef shard = findLocalShard(actorContext, shardName);
 
@@ -109,7 +109,7 @@ public class IntegrationTestKit extends ShardTestKit {
         }
     }
 
-    public void waitUntilNoLeader(ActorContext actorContext, String... shardNames) {
+    public void waitUntilNoLeader(final ActorContext actorContext, final String... shardNames) {
         for (String shardName: shardNames) {
             ActorRef shard = findLocalShard(actorContext, shardName);
             assertNotNull("No local shard found for " + shardName, shard);
@@ -118,7 +118,7 @@ public class IntegrationTestKit extends ShardTestKit {
         }
     }
 
-    public void waitForMembersUp(String... otherMembers) {
+    public void waitForMembersUp(final String... otherMembers) {
         Set<String> otherMembersSet = Sets.newHashSet(otherMembers);
         Stopwatch sw = Stopwatch.createStarted();
         while (sw.elapsed(TimeUnit.SECONDS) <= 10) {
@@ -136,7 +136,7 @@ public class IntegrationTestKit extends ShardTestKit {
         fail("Member(s) " + otherMembersSet + " are not Up");
     }
 
-    public static ActorRef findLocalShard(ActorContext actorContext, String shardName) {
+    public static ActorRef findLocalShard(final ActorContext actorContext, final String shardName) {
         ActorRef shard = null;
         for (int i = 0; i < 20 * 5 && shard == null; i++) {
             Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
@@ -148,8 +148,8 @@ public class IntegrationTestKit extends ShardTestKit {
         return shard;
     }
 
-    public static void verifyShardStats(DistributedDataStore datastore, String shardName, ShardStatsVerifier verifier)
-            throws Exception {
+    public static void verifyShardStats(final AbstractDataStore datastore, final String shardName,
+            final ShardStatsVerifier verifier) throws Exception {
         ActorContext actorContext = datastore.getActorContext();
 
         Future<ActorRef> future = actorContext.findLocalShardAsync(shardName);
@@ -173,8 +173,8 @@ public class IntegrationTestKit extends ShardTestKit {
         throw lastError;
     }
 
-    void testWriteTransaction(DistributedDataStore dataStore, YangInstanceIdentifier nodePath,
-            NormalizedNode<?, ?> nodeToWrite) throws Exception {
+    void testWriteTransaction(final AbstractDataStore dataStore, final YangInstanceIdentifier nodePath,
+            final NormalizedNode<?, ?> nodeToWrite) throws Exception {
 
         // 1. Create a write-only Tx
 
@@ -218,7 +218,7 @@ public class IntegrationTestKit extends ShardTestKit {
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    void assertExceptionOnCall(Callable<Void> callable, Class<? extends Exception> expType)
+    void assertExceptionOnCall(final Callable<Void> callable, final Class<? extends Exception> expType)
             throws Exception {
         try {
             callable.call();
@@ -229,7 +229,7 @@ public class IntegrationTestKit extends ShardTestKit {
     }
 
     void assertExceptionOnTxChainCreates(final DOMStoreTransactionChain txChain,
-            Class<? extends Exception> expType) throws Exception {
+            final Class<? extends Exception> expType) throws Exception {
         assertExceptionOnCall(() -> {
             txChain.newWriteOnlyTransaction();
             return null;
