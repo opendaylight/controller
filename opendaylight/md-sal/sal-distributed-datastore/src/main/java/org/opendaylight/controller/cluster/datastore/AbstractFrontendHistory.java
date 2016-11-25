@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Ticker;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -37,17 +38,23 @@ abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdent
 
     private final Map<TransactionIdentifier, FrontendTransaction> transactions = new HashMap<>();
     private final String persistenceId;
+    private final Ticker ticker;
 
-    AbstractFrontendHistory(final String persistenceId) {
+    AbstractFrontendHistory(final String persistenceId, final Ticker ticker) {
         this.persistenceId = Preconditions.checkNotNull(persistenceId);
+        this.ticker = Preconditions.checkNotNull(ticker);
     }
 
     final String persistenceId() {
         return persistenceId;
     }
 
+    final long readTime() {
+        return ticker.read();
+    }
+
     final @Nullable TransactionSuccess<?> handleTransactionRequest(final TransactionRequest<?> request,
-            final RequestEnvelope envelope) throws RequestException {
+            final RequestEnvelope envelope, final long now) throws RequestException {
 
         // FIXME: handle purging of transactions
 
@@ -76,7 +83,7 @@ abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdent
             }
         }
 
-        return tx.handleRequest(request, envelope);
+        return tx.handleRequest(request, envelope, now);
     }
 
     abstract FrontendTransaction createOpenTransaction(TransactionIdentifier id) throws RequestException;

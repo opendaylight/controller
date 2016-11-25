@@ -25,10 +25,12 @@ public final class RequestEnvelope extends Envelope<Request<?, ?>> {
      * Respond to this envelope with a {@link RequestFailure} caused by specified {@link RequestException}.
      *
      * @param cause Cause of this {@link RequestFailure}
+     * @param executionTimeNanos Time to execute the request, in nanoseconds
      * @throws NullPointerException if cause is null
      */
-    public void sendFailure(final RequestException cause) {
-        sendResponse(new FailureEnvelope(getMessage().toRequestFailure(cause), getSessionId(), getTxSequence()));
+    public void sendFailure(final RequestException cause, final long executionTimeNanos) {
+        sendResponse(new FailureEnvelope(getMessage().toRequestFailure(cause), getSessionId(), getTxSequence(),
+            executionTimeNanos));
     }
 
     /**
@@ -37,8 +39,8 @@ public final class RequestEnvelope extends Envelope<Request<?, ?>> {
      * @param success Successful response
      * @throws NullPointerException if success is null
      */
-    public void sendSuccess(final RequestSuccess<?, ?> success) {
-        sendResponse(new SuccessEnvelope(success, getSessionId(), getTxSequence()));
+    public void sendSuccess(final RequestSuccess<?, ?> success, final long executionTimeNanos) {
+        sendResponse(new SuccessEnvelope(success, getSessionId(), getTxSequence(), executionTimeNanos));
     }
 
     private void sendResponse(final ResponseEnvelope<?> envelope) {

@@ -10,8 +10,9 @@ package org.opendaylight.controller.cluster.access.concepts;
 public final class SuccessEnvelope extends ResponseEnvelope<RequestSuccess<?, ?>> {
     private static final long serialVersionUID = 1L;
 
-    public SuccessEnvelope(final RequestSuccess<?, ?> message, final long sessionId, final long txSequence) {
-        super(message, sessionId, txSequence);
+    public SuccessEnvelope(final RequestSuccess<?, ?> message, final long sessionId, final long txSequence,
+            final long executionTimeNanos) {
+        super(message, sessionId, txSequence, executionTimeNanos);
     }
 
     @Override
