@@ -47,8 +47,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
+import org.opendaylight.controller.cluster.datastore.AbstractDataStore;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
-import org.opendaylight.controller.cluster.datastore.DistributedDataStore;
 import org.opendaylight.controller.cluster.datastore.MemberNode;
 import org.opendaylight.controller.cluster.datastore.MemberNode.RaftStateVerifier;
 import org.opendaylight.controller.cluster.datastore.Shard;
@@ -246,8 +246,8 @@ public class ClusterAdminRpcServiceTest {
         verifyFailedRpcResult(rpcResult);
     }
 
-    private static NormalizedNode<?, ?> writeCarsNodeAndVerify(DistributedDataStore writeToStore,
-            DistributedDataStore readFromStore) throws Exception {
+    private static NormalizedNode<?, ?> writeCarsNodeAndVerify(AbstractDataStore writeToStore,
+            AbstractDataStore readFromStore) throws Exception {
         DOMStoreWriteTransaction writeTx = writeToStore.newWriteOnlyTransaction();
         NormalizedNode<?, ?> carsNode = CarsModel.create();
         writeTx.write(CarsModel.BASE_PATH, carsNode);
@@ -262,7 +262,7 @@ public class ClusterAdminRpcServiceTest {
         return carsNode;
     }
 
-    private static void readCarsNodeAndVerify(DistributedDataStore readFromStore,
+    private static void readCarsNodeAndVerify(AbstractDataStore readFromStore,
             NormalizedNode<?, ?> expCarsNode) throws Exception {
         Optional<NormalizedNode<?, ?>> optional = readFromStore.newReadOnlyTransaction()
                 .read(CarsModel.BASE_PATH).get(15, TimeUnit.SECONDS);
@@ -636,7 +636,7 @@ public class ClusterAdminRpcServiceTest {
                 successShardResult("cars", DataStoreType.Operational),
                 successShardResult("people", DataStoreType.Operational));
 
-        verifyVotingStates(new DistributedDataStore[]{leaderNode1.configDataStore(), leaderNode1.operDataStore(),
+        verifyVotingStates(new AbstractDataStore[]{leaderNode1.configDataStore(), leaderNode1.operDataStore(),
                 replicaNode2.configDataStore(), replicaNode2.operDataStore(),
                 replicaNode3.configDataStore(), replicaNode3.operDataStore()},
                 new String[]{"cars", "people"}, new SimpleEntry<>("member-1", true),
@@ -685,7 +685,7 @@ public class ClusterAdminRpcServiceTest {
                 successShardResult("cars", DataStoreType.Operational),
                 successShardResult("people", DataStoreType.Operational));
 
-        verifyVotingStates(new DistributedDataStore[]{leaderNode1.configDataStore(), leaderNode1.operDataStore(),
+        verifyVotingStates(new AbstractDataStore[]{leaderNode1.configDataStore(), leaderNode1.operDataStore(),
                 replicaNode2.configDataStore(), replicaNode2.operDataStore(),
                 replicaNode3.configDataStore(), replicaNode3.operDataStore()},
                 new String[]{"cars", "people"},
@@ -714,7 +714,7 @@ public class ClusterAdminRpcServiceTest {
                 successShardResult("cars", DataStoreType.Operational),
                 successShardResult("people", DataStoreType.Operational));
 
-        verifyVotingStates(new DistributedDataStore[]{leaderNode1.configDataStore(), leaderNode1.operDataStore(),
+        verifyVotingStates(new AbstractDataStore[]{leaderNode1.configDataStore(), leaderNode1.operDataStore(),
                 replicaNode2.configDataStore(), replicaNode2.operDataStore(),
                 replicaNode3.configDataStore(), replicaNode3.operDataStore()},
                 new String[]{"cars", "people"},
@@ -779,7 +779,7 @@ public class ClusterAdminRpcServiceTest {
                 successShardResult("cars", DataStoreType.Operational),
                 successShardResult("people", DataStoreType.Operational));
 
-        verifyVotingStates(new DistributedDataStore[]{replicaNode1.configDataStore(), replicaNode1.operDataStore(),
+        verifyVotingStates(new AbstractDataStore[]{replicaNode1.configDataStore(), replicaNode1.operDataStore(),
                 replicaNode2.configDataStore(), replicaNode2.operDataStore(),
                 replicaNode3.configDataStore(), replicaNode3.operDataStore()},
                 new String[]{"cars", "people"},
@@ -847,7 +847,7 @@ public class ClusterAdminRpcServiceTest {
                 successShardResult("people", DataStoreType.Operational));
 
         // Members 2 and 3 are now non-voting but should get replicated with the new new server config.
-        verifyVotingStates(new DistributedDataStore[]{leaderNode1.configDataStore(), leaderNode1.operDataStore(),
+        verifyVotingStates(new AbstractDataStore[]{leaderNode1.configDataStore(), leaderNode1.operDataStore(),
                 replicaNode2.configDataStore(), replicaNode2.operDataStore(),
                 replicaNode3.configDataStore(), replicaNode3.operDataStore()},
                 new String[]{"cars", "people"},
@@ -863,7 +863,7 @@ public class ClusterAdminRpcServiceTest {
         });
     }
 
-    private void setupPersistedServerConfigPayload(ServerConfigurationPayload serverConfig,
+    private static void setupPersistedServerConfigPayload(ServerConfigurationPayload serverConfig,
             String member, String datastoreTypeSuffix, String... shards) {
         String[] datastoreTypes = {"config_", "oper_"};
         for (String type : datastoreTypes) {
@@ -884,9 +884,9 @@ public class ClusterAdminRpcServiceTest {
     }
 
     @SafeVarargs
-    private static void verifyVotingStates(DistributedDataStore[] datastores, String[] shards,
+    private static void verifyVotingStates(AbstractDataStore[] datastores, String[] shards,
             SimpleEntry<String, Boolean>... expStates) throws Exception {
-        for (DistributedDataStore datastore: datastores) {
+        for (AbstractDataStore datastore: datastores) {
             for (String shard: shards) {
                 verifyVotingStates(datastore, shard, expStates);
             }
@@ -894,7 +894,7 @@ public class ClusterAdminRpcServiceTest {
     }
 
     @SafeVarargs
-    private static void verifyVotingStates(DistributedDataStore datastore, String shardName,
+    private static void verifyVotingStates(AbstractDataStore datastore, String shardName,
             SimpleEntry<String, Boolean>... expStates) throws Exception {
         String localMemberName = datastore.getActorContext().getCurrentMemberName().getName();
         Map<String, Boolean> expStateMap = new HashMap<>();
