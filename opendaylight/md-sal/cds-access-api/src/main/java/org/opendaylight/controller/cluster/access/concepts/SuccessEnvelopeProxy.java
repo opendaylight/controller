@@ -22,7 +22,8 @@ final class SuccessEnvelopeProxy extends AbstractResponseEnvelopeProxy<RequestSu
     }
 
     @Override
-    SuccessEnvelope createEnvelope(final RequestSuccess<?, ?> message, final long sessionId, final long txSequence) {
-        return new SuccessEnvelope(message, sessionId, txSequence);
+    ResponseEnvelope<RequestSuccess<?, ?>> createEnvelope(final RequestSuccess<?, ?> message, final long sessionId,
+            final long txSequence, final long executionTimeNanos) {
+        return new SuccessEnvelope(message, sessionId, txSequence, executionTimeNanos);
     }
 }
