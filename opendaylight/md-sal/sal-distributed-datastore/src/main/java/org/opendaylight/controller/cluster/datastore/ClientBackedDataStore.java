@@ -1,11 +1,10 @@
 /*
- * Copyright (c) 2014 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2016 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorSystem;
@@ -20,51 +19,38 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionChain;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 
 /**
- * Implements a distributed DOMStore using Akka Patterns.ask().
+ * Implements a distributed DOMStore using ClientActor.
  */
-public class DistributedDataStore extends AbstractDataStore {
+public class ClientBackedDataStore extends AbstractDataStore {
 
-    private final TransactionContextFactory txContextFactory;
-
-    public DistributedDataStore(final ActorSystem actorSystem, final ClusterWrapper cluster,
+    public ClientBackedDataStore(final ActorSystem actorSystem, final ClusterWrapper cluster,
             final Configuration configuration, final DatastoreContextFactory datastoreContextFactory,
             final DatastoreSnapshot restoreFromSnapshot) {
         super(actorSystem, cluster, configuration, datastoreContextFactory, restoreFromSnapshot);
-        this.txContextFactory = new TransactionContextFactory(getActorContext(), getIdentifier());
     }
 
     @VisibleForTesting
-    DistributedDataStore(final ActorContext actorContext, final ClientIdentifier identifier) {
+    ClientBackedDataStore(final ActorContext actorContext, final ClientIdentifier identifier) {
         super(actorContext, identifier);
-        this.txContextFactory = new TransactionContextFactory(getActorContext(), getIdentifier());
     }
-
 
     @Override
     public DOMStoreTransactionChain createTransactionChain() {
-        return txContextFactory.createTransactionChain();
+        return new ClientBackedTransactionChain(getClient().createLocalHistory());
     }
 
     @Override
     public DOMStoreReadTransaction newReadOnlyTransaction() {
-        return new TransactionProxy(txContextFactory, TransactionType.READ_ONLY);
+        return new ClientBackedReadTransaction(getClient().createTransaction());
     }
 
     @Override
     public DOMStoreWriteTransaction newWriteOnlyTransaction() {
-        getActorContext().acquireTxCreationPermit();
-        return new TransactionProxy(txContextFactory, TransactionType.WRITE_ONLY);
+        return new ClientBackedWriteTransaction(getClient().createTransaction());
     }
 
     @Override
     public DOMStoreReadWriteTransaction newReadWriteTransaction() {
-        getActorContext().acquireTxCreationPermit();
-        return new TransactionProxy(txContextFactory, TransactionType.READ_WRITE);
-    }
-
-    @Override
-    public void close() {
-        txContextFactory.close();
-        super.close();
+        return new ClientBackedReadWriteTransaction(getClient().createTransaction());
     }
 }
