@@ -49,6 +49,16 @@ public final class ClientLocalHistory extends AbstractClientHistory implements A
     }
 
     @Override
+    void onTransactionAbort(final TransactionIdentifier txId) {
+        final State local = state();
+        if (local == State.TX_OPEN) {
+            updateState(local, State.IDLE);
+        }
+
+        super.onTransactionAbort(txId);
+    }
+
+    @Override
     AbstractTransactionCommitCohort onTransactionReady(final TransactionIdentifier txId,
             final AbstractTransactionCommitCohort cohort) {
         final State local = state();
