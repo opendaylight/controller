@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Ticker;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.RequestException;
@@ -24,8 +25,9 @@ final class StandaloneFrontendHistory extends AbstractFrontendHistory {
     private final LocalHistoryIdentifier identifier;
     private final ShardDataTree tree;
 
-    StandaloneFrontendHistory(final String persistenceId, final ClientIdentifier clientId, final ShardDataTree tree) {
-        super(persistenceId);
+    StandaloneFrontendHistory(final String persistenceId, final Ticker ticker, final ClientIdentifier clientId,
+            final ShardDataTree tree) {
+        super(persistenceId, ticker);
         this.identifier = new LocalHistoryIdentifier(clientId, 0);
         this.tree = Preconditions.checkNotNull(tree);
     }
