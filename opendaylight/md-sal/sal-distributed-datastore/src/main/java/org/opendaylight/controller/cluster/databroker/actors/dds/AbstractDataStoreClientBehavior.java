@@ -202,6 +202,12 @@ abstract class AbstractDataStoreClientBehavior extends ClientActorBehavior<Shard
     }
 
     @Override
+    public final ClientSnapshot createSnapshot() {
+        // Same semantics
+        return createTransaction();
+    }
+
+    @Override
     public final void close() {
         context().executeInActor(this::shutdown);
     }
