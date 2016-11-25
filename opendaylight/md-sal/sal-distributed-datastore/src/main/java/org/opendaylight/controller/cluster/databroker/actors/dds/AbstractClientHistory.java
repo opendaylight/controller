@@ -49,7 +49,7 @@ abstract class AbstractClientHistory extends LocalAbortable implements Identifia
             AtomicReferenceFieldUpdater.newUpdater(AbstractClientHistory.class, State.class, "state");
 
     @GuardedBy("this")
-    private final Map<TransactionIdentifier, ClientTransaction> openTransactions = new HashMap<>();
+    private final Map<TransactionIdentifier, AbstractClientHandle<?>> openTransactions = new HashMap<>();
     @GuardedBy("this")
     private final Map<TransactionIdentifier, AbstractTransactionCommitCohort> readyTransactions = new HashMap<>();
 
@@ -99,7 +99,7 @@ abstract class AbstractClientHistory extends LocalAbortable implements Identifia
             LOG.debug("Force-closing history {}", getIdentifier(), cause);
 
             synchronized (this) {
-                for (ClientTransaction t : openTransactions.values()) {
+                for (AbstractClientHandle<?> t : openTransactions.values()) {
                     t.localAbort(cause);
                 }
                 openTransactions.clear();
@@ -152,16 +152,21 @@ abstract class AbstractClientHistory extends LocalAbortable implements Identifia
         }
     }
 
-    /**
-     * Allocate a {@link ClientTransaction}.
-     *
-     * @return A new {@link ClientTransaction}
-     * @throws TransactionChainClosedException if this history is closed
-     */
-    public final ClientTransaction createTransaction() {
+    private void checkNotClosed() {
         if (state == State.CLOSED) {
             throw new TransactionChainClosedException(String.format("Local history %s is closed", identifier));
         }
+    }
+
+    /**
+     * Allocate a new {@link ClientTransaction}.
+     *
+     * @return A new {@link ClientTransaction}
+     * @throws TransactionChainClosedException if this history is closed
+     * @throws IllegalStateException if a previous dependent transaction has not been closed
+     */
+    public final ClientTransaction createTransaction() {
+        checkNotClosed();
 
         synchronized (this) {
             final ClientTransaction ret = doCreateTransaction();
@@ -169,6 +174,26 @@ abstract class AbstractClientHistory extends LocalAbortable implements Identifia
             return ret;
         }
     }
+
+    /**
+     * Create a new {@link ClientSnapshot}.
+     *
+     * @return A new {@link ClientSnapshot}
+     * @throws TransactionChainClosedException if this history is closed
+     * @throws IllegalStateException if a previous dependent transaction has not been closed
+     */
+    public final ClientSnapshot takeSnapshot() {
+        checkNotClosed();
+
+        synchronized (this) {
+            final ClientSnapshot ret = doCreateSnapshot();
+            openTransactions.put(ret.getIdentifier(), ret);
+            return ret;
+        }
+    }
+
+    @GuardedBy("this")
+    abstract ClientSnapshot doCreateSnapshot();
 
     @GuardedBy("this")
     abstract ClientTransaction doCreateTransaction();
@@ -179,10 +204,12 @@ abstract class AbstractClientHistory extends LocalAbortable implements Identifia
      * @param txId Transaction identifier
      * @param cohort Transaction commit cohort
      */
-    synchronized AbstractTransactionCommitCohort onTransactionReady(final TransactionIdentifier txId,
+    synchronized AbstractTransactionCommitCohort onTransactionReady(final ClientTransaction tx,
             final AbstractTransactionCommitCohort cohort) {
-        final ClientTransaction tx = openTransactions.remove(txId);
-        Preconditions.checkState(tx != null, "Failed to find open transaction for %s", txId);
+        final TransactionIdentifier txId = tx.getIdentifier();
+        if (openTransactions.remove(txId) == null) {
+            LOG.warn("Transaction {} not recorded, proceeding with readiness", txId);
+        }
 
         final AbstractTransactionCommitCohort previous = readyTransactions.putIfAbsent(txId, cohort);
         Preconditions.checkState(previous == null, "Duplicate cohort %s for transaction %s, already have %s",
@@ -196,11 +223,11 @@ abstract class AbstractClientHistory extends LocalAbortable implements Identifia
      * Callback invoked from {@link ClientTransaction} when a child transaction has been aborted without touching
      * backend.
      *
-     * @param txId transaction identifier
+     * @param snapshot transaction identifier
      */
-    synchronized void onTransactionAbort(final TransactionIdentifier txId) {
-        if (openTransactions.remove(txId) == null) {
-            LOG.warn("Could not find aborting transaction {}", txId);
+    synchronized void onTransactionAbort(final AbstractClientHandle<?> snapshot) {
+        if (openTransactions.remove(snapshot.getIdentifier()) == null) {
+            LOG.warn("Could not find aborting transaction {}", snapshot.getIdentifier());
         }
     }
 

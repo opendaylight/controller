@@ -25,7 +25,12 @@ public final class ReadTransactionRequest extends AbstractReadTransactionRequest
 
     public ReadTransactionRequest(@Nonnull final TransactionIdentifier identifier, final long sequence,
             @Nonnull final ActorRef replyTo, @Nonnull final YangInstanceIdentifier path) {
-        super(identifier, sequence, replyTo, path);
+        this(identifier, sequence, replyTo, path, false);
+    }
+
+    public ReadTransactionRequest(@Nonnull final TransactionIdentifier identifier, final long sequence,
+            @Nonnull final ActorRef replyTo, @Nonnull final YangInstanceIdentifier path, final boolean snapshotOnly) {
+        super(identifier, sequence, replyTo, path, snapshotOnly);
     }
 
     private ReadTransactionRequest(final ReadTransactionRequest request, final ABIVersion version) {
