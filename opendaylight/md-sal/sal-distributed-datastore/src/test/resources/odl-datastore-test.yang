@@ -48,11 +48,11 @@ module odl-datastore-test {
                 }
             }
         }
-        
+
         container outer-container {
         }
     }
-    
+
     container test2 {
         presence "needs to be present when empty";
     }
