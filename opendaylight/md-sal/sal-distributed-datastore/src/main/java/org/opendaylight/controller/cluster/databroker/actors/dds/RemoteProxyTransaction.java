@@ -63,14 +63,22 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
     private static final int REQUEST_MAX_MODIFICATIONS = 1000;
 
     private final ModifyTransactionRequestBuilder builder;
+    private final boolean snapshotOnly;
 
     private boolean builderBusy;
 
     private volatile Exception operationFailure;
 
-    RemoteProxyTransaction(final ProxyHistory parent, final TransactionIdentifier identifier) {
+    RemoteProxyTransaction(final ProxyHistory parent, final TransactionIdentifier identifier,
+            final boolean snapshotOnly) {
         super(parent);
+        this.snapshotOnly = snapshotOnly;
         builder = new ModifyTransactionRequestBuilder(identifier, localActor());
+    }
+
+    @Override
+    boolean isSnapshotOnly() {
+        return snapshotOnly;
     }
 
     @Override
@@ -110,15 +118,15 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
     @Override
     CheckedFuture<Boolean, ReadFailedException> doExists(final YangInstanceIdentifier path) {
         final SettableFuture<Boolean> future = SettableFuture.create();
-        return sendReadRequest(new ExistsTransactionRequest(getIdentifier(), nextSequence(), localActor(), path),
-            t -> completeExists(future, t), future);
+        return sendReadRequest(new ExistsTransactionRequest(getIdentifier(), nextSequence(), localActor(), path,
+            isSnapshotOnly()), t -> completeExists(future, t), future);
     }
 
     @Override
     CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> doRead(final YangInstanceIdentifier path) {
         final SettableFuture<Optional<NormalizedNode<?, ?>>> future = SettableFuture.create();
-        return sendReadRequest(new ReadTransactionRequest(getIdentifier(), nextSequence(), localActor(), path),
-            t -> completeRead(future, t), future);
+        return sendReadRequest(new ReadTransactionRequest(getIdentifier(), nextSequence(), localActor(), path,
+            isSnapshotOnly()), t -> completeRead(future, t), future);
     }
 
     @Override
@@ -302,11 +310,11 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
         } else if (request instanceof ReadTransactionRequest) {
             ensureFlushedBuider();
             sendRequest(new ReadTransactionRequest(getIdentifier(), nextSequence(), localActor(),
-                ((ReadTransactionRequest) request).getPath()), callback);
+                ((ReadTransactionRequest) request).getPath(), isSnapshotOnly()), callback);
         } else if (request instanceof ExistsTransactionRequest) {
             ensureFlushedBuider();
             sendRequest(new ExistsTransactionRequest(getIdentifier(), nextSequence(), localActor(),
-                ((ExistsTransactionRequest) request).getPath()), callback);
+                ((ExistsTransactionRequest) request).getPath(), isSnapshotOnly()), callback);
         } else if (request instanceof TransactionPreCommitRequest) {
             ensureFlushedBuider();
             sendRequest(new TransactionPreCommitRequest(getIdentifier(), nextSequence(), localActor()), callback);
