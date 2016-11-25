@@ -1,0 +1,59 @@
+/*
+ * Copyright (c) 2016 Cisco Systems, Inc. and others.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
+package org.opendaylight.controller.cluster.databroker;
+
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.Futures;
+import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
+import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+
+/**
+ * An implementation of {@link DOMStoreReadTransaction} backed by a {@link RefcountedReadTransaction}. Used for
+ * transaction chains, where the backing transaction is shared.
+ *
+ * @author Robert Varga
+ */
+final class ClientBackedChainedReadTransaction implements DOMStoreReadTransaction {
+    private final String id;
+    private RefcountedReadTransaction parent;
+
+
+    ClientBackedChainedReadTransaction(final RefcountedReadTransaction parent, final TransactionIdentifier txId,
+            final int id) {
+        this.parent = Preconditions.checkNotNull(parent);
+        this.id = txId.toShortString() + "-read-" + id;
+    }
+
+    @Override
+    public CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> read(final YangInstanceIdentifier path) {
+        return Futures.makeChecked(parent.read(path), ReadFailedException.MAPPER);
+    }
+
+    @Override
+    public CheckedFuture<Boolean, ReadFailedException> exists(final YangInstanceIdentifier path) {
+        return Futures.makeChecked(parent.exists(path), ReadFailedException.MAPPER);
+    }
+
+    @Override
+    public String getIdentifier() {
+        return id;
+    }
+
+    @Override
+    public void close() {
+        if (parent != null) {
+            parent.release();
+            parent = null;
+        }
+    }
+}
