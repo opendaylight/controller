@@ -87,7 +87,7 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
         @Override
         AbstractProxyTransaction doCreateTransactionProxy(final AbstractClientConnection<ShardBackendInfo> connection,
                 final TransactionIdentifier txId) {
-            Preconditions.checkState(lastOpen == null, "Proxy {} is currently open", lastOpen);
+            Preconditions.checkState(lastOpen == null, "Proxy %s has %s currently open", this, lastOpen);
 
             // onTransactionCompleted() runs concurrently
             final LocalProxyTransaction localSealed = lastSealed;
@@ -100,6 +100,7 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
 
             lastOpen = new LocalProxyTransaction(this, txId,
                 (CursorAwareDataTreeModification) baseSnapshot.newModification());
+            LOG.debug("Proxy {} open transaction {}", this, lastOpen);
             return lastOpen;
         }
 
@@ -196,8 +197,9 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
         @Override
         void replaySuccessfulRequests() {
             for (AbstractProxyTransaction t : proxies.values()) {
+                LOG.debug("{} creating successor transaction proxy for {}", identifier, t);
                 final AbstractProxyTransaction newProxy = successor.createTransactionProxy(t.getIdentifier());
-                LOG.debug("{} created successor transaction proxy {} for {}", identifier, newProxy, t);
+                LOG.debug("{} created successor transaction proxy {}", identifier, newProxy);
                 t.replaySuccessfulRequests(newProxy);
             }
         }
@@ -282,10 +284,13 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
     }
 
     final AbstractProxyTransaction createTransactionProxy(final TransactionIdentifier txId) {
-        final TransactionIdentifier proxyId = new TransactionIdentifier(identifier, txId.getTransactionId());
-
         lock.lock();
         try {
+            if (successor != null) {
+                return successor.createTransactionProxy(txId);
+            }
+
+            final TransactionIdentifier proxyId = new TransactionIdentifier(identifier, txId.getTransactionId());
             final AbstractProxyTransaction ret = doCreateTransactionProxy(connection, proxyId);
             proxies.put(proxyId, ret);
             LOG.debug("Allocated proxy {} for transaction {}", proxyId, txId);
@@ -299,6 +304,8 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
         lock.lock();
         try {
             proxies.remove(tx.getIdentifier());
+            LOG.debug("Proxy {} aborting transaction {}", this, tx);
+            onTransactionAborted(tx);
         } finally {
             lock.unlock();
         }
@@ -308,6 +315,8 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
         lock.lock();
         try {
             proxies.remove(tx.getIdentifier());
+            LOG.debug("Proxy {} completing transaction {}", this, tx);
+            onTransactionCompleted(tx);
         } finally {
             lock.unlock();
         }
@@ -332,6 +341,7 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
         }
 
         successor = createSuccessor(newConnection);
+        LOG.debug("History {} instantiated successor {}", this, successor);
         return new ReconnectCohort();
     }
 
