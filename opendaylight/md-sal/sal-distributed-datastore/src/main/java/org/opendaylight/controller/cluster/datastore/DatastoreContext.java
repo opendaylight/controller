@@ -76,6 +76,7 @@ public class DatastoreContext {
     private int shardBatchedModificationCount = DEFAULT_SHARD_BATCHED_MODIFICATION_COUNT;
     private boolean writeOnlyTransactionOptimizationsEnabled = true;
     private long shardCommitQueueExpiryTimeoutInMillis = DEFAULT_SHARD_COMMIT_QUEUE_EXPIRY_TIMEOUT_IN_MS;
+    private boolean useTellBasedProtocol = false;
     private boolean transactionDebugContextEnabled = false;
     private String shardManagerPersistenceId;
 
@@ -113,6 +114,7 @@ public class DatastoreContext {
         this.shardCommitQueueExpiryTimeoutInMillis = other.shardCommitQueueExpiryTimeoutInMillis;
         this.transactionDebugContextEnabled = other.transactionDebugContextEnabled;
         this.shardManagerPersistenceId = other.shardManagerPersistenceId;
+        this.useTellBasedProtocol = other.useTellBasedProtocol;
 
         setShardJournalRecoveryLogBatchSize(other.raftConfig.getJournalRecoveryLogBatchSize());
         setSnapshotBatchCount(other.raftConfig.getSnapshotBatchCount());
@@ -256,6 +258,10 @@ public class DatastoreContext {
 
     public boolean isTransactionDebugContextEnabled() {
         return transactionDebugContextEnabled;
+    }
+
+    public boolean isUseTellBasedProtocol() {
+        return useTellBasedProtocol;
     }
 
     public int getShardSnapshotChunkSize() {
@@ -468,6 +474,11 @@ public class DatastoreContext {
 
         public Builder maxShardDataStoreExecutorQueueSize(int maxShardDataStoreExecutorQueueSize) {
             this.maxShardDataStoreExecutorQueueSize = maxShardDataStoreExecutorQueueSize;
+            return this;
+        }
+
+        public Builder useTellBasedProtocol(boolean value) {
+            datastoreContext.useTellBasedProtocol = value;
             return this;
         }
 
