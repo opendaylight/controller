@@ -94,6 +94,7 @@ public class DistributedOperationalDataStoreProviderModule
                 .transactionDebugContextEnabled(props.getTransactionDebugContextEnabled())
                 .customRaftPolicyImplementation(props.getCustomRaftPolicyImplementation())
                 .shardSnapshotChunkSize(props.getShardSnapshotChunkSize().getValue().intValue())
+                .tellBasedProtocolEnabled(props.getTransactionDebugContextEnabled())
                 .build();
     }
 
