@@ -39,38 +39,50 @@ public final class ClientLocalHistory extends AbstractClientHistory implements A
         }
     }
 
-    @Override
-    ClientTransaction doCreateTransaction() {
+    private State ensureIdleState() {
         final State local = state();
         Preconditions.checkState(local == State.IDLE, "Local history %s state is %s", this, local);
-        updateState(local, State.TX_OPEN);
+        return local;
+    }
 
+    @Override
+    ClientSnapshot doCreateSnapshot() {
+        ensureIdleState();
+        return new ClientSnapshot(this, new TransactionIdentifier(getIdentifier(), nextTx()));
+    }
+
+    @Override
+    ClientTransaction doCreateTransaction() {
+        updateState(ensureIdleState(), State.TX_OPEN);
         return new ClientTransaction(this, new TransactionIdentifier(getIdentifier(), nextTx()));
     }
 
     @Override
-    void onTransactionAbort(final TransactionIdentifier txId) {
-        final State local = state();
-        if (local == State.TX_OPEN) {
-            updateState(local, State.IDLE);
+    void onTransactionAbort(final ClientSnapshot snap) {
+        if (snap instanceof ClientTransaction) {
+            final State local = state();
+            if (local == State.TX_OPEN) {
+                updateState(local, State.IDLE);
+            }
         }
 
-        super.onTransactionAbort(txId);
+        super.onTransactionAbort(snap);
     }
 
     @Override
-    AbstractTransactionCommitCohort onTransactionReady(final TransactionIdentifier txId,
+    AbstractTransactionCommitCohort onTransactionReady(final ClientTransaction tx,
             final AbstractTransactionCommitCohort cohort) {
+
         final State local = state();
         switch (local) {
             case CLOSED:
-                return super.onTransactionReady(txId, cohort);
+                return super.onTransactionReady(tx, cohort);
             case IDLE:
                 throw new IllegalStateException(String.format("Local history %s is idle when readying transaction %s",
-                    this, txId));
+                    this, tx.getIdentifier()));
             case TX_OPEN:
                 updateState(local, State.IDLE);
-                return super.onTransactionReady(txId, cohort);
+                return super.onTransactionReady(tx, cohort);
             default:
                 throw new IllegalStateException(String.format("Local history %s in unhandled state %s", this, local));
 
