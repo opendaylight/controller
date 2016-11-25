@@ -38,14 +38,19 @@ final class StandaloneFrontendHistory extends AbstractFrontendHistory {
     }
 
     @Override
+    FrontendTransaction createOpenSnapshot(final TransactionIdentifier id) throws RequestException {
+        return FrontendReadOnlyTransaction.create(this, tree.newReadOnlyTransaction(id));
+    }
+
+    @Override
     FrontendTransaction createOpenTransaction(final TransactionIdentifier id) throws RequestException {
-        return FrontendTransaction.createOpen(this, tree.newReadWriteTransaction(id));
+        return FrontendReadWriteTransaction.createOpen(this, tree.newReadWriteTransaction(id));
     }
 
     @Override
     FrontendTransaction createReadyTransaction(final TransactionIdentifier id, final DataTreeModification mod)
             throws RequestException {
-        return FrontendTransaction.createReady(this, id, mod);
+        return FrontendReadWriteTransaction.createReady(this, id, mod);
     }
 
     @Override
