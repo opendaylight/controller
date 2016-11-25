@@ -48,10 +48,17 @@ final class LocalFrontendHistory extends AbstractFrontendHistory {
     }
 
     @Override
+    FrontendTransaction createOpenSnapshot(final TransactionIdentifier id) throws RequestException {
+        checkDeadTransaction(id);
+        lastSeenTransaction = id.getTransactionId();
+        return FrontendReadOnlyTransaction.create(this, chain.newReadOnlyTransaction(id));
+    }
+
+    @Override
     FrontendTransaction createOpenTransaction(final TransactionIdentifier id) throws RequestException {
         checkDeadTransaction(id);
         lastSeenTransaction = id.getTransactionId();
-        return FrontendTransaction.createOpen(this, chain.newReadWriteTransaction(id));
+        return FrontendReadWriteTransaction.createOpen(this, chain.newReadWriteTransaction(id));
     }
 
     @Override
@@ -59,7 +66,7 @@ final class LocalFrontendHistory extends AbstractFrontendHistory {
             throws RequestException {
         checkDeadTransaction(id);
         lastSeenTransaction = id.getTransactionId();
-        return FrontendTransaction.createReady(this, id, mod);
+        return FrontendReadWriteTransaction.createReady(this, id, mod);
     }
 
     @Override

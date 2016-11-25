@@ -28,6 +28,7 @@ abstract class AbstractReadTransactionRequestProxyV1<T extends AbstractReadTrans
         extends AbstractTransactionRequestProxy<T> {
     private static final long serialVersionUID = 1L;
     private YangInstanceIdentifier path;
+    private boolean snapshotOnly;
 
     protected AbstractReadTransactionRequestProxyV1() {
         // For Externalizable
@@ -36,6 +37,7 @@ abstract class AbstractReadTransactionRequestProxyV1<T extends AbstractReadTrans
     AbstractReadTransactionRequestProxyV1(final T request) {
         super(request);
         path = request.getPath();
+        snapshotOnly = request.isSnapshotOnly();
     }
 
     @Override
@@ -44,19 +46,21 @@ abstract class AbstractReadTransactionRequestProxyV1<T extends AbstractReadTrans
         try (NormalizedNodeDataOutput nnout = NormalizedNodeInputOutput.newDataOutput(out)) {
             nnout.writeYangInstanceIdentifier(path);
         }
+        out.writeBoolean(snapshotOnly);
     }
 
     @Override
     public final void readExternal(final ObjectInput in) throws ClassNotFoundException, IOException {
         super.readExternal(in);
         path = NormalizedNodeInputOutput.newDataInput(in).readYangInstanceIdentifier();
+        snapshotOnly = in.readBoolean();
     }
 
     @Override
     protected final T createRequest(final TransactionIdentifier target, final long sequence, final ActorRef replyTo) {
-        return createReadRequest(target, sequence, replyTo, path);
+        return createReadRequest(target, sequence, replyTo, path, snapshotOnly);
     }
 
     abstract T createReadRequest(TransactionIdentifier target, long sequence, ActorRef replyTo,
-            YangInstanceIdentifier requestPath);
+            YangInstanceIdentifier requestPath, boolean snapshotOnly);
 }
