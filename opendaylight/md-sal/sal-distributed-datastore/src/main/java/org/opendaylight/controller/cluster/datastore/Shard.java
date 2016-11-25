@@ -263,18 +263,21 @@ public class Shard extends RaftActor {
             }
 
             if (message instanceof RequestEnvelope) {
+                final long now = System.nanoTime();
                 final RequestEnvelope envelope = (RequestEnvelope)message;
+
                 try {
-                    final RequestSuccess<?, ?> success = handleRequest(envelope);
+                    final RequestSuccess<?, ?> success = handleRequest(envelope, now);
                     if (success != null) {
-                        envelope.sendSuccess(success);
+                        envelope.sendSuccess(success, System.nanoTime() - now);
                     }
                 } catch (RequestException e) {
                     LOG.debug("{}: request {} failed", persistenceId(), envelope, e);
-                    envelope.sendFailure(e);
+                    envelope.sendFailure(e, System.nanoTime() - now);
                 } catch (Exception e) {
                     LOG.debug("{}: request {} caused failure", persistenceId(), envelope, e);
-                    envelope.sendFailure(new RuntimeRequestException("Request failed to process", e));
+                    envelope.sendFailure(new RuntimeRequestException("Request failed to process", e),
+                        System.nanoTime() - now);
                 }
             } else if (message instanceof ConnectClientRequest) {
                 handleConnectClient((ConnectClientRequest)message);
@@ -388,7 +391,8 @@ public class Shard extends RaftActor {
         }
     }
 
-    private @Nullable RequestSuccess<?, ?> handleRequest(final RequestEnvelope envelope) throws RequestException {
+    private @Nullable RequestSuccess<?, ?> handleRequest(final RequestEnvelope envelope, final long now)
+            throws RequestException {
         // We are not the leader, hence we want to fail-fast.
         if (!isLeader() || !isLeaderActive()) {
             LOG.debug("{}: not currently leader, rejecting request {}", persistenceId(), envelope);
@@ -399,11 +403,11 @@ public class Shard extends RaftActor {
         if (request instanceof TransactionRequest) {
             final TransactionRequest<?> txReq = (TransactionRequest<?>)request;
             final ClientIdentifier clientId = txReq.getTarget().getHistoryId().getClientId();
-            return getFrontend(clientId).handleTransactionRequest(txReq, envelope);
+            return getFrontend(clientId).handleTransactionRequest(txReq, envelope, now);
         } else if (request instanceof LocalHistoryRequest) {
             final LocalHistoryRequest<?> lhReq = (LocalHistoryRequest<?>)request;
             final ClientIdentifier clientId = lhReq.getTarget().getClientId();
-            return getFrontend(clientId).handleLocalHistoryRequest(lhReq, envelope);
+            return getFrontend(clientId).handleLocalHistoryRequest(lhReq, envelope, now);
         } else {
             LOG.debug("{}: rejecting unsupported request {}", persistenceId(), request);
             throw new UnsupportedRequestException(request);

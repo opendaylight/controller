@@ -66,7 +66,7 @@ final class LocalFrontendHistory extends AbstractFrontendHistory {
         return chain.createReadyCohort(id, mod);
     }
 
-    LocalHistorySuccess destroy(final long sequence) throws RequestException {
+    LocalHistorySuccess destroy(final long sequence, final long now) throws RequestException {
         if (state != State.CLOSED) {
             LOG.debug("{}: closing history {}", persistenceId(), getIdentifier());
 

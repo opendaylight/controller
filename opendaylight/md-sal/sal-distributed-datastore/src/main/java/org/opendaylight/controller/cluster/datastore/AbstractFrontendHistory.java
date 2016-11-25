@@ -47,7 +47,7 @@ abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdent
     }
 
     final @Nullable TransactionSuccess<?> handleTransactionRequest(final TransactionRequest<?> request,
-            final RequestEnvelope envelope) throws RequestException {
+            final RequestEnvelope envelope, final long now) throws RequestException {
 
         // FIXME: handle purging of transactions
 
@@ -76,7 +76,7 @@ abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdent
             }
         }
 
-        return tx.handleRequest(request, envelope);
+        return tx.handleRequest(request, envelope, now);
     }
 
     abstract FrontendTransaction createOpenTransaction(TransactionIdentifier id) throws RequestException;

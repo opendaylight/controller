@@ -94,16 +94,16 @@ final class LeaderFrontendState implements Identifiable<ClientIdentifier> {
     }
 
     @Nullable LocalHistorySuccess handleLocalHistoryRequest(final LocalHistoryRequest<?> request,
-            final RequestEnvelope envelope) throws RequestException {
+            final RequestEnvelope envelope, final long now) throws RequestException {
         checkRequestSequence(envelope);
 
         try {
             if (request instanceof CreateLocalHistoryRequest) {
                 return handleCreateHistory((CreateLocalHistoryRequest) request);
             } else if (request instanceof DestroyLocalHistoryRequest) {
-                return handleDestroyHistory((DestroyLocalHistoryRequest) request);
+                return handleDestroyHistory((DestroyLocalHistoryRequest) request, now);
             } else if (request instanceof PurgeLocalHistoryRequest) {
-                return handlePurgeHistory((PurgeLocalHistoryRequest)request);
+                return handlePurgeHistory((PurgeLocalHistoryRequest)request, now);
             } else {
                 throw new UnsupportedRequestException(request);
             }
@@ -138,7 +138,8 @@ final class LeaderFrontendState implements Identifiable<ClientIdentifier> {
         return new LocalHistorySuccess(id, request.getSequence());
     }
 
-    private LocalHistorySuccess handleDestroyHistory(final DestroyLocalHistoryRequest request) throws RequestException {
+    private LocalHistorySuccess handleDestroyHistory(final DestroyLocalHistoryRequest request, final long now)
+            throws RequestException {
         final LocalHistoryIdentifier id = request.getTarget();
         final LocalFrontendHistory existing = localHistories.get(id);
         if (existing == null) {
@@ -147,10 +148,11 @@ final class LeaderFrontendState implements Identifiable<ClientIdentifier> {
             return new LocalHistorySuccess(id, request.getSequence());
         }
 
-        return existing.destroy(request.getSequence());
+        return existing.destroy(request.getSequence(), now);
     }
 
-    private LocalHistorySuccess handlePurgeHistory(final PurgeLocalHistoryRequest request) throws RequestException {
+    private LocalHistorySuccess handlePurgeHistory(final PurgeLocalHistoryRequest request, final long now)
+            throws RequestException {
         final LocalHistoryIdentifier id = request.getTarget();
         final LocalFrontendHistory existing = localHistories.remove(id);
         if (existing != null) {
@@ -158,7 +160,7 @@ final class LeaderFrontendState implements Identifiable<ClientIdentifier> {
 
             if (!existing.isDestroyed()) {
                 LOG.warn("{}: purging undestroyed history {}", persistenceId, id);
-                existing.destroy(request.getSequence());
+                existing.destroy(request.getSequence(), now);
             }
 
             // FIXME: record a PURGE tombstone in the journal
@@ -172,7 +174,7 @@ final class LeaderFrontendState implements Identifiable<ClientIdentifier> {
     }
 
     @Nullable TransactionSuccess<?> handleTransactionRequest(final TransactionRequest<?> request,
-            final RequestEnvelope envelope) throws RequestException {
+            final RequestEnvelope envelope, final long now) throws RequestException {
         checkRequestSequence(envelope);
 
         try {
@@ -189,7 +191,7 @@ final class LeaderFrontendState implements Identifiable<ClientIdentifier> {
                 history = standaloneHistory;
             }
 
-            return history.handleTransactionRequest(request, envelope);
+            return history.handleTransactionRequest(request, envelope, now);
         } finally {
             expectNextRequest();
         }
