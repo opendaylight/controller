@@ -20,7 +20,7 @@ abstract class AbstractEnvelopeProxy<T extends Message<?, ?>> implements Externa
     private long sessionId;
     private long txSequence;
 
-    protected AbstractEnvelopeProxy() {
+    AbstractEnvelopeProxy() {
         // for Externalizable
     }
 
@@ -31,21 +31,21 @@ abstract class AbstractEnvelopeProxy<T extends Message<?, ?>> implements Externa
     }
 
     @Override
-    public final void writeExternal(final ObjectOutput out) throws IOException {
+    public void writeExternal(final ObjectOutput out) throws IOException {
         WritableObjects.writeLongs(out, sessionId, txSequence);
         out.writeObject(message);
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public final void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
+    public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
         final byte header = WritableObjects.readLongHeader(in);
         sessionId = WritableObjects.readFirstLong(in, header);
         txSequence = WritableObjects.readSecondLong(in, header);
         message = (T) in.readObject();
     }
 
-    abstract Envelope<T> createEnvelope(T wrappedNessage, long envSessionId, long envTxSequence);
+    abstract Envelope<T> createEnvelope(T wrappedNessage, long sessionId, long txSequence);
 
     final Object readResolve() {
         return createEnvelope(message, sessionId, txSequence);
