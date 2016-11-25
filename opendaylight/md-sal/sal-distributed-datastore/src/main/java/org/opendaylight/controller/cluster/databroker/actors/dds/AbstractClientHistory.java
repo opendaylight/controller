@@ -22,6 +22,7 @@ import org.opendaylight.controller.cluster.access.commands.CreateLocalHistoryReq
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.Response;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
+import org.opendaylight.mdsal.common.api.TransactionChainClosedException;
 import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.slf4j.Logger;
@@ -113,12 +114,17 @@ abstract class AbstractClientHistory extends LocalAbortable implements Identifia
      */
     private ProxyHistory createHistoryProxy(final Long shard) {
         final AbstractClientConnection<ShardBackendInfo> connection = client.getConnection(shard);
-        final ProxyHistory ret = createHistoryProxy(new LocalHistoryIdentifier(identifier.getClientId(),
-            identifier.getHistoryId(), shard), connection);
+        final LocalHistoryIdentifier proxyId = new LocalHistoryIdentifier(identifier.getClientId(),
+            identifier.getHistoryId(), shard);
+        LOG.debug("Created proxyId {} for history {} shard {}", proxyId, identifier, shard);
 
-        // Request creation of the history.
-        connection.sendRequest(new CreateLocalHistoryRequest(ret.getIdentifier(), connection.localActor()),
-            this::createHistoryCallback);
+        final ProxyHistory ret = createHistoryProxy(proxyId, connection);
+
+        // Request creation of the history, if it is not the single history
+        if (ret.getIdentifier().getHistoryId() != 0) {
+            connection.sendRequest(new CreateLocalHistoryRequest(ret.getIdentifier(), connection.localActor()),
+                this::createHistoryCallback);
+        }
         return ret;
     }
 
@@ -145,8 +151,16 @@ abstract class AbstractClientHistory extends LocalAbortable implements Identifia
         }
     }
 
+    /**
+     * Allocate a {@link ClientTransaction}.
+     *
+     * @return A new {@link ClientTransaction}
+     * @throws TransactionChainClosedException if this history is closed
+     */
     public final ClientTransaction createTransaction() {
-        Preconditions.checkState(state != State.CLOSED);
+        if (state == State.CLOSED) {
+            throw new TransactionChainClosedException(String.format("Local history %s is closed", identifier));
+        }
 
         synchronized (this) {
             final ClientTransaction ret = doCreateTransaction();
