@@ -202,6 +202,7 @@ public abstract class ClientActorBehavior<T extends BackendInfo> extends
             return;
         }
 
+        LOG.debug("{}: resolved shard {} to {}", persistenceId(), shard, backend);
         final long stamp = connectionsLock.writeLock();
         try {
             // Bring the connection up
