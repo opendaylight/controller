@@ -42,10 +42,12 @@ final class ShardDataTreeTransactionChain extends ShardDataTreeTransactionParent
         Preconditions.checkState(openTransaction == null, "Transaction %s is open", openTransaction);
 
         if (previousTx == null) {
+            LOG.debug("Opening an unchained snapshot in {}", chainId);
             return dataTree.takeSnapshot();
-        } else {
-            return previousTx.getSnapshot();
         }
+
+        LOG.debug("Reusing a chained snapshot in {}", chainId);
+        return previousTx.getSnapshot();
     }
 
     ReadOnlyShardDataTreeTransaction newReadOnlyTransaction(final TransactionIdentifier txId) {
