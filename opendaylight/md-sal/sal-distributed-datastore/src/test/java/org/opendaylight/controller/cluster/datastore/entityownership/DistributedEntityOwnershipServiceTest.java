@@ -39,6 +39,7 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
+import org.opendaylight.controller.cluster.datastore.AbstractDataStore;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.DatastoreContextFactory;
 import org.opendaylight.controller.cluster.datastore.DistributedDataStore;
@@ -80,7 +81,7 @@ public class DistributedEntityOwnershipServiceTest extends AbstractEntityOwnersh
     static int ID_COUNTER = 1;
 
     private final String dataStoreName = "config" + ID_COUNTER++;
-    private DistributedDataStore dataStore;
+    private AbstractDataStore dataStore;
 
     @Before
     public void setUp() {
