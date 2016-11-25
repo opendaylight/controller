@@ -35,6 +35,7 @@ abstract class AbstractReadTransactionRequestProxyV1<T extends AbstractReadTrans
 
     AbstractReadTransactionRequestProxyV1(final T request) {
         super(request);
+        path = request.getPath();
     }
 
     @Override
