@@ -50,8 +50,6 @@ final class ReadTransactionSuccessProxyV1 extends AbstractTransactionSuccessProx
         } else {
             out.writeBoolean(false);
         }
-
-        out.writeObject(data);
     }
 
     @Override
