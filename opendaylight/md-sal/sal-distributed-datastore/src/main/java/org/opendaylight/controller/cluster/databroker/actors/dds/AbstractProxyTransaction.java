@@ -199,16 +199,19 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
     }
 
     final void delete(final YangInstanceIdentifier path) {
+        checkReadWrite();
         checkNotSealed();
         doDelete(path);
     }
 
     final void merge(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
+        checkReadWrite();
         checkNotSealed();
         doMerge(path, data);
     }
 
     final void write(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
+        checkReadWrite();
         checkNotSealed();
         doWrite(path, data);
     }
@@ -232,6 +235,8 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
      * Seal this transaction before it is either committed or aborted.
      */
     final void seal() {
+        checkReadWrite();
+
         // Transition user-visible state first
         final boolean success = SEALED_UPDATER.compareAndSet(this, 0, 1);
         Preconditions.checkState(success, "Proxy %s was already sealed", getIdentifier());
@@ -263,6 +268,12 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
         final State local = state;
         Verify.verify(local instanceof SuccessorState, "State %s has unexpected class", local);
         return (SuccessorState) local;
+    }
+
+    private void checkReadWrite() {
+        if (isSnapshotOnly()) {
+            throw new UnsupportedOperationException("Transaction " + getIdentifier() + " is a read-only snapshot");
+        }
     }
 
     final void recordSuccessfulRequest(final @Nonnull TransactionRequest<?> req) {
@@ -317,6 +328,7 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
      * @return Future completion
      */
     final ListenableFuture<Boolean> directCommit() {
+        checkReadWrite();
         checkSealed();
 
         // Precludes startReconnect() from interfering with the fast path
@@ -346,6 +358,7 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
     }
 
     final void canCommit(final VotingFuture<?> ret) {
+        checkReadWrite();
         checkSealed();
 
         // Precludes startReconnect() from interfering with the fast path
@@ -379,6 +392,7 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
     }
 
     final void preCommit(final VotingFuture<?> ret) {
+        checkReadWrite();
         checkSealed();
 
         final TransactionRequest<?> req = new TransactionPreCommitRequest(getIdentifier(), nextSequence(),
@@ -398,6 +412,7 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
     }
 
     final void doCommit(final VotingFuture<?> ret) {
+        checkReadWrite();
         checkSealed();
 
         sendRequest(new TransactionDoCommitRequest(getIdentifier(), nextSequence(), localActor()), t -> {
@@ -504,6 +519,8 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
             throw new IllegalStateException("Unhandled successor " + successor);
         }
     }
+
+    abstract boolean isSnapshotOnly();
 
     abstract void doDelete(final YangInstanceIdentifier path);
 
