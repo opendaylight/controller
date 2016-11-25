@@ -112,7 +112,8 @@ public final class TransactionIdentifier implements WritableIdentifier {
             String histStr = historyId.getHistoryId() == 0 ? "" : "-chn-" + historyId.getHistoryId();
             shortString = historyId.getClientId().getFrontendId().getMemberName().getName() + "-"
                     + historyId.getClientId().getFrontendId().getClientType().getName() + "-fe-"
-                    + historyId.getClientId().getGeneration() + histStr + "-txn-" + transactionId;
+                    + historyId.getClientId().getGeneration() + histStr + "-txn-" + transactionId
+                    + "-" + historyId.getCookie();
         }
 
         return shortString;

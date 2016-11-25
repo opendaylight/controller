@@ -33,9 +33,9 @@ public final class CommitLocalTransactionRequest
     private final DataTreeModification mod;
     private final boolean coordinated;
 
-    public CommitLocalTransactionRequest(@Nonnull final TransactionIdentifier identifier,
+    public CommitLocalTransactionRequest(@Nonnull final TransactionIdentifier identifier, final long sequence,
             @Nonnull final ActorRef replyTo, @Nonnull final DataTreeModification mod, final boolean coordinated) {
-        super(identifier, 0, replyTo);
+        super(identifier, sequence, replyTo);
         this.mod = Preconditions.checkNotNull(mod);
         this.coordinated = coordinated;
     }
