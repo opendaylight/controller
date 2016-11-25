@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Ticker;
 import org.opendaylight.controller.cluster.access.commands.DeadTransactionException;
 import org.opendaylight.controller.cluster.access.commands.LocalHistorySuccess;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
@@ -36,8 +37,8 @@ final class LocalFrontendHistory extends AbstractFrontendHistory {
     private Long lastSeenTransaction;
     private State state = State.OPEN;
 
-    LocalFrontendHistory(final String persistenceId, final ShardDataTreeTransactionChain chain) {
-        super(persistenceId);
+    LocalFrontendHistory(final String persistenceId, final Ticker ticker, final ShardDataTreeTransactionChain chain) {
+        super(persistenceId, ticker);
         this.chain = Preconditions.checkNotNull(chain);
     }
 
@@ -66,7 +67,7 @@ final class LocalFrontendHistory extends AbstractFrontendHistory {
         return chain.createReadyCohort(id, mod);
     }
 
-    LocalHistorySuccess destroy(final long sequence) throws RequestException {
+    LocalHistorySuccess destroy(final long sequence, final long now) throws RequestException {
         if (state != State.CLOSED) {
             LOG.debug("{}: closing history {}", persistenceId(), getIdentifier());
 
