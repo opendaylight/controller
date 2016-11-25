@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorSystem;
 import org.opendaylight.controller.cluster.ActorSystemProvider;
+import org.opendaylight.controller.cluster.databroker.ClientBackedDataStore;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.config.ConfigurationImpl;
 import org.opendaylight.controller.cluster.datastore.messages.DatastoreSnapshot;
@@ -20,9 +21,9 @@ import org.slf4j.LoggerFactory;
 public class DistributedDataStoreFactory {
     private static final Logger LOG = LoggerFactory.getLogger(DistributedDataStoreFactory.class);
 
-    public static DistributedDataStore createInstance(SchemaService schemaService,
-            DatastoreContext datastoreContext, DatastoreSnapshotRestore datastoreSnapshotRestore,
-            ActorSystemProvider actorSystemProvider, BundleContext bundleContext) {
+    public static AbstractDataStore createInstance(final SchemaService schemaService,
+            final DatastoreContext datastoreContext, final DatastoreSnapshotRestore datastoreSnapshotRestore,
+            final ActorSystemProvider actorSystemProvider, final BundleContext bundleContext) {
 
         LOG.info("Create data store instance of type : {}", datastoreContext.getDataStoreName());
 
@@ -34,8 +35,12 @@ public class DistributedDataStoreFactory {
                 introspector, bundleContext);
 
         Configuration config = new ConfigurationImpl("module-shards.conf", "modules.conf");
-        final DistributedDataStore dataStore = new DistributedDataStore(actorSystem,
-                new ClusterWrapperImpl(actorSystem), config, introspector.newContextFactory(), restoreFromSnapshot);
+        ClusterWrapper clusterWrapper = new ClusterWrapperImpl(actorSystem);
+        DatastoreContextFactory contextFactory = introspector.newContextFactory();
+
+        final AbstractDataStore dataStore = datastoreContext.isTellBasedProtocolEnabled()
+                ? new ClientBackedDataStore(actorSystem, clusterWrapper, config, contextFactory, restoreFromSnapshot) :
+                    new DistributedDataStore(actorSystem, clusterWrapper, config, contextFactory, restoreFromSnapshot);
 
         overlay.setListener(dataStore);
 
