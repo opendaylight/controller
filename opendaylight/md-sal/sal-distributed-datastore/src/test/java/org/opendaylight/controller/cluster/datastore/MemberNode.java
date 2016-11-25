@@ -50,8 +50,8 @@ public class MemberNode {
     static final Address MEMBER_1_ADDRESS = AddressFromURIString.parse("akka.tcp://cluster-test@127.0.0.1:2558");
 
     private IntegrationTestKit kit;
-    private DistributedDataStore configDataStore;
-    private DistributedDataStore operDataStore;
+    private AbstractDataStore configDataStore;
+    private AbstractDataStore operDataStore;
     private DatastoreContext.Builder datastoreContextBuilder;
     private boolean cleanedUp;
 
@@ -62,7 +62,7 @@ public class MemberNode {
      *                callers to cleanup instances on test completion.
      * @return a Builder instance
      */
-    public static Builder builder(List<MemberNode> members) {
+    public static Builder builder(final List<MemberNode> members) {
         return new Builder(members);
     }
 
@@ -71,12 +71,12 @@ public class MemberNode {
     }
 
 
-    public DistributedDataStore configDataStore() {
+    public AbstractDataStore configDataStore() {
         return configDataStore;
     }
 
 
-    public DistributedDataStore operDataStore() {
+    public AbstractDataStore operDataStore() {
         return operDataStore;
     }
 
@@ -84,11 +84,11 @@ public class MemberNode {
         return datastoreContextBuilder;
     }
 
-    public void waitForMembersUp(String... otherMembers) {
+    public void waitForMembersUp(final String... otherMembers) {
         kit.waitForMembersUp(otherMembers);
     }
 
-    public void waitForMemberDown(String member) {
+    public void waitForMemberDown(final String member) {
         Stopwatch sw = Stopwatch.createStarted();
         while (sw.elapsed(TimeUnit.SECONDS) <= 10) {
             CurrentClusterState state = Cluster.get(kit.getSystem()).state();
@@ -124,7 +124,7 @@ public class MemberNode {
         }
     }
 
-    public static void verifyRaftState(DistributedDataStore datastore, String shardName, RaftStateVerifier verifier)
+    public static void verifyRaftState(final AbstractDataStore datastore, final String shardName, final RaftStateVerifier verifier)
             throws Exception {
         ActorContext actorContext = datastore.getActorContext();
 
@@ -149,8 +149,8 @@ public class MemberNode {
         throw lastError;
     }
 
-    public static void verifyRaftPeersPresent(DistributedDataStore datastore, final String shardName,
-            String... peerMemberNames) throws Exception {
+    public static void verifyRaftPeersPresent(final DistributedDataStore datastore, final String shardName,
+            final String... peerMemberNames) throws Exception {
         final Set<String> peerIds = Sets.newHashSet();
         for (String p: peerMemberNames) {
             peerIds.add(ShardIdentifier.create(shardName, MemberName.forName(p),
@@ -161,7 +161,7 @@ public class MemberNode {
             raftState.getPeerAddresses().keySet()));
     }
 
-    public static void verifyNoShardPresent(DistributedDataStore datastore, String shardName) {
+    public static void verifyNoShardPresent(final DistributedDataStore datastore, final String shardName) {
         Stopwatch sw = Stopwatch.createStarted();
         while (sw.elapsed(TimeUnit.SECONDS) <= 5) {
             Optional<ActorRef> shardReply = datastore.getActorContext().findLocalShard(shardName);
@@ -186,7 +186,7 @@ public class MemberNode {
         private DatastoreContext.Builder datastoreContextBuilder = DatastoreContext.newBuilder()
                 .shardHeartbeatIntervalInMillis(300).shardElectionTimeoutFactor(30);
 
-        Builder(List<MemberNode> members) {
+        Builder(final List<MemberNode> members) {
             this.members = members;
         }
 
@@ -195,7 +195,7 @@ public class MemberNode {
          *
          * @return this Builder
          */
-        public Builder moduleShardsConfig(String newModuleShardsConfig) {
+        public Builder moduleShardsConfig(final String newModuleShardsConfig) {
             this.moduleShardsConfig = newModuleShardsConfig;
             return this;
         }
@@ -205,7 +205,7 @@ public class MemberNode {
          *
          * @return this Builder
          */
-        public Builder akkaConfig(String newAkkaConfig) {
+        public Builder akkaConfig(final String newAkkaConfig) {
             this.akkaConfig = newAkkaConfig;
             return this;
         }
@@ -215,7 +215,7 @@ public class MemberNode {
          *
          * @return this Builder
          */
-        public Builder testName(String newTestName) {
+        public Builder testName(final String newTestName) {
             this.testName = newTestName;
             return this;
         }
@@ -225,7 +225,7 @@ public class MemberNode {
          *
          * @return this Builder
          */
-        public Builder waitForShardLeader(String... shardNames) {
+        public Builder waitForShardLeader(final String... shardNames) {
             this.waitForshardLeader = shardNames;
             return this;
         }
@@ -235,7 +235,7 @@ public class MemberNode {
          *
          * @return this Builder
          */
-        public Builder createOperDatastore(boolean value) {
+        public Builder createOperDatastore(final boolean value) {
             this.createOperDatastore = value;
             return this;
         }
@@ -245,7 +245,7 @@ public class MemberNode {
          *
          * @return this Builder
          */
-        public Builder schemaContext(SchemaContext newSchemaContext) {
+        public Builder schemaContext(final SchemaContext newSchemaContext) {
             this.schemaContext = newSchemaContext;
             return this;
         }
@@ -255,7 +255,7 @@ public class MemberNode {
          *
          * @return this Builder
          */
-        public Builder datastoreContextBuilder(DatastoreContext.Builder builder) {
+        public Builder datastoreContextBuilder(final DatastoreContext.Builder builder) {
             datastoreContextBuilder = builder;
             return this;
         }
