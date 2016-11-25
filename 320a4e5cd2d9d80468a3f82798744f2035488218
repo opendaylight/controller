@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "3a65312a_3562863e",
+        "filename": "opendaylight/md-sal/cds-access-client/src/main/java/org/opendaylight/controller/cluster/access/client/AbstractClientConnection.java",
+        "patchSetId": 72
+      },
+      "lineNbr": 145,
+      "author": {
+        "id": 2046
+      },
+      "writtenOn": "2016-11-25T11:18:00Z",
+      "side": 1,
+      "message": "Empty queue cannot make progress. Setting lastProgress here emulates a stopwatch which was paused when the queue was empty.\nPerhaps explicitly using com.google.common.base.Stopwatch would be more readable.",
+      "parentUuid": "3a65312a_34d56c1c",
+      "range": {
+        "startLine": 145,
+        "startChar": 51,
+        "endLine": 145,
+        "endChar": 52
+      },
+      "revId": "320a4e5cd2d9d80468a3f82798744f2035488218",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a65312a_7a487487",
         "filename": "opendaylight/md-sal/cds-access-client/src/main/java/org/opendaylight/controller/cluster/access/client/AbstractClientConnection.java",
         "patchSetId": 72
@@ -178,6 +202,30 @@
       "side": 1,
       "message": "The value here is 15 minutes -- attempting to us in the last couple of nanoseconds does not make sense -- readTime() itself takes around 20ns.",
       "parentUuid": "3a65312a_dab0a88d",
+      "range": {
+        "startLine": 172,
+        "startChar": 35,
+        "endLine": 172,
+        "endChar": 63
+      },
+      "revId": "320a4e5cd2d9d80468a3f82798744f2035488218",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a65312a_357ba6f6",
+        "filename": "opendaylight/md-sal/cds-access-client/src/main/java/org/opendaylight/controller/cluster/access/client/AbstractClientConnection.java",
+        "patchSetId": 72
+      },
+      "lineNbr": 172,
+      "author": {
+        "id": 2046
+      },
+      "writtenOn": "2016-11-25T11:18:00Z",
+      "side": 1,
+      "message": "Ok, replace \"only few nanoseconds\" with \"roghly half of what it takes to dequeue\". The brittleness is still there, as lastProgress is so old just because there was nothing to do.",
+      "parentUuid": "3a65312a_f4c93479",
       "range": {
         "startLine": 172,
         "startChar": 35,
