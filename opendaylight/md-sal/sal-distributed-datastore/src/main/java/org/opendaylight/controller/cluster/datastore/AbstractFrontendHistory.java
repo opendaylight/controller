@@ -70,9 +70,11 @@ abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdent
 
             transactions.put(id, tx);
         } else {
-            final Optional<TransactionSuccess<?>> replay = tx.replaySequence(request.getSequence());
-            if (replay.isPresent()) {
-                return replay.get();
+            final Optional<TransactionSuccess<?>> maybeReplay = tx.replaySequence(request.getSequence());
+            if (maybeReplay.isPresent()) {
+                final TransactionSuccess<?> replay = maybeReplay.get();
+                LOG.debug("{}: envelope {} replaying response {}", persistenceId(), envelope, replay);
+                return replay;
             }
         }
 
