@@ -33,21 +33,28 @@ public abstract class AbstractReadTransactionRequest<T extends AbstractReadTrans
         extends TransactionRequest<T> {
     private static final long serialVersionUID = 1L;
     private final YangInstanceIdentifier path;
+    private final boolean snapshotOnly;
 
     AbstractReadTransactionRequest(final TransactionIdentifier identifier, final long sequence, final ActorRef replyTo,
-        final YangInstanceIdentifier path) {
+        final YangInstanceIdentifier path, final boolean snapshotOnly) {
         super(identifier, sequence, replyTo);
         this.path = Preconditions.checkNotNull(path);
+        this.snapshotOnly = snapshotOnly;
     }
 
     AbstractReadTransactionRequest(final T request, final ABIVersion version) {
         super(request, version);
         this.path = request.getPath();
+        this.snapshotOnly = request.isSnapshotOnly();
     }
 
     @Nonnull
     public final YangInstanceIdentifier getPath() {
         return path;
+    }
+
+    public final boolean isSnapshotOnly() {
+        return snapshotOnly;
     }
 
     @Override
