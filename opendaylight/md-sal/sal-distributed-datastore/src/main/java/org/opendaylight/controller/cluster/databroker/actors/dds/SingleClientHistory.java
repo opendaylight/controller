@@ -26,6 +26,12 @@ final class SingleClientHistory extends AbstractClientHistory {
     }
 
     @Override
+    ClientSnapshot doCreateSnapshot() {
+        // For single history snapshot and transaction are the same thing
+        return doCreateTransaction();
+    }
+
+    @Override
     ClientTransaction doCreateTransaction() {
         final TransactionIdentifier txId = new TransactionIdentifier(getIdentifier(), nextTx());
         LOG.debug("{}: creating a new transaction {}", this, txId);
