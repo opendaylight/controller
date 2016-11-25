@@ -150,16 +150,21 @@ public final class ClientTransaction extends LocalAbortable implements Identifia
 
     /**
      * Release all state associated with this transaction.
+     *
+     * @return True if this transaction became closed during this call
      */
-    public void abort() {
-        if (ensureClosed()) {
-            for (AbstractProxyTransaction proxy : proxies.values()) {
-                proxy.abort();
-            }
-            proxies.clear();
-
-            parent.onTransactionAbort(transactionId);
+    public boolean abort() {
+        if (!ensureClosed()) {
+            return false;
         }
+
+        for (AbstractProxyTransaction proxy : proxies.values()) {
+            proxy.abort();
+        }
+        proxies.clear();
+
+        parent.onTransactionAbort(transactionId);
+        return true;
     }
 
     @Override
