@@ -17,8 +17,12 @@ import javax.annotation.Nullable;
 import javax.annotation.concurrent.NotThreadSafe;
 import org.opendaylight.controller.cluster.access.commands.AbortLocalTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.CommitLocalTransactionRequest;
+import org.opendaylight.controller.cluster.access.commands.ExistsTransactionRequest;
+import org.opendaylight.controller.cluster.access.commands.ExistsTransactionSuccess;
 import org.opendaylight.controller.cluster.access.commands.ModifyTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.PersistenceProtocol;
+import org.opendaylight.controller.cluster.access.commands.ReadTransactionRequest;
+import org.opendaylight.controller.cluster.access.commands.ReadTransactionSuccess;
 import org.opendaylight.controller.cluster.access.commands.TransactionDelete;
 import org.opendaylight.controller.cluster.access.commands.TransactionMerge;
 import org.opendaylight.controller.cluster.access.commands.TransactionModification;
@@ -177,6 +181,14 @@ final class LocalProxyTransaction extends AbstractProxyTransaction {
 
         if (request instanceof ModifyTransactionRequest) {
             applyModifyTransactionRequest((ModifyTransactionRequest) request, callback);
+        } else if (request instanceof ReadTransactionRequest) {
+           final YangInstanceIdentifier path = ((ReadTransactionRequest) request).getPath();
+           final Optional<NormalizedNode<?, ?>> result = modification.readNode(path);
+           callback.accept(new ReadTransactionSuccess(request.getTarget(), request.getSequence(), result));
+        } else if (request instanceof ExistsTransactionRequest) {
+            final YangInstanceIdentifier path = ((ExistsTransactionRequest) request).getPath();
+            final boolean result = modification.readNode(path).isPresent();
+            callback.accept(new ExistsTransactionSuccess(request.getTarget(), request.getSequence(), result));
         } else {
             throw new IllegalArgumentException("Unhandled request " + request);
         }

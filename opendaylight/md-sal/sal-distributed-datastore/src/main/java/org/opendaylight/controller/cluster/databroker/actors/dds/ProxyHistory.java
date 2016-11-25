@@ -87,7 +87,7 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
         @Override
         AbstractProxyTransaction doCreateTransactionProxy(final AbstractClientConnection<ShardBackendInfo> connection,
                 final TransactionIdentifier txId) {
-            Preconditions.checkState(lastOpen == null, "Proxy {} is currently open", lastOpen);
+            Preconditions.checkState(lastOpen == null, "Proxy %s is currently open", lastOpen);
 
             // onTransactionCompleted() runs concurrently
             final LocalProxyTransaction localSealed = lastSealed;

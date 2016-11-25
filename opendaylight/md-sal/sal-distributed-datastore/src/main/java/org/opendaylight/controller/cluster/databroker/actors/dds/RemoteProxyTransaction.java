@@ -25,6 +25,7 @@ import org.opendaylight.controller.cluster.access.commands.ModifyTransactionRequ
 import org.opendaylight.controller.cluster.access.commands.PersistenceProtocol;
 import org.opendaylight.controller.cluster.access.commands.ReadTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.ReadTransactionSuccess;
+import org.opendaylight.controller.cluster.access.commands.TransactionAbortRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionDelete;
 import org.opendaylight.controller.cluster.access.commands.TransactionMerge;
 import org.opendaylight.controller.cluster.access.commands.TransactionModification;
@@ -299,6 +300,14 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
                         throw new IllegalArgumentException("Unhandled protocol " + maybeProto.get());
                 }
             }
+        } else if (request instanceof ReadTransactionRequest) {
+            sendRequest(new ReadTransactionRequest(getIdentifier(), nextSequence(), localActor(),
+                ((ReadTransactionRequest) request).getPath()), callback);
+        } else if (request instanceof ExistsTransactionRequest) {
+            sendRequest(new ExistsTransactionRequest(getIdentifier(), nextSequence(), localActor(),
+                ((ExistsTransactionRequest) request).getPath()), callback);
+        } else if (request instanceof TransactionAbortRequest) {
+            sendAbort(callback);
         } else {
             throw new IllegalArgumentException("Unhandled request {}" + request);
         }

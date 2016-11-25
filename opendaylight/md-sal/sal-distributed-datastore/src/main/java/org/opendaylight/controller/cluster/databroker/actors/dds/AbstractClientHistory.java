@@ -116,9 +116,11 @@ abstract class AbstractClientHistory extends LocalAbortable implements Identifia
         final ProxyHistory ret = createHistoryProxy(new LocalHistoryIdentifier(identifier.getClientId(),
             identifier.getHistoryId(), shard), connection);
 
-        // Request creation of the history.
-        connection.sendRequest(new CreateLocalHistoryRequest(ret.getIdentifier(), connection.localActor()),
-            this::createHistoryCallback);
+        // Request creation of the history, if it is not the single history
+        if (ret.getIdentifier().getHistoryId() != 0) {
+            connection.sendRequest(new CreateLocalHistoryRequest(ret.getIdentifier(), connection.localActor()),
+                this::createHistoryCallback);
+        }
         return ret;
     }
 
