@@ -44,8 +44,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.opendaylight.controller.cluster.datastore.AbstractDataStore;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
-import org.opendaylight.controller.cluster.datastore.DistributedDataStore;
 import org.opendaylight.controller.cluster.datastore.IntegrationTestKit;
 import org.opendaylight.controller.cluster.datastore.MemberNode;
 import org.opendaylight.controller.cluster.datastore.entityownership.selectionstrategy.EntityOwnerSelectionStrategyConfig;
@@ -122,7 +122,7 @@ public class DistributedEntityOwnershipIntegrationTest {
         memberNodes.clear();
     }
 
-    private static DistributedEntityOwnershipService newOwnershipService(final DistributedDataStore datastore) {
+    private static DistributedEntityOwnershipService newOwnershipService(final AbstractDataStore datastore) {
         return DistributedEntityOwnershipService.start(datastore.getActorContext(),
                 EntityOwnerSelectionStrategyConfig.newBuilder().build());
     }
@@ -142,7 +142,7 @@ public class DistributedEntityOwnershipIntegrationTest {
                 .moduleShardsConfig(MODULE_SHARDS_CONFIG).schemaContext(SCHEMA_CONTEXT).createOperDatastore(false)
                 .datastoreContextBuilder(followerDatastoreContextBuilder).build();
 
-        DistributedDataStore leaderDistributedDataStore = leaderNode.configDataStore();
+        AbstractDataStore leaderDistributedDataStore = leaderNode.configDataStore();
 
         leaderDistributedDataStore.waitTillReady();
         follower1Node.configDataStore().waitTillReady();
@@ -283,7 +283,7 @@ public class DistributedEntityOwnershipIntegrationTest {
                 .moduleShardsConfig(MODULE_SHARDS_CONFIG).schemaContext(SCHEMA_CONTEXT).createOperDatastore(false)
                 .datastoreContextBuilder(followerDatastoreContextBuilder).build();
 
-        DistributedDataStore leaderDistributedDataStore = leaderNode.configDataStore();
+        AbstractDataStore leaderDistributedDataStore = leaderNode.configDataStore();
 
         leaderDistributedDataStore.waitTillReady();
         follower1Node.configDataStore().waitTillReady();
@@ -368,7 +368,7 @@ public class DistributedEntityOwnershipIntegrationTest {
                 .moduleShardsConfig(MODULE_SHARDS_5_NODE_CONFIG).schemaContext(SCHEMA_CONTEXT)
                 .createOperDatastore(false).datastoreContextBuilder(followerDatastoreContextBuilder).build();
 
-        DistributedDataStore leaderDistributedDataStore = leaderNode.configDataStore();
+        AbstractDataStore leaderDistributedDataStore = leaderNode.configDataStore();
 
         leaderDistributedDataStore.waitTillReady();
         follower1Node.configDataStore().waitTillReady();
@@ -457,7 +457,7 @@ public class DistributedEntityOwnershipIntegrationTest {
                 .moduleShardsConfig(MODULE_SHARDS_CONFIG).schemaContext(SCHEMA_CONTEXT).createOperDatastore(false)
                 .datastoreContextBuilder(followerDatastoreContextBuilder).build();
 
-        DistributedDataStore leaderDistributedDataStore = leaderNode.configDataStore();
+        AbstractDataStore leaderDistributedDataStore = leaderNode.configDataStore();
 
         leaderDistributedDataStore.waitTillReady();
         follower1Node.configDataStore().waitTillReady();
@@ -538,7 +538,7 @@ public class DistributedEntityOwnershipIntegrationTest {
                 .moduleShardsConfig(moduleShardsConfig).schemaContext(SCHEMA_CONTEXT).createOperDatastore(false)
                 .datastoreContextBuilder(leaderDatastoreContextBuilder).build();
 
-        DistributedDataStore leaderDistributedDataStore = leaderNode.configDataStore();
+        AbstractDataStore leaderDistributedDataStore = leaderNode.configDataStore();
         final DOMEntityOwnershipService leaderEntityOwnershipService = newOwnershipService(leaderDistributedDataStore);
 
         leaderNode.kit().waitUntilLeader(leaderNode.configDataStore().getActorContext(), ENTITY_OWNERSHIP_SHARD_NAME);
@@ -547,7 +547,7 @@ public class DistributedEntityOwnershipIntegrationTest {
                 .moduleShardsConfig(moduleShardsConfig).schemaContext(SCHEMA_CONTEXT).createOperDatastore(false)
                 .datastoreContextBuilder(followerDatastoreContextBuilder).build();
 
-        DistributedDataStore follower1DistributedDataStore = follower1Node.configDataStore();
+        AbstractDataStore follower1DistributedDataStore = follower1Node.configDataStore();
         follower1DistributedDataStore.waitTillReady();
 
         leaderNode.waitForMembersUp("member-2");
@@ -616,7 +616,7 @@ public class DistributedEntityOwnershipIntegrationTest {
                 .moduleShardsConfig(MODULE_SHARDS_CONFIG).schemaContext(SCHEMA_CONTEXT).createOperDatastore(false)
                 .datastoreContextBuilder(followerDatastoreContextBuilder).build();
 
-        DistributedDataStore leaderDistributedDataStore = leaderNode.configDataStore();
+        AbstractDataStore leaderDistributedDataStore = leaderNode.configDataStore();
 
         leaderDistributedDataStore.waitTillReady();
         follower1Node.configDataStore().waitTillReady();
@@ -659,7 +659,7 @@ public class DistributedEntityOwnershipIntegrationTest {
                 .moduleShardsConfig(MODULE_SHARDS_CONFIG).schemaContext(SCHEMA_CONTEXT).createOperDatastore(false)
                 .datastoreContextBuilder(followerDatastoreContextBuilder).build();
 
-        DistributedDataStore leaderDistributedDataStore = leaderNode.configDataStore();
+        AbstractDataStore leaderDistributedDataStore = leaderNode.configDataStore();
 
         leaderDistributedDataStore.waitTillReady();
         follower1Node.configDataStore().waitTillReady();
@@ -694,7 +694,7 @@ public class DistributedEntityOwnershipIntegrationTest {
         assertEquals("EntityOwnershipState", expState, state.get());
     }
 
-    private static void verifyCandidates(final DistributedDataStore dataStore, final DOMEntity entity,
+    private static void verifyCandidates(final AbstractDataStore dataStore, final DOMEntity entity,
             final String... expCandidates) throws Exception {
         AssertionError lastError = null;
         Stopwatch sw = Stopwatch.createStarted();
@@ -721,7 +721,7 @@ public class DistributedEntityOwnershipIntegrationTest {
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    private static void verifyOwner(final DistributedDataStore dataStore, final DOMEntity entity,
+    private static void verifyOwner(final AbstractDataStore dataStore, final DOMEntity entity,
             final String expOwner) {
         AbstractEntityOwnershipTest.verifyOwner(expOwner, entity.getType(), entity.getIdentifier(), path -> {
             try {
