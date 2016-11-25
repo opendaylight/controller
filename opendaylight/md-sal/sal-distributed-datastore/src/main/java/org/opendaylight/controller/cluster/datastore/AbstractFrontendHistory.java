@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import javax.annotation.Nullable;
+import org.opendaylight.controller.cluster.access.commands.AbstractReadTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.CommitLocalTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.OutOfOrderRequestException;
 import org.opendaylight.controller.cluster.access.commands.TransactionRequest;
@@ -67,14 +68,7 @@ abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdent
                 throw UNSEQUENCED_START;
             }
 
-            if (request instanceof CommitLocalTransactionRequest) {
-                tx = createReadyTransaction(id, ((CommitLocalTransactionRequest) request).getModification());
-                LOG.debug("{}: allocated new ready transaction {}", persistenceId(), id);
-            } else {
-                tx = createOpenTransaction(id);
-                LOG.debug("{}: allocated new open transaction {}", persistenceId(), id);
-            }
-
+            tx = createTransaction(request, id);
             transactions.put(id, tx);
         } else {
             final Optional<TransactionSuccess<?>> maybeReplay = tx.replaySequence(request.getSequence());
@@ -87,6 +81,25 @@ abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdent
 
         return tx.handleRequest(request, envelope, now);
     }
+
+    private FrontendTransaction createTransaction(final TransactionRequest<?> request, final TransactionIdentifier id)
+            throws RequestException {
+        if (request instanceof CommitLocalTransactionRequest) {
+            LOG.debug("{}: allocating new ready transaction {}", persistenceId(), id);
+            return createReadyTransaction(id, ((CommitLocalTransactionRequest) request).getModification());
+        }
+        if (request instanceof AbstractReadTransactionRequest) {
+            if (((AbstractReadTransactionRequest<?>) request).isSnapshotOnly()) {
+                LOG.debug("{}: allocatint new open snapshot {}", persistenceId(), id);
+                return createOpenSnapshot(id);
+            }
+        }
+
+        LOG.debug("{}: allocating new open transaction {}", persistenceId(), id);
+        return createOpenTransaction(id);
+    }
+
+    abstract FrontendTransaction createOpenSnapshot(TransactionIdentifier id) throws RequestException;
 
     abstract FrontendTransaction createOpenTransaction(TransactionIdentifier id) throws RequestException;
 

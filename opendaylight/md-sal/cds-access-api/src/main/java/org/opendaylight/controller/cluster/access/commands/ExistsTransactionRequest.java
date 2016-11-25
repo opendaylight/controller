@@ -24,8 +24,8 @@ public final class ExistsTransactionRequest extends AbstractReadTransactionReque
     private static final long serialVersionUID = 1L;
 
     public ExistsTransactionRequest(@Nonnull final TransactionIdentifier identifier, final long sequence,
-            @Nonnull final ActorRef replyTo, @Nonnull final YangInstanceIdentifier path) {
-        super(identifier, sequence, replyTo, path);
+            @Nonnull final ActorRef replyTo, @Nonnull final YangInstanceIdentifier path, final boolean snapshotOnly) {
+        super(identifier, sequence, replyTo, path, snapshotOnly);
     }
 
     private ExistsTransactionRequest(final ExistsTransactionRequest request, final ABIVersion version) {
