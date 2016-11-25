@@ -147,7 +147,7 @@ public class ConnectingClientConnectionTest {
         mockRequest = new MockRequest(mockIdentifier, mockReplyTo);
         mockRequest2 = new MockRequest(mockIdentifier, mockReplyTo);
         mockResponse = mockRequest.toRequestFailure(mockCause);
-        mockResponseEnvelope = new FailureEnvelope(mockResponse, 0, 0);
+        mockResponseEnvelope = new FailureEnvelope(mockResponse, 0, 0, 0);
         mockCookie = ThreadLocalRandom.current().nextLong();
 
         queue = new ConnectingClientConnection<>(mockContext, mockCookie);
@@ -160,7 +160,7 @@ public class ConnectingClientConnectionTest {
 
     @Test
     public void testCookie() {
-        assertSame(mockCookie, queue.cookie());
+        assertEquals(mockCookie, queue.cookie());
     }
 
     @Test
