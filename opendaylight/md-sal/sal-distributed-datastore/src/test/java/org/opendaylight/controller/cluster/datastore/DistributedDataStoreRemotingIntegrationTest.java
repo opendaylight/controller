@@ -345,7 +345,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
         writeTx.write(CarsModel.BASE_PATH, CarsModel.emptyContainer());
 
-        writeTx.ready();
+        final DOMStoreThreePhaseCommitCohort writeTxReady = writeTx.ready();
 
         // Verify the top-level cars container with read-only.
 
@@ -371,6 +371,8 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         rwTx.merge(CarsModel.newCarPath("sportage"), car2);
 
         rwTx.delete(car1Path);
+
+        followerTestKit.doCommit(writeTxReady);
 
         followerTestKit.doCommit(rwTx.ready());
 
