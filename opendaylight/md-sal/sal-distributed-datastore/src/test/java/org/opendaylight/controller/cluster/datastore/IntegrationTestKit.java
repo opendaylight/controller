@@ -26,6 +26,7 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import org.mockito.Mockito;
+import org.opendaylight.controller.cluster.databroker.ClientBackedDataStore;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext.Builder;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.config.ConfigurationImpl;
@@ -87,7 +88,7 @@ public class IntegrationTestKit extends ShardTestKit {
         Mockito.doReturn(datastoreContext).when(mockContextFactory).getBaseDatastoreContext();
         Mockito.doReturn(datastoreContext).when(mockContextFactory).getShardDatastoreContext(Mockito.anyString());
 
-        AbstractDataStore dataStore = new DistributedDataStore(getSystem(), cluster, config, mockContextFactory,
+        AbstractDataStore dataStore = new ClientBackedDataStore(getSystem(), cluster, config, mockContextFactory,
                 restoreFromSnapshot);
 
         dataStore.onGlobalContextUpdated(schemaContext);
