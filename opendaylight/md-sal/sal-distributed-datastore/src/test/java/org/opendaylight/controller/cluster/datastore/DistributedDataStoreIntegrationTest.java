@@ -66,6 +66,7 @@ import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionChainClosedException;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListener;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
+import org.opendaylight.controller.md.sal.dom.api.DOMDataReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMTransactionChain;
@@ -975,11 +976,13 @@ public class DistributedDataStoreIntegrationTest {
                         f.checkedGet();
                     }
 
-                    Optional<NormalizedNode<?, ?>> optional = txChain.newReadOnlyTransaction()
+                    final DOMDataReadOnlyTransaction readTx = txChain.newReadOnlyTransaction();
+                    Optional<NormalizedNode<?, ?>> optional = readTx
                             .read(LogicalDatastoreType.CONFIGURATION, CarsModel.CAR_LIST_PATH).get(5, TimeUnit.SECONDS);
                     assertEquals("isPresent", true, optional.isPresent());
                     assertEquals("# cars", numCars, ((Collection<?>) optional.get().getValue()).size());
 
+                    readTx.close();
                     txChain.close();
 
                     broker.close();
@@ -1006,6 +1009,7 @@ public class DistributedDataStoreIntegrationTest {
                     Optional<NormalizedNode<?, ?>> optional = rwTx2.read(TestModel.TEST_PATH).get(5, TimeUnit.SECONDS);
                     assertEquals("isPresent", false, optional.isPresent());
 
+                    rwTx2.close();
                     txChain.close();
                 }
             }
