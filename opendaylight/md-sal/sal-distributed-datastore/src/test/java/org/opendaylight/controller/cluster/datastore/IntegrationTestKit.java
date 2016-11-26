@@ -86,7 +86,7 @@ public class IntegrationTestKit extends ShardTestKit {
         Mockito.doReturn(datastoreContext).when(mockContextFactory).getBaseDatastoreContext();
         Mockito.doReturn(datastoreContext).when(mockContextFactory).getShardDatastoreContext(Mockito.anyString());
 
-        AbstractDataStore dataStore = new DistributedDataStore(getSystem(), cluster, config, mockContextFactory,
+        AbstractDataStore dataStore = new ClientBackedDataStore(getSystem(), cluster, config, mockContextFactory,
                 restoreFromSnapshot);
 
         dataStore.onGlobalContextUpdated(schemaContext);
