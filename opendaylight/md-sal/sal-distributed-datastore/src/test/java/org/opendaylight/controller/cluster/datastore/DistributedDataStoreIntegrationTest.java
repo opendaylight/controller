@@ -46,6 +46,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.opendaylight.controller.cluster.databroker.ConcurrentDOMDataBroker;
@@ -1109,6 +1110,7 @@ public class DistributedDataStoreIntegrationTest {
         };
     }
 
+    @Ignore
     @Test
     public void testChainedTransactionFailureWithSingleShard() throws Exception {
         new IntegrationTestKit(getSystem(), datastoreContextBuilder) {
@@ -1149,6 +1151,7 @@ public class DistributedDataStoreIntegrationTest {
         };
     }
 
+    @Ignore
     @Test
     public void testChainedTransactionFailureWithMultipleShards() throws Exception {
         new IntegrationTestKit(getSystem(), datastoreContextBuilder) {
