@@ -16,8 +16,10 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import com.google.common.util.concurrent.Uninterruptibles;
+import java.util.Collection;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import javax.annotation.Nonnull;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.databroker.actors.dds.DataStoreClient;
 import org.opendaylight.controller.cluster.databroker.actors.dds.DistributedDataStoreClientActor;
@@ -45,6 +47,7 @@ import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
 import org.slf4j.Logger;
@@ -310,5 +313,45 @@ public class DistributedDataStore implements DistributedDataStoreInterface, Sche
     @VisibleForTesting
     public CountDownLatch getWaitTillReadyCountDownLatch() {
         return waitTillReadyCountDownLatch;
+    }
+
+    @SuppressWarnings("unchecked")
+    public <L extends DOMDataTreeChangeListener> ListenerRegistration<L> registerProxyListener(
+            final YangInstanceIdentifier shardLookup,
+            final YangInstanceIdentifier insideShard,
+            final org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener delegate) {
+
+        Preconditions.checkNotNull(shardLookup, "shardLookup should not be null");
+        Preconditions.checkNotNull(insideShard, "insideShard should not be null");
+        Preconditions.checkNotNull(delegate, "delegate should not be null");
+
+        final String shardName = actorContext.getShardStrategyFactory().getStrategy(shardLookup).findShard(shardLookup);
+        LOG.debug("Registering tree listener: {} for tree: {} shard: {}, path inside shard: {}",
+                delegate,shardLookup, shardName, insideShard);
+
+        final DataTreeChangeListenerProxy<DOMDataTreeChangeListener> listenerRegistrationProxy =
+                new DataTreeChangeListenerProxy<>(actorContext, new DOMDataTreeControllerProxyListener(delegate));
+        listenerRegistrationProxy.init(shardName, insideShard);
+
+        return (ListenerRegistration<L>) listenerRegistrationProxy;
+    }
+
+    /**
+     * Proxy class thats used purely for translating the calls from controller api to mdsal api.
+     * Remove this once controller is migrated to the mdsal apis.
+     */
+    public static final class DOMDataTreeControllerProxyListener implements DOMDataTreeChangeListener {
+
+        private final org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener delegate;
+
+        public DOMDataTreeControllerProxyListener(
+                final org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener delegate) {
+            this.delegate = delegate;
+        }
+
+        @Override
+        public void onDataTreeChanged(@Nonnull final Collection<DataTreeCandidate> changes) {
+            delegate.onDataTreeChanged(changes);
+        }
     }
 }
