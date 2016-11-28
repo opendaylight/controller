@@ -132,7 +132,26 @@ class DistributedShardFrontend implements ReadableWriteableDOMDataTreeShard {
     @Override
     public <L extends DOMDataTreeChangeListener> ListenerRegistration<L> registerTreeChangeListener(
             final YangInstanceIdentifier treeId, final L listener) {
-        throw new UnsupportedOperationException("Listener registration not supported");
+//        return distributedDataStore.registerTreeChangeListener(treeId, new DOMDataTreeControllerProxyListener(listener));
+        throw new UnsupportedOperationException("Listeners not supported");
     }
 
+
+    /**
+     * Remove this once controller is migrated to the mdsal apis.
+     */
+    static final class DOMDataTreeControllerProxyListener
+            implements org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeListener {
+
+        private final DOMDataTreeChangeListener delegate;
+
+        public DOMDataTreeControllerProxyListener(final DOMDataTreeChangeListener delegate) {
+            this.delegate = delegate;
+        }
+
+        @Override
+        public void onDataTreeChanged(@Nonnull final Collection<DataTreeCandidate> changes) {
+            delegate.onDataTreeChanged(changes);
+        }
+    }
 }
