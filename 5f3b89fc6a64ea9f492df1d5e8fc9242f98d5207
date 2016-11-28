@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "1a622d24_5946c324",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/AbstractShardBackendResolver.java",
+        "patchSetId": 22
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-11-28T13:20:31Z",
+      "side": 1,
+      "message": "We want to make sure getResult() and onStageResolved() are always serialized.",
+      "parentUuid": "3a65312a_80c0827d",
+      "revId": "5f3b89fc6a64ea9f492df1d5e8fc9242f98d5207",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a65312a_40cf8ab0",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/AbstractShardBackendResolver.java",
         "patchSetId": 22
@@ -30,6 +48,24 @@
       "writtenOn": "2016-11-23T12:56:12Z",
       "side": 1,
       "message": "minor but @Nullable should precede synchronized",
+      "revId": "5f3b89fc6a64ea9f492df1d5e8fc9242f98d5207",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_b971d779",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/AbstractShardBackendResolver.java",
+        "patchSetId": 22
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-11-28T13:20:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3a65312a_40cf8ab0",
       "revId": "5f3b89fc6a64ea9f492df1d5e8fc9242f98d5207",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
