@@ -8,7 +8,15 @@
 
 package org.opendaylight.controller.cluster.sharding;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.Matchers.anyCollection;
+import static org.mockito.Matchers.anyMap;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.opendaylight.controller.cluster.datastore.IntegrationTestKit.findLocalShard;
 import static org.opendaylight.controller.cluster.datastore.IntegrationTestKit.waitUntilShardIsDown;
 
@@ -18,17 +26,23 @@ import akka.actor.Address;
 import akka.actor.AddressFromURIString;
 import akka.cluster.Cluster;
 import akka.testkit.JavaTestKit;
+import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.typesafe.config.ConfigFactory;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.MockitoAnnotations;
 import org.opendaylight.controller.cluster.datastore.AbstractTest;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext.Builder;
@@ -46,15 +60,20 @@ import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.common.api.TransactionCommitFailedException;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeCursorAwareTransaction;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
+import org.opendaylight.mdsal.dom.api.DOMDataTreeListener;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeProducer;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeWriteCursor;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
+import org.opendaylight.yangtools.yang.data.api.schema.LeafNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
+import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableLeafNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableMapNodeBuilder;
 import org.slf4j.Logger;
@@ -85,8 +104,19 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
 
     private DistributedShardedDOMDataTree leaderShardFactory;
 
+    @Captor
+    private ArgumentCaptor<Collection<DataTreeCandidate>> captorForChanges;
+    @Captor
+    private ArgumentCaptor<Map<DOMDataTreeIdentifier, NormalizedNode<?, ?>>> captorForSubtrees;
+
+    private static final DOMDataTreeIdentifier INNER_LIST_ID =
+            new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION,
+                    YangInstanceIdentifier.create(getOuterListIdFor(0).getPathArguments())
+                            .node(TestModel.INNER_LIST_QNAME));
+
     @Before
     public void setUp() {
+        MockitoAnnotations.initMocks(this);
 
         leaderSystem = ActorSystem.create("cluster-test", ConfigFactory.load().getConfig("Member1"));
         Cluster.get(leaderSystem).join(MEMBER_1_ADDRESS);
@@ -167,14 +197,35 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
         Assert.assertNotNull(cursor);
         final YangInstanceIdentifier nameId =
                 YangInstanceIdentifier.builder(TestModel.TEST_PATH).node(TestModel.NAME_QNAME).build();
+        final LeafNode<String> valueToCheck = ImmutableLeafNodeBuilder.<String>create().withNodeIdentifier(
+                new NodeIdentifier(TestModel.NAME_QNAME)).withValue("Test Value").build();
         cursor.write(nameId.getLastPathArgument(),
-                ImmutableLeafNodeBuilder.<String>create().withNodeIdentifier(
-                        new NodeIdentifier(TestModel.NAME_QNAME)).withValue("Test Value").build());
+                valueToCheck);
 
         cursor.close();
         LOG.warn("Got to pre submit");
 
         tx.submit().checkedGet();
+
+        final DOMDataTreeListener mockedDataTreeListener = mock(DOMDataTreeListener.class);
+        doNothing().when(mockedDataTreeListener).onDataTreeChanged(anyCollection(), anyMap());
+
+        leaderShardFactory.registerListener(mockedDataTreeListener, Collections.singletonList(TEST_ID),
+                true, Collections.emptyList());
+
+        verify(mockedDataTreeListener, timeout(1000).times(1)).onDataTreeChanged(captorForChanges.capture(),
+                captorForSubtrees.capture());
+        final List<Collection<DataTreeCandidate>> capturedValue = captorForChanges.getAllValues();
+
+        final Optional<NormalizedNode<?, ?>> dataAfter =
+                capturedValue.get(0).iterator().next().getRootNode().getDataAfter();
+
+        final NormalizedNode<?,?> expected = ImmutableContainerNodeBuilder.create()
+                .withNodeIdentifier(new NodeIdentifier(TestModel.TEST_QNAME)).withChild(valueToCheck).build();
+        assertEquals(expected, dataAfter.get());
+
+        verifyNoMoreInteractions(mockedDataTreeListener);
+
     }
 
     @Test
@@ -192,8 +243,7 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
         leaderTestKit.waitUntilLeader(leaderDistributedDataStore.getActorContext(),
                 ClusterUtils.getCleanShardName(TestModel.TEST_PATH));
 
-        final YangInstanceIdentifier oid1 = TestModel.OUTER_LIST_PATH.node(new NodeIdentifierWithPredicates(
-                TestModel.OUTER_LIST_QNAME, QName.create(TestModel.OUTER_LIST_QNAME, "id"), 0));
+        final YangInstanceIdentifier oid1 = getOuterListIdFor(0);
         final DOMDataTreeIdentifier outerListPath = new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, oid1);
 
         final DistributedShardRegistration outerListShardReg = leaderShardFactory.createDistributedShard(outerListPath,
@@ -234,6 +284,28 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
         }
 
         futures.get(futures.size() - 1).checkedGet();
+
+        final DOMDataTreeListener mockedDataTreeListener = mock(DOMDataTreeListener.class);
+        doNothing().when(mockedDataTreeListener).onDataTreeChanged(anyCollection(), anyMap());
+
+        leaderShardFactory.registerListener(mockedDataTreeListener, Collections.singletonList(INNER_LIST_ID),
+                true, Collections.emptyList());
+
+        verify(mockedDataTreeListener, timeout(1000).times(1)).onDataTreeChanged(captorForChanges.capture(),
+                captorForSubtrees.capture());
+        verifyNoMoreInteractions(mockedDataTreeListener);
+        final List<Collection<DataTreeCandidate>> capturedValue = captorForChanges.getAllValues();
+
+        final NormalizedNode<?,?> expected =
+                ImmutableMapNodeBuilder
+                        .create()
+                        .withNodeIdentifier(new NodeIdentifier(TestModel.INNER_LIST_QNAME))
+                                // only the values from the last run should be present
+                        .withValue(createInnerListMapEntries(1000, "run-999"))
+                        .build();
+
+        assertEquals("List values dont match the expected values from the last run",
+                expected, capturedValue.get(0).iterator().next().getRootNode().getDataAfter().get());
 
     }
 
@@ -299,5 +371,10 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
                     ClusterUtils.getCleanShardName(TestModel.TEST_PATH));
 
         }
+    }
+
+    private static YangInstanceIdentifier getOuterListIdFor(final int id) {
+        return TestModel.OUTER_LIST_PATH.node(new NodeIdentifierWithPredicates(
+                TestModel.OUTER_LIST_QNAME, QName.create(TestModel.OUTER_LIST_QNAME, "id"), id));
     }
 }

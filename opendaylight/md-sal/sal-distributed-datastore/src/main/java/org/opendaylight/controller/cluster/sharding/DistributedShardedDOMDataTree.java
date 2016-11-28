@@ -135,8 +135,7 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
             final T listener, final Collection<DOMDataTreeIdentifier> subtrees,
             final boolean allowRxMerges, final Collection<DOMDataTreeProducer> producers)
             throws DOMDataTreeLoopException {
-
-        throw new UnsupportedOperationException("Not implemented");
+        return shardedDOMDataTree.registerListener(listener, subtrees, allowRxMerges, producers);
     }
 
     @Nonnull
