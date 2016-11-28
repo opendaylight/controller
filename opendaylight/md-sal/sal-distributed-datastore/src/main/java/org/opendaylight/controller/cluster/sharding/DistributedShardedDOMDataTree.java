@@ -127,8 +127,7 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
             final T listener, final Collection<DOMDataTreeIdentifier> subtrees,
             final boolean allowRxMerges, final Collection<DOMDataTreeProducer> producers)
             throws DOMDataTreeLoopException {
-
-        throw new UnsupportedOperationException("Not implemented");
+        return shardedDOMDataTree.registerListener(listener, subtrees, allowRxMerges, producers);
     }
 
     @Nonnull
@@ -208,7 +207,8 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
             final Entry<DataStoreClient, ActorRef> entry =
                     createDatastoreClient(shardName, distributedDataStore.getActorContext());
 
-            final DistributedShardFrontend shard = new DistributedShardFrontend(distributedDataStore, entry.getKey(), prefix);
+            final DistributedShardFrontend shard =
+                    new DistributedShardFrontend(distributedDataStore, entry.getKey(), prefix);
 
             @SuppressWarnings("unchecked")
             final DOMDataTreeShardRegistration<DOMDataTreeShard> reg =
