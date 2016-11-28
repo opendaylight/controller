@@ -24,9 +24,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.Mockito;
 import org.opendaylight.controller.cluster.databroker.actors.dds.ClientLocalHistory;
 import org.opendaylight.controller.cluster.databroker.actors.dds.ClientTransaction;
 import org.opendaylight.controller.cluster.databroker.actors.dds.DataStoreClient;
+import org.opendaylight.controller.cluster.datastore.DistributedDataStore;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeCursorAwareTransaction;
@@ -104,7 +106,8 @@ public class DistributedShardFrontendTest {
     @Test
     public void testClientTransaction() throws Exception {
 
-        final DistributedShardFrontend rootShard = new DistributedShardFrontend(distributedDataStore, client, ROOT);
+        final DistributedShardFrontend rootShard =
+                new DistributedShardFrontend(Mockito.mock(DistributedDataStore.class), client, ROOT);
 
         try (final DOMDataTreeProducer producer = shardedDOMDataTree.createProducer(Collections.singletonList(ROOT))) {
             shardedDOMDataTree.registerDataTreeShard(ROOT, rootShard, producer);
@@ -124,7 +127,7 @@ public class DistributedShardFrontendTest {
         doNothing().when(outerListClient).close();
 
         final DistributedShardFrontend outerListShard = new DistributedShardFrontend(
-                distributedDataStore, outerListClient, OUTER_LIST_ID);
+                Mockito.mock(DistributedDataStore.class), outerListClient, OUTER_LIST_ID);
         try (final DOMDataTreeProducer producer =
                      shardedDOMDataTree.createProducer(Collections.singletonList(OUTER_LIST_ID))) {
             shardedDOMDataTree.registerDataTreeShard(OUTER_LIST_ID, outerListShard, producer);
