@@ -287,4 +287,26 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
     public CountDownLatch getWaitTillReadyCountDownLatch() {
         return waitTillReadyCountDownLatch;
     }
+
+    @SuppressWarnings("unchecked")
+    public <L extends DOMDataTreeChangeListener> ListenerRegistration<L> registerProxyListener(
+            final YangInstanceIdentifier shardLookup,
+            final YangInstanceIdentifier insideShard,
+            final org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener delegate) {
+
+        Preconditions.checkNotNull(shardLookup, "shardLookup should not be null");
+        Preconditions.checkNotNull(insideShard, "insideShard should not be null");
+        Preconditions.checkNotNull(delegate, "delegate should not be null");
+
+        final String shardName = actorContext.getShardStrategyFactory().getStrategy(shardLookup).findShard(shardLookup);
+        LOG.debug("Registering tree listener: {} for tree: {} shard: {}, path inside shard: {}",
+                delegate,shardLookup, shardName, insideShard);
+
+        final DataTreeChangeListenerProxy<DOMDataTreeChangeListener> listenerRegistrationProxy =
+                new DataTreeChangeListenerProxy<>(actorContext, delegate::onDataTreeChanged, insideShard);
+        listenerRegistrationProxy.init(shardName);
+
+        return (ListenerRegistration<L>) listenerRegistrationProxy;
+    }
+
 }
