@@ -29,6 +29,7 @@ import org.opendaylight.mdsal.dom.spi.shard.SubshardProducerSpecification;
 import org.opendaylight.mdsal.dom.spi.shard.WriteableDOMDataTreeShard;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -134,9 +135,44 @@ class DistributedShardFrontend implements ReadableWriteableDOMDataTreeShard {
 
     @Nonnull
     @Override
+    @SuppressWarnings("unchecked")
     public <L extends DOMDataTreeChangeListener> ListenerRegistration<L> registerTreeChangeListener(
             final YangInstanceIdentifier treeId, final L listener) {
-        throw new UnsupportedOperationException("Listener registration not supported");
+
+        final List<PathArgument> toStrip = new ArrayList<>(shardRoot.getRootIdentifier().getPathArguments());
+        final List<PathArgument> stripFrom = new ArrayList<>(treeId.getPathArguments());
+
+        while (!toStrip.isEmpty()) {
+            stripFrom.remove(0);
+            toStrip.remove(0);
+        }
+
+        return (ListenerRegistration<L>) new ProxyRegistration(distributedDataStore
+                .registerProxyListener(treeId, YangInstanceIdentifier.create(stripFrom), listener), listener);
+    }
+
+    private static class ProxyRegistration implements ListenerRegistration<DOMDataTreeChangeListener> {
+
+        private ListenerRegistration<org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeListener> proxy;
+        private DOMDataTreeChangeListener listener;
+
+        private ProxyRegistration(
+                final ListenerRegistration<
+                        org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeListener> proxy,
+                final DOMDataTreeChangeListener listener) {
+            this.proxy = proxy;
+            this.listener = listener;
+        }
+
+        @Override
+        public DOMDataTreeChangeListener getInstance() {
+            return listener;
+        }
+
+        @Override
+        public void close() {
+            proxy.close();
+        }
     }
 
 }
