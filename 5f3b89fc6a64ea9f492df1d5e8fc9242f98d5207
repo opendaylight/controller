@@ -86,6 +86,24 @@
       "revId": "5f3b89fc6a64ea9f492df1d5e8fc9242f98d5207",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_592b6330",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/SimpleShardBackendResolver.java",
+        "patchSetId": 22
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-11-28T13:23:21Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3a65312a_e05696d1",
+      "revId": "5f3b89fc6a64ea9f492df1d5e8fc9242f98d5207",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
