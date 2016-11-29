@@ -13,6 +13,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.anyCollection;
 import static org.mockito.Matchers.anyMap;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
@@ -42,7 +43,9 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.opendaylight.controller.cluster.ActorSystemProvider;
 import org.opendaylight.controller.cluster.datastore.AbstractTest;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext.Builder;
@@ -87,6 +90,11 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
     private static final DOMDataTreeIdentifier TEST_ID =
             new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, TestModel.TEST_PATH);
 
+    private static final DOMDataTreeIdentifier INNER_LIST_ID =
+            new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION,
+                    YangInstanceIdentifier.create(getOuterListIdFor(0).getPathArguments())
+                            .node(TestModel.INNER_LIST_QNAME));
+
     private ActorSystem leaderSystem;
 
     private final Builder leaderDatastoreContextBuilder =
@@ -106,10 +114,7 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
     @Captor
     private ArgumentCaptor<Map<DOMDataTreeIdentifier, NormalizedNode<?, ?>>> captorForSubtrees;
 
-    private static final DOMDataTreeIdentifier INNER_LIST_ID =
-            new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION,
-                    YangInstanceIdentifier.create(getOuterListIdFor(0).getPathArguments())
-                            .node(TestModel.INNER_LIST_QNAME));
+    private ActorSystemProvider leaderSystemProvider;
 
     @Before
     public void setUp() {
@@ -118,6 +123,8 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
         leaderSystem = ActorSystem.create("cluster-test", ConfigFactory.load().getConfig("Member1"));
         Cluster.get(leaderSystem).join(MEMBER_1_ADDRESS);
 
+        leaderSystemProvider = Mockito.mock(ActorSystemProvider.class);
+        doReturn(leaderSystem).when(leaderSystemProvider).getActorSystem();
     }
 
     @After
@@ -135,10 +142,12 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
         leaderDistributedDataStore =
                 leaderTestKit.setupDistributedDataStoreWithoutConfig(type, SchemaContextHelper.full());
 
-        leaderShardFactory = new DistributedShardedDOMDataTree(leaderSystem,
+
+        leaderShardFactory = new DistributedShardedDOMDataTree(leaderSystemProvider,
                 leaderDistributedDataStore,
                 leaderDistributedDataStore);
     }
+
 
     @Test
     public void testWritesIntoDefaultShard() throws Exception {
