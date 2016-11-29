@@ -768,12 +768,12 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         RaftActorServerConfigurationSupport support = new RaftActorServerConfigurationSupport(
                 noLeaderActor.underlyingActor());
 
-        ReplicatedLogEntry serverConfigEntry = new MockRaftActorContext.MockReplicatedLogEntry(1, 1,
+        ReplicatedLogEntry serverConfigEntry = new SimpleReplicatedLogEntry(1, 1,
                 new ServerConfigurationPayload(Collections.<ServerInfo>emptyList()));
         boolean handled = support.handleMessage(new ApplyState(null, null, serverConfigEntry), ActorRef.noSender());
         assertEquals("Message handled", true, handled);
 
-        ReplicatedLogEntry nonServerConfigEntry = new MockRaftActorContext.MockReplicatedLogEntry(1, 1,
+        ReplicatedLogEntry nonServerConfigEntry = new SimpleReplicatedLogEntry(1, 1,
                 new MockRaftActorContext.MockPayload("1"));
         handled = support.handleMessage(new ApplyState(null, null, nonServerConfigEntry), ActorRef.noSender());
         assertEquals("Message handled", false, handled);

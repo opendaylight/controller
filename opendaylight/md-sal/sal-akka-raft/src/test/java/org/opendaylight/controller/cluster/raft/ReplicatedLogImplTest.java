@@ -29,9 +29,9 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.internal.matchers.Same;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;
-import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.persisted.DeleteEntries;
+import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,7 +82,7 @@ public class ReplicatedLogImplTest {
     public void testAppendAndPersistExpectingNoCapture() throws Exception {
         ReplicatedLog log = ReplicatedLogImpl.newInstance(context);
 
-        MockReplicatedLogEntry logEntry1 = new MockReplicatedLogEntry(1, 1, new MockPayload("1"));
+        ReplicatedLogEntry logEntry1 = new SimpleReplicatedLogEntry(1, 1, new MockPayload("1"));
 
         log.appendAndPersist(logEntry1, null, true);
 
@@ -92,7 +92,7 @@ public class ReplicatedLogImplTest {
 
         reset(mockPersistence);
 
-        MockReplicatedLogEntry logEntry2 = new MockReplicatedLogEntry(1, 2, new MockPayload("2"));
+        ReplicatedLogEntry logEntry2 = new SimpleReplicatedLogEntry(2, 1, new MockPayload("2"));
         Procedure<ReplicatedLogEntry> mockCallback = Mockito.mock(Procedure.class);
         log.appendAndPersist(logEntry2, mockCallback, true);
 
@@ -109,7 +109,7 @@ public class ReplicatedLogImplTest {
         ReplicatedLog log = ReplicatedLogImpl.newInstance(context);
 
         Procedure<ReplicatedLogEntry> mockCallback = Mockito.mock(Procedure.class);
-        MockReplicatedLogEntry logEntry = new MockReplicatedLogEntry(1, 1, new MockPayload("1"));
+        ReplicatedLogEntry logEntry = new SimpleReplicatedLogEntry(1, 1, new MockPayload("1"));
 
         log.appendAndPersist(logEntry, mockCallback, true);
 
@@ -134,8 +134,8 @@ public class ReplicatedLogImplTest {
 
         ReplicatedLog log = ReplicatedLogImpl.newInstance(context);
 
-        final MockReplicatedLogEntry logEntry1 = new MockReplicatedLogEntry(1, 2, new MockPayload("2"));
-        final MockReplicatedLogEntry logEntry2 = new MockReplicatedLogEntry(1, 3, new MockPayload("3"));
+        final ReplicatedLogEntry logEntry1 = new SimpleReplicatedLogEntry(2, 1, new MockPayload("2"));
+        final ReplicatedLogEntry logEntry2 = new SimpleReplicatedLogEntry(3, 1, new MockPayload("3"));
 
         log.appendAndPersist(logEntry1, null, true);
         verifyPersist(logEntry1);
@@ -158,14 +158,14 @@ public class ReplicatedLogImplTest {
         ReplicatedLog log = ReplicatedLogImpl.newInstance(context);
 
         int dataSize = 600;
-        MockReplicatedLogEntry logEntry = new MockReplicatedLogEntry(1, 2, new MockPayload("2", dataSize));
+        ReplicatedLogEntry logEntry = new SimpleReplicatedLogEntry(2, 1, new MockPayload("2", dataSize));
 
         log.appendAndPersist(logEntry, null, true);
         verifyPersist(logEntry);
 
         reset(mockPersistence);
 
-        logEntry = new MockReplicatedLogEntry(1, 3, new MockPayload("3", 5));
+        logEntry = new SimpleReplicatedLogEntry(3, 1, new MockPayload("3", 5));
 
         log.appendAndPersist(logEntry, null, true);
         verifyPersist(logEntry);
@@ -178,9 +178,9 @@ public class ReplicatedLogImplTest {
 
         ReplicatedLog log = ReplicatedLogImpl.newInstance(context);
 
-        log.append(new MockReplicatedLogEntry(1, 0, new MockPayload("0")));
-        log.append(new MockReplicatedLogEntry(1, 1, new MockPayload("1")));
-        log.append(new MockReplicatedLogEntry(1, 2, new MockPayload("2")));
+        log.append(new SimpleReplicatedLogEntry(0, 1, new MockPayload("0")));
+        log.append(new SimpleReplicatedLogEntry(1, 1, new MockPayload("1")));
+        log.append(new SimpleReplicatedLogEntry(2, 1, new MockPayload("2")));
 
         log.removeFromAndPersist(1);
 
