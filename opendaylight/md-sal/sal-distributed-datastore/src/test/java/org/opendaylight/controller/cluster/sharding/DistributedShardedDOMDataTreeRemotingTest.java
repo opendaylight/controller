@@ -11,6 +11,7 @@ package org.opendaylight.controller.cluster.sharding;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.doReturn;
 import static org.opendaylight.controller.cluster.datastore.IntegrationTestKit.findLocalShard;
 import static org.opendaylight.controller.cluster.datastore.IntegrationTestKit.waitUntilShardIsDown;
 
@@ -30,6 +31,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.mockito.Mockito;
+import org.opendaylight.controller.cluster.ActorSystemProvider;
 import org.opendaylight.controller.cluster.datastore.AbstractTest;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext.Builder;
@@ -86,6 +89,9 @@ public class DistributedShardedDOMDataTreeRemotingTest extends AbstractTest {
     private DistributedShardedDOMDataTree leaderShardFactory;
     private DistributedShardedDOMDataTree followerShardFactory;
 
+    private ActorSystemProvider leaderSystemProvider;
+    private ActorSystemProvider followerSystemProvider;
+
     @Before
     public void setUp() {
 
@@ -94,6 +100,12 @@ public class DistributedShardedDOMDataTreeRemotingTest extends AbstractTest {
 
         followerSystem = ActorSystem.create("cluster-test", ConfigFactory.load().getConfig("Member2"));
         Cluster.get(followerSystem).join(MEMBER_1_ADDRESS);
+
+        leaderSystemProvider = Mockito.mock(ActorSystemProvider.class);
+        doReturn(leaderSystem).when(leaderSystemProvider).getActorSystem();
+
+        followerSystemProvider = Mockito.mock(ActorSystemProvider.class);
+        doReturn(followerSystem).when(followerSystemProvider).getActorSystem();
 
     }
 
@@ -123,11 +135,11 @@ public class DistributedShardedDOMDataTreeRemotingTest extends AbstractTest {
         followerDistributedDataStore =
                 followerTestKit.setupDistributedDataStoreWithoutConfig(type, SchemaContextHelper.full());
 
-        leaderShardFactory = new DistributedShardedDOMDataTree(leaderSystem,
+        leaderShardFactory = new DistributedShardedDOMDataTree(leaderSystemProvider,
                 leaderDistributedDataStore,
                 leaderDistributedDataStore);
 
-        followerShardFactory = new DistributedShardedDOMDataTree(followerSystem,
+        followerShardFactory = new DistributedShardedDOMDataTree(followerSystemProvider,
                 followerDistributedDataStore,
                 followerDistributedDataStore);
 
