@@ -29,6 +29,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nonnull;
+import org.opendaylight.controller.cluster.ActorSystemProvider;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.databroker.actors.dds.DataStoreClient;
 import org.opendaylight.controller.cluster.databroker.actors.dds.SimpleDataStoreClientActor;
@@ -87,10 +88,12 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
     private final EnumMap<LogicalDatastoreType, DistributedShardRegistration> defaultShardRegistrations =
             new EnumMap<>(LogicalDatastoreType.class);
 
-    public DistributedShardedDOMDataTree(final ActorSystem actorSystem,
+    public DistributedShardedDOMDataTree(final ActorSystemProvider actorSystemProvider,
                                          final DistributedDataStore distributedOperDatastore,
                                          final DistributedDataStore distributedConfigDatastore) {
-        this.actorSystem = actorSystem;
+        LOG.warn("CDS node manager started");
+
+        this.actorSystem = actorSystemProvider.getActorSystem();
         this.distributedOperDatastore = distributedOperDatastore;
         this.distributedConfigDatastore = distributedConfigDatastore;
         shardedDOMDataTree = new ShardedDOMDataTree();
@@ -279,7 +282,7 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
     private DistributedShardRegistration initDefaultShard(final LogicalDatastoreType logicalDatastoreType)
             throws DOMDataTreeProducerException, DOMDataTreeShardingConflictException {
         final Collection<Member> members = JavaConverters.asJavaCollectionConverter(
-            Cluster.get(actorSystem).state().members()).asJavaCollection();
+                Cluster.get(actorSystem).state().members()).asJavaCollection();
         final Collection<MemberName> names = Collections2.transform(members,
             m -> MemberName.forName(m.roles().iterator().next()));
 
