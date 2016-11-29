@@ -19,6 +19,7 @@ import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotRep
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
+import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
@@ -31,7 +32,7 @@ import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
  */
 public class ReplicationAndSnapshotsIntegrationTest extends AbstractRaftActorIntegrationTest {
 
-    private List<ReplicatedLogImplEntry> origLeaderJournal;
+    private List<SimpleReplicatedLogEntry> origLeaderJournal;
 
     private MockPayload recoveredPayload0;
     private MockPayload recoveredPayload1;
@@ -51,14 +52,14 @@ public class ReplicationAndSnapshotsIntegrationTest extends AbstractRaftActorInt
         long seqId = 1;
         InMemoryJournal.addEntry(leaderId, seqId++, new UpdateElectionTerm(initialTerm, leaderId));
         recoveredPayload0 = new MockPayload("zero");
-        InMemoryJournal.addEntry(leaderId, seqId++, new ReplicatedLogImplEntry(0, initialTerm, recoveredPayload0));
+        InMemoryJournal.addEntry(leaderId, seqId++, new SimpleReplicatedLogEntry(0, initialTerm, recoveredPayload0));
         recoveredPayload1 = new MockPayload("one");
-        InMemoryJournal.addEntry(leaderId, seqId++, new ReplicatedLogImplEntry(1, initialTerm, recoveredPayload1));
+        InMemoryJournal.addEntry(leaderId, seqId++, new SimpleReplicatedLogEntry(1, initialTerm, recoveredPayload1));
         recoveredPayload2 = new MockPayload("two");
-        InMemoryJournal.addEntry(leaderId, seqId++, new ReplicatedLogImplEntry(2, initialTerm, recoveredPayload2));
+        InMemoryJournal.addEntry(leaderId, seqId++, new SimpleReplicatedLogEntry(2, initialTerm, recoveredPayload2));
         InMemoryJournal.addEntry(leaderId, seqId++, new ApplyJournalEntries(2));
 
-        origLeaderJournal = InMemoryJournal.get(leaderId, ReplicatedLogImplEntry.class);
+        origLeaderJournal = InMemoryJournal.get(leaderId, SimpleReplicatedLogEntry.class);
 
         // Create the leader and 2 follower actors and verify initial syncing of the followers after leader
         // persistence recovery.
@@ -195,8 +196,8 @@ public class ReplicationAndSnapshotsIntegrationTest extends AbstractRaftActorInt
         verifyReplicatedLogEntry(unAppliedEntry.get(0), currentTerm, 3, payload3);
 
         // The leader's persisted journal log should be cleared since we snapshotted.
-        List<ReplicatedLogImplEntry> persistedLeaderJournal =
-                InMemoryJournal.get(leaderId, ReplicatedLogImplEntry.class);
+        List<SimpleReplicatedLogEntry> persistedLeaderJournal =
+                InMemoryJournal.get(leaderId, SimpleReplicatedLogEntry.class);
         assertEquals("Persisted journal log size", 0, persistedLeaderJournal.size());
 
         // Allow AppendEntries to both followers to proceed. This should catch up the followers and cause a
@@ -368,8 +369,8 @@ public class ReplicationAndSnapshotsIntegrationTest extends AbstractRaftActorInt
         verifyReplicatedLogEntry(unAppliedEntry.get(0), currentTerm, 7, payload7);
 
         // The leader's persisted journal log should be cleared since we did a snapshot.
-        List<ReplicatedLogImplEntry> persistedLeaderJournal = InMemoryJournal.get(
-                leaderId, ReplicatedLogImplEntry.class);
+        List<SimpleReplicatedLogEntry> persistedLeaderJournal = InMemoryJournal.get(
+                leaderId, SimpleReplicatedLogEntry.class);
         assertEquals("Persisted journal log size", 0, persistedLeaderJournal.size());
 
         // Verify the followers apply all 4 new log entries.

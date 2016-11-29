@@ -51,7 +51,8 @@ public class SnapshotTest {
     private static Snapshot newLithiumSnapshot() {
         byte[] state = {1, 2, 3, 4, 5};
         List<ReplicatedLogEntry> entries = new ArrayList<>();
-        entries.add(new ReplicatedLogImplEntry(6, 2, new MockPayload("payload")));
+        entries.add(new org.opendaylight.controller.cluster.raft.ReplicatedLogImplEntry(
+                6, 2, new MockPayload("payload")));
         long lastIndex = 6;
         long lastTerm = 2;
         long lastAppliedIndex = 5;

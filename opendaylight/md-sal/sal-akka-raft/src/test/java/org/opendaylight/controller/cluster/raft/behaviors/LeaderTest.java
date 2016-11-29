@@ -43,7 +43,6 @@ import org.opendaylight.controller.cluster.raft.RaftActorLeadershipTransferCohor
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.RaftVersions;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
-import org.opendaylight.controller.cluster.raft.ReplicatedLogImplEntry;
 import org.opendaylight.controller.cluster.raft.Snapshot;
 import org.opendaylight.controller.cluster.raft.VotingState;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
@@ -60,6 +59,7 @@ import org.opendaylight.controller.cluster.raft.messages.InstallSnapshotReply;
 import org.opendaylight.controller.cluster.raft.messages.RaftRPC;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
+import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.policy.DefaultRaftPolicy;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
 import org.opendaylight.controller.cluster.raft.utils.ForwardMessageToBehaviorActor;
@@ -638,8 +638,8 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         MessageCollectorActor.expectFirstMatching(followerActor, AppendEntries.class);
 
         // new entry
-        ReplicatedLogImplEntry entry =
-                new ReplicatedLogImplEntry(newEntryIndex, currentTerm,
+        SimpleReplicatedLogEntry entry =
+                new SimpleReplicatedLogEntry(newEntryIndex, currentTerm,
                         new MockRaftActorContext.MockPayload("D"));
 
         actorContext.getReplicatedLog().append(entry);
@@ -686,7 +686,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         leader.setSnapshot(null);
 
         // new entry
-        ReplicatedLogImplEntry entry = new ReplicatedLogImplEntry(newEntryIndex, currentTerm,
+        SimpleReplicatedLogEntry entry = new SimpleReplicatedLogEntry(newEntryIndex, currentTerm,
                 new MockRaftActorContext.MockPayload("D"));
 
         actorContext.getReplicatedLog().append(entry);
@@ -742,12 +742,12 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         leader.setSnapshot(null);
 
         for (int i = 0; i < 4; i++) {
-            actorContext.getReplicatedLog().append(new ReplicatedLogImplEntry(i, 1,
+            actorContext.getReplicatedLog().append(new SimpleReplicatedLogEntry(i, 1,
                     new MockRaftActorContext.MockPayload("X" + i)));
         }
 
         // new entry
-        ReplicatedLogImplEntry entry = new ReplicatedLogImplEntry(newEntryIndex, currentTerm,
+        SimpleReplicatedLogEntry entry = new SimpleReplicatedLogEntry(newEntryIndex, currentTerm,
                 new MockRaftActorContext.MockPayload("D"));
 
         actorContext.getReplicatedLog().append(entry);

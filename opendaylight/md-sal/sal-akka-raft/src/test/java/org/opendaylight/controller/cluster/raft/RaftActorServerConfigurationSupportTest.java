@@ -60,6 +60,7 @@ import org.opendaylight.controller.cluster.raft.messages.UnInitializedFollowerSn
 import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload;
 import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
+import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
 import org.opendaylight.controller.cluster.raft.utils.ForwardMessageToBehaviorActor;
@@ -212,12 +213,12 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         assertEquals("New follower last applied index", 3, newFollowerActorContext.getLastApplied());
 
         assertEquals("Leader persisted ReplicatedLogImplEntry entries", 0,
-                InMemoryJournal.get(LEADER_ID, ReplicatedLogImplEntry.class).size());
+                InMemoryJournal.get(LEADER_ID, SimpleReplicatedLogEntry.class).size());
         assertEquals("Leader persisted ServerConfigurationPayload entries", 1,
                 InMemoryJournal.get(LEADER_ID, ServerConfigurationPayload.class).size());
 
         assertEquals("New follower persisted ReplicatedLogImplEntry entries", 0,
-                InMemoryJournal.get(NEW_SERVER_ID, ReplicatedLogImplEntry.class).size());
+                InMemoryJournal.get(NEW_SERVER_ID, SimpleReplicatedLogEntry.class).size());
         assertEquals("New follower persisted ServerConfigurationPayload entries", 1,
                 InMemoryJournal.get(NEW_SERVER_ID, ServerConfigurationPayload.class).size());
 
@@ -1131,7 +1132,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         ServerConfigurationPayload persistedServerConfig = new ServerConfigurationPayload(Arrays.asList(
                 new ServerInfo(node1ID, false), new ServerInfo(node2ID, false),
                 new ServerInfo("downNode1", true), new ServerInfo("downNode2", true)));
-        ReplicatedLogImplEntry persistedServerConfigEntry = new ReplicatedLogImplEntry(0, 1, persistedServerConfig);
+        SimpleReplicatedLogEntry persistedServerConfigEntry = new SimpleReplicatedLogEntry(0, 1, persistedServerConfig);
 
         InMemoryJournal.addEntry(node1ID, 1, new UpdateElectionTerm(1, "downNode1"));
         InMemoryJournal.addEntry(node1ID, 2, persistedServerConfigEntry);
@@ -1239,7 +1240,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
         ServerConfigurationPayload persistedServerConfig = new ServerConfigurationPayload(Arrays.asList(
                 new ServerInfo(node1ID, false), new ServerInfo(node2ID, true)));
-        ReplicatedLogImplEntry persistedServerConfigEntry = new ReplicatedLogImplEntry(0, 1, persistedServerConfig);
+        SimpleReplicatedLogEntry persistedServerConfigEntry = new SimpleReplicatedLogEntry(0, 1, persistedServerConfig);
 
         InMemoryJournal.addEntry(node1ID, 1, new UpdateElectionTerm(1, "node1"));
         InMemoryJournal.addEntry(node1ID, 2, persistedServerConfigEntry);
@@ -1307,13 +1308,13 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
         ServerConfigurationPayload persistedServerConfig = new ServerConfigurationPayload(Arrays.asList(
                 new ServerInfo(node1ID, false), new ServerInfo(node2ID, false)));
-        ReplicatedLogImplEntry persistedServerConfigEntry = new ReplicatedLogImplEntry(0, 1, persistedServerConfig);
+        SimpleReplicatedLogEntry persistedServerConfigEntry = new SimpleReplicatedLogEntry(0, 1, persistedServerConfig);
 
         InMemoryJournal.addEntry(node1ID, 1, new UpdateElectionTerm(1, "node1"));
         InMemoryJournal.addEntry(node1ID, 2, persistedServerConfigEntry);
         InMemoryJournal.addEntry(node2ID, 1, new UpdateElectionTerm(1, "node1"));
         InMemoryJournal.addEntry(node2ID, 2, persistedServerConfigEntry);
-        InMemoryJournal.addEntry(node2ID, 3, new ReplicatedLogImplEntry(1, 1,
+        InMemoryJournal.addEntry(node2ID, 3, new SimpleReplicatedLogEntry(1, 1,
                 new MockRaftActorContext.MockPayload("2")));
         InMemoryJournal.addEntry(node2ID, 4, new ApplyJournalEntries(1));
 
@@ -1375,7 +1376,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
         ServerConfigurationPayload persistedServerConfig = new ServerConfigurationPayload(Arrays.asList(
                 new ServerInfo(node1ID, false), new ServerInfo(node2ID, true)));
-        ReplicatedLogImplEntry persistedServerConfigEntry = new ReplicatedLogImplEntry(0, 1, persistedServerConfig);
+        SimpleReplicatedLogEntry persistedServerConfigEntry = new SimpleReplicatedLogEntry(0, 1, persistedServerConfig);
 
         InMemoryJournal.addEntry(node1ID, 1, new UpdateElectionTerm(1, "node1"));
         InMemoryJournal.addEntry(node1ID, 2, persistedServerConfigEntry);

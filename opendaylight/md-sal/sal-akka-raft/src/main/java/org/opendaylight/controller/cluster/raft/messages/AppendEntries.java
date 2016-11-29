@@ -15,7 +15,7 @@ import java.io.ObjectOutput;
 import java.util.ArrayList;
 import java.util.List;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
-import org.opendaylight.controller.cluster.raft.ReplicatedLogImplEntry;
+import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 
 /**
@@ -145,7 +145,7 @@ public class AppendEntries extends AbstractRaftRPC {
             int size = in.readInt();
             List<ReplicatedLogEntry> entries = new ArrayList<>(size);
             for (int i = 0; i < size; i++) {
-                entries.add(new ReplicatedLogImplEntry(in.readLong(), in.readLong(), (Payload) in.readObject()));
+                entries.add(new SimpleReplicatedLogEntry(in.readLong(), in.readLong(), (Payload) in.readObject()));
             }
 
             appendEntries = new AppendEntries(term, leaderId, prevLogIndex, prevLogTerm, entries, leaderCommit,
