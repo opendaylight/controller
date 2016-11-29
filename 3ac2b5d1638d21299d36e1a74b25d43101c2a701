@@ -16,6 +16,24 @@
       "revId": "3ac2b5d1638d21299d36e1a74b25d43101c2a701",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a65312a_eedb2eeb",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/test/java/org/opendaylight/controller/md/sal/binding/test/SchemaContextSingleton.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2016-11-29T18:03:25Z",
+      "side": 1,
+      "message": "OK, sure; done.",
+      "parentUuid": "3a65312a_77637fdc",
+      "revId": "3ac2b5d1638d21299d36e1a74b25d43101c2a701",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
