@@ -126,4 +126,20 @@
 
   <service ref="distributedEntityOwnershipService" interface="org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipService"
         odl:type="default"/>
+
+  <!-- CDS shard manager -->
+  <bean id="cdsNodeManager" class="org.opendaylight.controller.cluster.sharding.DistributedShardedDOMDataTree">
+    <argument ref="actorSystemProvider"/>
+    <argument ref="operDatastore"/>
+    <argument ref="configDatastore"/>
+  </bean>
+
+  <service ref="cdsNodeManager" odl:type="distributed-datastore">
+    <interfaces>
+      <value>org.opendaylight.mdsal.dom.api.DOMDataTreeShardingService</value>
+      <value>org.opendaylight.mdsal.dom.api.DOMDataTreeService</value>
+      <value>org.opendaylight.controller.cluster.sharding.DistributedShardFactory</value>
+    </interfaces>
+  </service>
+
 </blueprint>
