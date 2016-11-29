@@ -40,6 +40,7 @@ import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.messages.RaftRPC;
 import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
+import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -316,7 +317,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
         setLastLogEntry(context, 2, 0, payload);
 
         List<ReplicatedLogEntry> entries = new ArrayList<>();
-        entries.add(new MockRaftActorContext.MockReplicatedLogEntry(2, 0, payload));
+        entries.add(new SimpleReplicatedLogEntry(0, 2, payload));
 
         final AppendEntries appendEntries = new AppendEntries(2, "leader-1", -1, -1, entries, 2, -1, (short)0);
 

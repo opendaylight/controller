@@ -36,6 +36,7 @@ import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.messages.RaftRPC;
 import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
+import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
@@ -126,7 +127,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
         setLastLogEntry(context, 2, 0, payload);
 
         List<ReplicatedLogEntry> entries = new ArrayList<>();
-        entries.add(new MockRaftActorContext.MockReplicatedLogEntry(2, 0, payload));
+        entries.add(new SimpleReplicatedLogEntry(0, 2, payload));
 
         final AppendEntries appendEntries = new AppendEntries(2, "leader-1", -1, -1, entries, 2, -1, (short)0);
 
@@ -290,8 +291,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
 
     protected MockRaftActorContext.SimpleReplicatedLog setLastLogEntry(
         MockRaftActorContext actorContext, long term, long index, Payload data) {
-        return setLastLogEntry(actorContext,
-            new MockRaftActorContext.MockReplicatedLogEntry(term, index, data));
+        return setLastLogEntry(actorContext, new SimpleReplicatedLogEntry(index, term, data));
     }
 
     protected MockRaftActorContext.SimpleReplicatedLog setLastLogEntry(MockRaftActorContext actorContext,

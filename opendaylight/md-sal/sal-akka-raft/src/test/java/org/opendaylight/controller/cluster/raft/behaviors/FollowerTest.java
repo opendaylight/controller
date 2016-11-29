@@ -52,6 +52,7 @@ import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload;
 import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
+import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 import scala.concurrent.duration.FiniteDuration;
 
@@ -1126,7 +1127,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
 
 
     private static ReplicatedLogEntry newReplicatedLogEntry(long term, long index, String data) {
-        return new MockRaftActorContext.MockReplicatedLogEntry(term, index,
+        return new SimpleReplicatedLogEntry(index, term,
                 new MockRaftActorContext.MockPayload(data));
     }
 
