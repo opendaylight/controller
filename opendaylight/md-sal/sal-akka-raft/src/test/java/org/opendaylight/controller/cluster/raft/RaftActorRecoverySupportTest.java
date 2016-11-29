@@ -40,6 +40,7 @@ import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.persisted.DeleteEntries;
 import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload;
 import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
+import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.slf4j.Logger;
@@ -96,8 +97,7 @@ public class RaftActorRecoverySupportTest {
 
     @Test
     public void testOnReplicatedLogEntry() {
-        MockRaftActorContext.MockReplicatedLogEntry logEntry = new MockRaftActorContext.MockReplicatedLogEntry(1,
-                1, new MockRaftActorContext.MockPayload("1", 5));
+        ReplicatedLogEntry logEntry = new SimpleReplicatedLogEntry(1, 1, new MockRaftActorContext.MockPayload("1", 5));
 
         sendMessageToSupport(logEntry);
 
@@ -115,18 +115,12 @@ public class RaftActorRecoverySupportTest {
         configParams.setJournalRecoveryLogBatchSize(5);
 
         ReplicatedLog replicatedLog = context.getReplicatedLog();
-        replicatedLog.append(new MockRaftActorContext.MockReplicatedLogEntry(1,
-                0, new MockRaftActorContext.MockPayload("0")));
-        replicatedLog.append(new MockRaftActorContext.MockReplicatedLogEntry(1,
-                1, new MockRaftActorContext.MockPayload("1")));
-        replicatedLog.append(new MockRaftActorContext.MockReplicatedLogEntry(1,
-                2, new MockRaftActorContext.MockPayload("2")));
-        replicatedLog.append(new MockRaftActorContext.MockReplicatedLogEntry(1,
-                3, new MockRaftActorContext.MockPayload("3")));
-        replicatedLog.append(new MockRaftActorContext.MockReplicatedLogEntry(1,
-                4, new MockRaftActorContext.MockPayload("4")));
-        replicatedLog.append(new MockRaftActorContext.MockReplicatedLogEntry(1,
-                5, new MockRaftActorContext.MockPayload("5")));
+        replicatedLog.append(new SimpleReplicatedLogEntry(0, 1, new MockRaftActorContext.MockPayload("0")));
+        replicatedLog.append(new SimpleReplicatedLogEntry(1, 1, new MockRaftActorContext.MockPayload("1")));
+        replicatedLog.append(new SimpleReplicatedLogEntry(2, 1, new MockRaftActorContext.MockPayload("2")));
+        replicatedLog.append(new SimpleReplicatedLogEntry(3, 1, new MockRaftActorContext.MockPayload("3")));
+        replicatedLog.append(new SimpleReplicatedLogEntry(4, 1, new MockRaftActorContext.MockPayload("4")));
+        replicatedLog.append(new SimpleReplicatedLogEntry(5, 1, new MockRaftActorContext.MockPayload("5")));
 
         sendMessageToSupport(new ApplyJournalEntries(2));
 
@@ -164,20 +158,17 @@ public class RaftActorRecoverySupportTest {
     public void testOnSnapshotOffer() {
 
         ReplicatedLog replicatedLog = context.getReplicatedLog();
-        replicatedLog.append(new MockRaftActorContext.MockReplicatedLogEntry(1,
-                1, new MockRaftActorContext.MockPayload("1")));
-        replicatedLog.append(new MockRaftActorContext.MockReplicatedLogEntry(1,
-                2, new MockRaftActorContext.MockPayload("2")));
-        replicatedLog.append(new MockRaftActorContext.MockReplicatedLogEntry(1,
-                3, new MockRaftActorContext.MockPayload("3")));
+        replicatedLog.append(new SimpleReplicatedLogEntry(1, 1, new MockRaftActorContext.MockPayload("1")));
+        replicatedLog.append(new SimpleReplicatedLogEntry(2, 1, new MockRaftActorContext.MockPayload("2")));
+        replicatedLog.append(new SimpleReplicatedLogEntry(3, 1, new MockRaftActorContext.MockPayload("3")));
 
         byte[] snapshotBytes = {1,2,3,4,5};
 
-        ReplicatedLogEntry unAppliedEntry1 = new MockRaftActorContext.MockReplicatedLogEntry(1,
-                4, new MockRaftActorContext.MockPayload("4", 4));
+        ReplicatedLogEntry unAppliedEntry1 = new SimpleReplicatedLogEntry(4, 1,
+                new MockRaftActorContext.MockPayload("4", 4));
 
-        ReplicatedLogEntry unAppliedEntry2 = new MockRaftActorContext.MockReplicatedLogEntry(1,
-                5, new MockRaftActorContext.MockPayload("5", 5));
+        ReplicatedLogEntry unAppliedEntry2 = new SimpleReplicatedLogEntry(5, 1,
+                new MockRaftActorContext.MockPayload("5", 5));
 
         long lastAppliedDuringSnapshotCapture = 3;
         long lastIndexDuringSnapshotCapture = 5;
@@ -209,10 +200,8 @@ public class RaftActorRecoverySupportTest {
     @Test
     public void testOnRecoveryCompletedWithRemainingBatch() {
         ReplicatedLog replicatedLog = context.getReplicatedLog();
-        replicatedLog.append(new MockRaftActorContext.MockReplicatedLogEntry(1,
-                0, new MockRaftActorContext.MockPayload("0")));
-        replicatedLog.append(new MockRaftActorContext.MockReplicatedLogEntry(1,
-                1, new MockRaftActorContext.MockPayload("1")));
+        replicatedLog.append(new SimpleReplicatedLogEntry(0, 1, new MockRaftActorContext.MockPayload("0")));
+        replicatedLog.append(new SimpleReplicatedLogEntry(1, 1, new MockRaftActorContext.MockPayload("1")));
 
         sendMessageToSupport(new ApplyJournalEntries(1));
 
@@ -244,12 +233,9 @@ public class RaftActorRecoverySupportTest {
     @Test
     public void testOnDeleteEntries() {
         ReplicatedLog replicatedLog = context.getReplicatedLog();
-        replicatedLog.append(new MockRaftActorContext.MockReplicatedLogEntry(1,
-                0, new MockRaftActorContext.MockPayload("0")));
-        replicatedLog.append(new MockRaftActorContext.MockReplicatedLogEntry(1,
-                1, new MockRaftActorContext.MockPayload("1")));
-        replicatedLog.append(new MockRaftActorContext.MockReplicatedLogEntry(1,
-                2, new MockRaftActorContext.MockPayload("2")));
+        replicatedLog.append(new SimpleReplicatedLogEntry(0, 1, new MockRaftActorContext.MockPayload("0")));
+        replicatedLog.append(new SimpleReplicatedLogEntry(1, 1, new MockRaftActorContext.MockPayload("1")));
+        replicatedLog.append(new SimpleReplicatedLogEntry(2, 1, new MockRaftActorContext.MockPayload("2")));
 
         sendMessageToSupport(new DeleteEntries(1));
 
@@ -279,10 +265,8 @@ public class RaftActorRecoverySupportTest {
 
         sendMessageToSupport(new UpdateElectionTerm(5, "member2"));
 
-        sendMessageToSupport(new MockRaftActorContext.MockReplicatedLogEntry(1,
-                4, new MockRaftActorContext.MockPayload("4")));
-        sendMessageToSupport(new MockRaftActorContext.MockReplicatedLogEntry(1,
-                5, new MockRaftActorContext.MockPayload("5")));
+        sendMessageToSupport(new SimpleReplicatedLogEntry(4, 1, new MockRaftActorContext.MockPayload("4")));
+        sendMessageToSupport(new SimpleReplicatedLogEntry(5, 1, new MockRaftActorContext.MockPayload("5")));
 
         sendMessageToSupport(new ApplyJournalEntries(4));
 
@@ -353,7 +337,7 @@ public class RaftActorRecoverySupportTest {
                 new ServerInfo(follower2, false),
                 new ServerInfo(follower3, true)));
 
-        sendMessageToSupport(new MockRaftActorContext.MockReplicatedLogEntry(1, 0, obj));
+        sendMessageToSupport(new SimpleReplicatedLogEntry(0, 1, obj));
 
         //verify new peers
         assertTrue("Dynamic server configuration", context.isDynamicServerConfigurationInUse());
@@ -374,7 +358,7 @@ public class RaftActorRecoverySupportTest {
                 new ServerInfo("follower2", true),
                 new ServerInfo("follower3", true)));
 
-        sendMessageToSupport(new MockRaftActorContext.MockReplicatedLogEntry(1, 1, obj));
+        sendMessageToSupport(new SimpleReplicatedLogEntry(1, 1, obj));
 
         //verify new peers
         assertTrue("Dynamic server configuration", context.isDynamicServerConfigurationInUse());
@@ -389,7 +373,7 @@ public class RaftActorRecoverySupportTest {
         ServerConfigurationPayload obj = new ServerConfigurationPayload(Arrays.asList(
                 new ServerInfo(localId, true), new ServerInfo(follower, true)));
 
-        sendMessageToSupport(new MockRaftActorContext.MockReplicatedLogEntry(1, 0, obj));
+        sendMessageToSupport(new SimpleReplicatedLogEntry(0, 1, obj));
 
         //verify new peers
         assertEquals("New peer Ids", Sets.newHashSet(follower), Sets.newHashSet(context.getPeerIds()));

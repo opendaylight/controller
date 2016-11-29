@@ -79,8 +79,8 @@ public class MockRaftActorContext extends RaftActorContextImpl {
     public void initReplicatedLog() {
         SimpleReplicatedLog replicatedLog = new SimpleReplicatedLog();
         long term = getTermInformation().getCurrentTerm();
-        replicatedLog.append(new MockReplicatedLogEntry(term, 0, new MockPayload("1")));
-        replicatedLog.append(new MockReplicatedLogEntry(term, 1, new MockPayload("2")));
+        replicatedLog.append(new SimpleReplicatedLogEntry(0, term, new MockPayload("1")));
+        replicatedLog.append(new SimpleReplicatedLogEntry(1, term, new MockPayload("2")));
         setReplicatedLog(replicatedLog);
         setCommitIndex(replicatedLog.lastIndex());
         setLastApplied(replicatedLog.lastIndex());
@@ -221,15 +221,6 @@ public class MockRaftActorContext extends RaftActorContextImpl {
                 return false;
             }
             return true;
-        }
-    }
-
-    // TODO - this class can be removed and use ReplicatedLogImplEntry directly.
-    public static class MockReplicatedLogEntry extends SimpleReplicatedLogEntry {
-        private static final long serialVersionUID = 1L;
-
-        public MockReplicatedLogEntry(long term, long index, Payload data) {
-            super(index, term, data);
         }
     }
 

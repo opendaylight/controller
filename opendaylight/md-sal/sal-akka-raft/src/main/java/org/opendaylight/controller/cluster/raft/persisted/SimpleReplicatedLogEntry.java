@@ -21,7 +21,7 @@ import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payloa
  *
  * @author Thomas Pantelis
  */
-public class SimpleReplicatedLogEntry implements ReplicatedLogEntry, MigratedSerializable {
+public final class SimpleReplicatedLogEntry implements ReplicatedLogEntry, MigratedSerializable {
     private static final class Proxy implements Externalizable {
         private static final long serialVersionUID = 1L;
 

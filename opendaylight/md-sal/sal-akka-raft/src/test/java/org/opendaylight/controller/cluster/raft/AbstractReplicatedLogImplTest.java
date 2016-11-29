@@ -21,7 +21,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;
-import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockReplicatedLogEntry;
+import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 
 /**
 * Unit tests for AbstractReplicatedLogImplTest.
@@ -34,10 +34,10 @@ public class AbstractReplicatedLogImplTest {
     public void setUp() {
         replicatedLogImpl = new MockAbstractReplicatedLogImpl();
         // create a set of initial entries in the in-memory log
-        replicatedLogImpl.append(new MockReplicatedLogEntry(1, 0, new MockPayload("A")));
-        replicatedLogImpl.append(new MockReplicatedLogEntry(1, 1, new MockPayload("B")));
-        replicatedLogImpl.append(new MockReplicatedLogEntry(1, 2, new MockPayload("C")));
-        replicatedLogImpl.append(new MockReplicatedLogEntry(2, 3, new MockPayload("D")));
+        replicatedLogImpl.append(new SimpleReplicatedLogEntry(0, 1, new MockPayload("A")));
+        replicatedLogImpl.append(new SimpleReplicatedLogEntry(1, 1, new MockPayload("B")));
+        replicatedLogImpl.append(new SimpleReplicatedLogEntry(2, 1, new MockPayload("C")));
+        replicatedLogImpl.append(new SimpleReplicatedLogEntry(3, 2, new MockPayload("D")));
 
     }
 
@@ -105,10 +105,10 @@ public class AbstractReplicatedLogImplTest {
         assertTrue(replicatedLogImpl.isInSnapshot(2));
 
         // append few more entries
-        replicatedLogImpl.append(new MockReplicatedLogEntry(2, 4, new MockPayload("E")));
-        replicatedLogImpl.append(new MockReplicatedLogEntry(2, 5, new MockPayload("F")));
-        replicatedLogImpl.append(new MockReplicatedLogEntry(3, 6, new MockPayload("G")));
-        replicatedLogImpl.append(new MockReplicatedLogEntry(3, 7, new MockPayload("H")));
+        replicatedLogImpl.append(new SimpleReplicatedLogEntry(4, 2, new MockPayload("E")));
+        replicatedLogImpl.append(new SimpleReplicatedLogEntry(5, 2, new MockPayload("F")));
+        replicatedLogImpl.append(new SimpleReplicatedLogEntry(6, 3, new MockPayload("G")));
+        replicatedLogImpl.append(new SimpleReplicatedLogEntry(7, 3, new MockPayload("H")));
 
         // check their values as well
         assertEquals(5, replicatedLogImpl.size());
@@ -168,7 +168,7 @@ public class AbstractReplicatedLogImplTest {
         Assert.assertEquals("B", from.get(0).getData().toString());
         Assert.assertEquals("C", from.get(1).getData().toString());
 
-        replicatedLogImpl.append(new MockReplicatedLogEntry(2, 4, new MockPayload("12345")));
+        replicatedLogImpl.append(new SimpleReplicatedLogEntry(4, 2, new MockPayload("12345")));
         from = replicatedLogImpl.getFrom(4, 2, 2);
         Assert.assertEquals(1, from.size());
         Assert.assertEquals("12345", from.get(0).getData().toString());
@@ -177,10 +177,10 @@ public class AbstractReplicatedLogImplTest {
     @Test
     public void testSnapshotPreCommit() {
         //add 4 more entries
-        replicatedLogImpl.append(new MockReplicatedLogEntry(2, 4, new MockPayload("E")));
-        replicatedLogImpl.append(new MockReplicatedLogEntry(2, 5, new MockPayload("F")));
-        replicatedLogImpl.append(new MockReplicatedLogEntry(3, 6, new MockPayload("G")));
-        replicatedLogImpl.append(new MockReplicatedLogEntry(3, 7, new MockPayload("H")));
+        replicatedLogImpl.append(new SimpleReplicatedLogEntry(4, 2, new MockPayload("E")));
+        replicatedLogImpl.append(new SimpleReplicatedLogEntry(5, 2, new MockPayload("F")));
+        replicatedLogImpl.append(new SimpleReplicatedLogEntry(6, 3, new MockPayload("G")));
+        replicatedLogImpl.append(new SimpleReplicatedLogEntry(7, 3, new MockPayload("H")));
 
         //sending negative values should not cause any changes
         replicatedLogImpl.snapshotPreCommit(-1, -1);
@@ -256,7 +256,7 @@ public class AbstractReplicatedLogImplTest {
         assertTrue(replicatedLogImpl.isPresent(2));
         assertTrue(replicatedLogImpl.isPresent(3));
 
-        replicatedLogImpl.append(new MockReplicatedLogEntry(2, 4, new MockPayload("D")));
+        replicatedLogImpl.append(new SimpleReplicatedLogEntry(4, 2, new MockPayload("D")));
         replicatedLogImpl.snapshotPreCommit(3, 2); //snapshot on 3
         replicatedLogImpl.snapshotCommit();
 
@@ -270,15 +270,15 @@ public class AbstractReplicatedLogImplTest {
         replicatedLogImpl.snapshotCommit();
         assertFalse(replicatedLogImpl.isPresent(4));
 
-        replicatedLogImpl.append(new MockReplicatedLogEntry(2, 5, new MockPayload("D")));
+        replicatedLogImpl.append(new SimpleReplicatedLogEntry(5, 2, new MockPayload("D")));
         assertTrue(replicatedLogImpl.isPresent(5));
     }
 
     @Test
     public void testRemoveFrom() {
 
-        replicatedLogImpl.append(new MockReplicatedLogEntry(2, 4, new MockPayload("E", 2)));
-        replicatedLogImpl.append(new MockReplicatedLogEntry(2, 5, new MockPayload("F", 3)));
+        replicatedLogImpl.append(new SimpleReplicatedLogEntry(4, 2, new MockPayload("E", 2)));
+        replicatedLogImpl.append(new SimpleReplicatedLogEntry(5, 2, new MockPayload("F", 3)));
 
         assertEquals("dataSize", 9, replicatedLogImpl.dataSize());
 

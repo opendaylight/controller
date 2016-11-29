@@ -153,8 +153,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
     private RaftActorBehavior sendReplicate(MockRaftActorContext actorContext, long term, long index) {
         MockRaftActorContext.MockPayload payload = new MockRaftActorContext.MockPayload("foo");
-        MockRaftActorContext.MockReplicatedLogEntry newEntry = new MockRaftActorContext.MockReplicatedLogEntry(
-                term, index, payload);
+        SimpleReplicatedLogEntry newEntry = new SimpleReplicatedLogEntry(index, term, payload);
         actorContext.getReplicatedLog().append(newEntry);
         return leader.handleMessage(leaderActor, new Replicate(null, null, newEntry));
     }
@@ -513,8 +512,8 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         long newLogIndex = actorContext.getReplicatedLog().lastIndex() + 1;
         long term = actorContext.getTermInformation().getCurrentTerm();
-        MockRaftActorContext.MockReplicatedLogEntry newEntry = new MockRaftActorContext.MockReplicatedLogEntry(
-                term, newLogIndex, new MockRaftActorContext.MockPayload("foo"));
+        ReplicatedLogEntry newEntry = new SimpleReplicatedLogEntry(
+                newLogIndex, term, new MockRaftActorContext.MockPayload("foo"));
 
         actorContext.getReplicatedLog().append(newEntry);
 

@@ -14,13 +14,13 @@ import com.google.common.collect.ImmutableMap;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.DefaultConfigParamsImpl;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;
-import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext.SimpleReplicatedLog;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
 import org.opendaylight.controller.cluster.raft.base.messages.TimeoutNow;
 import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
+import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 
 /**
  * A leader election scenario test that partitions a candidate when trying to join a cluster on startup.
@@ -166,7 +166,7 @@ public class PartitionedCandidateOnStartupElectionScenarioTest extends AbstractL
         // will be 2 and the last term will be 1 so it is behind the leader's log.
 
         SimpleReplicatedLog candidateReplicatedLog = new SimpleReplicatedLog();
-        candidateReplicatedLog.append(new MockReplicatedLogEntry(2, 0, new MockPayload("")));
+        candidateReplicatedLog.append(new SimpleReplicatedLogEntry(0, 2, new MockPayload("")));
 
         member3Context.setReplicatedLog(candidateReplicatedLog);
         member3Context.setCommitIndex(candidateReplicatedLog.lastIndex());
@@ -216,8 +216,8 @@ public class PartitionedCandidateOnStartupElectionScenarioTest extends AbstractL
         // will be 3 and the last term will be 2.
 
         SimpleReplicatedLog replicatedLog = new SimpleReplicatedLog();
-        replicatedLog.append(new MockReplicatedLogEntry(2, 0, new MockPayload("")));
-        replicatedLog.append(new MockReplicatedLogEntry(3, 1, new MockPayload("")));
+        replicatedLog.append(new SimpleReplicatedLogEntry(0, 2, new MockPayload("")));
+        replicatedLog.append(new SimpleReplicatedLogEntry(1, 3, new MockPayload("")));
 
         // Create member 2's behavior as Follower.
 
