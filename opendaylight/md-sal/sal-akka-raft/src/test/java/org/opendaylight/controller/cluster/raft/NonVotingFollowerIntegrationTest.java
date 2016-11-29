@@ -25,6 +25,7 @@ import org.opendaylight.controller.cluster.raft.base.messages.SnapshotComplete;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload;
 import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
+import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
@@ -294,7 +295,7 @@ public class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrati
         ServerConfigurationPayload persistedServerConfig = new ServerConfigurationPayload(Arrays.asList(
                 new ServerInfo(leaderId, true), new ServerInfo(follower1Id, false),
                 new ServerInfo(follower2Id, true), new ServerInfo("downPeer", false)));
-        ReplicatedLogImplEntry persistedServerConfigEntry = new ReplicatedLogImplEntry(0, currentTerm,
+        SimpleReplicatedLogEntry persistedServerConfigEntry = new SimpleReplicatedLogEntry(0, currentTerm,
                 persistedServerConfig);
 
         InMemoryJournal.clear();
@@ -402,7 +403,7 @@ public class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrati
 
         ServerConfigurationPayload persistedServerConfig = new ServerConfigurationPayload(Arrays.asList(
                 new ServerInfo(leaderId, true), new ServerInfo(follower1Id, false)));
-        ReplicatedLogImplEntry persistedServerConfigEntry = new ReplicatedLogImplEntry(0, persistedTerm,
+        SimpleReplicatedLogEntry persistedServerConfigEntry = new SimpleReplicatedLogEntry(0, persistedTerm,
                 persistedServerConfig);
 
         InMemoryJournal.addEntry(leaderId, 1, new UpdateElectionTerm(persistedTerm, leaderId));

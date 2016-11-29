@@ -14,7 +14,10 @@ import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payloa
 
 /**
  * A {@link ReplicatedLogEntry} implementation.
+ *
+ * @deprecated Use {@link org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry} instead.
  */
+@Deprecated
 public class ReplicatedLogImplEntry implements ReplicatedLogEntry, Serializable {
     private static final long serialVersionUID = -9085798014576489130L;
 
@@ -54,6 +57,11 @@ public class ReplicatedLogImplEntry implements ReplicatedLogEntry, Serializable 
     @Override
     public int size() {
         return getData().size();
+    }
+
+    private Object readResolve() {
+        return org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry.createMigrated(
+                index, term, payload);
     }
 
     @Override

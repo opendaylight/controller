@@ -14,6 +14,7 @@ import akka.dispatch.Dispatchers;
 import akka.testkit.JavaTestKit;
 import akka.testkit.TestActorRef;
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -24,8 +25,10 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
+import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload;
 import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
+import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
@@ -131,7 +134,7 @@ public class MigratedMessagesTest extends AbstractActorTest {
         String persistenceId = factory.generateActorId("test-actor-");
 
         InMemoryJournal.addEntry(persistenceId, 1, new UpdateElectionTerm(1, persistenceId));
-        InMemoryJournal.addEntry(persistenceId, 2, new ReplicatedLogImplEntry(0, 1,
+        InMemoryJournal.addEntry(persistenceId, 2, new SimpleReplicatedLogEntry(0, 1,
                 new MockRaftActorContext.MockPayload("A")));
         InMemoryJournal.addEntry(persistenceId, 3,
                 new org.opendaylight.controller.cluster.raft.base.messages.ApplyJournalEntries(0));
@@ -149,7 +152,13 @@ public class MigratedMessagesTest extends AbstractActorTest {
 
     @Test
     public void testNoSnapshotAfterStartupWithNoMigratedMessages() {
+        TEST_LOG.info("testNoSnapshotAfterStartupWithNoMigratedMessages starting");
         String id = factory.generateActorId("test-actor-");
+
+        InMemoryJournal.addEntry(id, 1, new UpdateElectionTerm(1, id));
+        InMemoryJournal.addEntry(id, 2, new SimpleReplicatedLogEntry(0, 1, new MockRaftActorContext.MockPayload("A")));
+        InMemoryJournal.addEntry(id, 3, new ApplyJournalEntries(0));
+
         DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
         config.setCustomRaftPolicyImplementationClass(DisableElectionsRaftPolicy.class.getName());
 
@@ -175,6 +184,29 @@ public class MigratedMessagesTest extends AbstractActorTest {
 
         List<Snapshot> snapshots = InMemorySnapshotStore.getSnapshots(id, Snapshot.class);
         assertEquals("Snapshots", 0, snapshots.size());
+
+        TEST_LOG.info("testNoSnapshotAfterStartupWithNoMigratedMessages ending");
+    }
+
+    @Test
+    public void testSnapshotAfterStartupWithMigratedReplicatedLogEntry() {
+        TEST_LOG.info("testSnapshotAfterStartupWithMigratedReplicatedLogEntry starting");
+
+        String persistenceId = factory.generateActorId("test-actor-");
+
+        InMemoryJournal.addEntry(persistenceId, 1, new UpdateElectionTerm(1, persistenceId));
+        MockRaftActorContext.MockPayload expPayload = new MockRaftActorContext.MockPayload("A");
+        InMemoryJournal.addEntry(persistenceId, 2, new org.opendaylight.controller.cluster.raft.ReplicatedLogImplEntry(
+                0, 1, expPayload));
+
+        doTestSnapshotAfterStartupWithMigratedMessage(persistenceId, true, snapshot -> {
+            assertEquals("Unapplied entries size", 1, snapshot.getUnAppliedEntries().size());
+            assertEquals("Unapplied entry term", 1, snapshot.getUnAppliedEntries().get(0).getTerm());
+            assertEquals("Unapplied entry index", 0, snapshot.getUnAppliedEntries().get(0).getIndex());
+            assertEquals("Unapplied entry data", expPayload, snapshot.getUnAppliedEntries().get(0).getData());
+        });
+
+        TEST_LOG.info("testSnapshotAfterStartupWithMigratedReplicatedLogEntry ending");
     }
 
     private TestActorRef<MockRaftActor> doTestSnapshotAfterStartupWithMigratedServerConfigPayload(boolean persistent) {
@@ -191,7 +223,7 @@ public class MigratedMessagesTest extends AbstractActorTest {
                 new ServerInfo(persistenceId, true), new ServerInfo("downNode", true)));
 
         InMemoryJournal.addEntry(persistenceId, 1, new UpdateElectionTerm(1, persistenceId));
-        InMemoryJournal.addEntry(persistenceId, 3, new ReplicatedLogImplEntry(0, 1, persistedServerConfig));
+        InMemoryJournal.addEntry(persistenceId, 3, new SimpleReplicatedLogEntry(0, 1, persistedServerConfig));
 
         TestActorRef<MockRaftActor> actor = doTestSnapshotAfterStartupWithMigratedMessage(persistenceId,
             persistent, snapshot -> {
@@ -224,7 +256,8 @@ public class MigratedMessagesTest extends AbstractActorTest {
         };
 
         TestActorRef<MockRaftActor> raftActorRef = factory.createTestActor(MockRaftActor.builder().id(id)
-                .config(config).snapshotCohort(snapshotCohort).persistent(Optional.of(persistent)).props()
+                .config(config).snapshotCohort(snapshotCohort).persistent(Optional.of(persistent))
+                .peerAddresses(ImmutableMap.of("peer", "")).props()
                     .withDispatcher(Dispatchers.DefaultDispatcherId()), id);
         MockRaftActor mockRaftActor = raftActorRef.underlyingActor();
 

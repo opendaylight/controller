@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.opendaylight.controller.cluster.NonPersistentDataProvider;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
+import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.slf4j.Logger;
@@ -224,7 +225,7 @@ public class MockRaftActorContext extends RaftActorContextImpl {
     }
 
     // TODO - this class can be removed and use ReplicatedLogImplEntry directly.
-    public static class MockReplicatedLogEntry extends ReplicatedLogImplEntry {
+    public static class MockReplicatedLogEntry extends SimpleReplicatedLogEntry {
         private static final long serialVersionUID = 1L;
 
         public MockReplicatedLogEntry(long term, long index, Payload data) {
@@ -237,14 +238,14 @@ public class MockRaftActorContext extends RaftActorContextImpl {
 
         public  MockReplicatedLogBuilder createEntries(int start, int end, int term) {
             for (int i = start; i < end; i++) {
-                this.mockLog.append(new ReplicatedLogImplEntry(i, term,
+                this.mockLog.append(new SimpleReplicatedLogEntry(i, term,
                         new MockRaftActorContext.MockPayload(Integer.toString(i))));
             }
             return this;
         }
 
         public  MockReplicatedLogBuilder addEntry(int index, int term, MockPayload payload) {
-            this.mockLog.append(new ReplicatedLogImplEntry(index, term, payload));
+            this.mockLog.append(new SimpleReplicatedLogEntry(index, term, payload));
             return this;
         }
 

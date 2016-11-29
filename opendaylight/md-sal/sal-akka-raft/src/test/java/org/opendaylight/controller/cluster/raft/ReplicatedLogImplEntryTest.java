@@ -14,12 +14,14 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import org.junit.Assert;
 import org.junit.Test;
+import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 
 /**
  * Unit tests for ReplicatedLogImplEntry.
  *
  * @author Thomas Pantelis
  */
+@Deprecated
 public class ReplicatedLogImplEntryTest {
 
     @Test
@@ -31,7 +33,7 @@ public class ReplicatedLogImplEntryTest {
         try (FileInputStream fis = new FileInputStream("src/test/resources/helium-serialized-ReplicatedLogImplEntry")) {
             ObjectInputStream ois = new ObjectInputStream(fis);
 
-            ReplicatedLogImplEntry entry = (ReplicatedLogImplEntry) ois.readObject();
+            SimpleReplicatedLogEntry entry = (SimpleReplicatedLogEntry) ois.readObject();
             ois.close();
 
             Assert.assertEquals("getIndex", expIndex, entry.getIndex());
