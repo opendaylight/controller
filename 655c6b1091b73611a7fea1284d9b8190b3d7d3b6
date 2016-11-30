@@ -53,6 +53,24 @@
     },
     {
       "key": {
+        "uuid": "1a622d24_b273a9e6",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/AbstractClusterRefActorTest.java",
+        "patchSetId": 49
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2016-11-30T13:21:34Z",
+      "side": 1,
+      "message": "We started using akka-distributed-data for the prefix shard configuration and it needs ClusterActorRefs, and since most of these tests depend on ShardManager which would now interact with distributed-data (reacting to changes in the configuration) tests needed to be changed accordingly. It\u0027s just used to override the default ActorTest to load the configuration for ClusterActorRef.",
+      "parentUuid": "1a622d24_b28569af",
+      "revId": "655c6b1091b73611a7fea1284d9b8190b3d7d3b6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a622d24_12937dfb",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/AbstractRaftActorIntegrationTest.java",
         "patchSetId": 49
