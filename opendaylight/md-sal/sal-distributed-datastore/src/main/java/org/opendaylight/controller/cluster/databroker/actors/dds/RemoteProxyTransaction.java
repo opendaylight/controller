@@ -32,7 +32,6 @@ import org.opendaylight.controller.cluster.access.commands.TransactionPreCommitR
 import org.opendaylight.controller.cluster.access.commands.TransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionSuccess;
 import org.opendaylight.controller.cluster.access.commands.TransactionWrite;
-import org.opendaylight.controller.cluster.access.concepts.RequestException;
 import org.opendaylight.controller.cluster.access.concepts.RequestFailure;
 import org.opendaylight.controller.cluster.access.concepts.Response;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
@@ -262,13 +261,21 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
     }
 
     @Override
+    void flushState(final AbstractProxyTransaction successor) {
+        if (builderBusy) {
+            final ModifyTransactionRequest request = builder.build();
+            builderBusy = false;
+            successor.handleForwardedRemoteRequest(request, null);
+        }
+    }
+
+    @Override
     void forwardToRemote(final RemoteProxyTransaction successor, final TransactionRequest<?> request,
-            final Consumer<Response<?, ?>> callback) throws RequestException {
+            final Consumer<Response<?, ?>> callback) {
         successor.handleForwardedRequest(request, callback);
     }
 
-    private void handleForwardedRequest(final TransactionRequest<?> request, final Consumer<Response<?, ?>> callback)
-            throws RequestException {
+    private void handleForwardedRequest(final TransactionRequest<?> request, final Consumer<Response<?, ?>> callback) {
         if (request instanceof ModifyTransactionRequest) {
             final ModifyTransactionRequest req = (ModifyTransactionRequest) request;
 
@@ -316,7 +323,7 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
 
     @Override
     void forwardToLocal(final LocalProxyTransaction successor, final TransactionRequest<?> request,
-            final Consumer<Response<?, ?>> callback) throws RequestException {
+            final Consumer<Response<?, ?>> callback) {
         successor.handleForwardedRemoteRequest(request, callback);
     }
 }

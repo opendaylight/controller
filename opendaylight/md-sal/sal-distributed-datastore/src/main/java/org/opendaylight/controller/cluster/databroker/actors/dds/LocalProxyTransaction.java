@@ -31,7 +31,6 @@ import org.opendaylight.controller.cluster.access.commands.TransactionModificati
 import org.opendaylight.controller.cluster.access.commands.TransactionPreCommitRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionWrite;
-import org.opendaylight.controller.cluster.access.concepts.RequestException;
 import org.opendaylight.controller.cluster.access.concepts.Response;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.util.AbstractDataTreeModificationCursor;
@@ -40,7 +39,6 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.CursorAwareDataTreeModification;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.CursorAwareDataTreeSnapshot;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModificationCursor;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
@@ -69,7 +67,7 @@ final class LocalProxyTransaction extends AbstractProxyTransaction {
     private final TransactionIdentifier identifier;
 
     private CursorAwareDataTreeModification modification;
-    private CursorAwareDataTreeSnapshot sealedModification;
+    private CursorAwareDataTreeModification sealedModification;
 
     LocalProxyTransaction(final ProxyHistory parent, final TransactionIdentifier identifier,
         final CursorAwareDataTreeModification modification) {
@@ -135,6 +133,26 @@ final class LocalProxyTransaction extends AbstractProxyTransaction {
     void doSeal() {
         modification.ready();
         sealedModification = modification;
+    }
+
+    @Override
+    void flushState(final AbstractProxyTransaction successor) {
+        sealedModification.applyToCursor(new AbstractDataTreeModificationCursor() {
+            @Override
+            public void write(final PathArgument child, final NormalizedNode<?, ?> data) {
+                successor.write(current().node(child), data);
+            }
+
+            @Override
+            public void merge(final PathArgument child, final NormalizedNode<?, ?> data) {
+                successor.merge(current().node(child), data);
+            }
+
+            @Override
+            public void delete(final PathArgument child) {
+                successor.delete(current().node(child));
+            }
+        });
     }
 
     DataTreeSnapshot getSnapshot() {
@@ -205,7 +223,7 @@ final class LocalProxyTransaction extends AbstractProxyTransaction {
 
     @Override
     void forwardToRemote(final RemoteProxyTransaction successor, final TransactionRequest<?> request,
-            final Consumer<Response<?, ?>> callback) throws RequestException {
+            final Consumer<Response<?, ?>> callback) {
         if (request instanceof CommitLocalTransactionRequest) {
             final CommitLocalTransactionRequest req = (CommitLocalTransactionRequest) request;
             final DataTreeModification mod = req.getModification();
@@ -242,7 +260,7 @@ final class LocalProxyTransaction extends AbstractProxyTransaction {
 
     @Override
     void forwardToLocal(final LocalProxyTransaction successor, final TransactionRequest<?> request,
-            final Consumer<Response<?, ?>> callback) throws RequestException {
+            final Consumer<Response<?, ?>> callback) {
         if (request instanceof AbortLocalTransactionRequest) {
             successor.sendAbort(request, callback);
         } else if (request instanceof CommitLocalTransactionRequest) {
