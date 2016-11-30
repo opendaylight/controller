@@ -15,6 +15,7 @@ import java.util.Map;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.config.PrefixShardConfiguration;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -27,7 +28,10 @@ public class ClusterUtils {
 
     // key for replicated configuration key
     public static final Key<ORMap<PrefixShardConfiguration>> CONFIGURATION_KEY =
-            ORMapKey.create("prefix-shard-configuration");
+            ORMapKey.create("prefix-shard-configuration-config");
+
+    public static final Key<ORMap<PrefixShardConfiguration>> OPERATIONAL_KEY =
+            ORMapKey.create("prefix-shard-configuration-oper");
 
     public static ShardIdentifier getShardIdentifier(final MemberName memberName, final DOMDataTreeIdentifier prefix) {
         final String type;
@@ -75,5 +79,18 @@ public class ClusterUtils {
             builder.append("!");
         });
         return builder.toString();
+    }
+
+    public static Key<ORMap<PrefixShardConfiguration>> getReplicatorKey(LogicalDatastoreType type) {
+        if (LogicalDatastoreType.CONFIGURATION.equals(type)) {
+            return CONFIGURATION_KEY;
+        } else {
+            return OPERATIONAL_KEY;
+        }
+    }
+
+    public static org.opendaylight.mdsal.common.api.LogicalDatastoreType toMDSalApi(
+            final LogicalDatastoreType logicalDatastoreType) {
+        return org.opendaylight.mdsal.common.api.LogicalDatastoreType.valueOf(logicalDatastoreType.name());
     }
 }
