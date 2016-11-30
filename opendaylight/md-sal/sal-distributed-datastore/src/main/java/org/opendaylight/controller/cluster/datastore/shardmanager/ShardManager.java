@@ -392,7 +392,11 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
                                   final Map<DOMDataTreeIdentifier, PrefixShardConfiguration> configs) {
         LOG.debug("{} ShardManager : {}, resolving added configs : {}", addedConfigs);
 
-        addedConfigs.forEach(id -> doCreatePrefixedShard(configs.get(id)));
+        addedConfigs.stream().filter(identifier
+            -> identifier
+            .getDatastoreType().equals(
+                    ClusterUtils.toMDSalApi(datastoreContextFactory.getBaseDatastoreContext().getLogicalStoreType())))
+            .forEach(id -> doCreatePrefixedShard(configs.get(id)));
     }
 
     private void resolveUpdates(Set<DOMDataTreeIdentifier> maybeUpdatedConfigs) {
@@ -588,6 +592,22 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         final ShardIdentifier shardId = ClusterUtils.getShardIdentifier(cluster.getCurrentMemberName(),
                 config.getPrefix());
         final String shardName = shardId.getShardName();
+
+        if (localShards.containsKey(shardName)) {
+            LOG.debug("Received create for an already existing shard");
+            final PrefixShardConfiguration existing =
+                    configuration.getAllPrefixShardConfigurations().get(config.getPrefix());
+
+            if (existing == null) {
+                configuration.addPrefixShardConfiguration(config);
+            } else {
+                if (!existing.equals(config)) {
+                    // TODO update the existing config
+                } else {
+                    return;
+                }
+            }
+        }
 
         configuration.addPrefixShardConfiguration(config);
 
