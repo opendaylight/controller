@@ -101,6 +101,24 @@
       "revId": "655c6b1091b73611a7fea1284d9b8190b3d7d3b6",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_12aa5d19",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/shardmanager/ShardManagerSnapshot.java",
+        "patchSetId": 49
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2016-11-30T13:17:55Z",
+      "side": 1,
+      "message": "In one of the patches earlier in the chain you mentioned that we should add the prefix based shard configuration into the ShardManagerSnapshot so that it\u0027s persisted. Although we could also create a persisted snapshot just for the Frontend manager(DistributedShardedDOMDataTree) that would keep only the prefix based configuration and apply it on restarts etc.",
+      "parentUuid": "1a622d24_92b66d89",
+      "revId": "655c6b1091b73611a7fea1284d9b8190b3d7d3b6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
