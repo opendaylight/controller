@@ -16,6 +16,8 @@ import akka.actor.ActorSystem;
 import akka.actor.PoisonPill;
 import akka.actor.Props;
 import akka.actor.Status;
+import akka.actor.Status.Failure;
+import akka.actor.Status.Success;
 import akka.cluster.Cluster;
 import akka.cluster.ClusterEvent;
 import akka.cluster.ClusterEvent.MemberExited;
@@ -31,7 +33,10 @@ import akka.cluster.ddata.Replicator;
 import akka.cluster.ddata.Replicator.Changed;
 import akka.cluster.ddata.Replicator.Subscribe;
 import akka.cluster.ddata.Replicator.Update;
+import akka.dispatch.OnComplete;
+import akka.pattern.Patterns;
 import akka.util.Timeout;
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Sets.SetView;
@@ -51,6 +56,8 @@ import org.opendaylight.controller.cluster.datastore.DistributedDataStore;
 import org.opendaylight.controller.cluster.datastore.config.PrefixShardConfiguration;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.controller.cluster.datastore.utils.ClusterUtils;
+import org.opendaylight.controller.cluster.raft.client.messages.FindLeader;
+import org.opendaylight.controller.cluster.raft.client.messages.FindLeaderReply;
 import org.opendaylight.controller.cluster.sharding.messages.CreatePrefixShard;
 import org.opendaylight.controller.cluster.sharding.messages.NotifyProducerCreated;
 import org.opendaylight.controller.cluster.sharding.messages.NotifyProducerRemoved;
@@ -62,8 +69,15 @@ import org.opendaylight.controller.cluster.sharding.messages.RemovePrefixShard;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeProducer;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeProducerException;
+import org.opendaylight.mdsal.dom.api.DOMDataTreeShard;
+import org.opendaylight.mdsal.dom.broker.DOMDataTreeShardRegistration;
+import org.opendaylight.mdsal.dom.spi.DOMDataTreePrefixTableEntry;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import scala.compat.java8.FutureConverters;
+import scala.concurrent.Future;
+import scala.concurrent.duration.Duration;
+import scala.concurrent.duration.FiniteDuration;
 
 /**
  * Actor that tracks currently open producers/shards on remote nodes and handles notifications of remote
@@ -73,6 +87,8 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
 
     private static final String PERSISTENCE_ID = "sharding-service-actor";
     private static final Timeout DEFAULT_ASK_TIMEOUT = new Timeout(15, TimeUnit.SECONDS);
+    public static final FiniteDuration SHARD_LOOKUP_TASK_INTERVAL = new FiniteDuration(1L, TimeUnit.SECONDS);
+    public static final int LOOKUP_TASK_MAX_RETRIES = 100;
 
     private final DistributedShardedDOMDataTree shardingService;
     private final ActorSystem actorSystem;
@@ -346,6 +362,12 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
                     map -> map.put(cluster, configuration.toDataMapKey(), configuration));
 
         replicator.tell(update, self());
+
+        // schedule a notification task for the reply
+        actorSystem.scheduler().scheduleOnce(SHARD_LOOKUP_TASK_INTERVAL,
+                new ShardCreationLookupTask(actorSystem, getSender(),
+                        actorContext, shardingService, configuration.getPrefix()),
+                actorSystem.dispatcher());
     }
 
     private void onPrefixShardCreated(final PrefixShardCreated message) {
@@ -386,6 +408,12 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
                 new Update<>(ClusterUtils.CONFIGURATION_KEY, currentData, Replicator.writeLocal(),
                     map -> map.remove(cluster, "prefix=" + message.getPrefix()));
         replicator.tell(removal, self());
+
+        final ShardRemovalLookupTask removalTask =
+                new ShardRemovalLookupTask(actorSystem, getSender(),
+                        actorContext, message.getPrefix());
+
+        actorSystem.scheduler().scheduleOnce(SHARD_LOOKUP_TASK_INTERVAL, removalTask, actorSystem.dispatcher());
     }
 
     private void onPrefixShardRemoved(final PrefixShardRemoved message) {
@@ -437,6 +465,264 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
         public void close() {
             shardRegistration.close();
             clientActor.tell(PoisonPill.getInstance(), ActorRef.noSender());
+        }
+    }
+
+    /**
+     * Handles the lookup step of cds shard creation once the configuration is updated.
+     */
+    private class ShardCreationLookupTask implements Runnable {
+
+        private final ActorSystem system;
+        private final ActorRef replyTo;
+        private final ActorContext context;
+        private final DistributedShardedDOMDataTree shardingService;
+        private final DOMDataTreeIdentifier toLookup;
+
+        private int retries = 0;
+
+        ShardCreationLookupTask(final ActorSystem system,
+                                       final ActorRef replyTo,
+                                       final ActorContext context,
+                                       final DistributedShardedDOMDataTree shardingService,
+                                       final DOMDataTreeIdentifier toLookup) {
+
+            this.system = system;
+            this.replyTo = replyTo;
+            this.context = context;
+            this.shardingService = shardingService;
+            this.toLookup = toLookup;
+        }
+
+        @Override
+        public void run() {
+            final Optional<ActorRef> localShard =
+                    context.findLocalShard(ClusterUtils.getCleanShardName(toLookup.getRootIdentifier()));
+
+            if (!localShard.isPresent()) {
+                tryReschedule();
+            } else {
+                LOG.debug("Local backend for shard[{}] lookup successful, starting leader lookup..", toLookup);
+
+                system.scheduler().scheduleOnce(
+                        SHARD_LOOKUP_TASK_INTERVAL,
+                        new ShardLeaderLookupTask(system, replyTo, localShard.get(),
+                                shardingService, toLookup),
+                        system.dispatcher());
+            }
+        }
+
+        private void tryReschedule() {
+            if (retries <= LOOKUP_TASK_MAX_RETRIES) {
+                retries++;
+                LOG.debug("Local backend for shard[{}] not found, try: {}, rescheduling..", toLookup, retries);
+                system.scheduler().scheduleOnce(
+                        SHARD_LOOKUP_TASK_INTERVAL, ShardCreationLookupTask.this, system.dispatcher());
+            } else {
+                // fail
+                replyTo.tell(new Failure(
+                        new DOMDataTreeShardCreationFailedException("Unable to find the backend shard. Failing..")),
+                        noSender());
+            }
+
+        }
+    }
+
+    /**
+     * Handles the readiness step by waiting for a leader of the created shard.
+     */
+    private class ShardLeaderLookupTask implements Runnable {
+
+        private final ActorSystem system;
+        private final ActorRef replyTo;
+        private final ActorRef shard;
+        private final DistributedShardedDOMDataTree shardingService;
+        private final DOMDataTreeIdentifier toLookup;
+
+        private int retries = 0;
+
+        ShardLeaderLookupTask(final ActorSystem system,
+                                     final ActorRef replyTo,
+                                     final ActorRef shard,
+                                     final DistributedShardedDOMDataTree shardingService,
+                                     final DOMDataTreeIdentifier toLookup) {
+            this.system = system;
+            this.replyTo = replyTo;
+            this.shard = shard;
+            this.shardingService = shardingService;
+            this.toLookup = toLookup;
+        }
+
+        @Override
+        public void run() {
+            FiniteDuration leaderLookupDuration = Duration.create(500, TimeUnit.MILLISECONDS);
+
+            final Future<Object> ask = Patterns.ask(shard, FindLeader.INSTANCE, new Timeout(leaderLookupDuration));
+
+            ask.onComplete(new OnComplete<Object>() {
+                @Override
+                public void onComplete(final Throwable throwable, final Object findLeaderReply) throws Throwable {
+                    if (throwable != null) {
+                        tryReschedule();
+                    } else {
+                        final FindLeaderReply findLeader = (FindLeaderReply) findLeaderReply;
+                        final java.util.Optional<String> leaderActor = findLeader.getLeaderActor();
+                        if (leaderActor.isPresent()) {
+                            // leader is found, backend seems ready, check if the frontend is ready
+                            LOG.debug("{} - Leader for shard[{}] backend ready, starting frontend lookup..",
+                                    clusterWrapper.getCurrentMemberName(), toLookup);
+                            system.scheduler().scheduleOnce(
+                                    SHARD_LOOKUP_TASK_INTERVAL,
+                                    new FrontendLookupTask(system, replyTo, shardingService, toLookup),
+                                    system.dispatcher());
+                        } else {
+                            tryReschedule();
+                        }
+                    }
+                }
+            }, system.dispatcher());
+
+        }
+
+        private void tryReschedule() {
+            if (retries <= LOOKUP_TASK_MAX_RETRIES) {
+                LOG.debug("{} - Leader for shard[{}] backend not found on try: {}, retrying..",
+                        clusterWrapper.getCurrentMemberName(), toLookup, retries);
+                retries++;
+                system.scheduler().scheduleOnce(
+                        SHARD_LOOKUP_TASK_INTERVAL, ShardLeaderLookupTask.this, system.dispatcher());
+            } else {
+                // fail
+                replyTo.tell(new Failure(
+                        new DOMDataTreeShardCreationFailedException("Unable to find leader for backend shard. "
+                                + "Failing..")),
+                        noSender());
+            }
+        }
+    }
+
+    /**
+     * After backend is ready this handles the last step - checking if we have a frontend shard for the backend,
+     * once this completes(which should be ready by the time the backend is created, this is just a sanity check in
+     * case they race), the future for the cds shard creation is completed and the shard is ready for use.
+     */
+    private final class FrontendLookupTask implements Runnable {
+
+        private final ActorSystem system;
+        private final ActorRef replyTo;
+        private final DistributedShardedDOMDataTree shardingService;
+        private final DOMDataTreeIdentifier toLookup;
+
+        private int retries = 0;
+
+        FrontendLookupTask(final ActorSystem system,
+                                  final ActorRef replyTo,
+                                  final DistributedShardedDOMDataTree shardingService,
+                                  final DOMDataTreeIdentifier toLookup) {
+
+            this.system = system;
+            this.replyTo = replyTo;
+            this.shardingService = shardingService;
+            this.toLookup = toLookup;
+        }
+
+        @Override
+        public void run() {
+            final DOMDataTreePrefixTableEntry<DOMDataTreeShardRegistration<DOMDataTreeShard>> entry =
+                    shardingService.lookupShardFrontend(toLookup);
+
+            if (entry != null && tableEntryIdCheck(entry, toLookup) && entry.getValue() != null) {
+                replyTo.tell(new Success(null), noSender());
+            } else {
+                tryReschedule();
+            }
+        }
+
+        private boolean tableEntryIdCheck(final DOMDataTreePrefixTableEntry<?> entry,
+                                          final DOMDataTreeIdentifier prefix) {
+            if (entry == null) {
+                return false;
+            }
+
+            if (YangInstanceIdentifier.EMPTY.equals(prefix.getRootIdentifier())) {
+                return true;
+            }
+
+            if (entry.getIdentifier().equals(toLookup.getRootIdentifier().getLastPathArgument())) {
+                return true;
+            }
+
+            return false;
+        }
+
+        private void tryReschedule() {
+            if (retries <= LOOKUP_TASK_MAX_RETRIES) {
+                LOG.debug("Frontend for shard[{}] not found on try: {}, retrying..", toLookup, retries);
+                retries++;
+                system.scheduler().scheduleOnce(
+                        SHARD_LOOKUP_TASK_INTERVAL, FrontendLookupTask.this, system.dispatcher());
+            } else {
+                // fail
+                replyTo.tell(new Failure(
+                        new DOMDataTreeShardCreationFailedException("Unable to find the frontend for shard. "
+                                + "Failing..")),
+                        noSender());
+            }
+        }
+    }
+
+    /**
+     * Task that is run once a cds shard registration is closed and completes once the backend shard is removed from the
+     * configuration.
+     */
+    private class ShardRemovalLookupTask implements Runnable {
+
+        private final ActorSystem system;
+        private final ActorRef replyTo;
+        private final ActorContext context;
+        private final DOMDataTreeIdentifier toLookup;
+
+        private int retries = 0;
+
+        ShardRemovalLookupTask(final ActorSystem system,
+                               final ActorRef replyTo,
+                               final ActorContext context,
+                               final DOMDataTreeIdentifier toLookup) {
+
+            this.system = system;
+            this.replyTo = replyTo;
+            this.context = context;
+            this.toLookup = toLookup;
+        }
+
+        @Override
+        public void run() {
+            final Optional<ActorRef> localShard =
+                    context.findLocalShard(ClusterUtils.getCleanShardName(toLookup.getRootIdentifier()));
+
+            if (localShard.isPresent()) {
+                tryReschedule();
+            } else {
+                LOG.debug("Backend shard[{}] removal lookup successful notifying the registration future", toLookup);
+                replyTo.tell(new Success(null), noSender());
+            }
+        }
+
+        private void tryReschedule() {
+            if (retries <= LOOKUP_TASK_MAX_RETRIES) {
+                retries++;
+                LOG.debug("Backend shard[{}] removal lookup failed, shard is still present, try: {}, rescheduling..",
+                        toLookup, retries);
+                system.scheduler().scheduleOnce(
+                        SHARD_LOOKUP_TASK_INTERVAL, ShardRemovalLookupTask.this, system.dispatcher());
+            } else {
+                // fail
+                replyTo.tell(new Failure(
+                        new DOMDataTreeShardCreationFailedException("The backend shard was not removed in " + retries
+                                + " retries. Failing..")),
+                        noSender());
+            }
+
         }
     }
 
@@ -507,6 +793,5 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
             verify();
             return Props.create(ShardedDataTreeActor.class, this);
         }
-
     }
 }
