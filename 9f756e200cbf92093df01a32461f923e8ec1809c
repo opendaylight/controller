@@ -22,6 +22,30 @@
       "revId": "9f756e200cbf92093df01a32461f923e8ec1809c",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_354f8394",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/persisted/SimpleReplicatedLogEntry.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 145,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-11-30T16:02:08Z",
+      "side": 1,
+      "message": "Right but actually I can make the class final in the next patch now that the lone subclass has been removed. I meant to do that. I pushed a patch for that.",
+      "parentUuid": "1a622d24_950c9796",
+      "range": {
+        "startLine": 145,
+        "startChar": 8,
+        "endLine": 145,
+        "endChar": 58
+      },
+      "revId": "9f756e200cbf92093df01a32461f923e8ec1809c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
