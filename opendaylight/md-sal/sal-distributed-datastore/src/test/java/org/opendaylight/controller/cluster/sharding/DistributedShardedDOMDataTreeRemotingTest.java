@@ -43,7 +43,6 @@ import org.opendaylight.controller.cluster.datastore.messages.FindPrimary;
 import org.opendaylight.controller.cluster.datastore.messages.LocalPrimaryShardFound;
 import org.opendaylight.controller.cluster.datastore.messages.LocalShardFound;
 import org.opendaylight.controller.cluster.datastore.utils.ClusterUtils;
-import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
 import org.opendaylight.controller.cluster.sharding.DistributedShardFactory.DistributedShardRegistration;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
@@ -75,11 +74,14 @@ public class DistributedShardedDOMDataTreeRemotingTest extends AbstractTest {
 
 
     private final Builder leaderDatastoreContextBuilder =
-            DatastoreContext.newBuilder().shardHeartbeatIntervalInMillis(100).shardElectionTimeoutFactor(2);
+            DatastoreContext.newBuilder().shardHeartbeatIntervalInMillis(100).shardElectionTimeoutFactor(5)
+                    .logicalStoreType(
+                            org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.CONFIGURATION);
 
     private final DatastoreContext.Builder followerDatastoreContextBuilder =
             DatastoreContext.newBuilder().shardHeartbeatIntervalInMillis(100).shardElectionTimeoutFactor(5)
-                    .customRaftPolicyImplementation(DisableElectionsRaftPolicy.class.getName());
+                    .logicalStoreType(
+                            org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.CONFIGURATION);
 
     private DistributedDataStore followerDistributedDataStore;
     private DistributedDataStore leaderDistributedDataStore;
@@ -156,7 +158,7 @@ public class DistributedShardedDOMDataTreeRemotingTest extends AbstractTest {
 
         final DistributedShardRegistration shardRegistration =
                 leaderShardFactory.createDistributedShard(
-                        TEST_ID, Lists.newArrayList(AbstractTest.MEMBER_NAME, AbstractTest.MEMBER_2_NAME));
+                        TEST_ID, Lists.newArrayList(AbstractTest.MEMBER_NAME, AbstractTest.MEMBER_2_NAME)).get();
 
         leaderTestKit.waitUntilLeader(leaderDistributedDataStore.getActorContext(),
                 ClusterUtils.getCleanShardName(TEST_ID.getRootIdentifier()));
@@ -209,7 +211,7 @@ public class DistributedShardedDOMDataTreeRemotingTest extends AbstractTest {
         LOG.warn("registering first shard");
         final DistributedShardRegistration shardRegistration =
                 leaderShardFactory.createDistributedShard(TEST_ID,
-                        Lists.newArrayList(AbstractTest.MEMBER_NAME, AbstractTest.MEMBER_2_NAME));
+                        Lists.newArrayList(AbstractTest.MEMBER_NAME, AbstractTest.MEMBER_2_NAME)).get();
 
         leaderTestKit.waitUntilLeader(leaderDistributedDataStore.getActorContext(),
                 ClusterUtils.getCleanShardName(TEST_ID.getRootIdentifier()));
@@ -261,22 +263,22 @@ public class DistributedShardedDOMDataTreeRemotingTest extends AbstractTest {
 
         final DistributedShardRegistration reg1 = leaderShardFactory
                 .createDistributedShard(TEST_ID,
-                        Lists.newArrayList(AbstractTest.MEMBER_NAME, AbstractTest.MEMBER_2_NAME));
+                        Lists.newArrayList(AbstractTest.MEMBER_NAME, AbstractTest.MEMBER_2_NAME)).get();
 
         final DistributedShardRegistration reg2 = leaderShardFactory
                 .createDistributedShard(
                         new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, TestModel.OUTER_CONTAINER_PATH),
-                        Lists.newArrayList(AbstractTest.MEMBER_NAME, AbstractTest.MEMBER_2_NAME));
+                        Lists.newArrayList(AbstractTest.MEMBER_NAME, AbstractTest.MEMBER_2_NAME)).get();
 
         final DistributedShardRegistration reg3 = leaderShardFactory
                 .createDistributedShard(
                         new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, TestModel.INNER_LIST_PATH),
-                        Lists.newArrayList(AbstractTest.MEMBER_NAME, AbstractTest.MEMBER_2_NAME));
+                        Lists.newArrayList(AbstractTest.MEMBER_NAME, AbstractTest.MEMBER_2_NAME)).get();
 
         final DistributedShardRegistration reg4 = leaderShardFactory
                 .createDistributedShard(
                         new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, TestModel.JUNK_PATH),
-                        Lists.newArrayList(AbstractTest.MEMBER_NAME, AbstractTest.MEMBER_2_NAME));
+                        Lists.newArrayList(AbstractTest.MEMBER_NAME, AbstractTest.MEMBER_2_NAME)).get();
 
         leaderTestKit.waitUntilLeader(leaderDistributedDataStore.getActorContext(),
                 ClusterUtils.getCleanShardName(TestModel.TEST_PATH));
@@ -358,7 +360,7 @@ public class DistributedShardedDOMDataTreeRemotingTest extends AbstractTest {
             LOG.debug("Round {}", i);
             final DistributedShardRegistration reg1 = leaderShardFactory
                     .createDistributedShard(TEST_ID,
-                            Lists.newArrayList(AbstractTest.MEMBER_NAME, AbstractTest.MEMBER_2_NAME));
+                            Lists.newArrayList(AbstractTest.MEMBER_NAME, AbstractTest.MEMBER_2_NAME)).checkedGet();
 
             leaderTestKit.waitUntilLeader(leaderDistributedDataStore.getActorContext(),
                     ClusterUtils.getCleanShardName(TestModel.TEST_PATH));
@@ -369,7 +371,7 @@ public class DistributedShardedDOMDataTreeRemotingTest extends AbstractTest {
             assertNotNull(findLocalShard(followerDistributedDataStore.getActorContext(),
                     ClusterUtils.getCleanShardName(TestModel.TEST_PATH)));
 
-            reg1.close();
+            reg1.close().get();
 
             waitUntilShardIsDown(leaderDistributedDataStore.getActorContext(),
                     ClusterUtils.getCleanShardName(TestModel.TEST_PATH));
