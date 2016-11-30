@@ -143,11 +143,13 @@ public class DistributedShardFrontendTest {
         //check the lower shard got the correct modification
         verify(outerListClientTransaction, times(2)).write(yidCaptor.capture(), nodeCaptor.capture());
 
-        final YangInstanceIdentifier expectedYid = OUTER_LIST_YID.node(TestModel.ID_QNAME);
+        final YangInstanceIdentifier expectedYid =
+                YangInstanceIdentifier.create(new NodeIdentifier(TestModel.ID_QNAME));
         final YangInstanceIdentifier actualIdYid = yidCaptor.getAllValues().get(0);
         assertEquals(expectedYid, actualIdYid);
 
-        final YangInstanceIdentifier expectedInnerYid = OUTER_LIST_YID.node(TestModel.INNER_LIST_QNAME);
+        final YangInstanceIdentifier expectedInnerYid =
+                YangInstanceIdentifier.create(new NodeIdentifier(TestModel.INNER_LIST_QNAME));
         final YangInstanceIdentifier actualInnerListYid = yidCaptor.getAllValues().get(1);
         assertEquals(expectedInnerYid, actualInnerListYid);
 
