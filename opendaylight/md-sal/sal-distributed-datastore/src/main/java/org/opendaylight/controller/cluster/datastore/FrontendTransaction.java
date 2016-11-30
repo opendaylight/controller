@@ -170,8 +170,7 @@ final class FrontendTransaction {
             handleTransactionDoCommit((TransactionDoCommitRequest) request, envelope, now);
             return null;
         } else if (request instanceof TransactionAbortRequest) {
-            handleTransactionAbort((TransactionAbortRequest) request, envelope, now);
-            return null;
+            return handleTransactionAbort((TransactionAbortRequest) request, envelope, now);
         } else {
             throw new UnsupportedRequestException(request);
         }
@@ -239,8 +238,13 @@ final class FrontendTransaction {
         });
     }
 
-    private void handleTransactionAbort(final TransactionAbortRequest request, final RequestEnvelope envelope,
-            final long now) throws RequestException {
+    private TransactionSuccess<?> handleTransactionAbort(final TransactionAbortRequest request,
+            final RequestEnvelope envelope, final long now) throws RequestException {
+        if (readyCohort == null) {
+            openTransaction.abort();
+            return new TransactionAbortSuccess(id, request.getSequence());
+        }
+
         readyCohort.abort(new FutureCallback<Void>() {
             @Override
             public void onSuccess(final Void result) {
@@ -256,6 +260,7 @@ final class FrontendTransaction {
                 recordAndSendFailure(envelope, now, new RuntimeRequestException("Abort failed", failure));
             }
         });
+        return null;
     }
 
     private void coordinatedCommit(final RequestEnvelope envelope, final long now) {
