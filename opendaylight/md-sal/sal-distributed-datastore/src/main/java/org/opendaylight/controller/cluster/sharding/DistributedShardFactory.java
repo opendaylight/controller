@@ -9,12 +9,12 @@
 package org.opendaylight.controller.cluster.sharding;
 
 import com.google.common.annotations.Beta;
+import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.ListenableFuture;
 import java.util.Collection;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
-import org.opendaylight.mdsal.dom.api.DOMDataTreeProducerException;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeShardingConflictException;
-import org.opendaylight.yangtools.concepts.Registration;
 
 /**
  * A factory that handles addition of new clustered shard's based on a prefix. This factory is a QoL class that handles
@@ -31,18 +31,25 @@ public interface DistributedShardFactory {
      * @param prefix         Shard root
      * @param replicaMembers Members that this shard is replicated on, has to have at least one Member even if the shard
      *                       should not be replicated.
-     * @return ShardRegistration that should be closed if the shard should be destroyed
-     * @throws DOMDataTreeShardingConflictException If the prefix already has a shard registered
-     * @throws DOMDataTreeProducerException in case there is a problem closing the initial producer that is used to
-     *                                      register the shard into the ShardingService
+     * @return A future that will be completed with a DistributedShardRegistration once the backend and frontend shards
+     *         are spawned.
+     * @throws DOMDataTreeShardingConflictException If the initial check for a conflict on the local node fails, the
+     *         sharding configuration won't be updated if this exception is thrown.
      */
-    DistributedShardRegistration createDistributedShard(DOMDataTreeIdentifier prefix,
-                                                        Collection<MemberName> replicaMembers)
-            throws DOMDataTreeShardingConflictException, DOMDataTreeProducerException,
-            DOMDataTreeShardCreationFailedException;
+    CheckedFuture<DistributedShardRegistration, DOMDataTreeShardCreationFailedException>
+        createDistributedShard(DOMDataTreeIdentifier prefix, Collection<MemberName> replicaMembers)
+            throws DOMDataTreeShardingConflictException;
 
-    interface DistributedShardRegistration extends Registration {
-        @Override
-        void close();
+    /**
+     * Registration of the CDS shard that allows you to remove the shard from the system by closing the registration.
+     * This removal is done asynchronously.
+     */
+    interface DistributedShardRegistration {
+
+        /**
+         *  Removes the shard from the system, this removal is done asynchronously, the future completes once the
+         *  backend shard is no longer present.
+         */
+        ListenableFuture<Void> close();
     }
 }
