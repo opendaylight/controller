@@ -200,7 +200,7 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
                 LOG.debug("{} creating successor transaction proxy for {}", identifier, t);
                 final AbstractProxyTransaction newProxy = successor.createTransactionProxy(t.getIdentifier());
                 LOG.debug("{} created successor transaction proxy {}", identifier, newProxy);
-                t.replaySuccessfulRequests(newProxy);
+                t.startReconnect(newProxy);
             }
         }
 
@@ -208,6 +208,11 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
         @Override
         ProxyHistory finishReconnect() {
             final ProxyHistory ret = Verify.verifyNotNull(successor);
+
+            for (AbstractProxyTransaction t : proxies.values()) {
+                t.finishReconnect();
+            }
+
             LOG.debug("Finished reconnecting proxy history {}", this);
             lock.unlock();
             return ret;
