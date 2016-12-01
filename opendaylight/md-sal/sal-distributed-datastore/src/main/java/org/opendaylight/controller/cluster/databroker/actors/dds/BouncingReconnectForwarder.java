@@ -57,7 +57,7 @@ final class BouncingReconnectForwarder extends ReconnectForwarder {
 
 
     @Override
-    protected void forwardEntry(final ConnectionEntry entry) {
+    protected void forwardEntry(final ConnectionEntry entry, final long now) {
         final Request<? , ?> request = entry.getRequest();
 
         final LocalHistoryIdentifier historyId;
