@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
+import org.opendaylight.controller.cluster.access.client.ConnectionEntry;
+
 /**
  * Interface exposed by {@link AbstractClientHistory} to {@link DistributedDataStoreClientBehavior} for the sole
  * purpose of performing a connection switchover.
@@ -16,7 +18,7 @@ package org.opendaylight.controller.cluster.databroker.actors.dds;
 abstract class HistoryReconnectCohort implements AutoCloseable {
     abstract ProxyReconnectCohort getProxy();
 
-    abstract void replaySuccessfulRequests();
+    abstract void replaySuccessfulRequests(Iterable<ConnectionEntry> previousEntries);
 
     @Override
     public abstract void close();

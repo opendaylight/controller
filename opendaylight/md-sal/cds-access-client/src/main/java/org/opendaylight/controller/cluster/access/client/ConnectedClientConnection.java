@@ -7,18 +7,13 @@
  */
 package org.opendaylight.controller.cluster.access.client;
 
-import akka.actor.ActorRef;
 import com.google.common.annotations.Beta;
-import java.util.AbstractMap.SimpleImmutableEntry;
-import java.util.Map.Entry;
 import javax.annotation.concurrent.NotThreadSafe;
-import org.opendaylight.controller.cluster.access.concepts.Request;
-import org.opendaylight.controller.cluster.access.concepts.RequestEnvelope;
 
 @Beta
 @NotThreadSafe
 public final class ConnectedClientConnection<T extends BackendInfo> extends AbstractReceivingClientConnection<T> {
-    public ConnectedClientConnection(final ClientActorContext context, final Long cookie, final T backend) {
+    ConnectedClientConnection(final ClientActorContext context, final Long cookie, final T backend) {
         super(context, cookie, backend);
     }
 
@@ -28,16 +23,5 @@ public final class ConnectedClientConnection<T extends BackendInfo> extends Abst
         setForwarder(new SimpleReconnectForwarder(next));
         current.reconnectConnection(this, next);
         return current;
-    }
-
-    @Override
-    int remoteMaxMessages() {
-        return backend().getMaxMessages();
-    }
-
-    @Override
-    Entry<ActorRef, RequestEnvelope> prepareForTransmit(final Request<?, ?> req) {
-        return new SimpleImmutableEntry<>(backend().getActor(), new RequestEnvelope(
-            req.toVersion(backend().getVersion()), backend().getSessionId(), nextTxSequence()));
     }
 }

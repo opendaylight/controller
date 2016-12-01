@@ -33,7 +33,7 @@ public abstract class ReconnectForwarder {
         successor.sendRequest(request, callback);
     }
 
-    protected abstract void forwardEntry(ConnectionEntry entry);
+    protected abstract void forwardEntry(ConnectionEntry entry, long now);
 
     final AbstractReceivingClientConnection<?> successor() {
         return successor;
