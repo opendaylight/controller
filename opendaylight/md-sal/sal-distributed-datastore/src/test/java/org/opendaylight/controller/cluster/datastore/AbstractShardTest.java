@@ -313,7 +313,7 @@ public abstract class AbstractShardTest extends AbstractActorTest {
         BatchedModifications batched = newBatchedModifications(nextTransactionId(), id, node, true, true, 1);
         DataTreeModification modification = store.getDataTree().takeSnapshot().newModification();
         batched.apply(modification);
-        store.commit(modification);
+        store.notifyListeners(store.commit(modification));
     }
 
     public static void writeToStore(final DataTree store, final YangInstanceIdentifier id,
@@ -337,7 +337,7 @@ public abstract class AbstractShardTest extends AbstractActorTest {
 
         DataTreeModification modification = store.getDataTree().takeSnapshot().newModification();
         batched.apply(modification);
-        store.commit(modification);
+        store.notifyListeners(store.commit(modification));
     }
 
     DataTree setupInMemorySnapshotStore() throws DataValidationFailedException {

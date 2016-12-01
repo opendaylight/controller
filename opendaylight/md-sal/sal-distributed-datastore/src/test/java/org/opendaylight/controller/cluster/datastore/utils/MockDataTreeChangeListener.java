@@ -27,8 +27,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 
 public class MockDataTreeChangeListener implements DOMDataTreeChangeListener {
 
-    private final List<Collection<DataTreeCandidate>> changeList =
-            Lists.<Collection<DataTreeCandidate>>newArrayList();
+    private final List<DataTreeCandidate> changeList = Lists.newArrayList();
 
     private volatile CountDownLatch changeLatch;
     private int expChangeEventCount;
@@ -47,10 +46,12 @@ public class MockDataTreeChangeListener implements DOMDataTreeChangeListener {
 
     @Override
     public void onDataTreeChanged(@Nonnull final Collection<DataTreeCandidate> changes) {
-        synchronized (changeList) {
-            changeList.add(changes);
+        if (changeLatch.getCount() > 0) {
+            synchronized (changeList) {
+                changeList.addAll(changes);
+            }
+            changeLatch.countDown();
         }
-        changeLatch.countDown();
     }
 
     public void waitForChangeEvents() {
@@ -64,10 +65,8 @@ public class MockDataTreeChangeListener implements DOMDataTreeChangeListener {
     public void verifyNotifiedData(YangInstanceIdentifier... paths) {
         Set<YangInstanceIdentifier> pathSet = new HashSet<>(Arrays.asList(paths));
         synchronized (changeList) {
-            for (Collection<DataTreeCandidate> list : changeList) {
-                for (DataTreeCandidate c : list) {
-                    pathSet.remove(c.getRootPath());
-                }
+            for (DataTreeCandidate c : changeList) {
+                pathSet.remove(c.getRootPath());
             }
         }
 
@@ -86,11 +85,9 @@ public class MockDataTreeChangeListener implements DOMDataTreeChangeListener {
     public void verifyNoNotifiedData(YangInstanceIdentifier... paths) {
         Set<YangInstanceIdentifier> pathSet = new HashSet<>(Arrays.asList(paths));
         synchronized (changeList) {
-            for (Collection<DataTreeCandidate> list : changeList) {
-                for (DataTreeCandidate c : list) {
-                    assertFalse("Unexpected " + c.getRootPath() + " present in DataTreeCandidate",
-                            pathSet.contains(c.getRootPath()));
-                }
+            for (DataTreeCandidate c : changeList) {
+                assertFalse("Unexpected " + c.getRootPath() + " present in DataTreeCandidate",
+                        pathSet.contains(c.getRootPath()));
             }
         }
     }
