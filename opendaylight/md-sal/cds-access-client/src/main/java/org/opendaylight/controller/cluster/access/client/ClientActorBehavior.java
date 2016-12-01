@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.access.client;
 
 import com.google.common.annotations.Beta;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Verify;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.Nonnull;
@@ -36,6 +37,20 @@ import org.slf4j.LoggerFactory;
 @Beta
 public abstract class ClientActorBehavior<T extends BackendInfo> extends
         RecoveredClientActorBehavior<ClientActorContext> implements Identifiable<ClientIdentifier> {
+    /**
+     * Connection reconnect cohort, driven by this class.
+     */
+    @FunctionalInterface
+    protected interface ConnectionConnectCohort {
+        /**
+         * Finish the connection by replaying previous messages onto the new connection.
+         *
+         * @param enqueuedEntries Previously-enqueued entries
+         * @return A {@link ReconnectForwarder} to handle any straggler messages which arrive after this method returns.
+         */
+        @Nonnull ReconnectForwarder finishReconnect(@Nonnull Iterable<ConnectionEntry> enqueuedEntries);
+    }
+
     private static final Logger LOG = LoggerFactory.getLogger(ClientActorBehavior.class);
 
     /**
@@ -185,15 +200,15 @@ public abstract class ClientActorBehavior<T extends BackendInfo> extends
     }
 
     /**
-     * Callback invoked when a new connection has been established.
+     * Callback invoked when a new connection has been established. Implementations are expected perform preparatory
+     * tasks before the previous connection is frozen.
      *
-     * @param conn Old connection
-     * @param backend New backend
-     * @return Newly-connected connection.
+     * @param previousEntries Previous entries
+     * @param newConn New connection
+     * @return ConnectionConnectCohort which will be used to complete the process of bringing the connection up.
      */
     @GuardedBy("connectionsLock")
-    protected abstract @Nonnull ConnectedClientConnection<T> connectionUp(
-            final @Nonnull AbstractClientConnection<T> conn, final @Nonnull T backend);
+    @Nonnull protected abstract ConnectionConnectCohort connectionUp(@Nonnull ConnectedClientConnection<T> newConn);
 
     private void backendConnectFinished(final Long shard, final AbstractClientConnection<T> conn,
             final T backend, final Throwable failure) {
@@ -205,8 +220,22 @@ public abstract class ClientActorBehavior<T extends BackendInfo> extends
         LOG.debug("{}: resolved shard {} to {}", persistenceId(), shard, backend);
         final long stamp = connectionsLock.writeLock();
         try {
-            // Bring the connection up
-            final ConnectedClientConnection<T> newConn = connectionUp(conn, backend);
+            // Create a new connected connection
+            final ConnectedClientConnection<T> newConn = new ConnectedClientConnection<>(conn.context(),
+                    conn.cookie(), backend);
+            LOG.debug("{}: resolving connection {} to {}", persistenceId(), conn, newConn);
+
+            // Start reconnecting without the old connection lock held
+            final ConnectionConnectCohort cohort = Verify.verifyNotNull(connectionUp(newConn));
+
+            // Lock the old connection and get a reference to its entries
+            final Iterable<ConnectionEntry> replayIterable = conn.startReplay();
+
+            // Finish the connection attempt
+            final ReconnectForwarder forwarder = Verify.verifyNotNull(cohort.finishReconnect(replayIterable));
+
+            // Install the forwarder, unlocking the old connection
+            conn.finishReplay(forwarder);
 
             // Make sure new lookups pick up the new connection
             connections.replace(shard, conn, newConn);
