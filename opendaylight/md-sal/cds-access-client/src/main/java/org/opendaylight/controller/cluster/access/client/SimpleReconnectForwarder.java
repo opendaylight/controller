@@ -14,7 +14,7 @@ final class SimpleReconnectForwarder extends ReconnectForwarder {
     }
 
     @Override
-    protected void forwardEntry(final ConnectionEntry entry) {
-        successor().enqueueEntry(entry);
+    protected void forwardEntry(final ConnectionEntry entry, final long now) {
+        successor().enqueueEntry(entry, now);
     }
 }
