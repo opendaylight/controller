@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.access.client;
 
 import com.google.common.annotations.Beta;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Verify;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.Nonnull;
@@ -187,13 +188,12 @@ public abstract class ClientActorBehavior<T extends BackendInfo> extends
     /**
      * Callback invoked when a new connection has been established.
      *
-     * @param conn Old connection
-     * @param backend New backend
-     * @return Newly-connected connection.
+     * @param previousEntries Previous entries
+     * @param newConn New connection
      */
     @GuardedBy("connectionsLock")
-    protected abstract @Nonnull ConnectedClientConnection<T> connectionUp(
-            final @Nonnull AbstractClientConnection<T> conn, final @Nonnull T backend);
+    protected abstract ReconnectForwarder connectionUp(@Nonnull Iterable<ConnectionEntry> previousEntries,
+            @Nonnull ConnectedClientConnection<T> newConn);
 
     private void backendConnectFinished(final Long shard, final AbstractClientConnection<T> conn,
             final T backend, final Throwable failure) {
@@ -205,8 +205,15 @@ public abstract class ClientActorBehavior<T extends BackendInfo> extends
         LOG.debug("{}: resolved shard {} to {}", persistenceId(), shard, backend);
         final long stamp = connectionsLock.writeLock();
         try {
+            // Create a new connected connection
+            final ConnectedClientConnection<T> newConn = new ConnectedClientConnection<>(conn.context(),
+                    conn.cookie(), backend);
+            LOG.debug("{}: resolving connection {} to {}", persistenceId(), conn, newConn);
+
             // Bring the connection up
-            final ConnectedClientConnection<T> newConn = connectionUp(conn, backend);
+            final Iterable<ConnectionEntry> replayIterable = conn.startReplay();
+            final ReconnectForwarder forwarder = Verify.verifyNotNull(connectionUp(replayIterable, newConn));
+            conn.finishReplay(forwarder);
 
             // Make sure new lookups pick up the new connection
             connections.replace(shard, conn, newConn);
