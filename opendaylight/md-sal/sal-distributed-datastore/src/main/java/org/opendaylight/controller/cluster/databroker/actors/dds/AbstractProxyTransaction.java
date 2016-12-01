@@ -17,12 +17,14 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.Iterator;
 import java.util.concurrent.CountDownLatch;
 import java.util.function.Consumer;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.GuardedBy;
 import javax.annotation.concurrent.NotThreadSafe;
+import org.opendaylight.controller.cluster.access.client.ConnectionEntry;
 import org.opendaylight.controller.cluster.access.commands.TransactionAbortRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionAbortSuccess;
 import org.opendaylight.controller.cluster.access.commands.TransactionCanCommitSuccess;
@@ -31,6 +33,7 @@ import org.opendaylight.controller.cluster.access.commands.TransactionDoCommitRe
 import org.opendaylight.controller.cluster.access.commands.TransactionPreCommitRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionPreCommitSuccess;
 import org.opendaylight.controller.cluster.access.commands.TransactionRequest;
+import org.opendaylight.controller.cluster.access.concepts.Request;
 import org.opendaylight.controller.cluster.access.concepts.RequestException;
 import org.opendaylight.controller.cluster.access.concepts.RequestFailure;
 import org.opendaylight.controller.cluster.access.concepts.Response;
@@ -406,13 +409,21 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
         });
     }
 
-    final synchronized void startReconnect(final AbstractProxyTransaction successor) {
+    final synchronized void startReconnect(final AbstractProxyTransaction successor,
+            final Iterable<ConnectionEntry> enqueuedEntries) {
+        LOG.debug("Start reconnect of proxy {}", this);
         Preconditions.checkState(this.successor == null);
         this.successor = Preconditions.checkNotNull(successor);
 
+        /*
+         * Before releasing the lock we need to make sure that a call to seal() blocks until we have completed
+         * finishConnect().
+         */
+        successorLatch = new CountDownLatch(1);
+
         for (Object obj : successfulRequests) {
             if (obj instanceof TransactionRequest) {
-                LOG.debug("Forwarding request {} to successor {}", obj, successor);
+                LOG.debug("Forwarding successful request {} to successor {}", obj, successor);
                 successor.handleForwardedRemoteRequest((TransactionRequest<?>) obj, null);
             } else {
                 Verify.verify(obj instanceof IncrementSequence);
@@ -422,14 +433,22 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
         LOG.debug("{} replayed {} successful requests", getIdentifier(), successfulRequests.size());
         successfulRequests.clear();
 
-        /*
-         * Before releasing the lock we need to make sure that a call to seal() blocks until we have completed
-         * finishConnect().
-         */
-        successorLatch = new CountDownLatch(1);
+        final Iterator<ConnectionEntry> it = enqueuedEntries.iterator();
+        while (it.hasNext()) {
+            final ConnectionEntry e = it.next();
+            final Request<?, ?> req = e.getRequest();
+
+            if (getIdentifier().equals(req.getTarget())) {
+                Verify.verify(req instanceof TransactionRequest, "Unhandled request %s", req);
+                LOG.debug("Forwarding queued request{} to successor {}", req, successor);
+                successor.handleForwardedRemoteRequest((TransactionRequest<?>) req, e.getCallback());
+                it.remove();
+            }
+        }
     }
 
     final synchronized void finishReconnect() {
+        LOG.debug("Finish reconnect of proxy {} latch {}", this, successorLatch);
         Preconditions.checkState(successorLatch != null);
 
         if (sealed == SealState.SEALED) {

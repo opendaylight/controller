@@ -22,6 +22,8 @@ import java.util.function.Consumer;
 import javax.annotation.concurrent.GuardedBy;
 import org.opendaylight.controller.cluster.access.client.AbstractClientConnection;
 import org.opendaylight.controller.cluster.access.client.ConnectedClientConnection;
+import org.opendaylight.controller.cluster.access.client.ConnectionEntry;
+import org.opendaylight.controller.cluster.access.commands.CreateLocalHistoryRequest;
 import org.opendaylight.controller.cluster.access.commands.LocalHistoryRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionRequest;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
@@ -195,12 +197,33 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
 
         @GuardedBy("lock")
         @Override
-        void replaySuccessfulRequests() {
+        void replaySuccessfulRequests(final Iterable<ConnectionEntry> previousEntries) {
+            // First look for our Create message
+            for (ConnectionEntry e : previousEntries) {
+                final Request<?, ?> req = e.getRequest();
+                if (identifier.equals(req.getTarget())) {
+                    Verify.verify(req instanceof LocalHistoryRequest);
+                    if (req instanceof CreateLocalHistoryRequest) {
+                        successor.connection.sendRequest(req, e.getCallback());
+                        break;
+                    }
+                }
+            }
+
             for (AbstractProxyTransaction t : proxies.values()) {
                 LOG.debug("{} creating successor transaction proxy for {}", identifier, t);
                 final AbstractProxyTransaction newProxy = successor.createTransactionProxy(t.getIdentifier());
                 LOG.debug("{} created successor transaction proxy {}", identifier, newProxy);
-                t.startReconnect(newProxy);
+                t.startReconnect(newProxy, previousEntries);
+            }
+
+            // Now look for any finalizing messages
+            for (ConnectionEntry e : previousEntries) {
+                final Request<?, ?> req = e.getRequest();
+                if (identifier.equals(req.getTarget())) {
+                    Verify.verify(req instanceof LocalHistoryRequest);
+                    successor.connection.sendRequest(req, e.getCallback());
+                }
             }
         }
 

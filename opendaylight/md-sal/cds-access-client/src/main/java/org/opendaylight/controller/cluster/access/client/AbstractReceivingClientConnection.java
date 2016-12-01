@@ -20,17 +20,15 @@ import java.util.Optional;
  */
 abstract class AbstractReceivingClientConnection<T extends BackendInfo> extends AbstractClientConnection<T> {
     private final T backend;
-    private long nextTxSequence;
 
     AbstractReceivingClientConnection(final ClientActorContext context, final Long cookie, final T backend) {
-        super(context, cookie);
+        super(context, cookie, new TransmitQueue.Transmitting(backend));
         this.backend = Preconditions.checkNotNull(backend);
     }
 
     AbstractReceivingClientConnection(final AbstractReceivingClientConnection<T> oldConnection) {
         super(oldConnection);
         this.backend = oldConnection.backend;
-        this.nextTxSequence = oldConnection.nextTxSequence;
     }
 
     @Override
@@ -40,9 +38,5 @@ abstract class AbstractReceivingClientConnection<T extends BackendInfo> extends 
 
     final T backend() {
         return backend;
-    }
-
-    final long nextTxSequence() {
-        return nextTxSequence++;
     }
 }
