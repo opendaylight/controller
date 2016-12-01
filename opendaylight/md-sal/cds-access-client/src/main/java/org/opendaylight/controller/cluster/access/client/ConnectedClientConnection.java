@@ -9,65 +9,17 @@ package org.opendaylight.controller.cluster.access.client;
 
 import akka.actor.ActorRef;
 import com.google.common.annotations.Beta;
+import java.util.AbstractMap.SimpleImmutableEntry;
+import java.util.Map.Entry;
 import javax.annotation.concurrent.NotThreadSafe;
+import org.opendaylight.controller.cluster.access.concepts.Request;
 import org.opendaylight.controller.cluster.access.concepts.RequestEnvelope;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Beta
 @NotThreadSafe
 public final class ConnectedClientConnection<T extends BackendInfo> extends AbstractReceivingClientConnection<T> {
-    private static final Logger LOG = LoggerFactory.getLogger(ConnectedClientConnection.class);
-
-    private long nextTxSequence;
-
     public ConnectedClientConnection(final ClientActorContext context, final Long cookie, final T backend) {
         super(context, cookie, backend);
-    }
-
-    private void transmit(final ConnectionEntry entry) {
-        final long txSequence = nextTxSequence++;
-
-        final RequestEnvelope toSend = new RequestEnvelope(entry.getRequest().toVersion(remoteVersion()), sessionId(),
-            txSequence);
-
-        // We need to enqueue the request before we send it to the actor, as we may be executing on a different thread
-        // than the client actor thread, in which case the round-trip could be made faster than we can enqueue --
-        // in which case the receive routine would not find the entry.
-        final TransmittedConnectionEntry txEntry = new TransmittedConnectionEntry(entry, sessionId(), txSequence,
-            readTime());
-        appendToInflight(txEntry);
-
-        final ActorRef actor = remoteActor();
-        LOG.trace("Transmitting request {} as {} to {}", entry.getRequest(), toSend, actor);
-        actor.tell(toSend, ActorRef.noSender());
-    }
-
-    @Override
-    void enqueueEntry(final ConnectionEntry entry) {
-        if (inflightSize() < remoteMaxMessages()) {
-            transmit(entry);
-            LOG.debug("Enqueued request {} to queue {}", entry.getRequest(), this);
-        } else {
-            LOG.debug("Queue is at capacity, delayed sending of request {}", entry.getRequest());
-            super.enqueueEntry(entry);
-        }
-    }
-
-    @Override
-    void sendMessages(final int count) {
-        int toSend = count;
-
-        while (toSend > 0) {
-            final ConnectionEntry e = dequeEntry();
-            if (e == null) {
-                break;
-            }
-
-            LOG.debug("Transmitting entry {}", e);
-            transmit(e);
-            toSend--;
-        }
     }
 
     @Override
@@ -76,5 +28,16 @@ public final class ConnectedClientConnection<T extends BackendInfo> extends Abst
         setForwarder(new SimpleReconnectForwarder(next));
         current.reconnectConnection(this, next);
         return current;
+    }
+
+    @Override
+    int remoteMaxMessages() {
+        return backend().getMaxMessages();
+    }
+
+    @Override
+    Entry<ActorRef, RequestEnvelope> prepareForTransmit(final Request<?, ?> req) {
+        return new SimpleImmutableEntry<>(backend().getActor(), new RequestEnvelope(
+            req.toVersion(backend().getVersion()), backend().getSessionId(), nextTxSequence()));
     }
 }
