@@ -17,6 +17,7 @@ import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import javax.annotation.concurrent.GuardedBy;
 import org.opendaylight.controller.cluster.access.client.AbstractClientConnection;
 import org.opendaylight.controller.cluster.access.client.ConnectedClientConnection;
+import org.opendaylight.controller.cluster.access.client.ConnectionEntry;
 import org.opendaylight.controller.cluster.access.client.InversibleLockException;
 import org.opendaylight.controller.cluster.access.commands.CreateLocalHistoryRequest;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
@@ -229,8 +230,8 @@ abstract class AbstractClientHistory extends LocalAbortable implements Identifia
             }
 
             @Override
-            void replaySuccessfulRequests() {
-                proxy.replaySuccessfulRequests();
+            void replaySuccessfulRequests(final Iterable<ConnectionEntry> previousEntries) {
+                proxy.replaySuccessfulRequests(previousEntries);
             }
 
             @Override
