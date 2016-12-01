@@ -17,12 +17,16 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.Iterator;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
+import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.function.Consumer;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.GuardedBy;
 import javax.annotation.concurrent.NotThreadSafe;
+import org.opendaylight.controller.cluster.access.client.ConnectionEntry;
 import org.opendaylight.controller.cluster.access.commands.TransactionAbortRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionAbortSuccess;
 import org.opendaylight.controller.cluster.access.commands.TransactionCanCommitSuccess;
@@ -31,7 +35,7 @@ import org.opendaylight.controller.cluster.access.commands.TransactionDoCommitRe
 import org.opendaylight.controller.cluster.access.commands.TransactionPreCommitRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionPreCommitSuccess;
 import org.opendaylight.controller.cluster.access.commands.TransactionRequest;
-import org.opendaylight.controller.cluster.access.concepts.RequestException;
+import org.opendaylight.controller.cluster.access.concepts.Request;
 import org.opendaylight.controller.cluster.access.concepts.RequestFailure;
 import org.opendaylight.controller.cluster.access.concepts.Response;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
@@ -73,25 +77,80 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
         }
     }
 
-    private enum SealState {
-        /**
-         * The user has not sealed the transaction yet.
-         */
-        OPEN,
-        /**
-         * The user has sealed the transaction, but has not issued a canCommit().
-         */
-        SEALED,
-        /**
-         * The user has sealed the transaction and has issued a canCommit().
-         */
-        FLUSHED,
+    // Generic state base class. Direct instances are used for fast paths, sub-class is used for successor transitions
+    private static class State {
+        private final String string;
+
+        State(final String string) {
+            this.string = Preconditions.checkNotNull(string);
+        }
+
+        @Override
+        public final String toString() {
+            return string;
+        }
+    }
+
+    // State class used when a successor has interfered. Contains coordinator latch, the successor and previous state
+    private static final class SuccessorState extends State {
+        private final CountDownLatch latch = new CountDownLatch(1);
+        private AbstractProxyTransaction successor;
+        private State prevState;
+
+        SuccessorState() {
+            super("successor");
+        }
+
+        // Synchronize with succession process and return the successor
+        AbstractProxyTransaction await() {
+            try {
+                latch.await();
+            } catch (InterruptedException e) {
+                LOG.warn("Interrupted while waiting for latch of {}", successor);
+                throw Throwables.propagate(e);
+            }
+            return successor;
+        }
+
+        void finish() {
+            latch.countDown();
+        }
+
+        State getPrevState() {
+            return prevState;
+        }
+
+        void setPrevState(final State prevState) {
+            Verify.verify(this.prevState == null);
+            this.prevState = Preconditions.checkNotNull(prevState);
+        }
+
+        // To be called from safe contexts, where successor is known to be completed
+        AbstractProxyTransaction getSuccessor() {
+            return Verify.verifyNotNull(successor);
+        }
+
+        void setSuccessor(final AbstractProxyTransaction successor) {
+            Verify.verify(this.successor == null);
+            this.successor = Preconditions.checkNotNull(successor);
+        }
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractProxyTransaction.class);
+    private static final AtomicIntegerFieldUpdater<AbstractProxyTransaction> SEALED_UPDATER =
+            AtomicIntegerFieldUpdater.newUpdater(AbstractProxyTransaction.class, "sealed");
+    private static final AtomicReferenceFieldUpdater<AbstractProxyTransaction, State> STATE_UPDATER =
+            AtomicReferenceFieldUpdater.newUpdater(AbstractProxyTransaction.class, State.class, "state");
+    private static final State OPEN = new State("open");
+    private static final State SEALED = new State("sealed");
+    private static final State FLUSHED = new State("flushed");
 
+    // Touched from client actor thread only
     private final Deque<Object> successfulRequests = new ArrayDeque<>();
     private final ProxyHistory parent;
+
+    // Accessed from user thread only, which may not access this object concurrently
+    private long sequence;
 
     /*
      * Atomic state-keeping is required to synchronize the process of propagating completed transaction state towards
@@ -105,17 +164,20 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
      * or timeout, when a successor is injected.
      *
      * This leaves the problem of needing to completely transferring state just after all queued messages are replayed
-     * after a successor was injected, so that it can be properly sealed if we are racing.
+     * after a successor was injected, so that it can be properly sealed if we are racing. Further complication comes
+     * from lock ordering, where the successor injection works with a locked queue and locks proxy objects -- leading
+     * to a potential AB-BA deadlock in case of a naive implementation.
+     *
+     * For tracking user-visible state we use a single volatile int, which is flipped atomically from 0 to 1 exactly
+     * once in {@link AbstractProxyTransaction#seal()}. That keeps common operations fast, as they need to perform
+     * only a single volatile read to assert state correctness.
+     *
+     * For synchronizing client actor (successor-injecting) and user (commit-driving) thread, we keep a separate state
+     * variable. It uses pre-allocated objects for fast paths (i.e. no successor present) and a per-transition object
+     * for slow paths (when successor is injected/present).
      */
-    private volatile SealState sealed = SealState.OPEN;
-    @GuardedBy("this")
-    private AbstractProxyTransaction successor;
-    @GuardedBy("this")
-    private CountDownLatch successorLatch;
-
-    // Accessed from user thread only, which may not access this object concurrently
-    private long sequence;
-
+    private volatile int sealed = 0;
+    private volatile State state = OPEN;
 
     AbstractProxyTransaction(final ProxyHistory parent) {
         this.parent = Preconditions.checkNotNull(parent);
@@ -170,50 +232,37 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
      * Seal this transaction before it is either committed or aborted.
      */
     final void seal() {
-        final CountDownLatch localLatch;
+        // Transition user-visible state first
+        final boolean success = SEALED_UPDATER.compareAndSet(this, 0, 1);
+        Preconditions.checkState(success, "Proxy %s was already sealed", getIdentifier());
+        doSeal();
+        parent.onTransactionSealed(this);
 
-        synchronized (this) {
-            checkNotSealed();
-            doSeal();
+        // Now deal with state transfer, which can occur via successor or a follow-up canCommit() or directCommit().
+        if (!STATE_UPDATER.compareAndSet(this, OPEN, SEALED)) {
+            // Slow path: wait for the successor to complete
+            final AbstractProxyTransaction successor = awaitSuccessor();
 
-            // Fast path: no successor
-            if (successor == null) {
-                sealed = SealState.SEALED;
-                parent.onTransactionSealed(this);
-                return;
-            }
-
-            localLatch = successorLatch;
-        }
-
-        // Slow path: wait for the latch
-        LOG.debug("{} waiting on successor latch", getIdentifier());
-        try {
-            localLatch.await();
-        } catch (InterruptedException e) {
-            LOG.warn("{} interrupted while waiting for latch", getIdentifier());
-            throw Throwables.propagate(e);
-        }
-
-        synchronized (this) {
-            LOG.debug("{} reacquired lock", getIdentifier());
-
+            // At this point the successor has completed transition and is possibly visible by the user thread, which is
+            // still stuck here. The successor has not seen final part of our state, nor the fact it is sealed.
+            // Propagate state and seal the successor.
             flushState(successor);
             successor.seal();
-
-            sealed = SealState.FLUSHED;
-            parent.onTransactionSealed(this);
         }
     }
 
     private void checkNotSealed() {
-        Preconditions.checkState(sealed == SealState.OPEN, "Transaction %s has already been sealed", getIdentifier());
+        Preconditions.checkState(sealed == 0, "Transaction %s has already been sealed", getIdentifier());
     }
 
-    private SealState checkSealed() {
-        final SealState local = sealed;
-        Preconditions.checkState(local != SealState.OPEN, "Transaction %s has not been sealed yet", getIdentifier());
-        return local;
+    private void checkSealed() {
+        Preconditions.checkState(sealed != 0, "Transaction %s has not been sealed yet", getIdentifier());
+    }
+
+    private SuccessorState getSuccessorState() {
+        final State local = state;
+        Verify.verify(local instanceof SuccessorState, "State %s has unexpected class", local);
+        return (SuccessorState) local;
     }
 
     final void recordSuccessfulRequest(final @Nonnull TransactionRequest<?> req) {
@@ -268,15 +317,11 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
      * @return Future completion
      */
     final ListenableFuture<Boolean> directCommit() {
-        final CountDownLatch localLatch;
+        checkSealed();
 
+        // Precludes startReconnect() from interfering with the fast path
         synchronized (this) {
-            final SealState local = checkSealed();
-
-            // Fast path: no successor asserted
-            if (successor == null) {
-                Verify.verify(local == SealState.SEALED);
-
+            if (STATE_UPDATER.compareAndSet(this, SEALED, FLUSHED)) {
                 final SettableFuture<Boolean> ret = SettableFuture.create();
                 sendRequest(Verify.verifyNotNull(commitRequest(false)), t -> {
                     if (t instanceof TransactionCommitSuccess) {
@@ -292,44 +337,22 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
                     parent.completeTransaction(this);
                 });
 
-                sealed = SealState.FLUSHED;
                 return ret;
             }
-
-            // We have a successor, take its latch
-            localLatch = successorLatch;
         }
 
-        // Slow path: we need to wait for the successor to completely propagate
-        LOG.debug("{} waiting on successor latch", getIdentifier());
-        try {
-            localLatch.await();
-        } catch (InterruptedException e) {
-            LOG.warn("{} interrupted while waiting for latch", getIdentifier());
-            throw Throwables.propagate(e);
-        }
-
-        synchronized (this) {
-            LOG.debug("{} reacquired lock", getIdentifier());
-
-            final SealState local = sealed;
-            Verify.verify(local == SealState.FLUSHED);
-
-            return successor.directCommit();
-        }
+        // We have had some interference with successor injection, wait for it to complete and defer to the successor.
+        return awaitSuccessor().directCommit();
     }
 
     final void canCommit(final VotingFuture<?> ret) {
-        final CountDownLatch localLatch;
+        checkSealed();
 
+        // Precludes startReconnect() from interfering with the fast path
         synchronized (this) {
-            final SealState local = checkSealed();
-
-            // Fast path: no successor asserted
-            if (successor == null) {
-                Verify.verify(local == SealState.SEALED);
-
+            if (STATE_UPDATER.compareAndSet(this, SEALED, FLUSHED)) {
                 final TransactionRequest<?> req = Verify.verifyNotNull(commitRequest(true));
+
                 sendRequest(req, t -> {
                     if (t instanceof TransactionCanCommitSuccess) {
                         ret.voteYes();
@@ -343,31 +366,16 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
                     LOG.debug("Transaction {} canCommit completed", this);
                 });
 
-                sealed = SealState.FLUSHED;
                 return;
             }
-
-            // We have a successor, take its latch
-            localLatch = successorLatch;
         }
 
-        // Slow path: we need to wait for the successor to completely propagate
-        LOG.debug("{} waiting on successor latch", getIdentifier());
-        try {
-            localLatch.await();
-        } catch (InterruptedException e) {
-            LOG.warn("{} interrupted while waiting for latch", getIdentifier());
-            throw Throwables.propagate(e);
-        }
+        // We have had some interference with successor injection, wait for it to complete and defer to the successor.
+        awaitSuccessor().canCommit(ret);
+    }
 
-        synchronized (this) {
-            LOG.debug("{} reacquired lock", getIdentifier());
-
-            final SealState local = sealed;
-            Verify.verify(local == SealState.FLUSHED);
-
-            successor.canCommit(ret);
-        }
+    private AbstractProxyTransaction awaitSuccessor() {
+        return getSuccessorState().await();
     }
 
     final void preCommit(final VotingFuture<?> ret) {
@@ -389,7 +397,7 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
         });
     }
 
-    void doCommit(final VotingFuture<?> ret) {
+    final void doCommit(final VotingFuture<?> ret) {
         checkSealed();
 
         sendRequest(new TransactionDoCommitRequest(getIdentifier(), nextSequence(), localActor()), t -> {
@@ -406,13 +414,33 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
         });
     }
 
-    final synchronized void startReconnect(final AbstractProxyTransaction successor) {
-        Preconditions.checkState(this.successor == null);
-        this.successor = Preconditions.checkNotNull(successor);
+    // Called with the connection unlocked
+    final synchronized void startReconnect() {
+        // At this point canCommit/directCommit are blocked, we assert a new successor state, retrieving the previous
+        // state. This method is called with the queue still unlocked.
+        final SuccessorState nextState = new SuccessorState();
+        final State prevState = STATE_UPDATER.getAndSet(this, nextState);
 
+        LOG.debug("Start reconnect of proxy {} previous state {}", this, prevState);
+        Verify.verify(!(prevState instanceof SuccessorState), "Proxy %s duplicate reconnect attempt after %s", this,
+            prevState);
+
+        // We have asserted a slow-path state, seal(), canCommit(), directCommit() are forced to slow paths, which will
+        // wait until we unblock nextState's latch before accessing state. Now we record prevState for later use and we
+        // are done.
+        nextState.setPrevState(prevState);
+    }
+
+    // Called with the connection locked
+    final void replayMessages(final AbstractProxyTransaction successor,
+            final Iterable<ConnectionEntry> enqueuedEntries) {
+        final SuccessorState local = getSuccessorState();
+        local.setSuccessor(successor);
+
+        // Replay successful requests first
         for (Object obj : successfulRequests) {
             if (obj instanceof TransactionRequest) {
-                LOG.debug("Forwarding request {} to successor {}", obj, successor);
+                LOG.debug("Forwarding successful request {} to successor {}", obj, successor);
                 successor.handleForwardedRemoteRequest((TransactionRequest<?>) obj, null);
             } else {
                 Verify.verify(obj instanceof IncrementSequence);
@@ -422,28 +450,41 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
         LOG.debug("{} replayed {} successful requests", getIdentifier(), successfulRequests.size());
         successfulRequests.clear();
 
-        /*
-         * Before releasing the lock we need to make sure that a call to seal() blocks until we have completed
-         * finishConnect().
-         */
-        successorLatch = new CountDownLatch(1);
+        // Now replay whatever is in the connection
+        final Iterator<ConnectionEntry> it = enqueuedEntries.iterator();
+        while (it.hasNext()) {
+            final ConnectionEntry e = it.next();
+            final Request<?, ?> req = e.getRequest();
+
+            if (getIdentifier().equals(req.getTarget())) {
+                Verify.verify(req instanceof TransactionRequest, "Unhandled request %s", req);
+                LOG.debug("Forwarding queued request{} to successor {}", req, successor);
+                successor.handleForwardedRemoteRequest((TransactionRequest<?>) req, e.getCallback());
+                it.remove();
+            }
+        }
     }
 
-    final synchronized void finishReconnect() {
-        Preconditions.checkState(successorLatch != null);
+    // Called with the connection locked
+    final void finishReconnect() {
+        final SuccessorState local = getSuccessorState();
+        LOG.debug("Finishing reconnect of proxy {}", this);
 
-        if (sealed == SealState.SEALED) {
-            /*
-             * If this proxy is in the 'sealed, have not sent canCommit' state. If so, we need to forward current
-             * leftover state to the successor now.
-             */
+        /*
+         * Check the state at which we have started the reconnect attempt. State transitions triggered while we were
+         * reconnecting have been forced to slow paths, which will be unlocked once we unblock the state latch
+         * at the end of this method.
+         */
+        final State prevState = local.getPrevState();
+        if (SEALED.equals(prevState)) {
+            final AbstractProxyTransaction successor = local.getSuccessor();
+            LOG.debug("Proxy {} reconnected while being sealed, propagating state to successor {}", this, successor);
             flushState(successor);
             successor.seal();
-            sealed = SealState.FLUSHED;
         }
 
-        // All done, release the latch, unblocking seal() and canCommit()
-        successorLatch.countDown();
+        // All done, release the latch, unblocking seal() and canCommit() slow paths
+        local.finish();
     }
 
     /**
@@ -452,11 +493,9 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
      *
      * @param request Request to be forwarded
      * @param callback Original callback
-     * @throws RequestException when the request is unhandled by the successor
      */
-    final synchronized void replayRequest(final TransactionRequest<?> request,
-            final Consumer<Response<?, ?>> callback) {
-        Preconditions.checkState(successor != null, "%s does not have a successor set", this);
+    final void replayRequest(final TransactionRequest<?> request, final Consumer<Response<?, ?>> callback) {
+        final AbstractProxyTransaction successor = getSuccessorState().getSuccessor();
 
         if (successor instanceof LocalProxyTransaction) {
             forwardToLocal((LocalProxyTransaction)successor, request, callback);
