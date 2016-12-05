@@ -26,16 +26,20 @@ import org.slf4j.LoggerFactory;
 // Cohort aware forwarder, which forwards the request to the cohort, giving it a reference to the successor
 // connection
 final class BouncingReconnectForwarder extends ReconnectForwarder {
-    private static final Logger LOG = LoggerFactory.getLogger(BouncingReconnectForwarder.class);
-
-    private static final RequestException FAILED_TO_REPLAY_EXCEPTION = new RequestException("Cohort not found") {
+    private static final class CohortNotFoundException extends RequestException {
         private static final long serialVersionUID = 1L;
+
+        CohortNotFoundException(final LocalHistoryIdentifier historyId) {
+            super("Cohort for " + historyId + " not found");
+        }
 
         @Override
         public boolean isRetriable() {
             return false;
         }
-    };
+    }
+
+    private static final Logger LOG = LoggerFactory.getLogger(BouncingReconnectForwarder.class);
 
     private final Map<LocalHistoryIdentifier, ProxyReconnectCohort> cohorts;
 
@@ -69,7 +73,7 @@ final class BouncingReconnectForwarder extends ReconnectForwarder {
             final ProxyReconnectCohort cohort = cohorts.get(historyId);
             if (cohort == null) {
                 LOG.warn("Cohort for request {} not found, aborting it", request);
-                throw FAILED_TO_REPLAY_EXCEPTION;
+                throw new CohortNotFoundException(historyId);
             }
 
             // FIXME: do not use sendRequest() once we have throttling in place, as we have already waited the
