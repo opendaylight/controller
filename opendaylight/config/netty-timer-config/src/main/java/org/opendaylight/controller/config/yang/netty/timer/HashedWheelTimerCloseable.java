@@ -42,24 +42,24 @@ public final class HashedWheelTimerCloseable implements AutoCloseable, Timer {
     public static HashedWheelTimerCloseable newInstance(@Nullable ThreadFactory threadFactory,
             @Nullable Long duration, @Nullable Integer ticksPerWheel) {
         TimeUnit unit = TimeUnit.MILLISECONDS;
-        if(!nullOrNonZero(duration) && threadFactory == null && nullOrNonZero(ticksPerWheel)) {
+        if(!nullOrNonPositive(duration) && threadFactory == null && nullOrNonPositive(ticksPerWheel)) {
             return new HashedWheelTimerCloseable(new HashedWheelTimer(duration, unit));
         }
 
-        if(!nullOrNonZero(duration) && threadFactory == null && !nullOrNonZero(ticksPerWheel)) {
+        if(!nullOrNonPositive(duration) && threadFactory == null && !nullOrNonPositive(ticksPerWheel)) {
             return new HashedWheelTimerCloseable(new HashedWheelTimer(duration, unit, ticksPerWheel));
         }
 
-        if(nullOrNonZero(duration) && threadFactory != null && nullOrNonZero(ticksPerWheel)) {
+        if(nullOrNonPositive(duration) && threadFactory != null && nullOrNonPositive(ticksPerWheel)) {
             return new HashedWheelTimerCloseable(new HashedWheelTimer(threadFactory));
         }
 
-        if(!nullOrNonZero(duration) && threadFactory != null && nullOrNonZero(ticksPerWheel)) {
+        if(!nullOrNonPositive(duration) && threadFactory != null && nullOrNonPositive(ticksPerWheel)) {
             return new HashedWheelTimerCloseable(
                     new HashedWheelTimer(threadFactory, duration, unit));
         }
 
-        if(!nullOrNonZero(duration) && threadFactory != null && !nullOrNonZero(ticksPerWheel)) {
+        if(!nullOrNonPositive(duration) && threadFactory != null && !nullOrNonPositive(ticksPerWheel)) {
             return new HashedWheelTimerCloseable(
                     new HashedWheelTimer(threadFactory, duration, unit, ticksPerWheel));
         }
@@ -67,7 +67,7 @@ public final class HashedWheelTimerCloseable implements AutoCloseable, Timer {
         return new HashedWheelTimerCloseable(new HashedWheelTimer());
     }
 
-    private static boolean nullOrNonZero(Number n) {
+    private static boolean nullOrNonPositive(Number n) {
         return n == null || n.longValue() <= 0;
     }
 }
