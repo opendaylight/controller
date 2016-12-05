@@ -73,7 +73,6 @@ final class FrontendTransaction {
     private long expectedSequence;
 
     private ReadWriteShardDataTreeTransaction openTransaction;
-    private ModifyTransactionSuccess cachedModifySuccess;
     private DataTreeModification sealedModification;
     private ShardDataTreeCohort readyCohort;
 
@@ -361,11 +360,7 @@ final class FrontendTransaction {
     }
 
     private ModifyTransactionSuccess replyModifySuccess(final long sequence) {
-        if (cachedModifySuccess == null) {
-            cachedModifySuccess = new ModifyTransactionSuccess(id, sequence);
-        }
-
-        return recordSuccess(sequence, cachedModifySuccess);
+        return recordSuccess(sequence, new ModifyTransactionSuccess(id, sequence));
     }
 
     private @Nullable TransactionSuccess<?> handleModifyTransaction(final ModifyTransactionRequest request,
