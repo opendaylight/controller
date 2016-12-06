@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "1a622d24_73d8e153",
+        "filename": "opendaylight/md-sal/cds-access-client/src/main/java/org/opendaylight/controller/cluster/access/client/AbstractClientConnection.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-12-06T15:13:42Z",
+      "side": 1,
+      "message": "My thinking is that the return value would indicate wait time and/or blocking semaphore and it would be waited on after releasing the lock.",
+      "parentUuid": "1a622d24_b8d6d6c3",
+      "range": {
+        "startLine": 102,
+        "startChar": 12,
+        "endLine": 102,
+        "endChar": 25
+      },
+      "revId": "2155039674df6d598e5de036d20c874c24876435",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a622d24_e47c3175",
         "filename": "opendaylight/md-sal/cds-access-client/src/main/java/org/opendaylight/controller/cluster/access/client/TransmitQueue.java",
         "patchSetId": 2
