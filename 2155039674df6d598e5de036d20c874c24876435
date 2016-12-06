@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "1a622d24_b8d6d6c3",
+        "filename": "opendaylight/md-sal/cds-access-client/src/main/java/org/opendaylight/controller/cluster/access/client/AbstractClientConnection.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 2046
+      },
+      "writtenOn": "2016-12-06T13:10:33Z",
+      "side": 1,
+      "message": "When the queue computes a positive delay, it cannot unlock the lock by itself to allow other threads\u0027s receiveResponse() while waiting, right?\n\nThat means we needs something like queue.offer() in a while loop here.",
+      "range": {
+        "startLine": 102,
+        "startChar": 12,
+        "endLine": 102,
+        "endChar": 25
+      },
+      "revId": "2155039674df6d598e5de036d20c874c24876435",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a622d24_e47c3175",
         "filename": "opendaylight/md-sal/cds-access-client/src/main/java/org/opendaylight/controller/cluster/access/client/TransmitQueue.java",
         "patchSetId": 2
