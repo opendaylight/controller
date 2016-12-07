@@ -85,7 +85,7 @@ module dsbenchmark {
                     enum "DELETE" {
                         value 3;
                         description
-                            "Delete items from a list sotred in the data store";
+                            "Delete items from a list sorted in the data store";
                     }
                     enum "READ" {
                         value 4;
