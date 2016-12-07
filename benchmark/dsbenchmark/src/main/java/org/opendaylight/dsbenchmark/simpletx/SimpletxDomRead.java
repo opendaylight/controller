@@ -79,7 +79,7 @@ public class SimpletxDomRead extends DatastoreAbstractWriter {
                     txOk++;
                 } else {
                     txError++;
-                    LOG.info("In the else part");
+                    LOG.warn("optionalDataObject is either null or .isPresent is false");
                 }
             } catch (ReadFailedException e) {
                 LOG.warn("failed to ....", e);
