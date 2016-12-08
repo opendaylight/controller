@@ -275,8 +275,8 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
     private void onProducerCreated(final ProducerCreated message) {
         LOG.debug("Received ProducerCreated: {}", message);
 
-        // fastpath if no replication is needed, since there is only one node
-        if (resolver.getShardingServicePeerActorAddresses().size() == 1) {
+        // fastpath if we have no peers
+        if (resolver.getShardingServicePeerActorAddresses().size() == 0) {
             getSender().tell(new Status.Success(null), noSender());
         }
 
