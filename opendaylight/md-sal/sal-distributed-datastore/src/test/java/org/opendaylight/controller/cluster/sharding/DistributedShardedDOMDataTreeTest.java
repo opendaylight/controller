@@ -36,6 +36,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -46,6 +47,7 @@ import org.mockito.Captor;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.opendaylight.controller.cluster.ActorSystemProvider;
+import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.AbstractTest;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext.Builder;
@@ -94,6 +96,7 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
             new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION,
                     YangInstanceIdentifier.create(getOuterListIdFor(0).getPathArguments())
                             .node(TestModel.INNER_LIST_QNAME));
+    private static final Set<MemberName> SINGLE_MEMBER = Collections.singleton(AbstractTest.MEMBER_NAME);
 
     private ActorSystem leaderSystem;
 
@@ -304,18 +307,88 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
 
     }
 
-    private static Collection<MapEntryNode> createInnerListMapEntries(final int amount, final String valuePrefix) {
-        final Collection<MapEntryNode> ret = new ArrayList<>();
-        for (int i = 0; i < amount; i++) {
-            ret.add(ImmutableNodes.mapEntryBuilder()
-                    .withNodeIdentifier(new NodeIdentifierWithPredicates(TestModel.INNER_LIST_QNAME,
-                            QName.create(TestModel.INNER_LIST_QNAME, "name"), Integer.toString(i)))
-                    .withChild(ImmutableNodes
-                            .leafNode(QName.create(TestModel.INNER_LIST_QNAME, "value"), valuePrefix + "-" + i))
-                    .build());
+    // top level shard at TEST element, with subshards on each outer-list map entry
+    @Test
+    public void testMultipleShardLevels() throws Exception {
+        initEmptyDatastore("config");
+
+        final DistributedShardRegistration testShardId =
+                leaderShardFactory.createDistributedShard(TEST_ID, SINGLE_MEMBER)
+                        .checkedGet();
+
+        final ArrayList<DistributedShardRegistration> registrations = new ArrayList<>();
+        final int listSize = 5;
+        for (int i = 0; i < listSize; i++) {
+            final YangInstanceIdentifier entryYID = getOuterListIdFor(i);
+            final CheckedFuture<DistributedShardRegistration, DOMDataTreeShardCreationFailedException> future =
+                    leaderShardFactory.createDistributedShard(
+                            new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, entryYID), SINGLE_MEMBER);
+
+            registrations.add(future.checkedGet());
         }
 
-        return ret;
+        final DOMDataTreeIdentifier rootId =
+                new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, YangInstanceIdentifier.EMPTY);
+        final DOMDataTreeProducer producer = leaderShardFactory.createProducer(Collections.singletonList(
+                rootId));
+
+        DOMDataTreeCursorAwareTransaction transaction = producer.createTransaction(false);
+
+        DOMDataTreeWriteCursor cursor = transaction.createCursor(rootId);
+        assertNotNull(cursor);
+
+        final MapNode outerList =
+                ImmutableMapNodeBuilder.create()
+                        .withNodeIdentifier(new NodeIdentifier(TestModel.OUTER_LIST_QNAME)).build();
+
+        final ContainerNode testNode =
+                ImmutableContainerNodeBuilder.create()
+                        .withNodeIdentifier(new NodeIdentifier(TestModel.TEST_QNAME))
+                        .withChild(outerList)
+                        .build();
+
+        cursor.write(testNode.getIdentifier(), testNode);
+
+        cursor.close();
+        transaction.submit().checkedGet();
+
+        final MapNode wholeList = ImmutableMapNodeBuilder.create(outerList)
+                .withValue(createOuterEntries(listSize, "testing-values")).build();
+
+        transaction = producer.createTransaction(false);
+        cursor = transaction.createCursor(TEST_ID);
+        assertNotNull(cursor);
+
+        cursor.write(wholeList.getIdentifier(), wholeList);
+        cursor.close();
+
+        transaction.submit().checkedGet();
+
+        final DOMDataTreeListener mockedDataTreeListener = mock(DOMDataTreeListener.class);
+        doNothing().when(mockedDataTreeListener).onDataTreeChanged(anyCollection(), anyMap());
+
+        leaderShardFactory.registerListener(mockedDataTreeListener, Collections.singletonList(TEST_ID),
+                true, Collections.emptyList());
+
+        // need 6 invocations, first initial thats from the parent shard, and then each individual subshard
+        verify(mockedDataTreeListener, timeout(10000).times(6)).onDataTreeChanged(captorForChanges.capture(),
+                captorForSubtrees.capture());
+        verifyNoMoreInteractions(mockedDataTreeListener);
+        final List<Map<DOMDataTreeIdentifier, NormalizedNode<?, ?>>> allSubtrees = captorForSubtrees.getAllValues();
+
+        final Map<DOMDataTreeIdentifier, NormalizedNode<?, ?>> lastSubtree = allSubtrees.get(allSubtrees.size() - 1);
+
+        final NormalizedNode<?, ?> actual = lastSubtree.get(TEST_ID);
+        assertNotNull(actual);
+
+        final NormalizedNode<?, ?> expected =
+                ImmutableContainerNodeBuilder.create()
+                        .withNodeIdentifier(new NodeIdentifier(TestModel.TEST_QNAME))
+                        .withChild(ImmutableMapNodeBuilder.create(outerList)
+                                .withValue(createOuterEntries(listSize, "testing-values")).build())
+                        .build();
+
+        assertEquals(expected, actual);
     }
 
     @Test
@@ -366,6 +439,40 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
                     ClusterUtils.getCleanShardName(TestModel.TEST_PATH));
 
         }
+    }
+
+    private static Collection<MapEntryNode> createOuterEntries(final int amount, final String valuePrefix) {
+        final Collection<MapEntryNode> ret = new ArrayList<>();
+        for (int i = 0; i < amount; i++) {
+            ret.add(ImmutableNodes.mapEntryBuilder()
+                    .withNodeIdentifier(new NodeIdentifierWithPredicates(TestModel.OUTER_LIST_QNAME,
+                            QName.create(TestModel.OUTER_LIST_QNAME, "id"), i))
+                    .withChild(ImmutableNodes
+                            .leafNode(QName.create(TestModel.OUTER_LIST_QNAME, "id"), i))
+                    .withChild(createWholeInnerList(amount, "outer id: " + i + " " + valuePrefix))
+                    .build());
+        }
+
+        return ret;
+    }
+
+    private static MapNode createWholeInnerList(final int amount, final String valuePrefix) {
+        return ImmutableMapNodeBuilder.create().withNodeIdentifier(new NodeIdentifier(TestModel.INNER_LIST_QNAME))
+                .withValue(createInnerListMapEntries(amount, valuePrefix)).build();
+    }
+
+    private static Collection<MapEntryNode> createInnerListMapEntries(final int amount, final String valuePrefix) {
+        final Collection<MapEntryNode> ret = new ArrayList<>();
+        for (int i = 0; i < amount; i++) {
+            ret.add(ImmutableNodes.mapEntryBuilder()
+                    .withNodeIdentifier(new NodeIdentifierWithPredicates(TestModel.INNER_LIST_QNAME,
+                            QName.create(TestModel.INNER_LIST_QNAME, "name"), Integer.toString(i)))
+                    .withChild(ImmutableNodes
+                            .leafNode(QName.create(TestModel.INNER_LIST_QNAME, "value"), valuePrefix + "-" + i))
+                    .build());
+        }
+
+        return ret;
     }
 
     private static YangInstanceIdentifier getOuterListIdFor(final int id) {
