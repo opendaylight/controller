@@ -8,9 +8,9 @@
 package org.opendaylight.controller.blueprint.ext;
 
 import com.google.common.base.Preconditions;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import javax.annotation.Nullable;
@@ -31,12 +31,15 @@ import org.slf4j.LoggerFactory;
  * @author Thomas Pantelis
  */
 abstract class AbstractDependentComponentFactoryMetadata implements DependentComponentFactoryMetadata {
-    private final Logger log = LoggerFactory.getLogger(getClass());
+
+    private final Logger log = LoggerFactory.getLogger(AbstractDependentComponentFactoryMetadata.class);
+
     private final String id;
     private final AtomicBoolean started = new AtomicBoolean();
     private final AtomicBoolean satisfied = new AtomicBoolean();
     private final AtomicBoolean restarting = new AtomicBoolean();
-    private final List<StaticServiceReferenceRecipe> serviceRecipes = new ArrayList<>();
+    private final List<StaticServiceReferenceRecipe> serviceRecipes = new CopyOnWriteArrayList<>();
+
     private volatile ExtendedBlueprintContainer container;
     private volatile SatisfactionCallback satisfactionCallback;
     private volatile String failureMessage;
