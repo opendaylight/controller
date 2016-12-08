@@ -15,6 +15,6 @@ final class SimpleReconnectForwarder extends ReconnectForwarder {
 
     @Override
     protected void forwardEntry(final ConnectionEntry entry, final long now) {
-        successor().enqueueEntry(entry, now);
+        successor().enqueueEntry(entry, now);  // no throttling when forwarding entries
     }
 }

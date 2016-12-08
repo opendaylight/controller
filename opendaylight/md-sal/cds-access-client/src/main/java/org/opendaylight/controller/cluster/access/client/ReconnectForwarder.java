@@ -29,7 +29,8 @@ public abstract class ReconnectForwarder {
         this.successor = Preconditions.checkNotNull(successor);
     }
 
-    protected final void sendToSuccessor(final Request<?, ?> request, final Consumer<Response<?, ?>> callback) {
+    protected final void sendToSuccessor(final Request<?, ?> request, final Consumer<Response<?, ?>> callback)
+            throws InterruptedException {
         successor.sendRequest(request, callback);
     }
 
