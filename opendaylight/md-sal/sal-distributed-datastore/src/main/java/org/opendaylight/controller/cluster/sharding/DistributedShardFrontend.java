@@ -9,6 +9,8 @@
 package org.opendaylight.controller.cluster.sharding;
 
 import com.google.common.base.Preconditions;
+import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -27,8 +29,9 @@ import org.opendaylight.mdsal.dom.spi.shard.ReadableWriteableDOMDataTreeShard;
 import org.opendaylight.mdsal.dom.spi.shard.SubshardProducerSpecification;
 import org.opendaylight.mdsal.dom.spi.shard.WriteableDOMDataTreeShard;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
+import org.opendaylight.yangtools.util.concurrent.CountingRejectedExecutionHandler;
+import org.opendaylight.yangtools.util.concurrent.FastThreadPoolExecutor;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,18 +42,29 @@ class DistributedShardFrontend implements ReadableWriteableDOMDataTreeShard {
 
     private static final Logger LOG = LoggerFactory.getLogger(DistributedShardFrontend.class);
 
+    private static final ListeningExecutorService NOTIFICATION_PUBLISHER_EXECUTOR;
+
     private final DataStoreClient client;
     private final DOMDataTreeIdentifier shardRoot;
     private final Map<DOMDataTreeIdentifier, ChildShardContext> childShards = new HashMap<>();
     private final List<ShardProxyProducer> producers = new ArrayList<>();
-    private final DistributedDataStore distributedDataStore;
+
+    static {
+        final FastThreadPoolExecutor fte = new FastThreadPoolExecutor(1, 1000, "CDS-shard-nofif-publisher");
+        fte.setRejectedExecutionHandler(CountingRejectedExecutionHandler.newCallerWaitsPolicy());
+        NOTIFICATION_PUBLISHER_EXECUTOR = MoreExecutors.listeningDecorator(fte);
+    }
+
+    private final DistributedShardChangePublisher publisher;
 
     DistributedShardFrontend(final DistributedDataStore distributedDataStore,
                              final DataStoreClient client,
                              final DOMDataTreeIdentifier shardRoot) {
-        this.distributedDataStore = Preconditions.checkNotNull(distributedDataStore);
         this.client = Preconditions.checkNotNull(client);
         this.shardRoot = Preconditions.checkNotNull(shardRoot);
+
+        publisher = new DistributedShardChangePublisher(client, Preconditions.checkNotNull(distributedDataStore),
+                NOTIFICATION_PUBLISHER_EXECUTOR, shardRoot, childShards);
     }
 
     @Override
@@ -135,41 +149,6 @@ class DistributedShardFrontend implements ReadableWriteableDOMDataTreeShard {
     @SuppressWarnings("unchecked")
     public <L extends DOMDataTreeChangeListener> ListenerRegistration<L> registerTreeChangeListener(
             final YangInstanceIdentifier treeId, final L listener) {
-
-        final List<PathArgument> toStrip = new ArrayList<>(shardRoot.getRootIdentifier().getPathArguments());
-        final List<PathArgument> stripFrom = new ArrayList<>(treeId.getPathArguments());
-
-        while (!toStrip.isEmpty()) {
-            stripFrom.remove(0);
-            toStrip.remove(0);
-        }
-
-        return (ListenerRegistration<L>) new ProxyRegistration(distributedDataStore
-                .registerProxyListener(treeId, YangInstanceIdentifier.create(stripFrom), listener), listener);
+        return publisher.registerTreeChangeListener(treeId, listener);
     }
-
-    private static class ProxyRegistration implements ListenerRegistration<DOMDataTreeChangeListener> {
-
-        private ListenerRegistration<org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeListener> proxy;
-        private DOMDataTreeChangeListener listener;
-
-        private ProxyRegistration(
-                final ListenerRegistration<
-                        org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeListener> proxy,
-                final DOMDataTreeChangeListener listener) {
-            this.proxy = proxy;
-            this.listener = listener;
-        }
-
-        @Override
-        public DOMDataTreeChangeListener getInstance() {
-            return listener;
-        }
-
-        @Override
-        public void close() {
-            proxy.close();
-        }
-    }
-
 }
