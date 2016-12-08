@@ -38,10 +38,6 @@ import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext.Builder;
 import org.opendaylight.controller.cluster.datastore.DistributedDataStore;
 import org.opendaylight.controller.cluster.datastore.IntegrationTestKit;
-import org.opendaylight.controller.cluster.datastore.messages.FindLocalShard;
-import org.opendaylight.controller.cluster.datastore.messages.FindPrimary;
-import org.opendaylight.controller.cluster.datastore.messages.LocalPrimaryShardFound;
-import org.opendaylight.controller.cluster.datastore.messages.LocalShardFound;
 import org.opendaylight.controller.cluster.datastore.utils.ClusterUtils;
 import org.opendaylight.controller.cluster.sharding.DistributedShardFactory.DistributedShardRegistration;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
@@ -150,7 +146,6 @@ public class DistributedShardedDOMDataTreeRemotingTest extends AbstractTest {
     }
 
     @Test
-    @Ignore("Needs different shard creation handling due to replicas")
     public void testProducerRegistrations() throws Exception {
         initEmptyDatastores("config");
 
@@ -158,7 +153,7 @@ public class DistributedShardedDOMDataTreeRemotingTest extends AbstractTest {
 
         final DistributedShardRegistration shardRegistration =
                 leaderShardFactory.createDistributedShard(
-                        TEST_ID, Lists.newArrayList(AbstractTest.MEMBER_NAME, AbstractTest.MEMBER_2_NAME)).get();
+                        TEST_ID, Lists.newArrayList(AbstractTest.MEMBER_NAME, AbstractTest.MEMBER_2_NAME)).checkedGet();
 
         leaderTestKit.waitUntilLeader(leaderDistributedDataStore.getActorContext(),
                 ClusterUtils.getCleanShardName(TEST_ID.getRootIdentifier()));
@@ -194,52 +189,30 @@ public class DistributedShardedDOMDataTreeRemotingTest extends AbstractTest {
         // try to create a shard on an already registered prefix on follower
         try {
             followerShardFactory.createDistributedShard(TEST_ID,
-                    Lists.newArrayList(AbstractTest.MEMBER_NAME, AbstractTest.MEMBER_2_NAME));
+                    Lists.newArrayList(AbstractTest.MEMBER_NAME, AbstractTest.MEMBER_2_NAME)).checkedGet();
             fail("This prefix already should have a shard registration that was forwarded from the other node");
         } catch (final DOMDataTreeShardingConflictException e) {
-            assertTrue(e.getMessage().contains("is already occupied by shard"));
+            assertTrue(e.getMessage().contains("is already occupied by another shard"));
         }
     }
 
     @Test
-    @Ignore("Needs different shard creation handling due to replicas")
     public void testWriteIntoMultipleShards() throws Exception {
         initEmptyDatastores("config");
 
         leaderTestKit.waitForMembersUp("member-2");
 
-        LOG.warn("registering first shard");
+        LOG.debug("registering first shard");
         final DistributedShardRegistration shardRegistration =
                 leaderShardFactory.createDistributedShard(TEST_ID,
-                        Lists.newArrayList(AbstractTest.MEMBER_NAME, AbstractTest.MEMBER_2_NAME)).get();
+                        Lists.newArrayList(AbstractTest.MEMBER_NAME, AbstractTest.MEMBER_2_NAME)).checkedGet();
 
         leaderTestKit.waitUntilLeader(leaderDistributedDataStore.getActorContext(),
                 ClusterUtils.getCleanShardName(TEST_ID.getRootIdentifier()));
         findLocalShard(followerDistributedDataStore.getActorContext(),
                 ClusterUtils.getCleanShardName(TEST_ID.getRootIdentifier()));
 
-        LOG.warn("Got after waiting for nonleader");
-        final ActorRef leaderShardManager = leaderDistributedDataStore.getActorContext().getShardManager();
-
-        new JavaTestKit(leaderSystem) {
-            {
-                leaderShardManager.tell(
-                        new FindLocalShard(ClusterUtils.getCleanShardName(TestModel.TEST_PATH), true), getRef());
-                expectMsgClass(duration("5 seconds"), LocalShardFound.class);
-
-                final ActorRef followerShardManager = followerDistributedDataStore.getActorContext().getShardManager();
-
-                followerShardManager.tell(new FindLocalShard(
-                        ClusterUtils.getCleanShardName(TestModel.TEST_PATH), true), followerTestKit.getRef());
-                followerTestKit.expectMsgClass(duration("5 seconds"), LocalShardFound.class);
-                LOG.warn("Found follower shard");
-
-                leaderDistributedDataStore.getActorContext().getShardManager().tell(
-                        new FindPrimary(ClusterUtils.getCleanShardName(TestModel.TEST_PATH), true), getRef());
-                expectMsgClass(duration("5 seconds"), LocalPrimaryShardFound.class);
-            }
-        };
-
+        LOG.debug("Got after waiting for nonleader");
         final DOMDataTreeProducer producer = leaderShardFactory.createProducer(Collections.singleton(TEST_ID));
 
         final DOMDataTreeCursorAwareTransaction tx = producer.createTransaction(true);
@@ -254,7 +227,7 @@ public class DistributedShardedDOMDataTreeRemotingTest extends AbstractTest {
         cursor.close();
         LOG.warn("Got to pre submit");
 
-        tx.submit();
+        tx.submit().checkedGet();
     }
 
     @Test
