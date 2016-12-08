@@ -31,12 +31,16 @@ import org.slf4j.LoggerFactory;
  * @author Thomas Pantelis
  */
 abstract class AbstractDependentComponentFactoryMetadata implements DependentComponentFactoryMetadata {
+
     private final Logger log = LoggerFactory.getLogger(getClass());
+
     private final String id;
     private final AtomicBoolean started = new AtomicBoolean();
     private final AtomicBoolean satisfied = new AtomicBoolean();
     private final AtomicBoolean restarting = new AtomicBoolean();
-    private final List<StaticServiceReferenceRecipe> serviceRecipes = new ArrayList<>();
+    private final AtomicBoolean stoppedServiceRecipes = new AtomicBoolean();
+    private final List<StaticServiceReferenceRecipe> serviceRecipes = new ArrayList<>(); // synchronized below
+
     private volatile ExtendedBlueprintContainer container;
     private volatile SatisfactionCallback satisfactionCallback;
     private volatile String failureMessage;
@@ -99,7 +103,13 @@ abstract class AbstractDependentComponentFactoryMetadata implements DependentCom
         retrieveService(name, interfaceClass.getName(), onServiceRetrieved);
     }
 
-    protected void retrieveService(String name, String interfaceName, Consumer<Object> onServiceRetrieved) {
+    // synchronized to protect serviceRecipes
+    protected synchronized void retrieveService(
+            String name, String interfaceName, Consumer<Object> onServiceRetrieved) {
+        if (stoppedServiceRecipes.get()) {
+            log.warn("Ignored retrieveService(), because stoppedServiceRecipes");
+            return;
+        } // else
         StaticServiceReferenceRecipe recipe = new StaticServiceReferenceRecipe(getId() + "-" + name,
                 container, interfaceName);
         setDependendencyDesc(recipe.getOsgiFilter());
@@ -171,6 +181,8 @@ abstract class AbstractDependentComponentFactoryMetadata implements DependentCom
 
         this.satisfactionCallback = newSatisfactionCallback;
 
+
+        stoppedServiceRecipes.set(false);
         startTracking();
     }
 
@@ -188,12 +200,14 @@ abstract class AbstractDependentComponentFactoryMetadata implements DependentCom
         stopServiceRecipes();
     }
 
-    private void stopServiceRecipes() {
+    // synchronized to protect serviceRecipes
+    private synchronized void stopServiceRecipes() {
         for (StaticServiceReferenceRecipe recipe: serviceRecipes) {
             recipe.stop();
         }
 
         serviceRecipes.clear();
+        stoppedServiceRecipes.set(true);
     }
 
     protected void restartContainer() {
