@@ -749,7 +749,6 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         }
     }
 
-    @SuppressFBWarnings(value = "RV_RETURN_VALUE_IGNORED", justification = "See inline comment below.")
     void startAbort(final SimpleShardDataTreeCohort cohort) {
         final Iterator<CommitEntry> it = pendingTransactions.iterator();
         if (!it.hasNext()) {
@@ -764,10 +763,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
                 LOG.debug("{}: aborted head of queue {} in state {}", logContext, cohort.getIdentifier(),
                     cohort.getIdentifier());
 
-                // The suppression of the FindBugs "RV_RETURN_VALUE_IGNORED" warning pertains to this line. In
-                // this case, we've already obtained the head of the queue above via the Iterator and we just want to
-                // remove it here.
-                pendingTransactions.poll();
+                pendingTransactions.remove();
                 processNextTransaction();
             } else {
                 LOG.warn("{}: transaction {} is committing, skipping abort", logContext, cohort.getIdentifier());
