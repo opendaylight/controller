@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import javax.annotation.Nullable;
+import javax.annotation.concurrent.GuardedBy;
 import org.apache.aries.blueprint.di.AbstractRecipe;
 import org.apache.aries.blueprint.di.ExecutionContext;
 import org.apache.aries.blueprint.di.Recipe;
@@ -36,12 +37,15 @@ abstract class AbstractDependentComponentFactoryMetadata implements DependentCom
     private final AtomicBoolean started = new AtomicBoolean();
     private final AtomicBoolean satisfied = new AtomicBoolean();
     private final AtomicBoolean restarting = new AtomicBoolean();
+    @GuardedBy("serviceRecipes")
     private final List<StaticServiceReferenceRecipe> serviceRecipes = new ArrayList<>();
     private volatile ExtendedBlueprintContainer container;
     private volatile SatisfactionCallback satisfactionCallback;
     private volatile String failureMessage;
     private volatile Throwable failureCause;
     private volatile String dependendencyDesc;
+    @GuardedBy("serviceRecipes")
+    private boolean stoppedServiceRecipes;
 
     protected AbstractDependentComponentFactoryMetadata(String id) {
         this.id = Preconditions.checkNotNull(id);
@@ -100,12 +104,18 @@ abstract class AbstractDependentComponentFactoryMetadata implements DependentCom
     }
 
     protected void retrieveService(String name, String interfaceName, Consumer<Object> onServiceRetrieved) {
-        StaticServiceReferenceRecipe recipe = new StaticServiceReferenceRecipe(getId() + "-" + name,
-                container, interfaceName);
-        setDependendencyDesc(recipe.getOsgiFilter());
-        serviceRecipes.add(recipe);
+        synchronized (serviceRecipes) {
+            if (stoppedServiceRecipes) {
+                return;
+            }
 
-        recipe.startTracking(onServiceRetrieved);
+            StaticServiceReferenceRecipe recipe = new StaticServiceReferenceRecipe(getId() + "-" + name,
+                    container, interfaceName);
+            setDependendencyDesc(recipe.getOsgiFilter());
+            serviceRecipes.add(recipe);
+
+            recipe.startTracking(onServiceRetrieved);
+        }
     }
 
     protected final String logName() {
@@ -189,11 +199,14 @@ abstract class AbstractDependentComponentFactoryMetadata implements DependentCom
     }
 
     private void stopServiceRecipes() {
-        for (StaticServiceReferenceRecipe recipe: serviceRecipes) {
-            recipe.stop();
-        }
+        synchronized (serviceRecipes) {
+            stoppedServiceRecipes = true;
+            for (StaticServiceReferenceRecipe recipe: serviceRecipes) {
+                recipe.stop();
+            }
 
-        serviceRecipes.clear();
+            serviceRecipes.clear();
+        }
     }
 
     protected void restartContainer() {
