@@ -106,6 +106,21 @@
                 <artifactId>sal-schema-service</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>mdsal-trace-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>mdsal-trace-dom-impl</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>mdsal-trace-binding-impl</artifactId>
+                <version>${project.version}</version>
+            </dependency>
 
             <!-- Test support -->
             <dependency>
