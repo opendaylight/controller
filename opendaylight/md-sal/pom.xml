@@ -117,6 +117,9 @@
     <module>mdsal-it-base</module>
     <module>mdsal-it-parent</module>
 
+    <!-- Debug utils -->
+    <module>mdsal-trace</module>
+
   </modules>
 
   <scm>
