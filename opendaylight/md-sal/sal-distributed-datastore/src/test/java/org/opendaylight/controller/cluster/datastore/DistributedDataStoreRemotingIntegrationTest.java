@@ -36,16 +36,23 @@ import com.google.common.util.concurrent.Uninterruptibles;
 import com.typesafe.config.ConfigFactory;
 import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import org.junit.After;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameter;
+import org.junit.runners.Parameterized.Parameters;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
+import org.opendaylight.controller.cluster.databroker.ClientBackedDataStore;
 import org.opendaylight.controller.cluster.databroker.ConcurrentDOMDataBroker;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext.Builder;
 import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
@@ -102,7 +109,18 @@ import scala.concurrent.duration.FiniteDuration;
  *
  * @author Thomas Pantelis
  */
+@RunWith(Parameterized.class)
 public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
+
+    @Parameters(name = "{0}")
+    public static Collection<Object[]> data() {
+        return Arrays.asList(new Object[][] {
+                { DistributedDataStore.class }, { ClientBackedDataStore.class }
+        });
+    }
+
+    @Parameter
+    public Class<? extends AbstractDataStore> testParameter;
 
     private static final String[] CARS_AND_PEOPLE = {"cars", "people"};
     private static final String[] CARS = {"cars"};
@@ -166,33 +184,36 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         InMemorySnapshotStore.clear();
     }
 
-    private void initDatastoresWithCars(final String type) {
+    private void initDatastoresWithCars(final String type) throws Exception {
         initDatastores(type, MODULE_SHARDS_CARS_ONLY_1_2, CARS);
     }
 
-    private void initDatastoresWithCarsAndPeople(final String type) {
+    private void initDatastoresWithCarsAndPeople(final String type) throws Exception {
         initDatastores(type, MODULE_SHARDS_CARS_PEOPLE_1_2, CARS_AND_PEOPLE);
     }
 
-    private void initDatastores(final String type, final String moduleShardsConfig, final String[] shards) {
+    private void initDatastores(final String type, final String moduleShardsConfig, final String[] shards)
+            throws Exception {
         leaderTestKit = new IntegrationTestKit(leaderSystem, leaderDatastoreContextBuilder);
 
-        leaderDistributedDataStore = leaderTestKit.setupDistributedDataStore(type, moduleShardsConfig, false, shards);
+        leaderDistributedDataStore = leaderTestKit.setupDistributedDataStore(
+                testParameter, type, moduleShardsConfig, false, shards);
 
         followerTestKit = new IntegrationTestKit(followerSystem, followerDatastoreContextBuilder);
-        followerDistributedDataStore = followerTestKit.setupDistributedDataStore(type, moduleShardsConfig, false,
-                shards);
+        followerDistributedDataStore = followerTestKit.setupDistributedDataStore(
+                testParameter, type, moduleShardsConfig, false, shards);
 
         leaderTestKit.waitUntilLeader(leaderDistributedDataStore.getActorContext(), shards);
     }
 
     private static void verifyCars(final DOMStoreReadTransaction readTx, final MapEntryNode... entries)
             throws Exception {
-        Optional<NormalizedNode<?, ?>> optional = readTx.read(CarsModel.CAR_LIST_PATH).get(5, TimeUnit.SECONDS);
+        final Optional<NormalizedNode<?, ?>> optional = readTx.read(CarsModel.CAR_LIST_PATH).get(5, TimeUnit.SECONDS);
         assertEquals("isPresent", true, optional.isPresent());
 
-        CollectionNodeBuilder<MapEntryNode, MapNode> listBuilder = ImmutableNodes.mapNodeBuilder(CarsModel.CAR_QNAME);
-        for (NormalizedNode<?, ?> entry: entries) {
+        final CollectionNodeBuilder<MapEntryNode, MapNode> listBuilder = ImmutableNodes.mapNodeBuilder(
+                CarsModel.CAR_QNAME);
+        for (final NormalizedNode<?, ?> entry: entries) {
             listBuilder.withChild((MapEntryNode) entry);
         }
 
@@ -201,23 +222,23 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
     private static void verifyNode(final DOMStoreReadTransaction readTx, final YangInstanceIdentifier path,
             final NormalizedNode<?, ?> expNode) throws Exception {
-        Optional<NormalizedNode<?, ?>> optional = readTx.read(path).get(5, TimeUnit.SECONDS);
+        final Optional<NormalizedNode<?, ?>> optional = readTx.read(path).get(5, TimeUnit.SECONDS);
         assertEquals("isPresent", true, optional.isPresent());
         assertEquals("Data node", expNode, optional.get());
     }
 
     private static void verifyExists(final DOMStoreReadTransaction readTx, final YangInstanceIdentifier path)
             throws Exception {
-        Boolean exists = readTx.exists(path).get(5, TimeUnit.SECONDS);
+        final Boolean exists = readTx.exists(path).get(5, TimeUnit.SECONDS);
         assertEquals("exists", true, exists);
     }
 
     @Test
     public void testWriteTransactionWithSingleShard() throws Exception {
-        String testName = "testWriteTransactionWithSingleShard";
+        final String testName = "testWriteTransactionWithSingleShard";
         initDatastoresWithCars(testName);
 
-        String followerCarShardName = "member-2-shard-cars-" + testName;
+        final String followerCarShardName = "member-2-shard-cars-" + testName;
         InMemoryJournal.addWriteMessagesCompleteLatch(followerCarShardName, 2, ApplyJournalEntries.class);
 
         DOMStoreWriteTransaction writeTx = followerDistributedDataStore.newWriteOnlyTransaction();
@@ -226,12 +247,12 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         writeTx.write(CarsModel.BASE_PATH, CarsModel.emptyContainer());
         writeTx.write(CarsModel.CAR_LIST_PATH, CarsModel.newCarMapNode());
 
-        MapEntryNode car1 = CarsModel.newCarEntry("optima", BigInteger.valueOf(20000));
-        YangInstanceIdentifier car1Path = CarsModel.newCarPath("optima");
+        final MapEntryNode car1 = CarsModel.newCarEntry("optima", BigInteger.valueOf(20000));
+        final YangInstanceIdentifier car1Path = CarsModel.newCarPath("optima");
         writeTx.merge(car1Path, car1);
 
-        MapEntryNode car2 = CarsModel.newCarEntry("sportage", BigInteger.valueOf(25000));
-        YangInstanceIdentifier car2Path = CarsModel.newCarPath("sportage");
+        final MapEntryNode car2 = CarsModel.newCarEntry("sportage", BigInteger.valueOf(25000));
+        final YangInstanceIdentifier car2Path = CarsModel.newCarPath("sportage");
         writeTx.merge(car2Path, car2);
 
         followerTestKit.doCommit(writeTx.ready());
@@ -261,10 +282,11 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         JavaTestKit.shutdownActorSystem(leaderSystem, null, true);
         JavaTestKit.shutdownActorSystem(followerSystem, null, true);
 
-        ActorSystem newSystem = ActorSystem.create("reinstated-member2", ConfigFactory.load().getConfig("Member2"));
+        final ActorSystem newSystem = ActorSystem.create("reinstated-member2", ConfigFactory.load()
+                .getConfig("Member2"));
 
-        try (AbstractDataStore member2Datastore = new IntegrationTestKit(newSystem, leaderDatastoreContextBuilder)
-                .setupDistributedDataStore(testName, "module-shards-member2", true, CARS_AND_PEOPLE)) {
+        try (final AbstractDataStore member2Datastore = new IntegrationTestKit(newSystem, leaderDatastoreContextBuilder)
+                .setupDistributedDataStore(testParameter, testName, "module-shards-member2", true, CARS_AND_PEOPLE)) {
             verifyCars(member2Datastore.newReadOnlyTransaction(), car2);
         }
 
@@ -275,19 +297,19 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
     public void testReadWriteTransactionWithSingleShard() throws Exception {
         initDatastoresWithCars("testReadWriteTransactionWithSingleShard");
 
-        DOMStoreReadWriteTransaction rwTx = followerDistributedDataStore.newReadWriteTransaction();
+        final DOMStoreReadWriteTransaction rwTx = followerDistributedDataStore.newReadWriteTransaction();
         assertNotNull("newReadWriteTransaction returned null", rwTx);
 
         rwTx.write(CarsModel.BASE_PATH, CarsModel.emptyContainer());
         rwTx.write(CarsModel.CAR_LIST_PATH, CarsModel.newCarMapNode());
 
-        MapEntryNode car1 = CarsModel.newCarEntry("optima", BigInteger.valueOf(20000));
+        final MapEntryNode car1 = CarsModel.newCarEntry("optima", BigInteger.valueOf(20000));
         rwTx.merge(CarsModel.newCarPath("optima"), car1);
 
         verifyCars(rwTx, car1);
 
-        MapEntryNode car2 = CarsModel.newCarEntry("sportage", BigInteger.valueOf(25000));
-        YangInstanceIdentifier car2Path = CarsModel.newCarPath("sportage");
+        final MapEntryNode car2 = CarsModel.newCarEntry("sportage", BigInteger.valueOf(25000));
+        final YangInstanceIdentifier car2Path = CarsModel.newCarPath("sportage");
         rwTx.merge(car2Path, car2);
 
         verifyExists(rwTx, car2Path);
@@ -301,20 +323,20 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
     public void testWriteTransactionWithMultipleShards() throws Exception {
         initDatastoresWithCarsAndPeople("testWriteTransactionWithMultipleShards");
 
-        DOMStoreWriteTransaction writeTx = followerDistributedDataStore.newWriteOnlyTransaction();
+        final DOMStoreWriteTransaction writeTx = followerDistributedDataStore.newWriteOnlyTransaction();
         assertNotNull("newWriteOnlyTransaction returned null", writeTx);
 
-        YangInstanceIdentifier carsPath = CarsModel.BASE_PATH;
-        NormalizedNode<?, ?> carsNode = CarsModel.emptyContainer();
+        final YangInstanceIdentifier carsPath = CarsModel.BASE_PATH;
+        final NormalizedNode<?, ?> carsNode = CarsModel.emptyContainer();
         writeTx.write(carsPath, carsNode);
 
-        YangInstanceIdentifier peoplePath = PeopleModel.BASE_PATH;
-        NormalizedNode<?, ?> peopleNode = PeopleModel.emptyContainer();
+        final YangInstanceIdentifier peoplePath = PeopleModel.BASE_PATH;
+        final NormalizedNode<?, ?> peopleNode = PeopleModel.emptyContainer();
         writeTx.write(peoplePath, peopleNode);
 
         followerTestKit.doCommit(writeTx.ready());
 
-        DOMStoreReadTransaction readTx = followerDistributedDataStore.newReadOnlyTransaction();
+        final DOMStoreReadTransaction readTx = followerDistributedDataStore.newReadOnlyTransaction();
 
         verifyNode(readTx, carsPath, carsNode);
         verifyNode(readTx, peoplePath, peopleNode);
@@ -324,20 +346,20 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
     public void testReadWriteTransactionWithMultipleShards() throws Exception {
         initDatastoresWithCarsAndPeople("testReadWriteTransactionWithMultipleShards");
 
-        DOMStoreReadWriteTransaction rwTx = followerDistributedDataStore.newReadWriteTransaction();
+        final DOMStoreReadWriteTransaction rwTx = followerDistributedDataStore.newReadWriteTransaction();
         assertNotNull("newReadWriteTransaction returned null", rwTx);
 
-        YangInstanceIdentifier carsPath = CarsModel.BASE_PATH;
-        NormalizedNode<?, ?> carsNode = CarsModel.emptyContainer();
+        final YangInstanceIdentifier carsPath = CarsModel.BASE_PATH;
+        final NormalizedNode<?, ?> carsNode = CarsModel.emptyContainer();
         rwTx.write(carsPath, carsNode);
 
-        YangInstanceIdentifier peoplePath = PeopleModel.BASE_PATH;
-        NormalizedNode<?, ?> peopleNode = PeopleModel.emptyContainer();
+        final YangInstanceIdentifier peoplePath = PeopleModel.BASE_PATH;
+        final NormalizedNode<?, ?> peopleNode = PeopleModel.emptyContainer();
         rwTx.write(peoplePath, peopleNode);
 
         followerTestKit.doCommit(rwTx.ready());
 
-        DOMStoreReadTransaction readTx = followerDistributedDataStore.newReadOnlyTransaction();
+        final DOMStoreReadTransaction readTx = followerDistributedDataStore.newReadOnlyTransaction();
 
         verifyNode(readTx, carsPath, carsNode);
         verifyNode(readTx, peoplePath, peopleNode);
@@ -347,16 +369,16 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
     public void testTransactionChainWithSingleShard() throws Exception {
         initDatastoresWithCars("testTransactionChainWithSingleShard");
 
-        DOMStoreTransactionChain txChain = followerDistributedDataStore.createTransactionChain();
+        final DOMStoreTransactionChain txChain = followerDistributedDataStore.createTransactionChain();
 
         // Add the top-level cars container with write-only.
 
-        DOMStoreWriteTransaction writeTx = txChain.newWriteOnlyTransaction();
+        final DOMStoreWriteTransaction writeTx = txChain.newWriteOnlyTransaction();
         assertNotNull("newWriteOnlyTransaction returned null", writeTx);
 
         writeTx.write(CarsModel.BASE_PATH, CarsModel.emptyContainer());
 
-        writeTx.ready();
+        final DOMStoreThreePhaseCommitCohort writeTxReady = writeTx.ready();
 
         // Verify the top-level cars container with read-only.
 
@@ -364,24 +386,26 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
         // Perform car operations with read-write.
 
-        DOMStoreReadWriteTransaction rwTx = txChain.newReadWriteTransaction();
+        final DOMStoreReadWriteTransaction rwTx = txChain.newReadWriteTransaction();
 
         verifyNode(rwTx, CarsModel.BASE_PATH, CarsModel.emptyContainer());
 
         rwTx.merge(CarsModel.CAR_LIST_PATH, CarsModel.newCarMapNode());
 
-        MapEntryNode car1 = CarsModel.newCarEntry("optima", BigInteger.valueOf(20000));
-        YangInstanceIdentifier car1Path = CarsModel.newCarPath("optima");
+        final MapEntryNode car1 = CarsModel.newCarEntry("optima", BigInteger.valueOf(20000));
+        final YangInstanceIdentifier car1Path = CarsModel.newCarPath("optima");
         rwTx.write(car1Path, car1);
 
         verifyExists(rwTx, car1Path);
 
         verifyCars(rwTx, car1);
 
-        MapEntryNode car2 = CarsModel.newCarEntry("sportage", BigInteger.valueOf(25000));
+        final MapEntryNode car2 = CarsModel.newCarEntry("sportage", BigInteger.valueOf(25000));
         rwTx.merge(CarsModel.newCarPath("sportage"), car2);
 
         rwTx.delete(car1Path);
+
+        followerTestKit.doCommit(writeTxReady);
 
         followerTestKit.doCommit(rwTx.ready());
 
@@ -394,7 +418,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
     public void testTransactionChainWithMultipleShards() throws Exception {
         initDatastoresWithCarsAndPeople("testTransactionChainWithMultipleShards");
 
-        DOMStoreTransactionChain txChain = followerDistributedDataStore.createTransactionChain();
+        final DOMStoreTransactionChain txChain = followerDistributedDataStore.createTransactionChain();
 
         DOMStoreWriteTransaction writeTx = txChain.newWriteOnlyTransaction();
         assertNotNull("newWriteOnlyTransaction returned null", writeTx);
@@ -407,14 +431,14 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
         followerTestKit.doCommit(writeTx.ready());
 
-        DOMStoreReadWriteTransaction readWriteTx = txChain.newReadWriteTransaction();
+        final DOMStoreReadWriteTransaction readWriteTx = txChain.newReadWriteTransaction();
 
-        MapEntryNode car = CarsModel.newCarEntry("optima", BigInteger.valueOf(20000));
-        YangInstanceIdentifier carPath = CarsModel.newCarPath("optima");
+        final MapEntryNode car = CarsModel.newCarEntry("optima", BigInteger.valueOf(20000));
+        final YangInstanceIdentifier carPath = CarsModel.newCarPath("optima");
         readWriteTx.write(carPath, car);
 
-        MapEntryNode person = PeopleModel.newPersonEntry("jack");
-        YangInstanceIdentifier personPath = PeopleModel.newPersonPath("jack");
+        final MapEntryNode person = PeopleModel.newPersonEntry("jack");
+        final YangInstanceIdentifier personPath = PeopleModel.newPersonPath("jack");
         readWriteTx.merge(personPath, person);
 
         Optional<NormalizedNode<?, ?>> optional = readWriteTx.read(carPath).get(5, TimeUnit.SECONDS);
@@ -425,20 +449,20 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         assertEquals("isPresent", true, optional.isPresent());
         assertEquals("Data node", person, optional.get());
 
-        DOMStoreThreePhaseCommitCohort cohort2 = readWriteTx.ready();
+        final DOMStoreThreePhaseCommitCohort cohort2 = readWriteTx.ready();
 
         writeTx = txChain.newWriteOnlyTransaction();
 
         writeTx.delete(personPath);
 
-        DOMStoreThreePhaseCommitCohort cohort3 = writeTx.ready();
+        final DOMStoreThreePhaseCommitCohort cohort3 = writeTx.ready();
 
         followerTestKit.doCommit(cohort2);
         followerTestKit.doCommit(cohort3);
 
         txChain.close();
 
-        DOMStoreReadTransaction readTx = followerDistributedDataStore.newReadOnlyTransaction();
+        final DOMStoreReadTransaction readTx = followerDistributedDataStore.newReadOnlyTransaction();
         verifyCars(readTx, car);
 
         optional = readTx.read(personPath).get(5, TimeUnit.SECONDS);
@@ -449,17 +473,17 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
     public void testChainedTransactionFailureWithSingleShard() throws Exception {
         initDatastoresWithCars("testChainedTransactionFailureWithSingleShard");
 
-        ConcurrentDOMDataBroker broker = new ConcurrentDOMDataBroker(
+        final ConcurrentDOMDataBroker broker = new ConcurrentDOMDataBroker(
                 ImmutableMap.<LogicalDatastoreType, DOMStore>builder().put(
                         LogicalDatastoreType.CONFIGURATION, followerDistributedDataStore).build(),
                         MoreExecutors.directExecutor());
 
-        TransactionChainListener listener = Mockito.mock(TransactionChainListener.class);
-        DOMTransactionChain txChain = broker.createTransactionChain(listener);
+        final TransactionChainListener listener = Mockito.mock(TransactionChainListener.class);
+        final DOMTransactionChain txChain = broker.createTransactionChain(listener);
 
-        DOMDataWriteTransaction writeTx = txChain.newWriteOnlyTransaction();
+        final DOMDataWriteTransaction writeTx = txChain.newWriteOnlyTransaction();
 
-        ContainerNode invalidData = ImmutableContainerNodeBuilder.create().withNodeIdentifier(
+        final ContainerNode invalidData = ImmutableContainerNodeBuilder.create().withNodeIdentifier(
                 new YangInstanceIdentifier.NodeIdentifier(CarsModel.BASE_QNAME))
                     .withChild(ImmutableNodes.leafNode(TestModel.JUNK_QNAME, "junk")).build();
 
@@ -468,7 +492,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         try {
             writeTx.submit().checkedGet(5, TimeUnit.SECONDS);
             fail("Expected TransactionCommitFailedException");
-        } catch (TransactionCommitFailedException e) {
+        } catch (final TransactionCommitFailedException e) {
             // Expected
         }
 
@@ -482,19 +506,19 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
     public void testChainedTransactionFailureWithMultipleShards() throws Exception {
         initDatastoresWithCarsAndPeople("testChainedTransactionFailureWithMultipleShards");
 
-        ConcurrentDOMDataBroker broker = new ConcurrentDOMDataBroker(
+        final ConcurrentDOMDataBroker broker = new ConcurrentDOMDataBroker(
                 ImmutableMap.<LogicalDatastoreType, DOMStore>builder().put(
                         LogicalDatastoreType.CONFIGURATION, followerDistributedDataStore).build(),
                         MoreExecutors.directExecutor());
 
-        TransactionChainListener listener = Mockito.mock(TransactionChainListener.class);
-        DOMTransactionChain txChain = broker.createTransactionChain(listener);
+        final TransactionChainListener listener = Mockito.mock(TransactionChainListener.class);
+        final DOMTransactionChain txChain = broker.createTransactionChain(listener);
 
-        DOMDataWriteTransaction writeTx = txChain.newWriteOnlyTransaction();
+        final DOMDataWriteTransaction writeTx = txChain.newWriteOnlyTransaction();
 
         writeTx.put(LogicalDatastoreType.CONFIGURATION, PeopleModel.BASE_PATH, PeopleModel.emptyContainer());
 
-        ContainerNode invalidData = ImmutableContainerNodeBuilder.create().withNodeIdentifier(
+        final ContainerNode invalidData = ImmutableContainerNodeBuilder.create().withNodeIdentifier(
                 new YangInstanceIdentifier.NodeIdentifier(CarsModel.BASE_QNAME))
                     .withChild(ImmutableNodes.leafNode(TestModel.JUNK_QNAME, "junk")).build();
 
@@ -505,7 +529,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         try {
             writeTx.submit().checkedGet(5, TimeUnit.SECONDS);
             fail("Expected TransactionCommitFailedException");
-        } catch (TransactionCommitFailedException e) {
+        } catch (final TransactionCommitFailedException e) {
             // Expected
         }
 
@@ -517,10 +541,11 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
     @Test
     public void testSingleShardTransactionsWithLeaderChanges() throws Exception {
-        String testName = "testSingleShardTransactionsWithLeaderChanges";
+        Assume.assumeTrue(testParameter.equals(DistributedDataStore.class));
+        final String testName = "testSingleShardTransactionsWithLeaderChanges";
         initDatastoresWithCars(testName);
 
-        String followerCarShardName = "member-2-shard-cars-" + testName;
+        final String followerCarShardName = "member-2-shard-cars-" + testName;
         InMemoryJournal.addWriteMessagesCompleteLatch(followerCarShardName, 1, ApplyJournalEntries.class);
 
         // Write top-level car container from the follower so it uses a remote Tx.
@@ -547,12 +572,13 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         leaderSystem = ActorSystem.create("cluster-test", ConfigFactory.load().getConfig("Member1"));
         Cluster.get(leaderSystem).join(MEMBER_2_ADDRESS);
 
-        DatastoreContext.Builder newMember1Builder = DatastoreContext.newBuilder()
+        final DatastoreContext.Builder newMember1Builder = DatastoreContext.newBuilder()
                 .shardHeartbeatIntervalInMillis(100).shardElectionTimeoutFactor(5);
         IntegrationTestKit newMember1TestKit = new IntegrationTestKit(leaderSystem, newMember1Builder);
 
-        try (AbstractDataStore ds =
-                newMember1TestKit.setupDistributedDataStore(testName, MODULE_SHARDS_CARS_ONLY_1_2, false, CARS)) {
+        try (final AbstractDataStore ds =
+                newMember1TestKit.setupDistributedDataStore(
+                        testParameter, testName, MODULE_SHARDS_CARS_ONLY_1_2, false, CARS)) {
 
             followerTestKit.waitUntilLeader(followerDistributedDataStore.getActorContext(), CARS);
 
@@ -576,10 +602,11 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         initDatastoresWithCars("testReadyLocalTransactionForwardedToLeader");
         followerTestKit.waitUntilLeader(followerDistributedDataStore.getActorContext(), "cars");
 
-        Optional<ActorRef> carsFollowerShard = followerDistributedDataStore.getActorContext().findLocalShard("cars");
+        final Optional<ActorRef> carsFollowerShard = followerDistributedDataStore.getActorContext()
+                .findLocalShard("cars");
         assertEquals("Cars follower shard found", true, carsFollowerShard.isPresent());
 
-        TipProducingDataTree dataTree = InMemoryDataTreeFactory.getInstance().create(TreeType.OPERATIONAL);
+        final TipProducingDataTree dataTree = InMemoryDataTreeFactory.getInstance().create(TreeType.OPERATIONAL);
         dataTree.setSchemaContext(SchemaContextHelper.full());
 
         // Send a tx with immediate commit.
@@ -588,7 +615,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         new WriteModification(CarsModel.BASE_PATH, CarsModel.emptyContainer()).apply(modification);
         new MergeModification(CarsModel.CAR_LIST_PATH, CarsModel.newCarMapNode()).apply(modification);
 
-        MapEntryNode car1 = CarsModel.newCarEntry("optima", BigInteger.valueOf(20000));
+        final MapEntryNode car1 = CarsModel.newCarEntry("optima", BigInteger.valueOf(20000));
         new WriteModification(CarsModel.newCarPath("optima"), car1).apply(modification);
         modification.ready();
 
@@ -621,10 +648,10 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
         assertEquals("Response type", ReadyTransactionReply.class, resp.getClass());
 
-        ActorSelection txActor = leaderDistributedDataStore.getActorContext().actorSelection(
+        final ActorSelection txActor = leaderDistributedDataStore.getActorContext().actorSelection(
                 ((ReadyTransactionReply)resp).getCohortPath());
 
-        Supplier<Short> versionSupplier = Mockito.mock(Supplier.class);
+        final Supplier<Short> versionSupplier = Mockito.mock(Supplier.class);
         Mockito.doReturn(DataStoreVersions.CURRENT_VERSION).when(versionSupplier).get();
         ThreePhaseCommitCohortProxy cohort = new ThreePhaseCommitCohortProxy(
                 leaderDistributedDataStore.getActorContext(), Arrays.asList(
@@ -642,11 +669,12 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         initDatastoresWithCars("testForwardedReadyTransactionForwardedToLeader");
         followerTestKit.waitUntilLeader(followerDistributedDataStore.getActorContext(), "cars");
 
-        Optional<ActorRef> carsFollowerShard = followerDistributedDataStore.getActorContext().findLocalShard("cars");
+        final Optional<ActorRef> carsFollowerShard = followerDistributedDataStore.getActorContext()
+                .findLocalShard("cars");
         assertEquals("Cars follower shard found", true, carsFollowerShard.isPresent());
 
         carsFollowerShard.get().tell(GetShardDataTree.INSTANCE, followerTestKit.getRef());
-        DataTree dataTree = followerTestKit.expectMsgClass(DataTree.class);
+        final DataTree dataTree = followerTestKit.expectMsgClass(DataTree.class);
 
         // Send a tx with immediate commit.
 
@@ -654,7 +682,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         new WriteModification(CarsModel.BASE_PATH, CarsModel.emptyContainer()).apply(modification);
         new MergeModification(CarsModel.CAR_LIST_PATH, CarsModel.newCarMapNode()).apply(modification);
 
-        MapEntryNode car1 = CarsModel.newCarEntry("optima", BigInteger.valueOf(20000));
+        final MapEntryNode car1 = CarsModel.newCarEntry("optima", BigInteger.valueOf(20000));
         new WriteModification(CarsModel.newCarPath("optima"), car1).apply(modification);
 
         ForwardedReadyTransaction forwardedReady = new ForwardedReadyTransaction(tx1,
@@ -692,9 +720,9 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         ActorSelection txActor = leaderDistributedDataStore.getActorContext().actorSelection(
                 ((ReadyTransactionReply)resp).getCohortPath());
 
-        Supplier<Short> versionSupplier = Mockito.mock(Supplier.class);
+        final Supplier<Short> versionSupplier = Mockito.mock(Supplier.class);
         Mockito.doReturn(DataStoreVersions.CURRENT_VERSION).when(versionSupplier).get();
-        ThreePhaseCommitCohortProxy cohort = new ThreePhaseCommitCohortProxy(
+        final ThreePhaseCommitCohortProxy cohort = new ThreePhaseCommitCohortProxy(
                 leaderDistributedDataStore.getActorContext(), Arrays.asList(
                         new ThreePhaseCommitCohortProxy.CohortInfo(Futures.successful(txActor), versionSupplier)), tx2);
         cohort.canCommit().get(5, TimeUnit.SECONDS);
@@ -706,13 +734,14 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
     @Test
     public void testTransactionForwardedToLeaderAfterRetry() throws Exception {
+        Assume.assumeTrue(testParameter.equals(DistributedDataStore.class));
         followerDatastoreContextBuilder.shardBatchedModificationCount(2);
         leaderDatastoreContextBuilder.shardBatchedModificationCount(2);
         initDatastoresWithCarsAndPeople("testTransactionForwardedToLeaderAfterRetry");
 
         // Do an initial write to get the primary shard info cached.
 
-        DOMStoreWriteTransaction initialWriteTx = followerDistributedDataStore.newWriteOnlyTransaction();
+        final DOMStoreWriteTransaction initialWriteTx = followerDistributedDataStore.newWriteOnlyTransaction();
         initialWriteTx.write(CarsModel.BASE_PATH, CarsModel.emptyContainer());
         initialWriteTx.write(PeopleModel.BASE_PATH, PeopleModel.emptyContainer());
         followerTestKit.doCommit(initialWriteTx.ready());
@@ -728,18 +757,18 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         // Prepare, ready and canCommit a WO tx that writes to 2 shards. This will become the current tx in
         // the leader shard.
 
-        DOMStoreWriteTransaction writeTx1 = followerDistributedDataStore.newWriteOnlyTransaction();
+        final DOMStoreWriteTransaction writeTx1 = followerDistributedDataStore.newWriteOnlyTransaction();
         writeTx1.write(CarsModel.CAR_LIST_PATH, CarsModel.newCarMapNode());
         writeTx1.write(PeopleModel.BASE_PATH, PeopleModel.emptyContainer());
-        DOMStoreThreePhaseCommitCohort writeTx1Cohort = writeTx1.ready();
-        ListenableFuture<Boolean> writeTx1CanCommit = writeTx1Cohort.canCommit();
+        final DOMStoreThreePhaseCommitCohort writeTx1Cohort = writeTx1.ready();
+        final ListenableFuture<Boolean> writeTx1CanCommit = writeTx1Cohort.canCommit();
         writeTx1CanCommit.get(5, TimeUnit.SECONDS);
 
         // Prepare and ready another WO tx that writes to 2 shards but don't canCommit yet. This will be queued
         // in the leader shard.
 
-        DOMStoreWriteTransaction writeTx2 = followerDistributedDataStore.newWriteOnlyTransaction();
-        LinkedList<MapEntryNode> cars = new LinkedList<>();
+        final DOMStoreWriteTransaction writeTx2 = followerDistributedDataStore.newWriteOnlyTransaction();
+        final LinkedList<MapEntryNode> cars = new LinkedList<>();
         int carIndex = 1;
         cars.add(CarsModel.newCarEntry("car" + carIndex, BigInteger.valueOf(carIndex)));
         writeTx2.write(CarsModel.newCarPath("car" + carIndex), cars.getLast());
@@ -753,7 +782,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         // leader shard (with shardBatchedModificationCount set to 2). The 3rd BatchedModidifications will be
         // sent on ready.
 
-        DOMStoreWriteTransaction writeTx3 = followerDistributedDataStore.newWriteOnlyTransaction();
+        final DOMStoreWriteTransaction writeTx3 = followerDistributedDataStore.newWriteOnlyTransaction();
         for (int i = 1; i <= 5; i++, carIndex++) {
             cars.add(CarsModel.newCarEntry("car" + carIndex, BigInteger.valueOf(carIndex)));
             writeTx3.write(CarsModel.newCarPath("car" + carIndex), cars.getLast());
@@ -762,7 +791,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         // Prepare another WO that writes to a single shard. This will send a single BatchedModidifications
         // message on ready.
 
-        DOMStoreWriteTransaction writeTx4 = followerDistributedDataStore.newWriteOnlyTransaction();
+        final DOMStoreWriteTransaction writeTx4 = followerDistributedDataStore.newWriteOnlyTransaction();
         cars.add(CarsModel.newCarEntry("car" + carIndex, BigInteger.valueOf(carIndex)));
         writeTx4.write(CarsModel.newCarPath("car" + carIndex), cars.getLast());
         carIndex++;
@@ -770,7 +799,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         // Prepare a RW tx that will create a tx actor and send a ForwardedReadyTransaciton message to the
         // leader shard on ready.
 
-        DOMStoreReadWriteTransaction readWriteTx = followerDistributedDataStore.newReadWriteTransaction();
+        final DOMStoreReadWriteTransaction readWriteTx = followerDistributedDataStore.newReadWriteTransaction();
         cars.add(CarsModel.newCarEntry("car" + carIndex, BigInteger.valueOf(carIndex)));
         readWriteTx.write(CarsModel.newCarPath("car" + carIndex), cars.getLast());
 
@@ -788,7 +817,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
         // Submit all tx's - the messages should get queued for retry.
 
-        ListenableFuture<Boolean> writeTx2CanCommit = writeTx2Cohort.canCommit();
+        final ListenableFuture<Boolean> writeTx2CanCommit = writeTx2Cohort.canCommit();
         final DOMStoreThreePhaseCommitCohort writeTx3Cohort = writeTx3.ready();
         final DOMStoreThreePhaseCommitCohort writeTx4Cohort = writeTx4.ready();
         final DOMStoreThreePhaseCommitCohort rwTxCohort = readWriteTx.ready();
@@ -812,15 +841,16 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
     @Test
     public void testLeadershipTransferOnShutdown() throws Exception {
+        Assume.assumeTrue(testParameter.equals(DistributedDataStore.class));
         leaderDatastoreContextBuilder.shardBatchedModificationCount(1);
         followerDatastoreContextBuilder.shardElectionTimeoutFactor(10).customRaftPolicyImplementation(null);
-        String testName = "testLeadershipTransferOnShutdown";
+        final String testName = "testLeadershipTransferOnShutdown";
         initDatastores(testName, MODULE_SHARDS_CARS_PEOPLE_1_2_3, CARS_AND_PEOPLE);
 
-        IntegrationTestKit follower2TestKit = new IntegrationTestKit(follower2System,
+        final IntegrationTestKit follower2TestKit = new IntegrationTestKit(follower2System,
                 DatastoreContext.newBuilderFrom(followerDatastoreContextBuilder.build()).operationTimeoutInMillis(100));
-        try (AbstractDataStore follower2DistributedDataStore = follower2TestKit.setupDistributedDataStore(testName,
-                MODULE_SHARDS_CARS_PEOPLE_1_2_3, false)) {
+        try (final AbstractDataStore follower2DistributedDataStore = follower2TestKit.setupDistributedDataStore(
+                testParameter, testName, MODULE_SHARDS_CARS_PEOPLE_1_2_3, false)) {
 
             // Create and submit a couple tx's so they're pending.
 
@@ -834,7 +864,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
                 stats -> assertEquals("getTxCohortCacheSize", 1, stats.getTxCohortCacheSize()));
 
             writeTx = followerDistributedDataStore.newWriteOnlyTransaction();
-            MapEntryNode car = CarsModel.newCarEntry("optima", BigInteger.valueOf(20000));
+            final MapEntryNode car = CarsModel.newCarEntry("optima", BigInteger.valueOf(20000));
             writeTx.write(CarsModel.newCarPath("optima"), car);
             final DOMStoreThreePhaseCommitCohort cohort2 = writeTx.ready();
 
@@ -846,11 +876,11 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
             sendDatastoreContextUpdate(leaderDistributedDataStore, leaderDatastoreContextBuilder
                 .shardElectionTimeoutFactor(100));
 
-            FiniteDuration duration = FiniteDuration.create(5, TimeUnit.SECONDS);
-            Future<ActorRef> future = leaderDistributedDataStore.getActorContext().findLocalShardAsync("cars");
-            ActorRef leaderActor = Await.result(future, duration);
+            final FiniteDuration duration = FiniteDuration.create(5, TimeUnit.SECONDS);
+            final Future<ActorRef> future = leaderDistributedDataStore.getActorContext().findLocalShardAsync("cars");
+            final ActorRef leaderActor = Await.result(future, duration);
 
-            Future<Boolean> stopFuture = Patterns.gracefulStop(leaderActor, duration, Shutdown.INSTANCE);
+            final Future<Boolean> stopFuture = Patterns.gracefulStop(leaderActor, duration, Shutdown.INSTANCE);
 
             // Commit the 2 transactions. They should finish and succeed.
 
@@ -859,7 +889,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
             // Wait for the leader actor stopped.
 
-            Boolean stopped = Await.result(stopFuture, duration);
+            final Boolean stopped = Await.result(stopFuture, duration);
             assertEquals("Stopped", Boolean.TRUE, stopped);
 
             // Verify leadership was transferred by reading the committed data from the other nodes.
@@ -871,21 +901,22 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
     @Test
     public void testTransactionWithIsolatedLeader() throws Exception {
+        Assume.assumeTrue(testParameter.equals(DistributedDataStore.class));
         // Set the isolated leader check interval high so we can control the switch to IsolatedLeader.
         leaderDatastoreContextBuilder.shardIsolatedLeaderCheckIntervalInMillis(10000000);
-        String testName = "testTransactionWithIsolatedLeader";
+        final String testName = "testTransactionWithIsolatedLeader";
         initDatastoresWithCars(testName);
 
         // Tx that is submitted after the follower is stopped but before the leader transitions to IsolatedLeader.
-        DOMStoreWriteTransaction preIsolatedLeaderWriteTx = leaderDistributedDataStore.newWriteOnlyTransaction();
+        final DOMStoreWriteTransaction preIsolatedLeaderWriteTx = leaderDistributedDataStore.newWriteOnlyTransaction();
         preIsolatedLeaderWriteTx.write(CarsModel.BASE_PATH, CarsModel.emptyContainer());
 
         // Tx that is submitted after the leader transitions to IsolatedLeader.
-        DOMStoreWriteTransaction noShardLeaderWriteTx = leaderDistributedDataStore.newWriteOnlyTransaction();
+        final DOMStoreWriteTransaction noShardLeaderWriteTx = leaderDistributedDataStore.newWriteOnlyTransaction();
         noShardLeaderWriteTx.write(CarsModel.BASE_PATH, CarsModel.emptyContainer());
 
         // Tx that is submitted after the follower is reinstated.
-        DOMStoreWriteTransaction successWriteTx = leaderDistributedDataStore.newWriteOnlyTransaction();
+        final DOMStoreWriteTransaction successWriteTx = leaderDistributedDataStore.newWriteOnlyTransaction();
         successWriteTx.merge(CarsModel.BASE_PATH, CarsModel.emptyContainer());
 
         // Stop the follower
@@ -906,17 +937,17 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         try {
             leaderTestKit.doCommit(noShardLeaderWriteTx.ready());
             fail("Expected NoShardLeaderException");
-        } catch (ExecutionException e) {
-            assertEquals("getCause", NoShardLeaderException.class, e.getCause().getClass());
+        } catch (final ExecutionException e) {
+            assertEquals("getCause", NoShardLeaderException.class, Throwables.getRootCause(e).getClass());
         }
 
         sendDatastoreContextUpdate(leaderDistributedDataStore, leaderDatastoreContextBuilder
                 .shardElectionTimeoutFactor(100));
 
-        DOMStoreThreePhaseCommitCohort successTxCohort = successWriteTx.ready();
+        final DOMStoreThreePhaseCommitCohort successTxCohort = successWriteTx.ready();
 
-        followerDistributedDataStore = followerTestKit.setupDistributedDataStore(testName,
-                MODULE_SHARDS_CARS_ONLY_1_2, false, CARS);
+        followerDistributedDataStore = followerTestKit.setupDistributedDataStore(
+                testParameter, testName, MODULE_SHARDS_CARS_ONLY_1_2, false, CARS);
 
         leaderTestKit.doCommit(preIsolatedLeaderTxCohort);
         leaderTestKit.doCommit(successTxCohort);
@@ -924,12 +955,13 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
     @Test(expected = AskTimeoutException.class)
     public void testTransactionWithShardLeaderNotResponding() throws Exception {
+        Assume.assumeTrue(testParameter.equals(DistributedDataStore.class));
         followerDatastoreContextBuilder.shardElectionTimeoutFactor(50);
         initDatastoresWithCars("testTransactionWithShardLeaderNotResponding");
 
         // Do an initial read to get the primary shard info cached.
 
-        DOMStoreReadTransaction readTx = followerDistributedDataStore.newReadOnlyTransaction();
+        final DOMStoreReadTransaction readTx = followerDistributedDataStore.newReadOnlyTransaction();
         readTx.read(CarsModel.BASE_PATH).checkedGet(5, TimeUnit.SECONDS);
 
         // Shutdown the leader and try to create a new tx.
@@ -939,13 +971,13 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         followerDatastoreContextBuilder.operationTimeoutInMillis(50).shardElectionTimeoutFactor(1);
         sendDatastoreContextUpdate(followerDistributedDataStore, followerDatastoreContextBuilder);
 
-        DOMStoreReadWriteTransaction rwTx = followerDistributedDataStore.newReadWriteTransaction();
+        final DOMStoreReadWriteTransaction rwTx = followerDistributedDataStore.newReadWriteTransaction();
 
         rwTx.write(CarsModel.BASE_PATH, CarsModel.emptyContainer());
 
         try {
             followerTestKit.doCommit(rwTx.ready());
-        } catch (ExecutionException e) {
+        } catch (final ExecutionException e) {
             assertTrue("Expected ShardLeaderNotRespondingException cause. Actual: " + e.getCause(),
                     e.getCause() instanceof ShardLeaderNotRespondingException);
             assertNotNull("Expected a nested cause", e.getCause().getCause());
@@ -956,11 +988,12 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
     @Test(expected = NoShardLeaderException.class)
     public void testTransactionWithCreateTxFailureDueToNoLeader() throws Exception {
+        Assume.assumeTrue(testParameter.equals(DistributedDataStore.class));
         initDatastoresWithCars("testTransactionWithCreateTxFailureDueToNoLeader");
 
         // Do an initial read to get the primary shard info cached.
 
-        DOMStoreReadTransaction readTx = followerDistributedDataStore.newReadOnlyTransaction();
+        final DOMStoreReadTransaction readTx = followerDistributedDataStore.newReadOnlyTransaction();
         readTx.read(CarsModel.BASE_PATH).checkedGet(5, TimeUnit.SECONDS);
 
         // Shutdown the leader and try to create a new tx.
@@ -974,13 +1007,13 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         sendDatastoreContextUpdate(followerDistributedDataStore, followerDatastoreContextBuilder
                 .operationTimeoutInMillis(10).shardElectionTimeoutFactor(1).customRaftPolicyImplementation(null));
 
-        DOMStoreReadWriteTransaction rwTx = followerDistributedDataStore.newReadWriteTransaction();
+        final DOMStoreReadWriteTransaction rwTx = followerDistributedDataStore.newReadWriteTransaction();
 
         rwTx.write(CarsModel.BASE_PATH, CarsModel.emptyContainer());
 
         try {
             followerTestKit.doCommit(rwTx.ready());
-        } catch (ExecutionException e) {
+        } catch (final ExecutionException e) {
             Throwables.propagateIfInstanceOf(e.getCause(), Exception.class);
             Throwables.propagate(e.getCause());
         }
@@ -988,22 +1021,25 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
     @Test
     public void testTransactionRetryWithInitialAskTimeoutExOnCreateTx() throws Exception {
+        Assume.assumeTrue(testParameter.equals(DistributedDataStore.class));
         String testName = "testTransactionRetryWithInitialAskTimeoutExOnCreateTx";
         initDatastores(testName, MODULE_SHARDS_CARS_PEOPLE_1_2_3, CARS);
 
-        DatastoreContext.Builder follower2DatastoreContextBuilder = DatastoreContext.newBuilder()
+        final DatastoreContext.Builder follower2DatastoreContextBuilder = DatastoreContext.newBuilder()
                 .shardHeartbeatIntervalInMillis(100).shardElectionTimeoutFactor(5);
-        IntegrationTestKit follower2TestKit = new IntegrationTestKit(follower2System, follower2DatastoreContextBuilder);
+        final IntegrationTestKit follower2TestKit = new IntegrationTestKit(
+                follower2System, follower2DatastoreContextBuilder);
 
-        try (AbstractDataStore ds =
-                follower2TestKit.setupDistributedDataStore(testName, MODULE_SHARDS_CARS_PEOPLE_1_2_3, false, CARS)) {
+        try (final AbstractDataStore ds =
+                follower2TestKit.setupDistributedDataStore(
+                        testParameter, testName, MODULE_SHARDS_CARS_PEOPLE_1_2_3, false, CARS)) {
 
             followerTestKit.waitForMembersUp("member-1", "member-3");
             follower2TestKit.waitForMembersUp("member-1", "member-2");
 
             // Do an initial read to get the primary shard info cached.
 
-            DOMStoreReadTransaction readTx = followerDistributedDataStore.newReadOnlyTransaction();
+            final DOMStoreReadTransaction readTx = followerDistributedDataStore.newReadOnlyTransaction();
             readTx.read(CarsModel.BASE_PATH).checkedGet(5, TimeUnit.SECONDS);
 
             // Shutdown the leader and try to create a new tx.
@@ -1015,7 +1051,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
             sendDatastoreContextUpdate(followerDistributedDataStore, followerDatastoreContextBuilder
                 .operationTimeoutInMillis(500).shardElectionTimeoutFactor(1).customRaftPolicyImplementation(null));
 
-            DOMStoreReadWriteTransaction rwTx = followerDistributedDataStore.newReadWriteTransaction();
+            final DOMStoreReadWriteTransaction rwTx = followerDistributedDataStore.newReadWriteTransaction();
 
             rwTx.write(CarsModel.BASE_PATH, CarsModel.emptyContainer());
 
@@ -1035,12 +1071,12 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         TipProducingDataTree tree = InMemoryDataTreeFactory.getInstance().create(TreeType.CONFIGURATION);
         tree.setSchemaContext(SchemaContextHelper.full());
 
-        ContainerNode carsNode = CarsModel.newCarsNode(
+        final ContainerNode carsNode = CarsModel.newCarsNode(
                 CarsModel.newCarsMapNode(CarsModel.newCarEntry("optima", BigInteger.valueOf(20000))));
         AbstractShardTest.writeToStore(tree, CarsModel.BASE_PATH, carsNode);
 
-        NormalizedNode<?, ?> snapshotRoot = AbstractShardTest.readStore(tree, YangInstanceIdentifier.EMPTY);
-        Snapshot initialSnapshot = Snapshot.create(
+        final NormalizedNode<?, ?> snapshotRoot = AbstractShardTest.readStore(tree, YangInstanceIdentifier.EMPTY);
+        final Snapshot initialSnapshot = Snapshot.create(
                 new ShardSnapshotState(new MetadataShardDataTreeSnapshot(snapshotRoot)),
                 Collections.emptyList(), 5, 1, 5, 1, 1, null, null);
         InMemorySnapshotStore.addSnapshot(leaderCarShardName, initialSnapshot);
@@ -1050,7 +1086,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
         initDatastoresWithCars(testName);
 
-        Optional<NormalizedNode<?, ?>> readOptional = leaderDistributedDataStore.newReadOnlyTransaction().read(
+        final Optional<NormalizedNode<?, ?>> readOptional = leaderDistributedDataStore.newReadOnlyTransaction().read(
                 CarsModel.BASE_PATH).checkedGet(5, TimeUnit.SECONDS);
         assertEquals("isPresent", true, readOptional.isPresent());
         assertEquals("Node", carsNode, readOptional.get());
@@ -1062,7 +1098,8 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
                 initialSnapshot, snapshotRoot);
     }
 
-    private static void verifySnapshot(Snapshot actual, Snapshot expected, NormalizedNode<?, ?> expRoot) {
+    private static void verifySnapshot(final Snapshot actual, final Snapshot expected,
+                                       final NormalizedNode<?, ?> expRoot) {
         assertEquals("Snapshot getLastAppliedTerm", expected.getLastAppliedTerm(), actual.getLastAppliedTerm());
         assertEquals("Snapshot getLastAppliedIndex", expected.getLastAppliedIndex(), actual.getLastAppliedIndex());
         assertEquals("Snapshot getLastTerm", expected.getLastTerm(), actual.getLastTerm());
@@ -1075,8 +1112,8 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
     private static void sendDatastoreContextUpdate(final AbstractDataStore dataStore, final Builder builder) {
         final Builder newBuilder = DatastoreContext.newBuilderFrom(builder.build());
-        DatastoreContextFactory mockContextFactory = Mockito.mock(DatastoreContextFactory.class);
-        Answer<DatastoreContext> answer = invocation -> newBuilder.build();
+        final DatastoreContextFactory mockContextFactory = Mockito.mock(DatastoreContextFactory.class);
+        final Answer<DatastoreContext> answer = invocation -> newBuilder.build();
         Mockito.doAnswer(answer).when(mockContextFactory).getBaseDatastoreContext();
         Mockito.doAnswer(answer).when(mockContextFactory).getShardDatastoreContext(Mockito.anyString());
         dataStore.onDatastoreContextUpdated(mockContextFactory);

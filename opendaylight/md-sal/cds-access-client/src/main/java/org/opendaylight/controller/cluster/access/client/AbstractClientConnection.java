@@ -137,7 +137,7 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
         final long delay = enqueueEntry(entry, now);
         try {
             TimeUnit.NANOSECONDS.sleep(delay);
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
             LOG.debug("Interrupted while sleeping");
         }
     }
