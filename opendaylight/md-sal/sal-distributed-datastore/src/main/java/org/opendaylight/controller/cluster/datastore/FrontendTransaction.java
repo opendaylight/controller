@@ -112,6 +112,9 @@ abstract class FrontendTransaction implements Identifiable<TransactionIdentifier
     abstract @Nullable TransactionSuccess<?> handleRequest(TransactionRequest<?> request,
             RequestEnvelope envelope, long now) throws RequestException;
 
+    // Final request, needs routing to the data tree, so it can persist a tombstone
+    abstract void purge(Runnable callback);
+
     private void recordResponse(final long sequence, final Object response) {
         if (replayQueue.isEmpty()) {
             firstReplaySequence = sequence;
@@ -148,4 +151,5 @@ abstract class FrontendTransaction implements Identifiable<TransactionIdentifier
                 .add("lastPurgedSequence", lastPurgedSequence)
                 .toString();
     }
+
 }

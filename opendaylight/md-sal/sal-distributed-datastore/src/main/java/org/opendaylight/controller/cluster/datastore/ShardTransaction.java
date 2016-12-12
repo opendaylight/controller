@@ -37,15 +37,16 @@ public abstract class ShardTransaction extends AbstractUntypedActorWithMetering 
     private final ShardStats shardStats;
     private final TransactionIdentifier transactionId;
 
-    protected ShardTransaction(ActorRef shardActor, ShardStats shardStats, TransactionIdentifier transactionId) {
+    protected ShardTransaction(final ActorRef shardActor, final ShardStats shardStats,
+            final TransactionIdentifier transactionId) {
         super("shard-tx"); //actor name override used for metering. This does not change the "real" actor name
         this.shardActor = shardActor;
         this.shardStats = shardStats;
         this.transactionId = Preconditions.checkNotNull(transactionId);
     }
 
-    public static Props props(TransactionType type, AbstractShardDataTreeTransaction<?> transaction,
-            ActorRef shardActor, DatastoreContext datastoreContext, ShardStats shardStats) {
+    public static Props props(final TransactionType type, final AbstractShardDataTreeTransaction<?> transaction,
+            final ActorRef shardActor, final DatastoreContext datastoreContext, final ShardStats shardStats) {
         return Props.create(new ShardTransactionCreator(type, transaction, shardActor, datastoreContext, shardStats));
     }
 
@@ -60,7 +61,7 @@ public abstract class ShardTransaction extends AbstractUntypedActorWithMetering 
     }
 
     @Override
-    public void handleReceive(Object message) {
+    public void handleReceive(final Object message) {
         if (CloseTransaction.isSerializedType(message)) {
             closeTransaction(true);
         } else if (message instanceof ReceiveTimeout) {
@@ -75,8 +76,8 @@ public abstract class ShardTransaction extends AbstractUntypedActorWithMetering 
         return true;
     }
 
-    private void closeTransaction(boolean sendReply) {
-        getDOMStoreTransaction().abort();
+    private void closeTransaction(final boolean sendReply) {
+        getDOMStoreTransaction().abort(null);
 
         if (sendReply && returnCloseTransactionReply()) {
             getSender().tell(new CloseTransactionReply(), getSelf());
@@ -85,7 +86,7 @@ public abstract class ShardTransaction extends AbstractUntypedActorWithMetering 
         getSelf().tell(PoisonPill.getInstance(), getSelf());
     }
 
-    private boolean checkClosed(AbstractShardDataTreeTransaction<?> transaction) {
+    private boolean checkClosed(final AbstractShardDataTreeTransaction<?> transaction) {
         final boolean ret = transaction.isClosed();
         if (ret) {
             shardStats.incrementFailedReadTransactionsCount();
@@ -95,7 +96,7 @@ public abstract class ShardTransaction extends AbstractUntypedActorWithMetering 
         return ret;
     }
 
-    protected void readData(AbstractShardDataTreeTransaction<?> transaction, ReadData message) {
+    protected void readData(final AbstractShardDataTreeTransaction<?> transaction, final ReadData message) {
         if (checkClosed(transaction)) {
             return;
         }
@@ -106,7 +107,7 @@ public abstract class ShardTransaction extends AbstractUntypedActorWithMetering 
         sender().tell(readDataReply.toSerializable(), self());
     }
 
-    protected void dataExists(AbstractShardDataTreeTransaction<?> transaction, DataExists message) {
+    protected void dataExists(final AbstractShardDataTreeTransaction<?> transaction, final DataExists message) {
         if (checkClosed(transaction)) {
             return;
         }
@@ -128,8 +129,8 @@ public abstract class ShardTransaction extends AbstractUntypedActorWithMetering 
         final ShardStats shardStats;
         final TransactionType type;
 
-        ShardTransactionCreator(TransactionType type, AbstractShardDataTreeTransaction<?> transaction,
-                ActorRef shardActor, DatastoreContext datastoreContext, ShardStats shardStats) {
+        ShardTransactionCreator(final TransactionType type, final AbstractShardDataTreeTransaction<?> transaction,
+                final ActorRef shardActor, final DatastoreContext datastoreContext, final ShardStats shardStats) {
             this.transaction = Preconditions.checkNotNull(transaction);
             this.shardActor = shardActor;
             this.shardStats = shardStats;

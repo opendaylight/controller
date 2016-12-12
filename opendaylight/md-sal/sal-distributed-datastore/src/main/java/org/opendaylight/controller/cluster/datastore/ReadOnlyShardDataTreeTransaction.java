@@ -11,12 +11,8 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
 
 final class ReadOnlyShardDataTreeTransaction extends AbstractShardDataTreeTransaction<DataTreeSnapshot> {
-    ReadOnlyShardDataTreeTransaction(final TransactionIdentifier id, final DataTreeSnapshot snapshot) {
-        super(id, snapshot);
-    }
-
-    @Override
-    void abort() {
-        close();
+    ReadOnlyShardDataTreeTransaction(final ShardDataTreeTransactionParent parent, final TransactionIdentifier id,
+        final DataTreeSnapshot snapshot) {
+        super(parent, id, snapshot);
     }
 }
