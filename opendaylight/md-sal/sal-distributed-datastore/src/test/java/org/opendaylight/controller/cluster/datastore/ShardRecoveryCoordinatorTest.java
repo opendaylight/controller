@@ -8,7 +8,8 @@
 
 package org.opendaylight.controller.cluster.datastore;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import com.google.common.base.Optional;
@@ -31,13 +32,16 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.TreeType;
 import org.opendaylight.yangtools.yang.data.impl.schema.tree.InMemoryDataTreeFactory;
 import org.opendaylight.yangtools.yang.data.impl.schema.tree.SchemaValidationFailedException;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ShardRecoveryCoordinatorTest extends AbstractTest {
+    private static final Logger FOO_LOGGER = LoggerFactory.getLogger("foo");
 
     private ShardDataTree peopleDataTree;
     private SchemaContext peopleSchemaContext;
     private SchemaContext carsSchemaContext;
+    private ShardRecoveryCoordinator coordinator;
 
     @Before
     public void setUp() {
@@ -47,14 +51,13 @@ public class ShardRecoveryCoordinatorTest extends AbstractTest {
         final Shard mockShard = Mockito.mock(Shard.class);
 
         peopleDataTree = new ShardDataTree(mockShard, peopleSchemaContext, TreeType.OPERATIONAL);
+        coordinator = ShardRecoveryCoordinator.create(peopleDataTree, "foobar", FOO_LOGGER);
+        coordinator.startLogRecoveryBatch(10);
     }
 
     @Deprecated
     @Test
     public void testAppendRecoveredLogEntryDataTreeCandidatePayload() {
-        final ShardRecoveryCoordinator coordinator = new ShardRecoveryCoordinator(peopleDataTree,
-                null, "foobar", LoggerFactory.getLogger("foo"));
-        coordinator.startLogRecoveryBatch(10);
         try {
             coordinator.appendRecoveredLogEntry(DataTreeCandidatePayload.create(createCar()));
         } catch (final SchemaValidationFailedException e) {
@@ -66,9 +69,6 @@ public class ShardRecoveryCoordinatorTest extends AbstractTest {
 
     @Test
     public void testAppendRecoveredLogEntryCommitTransactionPayload() throws IOException {
-        final ShardRecoveryCoordinator coordinator = new ShardRecoveryCoordinator(peopleDataTree,
-                null, "foobar", LoggerFactory.getLogger("foo"));
-        coordinator.startLogRecoveryBatch(10);
         try {
             coordinator.appendRecoveredLogEntry(CommitTransactionPayload.create(nextTransactionId(), createCar()));
         } catch (final SchemaValidationFailedException e) {
@@ -80,23 +80,15 @@ public class ShardRecoveryCoordinatorTest extends AbstractTest {
 
     @Test
     public void testApplyRecoverySnapshot() {
-        final ShardRecoveryCoordinator coordinator = new ShardRecoveryCoordinator(peopleDataTree,
-                null, "foobar", LoggerFactory.getLogger("foo"));
-        coordinator.startLogRecoveryBatch(10);
-
         coordinator.applyRecoverySnapshot(createSnapshot());
 
-        assertEquals(false, readCars(peopleDataTree).isPresent());
-        assertEquals(true, readPeople(peopleDataTree).isPresent());
+        assertFalse(readCars(peopleDataTree).isPresent());
+        assertTrue(readPeople(peopleDataTree).isPresent());
     }
 
 
     @Test
     public void testApplyCurrentLogRecoveryBatch() {
-        final ShardRecoveryCoordinator coordinator = new ShardRecoveryCoordinator(peopleDataTree,
-                null, "foobar", LoggerFactory.getLogger("foo"));
-        coordinator.startLogRecoveryBatch(10);
-
         try {
             coordinator.applyCurrentLogRecoveryBatch();
         } catch (final IllegalArgumentException e) {
