@@ -63,16 +63,19 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
     private static final int REQUEST_MAX_MODIFICATIONS = 1000;
 
     private final ModifyTransactionRequestBuilder builder;
+    private final boolean sendReadyOnSeal;
     private final boolean snapshotOnly;
 
     private boolean builderBusy;
 
     private volatile Exception operationFailure;
 
+
     RemoteProxyTransaction(final ProxyHistory parent, final TransactionIdentifier identifier,
-            final boolean snapshotOnly) {
+            final boolean snapshotOnly, final boolean sendReadyOnSeal) {
         super(parent);
         this.snapshotOnly = snapshotOnly;
+        this.sendReadyOnSeal = sendReadyOnSeal;
         builder = new ModifyTransactionRequestBuilder(identifier, localActor());
     }
 
@@ -265,7 +268,11 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
 
     @Override
     void doSeal() {
-        // No-op
+        if (sendReadyOnSeal) {
+            ensureInitializedBuider();
+            builder.setReady();
+            flushBuilder();
+        }
     }
 
     @Override
@@ -291,7 +298,7 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
 
             final java.util.Optional<PersistenceProtocol> maybeProto = req.getPersistenceProtocol();
             if (maybeProto.isPresent()) {
-                seal();
+                ensureSealed();
 
                 switch (maybeProto.get()) {
                     case ABORT:
