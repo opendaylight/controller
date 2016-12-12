@@ -7,9 +7,12 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Collections2;
+import com.google.common.collect.Maps;
 import java.util.HashMap;
 import java.util.Map;
+import javax.annotation.Nonnull;
 import javax.annotation.concurrent.NotThreadSafe;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
@@ -32,6 +35,11 @@ final class FrontendMetadata extends ShardDataTreeMetadata<FrontendShardDataTree
     private static final Logger LOG = LoggerFactory.getLogger(FrontendMetadata.class);
 
     private final Map<FrontendIdentifier, FrontendClientMetadataBuilder> clients = new HashMap<>();
+    private final String shardName;
+
+    FrontendMetadata(final String shardName) {
+        this.shardName = Preconditions.checkNotNull(shardName);
+    }
 
     @Override
     Class<FrontendShardDataTreeSnapshotMetadata> getSupportedType() {
@@ -67,9 +75,9 @@ final class FrontendMetadata extends ShardDataTreeMetadata<FrontendShardDataTree
         final FrontendClientMetadataBuilder client = new FrontendClientMetadataBuilder(id);
         final FrontendClientMetadataBuilder previous = clients.put(id.getFrontendId(), client);
         if (previous != null) {
-            LOG.debug("Replaced client {} with {}", previous, client);
+            LOG.debug("{}: Replaced client {} with {}", shardName, previous, client);
         } else {
-            LOG.debug("Added client {}", client);
+            LOG.debug("{}: Added client {}", shardName, client);
         }
         return client;
     }
@@ -92,5 +100,14 @@ final class FrontendMetadata extends ShardDataTreeMetadata<FrontendShardDataTree
     @Override
     void onTransactionCommitted(final TransactionIdentifier txId) {
         ensureClient(txId.getHistoryId().getClientId()).onTransactionCommitted(txId);
+    }
+
+    /**
+     * Transform frontend metadata into an active leader state map.
+     *
+     * @return Leader frontend state
+     */
+    @Nonnull Map<FrontendIdentifier, LeaderFrontendState> toLeaderState(@Nonnull final Shard shard) {
+        return new HashMap<>(Maps.transformValues(clients, meta -> meta.toLeaderState(shard)));
     }
 }
