@@ -277,7 +277,7 @@ public class MemberNode {
             return this;
         }
 
-        public MemberNode build() {
+        public MemberNode build() throws Exception {
             Preconditions.checkNotNull(moduleShardsConfig, "moduleShardsConfig must be specified");
             Preconditions.checkNotNull(akkaConfig, "akkaConfig must be specified");
             Preconditions.checkNotNull(testName, "testName must be specified");
@@ -306,13 +306,13 @@ public class MemberNode {
 
             String memberName = new ClusterWrapperImpl(system).getCurrentMemberName().getName();
             node.kit.getDatastoreContextBuilder().shardManagerPersistenceId("shard-manager-config-" + memberName);
-            node.configDataStore = node.kit.setupDistributedDataStore("config_" + testName, moduleShardsConfig,
-                    true, schemaContext, waitForshardLeader);
+            node.configDataStore = node.kit.setupDistributedDataStore(DistributedDataStore.class,
+                    "config_" + testName, moduleShardsConfig, true, schemaContext, waitForshardLeader);
 
             if (createOperDatastore) {
                 node.kit.getDatastoreContextBuilder().shardManagerPersistenceId("shard-manager-oper-" + memberName);
-                node.operDataStore = node.kit.setupDistributedDataStore("oper_" + testName, moduleShardsConfig,
-                        true, schemaContext, waitForshardLeader);
+                node.operDataStore = node.kit.setupDistributedDataStore(DistributedDataStore.class,
+                        "oper_" + testName, moduleShardsConfig, true, schemaContext, waitForshardLeader);
             }
 
             members.add(node);
