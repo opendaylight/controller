@@ -683,8 +683,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         return cohort;
     }
 
-    @SuppressFBWarnings(value = {"RV_RETURN_VALUE_IGNORED", "DB_DUPLICATE_SWITCH_CLAUSES"},
-            justification = "See inline comments below.")
+    @SuppressFBWarnings(value = "DB_DUPLICATE_SWITCH_CLAUSES", justification = "See inline comments below.")
     void checkForExpiredTransactions(final long transactionCommitTimeoutMillis) {
         final long timeout = TimeUnit.MILLISECONDS.toNanos(transactionCommitTimeoutMillis);
         final long now = shard.ticker().read();
@@ -695,16 +694,16 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
             boolean processNext = true;
             switch (currentTx.cohort.getState()) {
                 case CAN_COMMIT_PENDING:
-                    pendingTransactions.poll().cohort.failedCanCommit(new TimeoutException());
+                    pendingTransactions.remove().cohort.failedCanCommit(new TimeoutException());
                     break;
                 case CAN_COMMIT_COMPLETE:
                     // The suppression of the FindBugs "DB_DUPLICATE_SWITCH_CLAUSES" warning pertains to this clause
                     // whose code is duplicated with PRE_COMMIT_COMPLETE. The clauses aren't combined in case the code
                     // in PRE_COMMIT_COMPLETE is changed.
-                    pendingTransactions.poll().cohort.reportFailure(new TimeoutException());
+                    pendingTransactions.remove().cohort.reportFailure(new TimeoutException());
                     break;
                 case PRE_COMMIT_PENDING:
-                    pendingTransactions.poll().cohort.failedPreCommit(new TimeoutException());
+                    pendingTransactions.remove().cohort.failedPreCommit(new TimeoutException());
                     break;
                 case PRE_COMMIT_COMPLETE:
                     // FIXME: this is a legacy behavior problem. Three-phase commit protocol specifies that after we
@@ -724,7 +723,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
                     //        In order to make the pre-commit timer working across failovers, though, we need
                     //        a per-shard cluster-wide monotonic time, so a follower becoming the leader can accurately
                     //        restart the timer.
-                    pendingTransactions.poll().cohort.reportFailure(new TimeoutException());
+                    pendingTransactions.remove().cohort.reportFailure(new TimeoutException());
                     break;
                 case COMMIT_PENDING:
                     LOG.warn("{}: Transaction {} is still committing, cannot abort", logContext,
@@ -737,10 +736,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
                 case FAILED:
                 case READY:
                 default:
-                    // The suppression of the FindBugs "RV_RETURN_VALUE_IGNORED" warning pertains to this line. In
-                    // this case, we just want to drop the current entry that expired and thus ignore the return value.
-                    // In fact we really shouldn't hit this case but we handle all enums for completeness.
-                    pendingTransactions.poll();
+                    pendingTransactions.remove();
             }
 
             if (processNext) {
