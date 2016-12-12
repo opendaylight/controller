@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "1a622d24_2305647a",
+        "filename": "opendaylight/md-sal/cds-access-client/src/main/java/org/opendaylight/controller/cluster/access/client/AbstractClientConnection.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-12-12T16:19:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1a622d24_d8ad7b8a",
+      "revId": "3ee2e7a1897544c5cab354c79a1f13f892828be4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a622d24_b8efdfaf",
         "filename": "opendaylight/md-sal/cds-access-client/src/main/java/org/opendaylight/controller/cluster/access/client/AbstractClientConnection.java",
         "patchSetId": 8
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "1a622d24_438980ea",
+        "filename": "opendaylight/md-sal/cds-access-client/src/main/java/org/opendaylight/controller/cluster/access/client/AbstractClientConnection.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 210,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-12-12T16:19:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1a622d24_b8efdfaf",
+      "revId": "3ee2e7a1897544c5cab354c79a1f13f892828be4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a622d24_d8f29b99",
         "filename": "opendaylight/md-sal/cds-access-client/src/main/java/org/opendaylight/controller/cluster/access/client/AbstractClientConnection.java",
         "patchSetId": 8
@@ -47,6 +83,24 @@
       "writtenOn": "2016-12-12T13:30:15Z",
       "side": 1,
       "message": "Should be @GuardedBy(\"lock\"). Should this method be private or if it needs to be exposed, how about rename it to \"safePoison\" and add a poison method that locks?",
+      "revId": "3ee2e7a1897544c5cab354c79a1f13f892828be4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_e3db6c19",
+        "filename": "opendaylight/md-sal/cds-access-client/src/main/java/org/opendaylight/controller/cluster/access/client/AbstractClientConnection.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 226,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-12-12T16:19:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1a622d24_d8f29b99",
       "revId": "3ee2e7a1897544c5cab354c79a1f13f892828be4",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
