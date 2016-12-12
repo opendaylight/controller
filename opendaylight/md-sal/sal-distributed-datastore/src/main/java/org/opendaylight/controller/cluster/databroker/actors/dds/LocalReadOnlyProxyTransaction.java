@@ -119,7 +119,7 @@ final class LocalReadOnlyProxyTransaction extends LocalProxyTransaction {
                 }
             });
 
-            successor.seal();
+            successor.ensureSealed();
 
             final ModifyTransactionRequest successorReq = successor.commitRequest(req.isCoordinated());
             successor.sendRequest(successorReq, callback);

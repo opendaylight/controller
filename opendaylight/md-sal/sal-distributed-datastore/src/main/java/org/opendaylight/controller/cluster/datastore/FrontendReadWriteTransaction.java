@@ -11,6 +11,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.primitives.UnsignedLong;
 import com.google.common.util.concurrent.FutureCallback;
+import java.util.Collection;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.NotThreadSafe;
 import org.opendaylight.controller.cluster.access.commands.CommitLocalTransactionRequest;
@@ -194,7 +195,6 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
                 readyCohort = null;
             }
         });
-
     }
 
     private void successfulDirectCanCommit(final RequestEnvelope envelope, final long startTime) {
@@ -270,16 +270,19 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
     private @Nullable TransactionSuccess<?> handleModifyTransaction(final ModifyTransactionRequest request,
             final RequestEnvelope envelope, final long now) throws RequestException {
 
-        final DataTreeModification modification = openTransaction.getSnapshot();
-        for (TransactionModification m : request.getModifications()) {
-            if (m instanceof TransactionDelete) {
-                modification.delete(m.getPath());
-            } else if (m instanceof TransactionWrite) {
-                modification.write(m.getPath(), ((TransactionWrite) m).getData());
-            } else if (m instanceof TransactionMerge) {
-                modification.merge(m.getPath(), ((TransactionMerge) m).getData());
-            } else {
-                LOG.warn("{}: ignoring unhandled modification {}", history().persistenceId(), m);
+        final Collection<TransactionModification> mods = request.getModifications();
+        if (!mods.isEmpty()) {
+            final DataTreeModification modification = openTransaction.getSnapshot();
+            for (TransactionModification m : mods) {
+                if (m instanceof TransactionDelete) {
+                    modification.delete(m.getPath());
+                } else if (m instanceof TransactionWrite) {
+                    modification.write(m.getPath(), ((TransactionWrite) m).getData());
+                } else if (m instanceof TransactionMerge) {
+                    modification.merge(m.getPath(), ((TransactionMerge) m).getData());
+                } else {
+                    LOG.warn("{}: ignoring unhandled modification {}", history().persistenceId(), m);
+                }
             }
         }
 
@@ -293,18 +296,29 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
                 openTransaction.abort();
                 openTransaction = null;
                 return replyModifySuccess(request.getSequence());
+            case READY:
+                ensureReady();
+                return replyModifySuccess(request.getSequence());
             case SIMPLE:
-                readyCohort = openTransaction.ready();
-                openTransaction = null;
+                ensureReady();
                 directCommit(envelope, now);
                 return null;
             case THREE_PHASE:
-                readyCohort = openTransaction.ready();
-                openTransaction = null;
+                ensureReady();
                 coordinatedCommit(envelope, now);
                 return null;
             default:
                 throw new UnsupportedRequestException(request);
+        }
+    }
+
+    private void ensureReady() {
+        // We may have a combination of READY + SIMPLE/THREE_PHASE , in which case we want to ready the transaction
+        // only once.
+        if (readyCohort == null) {
+            readyCohort = openTransaction.ready();
+            LOG.debug("{}: transitioned {} to ready", history().persistenceId(), openTransaction.getIdentifier());
+            openTransaction = null;
         }
     }
 }
