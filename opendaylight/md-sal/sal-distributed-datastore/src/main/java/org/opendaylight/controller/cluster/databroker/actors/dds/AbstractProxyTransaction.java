@@ -161,7 +161,7 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
      * Successor, unlike {@link AbstractProxyTransaction#seal()} is triggered from the client actor thread, which means
      * the successor placement needs to be atomic with regard to the application thread.
      *
-     * In the common case, the application thread performs performs the seal operations and then "immediately" sends
+     * In the common case, the application thread performs the seal operations and then "immediately" sends
      * the corresponding message. The uncommon case is when the seal and send operations race with a connect completion
      * or timeout, when a successor is injected.
      *
@@ -271,6 +271,7 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
     }
 
     private void checkSealed() {
+        // FIXME some tarnsactions are not sealed
         Preconditions.checkState(sealed != 0, "Transaction %s has not been sealed yet", getIdentifier());
     }
 
@@ -332,9 +333,8 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
     }
 
     /**
-     * Commit this transaction, possibly in a coordinated fashion.
+     * Commit this transaction
      *
-     * @param coordinated True if this transaction should be coordinated across multiple participants.
      * @return Future completion
      */
     final ListenableFuture<Boolean> directCommit() {
