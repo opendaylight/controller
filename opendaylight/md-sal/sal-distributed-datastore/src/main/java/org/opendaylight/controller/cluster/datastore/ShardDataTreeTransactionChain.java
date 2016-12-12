@@ -55,7 +55,7 @@ final class ShardDataTreeTransactionChain extends ShardDataTreeTransactionParent
         final DataTreeSnapshot snapshot = getSnapshot();
         LOG.debug("Allocated read-only transaction {} snapshot {}", txId, snapshot);
 
-        return new ReadOnlyShardDataTreeTransaction(txId, snapshot);
+        return new ReadOnlyShardDataTreeTransaction(this, txId, snapshot);
     }
 
     ReadWriteShardDataTreeTransaction newReadWriteTransaction(final TransactionIdentifier txId) {
@@ -72,17 +72,24 @@ final class ShardDataTreeTransactionChain extends ShardDataTreeTransactionParent
     }
 
     @Override
-    protected void abortTransaction(final AbstractShardDataTreeTransaction<?> transaction) {
+    void abortTransaction(final AbstractShardDataTreeTransaction<?> transaction, final Runnable callback) {
         if (transaction instanceof ReadWriteShardDataTreeTransaction) {
             Preconditions.checkState(openTransaction != null,
                     "Attempted to abort transaction %s while none is outstanding", transaction);
-            LOG.debug("Aborted transaction {}", transaction);
+            LOG.debug("Aborted open transaction {}", transaction);
             openTransaction = null;
         }
+
+        dataTree.abortTransaction(transaction, callback);
     }
 
     @Override
-    protected ShardDataTreeCohort finishTransaction(final ReadWriteShardDataTreeTransaction transaction) {
+    void purgeTransaction(final AbstractShardDataTreeTransaction<?> transaction, final Runnable callback) {
+        dataTree.abortTransaction(transaction, callback);
+    }
+
+    @Override
+    ShardDataTreeCohort finishTransaction(final ReadWriteShardDataTreeTransaction transaction) {
         Preconditions.checkState(openTransaction != null,
                 "Attempted to finish transaction %s while none is outstanding", transaction);
 
