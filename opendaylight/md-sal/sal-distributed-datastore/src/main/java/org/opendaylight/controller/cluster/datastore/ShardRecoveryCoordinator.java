@@ -27,21 +27,51 @@ import org.slf4j.Logger;
  *
  * @author Thomas Pantelis
  */
-class ShardRecoveryCoordinator implements RaftActorRecoveryCohort {
+abstract class ShardRecoveryCoordinator implements RaftActorRecoveryCohort {
+    private static final class Simple extends ShardRecoveryCoordinator {
+        Simple(final ShardDataTree store, final String shardName, final Logger log) {
+            super(store, shardName, log);
+        }
+
+        @Override
+        public Snapshot getRestoreFromSnapshot() {
+            return null;
+        }
+    }
+
+    private static final class WithSnapshot extends ShardRecoveryCoordinator {
+        private final Snapshot restoreFromSnapshot;
+
+        WithSnapshot(final ShardDataTree store, final String shardName, final Logger log, final Snapshot snapshot) {
+            super(store, shardName, log);
+            this.restoreFromSnapshot = Preconditions.checkNotNull(snapshot);
+        }
+
+        @Override
+        public Snapshot getRestoreFromSnapshot() {
+            return restoreFromSnapshot;
+        }
+    }
+
     private final ShardDataTree store;
     private final String shardName;
     private final Logger log;
-    private final Snapshot restoreFromSnapshot;
 
     private boolean open;
 
-    ShardRecoveryCoordinator(final ShardDataTree store,  final Snapshot restoreFromSnapshot, final String shardName,
-            final Logger log) {
+    ShardRecoveryCoordinator(final ShardDataTree store, final String shardName, final Logger log) {
         this.store = Preconditions.checkNotNull(store);
         this.shardName = Preconditions.checkNotNull(shardName);
         this.log = Preconditions.checkNotNull(log);
+    }
 
-        this.restoreFromSnapshot = restoreFromSnapshot;
+    static ShardRecoveryCoordinator create(final ShardDataTree store, final String shardName, final Logger log) {
+        return new Simple(store, shardName, log);
+    }
+
+    static ShardRecoveryCoordinator forSnapshot(final ShardDataTree store, final String shardName, final Logger log,
+            final Snapshot snapshot) {
+        return new WithSnapshot(store, shardName, log, snapshot);
     }
 
     @Override
@@ -103,10 +133,5 @@ class ShardRecoveryCoordinator implements RaftActorRecoveryCohort {
                     "%s: Failed to apply recovery snapshot %s. Node data was written to file %s",
                     shardName, shardSnapshot, f), e);
         }
-    }
-
-    @Override
-    public Snapshot getRestoreFromSnapshot() {
-        return restoreFromSnapshot;
     }
 }
