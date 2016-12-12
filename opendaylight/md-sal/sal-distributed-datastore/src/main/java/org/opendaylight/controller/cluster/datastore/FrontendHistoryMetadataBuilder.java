@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import com.google.common.base.Preconditions;
+import javax.annotation.Nonnull;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
@@ -43,10 +44,32 @@ final class FrontendHistoryMetadataBuilder implements Builder<FrontendHistoryMet
     }
 
     void onHistoryClosed() {
+        Preconditions.checkState(identifier.getHistoryId() != 0);
         closed = true;
     }
 
     void onTransactionCommitted(final TransactionIdentifier txId) {
         nextTransaction = txId.getTransactionId() + 1;
+    }
+
+    /**
+     * Transform frontend metadata for a particular client history into its {@link LocalFrontendHistory} counterpart.
+     *
+     * @param shard parent shard
+     * @return Leader history state
+     */
+    @Nonnull AbstractFrontendHistory toLeaderState(@Nonnull final Shard shard) {
+        if (identifier.getHistoryId() == 0) {
+            return new StandaloneFrontendHistory(shard.persistenceId(), shard.ticker(), identifier.getClientId(),
+                shard.getDataStore());
+        }
+
+        // FIXME: BUG-5280: pass down nextTransaction and closed
+
+
+
+
+        return new LocalFrontendHistory(shard.persistenceId(), shard.getDataStore(),
+            shard.getDataStore().ensureTransactionChain(identifier));
     }
 }
