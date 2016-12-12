@@ -30,8 +30,10 @@ public final class ModifyTransactionRequestBuilder implements Builder<ModifyTran
     private final List<TransactionModification> modifications = new ArrayList<>(1);
     private final TransactionIdentifier identifier;
     private final ActorRef replyTo;
+
     private PersistenceProtocol protocol;
-    private Long sequence;
+    private boolean haveSequence;
+    private long sequence;
 
     public ModifyTransactionRequestBuilder(final TransactionIdentifier identifier, final ActorRef replyTo) {
         this.identifier = Preconditions.checkNotNull(identifier);
@@ -53,7 +55,9 @@ public final class ModifyTransactionRequestBuilder implements Builder<ModifyTran
     }
 
     public void setSequence(final long sequence) {
+        Preconditions.checkState(!haveSequence, "Sequence has already been set");
         this.sequence = sequence;
+        haveSequence = true;
     }
 
     public void setAbort() {
@@ -68,19 +72,24 @@ public final class ModifyTransactionRequestBuilder implements Builder<ModifyTran
         protocol = coordinated ? PersistenceProtocol.THREE_PHASE : PersistenceProtocol.SIMPLE;
     }
 
+    public void setReady() {
+        checkNotFinished();
+        protocol = PersistenceProtocol.READY;
+    }
+
     public int size() {
         return modifications.size();
     }
 
     @Override
     public ModifyTransactionRequest build() {
-        Preconditions.checkState(sequence != null, "Request sequence has not been set");
+        Preconditions.checkState(haveSequence, "Request sequence has not been set");
 
         final ModifyTransactionRequest ret = new ModifyTransactionRequest(identifier, sequence, replyTo, modifications,
             protocol);
         modifications.clear();
         protocol = null;
-        sequence = null;
+        haveSequence = false;
         return ret;
     }
 }
