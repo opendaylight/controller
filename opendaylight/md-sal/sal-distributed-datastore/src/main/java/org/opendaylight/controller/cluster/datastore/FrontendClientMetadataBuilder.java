@@ -69,13 +69,6 @@ final class FrontendClientMetadataBuilder implements Builder<FrontendClientMetad
     }
 
     private FrontendHistoryMetadataBuilder ensureHistory(final LocalHistoryIdentifier historyId) {
-        final FrontendHistoryMetadataBuilder existing = currentHistories.get(historyId);
-        if (existing != null) {
-            return existing;
-        }
-
-        final FrontendHistoryMetadataBuilder ret = new FrontendHistoryMetadataBuilder(historyId);
-        currentHistories.put(historyId, ret);
-        return ret;
+        return currentHistories.computeIfAbsent(historyId, FrontendHistoryMetadataBuilder::new);
     }
 }
