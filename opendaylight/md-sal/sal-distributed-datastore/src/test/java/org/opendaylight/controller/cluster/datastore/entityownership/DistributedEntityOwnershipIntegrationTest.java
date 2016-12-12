@@ -57,7 +57,6 @@ import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolic
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
-import org.opendaylight.mdsal.eos.common.api.CandidateAlreadyRegisteredException;
 import org.opendaylight.mdsal.eos.common.api.EntityOwnershipState;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntity;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipCandidateRegistration;
@@ -452,7 +451,7 @@ public class DistributedEntityOwnershipIntegrationTest {
      * Reproduces bug <a href="https://bugs.opendaylight.org/show_bug.cgi?id=4554">4554</a>.
      */
     @Test
-    public void testCloseCandidateRegistrationInQuickSuccession() throws CandidateAlreadyRegisteredException {
+    public void testCloseCandidateRegistrationInQuickSuccession() throws Exception {
         String name = "testCloseCandidateRegistrationInQuickSuccession";
         MemberNode leaderNode = MemberNode.builder(memberNodes).akkaConfig("Member1").testName(name)
                 .moduleShardsConfig(MODULE_SHARDS_CONFIG).schemaContext(SCHEMA_CONTEXT).createOperDatastore(false)
