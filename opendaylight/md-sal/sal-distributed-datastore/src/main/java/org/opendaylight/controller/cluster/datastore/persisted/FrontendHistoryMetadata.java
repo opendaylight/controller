@@ -9,8 +9,8 @@ package org.opendaylight.controller.cluster.datastore.persisted;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Verify;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableRangeSet;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Range;
 import com.google.common.collect.RangeSet;
 import com.google.common.collect.TreeRangeSet;
@@ -18,26 +18,25 @@ import com.google.common.primitives.UnsignedLong;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Set;
 import org.opendaylight.yangtools.concepts.WritableObject;
 import org.opendaylight.yangtools.concepts.WritableObjects;
 
 public final class FrontendHistoryMetadata implements WritableObject {
     private final RangeSet<UnsignedLong> purgedTransactions;
-    private final Map<UnsignedLong, Boolean> closedTransactions;
+    private final Set<UnsignedLong> closedTransactions;
     private final long historyId;
     private final long cookie;
     private final boolean closed;
 
     public FrontendHistoryMetadata(final long historyId, final long cookie, final boolean closed,
-            final Map<UnsignedLong, Boolean> closedTransactions, final RangeSet<UnsignedLong> purgedTransactions) {
+            final Collection<UnsignedLong> closedTransactions, final RangeSet<UnsignedLong> purgedTransactions) {
         this.historyId = historyId;
         this.cookie = cookie;
         this.closed = closed;
-        this.closedTransactions = ImmutableMap.copyOf(closedTransactions);
+        this.closedTransactions = ImmutableSet.copyOf(closedTransactions);
         this.purgedTransactions = ImmutableRangeSet.copyOf(purgedTransactions);
     }
 
@@ -53,7 +52,7 @@ public final class FrontendHistoryMetadata implements WritableObject {
         return closed;
     }
 
-    public Map<UnsignedLong, Boolean> getClosedTransactions() {
+    public Collection<UnsignedLong> getClosedTransactions() {
         return closedTransactions;
     }
 
@@ -68,9 +67,8 @@ public final class FrontendHistoryMetadata implements WritableObject {
 
         final Set<Range<UnsignedLong>> purgedRanges = purgedTransactions.asRanges();
         WritableObjects.writeLongs(out, closedTransactions.size(), purgedRanges.size());
-        for (Entry<UnsignedLong, Boolean> e : closedTransactions.entrySet()) {
-            WritableObjects.writeLong(out, e.getKey().longValue());
-            out.writeBoolean(e.getValue().booleanValue());
+        for (UnsignedLong l : closedTransactions) {
+            WritableObjects.writeLong(out, l.longValue());
         }
         for (Range<UnsignedLong> r : purgedRanges) {
             WritableObjects.writeLongs(out, r.lowerEndpoint().longValue(), r.upperEndpoint().longValue());
@@ -92,11 +90,9 @@ public final class FrontendHistoryMetadata implements WritableObject {
         Verify.verify(ls >= 0 && ls <= Integer.MAX_VALUE);
         final int psize = (int) ls;
 
-        final Map<UnsignedLong, Boolean> closedTransactions = new HashMap<>(csize);
+        final Collection<UnsignedLong> closedTransactions = new ArrayList<>(csize);
         for (int i = 0; i < csize; ++i) {
-            final UnsignedLong key = UnsignedLong.fromLongBits(WritableObjects.readLong(in));
-            final Boolean value = Boolean.valueOf(in.readBoolean());
-            closedTransactions.put(key, value);
+            closedTransactions.add(UnsignedLong.fromLongBits(WritableObjects.readLong(in)));
         }
         final RangeSet<UnsignedLong> purgedTransactions = TreeRangeSet.create();
         for (int i = 0; i < psize; ++i) {

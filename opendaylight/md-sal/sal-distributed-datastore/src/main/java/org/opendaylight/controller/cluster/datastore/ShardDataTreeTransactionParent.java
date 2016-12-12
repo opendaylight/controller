@@ -14,7 +14,7 @@ abstract class ShardDataTreeTransactionParent {
 
     abstract void abortTransaction(AbstractShardDataTreeTransaction<?> transaction, Runnable callback);
 
-    abstract void purgeTransaction(TransactionIdentifier id, Runnable callback);
+    abstract void purgeTransaction(AbstractShardDataTreeTransaction<?> transaction, Runnable callback);
 
     abstract ShardDataTreeCohort finishTransaction(ReadWriteShardDataTreeTransaction transaction);
 

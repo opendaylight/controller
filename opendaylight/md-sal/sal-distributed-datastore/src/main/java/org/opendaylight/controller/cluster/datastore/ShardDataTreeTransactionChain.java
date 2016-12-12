@@ -84,8 +84,8 @@ final class ShardDataTreeTransactionChain extends ShardDataTreeTransactionParent
     }
 
     @Override
-    void purgeTransaction(final TransactionIdentifier id, final Runnable callback) {
-        dataTree.purgeTransaction(id, callback);
+    void purgeTransaction(final AbstractShardDataTreeTransaction<?> transaction, final Runnable callback) {
+        dataTree.abortTransaction(transaction, callback);
     }
 
     @Override

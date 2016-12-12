@@ -9,19 +9,17 @@ package org.opendaylight.controller.cluster.datastore;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableMap;
+import com.google.common.base.Ticker;
 import com.google.common.collect.Range;
 import com.google.common.collect.RangeSet;
+import com.google.common.collect.TreeRangeSet;
 import com.google.common.primitives.UnsignedLong;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import javax.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.commands.AbstractReadTransactionRequest;
-import org.opendaylight.controller.cluster.access.commands.ClosedTransactionException;
 import org.opendaylight.controller.cluster.access.commands.CommitLocalTransactionRequest;
-import org.opendaylight.controller.cluster.access.commands.DeadTransactionException;
-import org.opendaylight.controller.cluster.access.commands.LocalHistorySuccess;
 import org.opendaylight.controller.cluster.access.commands.OutOfOrderRequestException;
 import org.opendaylight.controller.cluster.access.commands.TransactionPurgeRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionPurgeResponse;
@@ -47,22 +45,14 @@ abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdent
     private static final OutOfOrderRequestException UNSEQUENCED_START = new OutOfOrderRequestException(0);
 
     private final Map<TransactionIdentifier, FrontendTransaction> transactions = new HashMap<>();
-    private final RangeSet<UnsignedLong> purgedTransactions;
+    private final RangeSet<UnsignedLong> purgedTransactions = TreeRangeSet.create();
+
     private final String persistenceId;
-    private final ShardDataTree tree;
+    private final Ticker ticker;
 
-    /**
-     * Transactions closed by the previous leader. Boolean indicates whether the transaction was committed (true) or
-     * aborted (false). We only ever shrink these.
-     */
-    private Map<UnsignedLong, Boolean> closedTransactions;
-
-    AbstractFrontendHistory(final String persistenceId, final ShardDataTree tree,
-        final Map<UnsignedLong, Boolean> closedTransactions, final RangeSet<UnsignedLong> purgedTransactions) {
+    AbstractFrontendHistory(final String persistenceId, final Ticker ticker) {
         this.persistenceId = Preconditions.checkNotNull(persistenceId);
-        this.tree = Preconditions.checkNotNull(tree);
-        this.closedTransactions = Preconditions.checkNotNull(closedTransactions);
-        this.purgedTransactions = Preconditions.checkNotNull(purgedTransactions);
+        this.ticker = Preconditions.checkNotNull(ticker);
     }
 
     final String persistenceId() {
@@ -70,35 +60,19 @@ abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdent
     }
 
     final long readTime() {
-        return tree.ticker().read();
+        return ticker.read();
     }
 
     final @Nullable TransactionSuccess<?> handleTransactionRequest(final TransactionRequest<?> request,
             final RequestEnvelope envelope, final long now) throws RequestException {
         final TransactionIdentifier id = request.getTarget();
-        final UnsignedLong ul = UnsignedLong.fromLongBits(id.getTransactionId());
 
         if (request instanceof TransactionPurgeRequest) {
+            final UnsignedLong ul = UnsignedLong.fromLongBits(id.getTransactionId());
             if (purgedTransactions.contains(ul)) {
                 // Retransmitted purge request: nothing to do
                 LOG.debug("{}: transaction {} already purged", persistenceId, id);
                 return new TransactionPurgeResponse(id, request.getSequence());
-            }
-
-            // We perform two lookups instead of a straight remove, because once the map becomes empty we switch it
-            // to an ImmutableMap, which does not allow remove().
-            if (closedTransactions.containsKey(ul)) {
-                tree.purgeTransaction(id, () -> {
-                    closedTransactions.remove(ul);
-                    if (closedTransactions.isEmpty()) {
-                        closedTransactions = ImmutableMap.of();
-                    }
-
-                    purgedTransactions.add(Range.singleton(ul));
-                    LOG.debug("{}: finished purging inherited transaction {}", persistenceId(), id);
-                    envelope.sendSuccess(new TransactionPurgeResponse(id, request.getSequence()), readTime() - now);
-                });
-                return null;
             }
 
             final FrontendTransaction tx = transactions.get(id);
@@ -118,18 +92,6 @@ abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdent
                 envelope.sendSuccess(new TransactionPurgeResponse(id, request.getSequence()), readTime() - now);
             });
             return null;
-        }
-
-        if (purgedTransactions.contains(ul)) {
-            LOG.warn("{}: Request {} is contained purged transactions {}", persistenceId, request, purgedTransactions);
-            throw new DeadTransactionException(purgedTransactions);
-        }
-        final Boolean closed = closedTransactions.get(ul);
-        if (closed != null) {
-            final boolean successful = closed.booleanValue();
-            LOG.debug("{}: Request {} refers to a {} transaction", persistenceId, request, successful ? "successful"
-                    : "failed");
-            throw new ClosedTransactionException(successful);
         }
 
         FrontendTransaction tx = transactions.get(id);
@@ -152,20 +114,6 @@ abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdent
         }
 
         return tx.handleRequest(request, envelope, now);
-    }
-
-    void destroy(final long sequence, final RequestEnvelope envelope, final long now) {
-        LOG.debug("{}: closing history {}", persistenceId(), getIdentifier());
-        tree.closeTransactionChain(getIdentifier(), () -> {
-            envelope.sendSuccess(new LocalHistorySuccess(getIdentifier(), sequence), readTime() - now);
-        });
-    }
-
-    void purge(final long sequence, final RequestEnvelope envelope, final long now) {
-        LOG.debug("{}: purging history {}", persistenceId(), getIdentifier());
-        tree.purgeTransactionChain(getIdentifier(), () -> {
-            envelope.sendSuccess(new LocalHistorySuccess(getIdentifier(), sequence), readTime() - now);
-        });
     }
 
     private FrontendTransaction createTransaction(final TransactionRequest<?> request, final TransactionIdentifier id)

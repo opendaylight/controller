@@ -12,8 +12,8 @@ import com.google.common.collect.Range;
 import com.google.common.collect.RangeSet;
 import com.google.common.collect.TreeRangeSet;
 import com.google.common.primitives.UnsignedLong;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Collection;
+import java.util.HashSet;
 import javax.annotation.Nonnull;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
@@ -25,7 +25,7 @@ import org.opendaylight.yangtools.concepts.Identifiable;
 final class FrontendHistoryMetadataBuilder implements Builder<FrontendHistoryMetadata>,
         Identifiable<LocalHistoryIdentifier> {
 
-    private final Map<UnsignedLong, Boolean> closedTransactions;
+    private final Collection<UnsignedLong> closedTransactions;
     private final RangeSet<UnsignedLong> purgedTransactions;
     private final LocalHistoryIdentifier identifier;
 
@@ -34,12 +34,12 @@ final class FrontendHistoryMetadataBuilder implements Builder<FrontendHistoryMet
     FrontendHistoryMetadataBuilder(final LocalHistoryIdentifier identifier) {
         this.identifier = Preconditions.checkNotNull(identifier);
         this.purgedTransactions = TreeRangeSet.create();
-        this.closedTransactions = new HashMap<>(2);
+        this.closedTransactions = new HashSet<>(2);
     }
 
     FrontendHistoryMetadataBuilder(final ClientIdentifier clientId, final FrontendHistoryMetadata meta) {
         identifier = new LocalHistoryIdentifier(clientId, meta.getHistoryId(), meta.getCookie());
-        closedTransactions = new HashMap<>(meta.getClosedTransactions());
+        closedTransactions = new HashSet<>(meta.getClosedTransactions());
         purgedTransactions = TreeRangeSet.create(meta.getPurgedTransactions());
         closed = meta.isClosed();
     }
@@ -61,11 +61,11 @@ final class FrontendHistoryMetadataBuilder implements Builder<FrontendHistoryMet
     }
 
     void onTransactionAborted(final TransactionIdentifier txId) {
-        closedTransactions.put(UnsignedLong.fromLongBits(txId.getTransactionId()), Boolean.FALSE);
+        closedTransactions.add(UnsignedLong.fromLongBits(txId.getTransactionId()));
     }
 
     void onTransactionCommitted(final TransactionIdentifier txId) {
-        closedTransactions.put(UnsignedLong.fromLongBits(txId.getTransactionId()), Boolean.TRUE);
+        closedTransactions.add(UnsignedLong.fromLongBits(txId.getTransactionId()));
     }
 
     void onTransactionPurged(final TransactionIdentifier txId) {
@@ -82,8 +82,8 @@ final class FrontendHistoryMetadataBuilder implements Builder<FrontendHistoryMet
      */
     @Nonnull AbstractFrontendHistory toLeaderState(@Nonnull final Shard shard) {
         if (identifier.getHistoryId() == 0) {
-            return StandaloneFrontendHistory.recreate(shard.persistenceId(), identifier.getClientId(),
-                shard.getDataStore(), closedTransactions, purgedTransactions);
+            return new StandaloneFrontendHistory(shard.persistenceId(), shard.ticker(), identifier.getClientId(),
+                shard.getDataStore());
         }
 
         return LocalFrontendHistory.recreate(shard.persistenceId(), shard.getDataStore(),

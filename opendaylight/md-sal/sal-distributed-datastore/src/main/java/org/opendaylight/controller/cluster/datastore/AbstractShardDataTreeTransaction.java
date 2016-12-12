@@ -79,7 +79,7 @@ abstract class AbstractShardDataTreeTransaction<T extends DataTreeSnapshot>
         if (!closed) {
             LOG.warn("Purging unclosed transaction {}", id);
         }
-        parent.purgeTransaction(id, callback);
+        parent.purgeTransaction(this, callback);
     }
 
     @Override

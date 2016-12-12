@@ -71,8 +71,14 @@ final class LeaderFrontendState implements Identifiable<ClientIdentifier> {
     // - per-RequestException throw counters
 
     LeaderFrontendState(final String persistenceId, final ClientIdentifier clientId, final ShardDataTree tree) {
-        this(persistenceId, clientId, tree, TreeRangeSet.create(), StandaloneFrontendHistory.create(persistenceId,
-            clientId, tree), new HashMap<>());
+        this(persistenceId, clientId, tree, TreeRangeSet.create(), new HashMap<>());
+    }
+
+    LeaderFrontendState(final String persistenceId, final ClientIdentifier clientId, final ShardDataTree tree,
+        final TreeRangeSet<UnsignedLong> purgedHistories,
+        final Map<LocalHistoryIdentifier, LocalFrontendHistory> localHistories) {
+        this(persistenceId, clientId, tree, purgedHistories,
+            new StandaloneFrontendHistory(persistenceId, tree.ticker(), clientId, tree), localHistories);
     }
 
     LeaderFrontendState(final String persistenceId, final ClientIdentifier clientId, final ShardDataTree tree,
