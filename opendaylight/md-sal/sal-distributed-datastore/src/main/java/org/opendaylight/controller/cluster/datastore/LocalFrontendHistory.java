@@ -71,8 +71,7 @@ final class LocalFrontendHistory extends AbstractFrontendHistory {
         return chain.createReadyCohort(id, mod);
     }
 
-    void destroy(final long sequence, final RequestEnvelope envelope, final long now)
-            throws RequestException {
+    void destroy(final long sequence, final RequestEnvelope envelope, final long now) {
         LOG.debug("{}: closing history {}", persistenceId(), getIdentifier());
         tree.closeTransactionChain(getIdentifier(), () -> {
             envelope.sendSuccess(new LocalHistorySuccess(getIdentifier(), sequence), readTime() - now);
