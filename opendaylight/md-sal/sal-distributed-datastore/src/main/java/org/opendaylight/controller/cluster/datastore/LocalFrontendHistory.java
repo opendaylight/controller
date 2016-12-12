@@ -77,8 +77,7 @@ final class LocalFrontendHistory extends AbstractFrontendHistory {
     LocalHistorySuccess destroy(final long sequence, final long now) throws RequestException {
         if (state != State.CLOSED) {
             LOG.debug("{}: closing history {}", persistenceId(), getIdentifier());
-
-            // FIXME: add any finalization as needed
+            chain.close();
             state = State.CLOSED;
         }
 
