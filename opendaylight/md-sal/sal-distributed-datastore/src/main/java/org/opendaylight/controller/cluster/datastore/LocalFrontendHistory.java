@@ -8,6 +8,9 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.RangeSet;
+import com.google.common.primitives.UnsignedLong;
+import java.util.Collection;
 import org.opendaylight.controller.cluster.access.commands.DeadTransactionException;
 import org.opendaylight.controller.cluster.access.commands.LocalHistorySuccess;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
@@ -32,11 +35,26 @@ final class LocalFrontendHistory extends AbstractFrontendHistory {
 
     private Long lastSeenTransaction;
 
-    LocalFrontendHistory(final String persistenceId, final ShardDataTree tree,
-            final ShardDataTreeTransactionChain chain) {
+    private LocalFrontendHistory(final String persistenceId, final ShardDataTree tree,
+            final ShardDataTreeTransactionChain chain, final Long lastSeenTransaction) {
         super(persistenceId, tree.ticker());
         this.tree = Preconditions.checkNotNull(tree);
         this.chain = Preconditions.checkNotNull(chain);
+        this.lastSeenTransaction = lastSeenTransaction;
+    }
+
+    static LocalFrontendHistory create(final String persistenceId, final ShardDataTree tree,
+            final LocalHistoryIdentifier historyId) {
+        return new LocalFrontendHistory(persistenceId, tree, tree.ensureTransactionChain(historyId), null);
+    }
+
+    static LocalFrontendHistory recreate(final String persistenceId, final ShardDataTree tree,
+            final ShardDataTreeTransactionChain chain, final Collection<UnsignedLong> closedTransactions,
+            final RangeSet<UnsignedLong> purgedTransactions) {
+
+
+        // FIXME: BUG-5280: this is not right
+        return new LocalFrontendHistory(persistenceId, tree, chain, null);
     }
 
     @Override
@@ -71,8 +89,7 @@ final class LocalFrontendHistory extends AbstractFrontendHistory {
         return chain.createReadyCohort(id, mod);
     }
 
-    void destroy(final long sequence, final RequestEnvelope envelope, final long now)
-            throws RequestException {
+    void destroy(final long sequence, final RequestEnvelope envelope, final long now) {
         LOG.debug("{}: closing history {}", persistenceId(), getIdentifier());
         tree.closeTransactionChain(getIdentifier(), () -> {
             envelope.sendSuccess(new LocalHistorySuccess(getIdentifier(), sequence), readTime() - now);
