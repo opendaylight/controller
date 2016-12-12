@@ -155,12 +155,15 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
 
         final java.util.Optional<PersistenceProtocol> maybeProtocol = request.getPersistenceProtocol();
         if (maybeProtocol.isPresent()) {
-            seal();
             Verify.verify(callback != null, "Request {} has null callback", request);
+            ensureSealed();
 
             switch (maybeProtocol.get()) {
                 case ABORT:
                     sendAbort(callback);
+                    break;
+                case READY:
+                    // No-op, as we have already issued a seal()
                     break;
                 case SIMPLE:
                     sendRequest(commitRequest(false), callback);
@@ -215,7 +218,7 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
                 }
             });
 
-            successor.seal();
+            successor.ensureSealed();
 
             final ModifyTransactionRequest successorReq = successor.commitRequest(req.isCoordinated());
             successor.sendRequest(successorReq, callback);
@@ -251,7 +254,7 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
             request.getModification().applyToCursor(cursor);
         }
 
-        seal();
+        ensureSealed();
         sendRequest(commitRequest(request.isCoordinated()), callback);
     }
 }

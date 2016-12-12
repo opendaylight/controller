@@ -50,7 +50,16 @@ public enum PersistenceProtocol implements WritableObject {
         byte byteValue() {
             return 3;
         }
-
+    },
+    /**
+     * Transaction is ready. This is not a really a persistence protocol, but an indication that that frontend has
+     * completed modifications on the transaction and considers it ready, without deciding the actual commit protocol.
+     */
+    READY {
+        @Override
+        byte byteValue() {
+            return 4;
+        }
     };
 
     @Override
@@ -78,6 +87,8 @@ public enum PersistenceProtocol implements WritableObject {
                 return SIMPLE;
             case 3:
                 return THREE_PHASE;
+            case 4:
+                return READY;
             default:
                 throw new IllegalArgumentException("Unhandled byte value " + value);
         }
