@@ -130,6 +130,7 @@ public abstract class AbstractDOMBrokerWriteTransaction<T extends DOMStoreWriteT
     }
 
     @Override
+    @SuppressWarnings("checkstyle:IllegalCatch")
     public CheckedFuture<Void, TransactionCommitFailedException> submit() {
         final AbstractDOMTransactionFactory<?> impl = IMPL_UPDATER.getAndSet(this, null);
         checkRunning(impl);
@@ -137,9 +138,16 @@ public abstract class AbstractDOMBrokerWriteTransaction<T extends DOMStoreWriteT
         final Collection<T> txns = getSubtransactions();
         final Collection<DOMStoreThreePhaseCommitCohort> cohorts = new ArrayList<>(txns.size());
 
-        // FIXME: deal with errors thrown by backed (ready and submit can fail in theory)
         for (final T txn : txns) {
-            cohorts.add(txn.ready());
+            try {
+                cohorts.add(txn.ready());
+            } catch (final Exception e) {
+                final CheckedFuture<Void, TransactionCommitFailedException> failure =
+                        Futures.immediateFailedCheckedFuture(
+                                new TransactionCommitFailedException("Transaction failed", e, null));
+                FUTURE_UPDATER.lazySet(this, failure);
+                return failure;
+            }
         }
 
         final CheckedFuture<Void, TransactionCommitFailedException> ret = impl.submit(this, cohorts);
