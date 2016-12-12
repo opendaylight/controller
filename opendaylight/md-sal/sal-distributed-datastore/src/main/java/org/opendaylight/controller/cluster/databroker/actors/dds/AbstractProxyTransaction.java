@@ -332,9 +332,8 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
     }
 
     /**
-     * Commit this transaction, possibly in a coordinated fashion.
+     * Commit this transaction
      *
-     * @param coordinated True if this transaction should be coordinated across multiple participants.
      * @return Future completion
      */
     final ListenableFuture<Boolean> directCommit() {
