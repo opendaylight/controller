@@ -62,13 +62,6 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
             final LocalHistoryIdentifier identifier) {
             super(connection, identifier);
         }
-
-        @Override
-        final AbstractProxyTransaction doCreateTransactionProxy(
-                final AbstractClientConnection<ShardBackendInfo> connection, final TransactionIdentifier txId,
-                final boolean snapshotOnly) {
-            return new RemoteProxyTransaction(this, txId, snapshotOnly);
-        }
     }
 
     private static final class Local extends AbstractLocal {
@@ -165,6 +158,12 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
         }
 
         @Override
+        AbstractProxyTransaction doCreateTransactionProxy(final AbstractClientConnection<ShardBackendInfo> connection,
+                final TransactionIdentifier txId, final boolean snapshotOnly) {
+            return new RemoteProxyTransaction(this, txId, snapshotOnly, true);
+        }
+
+        @Override
         ProxyHistory createSuccessor(final AbstractClientConnection<ShardBackendInfo> connection) {
             return createClient(connection, getIdentifier());
         }
@@ -174,6 +173,12 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
         RemoteSingle(final AbstractClientConnection<ShardBackendInfo> connection,
             final LocalHistoryIdentifier identifier) {
             super(connection, identifier);
+        }
+
+        @Override
+        AbstractProxyTransaction doCreateTransactionProxy(final AbstractClientConnection<ShardBackendInfo> connection,
+                final TransactionIdentifier txId, final boolean snapshotOnly) {
+            return new RemoteProxyTransaction(this, txId, snapshotOnly, false);
         }
 
         @Override
