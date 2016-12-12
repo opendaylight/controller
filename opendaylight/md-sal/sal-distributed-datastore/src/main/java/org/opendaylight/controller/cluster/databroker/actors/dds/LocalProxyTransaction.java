@@ -93,6 +93,7 @@ abstract class LocalProxyTransaction extends AbstractProxyTransaction {
             final @Nullable Consumer<Response<?, ?>> callback) {
         if (request instanceof ModifyTransactionRequest) {
             applyModifyTransactionRequest((ModifyTransactionRequest) request, callback);
+            // FIXME callback.accept?
         } else if (request instanceof ReadTransactionRequest) {
             final YangInstanceIdentifier path = ((ReadTransactionRequest) request).getPath();
             final Optional<NormalizedNode<?, ?>> result = readOnlyView().readNode(path);

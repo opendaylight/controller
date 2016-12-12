@@ -42,7 +42,7 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
     @VisibleForTesting
     static final long NO_PROGRESS_TIMEOUT_NANOS = TimeUnit.MINUTES.toNanos(15);
     @VisibleForTesting
-    static final long REQUEST_TIMEOUT_NANOS = TimeUnit.SECONDS.toNanos(30);
+    static final long REQUEST_TIMEOUT_NANOS = TimeUnit.SECONDS.toNanos(3);
 
     private final Lock lock = new ReentrantLock();
     private final ClientActorContext context;
@@ -137,7 +137,7 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
         final long delay = enqueueEntry(entry, now);
         try {
             TimeUnit.NANOSECONDS.sleep(delay);
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
             LOG.debug("Interrupted while sleeping");
         }
     }

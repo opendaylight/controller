@@ -76,7 +76,7 @@ abstract class AbstractShardBackendResolver extends BackendInfoResolver<ShardBac
      * non-operational.
      */
     // TODO: maybe make this configurable somehow?
-    private static final Timeout DEAD_TIMEOUT = Timeout.apply(15, TimeUnit.MINUTES);
+    private static final Timeout DEAD_TIMEOUT = Timeout.apply(15, TimeUnit.SECONDS);
 
     private final AtomicLong nextSessionId = new AtomicLong();
     private final Function1<ActorRef, ?> connectFunction;

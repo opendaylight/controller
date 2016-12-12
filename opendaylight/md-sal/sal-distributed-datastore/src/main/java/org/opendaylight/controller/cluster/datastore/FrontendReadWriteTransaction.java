@@ -237,7 +237,7 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
 
     private void handleCommitLocalTransaction(final CommitLocalTransactionRequest request,
             final RequestEnvelope envelope, final long now) throws RequestException {
-        if (sealedModification.equals(request.getModification())) {
+        if (request.getModification().equals(sealedModification)) {
             readyCohort = history().createReadyCohort(getIdentifier(), sealedModification);
 
             if (request.isCoordinated()) {
