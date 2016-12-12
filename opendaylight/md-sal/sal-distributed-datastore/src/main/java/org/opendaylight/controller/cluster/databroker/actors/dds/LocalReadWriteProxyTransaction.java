@@ -34,6 +34,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.CursorAwareDataTreeS
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModificationCursor;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
+import org.opendaylight.yangtools.yang.data.impl.schema.tree.SchemaValidationFailedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -144,7 +145,13 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
             if (mod instanceof TransactionWrite) {
                 modification.write(mod.getPath(), ((TransactionWrite)mod).getData());
             } else if (mod instanceof TransactionMerge) {
-                modification.merge(mod.getPath(), ((TransactionMerge)mod).getData());
+                try {
+                    modification.merge(mod.getPath(), ((TransactionMerge) mod).getData());
+                } catch (final SchemaValidationFailedException e) {
+                    ensureSealed();
+                    sendAbort(callback);
+                    return;
+                }
             } else if (mod instanceof TransactionDelete) {
                 modification.delete(mod.getPath());
             } else {
