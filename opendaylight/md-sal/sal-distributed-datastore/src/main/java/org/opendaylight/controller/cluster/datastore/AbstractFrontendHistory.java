@@ -10,12 +10,16 @@ package org.opendaylight.controller.cluster.datastore;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Ticker;
+import com.google.common.collect.Range;
+import com.google.common.collect.RangeSet;
+import com.google.common.primitives.UnsignedLong;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import javax.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.commands.AbstractReadTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.CommitLocalTransactionRequest;
+import org.opendaylight.controller.cluster.access.commands.DeadTransactionException;
 import org.opendaylight.controller.cluster.access.commands.OutOfOrderRequestException;
 import org.opendaylight.controller.cluster.access.commands.TransactionPurgeRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionPurgeResponse;
@@ -41,12 +45,16 @@ abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdent
     private static final OutOfOrderRequestException UNSEQUENCED_START = new OutOfOrderRequestException(0);
 
     private final Map<TransactionIdentifier, FrontendTransaction> transactions = new HashMap<>();
+    private final RangeSet<UnsignedLong> purgedTransactions;
+
     private final String persistenceId;
     private final Ticker ticker;
 
-    AbstractFrontendHistory(final String persistenceId, final Ticker ticker) {
+    AbstractFrontendHistory(final String persistenceId, final Ticker ticker,
+        final RangeSet<UnsignedLong> purgedTransactions) {
         this.persistenceId = Preconditions.checkNotNull(persistenceId);
         this.ticker = Preconditions.checkNotNull(ticker);
+        this.purgedTransactions = Preconditions.checkNotNull(purgedTransactions);
     }
 
     final String persistenceId() {
@@ -60,33 +68,55 @@ abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdent
     final @Nullable TransactionSuccess<?> handleTransactionRequest(final TransactionRequest<?> request,
             final RequestEnvelope envelope, final long now) throws RequestException {
         final TransactionIdentifier id = request.getTarget();
+        final UnsignedLong ul = UnsignedLong.fromLongBits(id.getTransactionId());
 
-        FrontendTransaction tx;
         if (request instanceof TransactionPurgeRequest) {
-            tx = transactions.remove(id);
-            if (tx == null) {
-                // We have no record of the transaction, nothing to do
-                LOG.debug("{}: no state for transaction {}, purge is complete", persistenceId(), id);
+            if (purgedTransactions.contains(ul)) {
+                // Retransmitted purge request: nothing to do
+                LOG.debug("{}: transaction {} already purged", persistenceId, id);
                 return new TransactionPurgeResponse(id, request.getSequence());
             }
-        } else {
-            tx = transactions.get(id);
-            if (tx == null) {
-                // The transaction does not exist and we are about to create it, check sequence number
-                if (request.getSequence() != 0) {
-                    LOG.debug("{}: no transaction state present, unexpected request {}", persistenceId(), request);
-                    throw UNSEQUENCED_START;
-                }
 
-                tx = createTransaction(request, id);
-                transactions.put(id, tx);
-            } else {
-                final Optional<TransactionSuccess<?>> maybeReplay = tx.replaySequence(request.getSequence());
-                if (maybeReplay.isPresent()) {
-                    final TransactionSuccess<?> replay = maybeReplay.get();
-                    LOG.debug("{}: envelope {} replaying response {}", persistenceId(), envelope, replay);
-                    return replay;
-                }
+            final FrontendTransaction tx = transactions.get(id);
+            if (tx == null) {
+                // This should never happen because the purge callback removes the transaction and puts it into
+                // purged transactions in one go. If it does, we warn about the situation and
+                LOG.warn("{}: transaction {} not tracked in {}, but not present in active transactions", persistenceId,
+                    id, purgedTransactions);
+                purgedTransactions.add(Range.singleton(ul));
+                return new TransactionPurgeResponse(id, request.getSequence());
+            }
+
+            tx.purge(() -> {
+                purgedTransactions.add(Range.singleton(ul));
+                transactions.remove(id);
+                LOG.debug("{}: finished purging transaction {}", persistenceId(), id);
+                envelope.sendSuccess(new TransactionPurgeResponse(id, request.getSequence()), readTime() - now);
+            });
+            return null;
+        }
+
+        if (purgedTransactions.contains(ul)) {
+            LOG.warn("Request {} is contained purged transactions {}", request, purgedTransactions);
+            throw new DeadTransactionException(purgedTransactions);
+        }
+
+        FrontendTransaction tx = transactions.get(id);
+        if (tx == null) {
+            // The transaction does not exist and we are about to create it, check sequence number
+            if (request.getSequence() != 0) {
+                LOG.debug("{}: no transaction state present, unexpected request {}", persistenceId(), request);
+                throw UNSEQUENCED_START;
+            }
+
+            tx = createTransaction(request, id);
+            transactions.put(id, tx);
+        } else {
+            final Optional<TransactionSuccess<?>> maybeReplay = tx.replaySequence(request.getSequence());
+            if (maybeReplay.isPresent()) {
+                final TransactionSuccess<?> replay = maybeReplay.get();
+                LOG.debug("{}: envelope {} replaying response {}", persistenceId(), envelope, replay);
+                return replay;
             }
         }
 

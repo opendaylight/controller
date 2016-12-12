@@ -8,6 +8,9 @@
 package org.opendaylight.controller.cluster.access.commands;
 
 import com.google.common.annotations.Beta;
+import com.google.common.collect.ImmutableRangeSet;
+import com.google.common.collect.RangeSet;
+import com.google.common.primitives.UnsignedLong;
 import org.opendaylight.controller.cluster.access.concepts.RequestException;
 
 /**
@@ -20,12 +23,19 @@ import org.opendaylight.controller.cluster.access.concepts.RequestException;
 public final class DeadTransactionException extends RequestException {
     private static final long serialVersionUID = 1L;
 
-    public DeadTransactionException(final long lastSeenTransaction) {
-        super("Transaction up to " + Long.toUnsignedString(lastSeenTransaction) + " are accounted for");
+    private final RangeSet<UnsignedLong> purgedIdentifiers;
+
+    public DeadTransactionException(final RangeSet<UnsignedLong> purgedIdentifiers) {
+        super("Transactions " + purgedIdentifiers + " have been purged");
+        this.purgedIdentifiers = ImmutableRangeSet.copyOf(purgedIdentifiers);
     }
 
     @Override
     public boolean isRetriable() {
         return true;
+    }
+
+    public RangeSet<UnsignedLong> getPurgedIdentifier() {
+        return purgedIdentifiers;
     }
 }
