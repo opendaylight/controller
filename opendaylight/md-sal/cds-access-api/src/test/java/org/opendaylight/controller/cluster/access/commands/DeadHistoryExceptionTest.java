@@ -7,8 +7,9 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 
 import org.opendaylight.controller.cluster.access.concepts.RequestExceptionTest;
 
@@ -18,13 +19,13 @@ public class DeadHistoryExceptionTest extends RequestExceptionTest<DeadHistoryEx
 
     @Override
     protected void isRetriable() {
-        assertTrue(OBJECT.isRetriable());
+        assertFalse(OBJECT.isRetriable());
     }
 
     @Override
     protected void checkMessage() {
         final String message = OBJECT.getMessage();
-        assertTrue("Histories up to 100 are accounted for".equals(message));
+        assertEquals("Histories up to 100 are accounted for", message);
         assertNull(OBJECT.getCause());
     }
 
