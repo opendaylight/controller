@@ -17,11 +17,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Payload persisted when a transaction is aborted. It contains the transaction identifier.
+ * Payload persisted when a transaction is purged from the frontend. It contains the transaction identifier.
  *
  * @author Robert Varga
  */
-public final class AbortTransactionPayload extends AbstractIdentifiablePayload<TransactionIdentifier> {
+public final class PurgeTransactionPayload extends AbstractIdentifiablePayload<TransactionIdentifier> {
     private static final class Proxy extends AbstractProxy<TransactionIdentifier> {
         private static final long serialVersionUID = 1L;
 
@@ -42,20 +42,20 @@ public final class AbortTransactionPayload extends AbstractIdentifiablePayload<T
         }
 
         @Override
-        protected AbortTransactionPayload createObject(final TransactionIdentifier identifier,
+        protected PurgeTransactionPayload createObject(final TransactionIdentifier identifier,
                 final byte[] serialized) {
-            return new AbortTransactionPayload(identifier, serialized);
+            return new PurgeTransactionPayload(identifier, serialized);
         }
     }
 
-    private static final Logger LOG = LoggerFactory.getLogger(AbortTransactionPayload.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PurgeTransactionPayload.class);
     private static final long serialVersionUID = 1L;
 
-    AbortTransactionPayload(final TransactionIdentifier transactionId, final byte[] serialized) {
+    PurgeTransactionPayload(final TransactionIdentifier transactionId, final byte[] serialized) {
         super(transactionId, serialized);
     }
 
-    public static AbortTransactionPayload create(final TransactionIdentifier transactionId) {
+    public static PurgeTransactionPayload create(final TransactionIdentifier transactionId) {
         final ByteArrayDataOutput out = ByteStreams.newDataOutput();
         try {
             transactionId.writeTo(out);
@@ -64,7 +64,7 @@ public final class AbortTransactionPayload extends AbstractIdentifiablePayload<T
             LOG.error("Failed to serialize {}", transactionId, e);
             throw Throwables.propagate(e);
         }
-        return new AbortTransactionPayload(transactionId, out.toByteArray());
+        return new PurgeTransactionPayload(transactionId, out.toByteArray());
     }
 
     @Override

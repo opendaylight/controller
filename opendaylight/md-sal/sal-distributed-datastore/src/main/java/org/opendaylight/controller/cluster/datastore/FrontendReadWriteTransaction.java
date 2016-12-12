@@ -32,8 +32,6 @@ import org.opendaylight.controller.cluster.access.commands.TransactionMerge;
 import org.opendaylight.controller.cluster.access.commands.TransactionModification;
 import org.opendaylight.controller.cluster.access.commands.TransactionPreCommitRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionPreCommitSuccess;
-import org.opendaylight.controller.cluster.access.commands.TransactionPurgeRequest;
-import org.opendaylight.controller.cluster.access.commands.TransactionPurgeResponse;
 import org.opendaylight.controller.cluster.access.commands.TransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionSuccess;
 import org.opendaylight.controller.cluster.access.commands.TransactionWrite;
@@ -103,13 +101,16 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
             handleTransactionDoCommit((TransactionDoCommitRequest) request, envelope, now);
             return null;
         } else if (request instanceof TransactionAbortRequest) {
-            return handleTransactionAbort((TransactionAbortRequest) request, envelope, now);
-        } else if (request instanceof TransactionPurgeRequest) {
-            // No-op for now
-            return new TransactionPurgeResponse(request.getTarget(), request.getSequence());
+            handleTransactionAbort((TransactionAbortRequest) request, envelope, now);
+            return null;
         } else {
             throw new UnsupportedRequestException(request);
         }
+    }
+
+    @Override
+    void purge(final Runnable callback) {
+        openTransaction.purge(callback);
     }
 
     private void handleTransactionPreCommit(final TransactionPreCommitRequest request,
@@ -145,11 +146,12 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
         });
     }
 
-    private TransactionSuccess<?> handleTransactionAbort(final TransactionAbortRequest request,
+    private void handleTransactionAbort(final TransactionAbortRequest request,
             final RequestEnvelope envelope, final long now) throws RequestException {
         if (readyCohort == null) {
-            openTransaction.abort();
-            return new TransactionAbortSuccess(getIdentifier(), request.getSequence());
+            openTransaction.abort(() -> recordAndSendSuccess(envelope, now,
+                new TransactionAbortSuccess(getIdentifier(), request.getSequence())));
+            return;
         }
 
         readyCohort.abort(new FutureCallback<Void>() {
@@ -168,7 +170,6 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
                 recordAndSendFailure(envelope, now, new RuntimeRequestException("Abort failed", failure));
             }
         });
-        return null;
     }
 
     private void coordinatedCommit(final RequestEnvelope envelope, final long now) {
@@ -298,9 +299,9 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
 
         switch (maybeProto.get()) {
             case ABORT:
-                openTransaction.abort();
+                openTransaction.abort(() -> replyModifySuccess(request.getSequence()));
                 openTransaction = null;
-                return replyModifySuccess(request.getSequence());
+                return null;
             case READY:
                 ensureReady();
                 return replyModifySuccess(request.getSequence());

@@ -12,24 +12,14 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 
 public final class ReadWriteShardDataTreeTransaction extends AbstractShardDataTreeTransaction<DataTreeModification> {
-    private final ShardDataTreeTransactionParent parent;
 
-    ReadWriteShardDataTreeTransaction(final ShardDataTreeTransactionParent parent,
-            final TransactionIdentifier id, final DataTreeModification modification) {
-        super(id, modification);
-        this.parent = Preconditions.checkNotNull(parent);
-    }
-
-    @Override
-    void abort() {
-        Preconditions.checkState(close(), "Transaction is already closed");
-
-        parent.abortTransaction(this);
+    ReadWriteShardDataTreeTransaction(final ShardDataTreeTransactionParent parent, final TransactionIdentifier id,
+        final DataTreeModification modification) {
+        super(parent, id, modification);
     }
 
     ShardDataTreeCohort ready() {
         Preconditions.checkState(close(), "Transaction is already closed");
-
-        return parent.finishTransaction(this);
+        return getParent().finishTransaction(this);
     }
 }

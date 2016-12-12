@@ -8,7 +8,12 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import com.google.common.base.Preconditions;
-import com.google.common.base.Ticker;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.RangeSet;
+import com.google.common.collect.TreeRangeSet;
+import com.google.common.primitives.UnsignedLong;
+import java.util.HashMap;
+import java.util.Map;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.RequestException;
@@ -25,11 +30,25 @@ final class StandaloneFrontendHistory extends AbstractFrontendHistory {
     private final LocalHistoryIdentifier identifier;
     private final ShardDataTree tree;
 
-    StandaloneFrontendHistory(final String persistenceId, final Ticker ticker, final ClientIdentifier clientId,
-            final ShardDataTree tree) {
-        super(persistenceId, ticker);
+    private StandaloneFrontendHistory(final String persistenceId, final ClientIdentifier clientId,
+            final ShardDataTree tree, final Map<UnsignedLong, Boolean> closedTransactions,
+            final RangeSet<UnsignedLong> purgedTransactions) {
+        super(persistenceId, tree, closedTransactions, purgedTransactions);
         this.identifier = new LocalHistoryIdentifier(clientId, 0);
         this.tree = Preconditions.checkNotNull(tree);
+    }
+
+    static StandaloneFrontendHistory create(final String persistenceId, final ClientIdentifier clientId,
+            final ShardDataTree tree) {
+        return new StandaloneFrontendHistory(persistenceId, clientId, tree, ImmutableMap.of(),
+            TreeRangeSet.create());
+    }
+
+    static StandaloneFrontendHistory recreate(final String persistenceId, final ClientIdentifier clientId,
+            final ShardDataTree tree, final Map<UnsignedLong, Boolean> closedTransactions,
+            final RangeSet<UnsignedLong> purgedTransactions) {
+        return new StandaloneFrontendHistory(persistenceId, clientId, tree, new HashMap<>(closedTransactions),
+            purgedTransactions);
     }
 
     @Override

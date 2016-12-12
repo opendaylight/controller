@@ -7,25 +7,27 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 
+import com.google.common.collect.ImmutableRangeSet;
 import org.opendaylight.controller.cluster.access.concepts.RequestException;
 import org.opendaylight.controller.cluster.access.concepts.RequestExceptionTest;
 
 public class DeadTransactionExceptionTest extends RequestExceptionTest<DeadTransactionException> {
 
-    private static final RequestException OBJECT = new DeadTransactionException(100);
+    private static final RequestException OBJECT = new DeadTransactionException(ImmutableRangeSet.of());
 
     @Override
     protected void isRetriable() {
-        assertTrue(OBJECT.isRetriable());
+        assertFalse(OBJECT.isRetriable());
     }
 
     @Override
     protected void checkMessage() {
         final String message = OBJECT.getMessage();
-        assertTrue("Transaction up to 100 are accounted for".equals(message));
+        assertEquals("Transactions [] have been purged", message);
         assertNull(OBJECT.getCause());
     }
 
