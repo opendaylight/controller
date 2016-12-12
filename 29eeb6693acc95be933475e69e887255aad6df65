@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a622d24_58584b32",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardDataTree.java",
+        "patchSetId": 15
+      },
+      "lineNbr": 646,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-12-12T13:03:38Z",
+      "side": 1,
+      "message": "Using equals here might be expensive - reference equality would be more efficient and immune to potential latent performance issues on changes to DataTreeCandidate impl(s).",
+      "revId": "29eeb6693acc95be933475e69e887255aad6df65",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_385d8f22",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardDataTree.java",
+        "patchSetId": 15
+      },
+      "lineNbr": 661,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-12-12T13:03:38Z",
+      "side": 1,
+      "message": "reference equality...",
+      "revId": "29eeb6693acc95be933475e69e887255aad6df65",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
