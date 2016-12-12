@@ -101,8 +101,8 @@ public class DataTreeCohortIntegrationTest {
         ArgumentCaptor<Collection> candidateCapt = ArgumentCaptor.forClass(Collection.class);
         IntegrationTestKit kit = new IntegrationTestKit(getSystem(), datastoreContextBuilder);
 
-        try (AbstractDataStore dataStore = kit.setupDistributedDataStore("testSuccessfulCanCommitWithNoopPostStep",
-                "test-1")) {
+        try (AbstractDataStore dataStore = kit.setupAbstractDataStore(
+                DistributedDataStore.class, "testSuccessfulCanCommitWithNoopPostStep", "test-1")) {
             final ObjectRegistration<DOMDataTreeCommitCohort> cohortReg = dataStore.registerCommitCohort(TEST_ID,
                     cohort);
             assertNotNull(cohortReg);
@@ -144,7 +144,8 @@ public class DataTreeCohortIntegrationTest {
                 any(Collection.class), any(SchemaContext.class));
 
         IntegrationTestKit kit = new IntegrationTestKit(getSystem(), datastoreContextBuilder);
-        try (AbstractDataStore dataStore = kit.setupDistributedDataStore("testFailedCanCommit", "test-1")) {
+        try (AbstractDataStore dataStore = kit.setupAbstractDataStore(
+                DistributedDataStore.class, "testFailedCanCommit", "test-1")) {
             dataStore.registerCommitCohort(TEST_ID, failedCohort);
 
             IntegrationTestKit.verifyShardState(dataStore, "test-1",
@@ -170,8 +171,8 @@ public class DataTreeCohortIntegrationTest {
                 any(Collection.class), any(SchemaContext.class));
         IntegrationTestKit kit = new IntegrationTestKit(getSystem(), datastoreContextBuilder);
 
-        try (AbstractDataStore dataStore = kit.setupDistributedDataStore("testCanCommitWithMultipleListEntries",
-                "cars-1")) {
+        try (AbstractDataStore dataStore = kit.setupAbstractDataStore(
+                DistributedDataStore.class, "testCanCommitWithMultipleListEntries", "cars-1")) {
             final ObjectRegistration<DOMDataTreeCommitCohort> cohortReg = dataStore.registerCommitCohort(
                     new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, CarsModel.CAR_LIST_PATH
                             .node(CarsModel.CAR_QNAME)), cohort);
@@ -287,8 +288,8 @@ public class DataTreeCohortIntegrationTest {
                 any(Collection.class), any(SchemaContext.class));
 
         IntegrationTestKit kit = new IntegrationTestKit(getSystem(), datastoreContextBuilder);
-        try (AbstractDataStore dataStore = kit.setupDistributedDataStore("testAbortAfterCanCommit",
-                "test-1", "cars-1")) {
+        try (AbstractDataStore dataStore = kit.setupAbstractDataStore(
+                DistributedDataStore.class, "testAbortAfterCanCommit", "test-1", "cars-1")) {
             dataStore.registerCommitCohort(TEST_ID, cohortToAbort);
 
             IntegrationTestKit.verifyShardState(dataStore, "test-1",
