@@ -33,6 +33,23 @@
       "revId": "29eeb6693acc95be933475e69e887255aad6df65",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_988943cd",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardDataTree.java",
+        "patchSetId": 15
+      },
+      "lineNbr": 844,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-12-12T14:06:37Z",
+      "side": 1,
+      "message": "If the cohort that was aborted was aborted before pre-commit then it wouldn\u0027t have been added to pendingCandidates, in which case we would reach here. Therefore it seems we shouldn\u0027t treat that as an error and throw IEA. Or am I missing something?",
+      "revId": "29eeb6693acc95be933475e69e887255aad6df65",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
