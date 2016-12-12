@@ -136,13 +136,13 @@ public class DistributedShardedDOMDataTreeRemotingTest extends AbstractTest {
         InMemorySnapshotStore.clear();
     }
 
-    private void initEmptyDatastores() {
+    private void initEmptyDatastores() throws Exception {
         leaderTestKit = new IntegrationTestKit(leaderSystem, leaderDatastoreContextBuilder);
 
-        leaderConfigDatastore = (DistributedDataStore) leaderTestKit.setupDistributedDataStore(
+        leaderConfigDatastore = (DistributedDataStore) leaderTestKit.setupAbstractDataStore(
                 "config", MODULE_SHARDS_CONFIG, true,
                 SchemaContextHelper.distributedShardedDOMDataTreeSchemaContext());
-        leaderOperDatastore = (DistributedDataStore) leaderTestKit.setupDistributedDataStore(
+        leaderOperDatastore = (DistributedDataStore) leaderTestKit.setupAbstractDataStore(
                 "operational", MODULE_SHARDS_CONFIG, true,
                 SchemaContextHelper.distributedShardedDOMDataTreeSchemaContext());
 
@@ -152,9 +152,9 @@ public class DistributedShardedDOMDataTreeRemotingTest extends AbstractTest {
 
         followerTestKit = new IntegrationTestKit(followerSystem, followerDatastoreContextBuilder);
 
-        followerConfigDatastore = (DistributedDataStore) followerTestKit.setupDistributedDataStore(
+        followerConfigDatastore = (DistributedDataStore) followerTestKit.setupAbstractDataStore(
                 "config", MODULE_SHARDS_CONFIG, true, SchemaContextHelper.distributedShardedDOMDataTreeSchemaContext());
-        followerOperDatastore = (DistributedDataStore) followerTestKit.setupDistributedDataStore(
+        followerOperDatastore = (DistributedDataStore) followerTestKit.setupAbstractDataStore(
                 "operational", MODULE_SHARDS_CONFIG, true,
                 SchemaContextHelper.distributedShardedDOMDataTreeSchemaContext());
 
