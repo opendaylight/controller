@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a622d24_eba05ef6",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/RemoteProxyTransaction.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 272,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-12-13T12:34:43Z",
+      "side": 1,
+      "message": "ensureInitializedBuider (sic) -\u003e ensureInitializedBuilder",
+      "revId": "0a2dfc46f5712ca1afeba0ffc35bce607af1fe94",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
