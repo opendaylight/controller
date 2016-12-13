@@ -1,0 +1,193 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a4c51b2_d483b2ca",
+        "filename": "opendaylight/md-sal/mdsal-cli/src/main/java/org/opendaylight/mdsal/cli/ShardInfo.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-12-13T15:32:09Z",
+      "side": 1,
+      "message": "cluster instead of mdsal makes more sense I think",
+      "range": {
+        "startLine": 27,
+        "startChar": 18,
+        "endLine": 27,
+        "endChar": 23
+      },
+      "revId": "83ce19ce1e85c884f9b9e7c53a4a78453354c417",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a4c51b2_94ee4a8a",
+        "filename": "opendaylight/md-sal/mdsal-cli/src/main/java/org/opendaylight/mdsal/cli/ShardInfo.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-12-13T15:32:09Z",
+      "side": 1,
+      "message": "You could use Preconditions.isNullOrEmpty(string)",
+      "range": {
+        "startLine": 50,
+        "startChar": 17,
+        "endLine": 50,
+        "endChar": 42
+      },
+      "revId": "83ce19ce1e85c884f9b9e7c53a4a78453354c417",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a4c51b2_f4506e60",
+        "filename": "opendaylight/md-sal/mdsal-cli/src/main/java/org/opendaylight/mdsal/cli/ShardInfo.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-12-13T15:32:09Z",
+      "side": 1,
+      "message": "you can return null, no need to return an empty string. Same apply elsewhere",
+      "range": {
+        "startLine": 53,
+        "startChar": 23,
+        "endLine": 53,
+        "endChar": 25
+      },
+      "revId": "83ce19ce1e85c884f9b9e7c53a4a78453354c417",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a4c51b2_b488a6e8",
+        "filename": "opendaylight/md-sal/mdsal-cli/src/main/java/org/opendaylight/mdsal/cli/ShardInfo.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-12-13T15:32:09Z",
+      "side": 1,
+      "message": "failed",
+      "revId": "83ce19ce1e85c884f9b9e7c53a4a78453354c417",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a4c51b2_d49f3202",
+        "filename": "opendaylight/md-sal/mdsal-cli/src/main/java/org/opendaylight/mdsal/cli/StatusInfo.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-12-13T15:32:09Z",
+      "side": 1,
+      "message": "failed",
+      "revId": "83ce19ce1e85c884f9b9e7c53a4a78453354c417",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a4c51b2_14899aca",
+        "filename": "opendaylight/md-sal/mdsal-cli/src/main/java/org/opendaylight/mdsal/cli/StoresInfo.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-12-13T15:32:09Z",
+      "side": 1,
+      "message": "datastore-info might make more sense",
+      "range": {
+        "startLine": 25,
+        "startChar": 34,
+        "endLine": 25,
+        "endChar": 39
+      },
+      "revId": "83ce19ce1e85c884f9b9e7c53a4a78453354c417",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a4c51b2_f4850eae",
+        "filename": "opendaylight/md-sal/mdsal-cli/src/main/java/org/opendaylight/mdsal/cli/StoresInfo.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-12-13T15:32:09Z",
+      "side": 1,
+      "message": "Datastore",
+      "range": {
+        "startLine": 25,
+        "startChar": 63,
+        "endLine": 25,
+        "endChar": 68
+      },
+      "revId": "83ce19ce1e85c884f9b9e7c53a4a78453354c417",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a4c51b2_549322fa",
+        "filename": "opendaylight/md-sal/mdsal-cli/src/main/java/org/opendaylight/mdsal/cli/StoresInfo.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-12-13T15:32:09Z",
+      "side": 1,
+      "message": "DatastoreInfo\n\nWe\u0027re really gathering the datastore info, so I think we can be more accurate in the naming everywhere\n\nAlso, have you taking in account Tom\u0027s review, saying this might be the in-memory datastore info, that is deprecated in favor of the",
+      "range": {
+        "startLine": 26,
+        "startChar": 13,
+        "endLine": 26,
+        "endChar": 23
+      },
+      "revId": "83ce19ce1e85c884f9b9e7c53a4a78453354c417",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a4c51b2_b4a42658",
+        "filename": "opendaylight/md-sal/mdsal-cli/src/main/java/org/opendaylight/mdsal/cli/StoresInfo.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-12-13T15:32:09Z",
+      "side": 1,
+      "message": "failed",
+      "revId": "83ce19ce1e85c884f9b9e7c53a4a78453354c417",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
