@@ -1,0 +1,157 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a622d24_2b04167a",
+        "filename": "opendaylight/md-sal/mdsal-trace/.gitignore",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2016-12-13T13:36:19Z",
+      "side": 1,
+      "message": "Could you add whatever you have here that\u0027s missing in the root controller/.gitignore, and remove this project specific .gitignore?",
+      "revId": "5cb49a90a57134f828c5f324ab41e0b1312592ad",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_cbf2c299",
+        "filename": "opendaylight/md-sal/mdsal-trace/api/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2016-12-13T13:36:19Z",
+      "side": 1,
+      "message": "Could I encourage you do enable CS enforcement on all brand new artifacts such as this one, by inserting https://wiki.opendaylight.org/view/BestPractices/Coding_Guidelines#Checkstyle here?",
+      "revId": "5cb49a90a57134f828c5f324ab41e0b1312592ad",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_8b3f2a25",
+        "filename": "opendaylight/md-sal/mdsal-trace/api/src/main/yang/mdsaltrace.yang",
+        "patchSetId": 2
+      },
+      "lineNbr": 6,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2016-12-13T13:36:19Z",
+      "side": 1,
+      "message": "nit pick: remove trailing space (if you use https://github.com/vorburger/opendaylight-eclipse-setup then this happens automatically on save; your-favourite-editor may have a similar preference option which you may would like to enable)",
+      "revId": "5cb49a90a57134f828c5f324ab41e0b1312592ad",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_6b3c4e30",
+        "filename": "opendaylight/md-sal/mdsal-trace/api/src/main/yang/mdsaltrace.yang",
+        "patchSetId": 2
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2016-12-13T13:36:19Z",
+      "side": 1,
+      "message": "nit pick: remove trailing space",
+      "revId": "5cb49a90a57134f828c5f324ab41e0b1312592ad",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_cb4922d2",
+        "filename": "opendaylight/md-sal/mdsal-trace/binding-impl/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2016-12-13T13:36:19Z",
+      "side": 1,
+      "message": "are you 100% sure that you need these explicit Import-Package statements?  In my experience, the maven-bundle-plugin auto-detects this (from the import in the Java code) - that\u0027s kind of the point of it... ;-) Try removing this; you should be fine.  If it breaks things for you, I\u0027d be interesting in hearing about it, to myself learn why here this is required.",
+      "revId": "5cb49a90a57134f828c5f324ab41e0b1312592ad",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_abef86af",
+        "filename": "opendaylight/md-sal/mdsal-trace/binding-impl/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2016-12-13T13:36:19Z",
+      "side": 1,
+      "message": "Could I encourage you do enable CS enforcement on all brand new artifacts such as this one, by inserting https://wiki.opendaylight.org/view/BestPractices/Coding_Guidelines#Checkstyle here?",
+      "revId": "5cb49a90a57134f828c5f324ab41e0b1312592ad",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_0b131ab9",
+        "filename": "opendaylight/md-sal/mdsal-trace/dom-impl/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2016-12-13T13:36:19Z",
+      "side": 1,
+      "message": "as per the earlier comment, AFAIK you do not need this Import-Package.",
+      "revId": "5cb49a90a57134f828c5f324ab41e0b1312592ad",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_6b23ae05",
+        "filename": "opendaylight/md-sal/mdsal-trace/dom-impl/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2016-12-13T13:36:19Z",
+      "side": 1,
+      "message": "NB: You do need this if you really want your *.impl package to be exported.. but its strange that you do - in normal OSGi, you would not have to do this - or what you have in this package isn\u0027t an internal impl, so you should rename the package (and which case the maven-bundle-plugin will automatically export it)",
+      "revId": "5cb49a90a57134f828c5f324ab41e0b1312592ad",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_0b2cba01",
+        "filename": "opendaylight/md-sal/mdsal-trace/dom-impl/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2016-12-13T13:36:19Z",
+      "side": 1,
+      "message": "Could I encourage you do enable CS enforcement on all brand new artifacts such as this one, by inserting https://wiki.opendaylight.org/view/BestPractices/Coding_Guidelines#Checkstyle here?",
+      "revId": "5cb49a90a57134f828c5f324ab41e0b1312592ad",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
