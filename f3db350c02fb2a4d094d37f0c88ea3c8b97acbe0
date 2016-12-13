@@ -34,6 +34,63 @@
       "revId": "f3db350c02fb2a4d094d37f0c88ea3c8b97acbe0",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a4c51b2_4ef2759b",
+        "filename": "opendaylight/md-sal/mdsal-cli/src/main/java/org/opendaylight/mdsal/cli/StatusInfo.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-12-13T15:32:09Z",
+      "side": 1,
+      "message": "failed",
+      "revId": "f3db350c02fb2a4d094d37f0c88ea3c8b97acbe0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a4c51b2_2eef29b2",
+        "filename": "opendaylight/md-sal/mdsal-cli/src/main/java/org/opendaylight/mdsal/cli/TransactionsInfo.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-12-13T15:32:09Z",
+      "side": 1,
+      "message": "could add a help to the other command?",
+      "range": {
+        "startLine": 30,
+        "startChar": 0,
+        "endLine": 31,
+        "endChar": 35
+      },
+      "revId": "f3db350c02fb2a4d094d37f0c88ea3c8b97acbe0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a4c51b2_ce35e547",
+        "filename": "opendaylight/md-sal/mdsal-cli/src/main/java/org/opendaylight/mdsal/cli/TransactionsInfo.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-12-13T15:32:09Z",
+      "side": 1,
+      "message": "failed",
+      "revId": "f3db350c02fb2a4d094d37f0c88ea3c8b97acbe0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
