@@ -102,6 +102,11 @@ class CompositeDataTreeCohort {
         this.timeout = Preconditions.checkNotNull(timeout);
     }
 
+    void reset() {
+        successfulFromPrevious = null;
+        state = State.IDLE;
+    }
+
     void canCommit(final DataTreeCandidate tip) throws ExecutionException, TimeoutException {
         Collection<CanCommit> messages = registry.createCanCommitMessages(txId, tip, schema);
         // FIXME: Optimize empty collection list with pre-created futures, containing success.
@@ -127,7 +132,7 @@ class CompositeDataTreeCohort {
     }
 
     Optional<Future<Iterable<Object>>> abort() {
-        if (successfulFromPrevious != null) {
+        if (successfulFromPrevious != null && !Iterables.isEmpty(successfulFromPrevious)) {
             return Optional.of(sendMesageToSuccessful(new DataTreeCohortActor.Abort(txId)));
         }
 
