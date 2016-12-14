@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a622d24_44e85c10",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/pom.xml",
+        "patchSetId": 57
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-12-14T17:03:22Z",
+      "side": 1,
+      "message": "Why do we need powermock? It is pretty much unmaintained and we have problems with it in other projects.",
+      "range": {
+        "startLine": 25,
+        "startChar": 0,
+        "endLine": 33,
+        "endChar": 17
+      },
+      "revId": "c4bb3afa03f7e0e1ae6cd345cbd5ff310f938efc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
