@@ -43,6 +43,14 @@ public final class ShardDataTreeMocking {
         return cohort;
     }
 
+    public static FutureCallback<Void> coordinatedCanCommit(final ShardDataTreeCohort cohort) {
+        final FutureCallback<Void> callback = mockCallback();
+        doNothing().when(callback).onSuccess(null);
+        doNothing().when(callback).onFailure(any(Throwable.class));
+        cohort.canCommit(callback);
+        return callback;
+    }
+
     public static ShardDataTreeCohort immediatePreCommit(final ShardDataTreeCohort cohort) {
         final FutureCallback<DataTreeCandidate> callback = mockCallback();
         doNothing().when(callback).onSuccess(any(DataTreeCandidate.class));
@@ -53,6 +61,14 @@ public final class ShardDataTreeMocking {
         return cohort;
     }
 
+    public static FutureCallback<DataTreeCandidate> coordinatedPreCommit(final ShardDataTreeCohort cohort) {
+        final FutureCallback<DataTreeCandidate> callback = mockCallback();
+        doNothing().when(callback).onSuccess(any(DataTreeCandidate.class));
+        doNothing().when(callback).onFailure(any(Throwable.class));
+        cohort.preCommit(callback);
+        return callback;
+    }
+
     public static ShardDataTreeCohort immediateCommit(final ShardDataTreeCohort cohort) {
         final FutureCallback<UnsignedLong> callback = mockCallback();
         doNothing().when(callback).onSuccess(any(UnsignedLong.class));
@@ -61,6 +77,14 @@ public final class ShardDataTreeMocking {
         verify(callback, timeout(5000)).onSuccess(any(UnsignedLong.class));
         verifyNoMoreInteractions(callback);
         return cohort;
+    }
+
+    public static FutureCallback<UnsignedLong> coordinatedCommit(final ShardDataTreeCohort cohort) {
+        final FutureCallback<UnsignedLong> callback = mockCallback();
+        doNothing().when(callback).onSuccess(any(UnsignedLong.class));
+        doNothing().when(callback).onFailure(any(Throwable.class));
+        cohort.commit(callback);
+        return callback;
     }
 
     @SuppressWarnings("unchecked")

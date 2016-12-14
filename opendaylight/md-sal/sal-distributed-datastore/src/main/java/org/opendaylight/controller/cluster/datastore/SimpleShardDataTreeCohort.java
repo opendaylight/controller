@@ -168,6 +168,7 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
      */
     // FIXME: this should be asynchronous
     void userPreCommit(final DataTreeCandidate dataTreeCandidate) throws ExecutionException, TimeoutException {
+        userCohorts.reset();
         userCohorts.canCommit(dataTreeCandidate);
         userCohorts.preCommit();
     }
