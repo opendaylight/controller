@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "1a622d24_4faeb586",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardDataTree.java",
+        "patchSetId": 15
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-12-14T23:26:21Z",
+      "side": 1,
+      "message": "Fair point. I think the reason for this was ... a transaction can be aborted before preCommit finishes. We can do without, rendering the argument about the IAE below a no-brainer.",
+      "parentUuid": "1a622d24_03cdc831",
+      "revId": "29eeb6693acc95be933475e69e887255aad6df65",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a622d24_58584b32",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardDataTree.java",
         "patchSetId": 15
@@ -30,6 +48,24 @@
       "writtenOn": "2016-12-12T13:03:38Z",
       "side": 1,
       "message": "Using equals here might be expensive - reference equality would be more efficient and immune to potential latent performance issues on changes to DataTreeCandidate impl(s).",
+      "revId": "29eeb6693acc95be933475e69e887255aad6df65",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_6f93b14f",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardDataTree.java",
+        "patchSetId": 15
+      },
+      "lineNbr": 646,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-12-14T23:26:21Z",
+      "side": 1,
+      "message": "Let\u0027s fix that in DataTreeCandidate by explicitly defining their hashCode/equals to be identity. That way such a surprise would be an API breach (e.g. that implementation\u0027s fault).",
+      "parentUuid": "1a622d24_58584b32",
       "revId": "29eeb6693acc95be933475e69e887255aad6df65",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -64,6 +100,24 @@
       "writtenOn": "2016-12-12T14:06:37Z",
       "side": 1,
       "message": "If the cohort that was aborted was aborted before pre-commit then it wouldn\u0027t have been added to pendingCandidates, in which case we would reach here. Therefore it seems we shouldn\u0027t treat that as an error and throw IEA. Or am I missing something?",
+      "revId": "29eeb6693acc95be933475e69e887255aad6df65",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_cf9ac562",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardDataTree.java",
+        "patchSetId": 15
+      },
+      "lineNbr": 844,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-12-14T23:26:21Z",
+      "side": 1,
+      "message": "right ... but where would the DataTreeCandidate argument come from in that case? I cannot think of such a case and if it happens we probably have a bug somewhere -- maybe ISE is more appropriate.",
+      "parentUuid": "1a622d24_988943cd",
       "revId": "29eeb6693acc95be933475e69e887255aad6df65",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
