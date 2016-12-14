@@ -70,7 +70,7 @@ class CompositeDataTreeCohort {
          */
         COMMITED,
         /**
-         * Some of cohorts responsed back with unsuccessful message.
+         * Some of cohorts responded back with unsuccessful message.
          */
         FAILED,
         /**
@@ -102,6 +102,23 @@ class CompositeDataTreeCohort {
         this.timeout = Preconditions.checkNotNull(timeout);
     }
 
+    void reset() {
+        switch (state) {
+            case CAN_COMMIT_SENT:
+            case CAN_COMMIT_SUCCESSFUL:
+            case PRE_COMMIT_SENT:
+            case PRE_COMMIT_SUCCESSFUL:
+            case COMMIT_SENT:
+                abort();
+                break;
+            default :
+                break;
+        }
+
+        successfulFromPrevious = null;
+        state = State.IDLE;
+    }
+
     void canCommit(final DataTreeCandidate tip) throws ExecutionException, TimeoutException {
         Collection<CanCommit> messages = registry.createCanCommitMessages(txId, tip, schema);
         // FIXME: Optimize empty collection list with pre-created futures, containing success.
@@ -127,7 +144,8 @@ class CompositeDataTreeCohort {
     }
 
     Optional<Future<Iterable<Object>>> abort() {
-        if (successfulFromPrevious != null) {
+        state = State.ABORTED;
+        if (successfulFromPrevious != null && !Iterables.isEmpty(successfulFromPrevious)) {
             return Optional.of(sendMesageToSuccessful(new DataTreeCohortActor.Abort(txId)));
         }
 
