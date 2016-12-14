@@ -22,6 +22,30 @@
       "revId": "c4bb3afa03f7e0e1ae6cd345cbd5ff310f938efc",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_842d5449",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/pom.xml",
+        "patchSetId": 57
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2016-12-14T17:12:09Z",
+      "side": 1,
+      "message": "I needed to mock ClientTransaction in DistributedShardFrontendTest which is final",
+      "parentUuid": "1a622d24_44e85c10",
+      "range": {
+        "startLine": 25,
+        "startChar": 0,
+        "endLine": 33,
+        "endChar": 17
+      },
+      "revId": "c4bb3afa03f7e0e1ae6cd345cbd5ff310f938efc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
