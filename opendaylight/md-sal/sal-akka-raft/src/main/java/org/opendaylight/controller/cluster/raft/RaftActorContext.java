@@ -16,10 +16,12 @@ import akka.cluster.Cluster;
 import com.google.common.annotations.VisibleForTesting;
 import java.util.Collection;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.LongSupplier;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
+import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
@@ -316,4 +318,12 @@ public interface RaftActorContext {
      * @return current behavior.
      */
     RaftActorBehavior getCurrentBehavior();
+
+    /**
+     * Returns the consumer of ApplyState operations. This is invoked by a behavior when a log entry needs to be
+     * applied to the state.
+     *
+     * @return the Consumer
+     */
+    Consumer<ApplyState> getApplyStateConsumer();
 }

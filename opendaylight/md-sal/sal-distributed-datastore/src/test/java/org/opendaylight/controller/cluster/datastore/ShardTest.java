@@ -88,7 +88,6 @@ import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.Snapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
-import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
 import org.opendaylight.controller.cluster.raft.base.messages.FollowerInitialSyncUpStatus;
 import org.opendaylight.controller.cluster.raft.base.messages.TimeoutNow;
@@ -474,13 +473,6 @@ public class ShardTest extends AbstractShardTest {
 
         final DataTree store = InMemoryDataTreeFactory.getInstance().create(TreeType.OPERATIONAL);
         store.setSchemaContext(SCHEMA_CONTEXT);
-        writeToStore(store, TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
-
-        final NormalizedNode<?, ?> root = readStore(store, YangInstanceIdentifier.EMPTY);
-        final Snapshot snapshot = Snapshot.create(new MetadataShardDataTreeSnapshot(root).serialize(),
-                Collections.<ReplicatedLogEntry>emptyList(), 1, 2, 3, 4);
-
-        shard.tell(new ApplySnapshot(snapshot), ActorRef.noSender());
 
         final DataTreeModification writeMod = store.takeSnapshot().newModification();
         final ContainerNode node = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
@@ -488,10 +480,7 @@ public class ShardTest extends AbstractShardTest {
         writeMod.ready();
 
         final TransactionIdentifier tx = nextTransactionId();
-        final ApplyState applyState = new ApplyState(null, tx,
-                new SimpleReplicatedLogEntry(1, 2, payloadForModification(store, writeMod, tx)));
-
-        shard.tell(applyState, shard);
+        shard.underlyingActor().applyState(null, null, payloadForModification(store, writeMod, tx));
 
         final Stopwatch sw = Stopwatch.createStarted();
         while (sw.elapsed(TimeUnit.SECONDS) <= 5) {

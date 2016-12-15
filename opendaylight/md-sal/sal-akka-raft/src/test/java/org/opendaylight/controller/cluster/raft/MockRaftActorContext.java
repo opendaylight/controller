@@ -62,13 +62,14 @@ public class MockRaftActorContext extends RaftActorContextImpl {
 
     public MockRaftActorContext() {
         super(null, null, "test", newElectionTerm(), -1, -1, new HashMap<>(),
-                new DefaultConfigParamsImpl(), new NonPersistentDataProvider(), LOG);
+                new DefaultConfigParamsImpl(), new NonPersistentDataProvider(), applyState -> { }, LOG);
         setReplicatedLog(new MockReplicatedLogBuilder().build());
     }
 
     public MockRaftActorContext(String id, ActorSystem system, ActorRef actor) {
         super(actor, null, id, newElectionTerm(), -1, -1, new HashMap<>(),
-                new DefaultConfigParamsImpl(), new NonPersistentDataProvider(), LOG);
+            new DefaultConfigParamsImpl(), new NonPersistentDataProvider(),
+            applyState -> actor.tell(applyState, actor), LOG);
 
         this.system = system;
 
