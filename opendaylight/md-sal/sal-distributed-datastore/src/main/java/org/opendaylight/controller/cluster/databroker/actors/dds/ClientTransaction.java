@@ -13,8 +13,11 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterables;
 import com.google.common.util.concurrent.CheckedFuture;
 import java.util.Collection;
+import javax.annotation.Nonnull;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.mdsal.common.api.ReadFailedException;
+import org.opendaylight.mdsal.dom.api.DOMDataTreeCursor;
+import org.opendaylight.mdsal.dom.api.DOMDataTreeWriteCursor;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -52,10 +55,11 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 @Beta
 public final class ClientTransaction extends AbstractClientHandle<AbstractProxyTransaction> {
 
+    private ClientTransactionCursor cursor;
+
     ClientTransaction(final AbstractClientHistory parent, final TransactionIdentifier transactionId) {
         super(parent, transactionId);
     }
-
 
     private AbstractProxyTransaction createProxy(final Long shard) {
         return parent().createTransactionProxy(getIdentifier(), shard);
@@ -63,6 +67,12 @@ public final class ClientTransaction extends AbstractClientHandle<AbstractProxyT
 
     private AbstractProxyTransaction ensureTransactionProxy(final YangInstanceIdentifier path) {
         return ensureProxy(path, this::createProxy);
+    }
+
+    public DOMDataTreeWriteCursor openCursor() {
+        Preconditions.checkState(cursor == null, "Transaction %s has open cursor", getIdentifier());
+        cursor = new ClientTransactionCursor(this);
+        return cursor;
     }
 
     public CheckedFuture<Boolean, ReadFailedException> exists(final YangInstanceIdentifier path) {
@@ -106,5 +116,11 @@ public final class ClientTransaction extends AbstractClientHandle<AbstractProxyT
         }
 
         return parent().onTransactionReady(this, cohort);
+    }
+
+    void closeCursor(@Nonnull final DOMDataTreeCursor cursor) {
+        if (cursor.equals(this.cursor)) {
+            this.cursor = null;
+        }
     }
 }
