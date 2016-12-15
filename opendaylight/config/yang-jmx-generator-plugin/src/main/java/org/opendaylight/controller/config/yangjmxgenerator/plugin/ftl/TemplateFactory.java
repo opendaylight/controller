@@ -439,7 +439,7 @@ public class TemplateFactory {
                         "        final %s that = (%s) o;\n", name, name));
                 for (AttributeIfc s : attrs.values()) {
                     equalsBodyBuilder.append(String.format(
-                            "        if(java.util.Objects.equals(%1$s, that.%1$s) == false) {\n" +
+                            "        if (!java.util.Objects.equals(%1$s, that.%1$s)) {\n" +
                             "            return false;\n" +
                             "        }\n\n", s.getLowerCaseCammelCase()));
                 }
