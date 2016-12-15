@@ -25,6 +25,86 @@
     },
     {
       "key": {
+        "uuid": "1a622d24_158a0cbf",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardedDOMDataTree.java",
+        "patchSetId": 53
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-12-15T13:18:53Z",
+      "side": 1,
+      "message": "space after comma",
+      "range": {
+        "startLine": 131,
+        "startChar": 55,
+        "endLine": 131,
+        "endChar": 56
+      },
+      "revId": "f7022bbf86db1e05f093e5e8a4f1129a4c742051",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_95bd7c6b",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardedDOMDataTree.java",
+        "patchSetId": 53
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-12-15T13:18:53Z",
+      "side": 1,
+      "message": "don\u0027t need toString",
+      "range": {
+        "startLine": 176,
+        "startChar": 100,
+        "endLine": 176,
+        "endChar": 111
+      },
+      "revId": "f7022bbf86db1e05f093e5e8a4f1129a4c742051",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_358f48ce",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardedDOMDataTree.java",
+        "patchSetId": 53
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-12-15T13:18:53Z",
+      "side": 1,
+      "message": "Should throw DOMDataTreeShardCreationFailedException here.",
+      "revId": "f7022bbf86db1e05f093e5e8a4f1129a4c742051",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_15b16c8f",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardedDOMDataTree.java",
+        "patchSetId": 53
+      },
+      "lineNbr": 301,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-12-15T13:18:53Z",
+      "side": 1,
+      "message": "An exception thrown above would elide closing the delegate. I think the delegate should be closed first.",
+      "revId": "f7022bbf86db1e05f093e5e8a4f1129a4c742051",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a622d24_441e9c64",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/ShardFrontend.java",
         "patchSetId": 53
@@ -209,6 +289,23 @@
     },
     {
       "key": {
+        "uuid": "1a622d24_f52030b2",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/ShardedDataTreeActor.java",
+        "patchSetId": 53
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-12-15T13:18:53Z",
+      "side": 1,
+      "message": "If this actor doesn\u0027t persist data then it shouldn\u0027t be an AbstractUntypedPersistentActor.",
+      "revId": "f7022bbf86db1e05f093e5e8a4f1129a4c742051",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a622d24_e4aa48d1",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/ShardedDataTreeActor.java",
         "patchSetId": 53
@@ -226,6 +323,23 @@
         "endLine": 210,
         "endChar": 41
       },
+      "revId": "f7022bbf86db1e05f093e5e8a4f1129a4c742051",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_9519fc8a",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/ShardedDataTreeActor.java",
+        "patchSetId": 53
+      },
+      "lineNbr": 260,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-12-15T13:18:53Z",
+      "side": 1,
+      "message": "Not usually a good idea to block the actor - should be async.",
       "revId": "f7022bbf86db1e05f093e5e8a4f1129a4c742051",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -278,6 +392,23 @@
     },
     {
       "key": {
+        "uuid": "1a622d24_753540f6",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/messages/CreatePrefixShard.java",
+        "patchSetId": 53
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-12-15T13:18:53Z",
+      "side": 1,
+      "message": "Is it worth using the Externlizable proxy pattern for these Serializable messages...",
+      "revId": "f7022bbf86db1e05f093e5e8a4f1129a4c742051",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a622d24_24b56031",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/messages/CreatePrefixShard.java",
         "patchSetId": 53
@@ -301,6 +432,23 @@
     },
     {
       "key": {
+        "uuid": "1a622d24_155fac42",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/messages/NotifyProducerCreated.java",
+        "patchSetId": 53
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-12-15T13:18:53Z",
+      "side": 1,
+      "message": "We\u0027re assuming the actual instance is Serializable - should be OK...",
+      "revId": "f7022bbf86db1e05f093e5e8a4f1129a4c742051",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a622d24_64863867",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/messages/NotifyProducerCreated.java",
         "patchSetId": 53
@@ -318,6 +466,23 @@
         "endLine": 26,
         "endChar": 33
       },
+      "revId": "f7022bbf86db1e05f093e5e8a4f1129a4c742051",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_f559505c",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/messages/NotifyProducerRemoved.java",
+        "patchSetId": 53
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-12-15T13:18:53Z",
+      "side": 1,
+      "message": "Same comments as in NotifyProducerCreated",
       "revId": "f7022bbf86db1e05f093e5e8a4f1129a4c742051",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
