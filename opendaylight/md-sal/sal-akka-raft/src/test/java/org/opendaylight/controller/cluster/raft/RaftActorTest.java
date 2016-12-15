@@ -885,7 +885,7 @@ public class RaftActorTest extends AbstractActorTest {
 
         // Persist another entry (this will cause a CaptureSnapshot to be triggered
         leaderActor.persistData(mockActorRef, new MockIdentifier("x"),
-                new MockRaftActorContext.MockPayload("duh"));
+                new MockRaftActorContext.MockPayload("duh"), false);
 
         // Now send a CaptureSnapshotReply
         mockActorRef.tell(new CaptureSnapshotReply(fromObject("foo").toByteArray()), mockActorRef);
@@ -1294,7 +1294,8 @@ public class RaftActorTest extends AbstractActorTest {
         Leader leader = new Leader(leaderActor.getRaftActorContext());
         leaderActor.setCurrentBehavior(leader);
 
-        leaderActor.persistData(leaderActorRef, new MockIdentifier("1"), new MockRaftActorContext.MockPayload("1"));
+        leaderActor.persistData(leaderActorRef, new MockIdentifier("1"), new MockRaftActorContext.MockPayload("1"),
+                false);
 
         ReplicatedLogEntry logEntry = leaderActor.getReplicatedLog().get(0);
         assertNotNull("ReplicatedLogEntry not found", logEntry);
