@@ -204,9 +204,6 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         assertEquals("New follower peers", Sets.newHashSet(LEADER_ID, FOLLOWER_ID),
                 newFollowerActorContext.getPeerIds());
 
-        expectFirstMatching(newFollowerCollectorActor, ApplyState.class);
-        expectFirstMatching(followerActor, ApplyState.class);
-
         assertEquals("Follower commit index", 3, followerActorContext.getCommitIndex());
         assertEquals("Follower last applied index", 3, followerActorContext.getLastApplied());
         assertEquals("New follower commit index", 3, newFollowerActorContext.getCommitIndex());
@@ -1479,7 +1476,8 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         ElectionTermImpl termInfo = new ElectionTermImpl(noPersistence, id, LOG);
         termInfo.update(1, LEADER_ID);
         return new RaftActorContextImpl(actor, actor.underlyingActor().getContext(),
-                id, termInfo, -1, -1, ImmutableMap.of(LEADER_ID, ""), configParams, noPersistence, LOG);
+                id, termInfo, -1, -1, ImmutableMap.of(LEADER_ID, ""), configParams,
+                noPersistence, applyState -> actor.tell(applyState, actor), LOG);
     }
 
     abstract static class AbstractMockRaftActor extends MockRaftActor {

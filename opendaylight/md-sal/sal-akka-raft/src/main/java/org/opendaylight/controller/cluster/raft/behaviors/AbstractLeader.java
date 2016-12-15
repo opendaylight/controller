@@ -323,14 +323,9 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
             int replicatedCount = replicatedLogEntry.isPersistencePending() ? 0 : 1;
 
             if (replicatedCount == 0) {
-                // We don't commit and apply a log entry until we've gotten the ack from our local persistence. Ideally
-                // we should be able to update the commit index if we get a consensus amongst the followers
-                // w/o the local persistence ack however this can cause timing issues with snapshot capture
-                // which may lead to an entry that is neither in the serialized snapshot state nor in the snapshot's
-                // unapplied entries. This can happen if the lastAppliedIndex is updated but the corresponding
-                // ApplyState message is still pending in the message queue and thus the corresponding log entry hasn't
-                // actually been applied to the state yet. This would be alleviated by eliminating the ApplyState
-                // message in lieu of synchronously updating lastAppliedIndex and applying to state.
+                // We don't commit and apply a log entry until we've gotten the ack from our local persistence,
+                // even though there *shouldn't* be any issue with updating the commit index if we get a consensus
+                // amongst the followers w/o the local persistence ack.
                 break;
             }
 

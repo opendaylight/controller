@@ -53,12 +53,17 @@ class ReplicatedLogImpl extends AbstractReplicatedLogImpl {
     }
 
     @Override
-    public void captureSnapshotIfReady(final ReplicatedLogEntry replicatedLogEntry) {
+    public boolean shouldCaptureSnapshot(long logIndex) {
         final ConfigParams config = context.getConfigParams();
-        final long journalSize = replicatedLogEntry.getIndex() + 1;
+        final long journalSize = logIndex + 1;
         final long dataThreshold = context.getTotalMemory() * config.getSnapshotDataThresholdPercentage() / 100;
 
-        if (journalSize % config.getSnapshotBatchCount() == 0 || getDataSizeForSnapshotCheck() > dataThreshold) {
+        return journalSize % config.getSnapshotBatchCount() == 0 || getDataSizeForSnapshotCheck() > dataThreshold;
+    }
+
+    @Override
+    public void captureSnapshotIfReady(final ReplicatedLogEntry replicatedLogEntry) {
+        if (shouldCaptureSnapshot(replicatedLogEntry.getIndex())) {
             boolean started = context.getSnapshotManager().capture(replicatedLogEntry,
                     context.getCurrentBehavior().getReplicatedToAllIndex());
             if (started && !context.hasFollowers()) {

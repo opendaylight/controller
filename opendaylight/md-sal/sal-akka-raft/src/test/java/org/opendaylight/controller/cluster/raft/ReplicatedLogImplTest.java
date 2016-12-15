@@ -57,8 +57,8 @@ public class ReplicatedLogImplTest {
         MockitoAnnotations.initMocks(this);
 
         context = new RaftActorContextImpl(null, null, "test",
-                new ElectionTermImpl(mockPersistence, "test", LOG),
-                -1, -1, Collections.<String,String>emptyMap(), configParams, mockPersistence, LOG);
+                new ElectionTermImpl(mockPersistence, "test", LOG), -1, -1, Collections.<String,String>emptyMap(),
+                configParams, mockPersistence, applyState -> { }, LOG);
     }
 
     private void verifyPersist(Object message) throws Exception {

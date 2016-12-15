@@ -333,5 +333,10 @@ public class AbstractReplicatedLogImplTest {
         @Override
         public void captureSnapshotIfReady(ReplicatedLogEntry replicatedLogEntry) {
         }
+
+        @Override
+        public boolean shouldCaptureSnapshot(long logIndex) {
+            return false;
+        }
     }
 }
