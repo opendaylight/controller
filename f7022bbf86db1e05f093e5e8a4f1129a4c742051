@@ -25,6 +25,46 @@
     },
     {
       "key": {
+        "uuid": "1a622d24_f035dedb",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardedDOMDataTree.java",
+        "patchSetId": 53
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-12-15T14:18:32Z",
+      "side": 1,
+      "message": "why not creating the producer only if response \u003d\u003d null. This would avoid creating it then calling closeProducer if the operation failed.",
+      "range": {
+        "startLine": 110,
+        "startChar": 8,
+        "endLine": 110,
+        "endChar": 89
+      },
+      "revId": "f7022bbf86db1e05f093e5e8a4f1129a4c742051",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_10421a3e",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardedDOMDataTree.java",
+        "patchSetId": 53
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-12-15T14:18:32Z",
+      "side": 1,
+      "message": "shouldn\u0027t we add the unexpected response to this RuntimeException to keep visibility of it?",
+      "revId": "f7022bbf86db1e05f093e5e8a4f1129a4c742051",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a622d24_158a0cbf",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardedDOMDataTree.java",
         "patchSetId": 53
@@ -340,6 +380,29 @@
       "writtenOn": "2016-12-15T13:18:53Z",
       "side": 1,
       "message": "Not usually a good idea to block the actor - should be async.",
+      "revId": "f7022bbf86db1e05f093e5e8a4f1129a4c742051",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_f06dde9a",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/ShardedDataTreeActor.java",
+        "patchSetId": 53
+      },
+      "lineNbr": 374,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-12-15T14:18:32Z",
+      "side": 1,
+      "message": "could this be pre-cache?",
+      "range": {
+        "startLine": 374,
+        "startChar": 23,
+        "endLine": 374,
+        "endChar": 62
+      },
       "revId": "f7022bbf86db1e05f093e5e8a4f1129a4c742051",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
