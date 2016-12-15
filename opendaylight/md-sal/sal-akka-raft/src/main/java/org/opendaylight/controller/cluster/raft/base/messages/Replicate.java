@@ -18,12 +18,14 @@ public class Replicate implements Serializable {
     private final ActorRef clientActor;
     private final Identifier identifier;
     private final ReplicatedLogEntry replicatedLogEntry;
+    private final boolean sendImmediate;
 
-    public Replicate(ActorRef clientActor, Identifier identifier, ReplicatedLogEntry replicatedLogEntry) {
-
+    public Replicate(ActorRef clientActor, Identifier identifier, ReplicatedLogEntry replicatedLogEntry,
+            boolean sendImmediate) {
         this.clientActor = clientActor;
         this.identifier = identifier;
         this.replicatedLogEntry = replicatedLogEntry;
+        this.sendImmediate = sendImmediate;
     }
 
     public ActorRef getClientActor() {
@@ -36,5 +38,9 @@ public class Replicate implements Serializable {
 
     public ReplicatedLogEntry getReplicatedLogEntry() {
         return replicatedLogEntry;
+    }
+
+    public boolean isSendImmediate() {
+        return sendImmediate;
     }
 }

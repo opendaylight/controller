@@ -571,8 +571,9 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
     private void replicate(Replicate replicate) {
         long logIndex = replicate.getReplicatedLogEntry().getIndex();
 
-        log.debug("{}: Replicate message: identifier: {}, logIndex: {}, payload: {}", logName(),
-                replicate.getIdentifier(), logIndex, replicate.getReplicatedLogEntry().getData().getClass());
+        log.debug("{}: Replicate message: identifier: {}, logIndex: {}, payload: {}, isSendImmediate: {}", logName(),
+                replicate.getIdentifier(), logIndex, replicate.getReplicatedLogEntry().getData().getClass(),
+                replicate.isSendImmediate());
 
         // Create a tracker entry we will use this later to notify the
         // client actor
@@ -589,7 +590,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
             applyLogToStateMachine(logIndex);
         }
 
-        if (!followerToLog.isEmpty()) {
+        if (replicate.isSendImmediate() && !followerToLog.isEmpty()) {
             sendAppendEntries(0, false);
         }
     }

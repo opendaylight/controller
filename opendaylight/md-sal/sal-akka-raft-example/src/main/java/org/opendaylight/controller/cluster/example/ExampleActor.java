@@ -70,7 +70,7 @@ public class ExampleActor extends RaftActor implements RaftActorRecoveryCohort, 
     protected void handleNonRaftCommand(Object message) {
         if(message instanceof KeyValue){
             if(isLeader()) {
-                persistData(getSender(), new PayloadIdentifier(persistIdentifier++), (Payload) message);
+                persistData(getSender(), new PayloadIdentifier(persistIdentifier++), (Payload) message, false);
             } else {
                 if(getLeader() != null) {
                     getLeader().forward(message, getContext());
