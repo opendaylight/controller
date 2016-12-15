@@ -416,7 +416,7 @@ public class RaftActorTest extends AbstractActorTest {
         ReplicatedLogEntry entry = new SimpleReplicatedLogEntry(5, 1, new MockRaftActorContext.MockPayload("F"));
 
         final Identifier id = new MockIdentifier("apply-state");
-        mockRaftActor.onReceiveCommand(new ApplyState(mockActorRef, id, entry));
+        mockRaftActor.getRaftActorContext().getApplyStateConsumer().accept(new ApplyState(mockActorRef, id, entry));
 
         verify(mockRaftActor.actorDelegate).applyState(eq(mockActorRef), eq(id), anyObject());
     }

@@ -59,7 +59,7 @@ public class RaftActorContextImplTest extends AbstractActorTest {
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
         RaftActorContextImpl context = new RaftActorContextImpl(actor, actor.underlyingActor().getContext(),
                 "test", new ElectionTermImpl(new NonPersistentDataProvider(), "test", log), -1, -1,
-                peerMap, configParams, new NonPersistentDataProvider(), log);
+                peerMap, configParams, new NonPersistentDataProvider(), applyState -> { }, log);
 
         assertEquals("getPeerAddress", "peerAddress1", context.getPeerAddress("peer1"));
         assertEquals("getPeerAddress", null, context.getPeerAddress("peer2"));
@@ -84,7 +84,7 @@ public class RaftActorContextImplTest extends AbstractActorTest {
         RaftActorContextImpl context = new RaftActorContextImpl(actor, actor.underlyingActor().getContext(),
                 "test", new ElectionTermImpl(new NonPersistentDataProvider(), "test", log), -1, -1,
                 Maps.newHashMap(ImmutableMap.<String, String>of("peer1", "peerAddress1")), configParams,
-                new NonPersistentDataProvider(), log);
+                new NonPersistentDataProvider(), applyState -> { }, log);
 
         context.setPeerAddress("peer1", "peerAddress1_1");
         assertEquals("getPeerAddress", "peerAddress1_1", context.getPeerAddress("peer1"));
@@ -98,7 +98,7 @@ public class RaftActorContextImplTest extends AbstractActorTest {
         RaftActorContextImpl context = new RaftActorContextImpl(actor, actor.underlyingActor().getContext(),
                 "self", new ElectionTermImpl(new NonPersistentDataProvider(), "test", log), -1, -1,
                 Maps.newHashMap(ImmutableMap.<String, String>of("peer1", "peerAddress1")),
-                new DefaultConfigParamsImpl(), new NonPersistentDataProvider(), log);
+                new DefaultConfigParamsImpl(), new NonPersistentDataProvider(), applyState -> { }, log);
 
         context.updatePeerIds(new ServerConfigurationPayload(Arrays.asList(new ServerInfo("self", false),
                 new ServerInfo("peer2", true), new ServerInfo("peer3", false))));
