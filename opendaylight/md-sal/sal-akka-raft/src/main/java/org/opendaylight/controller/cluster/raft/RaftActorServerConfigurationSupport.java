@@ -237,7 +237,8 @@ class RaftActorServerConfigurationSupport {
                     operationContext.includeSelfInNewConfiguration(raftActor));
             LOG.debug("{}: New server configuration : {}", raftContext.getId(), payload.getServerConfig());
 
-            raftActor.persistData(operationContext.getClientRequestor(), operationContext.getContextId(), payload);
+            raftActor.persistData(operationContext.getClientRequestor(), operationContext.getContextId(),
+                    payload, false);
 
             currentOperationState = new Persisting(operationContext, newTimer(new ServerOperationTimeout(
                     operationContext.getLoggingContext())));
