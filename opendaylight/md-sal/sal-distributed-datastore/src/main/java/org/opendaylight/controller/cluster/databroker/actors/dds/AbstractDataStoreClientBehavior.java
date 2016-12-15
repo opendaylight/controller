@@ -16,6 +16,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.StampedLock;
 import org.opendaylight.controller.cluster.access.client.BackendInfoResolver;
 import org.opendaylight.controller.cluster.access.client.ClientActorBehavior;
 import org.opendaylight.controller.cluster.access.client.ClientActorContext;
@@ -62,6 +63,7 @@ abstract class AbstractDataStoreClientBehavior extends ClientActorBehavior<Shard
 
     private final Map<LocalHistoryIdentifier, ClientLocalHistory> histories = new ConcurrentHashMap<>();
     private final AtomicLong nextHistoryId = new AtomicLong(1);
+    private final StampedLock lock = new StampedLock();
     private final SingleClientHistory singleHistory;
 
     private volatile Throwable aborted;
@@ -89,14 +91,19 @@ abstract class AbstractDataStoreClientBehavior extends ClientActorBehavior<Shard
     }
 
     private void abortOperations(final Throwable cause) {
-        // This acts as a barrier, application threads check this after they have added an entry in the maps,
-        // and if they observe aborted being non-null, they will perform their cleanup and not return the handle.
-        aborted = cause;
+        final long stamp = lock.writeLock();
+        try {
+            // This acts as a barrier, application threads check this after they have added an entry in the maps,
+            // and if they observe aborted being non-null, they will perform their cleanup and not return the handle.
+            aborted = cause;
 
-        for (ClientLocalHistory h : histories.values()) {
-            h.localAbort(cause);
+            for (ClientLocalHistory h : histories.values()) {
+                h.localAbort(cause);
+            }
+            histories.clear();
+        } finally {
+            lock.unlockWrite(stamp);
         }
-        histories.clear();
     }
 
     private AbstractDataStoreClientBehavior shutdown(final ClientActorBehavior<ShardBackendInfo> currentBehavior) {
@@ -121,6 +128,8 @@ abstract class AbstractDataStoreClientBehavior extends ClientActorBehavior<Shard
      */
     @Override
     protected final ConnectionConnectCohort connectionUp(final ConnectedClientConnection<ShardBackendInfo> newConn) {
+        final long stamp = lock.writeLock();
+
         // Step 1: Freeze all AbstractProxyHistory instances pointing to that shard. This indirectly means that no
         //         further TransactionProxies can be created and we can safely traverse maps without risking
         //         missing an entry
@@ -143,9 +152,13 @@ abstract class AbstractDataStoreClientBehavior extends ClientActorBehavior<Shard
                 //         forwarded once they hit the new connection.
                 return BouncingReconnectForwarder.forCohorts(newConn, cohorts);
             } finally {
-                // Step 4: Complete switchover of the connection. The cohorts can resume normal operations.
-                for (HistoryReconnectCohort c : cohorts) {
-                    c.close();
+                try {
+                    // Step 4: Complete switchover of the connection. The cohorts can resume normal operations.
+                    for (HistoryReconnectCohort c : cohorts) {
+                        c.close();
+                    }
+                } finally {
+                    lock.unlockWrite(stamp);
                 }
             }
         };
@@ -170,19 +183,21 @@ abstract class AbstractDataStoreClientBehavior extends ClientActorBehavior<Shard
     public final ClientLocalHistory createLocalHistory() {
         final LocalHistoryIdentifier historyId = new LocalHistoryIdentifier(getIdentifier(),
             nextHistoryId.getAndIncrement());
-        final ClientLocalHistory history = new ClientLocalHistory(this, historyId);
-        LOG.debug("{}: creating a new local history {}", persistenceId(), history);
 
-        Verify.verify(histories.put(historyId, history) == null);
+        final long stamp = lock.readLock();
+        try {
+            if (aborted != null) {
+                throw Throwables.propagate(aborted);
+            }
 
-        final Throwable a = aborted;
-        if (a != null) {
-            history.localAbort(a);
-            histories.remove(historyId, history);
-            throw Throwables.propagate(a);
+            final ClientLocalHistory history = new ClientLocalHistory(this, historyId);
+            LOG.debug("{}: creating a new local history {}", persistenceId(), history);
+
+            Verify.verify(histories.put(historyId, history) == null);
+            return history;
+        } finally {
+            lock.unlockRead(stamp);
         }
-
-        return history;
     }
 
     @Override
