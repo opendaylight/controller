@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "1a622d24_0fdcbde3",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardDataTree.java",
+        "patchSetId": 15
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-12-15T00:52:24Z",
+      "side": 1,
+      "message": "I removed this queue and implemented \"rebase\" in my patch set. In the next patch I\u0027ve added pipe-lining and test cases which exercise the rebase code.",
+      "parentUuid": "1a622d24_4faeb586",
+      "revId": "29eeb6693acc95be933475e69e887255aad6df65",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a622d24_58584b32",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardDataTree.java",
         "patchSetId": 15
