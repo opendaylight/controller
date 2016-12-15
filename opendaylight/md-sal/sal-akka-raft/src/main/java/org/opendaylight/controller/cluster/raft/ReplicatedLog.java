@@ -205,9 +205,17 @@ public interface ReplicatedLog {
     int dataSize();
 
     /**
-     * Determines if a snapshot need to be captured based on the count/memory consumed.
+     * Determines if a snapshot needs to be captured based on the count/memory consumed and initiates the capture.
      *
      * @param replicatedLogEntry the last log entry.
      */
     void captureSnapshotIfReady(ReplicatedLogEntry replicatedLogEntry);
+
+    /**
+     * Determines if a snapshot should be captured based on the count/memory consumed.
+     *
+     * @param logIndex the log index to use to determine if the log count has exceeded the threshold
+     * @return true if a snapshot should be captured, false otherwise
+     */
+    boolean shouldCaptureSnapshot(long logIndex);
 }

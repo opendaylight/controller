@@ -77,7 +77,8 @@ public class RaftActorRecoverySupportTest {
         MockitoAnnotations.initMocks(this);
 
         context = new RaftActorContextImpl(null, null, localId, new ElectionTermImpl(mockPersistentProvider, "test",
-                LOG), -1, -1, Collections.<String,String>emptyMap(), configParams, mockPersistence, LOG);
+                LOG), -1, -1, Collections.<String,String>emptyMap(), configParams,
+                mockPersistence, applyState -> { }, LOG);
 
         support = new RaftActorRecoverySupport(context, mockCohort);
 
