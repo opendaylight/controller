@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>karaf-parent</artifactId>
-    <version>1.7.2-SNAPSHOT</version>
+    <version>1.7.2-Boron-SR2</version>
     <relativePath/>
   </parent>
 
@@ -60,7 +60,7 @@
       <dependency>
         <groupId>org.opendaylight.openflowplugin</groupId>
         <artifactId>features-openflowplugin</artifactId>
-        <version>0.3.2-SNAPSHOT</version>
+        <version>0.3.2-Boron-SR2</version>
         <classifier>features</classifier>
         <type>xml</type>
         <scope>runtime</scope>

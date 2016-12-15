@@ -10,16 +10,16 @@
     <parent>
         <groupId>org.opendaylight.odlparent</groupId>
         <artifactId>features-parent</artifactId>
-        <version>1.7.2-SNAPSHOT</version>
+        <version>1.7.2-Boron-SR2</version>
         <relativePath/>
     </parent>
 
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>features-extras</artifactId>
-    <version>1.7.2-SNAPSHOT</version>
+    <version>1.7.2-Boron-SR2</version>
     <packaging>jar</packaging>
     <properties>
-        <odl-jolokia-osgi.version>0.4.2-SNAPSHOT</odl-jolokia-osgi.version>
+        <odl-jolokia-osgi.version>0.4.2-Boron-SR2</odl-jolokia-osgi.version>
     </properties>
 
     <dependencies>

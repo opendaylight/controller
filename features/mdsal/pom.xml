@@ -4,25 +4,25 @@
   <parent>
     <groupId>org.opendaylight.odlparent</groupId>
     <artifactId>features-parent</artifactId>
-    <version>1.7.2-SNAPSHOT</version>
+    <version>1.7.2-Boron-SR2</version>
     <relativePath/>
   </parent>
 
   <groupId>org.opendaylight.controller</groupId>
   <artifactId>features-mdsal</artifactId>
-  <version>1.4.2-SNAPSHOT</version>
+  <version>1.4.2-Boron-SR2</version>
 
   <packaging>jar</packaging>
 
   <properties>
-    <blueprint.version>0.5.2-SNAPSHOT</blueprint.version>
-    <yangtools.version>1.0.2-SNAPSHOT</yangtools.version>
-    <mdsal.version>2.1.2-SNAPSHOT</mdsal.version>
-    <mdsal.model.version>0.9.2-SNAPSHOT</mdsal.model.version>
-    <controller.mdsal.version>1.4.2-SNAPSHOT</controller.mdsal.version>
-    <config.version>0.5.2-SNAPSHOT</config.version>
-    <commons.opendaylight.version>1.7.2-SNAPSHOT</commons.opendaylight.version>
-    <akka.features.version>1.7.2-SNAPSHOT</akka.features.version>
+    <blueprint.version>0.5.2-Boron-SR2</blueprint.version>
+    <yangtools.version>1.0.2-Boron-SR2</yangtools.version>
+    <mdsal.version>2.1.2-Boron-SR2</mdsal.version>
+    <mdsal.model.version>0.9.2-Boron-SR2</mdsal.model.version>
+    <controller.mdsal.version>1.4.2-Boron-SR2</controller.mdsal.version>
+    <config.version>0.5.2-Boron-SR2</config.version>
+    <commons.opendaylight.version>1.7.2-Boron-SR2</commons.opendaylight.version>
+    <akka.features.version>1.7.2-Boron-SR2</akka.features.version>
     <features.file>features.xml</features.file>
     <config.configfile.directory>etc/opendaylight/karaf</config.configfile.directory>
     <config.clustering.configfile>05-clustering.xml</config.clustering.configfile>
@@ -37,7 +37,7 @@
       <dependency>
         <groupId>org.opendaylight.odlparent</groupId>
         <artifactId>odlparent-artifacts</artifactId>
-        <version>1.7.2-SNAPSHOT</version>
+        <version>1.7.2-Boron-SR2</version>
         <scope>import</scope>
         <type>pom</type>
       </dependency>

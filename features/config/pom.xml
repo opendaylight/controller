@@ -4,19 +4,19 @@
   <parent>
     <groupId>org.opendaylight.odlparent</groupId>
     <artifactId>features-parent</artifactId>
-    <version>1.7.2-SNAPSHOT</version>
+    <version>1.7.2-Boron-SR2</version>
     <relativePath/>
   </parent>
 
   <groupId>org.opendaylight.controller</groupId>
   <artifactId>features-config</artifactId>
-  <version>0.5.2-SNAPSHOT</version>
+  <version>0.5.2-Boron-SR2</version>
   <packaging>jar</packaging>
 
   <properties>
-    <yangtools.version>1.0.2-SNAPSHOT</yangtools.version>
-    <mdsal.version>2.1.2-SNAPSHOT</mdsal.version>
-    <config.version>0.5.2-SNAPSHOT</config.version>
+    <yangtools.version>1.0.2-Boron-SR2</yangtools.version>
+    <mdsal.version>2.1.2-Boron-SR2</mdsal.version>
+    <config.version>0.5.2-Boron-SR2</config.version>
     <features.file>features.xml</features.file>
     <config.configfile.directory>etc/opendaylight/karaf</config.configfile.directory>
   </properties>
@@ -27,7 +27,7 @@
        <dependency>
         <groupId>org.opendaylight.odlparent</groupId>
         <artifactId>odlparent-artifacts</artifactId>
-        <version>1.7.2-SNAPSHOT</version>
+        <version>1.7.2-Boron-SR2</version>
         <scope>import</scope>
         <type>pom</type>
       </dependency>

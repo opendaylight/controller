@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.opendaylight.controller.samples</groupId>
     <artifactId>sal-samples</artifactId>
-    <version>1.4.2-SNAPSHOT</version>
+    <version>1.4.2-Boron-SR2</version>
   </parent>
   <!-- FIXME Use org.opendaylight.mdsal:binding-parent -->
 
