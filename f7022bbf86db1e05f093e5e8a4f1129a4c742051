@@ -710,6 +710,24 @@
     },
     {
       "key": {
+        "uuid": "1a622d24_53c4975e",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/messages/NotifyProducerCreated.java",
+        "patchSetId": 53
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-12-16T16:13:42Z",
+      "side": 1,
+      "message": "I meant the Collection. Collection isn\u0027t Serializable, implementations may be although every known implementation I\u0027ve seen is so shouldn\u0027t be an issue. I\u0027m surprised FindBugs didn\u0027t complain here...it checks if field is either Serializable or transient.",
+      "parentUuid": "1a622d24_a49ccbc1",
+      "revId": "f7022bbf86db1e05f093e5e8a4f1129a4c742051",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a622d24_64863867",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/messages/NotifyProducerCreated.java",
         "patchSetId": 53
