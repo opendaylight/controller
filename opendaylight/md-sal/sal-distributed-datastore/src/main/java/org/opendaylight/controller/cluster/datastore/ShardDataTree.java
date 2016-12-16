@@ -628,6 +628,11 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         maybeRunOperationOnPendingTransactionsComplete();
     }
 
+    private boolean peekNextPendingCommit() {
+        final CommitEntry first = pendingCommits.peek();
+        return first != null && first.cohort.getState() == State.COMMIT_PENDING;
+    }
+
     private void processNextPending() {
         processNextPendingCommit();
         processNextPendingTransaction();
@@ -656,17 +661,14 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
 
         final SimpleShardDataTreeCohort current = entry.cohort;
         Verify.verify(cohort.equals(current), "Attempted to pre-commit %s while %s is pending", cohort, current);
+
+        LOG.debug("{}: Preparing transaction {}", logContext, current.getIdentifier());
+
         final DataTreeCandidateTip candidate;
         try {
             candidate = tip.prepare(cohort.getDataTreeModification());
-        } catch (Exception e) {
-            failPreCommit(e);
-            return;
-        }
-
-        try {
             cohort.userPreCommit(candidate);
-        } catch (ExecutionException | TimeoutException e) {
+        } catch (ExecutionException | TimeoutException | RuntimeException e) {
             failPreCommit(e);
             return;
         }
@@ -678,6 +680,9 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
 
         pendingTransactions.remove();
         pendingCommits.add(entry);
+
+        LOG.debug("{}: Transaction {} prepared", logContext, current.getIdentifier());
+
         cohort.successfulPreCommit(candidate);
 
         processNextPendingTransaction();
@@ -731,6 +736,8 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
             return;
         }
 
+        LOG.debug("{}: Starting commit for transaction {}", logContext, current.getIdentifier());
+
         if (shard.canSkipPayload() || candidate.getRootNode().getModificationType() == ModificationType.UNMODIFIED) {
             LOG.debug("{}: No replication required, proceeding to finish commit", logContext);
             pendingCommits.remove();
@@ -743,22 +750,41 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         final Payload payload;
         try {
             payload = CommitTransactionPayload.create(txId, candidate);
-
-            // Once completed, we will continue via payloadReplicationComplete
-            entry.lastAccess = shard.ticker().read();
-            shard.persistPayload(txId, payload);
-
-            LOG.debug("{}: Transaction {} submitted to persistence", logContext, txId);
-
-            pendingCommits.remove();
-            pendingFinishCommits.add(entry);
         } catch (IOException e) {
             LOG.error("{}: Failed to encode transaction {} candidate {}", logContext, txId, candidate, e);
             pendingCommits.poll().cohort.failedCommit(e);
+            processNextPending();
             return;
         }
 
-        processNextPending();
+        // We process next transactions pending canCommit before we call persistPayload to possibly progress subsequent
+        // transactions to the COMMIT_PENDING state so the payloads can be batched for replication. This is done for
+        // single-shard transactions that immediately transition from canCommit to preCommit to commit. Note that
+        // if the next pending transaction is progressed to COMMIT_PENDING and this method (startCommit) is called,
+        // the next transaction will not attempt to replicate b/c the current transaction is still at the head of the
+        // pendingCommits queue.
+        processNextPendingTransaction();
+
+        // After processing next pending transactions, we can now remove the current transaction from pendingCommits.
+        // Note this must be done before the call to peekNextPendingCommit below so we check the next transaction
+        // in order to properly determine the batchHint flag for the call to persistPayload.
+        pendingCommits.remove();
+        pendingFinishCommits.add(entry);
+
+        // See if the next transaction is pending commit (ie in the COMMIT_PENDING state) so it can be batched with
+        // this transaction for replication.
+        boolean replicationBatchHint = peekNextPendingCommit();
+
+        // Once completed, we will continue via payloadReplicationComplete
+        shard.persistPayload(txId, payload, replicationBatchHint);
+
+        entry.lastAccess = shard.ticker().read();
+
+        LOG.debug("{}: Transaction {} submitted to persistence", logContext, txId);
+
+        // Process the next transaction pending commit, if any. If there is one it will be batched with this
+        // transaction for replication.
+        processNextPendingCommit();
     }
 
     void processCohortRegistryCommand(final ActorRef sender, final CohortRegistryCommand message) {
