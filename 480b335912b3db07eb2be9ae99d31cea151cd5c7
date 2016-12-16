@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "1a622d24_13acdf34",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/AbstractDataStoreClientBehavior.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-12-16T17:18:30Z",
+      "side": 1,
+      "message": "... because it does not starve readers nor writers without the overhead of a fair ReadWriteLock :-)\n\nI was thinking about using optimistic read, but it is a bit dicey with the writer coming in and observing the map. Essentially we do not know if the optimistic read got broken before or after the insert operation was visible in the map.\n\nI will explore that once we get this thing stable :)",
+      "parentUuid": "1a622d24_fd59325c",
+      "revId": "480b335912b3db07eb2be9ae99d31cea151cd5c7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a622d24_1d5fce42",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/AbstractDataStoreClientBehavior.java",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2016-12-16T12:26:08Z",
       "side": 1,
       "message": "If the code above in the finally block threw an exception, the lock wouldn\u0027t be freed. Should wrap that code in try/finally to be safe.",
+      "revId": "480b335912b3db07eb2be9ae99d31cea151cd5c7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_73ab931d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/AbstractDataStoreClientBehavior.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-12-16T17:18:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1a622d24_1d5fce42",
       "revId": "480b335912b3db07eb2be9ae99d31cea151cd5c7",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
