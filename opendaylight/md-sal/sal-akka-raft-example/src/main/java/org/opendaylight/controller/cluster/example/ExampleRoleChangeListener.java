@@ -35,7 +35,7 @@ import scala.concurrent.duration.FiniteDuration;
  */
 public class ExampleRoleChangeListener extends AbstractUntypedActor implements AutoCloseable{
     // the akka url should be set to the notifiers actor-system and domain.
-    private static final String NOTIFIER_AKKA_URL = "akka.tcp://raft-test@127.0.0.1:2550/user/";
+    private static final String NOTIFIER_AKKA_URL = "akka://raft-test@127.0.0.1:2550/user/";
 
     private Map<String, Boolean> notifierRegistrationStatus = new HashMap<>();
     private Cancellable registrationSchedule = null;

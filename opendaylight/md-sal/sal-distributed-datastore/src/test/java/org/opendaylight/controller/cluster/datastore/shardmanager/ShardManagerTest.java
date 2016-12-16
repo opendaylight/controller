@@ -634,7 +634,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
         // Create an ActorSystem ShardManager actor for member-1.
 
         final ActorSystem system1 = newActorSystem("Member1");
-        Cluster.get(system1).join(AddressFromURIString.parse("akka.tcp://cluster-test@127.0.0.1:2558"));
+        Cluster.get(system1).join(AddressFromURIString.parse("akka://cluster-test@127.0.0.1:2558"));
 
         final TestActorRef<TestShardManager> shardManager1 = TestActorRef.create(system1,
                 newTestShardMgrBuilderWithMockShardActor().cluster(
@@ -645,7 +645,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
 
         final ActorSystem system2 = newActorSystem("Member2");
 
-        Cluster.get(system2).join(AddressFromURIString.parse("akka.tcp://cluster-test@127.0.0.1:2558"));
+        Cluster.get(system2).join(AddressFromURIString.parse("akka://cluster-test@127.0.0.1:2558"));
 
         final ActorRef mockShardActor2 = newMockShardActor(system2, "astronauts", "member-2");
 
@@ -684,7 +684,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
 
                 shardManager2.underlyingActor().verifyFindPrimary();
 
-                Cluster.get(system2).down(AddressFromURIString.parse("akka.tcp://cluster-test@127.0.0.1:2558"));
+                Cluster.get(system2).down(AddressFromURIString.parse("akka://cluster-test@127.0.0.1:2558"));
 
                 shardManager1.underlyingActor().waitForMemberRemoved();
 
@@ -705,7 +705,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
         // Create an ActorSystem ShardManager actor for member-1.
 
         final ActorSystem system1 = newActorSystem("Member1");
-        Cluster.get(system1).join(AddressFromURIString.parse("akka.tcp://cluster-test@127.0.0.1:2558"));
+        Cluster.get(system1).join(AddressFromURIString.parse("akka://cluster-test@127.0.0.1:2558"));
 
         final ActorRef mockShardActor1 = newMockShardActor(system1, Shard.DEFAULT_NAME, "member-1");
 
@@ -718,7 +718,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
 
         final ActorSystem system2 = newActorSystem("Member2");
 
-        Cluster.get(system2).join(AddressFromURIString.parse("akka.tcp://cluster-test@127.0.0.1:2558"));
+        Cluster.get(system2).join(AddressFromURIString.parse("akka://cluster-test@127.0.0.1:2558"));
 
         final ActorRef mockShardActor2 = newMockShardActor(system2, Shard.DEFAULT_NAME, "member-2");
 
@@ -758,7 +758,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
                 assertTrue("Unexpected primary path " + path, path.contains("member-2-shard-default-config"));
 
                 shardManager1.tell(MockClusterWrapper.createUnreachableMember("member-2",
-                        "akka.tcp://cluster-test@127.0.0.1:2558"), getRef());
+                        "akka://cluster-test@127.0.0.1:2558"), getRef());
 
                 shardManager1.underlyingActor().waitForUnreachableMember();
 
@@ -767,7 +767,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
                 MessageCollectorActor.clearMessages(mockShardActor1);
 
                 shardManager1.tell(
-                        MockClusterWrapper.createMemberRemoved("member-2", "akka.tcp://cluster-test@127.0.0.1:2558"),
+                        MockClusterWrapper.createMemberRemoved("member-2", "akka://cluster-test@127.0.0.1:2558"),
                         getRef());
 
                 MessageCollectorActor.expectFirstMatching(mockShardActor1, PeerDown.class);
@@ -777,7 +777,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
                 expectMsgClass(duration("5 seconds"), NoShardLeaderException.class);
 
                 shardManager1.tell(
-                        MockClusterWrapper.createReachableMember("member-2", "akka.tcp://cluster-test@127.0.0.1:2558"),
+                        MockClusterWrapper.createReachableMember("member-2", "akka://cluster-test@127.0.0.1:2558"),
                         getRef());
 
                 shardManager1.underlyingActor().waitForReachableMember();
@@ -793,7 +793,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
                 assertTrue("Unexpected primary path " + path1, path1.contains("member-2-shard-default-config"));
 
                 shardManager1.tell(
-                        MockClusterWrapper.createMemberUp("member-2", "akka.tcp://cluster-test@127.0.0.1:2558"),
+                        MockClusterWrapper.createMemberUp("member-2", "akka://cluster-test@127.0.0.1:2558"),
                         getRef());
 
                 MessageCollectorActor.expectFirstMatching(mockShardActor1, PeerUp.class);
@@ -801,13 +801,13 @@ public class ShardManagerTest extends AbstractShardManagerTest {
                 // Test FindPrimary wait succeeds after reachable member event.
 
                 shardManager1.tell(MockClusterWrapper.createUnreachableMember("member-2",
-                        "akka.tcp://cluster-test@127.0.0.1:2558"), getRef());
+                        "akka://cluster-test@127.0.0.1:2558"), getRef());
                 shardManager1.underlyingActor().waitForUnreachableMember();
 
                 shardManager1.tell(new FindPrimary("default", true), getRef());
 
                 shardManager1.tell(
-                        MockClusterWrapper.createReachableMember("member-2", "akka.tcp://cluster-test@127.0.0.1:2558"),
+                        MockClusterWrapper.createReachableMember("member-2", "akka://cluster-test@127.0.0.1:2558"),
                         getRef());
 
                 RemotePrimaryShardFound found2 = expectMsgClass(duration("5 seconds"), RemotePrimaryShardFound.class);
@@ -827,7 +827,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
         // Create an ActorSystem ShardManager actor for member-1.
 
         final ActorSystem system1 = newActorSystem("Member1");
-        Cluster.get(system1).join(AddressFromURIString.parse("akka.tcp://cluster-test@127.0.0.1:2558"));
+        Cluster.get(system1).join(AddressFromURIString.parse("akka://cluster-test@127.0.0.1:2558"));
 
         final ActorRef mockShardActor1 = newMockShardActor(system1, Shard.DEFAULT_NAME, "member-1");
 
@@ -842,7 +842,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
 
         final ActorSystem system2 = newActorSystem("Member2");
 
-        Cluster.get(system2).join(AddressFromURIString.parse("akka.tcp://cluster-test@127.0.0.1:2558"));
+        Cluster.get(system2).join(AddressFromURIString.parse("akka://cluster-test@127.0.0.1:2558"));
 
         final ActorRef mockShardActor2 = newMockShardActor(system2, Shard.DEFAULT_NAME, "member-2");
 
@@ -885,7 +885,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
                         system1.actorSelection(mockShardActor1.path()), DataStoreVersions.CURRENT_VERSION));
 
                 shardManager1.tell(MockClusterWrapper.createUnreachableMember("member-2",
-                        "akka.tcp://cluster-test@127.0.0.1:2558"), getRef());
+                        "akka://cluster-test@127.0.0.1:2558"), getRef());
 
                 shardManager1.underlyingActor().waitForUnreachableMember();
 
@@ -1449,7 +1449,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
 
         // Create an ActorSystem ShardManager actor for member-1.
         final ActorSystem system1 = newActorSystem("Member1");
-        Cluster.get(system1).join(AddressFromURIString.parse("akka.tcp://cluster-test@127.0.0.1:2558"));
+        Cluster.get(system1).join(AddressFromURIString.parse("akka://cluster-test@127.0.0.1:2558"));
         ActorRef mockDefaultShardActor = newMockShardActor(system1, Shard.DEFAULT_NAME, "member-1");
         final TestActorRef<TestShardManager> newReplicaShardManager = TestActorRef.create(system1,
                 newTestShardMgrBuilder(mockConfig).shardActor(mockDefaultShardActor)
@@ -1459,7 +1459,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
 
         // Create an ActorSystem ShardManager actor for member-2.
         final ActorSystem system2 = newActorSystem("Member2");
-        Cluster.get(system2).join(AddressFromURIString.parse("akka.tcp://cluster-test@127.0.0.1:2558"));
+        Cluster.get(system2).join(AddressFromURIString.parse("akka://cluster-test@127.0.0.1:2558"));
 
         String memberId2 = "member-2-shard-astronauts-" + shardMrgIDSuffix;
         String name = ShardIdentifier.create("astronauts", MEMBER_2, "config").toString();
@@ -1680,7 +1680,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
 
                 newReplicaShardManager.tell(new UpdateSchemaContext(TestModel.createTestContext()), getRef());
                 MockClusterWrapper.sendMemberUp(newReplicaShardManager, "member-2",
-                        AddressFromURIString.parse("akka.tcp://non-existent@127.0.0.1:5").toString());
+                        AddressFromURIString.parse("akka://non-existent@127.0.0.1:5").toString());
 
                 newReplicaShardManager.tell(new AddShardReplica("astronauts"), getRef());
                 Status.Failure resp = expectMsgClass(duration("5 seconds"), Status.Failure.class);
@@ -1748,7 +1748,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
 
         // Create an ActorSystem ShardManager actor for member-1.
         final ActorSystem system1 = newActorSystem("Member1");
-        Cluster.get(system1).join(AddressFromURIString.parse("akka.tcp://cluster-test@127.0.0.1:2558"));
+        Cluster.get(system1).join(AddressFromURIString.parse("akka://cluster-test@127.0.0.1:2558"));
         ActorRef mockDefaultShardActor = newMockShardActor(system1, Shard.DEFAULT_NAME, "member-1");
 
         final TestActorRef<TestShardManager> newReplicaShardManager = TestActorRef.create(system1,
@@ -1758,7 +1758,7 @@ public class ShardManagerTest extends AbstractShardManagerTest {
 
         // Create an ActorSystem ShardManager actor for member-2.
         final ActorSystem system2 = newActorSystem("Member2");
-        Cluster.get(system2).join(AddressFromURIString.parse("akka.tcp://cluster-test@127.0.0.1:2558"));
+        Cluster.get(system2).join(AddressFromURIString.parse("akka://cluster-test@127.0.0.1:2558"));
 
         String name = ShardIdentifier.create("default", MEMBER_2, shardMrgIDSuffix).toString();
         String memberId2 = "member-2-shard-default-" + shardMrgIDSuffix;
@@ -1774,11 +1774,11 @@ public class ShardManagerTest extends AbstractShardManagerTest {
                 shardManagerID);
 
         // Because mockShardLeaderActor is created at the top level of the actor system it has an address like so,
-        //    akka.tcp://cluster-test@127.0.0.1:2559/user/member-2-shard-default-config1
+        //    akka://cluster-test@127.0.0.1:2559/user/member-2-shard-default-config1
         // However when a shard manager has a local shard which is a follower and a leader that is remote it will
         // try to compute an address for the remote shard leader using the ShardPeerAddressResolver. This address will
         // look like so,
-        //    akka.tcp://cluster-test@127.0.0.1:2559/user/shardmanager-config1/member-2-shard-default-config1
+        //    akka://cluster-test@127.0.0.1:2559/user/shardmanager-config1/member-2-shard-default-config1
         // In this specific case if we did a FindPrimary for shard default from member-1 we would come up
         // with the address of an actor which does not exist, therefore any message sent to that actor would go to
         // dead letters.
