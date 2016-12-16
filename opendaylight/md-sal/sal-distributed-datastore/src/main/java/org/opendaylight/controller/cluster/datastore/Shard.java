@@ -456,9 +456,9 @@ public class Shard extends RaftActor {
     }
 
     // applyState() will be invoked once consensus is reached on the payload
-    void persistPayload(final TransactionIdentifier transactionId, final Payload payload) {
+    void persistPayload(final TransactionIdentifier transactionId, final Payload payload, boolean batchHint) {
         // We are faking the sender
-        persistData(self(), transactionId, payload, false);
+        persistData(self(), transactionId, payload, batchHint);
     }
 
     private void handleCommitTransaction(final CommitTransaction commit) {
