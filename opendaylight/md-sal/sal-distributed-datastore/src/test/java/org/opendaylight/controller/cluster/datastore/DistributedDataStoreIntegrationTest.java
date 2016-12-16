@@ -97,7 +97,7 @@ public class DistributedDataStoreIntegrationTest {
     @BeforeClass
     public static void setUpClass() throws IOException {
         system = ActorSystem.create("cluster-test", ConfigFactory.load().getConfig("Member1"));
-        Address member1Address = AddressFromURIString.parse("akka.tcp://cluster-test@127.0.0.1:2558");
+        Address member1Address = AddressFromURIString.parse("akka://cluster-test@127.0.0.1:2558");
         Cluster.get(system).join(member1Address);
     }
 

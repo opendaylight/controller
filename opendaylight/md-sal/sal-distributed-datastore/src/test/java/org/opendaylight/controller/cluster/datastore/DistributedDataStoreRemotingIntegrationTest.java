@@ -103,9 +103,9 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
     private static final String[] CARS = {"cars"};
 
     private static final Address MEMBER_1_ADDRESS = AddressFromURIString.parse(
-            "akka.tcp://cluster-test@127.0.0.1:2558");
+            "akka://cluster-test@127.0.0.1:2558");
     private static final Address MEMBER_2_ADDRESS = AddressFromURIString.parse(
-            "akka.tcp://cluster-test@127.0.0.1:2559");
+            "akka://cluster-test@127.0.0.1:2559");
 
     private static final String MODULE_SHARDS_CARS_ONLY_1_2 = "module-shards-cars-member-1-and-2.conf";
     private static final String MODULE_SHARDS_CARS_PEOPLE_1_2 = "module-shards-member1-and-2.conf";
