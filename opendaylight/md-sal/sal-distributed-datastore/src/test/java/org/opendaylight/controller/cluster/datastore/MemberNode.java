@@ -12,7 +12,6 @@ import static org.junit.Assert.fail;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
-import akka.actor.Address;
 import akka.actor.AddressFromURIString;
 import akka.cluster.Cluster;
 import akka.cluster.ClusterEvent.CurrentClusterState;
@@ -23,6 +22,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.Uninterruptibles;
+import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import java.util.List;
 import java.util.Set;
@@ -34,6 +34,7 @@ import org.opendaylight.controller.cluster.raft.client.messages.GetOnDemandRaftS
 import org.opendaylight.controller.cluster.raft.client.messages.OnDemandRaftState;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.slf4j.LoggerFactory;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
@@ -47,7 +48,7 @@ import scala.concurrent.duration.Duration;
  * @author Thomas Pantelis
  */
 public class MemberNode {
-    static final Address MEMBER_1_ADDRESS = AddressFromURIString.parse("akka.tcp://cluster-test@127.0.0.1:2558");
+    private static final String MEMBER_1_ADDRESS = "akka://cluster-test@127.0.0.1:2558";
 
     private IntegrationTestKit kit;
     private AbstractDataStore configDataStore;
@@ -110,6 +111,7 @@ public class MemberNode {
         fail("Member " + member + " is now down");
     }
 
+    @SuppressWarnings("checkstyle:IllegalCatch")
     public void cleanup() {
         if (!cleanedUp) {
             cleanedUp = true;
@@ -120,7 +122,11 @@ public class MemberNode {
                 operDataStore.close();
             }
 
-            IntegrationTestKit.shutdownActorSystem(kit.getSystem(), Boolean.TRUE);
+            try {
+                IntegrationTestKit.shutdownActorSystem(kit.getSystem(), Boolean.TRUE);
+            } catch (RuntimeException e) {
+                LoggerFactory.getLogger(MemberNode.class).warn("Failed to shutdown actor system", e);
+            }
         }
     }
 
@@ -179,6 +185,7 @@ public class MemberNode {
         private final List<MemberNode> members;
         private String moduleShardsConfig;
         private String akkaConfig;
+        private boolean useAkkaArtery = true;
         private String[] waitForshardLeader = new String[0];
         private String testName;
         private SchemaContext schemaContext;
@@ -207,6 +214,16 @@ public class MemberNode {
          */
         public Builder akkaConfig(final String newAkkaConfig) {
             this.akkaConfig = newAkkaConfig;
+            return this;
+        }
+
+        /**
+         * Specifies whether or not to use akka artery for remoting. Default is true.
+         *
+         * @return this Builder
+         */
+        public Builder useAkkaArtery(final boolean newUseAkkaArtery) {
+            this.useAkkaArtery = newUseAkkaArtery;
             return this;
         }
 
@@ -272,8 +289,18 @@ public class MemberNode {
             MemberNode node = new MemberNode();
             node.datastoreContextBuilder = datastoreContextBuilder;
 
-            ActorSystem system = ActorSystem.create("cluster-test", ConfigFactory.load().getConfig(akkaConfig));
-            Cluster.get(system).join(MEMBER_1_ADDRESS);
+            final String akkaConfigWithoutArtery = akkaConfig + "-without-artery";
+            Config baseConfig = ConfigFactory.load();
+            Config config;
+            if (useAkkaArtery) {
+                config = baseConfig.getConfig(akkaConfig).withFallback(baseConfig.getConfig(akkaConfigWithoutArtery));
+            } else {
+                config = baseConfig.getConfig(akkaConfigWithoutArtery);
+            }
+
+            ActorSystem system = ActorSystem.create("cluster-test", config);
+            String member1Address = useAkkaArtery ? MEMBER_1_ADDRESS : MEMBER_1_ADDRESS.replace("akka", "akka.tcp");
+            Cluster.get(system).join(AddressFromURIString.parse(member1Address));
 
             node.kit = new IntegrationTestKit(system, datastoreContextBuilder);
 

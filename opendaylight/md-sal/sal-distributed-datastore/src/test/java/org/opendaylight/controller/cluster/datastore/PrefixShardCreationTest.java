@@ -100,7 +100,7 @@ public class PrefixShardCreationTest extends AbstractShardManagerTest {
 
         // Create ACtorSystem for member-1
         final ActorSystem system1 = newActorSystem("Member1");
-        Cluster.get(system1).join(AddressFromURIString.parse("akka.tcp://cluster-test@127.0.0.1:2558"));
+        Cluster.get(system1).join(AddressFromURIString.parse("akka://cluster-test@127.0.0.1:2558"));
 
         final TestActorRef<TestShardManager> shardManager1 = TestActorRef.create(system1,
                 newTestShardMgrBuilder(new ConfigurationImpl(new EmptyModuleShardConfigProvider()))
@@ -113,7 +113,7 @@ public class PrefixShardCreationTest extends AbstractShardManagerTest {
 
         final ActorSystem system2 = newActorSystem("Member2");
 
-        Cluster.get(system2).join(AddressFromURIString.parse("akka.tcp://cluster-test@127.0.0.1:2558"));
+        Cluster.get(system2).join(AddressFromURIString.parse("akka://cluster-test@127.0.0.1:2558"));
 
         final TestActorRef<TestShardManager> shardManager2 = TestActorRef.create(system2,
                 newTestShardMgrBuilder()
