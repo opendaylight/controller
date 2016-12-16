@@ -103,9 +103,9 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
     private static final String[] CARS = {"cars"};
 
     private static final Address MEMBER_1_ADDRESS = AddressFromURIString.parse(
-            "akka.tcp://cluster-test@127.0.0.1:2558");
+            "akka://cluster-test@127.0.0.1:2558");
     private static final Address MEMBER_2_ADDRESS = AddressFromURIString.parse(
-            "akka.tcp://cluster-test@127.0.0.1:2559");
+            "akka://cluster-test@127.0.0.1:2559");
 
     private static final String MODULE_SHARDS_CARS_ONLY_1_2 = "module-shards-cars-member-1-and-2.conf";
     private static final String MODULE_SHARDS_CARS_PEOPLE_1_2 = "module-shards-member1-and-2.conf";
@@ -806,7 +806,8 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         String testName = "testLeadershipTransferOnShutdown";
         initDatastores(testName, MODULE_SHARDS_CARS_PEOPLE_1_2_3, CARS_AND_PEOPLE);
 
-        IntegrationTestKit follower2TestKit = new IntegrationTestKit(follower2System, followerDatastoreContextBuilder);
+        IntegrationTestKit follower2TestKit = new IntegrationTestKit(follower2System,
+                DatastoreContext.newBuilderFrom(followerDatastoreContextBuilder.build()).operationTimeoutInMillis(100));
         try (AbstractDataStore follower2DistributedDataStore = follower2TestKit.setupDistributedDataStore(testName,
                 MODULE_SHARDS_CARS_PEOPLE_1_2_3, false)) {
 
@@ -912,6 +913,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
     @Test(expected = AskTimeoutException.class)
     public void testTransactionWithShardLeaderNotResponding() throws Exception {
+        followerDatastoreContextBuilder.shardElectionTimeoutFactor(50);
         initDatastoresWithCars("testTransactionWithShardLeaderNotResponding");
 
         // Do an initial read to get the primary shard info cached.
