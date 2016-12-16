@@ -47,7 +47,7 @@ import scala.concurrent.duration.Duration;
  * @author Thomas Pantelis
  */
 public class MemberNode {
-    static final Address MEMBER_1_ADDRESS = AddressFromURIString.parse("akka.tcp://cluster-test@127.0.0.1:2558");
+    static final Address MEMBER_1_ADDRESS = AddressFromURIString.parse("akka://cluster-test@127.0.0.1:2558");
 
     private IntegrationTestKit kit;
     private DistributedDataStore configDataStore;
