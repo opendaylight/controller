@@ -22,7 +22,7 @@ import scala.collection.JavaConversions;
 
 public class MockClusterWrapper implements ClusterWrapper {
 
-    private Address selfAddress = new Address("akka.tcp", "test", "127.0.0.1", 2550);
+    private Address selfAddress = new Address("akka", "test", "127.0.0.1", 2550);
     private final MemberName currentMemberName;
 
     public MockClusterWrapper() {
