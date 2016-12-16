@@ -1520,14 +1520,15 @@ public class ShardTest extends AbstractShardTest {
             {
                 final Creator<Shard> creator = () -> new Shard(newShardBuilder()) {
                     @Override
-                    void persistPayload(final TransactionIdentifier transactionId, final Payload payload) {
+                    void persistPayload(final TransactionIdentifier transactionId, final Payload payload,
+                            boolean batchHint) {
                         // Simulate an AbortTransaction message occurring during
                         // replication, after
                         // persisting and before finishing the commit to the
                         // in-memory store.
 
                         doAbortTransaction(transactionId, null);
-                        super.persistPayload(transactionId, payload);
+                        super.persistPayload(transactionId, payload, batchHint);
                     }
                 };
 

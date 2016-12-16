@@ -87,6 +87,29 @@ public final class ShardDataTreeMocking {
         return callback;
     }
 
+    public static FutureCallback<UnsignedLong> immediate3PhaseCommit(final ShardDataTreeCohort cohort) {
+        final FutureCallback<UnsignedLong> commitCallback = mockCallback();
+        doNothing().when(commitCallback).onSuccess(any(UnsignedLong.class));
+        doNothing().when(commitCallback).onFailure(any(Throwable.class));
+
+        final FutureCallback<DataTreeCandidate> preCommitCallback = mockCallback();
+        doAnswer(invocation -> {
+            cohort.commit(commitCallback);
+            return null;
+        }).when(preCommitCallback).onSuccess(any(DataTreeCandidate.class));
+        doNothing().when(preCommitCallback).onFailure(any(Throwable.class));
+
+        final FutureCallback<Void> canCommit = mockCallback();
+        doAnswer(invocation -> {
+            cohort.preCommit(preCommitCallback);
+            return null;
+        }).when(canCommit).onSuccess(null);
+        doNothing().when(canCommit).onFailure(any(Throwable.class));
+
+        cohort.canCommit(canCommit);
+        return commitCallback;
+    }
+
     @SuppressWarnings("unchecked")
     private static <T> Object invokeSuccess(final InvocationOnMock invocation, final T value) {
         invocation.getArgumentAt(0, FutureCallback.class).onSuccess(value);
