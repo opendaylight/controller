@@ -728,6 +728,24 @@
     },
     {
       "key": {
+        "uuid": "1a622d24_13733fe8",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/messages/NotifyProducerCreated.java",
+        "patchSetId": 53
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-12-16T17:20:13Z",
+      "side": 1,
+      "message": "We can keep this a collection...",
+      "parentUuid": "1a622d24_53c4975e",
+      "revId": "f7022bbf86db1e05f093e5e8a4f1129a4c742051",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a622d24_64863867",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/messages/NotifyProducerCreated.java",
         "patchSetId": 53
@@ -739,6 +757,30 @@
       "writtenOn": "2016-12-14T17:00:09Z",
       "side": 1,
       "message": "This *really* needs to be immutable",
+      "range": {
+        "startLine": 26,
+        "startChar": 21,
+        "endLine": 26,
+        "endChar": 33
+      },
+      "revId": "f7022bbf86db1e05f093e5e8a4f1129a4c742051",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_73827395",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/messages/NotifyProducerCreated.java",
+        "patchSetId": 53
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-12-16T17:20:13Z",
+      "side": 1,
+      "message": "... and use ImmutableList.copyOf(subtrees) here.\n\nThus we have well-known implementation, which is serializable...",
+      "parentUuid": "1a622d24_64863867",
       "range": {
         "startLine": 26,
         "startChar": 21,
