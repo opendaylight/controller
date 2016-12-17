@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a622d24_c9bab86d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/config/yang/config/distributed_datastore_provider/DistributedConfigDataStoreProviderModule.java",
+        "patchSetId": 45
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-12-17T13:27:28Z",
+      "side": 1,
+      "message": "should be getTellBased...",
+      "revId": "85198a2c6fc2aaf071d49c46359f79c20020c1db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_e9b7b484",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/config/yang/config/distributed_datastore_provider/DistributedOperationalDataStoreProviderModule.java",
+        "patchSetId": 45
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-12-17T13:27:28Z",
+      "side": 1,
+      "message": "should be getTellBased...",
+      "revId": "85198a2c6fc2aaf071d49c46359f79c20020c1db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
