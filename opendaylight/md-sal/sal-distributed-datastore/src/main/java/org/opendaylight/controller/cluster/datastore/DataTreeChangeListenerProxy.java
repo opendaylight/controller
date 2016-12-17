@@ -7,12 +7,15 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import akka.actor.ActorPath$;
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
+import akka.actor.InvalidActorNameException;
 import akka.actor.PoisonPill;
 import akka.dispatch.OnComplete;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import java.util.concurrent.atomic.AtomicInteger;
 import javax.annotation.concurrent.GuardedBy;
 import org.opendaylight.controller.cluster.datastore.exceptions.LocalShardNotFoundException;
 import org.opendaylight.controller.cluster.datastore.messages.CloseDataTreeChangeListenerRegistration;
@@ -35,8 +38,12 @@ import scala.concurrent.Future;
  */
 final class DataTreeChangeListenerProxy<T extends DOMDataTreeChangeListener> extends AbstractListenerRegistration<T> {
     private static final Logger LOG = LoggerFactory.getLogger(DataTreeChangeListenerProxy.class);
-    private final ActorRef dataChangeListenerActor;
     private final ActorContext actorContext;
+
+    private ActorRef dataChangeListenerActor;
+    private String dataChangeListenerActorName;
+    private static final AtomicInteger NEXT_INSTANCE_ID = new AtomicInteger(1);
+    private static final char ACTOR_NAME_SEP_CH = '-';
 
     @GuardedBy("this")
     private ActorSelection listenerRegistrationActor;
@@ -44,9 +51,6 @@ final class DataTreeChangeListenerProxy<T extends DOMDataTreeChangeListener> ext
     DataTreeChangeListenerProxy(final ActorContext actorContext, final T listener) {
         super(listener);
         this.actorContext = Preconditions.checkNotNull(actorContext);
-        this.dataChangeListenerActor = actorContext.getActorSystem().actorOf(
-                DataTreeChangeListenerActor.props(getInstance())
-                    .withDispatcher(actorContext.getNotificationDispatcherPath()));
     }
 
     @Override
@@ -56,7 +60,64 @@ final class DataTreeChangeListenerProxy<T extends DOMDataTreeChangeListener> ext
             listenerRegistrationActor = null;
         }
 
-        dataChangeListenerActor.tell(PoisonPill.getInstance(), ActorRef.noSender());
+        if (dataChangeListenerActor != null) {
+            dataChangeListenerActor.tell(PoisonPill.getInstance(), ActorRef.noSender());
+        }
+    }
+
+    public static String replaceInvalidActorPathCharacterWith(final String strToBeReplaced,
+                                                              final char replaceWithCharacter) {
+        StringBuilder actorNameBuilder = new StringBuilder();
+        for (char charInStr : strToBeReplaced.toCharArray()) {
+            if (ActorPath$.MODULE$.isValidPathElement(String.valueOf(charInStr))) {
+                actorNameBuilder.append(charInStr);
+            } else {
+                actorNameBuilder.append(replaceWithCharacter);
+            }
+        }
+        return actorNameBuilder.toString();
+    }
+
+    public static String actorNameStrFromYangPathStr(final String yangPathStr) {
+        String replacedYangPathStr = yangPathStr.replace('/', '$').replace('?', '@');
+        final char charForOtherInvalidChars = '~';
+        return replaceInvalidActorPathCharacterWith(replacedYangPathStr, charForOtherInvalidChars);
+    }
+
+    protected static int newInstanceId() {
+        return NEXT_INSTANCE_ID.getAndIncrement();
+    }
+
+    private boolean initActor(final YangInstanceIdentifier treeId) {
+        StringBuilder sbActorName = new StringBuilder();
+        String actorName = sbActorName.append("DataTreeChangeListener")
+                                .append(ACTOR_NAME_SEP_CH)
+                                .append(newInstanceId())
+                                .append(ACTOR_NAME_SEP_CH)
+                                .append(actorNameStrFromYangPathStr(treeId.toString()))
+                                .toString();
+        try {
+            ActorRef actorRef = actorContext.getActorSystem().actorOf(
+                DataTreeChangeListenerActor.props(getInstance())
+                    .withDispatcher(actorContext.getNotificationDispatcherPath())
+                    .withMailbox(ActorContext.BOUNDED_MAILBOX),
+                actorName);
+            LOG.info("Success to create actor with name \"{}\" for listener listening to \"{}\"",
+                     actorName, treeId);
+            dataChangeListenerActor     = actorRef;
+            dataChangeListenerActorName = actorName;
+        } catch (InvalidActorNameException | IllegalStateException e) {
+            LOG.error("Failed to create actor with name \"{}\" for listener listening to \"{}\" due to {}",
+                      actorName, treeId, e);
+            if (dataChangeListenerActor != null) {
+                LOG.warn("Data tree change listener actor with name \"{}\" will be removed!",
+                         dataChangeListenerActorName);
+            }
+            dataChangeListenerActor     = null;
+            dataChangeListenerActorName = null;
+        }
+
+        return dataChangeListenerActor != null;
     }
 
     void init(final String shardName, final YangInstanceIdentifier treeId) {
@@ -71,7 +132,9 @@ final class DataTreeChangeListenerProxy<T extends DOMDataTreeChangeListener> ext
                     LOG.error("Failed to find local shard {} - DataTreeChangeListener {} at path {} "
                             + "cannot be registered: {}", shardName, getInstance(), treeId, failure);
                 } else {
-                    doRegistration(shard, treeId);
+                    if (initActor(treeId)) {
+                        doRegistration(shard, treeId);
+                    }
                 }
             }
         }, actorContext.getClientDispatcher());
