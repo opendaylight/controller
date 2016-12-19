@@ -386,7 +386,7 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
         visitor.assertField("private java.lang.Long maximumSize");
         visitor.assertField("private javax.management.ObjectName threadfactory");
         visitor.assertField("private java.util.concurrent.ThreadFactory threadfactoryDependency");
-        visitor.assertField("private java.lang.Long keepAlive = new java.lang.Long(\"10\")");
+        visitor.assertField("private java.lang.Long keepAlive = java.lang.Long.valueOf(\"10\")");
         visitor.assertField("private java.lang.Long coreSize");
         visitor.assertField("private byte[] binary");
 
