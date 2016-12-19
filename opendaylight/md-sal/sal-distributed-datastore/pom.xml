@@ -235,6 +235,7 @@
                 org.opendaylight.controller.cluster.datastore.config;
                 org.opendaylight.controller.cluster.datastore.messages;
                 org.opendaylight.controller.cluster.datastore.utils;
+                org.opendaylight.controller.cluster.sharding;
             </Export-Package>
             <Import-Package>
                 !*snappy;
