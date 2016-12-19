@@ -7,9 +7,12 @@
  */
 package org.opendaylight.controller.cluster.datastore.admin;
 
+import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
 import static org.hamcrest.CoreMatchers.anyOf;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
@@ -148,7 +151,7 @@ public class ClusterAdminRpcServiceTest {
 
         rpcResult = service.backupDatastore(new BackupDatastoreInputBuilder().setFilePath(fileName).build())
                 .get(5, TimeUnit.SECONDS);
-        assertEquals("isSuccessful", false, rpcResult.isSuccessful());
+        assertFalse("isSuccessful", rpcResult.isSuccessful());
         assertEquals("getErrors", 1, rpcResult.getErrors().size());
     }
 
@@ -253,8 +256,8 @@ public class ClusterAdminRpcServiceTest {
         writeTx.write(CarsModel.BASE_PATH, carsNode);
 
         DOMStoreThreePhaseCommitCohort cohort = writeTx.ready();
-        Boolean canCommit = cohort .canCommit().get(7, TimeUnit.SECONDS);
-        assertEquals("canCommit", true, canCommit);
+        Boolean canCommit = cohort.canCommit().get(7, TimeUnit.SECONDS);
+        assertEquals("canCommit", TRUE, canCommit);
         cohort.preCommit().get(5, TimeUnit.SECONDS);
         cohort.commit().get(5, TimeUnit.SECONDS);
 
@@ -266,7 +269,7 @@ public class ClusterAdminRpcServiceTest {
             NormalizedNode<?, ?> expCarsNode) throws Exception {
         Optional<NormalizedNode<?, ?>> optional = readFromStore.newReadOnlyTransaction()
                 .read(CarsModel.BASE_PATH).get(15, TimeUnit.SECONDS);
-        assertEquals("isPresent", true, optional.isPresent());
+        assertTrue("isPresent", optional.isPresent());
         assertEquals("Data node", expCarsNode, optional.get());
     }
 
@@ -284,7 +287,7 @@ public class ClusterAdminRpcServiceTest {
         verifyRaftPeersPresent(memberNode.configDataStore(), shardName, peerMemberNames);
 
         Optional<ActorRef> optional = memberNode.operDataStore().getActorContext().findLocalShard(shardName);
-        assertEquals("Oper shard present", false, optional.isPresent());
+        assertFalse("Oper shard present", optional.isPresent());
 
         rpcResult = service.addShardReplica(new AddShardReplicaInputBuilder().setShardName(shardName)
                 .setDataStoreType(DataStoreType.Operational).build()).get(10, TimeUnit.SECONDS);
@@ -307,7 +310,7 @@ public class ClusterAdminRpcServiceTest {
     }
 
     private static void verifyFailedRpcResult(RpcResult<Void> rpcResult) {
-        assertEquals("RpcResult", false, rpcResult.isSuccessful());
+        assertFalse("RpcResult", rpcResult.isSuccessful());
         assertEquals("RpcResult errors size", 1, rpcResult.getErrors().size());
         RpcError error = Iterables.getFirst(rpcResult.getErrors(), null);
         assertNotNull("RpcResult error message null", error.getMessage());
@@ -555,18 +558,18 @@ public class ClusterAdminRpcServiceTest {
                 .changeMemberVotingStatesForShard(new ChangeMemberVotingStatesForShardInputBuilder()
                         .setShardName("cars").setDataStoreType(DataStoreType.Config)
                         .setMemberVotingState(ImmutableList.of(
-                                new MemberVotingStateBuilder().setMemberName("member-2").setVoting(false).build(),
-                                new MemberVotingStateBuilder().setMemberName("member-3").setVoting(false).build()))
+                                new MemberVotingStateBuilder().setMemberName("member-2").setVoting(FALSE).build(),
+                                new MemberVotingStateBuilder().setMemberName("member-3").setVoting(FALSE).build()))
                         .build())
                 .get(10, TimeUnit.SECONDS);
         verifySuccessfulRpcResult(rpcResult);
 
-        verifyVotingStates(leaderNode1.configDataStore(), "cars", new SimpleEntry<>("member-1", true),
-                new SimpleEntry<>("member-2", false), new SimpleEntry<>("member-3", false));
-        verifyVotingStates(replicaNode2.configDataStore(), "cars", new SimpleEntry<>("member-1", true),
-                new SimpleEntry<>("member-2", false), new SimpleEntry<>("member-3", false));
-        verifyVotingStates(replicaNode3.configDataStore(), "cars", new SimpleEntry<>("member-1", true),
-                new SimpleEntry<>("member-2", false), new SimpleEntry<>("member-3", false));
+        verifyVotingStates(leaderNode1.configDataStore(), "cars", new SimpleEntry<>("member-1", TRUE),
+                new SimpleEntry<>("member-2", FALSE), new SimpleEntry<>("member-3", FALSE));
+        verifyVotingStates(replicaNode2.configDataStore(), "cars", new SimpleEntry<>("member-1", TRUE),
+                new SimpleEntry<>("member-2", FALSE), new SimpleEntry<>("member-3", FALSE));
+        verifyVotingStates(replicaNode3.configDataStore(), "cars", new SimpleEntry<>("member-1", TRUE),
+                new SimpleEntry<>("member-2", FALSE), new SimpleEntry<>("member-3", FALSE));
     }
 
     @Test
@@ -589,12 +592,12 @@ public class ClusterAdminRpcServiceTest {
                 .changeMemberVotingStatesForShard(new ChangeMemberVotingStatesForShardInputBuilder()
                         .setShardName("cars").setDataStoreType(DataStoreType.Config)
                         .setMemberVotingState(ImmutableList
-                                .of(new MemberVotingStateBuilder().setMemberName("member-1").setVoting(false).build()))
+                                .of(new MemberVotingStateBuilder().setMemberName("member-1").setVoting(FALSE).build()))
                         .build())
                 .get(10, TimeUnit.SECONDS);
         verifyFailedRpcResult(rpcResult);
 
-        verifyVotingStates(leaderNode.configDataStore(), "cars", new SimpleEntry<>("member-1", true));
+        verifyVotingStates(leaderNode.configDataStore(), "cars", new SimpleEntry<>("member-1", TRUE));
     }
 
     @Test
@@ -627,8 +630,8 @@ public class ClusterAdminRpcServiceTest {
 
         RpcResult<ChangeMemberVotingStatesForAllShardsOutput> rpcResult = service3.changeMemberVotingStatesForAllShards(
                 new ChangeMemberVotingStatesForAllShardsInputBuilder().setMemberVotingState(ImmutableList.of(
-                        new MemberVotingStateBuilder().setMemberName("member-2").setVoting(false).build(),
-                        new MemberVotingStateBuilder().setMemberName("member-3").setVoting(false).build())).build())
+                        new MemberVotingStateBuilder().setMemberName("member-2").setVoting(FALSE).build(),
+                        new MemberVotingStateBuilder().setMemberName("member-3").setVoting(FALSE).build())).build())
                 .get(10, TimeUnit.SECONDS);
         ChangeMemberVotingStatesForAllShardsOutput result = verifySuccessfulRpcResult(rpcResult);
         verifyShardResults(result.getShardResult(), successShardResult("cars", DataStoreType.Config),
@@ -639,8 +642,8 @@ public class ClusterAdminRpcServiceTest {
         verifyVotingStates(new AbstractDataStore[]{leaderNode1.configDataStore(), leaderNode1.operDataStore(),
                 replicaNode2.configDataStore(), replicaNode2.operDataStore(),
                 replicaNode3.configDataStore(), replicaNode3.operDataStore()},
-                new String[]{"cars", "people"}, new SimpleEntry<>("member-1", true),
-                new SimpleEntry<>("member-2", false), new SimpleEntry<>("member-3", false));
+                new String[]{"cars", "people"}, new SimpleEntry<>("member-1", TRUE),
+                new SimpleEntry<>("member-2", FALSE), new SimpleEntry<>("member-3", FALSE));
     }
 
     @Test
@@ -671,8 +674,8 @@ public class ClusterAdminRpcServiceTest {
         leaderNode1.operDataStore().waitTillReady();
         replicaNode3.configDataStore().waitTillReady();
         replicaNode3.operDataStore().waitTillReady();
-        verifyVotingStates(leaderNode1.configDataStore(), "cars", new SimpleEntry<>("member-1", true),
-                new SimpleEntry<>("member-2", true), new SimpleEntry<>("member-3", false));
+        verifyVotingStates(leaderNode1.configDataStore(), "cars", new SimpleEntry<>("member-1", TRUE),
+                new SimpleEntry<>("member-2", TRUE), new SimpleEntry<>("member-3", FALSE));
 
         ClusterAdminRpcService service3 = new ClusterAdminRpcService(replicaNode3.configDataStore(),
                 replicaNode3.operDataStore());
@@ -689,8 +692,8 @@ public class ClusterAdminRpcServiceTest {
                 replicaNode2.configDataStore(), replicaNode2.operDataStore(),
                 replicaNode3.configDataStore(), replicaNode3.operDataStore()},
                 new String[]{"cars", "people"},
-                new SimpleEntry<>("member-1", false), new SimpleEntry<>("member-2", false),
-                new SimpleEntry<>("member-3", true));
+                new SimpleEntry<>("member-1", FALSE), new SimpleEntry<>("member-2", FALSE),
+                new SimpleEntry<>("member-3", TRUE));
 
         // Leadership should have transferred to member 3 since it is the only remaining voting member.
         verifyRaftState(leaderNode1.configDataStore(), "cars", raftState -> {
@@ -718,8 +721,8 @@ public class ClusterAdminRpcServiceTest {
                 replicaNode2.configDataStore(), replicaNode2.operDataStore(),
                 replicaNode3.configDataStore(), replicaNode3.operDataStore()},
                 new String[]{"cars", "people"},
-                new SimpleEntry<>("member-1", true), new SimpleEntry<>("member-2", true),
-                new SimpleEntry<>("member-3", false));
+                new SimpleEntry<>("member-1", TRUE), new SimpleEntry<>("member-2", TRUE),
+                new SimpleEntry<>("member-3", FALSE));
 
         // Leadership should have transferred to member 1 or 2.
         verifyRaftState(leaderNode1.configDataStore(), "cars", raftState -> {
@@ -760,10 +763,10 @@ public class ClusterAdminRpcServiceTest {
 
         replicaNode1.waitForMembersUp("member-2", "member-3");
 
-        verifyVotingStates(replicaNode1.configDataStore(), "cars", new SimpleEntry<>("member-1", false),
-                new SimpleEntry<>("member-2", false), new SimpleEntry<>("member-3", false),
-                new SimpleEntry<>("member-4", true), new SimpleEntry<>("member-5", true),
-                new SimpleEntry<>("member-6", true));
+        verifyVotingStates(replicaNode1.configDataStore(), "cars", new SimpleEntry<>("member-1", FALSE),
+                new SimpleEntry<>("member-2", FALSE), new SimpleEntry<>("member-3", FALSE),
+                new SimpleEntry<>("member-4", TRUE), new SimpleEntry<>("member-5", TRUE),
+                new SimpleEntry<>("member-6", TRUE));
 
         verifyRaftState(replicaNode1.configDataStore(), "cars", raftState ->
             assertEquals("Expected raft state", RaftState.Follower.toString(), raftState.getRaftState()));
@@ -783,9 +786,9 @@ public class ClusterAdminRpcServiceTest {
                 replicaNode2.configDataStore(), replicaNode2.operDataStore(),
                 replicaNode3.configDataStore(), replicaNode3.operDataStore()},
                 new String[]{"cars", "people"},
-                new SimpleEntry<>("member-1", true), new SimpleEntry<>("member-2", true),
-                new SimpleEntry<>("member-3", true), new SimpleEntry<>("member-4", false),
-                new SimpleEntry<>("member-5", false), new SimpleEntry<>("member-6", false));
+                new SimpleEntry<>("member-1", TRUE), new SimpleEntry<>("member-2", TRUE),
+                new SimpleEntry<>("member-3", TRUE), new SimpleEntry<>("member-4", FALSE),
+                new SimpleEntry<>("member-5", FALSE), new SimpleEntry<>("member-6", FALSE));
 
         // Since member 1 was changed to voting and there was no leader, it should've started and election
         // and become leader
@@ -830,10 +833,10 @@ public class ClusterAdminRpcServiceTest {
 
         leaderNode1.configDataStore().waitTillReady();
         leaderNode1.operDataStore().waitTillReady();
-        verifyVotingStates(leaderNode1.configDataStore(), "cars", new SimpleEntry<>("member-1", true),
-                new SimpleEntry<>("member-2", true), new SimpleEntry<>("member-3", true),
-                new SimpleEntry<>("member-4", false), new SimpleEntry<>("member-5", false),
-                new SimpleEntry<>("member-6", false));
+        verifyVotingStates(leaderNode1.configDataStore(), "cars", new SimpleEntry<>("member-1", TRUE),
+                new SimpleEntry<>("member-2", TRUE), new SimpleEntry<>("member-3", TRUE),
+                new SimpleEntry<>("member-4", FALSE), new SimpleEntry<>("member-5", FALSE),
+                new SimpleEntry<>("member-6", FALSE));
 
         ClusterAdminRpcService service1 = new ClusterAdminRpcService(leaderNode1.configDataStore(),
                 leaderNode1.operDataStore());
@@ -851,9 +854,9 @@ public class ClusterAdminRpcServiceTest {
                 replicaNode2.configDataStore(), replicaNode2.operDataStore(),
                 replicaNode3.configDataStore(), replicaNode3.operDataStore()},
                 new String[]{"cars", "people"},
-                new SimpleEntry<>("member-1", false), new SimpleEntry<>("member-2", false),
-                new SimpleEntry<>("member-3", false), new SimpleEntry<>("member-4", true),
-                new SimpleEntry<>("member-5", true), new SimpleEntry<>("member-6", true));
+                new SimpleEntry<>("member-1", FALSE), new SimpleEntry<>("member-2", FALSE),
+                new SimpleEntry<>("member-3", FALSE), new SimpleEntry<>("member-4", TRUE),
+                new SimpleEntry<>("member-5", TRUE), new SimpleEntry<>("member-6", TRUE));
 
         // The leader (member 1) was changed to non-voting but it shouldn't be able to step down as leader yet
         // b/c it can't get a majority consensus with all voting members down. So verify it remains the leader.
@@ -937,10 +940,10 @@ public class ClusterAdminRpcServiceTest {
     }
 
     private static ShardResult successShardResult(String shardName, DataStoreType type) {
-        return new ShardResultBuilder().setDataStoreType(type).setShardName(shardName).setSucceeded(true).build();
+        return new ShardResultBuilder().setDataStoreType(type).setShardName(shardName).setSucceeded(TRUE).build();
     }
 
     private static ShardResult failedShardResult(String shardName, DataStoreType type) {
-        return new ShardResultBuilder().setDataStoreType(type).setShardName(shardName).setSucceeded(false).build();
+        return new ShardResultBuilder().setDataStoreType(type).setShardName(shardName).setSucceeded(FALSE).build();
     }
 }
