@@ -122,4 +122,17 @@
         <bundle>mvn:org.opendaylight.controller/messagebus-impl/{{VERSION}}</bundle>
         <configfile finalname="${config.configfile.directory}/05-message-bus.xml">mvn:org.opendaylight.controller/messagebus-config/{{VERSION}}/xml/config</configfile>
     </feature>
+
+    <feature name='odl-benchmark-sharding-api' version='${sharding.benchmark.version}' description='OpenDaylight :: shardingsimple :: api'>
+        <feature version='${mdsal.model.version}'>odl-mdsal-models</feature>
+        <bundle>mvn:org.opendaylight.controller.clustering/benchmark-sharding-api/{{VERSION}}</bundle>
+    </feature>
+    <feature name='odl-benchmark-sharding' version='${sharding.benchmark.version}' description='OpenDaylight :: shardingsimple'>
+        <feature version='${controller.mdsal.version}'>odl-mdsal-clustering</feature>
+        <feature version='${mdsal.version}'>odl-mdsal-dom-broker</feature>
+        <feature version="${project.version}">odl-mdsal-distributed-datastore</feature>
+        <feature version='${sharding.benchmark.version}'>odl-benchmark-sharding-api</feature>
+        <bundle>mvn:com.google.code.gson/gson/{{VERSION}}</bundle>
+        <bundle>mvn:org.opendaylight.controller.clustering/benchmark-sharding-impl/{{VERSION}}</bundle>
+    </feature>
 </features>
