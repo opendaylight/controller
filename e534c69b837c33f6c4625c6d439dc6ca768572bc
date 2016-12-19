@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a622d24_960a981f",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardFrontend.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2016-12-19T13:48:34Z",
+      "side": 1,
+      "message": "this cant be static, we need to have an executor for each frontend, however we\u0027ll have to introduce a close() concept for the shards so that they can cleanup after removal from the sharding service.",
+      "range": {
+        "startLine": 52,
+        "startChar": 4,
+        "endLine": 56,
+        "endChar": 5
+      },
+      "revId": "e534c69b837c33f6c4625c6d439dc6ca768572bc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
