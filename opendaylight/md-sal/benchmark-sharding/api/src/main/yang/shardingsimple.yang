@@ -1,0 +1,256 @@
+module shardingsimple {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:clustering:sharding.simple";
+    prefix "css";
+
+    revision "2016-08-02" {
+        description "Initial revision of the shardingsimple model";
+    }
+
+    container test-data {
+        description
+            "Container for test data. Tests write test data to this
+            location. Logically, the test data is a linear array of strings.
+            However, to support sharding, the array is organized as a list
+            of lists. The outer list is used to steer data into shards. Each
+            outer list element contains an inner list which holds the test
+            data. Each inner list holds a portion of the overall test data
+            set.";
+
+        config true;
+
+        list outer-list {
+            description
+                "The outer list is used to route data into shards.
+                There is one outer list element per shard.";
+
+            key oid;
+            leaf oid {
+                type int32;
+                description
+                    "Identifier for outer list elements";
+            }
+
+            list inner-list {
+                description
+                    "The element in an outer list is another list - the
+                    inner list that holds the test data. Each inner list
+                    holds a portion of the overall data set, each inner
+                    list elements hold one test data item.";
+
+                key iid;
+                leaf iid {
+                    type int32;
+                    description
+                        "Identifier for inner list elements";
+                }
+                leaf value {
+                    type string;
+                    description
+                        "Test data - strings";
+                }
+            }
+        }
+    }
+
+    container test-status {
+        description
+            "Test status and test summary information";
+
+        leaf execStatus {
+            type enumeration {
+                enum "idle" {
+                    value 1;
+                }
+                enum "executing" {
+                    value 2;
+                }
+            }
+            config false;
+            mandatory true;
+            description
+                "Indicates whether a test run is in progress; only one test
+                can run at a time";
+        }
+        leaf testsCompleted {
+            type uint32;
+            default 0;
+            description
+                "Number of completed test runs";
+          }
+    }
+
+    rpc shard-test {
+        description
+          "Start a new test run for the sharding test";
+
+        input {
+            leaf test-type{
+                type enumeration {
+                    enum "ROUND-ROBIN" {
+                        value 1;
+                        description
+                            "Run a simple single-threaded test where test
+                            data is distributed to shards in a round-robin
+                            fashion";
+                    }
+                    enum "MULTI-THREADED" {
+                        value 2;
+                        description
+                            "Run a multi-threaded test where there is a
+                            dedicated thread for shard that pushes data
+                            into the shard";
+                    }
+                    enum "SOAK-TEST" {
+                        value 3;
+                        description
+                            "Run a long-running test that randomly and
+                            repeatedly writes data from a set into the
+                            data store. Entire data set in the data store
+                            is being churned.";
+                    }
+                    enum "RANDOM-SHARD" {
+                        value 4;
+                        description
+                            "Run a multi-threaded test where there is a
+                            dedicated thread for shard that pushes data
+                            randomly into the shard";
+                    }
+                }
+                default "ROUND-ROBIN";
+                description
+                    "Type of test to run";
+            }
+            leaf data-store {
+                type enumeration {
+                    enum "CONFIG" {
+                        value 1;
+                    }
+                    enum "OPERATIONAL" {
+                        value 2;
+                    }
+                }
+                default "CONFIG";
+                description
+                    "Data store stype - must be either CONFIG or
+                    OPERATIONAL";
+            }
+            leaf shard-type {
+                type enumeration {
+                    enum "INMEMORY" {
+                        value 1;
+                    }
+                    enum "CDS" {
+                        value 2;
+                    }
+                }
+                default "INMEMORY";
+            }
+            leaf shards {
+                type uint32;
+                default 1;
+                description
+                  "Number of shards";
+            }
+            leaf dataItems {
+                type uint32;
+                default 100;
+                description
+                  "Number of per-shard data items";
+            }
+            leaf operations {
+                type uint32;
+                default 100;
+                description
+                  "When test-type is SOAK-TEST, specifies the number of
+                    writes to perform on the data store.";
+            }
+           leaf putsPerTx {
+                type uint32;
+                default 1;
+                description
+                  "Number of write operations (PUT, MERGE, or DELETE)
+                   before a transaction submit() is issued";
+            }
+            leaf listeners {
+                type uint32;
+                default 0;
+                description
+                    "Number of data tree change listeners listening for
+                    changes on the test exec tree.";
+            }
+            leaf precreate-data {
+                type boolean;
+                default false;
+                description
+                    "Specifies whether test data should be pre-created
+                    before pushing it into the data store.";
+            }
+            leaf validate-data {
+                type boolean;
+                default false;
+                description
+                    "Specifies whether the written data should be
+                    validated.";
+            }
+       }
+
+        output {
+            leaf status {
+                mandatory true;
+                type enumeration {
+                    enum "OK" {
+                        value 1;
+                    }
+                    enum "FAILED" {
+                        value 2;
+                    }
+                    enum "TEST-IN-PROGRESS" {
+                        value 3;
+                    }
+                }
+                description
+                    "Indicates whether the test finished successfuly";
+            }
+            leaf txSubmitted {
+                type uint32;
+                description
+                    "The number of submitted transactions";
+            }
+            leaf txOk {
+                type uint32;
+                description
+                    "The number of transactions that finished successfully";
+            }
+            leaf txError {
+                type uint32;
+                description
+                    "The number of transactions that had an error";
+            }
+            leaf listenerEventsOk {
+                type uint32;
+                description
+                    "The number of DataTreeChange OK events recorded at the
+                    test DataTreeChange listener";
+            }
+            leaf listenerEventsFail {
+                type uint32;
+                description
+                    "The number of DataTreeChange OK events recorded at the
+                    test DataTreeChange listener.";
+            }
+            leaf totalExecTime {
+                type uint32;
+                description
+                    "The time it took to execute all transactions on all
+                    shards";
+            }
+            leaf-list shardExecTime {
+                type uint32;
+                description
+                    "The time it took to execute transactions on a single
+                    shard";
+            }
+        }
+    }
+}
