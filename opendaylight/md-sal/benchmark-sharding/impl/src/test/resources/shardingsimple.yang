@@ -1,0 +1,82 @@
+module shardingsimple {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:clustering:sharding.simple";
+    prefix "shardingsimple";
+
+    revision "2016-08-02" {
+        description "Initial revision of shardingsimple model";
+    }
+
+    container test-data {
+        description
+            "Container for test data. Tests write test data to this
+            location. Logically, the test data is a linear array of strings.
+            However, to support sharding, the array is organized as a list
+            of lists. The outer list is used to steer data into shards. Each
+            outer list element contains an inner list which holds the test
+            data. Each inner list holds a portion of the overall test data
+            set.";
+
+        config true;
+
+        list outer-list {
+            description
+                "The outer list is used to route data into shards.
+                There is one outer list element per shard.";
+
+            key oid;
+            leaf oid {
+                type int32;
+                description
+                    "Identifier for outer list elements";
+            }
+
+            list inner-list {
+                description
+                    "The element in an outer list is another list - the
+                    inner list that holds the test data. Each inner list
+                    holds a portion of the overall data set, each inner
+                    list elements hold one test data item.";
+
+                key iid;
+                leaf iid {
+                    type int32;
+                    description
+                        "Identifier for inner list elements";
+                }
+                leaf value {
+                    type string;
+                    description
+                        "Test data - strings";
+                }
+            }
+        }
+    }
+
+    container test-status {
+        description
+            "Shows the test application's status information";
+
+        leaf execStatus {
+            type enumeration {
+                enum "idle" {
+                    value 1;
+                }
+                enum "executing" {
+                    value 2;
+                }
+            }
+            config false;
+            mandatory true;
+            description
+                "Indicates whether a test run is in progress; only one test
+                can run at a time";
+        }
+        leaf testsCompleted {
+            type uint32;
+            default 0;
+            description
+                "Number of completed test runs";
+          }
+    }
+}
