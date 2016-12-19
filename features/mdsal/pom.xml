@@ -24,6 +24,7 @@
     <config.version>0.6.0-SNAPSHOT</config.version>
     <commons.opendaylight.version>1.8.0-SNAPSHOT</commons.opendaylight.version>
     <akka.features.version>1.8.0-SNAPSHOT</akka.features.version>
+    <sharding.benchmark.version>0.1.0-SNAPSHOT</sharding.benchmark.version>
     <features.file>features.xml</features.file>
     <config.configfile.directory>etc/opendaylight/karaf</config.configfile.directory>
     <config.clustering.configfile>05-clustering.xml</config.clustering.configfile>
@@ -69,6 +70,11 @@
         <version>${controller.mdsal.version}</version>
         <scope>import</scope>
         <type>pom</type>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller.clustering</groupId>
+        <artifactId>benchmark-sharding-artifacts</artifactId>
+        <version>${sharding.benchmark.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -354,6 +360,18 @@
     <dependency>
       <groupId>org.opendaylight.controller.samples</groupId>
       <artifactId>sample-toaster-provider</artifactId>
+    </dependency>
+
+    <!-- sharding benchmark -->
+    <dependency>
+      <groupId>org.opendaylight.controller.clustering</groupId>
+      <artifactId>benchmark-sharding-api</artifactId>
+      <version>${sharding.benchmark.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller.clustering</groupId>
+      <artifactId>benchmark-sharding-impl</artifactId>
+      <version>${sharding.benchmark.version}</version>
     </dependency>
 
   </dependencies>
