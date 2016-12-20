@@ -22,6 +22,30 @@
       "revId": "3d101e5c9a1682bc6b75ebc6d0ab25e399c326ad",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_ccf3dc9d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/CompositeDataTreeCohort.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-12-20T15:20:55Z",
+      "side": 1,
+      "message": "I assume that means abort",
+      "parentUuid": "1a622d24_70b8a4e5",
+      "range": {
+        "startLine": 105,
+        "startChar": 0,
+        "endLine": 108,
+        "endChar": 5
+      },
+      "revId": "3d101e5c9a1682bc6b75ebc6d0ab25e399c326ad",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
