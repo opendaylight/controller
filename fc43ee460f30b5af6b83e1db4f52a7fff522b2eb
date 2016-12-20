@@ -94,6 +94,30 @@
     },
     {
       "key": {
+        "uuid": "1a622d24_d6840bb3",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardedDOMDataTree.java",
+        "patchSetId": 58
+      },
+      "lineNbr": 233,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2016-12-20T11:56:18Z",
+      "side": 1,
+      "message": "Nope it\u0027s over by 8 chars if its in one line.",
+      "parentUuid": "1a622d24_b60a2f1f",
+      "range": {
+        "startLine": 232,
+        "startChar": 68,
+        "endLine": 233,
+        "endChar": 35
+      },
+      "revId": "fc43ee460f30b5af6b83e1db4f52a7fff522b2eb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a622d24_d60ecb31",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardedDOMDataTree.java",
         "patchSetId": 58
@@ -186,6 +210,30 @@
     },
     {
       "key": {
+        "uuid": "1a622d24_56c0fbdf",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardedDOMDataTree.java",
+        "patchSetId": 58
+      },
+      "lineNbr": 308,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2016-12-20T11:56:18Z",
+      "side": 1,
+      "message": "It\u0027s used in createDistributedShard() when registering the shard since the sharding service is checking explicitly for the delegate implementation.",
+      "parentUuid": "1a622d24_36357fda",
+      "range": {
+        "startLine": 306,
+        "startChar": 0,
+        "endLine": 308,
+        "endChar": 9
+      },
+      "revId": "fc43ee460f30b5af6b83e1db4f52a7fff522b2eb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a622d24_56511b0d",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/ShardProxyProducer.java",
         "patchSetId": 58
@@ -197,6 +245,30 @@
       "writtenOn": "2016-12-20T09:49:28Z",
       "side": 1,
       "message": "how do we know this is not a mutable collection leak?",
+      "range": {
+        "startLine": 38,
+        "startChar": 8,
+        "endLine": 38,
+        "endChar": 24
+      },
+      "revId": "fc43ee460f30b5af6b83e1db4f52a7fff522b2eb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_36829f94",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/ShardProxyProducer.java",
+        "patchSetId": 58
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2016-12-20T11:56:18Z",
+      "side": 1,
+      "message": "Changed to an ImmutableList.copyOf in the constructor.",
+      "parentUuid": "1a622d24_56511b0d",
       "range": {
         "startLine": 38,
         "startChar": 8,
