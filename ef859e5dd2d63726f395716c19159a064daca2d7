@@ -1,0 +1,356 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a622d24_d946fc20",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 62
+      },
+      "lineNbr": 236,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-12-20T13:11:27Z",
+      "side": 1,
+      "message": "Looks like all extraneous changes in this file",
+      "revId": "ef859e5dd2d63726f395716c19159a064daca2d7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_395610d3",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
+        "patchSetId": 62
+      },
+      "lineNbr": 383,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-12-20T13:11:27Z",
+      "side": 1,
+      "message": "Looks like extraneous change",
+      "revId": "ef859e5dd2d63726f395716c19159a064daca2d7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_d9e27c00",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/AbstractClusterRefActorTest.java",
+        "patchSetId": 62
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-12-20T13:11:27Z",
+      "side": 1,
+      "message": "Why derive from AbstractActorTest?  It also has @BeforeClass setUpClass which will create another ActorSystem.",
+      "revId": "ef859e5dd2d63726f395716c19159a064daca2d7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_195194d8",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/AbstractClusterRefActorTest.java",
+        "patchSetId": 62
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-12-20T13:11:27Z",
+      "side": 1,
+      "message": "Don\u0027t need this.",
+      "revId": "ef859e5dd2d63726f395716c19159a064daca2d7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_792c0803",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/shardmanager/ShardManager.java",
+        "patchSetId": 62
+      },
+      "lineNbr": 399,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-12-20T13:11:27Z",
+      "side": 1,
+      "message": "No implementation",
+      "revId": "ef859e5dd2d63726f395716c19159a064daca2d7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_59166ca8",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/shardmanager/ShardManager.java",
+        "patchSetId": 62
+      },
+      "lineNbr": 1291,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-12-20T13:11:27Z",
+      "side": 1,
+      "message": "This should remain indented",
+      "range": {
+        "startLine": 1278,
+        "startChar": 0,
+        "endLine": 1291,
+        "endChar": 17
+      },
+      "revId": "ef859e5dd2d63726f395716c19159a064daca2d7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_b90d0093",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/shardmanager/ShardManager.java",
+        "patchSetId": 62
+      },
+      "lineNbr": 1528,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-12-20T13:11:27Z",
+      "side": 1,
+      "message": "Implementation?",
+      "revId": "ef859e5dd2d63726f395716c19159a064daca2d7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_394f30bf",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardFrontend.java",
+        "patchSetId": 62
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-12-20T13:11:27Z",
+      "side": 1,
+      "message": "Is this class thread safe or do these structures need protection?",
+      "revId": "ef859e5dd2d63726f395716c19159a064daca2d7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_194a34ac",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardModification.java",
+        "patchSetId": 62
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-12-20T13:11:27Z",
+      "side": 1,
+      "message": "javadocs please",
+      "revId": "ef859e5dd2d63726f395716c19159a064daca2d7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_79c88822",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardModificationContext.java",
+        "patchSetId": 62
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-12-20T13:11:27Z",
+      "side": 1,
+      "message": "javadocs please",
+      "revId": "ef859e5dd2d63726f395716c19159a064daca2d7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_59cb0c1e",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardModificationCursor.java",
+        "patchSetId": 62
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-12-20T13:11:27Z",
+      "side": 1,
+      "message": "javadocs please",
+      "revId": "ef859e5dd2d63726f395716c19159a064daca2d7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_b9d220d0",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardModificationFactory.java",
+        "patchSetId": 62
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-12-20T13:11:27Z",
+      "side": 1,
+      "message": "javadocs please",
+      "revId": "ef859e5dd2d63726f395716c19159a064daca2d7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_f9dbf8ea",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardModificationFactoryBuilder.java",
+        "patchSetId": 62
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-12-20T13:11:27Z",
+      "side": 1,
+      "message": "javadocs please",
+      "revId": "ef859e5dd2d63726f395716c19159a064daca2d7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_79efe887",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardedDOMDataTree.java",
+        "patchSetId": 62
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-12-20T13:11:27Z",
+      "side": 1,
+      "message": "add blank line here",
+      "revId": "ef859e5dd2d63726f395716c19159a064daca2d7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_f995b840",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/AbstractClusterRefActorTest.java",
+        "patchSetId": 62
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-12-20T13:11:27Z",
+      "side": 1,
+      "message": "You added the same class to sal-akka-raft - why the duplication here?",
+      "revId": "ef859e5dd2d63726f395716c19159a064daca2d7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_598cac35",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/IntegrationTestKit.java",
+        "patchSetId": 62
+      },
+      "lineNbr": 178,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-12-20T13:11:27Z",
+      "side": 1,
+      "message": "Until",
+      "range": {
+        "startLine": 178,
+        "startChar": 27,
+        "endLine": 178,
+        "endChar": 33
+      },
+      "revId": "ef859e5dd2d63726f395716c19159a064daca2d7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_99864412",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/PrefixShardCreationTest.java",
+        "patchSetId": 62
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-12-20T13:11:27Z",
+      "side": 1,
+      "message": "If this test is no longer needed/valid, why not remove it? I\u0027d rather not have ignored tests.",
+      "revId": "ef859e5dd2d63726f395716c19159a064daca2d7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_f9a3f89b",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/entityownership/DistributedEntityOwnershipIntegrationTest.java",
+        "patchSetId": 62
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-12-20T13:11:27Z",
+      "side": 1,
+      "message": "Why is this ...",
+      "revId": "ef859e5dd2d63726f395716c19159a064daca2d7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_d99efc53",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/entityownership/DistributedEntityOwnershipIntegrationTest.java",
+        "patchSetId": 62
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-12-20T13:11:27Z",
+      "side": 1,
+      "message": "and these methods needed?",
+      "revId": "ef859e5dd2d63726f395716c19159a064daca2d7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_f97c9822",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/entityownership/DistributedEntityOwnershipIntegrationTest.java",
+        "patchSetId": 62
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-12-20T13:11:27Z",
+      "side": 1,
+      "message": "Don\u0027t need this",
+      "revId": "ef859e5dd2d63726f395716c19159a064daca2d7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
