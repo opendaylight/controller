@@ -539,6 +539,24 @@
     },
     {
       "key": {
+        "uuid": "1a622d24_0f5e6612",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/AbstractClusterRefActorTest.java",
+        "patchSetId": 62
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-12-20T15:19:44Z",
+      "side": 1,
+      "message": "yeah - AbstractTest. We could refactor those methods into a util class and eliminate the duplication but not a big deal - can be done later.",
+      "parentUuid": "1a622d24_ace820b5",
+      "revId": "ef859e5dd2d63726f395716c19159a064daca2d7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a622d24_598cac35",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/IntegrationTestKit.java",
         "patchSetId": 62
