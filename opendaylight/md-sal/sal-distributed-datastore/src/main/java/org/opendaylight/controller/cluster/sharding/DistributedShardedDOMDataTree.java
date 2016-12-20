@@ -297,6 +297,10 @@ public class DistributedShardedDOMDataTree implements DOMDataTreeService, DOMDat
 
         LOG.debug("Registering shard[{}] at prefix: {}", shard, prefix);
 
+        if (producer instanceof ProxyProducer) {
+            return shardedDOMDataTree.registerDataTreeShard(prefix, shard, ((ProxyProducer) producer).delegate());
+        }
+
         return shardedDOMDataTree.registerDataTreeShard(prefix, shard, producer);
     }
 
