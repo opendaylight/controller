@@ -618,6 +618,30 @@
     },
     {
       "key": {
+        "uuid": "1a622d24_76325711",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/ShardedDataTreeActor.java",
+        "patchSetId": 53
+      },
+      "lineNbr": 409,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2016-12-20T11:56:18Z",
+      "side": 1,
+      "message": "It\u0027s propagating the exception that the producer would throw thats declared in the api. DOMDataTreeProducer.close() throws it when theres a transaction still open at the moment of close().",
+      "parentUuid": "1a622d24_d6636bdb",
+      "range": {
+        "startLine": 409,
+        "startChar": 31,
+        "endLine": 409,
+        "endChar": 43
+      },
+      "revId": "f7022bbf86db1e05f093e5e8a4f1129a4c742051",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a622d24_8475549a",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/ShardedDataTreeActor.java",
         "patchSetId": 53
