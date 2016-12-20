@@ -594,6 +594,30 @@
     },
     {
       "key": {
+        "uuid": "1a622d24_d6636bdb",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/ShardedDataTreeActor.java",
+        "patchSetId": 53
+      },
+      "lineNbr": 409,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2016-12-20T09:49:28Z",
+      "side": 1,
+      "message": "throwing exceptions for \u0027close\u0027 is confusing -- what is the actual state if the exception is thrown?",
+      "parentUuid": "1a622d24_443057e8",
+      "range": {
+        "startLine": 409,
+        "startChar": 31,
+        "endLine": 409,
+        "endChar": 43
+      },
+      "revId": "f7022bbf86db1e05f093e5e8a4f1129a4c742051",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a622d24_8475549a",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/ShardedDataTreeActor.java",
         "patchSetId": 53
