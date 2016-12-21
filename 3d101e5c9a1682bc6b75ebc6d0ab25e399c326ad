@@ -72,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "1a622d24_805b652d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardDataTree.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 539,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-12-21T10:01:09Z",
+      "side": 1,
+      "message": "yeah we could use that",
+      "parentUuid": "1a622d24_1ab1948f",
+      "range": {
+        "startLine": 538,
+        "startChar": 62,
+        "endLine": 539,
+        "endChar": 45
+      },
+      "revId": "3d101e5c9a1682bc6b75ebc6d0ab25e399c326ad",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a622d24_1d14ee42",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardDataTree.java",
         "patchSetId": 4
@@ -83,6 +107,30 @@
       "writtenOn": "2016-12-21T07:05:24Z",
       "side": 1,
       "message": "It should be MoreObjects.firstNonNull(e.cohort.getCandidate(), newTip) ?",
+      "range": {
+        "startLine": 883,
+        "startChar": 25,
+        "endLine": 883,
+        "endChar": 84
+      },
+      "revId": "3d101e5c9a1682bc6b75ebc6d0ab25e399c326ad",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_c03c3dc2",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardDataTree.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 883,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-12-21T10:01:09Z",
+      "side": 1,
+      "message": "good catch - copy paste error. Will submit follow-up",
+      "parentUuid": "1a622d24_1d14ee42",
       "range": {
         "startLine": 883,
         "startChar": 25,
