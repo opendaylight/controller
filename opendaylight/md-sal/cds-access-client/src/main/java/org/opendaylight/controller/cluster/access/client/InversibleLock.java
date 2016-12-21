@@ -45,7 +45,7 @@ public final class InversibleLock {
             // and force release of locks.
             final CountDownLatch local = latch;
             if (local != null) {
-                throw new InversibleLockException(latch);
+                throw new InversibleLockException(local);
             }
 
             // No latch present: retry optimistic lock
