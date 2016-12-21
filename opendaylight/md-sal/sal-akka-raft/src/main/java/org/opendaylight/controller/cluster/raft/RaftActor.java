@@ -278,7 +278,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         } else if (message instanceof SwitchBehavior) {
             switchBehavior((SwitchBehavior) message);
         } else if (message instanceof LeaderTransitioning) {
-            onLeaderTransitioning();
+            onLeaderTransitioning((LeaderTransitioning)message);
         } else if (message instanceof Shutdown) {
             onShutDown();
         } else if (message instanceof Runnable) {
@@ -376,10 +376,11 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         }
     }
 
-    private void onLeaderTransitioning() {
-        LOG.debug("{}: onLeaderTransitioning", persistenceId());
+    private void onLeaderTransitioning(final LeaderTransitioning leaderTransitioning) {
+        LOG.debug("{}: onLeaderTransitioning: {}", persistenceId(), leaderTransitioning);
         Optional<ActorRef> roleChangeNotifier = getRoleChangeNotifier();
-        if (getRaftState() == RaftState.Follower && roleChangeNotifier.isPresent()) {
+        if (getRaftState() == RaftState.Follower && roleChangeNotifier.isPresent()
+                && leaderTransitioning.getLeaderId().equals(getCurrentBehavior().getLeaderId())) {
             roleChangeNotifier.get().tell(newLeaderStateChanged(getId(), null,
                 getCurrentBehavior().getLeaderPayloadVersion()), getSelf());
         }
