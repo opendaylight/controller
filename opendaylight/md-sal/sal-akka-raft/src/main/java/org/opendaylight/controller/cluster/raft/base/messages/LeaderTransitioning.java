@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.raft.base.messages;
 
+import com.google.common.base.Preconditions;
 import java.io.Serializable;
 
 /**
@@ -16,13 +17,19 @@ import java.io.Serializable;
  */
 public final class LeaderTransitioning implements Serializable {
     private static final long serialVersionUID = 1L;
-    public static final LeaderTransitioning INSTANCE = new LeaderTransitioning();
 
-    private LeaderTransitioning() {
-        // Hidden on purpose
+    private final String leaderId;
+
+    public LeaderTransitioning(String leaderId) {
+        this.leaderId = Preconditions.checkNotNull(leaderId);
     }
 
-    private Object readResolve() {
-        return INSTANCE;
+    public String getLeaderId() {
+        return leaderId;
+    }
+
+    @Override
+    public String toString() {
+        return "LeaderTransitioning [leaderId=" + leaderId + "]";
     }
 }

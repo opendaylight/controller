@@ -8,19 +8,23 @@
 package org.opendaylight.controller.cluster.raft;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import static org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor.clearMessages;
 import static org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor.expectFirstMatching;
+import static org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor.expectMatching;
 
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.pattern.Patterns;
 import akka.testkit.TestActorRef;
 import com.google.common.collect.ImmutableMap;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.notifications.LeaderStateChanged;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
+import org.opendaylight.controller.cluster.raft.base.messages.LeaderTransitioning;
 import org.opendaylight.controller.cluster.raft.client.messages.Shutdown;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
@@ -79,22 +83,36 @@ public class LeadershipTransferIntegrationTest extends AbstractRaftActorIntegrat
         clearMessages(follower2NotifierActor);
         clearMessages(follower3NotifierActor);
 
+        // Simulate a delay for follower2 in receiving the LeaderTransitioning message with null leader id.
+        final TestRaftActor follower2Instance = follower2Actor.underlyingActor();
+        follower2Instance.startDropMessages(LeaderTransitioning.class);
+
         FiniteDuration duration = FiniteDuration.create(5, TimeUnit.SECONDS);
         final Future<Boolean> stopFuture = Patterns.gracefulStop(leaderActor, duration, Shutdown.INSTANCE);
-
-        assertNullLeaderIdChange(leaderNotifierActor);
-        assertNullLeaderIdChange(follower1NotifierActor);
-        assertNullLeaderIdChange(follower2NotifierActor);
-        assertNullLeaderIdChange(follower3NotifierActor);
 
         verifyRaftState(follower1Actor, RaftState.Leader);
 
         Boolean stopped = Await.result(stopFuture, duration);
         assertEquals("Stopped", Boolean.TRUE, stopped);
 
-        follower2Actor.underlyingActor().stopDropMessages(AppendEntries.class);
+        // Re-enable LeaderTransitioning messages to follower2.
+        final LeaderTransitioning leaderTransitioning = expectFirstMatching(follower2CollectorActor,
+                LeaderTransitioning.class);
+        follower2Instance.stopDropMessages(LeaderTransitioning.class);
+
+        follower2Instance.stopDropMessages(AppendEntries.class);
         ApplyState applyState = expectFirstMatching(follower2CollectorActor, ApplyState.class);
         assertEquals("Apply sate index", 0, applyState.getReplicatedLogEntry().getIndex());
+
+        // Now send the LeaderTransitioning to follower2 after it has received AppendEntries from the new leader.
+        follower2Actor.tell(leaderTransitioning, ActorRef.noSender());
+
+        verifyLeaderStateChangedMessages(leaderNotifierActor, null, follower1Id);
+        verifyLeaderStateChangedMessages(follower1NotifierActor, null, follower1Id);
+        // follower2 should only get 1 LeaderStateChanged with the new leaderId - the LeaderTransitioning message
+        // should not generate a LeaderStateChanged with null leaderId since it arrived after the new leaderId was set.
+        verifyLeaderStateChangedMessages(follower2NotifierActor, follower1Id);
+        verifyLeaderStateChangedMessages(follower3NotifierActor, null, follower1Id);
 
         testLog.info("sendShutDownToLeaderAndVerifyLeadershipTransferToFollower1 ending");
     }
@@ -166,9 +184,16 @@ public class LeadershipTransferIntegrationTest extends AbstractRaftActorIntegrat
         verifyRaftState(raftActor, rs -> assertEquals("getRaftState", expState.toString(), rs.getRaftState()));
     }
 
-    private static void assertNullLeaderIdChange(TestActorRef<MessageCollectorActor> notifierActor) {
-        LeaderStateChanged change = expectFirstMatching(notifierActor, LeaderStateChanged.class);
-        assertNull("Expected null leader Id", change.getLeaderId());
+    private void verifyLeaderStateChangedMessages(TestActorRef<MessageCollectorActor> notifierActor,
+            String... expLeaderIds) {
+        List<LeaderStateChanged> leaderStateChanges = expectMatching(notifierActor, LeaderStateChanged.class,
+                expLeaderIds.length);
+
+        Collections.reverse(leaderStateChanges);
+        Iterator<LeaderStateChanged> actual = leaderStateChanges.iterator();
+        for (int i = expLeaderIds.length - 1; i >= 0; i--) {
+            assertEquals("getLeaderId", expLeaderIds[i], actual.next().getLeaderId());
+        }
     }
 
     @Test
