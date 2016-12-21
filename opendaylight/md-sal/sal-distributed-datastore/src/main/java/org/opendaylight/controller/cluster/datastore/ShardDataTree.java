@@ -537,8 +537,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     }
 
     public Collection<ShardDataTreeCohort> getAndClearPendingTransactions() {
-        Collection<ShardDataTreeCohort> ret = new ArrayList<>(pendingTransactions.size() + pendingCommits.size()
-                + pendingFinishCommits.size());
+        Collection<ShardDataTreeCohort> ret = new ArrayList<>(getQueueSize());
 
         for (CommitEntry entry: pendingFinishCommits) {
             ret.add(entry.cohort);
@@ -908,7 +907,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
 
                 return true;
             } else {
-                newTip = MoreObjects.firstNonNull(e.cohort.getCandidate(), dataTree);
+                newTip = MoreObjects.firstNonNull(e.cohort.getCandidate(), newTip);
             }
         }
 
