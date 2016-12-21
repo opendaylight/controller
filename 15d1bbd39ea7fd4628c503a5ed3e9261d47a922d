@@ -22,6 +22,30 @@
       "revId": "15d1bbd39ea7fd4628c503a5ed3e9261d47a922d",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_6083a956",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardDataTree.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 766,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-12-21T10:30:53Z",
+      "side": 1,
+      "message": "Not sure I follow - can you elaborate? As per my comment above, \"if the next pending transaction is progressed to COMMIT_PENDING and this method (startCommit) is called, the next transaction will not attempt to replicate b/c the current transaction is still at the head of the pendingCommits queue.\". Even if it did, logIndex is obtained from the passed ReplicatedLogEntry which is newly allocated in persistData and this call chain hasn\u0027t progressed to persistData yet so what could the logIndex be out of sequence with?",
+      "parentUuid": "1a622d24_05c00729",
+      "range": {
+        "startLine": 766,
+        "startChar": 8,
+        "endLine": 766,
+        "endChar": 40
+      },
+      "revId": "15d1bbd39ea7fd4628c503a5ed3e9261d47a922d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
