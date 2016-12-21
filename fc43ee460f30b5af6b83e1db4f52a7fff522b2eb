@@ -118,6 +118,30 @@
     },
     {
       "key": {
+        "uuid": "1a622d24_c06d5d9b",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardedDOMDataTree.java",
+        "patchSetId": 58
+      },
+      "lineNbr": 233,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-12-21T11:01:22Z",
+      "side": 1,
+      "message": "checkstyle enforcement would catch it anyway",
+      "parentUuid": "1a622d24_d6840bb3",
+      "range": {
+        "startLine": 232,
+        "startChar": 68,
+        "endLine": 233,
+        "endChar": 35
+      },
+      "revId": "fc43ee460f30b5af6b83e1db4f52a7fff522b2eb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a622d24_d60ecb31",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardedDOMDataTree.java",
         "patchSetId": 58
