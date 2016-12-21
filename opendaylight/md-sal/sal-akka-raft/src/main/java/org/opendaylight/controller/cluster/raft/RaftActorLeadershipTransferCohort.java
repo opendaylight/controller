@@ -79,7 +79,7 @@ public class RaftActorLeadershipTransferCohort {
         for (String peerId: context.getPeerIds()) {
             ActorSelection followerActor = context.getPeerActorSelection(peerId);
             if (followerActor != null) {
-                followerActor.tell(LeaderTransitioning.INSTANCE, context.getActor());
+                followerActor.tell(new LeaderTransitioning(context.getId()), context.getActor());
             }
         }
 

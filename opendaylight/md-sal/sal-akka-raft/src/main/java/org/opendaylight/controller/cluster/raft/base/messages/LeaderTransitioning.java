@@ -7,7 +7,9 @@
  */
 package org.opendaylight.controller.cluster.raft.base.messages;
 
+import com.google.common.base.Preconditions;
 import java.io.Serializable;
+import javax.annotation.Nonnull;
 
 /**
  * Message sent from a leader to its followers to indicate leadership transfer is starting.
@@ -16,13 +18,20 @@ import java.io.Serializable;
  */
 public final class LeaderTransitioning implements Serializable {
     private static final long serialVersionUID = 1L;
-    public static final LeaderTransitioning INSTANCE = new LeaderTransitioning();
 
-    private LeaderTransitioning() {
-        // Hidden on purpose
+    private final String leaderId;
+
+    public LeaderTransitioning(@Nonnull final String leaderId) {
+        this.leaderId = Preconditions.checkNotNull(leaderId);
     }
 
-    private Object readResolve() {
-        return INSTANCE;
+    @Nonnull
+    public String getLeaderId() {
+        return leaderId;
+    }
+
+    @Override
+    public String toString() {
+        return "LeaderTransitioning [leaderId=" + leaderId + "]";
     }
 }
