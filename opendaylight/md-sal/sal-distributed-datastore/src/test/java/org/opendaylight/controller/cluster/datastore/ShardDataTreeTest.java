@@ -346,6 +346,39 @@ public class ShardDataTreeTest extends AbstractTest {
         assertEquals("Car node", carNode, optional.get());
     }
 
+    @Test
+    public void testPipelinedTransactionsWithUnmodifiedCandidate() throws Exception {
+        doReturn(false).when(mockShard).canSkipPayload();
+
+        final ShardDataTreeCohort cohort1 = newShardDataTreeCohort(snapshot ->
+            snapshot.write(CarsModel.BASE_PATH, CarsModel.emptyContainer()));
+
+        final ShardDataTreeCohort cohort2 = newShardDataTreeCohort(snapshot ->
+            snapshot.merge(CarsModel.BASE_PATH, CarsModel.emptyContainer()));
+
+        final FutureCallback<UnsignedLong> commitCallback1 = immediate3PhaseCommit(cohort1);
+
+        verify(mockShard).persistPayload(eq(cohort1.getIdentifier()), any(CommitTransactionPayload.class), eq(false));
+
+        final FutureCallback<UnsignedLong> commitCallback2 = immediate3PhaseCommit(cohort2);
+
+        verify(mockShard, never()).persistPayload(eq(cohort2.getIdentifier()), any(CommitTransactionPayload.class),
+                anyBoolean());
+
+        // The payload instance doesn't matter - it just needs to be of type CommitTransactionPayload.
+        shardDataTree.applyReplicatedPayload(cohort1.getIdentifier(),
+                CommitTransactionPayload.create(nextTransactionId(), cohort1.getCandidate()));
+
+        InOrder inOrder = inOrder(commitCallback1, commitCallback2);
+        inOrder.verify(commitCallback1).onSuccess(any(UnsignedLong.class));
+        inOrder.verify(commitCallback2).onSuccess(any(UnsignedLong.class));
+
+        final DataTreeSnapshot snapshot =
+                shardDataTree.newReadOnlyTransaction(nextTransactionId()).getSnapshot();
+        Optional<NormalizedNode<?, ?>> optional = snapshot.readNode(CarsModel.BASE_PATH);
+        assertEquals("Car node present", true, optional.isPresent());
+    }
+
     @SuppressWarnings("unchecked")
     @Test
     public void testAbortWithPendingCommits() throws Exception {
