@@ -45,8 +45,7 @@ import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
-import org.opendaylight.yangtools.yang.parser.stmt.reactor.CrossSourceStatementReactor;
-import org.opendaylight.yangtools.yang.parser.stmt.rfc6020.YangInferencePipeline;
+import org.opendaylight.yangtools.yang.test.util.YangParserTestUtils;
 
 /**
  * Test case for reported bug 560
@@ -79,7 +78,7 @@ public class DOMRpcServiceTestBugfix560 {
     @Before
     public void setUp() throws Exception {
         final BindingBrokerTestFactory testFactory = new BindingBrokerTestFactory();
-        testFactory.setExecutor(MoreExecutors.sameThreadExecutor());
+        testFactory.setExecutor(MoreExecutors.newDirectExecutorService());
         testFactory.setStartWithParsedSchema(true);
         testContext = testFactory.getTestContext();
 
@@ -94,8 +93,7 @@ public class DOMRpcServiceTestBugfix560 {
 
         assertNotNull(moduleStream);
         final List<InputStream> rpcModels = Collections.singletonList(moduleStream);
-        final CrossSourceStatementReactor.BuildAction reactor = YangInferencePipeline.RFC6020_REACTOR.newBuild();
-        schemaContext = reactor.buildEffective(rpcModels);
+        schemaContext = YangParserTestUtils.parseYangStreams(rpcModels);
     }
 
     private static org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier createBITllIdentifier(
@@ -110,7 +108,7 @@ public class DOMRpcServiceTestBugfix560 {
     private static InstanceIdentifier<TopLevelList> createBATllIdentifier(
             final String mount) {
         return InstanceIdentifier.builder(Top.class)
-                .child(TopLevelList.class, new TopLevelListKey(mount)).toInstance();
+                .child(TopLevelList.class, new TopLevelListKey(mount)).build();
     }
 
     @Test

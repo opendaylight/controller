@@ -68,6 +68,10 @@
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.opendaylight.yangtools</groupId>
+      <artifactId>yang-test-util</artifactId>
+    </dependency>
   </dependencies>
 
   <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:MD-SAL:XSQL</url>

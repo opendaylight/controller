@@ -16,13 +16,11 @@ import static org.junit.Assert.assertTrue;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.testkit.JavaTestKit;
-import com.google.common.collect.Lists;
-import com.google.common.io.ByteSource;
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -44,8 +42,7 @@ import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
-import org.opendaylight.yangtools.yang.parser.stmt.reactor.CrossSourceStatementReactor;
-import org.opendaylight.yangtools.yang.parser.stmt.rfc6020.YangInferencePipeline;
+import org.opendaylight.yangtools.yang.test.util.YangParserTestUtils;
 
 /**
  * Base class for RPC tests.
@@ -102,18 +99,11 @@ public class AbstractRpcTest {
 
     @Before
     public void setUp() throws Exception {
-        final ByteSource byteSource = new ByteSource() {
-            @Override
-            public InputStream openStream() throws IOException {
-                return AbstractRpcTest.this.getClass().getResourceAsStream("/test-rpc.yang");
-            }
-        };
-
-        final CrossSourceStatementReactor.BuildAction reactor = YangInferencePipeline.RFC6020_REACTOR.newBuild();
-        final ArrayList<ByteSource> sources = Lists.newArrayList(byteSource);
+        final List<InputStream> sources = Collections.singletonList(
+            AbstractRpcTest.this.getClass().getResourceAsStream("/test-rpc.yang"));
 
         try {
-            schemaContext = reactor.buildEffective(sources);
+            schemaContext = YangParserTestUtils.parseYangStreams(sources);
         } catch (ReactorException e) {
             throw new RuntimeException("Unable to build schema context from " + sources, e);
         }

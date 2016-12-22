@@ -43,6 +43,10 @@
       <version>1.5.0-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.opendaylight.yangtools</groupId>
+      <artifactId>yang-test-util</artifactId>
+    </dependency>
 
     <!-- Akka -->
     <dependency>

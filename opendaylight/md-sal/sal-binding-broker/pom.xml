@@ -83,11 +83,6 @@
       <artifactId>truth</artifactId>
       <scope>test</scope>
     </dependency>
-    <dependency>
-      <groupId>org.opendaylight.yangtools</groupId>
-      <artifactId>yang-parser-impl</artifactId>
-      <scope>test</scope>
-    </dependency>
 
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
