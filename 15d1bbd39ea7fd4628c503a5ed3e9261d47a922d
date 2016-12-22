@@ -46,6 +46,30 @@
       "revId": "15d1bbd39ea7fd4628c503a5ed3e9261d47a922d",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_22c9b426",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardDataTree.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 766,
+      "author": {
+        "id": 6757
+      },
+      "writtenOn": "2016-12-22T02:37:33Z",
+      "side": 1,
+      "message": "It seem to be a recursive processing. I misunderstand the order of the method shard.persistPayload() is called. On second thought, the applyLogToStateMachine(logindex) sequence will be correct. but I\u0027m still puzzled about the order of shard.persistPayload(), for example, if the current Tx is Tx-N, {Tx-N+1, Tx-N+2} in pendingTransactions queue. first Tx-N+2.shard.persistPayload(replicationBatchHint\u003dfalse) with logindex(M)\nand then  Tx-N+1.shard.persistPayload(replicationBatchHint\u003dfalse) with logindex(M+1)\nfinally,  Tx-N.shard.persistPayload(replicationBatchHint\u003dtrue) with logindex(M+2)\n\nis it right ?",
+      "parentUuid": "1a622d24_6083a956",
+      "range": {
+        "startLine": 766,
+        "startChar": 8,
+        "endLine": 766,
+        "endChar": 40
+      },
+      "revId": "15d1bbd39ea7fd4628c503a5ed3e9261d47a922d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
