@@ -92,18 +92,18 @@ abstract class TransmitQueue {
 
     private final ArrayDeque<TransmittedConnectionEntry> inflight = new ArrayDeque<>();
     private final ArrayDeque<ConnectionEntry> pending = new ArrayDeque<>();
-
+    private final ProgressTracker tracker = new AveragingProgressTracker(1_000_000L);
     private ReconnectForwarder successor;
 
     final Iterable<ConnectionEntry> asIterable() {
         return Iterables.concat(inflight, pending);
     }
 
-    private void recordCompletion(final long now, final long enqueuedTicks, final long transmitTicks,
-            final long execNanos) {
-        // TODO: record
+    final long ticksStalling(final long now) {
+        return tracker.ticksStalling(now);
     }
 
+    // If a matching request was found, this will track a task was closed.
     final void complete(final ResponseEnvelope<?> envelope, final long now) {
         Optional<TransmittedConnectionEntry> maybeEntry = findMatchingEntry(inflight, envelope);
         if (maybeEntry == null) {
@@ -120,7 +120,8 @@ abstract class TransmitQueue {
         LOG.debug("Completing {} with {}", entry, envelope);
         entry.complete(envelope.getMessage());
 
-        recordCompletion(now, entry.getEnqueuedTicks(), entry.getTxTicks(), envelope.getExecutionTimeNanos());
+        tracker.closeTask(now, entry.getEnqueuedTicks(), entry.getTxTicks(), envelope.getExecutionTimeNanos());
+        // FIXME: Check the returned value is true.
 
         // We have freed up a slot, try to transmit something
         int toSend = canTransmitCount(inflight.size());
@@ -136,22 +137,25 @@ abstract class TransmitQueue {
         }
     }
 
-    final void enqueue(final ConnectionEntry entry, final long now) {
+    // This will either forward the entry, or track a task; either way returns a duration to sleep afterwards.
+    final long enqueue(final ConnectionEntry entry, final long now) {
         if (successor != null) {
             successor.forwardEntry(entry, now);
-            return;
+            return 0L;
         }
 
+        final long delay = tracker.openTask(now);  // reserve the delay before failable code
         if (canTransmitCount(inflight.size()) <= 0) {
             LOG.trace("Queue is at capacity, delayed sending of request {}", entry.getRequest());
             pending.add(entry);
-            return;
+        } else {
+            // We are not thread-safe and are supposed to be externally-guarded,
+            // hence send-before-record should be fine.
+            // This needs to be revisited if the external guards are lowered.
+            inflight.offer(transmit(entry, now));
+            LOG.debug("Sent request {} on queue {}", entry.getRequest(), this);
         }
-
-        // We are not thread-safe and are supposed to be externally-guarded, hence send-before-record should be fine.
-        // This needs to be revisited if the external guards are lowered.
-        inflight.offer(transmit(entry, now));
-        LOG.debug("Sent request {} on queue {}", entry.getRequest(), this);
+        return delay;
     }
 
     abstract int canTransmitCount(int inflightSize);
