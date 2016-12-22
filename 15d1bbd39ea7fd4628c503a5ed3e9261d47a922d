@@ -70,6 +70,30 @@
       "revId": "15d1bbd39ea7fd4628c503a5ed3e9261d47a922d",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_a22664cc",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardDataTree.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 766,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-12-22T04:02:32Z",
+      "side": 1,
+      "message": "No. If 3 txs are queued with CAN_COMMIT_PENDING and immediately progress to COMMIT_PENDING,  replicationBatchHint will be passed as true, true, false. Take a look at ShardDataTreeTest#testPipelinedTransactionsWithImmediateCommits - it plays out this scenario.",
+      "parentUuid": "1a622d24_22c9b426",
+      "range": {
+        "startLine": 766,
+        "startChar": 8,
+        "endLine": 766,
+        "endChar": 40
+      },
+      "revId": "15d1bbd39ea7fd4628c503a5ed3e9261d47a922d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
