@@ -212,6 +212,12 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
         switchState(State.FAILED).onFailure(cause);
     }
 
+    void finishCommitPending() {
+        checkState(State.COMMIT_PENDING);
+        // We want to switch the state but keep the callback.
+        callback = switchState(State.FINISH_COMMIT_PENDING);
+    }
+
     @Override
     public State getState() {
         return state;
