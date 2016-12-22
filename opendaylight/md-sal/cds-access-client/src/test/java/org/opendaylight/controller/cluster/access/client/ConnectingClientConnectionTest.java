@@ -164,7 +164,7 @@ public class ConnectingClientConnectionTest {
     }
 
     @Test
-    public void testPoison() {
+    public void testPoison() throws InterruptedException {
         queue.sendRequest(mockRequest, mockCallback);
         queue.poison(mockCause);
 
@@ -174,7 +174,7 @@ public class ConnectingClientConnectionTest {
     }
 
     @Test(expected = IllegalStateException.class)
-    public void testPoisonPerformsClose() {
+    public void testPoisonPerformsClose() throws InterruptedException {
         // Implies close()
         queue.poison(mockCause);
 
@@ -189,7 +189,7 @@ public class ConnectingClientConnectionTest {
     }
 
     @Test
-    public void testSendRequestNeedsBackend() {
+    public void testSendRequestNeedsBackend() throws InterruptedException {
         queue.sendRequest(mockRequest, mockCallback);
         final Optional<FiniteDuration> ret = queue.checkTimeout(ticker.read());
         assertNotNull(ret);
@@ -203,7 +203,7 @@ public class ConnectingClientConnectionTest {
     }
 
     @Test
-    public void testSendRequestNeedsTimer() {
+    public void testSendRequestNeedsTimer() throws InterruptedException {
         setupBackend();
 
         queue.sendRequest(mockRequest, mockCallback);
@@ -221,7 +221,7 @@ public class ConnectingClientConnectionTest {
     }
 
     @Test
-    public void testRunTimeoutWithoutShift() throws NoProgressException {
+    public void testRunTimeoutWithoutShift() throws NoProgressException, InterruptedException {
         queue.sendRequest(mockRequest, mockCallback);
         Optional<FiniteDuration> ret = queue.checkTimeout(ticker.read());
         assertNotNull(ret);
@@ -229,7 +229,7 @@ public class ConnectingClientConnectionTest {
     }
 
     @Test
-    public void testRunTimeoutWithTimeoutLess() throws NoProgressException {
+    public void testRunTimeoutWithTimeoutLess() throws NoProgressException, InterruptedException {
         queue.sendRequest(mockRequest, mockCallback);
 
         ticker.increment(AbstractClientConnection.REQUEST_TIMEOUT_NANOS - 1);
@@ -240,7 +240,7 @@ public class ConnectingClientConnectionTest {
     }
 
     @Test
-    public void testRunTimeoutWithTimeoutExact() throws NoProgressException {
+    public void testRunTimeoutWithTimeoutExact() throws NoProgressException, InterruptedException {
         setupBackend();
 
         queue.sendRequest(mockRequest, mockCallback);
@@ -252,7 +252,7 @@ public class ConnectingClientConnectionTest {
     }
 
     @Test
-    public void testRunTimeoutWithTimeoutMore() throws NoProgressException {
+    public void testRunTimeoutWithTimeoutMore() throws NoProgressException, InterruptedException {
         setupBackend();
 
         queue.sendRequest(mockRequest, mockCallback);
@@ -264,7 +264,7 @@ public class ConnectingClientConnectionTest {
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public void testRunTimeoutWithoutProgressExact() throws NoProgressException {
+    public void testRunTimeoutWithoutProgressExact() throws NoProgressException, InterruptedException {
         queue.sendRequest(mockRequest, mockCallback);
 
         ticker.increment(AbstractClientConnection.NO_PROGRESS_TIMEOUT_NANOS);
@@ -275,7 +275,7 @@ public class ConnectingClientConnectionTest {
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public void testRunTimeoutWithoutProgressMore() throws NoProgressException {
+    public void testRunTimeoutWithoutProgressMore() throws NoProgressException, InterruptedException {
         queue.sendRequest(mockRequest, mockCallback);
 
         ticker.increment(AbstractClientConnection.NO_PROGRESS_TIMEOUT_NANOS + 1);
@@ -312,7 +312,7 @@ public class ConnectingClientConnectionTest {
     }
 
     @Test
-    public void testCompleteSingle() {
+    public void testCompleteSingle() throws InterruptedException {
         setupBackend();
 
         queue.sendRequest(mockRequest, mockCallback);
@@ -325,7 +325,7 @@ public class ConnectingClientConnectionTest {
     }
 
     @Test
-    public void testCompleteNull() {
+    public void testCompleteNull() throws InterruptedException {
         setupBackend();
 
         queue.sendRequest(mockRequest, mockCallback);
@@ -337,7 +337,7 @@ public class ConnectingClientConnectionTest {
     }
 
     @Test
-    public void testProgressRecord() throws NoProgressException {
+    public void testProgressRecord() throws NoProgressException, InterruptedException {
         setupBackend();
 
         queue.sendRequest(mockRequest, mockCallback);
