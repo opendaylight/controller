@@ -23,10 +23,8 @@ import org.junit.Test;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.util.NameConflictException;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.util.YangModelSearchUtils;
 import org.opendaylight.yangtools.sal.binding.yang.types.TypeProviderImpl;
-import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.model.api.Module;
-import org.opendaylight.yangtools.yang.parser.stmt.reactor.CrossSourceStatementReactor;
-import org.opendaylight.yangtools.yang.parser.stmt.rfc6020.YangInferencePipeline;
+import org.opendaylight.yangtools.yang.test.util.YangParserTestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -105,13 +103,13 @@ public class ModuleMXBeanEntryNameConflictTest extends AbstractYangTest {
                 "port");
     }
 
-    private String getYangModuleName(String name) {
+    private static String getYangModuleName(final String name) {
         int startIndex = 0;
         int endIndex = name.indexOf(".yang");
         return name.substring(startIndex, endIndex);
     }
 
-    private Module loadYangs(File testedModule, String moduleName)
+    private Module loadYangs(final File testedModule, final String moduleName)
             throws Exception {
         List<InputStream> yangISs = new ArrayList<>();
         yangISs.addAll(getStreams("/ietf-inet-types.yang"));
@@ -120,8 +118,7 @@ public class ModuleMXBeanEntryNameConflictTest extends AbstractYangTest {
 
         yangISs.addAll(getConfigApiYangInputStreams());
 
-        final CrossSourceStatementReactor.BuildAction reactor = YangInferencePipeline.RFC6020_REACTOR.newBuild();
-        context = reactor.buildEffective(yangISs);
+        context =  YangParserTestUtils.parseYangStreams(yangISs);
         // close ISs
         for (InputStream is : yangISs) {
             is.close();

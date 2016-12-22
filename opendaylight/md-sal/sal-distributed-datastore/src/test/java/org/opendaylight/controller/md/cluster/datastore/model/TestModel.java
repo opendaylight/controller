@@ -7,11 +7,11 @@
  */
 package org.opendaylight.controller.md.cluster.datastore.model;
 
-import com.google.common.io.ByteSource;
 import com.google.common.io.Resources;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Collections;
-import java.util.Set;
+import java.util.List;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
@@ -24,8 +24,7 @@ import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.CollectionNo
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
-import org.opendaylight.yangtools.yang.parser.stmt.reactor.CrossSourceStatementReactor;
-import org.opendaylight.yangtools.yang.parser.stmt.rfc6020.YangInferencePipeline;
+import org.opendaylight.yangtools.yang.test.util.YangParserTestUtils;
 
 public class TestModel {
 
@@ -60,22 +59,23 @@ public class TestModel {
     public static final QName THREE_QNAME = QName.create(TEST_QNAME,"three");
 
     public static SchemaContext createTestContext() {
-        final CrossSourceStatementReactor.BuildAction reactor = YangInferencePipeline.RFC6020_REACTOR.newBuild();
-        final SchemaContext schemaContext;
-        final Set<ByteSource> sources = Collections
-                .singleton(Resources.asByteSource(TestModel.class.getResource(DATASTORE_TEST_YANG)));
+        final List<InputStream> sources;
 
         try {
-            schemaContext = reactor.buildEffective(sources);
+            sources = Collections.singletonList(
+                Resources.asByteSource(TestModel.class.getResource(DATASTORE_TEST_YANG)).openStream());
         } catch (IOException e1) {
             throw new ExceptionInInitializerError(e1);
-        }  catch (ReactorException e2) {
-            throw new RuntimeException("Unable to build schema context from " + sources, e2);
         }
-        return schemaContext;
+
+        try {
+            return YangParserTestUtils.parseYangStreams(sources);
+        }  catch (ReactorException e) {
+            throw new RuntimeException("Unable to build schema context from " + sources, e);
+        }
     }
 
-    public static DataContainerChild<?, ?> outerNode(int... ids) {
+    public static DataContainerChild<?, ?> outerNode(final int... ids) {
         CollectionNodeBuilder<MapEntryNode, MapNode> outer = ImmutableNodes.mapNodeBuilder(OUTER_LIST_QNAME);
         for (int id: ids) {
             outer.addChild(ImmutableNodes.mapEntry(OUTER_LIST_QNAME, ID_QNAME, id));
@@ -84,7 +84,7 @@ public class TestModel {
         return outer.build();
     }
 
-    public static DataContainerChild<?, ?> outerNode(MapEntryNode... entries) {
+    public static DataContainerChild<?, ?> outerNode(final MapEntryNode... entries) {
         CollectionNodeBuilder<MapEntryNode, MapNode> outer = ImmutableNodes.mapNodeBuilder(OUTER_LIST_QNAME);
         for (MapEntryNode e: entries) {
             outer.addChild(e);
@@ -93,7 +93,7 @@ public class TestModel {
         return outer.build();
     }
 
-    public static DataContainerChild<?, ?> innerNode(String... names) {
+    public static DataContainerChild<?, ?> innerNode(final String... names) {
         CollectionNodeBuilder<MapEntryNode, MapNode> outer = ImmutableNodes.mapNodeBuilder(INNER_LIST_QNAME);
         for (String name: names) {
             outer.addChild(ImmutableNodes.mapEntry(INNER_LIST_QNAME, NAME_QNAME, name));
@@ -102,32 +102,32 @@ public class TestModel {
         return outer.build();
     }
 
-    public static MapEntryNode outerNodeEntry(int id, DataContainerChild<?, ?> inner) {
+    public static MapEntryNode outerNodeEntry(final int id, final DataContainerChild<?, ?> inner) {
         return ImmutableNodes.mapEntryBuilder(OUTER_LIST_QNAME, ID_QNAME, id).addChild(inner).build();
     }
 
-    public static NormalizedNode<?, ?> testNodeWithOuter(int... ids) {
+    public static NormalizedNode<?, ?> testNodeWithOuter(final int... ids) {
         return testNodeWithOuter(outerNode(ids));
     }
 
-    public static NormalizedNode<?, ?> testNodeWithOuter(DataContainerChild<?, ?> outer) {
+    public static NormalizedNode<?, ?> testNodeWithOuter(final DataContainerChild<?, ?> outer) {
         return ImmutableContainerNodeBuilder.create().withNodeIdentifier(
                 new YangInstanceIdentifier.NodeIdentifier(TEST_QNAME)).withChild(outer).build();
     }
 
-    public static NodeIdentifierWithPredicates outerEntryKey(int id) {
+    public static NodeIdentifierWithPredicates outerEntryKey(final int id) {
         return new NodeIdentifierWithPredicates(OUTER_LIST_QNAME, ID_QNAME, id);
     }
 
-    public static YangInstanceIdentifier outerEntryPath(int id) {
+    public static YangInstanceIdentifier outerEntryPath(final int id) {
         return OUTER_LIST_PATH.node(outerEntryKey(id));
     }
 
-    public static NodeIdentifierWithPredicates innerEntryKey(String name) {
+    public static NodeIdentifierWithPredicates innerEntryKey(final String name) {
         return new NodeIdentifierWithPredicates(INNER_LIST_QNAME, NAME_QNAME, name);
     }
 
-    public static YangInstanceIdentifier innerEntryPath(int id, String name) {
+    public static YangInstanceIdentifier innerEntryPath(final int id, final String name) {
         return OUTER_LIST_PATH.node(outerEntryKey(id)).node(INNER_LIST_QNAME).node(innerEntryKey(name));
     }
 }

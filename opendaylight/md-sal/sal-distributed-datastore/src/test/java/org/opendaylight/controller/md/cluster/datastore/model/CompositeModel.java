@@ -36,8 +36,7 @@ import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableLe
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableLeafSetNodeBuilder;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
-import org.opendaylight.yangtools.yang.parser.stmt.reactor.CrossSourceStatementReactor;
-import org.opendaylight.yangtools.yang.parser.stmt.rfc6020.YangInferencePipeline;
+import org.opendaylight.yangtools.yang.test.util.YangParserTestUtils;
 
 public class CompositeModel {
 
@@ -132,15 +131,11 @@ public class CompositeModel {
         inputStreams.add(getDatastoreAugInputStream());
         inputStreams.add(getDatastoreTestNotificationInputStream());
 
-        final CrossSourceStatementReactor.BuildAction reactor = YangInferencePipeline.RFC6020_REACTOR.newBuild();
-        final SchemaContext schemaContext;
-
         try {
-            schemaContext = reactor.buildEffective(inputStreams);
+            return YangParserTestUtils.parseYangStreams(inputStreams);
         } catch (ReactorException e) {
             throw new RuntimeException("Unable to build schema context from " + inputStreams, e);
         }
-        return schemaContext;
     }
 
     /**
@@ -159,7 +154,7 @@ public class CompositeModel {
      *
      * </pre>
      */
-    public static NormalizedNode<?, ?> createDocumentOne(SchemaContext schemaContext) {
+    public static NormalizedNode<?, ?> createDocumentOne(final SchemaContext schemaContext) {
         return ImmutableContainerNodeBuilder.create()
                 .withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(schemaContext.getQName()))
                 .withChild(createTestContainer()).build();
