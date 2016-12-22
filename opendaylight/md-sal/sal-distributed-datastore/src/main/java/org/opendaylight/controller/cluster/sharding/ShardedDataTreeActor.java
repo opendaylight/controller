@@ -66,6 +66,7 @@ import org.opendaylight.controller.cluster.sharding.messages.PrefixShardRemoved;
 import org.opendaylight.controller.cluster.sharding.messages.ProducerCreated;
 import org.opendaylight.controller.cluster.sharding.messages.ProducerRemoved;
 import org.opendaylight.controller.cluster.sharding.messages.RemovePrefixShard;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeProducer;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeProducerException;
@@ -373,10 +374,14 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
 
         replicator.tell(update, self());
 
+        final ActorContext context =
+                configuration.getPrefix().getDatastoreType().equals(LogicalDatastoreType.CONFIGURATION)
+                        ? distributedConfigDatastore.getActorContext() : distributedOperDatastore.getActorContext();
+
         // schedule a notification task for the reply
         actorSystem.scheduler().scheduleOnce(SHARD_LOOKUP_TASK_INTERVAL,
                 new ShardCreationLookupTask(actorSystem, getSender(),
-                        actorContext, shardingService, configuration.getPrefix()),
+                        context, shardingService, configuration.getPrefix()),
                 actorSystem.dispatcher());
     }
 
