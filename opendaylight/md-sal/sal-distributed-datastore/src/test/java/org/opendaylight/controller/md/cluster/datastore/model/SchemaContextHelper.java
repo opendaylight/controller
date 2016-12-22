@@ -8,19 +8,15 @@
 
 package org.opendaylight.controller.md.cluster.datastore.model;
 
-import com.google.common.io.ByteSource;
-import com.google.common.io.Resources;
+import com.google.common.base.Throwables;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
-import org.opendaylight.yangtools.yang.parser.stmt.reactor.CrossSourceStatementReactor;
-import org.opendaylight.yangtools.yang.parser.stmt.rfc6020.YangInferencePipeline;
+import org.opendaylight.yangtools.yang.test.util.YangParserTestUtils;
 
 public class SchemaContextHelper {
 
@@ -36,42 +32,25 @@ public class SchemaContextHelper {
         return select(ODL_DATASTORE_TEST_YANG, PEOPLE_YANG, CARS_YANG);
     }
 
-    public static SchemaContext select(String... schemaFiles) {
-        final CrossSourceStatementReactor.BuildAction reactor = YangInferencePipeline.RFC6020_REACTOR.newBuild();
-        final SchemaContext schemaContext;
-        List<InputStream> streams = new ArrayList<>();
+    public static SchemaContext select(final String... schemaFiles) {
+        List<InputStream> streams = new ArrayList<>(schemaFiles.length);
 
         for (String schemaFile : schemaFiles) {
             streams.add(getInputStream(schemaFile));
         }
 
         try {
-            schemaContext = reactor.buildEffective(streams);
+            return YangParserTestUtils.parseYangStreams(streams);
         } catch (ReactorException e) {
             throw new RuntimeException("Unable to build schema context from " + streams, e);
         }
-
-        return schemaContext;
     }
 
     public static SchemaContext entityOwners() {
-        final CrossSourceStatementReactor.BuildAction reactor = YangInferencePipeline.RFC6020_REACTOR.newBuild();
-        final SchemaContext schemaContext;
-        File file = null;
-
         try {
-            file = new File("src/main/yang/entity-owners.yang");
-            final List<ByteSource> sources = Arrays.asList(Resources.asByteSource(file.toURI().toURL()));
-            try {
-                schemaContext = reactor.buildEffective(sources);
-            } catch (IOException e1) {
-                throw new ExceptionInInitializerError(e1);
-            } catch (ReactorException e2) {
-                throw new RuntimeException("Unable to build schema context from " + sources, e2);
-            }
-            return schemaContext;
-        } catch (MalformedURLException e3) {
-            throw new RuntimeException("Malformed URL detected in " + file, e3);
+            return YangParserTestUtils.parseYangSources(new File("src/main/yang/entity-owners.yang"));
+        } catch (IOException | ReactorException e) {
+            throw Throwables.propagate(e);
         }
     }
 }

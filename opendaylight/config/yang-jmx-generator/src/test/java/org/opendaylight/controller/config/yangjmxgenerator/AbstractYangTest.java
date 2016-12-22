@@ -27,8 +27,7 @@ import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.model.api.IdentitySchemaNode;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-import org.opendaylight.yangtools.yang.parser.stmt.reactor.CrossSourceStatementReactor;
-import org.opendaylight.yangtools.yang.parser.stmt.rfc6020.YangInferencePipeline;
+import org.opendaylight.yangtools.yang.test.util.YangParserTestUtils;
 
 public abstract class AbstractYangTest {
     protected SchemaContext context;
@@ -57,8 +56,7 @@ public abstract class AbstractYangTest {
 
         yangISs.addAll(getConfigApiYangInputStreams());
 
-        final CrossSourceStatementReactor.BuildAction reactor = YangInferencePipeline.RFC6020_REACTOR.newBuild();
-        context = reactor.buildEffective(yangISs);
+        context = YangParserTestUtils.parseYangStreams(yangISs);
         // close ISs
         for (InputStream is : yangISs) {
             is.close();
@@ -81,11 +79,10 @@ public abstract class AbstractYangTest {
     }
 
     public static List<InputStream> getConfigApiYangInputStreams() {
-        return getStreams("/META-INF/yang/config.yang",
-                "/META-INF/yang/rpc-context.yang");
+        return getStreams("/META-INF/yang/config.yang", "/META-INF/yang/rpc-context.yang");
     }
 
-    public Map<QName, IdentitySchemaNode> mapIdentitiesByQNames(Module module) {
+    public Map<QName, IdentitySchemaNode> mapIdentitiesByQNames(final Module module) {
         Map<QName, IdentitySchemaNode> result = new HashMap<>();
         for (IdentitySchemaNode identitySchemaNode : module.getIdentities()) {
             QName qName = identitySchemaNode.getQName();
@@ -98,7 +95,7 @@ public abstract class AbstractYangTest {
         return result;
     }
 
-    protected static List<InputStream> getStreams(String... paths) {
+    protected static List<InputStream> getStreams(final String... paths) {
         List<InputStream> result = new ArrayList<>();
         for (String path : paths) {
             InputStream is = AbstractYangTest.class.getResourceAsStream(path);
@@ -108,12 +105,13 @@ public abstract class AbstractYangTest {
         return result;
     }
 
-    protected Map<QName, ServiceInterfaceEntry>  loadThreadsServiceInterfaceEntries(String packageName) {
+    protected Map<QName, ServiceInterfaceEntry>  loadThreadsServiceInterfaceEntries(final String packageName) {
         Map<IdentitySchemaNode, ServiceInterfaceEntry> identitiesToSIs = new HashMap<>();
         return ServiceInterfaceEntry.create(threadsModule, packageName,identitiesToSIs);
     }
 
-    protected Map<String /* identity local name */, ModuleMXBeanEntry> loadThreadsJava(Map<QName, ServiceInterfaceEntry> modulesToSIEs, String packageName) {
+    protected Map<String /* identity local name */, ModuleMXBeanEntry> loadThreadsJava(
+            final Map<QName, ServiceInterfaceEntry> modulesToSIEs, final String packageName) {
         Map<String /* identity local name */, ModuleMXBeanEntry> namesToMBEs = ModuleMXBeanEntry
                 .create(threadsJavaModule, modulesToSIEs, context, new TypeProviderWrapper(new TypeProviderImpl
                 (context)), packageName);

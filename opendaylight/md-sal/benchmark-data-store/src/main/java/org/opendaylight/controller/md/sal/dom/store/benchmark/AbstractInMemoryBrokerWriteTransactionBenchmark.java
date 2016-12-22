@@ -18,7 +18,7 @@ import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Warmup;
 
 /**
- * @author Lukas Sedlak <lsedlak@cisco.com>
+ * @author Lukas Sedlak
  */
 public abstract class AbstractInMemoryBrokerWriteTransactionBenchmark extends AbstractInMemoryWriteTransactionBenchmark {
 
