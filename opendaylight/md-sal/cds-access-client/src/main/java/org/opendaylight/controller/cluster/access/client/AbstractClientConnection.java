@@ -50,9 +50,6 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
     private final TransmitQueue queue;
     private final Long cookie;
 
-    // Updated from actor thread only
-    private long lastProgress;
-
     private volatile RequestException poisoned;
 
     // Do not allow subclassing outside of this package
@@ -61,15 +58,13 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
         this.context = Preconditions.checkNotNull(context);
         this.cookie = Preconditions.checkNotNull(cookie);
         this.queue = Preconditions.checkNotNull(queue);
-        this.lastProgress = readTime();
     }
 
     // Do not allow subclassing outside of this package
-    AbstractClientConnection(final AbstractClientConnection<T> oldConnection) {
+    AbstractClientConnection(final AbstractClientConnection<T> oldConnection, final int targetQueueSize) {
         this.context = oldConnection.context;
         this.cookie = oldConnection.cookie;
-        this.lastProgress = oldConnection.lastProgress;
-        this.queue = new TransmitQueue.Halted();
+        this.queue = new TransmitQueue.Halted(targetQueueSize);
     }
 
     public final ClientActorContext context() {
@@ -88,6 +83,9 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
      * Send a request to the backend and invoke a specified callback when it finishes. This method is safe to invoke
      * from any thread.
      *
+     * <p>This method may put the caller thread to sleep in order to throttle the request rate.
+     * The callback may be called before the sleep finishes.
+     *
      * @param request Request to send
      * @param callback Callback to invoke
      */
@@ -98,13 +96,7 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
         }
 
         final ConnectionEntry entry = new ConnectionEntry(request, callback, readTime());
-
-        lock.lock();
-        try {
-            queue.enqueue(entry, entry.getEnqueuedTicks());
-        } finally {
-            lock.unlock();
-        }
+        enqueueAndWait(entry, entry.getEnqueuedTicks());
     }
 
     public abstract Optional<T> getBackendInfo();
@@ -132,12 +124,21 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
         return context.ticker().read();
     }
 
-    final void enqueueEntry(final ConnectionEntry entry, final long now) {
+    final long enqueueEntry(final ConnectionEntry entry, final long now) {
         lock.lock();
         try {
-            queue.enqueue(entry, now);
+            return queue.enqueue(entry, now);
         } finally {
             lock.unlock();
+        }
+    }
+
+    final void enqueueAndWait(final ConnectionEntry entry, final long now) {
+        final long delay = enqueueEntry(entry, now);
+        try {
+            TimeUnit.NANOSECONDS.sleep(delay);
+        } catch (InterruptedException e) {
+            LOG.debug("Interrupted while sleeping");
         }
     }
 
@@ -165,16 +166,15 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
         lock.lock();
         try {
             final long now = readTime();
-            if (!queue.isEmpty()) {
-                final long ticksSinceProgress = now - lastProgress;
-                if (ticksSinceProgress >= NO_PROGRESS_TIMEOUT_NANOS) {
-                    LOG.error("Queue {} has not seen progress in {} seconds, failing all requests", this,
-                        TimeUnit.NANOSECONDS.toSeconds(ticksSinceProgress));
+            // The following line is only reliable when queue is not forwarding, but such state should not last long.
+            final long ticksSinceProgress = queue.ticksStalling(now);
+            if (ticksSinceProgress >= NO_PROGRESS_TIMEOUT_NANOS) {
+                LOG.error("Queue {} has not seen progress in {} seconds, failing all requests", this,
+                    TimeUnit.NANOSECONDS.toSeconds(ticksSinceProgress));
 
-                    lockedPoison(new NoProgressException(ticksSinceProgress));
-                    current.removeConnection(this);
-                    return current;
-                }
+                lockedPoison(new NoProgressException(ticksSinceProgress));
+                current.removeConnection(this);
+                return current;
             }
 
             // Requests are always scheduled in sequence, hence checking for timeout is relatively straightforward.
@@ -222,13 +222,13 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
             return Optional.empty();
         }
 
-        final long delay = head.getEnqueuedTicks() - now + REQUEST_TIMEOUT_NANOS;
-        if (delay <= 0) {
-            LOG.debug("Connection {} timed out", this);
+        final long beenOpen = now - head.getEnqueuedTicks();
+        if (beenOpen >= REQUEST_TIMEOUT_NANOS) {
+            LOG.debug("Connection {} has a request not completed for {} nanoseconds, timing out", this, beenOpen);
             return null;
         }
 
-        return Optional.of(FiniteDuration.apply(delay, TimeUnit.NANOSECONDS));
+        return Optional.of(FiniteDuration.apply(REQUEST_TIMEOUT_NANOS - beenOpen, TimeUnit.NANOSECONDS));
     }
 
     final void poison(final RequestException cause) {
@@ -267,7 +267,5 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
             LOG.debug("Completing {} with {}", entry, envelope);
             entry.complete(envelope.getMessage());
         }
-
-        lastProgress = readTime();
     }
 }
