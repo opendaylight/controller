@@ -76,10 +76,6 @@
       <groupId>org.opendaylight.yangtools</groupId>
       <artifactId>yang-data-impl</artifactId>
     </dependency>
-    <dependency>
-      <groupId>org.opendaylight.yangtools</groupId>
-      <artifactId>yang-parser-impl</artifactId>
-    </dependency>
 
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
@@ -121,7 +117,11 @@
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal-test-model</artifactId>
       <scope>test</scope>
-      </dependency>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.yangtools</groupId>
+      <artifactId>yang-test-util</artifactId>
+    </dependency>
   </dependencies>
 
   <build>

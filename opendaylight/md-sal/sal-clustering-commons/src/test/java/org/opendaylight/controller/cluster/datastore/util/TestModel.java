@@ -50,8 +50,7 @@ import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableLe
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableMapEntryNodeBuilder;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
-import org.opendaylight.yangtools.yang.parser.stmt.reactor.CrossSourceStatementReactor;
-import org.opendaylight.yangtools.yang.parser.stmt.rfc6020.YangInferencePipeline;
+import org.opendaylight.yangtools.yang.test.util.YangParserTestUtils;
 
 public class TestModel {
 
@@ -198,16 +197,12 @@ public class TestModel {
         return resolveSchemaContext(inputStreams);
     }
 
-    private static SchemaContext resolveSchemaContext(List<InputStream> streams) {
-        final CrossSourceStatementReactor.BuildAction reactor = YangInferencePipeline.RFC6020_REACTOR.newBuild();
-        final SchemaContext schemaContext;
-
+    private static SchemaContext resolveSchemaContext(final List<InputStream> streams) {
         try {
-            schemaContext = reactor.buildEffective(streams);
+            return YangParserTestUtils.parseYangStreams(streams);
         } catch (ReactorException e) {
             throw new RuntimeException("Unable to build schema context from " + streams, e);
         }
-        return schemaContext;
     }
 
     /**
@@ -227,8 +222,7 @@ public class TestModel {
      *
      * </pre>
      */
-    public static NormalizedNode<?, ?> createDocumentOne(
-            SchemaContext schemaContext) {
+    public static NormalizedNode<?, ?> createDocumentOne(final SchemaContext schemaContext) {
         return ImmutableContainerNodeBuilder
                 .create()
                 .withNodeIdentifier(
@@ -360,7 +354,7 @@ public class TestModel {
         return createBaseTestContainerBuilder().build();
     }
 
-    public static MapEntryNode createAugmentedListEntry(int id, String name) {
+    public static MapEntryNode createAugmentedListEntry(final int id, final String name) {
 
         Set<QName> childAugmentations = new HashSet<>();
         childAugmentations.add(AUG_CONT_QNAME);

@@ -26,7 +26,7 @@ import org.openjdk.jmh.annotations.OutputTimeUnit;
  * of benchmark creates InMemoryDataStore with Data Change Listener Executor Service as Blocking Bounded Fast Thread Pool
  * and DOM Store Executor Service as Same Thread Executor.
  *
- * @author Lukas Sedlak <lsedlak@cisco.com>
+ * @author Lukas Sedlak
  */
 @State(Scope.Thread)
 @BenchmarkMode(Mode.AverageTime)
