@@ -12,9 +12,16 @@ import java.util.Optional;
 
 @Beta
 public final class ConnectingClientConnection<T extends BackendInfo> extends AbstractClientConnection<T> {
+    /**
+     * A wild estimate on how deep a queue should be. Without having knowledge of the remote actor we can only
+     * guess its processing capabilities while we are doing initial buffering. With {@link AveragingProgressTracker}
+     * this boils down to a burst of up to 2000 messages before we start throttling.
+     */
+    private static final int TARGET_QUEUE_DEPTH = 4000;
+
     // Initial state, never instantiated externally
     ConnectingClientConnection(final ClientActorContext context, final Long cookie) {
-        super(context, cookie, new TransmitQueue.Halted());
+        super(context, cookie, new TransmitQueue.Halted(TARGET_QUEUE_DEPTH));
     }
 
     @Override
