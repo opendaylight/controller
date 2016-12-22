@@ -22,9 +22,9 @@ import org.opendaylight.controller.md.sal.dom.xsql.jdbc.JDBCResultSet;
 import org.opendaylight.controller.md.sal.dom.xsql.jdbc.JDBCServer;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
-import org.opendaylight.yangtools.yang.parser.stmt.reactor.CrossSourceStatementReactor;
-import org.opendaylight.yangtools.yang.parser.stmt.rfc6020.YangInferencePipeline;
+import org.opendaylight.yangtools.yang.test.util.YangParserTestUtils;
 
+@Deprecated
 public class XSQLTest {
     private static final String DATASTORE_TEST_YANG = "/sal-persisted-dom-test.yang";
     private XSQLBluePrint bluePrint = null;
@@ -114,7 +114,7 @@ public class XSQLTest {
         }
     }
 
-    private static void parseTables(String sql,XSQLBluePrint bp,JDBCResultSet rs){
+    private static void parseTables(final String sql,final XSQLBluePrint bp,final JDBCResultSet rs){
         try{
             JDBCServer.parseTables(rs, bp);
             log("Test Table parsing of \""+sql+"\" Passed!");
@@ -170,7 +170,7 @@ public class XSQLTest {
         }
     }
 
-    private static void parseFields(String sql,XSQLBluePrint bp,JDBCResultSet rs){
+    private static void parseFields(final String sql,final XSQLBluePrint bp,final JDBCResultSet rs){
         try{
             JDBCServer.parseFields(rs, bp);
             log("Test Fields parsing of \""+sql+"\" Passed!");
@@ -182,7 +182,7 @@ public class XSQLTest {
         }
     }
 
-    private static void log(String str) {
+    private static void log(final String str) {
         System.out.print("*** XSQL Tests -");
         System.out.println(str);
     }
@@ -192,15 +192,12 @@ public class XSQLTest {
     }
 
     public static SchemaContext createTestContext() {
-        final CrossSourceStatementReactor.BuildAction reactor = YangInferencePipeline.RFC6020_REACTOR.newBuild();
-        final SchemaContext schemaContext;
         final List<InputStream> streams = Collections.singletonList(getInputStream());
 
         try {
-            schemaContext = reactor.buildEffective(streams);
+            return YangParserTestUtils.parseYangStreams(streams);
         } catch (ReactorException e) {
             throw new RuntimeException("Unable to build schema context from " + streams, e);
         }
-        return schemaContext;
     }
 }

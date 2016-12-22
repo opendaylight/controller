@@ -17,8 +17,7 @@ import org.junit.Test;
 import org.opendaylight.controller.config.yangjmxgenerator.ConfigConstants;
 import org.opendaylight.controller.config.yangjmxgenerator.ServiceInterfaceEntryTest;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.util.YangModelSearchUtils;
-import org.opendaylight.yangtools.yang.parser.stmt.reactor.CrossSourceStatementReactor;
-import org.opendaylight.yangtools.yang.parser.stmt.rfc6020.YangInferencePipeline;
+import org.opendaylight.yangtools.yang.test.util.YangParserTestUtils;
 
 public class UnknownExtensionTest extends ServiceInterfaceEntryTest {
 
@@ -28,21 +27,16 @@ public class UnknownExtensionTest extends ServiceInterfaceEntryTest {
                 .getResourceAsStream("test-ifcWithUnknownExtension.yang"));
         yangISs.addAll(getConfigApiYangInputStreams());
         try {
-            final CrossSourceStatementReactor.BuildAction reactor = YangInferencePipeline.RFC6020_REACTOR.newBuild();
-            context = reactor.buildEffective(yangISs);
-            namesToModules = YangModelSearchUtils.mapModulesByNames(context
-                    .getModules());
+            context = YangParserTestUtils.parseYangStreams(yangISs);
+            namesToModules = YangModelSearchUtils.mapModulesByNames(context.getModules());
             configModule = namesToModules.get(ConfigConstants.CONFIG_MODULE);
-            threadsModule = namesToModules
-                    .get(ConfigConstants.CONFIG_THREADS_MODULE);
+            threadsModule = namesToModules.get(ConfigConstants.CONFIG_THREADS_MODULE);
             try {
                 super.testCreateFromIdentities();
                 fail();
             } catch (IllegalStateException e) {
-                assertTrue(
-                        e.getMessage(),
-                        e.getMessage().startsWith(
-                                "Unexpected unknown schema node."));
+                assertTrue(e.getMessage(),
+                        e.getMessage().startsWith("Unexpected unknown schema node."));
             }
         } finally {
             for (InputStream is : yangISs) {

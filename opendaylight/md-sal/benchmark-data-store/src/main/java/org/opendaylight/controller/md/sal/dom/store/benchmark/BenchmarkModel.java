@@ -9,9 +9,12 @@ package org.opendaylight.controller.md.sal.dom.store.benchmark;
 
 import java.io.InputStream;
 import java.util.Collections;
+import java.util.List;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
+import org.opendaylight.yangtools.yang.test.util.YangParserTestUtils;
 
 /**
  * Benchmark Model class loads the odl-datastore-test.yang model from resources.
@@ -19,7 +22,7 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
  * This class serves as facilitator class which holds several references to initialized yang model as static final
  * members.
  *
- * @author Lukas Sedlak <lsedlak@cisco.com>
+ * @author Lukas Sedlak
  */
 public final class BenchmarkModel {
 
@@ -40,12 +43,11 @@ public final class BenchmarkModel {
     }
 
     public static SchemaContext createTestContext() {
-        final CrossSourceStatementReactor.BuildAction reactor = YangInferencePipeline.RFC6020_REACTOR.newBuild();
         final SchemaContext schemaContext;
         final List<InputStream> streams = Collections.singletonList(getInputStream());
 
         try {
-            schemaContext = reactor.buildEffective(streams);
+            schemaContext = YangParserTestUtils.parseYangStreams(streams);
         } catch (ReactorException e) {
             throw new RuntimeException("Unable to build schema context from " + streams, e);
         }
