@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a622d24_f9abeb1a",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardedDOMDataTree.java",
+        "patchSetId": 23
+      },
+      "lineNbr": 398,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-12-23T10:23:01Z",
+      "side": 1,
+      "message": "Should we report failure for debugging?",
+      "revId": "d52d9b44bab63022132766daadab237e905129f0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_793d1bde",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/ShardedDataTreeActor.java",
+        "patchSetId": 23
+      },
+      "lineNbr": 482,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-12-23T10:23:01Z",
+      "side": 1,
+      "message": "It looks like this class and the others can be static.",
+      "revId": "d52d9b44bab63022132766daadab237e905129f0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_391a837d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/ShardedDataTreeActor.java",
+        "patchSetId": 23
+      },
+      "lineNbr": 566,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-12-23T10:23:01Z",
+      "side": 1,
+      "message": "This timeout is hardcoded and rather small. I think it should use ActorContext.getOperationDuration to be consistent with findLocalShard et al.",
+      "revId": "d52d9b44bab63022132766daadab237e905129f0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_f9300b03",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/ShardedDataTreeActor.java",
+        "patchSetId": 23
+      },
+      "lineNbr": 574,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-12-23T10:23:01Z",
+      "side": 1,
+      "message": "We shouldn\u0027t lose this exception - if tryReschedule runs out of retries I think it should report this exception as the root cause.",
+      "revId": "d52d9b44bab63022132766daadab237e905129f0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_3933a315",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/ShardedDataTreeActor.java",
+        "patchSetId": 23
+      },
+      "lineNbr": 719,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-12-23T10:23:01Z",
+      "side": 1,
+      "message": "This looks to be common between all these classes - you could create an abstract base class.",
+      "revId": "d52d9b44bab63022132766daadab237e905129f0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
