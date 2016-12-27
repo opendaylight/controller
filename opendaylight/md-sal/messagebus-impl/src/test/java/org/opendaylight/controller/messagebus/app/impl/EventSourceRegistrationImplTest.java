@@ -43,7 +43,7 @@ public class EventSourceRegistrationImplTest {
     private class EventSourceRegistrationImplLocal extends EventSourceRegistrationImpl{
 
         /**
-         * @param instance            of EventSource that has been registered by {@link EventSourceRegistryImpl#registerEventSource(Node, org.opendaylight.controller.messagebus.spi.EventSource)}
+         * @param instance of EventSource that has been registered by {@link EventSourceRegistryImpl#registerEventSource(Node, org.opendaylight.controller.messagebus.spi.EventSource)}
          * @param eventSourceTopology
          */
         public EventSourceRegistrationImplLocal(EventSource instance, EventSourceTopology eventSourceTopology) {

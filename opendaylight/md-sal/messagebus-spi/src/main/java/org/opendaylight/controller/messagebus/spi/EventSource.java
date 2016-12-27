@@ -14,7 +14,7 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 
 /**
- * Event source is a node in topology which is able to produces notifications.
+ * Event source is a node in topology which is able to produce notifications.
  * To register event source you use {@link EventSourceRegistry#registerEventSource(EventSource)}.
  * EventSourceRegistry will request registered event source to publish notifications
  * whenever EventSourceRegistry has been asked to publish a certain type of notifications.

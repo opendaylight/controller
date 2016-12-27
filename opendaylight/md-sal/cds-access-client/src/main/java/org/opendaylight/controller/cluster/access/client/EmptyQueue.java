@@ -17,7 +17,6 @@ import org.opendaylight.yangtools.concepts.Immutable;
 /**
  * A specialized always-empty implementation of {@link java.util.Queue}. This implementation will always refuse new
  * elements in its {@link #offer(Object)} method.
-
  * @author Robert Varga
  *
  * @param <E> the type of elements held in this collection

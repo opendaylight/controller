@@ -33,7 +33,7 @@ public enum PersistenceProtocol implements WritableObject {
     },
     /**
      * Simple commit protocol. The transaction should be committed to the global history. The receiving backend
-     * it the only entity which needs to persist its effects, hence a simple request/reply protocol is sufficient.
+     * is the only entity which needs to persist its effects, hence a simple request/reply protocol is sufficient.
      */
     SIMPLE {
         @Override
@@ -52,7 +52,7 @@ public enum PersistenceProtocol implements WritableObject {
         }
     },
     /**
-     * Transaction is ready. This is not a really a persistence protocol, but an indication that that frontend has
+     * Transaction is ready. This is not a really a persistence protocol, but an indication that frontend has
      * completed modifications on the transaction and considers it ready, without deciding the actual commit protocol.
      */
     READY {

@@ -26,7 +26,7 @@ import org.opendaylight.yangtools.yang.binding.BaseIdentity;
 public interface DependencyResolver extends Identifiable<ModuleIdentifier> {
 
     /**
-     * To be used during validation phase to validate serice interface of
+     * To be used during validation phase to validate service interface of
      * dependent module.
      *
      * @param expectedServiceInterface MBean/MXBean interface which will back the proxy object.
