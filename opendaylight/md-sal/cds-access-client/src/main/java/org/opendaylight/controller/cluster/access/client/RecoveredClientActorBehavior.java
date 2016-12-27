@@ -8,7 +8,7 @@
 package org.opendaylight.controller.cluster.access.client;
 
 /**
- * Abstract base class class for a behavior whose actor has recovered from persistence.
+ * Abstract base class for a behavior whose actor has recovered from persistence.
  *
  * @param <C> Concrete context type
  *
