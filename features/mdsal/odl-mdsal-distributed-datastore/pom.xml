@@ -58,6 +58,10 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
+            <artifactId>cds-dom-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
             <artifactId>sal-distributed-datastore</artifactId>
         </dependency>
         <dependency>
