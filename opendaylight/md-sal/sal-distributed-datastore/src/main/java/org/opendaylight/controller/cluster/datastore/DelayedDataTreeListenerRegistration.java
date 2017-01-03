@@ -8,7 +8,7 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import org.opendaylight.controller.cluster.datastore.messages.RegisterDataTreeChangeListener;
-import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeListener;
+import org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener;
 
 /**
  * Intermediate proxy registration returned to the user when we cannot

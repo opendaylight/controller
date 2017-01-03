@@ -9,7 +9,7 @@ package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorContext;
 import javax.annotation.concurrent.NotThreadSafe;
-import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeListener;
+import org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 

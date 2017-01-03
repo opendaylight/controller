@@ -61,20 +61,20 @@ import org.opendaylight.controller.md.cluster.datastore.model.PeopleModel;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionChainClosedException;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListener;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
-import org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction;
-import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
-import org.opendaylight.controller.md.sal.dom.api.DOMTransactionChain;
-import org.opendaylight.controller.sal.core.spi.data.DOMStore;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionChain;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
+import org.opendaylight.mdsal.common.api.ReadFailedException;
+import org.opendaylight.mdsal.common.api.TransactionChainClosedException;
+import org.opendaylight.mdsal.common.api.TransactionChainListener;
+import org.opendaylight.mdsal.common.api.TransactionCommitFailedException;
+import org.opendaylight.mdsal.dom.api.DOMDataTreeReadWriteTransaction;
+import org.opendaylight.mdsal.dom.api.DOMDataTreeWriteTransaction;
+import org.opendaylight.mdsal.dom.api.DOMTransactionChain;
+import org.opendaylight.mdsal.dom.spi.store.DOMStore;
+import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadTransaction;
+import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadWriteTransaction;
+import org.opendaylight.mdsal.dom.spi.store.DOMStoreThreePhaseCommitCohort;
+import org.opendaylight.mdsal.dom.spi.store.DOMStoreTransactionChain;
+import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
@@ -956,14 +956,14 @@ public class DistributedDataStoreIntegrationTest {
 
                     List<CheckedFuture<Void, TransactionCommitFailedException>> futures = new ArrayList<>();
 
-                    DOMDataWriteTransaction writeTx = txChain.newWriteOnlyTransaction();
+                    DOMDataTreeWriteTransaction writeTx = txChain.newWriteOnlyTransaction();
                     writeTx.put(LogicalDatastoreType.CONFIGURATION, CarsModel.BASE_PATH, CarsModel.emptyContainer());
                     writeTx.put(LogicalDatastoreType.CONFIGURATION, CarsModel.CAR_LIST_PATH, CarsModel.newCarMapNode());
                     futures.add(writeTx.submit());
 
                     int numCars = 100;
                     for (int i = 0; i < numCars; i++) {
-                        DOMDataReadWriteTransaction rwTx = txChain.newReadWriteTransaction();
+                        DOMDataTreeReadWriteTransaction rwTx = txChain.newReadWriteTransaction();
 
                         rwTx.merge(LogicalDatastoreType.CONFIGURATION, CarsModel.newCarPath("car" + i),
                                 CarsModel.newCarEntry("car" + i, BigInteger.valueOf(20000)));
@@ -1119,7 +1119,7 @@ public class DistributedDataStoreIntegrationTest {
                     TransactionChainListener listener = Mockito.mock(TransactionChainListener.class);
                     DOMTransactionChain txChain = broker.createTransactionChain(listener);
 
-                    DOMDataReadWriteTransaction rwTx = txChain.newReadWriteTransaction();
+                    DOMDataTreeReadWriteTransaction rwTx = txChain.newReadWriteTransaction();
 
                     ContainerNode invalidData = ImmutableContainerNodeBuilder.create()
                             .withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(CarsModel.BASE_QNAME))
@@ -1159,7 +1159,7 @@ public class DistributedDataStoreIntegrationTest {
                     TransactionChainListener listener = Mockito.mock(TransactionChainListener.class);
                     DOMTransactionChain txChain = broker.createTransactionChain(listener);
 
-                    DOMDataWriteTransaction writeTx = txChain.newWriteOnlyTransaction();
+                    DOMDataTreeWriteTransaction writeTx = txChain.newWriteOnlyTransaction();
 
                     writeTx.put(LogicalDatastoreType.CONFIGURATION, PeopleModel.BASE_PATH,
                             PeopleModel.emptyContainer());

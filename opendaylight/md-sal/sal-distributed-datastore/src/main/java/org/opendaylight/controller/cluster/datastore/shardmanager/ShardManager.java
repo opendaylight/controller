@@ -104,7 +104,6 @@ import org.opendaylight.controller.cluster.raft.messages.ServerChangeReply;
 import org.opendaylight.controller.cluster.raft.messages.ServerChangeStatus;
 import org.opendaylight.controller.cluster.raft.messages.ServerRemoved;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -488,8 +487,8 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
         if (shardDatastoreContext == null) {
             final Builder builder = newShardDatastoreContextBuilder(shardName);
-            builder.logicalStoreType(LogicalDatastoreType.valueOf(config.getPrefix().getDatastoreType().name()))
-                    .storeRoot(config.getPrefix().getRootIdentifier());
+            builder.logicalStoreType(config.getPrefix().getDatastoreType())
+                .storeRoot(config.getPrefix().getRootIdentifier());
             shardDatastoreContext = builder.build();
         } else {
             shardDatastoreContext = DatastoreContext.newBuilderFrom(shardDatastoreContext).shardPeerAddressResolver(
@@ -1173,12 +1172,8 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
                 new AutoFindPrimaryFailureResponseHandler(getSender(), shardName, persistenceId(), getSelf()) {
                     @Override
                     public void onRemotePrimaryShardFound(final RemotePrimaryShardFound response) {
-                        getSelf().tell(new RunnableMessage() {
-                            @Override
-                            public void run() {
-                                addShard(getShardName(), response, getSender());
-                            }
-                        }, getTargetActor());
+                        getSelf().tell((RunnableMessage) () -> addShard(getShardName(),
+                                response, getSender()), getTargetActor());
                     }
 
                     @Override
