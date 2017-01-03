@@ -13,7 +13,7 @@ import org.opendaylight.controller.cluster.datastore.DistributedDataStoreInterfa
 import org.opendaylight.controller.config.api.DependencyResolver;
 import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.config.api.osgi.WaitingServiceTracker;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.osgi.framework.BundleContext;
 
 public class DistributedConfigDataStoreProviderModule extends AbstractDistributedConfigDataStoreProviderModule {

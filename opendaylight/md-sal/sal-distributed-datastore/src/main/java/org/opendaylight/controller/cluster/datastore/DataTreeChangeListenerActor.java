@@ -15,7 +15,7 @@ import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActor;
 import org.opendaylight.controller.cluster.datastore.messages.DataTreeChanged;
 import org.opendaylight.controller.cluster.datastore.messages.DataTreeChangedReply;
 import org.opendaylight.controller.cluster.datastore.messages.EnableNotification;
-import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeListener;
+import org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener;
 
 /**
  * Proxy actor which acts as a facade to the user-provided listener. Responsible for decapsulating
