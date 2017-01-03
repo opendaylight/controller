@@ -11,17 +11,17 @@ package org.opendaylight.controller.cluster.databroker;
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
 import java.util.Map;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
-import org.opendaylight.controller.md.sal.dom.api.DOMDataReadOnlyTransaction;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionFactory;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
+import org.opendaylight.mdsal.common.api.ReadFailedException;
+import org.opendaylight.mdsal.dom.api.DOMDataTreeReadTransaction;
+import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadTransaction;
+import org.opendaylight.mdsal.dom.spi.store.DOMStoreTransactionFactory;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 public class DOMBrokerReadOnlyTransaction
-    extends AbstractDOMBrokerTransaction<DOMStoreReadTransaction>
-        implements DOMDataReadOnlyTransaction {
+        extends AbstractDOMBrokerTransaction<DOMStoreReadTransaction> implements DOMDataTreeReadTransaction {
+
     /**
      * Creates new composite Transactions.
      *
@@ -54,6 +54,4 @@ public class DOMBrokerReadOnlyTransaction
     protected DOMStoreReadTransaction createTransaction(LogicalDatastoreType key) {
         return getTxFactory(key).newReadOnlyTransaction();
     }
-
-
 }
