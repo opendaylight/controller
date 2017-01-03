@@ -118,8 +118,7 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
             DatastoreContext.newBuilder()
                     .shardHeartbeatIntervalInMillis(100)
                     .shardElectionTimeoutFactor(2)
-                    .logicalStoreType(
-                            org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.CONFIGURATION);
+                    .logicalStoreType(LogicalDatastoreType.CONFIGURATION);
 
     private DistributedDataStore leaderDistributedDataStore;
     private DistributedDataStore operDistributedDatastore;
