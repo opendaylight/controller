@@ -12,7 +12,7 @@ import akka.actor.ActorSelection;
 import com.google.common.base.Preconditions;
 import java.util.Collection;
 import org.opendaylight.controller.cluster.datastore.messages.DataTreeChanged;
-import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeListener;
+import org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
