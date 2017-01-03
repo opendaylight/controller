@@ -65,7 +65,7 @@ public class ClientBackedWriteTransactionTest extends ClientBackedTransactionTes
 
     @Test
     public void testReady() throws Exception {
-        final org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort result = object().ready();
+        final DOMStoreThreePhaseCommitCohort result = object().ready();
         Assert.assertNotNull(result);
         Mockito.verify(delegate).ready();
     }

@@ -112,7 +112,6 @@ import org.opendaylight.controller.cluster.sharding.PrefixedShardConfigUpdateHan
 import org.opendaylight.controller.cluster.sharding.messages.InitConfigListener;
 import org.opendaylight.controller.cluster.sharding.messages.PrefixShardCreated;
 import org.opendaylight.controller.cluster.sharding.messages.PrefixShardRemoved;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeListener;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
@@ -653,7 +652,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         configuration.addPrefixShardConfiguration(config);
 
         final Builder builder = newShardDatastoreContextBuilder(shardName);
-        builder.logicalStoreType(LogicalDatastoreType.valueOf(config.getPrefix().getDatastoreType().name()))
+        builder.logicalStoreType(config.getPrefix().getDatastoreType())
                 .storeRoot(config.getPrefix().getRootIdentifier());
         DatastoreContext shardDatastoreContext = builder.build();
 

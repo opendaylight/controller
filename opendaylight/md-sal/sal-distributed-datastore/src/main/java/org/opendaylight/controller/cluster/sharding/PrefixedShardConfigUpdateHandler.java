@@ -27,8 +27,9 @@ import org.opendaylight.controller.cluster.datastore.shardstrategy.PrefixShardSt
 import org.opendaylight.controller.cluster.datastore.utils.ClusterUtils;
 import org.opendaylight.controller.cluster.sharding.messages.PrefixShardCreated;
 import org.opendaylight.controller.cluster.sharding.messages.PrefixShardRemoved;
-import org.opendaylight.controller.md.sal.dom.api.ClusteredDOMDataTreeChangeListener;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
+import org.opendaylight.mdsal.dom.api.ClusteredDOMDataTreeChangeListener;
+import org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -53,8 +54,7 @@ public class PrefixedShardConfigUpdateHandler {
     private final ActorRef handlingActor;
     private final MemberName memberName;
 
-    private final EnumMap<LogicalDatastoreType,
-            ListenerRegistration<org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeListener>> registrations =
+    private final EnumMap<LogicalDatastoreType,ListenerRegistration<DOMDataTreeChangeListener>> registrations =
             new EnumMap<>(LogicalDatastoreType.class);
 
     public PrefixedShardConfigUpdateHandler(final ActorRef handlingActor, final MemberName memberName) {

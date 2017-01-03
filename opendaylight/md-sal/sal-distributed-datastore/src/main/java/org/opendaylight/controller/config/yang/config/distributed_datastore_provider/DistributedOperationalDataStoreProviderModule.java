@@ -10,12 +10,14 @@ package org.opendaylight.controller.config.yang.config.distributed_datastore_pro
 
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.DistributedDataStoreInterface;
+import org.opendaylight.controller.cluster.datastore.compat.LegacyDOMStoreAdapter;
 import org.opendaylight.controller.config.api.DependencyResolver;
 import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.config.api.osgi.WaitingServiceTracker;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.osgi.framework.BundleContext;
 
+@Deprecated
 public class DistributedOperationalDataStoreProviderModule
         extends AbstractDistributedOperationalDataStoreProviderModule {
     private BundleContext bundleContext;
@@ -48,7 +50,12 @@ public class DistributedOperationalDataStoreProviderModule
         WaitingServiceTracker<DistributedDataStoreInterface> tracker = WaitingServiceTracker.create(
                 DistributedDataStoreInterface.class, bundleContext, "(type=distributed-operational)");
         DistributedDataStoreInterface delegate = tracker.waitForService(WaitingServiceTracker.FIVE_MINUTES);
-        return new ForwardingDistributedDataStore(delegate, tracker);
+        return new LegacyDOMStoreAdapter(delegate) {
+            @Override
+            public void close() {
+                tracker.close();
+            }
+        };
     }
 
     public static DatastoreContext newDatastoreContext() {
