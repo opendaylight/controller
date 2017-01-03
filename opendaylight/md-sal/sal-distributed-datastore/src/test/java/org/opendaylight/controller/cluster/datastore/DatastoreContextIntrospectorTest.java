@@ -19,8 +19,8 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
 import org.junit.Test;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStoreConfigProperties;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 
 /**
  * Unit tests for DatastoreContextIntrospector.
