@@ -23,13 +23,13 @@ import java.util.Map;
 import java.util.concurrent.Executor;
 import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
 import org.opendaylight.controller.cluster.datastore.exceptions.ShardLeaderNotRespondingException;
-import org.opendaylight.controller.md.sal.common.api.data.DataStoreUnavailableException;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
-import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
-import org.opendaylight.controller.md.sal.dom.broker.impl.TransactionCommitFailedExceptionMapper;
-import org.opendaylight.controller.sal.core.spi.data.DOMStore;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
+import org.opendaylight.mdsal.common.api.DataStoreUnavailableException;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
+import org.opendaylight.mdsal.common.api.TransactionCommitFailedException;
+import org.opendaylight.mdsal.dom.api.DOMDataTreeWriteTransaction;
+import org.opendaylight.mdsal.dom.broker.TransactionCommitFailedExceptionMapper;
+import org.opendaylight.mdsal.dom.spi.store.DOMStore;
+import org.opendaylight.mdsal.dom.spi.store.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.yangtools.util.DurationStatisticsTracker;
 import org.opendaylight.yangtools.util.concurrent.MappingCheckedFuture;
 import org.slf4j.Logger;
@@ -73,7 +73,7 @@ public class ConcurrentDOMDataBroker extends AbstractDOMBroker {
     }
 
     @Override
-    protected CheckedFuture<Void, TransactionCommitFailedException> submit(DOMDataWriteTransaction transaction,
+    protected CheckedFuture<Void, TransactionCommitFailedException> submit(DOMDataTreeWriteTransaction transaction,
             Collection<DOMStoreThreePhaseCommitCohort> cohorts) {
 
         Preconditions.checkArgument(transaction != null, "Transaction must not be null.");
@@ -94,7 +94,7 @@ public class ConcurrentDOMDataBroker extends AbstractDOMBroker {
     }
 
     private void doCanCommit(final AsyncNotifyingSettableFuture clientSubmitFuture,
-            final DOMDataWriteTransaction transaction,
+            final DOMDataTreeWriteTransaction transaction,
             final Collection<DOMStoreThreePhaseCommitCohort> cohorts) {
 
         final long startTime = System.nanoTime();
@@ -133,7 +133,7 @@ public class ConcurrentDOMDataBroker extends AbstractDOMBroker {
     }
 
     private void doPreCommit(final long startTime, final AsyncNotifyingSettableFuture clientSubmitFuture,
-            final DOMDataWriteTransaction transaction,
+            final DOMDataTreeWriteTransaction transaction,
             final Collection<DOMStoreThreePhaseCommitCohort> cohorts) {
 
         final Iterator<DOMStoreThreePhaseCommitCohort> cohortIterator = cohorts.iterator();
@@ -163,7 +163,7 @@ public class ConcurrentDOMDataBroker extends AbstractDOMBroker {
     }
 
     private void doCommit(final long startTime, final AsyncNotifyingSettableFuture clientSubmitFuture,
-            final DOMDataWriteTransaction transaction,
+            final DOMDataTreeWriteTransaction transaction,
             final Collection<DOMStoreThreePhaseCommitCohort> cohorts) {
 
         final Iterator<DOMStoreThreePhaseCommitCohort> cohortIterator = cohorts.iterator();
@@ -199,7 +199,7 @@ public class ConcurrentDOMDataBroker extends AbstractDOMBroker {
                 + "uncomfirmed cast but the generic type in TransactionCommitFailedExceptionMapper is "
                 + "TransactionCommitFailedException and thus should be deemed as confirmed.")
     private static void handleException(final AsyncNotifyingSettableFuture clientSubmitFuture,
-            final DOMDataWriteTransaction transaction,
+            final DOMDataTreeWriteTransaction transaction,
             final Collection<DOMStoreThreePhaseCommitCohort> cohorts,
             final String phase, final TransactionCommitFailedExceptionMapper exMapper,
             final Throwable throwable) {

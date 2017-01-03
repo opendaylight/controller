@@ -14,13 +14,13 @@ import java.util.Collection;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
-import org.opendaylight.controller.md.sal.dom.api.DOMDataReadOnlyTransaction;
-import org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction;
-import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionFactory;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
+import org.opendaylight.mdsal.common.api.TransactionCommitFailedException;
+import org.opendaylight.mdsal.dom.api.DOMDataTreeReadTransaction;
+import org.opendaylight.mdsal.dom.api.DOMDataTreeReadWriteTransaction;
+import org.opendaylight.mdsal.dom.api.DOMDataTreeWriteTransaction;
+import org.opendaylight.mdsal.dom.spi.store.DOMStoreThreePhaseCommitCohort;
+import org.opendaylight.mdsal.dom.spi.store.DOMStoreTransactionFactory;
 
 public abstract class AbstractDOMTransactionFactory<T extends DOMStoreTransactionFactory> implements AutoCloseable {
     @SuppressWarnings("rawtypes")
@@ -48,15 +48,15 @@ public abstract class AbstractDOMTransactionFactory<T extends DOMStoreTransactio
      * @param cohorts the associated cohorts
      * @return a resulting Future
      */
-    protected abstract CheckedFuture<Void,TransactionCommitFailedException> submit(DOMDataWriteTransaction transaction,
-            Collection<DOMStoreThreePhaseCommitCohort> cohorts);
+    protected abstract CheckedFuture<Void,TransactionCommitFailedException> submit(
+            DOMDataTreeWriteTransaction transaction, Collection<DOMStoreThreePhaseCommitCohort> cohorts);
 
     /**
      * Creates a new read-only transaction.
      *
      * @return the transaction instance
      */
-    public final DOMDataReadOnlyTransaction newReadOnlyTransaction() {
+    public final DOMDataTreeReadTransaction newReadOnlyTransaction() {
         checkNotClosed();
 
         return new DOMBrokerReadOnlyTransaction(newTransactionIdentifier(), storeTxFactories);
@@ -68,7 +68,7 @@ public abstract class AbstractDOMTransactionFactory<T extends DOMStoreTransactio
      *
      * @return the transaction instance
      */
-    public final DOMDataWriteTransaction newWriteOnlyTransaction() {
+    public final DOMDataTreeWriteTransaction newWriteOnlyTransaction() {
         checkNotClosed();
 
         return new DOMBrokerWriteOnlyTransaction(newTransactionIdentifier(), storeTxFactories, this);
@@ -80,7 +80,7 @@ public abstract class AbstractDOMTransactionFactory<T extends DOMStoreTransactio
      *
      * @return the transaction instance
      */
-    public final DOMDataReadWriteTransaction newReadWriteTransaction() {
+    public final DOMDataTreeReadWriteTransaction newReadWriteTransaction() {
         checkNotClosed();
 
         return new DOMBrokerReadWriteTransaction(newTransactionIdentifier(), storeTxFactories, this);
