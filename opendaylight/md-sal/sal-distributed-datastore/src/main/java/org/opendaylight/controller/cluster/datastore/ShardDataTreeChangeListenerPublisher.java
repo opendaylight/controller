@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreTreeChangePublisher;
+import org.opendaylight.mdsal.dom.spi.store.DOMStoreTreeChangePublisher;
 
 /**
  * Interface for a class that generates and publishes notifications for DataTreeChangeListeners.

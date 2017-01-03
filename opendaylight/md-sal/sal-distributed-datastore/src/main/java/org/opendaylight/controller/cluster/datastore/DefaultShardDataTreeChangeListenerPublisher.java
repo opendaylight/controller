@@ -9,11 +9,8 @@ package org.opendaylight.controller.cluster.datastore;
 
 import java.util.Collection;
 import javax.annotation.concurrent.NotThreadSafe;
-import org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener;
 import org.opendaylight.mdsal.dom.spi.AbstractDOMDataTreeChangeListenerRegistration;
 import org.opendaylight.mdsal.dom.spi.store.AbstractDOMStoreTreeChangePublisher;
-import org.opendaylight.yangtools.concepts.ListenerRegistration;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,21 +45,5 @@ final class DefaultShardDataTreeChangeListenerPublisher extends AbstractDOMStore
     @Override
     protected void registrationRemoved(final AbstractDOMDataTreeChangeListenerRegistration<?> registration) {
         LOG.debug("Registration {} removed", registration);
-    }
-
-    @Override
-    public <L extends org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeListener> ListenerRegistration<L>
-            registerTreeChangeListener(final YangInstanceIdentifier treeId, final L listener) {
-        final AbstractDOMDataTreeChangeListenerRegistration<DOMDataTreeChangeListener> registration =
-            super.registerTreeChangeListener(treeId, (org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener)
-                changes -> listener.onDataTreeChanged(changes));
-
-        return new org.opendaylight.controller.md.sal.dom.spi.AbstractDOMDataTreeChangeListenerRegistration<L>(
-                listener) {
-            @Override
-            protected void removeRegistration() {
-                registration.close();
-            }
-        };
     }
 }
