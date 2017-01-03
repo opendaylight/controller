@@ -29,6 +29,7 @@ import static org.opendaylight.controller.cluster.datastore.ShardDataTreeMocking
 import static org.opendaylight.controller.cluster.datastore.ShardDataTreeMocking.immediate3PhaseCommit;
 import static org.opendaylight.controller.cluster.datastore.ShardDataTreeMocking.immediateCanCommit;
 import static org.opendaylight.controller.cluster.datastore.ShardDataTreeMocking.immediateCommit;
+import static org.opendaylight.controller.cluster.datastore.ShardDataTreeMocking.immediatePayloadReplication;
 import static org.opendaylight.controller.cluster.datastore.ShardDataTreeMocking.immediatePreCommit;
 
 import com.google.common.base.Optional;
@@ -73,7 +74,6 @@ public class ShardDataTreeTest extends AbstractTest {
 
     @Before
     public void setUp() {
-        doReturn(true).when(mockShard).canSkipPayload();
         doReturn(Ticker.systemTicker()).when(mockShard).ticker();
         doReturn(Mockito.mock(ShardStats.class)).when(mockShard).getShardMBean();
 
@@ -94,6 +94,7 @@ public class ShardDataTreeTest extends AbstractTest {
 
     private void modify(final boolean merge, final boolean expectedCarsPresent, final boolean expectedPeoplePresent)
             throws ExecutionException, InterruptedException {
+        immediatePayloadReplication(shardDataTree, mockShard);
 
         assertEquals(fullSchema, shardDataTree.getSchemaContext());
 
@@ -134,6 +135,8 @@ public class ShardDataTreeTest extends AbstractTest {
 
     @Test
     public void bug4359AddRemoveCarOnce() throws ExecutionException, InterruptedException {
+        immediatePayloadReplication(shardDataTree, mockShard);
+
         final List<DataTreeCandidate> candidates = new ArrayList<>();
         candidates.add(addCar(shardDataTree));
         candidates.add(removeCar(shardDataTree));
@@ -149,6 +152,8 @@ public class ShardDataTreeTest extends AbstractTest {
 
     @Test
     public void bug4359AddRemoveCarTwice() throws ExecutionException, InterruptedException {
+        immediatePayloadReplication(shardDataTree, mockShard);
+
         final List<DataTreeCandidate> candidates = new ArrayList<>();
         candidates.add(addCar(shardDataTree));
         candidates.add(removeCar(shardDataTree));
@@ -166,6 +171,8 @@ public class ShardDataTreeTest extends AbstractTest {
 
     @Test
     public void testListenerNotifiedOnApplySnapshot() throws Exception {
+        immediatePayloadReplication(shardDataTree, mockShard);
+
         DOMDataTreeChangeListener listener = mock(DOMDataTreeChangeListener.class);
         shardDataTree.registerTreeChangeListener(CarsModel.CAR_LIST_PATH.node(CarsModel.CAR_QNAME), listener);
 
@@ -184,6 +191,7 @@ public class ShardDataTreeTest extends AbstractTest {
         });
 
         ShardDataTree newDataTree = new ShardDataTree(mockShard, fullSchema, TreeType.OPERATIONAL);
+        immediatePayloadReplication(newDataTree, mockShard);
         addCar(newDataTree, "optima");
         addCar(newDataTree, "murano");
 
@@ -206,8 +214,6 @@ public class ShardDataTreeTest extends AbstractTest {
 
     @Test
     public void testPipelinedTransactionsWithCoordinatedCommits() throws Exception {
-        doReturn(false).when(mockShard).canSkipPayload();
-
         final ShardDataTreeCohort cohort1 = newShardDataTreeCohort(snapshot ->
             snapshot.write(CarsModel.BASE_PATH, CarsModel.emptyContainer()));
 
@@ -303,8 +309,6 @@ public class ShardDataTreeTest extends AbstractTest {
 
     @Test
     public void testPipelinedTransactionsWithImmediateCommits() throws Exception {
-        doReturn(false).when(mockShard).canSkipPayload();
-
         final ShardDataTreeCohort cohort1 = newShardDataTreeCohort(snapshot ->
             snapshot.write(CarsModel.BASE_PATH, CarsModel.emptyContainer()));
 
@@ -347,31 +351,27 @@ public class ShardDataTreeTest extends AbstractTest {
     }
 
     @Test
-    public void testPipelinedTransactionsWithUnmodifiedCandidate() throws Exception {
-        doReturn(false).when(mockShard).canSkipPayload();
+    public void testPipelinedTransactionsWithImmediateReplication() throws Exception {
+        immediatePayloadReplication(shardDataTree, mockShard);
 
         final ShardDataTreeCohort cohort1 = newShardDataTreeCohort(snapshot ->
             snapshot.write(CarsModel.BASE_PATH, CarsModel.emptyContainer()));
 
         final ShardDataTreeCohort cohort2 = newShardDataTreeCohort(snapshot ->
-            snapshot.merge(CarsModel.BASE_PATH, CarsModel.emptyContainer()));
+            snapshot.write(CarsModel.CAR_LIST_PATH, CarsModel.newCarMapNode()));
+
+        YangInstanceIdentifier carPath = CarsModel.newCarPath("optima");
+        MapEntryNode carNode = CarsModel.newCarEntry("optima", new BigInteger("100"));
+        final ShardDataTreeCohort cohort3 = newShardDataTreeCohort(snapshot -> snapshot.write(carPath, carNode));
 
         final FutureCallback<UnsignedLong> commitCallback1 = immediate3PhaseCommit(cohort1);
-
-        verify(mockShard).persistPayload(eq(cohort1.getIdentifier()), any(CommitTransactionPayload.class), eq(false));
-
         final FutureCallback<UnsignedLong> commitCallback2 = immediate3PhaseCommit(cohort2);
+        final FutureCallback<UnsignedLong> commitCallback3 = immediate3PhaseCommit(cohort3);
 
-        verify(mockShard, never()).persistPayload(eq(cohort2.getIdentifier()), any(CommitTransactionPayload.class),
-                anyBoolean());
-
-        // The payload instance doesn't matter - it just needs to be of type CommitTransactionPayload.
-        shardDataTree.applyReplicatedPayload(cohort1.getIdentifier(),
-                CommitTransactionPayload.create(nextTransactionId(), cohort1.getCandidate()));
-
-        InOrder inOrder = inOrder(commitCallback1, commitCallback2);
+        InOrder inOrder = inOrder(commitCallback1, commitCallback2, commitCallback3);
         inOrder.verify(commitCallback1).onSuccess(any(UnsignedLong.class));
         inOrder.verify(commitCallback2).onSuccess(any(UnsignedLong.class));
+        inOrder.verify(commitCallback3).onSuccess(any(UnsignedLong.class));
 
         final DataTreeSnapshot snapshot =
                 shardDataTree.newReadOnlyTransaction(nextTransactionId()).getSnapshot();
@@ -382,8 +382,6 @@ public class ShardDataTreeTest extends AbstractTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testAbortWithPendingCommits() throws Exception {
-        doReturn(false).when(mockShard).canSkipPayload();
-
         final ShardDataTreeCohort cohort1 = newShardDataTreeCohort(snapshot ->
             snapshot.write(CarsModel.BASE_PATH, CarsModel.emptyContainer()));
 
@@ -441,6 +439,8 @@ public class ShardDataTreeTest extends AbstractTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testAbortWithFailedRebase() throws Exception {
+        immediatePayloadReplication(shardDataTree, mockShard);
+
         final ShardDataTreeCohort cohort1 = newShardDataTreeCohort(snapshot ->
             snapshot.write(CarsModel.BASE_PATH, CarsModel.emptyContainer()));
 
