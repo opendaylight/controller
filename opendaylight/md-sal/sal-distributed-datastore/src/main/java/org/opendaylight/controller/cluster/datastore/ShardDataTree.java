@@ -69,7 +69,6 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeTip;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataValidationFailedException;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.ModificationType;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.TipProducingDataTree;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.TipProducingDataTreeTip;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.TreeType;
@@ -597,7 +596,6 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     }
 
     private void processNextPending() {
-        processNextPendingFinishCommit();
         processNextPendingCommit();
         processNextPendingTransaction();
     }
@@ -626,11 +624,6 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     private void processNextPendingCommit() {
         processNextPending(pendingCommits, State.COMMIT_PENDING,
             entry -> startCommit(entry.cohort, entry.cohort.getCandidate()));
-    }
-
-    private void processNextPendingFinishCommit() {
-        processNextPending(pendingFinishCommits, State.FINISH_COMMIT_PENDING,
-            entry -> payloadReplicationComplete(entry.cohort.getIdentifier()));
     }
 
     private boolean peekNextPendingCommit() {
@@ -739,15 +732,6 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         LOG.debug("{}: Starting commit for transaction {}", logContext, current.getIdentifier());
 
         final TransactionIdentifier txId = cohort.getIdentifier();
-        if (shard.canSkipPayload() || candidate.getRootNode().getModificationType() == ModificationType.UNMODIFIED) {
-            LOG.debug("{}: No replication required, proceeding to finish commit", logContext);
-            pendingCommits.remove();
-            pendingFinishCommits.add(entry);
-            cohort.finishCommitPending();
-            payloadReplicationComplete(txId);
-            return;
-        }
-
         final Payload payload;
         try {
             payload = CommitTransactionPayload.create(txId, candidate);

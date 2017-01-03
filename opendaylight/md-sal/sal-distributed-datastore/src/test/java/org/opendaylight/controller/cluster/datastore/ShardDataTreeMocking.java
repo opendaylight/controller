@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.inOrder;
@@ -20,6 +21,9 @@ import com.google.common.primitives.UnsignedLong;
 import com.google.common.util.concurrent.FutureCallback;
 import org.mockito.InOrder;
 import org.mockito.invocation.InvocationOnMock;
+import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
+import org.opendaylight.controller.cluster.datastore.persisted.CommitTransactionPayload;
+import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 
 public final class ShardDataTreeMocking {
@@ -187,5 +191,14 @@ public final class ShardDataTreeMocking {
         inOrder.verify(mock).canCommit(any(FutureCallback.class));
         inOrder.verify(mock).preCommit(any(FutureCallback.class));
         inOrder.verify(mock).commit(any(FutureCallback.class));
+    }
+
+    public static void immediatePayloadReplication(final ShardDataTree shardDataTree, final Shard mockShard) {
+        doAnswer(invocation -> {
+            shardDataTree.applyReplicatedPayload(invocation.getArgumentAt(0, TransactionIdentifier.class),
+                    invocation.getArgumentAt(1, Payload.class));
+            return null;
+        }).when(mockShard).persistPayload(any(TransactionIdentifier.class), any(CommitTransactionPayload.class),
+                anyBoolean());
     }
 }

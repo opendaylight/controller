@@ -63,7 +63,6 @@ import org.opendaylight.controller.cluster.datastore.messages.CommitTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CommitTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransactionReply;
-import org.opendaylight.controller.cluster.datastore.messages.ForwardedReadyTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.PeerAddressResolved;
 import org.opendaylight.controller.cluster.datastore.messages.ReadData;
 import org.opendaylight.controller.cluster.datastore.messages.ReadDataReply;
@@ -76,7 +75,6 @@ import org.opendaylight.controller.cluster.datastore.messages.RegisterDataTreeCh
 import org.opendaylight.controller.cluster.datastore.messages.ShardLeaderStateChanged;
 import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContext;
 import org.opendaylight.controller.cluster.datastore.modification.MergeModification;
-import org.opendaylight.controller.cluster.datastore.modification.MutableCompositeModification;
 import org.opendaylight.controller.cluster.datastore.modification.WriteModification;
 import org.opendaylight.controller.cluster.datastore.persisted.MetadataShardDataTreeSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.ShardDataTreeSnapshot;
@@ -1150,67 +1148,6 @@ public class ShardTest extends AbstractShardTest {
 
                 final NormalizedNode<?, ?> actualNode = readStore(shard, TestModel.TEST_PATH);
                 assertEquals(TestModel.TEST_QNAME.getLocalName(), containerNode, actualNode);
-            }
-        };
-    }
-
-    @Test
-    public void testReadWriteCommitWhenTransactionHasNoModifications() {
-        testCommitWhenTransactionHasNoModifications(true);
-    }
-
-    @Test
-    public void testWriteOnlyCommitWhenTransactionHasNoModifications() {
-        testCommitWhenTransactionHasNoModifications(false);
-    }
-
-    private void testCommitWhenTransactionHasNoModifications(final boolean readWrite) {
-        // Note that persistence is enabled which would normally result in the
-        // entry getting written to the journal
-        // but here that need not happen
-        new ShardTestKit(getSystem()) {
-            {
-                final TestActorRef<Shard> shard = actorFactory.createTestActor(
-                        newShardProps().withDispatcher(Dispatchers.DefaultDispatcherId()),
-                        "testCommitWhenTransactionHasNoModifications-" + readWrite);
-
-                waitUntilLeader(shard);
-
-                final TransactionIdentifier transactionID = nextTransactionId();
-
-                final FiniteDuration duration = duration("5 seconds");
-
-                if (readWrite) {
-                    final ReadWriteShardDataTreeTransaction rwTx = shard.underlyingActor().getDataStore()
-                            .newReadWriteTransaction(transactionID);
-                    shard.tell(new ForwardedReadyTransaction(transactionID, CURRENT_VERSION, rwTx, false), getRef());
-                } else {
-                    shard.tell(prepareBatchedModifications(transactionID, new MutableCompositeModification()),
-                            getRef());
-                }
-
-                expectMsgClass(duration, ReadyTransactionReply.class);
-
-                // Send the CanCommitTransaction message.
-
-                shard.tell(new CanCommitTransaction(transactionID, CURRENT_VERSION).toSerializable(), getRef());
-                final CanCommitTransactionReply canCommitReply = CanCommitTransactionReply
-                        .fromSerializable(expectMsgClass(duration, CanCommitTransactionReply.class));
-                assertEquals("Can commit", true, canCommitReply.getCanCommit());
-
-                shard.tell(new CommitTransaction(transactionID, CURRENT_VERSION).toSerializable(), getRef());
-                expectMsgClass(duration, CommitTransactionReply.class);
-
-                shard.tell(Shard.GET_SHARD_MBEAN_MESSAGE, getRef());
-                final ShardStats shardStats = expectMsgClass(duration, ShardStats.class);
-
-                // Use MBean for verification
-                // Committed transaction count should increase as usual
-                assertEquals(1, shardStats.getCommittedTransactionsCount());
-
-                // Commit index should not advance because this does not go into
-                // the journal
-                assertEquals(-1, shardStats.getCommitIndex());
             }
         };
     }

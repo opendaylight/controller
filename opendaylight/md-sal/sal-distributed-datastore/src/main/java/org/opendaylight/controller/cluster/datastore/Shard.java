@@ -450,16 +450,15 @@ public class Shard extends RaftActor {
         updateConfigParams(datastoreContext.getShardRaftConfig());
     }
 
-    boolean canSkipPayload() {
-        // If we do not have any followers and we are not using persistence we can apply modification to the state
-        // immediately
-        return !hasFollowers() && !persistence().isRecoveryApplicable();
-    }
-
     // applyState() will be invoked once consensus is reached on the payload
     void persistPayload(final TransactionIdentifier transactionId, final Payload payload, boolean batchHint) {
-        // We are faking the sender
-        persistData(self(), transactionId, payload, batchHint);
+        boolean canSkipPayload = !hasFollowers() && !persistence().isRecoveryApplicable();
+        if (canSkipPayload) {
+            applyState(self(), transactionId, payload);
+        } else {
+            // We are faking the sender
+            persistData(self(), transactionId, payload, batchHint);
+        }
     }
 
     private void handleCommitTransaction(final CommitTransaction commit) {

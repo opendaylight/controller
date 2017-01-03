@@ -25,7 +25,6 @@ public abstract class ShardDataTreeCohort implements Identifiable<TransactionIde
         PRE_COMMIT_PENDING,
         PRE_COMMIT_COMPLETE,
         COMMIT_PENDING,
-        FINISH_COMMIT_PENDING,
 
         ABORTED,
         COMMITTED,
