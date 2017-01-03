@@ -117,7 +117,14 @@
     <argument ref="commitStatsTracker"/>
   </bean>
 
-  <service ref="clusteredDOMDataBroker" interface="org.opendaylight.controller.md.sal.dom.api.DOMDataBroker"
+  <service ref="clusteredDOMDataBroker" interface="org.opendaylight.mdsal.dom.api.DOMDataBroker"
+          odl:type="default"/>
+
+  <bean id="legacyDOMDataBroker" class="org.opendaylight.controller.cluster.databroker.LegacyDOMDataBrokerAdapter">
+    <argument ref="clusteredDOMDataBroker"/>
+  </bean>
+
+  <service ref="legacyDOMDataBroker" interface="org.opendaylight.controller.md.sal.dom.api.DOMDataBroker"
           odl:type="default"/>
 
   <!-- JMX beans for the data broker -->

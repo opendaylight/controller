@@ -48,26 +48,26 @@ import org.mockito.InOrder;
 import org.mockito.stubbing.Answer;
 import org.opendaylight.controller.cluster.datastore.DistributedDataStore;
 import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
-import org.opendaylight.controller.md.sal.common.api.data.DataStoreUnavailableException;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListener;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
-import org.opendaylight.controller.md.sal.dom.api.DOMDataBrokerExtension;
-import org.opendaylight.controller.md.sal.dom.api.DOMDataReadOnlyTransaction;
-import org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction;
-import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeService;
-import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeCommitCohortRegistry;
-import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
-import org.opendaylight.controller.md.sal.dom.api.DOMTransactionChain;
-import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
-import org.opendaylight.controller.sal.core.spi.data.DOMStore;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionChain;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
+import org.opendaylight.mdsal.common.api.DataStoreUnavailableException;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
+import org.opendaylight.mdsal.common.api.TransactionChainListener;
+import org.opendaylight.mdsal.common.api.TransactionCommitFailedException;
+import org.opendaylight.mdsal.dom.api.DOMDataBrokerExtension;
+import org.opendaylight.mdsal.dom.api.DOMDataTreeChangeService;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeCommitCohort;
+import org.opendaylight.mdsal.dom.api.DOMDataTreeCommitCohortRegistry;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
+import org.opendaylight.mdsal.dom.api.DOMDataTreeReadTransaction;
+import org.opendaylight.mdsal.dom.api.DOMDataTreeReadWriteTransaction;
+import org.opendaylight.mdsal.dom.api.DOMDataTreeWriteTransaction;
+import org.opendaylight.mdsal.dom.api.DOMTransactionChain;
+import org.opendaylight.mdsal.dom.spi.store.DOMStore;
+import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadTransaction;
+import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadWriteTransaction;
+import org.opendaylight.mdsal.dom.spi.store.DOMStoreThreePhaseCommitCohort;
+import org.opendaylight.mdsal.dom.spi.store.DOMStoreTransactionChain;
+import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
+import org.opendaylight.mdsal.dom.store.inmemory.InMemoryDOMDataStore;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
@@ -78,7 +78,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
  */
 public class ConcurrentDOMDataBrokerTest {
 
-    private final DOMDataWriteTransaction transaction = mock(DOMDataWriteTransaction.class);
+    private final DOMDataTreeWriteTransaction transaction = mock(DOMDataTreeWriteTransaction.class);
     private final DOMStoreThreePhaseCommitCohort mockCohort1 = mock(DOMStoreThreePhaseCommitCohort.class);
     private final DOMStoreThreePhaseCommitCohort mockCohort2 = mock(DOMStoreThreePhaseCommitCohort.class);
     private final ThreadPoolExecutor futureExecutor =
@@ -89,8 +89,7 @@ public class ConcurrentDOMDataBrokerTest {
     public void setup() {
         doReturn("tx").when(transaction).getIdentifier();
 
-        DOMStore store = new InMemoryDOMDataStore("OPER",
-            MoreExecutors.newDirectExecutorService());
+        DOMStore store = new InMemoryDOMDataStore("OPER", MoreExecutors.newDirectExecutorService());
 
         coordinator = new ConcurrentDOMDataBroker(ImmutableMap.of(LogicalDatastoreType.OPERATIONAL, store),
                 futureExecutor);
@@ -354,7 +353,7 @@ public class ConcurrentDOMDataBrokerTest {
         try (ConcurrentDOMDataBroker dataBroker = new ConcurrentDOMDataBroker(ImmutableMap.of(
                 LogicalDatastoreType.OPERATIONAL, operationalDomStore, LogicalDatastoreType.CONFIGURATION,
                 configDomStore), futureExecutor)) {
-            DOMDataReadWriteTransaction dataTxn = dataBroker.newReadWriteTransaction();
+            DOMDataTreeReadWriteTransaction dataTxn = dataBroker.newReadWriteTransaction();
 
             dataTxn.put(LogicalDatastoreType.OPERATIONAL, YangInstanceIdentifier.EMPTY, mock(NormalizedNode.class));
             dataTxn.put(LogicalDatastoreType.OPERATIONAL, YangInstanceIdentifier.EMPTY, mock(NormalizedNode.class));
@@ -383,7 +382,7 @@ public class ConcurrentDOMDataBrokerTest {
         try (ConcurrentDOMDataBroker dataBroker = new ConcurrentDOMDataBroker(ImmutableMap.of(
                 LogicalDatastoreType.OPERATIONAL, operationalDomStore, LogicalDatastoreType.CONFIGURATION,
                 configDomStore), futureExecutor)) {
-            DOMDataWriteTransaction dataTxn = dataBroker.newWriteOnlyTransaction();
+            DOMDataTreeWriteTransaction dataTxn = dataBroker.newWriteOnlyTransaction();
 
             dataTxn.put(LogicalDatastoreType.OPERATIONAL, YangInstanceIdentifier.EMPTY, mock(NormalizedNode.class));
             dataTxn.put(LogicalDatastoreType.OPERATIONAL, YangInstanceIdentifier.EMPTY, mock(NormalizedNode.class));
@@ -410,7 +409,7 @@ public class ConcurrentDOMDataBrokerTest {
         try (ConcurrentDOMDataBroker dataBroker = new ConcurrentDOMDataBroker(ImmutableMap.of(
                 LogicalDatastoreType.OPERATIONAL, operationalDomStore, LogicalDatastoreType.CONFIGURATION,
                 configDomStore), futureExecutor)) {
-            DOMDataReadOnlyTransaction dataTxn = dataBroker.newReadOnlyTransaction();
+            DOMDataTreeReadTransaction dataTxn = dataBroker.newReadOnlyTransaction();
 
             dataTxn.read(LogicalDatastoreType.OPERATIONAL, YangInstanceIdentifier.EMPTY);
             dataTxn.read(LogicalDatastoreType.OPERATIONAL, YangInstanceIdentifier.EMPTY);
@@ -444,14 +443,14 @@ public class ConcurrentDOMDataBrokerTest {
                 LogicalDatastoreType.OPERATIONAL, operationalDomStore, LogicalDatastoreType.CONFIGURATION,
                 configDomStore), futureExecutor) {
             @Override
-            public CheckedFuture<Void, TransactionCommitFailedException> submit(DOMDataWriteTransaction writeTx,
+            public CheckedFuture<Void, TransactionCommitFailedException> submit(DOMDataTreeWriteTransaction writeTx,
                     Collection<DOMStoreThreePhaseCommitCohort> cohorts) {
                 commitCohorts.addAll(cohorts);
                 latch.countDown();
                 return super.submit(writeTx, cohorts);
             }
         }) {
-            DOMDataReadWriteTransaction domDataReadWriteTransaction = dataBroker.newReadWriteTransaction();
+            DOMDataTreeReadWriteTransaction domDataReadWriteTransaction = dataBroker.newReadWriteTransaction();
 
             domDataReadWriteTransaction.delete(LogicalDatastoreType.OPERATIONAL, YangInstanceIdentifier.EMPTY);
 
@@ -490,14 +489,14 @@ public class ConcurrentDOMDataBrokerTest {
                 LogicalDatastoreType.OPERATIONAL, operationalDomStore, LogicalDatastoreType.CONFIGURATION,
                 configDomStore), futureExecutor) {
             @Override
-            public CheckedFuture<Void, TransactionCommitFailedException> submit(DOMDataWriteTransaction transaction,
+            public CheckedFuture<Void, TransactionCommitFailedException> submit(DOMDataTreeWriteTransaction writeTx,
                     Collection<DOMStoreThreePhaseCommitCohort> cohorts) {
                 commitCohorts.addAll(cohorts);
                 latch.countDown();
-                return super.submit(transaction, cohorts);
+                return super.submit(writeTx, cohorts);
             }
         }) {
-            DOMDataReadWriteTransaction domDataReadWriteTransaction = dataBroker.newReadWriteTransaction();
+            DOMDataTreeReadWriteTransaction domDataReadWriteTransaction = dataBroker.newReadWriteTransaction();
 
             domDataReadWriteTransaction.put(LogicalDatastoreType.OPERATIONAL, YangInstanceIdentifier.EMPTY,
                     mock(NormalizedNode.class));
@@ -542,7 +541,7 @@ public class ConcurrentDOMDataBrokerTest {
             DOMTransactionChain transactionChain = dataBroker.createTransactionChain(
                     mock(TransactionChainListener.class));
 
-            DOMDataWriteTransaction domDataWriteTransaction = transactionChain.newWriteOnlyTransaction();
+            DOMDataTreeWriteTransaction domDataWriteTransaction = transactionChain.newWriteOnlyTransaction();
 
             verify(mockChain, never()).newWriteOnlyTransaction();
 
