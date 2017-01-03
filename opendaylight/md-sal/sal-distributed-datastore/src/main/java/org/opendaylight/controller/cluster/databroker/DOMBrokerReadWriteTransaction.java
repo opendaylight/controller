@@ -11,16 +11,16 @@ package org.opendaylight.controller.cluster.databroker;
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
 import java.util.Map;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
-import org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionFactory;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
+import org.opendaylight.mdsal.common.api.ReadFailedException;
+import org.opendaylight.mdsal.dom.api.DOMDataTreeReadWriteTransaction;
+import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadWriteTransaction;
+import org.opendaylight.mdsal.dom.spi.store.DOMStoreTransactionFactory;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
-public class DOMBrokerReadWriteTransaction
-        extends AbstractDOMBrokerWriteTransaction<DOMStoreReadWriteTransaction> implements DOMDataReadWriteTransaction {
+public class DOMBrokerReadWriteTransaction extends AbstractDOMBrokerWriteTransaction<DOMStoreReadWriteTransaction>
+        implements DOMDataTreeReadWriteTransaction {
 
     /**
      * Constructs an instance.
@@ -50,5 +50,10 @@ public class DOMBrokerReadWriteTransaction
     @Override
     protected DOMStoreReadWriteTransaction createTransaction(LogicalDatastoreType key) {
         return getTxFactory(key).newReadWriteTransaction();
+    }
+
+    @Override
+    public void close() {
+        cancel();
     }
 }
