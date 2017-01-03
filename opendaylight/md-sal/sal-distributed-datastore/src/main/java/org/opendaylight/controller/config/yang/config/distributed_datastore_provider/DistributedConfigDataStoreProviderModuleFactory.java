@@ -12,6 +12,7 @@ import org.opendaylight.controller.config.api.DynamicMBeanWithInstance;
 import org.opendaylight.controller.config.spi.Module;
 import org.osgi.framework.BundleContext;
 
+@Deprecated
 public class DistributedConfigDataStoreProviderModuleFactory
         extends AbstractDistributedConfigDataStoreProviderModuleFactory {
 
