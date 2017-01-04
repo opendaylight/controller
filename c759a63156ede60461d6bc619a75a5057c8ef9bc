@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a622d24_b0f2136d",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/FollowerTest.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 5706
+      },
+      "writtenOn": "2017-01-04T10:42:14Z",
+      "side": 1,
+      "message": "The new added case of \"testCaptureSnapshotOnAppendEntries\" only tests the last entry in AppendEntries will trigger capturing snapshot. Please add a case that tests a not-last entry in AppendEntries will trigger capturing snapshot. I doubt whether that case can produce correct snapshot.",
+      "revId": "c759a63156ede60461d6bc619a75a5057c8ef9bc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
