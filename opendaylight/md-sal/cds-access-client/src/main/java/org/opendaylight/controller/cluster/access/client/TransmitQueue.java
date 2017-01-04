@@ -104,7 +104,7 @@ abstract class TransmitQueue {
         // TODO: record
     }
 
-    final void complete(final ResponseEnvelope<?> envelope, final long now) {
+    final Optional<TransmittedConnectionEntry> complete(final ResponseEnvelope<?> envelope, final long now) {
         Optional<TransmittedConnectionEntry> maybeEntry = findMatchingEntry(inflight, envelope);
         if (maybeEntry == null) {
             LOG.debug("Request for {} not found in inflight queue, checking pending queue", envelope);
@@ -113,13 +113,10 @@ abstract class TransmitQueue {
 
         if (maybeEntry == null || !maybeEntry.isPresent()) {
             LOG.warn("No request matching {} found, ignoring response", envelope);
-            return;
+            return Optional.empty();
         }
 
         final TransmittedConnectionEntry entry = maybeEntry.get();
-        LOG.debug("Completing {} with {}", entry, envelope);
-        entry.complete(envelope.getMessage());
-
         recordCompletion(now, entry.getEnqueuedTicks(), entry.getTxTicks(), envelope.getExecutionTimeNanos());
 
         // We have freed up a slot, try to transmit something
@@ -134,6 +131,8 @@ abstract class TransmitQueue {
             transmit(e, now);
             toSend--;
         }
+
+        return Optional.of(entry);
     }
 
     final void enqueue(final ConnectionEntry entry, final long now) {

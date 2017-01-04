@@ -50,8 +50,10 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
     private final TransmitQueue queue;
     private final Long cookie;
 
-    private volatile RequestException poisoned;
+    @GuardedBy("lock")
     private long lastProgress;
+
+    private volatile RequestException poisoned;
 
     // Do not allow subclassing outside of this package
     AbstractClientConnection(final ClientActorContext context, final Long cookie,
@@ -252,13 +254,20 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
     final void receiveResponse(final ResponseEnvelope<?> envelope) {
         final long now = readTime();
 
+        final Optional<TransmittedConnectionEntry> maybeEntry;
         lock.lock();
         try {
-            queue.complete(envelope, now);
+            maybeEntry = queue.complete(envelope, now);
+            lastProgress = readTime();
         } finally {
             lock.unlock();
         }
 
-        lastProgress = readTime();
+        if (maybeEntry.isPresent()) {
+            final TransmittedConnectionEntry entry = maybeEntry.get();
+            LOG.debug("Completing {} with {}", entry, envelope);
+            entry.complete(envelope.getMessage());
+        }
+
     }
 }
