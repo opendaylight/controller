@@ -252,13 +252,19 @@ public abstract class AbstractClientConnection<T extends BackendInfo> {
     final void receiveResponse(final ResponseEnvelope<?> envelope) {
         final long now = readTime();
 
+        final Optional<TransmittedConnectionEntry> maybeEntry;
         lock.lock();
         try {
-            queue.complete(envelope, now);
+            maybeEntry = queue.complete(envelope, now);
         } finally {
             lock.unlock();
         }
 
         lastProgress = readTime();
+        if (maybeEntry.isPresent()) {
+            final TransmittedConnectionEntry entry = maybeEntry.get();
+            LOG.debug("Completing {} with {}", entry, envelope);
+            entry.complete(envelope.getMessage());
+        }
     }
 }
