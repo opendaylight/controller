@@ -38,7 +38,6 @@ import org.opendaylight.controller.cluster.datastore.messages.LocalShardFound;
 import org.opendaylight.controller.cluster.datastore.messages.RemotePrimaryShardFound;
 import org.opendaylight.controller.cluster.datastore.utils.ClusterUtils;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
-import org.opendaylight.controller.cluster.sharding.DistributedShardFactory.DistributedShardRegistration;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
@@ -47,7 +46,6 @@ import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeProducer;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeShardingConflictException;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeWriteCursor;
-import org.opendaylight.mdsal.dom.broker.ShardedDOMDataTree;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableLeafNodeBuilder;
@@ -55,12 +53,10 @@ import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableLe
 public class DistributedShardedDOMDataTreeTest extends AbstractTest {
 
     private static final Address MEMBER_1_ADDRESS =
-            AddressFromURIString.parse("akka.tcp://cluster-test@127.0.0.1:2558");
+            AddressFromURIString.parse("akka://cluster-test@127.0.0.1:2558");
 
     private static final DOMDataTreeIdentifier TEST_ID =
             new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, TestModel.TEST_PATH);
-
-    private ShardedDOMDataTree shardedDOMDataTree = new ShardedDOMDataTree();
 
     private ActorSystem leaderSystem;
     private ActorSystem followerSystem;
@@ -83,8 +79,6 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
 
     @Before
     public void setUp() {
-        shardedDOMDataTree = new ShardedDOMDataTree();
-
         leaderSystem = ActorSystem.create("cluster-test", ConfigFactory.load().getConfig("Member1"));
         Cluster.get(leaderSystem).join(MEMBER_1_ADDRESS);
 
@@ -128,9 +122,8 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
     public void testProducerRegistrations() throws Exception {
         initEmptyDatastore("config");
 
-        final DistributedShardRegistration shardRegistration =
-                leaderShardFactory.createDistributedShard(TEST_ID,
-                        Lists.newArrayList(AbstractTest.MEMBER_NAME, AbstractTest.MEMBER_2_NAME));
+        leaderShardFactory.createDistributedShard(TEST_ID,
+                Lists.newArrayList(AbstractTest.MEMBER_NAME, AbstractTest.MEMBER_2_NAME));
 
         leaderTestKit.waitUntilLeader(leaderDistributedDataStore.getActorContext(),
                 ClusterUtils.getCleanShardName(TEST_ID.getRootIdentifier()));
@@ -188,9 +181,8 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
     public void testWriteIntoMultipleShards() throws Exception {
         initEmptyDatastore("config");
 
-        final DistributedShardRegistration shardRegistration =
-                leaderShardFactory.createDistributedShard(
-                        TEST_ID,Lists.newArrayList(AbstractTest.MEMBER_NAME, AbstractTest.MEMBER_2_NAME));
+        leaderShardFactory.createDistributedShard(TEST_ID,
+                Lists.newArrayList(AbstractTest.MEMBER_NAME, AbstractTest.MEMBER_2_NAME));
 
         leaderTestKit.waitUntilLeader(leaderDistributedDataStore.getActorContext(),
                 ClusterUtils.getCleanShardName(TEST_ID.getRootIdentifier()));
