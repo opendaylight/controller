@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a622d24_df24f8b0",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 482,
+      "author": {
+        "id": 5706
+      },
+      "writtenOn": "2017-01-05T03:53:23Z",
+      "side": 1,
+      "message": "It seems better to use such name as \"consumeApplyState\" than \"handleApplyState\" here for handleXXX often means an operation in the processing flow of a received message XXX, consumeXXX just means to consume an object XXX.",
+      "revId": "5578e2a7d6cb3f7f6608f961ad197370dd844628",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_9f78c090",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractRaftActorBehavior.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 370,
+      "author": {
+        "id": 5706
+      },
+      "writtenOn": "2017-01-05T03:53:23Z",
+      "side": 1,
+      "message": "Before the for loop, we\u0027d better check whether index is larger than lastAppliedIndex and log a warning if not larger? Many abnormal execution flows happen silently and unobservably.",
+      "revId": "5578e2a7d6cb3f7f6608f961ad197370dd844628",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_bf75bc99",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 237,
+      "author": {
+        "id": 5706
+      },
+      "writtenOn": "2017-01-05T03:53:23Z",
+      "side": 1,
+      "message": "Can you extract the \"if (appendEntries has entries)\" clause and \"for (entries in appendEntries)\" clause into two new small methods? Each of such two clauses has 50+ lines, and the whole handleAppendEntries method has almost 200 lines. It becomes more and more impossible to maintain and modify this method.",
+      "revId": "5578e2a7d6cb3f7f6608f961ad197370dd844628",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
