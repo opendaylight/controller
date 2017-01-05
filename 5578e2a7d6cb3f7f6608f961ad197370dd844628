@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "1a622d24_03cd7e85",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 482,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-01-05T11:52:58Z",
+      "side": 1,
+      "message": "yeah - either could be fine, as could \"acceptApplyState\" or  \"onApplyState\". However I didn\u0027t choose onApplyState b/c onXXX is used elsewhere in this class to convey processing of a received message from the actor queue. handleXXX could also convey that - I think it\u0027s up to individual interpretation of the terms and what one prefers.  In the end it doesn\u0027t really matter as long as one is consistent.",
+      "parentUuid": "1a622d24_df24f8b0",
+      "revId": "5578e2a7d6cb3f7f6608f961ad197370dd844628",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a622d24_9f78c090",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractRaftActorBehavior.java",
         "patchSetId": 6
@@ -30,6 +48,24 @@
       "writtenOn": "2017-01-05T03:53:23Z",
       "side": 1,
       "message": "Before the for loop, we\u0027d better check whether index is larger than lastAppliedIndex and log a warning if not larger? Many abnormal execution flows happen silently and unobservably.",
+      "revId": "5578e2a7d6cb3f7f6608f961ad197370dd844628",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_e3a96291",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractRaftActorBehavior.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 370,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-01-05T11:52:58Z",
+      "side": 1,
+      "message": "We could - that shouldn\u0027t happen. But that is not really in scope of this patch and I\u0027d rather not overload this patch. I\u0027d encourage you to push a patch...",
+      "parentUuid": "1a622d24_9f78c090",
       "revId": "5578e2a7d6cb3f7f6608f961ad197370dd844628",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "1a622d24_838fce29",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractRaftActorBehavior.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 388,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-01-05T11:52:58Z",
+      "side": 1,
+      "message": "No I thought that originally as well at first but it needs to be called first since applyState in Shard is now called directly and needs to observe the updated lastApplied state.",
+      "parentUuid": "1a622d24_7fa0449f",
+      "revId": "5578e2a7d6cb3f7f6608f961ad197370dd844628",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a622d24_bf75bc99",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
         "patchSetId": 6
@@ -64,6 +118,24 @@
       "writtenOn": "2017-01-05T03:53:23Z",
       "side": 1,
       "message": "Can you extract the \"if (appendEntries has entries)\" clause and \"for (entries in appendEntries)\" clause into two new small methods? Each of such two clauses has 50+ lines, and the whole handleAppendEntries method has almost 200 lines. It becomes more and more impossible to maintain and modify this method.",
+      "revId": "5578e2a7d6cb3f7f6608f961ad197370dd844628",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_639d5266",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 237,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-01-05T11:52:58Z",
+      "side": 1,
+      "message": "I agree that handleAppendEntries has gotten too large and needs refactoring but that should be done in a separate patch - we try not to mix refactoring with actual code changes. It used to be even larger until isOutOfSync was extracted. I\u0027ve been meaning to refactor it further for a while. Perhaps you would like to push a patch for this? (I\u0027ve mainly been the only one pushing patches to this code for a while now since the Cisco folks left ODL so I\u0027m trying to recruit/encourage other contributors :))",
+      "parentUuid": "1a622d24_bf75bc99",
       "revId": "5578e2a7d6cb3f7f6608f961ad197370dd844628",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
