@@ -36,6 +36,23 @@
     },
     {
       "key": {
+        "uuid": "1a622d24_7fa0449f",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractRaftActorBehavior.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 388,
+      "author": {
+        "id": 5706
+      },
+      "writtenOn": "2017-01-05T06:55:07Z",
+      "side": 1,
+      "message": "It\u0027s more safer to call context.setLastApplied() after calling context.getApplyStateConsumer().accept().",
+      "revId": "5578e2a7d6cb3f7f6608f961ad197370dd844628",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a622d24_bf75bc99",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
         "patchSetId": 6
