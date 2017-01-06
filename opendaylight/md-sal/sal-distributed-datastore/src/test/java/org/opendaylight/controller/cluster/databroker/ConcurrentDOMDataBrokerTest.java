@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.SynchronousQueue;
@@ -44,13 +45,17 @@ import org.junit.Test;
 import org.mockito.InOrder;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import org.opendaylight.controller.cluster.datastore.DistributedDataStore;
 import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
 import org.opendaylight.controller.md.sal.common.api.data.DataStoreUnavailableException;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListener;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
+import org.opendaylight.controller.md.sal.dom.api.DOMDataBrokerExtension;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction;
+import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeService;
+import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeCommitCohortRegistry;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMTransactionChain;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
@@ -60,6 +65,8 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransactio
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionChain;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
+import org.opendaylight.mdsal.dom.api.DOMDataTreeCommitCohort;
+import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
@@ -563,4 +570,29 @@ public class ConcurrentDOMDataBrokerTest {
         }
     }
 
+    @Test
+    public void testExtensions() {
+        DistributedDataStore mockConfigStore = mock(DistributedDataStore.class);
+        DistributedDataStore mockOperStore = mock(DistributedDataStore.class);
+        try (ConcurrentDOMDataBroker dataBroker = new ConcurrentDOMDataBroker(ImmutableMap.of(
+                LogicalDatastoreType.OPERATIONAL, mockOperStore,
+                LogicalDatastoreType.CONFIGURATION, mockConfigStore), futureExecutor)) {
+
+            Map<Class<? extends DOMDataBrokerExtension>, DOMDataBrokerExtension> supportedExtensions =
+                    dataBroker.getSupportedExtensions();
+            assertNotNull(supportedExtensions.get(DOMDataTreeChangeService.class));
+
+            DOMDataTreeCommitCohortRegistry cohortRegistry =
+                    (DOMDataTreeCommitCohortRegistry) supportedExtensions.get(DOMDataTreeCommitCohortRegistry.class);
+            assertNotNull(cohortRegistry);
+
+            DOMDataTreeCommitCohort mockCohort = mock(DOMDataTreeCommitCohort.class);
+            DOMDataTreeIdentifier path = new DOMDataTreeIdentifier(
+                    org.opendaylight.mdsal.common.api.LogicalDatastoreType.CONFIGURATION,
+                    YangInstanceIdentifier.EMPTY);
+            cohortRegistry.registerCommitCohort(path, mockCohort);
+
+            verify(mockConfigStore).registerCommitCohort(path, mockCohort);
+        }
+    }
 }
