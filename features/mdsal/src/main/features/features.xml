@@ -37,7 +37,7 @@
         <feature version='${project.version}'>odl-mdsal-common</feature>
         <feature version='${config.version}'>odl-config-startup</feature>
         <feature version='${config.version}'>odl-config-netty</feature>
-        <feature version='[3.3.0,4.0.0)'>odl-lmax</feature>
+        <feature version="${odlparent.version}">odl-lmax-3</feature>
         <!-- FIXME: Bug 4202: Add MD-SAL provided odl-mdsal-binding-adapter -->
         <!-- FIXME: Bug 4202: Add MD-SAL provided odl-mdsal-dom-broker -->
         <feature version='${mdsal.version}'>odl-mdsal-dom</feature>
@@ -75,9 +75,9 @@
     </feature>
     <feature name ='odl-mdsal-clustering-commons' version='${project.version}'>
         <feature version='${project.version}'>odl-mdsal-broker-local</feature>
-        <feature version='[2.4.1,2.5.0)'>odl-akka-system</feature>
-        <feature version='[2.4.1,2.5.0)'>odl-akka-persistence</feature>
-        <feature version='[2.4.1,2.5.0)'>odl-akka-clustering</feature>
+        <feature version="${odlparent.version}">odl-akka-system-2.4</feature>
+        <feature version="${odlparent.version}">odl-akka-persistence-2.4</feature>
+        <feature version="${odlparent.version}">odl-akka-clustering-2.4</feature>
         <bundle>mvn:org.opendaylight.controller/sal-clustering-commons/{{VERSION}}</bundle>
         <bundle>mvn:org.opendaylight.controller/sal-akka-raft/{{VERSION}}</bundle>
         <bundle>mvn:io.dropwizard.metrics/metrics-core/{{VERSION}}</bundle>
@@ -94,7 +94,7 @@
     <feature name ='odl-mdsal-remoterpc-connector' version='${project.version}'>
         <feature version='${project.version}'>odl-mdsal-broker-local</feature>
         <feature version='${project.version}'>odl-mdsal-clustering-commons</feature>
-        <feature version='0.7'>odl-akka-leveldb</feature>
+        <feature version="${odlparent.version}">odl-akka-leveldb-0.7</feature>
         <bundle>mvn:org.opendaylight.controller/sal-remoterpc-connector/{{VERSION}}</bundle>
     </feature>
     <feature name ='odl-mdsal-broker' version='${project.version}'>
