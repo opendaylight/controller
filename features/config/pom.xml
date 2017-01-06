@@ -17,6 +17,7 @@
     <yangtools.version>1.1.0-SNAPSHOT</yangtools.version>
     <mdsal.version>2.2.0-SNAPSHOT</mdsal.version>
     <config.version>0.6.0-SNAPSHOT</config.version>
+    <odlparent.version>1.8.0-SNAPSHOT</odlparent.version>
     <features.file>features.xml</features.file>
     <config.configfile.directory>etc/opendaylight/karaf</config.configfile.directory>
   </properties>
