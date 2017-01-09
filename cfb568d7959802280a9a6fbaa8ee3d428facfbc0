@@ -2,6 +2,40 @@
   "comments": [
     {
       "key": {
+        "uuid": "1a622d24_05345948",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/AbstractClusterRefActorTest.java",
+        "patchSetId": 69
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-01-09T12:43:33Z",
+      "side": 1,
+      "message": "Why was this added? The raft unit tests don\u0027t actually use remoting/clustering.",
+      "revId": "cfb568d7959802280a9a6fbaa8ee3d428facfbc0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_c52d4100",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/resources/application.conf",
+        "patchSetId": 69
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-01-09T12:43:33Z",
+      "side": 1,
+      "message": "... and also this",
+      "revId": "cfb568d7959802280a9a6fbaa8ee3d428facfbc0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a622d24_65670db8",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/config/ConfigurationImpl.java",
         "patchSetId": 69
@@ -226,6 +260,91 @@
         "endLine": 56,
         "endChar": 53
       },
+      "revId": "cfb568d7959802280a9a6fbaa8ee3d428facfbc0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_8547c9bb",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/AbstractShardTest.java",
+        "patchSetId": 69
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-01-09T12:43:33Z",
+      "side": 1,
+      "message": "I don\u0027t think the Shard test classes need clustering.",
+      "revId": "cfb568d7959802280a9a6fbaa8ee3d428facfbc0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_050bb97d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardTest.java",
+        "patchSetId": 69
+      },
+      "lineNbr": 380,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-01-09T12:43:33Z",
+      "side": 1,
+      "message": "We don\u0027t need these changes it we don\u0027t setup akka clustering.",
+      "revId": "cfb568d7959802280a9a6fbaa8ee3d428facfbc0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_e50f9d86",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardTransactionFailureTest.java",
+        "patchSetId": 69
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-01-09T12:43:33Z",
+      "side": 1,
+      "message": "These tests shouldn\u0027t need to use akka clustering.",
+      "revId": "cfb568d7959802280a9a6fbaa8ee3d428facfbc0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_452811e2",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardTransactionTest.java",
+        "patchSetId": 69
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-01-09T12:43:33Z",
+      "side": 1,
+      "message": "These tests shouldn\u0027t need to use akka clustering.",
+      "revId": "cfb568d7959802280a9a6fbaa8ee3d428facfbc0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_25251509",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/entityownership/AbstractClusterRefEntityOwnershipTest.java",
+        "patchSetId": 69
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-01-09T12:43:33Z",
+      "side": 1,
+      "message": "Don\u0027t need this.",
       "revId": "cfb568d7959802280a9a6fbaa8ee3d428facfbc0",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
