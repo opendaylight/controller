@@ -266,6 +266,52 @@
     },
     {
       "key": {
+        "uuid": "1a622d24_a5e485e1",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardFrontend.java",
+        "patchSetId": 69
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2017-01-09T13:49:52Z",
+      "side": 1,
+      "message": "this needs to be @GuardedBy, I suspect",
+      "range": {
+        "startLine": 43,
+        "startChar": 4,
+        "endLine": 43,
+        "endChar": 94
+      },
+      "revId": "cfb568d7959802280a9a6fbaa8ee3d428facfbc0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_05e619e8",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/sharding/DistributedShardFrontend.java",
+        "patchSetId": 69
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2017-01-09T13:49:52Z",
+      "side": 1,
+      "message": "this needs to be @GuardedBy something, as we can have concurrent createProducer() and onChildAttached().",
+      "range": {
+        "startLine": 44,
+        "startChar": 4,
+        "endLine": 44,
+        "endChar": 73
+      },
+      "revId": "cfb568d7959802280a9a6fbaa8ee3d428facfbc0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a622d24_8547c9bb",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/AbstractShardTest.java",
         "patchSetId": 69
