@@ -1,0 +1,234 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a622d24_65670db8",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/config/ConfigurationImpl.java",
+        "patchSetId": 69
+      },
+      "lineNbr": 211,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2017-01-09T11:59:26Z",
+      "side": 1,
+      "message": "ImmutableSet.copyOf(temp);",
+      "range": {
+        "startLine": 211,
+        "startChar": 24,
+        "endLine": 211,
+        "endChar": 76
+      },
+      "revId": "cfb568d7959802280a9a6fbaa8ee3d428facfbc0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_c50701c9",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/config/PrefixShardConfiguration.java",
+        "patchSetId": 69
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2017-01-09T11:59:26Z",
+      "side": 1,
+      "message": "Precodingition.checkArgument()",
+      "range": {
+        "startLine": 66,
+        "startChar": 0,
+        "endLine": 68,
+        "endChar": 9
+      },
+      "revId": "cfb568d7959802280a9a6fbaa8ee3d428facfbc0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_e512fd07",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/shardmanager/ShardManager.java",
+        "patchSetId": 69
+      },
+      "lineNbr": 365,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2017-01-09T11:59:26Z",
+      "side": 1,
+      "message": "wrap this in a LOG.isDebugEnabled(), since the operation involves iterating over the map.",
+      "range": {
+        "startLine": 363,
+        "startChar": 0,
+        "endLine": 365,
+        "endChar": 118
+      },
+      "revId": "cfb568d7959802280a9a6fbaa8ee3d428facfbc0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_25f875c2",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/shardmanager/ShardManager.java",
+        "patchSetId": 69
+      },
+      "lineNbr": 388,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2017-01-09T11:59:26Z",
+      "side": 1,
+      "message": "this::doRemovePrefixedShard",
+      "range": {
+        "startLine": 388,
+        "startChar": 31,
+        "endLine": 388,
+        "endChar": 62
+      },
+      "revId": "cfb568d7959802280a9a6fbaa8ee3d428facfbc0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_c52ee142",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/shardmanager/ShardManager.java",
+        "patchSetId": 69
+      },
+      "lineNbr": 399,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2017-01-09T11:59:26Z",
+      "side": 1,
+      "message": "missing arguments?",
+      "range": {
+        "startLine": 399,
+        "startChar": 19,
+        "endLine": 399,
+        "endChar": 83
+      },
+      "revId": "cfb568d7959802280a9a6fbaa8ee3d428facfbc0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_65feedaf",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/shardmanager/ShardManager.java",
+        "patchSetId": 69
+      },
+      "lineNbr": 411,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2017-01-09T11:59:26Z",
+      "side": 1,
+      "message": "missing persistenceId()",
+      "range": {
+        "startLine": 411,
+        "startChar": 20,
+        "endLine": 411,
+        "endChar": 22
+      },
+      "revId": "cfb568d7959802280a9a6fbaa8ee3d428facfbc0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_0525795b",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/shardmanager/ShardManager.java",
+        "patchSetId": 69
+      },
+      "lineNbr": 417,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2017-01-09T11:59:26Z",
+      "side": 1,
+      "message": "Do we need to pass self() here? If we are not expecting a reply, we should just pass no actor.",
+      "range": {
+        "startLine": 417,
+        "startChar": 53,
+        "endLine": 417,
+        "endChar": 59
+      },
+      "revId": "cfb568d7959802280a9a6fbaa8ee3d428facfbc0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_e5295d38",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/shardstrategy/ModuleShardStrategy.java",
+        "patchSetId": 69
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2017-01-09T11:59:26Z",
+      "side": 1,
+      "message": "that is correct -- all of them are rooted at /",
+      "range": {
+        "startLine": 34,
+        "startChar": 8,
+        "endLine": 34,
+        "endChar": 110
+      },
+      "revId": "cfb568d7959802280a9a6fbaa8ee3d428facfbc0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_4522d152",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/shardstrategy/ShardStrategyFactory.java",
+        "patchSetId": 69
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2017-01-09T11:59:26Z",
+      "side": 1,
+      "message": "final?",
+      "range": {
+        "startLine": 21,
+        "startChar": 11,
+        "endLine": 21,
+        "endChar": 33
+      },
+      "revId": "cfb568d7959802280a9a6fbaa8ee3d428facfbc0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_05dc5945",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ClusterUtils.java",
+        "patchSetId": 69
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2017-01-09T11:59:26Z",
+      "side": 1,
+      "message": "path.isEmpty()",
+      "range": {
+        "startLine": 56,
+        "startChar": 12,
+        "endLine": 56,
+        "endChar": 53
+      },
+      "revId": "cfb568d7959802280a9a6fbaa8ee3d428facfbc0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
