@@ -41,7 +41,6 @@ import java.util.concurrent.CompletionStage;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -55,6 +54,8 @@ import org.opendaylight.controller.cluster.datastore.DatastoreContext.Builder;
 import org.opendaylight.controller.cluster.datastore.DistributedDataStore;
 import org.opendaylight.controller.cluster.datastore.IntegrationTestKit;
 import org.opendaylight.controller.cluster.datastore.utils.ClusterUtils;
+import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
+import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
 import org.opendaylight.controller.cluster.sharding.DistributedShardFactory.DistributedShardRegistration;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
@@ -82,7 +83,6 @@ import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableMa
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Ignore("distributed-data is broken needs to be removed")
 public class DistributedShardedDOMDataTreeTest extends AbstractTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(DistributedShardedDOMDataTreeRemotingTest.class);
@@ -99,6 +99,8 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
                             .node(TestModel.INNER_LIST_QNAME));
     private static final Set<MemberName> SINGLE_MEMBER = Collections.singleton(AbstractTest.MEMBER_NAME);
 
+    private static final String MODULE_SHARDS_CONFIG = "module-shards-cars-member-1.conf";
+
     private ActorSystem leaderSystem;
 
     private final Builder leaderDatastoreContextBuilder =
@@ -109,6 +111,7 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
                             org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.CONFIGURATION);
 
     private DistributedDataStore leaderDistributedDataStore;
+    private DistributedDataStore operDistributedDatastore;
     private IntegrationTestKit leaderTestKit;
 
     private DistributedShardedDOMDataTree leaderShardFactory;
@@ -124,6 +127,9 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
+        InMemoryJournal.clear();
+        InMemorySnapshotStore.clear();
+
         leaderSystem = ActorSystem.create("cluster-test", ConfigFactory.load().getConfig("Member1"));
         Cluster.get(leaderSystem).join(MEMBER_1_ADDRESS);
 
@@ -132,30 +138,41 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
     }
 
     @After
-    public void tearDown() {
+    public void tearDown() throws Exception {
         if (leaderDistributedDataStore != null) {
             leaderDistributedDataStore.close();
         }
 
+        if (operDistributedDatastore != null) {
+            operDistributedDatastore.close();
+        }
+
         JavaTestKit.shutdownActorSystem(leaderSystem);
+
+        InMemoryJournal.clear();
+        InMemorySnapshotStore.clear();
     }
 
-    private void initEmptyDatastore(final String type) {
+    private void initEmptyDatastores() {
         leaderTestKit = new IntegrationTestKit(leaderSystem, leaderDatastoreContextBuilder);
 
-        leaderDistributedDataStore =
-                leaderTestKit.setupDistributedDataStoreWithoutConfig(type, SchemaContextHelper.full());
+        leaderDistributedDataStore = (DistributedDataStore) leaderTestKit.setupDistributedDataStore(
+                "config", MODULE_SHARDS_CONFIG, "empty-modules.conf", true, SchemaContextHelper.full());
 
+        operDistributedDatastore = (DistributedDataStore) leaderTestKit.setupDistributedDataStore(
+                "operational", MODULE_SHARDS_CONFIG, "empty-modules.conf",true, SchemaContextHelper.full());
 
         leaderShardFactory = new DistributedShardedDOMDataTree(leaderSystemProvider,
-                leaderDistributedDataStore,
+                operDistributedDatastore,
                 leaderDistributedDataStore);
+
+        leaderShardFactory.init();
     }
 
 
     @Test
     public void testWritesIntoDefaultShard() throws Exception {
-        initEmptyDatastore("config");
+        initEmptyDatastores();
 
         final DOMDataTreeIdentifier configRoot =
                 new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, YangInstanceIdentifier.EMPTY);
@@ -180,7 +197,7 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
 
     @Test
     public void testSingleNodeWrites() throws Exception {
-        initEmptyDatastore("config");
+        initEmptyDatastores();
 
         final DistributedShardRegistration shardRegistration = waitOnAsyncTask(
                 leaderShardFactory.createDistributedShard(TEST_ID, Lists.newArrayList(AbstractTest.MEMBER_NAME)),
@@ -198,6 +215,7 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
                 YangInstanceIdentifier.builder(TestModel.TEST_PATH).node(TestModel.NAME_QNAME).build();
         final LeafNode<String> valueToCheck = ImmutableLeafNodeBuilder.<String>create().withNodeIdentifier(
                 new NodeIdentifier(TestModel.NAME_QNAME)).withValue("Test Value").build();
+        LOG.debug("Writing data {} at {}, cursor {}", nameId.getLastPathArgument(), valueToCheck, cursor);
         cursor.write(nameId.getLastPathArgument(),
                 valueToCheck);
 
@@ -225,11 +243,13 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
 
         verifyNoMoreInteractions(mockedDataTreeListener);
 
+        shardRegistration.close().toCompletableFuture().get();
+
     }
 
     @Test
     public void testMultipleWritesIntoSingleMapEntry() throws Exception {
-        initEmptyDatastore("config");
+        initEmptyDatastores();
 
         final DistributedShardRegistration shardRegistration = waitOnAsyncTask(
                 leaderShardFactory.createDistributedShard(TEST_ID, Lists.newArrayList(AbstractTest.MEMBER_NAME)),
@@ -314,9 +334,9 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
     // top level shard at TEST element, with subshards on each outer-list map entry
     @Test
     public void testMultipleShardLevels() throws Exception {
-        initEmptyDatastore("config");
+        initEmptyDatastores();
 
-        final DistributedShardRegistration testShardId = waitOnAsyncTask(
+        final DistributedShardRegistration testShardReg = waitOnAsyncTask(
                 leaderShardFactory.createDistributedShard(TEST_ID, SINGLE_MEMBER),
                 DistributedShardedDOMDataTree.SHARD_FUTURE_TIMEOUT_DURATION);
 
@@ -374,7 +394,7 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
                 true, Collections.emptyList());
 
         // need 6 invocations, first initial thats from the parent shard, and then each individual subshard
-        verify(mockedDataTreeListener, timeout(10000).times(6)).onDataTreeChanged(captorForChanges.capture(),
+        verify(mockedDataTreeListener, timeout(20000).times(6)).onDataTreeChanged(captorForChanges.capture(),
                 captorForSubtrees.capture());
         verifyNoMoreInteractions(mockedDataTreeListener);
         final List<Map<DOMDataTreeIdentifier, NormalizedNode<?, ?>>> allSubtrees = captorForSubtrees.getAllValues();
@@ -391,49 +411,19 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
                                 .withValue(createOuterEntries(listSize, "testing-values")).build())
                         .build();
 
+
+        for (final DistributedShardRegistration registration : registrations) {
+            waitOnAsyncTask(registration.close(), DistributedShardedDOMDataTree.SHARD_FUTURE_TIMEOUT_DURATION);
+        }
+
+        waitOnAsyncTask(testShardReg.close(), DistributedShardedDOMDataTree.SHARD_FUTURE_TIMEOUT_DURATION);
+
         assertEquals(expected, actual);
     }
 
     @Test
-    public void testDistributedData() throws Exception {
-        initEmptyDatastore("config");
-
-        waitOnAsyncTask(
-                leaderShardFactory.createDistributedShard(TEST_ID, Lists.newArrayList(AbstractTest.MEMBER_NAME)),
-                DistributedShardedDOMDataTree.SHARD_FUTURE_TIMEOUT_DURATION);
-
-        waitOnAsyncTask(
-                leaderShardFactory.createDistributedShard(
-                        new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, TestModel.OUTER_CONTAINER_PATH),
-                        Lists.newArrayList(AbstractTest.MEMBER_NAME)),
-                DistributedShardedDOMDataTree.SHARD_FUTURE_TIMEOUT_DURATION);
-
-        waitOnAsyncTask(
-                leaderShardFactory.createDistributedShard(
-                        new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, TestModel.INNER_LIST_PATH),
-                        Lists.newArrayList(AbstractTest.MEMBER_NAME)),
-                DistributedShardedDOMDataTree.SHARD_FUTURE_TIMEOUT_DURATION);
-
-        waitOnAsyncTask(
-                leaderShardFactory.createDistributedShard(
-                        new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, TestModel.JUNK_PATH),
-                        Lists.newArrayList(AbstractTest.MEMBER_NAME)),
-                DistributedShardedDOMDataTree.SHARD_FUTURE_TIMEOUT_DURATION);
-
-        leaderTestKit.waitUntilLeader(leaderDistributedDataStore.getActorContext(),
-                ClusterUtils.getCleanShardName(TestModel.TEST_PATH));
-        leaderTestKit.waitUntilLeader(leaderDistributedDataStore.getActorContext(),
-                ClusterUtils.getCleanShardName(TestModel.OUTER_CONTAINER_PATH));
-        leaderTestKit.waitUntilLeader(leaderDistributedDataStore.getActorContext(),
-                ClusterUtils.getCleanShardName(TestModel.INNER_LIST_PATH));
-        leaderTestKit.waitUntilLeader(leaderDistributedDataStore.getActorContext(),
-                ClusterUtils.getCleanShardName(TestModel.JUNK_PATH));
-
-    }
-
-    @Test
     public void testMultipleRegistrationsAtOnePrefix() throws Exception {
-        initEmptyDatastore("config");
+        initEmptyDatastores();
 
         for (int i = 0; i < 10; i++) {
             LOG.debug("Round {}", i);
