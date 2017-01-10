@@ -10,6 +10,8 @@ package org.opendaylight.controller.md.cluster.datastore.model;
 
 import com.google.common.base.Throwables;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -43,6 +45,19 @@ public class SchemaContextHelper {
             return YangParserTestUtils.parseYangStreams(streams);
         } catch (ReactorException e) {
             throw new RuntimeException("Unable to build schema context from " + streams, e);
+        }
+    }
+
+    public static SchemaContext distributedShardedDOMDataTreeSchemaContext() {
+        final List<InputStream> streams = new ArrayList<>();
+        try {
+            // we need prefix-shard-configuration and odl-datastore-test models
+            // for DistributedShardedDOMDataTree tests
+            streams.add(getInputStream(ODL_DATASTORE_TEST_YANG));
+            streams.add(new FileInputStream("src/main/yang/prefix-shard-configuration.yang"));
+            return YangParserTestUtils.parseYangStreams(streams);
+        } catch (FileNotFoundException | ReactorException e) {
+            throw new RuntimeException(e);
         }
     }
 
