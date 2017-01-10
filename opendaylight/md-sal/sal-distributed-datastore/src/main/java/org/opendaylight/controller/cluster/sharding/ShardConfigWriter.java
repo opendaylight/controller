@@ -1,0 +1,196 @@
+/*
+ * Copyright (c) 2017 Cisco Systems, Inc. and others.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
+
+package org.opendaylight.controller.cluster.sharding;
+
+import com.google.common.util.concurrent.AsyncFunction;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Collection;
+import java.util.concurrent.ExecutionException;
+import org.opendaylight.controller.cluster.access.concepts.MemberName;
+import org.opendaylight.controller.cluster.databroker.actors.dds.ClientLocalHistory;
+import org.opendaylight.controller.cluster.databroker.actors.dds.ClientSnapshot;
+import org.opendaylight.controller.cluster.databroker.actors.dds.ClientTransaction;
+import org.opendaylight.controller.cluster.databroker.actors.dds.DataStoreClient;
+import org.opendaylight.controller.cluster.datastore.node.utils.stream.SerializationUtils;
+import org.opendaylight.controller.cluster.datastore.utils.ClusterUtils;
+import org.opendaylight.mdsal.common.api.ReadFailedException;
+import org.opendaylight.mdsal.dom.api.DOMDataTreeWriteCursor;
+import org.opendaylight.mdsal.dom.spi.store.DOMStoreThreePhaseCommitCohort;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeWithValue;
+import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
+import org.opendaylight.yangtools.yang.data.api.schema.LeafSetEntryNode;
+import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.ListNodeBuilder;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableLeafNodeBuilder;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableLeafSetEntryNodeBuilder;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableLeafSetNodeBuilder;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableMapEntryNodeBuilder;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableMapNodeBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+class ShardConfigWriter {
+
+    private static final Logger LOG = LoggerFactory.getLogger(ShardConfigWriter.class);
+
+    private final DataStoreClient client;
+    private final ClientLocalHistory history;
+
+    ShardConfigWriter(final DataStoreClient client) {
+
+        this.client = client;
+        history = client.createLocalHistory();
+
+        writeInitialParent();
+    }
+
+    ListenableFuture<Void> writeConfig(final YangInstanceIdentifier path, final Collection<MemberName> replicas) {
+        LOG.debug("Writing config for {}, replicas {}", path, replicas);
+
+        return doSubmit(doWrite(serializePath(path), replicas));
+    }
+
+    ListenableFuture<Void> removeConfig(final YangInstanceIdentifier path) {
+        LOG.debug("Removing config for {}.", path);
+
+        return doSubmit(doDelete(serializePath(path)));
+    }
+
+    private String serializePath(final YangInstanceIdentifier path) {
+        final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        final DataOutputStream dataOutputStream = new DataOutputStream(outputStream);
+        try {
+            SerializationUtils.serializePath(path, dataOutputStream);
+            final String serialized = new String(outputStream.toByteArray(), StandardCharsets.ISO_8859_1);
+            LOG.debug("Serialized : {} into : {}", path, serialized);
+            return serialized;
+        } finally {
+            try {
+                outputStream.close();
+                dataOutputStream.close();
+            } catch (IOException e) {
+                LOG.error("Unable to close underlying streams after path serialization");
+            }
+        }
+    }
+
+    private void writeInitialParent() {
+        final ClientTransaction tx = history.createTransaction();
+
+        final DOMDataTreeWriteCursor cursor = tx.openCursor();
+
+        final ContainerNode root = ImmutableContainerNodeBuilder.create()
+                .withNodeIdentifier(new NodeIdentifier(ClusterUtils.PREFIX_SHARDS_QNAME))
+                .withChild(ImmutableMapNodeBuilder.create()
+                        .withNodeIdentifier(new NodeIdentifier(ClusterUtils.SHARD_LIST_QNAME))
+                        .build())
+                .build();
+
+        cursor.merge(ClusterUtils.PREFIX_SHARDS_PATH.getLastPathArgument(), root);
+        cursor.close();
+
+        final DOMStoreThreePhaseCommitCohort cohort = tx.ready();
+
+        submitBlocking(cohort);
+    }
+
+    private void submitBlocking(final DOMStoreThreePhaseCommitCohort cohort) {
+        try {
+            doSubmit(cohort).get();
+        } catch (final InterruptedException | ExecutionException e) {
+            LOG.error("Unable to write initial shard config parent.", e);
+        }
+    }
+
+    private ListenableFuture<Void> doSubmit(final DOMStoreThreePhaseCommitCohort cohort) {
+        final AsyncFunction<Boolean, Void> validateFunction = input -> cohort.preCommit();
+        final AsyncFunction<Void, Void> prepareFunction = input -> cohort.commit();
+
+        final ListenableFuture<Void> prepareFuture = Futures.transform(cohort.canCommit(), validateFunction);
+        return Futures.transform(prepareFuture, prepareFunction);
+    }
+
+    boolean checkDefaultIsPresent() {
+        final String idValue = serializePath(YangInstanceIdentifier.EMPTY);
+
+        final NodeIdentifierWithPredicates pag =
+                new NodeIdentifierWithPredicates(ClusterUtils.SHARD_LIST_QNAME, ClusterUtils.SHARD_PREFIX_QNAME,
+                idValue);
+
+        final YangInstanceIdentifier defaultId = ClusterUtils.SHARD_LIST_PATH.node(pag);
+
+        final ClientSnapshot snapshot = history.takeSnapshot();
+        try {
+            return snapshot.exists(defaultId).checkedGet();
+        } catch (final ReadFailedException e) {
+            LOG.error("Presence check of default shard in configuration failed.", e);
+            return false;
+        }
+    }
+
+    private DOMStoreThreePhaseCommitCohort doWrite(final String serializedPath, final Collection<MemberName> replicas) {
+
+        final ListNodeBuilder<Object, LeafSetEntryNode<Object>> replicaListBuilder =
+                ImmutableLeafSetNodeBuilder.create().withNodeIdentifier(
+                        new NodeIdentifier(ClusterUtils.SHARD_REPLICA_QNAME));
+
+        replicas.forEach(name -> replicaListBuilder.withChild(
+                ImmutableLeafSetEntryNodeBuilder.create()
+                        .withNodeIdentifier(new NodeWithValue<>(ClusterUtils.SHARD_REPLICA_QNAME, name.getName()))
+                        .withValue(name.getName())
+                        .build()));
+
+        final MapEntryNode newEntry = ImmutableMapEntryNodeBuilder.create()
+                .withNodeIdentifier(
+                        new NodeIdentifierWithPredicates(ClusterUtils.SHARD_LIST_QNAME, ClusterUtils.SHARD_PREFIX_QNAME,
+                                serializedPath))
+                .withChild(ImmutableLeafNodeBuilder.create()
+                        .withNodeIdentifier(new NodeIdentifier(ClusterUtils.SHARD_PREFIX_QNAME))
+                        .withValue(serializedPath)
+                        .build())
+                .withChild(ImmutableContainerNodeBuilder.create()
+                        .withNodeIdentifier(new NodeIdentifier(ClusterUtils.SHARD_REPLICAS_QNAME))
+                        .withChild(replicaListBuilder.build())
+                        .build())
+                .build();
+
+        final ClientTransaction tx = history.createTransaction();
+        final DOMDataTreeWriteCursor cursor = tx.openCursor();
+
+        ClusterUtils.SHARD_LIST_PATH.getPathArguments().forEach(cursor::enter);
+
+        cursor.write(newEntry.getIdentifier(), newEntry);
+        cursor.close();
+
+        return tx.ready();
+    }
+
+    private DOMStoreThreePhaseCommitCohort doDelete(final String serializedPath) {
+
+        final ClientTransaction tx = history.createTransaction();
+        final DOMDataTreeWriteCursor cursor = tx.openCursor();
+
+        ClusterUtils.SHARD_LIST_PATH.getPathArguments().forEach(cursor::enter);
+
+        cursor.delete(new NodeIdentifierWithPredicates(ClusterUtils.SHARD_LIST_QNAME, ClusterUtils.SHARD_PREFIX_QNAME,
+                serializedPath));
+        cursor.close();
+
+        return tx.ready();
+    }
+}
