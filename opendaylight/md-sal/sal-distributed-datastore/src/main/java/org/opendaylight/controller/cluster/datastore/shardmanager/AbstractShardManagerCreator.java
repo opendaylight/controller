@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.datastore.shardmanager;
 import akka.actor.Props;
 import com.google.common.base.Preconditions;
 import java.util.concurrent.CountDownLatch;
+import org.opendaylight.controller.cluster.datastore.AbstractDataStore;
 import org.opendaylight.controller.cluster.datastore.ClusterWrapper;
 import org.opendaylight.controller.cluster.datastore.DatastoreContextFactory;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
@@ -20,6 +21,7 @@ public abstract class AbstractShardManagerCreator<T extends AbstractShardManager
     private ClusterWrapper cluster;
     private Configuration configuration;
     private DatastoreContextFactory datastoreContextFactory;
+    private AbstractDataStore distributedDataStore;
     private CountDownLatch waitTillReadyCountDownLatch;
     private PrimaryShardInfoFutureCache primaryShardInfoCache;
     private DatastoreSnapshot restoreFromSnapshot;
@@ -68,6 +70,16 @@ public abstract class AbstractShardManagerCreator<T extends AbstractShardManager
         return self();
     }
 
+    AbstractDataStore getDistributedDataStore() {
+        return distributedDataStore;
+    }
+
+    public T distributedDataStore(final AbstractDataStore distributedDataStore) {
+        checkSealed();
+        this.distributedDataStore = distributedDataStore;
+        return self();
+    }
+
     CountDownLatch getWaitTillReadyCountDownLatch() {
         return waitTillReadyCountDownLatch;
     }
@@ -103,6 +115,7 @@ public abstract class AbstractShardManagerCreator<T extends AbstractShardManager
         Preconditions.checkNotNull(cluster, "cluster should not be null");
         Preconditions.checkNotNull(configuration, "configuration should not be null");
         Preconditions.checkNotNull(datastoreContextFactory, "datastoreContextFactory should not be null");
+        Preconditions.checkNotNull(distributedDataStore, "distributedDataStore should not be null");
         Preconditions.checkNotNull(waitTillReadyCountDownLatch, "waitTillReadyCountdownLatch should not be null");
         Preconditions.checkNotNull(primaryShardInfoCache, "primaryShardInfoCache should not be null");
     }
