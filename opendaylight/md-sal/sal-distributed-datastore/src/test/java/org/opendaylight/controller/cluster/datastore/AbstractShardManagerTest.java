@@ -8,6 +8,7 @@
 
 package org.opendaylight.controller.cluster.datastore;
 
+import static org.mockito.Mockito.mock;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 import akka.actor.ActorRef;
@@ -51,11 +52,12 @@ public class AbstractShardManagerTest extends AbstractClusterRefActorTest {
     protected static CountDownLatch ready;
 
     protected TestShardManager.Builder newTestShardMgrBuilder() {
-        return TestShardManager.builder(datastoreContextBuilder);
+        return TestShardManager.builder(datastoreContextBuilder).distributedDataStore(mock(DistributedDataStore.class));
     }
 
     protected TestShardManager.Builder newTestShardMgrBuilder(final Configuration config) {
-        return TestShardManager.builder(datastoreContextBuilder).configuration(config);
+        return TestShardManager.builder(datastoreContextBuilder).configuration(config)
+                .distributedDataStore(mock(DistributedDataStore.class));
     }
 
     protected Props newShardMgrProps(final Configuration config) {
