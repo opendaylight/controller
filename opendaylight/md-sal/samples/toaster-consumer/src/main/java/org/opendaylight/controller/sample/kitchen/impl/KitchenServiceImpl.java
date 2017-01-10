@@ -77,7 +77,7 @@ public class KitchenServiceImpl extends AbstractMXBean
 
         // Then transform the RpcResults into 1.
 
-        return Futures.transform( combinedFutures,
+        return Futures.transformAsync( combinedFutures,
             new AsyncFunction<List<RpcResult<Void>>,RpcResult<Void>>() {
                 @Override
                 public ListenableFuture<RpcResult<Void>> apply( List<RpcResult<Void>> results )
