@@ -16,7 +16,6 @@ import akka.actor.ActorSystem;
 import akka.actor.PoisonPill;
 import akka.actor.Props;
 import akka.actor.Status;
-import akka.actor.Status.Failure;
 import akka.actor.Status.Success;
 import akka.cluster.Cluster;
 import akka.cluster.ClusterEvent;
@@ -27,28 +26,19 @@ import akka.cluster.ClusterEvent.MemberWeaklyUp;
 import akka.cluster.ClusterEvent.ReachableMember;
 import akka.cluster.ClusterEvent.UnreachableMember;
 import akka.cluster.Member;
-import akka.cluster.ddata.DistributedData;
-import akka.cluster.ddata.ORMap;
-import akka.cluster.ddata.Replicator;
-import akka.cluster.ddata.Replicator.Changed;
-import akka.cluster.ddata.Replicator.Subscribe;
-import akka.cluster.ddata.Replicator.Update;
 import akka.dispatch.OnComplete;
 import akka.pattern.Patterns;
 import akka.util.Timeout;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Sets;
-import com.google.common.collect.Sets.SetView;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedPersistentActor;
@@ -59,14 +49,15 @@ import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.controller.cluster.datastore.utils.ClusterUtils;
 import org.opendaylight.controller.cluster.raft.client.messages.FindLeader;
 import org.opendaylight.controller.cluster.raft.client.messages.FindLeaderReply;
-import org.opendaylight.controller.cluster.sharding.messages.CreatePrefixShard;
+import org.opendaylight.controller.cluster.sharding.messages.LookupPrefixShard;
 import org.opendaylight.controller.cluster.sharding.messages.NotifyProducerCreated;
 import org.opendaylight.controller.cluster.sharding.messages.NotifyProducerRemoved;
 import org.opendaylight.controller.cluster.sharding.messages.PrefixShardCreated;
+import org.opendaylight.controller.cluster.sharding.messages.PrefixShardRemovalLookup;
 import org.opendaylight.controller.cluster.sharding.messages.PrefixShardRemoved;
 import org.opendaylight.controller.cluster.sharding.messages.ProducerCreated;
 import org.opendaylight.controller.cluster.sharding.messages.ProducerRemoved;
-import org.opendaylight.controller.cluster.sharding.messages.RemovePrefixShard;
+import org.opendaylight.controller.cluster.sharding.messages.StartConfigShardLookup;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeProducer;
@@ -95,7 +86,6 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
     private static final Timeout DEFAULT_ASK_TIMEOUT = new Timeout(15, TimeUnit.SECONDS);
 
     static final FiniteDuration SHARD_LOOKUP_TASK_INTERVAL = new FiniteDuration(1L, TimeUnit.SECONDS);
-    static final int LOOKUP_TASK_MAX_RETRIES = 100;
 
     private final DistributedShardedDOMDataTree shardingService;
     private final ActorSystem actorSystem;
@@ -111,9 +101,7 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
     private final Map<DOMDataTreeIdentifier, ShardFrontendRegistration> idToShardRegistration = new HashMap<>();
 
     private final Cluster cluster;
-    private final ActorRef replicator;
 
-    private ORMap<PrefixShardConfiguration> currentData = ORMap.create();
     private Map<DOMDataTreeIdentifier, PrefixShardConfiguration> currentConfiguration = new HashMap<>();
 
     ShardedDataTreeActor(final ShardedDataTreeActorCreator builder) {
@@ -130,15 +118,10 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
 
         clusterWrapper.subscribeToMemberEvents(self());
         cluster = Cluster.get(actorSystem);
-
-        replicator = DistributedData.get(context().system()).replicator();
     }
 
     @Override
     public void preStart() {
-        final Subscribe<ORMap<PrefixShardConfiguration>> subscribe =
-                new Subscribe<>(ClusterUtils.CONFIGURATION_KEY, self());
-        replicator.tell(subscribe, noSender());
     }
 
     @Override
@@ -148,7 +131,7 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
 
     @Override
     protected void handleCommand(final Object message) throws Exception {
-        LOG.debug("Received {}", message);
+        LOG.debug("{} : Received {}", clusterWrapper.getCurrentMemberName(), message);
         if (message instanceof ClusterEvent.MemberUp) {
             memberUp((ClusterEvent.MemberUp) message);
         } else if (message instanceof ClusterEvent.MemberWeaklyUp) {
@@ -161,8 +144,6 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
             memberUnreachable((ClusterEvent.UnreachableMember) message);
         } else if (message instanceof ClusterEvent.ReachableMember) {
             memberReachable((ClusterEvent.ReachableMember) message);
-        } else if (message instanceof Changed) {
-            onConfigChanged((Changed) message);
         } else if (message instanceof ProducerCreated) {
             onProducerCreated((ProducerCreated) message);
         } else if (message instanceof NotifyProducerCreated) {
@@ -173,49 +154,15 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
             onNotifyProducerRemoved((NotifyProducerRemoved) message);
         } else if (message instanceof PrefixShardCreated) {
             onPrefixShardCreated((PrefixShardCreated) message);
-        } else if (message instanceof CreatePrefixShard) {
-            onCreatePrefixShard((CreatePrefixShard) message);
-        } else if (message instanceof RemovePrefixShard) {
-            onRemovePrefixShard((RemovePrefixShard) message);
+        } else if (message instanceof LookupPrefixShard) {
+            onLookupPrefixShard((LookupPrefixShard) message);
+        } else if (message instanceof PrefixShardRemovalLookup) {
+            onPrefixShardRemovalLookup((PrefixShardRemovalLookup) message);
         } else if (message instanceof PrefixShardRemoved) {
             onPrefixShardRemoved((PrefixShardRemoved) message);
+        } else if (message instanceof StartConfigShardLookup) {
+            onStartConfigShardLookup((StartConfigShardLookup) message);
         }
-    }
-
-    private void onConfigChanged(final Changed<ORMap<PrefixShardConfiguration>> change) {
-        LOG.debug("member : {}, Received configuration changed: {}", clusterWrapper.getCurrentMemberName(), change);
-
-        currentData = change.dataValue();
-        final Map<String, PrefixShardConfiguration> changedConfig = change.dataValue().getEntries();
-
-        LOG.debug("Changed set {}", changedConfig);
-
-        try {
-            final Map<DOMDataTreeIdentifier, PrefixShardConfiguration> newConfig =
-                    changedConfig.values().stream().collect(
-                            Collectors.toMap(PrefixShardConfiguration::getPrefix, Function.identity()));
-            resolveConfig(newConfig);
-        } catch (final IllegalStateException e) {
-            LOG.error("Failed, ", e);
-        }
-
-    }
-
-    private void resolveConfig(final Map<DOMDataTreeIdentifier, PrefixShardConfiguration> newConfig) {
-
-        // get the removed configurations
-        final SetView<DOMDataTreeIdentifier> deleted =
-                Sets.difference(currentConfiguration.keySet(), newConfig.keySet());
-        shardingService.resolveShardRemovals(deleted);
-
-        // get the added configurations
-        final SetView<DOMDataTreeIdentifier> additions =
-                Sets.difference(newConfig.keySet(), currentConfiguration.keySet());
-        shardingService.resolveShardAdditions(additions);
-        // we can ignore those that existed previously since the potential changes in replicas will be handled by
-        // shard manager.
-
-        currentConfiguration = new HashMap<>(newConfig);
     }
 
     @Override
@@ -368,61 +315,32 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    private void onCreatePrefixShard(final CreatePrefixShard message) {
-        LOG.debug("Member: {}, Received CreatePrefixShard: {}", clusterWrapper.getCurrentMemberName(), message);
+    private void onLookupPrefixShard(final LookupPrefixShard message) {
+        LOG.debug("Member: {}, Received LookupPrefixShard: {}", clusterWrapper.getCurrentMemberName(), message);
 
-        final PrefixShardConfiguration configuration = message.getConfiguration();
-
-        final Update<ORMap<PrefixShardConfiguration>> update =
-                new Update<>(ClusterUtils.CONFIGURATION_KEY, currentData, Replicator.writeLocal(),
-                    map -> map.put(cluster, configuration.toDataMapKey(), configuration));
-
-        replicator.tell(update, self());
+        final DOMDataTreeIdentifier prefix = message.getPrefix();
 
         final ActorContext context =
-                configuration.getPrefix().getDatastoreType().equals(LogicalDatastoreType.CONFIGURATION)
+                prefix.getDatastoreType().equals(LogicalDatastoreType.CONFIGURATION)
                         ? distributedConfigDatastore.getActorContext() : distributedOperDatastore.getActorContext();
 
         // schedule a notification task for the reply
         actorSystem.scheduler().scheduleOnce(SHARD_LOOKUP_TASK_INTERVAL,
                 new ShardCreationLookupTask(actorSystem, getSender(), clusterWrapper,
-                        context, shardingService, configuration.getPrefix()),
+                        context, shardingService, prefix),
                 actorSystem.dispatcher());
     }
 
     private void onPrefixShardCreated(final PrefixShardCreated message) {
         LOG.debug("Member: {}, Received PrefixShardCreated: {}", clusterWrapper.getCurrentMemberName(), message);
 
-        final Collection<String> addresses = resolver.getShardingServicePeerActorAddresses();
-        final ActorRef sender = getSender();
+        final PrefixShardConfiguration config = message.getConfiguration();
 
-        final List<CompletableFuture<Object>> futures = new ArrayList<>();
-
-        for (final String address : addresses) {
-            final ActorSelection actorSelection = actorSystem.actorSelection(address);
-            futures.add(FutureConverters.toJava(actorContext.executeOperationAsync(actorSelection,
-                    new CreatePrefixShard(message.getConfiguration()))).toCompletableFuture());
-        }
-
-        final CompletableFuture<Void> combinedFuture =
-                CompletableFuture.allOf(futures.toArray(new CompletableFuture[futures.size()]));
-
-        combinedFuture.thenRun(() -> {
-            sender.tell(new Status.Success(null), self());
-        }).exceptionally(throwable -> {
-            sender.tell(new Status.Failure(throwable), self());
-            return null;
-        });
+        shardingService.resolveShardAdditions(Collections.singleton(config.getPrefix()));
     }
 
-    private void onRemovePrefixShard(final RemovePrefixShard message) {
-        LOG.debug("Member: {}, Received RemovePrefixShard: {}", clusterWrapper.getCurrentMemberName(), message);
-
-        //TODO the removal message should have the configuration or some other way to get to the key
-        final Update<ORMap<PrefixShardConfiguration>> removal =
-                new Update<>(ClusterUtils.CONFIGURATION_KEY, currentData, Replicator.writeLocal(),
-                    map -> map.remove(cluster, "prefix=" + message.getPrefix()));
-        replicator.tell(removal, self());
+    private void onPrefixShardRemovalLookup(final PrefixShardRemovalLookup message) {
+        LOG.debug("Member: {}, Received PrefixShardRemovalLookup: {}", clusterWrapper.getCurrentMemberName(), message);
 
         final ShardRemovalLookupTask removalTask =
                 new ShardRemovalLookupTask(actorSystem, getSender(),
@@ -434,15 +352,20 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
     private void onPrefixShardRemoved(final PrefixShardRemoved message) {
         LOG.debug("Received PrefixShardRemoved: {}", message);
 
-        final ShardFrontendRegistration registration = idToShardRegistration.get(message.getPrefix());
+        shardingService.resolveShardRemovals(Collections.singleton(message.getPrefix()));
+    }
 
-        if (registration == null) {
-            LOG.warn("Received shard removed for {}, but not shard registered at this prefix all registrations: {}",
-                    message.getPrefix(), idToShardRegistration);
-            return;
-        }
+    private void onStartConfigShardLookup(final StartConfigShardLookup message) {
+        LOG.debug("Received StartConfigShardLookup: {}", message);
 
-        registration.close();
+        final ActorContext context =
+                message.getType().equals(LogicalDatastoreType.CONFIGURATION)
+                        ? distributedConfigDatastore.getActorContext() : distributedOperDatastore.getActorContext();
+
+        // schedule a notification task for the reply
+        actorSystem.scheduler().scheduleOnce(SHARD_LOOKUP_TASK_INTERVAL,
+                new ConfigShardLookupTask(actorSystem, getSender(), context, clusterWrapper, message),
+                actorSystem.dispatcher());
     }
 
     private static MemberName memberToName(final Member member) {
@@ -483,39 +406,6 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
         protected void removeRegistration() {
             shardRegistration.close();
             clientActor.tell(PoisonPill.getInstance(), ActorRef.noSender());
-        }
-    }
-
-    private abstract static class LookupTask implements Runnable {
-
-        private final ActorRef replyTo;
-        private int retries = 0;
-
-        private LookupTask(final ActorRef replyTo) {
-            this.replyTo = replyTo;
-        }
-
-        abstract void reschedule(int retries);
-
-        void tryReschedule(@Nullable final Throwable throwable) {
-            if (retries <= LOOKUP_TASK_MAX_RETRIES) {
-                retries++;
-                reschedule(retries);
-            } else {
-                fail(throwable);
-            }
-        }
-
-        void fail(@Nullable final Throwable throwable) {
-            if (throwable == null) {
-                replyTo.tell(new Failure(
-                        new DOMDataTreeShardCreationFailedException("Unable to find the backend shard."
-                                + "Failing..")), noSender());
-            } else {
-                replyTo.tell(new Failure(
-                        new DOMDataTreeShardCreationFailedException("Unable to find the backend shard."
-                                + "Failing..", throwable)), noSender());
-            }
         }
     }
 
@@ -747,6 +637,110 @@ public class ShardedDataTreeActor extends AbstractUntypedPersistentActor {
         @Override
         void fail(@Nullable final Throwable throwable) {
             super.fail(throwable);
+        }
+    }
+
+    /**
+     * Task for handling the lookup of the backend for the configuration shard.
+     */
+    private static class ConfigShardLookupTask extends LookupTask {
+
+        private final ActorSystem system;
+        private final ActorRef replyTo;
+        private final ActorContext context;
+        private final ClusterWrapper clusterWrapper;
+
+        ConfigShardLookupTask(final ActorSystem system,
+                              final ActorRef replyTo,
+                              final ActorContext context,
+                              final ClusterWrapper clusterWrapper,
+                              final StartConfigShardLookup message) {
+            super(replyTo);
+            this.system = system;
+            this.replyTo = replyTo;
+            this.context = context;
+            this.clusterWrapper = clusterWrapper;
+        }
+
+        @Override
+        void reschedule(int retries) {
+            LOG.debug("Local backend for prefix configuration shard not found, try: {}, rescheduling..", retries);
+            system.scheduler().scheduleOnce(
+                    SHARD_LOOKUP_TASK_INTERVAL, ConfigShardLookupTask.this, system.dispatcher());
+        }
+
+        @Override
+        public void run() {
+            final Optional<ActorRef> localShard =
+                    context.findLocalShard(ClusterUtils.PREFIX_CONFIG_SHARD_ID);
+
+            if (!localShard.isPresent()) {
+                tryReschedule(null);
+            } else {
+                LOG.debug("Local backend for prefix configuration shard lookup successful, starting leader lookup..");
+                system.scheduler().scheduleOnce(
+                        SHARD_LOOKUP_TASK_INTERVAL,
+                        new ConfigShardReadinessTask(system, replyTo, context, clusterWrapper, localShard.get()),
+                        system.dispatcher());
+            }
+        }
+    }
+
+    /**
+     * Task for handling the readiness state of the config shard. Reports success once the leader is elected.
+     */
+    private static class ConfigShardReadinessTask extends LookupTask {
+
+        private final ActorSystem system;
+        private final ActorRef replyTo;
+        private final ActorContext context;
+        private final ClusterWrapper clusterWrapper;
+        private final ActorRef shard;
+
+        ConfigShardReadinessTask(final ActorSystem system,
+                                 final ActorRef replyTo,
+                                 final ActorContext context,
+                                 final ClusterWrapper clusterWrapper,
+                                 final ActorRef shard) {
+            super(replyTo);
+            this.system = system;
+            this.replyTo = replyTo;
+            this.context = context;
+            this.clusterWrapper = clusterWrapper;
+            this.shard = shard;
+        }
+
+        @Override
+        void reschedule(int retries) {
+            LOG.debug("{} - Leader for config shard not found on try: {}, retrying..",
+                    clusterWrapper.getCurrentMemberName(), retries);
+            system.scheduler().scheduleOnce(
+                    SHARD_LOOKUP_TASK_INTERVAL, ConfigShardReadinessTask.this, system.dispatcher());
+        }
+
+        @Override
+        public void run() {
+            final Future<Object> ask = Patterns.ask(shard, FindLeader.INSTANCE, context.getOperationTimeout());
+
+            ask.onComplete(new OnComplete<Object>() {
+                @Override
+                public void onComplete(final Throwable throwable, final Object findLeaderReply) throws Throwable {
+                    if (throwable != null) {
+                        tryReschedule(throwable);
+                    } else {
+                        final FindLeaderReply findLeader = (FindLeaderReply) findLeaderReply;
+                        final java.util.Optional<String> leaderActor = findLeader.getLeaderActor();
+                        if (leaderActor.isPresent()) {
+                            // leader is found, backend seems ready, check if the frontend is ready
+                            LOG.debug("{} - Leader for config shard is ready. Ending lookup.",
+                                    clusterWrapper.getCurrentMemberName());
+                            replyTo.tell(new Status.Success(null), noSender());
+                        } else {
+                            tryReschedule(null);
+                        }
+                    }
+                }
+            }, system.dispatcher());
         }
     }
 
