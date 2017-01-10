@@ -23,13 +23,14 @@ public class SchemaContextHelper {
     public static final String ODL_DATASTORE_TEST_YANG = "/odl-datastore-test.yang";
     public static final String PEOPLE_YANG = "/people.yang";
     public static final String CARS_YANG = "/cars.yang";
+    public static final String SHARDS_YANG = "/prefix-shard-configuration.yang";
 
     public static InputStream getInputStream(final String yangFileName) {
         return SchemaContextHelper.class.getResourceAsStream(yangFileName);
     }
 
     public static SchemaContext full() {
-        return select(ODL_DATASTORE_TEST_YANG, PEOPLE_YANG, CARS_YANG);
+        return select(ODL_DATASTORE_TEST_YANG, PEOPLE_YANG, CARS_YANG, SHARDS_YANG);
     }
 
     public static SchemaContext select(final String... schemaFiles) {
