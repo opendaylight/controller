@@ -8,19 +8,17 @@
 
 package org.opendaylight.controller.cluster.datastore.config;
 
-import akka.cluster.ddata.ReplicatedData;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.HashSet;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
 
 /**
  * Configuration for prefix based shards.
  */
-public class PrefixShardConfiguration implements ReplicatedData, Serializable {
+public class PrefixShardConfiguration implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private final DOMDataTreeIdentifier prefix;
@@ -57,23 +55,4 @@ public class PrefixShardConfiguration implements ReplicatedData, Serializable {
                 + '}';
     }
 
-    public String toDataMapKey() {
-        return "prefix=" + prefix;
-    }
-
-    @Override
-    public ReplicatedData merge(final ReplicatedData replicatedData) {
-        if (!(replicatedData instanceof PrefixShardConfiguration)) {
-            throw new IllegalStateException("replicatedData expected to be instance of PrefixShardConfiguration");
-        }
-        final PrefixShardConfiguration entry = (PrefixShardConfiguration) replicatedData;
-        if (!entry.getPrefix().equals(prefix)) {
-            // this should never happen since the key is the prefix
-            // if it does just return current?
-            return this;
-        }
-        final HashSet<MemberName> members = new HashSet<>(shardMemberNames);
-        members.addAll(entry.getShardMemberNames());
-        return new PrefixShardConfiguration(prefix, shardStrategyName, members);
-    }
 }
