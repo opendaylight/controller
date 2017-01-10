@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a622d24_6f799fc7",
+        "filename": "opendaylight/md-sal/sal-clustering-config/src/main/resources/initial/akka.conf",
+        "patchSetId": 1
+      },
+      "lineNbr": 6,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-01-10T19:30:16Z",
+      "side": 0,
+      "message": "You can leave the artery section but set enabled \u003d off",
+      "revId": "d51fa94a802a2ce48b06550f78bb73d61fadb095",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
