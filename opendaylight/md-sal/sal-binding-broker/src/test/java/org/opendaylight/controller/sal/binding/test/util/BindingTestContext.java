@@ -8,6 +8,7 @@
 package org.opendaylight.controller.sal.binding.test.util;
 
 import static com.google.common.base.Preconditions.checkState;
+
 import com.google.common.annotations.Beta;
 import com.google.common.collect.ClassToInstanceMap;
 import com.google.common.collect.ImmutableMap;
@@ -15,6 +16,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.MutableClassToInstanceMap;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
+import javassist.ClassPool;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.MountPointService;
 import org.opendaylight.controller.md.sal.binding.api.NotificationPublishService;
@@ -59,7 +61,6 @@ import org.opendaylight.yangtools.sal.binding.generator.util.JavassistUtils;
 import org.opendaylight.yangtools.yang.binding.YangModuleInfo;
 import org.opendaylight.yangtools.yang.binding.util.BindingReflections;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-import javassist.ClassPool;
 
 @Beta
 public class BindingTestContext implements AutoCloseable {
@@ -132,8 +133,10 @@ public class BindingTestContext implements AutoCloseable {
 
     public void startNewDomDataBroker() {
         checkState(executor != null, "Executor needs to be set");
-        final InMemoryDOMDataStore operStore = new InMemoryDOMDataStore("OPER", MoreExecutors.sameThreadExecutor());
-        final InMemoryDOMDataStore configStore = new InMemoryDOMDataStore("CFG", MoreExecutors.sameThreadExecutor());
+        final InMemoryDOMDataStore operStore = new InMemoryDOMDataStore("OPER",
+            MoreExecutors.newDirectExecutorService());
+        final InMemoryDOMDataStore configStore = new InMemoryDOMDataStore("CFG",
+            MoreExecutors.newDirectExecutorService());
         newDatastores = ImmutableMap.<LogicalDatastoreType, DOMStore>builder()
                 .put(LogicalDatastoreType.OPERATIONAL, operStore)
                 .put(LogicalDatastoreType.CONFIGURATION, configStore)

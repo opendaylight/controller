@@ -22,7 +22,7 @@ public abstract class AbstractDataServiceTest {
 
     @Before
     public void setUp() {
-        ListeningExecutorService executor = MoreExecutors.sameThreadExecutor();
+        ListeningExecutorService executor = MoreExecutors.newDirectExecutorService();
         BindingBrokerTestFactory factory = new BindingBrokerTestFactory();
         factory.setExecutor(executor);
         factory.setStartWithParsedSchema(getStartWithSchema());

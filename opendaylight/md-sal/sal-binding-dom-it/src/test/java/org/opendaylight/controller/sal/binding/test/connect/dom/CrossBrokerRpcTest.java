@@ -74,7 +74,7 @@ public class CrossBrokerRpcTest {
     @Before
     public void setup() {
         BindingBrokerTestFactory testFactory = new BindingBrokerTestFactory();
-        testFactory.setExecutor(MoreExecutors.sameThreadExecutor());
+        testFactory.setExecutor(MoreExecutors.newDirectExecutorService());
         testFactory.setStartWithParsedSchema(true);
         testContext = testFactory.getTestContext();
 
@@ -122,7 +122,7 @@ public class CrossBrokerRpcTest {
         provisionRegistry.registerRpcImplementation(new DOMRpcImplementation() {
 
             @Override
-            public CheckedFuture<DOMRpcResult, DOMRpcException> invokeRpc(DOMRpcIdentifier rpc, NormalizedNode<?, ?> input) {
+            public CheckedFuture<DOMRpcResult, DOMRpcException> invokeRpc(final DOMRpcIdentifier rpc, final NormalizedNode<?, ?> input) {
                 ContainerNode result = testContext.getCodec().getCodecFactory().toNormalizedNodeRpcData(output);
                 return Futures.<DOMRpcResult, DOMRpcException>immediateCheckedFuture(new DefaultDOMRpcResult(result));
             }
@@ -135,7 +135,7 @@ public class CrossBrokerRpcTest {
         assertEquals(output, baResult.get().getResult());
     }
 
-    private ContainerNode toDomRpcInput(DataObject addFlowA) {
+    private ContainerNode toDomRpcInput(final DataObject addFlowA) {
         return testContext.getCodec().getCodecFactory().toNormalizedNodeRpcData(addFlowA);
     }
 
@@ -144,26 +144,26 @@ public class CrossBrokerRpcTest {
         testContext.close();
     }
 
-    private static org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier createBINodeIdentifier(TopLevelListKey listKey) {
+    private static org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier createBINodeIdentifier(final TopLevelListKey listKey) {
         return org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.builder().node(Top.QNAME)
                 .node(TopLevelList.QNAME)
                 .nodeWithKey(TopLevelList.QNAME, NODE_ID_QNAME, listKey.getName()).build();
     }
 
-    private Future<RpcResult<KnockKnockOutput>> knockResult(boolean success, String answer) {
+    private Future<RpcResult<KnockKnockOutput>> knockResult(final boolean success, final String answer) {
         KnockKnockOutput output = new KnockKnockOutputBuilder() //
                 .setAnswer(answer).build();
         RpcResult<KnockKnockOutput> result = RpcResultBuilder.<KnockKnockOutput>status(success).withResult(output).build();
         return Futures.immediateFuture(result);
     }
 
-    private static KnockKnockInputBuilder knockKnock(InstanceIdentifier<TopLevelList> listId) {
+    private static KnockKnockInputBuilder knockKnock(final InstanceIdentifier<TopLevelList> listId) {
         KnockKnockInputBuilder builder = new KnockKnockInputBuilder();
         builder.setKnockerId(listId);
         return builder;
     }
 
-    private ContainerNode toDomRpc(QName rpcName, KnockKnockInput knockInput) {
+    private ContainerNode toDomRpc(final QName rpcName, final KnockKnockInput knockInput) {
         return toDomRpcInput(knockInput);
     }
 }
