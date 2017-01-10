@@ -8,7 +8,6 @@
 
 package org.opendaylight.controller.cluster.datastore.shardmanager;
 
-import static akka.actor.ActorRef.noSender;
 import static akka.pattern.Patterns.ask;
 
 import akka.actor.ActorRef;
@@ -19,13 +18,10 @@ import akka.actor.PoisonPill;
 import akka.actor.Status;
 import akka.actor.SupervisorStrategy;
 import akka.actor.SupervisorStrategy.Directive;
+import akka.cluster.Cluster;
 import akka.cluster.ClusterEvent;
 import akka.cluster.ClusterEvent.MemberWeaklyUp;
 import akka.cluster.Member;
-import akka.cluster.ddata.DistributedData;
-import akka.cluster.ddata.ORMap;
-import akka.cluster.ddata.Replicator.Changed;
-import akka.cluster.ddata.Replicator.Subscribe;
 import akka.dispatch.Futures;
 import akka.dispatch.OnComplete;
 import akka.japi.Function;
@@ -57,10 +53,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import org.apache.commons.lang3.SerializationUtils;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedPersistentActorWithMetering;
+import org.opendaylight.controller.cluster.datastore.AbstractDataStore;
 import org.opendaylight.controller.cluster.datastore.ClusterWrapper;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext.Builder;
@@ -78,6 +74,7 @@ import org.opendaylight.controller.cluster.datastore.messages.ActorInitialized;
 import org.opendaylight.controller.cluster.datastore.messages.AddPrefixShardReplica;
 import org.opendaylight.controller.cluster.datastore.messages.AddShardReplica;
 import org.opendaylight.controller.cluster.datastore.messages.ChangeShardMembersVotingStatus;
+import org.opendaylight.controller.cluster.datastore.messages.CreatePrefixConfigShard;
 import org.opendaylight.controller.cluster.datastore.messages.CreatePrefixedShard;
 import org.opendaylight.controller.cluster.datastore.messages.CreateShard;
 import org.opendaylight.controller.cluster.datastore.messages.DatastoreSnapshot;
@@ -112,8 +109,14 @@ import org.opendaylight.controller.cluster.raft.messages.ServerChangeReply;
 import org.opendaylight.controller.cluster.raft.messages.ServerChangeStatus;
 import org.opendaylight.controller.cluster.raft.messages.ServerRemoved;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
+import org.opendaylight.controller.cluster.sharding.ShardConfigUpdateHandler;
+import org.opendaylight.controller.cluster.sharding.messages.InitConfigListener;
+import org.opendaylight.controller.cluster.sharding.messages.PrefixShardCreated;
+import org.opendaylight.controller.cluster.sharding.messages.PrefixShardRemoved;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeListener;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
+import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -168,8 +171,10 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     private final Set<String> shardReplicaOperationsInProgress = new HashSet<>();
 
     private final String persistenceId;
+    private final AbstractDataStore dataStore;
 
-    private final ActorRef replicator;
+    private ListenerRegistration<DOMDataTreeChangeListener> configListenerReg = null;
+    private ShardConfigUpdateHandler configUpdateHandler;
 
     ShardManager(AbstractShardManagerCreator<?> builder) {
         this.cluster = builder.getCluster();
@@ -195,16 +200,12 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
                 datastoreContextFactory.getBaseDatastoreContext().getDataStoreMXBeanType());
         shardManagerMBean.registerMBean();
 
-        replicator = DistributedData.get(context().system()).replicator();
-
+        dataStore = builder.getDistributedDataStore();
     }
 
+    @Override
     public void preStart() {
-        LOG.info("Starting Shardmanager {}", persistenceId);
-
-        final Subscribe<ORMap<PrefixShardConfiguration>> subscribe =
-                new Subscribe<>(ClusterUtils.CONFIGURATION_KEY, self());
-        replicator.tell(subscribe, noSender());
+        LOG.info("Starting ShardManager {}", persistenceId);
     }
 
     @Override
@@ -212,6 +213,10 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         LOG.info("Stopping ShardManager {}", persistenceId());
 
         shardManagerMBean.unregisterMBean();
+
+        if (configListenerReg != null) {
+            configListenerReg.close();
+        }
     }
 
     @Override
@@ -256,6 +261,12 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             onCreatePrefixedShard((CreatePrefixedShard) message);
         } else if (message instanceof AddPrefixShardReplica) {
             onAddPrefixShardReplica((AddPrefixShardReplica) message);
+        } else if (message instanceof PrefixShardCreated) {
+            onPrefixShardCreated((PrefixShardCreated) message);
+        } else if (message instanceof PrefixShardRemoved) {
+            onPrefixShardRemoved((PrefixShardRemoved) message);
+        } else if (message instanceof InitConfigListener) {
+            onInitConfigListener();
         } else if (message instanceof ForwardedAddServerReply) {
             ForwardedAddServerReply msg = (ForwardedAddServerReply)message;
             onAddServerReply(msg.shardInfo, msg.addServerReply, getSender(), msg.leaderPath,
@@ -286,11 +297,26 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             onGetLocalShardIds();
         } else if (message instanceof RunnableMessage) {
             ((RunnableMessage)message).run();
-        } else if (message instanceof Changed) {
-            onConfigChanged((Changed) message);
+        } else if (message instanceof CreatePrefixConfigShard) {
+            doCreatePrefixConfigShard((CreatePrefixConfigShard) message);
         } else {
             unknownMessage(message);
         }
+    }
+
+    private void onInitConfigListener() {
+        LOG.debug("{}: Initializing config listener.", cluster.getCurrentMemberName());
+
+        final org.opendaylight.mdsal.common.api.LogicalDatastoreType type =
+                org.opendaylight.mdsal.common.api.LogicalDatastoreType
+                        .valueOf(datastoreContextFactory.getBaseDatastoreContext().getLogicalStoreType().name());
+
+        if (configUpdateHandler != null) {
+            configUpdateHandler.close();
+        }
+
+        configUpdateHandler = new ShardConfigUpdateHandler(self());
+        configUpdateHandler.initListener(dataStore, type);
     }
 
     private void onShutDown() {
@@ -343,19 +369,6 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         }
     }
 
-    private void onConfigChanged(final Changed<ORMap<PrefixShardConfiguration>> change) {
-        LOG.debug("{}, ShardManager {} received config changed {}",
-                cluster.getCurrentMemberName(), persistenceId, change.dataValue().getEntries());
-
-        final Map<String, PrefixShardConfiguration> changedConfig = change.dataValue().getEntries();
-
-        final Map<DOMDataTreeIdentifier, PrefixShardConfiguration> newConfig =
-                changedConfig.values().stream().collect(
-                        Collectors.toMap(PrefixShardConfiguration::getPrefix, java.util.function.Function.identity()));
-
-        resolveConfig(newConfig);
-    }
-
     private void resolveConfig(final Map<DOMDataTreeIdentifier, PrefixShardConfiguration> newConfig) {
         LOG.debug("{} ShardManager : {}, resolving new shard configuration : {}",
                 cluster.getCurrentMemberName(), persistenceId, newConfig);
@@ -401,28 +414,6 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
     private void resolveUpdates(Set<DOMDataTreeIdentifier> maybeUpdatedConfigs) {
         LOG.debug("{} ShardManager : {}, resolving potentially updated configs : {}", maybeUpdatedConfigs);
-    }
-
-    private void doRemovePrefixedShard(final DOMDataTreeIdentifier prefix) {
-        LOG.debug("{} ShardManager : {}, removing prefix shard: {}",
-                cluster.getCurrentMemberName(), persistenceId, prefix);
-        final ShardIdentifier shardId = ClusterUtils.getShardIdentifier(cluster.getCurrentMemberName(), prefix);
-        final ShardInformation shard = localShards.remove(shardId.getShardName());
-
-        configuration.removePrefixShardConfiguration(prefix);
-
-        if (shard == null) {
-            LOG.warn("Received removal for unconfigured shard: {} , ignoring.. ", prefix);
-            return;
-        }
-
-        if (shard.getActor() != null) {
-            LOG.debug("{} : Sending Shutdown to Shard actor {}", persistenceId(), shard.getActor());
-            shard.getActor().tell(Shutdown.INSTANCE, self());
-        }
-        LOG.debug("{} : {} : Local Shard replica for shard {} has been removed", cluster.getCurrentMemberName(),
-                persistenceId(), shardId.getShardName());
-        persistShardList();
     }
 
     private void onRemoveServerReply(ActorRef originalSender, ShardIdentifier shardId, RemoveServerReply replyMsg,
@@ -581,13 +572,58 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         }
     }
 
+    private void doCreatePrefixConfigShard(final CreatePrefixConfigShard message) {
+        LOG.debug("{} - doCreatePrefixConfigShard.", cluster.getCurrentMemberName());
+
+        ShardIdentifier shardId = ClusterUtils.getShardIdentifier(cluster.getCurrentMemberName(),
+                LogicalDatastoreType.valueOf(message.getType().name()),
+                ClusterUtils.PREFIX_CONFIG_SHARD_ID);
+
+        final String shardName = shardId.getShardName();
+
+        if (localShards.containsKey(shardName)) {
+            LOG.warn("Prefix configuration shard already exists, aborting..");
+        }
+
+        final Builder builder = newShardDatastoreContextBuilder(shardName);
+        builder.logicalStoreType(datastoreContextFactory.getBaseDatastoreContext().getLogicalStoreType());
+        final DatastoreContext shardDatastoreContext = builder.build();
+
+        final ArrayList<MemberName> members = new ArrayList<>();
+        Cluster.get(context().system()).state().getMembers()
+                .forEach(member -> members.add(MemberName.forName(member.getRoles().iterator().next())));
+
+        final Map<String, String> peerAddresses = getPeerAddresses(shardName, members);
+//        final Map<String, String> peerAddresses = Collections.emptyMap();
+        final boolean isActiveMember = true;
+        LOG.debug("{} doCreatePrefixedShard: persistenceId(): {}, memberNames: "
+                        + "{}, peerAddresses: {}, isActiveMember: {}",
+                shardId, persistenceId(), Collections.emptyList(),
+                peerAddresses, isActiveMember);
+
+
+
+        final ShardInformation info = new ShardInformation(shardName, shardId, peerAddresses,
+                shardDatastoreContext, Shard.builder(), peerAddressResolver);
+        info.setActiveMember(isActiveMember);
+        localShards.put(info.getShardName(), info);
+
+        if (schemaContext != null) {
+            info.setActor(newShardActor(schemaContext, info));
+        }
+    }
+
+    private void onPrefixShardCreated(final PrefixShardCreated message) {
+        doCreatePrefixedShard(message.getConfiguration());
+    }
+
     private void doCreatePrefixedShard(final CreatePrefixedShard createPrefixedShard) {
         doCreatePrefixedShard(createPrefixedShard.getConfig());
         // do not replicate on this level
     }
 
     private void doCreatePrefixedShard(final PrefixShardConfiguration config) {
-        LOG.debug("doCreatePrefixShard : {}", config.getPrefix());
+        LOG.debug("{}: doCreatePrefixShard : {}", cluster.getCurrentMemberName(), config.getPrefix());
 
         final ShardIdentifier shardId = ClusterUtils.getShardIdentifier(cluster.getCurrentMemberName(),
                 config.getPrefix());
@@ -631,7 +667,31 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         if (schemaContext != null) {
             info.setActor(newShardActor(schemaContext, info));
         }
+    }
 
+    private void onPrefixShardRemoved(final PrefixShardRemoved message) {
+        doRemovePrefixedShard(message.getPrefix());
+    }
+
+    private void doRemovePrefixedShard(final DOMDataTreeIdentifier prefix) {
+        LOG.debug("{} ShardManager : {}, removing prefix shard: {}",
+                cluster.getCurrentMemberName(), persistenceId, prefix);
+        final ShardIdentifier shardId = ClusterUtils.getShardIdentifier(cluster.getCurrentMemberName(), prefix);
+        final ShardInformation shard = localShards.remove(shardId.getShardName());
+
+        configuration.removePrefixShardConfiguration(prefix);
+
+        if (shard == null) {
+            LOG.warn("Received removal for unconfigured shard: {} , ignoring.. ", prefix);
+            return;
+        }
+
+        if (shard.getActor() != null) {
+            LOG.debug("{} : Sending Shutdown to Shard actor {}", persistenceId(), shard.getActor());
+            shard.getActor().tell(Shutdown.INSTANCE, self());
+        }
+        LOG.debug("{} : {} : Local Shard replica for shard {} has been removed", cluster.getCurrentMemberName(),
+                persistenceId(), shardId.getShardName());
         persistShardList();
     }
 
@@ -1606,10 +1666,20 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     }
 
     private void findLocalShard(FindLocalShard message) {
+        LOG.debug("{} - findLocalShard : {}", cluster.getCurrentMemberName(), message.getShardName());
+
         final ShardInformation shardInformation = localShards.get(message.getShardName());
 
         if (shardInformation == null) {
             getSender().tell(new LocalShardNotFound(message.getShardName()), getSelf());
+
+            StringBuilder aa = new StringBuilder();
+            localShards.keySet().forEach(s -> {
+                aa.append(s);
+                aa.append(",");
+            });
+
+            LOG.debug("{} - findLocalShard : {}, shards present: {}", cluster.getCurrentMemberName(), message.getShardName(), aa.toString());
             return;
         }
 
