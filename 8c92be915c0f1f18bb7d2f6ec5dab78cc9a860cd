@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a622d24_8f46bb4d",
+        "filename": "opendaylight/md-sal/sal-clustering-config/src/main/resources/initial/akka.conf",
+        "patchSetId": 2
+      },
+      "lineNbr": 4,
+      "author": {
+        "id": 2046
+      },
+      "writtenOn": "2017-01-10T17:40:33Z",
+      "side": 1,
+      "message": "Turns out Bug 7493 was caused by configure-cluster script being ignorant of such semantics, and just assuming \"akka.tcp\" would work forever.",
+      "range": {
+        "startLine": 4,
+        "startChar": 2,
+        "endLine": 4,
+        "endChar": 55
+      },
+      "revId": "8c92be915c0f1f18bb7d2f6ec5dab78cc9a860cd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_cf7b938a",
+        "filename": "opendaylight/md-sal/sal-clustering-config/src/main/resources/initial/akka.conf",
+        "patchSetId": 2
+      },
+      "lineNbr": 5,
+      "author": {
+        "id": 2046
+      },
+      "writtenOn": "2017-01-10T17:40:33Z",
+      "side": 1,
+      "message": "This might be incorrect. If that is true, this Change can be Abandoned.",
+      "range": {
+        "startLine": 5,
+        "startChar": 30,
+        "endLine": 5,
+        "endChar": 68
+      },
+      "revId": "8c92be915c0f1f18bb7d2f6ec5dab78cc9a860cd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
