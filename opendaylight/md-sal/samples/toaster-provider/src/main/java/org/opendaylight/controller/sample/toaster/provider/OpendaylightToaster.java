@@ -217,7 +217,7 @@ public class OpendaylightToaster extends AbstractMXBean
         ListenableFuture<Optional<Toaster>> readFuture = tx.read(OPERATIONAL, TOASTER_IID);
 
         final ListenableFuture<Void> commitFuture =
-            Futures.transform( readFuture, (AsyncFunction<Optional<Toaster>, Void>) toasterData -> {
+            Futures.transformAsync( readFuture, (AsyncFunction<Optional<Toaster>, Void>) toasterData -> {
 
                     ToasterStatus toasterStatus = ToasterStatus.Up;
                     if( toasterData.isPresent() ) {

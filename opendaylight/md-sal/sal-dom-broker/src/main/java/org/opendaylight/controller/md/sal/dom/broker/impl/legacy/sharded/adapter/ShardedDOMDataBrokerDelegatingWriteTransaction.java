@@ -10,7 +10,6 @@ package org.opendaylight.controller.md.sal.dom.broker.impl.legacy.sharded.adapte
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.util.concurrent.AsyncFunction;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -64,7 +63,7 @@ class ShardedDOMDataBrokerDelegatingWriteTransaction implements DOMDataWriteTran
 
     @Override
     public ListenableFuture<RpcResult<TransactionStatus>> commit() {
-        return Futures.transform(submit(), (AsyncFunction<Void, RpcResult<TransactionStatus>>) input -> SUCCESS_FUTURE);
+        return Futures.transformAsync(submit(), input -> SUCCESS_FUTURE);
     }
 
     @Override
