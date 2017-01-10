@@ -31,12 +31,20 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.typesafe.config.ConfigFactory;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -53,6 +61,7 @@ import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext.Builder;
 import org.opendaylight.controller.cluster.datastore.DistributedDataStore;
 import org.opendaylight.controller.cluster.datastore.IntegrationTestKit;
+import org.opendaylight.controller.cluster.datastore.node.utils.stream.SerializationUtils;
 import org.opendaylight.controller.cluster.datastore.utils.ClusterUtils;
 import org.opendaylight.controller.cluster.sharding.DistributedShardFactory.DistributedShardRegistration;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
@@ -108,6 +117,7 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
                             org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.CONFIGURATION);
 
     private DistributedDataStore leaderDistributedDataStore;
+    private DistributedDataStore operDistributedDatastore;
     private IntegrationTestKit leaderTestKit;
 
     private DistributedShardedDOMDataTree leaderShardFactory;
@@ -131,12 +141,26 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
     }
 
     @After
-    public void tearDown() {
+    public void tearDown() throws Exception {
         if (leaderDistributedDataStore != null) {
             leaderDistributedDataStore.close();
         }
 
+        if (operDistributedDatastore != null) {
+            operDistributedDatastore.close();
+        }
+
         JavaTestKit.shutdownActorSystem(leaderSystem);
+
+        deleteJournal();
+    }
+
+    private static void deleteJournal() throws IOException {
+        File journal = new File("journal");
+
+        if (journal.exists()) {
+            FileUtils.deleteDirectory(journal);
+        }
     }
 
     private void initEmptyDatastore(final String type) {
@@ -151,9 +175,27 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
                 leaderDistributedDataStore);
     }
 
+    private void initEmptyDatastores() {
+        leaderTestKit = new IntegrationTestKit(leaderSystem, leaderDatastoreContextBuilder);
+
+        leaderDistributedDataStore =
+                leaderTestKit.setupDistributedDataStoreWithoutConfig("config", SchemaContextHelper.full(),
+                        org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.CONFIGURATION);
+
+        operDistributedDatastore =
+                leaderTestKit.setupDistributedDataStoreWithoutConfig("operational", SchemaContextHelper.full(),
+                        org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.OPERATIONAL);
+
+        leaderShardFactory = new DistributedShardedDOMDataTree(leaderSystemProvider,
+                operDistributedDatastore,
+                leaderDistributedDataStore);
+
+        leaderShardFactory.init();
+    }
+
     @Test
     public void testWritesIntoDefaultShard() throws Exception {
-        initEmptyDatastore("config");
+        initEmptyDatastores();
 
         final DOMDataTreeIdentifier configRoot =
                 new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, YangInstanceIdentifier.EMPTY);
@@ -178,7 +220,7 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
 
     @Test
     public void testSingleNodeWrites() throws Exception {
-        initEmptyDatastore("config");
+        initEmptyDatastores();
 
         final DistributedShardRegistration shardRegistration =
                 leaderShardFactory
@@ -222,11 +264,13 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
 
         verifyNoMoreInteractions(mockedDataTreeListener);
 
+        shardRegistration.close().get();
+
     }
 
     @Test
     public void testMultipleWritesIntoSingleMapEntry() throws Exception {
-        initEmptyDatastore("config");
+        initEmptyDatastores();
 
         final DistributedShardRegistration shardRegistration =
                 leaderShardFactory
@@ -309,9 +353,9 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
     // top level shard at TEST element, with subshards on each outer-list map entry
     @Test
     public void testMultipleShardLevels() throws Exception {
-        initEmptyDatastore("config");
+        initEmptyDatastores();
 
-        final DistributedShardRegistration testShardId =
+        final DistributedShardRegistration testShardReg =
                 leaderShardFactory.createDistributedShard(TEST_ID, SINGLE_MEMBER)
                         .checkedGet();
 
@@ -387,38 +431,17 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
                                 .withValue(createOuterEntries(listSize, "testing-values")).build())
                         .build();
 
+        for (final DistributedShardRegistration registration : registrations) {
+            registration.close().get();
+        }
+        testShardReg.close().get();
+
         assertEquals(expected, actual);
     }
 
     @Test
-    public void testDistributedData() throws Exception {
-        initEmptyDatastore("config");
-
-        leaderShardFactory.createDistributedShard(TEST_ID, Lists.newArrayList(AbstractTest.MEMBER_NAME)).checkedGet();
-        leaderShardFactory.createDistributedShard(
-                new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, TestModel.OUTER_CONTAINER_PATH),
-                Lists.newArrayList(AbstractTest.MEMBER_NAME)).checkedGet();
-        leaderShardFactory.createDistributedShard(
-                new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, TestModel.INNER_LIST_PATH),
-                Lists.newArrayList(AbstractTest.MEMBER_NAME)).checkedGet();
-        leaderShardFactory.createDistributedShard(
-                new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, TestModel.JUNK_PATH),
-                Lists.newArrayList(AbstractTest.MEMBER_NAME)).checkedGet();
-
-        leaderTestKit.waitUntilLeader(leaderDistributedDataStore.getActorContext(),
-                ClusterUtils.getCleanShardName(TestModel.TEST_PATH));
-        leaderTestKit.waitUntilLeader(leaderDistributedDataStore.getActorContext(),
-                ClusterUtils.getCleanShardName(TestModel.OUTER_CONTAINER_PATH));
-        leaderTestKit.waitUntilLeader(leaderDistributedDataStore.getActorContext(),
-                ClusterUtils.getCleanShardName(TestModel.INNER_LIST_PATH));
-        leaderTestKit.waitUntilLeader(leaderDistributedDataStore.getActorContext(),
-                ClusterUtils.getCleanShardName(TestModel.JUNK_PATH));
-
-    }
-
-    @Test
     public void testMultipleRegistrationsAtOnePrefix() throws Exception {
-        initEmptyDatastore("config");
+        initEmptyDatastores();
 
         for (int i = 0; i < 10; i++) {
             LOG.debug("Round {}", i);
@@ -438,6 +461,30 @@ public class DistributedShardedDOMDataTreeTest extends AbstractTest {
                     ClusterUtils.getCleanShardName(TestModel.TEST_PATH));
 
         }
+    }
+
+    @Test
+    public void testPath() throws Exception {
+
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        DataOutputStream dataOutputStream = new DataOutputStream(outputStream);
+        String serialized = null;
+        try {
+            SerializationUtils.serializePath(TEST_ID.getRootIdentifier(), dataOutputStream);
+            serialized = new String(outputStream.toByteArray(), StandardCharsets.ISO_8859_1);
+        } finally {
+            dataOutputStream.close();
+            outputStream.close();
+        }
+
+        LOG.warn("Serialized value: {}", serialized);
+
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(serialized.getBytes(StandardCharsets.ISO_8859_1));
+        DataInputStream dataInputStream = new DataInputStream(inputStream);
+        YangInstanceIdentifier deserialized = SerializationUtils.deserializePath(dataInputStream);
+
+        assertEquals(TEST_ID.getRootIdentifier(), deserialized);
+
     }
 
     private static Collection<MapEntryNode> createOuterEntries(final int amount, final String valuePrefix) {
