@@ -34,6 +34,7 @@ import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStats
 import org.opendaylight.controller.cluster.datastore.messages.DatastoreSnapshot;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionChain;
@@ -112,6 +113,30 @@ public class IntegrationTestKit extends ShardTestKit {
         getDatastoreContextBuilder().dataStoreName(typeName);
 
         final DatastoreContext datastoreContext = getDatastoreContextBuilder().build();
+
+        final DatastoreContextFactory mockContextFactory = Mockito.mock(DatastoreContextFactory.class);
+        Mockito.doReturn(datastoreContext).when(mockContextFactory).getBaseDatastoreContext();
+        Mockito.doReturn(datastoreContext).when(mockContextFactory).getShardDatastoreContext(Mockito.anyString());
+
+        final DistributedDataStore dataStore = new DistributedDataStore(getSystem(), cluster,
+                configuration, mockContextFactory, restoreFromSnapshot);
+
+        dataStore.onGlobalContextUpdated(schemaContext);
+
+        datastoreContextBuilder = DatastoreContext.newBuilderFrom(datastoreContext);
+        return dataStore;
+    }
+
+    public DistributedDataStore setupDistributedDataStoreWithoutConfig(final String typeName,
+                                                                       final SchemaContext schemaContext,
+                                                                       final LogicalDatastoreType storeType) {
+        final ClusterWrapper cluster = new ClusterWrapperImpl(getSystem());
+        final ConfigurationImpl configuration = new ConfigurationImpl(new EmptyModuleShardConfigProvider());
+
+        getDatastoreContextBuilder().dataStoreName(typeName);
+
+        final DatastoreContext datastoreContext =
+                getDatastoreContextBuilder().logicalStoreType(storeType).build();
 
         final DatastoreContextFactory mockContextFactory = Mockito.mock(DatastoreContextFactory.class);
         Mockito.doReturn(datastoreContext).when(mockContextFactory).getBaseDatastoreContext();
