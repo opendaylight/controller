@@ -136,8 +136,7 @@ public class ConcurrentDOMDataBrokerTest {
         doReturn(Futures.immediateFuture(null)).when(mockCohort2).preCommit();
         doReturn(Futures.immediateFuture(null)).when(mockCohort2).commit();
 
-        CheckedFuture<Void, TransactionCommitFailedException> future = coordinator.submit(
-                transaction, Arrays.asList(mockCohort1, mockCohort2));
+        ListenableFuture<Void> future = coordinator.submit(transaction, Arrays.asList(mockCohort1, mockCohort2));
 
         final CountDownLatch doneLatch = new CountDownLatch(1);
         final AtomicReference<Throwable> caughtEx = new AtomicReference<>();
@@ -152,7 +151,7 @@ public class ConcurrentDOMDataBrokerTest {
                 caughtEx.set(failure);
                 doneLatch.countDown();
             }
-        });
+        }, MoreExecutors.directExecutor());
 
         asyncCanCommitContinue.countDown();
 

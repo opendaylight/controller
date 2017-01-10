@@ -14,6 +14,7 @@ import com.google.common.util.concurrent.AsyncFunction;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.SettableFuture;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -129,9 +130,10 @@ class ShardProxyTransaction implements DOMDataTreeShardWriteTransaction {
         final AsyncFunction<Void, Void> prepareFunction = input -> commit();
 
         // transform validate into prepare
-        final ListenableFuture<Void> prepareFuture = Futures.transform(validate(), validateFunction);
+        final ListenableFuture<Void> prepareFuture = Futures.transformAsync(validate(), validateFunction,
+            MoreExecutors.directExecutor());
         // transform prepare into commit and return as submit result
-        return Futures.transform(prepareFuture, prepareFunction);
+        return Futures.transformAsync(prepareFuture, prepareFunction, MoreExecutors.directExecutor());
     }
 
     @Override
@@ -153,7 +155,7 @@ class ShardProxyTransaction implements DOMDataTreeShardWriteTransaction {
             public void onFailure(final Throwable throwable) {
                 ret.setException(throwable);
             }
-        });
+        }, MoreExecutors.directExecutor());
 
         return ret;
     }
@@ -177,7 +179,7 @@ class ShardProxyTransaction implements DOMDataTreeShardWriteTransaction {
             public void onFailure(final Throwable throwable) {
                 ret.setException(throwable);
             }
-        });
+        }, MoreExecutors.directExecutor());
 
         return ret;
     }
@@ -201,7 +203,7 @@ class ShardProxyTransaction implements DOMDataTreeShardWriteTransaction {
             public void onFailure(final Throwable throwable) {
                 ret.setException(throwable);
             }
-        });
+        }, MoreExecutors.directExecutor());
 
         return ret;
     }
