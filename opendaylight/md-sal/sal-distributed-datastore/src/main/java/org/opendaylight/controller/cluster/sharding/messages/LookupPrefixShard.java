@@ -8,21 +8,24 @@
 
 package org.opendaylight.controller.cluster.sharding.messages;
 
+import com.google.common.annotations.Beta;
 import com.google.common.base.Preconditions;
+import java.io.Serializable;
 import org.opendaylight.controller.cluster.sharding.ShardedDataTreeActor;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
 
 /**
- * Sent to the local {@link ShardedDataTreeActor} to notify of a shard removal on the local node.
- * The local actor should update the configuration so that the change is picked up by other CDS Node Agents and
- * backend ShardManagers.
+ * Sent to the local {@link ShardedDataTreeActor} when there was a shard created
+ * on the local node. The local actor should notify the remote actors with {@link PrefixShardCreated} which should
+ * create the required frontend/backend shards.
  */
-public class RemovePrefixShard {
+@Beta
+public class LookupPrefixShard implements Serializable {
+    private static final long serialVersionUID = 1L;
 
     private final DOMDataTreeIdentifier prefix;
 
-    public RemovePrefixShard(final DOMDataTreeIdentifier prefix) {
-
+    public LookupPrefixShard(final DOMDataTreeIdentifier prefix) {
         this.prefix = Preconditions.checkNotNull(prefix);
     }
 
@@ -30,10 +33,12 @@ public class RemovePrefixShard {
         return prefix;
     }
 
+
     @Override
     public String toString() {
-        return "RemovePrefixShard{"
-                + "prefix=" + prefix
+        return "LookupPrefixShard{"
+                + "prefix="
+                + prefix
                 + '}';
     }
 }

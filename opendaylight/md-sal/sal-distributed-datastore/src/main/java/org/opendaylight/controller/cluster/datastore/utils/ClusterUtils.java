@@ -8,12 +8,8 @@
 
 package org.opendaylight.controller.cluster.datastore.utils;
 
-import akka.cluster.ddata.Key;
-import akka.cluster.ddata.ORMap;
-import akka.cluster.ddata.ORMapKey;
 import java.util.Map;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
-import org.opendaylight.controller.cluster.datastore.config.PrefixShardConfiguration;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
@@ -26,12 +22,27 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdent
  */
 public class ClusterUtils {
 
-    // key for replicated configuration key
-    public static final Key<ORMap<PrefixShardConfiguration>> CONFIGURATION_KEY =
-            ORMapKey.create("prefix-shard-configuration-config");
+    // id for the shard used to store prefix configuration
+    public static final String PREFIX_CONFIG_SHARD_ID = "prefix-configuration-shard";
 
-    public static final Key<ORMap<PrefixShardConfiguration>> OPERATIONAL_KEY =
-            ORMapKey.create("prefix-shard-configuration-oper");
+    public static final QName PREFIX_SHARDS_QNAME =
+            QName.create("urn:opendaylight:params:xml:ns:yang:controller:md:sal:clustering:prefix-shard-configuration",
+                    "2017-01-10", "prefix-shards");
+    public static final QName SHARD_LIST_QNAME =
+            QName.create("urn:opendaylight:params:xml:ns:yang:controller:md:sal:clustering:prefix-shard-configuration",
+                    "2017-01-10", "shard");
+    public static final QName SHARD_PREFIX_QNAME =
+            QName.create("urn:opendaylight:params:xml:ns:yang:controller:md:sal:clustering:prefix-shard-configuration",
+                    "2017-01-10", "prefix");
+    public static final QName SHARD_REPLICAS_QNAME =
+            QName.create("urn:opendaylight:params:xml:ns:yang:controller:md:sal:clustering:prefix-shard-configuration",
+                    "2017-01-10", "replicas");
+    public static final QName SHARD_REPLICA_QNAME =
+            QName.create("urn:opendaylight:params:xml:ns:yang:controller:md:sal:clustering:prefix-shard-configuration",
+                "2017-01-10", "replica");
+
+    public static final YangInstanceIdentifier PREFIX_SHARDS_PATH = YangInstanceIdentifier.of(PREFIX_SHARDS_QNAME);
+    public static final YangInstanceIdentifier SHARD_LIST_PATH = PREFIX_SHARDS_PATH.node(SHARD_LIST_QNAME);
 
     public static ShardIdentifier getShardIdentifier(final MemberName memberName, final DOMDataTreeIdentifier prefix) {
         final String type;
@@ -47,6 +58,23 @@ public class ClusterUtils {
         }
 
         return ShardIdentifier.create(getCleanShardName(prefix.getRootIdentifier()), memberName, type);
+    }
+
+    public static ShardIdentifier getShardIdentifier(final MemberName memberName, final LogicalDatastoreType dsType,
+                                                     final String id) {
+        final String type;
+        switch (dsType) {
+            case OPERATIONAL:
+                type = "operational";
+                break;
+            case CONFIGURATION:
+                type = "config";
+                break;
+            default:
+                type = "unknown";
+        }
+
+        return ShardIdentifier.create(id, memberName, type);
     }
 
     /**
@@ -79,14 +107,6 @@ public class ClusterUtils {
             builder.append("!");
         });
         return builder.toString();
-    }
-
-    public static Key<ORMap<PrefixShardConfiguration>> getReplicatorKey(LogicalDatastoreType type) {
-        if (LogicalDatastoreType.CONFIGURATION.equals(type)) {
-            return CONFIGURATION_KEY;
-        } else {
-            return OPERATIONAL_KEY;
-        }
     }
 
     public static org.opendaylight.mdsal.common.api.LogicalDatastoreType toMDSalApi(

@@ -70,7 +70,7 @@ class DistributedShardFrontend implements ReadableWriteableDOMDataTreeShard {
     @Override
     public DOMDataTreeShardProducer createProducer(final Collection<DOMDataTreeIdentifier> paths) {
         for (final DOMDataTreeIdentifier prodPrefix : paths) {
-            Preconditions.checkArgument(paths.contains(prodPrefix), "Prefix %s is not contained under shard root",
+            Preconditions.checkArgument(shardRoot.contains(prodPrefix), "Prefix %s is not contained under shard root",
                     prodPrefix, paths);
         }
 

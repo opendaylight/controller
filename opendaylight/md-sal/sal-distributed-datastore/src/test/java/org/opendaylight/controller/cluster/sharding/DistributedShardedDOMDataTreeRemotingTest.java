@@ -289,10 +289,10 @@ public class DistributedShardedDOMDataTreeRemotingTest extends AbstractTest {
 
         LOG.debug("Closing registrations");
 
-        reg1.close();
-        reg2.close();
-        reg3.close();
-        reg4.close();
+        reg1.close().get();
+        reg2.close().get();
+        reg3.close().get();
+        reg4.close().get();
 
         waitUntilShardIsDown(leaderDistributedDataStore.getActorContext(),
                 ClusterUtils.getCleanShardName(TestModel.TEST_PATH));
@@ -350,5 +350,6 @@ public class DistributedShardedDOMDataTreeRemotingTest extends AbstractTest {
             waitUntilShardIsDown(followerDistributedDataStore.getActorContext(),
                     ClusterUtils.getCleanShardName(TestModel.TEST_PATH));
         }
+
     }
 }
