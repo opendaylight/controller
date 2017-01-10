@@ -67,6 +67,7 @@ import org.opendaylight.controller.cluster.datastore.ClusterWrapperImpl;
 import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.DatastoreContextFactory;
+import org.opendaylight.controller.cluster.datastore.DistributedDataStore;
 import org.opendaylight.controller.cluster.datastore.Shard;
 import org.opendaylight.controller.cluster.datastore.ShardManager.SchemaContextModules;
 import org.opendaylight.controller.cluster.datastore.config.ConfigurationImpl;
@@ -168,7 +169,8 @@ public class ShardManagerTest extends AbstractShardManagerTest {
     }
 
     private TestShardManager.Builder newTestShardMgrBuilderWithMockShardActor(ActorRef shardActor) {
-        return TestShardManager.builder(datastoreContextBuilder).shardActor(shardActor);
+        return TestShardManager.builder(datastoreContextBuilder).shardActor(shardActor)
+                .distributedDataStore(mock(DistributedDataStore.class));
     }
 
 
