@@ -9,6 +9,7 @@ package org.opendaylight.controller.sal.binding.test.connect.dom;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
@@ -106,7 +107,7 @@ public class CrossBrokerMountPointTest {
     @Before
     public void setup() {
         final BindingBrokerTestFactory testFactory = new BindingBrokerTestFactory();
-        testFactory.setExecutor(MoreExecutors.sameThreadExecutor());
+        testFactory.setExecutor(MoreExecutors.newDirectExecutorService());
         testFactory.setStartWithParsedSchema(true);
         testContext = testFactory.getTestContext();
 

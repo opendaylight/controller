@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.md.sal.binding.compat;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
 import org.opendaylight.yangtools.yang.binding.Notification;
 import org.slf4j.Logger;
@@ -90,7 +90,7 @@ class NotifyTask implements Runnable {
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
+        return MoreObjects.toStringHelper(this)
                 .add("listener", registration)
                 .add("notification", notification.getClass())
                 .toString();
