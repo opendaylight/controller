@@ -29,7 +29,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
     <mdsal.version>1.5.0-SNAPSHOT</mdsal.version>
     <restconf.version>1.5.0-SNAPSHOT</restconf.version>
     <yangtools.version>1.1.0-SNAPSHOT</yangtools.version>
-    <dlux.version>0.5.0-SNAPSHOT</dlux.version>
+    <dluxapps.version>0.5.0-SNAPSHOT</dluxapps.version>
     <configfile.directory>etc/opendaylight/karaf</configfile.directory>
   </properties>
 
@@ -91,10 +91,10 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
       <scope>runtime</scope>
     </dependency>
     <dependency>
-      <groupId>org.opendaylight.dlux</groupId>
-      <artifactId>features-dlux</artifactId>
+      <groupId>org.opendaylight.dluxapps</groupId>
+      <artifactId>features-dluxapps</artifactId>
       <classifier>features</classifier>
-      <version>${dlux.version}</version>
+      <version>${dluxapps.version}</version>
       <type>xml</type>
       <scope>runtime</scope>
     </dependency>
