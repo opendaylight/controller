@@ -28,6 +28,7 @@ import org.opendaylight.controller.cluster.datastore.jmx.mbeans.DatastoreInfoMXB
 import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot;
 import org.opendaylight.controller.cluster.datastore.shardmanager.ShardManagerCreator;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
+import org.opendaylight.controller.cluster.datastore.utils.ClusterUtils;
 import org.opendaylight.controller.cluster.datastore.utils.Dispatchers;
 import org.opendaylight.controller.cluster.datastore.utils.PrimaryShardInfoFutureCache;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker;
@@ -94,7 +95,8 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
                 .datastoreContextFactory(datastoreContextFactory)
                 .waitTillReadyCountDownLatch(waitTillReadyCountDownLatch)
                 .primaryShardInfoCache(primaryShardInfoCache)
-                .restoreFromSnapshot(restoreFromSnapshot);
+                .restoreFromSnapshot(restoreFromSnapshot)
+                .distributedDataStore(this);
 
         actorContext = new ActorContext(actorSystem, createShardManager(actorSystem, creator, shardDispatcher,
                 shardManagerId), cluster, configuration, datastoreContextFactory.getBaseDatastoreContext(),
@@ -307,6 +309,21 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
         listenerRegistrationProxy.init(shardName);
 
         return (ListenerRegistration<L>) listenerRegistrationProxy;
+    }
+
+    @SuppressWarnings("unchecked")
+    public <L extends DOMDataTreeChangeListener> ListenerRegistration<L> registerShardConfigListener(
+            final YangInstanceIdentifier internalPath,
+            final DOMDataTreeChangeListener delegate) {
+        Preconditions.checkNotNull(delegate, "delegate should not be null");
+
+        LOG.debug("Registering a listener for the configuration shard: {}", internalPath);
+
+        final DataTreeChangeListenerProxy<DOMDataTreeChangeListener> proxy =
+                new DataTreeChangeListenerProxy<>(actorContext, delegate, internalPath);
+        proxy.init(ClusterUtils.PREFIX_CONFIG_SHARD_ID);
+
+        return (ListenerRegistration<L>) proxy;
     }
 
 }
