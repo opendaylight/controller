@@ -91,17 +91,15 @@ abstract class AbstractDOMBroker extends AbstractDOMTransactionFactory<DOMStore>
         }
     }
 
-    private boolean isSupported(Map<LogicalDatastoreType, DOMStore> datastores,
+    private static boolean isSupported(Map<LogicalDatastoreType, DOMStore> datastores,
             Class<?> expDOMStoreInterface) {
-        boolean supported = true;
         for (DOMStore ds : datastores.values()) {
             if (!expDOMStoreInterface.isAssignableFrom(ds.getClass())) {
-                supported = false;
-                break;
+                return false;
             }
         }
 
-        return supported;
+        return true;
     }
 
     public void setCloseable(final AutoCloseable closeable) {
