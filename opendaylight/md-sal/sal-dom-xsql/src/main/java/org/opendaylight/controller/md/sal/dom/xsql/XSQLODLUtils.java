@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.model.api.AugmentationSchema;
@@ -46,11 +45,11 @@ public class XSQLODLUtils {
         types.put(Status.class, Status.class);
     }
 
-    public static boolean isColumnType(Class<?> cls) {
+    public static boolean isColumnType(final Class<?> cls) {
         return types.containsKey(cls);
     }
 
-    public static String getTableName(Object odlNode) {
+    public static String getTableName(final Object odlNode) {
         if (odlNode instanceof Module) {
             return ((Module) odlNode).getNamespace().toString();
         } else if (odlNode instanceof DataSchemaNode) {
@@ -62,7 +61,7 @@ public class XSQLODLUtils {
         return null;
     }
 
-    public static String extractTableName(SchemaPath path) {
+    public static String extractTableName(final SchemaPath path) {
         List<QName> lst = path.getPath();
         StringBuffer name = new StringBuffer();
         int i = 0;
@@ -76,7 +75,7 @@ public class XSQLODLUtils {
         return name.toString();
     }
 
-    public static String getBluePrintName(Object odlNode){
+    public static String getBluePrintName(final Object odlNode){
         if (odlNode instanceof Module) {
             return ((Module) odlNode).getNamespace().toString();
         } else if (odlNode instanceof DataSchemaNode) {
@@ -86,7 +85,7 @@ public class XSQLODLUtils {
         return null;
     }
 
-    public static String getODLNodeName(Object odlNode) {
+    public static String getODLNodeName(final Object odlNode) {
         if (odlNode instanceof Module) {
             return ((Module) odlNode).getNamespace().toString();
         } else if (odlNode instanceof DataSchemaNode) {
@@ -97,12 +96,12 @@ public class XSQLODLUtils {
         return null;
     }
 
-    public static List<QName> getPath(Object odlNode) {
+    public static List<QName> getPath(final Object odlNode) {
         return ((DataSchemaNode) odlNode).getPath().getPath();
     }
 
 
-    public static String getODLTableName(Object odlNode) {
+    public static String getODLTableName(final Object odlNode) {
         if (odlNode instanceof Module) {
             return ((Module) odlNode).getNamespace().toString();
         } else if (odlNode instanceof DataSchemaNode) {
@@ -111,29 +110,29 @@ public class XSQLODLUtils {
         return null;
     }
 
-    public static String getNodeNameFromDSN(Object o) {
+    public static String getNodeNameFromDSN(final Object o) {
         DataSchemaNode node = (DataSchemaNode) o;
         String nodeName = node.getQName().toString();
         int index = nodeName.lastIndexOf(")");
         return nodeName.substring(index + 1);
     }
 
-    public static boolean isModule(Object o) {
+    public static boolean isModule(final Object o) {
         if (o instanceof Module) {
             return true;
         }
         return false;
     }
 
-    public static boolean createOpenDaylightCache(XSQLBluePrint bluePrint,Object module) {
+    public static boolean createOpenDaylightCache(final XSQLBluePrint bluePrint, final Module module) {
         XSQLBluePrintNode node = new XSQLBluePrintNode(module, 0,null);
         bluePrint.addToBluePrintCache(node,null);
-        collectODL(bluePrint, node, ((Module) module).getChildNodes(), 1);
+        collectODL(bluePrint, node, module.getChildNodes(), 1);
         return true;
     }
 
-    private static void collectODL(XSQLBluePrint bluePrint,
-        XSQLBluePrintNode parent, Collection<DataSchemaNode> nodes, int level) {
+    private static void collectODL(final XSQLBluePrint bluePrint,
+        final XSQLBluePrintNode parent, final Collection<DataSchemaNode> nodes, int level) {
         if (nodes == null) {
             return;
         }
@@ -177,7 +176,7 @@ public class XSQLODLUtils {
     public static Map<String, Field> refFieldsCache =
         new HashMap<String, Field>();
 
-    public static Field findField(Class<?> c, String name) {
+    public static Field findField(final Class<?> c, final String name) {
         if (c == null) {
             return null;
         }
@@ -207,7 +206,7 @@ public class XSQLODLUtils {
     }
 
 
-    public static Object get(Object o, String name) {
+    public static Object get(final Object o, final String name) {
         try {
             Class<?> c = o.getClass();
             Field f = findField(c, name);
@@ -218,26 +217,27 @@ public class XSQLODLUtils {
         return null;
     }
 
-    public static List<Object> getMChildren(Object o) {
+    public static List<Object> getMChildren(final Object o) {
         Map<?, ?> children = getChildren(o);
         List<Object> result = new LinkedList<Object>();
         for (Object val : children.values()) {
-            result.add((Object) val);
+            result.add(val);
         }
         return result;
     }
 
-    public static Map<?, ?> getChildren(Object o) {
+    public static Map<?, ?> getChildren(final Object o) {
         return (Map<?, ?>) get(o, "children");
     }
 
-    public static Collection<?> getChildrenCollection(Object o) {
+    public static Collection<?> getChildrenCollection(final Object o) {
         Object value = get(o, "children");
-        if(value==null)
+        if(value==null) {
             return Collections.emptyList();
-        if(value instanceof Map)
+        }
+        if(value instanceof Map) {
             return ((Map<?,?>)value).values();
-        else
+        } else
         if(value instanceof Collection){
             return (Collection<?>)value;
         }else{
@@ -246,11 +246,11 @@ public class XSQLODLUtils {
         }
     }
 
-    public static Object getValue(Object o) {
+    public static Object getValue(final Object o) {
         return get(o, "value");
     }
 
-    public static String getNodeIdentiofier(Object o) {
+    public static String getNodeIdentiofier(final Object o) {
         try{
             return ((PathArgument) get(o, "nodeIdentifier")).getNodeType().toString();
         }catch(Exception err){
@@ -258,7 +258,7 @@ public class XSQLODLUtils {
         }
     }
 
-    public static String getNodeName(Object o) {
+    public static String getNodeName(final Object o) {
         Object nodeID = get(o, "nodeIdentifier");
         if (nodeID != null) {
             String nodeName = nodeID.toString();
