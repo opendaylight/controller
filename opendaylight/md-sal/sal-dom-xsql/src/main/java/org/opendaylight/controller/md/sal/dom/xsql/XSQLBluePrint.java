@@ -30,6 +30,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.opendaylight.yangtools.yang.model.api.Module;
+import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 /**
  * @author Sharon Aicler(saichler@gmail.com)
  **/
@@ -39,14 +41,14 @@ public class XSQLBluePrint implements DatabaseMetaData, Serializable {
 
     public static final String CACHE_FILE_NAME = "./BluePrintCache.dat";
 
-    private Map<String, XSQLBluePrintNode> tableNameToBluePrint = new HashMap<String, XSQLBluePrintNode>();
-    private Map<String, Map<String, XSQLBluePrintNode>> odlNameToBluePrint = new HashMap<String, Map<String, XSQLBluePrintNode>>();
+    private final Map<String, XSQLBluePrintNode> tableNameToBluePrint = new HashMap<>();
+    private final Map<String, Map<String, XSQLBluePrintNode>> odlNameToBluePrint = new HashMap<>();
 
-    private boolean cacheLoadedSuccessfuly = false;
+    private final boolean cacheLoadedSuccessfuly = false;
     private DatabaseMetaData myProxy = null;
 
-    public static final String replaceAll(String source, String toReplace,
-            String withThis) {
+    public static final String replaceAll(final String source, final String toReplace,
+            final String withThis) {
         int index = source.indexOf(toReplace);
         int index2 = 0;
         StringBuffer result = new StringBuffer();
@@ -62,15 +64,16 @@ public class XSQLBluePrint implements DatabaseMetaData, Serializable {
         return result.toString();
     }
 
-    public XSQLBluePrint() {
+    XSQLBluePrint() {
+
     }
 
-    public static void save(XSQLBluePrint bp) {
+    public void save() {
         ObjectOutputStream out = null;
         try {
             out = new ObjectOutputStream(new DataOutputStream(
                     new FileOutputStream(CACHE_FILE_NAME)));
-            out.writeObject(bp);
+            out.writeObject(this);
         } catch (Exception err) {
             err.printStackTrace();
         } finally {
@@ -81,7 +84,16 @@ public class XSQLBluePrint implements DatabaseMetaData, Serializable {
         }
     }
 
-    public static XSQLBluePrint load(InputStream ins) {
+    static XSQLBluePrint create(final SchemaContext context) {
+        final XSQLBluePrint ret = new XSQLBluePrint();
+        for (Module m : context.getModules()) {
+            XSQLODLUtils.createOpenDaylightCache(ret, m);
+        }
+
+        return ret;
+    }
+
+    public static XSQLBluePrint load(final InputStream ins) {
         ObjectInputStream in = null;
         try {
             in = new ObjectInputStream(new DataInputStream(ins));
@@ -98,7 +110,8 @@ public class XSQLBluePrint implements DatabaseMetaData, Serializable {
     }
 
     private class NQLBluePrintProxy implements InvocationHandler {
-        public Object invoke(Object proxy, Method method, Object[] args)
+        @Override
+        public Object invoke(final Object proxy, final Method method, final Object[] args)
                 throws Throwable {
             System.out.println("Method " + method);
             return method.invoke(XSQLBluePrint.this, args);
@@ -120,7 +133,7 @@ public class XSQLBluePrint implements DatabaseMetaData, Serializable {
     }
 
     public XSQLBluePrintNode[] getBluePrintNodeByODLTableName(
-            String odlTableName) {
+            final String odlTableName) {
         Map<String, XSQLBluePrintNode> map = this.odlNameToBluePrint
                 .get(odlTableName);
         if (map == null) {
@@ -175,8 +188,8 @@ public class XSQLBluePrint implements DatabaseMetaData, Serializable {
 
     private static Map<Class<?>, Set<Class<?>>> superClassMap = new HashMap<>();
 
-    public static Set<Class<?>> getInheritance(Class<?> myObjectClass,
-            Class<?> returnType) {
+    public static Set<Class<?>> getInheritance(final Class<?> myObjectClass,
+            final Class<?> returnType) {
 
         if (returnType != null && myObjectClass.equals(returnType)) {
             return new HashSet<>();
@@ -200,7 +213,7 @@ public class XSQLBluePrint implements DatabaseMetaData, Serializable {
         return result;
     }
 
-    public static Set<Class<?>> collectInterfaces(Class<?> cls) {
+    public static Set<Class<?>> collectInterfaces(final Class<?> cls) {
         Set<Class<?>> result = new HashSet<>();
         Class<?> myInterfaces[] = cls.getInterfaces();
         if (myInterfaces != null) {
@@ -212,7 +225,7 @@ public class XSQLBluePrint implements DatabaseMetaData, Serializable {
         return result;
     }
 
-    public XSQLBluePrintNode addToBluePrintCache(XSQLBluePrintNode blNode,XSQLBluePrintNode parent) {
+    public XSQLBluePrintNode addToBluePrintCache(final XSQLBluePrintNode blNode,final XSQLBluePrintNode parent) {
         XSQLBluePrintNode existingNode = this.tableNameToBluePrint.get(blNode.getBluePrintNodeName());
         if(existingNode!=null){
             existingNode.mergeAugmentation(blNode);
@@ -225,13 +238,14 @@ public class XSQLBluePrint implements DatabaseMetaData, Serializable {
                 this.odlNameToBluePrint.put(blNode.getODLTableName(), map);
             }
             map.put(blNode.getBluePrintNodeName(), blNode);
-            if(parent!=null)
+            if(parent!=null) {
                 parent.addChild(blNode);
+            }
             return blNode;
         }
     }
 
-    public Class<?> getGenericType(ParameterizedType type) {
+    public Class<?> getGenericType(final ParameterizedType type) {
         Type[] typeArguments = type.getActualTypeArguments();
         for (Type typeArgument : typeArguments) {
             if (typeArgument instanceof ParameterizedType) {
@@ -244,7 +258,7 @@ public class XSQLBluePrint implements DatabaseMetaData, Serializable {
         return null;
     }
 
-    public Class<?> getMethodReturnTypeFromGeneric(Method m) {
+    public Class<?> getMethodReturnTypeFromGeneric(final Method m) {
         Type rType = m.getGenericReturnType();
         if (rType instanceof ParameterizedType) {
             return getGenericType((ParameterizedType) rType);
@@ -263,7 +277,7 @@ public class XSQLBluePrint implements DatabaseMetaData, Serializable {
 
     }
 
-    public List<String> getInterfaceNames(XSQLBluePrintNode node) {
+    public List<String> getInterfaceNames(final XSQLBluePrintNode node) {
         Set<XSQLBluePrintNode> children = node.getChildren();
         List<String> names = new ArrayList<String>();
         for (XSQLBluePrintNode n : children) {
@@ -304,7 +318,7 @@ public class XSQLBluePrint implements DatabaseMetaData, Serializable {
     }
 
     @Override
-    public boolean deletesAreDetected(int type) throws SQLException {
+    public boolean deletesAreDetected(final int type) throws SQLException {
         // TODO Auto-generated method stub
         return false;
     }
@@ -316,16 +330,16 @@ public class XSQLBluePrint implements DatabaseMetaData, Serializable {
     }
 
     @Override
-    public ResultSet getAttributes(String catalog, String schemaPattern,
-            String typeNamePattern, String attributeNamePattern)
+    public ResultSet getAttributes(final String catalog, final String schemaPattern,
+            final String typeNamePattern, final String attributeNamePattern)
             throws SQLException {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public ResultSet getBestRowIdentifier(String catalog, String schema,
-            String table, int scope, boolean nullable) throws SQLException {
+    public ResultSet getBestRowIdentifier(final String catalog, final String schema,
+            final String table, final int scope, final boolean nullable) throws SQLException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -355,15 +369,15 @@ public class XSQLBluePrint implements DatabaseMetaData, Serializable {
     }
 
     @Override
-    public ResultSet getColumnPrivileges(String catalog, String schema,
-            String table, String columnNamePattern) throws SQLException {
+    public ResultSet getColumnPrivileges(final String catalog, final String schema,
+            final String table, final String columnNamePattern) throws SQLException {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public ResultSet getColumns(String catalog, String schemaPattern,
-            String tableNamePattern, String columnNamePattern)
+    public ResultSet getColumns(final String catalog, final String schemaPattern,
+            final String tableNamePattern, final String columnNamePattern)
             throws SQLException {
         // TODO Auto-generated method stub
         return null;
@@ -376,9 +390,9 @@ public class XSQLBluePrint implements DatabaseMetaData, Serializable {
     }
 
     @Override
-    public ResultSet getCrossReference(String parentCatalog,
-            String parentSchema, String parentTable, String foreignCatalog,
-            String foreignSchema, String foreignTable) throws SQLException {
+    public ResultSet getCrossReference(final String parentCatalog,
+            final String parentSchema, final String parentTable, final String foreignCatalog,
+            final String foreignSchema, final String foreignTable) throws SQLException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -435,7 +449,7 @@ public class XSQLBluePrint implements DatabaseMetaData, Serializable {
     }
 
     @Override
-    public ResultSet getExportedKeys(String catalog, String schema, String table)
+    public ResultSet getExportedKeys(final String catalog, final String schema, final String table)
             throws SQLException {
         // TODO Auto-generated method stub
         return null;
@@ -448,16 +462,16 @@ public class XSQLBluePrint implements DatabaseMetaData, Serializable {
     }
 
     @Override
-    public ResultSet getFunctionColumns(String catalog, String schemaPattern,
-            String functionNamePattern, String columnNamePattern)
+    public ResultSet getFunctionColumns(final String catalog, final String schemaPattern,
+            final String functionNamePattern, final String columnNamePattern)
             throws SQLException {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public ResultSet getFunctions(String catalog, String schemaPattern,
-            String functionNamePattern) throws SQLException {
+    public ResultSet getFunctions(final String catalog, final String schemaPattern,
+            final String functionNamePattern) throws SQLException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -469,15 +483,15 @@ public class XSQLBluePrint implements DatabaseMetaData, Serializable {
     }
 
     @Override
-    public ResultSet getImportedKeys(String catalog, String schema, String table)
+    public ResultSet getImportedKeys(final String catalog, final String schema, final String table)
             throws SQLException {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public ResultSet getIndexInfo(String catalog, String schema, String table,
-            boolean unique, boolean approximate) throws SQLException {
+    public ResultSet getIndexInfo(final String catalog, final String schema, final String table,
+            final boolean unique, final boolean approximate) throws SQLException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -621,23 +635,23 @@ public class XSQLBluePrint implements DatabaseMetaData, Serializable {
     }
 
     @Override
-    public ResultSet getPrimaryKeys(String catalog, String schema, String table)
+    public ResultSet getPrimaryKeys(final String catalog, final String schema, final String table)
             throws SQLException {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public ResultSet getProcedureColumns(String catalog, String schemaPattern,
-            String procedureNamePattern, String columnNamePattern)
+    public ResultSet getProcedureColumns(final String catalog, final String schemaPattern,
+            final String procedureNamePattern, final String columnNamePattern)
             throws SQLException {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public ResultSet getProcedures(String catalog, String schemaPattern,
-            String procedureNamePattern) throws SQLException {
+    public ResultSet getProcedures(final String catalog, final String schemaPattern,
+            final String procedureNamePattern) throws SQLException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -667,7 +681,7 @@ public class XSQLBluePrint implements DatabaseMetaData, Serializable {
     }
 
     @Override
-    public ResultSet getSchemas(String catalog, String schemaPattern)
+    public ResultSet getSchemas(final String catalog, final String schemaPattern)
             throws SQLException {
         // TODO Auto-generated method stub
         return null;
@@ -704,15 +718,15 @@ public class XSQLBluePrint implements DatabaseMetaData, Serializable {
     }
 
     @Override
-    public ResultSet getSuperTables(String catalog, String schemaPattern,
-            String tableNamePattern) throws SQLException {
+    public ResultSet getSuperTables(final String catalog, final String schemaPattern,
+            final String tableNamePattern) throws SQLException {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public ResultSet getSuperTypes(String catalog, String schemaPattern,
-            String typeNamePattern) throws SQLException {
+    public ResultSet getSuperTypes(final String catalog, final String schemaPattern,
+            final String typeNamePattern) throws SQLException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -724,15 +738,15 @@ public class XSQLBluePrint implements DatabaseMetaData, Serializable {
     }
 
     @Override
-    public ResultSet getTablePrivileges(String catalog, String schemaPattern,
-            String tableNamePattern) throws SQLException {
+    public ResultSet getTablePrivileges(final String catalog, final String schemaPattern,
+            final String tableNamePattern) throws SQLException {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public ResultSet getTables(String catalog, String schemaPattern,
-            String tableNamePattern, String[] types) throws SQLException {
+    public ResultSet getTables(final String catalog, final String schemaPattern,
+            final String tableNamePattern, final String[] types) throws SQLException {
         return new TablesResultSet(this);
     }
 
@@ -755,8 +769,8 @@ public class XSQLBluePrint implements DatabaseMetaData, Serializable {
     }
 
     @Override
-    public ResultSet getUDTs(String catalog, String schemaPattern,
-            String typeNamePattern, int[] types) throws SQLException {
+    public ResultSet getUDTs(final String catalog, final String schemaPattern,
+            final String typeNamePattern, final int[] types) throws SQLException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -774,14 +788,14 @@ public class XSQLBluePrint implements DatabaseMetaData, Serializable {
     }
 
     @Override
-    public ResultSet getVersionColumns(String catalog, String schema,
-            String table) throws SQLException {
+    public ResultSet getVersionColumns(final String catalog, final String schema,
+            final String table) throws SQLException {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public boolean insertsAreDetected(int type) throws SQLException {
+    public boolean insertsAreDetected(final int type) throws SQLException {
         // TODO Auto-generated method stub
         return false;
     }
@@ -835,37 +849,37 @@ public class XSQLBluePrint implements DatabaseMetaData, Serializable {
     }
 
     @Override
-    public boolean othersDeletesAreVisible(int type) throws SQLException {
+    public boolean othersDeletesAreVisible(final int type) throws SQLException {
         // TODO Auto-generated method stub
         return false;
     }
 
     @Override
-    public boolean othersInsertsAreVisible(int type) throws SQLException {
+    public boolean othersInsertsAreVisible(final int type) throws SQLException {
         // TODO Auto-generated method stub
         return false;
     }
 
     @Override
-    public boolean othersUpdatesAreVisible(int type) throws SQLException {
+    public boolean othersUpdatesAreVisible(final int type) throws SQLException {
         // TODO Auto-generated method stub
         return false;
     }
 
     @Override
-    public boolean ownDeletesAreVisible(int type) throws SQLException {
+    public boolean ownDeletesAreVisible(final int type) throws SQLException {
         // TODO Auto-generated method stub
         return false;
     }
 
     @Override
-    public boolean ownInsertsAreVisible(int type) throws SQLException {
+    public boolean ownInsertsAreVisible(final int type) throws SQLException {
         // TODO Auto-generated method stub
         return false;
     }
 
     @Override
-    public boolean ownUpdatesAreVisible(int type) throws SQLException {
+    public boolean ownUpdatesAreVisible(final int type) throws SQLException {
         // TODO Auto-generated method stub
         return false;
     }
@@ -985,7 +999,7 @@ public class XSQLBluePrint implements DatabaseMetaData, Serializable {
     }
 
     @Override
-    public boolean supportsConvert(int fromType, int toType)
+    public boolean supportsConvert(final int fromType, final int toType)
             throws SQLException {
         // TODO Auto-generated method stub
         return false;
@@ -1180,21 +1194,21 @@ public class XSQLBluePrint implements DatabaseMetaData, Serializable {
     }
 
     @Override
-    public boolean supportsResultSetConcurrency(int type, int concurrency)
+    public boolean supportsResultSetConcurrency(final int type, final int concurrency)
             throws SQLException {
         // TODO Auto-generated method stub
         return false;
     }
 
     @Override
-    public boolean supportsResultSetHoldability(int holdability)
+    public boolean supportsResultSetHoldability(final int holdability)
             throws SQLException {
         // TODO Auto-generated method stub
         return false;
     }
 
     @Override
-    public boolean supportsResultSetType(int type) throws SQLException {
+    public boolean supportsResultSetType(final int type) throws SQLException {
         // TODO Auto-generated method stub
         return false;
     }
@@ -1290,7 +1304,7 @@ public class XSQLBluePrint implements DatabaseMetaData, Serializable {
     }
 
     @Override
-    public boolean supportsTransactionIsolationLevel(int level)
+    public boolean supportsTransactionIsolationLevel(final int level)
             throws SQLException {
         // TODO Auto-generated method stub
         return false;
@@ -1315,7 +1329,7 @@ public class XSQLBluePrint implements DatabaseMetaData, Serializable {
     }
 
     @Override
-    public boolean updatesAreDetected(int type) throws SQLException {
+    public boolean updatesAreDetected(final int type) throws SQLException {
         // TODO Auto-generated method stub
         return false;
     }
@@ -1333,20 +1347,20 @@ public class XSQLBluePrint implements DatabaseMetaData, Serializable {
     }
 
     @Override
-    public boolean isWrapperFor(Class<?> iface) throws SQLException {
+    public boolean isWrapperFor(final Class<?> iface) throws SQLException {
         // TODO Auto-generated method stub
         return false;
     }
 
     @Override
-    public <T> T unwrap(Class<T> iface) throws SQLException {
+    public <T> T unwrap(final Class<T> iface) throws SQLException {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public ResultSet getPseudoColumns(String catalog, String schemaPattern,
-            String tableNamePattern, String columnNamePattern)
+    public ResultSet getPseudoColumns(final String catalog, final String schemaPattern,
+            final String tableNamePattern, final String columnNamePattern)
             throws SQLException {
         // TODO Auto-generated method stub
         return null;
@@ -1357,5 +1371,4 @@ public class XSQLBluePrint implements DatabaseMetaData, Serializable {
         // TODO Auto-generated method stub
         return false;
     }
-
 }
