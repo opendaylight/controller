@@ -31,7 +31,6 @@ import org.opendaylight.controller.md.sal.dom.api.DOMRpcImplementationNotAvailab
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcResult;
 import org.opendaylight.controller.md.sal.dom.spi.DefaultDOMRpcResult;
 import org.opendaylight.controller.remote.rpc.registry.RpcRegistry;
-import org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.FindRouters;
 import org.opendaylight.controller.sal.connector.api.RpcRouter.RouteIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -42,8 +41,6 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
  * @author Thomas Pantelis
  */
 public class RemoteRpcImplementationTest extends AbstractRpcTest {
-
-
 
     @Test(expected = DOMRpcImplementationNotAvailableException.class)
     public void testInvokeRpcWithNoRemoteActor() throws Exception {
@@ -81,7 +78,7 @@ public class RemoteRpcImplementationTest extends AbstractRpcTest {
         assertEquals("getRoute", TEST_PATH, routeIdentifier.getRoute());
 
         rpcRegistry1Probe.reply(new RpcRegistry.Messages.FindRoutersReply(Arrays.asList(new Pair<>(
-                rpcBroker2, 200L))));
+                rpcInvoker2, 200L))));
 
         final DOMRpcResult result = frontEndFuture.checkedGet(5, TimeUnit.SECONDS);
         assertEquals(rpcOutput, result.getResult());
@@ -111,7 +108,7 @@ public class RemoteRpcImplementationTest extends AbstractRpcTest {
         assertEquals("getRoute", TEST_PATH, routeIdentifier.getRoute());
 
         rpcRegistry1Probe.reply(new RpcRegistry.Messages.FindRoutersReply(Arrays.asList(new Pair<>(
-                rpcBroker2, 200L))));
+                rpcInvoker2, 200L))));
 
         final DOMRpcResult result = frontEndFuture.checkedGet(5, TimeUnit.SECONDS);
         assertEquals(rpcOutput, result.getResult());
@@ -143,7 +140,7 @@ public class RemoteRpcImplementationTest extends AbstractRpcTest {
         assertEquals("getRoute", TEST_PATH, routeIdentifier.getRoute());
 
         rpcRegistry1Probe.reply(new RpcRegistry.Messages.FindRoutersReply(Arrays.asList(new Pair<>(
-                rpcBroker2, 200L))));
+                rpcInvoker2, 200L))));
 
         final DOMRpcResult result = frontEndFuture.checkedGet(5, TimeUnit.SECONDS);
         assertNull(result.getResult());
@@ -173,7 +170,7 @@ public class RemoteRpcImplementationTest extends AbstractRpcTest {
         assertEquals("getRoute", TEST_PATH, routeIdentifier.getRoute());
 
         rpcRegistry1Probe.reply(new RpcRegistry.Messages.FindRoutersReply(Arrays.asList(new Pair<>(
-                rpcBroker2, 200L))));
+                rpcInvoker2, 200L))));
         frontEndFuture.checkedGet(5, TimeUnit.SECONDS);
     }
 
