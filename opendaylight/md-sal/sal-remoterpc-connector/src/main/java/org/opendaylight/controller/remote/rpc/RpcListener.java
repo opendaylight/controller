@@ -17,6 +17,7 @@ import java.util.List;
 import javax.annotation.Nonnull;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcAvailabilityListener;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcIdentifier;
+import org.opendaylight.controller.md.sal.dom.api.DOMRpcImplementation;
 import org.opendaylight.controller.remote.rpc.registry.RpcRegistry;
 import org.opendaylight.controller.sal.connector.api.RpcRouter;
 import org.slf4j.Logger;
@@ -62,5 +63,10 @@ public class RpcListener implements DOMRpcAvailabilityListener {
         }
         final RpcRegistry.Messages.RemoveRoutes removeRpcMsg = new RpcRegistry.Messages.RemoveRoutes(routeIds);
         rpcRegistry.tell(removeRpcMsg, ActorRef.noSender());
+    }
+
+    @Override
+    public boolean acceptsImplementation(final DOMRpcImplementation impl) {
+        return !(impl instanceof RemoteRpcImplementation);
     }
 }
