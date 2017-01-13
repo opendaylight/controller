@@ -60,15 +60,15 @@ public class BucketStoreTest {
         BucketStore<T> store = createStore();
 
         Address localAddress = system.provider().getDefaultAddress();
-        Bucket<T> localBucket = new BucketImpl<>();
+        Bucket<T> localBucket = new BucketImpl<>(new T());
 
         Address a1 = new Address("tcp", "system1");
         Address a2 = new Address("tcp", "system2");
         Address a3 = new Address("tcp", "system3");
 
-        Bucket<T> b1 = new BucketImpl<>();
-        Bucket<T> b2 = new BucketImpl<>();
-        Bucket<T> b3 = new BucketImpl<>();
+        Bucket<T> b1 = new BucketImpl<>(new T());
+        Bucket<T> b2 = new BucketImpl<>(new T());
+        Bucket<T> b3 = new BucketImpl<>(new T());
 
         Map<Address, Bucket<T>> remoteBuckets = new HashMap<>(3);
         remoteBuckets.put(a1, b1);
@@ -87,7 +87,7 @@ public class BucketStoreTest {
 
         //Add a new remote bucket
         Address a4 = new Address("tcp", "system4");
-        Bucket<T> b4 = new BucketImpl<T>();
+        Bucket<T> b4 = new BucketImpl<>(new T());
         remoteBuckets.clear();
         remoteBuckets.put(a4, b4);
         store.receiveUpdateRemoteBuckets(remoteBuckets);
@@ -99,9 +99,9 @@ public class BucketStoreTest {
         Assert.assertTrue(remoteBucketsInStore.size() == 4);
 
         //Update a bucket
-        Bucket<T> b3_new = new BucketImpl<T>();
+        Bucket<T> b3New = new BucketImpl<>(new T());
         remoteBuckets.clear();
-        remoteBuckets.put(a3, b3_new);
+        remoteBuckets.put(a3, b3New);
         remoteBuckets.put(a1, null);
         remoteBuckets.put(a2, null);
         store.receiveUpdateRemoteBuckets(remoteBuckets);
@@ -109,7 +109,7 @@ public class BucketStoreTest {
         //Should only update a3
         remoteBucketsInStore = store.getRemoteBuckets();
         Bucket<T> b3_inStore = remoteBucketsInStore.get(a3);
-        Assert.assertEquals(b3_new.getVersion(), b3_inStore.getVersion());
+        Assert.assertEquals(b3New.getVersion(), b3_inStore.getVersion());
 
         //Should NOT update a1 and a2
         Bucket<T> b1_inStore = remoteBucketsInStore.get(a1);
@@ -122,10 +122,10 @@ public class BucketStoreTest {
         //versions map contains versions for all remote buckets (4).
         Map<Address, Long> versionsInStore = store.getVersions();
         Assert.assertEquals(4, versionsInStore.size());
-        Assert.assertEquals(b1.getVersion(), versionsInStore.get(a1));
-        Assert.assertEquals(b2.getVersion(), versionsInStore.get(a2));
-        Assert.assertEquals(b3_new.getVersion(), versionsInStore.get(a3));
-        Assert.assertEquals(b4.getVersion(), versionsInStore.get(a4));
+        Assert.assertEquals((Long)b1.getVersion(), versionsInStore.get(a1));
+        Assert.assertEquals((Long)b2.getVersion(), versionsInStore.get(a2));
+        Assert.assertEquals((Long)b3New.getVersion(), versionsInStore.get(a3));
+        Assert.assertEquals((Long)b4.getVersion(), versionsInStore.get(a4));
 
         //Send older version of bucket
         remoteBuckets.clear();
@@ -135,7 +135,7 @@ public class BucketStoreTest {
         //Should NOT update a3
         remoteBucketsInStore = store.getRemoteBuckets();
         b3_inStore = remoteBucketsInStore.get(a3);
-        Assert.assertTrue(b3_inStore.getVersion().longValue() == b3_new.getVersion().longValue());
+        Assert.assertEquals(b3_inStore.getVersion(), b3New.getVersion());
 
     }
 
@@ -144,8 +144,9 @@ public class BucketStoreTest {
      *
      * @return instance of BucketStore class
      */
-    private static BucketStore<T> createStore(){
-        final Props props = Props.create(BucketStore.class, new RemoteRpcProviderConfig(system.settings().config()));
+    private static BucketStore<T> createStore() {
+        final Props props = Props.create(BucketStore.class, new RemoteRpcProviderConfig(system.settings().config()),
+            new T());
         final TestActorRef<BucketStore<T>> testRef = TestActorRef.create(system, props, "testStore");
         return testRef.underlyingActor();
     }

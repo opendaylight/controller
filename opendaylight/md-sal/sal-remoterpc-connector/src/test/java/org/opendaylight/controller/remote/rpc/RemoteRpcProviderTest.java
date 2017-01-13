@@ -6,9 +6,7 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-
 package org.opendaylight.controller.remote.rpc;
-
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -25,8 +23,6 @@ import org.junit.Test;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcProviderService;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
 import org.opendaylight.controller.sal.core.api.Broker;
-import org.opendaylight.controller.sal.core.api.model.SchemaService;
-import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import scala.concurrent.Await;
 import scala.concurrent.duration.Duration;
 
@@ -54,9 +50,6 @@ public class RemoteRpcProviderTest {
         try (final RemoteRpcProvider rpcProvider = new RemoteRpcProvider(system, mock(DOMRpcProviderService.class),
                 new RemoteRpcProviderConfig(system.settings().config()))) {
             final Broker.ProviderSession session = mock(Broker.ProviderSession.class);
-            final SchemaService schemaService = mock(SchemaService.class);
-            when(schemaService.getGlobalContext()).thenReturn(mock(SchemaContext.class));
-            when(session.getService(SchemaService.class)).thenReturn(schemaService);
             when(session.getService(DOMRpcService.class)).thenReturn(mock(DOMRpcService.class));
 
             rpcProvider.onSessionInitiated(session);

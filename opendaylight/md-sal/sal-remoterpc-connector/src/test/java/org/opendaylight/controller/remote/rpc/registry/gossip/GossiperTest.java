@@ -22,9 +22,6 @@ import akka.actor.Address;
 import akka.actor.Props;
 import akka.testkit.TestActorRef;
 import com.typesafe.config.ConfigFactory;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -68,21 +65,16 @@ public class GossiperTest {
     }
 
     @Test
-    public void testReceiveGossipTick_WhenNoRemoteMemberShouldIgnore(){
-
-        mockGossiper.setClusterMembers(Collections.<Address>emptyList());
+    public void testReceiveGossipTick_WhenNoRemoteMemberShouldIgnore() {
+        mockGossiper.setClusterMembers();
         doNothing().when(mockGossiper).getLocalStatusAndSendTo(any(Address.class));
         mockGossiper.receiveGossipTick();
         verify(mockGossiper, times(0)).getLocalStatusAndSendTo(any(Address.class));
     }
 
     @Test
-    public void testReceiveGossipTick_WhenRemoteMemberExistsShouldSendStatus(){
-        List<Address> members = new ArrayList<>();
-        Address remote = new Address("tcp", "member");
-        members.add(remote);
-
-        mockGossiper.setClusterMembers(members);
+    public void testReceiveGossipTick_WhenRemoteMemberExistsShouldSendStatus() {
+        mockGossiper.setClusterMembers(new Address("tcp", "member"));
         doNothing().when(mockGossiper).getLocalStatusAndSendTo(any(Address.class));
         mockGossiper.receiveGossipTick();
         verify(mockGossiper, times(1)).getLocalStatusAndSendTo(any(Address.class));
@@ -95,10 +87,7 @@ public class GossiperTest {
         GossipStatus remoteStatus = new GossipStatus(nonMember, mock(Map.class));
 
         //add a member
-        List<Address> members = new ArrayList<>();
-        members.add(new Address("tcp", "member"));
-
-        mockGossiper.setClusterMembers(members);
+        mockGossiper.setClusterMembers(new Address("tcp", "member"));
         mockGossiper.receiveGossipStatus(remoteStatus);
         verify(mockGossiper, times(0)).getSender();
     }
@@ -118,9 +107,8 @@ public class GossiperTest {
      *
      * @return instance of Gossiper class
      */
-    private static Gossiper createGossiper(){
-
-        final Props props = Props.create(Gossiper.class, false, new RemoteRpcProviderConfig(system.settings().config()));
+    private static Gossiper createGossiper() {
+        final Props props = Gossiper.testProps(new RemoteRpcProviderConfig(system.settings().config()));
         final TestActorRef<Gossiper> testRef = TestActorRef.create(system, props, "testGossiper");
 
         return testRef.underlyingActor();
