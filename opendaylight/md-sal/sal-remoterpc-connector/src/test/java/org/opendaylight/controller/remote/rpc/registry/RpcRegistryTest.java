@@ -92,7 +92,7 @@ public class RpcRegistryTest {
         waitForMembersUp(node2, Cluster.get(node1).selfUniqueAddress(), Cluster.get(node3).selfUniqueAddress());
     }
 
-    static void waitForMembersUp(ActorSystem node, UniqueAddress... addresses) {
+    static void waitForMembersUp(final ActorSystem node, final UniqueAddress... addresses) {
         Set<UniqueAddress> otherMembersSet = Sets.newHashSet(addresses);
         Stopwatch sw = Stopwatch.createStarted();
         while (sw.elapsed(TimeUnit.SECONDS) <= 10) {
@@ -124,7 +124,7 @@ public class RpcRegistryTest {
         registry3 = node3.actorOf(Props.create(RpcRegistry.class, config(node3)));
     }
 
-    private RemoteRpcProviderConfig config(ActorSystem node) {
+    private RemoteRpcProviderConfig config(final ActorSystem node) {
         return new RemoteRpcProviderConfig(node.settings().config());
     }
 
@@ -166,7 +166,7 @@ public class RpcRegistryTest {
         verifyBucket(buckets.get(nodeAddress), addedRouteIds);
 
         Map<Address, Long> versions = retrieveVersions(registry1, mockBroker);
-        Assert.assertEquals("Version for bucket " + nodeAddress, buckets.get(nodeAddress).getVersion(),
+        Assert.assertEquals("Version for bucket " + nodeAddress, (Long) buckets.get(nodeAddress).getVersion(),
                 versions.get(nodeAddress));
 
         // Now remove rpc
@@ -216,7 +216,7 @@ public class RpcRegistryTest {
         LOG.info("testRpcAddRemoveInCluster ending");
     }
 
-    private void verifyEmptyBucket(JavaTestKit testKit, ActorRef registry, Address address)
+    private void verifyEmptyBucket(final JavaTestKit testKit, final ActorRef registry, final Address address)
             throws AssertionError {
         Map<Address, Bucket<RoutingTable>> buckets;
         int numTries = 0;
@@ -268,9 +268,9 @@ public class RpcRegistryTest {
         verifyBucket(buckets.get(node2Address), addedRouteIds2);
 
         Map<Address, Long> versions = retrieveVersions(registry3, mockBroker3);
-        Assert.assertEquals("Version for bucket " + node1Address, buckets.get(node1Address).getVersion(),
+        Assert.assertEquals("Version for bucket " + node1Address, (Long) buckets.get(node1Address).getVersion(),
                 versions.get(node1Address));
-        Assert.assertEquals("Version for bucket " + node2Address, buckets.get(node2Address).getVersion(),
+        Assert.assertEquals("Version for bucket " + node2Address, (Long) buckets.get(node2Address).getVersion(),
                 versions.get(node2Address));
 
         RouteIdentifier<?, ?, ?> routeID = addedRouteIds1.get(0);
@@ -286,14 +286,15 @@ public class RpcRegistryTest {
         mockBroker1.expectMsgEquals(Duration.create(3, TimeUnit.SECONDS), "hello");
     }
 
-    private Map<Address, Long> retrieveVersions(ActorRef bucketStore, JavaTestKit testKit) {
+    private static Map<Address, Long> retrieveVersions(final ActorRef bucketStore, final JavaTestKit testKit) {
         bucketStore.tell(new GetBucketVersions(), testKit.getRef());
         GetBucketVersionsReply reply = testKit.expectMsgClass(Duration.create(3, TimeUnit.SECONDS),
                 GetBucketVersionsReply.class);
         return reply.getVersions();
     }
 
-    private void verifyBucket(Bucket<RoutingTable> bucket, List<RouteIdentifier<?, ?, ?>> expRouteIds) {
+    private static void verifyBucket(final Bucket<RoutingTable> bucket,
+            final List<RouteIdentifier<?, ?, ?>> expRouteIds) {
         RoutingTable table = bucket.getData();
         Assert.assertNotNull("Bucket RoutingTable is null", table);
         for (RouteIdentifier<?, ?, ?> r : expRouteIds) {
@@ -305,8 +306,8 @@ public class RpcRegistryTest {
         Assert.assertEquals("RoutingTable size", expRouteIds.size(), table.size());
     }
 
-    private Map<Address, Bucket<RoutingTable>> retrieveBuckets(ActorRef bucketStore, JavaTestKit testKit,
-            Address... addresses) {
+    private static Map<Address, Bucket<RoutingTable>> retrieveBuckets(final ActorRef bucketStore,
+            final JavaTestKit testKit, final Address... addresses) {
         int numTries = 0;
         while (true) {
             bucketStore.tell(new GetAllBuckets(), testKit.getRef());

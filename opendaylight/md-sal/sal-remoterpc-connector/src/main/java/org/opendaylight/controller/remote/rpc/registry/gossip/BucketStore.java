@@ -16,6 +16,8 @@ import akka.cluster.ClusterActorRefProvider;
 import com.google.common.base.Preconditions;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActorWithMetering;
 import org.opendaylight.controller.remote.rpc.RemoteRpcProviderConfig;
@@ -27,8 +29,6 @@ import org.opendaylight.controller.remote.rpc.registry.gossip.Messages.BucketSto
 import org.opendaylight.controller.remote.rpc.registry.gossip.Messages.BucketStoreMessages.GetBucketsByMembersReply;
 import org.opendaylight.controller.remote.rpc.registry.gossip.Messages.BucketStoreMessages.UpdateRemoteBuckets;
 import org.opendaylight.controller.utils.ConditionalProbe;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * A store that syncs its data across nodes in the cluster.
@@ -41,18 +41,13 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class BucketStore<T extends Copier<T>> extends AbstractUntypedActorWithMetering {
-
-    private static final Long NO_VERSION = -1L;
-
-    protected final Logger log = LoggerFactory.getLogger(getClass());
-
     /**
      * Bucket owned by the node.
      */
-    private final BucketImpl<T> localBucket = new BucketImpl<>();
+    private final BucketImpl<T> localBucket;
 
     /**
-     * Buckets ownded by other known nodes in the cluster.
+     * Buckets owned by other known nodes in the cluster.
      */
     private final Map<Address, Bucket<T>> remoteBuckets = new HashMap<>();
 
@@ -70,8 +65,9 @@ public class BucketStore<T extends Copier<T>> extends AbstractUntypedActorWithMe
 
     private final RemoteRpcProviderConfig config;
 
-    public BucketStore(RemoteRpcProviderConfig config) {
+    public BucketStore(final RemoteRpcProviderConfig config, final T initialData) {
         this.config = Preconditions.checkNotNull(config);
+        this.localBucket = new BucketImpl<>(initialData);
     }
 
     @Override
@@ -86,14 +82,14 @@ public class BucketStore<T extends Copier<T>> extends AbstractUntypedActorWithMe
 
     @SuppressWarnings("unchecked")
     @Override
-    protected void handleReceive(Object message) throws Exception {
+    protected void handleReceive(final Object message) throws Exception {
         if (probe != null) {
             probe.tell(message, getSelf());
         }
 
         if (message instanceof ConditionalProbe) {
             // The ConditionalProbe is only used for unit tests.
-            log.info("Received probe {} {}", getSelf(), message);
+            LOG.info("Received probe {} {}", getSelf(), message);
             probe = (ConditionalProbe) message;
             // Send back any message to tell the caller we got the probe.
             getSender().tell("Got it", getSelf());
@@ -106,7 +102,7 @@ public class BucketStore<T extends Copier<T>> extends AbstractUntypedActorWithMe
         } else if (message instanceof UpdateRemoteBuckets) {
             receiveUpdateRemoteBuckets(((UpdateRemoteBuckets<T>) message).getBuckets());
         } else {
-            log.debug("Unhandled message [{}]", message);
+            LOG.debug("Unhandled message [{}]", message);
             unhandled(message);
         }
     }
@@ -145,7 +141,7 @@ public class BucketStore<T extends Copier<T>> extends AbstractUntypedActorWithMe
      *
      * @param members requested members
      */
-    void receiveGetBucketsByMembers(Set<Address> members) {
+    void receiveGetBucketsByMembers(final Set<Address> members) {
         final ActorRef sender = getSender();
         Map<Address, Bucket<T>> buckets = getBucketsByMembers(members);
         sender.tell(new GetBucketsByMembersReply<>(buckets), getSelf());
@@ -157,7 +153,7 @@ public class BucketStore<T extends Copier<T>> extends AbstractUntypedActorWithMe
      * @param members requested members
      * @return buckets for requested members
      */
-    Map<Address, Bucket<T>> getBucketsByMembers(Set<Address> members) {
+    Map<Address, Bucket<T>> getBucketsByMembers(final Set<Address> members) {
         Map<Address, Bucket<T>> buckets = new HashMap<>();
 
         //first add the local bucket if asked
@@ -190,53 +186,60 @@ public class BucketStore<T extends Copier<T>> extends AbstractUntypedActorWithMe
      * @param receivedBuckets buckets sent by remote
      *                        {@link org.opendaylight.controller.remote.rpc.registry.gossip.Gossiper}
      */
-    void receiveUpdateRemoteBuckets(Map<Address, Bucket<T>> receivedBuckets) {
-        log.debug("{}: receiveUpdateRemoteBuckets: {}", selfAddress, receivedBuckets);
+    void receiveUpdateRemoteBuckets(final Map<Address, Bucket<T>> receivedBuckets) {
+        LOG.debug("{}: receiveUpdateRemoteBuckets: {}", selfAddress, receivedBuckets);
         if (receivedBuckets == null || receivedBuckets.isEmpty()) {
-            return; //nothing to do
+            //nothing to do
+            return;
         }
 
-        //Remote cant update self's bucket
+        // Remote cannot update our bucket
         receivedBuckets.remove(selfAddress);
 
-        for (Map.Entry<Address, Bucket<T>> entry : receivedBuckets.entrySet()) {
+        final Map<Address, Optional<Bucket<T>>> newBuckets = new HashMap<>(receivedBuckets.size());
 
-            Long localVersion = versions.get(entry.getKey());
-            if (localVersion == null) {
-                localVersion = NO_VERSION;
-            }
-
-            Bucket<T> receivedBucket = entry.getValue();
-
+        for (Entry<Address, Bucket<T>> entry : receivedBuckets.entrySet()) {
+            final Bucket<T> receivedBucket = entry.getValue();
             if (receivedBucket == null) {
+                LOG.debug("Ignoring null bucket from {}", entry.getKey());
                 continue;
             }
 
-            Long remoteVersion = receivedBucket.getVersion();
-            if (remoteVersion == null) {
-                remoteVersion = NO_VERSION;
+            // update only if remote version is newer
+            final long remoteVersion = receivedBucket.getVersion();
+            final Long localVersion = versions.get(entry.getKey());
+            if (localVersion != null && remoteVersion <= localVersion.longValue()) {
+                LOG.debug("Ignoring down-versioned bucket from {} ({} local {} remote)", entry.getKey(), localVersion,
+                    remoteVersion);
+                continue;
             }
 
-            //update only if remote version is newer
-            if ( remoteVersion.longValue() > localVersion.longValue() ) {
-                remoteBuckets.put(entry.getKey(), receivedBucket);
-                versions.put(entry.getKey(), remoteVersion);
-            }
+            newBuckets.put(entry.getKey(), Optional.of(receivedBucket));
+            remoteBuckets.put(entry.getKey(), receivedBucket);
+            versions.put(entry.getKey(), remoteVersion);
+            LOG.debug("Updating bucket from {} to version {}", entry.getKey(), remoteVersion);
         }
 
-        log.debug("State after update - Local Bucket [{}], Remote Buckets [{}]", localBucket, remoteBuckets);
+        LOG.debug("State after update - Local Bucket [{}], Remote Buckets [{}]", localBucket, remoteBuckets);
 
-        onBucketsUpdated();
+        onBucketsUpdated(newBuckets);
     }
 
-    protected void onBucketsUpdated() {
+    /**
+     * Callback to subclasses invoked when the set of remote buckets is updated.
+     *
+     * @param newBuckets Map of address to an optional new bucket. Never null, but can be empty. Absent buckets
+     *                   indicate removal/unreachability.
+     */
+    protected void onBucketsUpdated(final Map<Address, Optional<Bucket<T>>> newBuckets) {
+        // Default noop
     }
 
     public BucketImpl<T> getLocalBucket() {
         return localBucket;
     }
 
-    protected void updateLocalBucket(T data) {
+    protected void updateLocalBucket(final T data) {
         localBucket.setData(data);
         versions.put(selfAddress, localBucket.getVersion());
     }

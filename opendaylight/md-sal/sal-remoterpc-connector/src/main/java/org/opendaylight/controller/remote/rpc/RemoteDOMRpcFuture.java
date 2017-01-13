@@ -70,7 +70,7 @@ class RemoteDOMRpcFuture extends AbstractFuture<DOMRpcResult> implements Checked
         }
     }
 
-    private DOMRpcException mapException(final ExecutionException ex) {
+    private static DOMRpcException mapException(final ExecutionException ex) {
         final Throwable cause = ex.getCause();
         if (cause instanceof DOMRpcException) {
             return (DOMRpcException) cause;

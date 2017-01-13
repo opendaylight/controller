@@ -70,9 +70,9 @@ public class AbstractRpcTest {
     static RemoteRpcProviderConfig config1;
     static RemoteRpcProviderConfig config2;
 
-    protected ActorRef rpcBroker1;
+    protected ActorRef rpcInvoker1;
     protected JavaTestKit rpcRegistry1Probe;
-    protected ActorRef rpcBroker2;
+    protected ActorRef rpcInvoker2;
     protected JavaTestKit rpcRegistry2Probe;
     protected Broker.ProviderSession brokerSession;
     protected SchemaContext schemaContext;
@@ -111,9 +111,9 @@ public class AbstractRpcTest {
         domRpcService1 = Mockito.mock(DOMRpcService.class);
         domRpcService2 = Mockito.mock(DOMRpcService.class);
         rpcRegistry1Probe = new JavaTestKit(node1);
-        rpcBroker1 = node1.actorOf(RpcBroker.props(domRpcService1));
+        rpcInvoker1 = node1.actorOf(RpcInvoker.props(domRpcService1));
         rpcRegistry2Probe = new JavaTestKit(node2);
-        rpcBroker2 = node2.actorOf(RpcBroker.props(domRpcService2));
+        rpcInvoker2 = node2.actorOf(RpcInvoker.props(domRpcService2));
         remoteRpcImpl1 = new RemoteRpcImplementation(rpcRegistry1Probe.getRef(), config1);
         remoteRpcImpl2 = new RemoteRpcImplementation(rpcRegistry2Probe.getRef(), config2);
 
