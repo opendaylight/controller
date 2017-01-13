@@ -81,7 +81,7 @@ public class RemoteRpcImplementationTest extends AbstractRpcTest {
         assertEquals("getRoute", TEST_PATH, routeIdentifier.getRoute());
 
         rpcRegistry1Probe.reply(new RpcRegistry.Messages.FindRoutersReply(Arrays.asList(new Pair<>(
-                rpcBroker2, 200L))));
+                rpcInvoker2, 200L))));
 
         final DOMRpcResult result = frontEndFuture.checkedGet(5, TimeUnit.SECONDS);
         assertEquals(rpcOutput, result.getResult());
@@ -111,7 +111,7 @@ public class RemoteRpcImplementationTest extends AbstractRpcTest {
         assertEquals("getRoute", TEST_PATH, routeIdentifier.getRoute());
 
         rpcRegistry1Probe.reply(new RpcRegistry.Messages.FindRoutersReply(Arrays.asList(new Pair<>(
-                rpcBroker2, 200L))));
+                rpcInvoker2, 200L))));
 
         final DOMRpcResult result = frontEndFuture.checkedGet(5, TimeUnit.SECONDS);
         assertEquals(rpcOutput, result.getResult());
@@ -143,7 +143,7 @@ public class RemoteRpcImplementationTest extends AbstractRpcTest {
         assertEquals("getRoute", TEST_PATH, routeIdentifier.getRoute());
 
         rpcRegistry1Probe.reply(new RpcRegistry.Messages.FindRoutersReply(Arrays.asList(new Pair<>(
-                rpcBroker2, 200L))));
+                rpcInvoker2, 200L))));
 
         final DOMRpcResult result = frontEndFuture.checkedGet(5, TimeUnit.SECONDS);
         assertNull(result.getResult());
@@ -173,7 +173,7 @@ public class RemoteRpcImplementationTest extends AbstractRpcTest {
         assertEquals("getRoute", TEST_PATH, routeIdentifier.getRoute());
 
         rpcRegistry1Probe.reply(new RpcRegistry.Messages.FindRoutersReply(Arrays.asList(new Pair<>(
-                rpcBroker2, 200L))));
+                rpcInvoker2, 200L))));
         frontEndFuture.checkedGet(5, TimeUnit.SECONDS);
     }
 
