@@ -9,15 +9,13 @@ package org.opendaylight.controller.remote.rpc.registry.gossip;
 
 import akka.actor.Address;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import java.io.Serializable;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import org.opendaylight.controller.remote.rpc.registry.gossip.Messages.BucketStoreMessages.ContainsBucketVersions;
 import org.opendaylight.controller.remote.rpc.registry.gossip.Messages.BucketStoreMessages.ContainsBuckets;
-
 
 /**
  * These messages are used by {@link org.opendaylight.controller.remote.rpc.registry.gossip.BucketStore} and
@@ -27,21 +25,21 @@ public class Messages {
 
     public static class BucketStoreMessages {
 
-        public static class GetAllBuckets implements Serializable {
+        public static final class GetAllBuckets implements Serializable {
             private static final long serialVersionUID = 1L;
         }
 
-        public static class GetBucketsByMembers implements Serializable {
+        public static final class GetBucketsByMembers implements Serializable {
             private static final long serialVersionUID = 1L;
             private final Set<Address> members;
 
-            public GetBucketsByMembers(Set<Address> members) {
+            public GetBucketsByMembers(final Set<Address> members) {
                 Preconditions.checkArgument(members != null, "members can not be null");
-                this.members = members;
+                this.members = ImmutableSet.copyOf(members);
             }
 
             public Set<Address> getMembers() {
-                return new HashSet<>(members);
+                return members;
             }
         }
 
@@ -50,42 +48,33 @@ public class Messages {
 
             private final Map<Address, Bucket<T>> buckets;
 
-            public ContainsBuckets(Map<Address, Bucket<T>> buckets) {
+            protected ContainsBuckets(final Map<Address, Bucket<T>> buckets) {
                 Preconditions.checkArgument(buckets != null, "buckets can not be null");
-                this.buckets = buckets;
+                this.buckets = ImmutableMap.copyOf(buckets);
             }
 
-            public Map<Address, Bucket<T>> getBuckets() {
-                Map<Address, Bucket<T>> copy = new HashMap<>(buckets.size());
-
-                for (Map.Entry<Address, Bucket<T>> entry : buckets.entrySet()) {
-                    //ignore null entries
-                    if ( entry.getKey() == null || entry.getValue() == null ) {
-                        continue;
-                    }
-                    copy.put(entry.getKey(), entry.getValue());
-                }
-                return copy;
+            public final Map<Address, Bucket<T>> getBuckets() {
+                return buckets;
             }
         }
 
-        public static class GetAllBucketsReply<T extends Copier<T>> extends ContainsBuckets<T> {
+        public static final class GetAllBucketsReply<T extends Copier<T>> extends ContainsBuckets<T> {
             private static final long serialVersionUID = 1L;
 
-            public GetAllBucketsReply(Map<Address, Bucket<T>> buckets) {
+            public GetAllBucketsReply(final Map<Address, Bucket<T>> buckets) {
                 super(buckets);
             }
         }
 
-        public static class GetBucketsByMembersReply<T extends Copier<T>> extends ContainsBuckets<T>  {
+        public static final class GetBucketsByMembersReply<T extends Copier<T>> extends ContainsBuckets<T>  {
             private static final long serialVersionUID = 1L;
 
-            public GetBucketsByMembersReply(Map<Address, Bucket<T>> buckets) {
+            public GetBucketsByMembersReply(final Map<Address, Bucket<T>> buckets) {
                 super(buckets);
             }
         }
 
-        public static class GetBucketVersions implements Serializable {
+        public static final class GetBucketVersions implements Serializable {
             private static final long serialVersionUID = 1L;
         }
 
@@ -94,31 +83,46 @@ public class Messages {
 
             Map<Address, Long> versions;
 
-            public ContainsBucketVersions(Map<Address, Long> versions) {
+            public ContainsBucketVersions(final Map<Address, Long> versions) {
                 Preconditions.checkArgument(versions != null, "versions can not be null or empty");
 
-                this.versions = versions;
+                this.versions = ImmutableMap.copyOf(versions);
             }
 
             public Map<Address, Long> getVersions() {
-                return Collections.unmodifiableMap(versions);
+                return versions;
             }
-
         }
 
-        public static class GetBucketVersionsReply extends ContainsBucketVersions {
+        public static final class GetBucketVersionsReply extends ContainsBucketVersions {
             private static final long serialVersionUID = 1L;
 
-            public GetBucketVersionsReply(Map<Address, Long> versions) {
+            public GetBucketVersionsReply(final Map<Address, Long> versions) {
                 super(versions);
             }
         }
 
-        public static class UpdateRemoteBuckets<T extends Copier<T>> extends ContainsBuckets<T> {
+        public static final class UpdateRemoteBuckets<T extends Copier<T>> extends ContainsBuckets<T> {
             private static final long serialVersionUID = 1L;
 
-            public UpdateRemoteBuckets(Map<Address, Bucket<T>> buckets) {
+            public UpdateRemoteBuckets(final Map<Address, Bucket<T>> buckets) {
                 super(buckets);
+            }
+        }
+
+        /**
+         * Message sent from the gossiper to its parent, therefore not Serializable, requesting removal
+         * of a bucket corresponding to an address.
+         */
+        public static final class RemoveRemoteBucket {
+            private final Address address;
+
+            public RemoveRemoteBucket(final Address address) {
+                this.address = Preconditions.checkNotNull(address);
+            }
+
+            public Address getAddress() {
+                return address;
             }
         }
     }
@@ -137,7 +141,7 @@ public class Messages {
 
             private final Address from;
 
-            public GossipStatus(Address from, Map<Address, Long> versions) {
+            public GossipStatus(final Address from, final Map<Address, Long> versions) {
                 super(versions);
                 this.from = from;
             }
@@ -153,7 +157,7 @@ public class Messages {
             private final Address from;
             private final Address to;
 
-            public GossipEnvelope(Address from, Address to, Map<Address, Bucket<T>> buckets) {
+            public GossipEnvelope(final Address from, final Address to, final Map<Address, Bucket<T>> buckets) {
                 super(buckets);
                 Preconditions.checkArgument(to != null, "Recipient of message must not be null");
                 this.to = to;
