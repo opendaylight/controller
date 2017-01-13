@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a622d24_a94c4043",
+        "filename": "opendaylight/md-sal/sal-dom-xsql/src/main/java/org/opendaylight/controller/md/sal/dom/xsql/XSQLAdapter.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 175,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-01-13T13:37:44Z",
+      "side": 0,
+      "message": "wtf - why ?!?!",
+      "revId": "235abd0af13dcc3d6ab446f9587e07faf67f0bd2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
