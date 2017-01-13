@@ -16,15 +16,13 @@ import static org.junit.Assert.assertTrue;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.testkit.JavaTestKit;
-import java.io.InputStream;
 import java.net.URI;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.mockito.Mockito;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcIdentifier;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcResult;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
@@ -70,15 +68,18 @@ public class AbstractRpcTest {
     static RemoteRpcProviderConfig config1;
     static RemoteRpcProviderConfig config2;
 
-    protected ActorRef rpcBroker1;
+    protected ActorRef rpcInvoker1;
     protected JavaTestKit rpcRegistry1Probe;
-    protected ActorRef rpcBroker2;
+    protected ActorRef rpcInvoker2;
     protected JavaTestKit rpcRegistry2Probe;
     protected Broker.ProviderSession brokerSession;
     protected SchemaContext schemaContext;
     protected RemoteRpcImplementation remoteRpcImpl1;
     protected RemoteRpcImplementation remoteRpcImpl2;
+
+    @Mock
     protected DOMRpcService domRpcService1;
+    @Mock
     protected DOMRpcService domRpcService2;
 
     @BeforeClass
@@ -98,25 +99,17 @@ public class AbstractRpcTest {
     }
 
     @Before
-    public void setUp() throws Exception {
-        final List<InputStream> sources = Collections.singletonList(
-            AbstractRpcTest.this.getClass().getResourceAsStream("/test-rpc.yang"));
+    public void setUp() throws ReactorException {
+        schemaContext = YangParserTestUtils.parseYangResources(AbstractRpcTest.class, "/test-rpc.yang");
 
-        try {
-            schemaContext = YangParserTestUtils.parseYangStreams(sources);
-        } catch (ReactorException e) {
-            throw new RuntimeException("Unable to build schema context from " + sources, e);
-        }
+        MockitoAnnotations.initMocks(this);
 
-        domRpcService1 = Mockito.mock(DOMRpcService.class);
-        domRpcService2 = Mockito.mock(DOMRpcService.class);
         rpcRegistry1Probe = new JavaTestKit(node1);
-        rpcBroker1 = node1.actorOf(RpcBroker.props(domRpcService1));
+        rpcInvoker1 = node1.actorOf(RpcInvoker.props(domRpcService1));
         rpcRegistry2Probe = new JavaTestKit(node2);
-        rpcBroker2 = node2.actorOf(RpcBroker.props(domRpcService2));
-        remoteRpcImpl1 = new RemoteRpcImplementation(rpcRegistry1Probe.getRef(), config1);
-        remoteRpcImpl2 = new RemoteRpcImplementation(rpcRegistry2Probe.getRef(), config2);
-
+        rpcInvoker2 = node2.actorOf(RpcInvoker.props(domRpcService2));
+        remoteRpcImpl1 = new RemoteRpcImplementation(rpcInvoker2, config1);
+        remoteRpcImpl2 = new RemoteRpcImplementation(rpcInvoker1, config2);
     }
 
     static void assertRpcErrorEquals(final RpcError rpcError, final ErrorSeverity severity,
