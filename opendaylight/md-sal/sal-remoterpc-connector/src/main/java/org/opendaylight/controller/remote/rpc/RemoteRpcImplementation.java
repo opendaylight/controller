@@ -35,6 +35,9 @@ import scala.concurrent.Future;
 public class RemoteRpcImplementation implements DOMRpcImplementation {
     private static final Logger LOG = LoggerFactory.getLogger(RemoteRpcImplementation.class);
 
+    // 0 for local, 1 for binding, 2 for remote
+    private static final long COST = 2;
+
     private final ActorRef rpcRegistry;
     private final RemoteRpcProviderConfig config;
 
@@ -75,6 +78,11 @@ public class RemoteRpcImplementation implements DOMRpcImplementation {
             }
         }, ExecutionContext.Implicits$.MODULE$.global());
         return frontEndFuture;
+    }
+
+    @Override
+    public long invocationCost() {
+        return COST;
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
