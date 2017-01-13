@@ -18,6 +18,7 @@ import scala.concurrent.duration.FiniteDuration;
 public class RemoteRpcProviderConfig extends CommonConfig {
 
     protected static final String TAG_RPC_BROKER_NAME = "rpc-broker-name";
+    protected static final String TAG_RPC_REGISTRAR_NAME = "rpc-registrar-name";
     protected static final String TAG_RPC_REGISTRY_NAME = "registry-name";
     protected static final String TAG_RPC_MGR_NAME = "rpc-manager-name";
     protected static final String TAG_RPC_BROKER_PATH = "rpc-broker-path";
@@ -30,7 +31,7 @@ public class RemoteRpcProviderConfig extends CommonConfig {
     private Timeout cachedAskDuration;
     private FiniteDuration cachedGossipTickInterval;
 
-    public RemoteRpcProviderConfig(Config config){
+    public RemoteRpcProviderConfig(final Config config) {
         super(config);
     }
 
@@ -38,7 +39,11 @@ public class RemoteRpcProviderConfig extends CommonConfig {
         return get().getString(TAG_RPC_BROKER_NAME);
     }
 
-    public String getRpcRegistryName(){
+    public String getRpcRegistrarName() {
+        return get().getString(TAG_RPC_REGISTRAR_NAME);
+    }
+
+    public String getRpcRegistryName() {
         return get().getString(TAG_RPC_REGISTRY_NAME);
     }
 
@@ -85,19 +90,20 @@ public class RemoteRpcProviderConfig extends CommonConfig {
     /**
      * This is called via blueprint xml as the builder pattern can't be used.
      */
-    public static RemoteRpcProviderConfig newInstance(String actorSystemName, boolean metricCaptureEnabled,
-            int mailboxCapacity) {
-        return new Builder(actorSystemName).metricCaptureEnabled(metricCaptureEnabled).
-                mailboxCapacity(mailboxCapacity).build();
+    public static RemoteRpcProviderConfig newInstance(final String actorSystemName, final boolean metricCaptureEnabled,
+            final int mailboxCapacity) {
+        return new Builder(actorSystemName).metricCaptureEnabled(metricCaptureEnabled)
+                .mailboxCapacity(mailboxCapacity).build();
     }
 
     public static class Builder extends CommonConfig.Builder<Builder>{
 
-        public Builder(String actorSystemName){
+        public Builder(final String actorSystemName) {
             super(actorSystemName);
 
             //Actor names
             configHolder.put(TAG_RPC_BROKER_NAME, "broker");
+            configHolder.put(TAG_RPC_REGISTRAR_NAME, "registrar");
             configHolder.put(TAG_RPC_REGISTRY_NAME, "registry");
             configHolder.put(TAG_RPC_MGR_NAME, "rpc");
 
@@ -112,7 +118,7 @@ public class RemoteRpcProviderConfig extends CommonConfig {
 
         }
 
-        public Builder gossipTickInterval(String interval) {
+        public Builder gossipTickInterval(final String interval) {
             configHolder.put(TAG_GOSSIP_TICK_INTERVAL, interval);
             return this;
         }

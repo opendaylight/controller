@@ -5,9 +5,7 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.remote.rpc;
-
 
 import akka.actor.ActorRef;
 import com.google.common.base.Preconditions;
@@ -17,48 +15,59 @@ import java.util.List;
 import javax.annotation.Nonnull;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcAvailabilityListener;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcIdentifier;
+import org.opendaylight.controller.md.sal.dom.api.DOMRpcImplementation;
 import org.opendaylight.controller.remote.rpc.registry.RpcRegistry;
-import org.opendaylight.controller.sal.connector.api.RpcRouter;
+import org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.AddOrUpdateRoutes;
+import org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.RemoveRoutes;
+import org.opendaylight.controller.sal.connector.api.RpcRouter.RouteIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class RpcListener implements DOMRpcAvailabilityListener{
+/**
+ * A {@link DOMRpcAvailabilityListener} reacting to RPC implementations different than {@link RemoteRpcImplementation}.
+ * The knowledge of such implementations is forwarded to {@link RpcRegistry}, which is responsible for advertising
+ * their presence to other nodes.
+ */
+final class RpcListener implements DOMRpcAvailabilityListener {
+    private static final Logger LOG = LoggerFactory.getLogger(RpcListener.class);
 
-  private static final Logger LOG = LoggerFactory.getLogger(RpcListener.class);
-  private final ActorRef rpcRegistry;
+    private final ActorRef rpcRegistry;
 
-  public RpcListener(final ActorRef rpcRegistry) {
-    this.rpcRegistry = rpcRegistry;
-  }
+    RpcListener(final ActorRef rpcRegistry) {
+        this.rpcRegistry = Preconditions.checkNotNull(rpcRegistry);
+    }
 
     @Override
     public void onRpcAvailable(@Nonnull final Collection<DOMRpcIdentifier> rpcs) {
         Preconditions.checkArgument(rpcs != null, "Input Collection of DOMRpcIdentifier can not be null.");
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Adding registration for [{}]", rpcs);
-        }
-        final List<RpcRouter.RouteIdentifier<?,?,?>> routeIds = new ArrayList<>();
+        LOG.debug("Adding registration for [{}]", rpcs);
+
+        final List<RouteIdentifier<?,?,?>> routeIds = new ArrayList<>(rpcs.size());
 
         for (final DOMRpcIdentifier rpc : rpcs) {
-            final RpcRouter.RouteIdentifier<?,?,?> routeId = new RouteIdentifierImpl(null, rpc.getType().getLastComponent(), rpc.getContextReference());
+            // FIXME: Refactor routeId and message to use DOMRpcIdentifier directly.
+            final RouteIdentifier<?,?,?> routeId =
+                    new RouteIdentifierImpl(null, rpc.getType().getLastComponent(), rpc.getContextReference());
             routeIds.add(routeId);
         }
-        final RpcRegistry.Messages.AddOrUpdateRoutes addRpcMsg = new RpcRegistry.Messages.AddOrUpdateRoutes(routeIds);
-        rpcRegistry.tell(addRpcMsg, ActorRef.noSender());
+        rpcRegistry.tell(new AddOrUpdateRoutes(routeIds), ActorRef.noSender());
     }
 
     @Override
     public void onRpcUnavailable(@Nonnull final Collection<DOMRpcIdentifier> rpcs) {
         Preconditions.checkArgument(rpcs != null, "Input Collection of DOMRpcIdentifier can not be null.");
-        if(LOG.isDebugEnabled()) {
-            LOG.debug("Removing registration for [{}]", rpcs);
-        }
-        final List<RpcRouter.RouteIdentifier<?,?,?>> routeIds = new ArrayList<>();
+
+        LOG.debug("Removing registration for [{}]", rpcs);
+
+        final List<RouteIdentifier<?,?,?>> routeIds = new ArrayList<>(rpcs.size());
         for (final DOMRpcIdentifier rpc : rpcs) {
-            final RpcRouter.RouteIdentifier<?,?,?> routeId = new RouteIdentifierImpl(null, rpc.getType().getLastComponent(), rpc.getContextReference());
-            routeIds.add(routeId);
+            routeIds.add(new RouteIdentifierImpl(null, rpc.getType().getLastComponent(), rpc.getContextReference()));
         }
-        final RpcRegistry.Messages.RemoveRoutes removeRpcMsg = new RpcRegistry.Messages.RemoveRoutes(routeIds);
-        rpcRegistry.tell(removeRpcMsg, ActorRef.noSender());
+        rpcRegistry.tell(new RemoveRoutes(routeIds), ActorRef.noSender());
+    }
+
+    @Override
+    public boolean acceptsImplementation(final DOMRpcImplementation impl) {
+        return !(impl instanceof RemoteRpcImplementation);
     }
 }
