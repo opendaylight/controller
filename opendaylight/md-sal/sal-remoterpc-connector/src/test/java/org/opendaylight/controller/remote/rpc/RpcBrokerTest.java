@@ -43,7 +43,7 @@ public class RpcBrokerTest extends AbstractRpcTest {
 
                 final ExecuteRpc executeMsg = ExecuteRpc.from(TEST_RPC_ID, null);
 
-                rpcBroker1.tell(executeMsg, getRef());
+                rpcInvoker1.tell(executeMsg, getRef());
 
                 final RpcResponse rpcResponse = expectMsgClass(duration("5 seconds"), RpcResponse.class);
 
@@ -63,7 +63,7 @@ public class RpcBrokerTest extends AbstractRpcTest {
 
                 final ExecuteRpc executeMsg = ExecuteRpc.from(TEST_RPC_ID, null);
 
-                rpcBroker1.tell(executeMsg, getRef());
+                rpcInvoker1.tell(executeMsg, getRef());
 
                 final Failure rpcResponse = expectMsgClass(duration("5 seconds"), akka.actor.Status.Failure.class);
 
