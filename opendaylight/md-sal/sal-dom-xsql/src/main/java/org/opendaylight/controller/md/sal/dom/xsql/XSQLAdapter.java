@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.md.sal.dom.xsql;
 
+import com.google.common.base.Optional;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
@@ -21,10 +22,11 @@ import java.util.List;
 import javax.annotation.concurrent.GuardedBy;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
-import org.opendaylight.controller.md.sal.dom.api.DOMDataReadTransaction;
+import org.opendaylight.controller.md.sal.dom.api.DOMDataReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.dom.xsql.jdbc.JDBCResultSet;
 import org.opendaylight.controller.md.sal.dom.xsql.jdbc.JDBCServer;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
@@ -61,7 +63,6 @@ public class XSQLAdapter extends Thread implements SchemaContextListener {
     private String pinningFile;
     private ServerSocket serverSocket = null;
     private DOMDataBroker domDataBroker = null;
-    private static final String REFERENCE_FIELD_NAME = "reference";
 
     @GuardedBy("this")
     private SchemaContext context;
@@ -163,24 +164,24 @@ public class XSQLAdapter extends Thread implements SchemaContextListener {
         return bluePrint;
     }
 
-    public List<Object> collectModuleRoots(final XSQLBluePrintNode table,final LogicalDatastoreType type) {
+    public List<NormalizedNode<?, ?>> collectModuleRoots(final XSQLBluePrintNode table,final LogicalDatastoreType type) {
         if (table.getParent().isModule()) {
             try {
-                List<Object> result = new LinkedList<>();
+                List<NormalizedNode<?, ?>> result = new LinkedList<>();
                 YangInstanceIdentifier instanceIdentifier = YangInstanceIdentifier
                         .builder()
                         .node(XSQLODLUtils.getPath(table.getFirstFromSchemaNodes()).get(0))
                         .build();
-                DOMDataReadTransaction t = this.domDataBroker
+                DOMDataReadOnlyTransaction t = this.domDataBroker
                         .newReadOnlyTransaction();
-                Object node = t.read(type,
+                Optional<NormalizedNode<?, ?>> node = t.read(type,
                         instanceIdentifier).get();
+                t.close();
 
-                node = XSQLODLUtils.get(node, REFERENCE_FIELD_NAME);
-                if (node == null) {
-                    return result;
+                if (node.isPresent()) {
+                    result.add(node.get());
                 }
-                result.add(node);
+
                 return result;
             } catch (Exception err) {
                 XSQLAdapter.log(err);
@@ -197,7 +198,7 @@ public class XSQLAdapter extends Thread implements SchemaContextListener {
             return;
         }
         List<XSQLBluePrintNode> tables = rs.getTables();
-        List<Object> roots = collectModuleRoots(tables.get(0),LogicalDatastoreType.OPERATIONAL);
+        List<NormalizedNode<?, ?>> roots = collectModuleRoots(tables.get(0),LogicalDatastoreType.OPERATIONAL);
         roots.addAll(collectModuleRoots(tables.get(0),LogicalDatastoreType.CONFIGURATION));
         if(roots.isEmpty()){
             rs.setFinished(true);
@@ -205,7 +206,7 @@ public class XSQLAdapter extends Thread implements SchemaContextListener {
         XSQLBluePrintNode main = rs.getMainTable();
         List<NETask> tasks = new LinkedList<>();
 
-        for (Object entry : roots) {
+        for (NormalizedNode<?, ?> entry : roots) {
             NETask task = new NETask(rs, entry, main, getBluePrint());
             rs.numberOfTasks++;
             tasks.add(task);
@@ -451,12 +452,12 @@ public class XSQLAdapter extends Thread implements SchemaContextListener {
 
     public static class NETask implements Runnable {
 
-        private JDBCResultSet rs = null;
-        private Object modelRoot = null;
-        private XSQLBluePrintNode main = null;
-        private XSQLBluePrint bluePrint = null;
+        private final JDBCResultSet rs;
+        private final NormalizedNode<?, ?> modelRoot;
+        private final XSQLBluePrintNode main;
+        private final XSQLBluePrint bluePrint;
 
-        public NETask(final JDBCResultSet _rs, final Object _modelRoot,
+        public NETask(final JDBCResultSet _rs, final NormalizedNode<?, ?> _modelRoot,
                 final XSQLBluePrintNode _main, final XSQLBluePrint _bluePrint) {
             this.rs = _rs;
             this.modelRoot = _modelRoot;

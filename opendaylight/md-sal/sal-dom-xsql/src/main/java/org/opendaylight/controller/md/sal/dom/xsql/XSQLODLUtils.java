@@ -209,7 +209,7 @@ public class XSQLODLUtils {
     }
 
 
-    public static Object get(final Object o, final String name) {
+    private static Object get(final Object o, final String name) {
         try {
             Class<?> c = o.getClass();
             Field f = findField(c, name);
