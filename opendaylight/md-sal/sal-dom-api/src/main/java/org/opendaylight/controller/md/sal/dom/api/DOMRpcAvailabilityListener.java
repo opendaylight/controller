@@ -29,4 +29,17 @@ public interface DOMRpcAvailabilityListener extends EventListener {
      * @param rpcs RPC types which became unavailable
      */
     void onRpcUnavailable(@Nonnull Collection<DOMRpcIdentifier> rpcs);
+
+    /**
+     * Implementation filtering method. This method is useful for forwarding RPC implementations,
+     * which need to ensure they do not re-announce their own implementations. Without this method
+     * a forwarder which registers an implementation would be notified of its own implementation,
+     * potentially re-exporting it as local -- hence creating a forwarding loop.
+     *
+     * @param impl RPC implementation being registered
+     * @return False if the implementation should not be reported, defaults to true.
+     */
+    default boolean acceptsImplementation(final DOMRpcImplementation impl) {
+        return true;
+    }
 }
