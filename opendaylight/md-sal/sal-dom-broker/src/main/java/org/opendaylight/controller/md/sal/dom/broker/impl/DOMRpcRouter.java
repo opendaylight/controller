@@ -49,7 +49,7 @@ public final class DOMRpcRouter implements AutoCloseable, DOMRpcService, DOMRpcP
     private Collection<ListenerRegistration<? extends DOMRpcAvailabilityListener>> listeners = Collections.emptyList();
     private volatile DOMRpcRoutingTable routingTable = DOMRpcRoutingTable.EMPTY;
 
-    public static DOMRpcRouter newInstance(SchemaService schemaService) {
+    public static DOMRpcRouter newInstance(final SchemaService schemaService) {
         final DOMRpcRouter rpcRouter = new DOMRpcRouter();
         schemaService.registerSchemaContextListener(rpcRouter);
         return rpcRouter;
@@ -94,7 +94,8 @@ public final class DOMRpcRouter implements AutoCloseable, DOMRpcService, DOMRpcP
     }
 
     @Override
-    public synchronized <T extends DOMRpcImplementation> DOMRpcImplementationRegistration<T> registerRpcImplementation(final T implementation, final Set<DOMRpcIdentifier> rpcs) {
+    public synchronized <T extends DOMRpcImplementation> DOMRpcImplementationRegistration<T> registerRpcImplementation(
+            final T implementation, final Set<DOMRpcIdentifier> rpcs) {
         final DOMRpcRoutingTable oldTable = routingTable;
         final DOMRpcRoutingTable newTable = oldTable.add(implementation, rpcs);
 
@@ -106,11 +107,14 @@ public final class DOMRpcRouter implements AutoCloseable, DOMRpcService, DOMRpcP
             listenerNotifier.execute(new Runnable() {
                 @Override
                 public void run() {
-                    for (final ListenerRegistration<? extends DOMRpcAvailabilityListener> l : capturedListeners) {
+                    for (final ListenerRegistration<? extends DOMRpcAvailabilityListener> r : capturedListeners) {
                         // Need to ensure removed listeners do not get notified
                         synchronized (DOMRpcRouter.this) {
-                            if (listeners.contains(l)) {
-                                l.getInstance().onRpcAvailable(addedRpcs);
+                            if (listeners.contains(r)) {
+                                final DOMRpcAvailabilityListener l = r.getInstance();
+                                if (l.acceptsImplementation(implementation)) {
+                                    l.onRpcAvailable(addedRpcs);
+                                }
                             }
                         }
                     }

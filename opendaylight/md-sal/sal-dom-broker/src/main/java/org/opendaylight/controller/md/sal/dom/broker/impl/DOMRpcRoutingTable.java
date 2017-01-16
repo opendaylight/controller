@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.md.sal.dom.broker.impl;
 
-import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
@@ -40,16 +39,11 @@ import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 import org.opendaylight.yangtools.yang.model.api.UnknownSchemaNode;
 
 final class DOMRpcRoutingTable {
-    private static final QName CONTEXT_REFERENCE = QName.create("urn:opendaylight:yang:extension:yang-ext", "2013-07-09", "context-reference");
+    private static final QName CONTEXT_REFERENCE = QName.create("urn:opendaylight:yang:extension:yang-ext",
+        "2013-07-09", "context-reference");
 
     static final DOMRpcRoutingTable EMPTY = new DOMRpcRoutingTable();
-    private static final Function<AbstractDOMRpcRoutingTableEntry, Set<YangInstanceIdentifier>> EXTRACT_IDENTIFIERS =
-            new Function<AbstractDOMRpcRoutingTableEntry, Set<YangInstanceIdentifier>>() {
-                @Override
-                public Set<YangInstanceIdentifier> apply(final AbstractDOMRpcRoutingTableEntry input) {
-                    return input.registeredIdentifiers();
-                }
-    };
+
     private final Map<SchemaPath, AbstractDOMRpcRoutingTableEntry> rpcs;
     private final SchemaContext schemaContext;
 
@@ -137,7 +131,7 @@ final class DOMRpcRoutingTable {
     }
 
     Map<SchemaPath, Set<YangInstanceIdentifier>> getRpcs() {
-        return Maps.transformValues(rpcs, EXTRACT_IDENTIFIERS);
+        return Maps.transformValues(rpcs, AbstractDOMRpcRoutingTableEntry::registeredIdentifiers);
     }
 
     private static RpcDefinition findRpcDefinition(final SchemaContext context, final SchemaPath schemaPath) {

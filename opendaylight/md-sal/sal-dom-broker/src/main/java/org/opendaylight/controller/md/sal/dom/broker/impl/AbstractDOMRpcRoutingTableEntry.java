@@ -65,6 +65,7 @@ abstract class AbstractDOMRpcRoutingTableEntry {
                 final ArrayList<DOMRpcImplementation> i = new ArrayList<>(ve.getValue().size() + 1);
                 i.addAll(ve.getValue());
                 i.add(implementation);
+                i.sort((a, b) -> Long.compare(a.invocationCost(), b.invocationCost()));
                 vb.put(ve.getKey(), i);
             } else {
                 vb.put(ve);
@@ -73,7 +74,7 @@ abstract class AbstractDOMRpcRoutingTableEntry {
         for(final YangInstanceIdentifier ii : newRpcs) {
             final ArrayList<DOMRpcImplementation> impl = new ArrayList<>(1);
             impl.add(implementation);
-            vb.put(ii,impl);
+            vb.put(ii, impl);
         }
 
         return newInstance(vb.build());
