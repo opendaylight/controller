@@ -7,8 +7,15 @@
  */
 package org.opendaylight.controller.remote.rpc.registry.gossip;
 
-public interface Bucket<T extends Copier<T>> {
+import akka.actor.ActorRef;
+import java.util.Optional;
+
+public interface Bucket<T extends BucketData<T>> {
     long getVersion();
 
     T getData();
+
+    default Optional<ActorRef> getWatchActor() {
+        return getData().getWatchActor();
+    }
 }
