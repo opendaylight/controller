@@ -9,7 +9,7 @@ package org.opendaylight.controller.remote.rpc.registry.gossip;
 
 import java.io.Serializable;
 
-public final class BucketImpl<T extends Copier<T>> implements Bucket<T>, Serializable {
+public final class BucketImpl<T extends BucketData<T>> implements Bucket<T>, Serializable {
     private static final long serialVersionUID = 294779770032719196L;
 
     private Long version = System.currentTimeMillis();

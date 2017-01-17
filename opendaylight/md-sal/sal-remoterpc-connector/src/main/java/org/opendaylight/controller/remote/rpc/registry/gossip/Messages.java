@@ -43,7 +43,7 @@ public class Messages {
             }
         }
 
-        public static class ContainsBuckets<T extends Copier<T>> implements Serializable{
+        public static class ContainsBuckets<T extends BucketData<T>> implements Serializable {
             private static final long serialVersionUID = -4940160367495308286L;
 
             private final Map<Address, Bucket<T>> buckets;
@@ -58,7 +58,7 @@ public class Messages {
             }
         }
 
-        public static final class GetAllBucketsReply<T extends Copier<T>> extends ContainsBuckets<T> {
+        public static final class GetAllBucketsReply<T extends BucketData<T>> extends ContainsBuckets<T> {
             private static final long serialVersionUID = 1L;
 
             public GetAllBucketsReply(final Map<Address, Bucket<T>> buckets) {
@@ -66,7 +66,7 @@ public class Messages {
             }
         }
 
-        public static final class GetBucketsByMembersReply<T extends Copier<T>> extends ContainsBuckets<T>  {
+        public static final class GetBucketsByMembersReply<T extends BucketData<T>> extends ContainsBuckets<T>  {
             private static final long serialVersionUID = 1L;
 
             public GetBucketsByMembersReply(final Map<Address, Bucket<T>> buckets) {
@@ -102,7 +102,7 @@ public class Messages {
             }
         }
 
-        public static final class UpdateRemoteBuckets<T extends Copier<T>> extends ContainsBuckets<T> {
+        public static final class UpdateRemoteBuckets<T extends BucketData<T>> extends ContainsBuckets<T> {
             private static final long serialVersionUID = 1L;
 
             public UpdateRemoteBuckets(final Map<Address, Bucket<T>> buckets) {
@@ -151,7 +151,7 @@ public class Messages {
             }
         }
 
-        public static final class GossipEnvelope<T extends Copier<T>> extends ContainsBuckets<T> implements Serializable {
+        public static final class GossipEnvelope<T extends BucketData<T>> extends ContainsBuckets<T> {
             private static final long serialVersionUID = 8346634072582438818L;
 
             private final Address from;
