@@ -10,6 +10,8 @@ package org.opendaylight.controller.cluster.datastore.persisted;
 import static org.junit.Assert.assertEquals;
 
 import com.google.common.collect.ImmutableMap;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
@@ -37,9 +39,11 @@ public class ShardDataTreeSnapshotTest {
                 .withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo")).build();
 
         MetadataShardDataTreeSnapshot snapshot = new MetadataShardDataTreeSnapshot(expectedNode);
-        byte[] serialized = snapshot.serialize();
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        snapshot.serialize(bos);
 
-        ShardDataTreeSnapshot deserialized = ShardDataTreeSnapshot.deserialize(serialized);
+        ShardDataTreeSnapshot deserialized = ShardDataTreeSnapshot.deserialize(
+                new ByteArrayInputStream(bos.toByteArray()));
 
         Optional<NormalizedNode<?, ?>> actualNode = deserialized.getRootNode();
         assertEquals("rootNode present", true, actualNode.isPresent());
@@ -57,9 +61,11 @@ public class ShardDataTreeSnapshotTest {
         Map<Class<? extends ShardDataTreeSnapshotMetadata<?>>, ShardDataTreeSnapshotMetadata<?>> expMetadata =
                 ImmutableMap.of(TestShardDataTreeSnapshotMetadata.class, new TestShardDataTreeSnapshotMetadata("test"));
         MetadataShardDataTreeSnapshot snapshot = new MetadataShardDataTreeSnapshot(expectedNode, expMetadata);
-        byte[] serialized = snapshot.serialize();
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        snapshot.serialize(bos);
 
-        ShardDataTreeSnapshot deserialized = ShardDataTreeSnapshot.deserialize(serialized);
+        ShardDataTreeSnapshot deserialized = ShardDataTreeSnapshot.deserialize(
+                new ByteArrayInputStream(bos.toByteArray()));
 
         Optional<NormalizedNode<?, ?>> actualNode = deserialized.getRootNode();
         assertEquals("rootNode present", true, actualNode.isPresent());
@@ -69,15 +75,17 @@ public class ShardDataTreeSnapshotTest {
     }
 
     @Test
+    @Deprecated
     public void testPreBoronShardDataTreeSnapshot() throws Exception {
         NormalizedNode<?, ?> expectedNode = ImmutableContainerNodeBuilder.create()
                 .withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME))
                 .withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo")).build();
 
         PreBoronShardDataTreeSnapshot snapshot = new PreBoronShardDataTreeSnapshot(expectedNode);
-        byte[] serialized = snapshot.serialize();
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        snapshot.serialize(bos);
 
-        ShardDataTreeSnapshot deserialized = ShardDataTreeSnapshot.deserialize(serialized);
+        ShardDataTreeSnapshot deserialized = ShardDataTreeSnapshot.deserialize(bos.toByteArray());
 
         Optional<NormalizedNode<?, ?>> actualNode = deserialized.getRootNode();
         assertEquals("rootNode present", true, actualNode.isPresent());

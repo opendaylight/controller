@@ -10,7 +10,11 @@ package org.opendaylight.controller.cluster.datastore;
 import akka.actor.ActorContext;
 import akka.actor.ActorRef;
 import com.google.common.base.Preconditions;
+import com.google.common.io.ByteSource;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Optional;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendType;
@@ -18,7 +22,10 @@ import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifie
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.actors.ShardSnapshotActor;
 import org.opendaylight.controller.cluster.datastore.persisted.ShardDataTreeSnapshot;
+import org.opendaylight.controller.cluster.datastore.persisted.ShardSnapshotState;
 import org.opendaylight.controller.cluster.raft.RaftActorSnapshotCohort;
+import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
+import org.opendaylight.controller.cluster.raft.persisted.Snapshot.State;
 import org.slf4j.Logger;
 
 /**
@@ -56,27 +63,25 @@ class ShardSnapshotCohort implements RaftActorSnapshotCohort {
     }
 
     @Override
-    public void createSnapshot(final ActorRef actorRef) {
+    public void createSnapshot(final ActorRef actorRef, final Optional<OutputStream> installSnapshotStream) {
         // Forward the request to the snapshot actor
-        ShardSnapshotActor.requestSnapshot(snapshotActor, store.takeStateSnapshot(), actorRef);
+        ShardSnapshotActor.requestSnapshot(snapshotActor, store.takeStateSnapshot(), installSnapshotStream, actorRef);
     }
 
     @Override
     @SuppressWarnings("checkstyle:IllegalCatch")
-    public void applySnapshot(final byte[] snapshotBytes) {
+    public void applySnapshot(final Snapshot.State snapshotState) {
+        if (!(snapshotState instanceof ShardSnapshotState)) {
+            log.debug("{}: applySnapshot ignoring snapshot: {}", snapshotState);
+        }
+
+        final ShardDataTreeSnapshot snapshot = ((ShardSnapshotState)snapshotState).getSnapshot();
+
         // Since this will be done only on Recovery or when this actor is a Follower
         // we can safely commit everything in here. We not need to worry about event notifications
         // as they would have already been disabled on the follower
 
         log.info("{}: Applying snapshot", logId);
-
-        final ShardDataTreeSnapshot snapshot;
-        try {
-            snapshot = ShardDataTreeSnapshot.deserialize(snapshotBytes);
-        } catch (IOException e) {
-            log.error("{}: Failed to deserialize snapshot", logId, e);
-            return;
-        }
 
         try {
             store.applySnapshot(snapshot);
@@ -86,5 +91,12 @@ class ShardSnapshotCohort implements RaftActorSnapshotCohort {
         }
 
         log.info("{}: Done applying snapshot", logId);
+    }
+
+    @Override
+    public State deserializeSnapshot(ByteSource snapshotBytes) throws IOException {
+        try (final InputStream is = snapshotBytes.openStream()) {
+            return new ShardSnapshotState(ShardDataTreeSnapshot.deserialize(is));
+        }
     }
 }
