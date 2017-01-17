@@ -120,7 +120,7 @@ public class MockRaftActorContext extends RaftActorContextImpl {
     @Override
     public SnapshotManager getSnapshotManager() {
         SnapshotManager snapshotManager = super.getSnapshotManager();
-        snapshotManager.setCreateSnapshotRunnable(() -> { });
+        snapshotManager.setCreateSnapshotConsumer(out -> { });
         return snapshotManager;
     }
 

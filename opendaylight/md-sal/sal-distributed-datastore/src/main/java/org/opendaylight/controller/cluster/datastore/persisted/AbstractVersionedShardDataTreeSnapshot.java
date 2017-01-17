@@ -8,12 +8,12 @@
 package org.opendaylight.controller.cluster.datastore.persisted;
 
 import com.google.common.base.Verify;
-import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.util.Optional;
 import javax.annotation.Nonnull;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -93,15 +93,11 @@ abstract class AbstractVersionedShardDataTreeSnapshot extends ShardDataTreeSnaps
     }
 
     @Override
-    public final byte[] serialize() throws IOException {
-        try (final ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
-            try (final DataOutputStream dos = new DataOutputStream(bos)) {
-                final PayloadVersion version = version();
-                version.writeTo(dos);
-                versionedSerialize(dos, version);
-            }
-
-            return bos.toByteArray();
+    public void serialize(final OutputStream os) throws IOException {
+        try (final DataOutputStream dos = new DataOutputStream(os)) {
+            final PayloadVersion version = version();
+            version.writeTo(dos);
+            versionedSerialize(dos, version);
         }
     }
 }

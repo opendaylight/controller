@@ -9,9 +9,11 @@ package org.opendaylight.controller.cluster.datastore.persisted;
 
 import com.google.common.annotations.Beta;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Optional;
 import javax.annotation.Nonnull;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.SerializationUtils;
@@ -50,22 +52,26 @@ public abstract class ShardDataTreeSnapshot {
 
         try {
             try (final InputStream is = new ByteArrayInputStream(bytes)) {
-                try (final DataInputStream dis = new DataInputStream(is)) {
-                    final ShardDataTreeSnapshot ret = AbstractVersionedShardDataTreeSnapshot.deserialize(dis);
-
-                    // Make sure we consume all bytes, otherwise something went very wrong
-                    final int bytesLeft = dis.available();
-                    if (bytesLeft != 0) {
-                        throw new IOException("Deserialization left " + bytesLeft + " in the buffer");
-                    }
-
-
-                    return ret;
-                }
+                return deserialize(is);
             }
         } catch (IOException e) {
             LOG.debug("Failed to deserialize versioned stream, attempting pre-Lithium ProtoBuf", e);
             return deserializeLegacy(bytes);
+        }
+    }
+
+    public static ShardDataTreeSnapshot deserialize(final InputStream is) throws IOException {
+        try (final DataInputStream dis = new DataInputStream(is)) {
+            final ShardDataTreeSnapshot ret = AbstractVersionedShardDataTreeSnapshot.deserialize(dis);
+
+            // Make sure we consume all bytes, otherwise something went very wrong
+            final int bytesLeft = dis.available();
+            if (bytesLeft != 0) {
+                throw new IOException("Deserialization left " + bytesLeft + " in the buffer");
+            }
+
+
+            return ret;
         }
     }
 
@@ -82,7 +88,15 @@ public abstract class ShardDataTreeSnapshot {
      * @return Serialized snapshot
      * @throws IOException when a serialization problem occurs
      */
-    public abstract @Nonnull byte[] serialize() throws IOException;
+    @Nonnull
+    public byte[] serialize() throws IOException {
+        try (final ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
+            serialize(bos);
+            return bos.toByteArray();
+        }
+    }
+
+    public abstract void serialize(final OutputStream os) throws IOException;
 
     private static boolean isLegacyStream(final byte[] bytes) {
         if (bytes.length < 2) {

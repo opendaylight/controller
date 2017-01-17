@@ -15,20 +15,30 @@ import akka.testkit.JavaTestKit;
 import akka.testkit.TestActorRef;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Sets;
+import com.google.common.io.ByteSource;
 import com.google.common.util.concurrent.Uninterruptibles;
+import java.io.OutputStream;
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import org.apache.commons.lang3.SerializationUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.opendaylight.controller.cluster.raft.MockRaftActor.MockSnapshotState;
+import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
 import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
+import org.opendaylight.controller.cluster.raft.persisted.ByteState;
 import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload;
 import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
+import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
+import org.opendaylight.controller.cluster.raft.persisted.Snapshot.State;
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
@@ -103,7 +113,7 @@ public class MigratedMessagesTest extends AbstractActorTest {
         doTestSnapshotAfterStartupWithMigratedMessage(persistenceId, true, snapshot -> {
             assertEquals("getElectionVotedFor", persistenceId, snapshot.getElectionVotedFor());
             assertEquals("getElectionTerm", 5, snapshot.getElectionTerm());
-        });
+        }, ByteState.empty());
 
         TEST_LOG.info("testSnapshotAfterStartupWithMigratedUpdateElectionTermAndPersistenceEnabled ending");
     }
@@ -122,7 +132,7 @@ public class MigratedMessagesTest extends AbstractActorTest {
         doTestSnapshotAfterStartupWithMigratedMessage(persistenceId, false, snapshot -> {
             assertEquals("getElectionVotedFor", persistenceId, snapshot.getElectionVotedFor());
             assertEquals("getElectionTerm", 5, snapshot.getElectionTerm());
-        });
+        }, ByteState.empty());
 
         TEST_LOG.info("testSnapshotAfterStartupWithMigratedUpdateElectionTermAndPersistenceDisabled ending");
     }
@@ -145,7 +155,7 @@ public class MigratedMessagesTest extends AbstractActorTest {
             assertEquals("getLastAppliedTerm", 1, snapshot.getLastAppliedTerm());
             assertEquals("getLastIndex", 0, snapshot.getLastIndex());
             assertEquals("getLastTerm", 1, snapshot.getLastTerm());
-        });
+        }, ByteState.empty());
 
         TEST_LOG.info("testSnapshotAfterStartupWithMigratedApplyJournalEntries ending");
     }
@@ -164,12 +174,17 @@ public class MigratedMessagesTest extends AbstractActorTest {
 
         RaftActorSnapshotCohort snapshotCohort = new RaftActorSnapshotCohort() {
             @Override
-            public void createSnapshot(ActorRef actorRef) {
-                actorRef.tell(new CaptureSnapshotReply(new byte[0]), actorRef);
+            public void createSnapshot(ActorRef actorRef, java.util.Optional<OutputStream> installSnapshotStream) {
+                actorRef.tell(new CaptureSnapshotReply(ByteState.empty(), installSnapshotStream), actorRef);
             }
 
             @Override
-            public void applySnapshot(byte[] snapshotBytes) {
+            public void applySnapshot(Snapshot.State snapshotState) {
+            }
+
+            @Override
+            public State deserializeSnapshot(ByteSource snapshotBytes) {
+                throw new UnsupportedOperationException();
             }
         };
 
@@ -204,7 +219,7 @@ public class MigratedMessagesTest extends AbstractActorTest {
             assertEquals("Unapplied entry term", 1, snapshot.getUnAppliedEntries().get(0).getTerm());
             assertEquals("Unapplied entry index", 0, snapshot.getUnAppliedEntries().get(0).getIndex());
             assertEquals("Unapplied entry data", expPayload, snapshot.getUnAppliedEntries().get(0).getData());
-        });
+        }, ByteState.empty());
 
         TEST_LOG.info("testSnapshotAfterStartupWithMigratedReplicatedLogEntry ending");
     }
@@ -231,14 +246,53 @@ public class MigratedMessagesTest extends AbstractActorTest {
                 assertEquals("getElectionTerm", 1, snapshot.getElectionTerm());
                 assertEquals("getServerConfiguration", new HashSet<>(expectedServerConfig.getServerConfig()),
                         new HashSet<>(snapshot.getServerConfiguration().getServerConfig()));
-            });
+            }, ByteState.empty());
 
         return actor;
     }
 
+    @Test
+    public void testSnapshotAfterStartupWithMigratedSnapshot() throws Exception {
+        TEST_LOG.info("testSnapshotAfterStartupWithMigratedSnapshot starting");
+
+        String persistenceId = factory.generateActorId("test-actor-");
+
+        List<Object> snapshotData = Arrays.asList(new MockPayload("1"));
+        final MockSnapshotState snapshotState = new MockSnapshotState(snapshotData);
+
+        org.opendaylight.controller.cluster.raft.Snapshot legacy = org.opendaylight.controller.cluster.raft.Snapshot
+            .create(SerializationUtils.serialize((Serializable) snapshotData),
+                Arrays.asList(new SimpleReplicatedLogEntry(6, 2, new MockPayload("payload"))),
+                6, 2, 5, 1, 3, "member-1", new ServerConfigurationPayload(Arrays.asList(
+                        new ServerInfo(persistenceId, true), new ServerInfo("2", false))));
+        InMemorySnapshotStore.addSnapshot(persistenceId, legacy);
+
+        doTestSnapshotAfterStartupWithMigratedMessage(persistenceId, true, snapshot -> {
+            assertEquals("getLastIndex", legacy.getLastIndex(), snapshot.getLastIndex());
+            assertEquals("getLastTerm", legacy.getLastTerm(), snapshot.getLastTerm());
+            assertEquals("getLastAppliedIndex", legacy.getLastAppliedIndex(), snapshot.getLastAppliedIndex());
+            assertEquals("getLastAppliedTerm", legacy.getLastAppliedTerm(), snapshot.getLastAppliedTerm());
+            assertEquals("getState", snapshotState, snapshot.getState());
+            assertEquals("Unapplied entries size", legacy.getUnAppliedEntries().size(),
+                    snapshot.getUnAppliedEntries().size());
+            assertEquals("Unapplied entry term", legacy.getUnAppliedEntries().get(0).getTerm(),
+                    snapshot.getUnAppliedEntries().get(0).getTerm());
+            assertEquals("Unapplied entry index", legacy.getUnAppliedEntries().get(0).getIndex(),
+                    snapshot.getUnAppliedEntries().get(0).getIndex());
+            assertEquals("Unapplied entry data", legacy.getUnAppliedEntries().get(0).getData(),
+                    snapshot.getUnAppliedEntries().get(0).getData());
+            assertEquals("getElectionVotedFor", legacy.getElectionVotedFor(), snapshot.getElectionVotedFor());
+            assertEquals("getElectionTerm", legacy.getElectionTerm(), snapshot.getElectionTerm());
+            assertEquals("getServerConfiguration", Sets.newHashSet(legacy.getServerConfiguration().getServerConfig()),
+                    Sets.newHashSet(snapshot.getServerConfiguration().getServerConfig()));
+        }, snapshotState);
+
+        TEST_LOG.info("testSnapshotAfterStartupWithMigratedSnapshot ending");
+    }
+
     @SuppressWarnings("checkstyle:IllegalCatch")
     private TestActorRef<MockRaftActor> doTestSnapshotAfterStartupWithMigratedMessage(String id, boolean persistent,
-            Consumer<Snapshot> snapshotVerifier) {
+            Consumer<Snapshot> snapshotVerifier, final State snapshotState) {
         InMemorySnapshotStore.addSnapshotSavedLatch(id);
         InMemoryJournal.addDeleteMessagesCompleteLatch(id);
         DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
@@ -246,12 +300,17 @@ public class MigratedMessagesTest extends AbstractActorTest {
 
         RaftActorSnapshotCohort snapshotCohort = new RaftActorSnapshotCohort() {
             @Override
-            public void createSnapshot(ActorRef actorRef) {
-                actorRef.tell(new CaptureSnapshotReply(new byte[0]), actorRef);
+            public void createSnapshot(ActorRef actorRef, java.util.Optional<OutputStream> installSnapshotStream) {
+                actorRef.tell(new CaptureSnapshotReply(snapshotState, installSnapshotStream), actorRef);
             }
 
             @Override
-            public void applySnapshot(byte[] snapshotBytes) {
+            public void applySnapshot(State newState) {
+            }
+
+            @Override
+            public State deserializeSnapshot(ByteSource snapshotBytes) {
+                throw new UnsupportedOperationException();
             }
         };
 

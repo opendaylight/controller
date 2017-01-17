@@ -10,9 +10,13 @@ package org.opendaylight.controller.cluster.datastore;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import java.io.File;
+import java.io.IOException;
 import org.opendaylight.controller.cluster.datastore.persisted.ShardDataTreeSnapshot;
+import org.opendaylight.controller.cluster.datastore.persisted.ShardSnapshotState;
 import org.opendaylight.controller.cluster.datastore.utils.NormalizedNodeXMLOutput;
 import org.opendaylight.controller.cluster.raft.RaftActorRecoveryCohort;
+import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
+import org.opendaylight.controller.cluster.raft.persisted.Snapshot.State;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.slf4j.Logger;
@@ -86,29 +90,36 @@ class ShardRecoveryCoordinator implements RaftActorRecoveryCohort {
      */
     @Override
     @SuppressWarnings("checkstyle:IllegalCatch")
-    public void applyRecoverySnapshot(final byte[] snapshotBytes) {
-        log.debug("{}: Applying recovered snapshot", shardName);
-
-        final ShardDataTreeSnapshot snapshot;
-        try {
-            snapshot = ShardDataTreeSnapshot.deserialize(snapshotBytes);
-        } catch (Exception e) {
-            log.error("{}: failed to deserialize snapshot", shardName, e);
-            throw Throwables.propagate(e);
+    public void applyRecoverySnapshot(final Snapshot.State snapshotState) {
+        if (!(snapshotState instanceof ShardSnapshotState)) {
+            log.debug("{}: applyRecoverySnapshot ignoring snapshot: {}", snapshotState);
         }
 
+        log.debug("{}: Applying recovered snapshot", shardName);
+
+        ShardDataTreeSnapshot shardSnapshot = ((ShardSnapshotState)snapshotState).getSnapshot();
         try {
-            store.applyRecoverySnapshot(snapshot);
+            store.applyRecoverySnapshot(shardSnapshot);
         } catch (Exception e) {
-            final File f = writeRoot("snapshot", snapshot.getRootNode().orElse(null));
+            final File f = writeRoot("snapshot", shardSnapshot.getRootNode().orElse(null));
             throw new IllegalStateException(String.format(
                     "%s: Failed to apply recovery snapshot %s. Node data was written to file %s",
-                    shardName, snapshot, f), e);
+                    shardName, shardSnapshot, f), e);
         }
     }
 
     @Override
     public byte[] getRestoreFromSnapshot() {
         return restoreFromSnapshot;
+    }
+
+    @Override
+    public State deserializePreCarbonSnapshot(byte[] from) {
+        try {
+            return new ShardSnapshotState(ShardDataTreeSnapshot.deserialize(from));
+        } catch (IOException e) {
+            log.error("{}: failed to deserialize snapshot", shardName, e);
+            throw Throwables.propagate(e);
+        }
     }
 }

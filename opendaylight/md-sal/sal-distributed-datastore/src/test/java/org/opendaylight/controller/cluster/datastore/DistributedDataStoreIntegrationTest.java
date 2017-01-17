@@ -52,9 +52,10 @@ import org.opendaylight.controller.cluster.datastore.messages.DatastoreSnapshot;
 import org.opendaylight.controller.cluster.datastore.messages.FindLocalShard;
 import org.opendaylight.controller.cluster.datastore.messages.LocalShardFound;
 import org.opendaylight.controller.cluster.datastore.persisted.MetadataShardDataTreeSnapshot;
+import org.opendaylight.controller.cluster.datastore.persisted.ShardSnapshotState;
 import org.opendaylight.controller.cluster.datastore.utils.MockDataChangeListener;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
-import org.opendaylight.controller.cluster.raft.Snapshot;
+import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.md.cluster.datastore.model.CarsModel;
 import org.opendaylight.controller.md.cluster.datastore.model.PeopleModel;
@@ -1255,8 +1256,9 @@ public class DistributedDataStoreIntegrationTest {
                 AbstractShardTest.writeToStore(dataTree, CarsModel.BASE_PATH, carsNode);
                 NormalizedNode<?, ?> root = AbstractShardTest.readStore(dataTree, YangInstanceIdentifier.EMPTY);
 
-                final Snapshot carsSnapshot = Snapshot.create(new MetadataShardDataTreeSnapshot(root).serialize(),
-                        Collections.<ReplicatedLogEntry>emptyList(), 2, 1, 2, 1, 1, "member-1");
+                final Snapshot carsSnapshot = Snapshot.create(
+                        new ShardSnapshotState(new MetadataShardDataTreeSnapshot(root)),
+                        Collections.<ReplicatedLogEntry>emptyList(), 2, 1, 2, 1, 1, "member-1", null);
 
                 NormalizedNode<?, ?> peopleNode = PeopleModel.create();
                 dataTree = InMemoryDataTreeFactory.getInstance().create(TreeType.OPERATIONAL);
@@ -1264,8 +1266,9 @@ public class DistributedDataStoreIntegrationTest {
                 AbstractShardTest.writeToStore(dataTree, PeopleModel.BASE_PATH, peopleNode);
                 root = AbstractShardTest.readStore(dataTree, YangInstanceIdentifier.EMPTY);
 
-                Snapshot peopleSnapshot = Snapshot.create(new MetadataShardDataTreeSnapshot(root).serialize(),
-                        Collections.<ReplicatedLogEntry>emptyList(), 2, 1, 2, 1, 1, "member-1");
+                Snapshot peopleSnapshot = Snapshot.create(
+                        new ShardSnapshotState(new MetadataShardDataTreeSnapshot(root)),
+                        Collections.<ReplicatedLogEntry>emptyList(), 2, 1, 2, 1, 1, "member-1", null);
 
                 restoreFromSnapshot = new DatastoreSnapshot(name, null,
                         Arrays.asList(
