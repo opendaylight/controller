@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
+import com.google.common.io.ByteSource;
 import javax.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 
@@ -38,7 +39,7 @@ public interface RaftActorRecoveryCohort {
      *
      * @param snapshotBytes A snapshot of the state of the actor
      */
-    void applyRecoverySnapshot(byte[] snapshotBytes);
+    void applyRecoverySnapshot(ByteSource snapshotBytes);
 
     /**
      * This method is called during recovery at the end of a batch to apply the current batched

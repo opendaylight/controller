@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.datastore;
 import akka.actor.ActorContext;
 import akka.actor.ActorRef;
 import com.google.common.base.Preconditions;
+import com.google.common.io.ByteSource;
 import java.io.IOException;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
@@ -63,7 +64,7 @@ class ShardSnapshotCohort implements RaftActorSnapshotCohort {
 
     @Override
     @SuppressWarnings("checkstyle:IllegalCatch")
-    public void applySnapshot(final byte[] snapshotBytes) {
+    public void applySnapshot(final ByteSource snapshotBytes) {
         // Since this will be done only on Recovery or when this actor is a Follower
         // we can safely commit everything in here. We not need to worry about event notifications
         // as they would have already been disabled on the follower
@@ -72,7 +73,7 @@ class ShardSnapshotCohort implements RaftActorSnapshotCohort {
 
         final ShardDataTreeSnapshot snapshot;
         try {
-            snapshot = ShardDataTreeSnapshot.deserialize(snapshotBytes);
+            snapshot = ShardDataTreeSnapshot.deserialize(snapshotBytes.read());
         } catch (IOException e) {
             log.error("{}: Failed to deserialize snapshot", logId, e);
             return;

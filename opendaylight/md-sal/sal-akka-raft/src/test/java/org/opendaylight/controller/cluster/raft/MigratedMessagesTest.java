@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 import akka.actor.ActorRef;
@@ -14,8 +15,11 @@ import akka.dispatch.Dispatchers;
 import akka.testkit.JavaTestKit;
 import akka.testkit.TestActorRef;
 import com.google.common.base.Optional;
+import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.io.ByteSource;
 import com.google.common.util.concurrent.Uninterruptibles;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -24,11 +28,14 @@ import java.util.function.Consumer;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.internal.ArrayComparisonFailure;
+import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
 import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload;
 import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
+import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
@@ -169,7 +176,7 @@ public class MigratedMessagesTest extends AbstractActorTest {
             }
 
             @Override
-            public void applySnapshot(byte[] snapshotBytes) {
+            public void applySnapshot(ByteSource snapshotBytes) {
             }
         };
 
@@ -236,6 +243,47 @@ public class MigratedMessagesTest extends AbstractActorTest {
         return actor;
     }
 
+    @Test
+    public void testSnapshotAfterStartupWithMigratedSnapshot() throws Exception {
+        TEST_LOG.info("testSnapshotAfterStartupWithMigratedSnapshot starting");
+
+        String persistenceId = factory.generateActorId("test-actor-");
+
+        Snapshot migratedSnapshot = Snapshot.create(
+                ByteSource.wrap(RaftActorTest.fromObject("state").toByteArray()),
+                Arrays.asList(new SimpleReplicatedLogEntry(6, 2, new MockPayload("payload"))),
+                6, 2, 5, 1, 3, "member-1", new ServerConfigurationPayload(Arrays.asList(
+                        new ServerInfo("1", true), new ServerInfo("2", false))), true);
+        InMemorySnapshotStore.addSnapshot(persistenceId, migratedSnapshot);
+
+        doTestSnapshotAfterStartupWithMigratedMessage(persistenceId, true, snapshot -> {
+            assertEquals("getLastIndex", migratedSnapshot.getLastIndex(), snapshot.getLastIndex());
+            assertEquals("getLastTerm", migratedSnapshot.getLastTerm(), snapshot.getLastTerm());
+            assertEquals("getLastAppliedIndex", migratedSnapshot.getLastAppliedIndex(), snapshot.getLastAppliedIndex());
+            assertEquals("getLastAppliedTerm", migratedSnapshot.getLastAppliedTerm(), snapshot.getLastAppliedTerm());
+            try {
+                assertArrayEquals("getState", migratedSnapshot.getState().read(), snapshot.getState().read());
+            } catch (ArrayComparisonFailure | IOException e) {
+                Throwables.propagate(e);
+            }
+
+            assertEquals("Unapplied entries size", migratedSnapshot.getUnAppliedEntries().size(),
+                    snapshot.getUnAppliedEntries().size());
+            assertEquals("Unapplied entry term", migratedSnapshot.getUnAppliedEntries().get(0).getTerm(),
+                    snapshot.getUnAppliedEntries().get(0).getTerm());
+            assertEquals("Unapplied entry index", migratedSnapshot.getUnAppliedEntries().get(0).getIndex(),
+                    snapshot.getUnAppliedEntries().get(0).getIndex());
+            assertEquals("Unapplied entry data", migratedSnapshot.getUnAppliedEntries().get(0).getData(),
+                    snapshot.getUnAppliedEntries().get(0).getData());
+            assertEquals("getElectionVotedFor", migratedSnapshot.getElectionVotedFor(), snapshot.getElectionVotedFor());
+            assertEquals("getElectionTerm", migratedSnapshot.getElectionTerm(), snapshot.getElectionTerm());
+            assertEquals("getServerConfiguration", migratedSnapshot.getServerConfiguration().getServerConfig(),
+                    snapshot.getServerConfiguration().getServerConfig());
+        });
+
+        TEST_LOG.info("testSnapshotAfterStartupWithMigratedSnapshot ending");
+    }
+
     @SuppressWarnings("checkstyle:IllegalCatch")
     private TestActorRef<MockRaftActor> doTestSnapshotAfterStartupWithMigratedMessage(String id, boolean persistent,
             Consumer<Snapshot> snapshotVerifier) {
@@ -251,7 +299,7 @@ public class MigratedMessagesTest extends AbstractActorTest {
             }
 
             @Override
-            public void applySnapshot(byte[] snapshotBytes) {
+            public void applySnapshot(ByteSource snapshotBytes) {
             }
         };
 

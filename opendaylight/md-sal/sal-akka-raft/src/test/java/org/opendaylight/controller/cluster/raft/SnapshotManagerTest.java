@@ -39,6 +39,7 @@ import org.opendaylight.controller.cluster.raft.base.messages.SendInstallSnapsho
 import org.opendaylight.controller.cluster.raft.base.messages.SnapshotComplete;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
+import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 import org.slf4j.LoggerFactory;
 
@@ -226,7 +227,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
     }
 
     @Test
-    public void testPersistWhenReplicatedToAllIndexMinusOne() {
+    public void testPersistWhenReplicatedToAllIndexMinusOne() throws Exception {
         doReturn(7L).when(mockReplicatedLog).getSnapshotIndex();
         doReturn(1L).when(mockReplicatedLog).getSnapshotTerm();
 
@@ -257,7 +258,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
         assertEquals("getLastIndex", 9L, snapshot.getLastIndex());
         assertEquals("getLastAppliedTerm", 2L, snapshot.getLastAppliedTerm());
         assertEquals("getLastAppliedIndex", 8L, snapshot.getLastAppliedIndex());
-        assertArrayEquals("getState", bytes, snapshot.getState());
+        assertArrayEquals("getState", bytes, snapshot.getState().read());
         assertEquals("getUnAppliedEntries", Arrays.asList(lastLogEntry), snapshot.getUnAppliedEntries());
         assertEquals("electionTerm", mockElectionTerm.getCurrentTerm(), snapshot.getElectionTerm());
         assertEquals("electionVotedFor", mockElectionTerm.getVotedFor(), snapshot.getElectionVotedFor());
@@ -266,7 +267,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
     }
 
     @Test
-    public void testPersistWhenReplicatedToAllIndexNotMinus() {
+    public void testPersistWhenReplicatedToAllIndexNotMinus() throws Exception {
         doReturn(45L).when(mockReplicatedLog).getSnapshotIndex();
         doReturn(6L).when(mockReplicatedLog).getSnapshotTerm();
         ReplicatedLogEntry replicatedLogEntry = mock(ReplicatedLogEntry.class);
@@ -289,7 +290,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
         assertEquals("getLastIndex", 9L, snapshot.getLastIndex());
         assertEquals("getLastAppliedTerm", 6L, snapshot.getLastAppliedTerm());
         assertEquals("getLastAppliedIndex", 9L, snapshot.getLastAppliedIndex());
-        assertArrayEquals("getState", bytes, snapshot.getState());
+        assertArrayEquals("getState", bytes, snapshot.getState().read());
         assertEquals("getUnAppliedEntries size", 0, snapshot.getUnAppliedEntries().size());
 
         verify(mockReplicatedLog).snapshotPreCommit(9L, 6L);
@@ -340,7 +341,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
     }
 
     @Test
-    public void testPersistSendInstallSnapshot() {
+    public void testPersistSendInstallSnapshot() throws Exception {
         doReturn(Integer.MAX_VALUE).when(mockReplicatedLog).dataSize();
 
         // when replicatedToAllIndex = -1
@@ -366,7 +367,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
         SendInstallSnapshot sendInstallSnapshot = sendInstallSnapshotArgumentCaptor.getValue();
 
-        assertTrue(Arrays.equals(bytes, sendInstallSnapshot.getSnapshot().getState()));
+        assertTrue(Arrays.equals(bytes, sendInstallSnapshot.getSnapshot().getState().read()));
     }
 
     @Test

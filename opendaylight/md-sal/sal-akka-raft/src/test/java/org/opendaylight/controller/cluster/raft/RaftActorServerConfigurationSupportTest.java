@@ -26,6 +26,7 @@ import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.google.common.io.ByteSource;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -168,7 +169,8 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
         ApplySnapshot applySnapshot = expectFirstMatching(newFollowerCollectorActor, ApplySnapshot.class);
         @SuppressWarnings("unchecked")
-        List<Object> snapshotState = (List<Object>) MockRaftActor.toObject(applySnapshot.getSnapshot().getState());
+        List<Object> snapshotState = (List<Object>) MockRaftActor.toObject(
+                applySnapshot.getSnapshot().getState().read());
         assertEquals("Snapshot state", snapshotState, leaderRaftActor.getState());
 
         AddServerReply addServerReply = testKit.expectMsgClass(JavaTestKit.duration("5 seconds"), AddServerReply.class);
@@ -249,7 +251,8 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
         ApplySnapshot applySnapshot = expectFirstMatching(newFollowerCollectorActor, ApplySnapshot.class);
         @SuppressWarnings("unchecked")
-        List<Object> snapshotState = (List<Object>) MockRaftActor.toObject(applySnapshot.getSnapshot().getState());
+        List<Object> snapshotState = (List<Object>) MockRaftActor.toObject(
+                applySnapshot.getSnapshot().getState().read());
         assertEquals("Snapshot state", snapshotState, leaderRaftActor.getState());
 
         AddServerReply addServerReply = testKit.expectMsgClass(JavaTestKit.duration("5 seconds"), AddServerReply.class);
@@ -1523,7 +1526,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
                 }
 
                 @Override
-                public void applySnapshot(byte[] snapshotBytes) {
+                public void applySnapshot(ByteSource snapshotBytes) {
                 }
             };
         }

@@ -29,6 +29,7 @@ import com.google.common.base.Stopwatch;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.io.ByteSource;
 import com.google.common.util.concurrent.Uninterruptibles;
 import com.google.protobuf.ByteString;
 import java.util.ArrayList;
@@ -49,7 +50,6 @@ import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftActorSnapshotCohort;
 import org.opendaylight.controller.cluster.raft.RaftActorTest;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
-import org.opendaylight.controller.cluster.raft.Snapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
 import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
@@ -66,6 +66,7 @@ import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload;
 import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
+import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
@@ -838,7 +839,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         assertEquals("getLastAppliedIndex", lastInstallSnapshot.getLastIncludedIndex(),
                 snapshot.getLastAppliedIndex());
         assertEquals("getLastTerm", lastInstallSnapshot.getLastIncludedTerm(), snapshot.getLastTerm());
-        Assert.assertArrayEquals("getState", bsSnapshot.toByteArray(), snapshot.getState());
+        Assert.assertArrayEquals("getState", bsSnapshot.toByteArray(), snapshot.getState().read());
         assertEquals("getElectionTerm", 1, snapshot.getElectionTerm());
         assertEquals("getElectionVotedFor", "leader", snapshot.getElectionVotedFor());
         applySnapshot.getCallback().onSuccess();
@@ -1154,7 +1155,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         assertEquals("Snapshot getLastTerm", 1, snapshot.getLastTerm());
         assertEquals("Snapshot getLastIndex", 1, snapshot.getLastIndex());
         assertEquals("Snapshot state", ImmutableList.of(entries.get(0).getData(), entries.get(1).getData()),
-                MockRaftActor.toObject(snapshot.getState()));
+                MockRaftActor.toObject(snapshot.getState().read()));
     }
 
     @Test
@@ -1208,7 +1209,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         assertEquals("Snapshot getLastTerm", 1, snapshot.getLastTerm());
         assertEquals("Snapshot getLastIndex", 2, snapshot.getLastIndex());
         assertEquals("Snapshot state", ImmutableList.of(entries.get(0).getData(), entries.get(1).getData(),
-                entries.get(2).getData()), MockRaftActor.toObject(snapshot.getState()));
+                entries.get(2).getData()), MockRaftActor.toObject(snapshot.getState().read()));
 
         assertEquals("Journal size", 0, followerRaftActor.get().getReplicatedLog().size());
         assertEquals("Snapshot index", 2, followerRaftActor.get().getReplicatedLog().getSnapshotIndex());
@@ -1283,7 +1284,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         assertEquals("Snapshot getLastTerm", 1, snapshot.getLastTerm());
         assertEquals("Snapshot getLastIndex", 2, snapshot.getLastIndex());
         assertEquals("Snapshot state", ImmutableList.of(entries.get(0).getData()),
-                MockRaftActor.toObject(snapshot.getState()));
+                MockRaftActor.toObject(snapshot.getState().read()));
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
@@ -1300,7 +1301,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
             }
 
             @Override
-            public void applySnapshot(byte[] snapshotBytes) {
+            public void applySnapshot(ByteSource snapshotBytes) {
             }
         };
         return snapshotCohort;

@@ -10,7 +10,7 @@ package org.opendaylight.controller.cluster.raft.base.messages;
 
 import com.google.common.base.Preconditions;
 import javax.annotation.Nonnull;
-import org.opendaylight.controller.cluster.raft.Snapshot;
+import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 
 /**
  * Internal message, issued by follower to its actor.

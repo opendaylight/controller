@@ -11,6 +11,7 @@ package org.opendaylight.controller.cluster.example;
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import com.google.common.base.Optional;
+import com.google.common.io.ByteSource;
 import com.google.protobuf.ByteString;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -141,11 +142,12 @@ public class ExampleActor extends RaftActor implements RaftActorRecoveryCohort, 
         getSelf().tell(new CaptureSnapshotReply(bs.toByteArray()), null);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public void applySnapshot(byte [] snapshot) {
+    public void applySnapshot(ByteSource snapshot) {
         state.clear();
         try {
-            state.putAll((HashMap<String, String>) toObject(snapshot));
+            state.putAll((HashMap<String, String>) toObject(snapshot.read()));
         } catch (Exception e) {
            LOG.error("Exception in applying snapshot", e);
         }
@@ -224,7 +226,7 @@ public class ExampleActor extends RaftActor implements RaftActorRecoveryCohort, 
     }
 
     @Override
-    public void applyRecoverySnapshot(byte[] snapshot) {
+    public void applyRecoverySnapshot(ByteSource snapshot) {
     }
 
     @Override

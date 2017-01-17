@@ -18,6 +18,7 @@ import akka.actor.ActorRef;
 import akka.persistence.SaveSnapshotFailure;
 import akka.persistence.SaveSnapshotSuccess;
 import akka.persistence.SnapshotMetadata;
+import com.google.common.io.ByteSource;
 import java.util.Collections;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,6 +28,7 @@ import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
+import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -95,8 +97,8 @@ public class RaftActorSnapshotMessageSupportTest {
         long lastIndexDuringSnapshotCapture = 2;
         byte[] snapshotBytes = {1,2,3,4,5};
 
-        Snapshot snapshot = Snapshot.create(snapshotBytes, Collections.<ReplicatedLogEntry>emptyList(),
-                lastIndexDuringSnapshotCapture, 1, lastAppliedDuringSnapshotCapture, 1);
+        Snapshot snapshot = Snapshot.create(ByteSource.wrap(snapshotBytes), Collections.<ReplicatedLogEntry>emptyList(),
+                lastIndexDuringSnapshotCapture, 1, lastAppliedDuringSnapshotCapture, 1, -1, null, null);
 
         ApplySnapshot applySnapshot = new ApplySnapshot(snapshot);
         sendMessageToSupport(applySnapshot);

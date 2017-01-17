@@ -12,6 +12,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import com.google.common.base.Optional;
+import com.google.common.io.ByteSource;
 import java.io.IOException;
 import org.junit.Before;
 import org.junit.Test;
@@ -133,7 +134,7 @@ public class ShardRecoveryCoordinatorTest extends AbstractTest {
         return shardDataTree.readNode(PeopleModel.BASE_PATH);
     }
 
-    private static byte[] createSnapshot() {
+    private static ByteSource createSnapshot() {
         final TipProducingDataTree dataTree = InMemoryDataTreeFactory.getInstance().create(TreeType.OPERATIONAL);
         dataTree.setSchemaContext(SchemaContextHelper.select(SchemaContextHelper.CARS_YANG,
                 SchemaContextHelper.PEOPLE_YANG));
@@ -147,7 +148,7 @@ public class ShardRecoveryCoordinatorTest extends AbstractTest {
         modification.ready();
         dataTree.commit(dataTree.prepare(modification));
 
-        return new PreBoronShardDataTreeSnapshot(dataTree.takeSnapshot().readNode(YangInstanceIdentifier.EMPTY).get())
-                .serialize();
+        return ByteSource.wrap(new PreBoronShardDataTreeSnapshot(dataTree.takeSnapshot().readNode(
+                YangInstanceIdentifier.EMPTY).get()).serialize());
     }
 }

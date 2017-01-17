@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.raft;
 
 import akka.actor.ActorRef;
+import com.google.common.io.ByteSource;
 
 /**
  * Interface for a class that participates in raft actor snapshotting.
@@ -29,5 +30,5 @@ public interface RaftActorSnapshotCohort {
      *
      * @param snapshotBytes a snapshot of the state of the actor
      */
-    void applySnapshot(byte[] snapshotBytes);
+    void applySnapshot(ByteSource snapshotBytes);
 }

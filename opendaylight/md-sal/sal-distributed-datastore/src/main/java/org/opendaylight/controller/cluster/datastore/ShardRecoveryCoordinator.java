@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.datastore;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
+import com.google.common.io.ByteSource;
 import java.io.File;
 import org.opendaylight.controller.cluster.datastore.persisted.ShardDataTreeSnapshot;
 import org.opendaylight.controller.cluster.datastore.utils.NormalizedNodeXMLOutput;
@@ -86,12 +87,12 @@ class ShardRecoveryCoordinator implements RaftActorRecoveryCohort {
      */
     @Override
     @SuppressWarnings("checkstyle:IllegalCatch")
-    public void applyRecoverySnapshot(final byte[] snapshotBytes) {
+    public void applyRecoverySnapshot(final ByteSource snapshotBytes) {
         log.debug("{}: Applying recovered snapshot", shardName);
 
         final ShardDataTreeSnapshot snapshot;
         try {
-            snapshot = ShardDataTreeSnapshot.deserialize(snapshotBytes);
+            snapshot = ShardDataTreeSnapshot.deserialize(snapshotBytes.read());
         } catch (Exception e) {
             log.error("{}: failed to deserialize snapshot", shardName, e);
             throw Throwables.propagate(e);

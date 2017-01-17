@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.raft;
 
 import akka.persistence.SnapshotSelectionCriteria;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.io.ByteSource;
 import java.util.List;
 import java.util.function.Consumer;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
@@ -17,6 +18,7 @@ import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.SendInstallSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.SnapshotComplete;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
+import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.slf4j.Logger;
 
 /**
@@ -51,7 +53,7 @@ public class SnapshotManager implements SnapshotState {
     private Runnable createSnapshotProcedure;
 
     private ApplySnapshot applySnapshot;
-    private Consumer<byte[]> applySnapshotProcedure;
+    private Consumer<ByteSource> applySnapshotProcedure;
 
     /**
      * Constructs an instance.
@@ -112,7 +114,7 @@ public class SnapshotManager implements SnapshotState {
         this.createSnapshotProcedure = createSnapshotProcedure;
     }
 
-    public void setApplySnapshotConsumer(Consumer<byte[]> applySnapshotProcedure) {
+    public void setApplySnapshotConsumer(Consumer<ByteSource> applySnapshotProcedure) {
         this.applySnapshotProcedure = applySnapshotProcedure;
     }
 
@@ -329,7 +331,7 @@ public class SnapshotManager implements SnapshotState {
             // create a snapshot object from the state provided and save it
             // when snapshot is saved async, SaveSnapshotSuccess is raised.
 
-            Snapshot snapshot = Snapshot.create(snapshotBytes,
+            Snapshot snapshot = Snapshot.create(ByteSource.wrap(snapshotBytes),
                     captureSnapshot.getUnAppliedEntries(),
                     captureSnapshot.getLastIndex(), captureSnapshot.getLastTerm(),
                     captureSnapshot.getLastAppliedIndex(), captureSnapshot.getLastAppliedTerm(),
@@ -431,7 +433,7 @@ public class SnapshotManager implements SnapshotState {
                         context.updatePeerIds(snapshot.getServerConfiguration());
                     }
 
-                    if (snapshot.getState().length > 0 ) {
+                    if (snapshot.getState().size() > 0 ) {
                         applySnapshotProcedure.accept(snapshot.getState());
                     }
 

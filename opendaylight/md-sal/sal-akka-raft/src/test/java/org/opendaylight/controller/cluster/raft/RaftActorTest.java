@@ -41,6 +41,7 @@ import akka.testkit.JavaTestKit;
 import akka.testkit.TestActorRef;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.io.ByteSource;
 import com.google.common.util.concurrent.Uninterruptibles;
 import com.google.protobuf.ByteString;
 import java.io.ByteArrayOutputStream;
@@ -83,6 +84,7 @@ import org.opendaylight.controller.cluster.raft.persisted.DeleteEntries;
 import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload;
 import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
+import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
@@ -159,9 +161,9 @@ public class RaftActorTest extends AbstractActorTest {
                 new MockRaftActorContext.MockPayload("C"),
                 new MockRaftActorContext.MockPayload("D")));
 
-        Snapshot snapshot = Snapshot.create(snapshotBytes.toByteArray(),
+        Snapshot snapshot = Snapshot.create(ByteSource.wrap(snapshotBytes.toByteArray()),
                 snapshotUnappliedEntries, lastIndexDuringSnapshotCapture, 1,
-                lastAppliedDuringSnapshotCapture, 1);
+                lastAppliedDuringSnapshotCapture, 1, -1, null, null);
         InMemorySnapshotStore.addSnapshot(persistenceId, snapshot);
 
         // add more entries after snapshot is taken
@@ -292,7 +294,8 @@ public class RaftActorTest extends AbstractActorTest {
         RaftActorRecoverySupport mockSupport = mock(RaftActorRecoverySupport.class);
         mockRaftActor.setRaftActorRecoverySupport(mockSupport );
 
-        Snapshot snapshot = Snapshot.create(new byte[]{1}, Collections.<ReplicatedLogEntry>emptyList(), 3, 1, 3, 1);
+        Snapshot snapshot = Snapshot.create(ByteSource.wrap(new byte[]{1}),
+                Collections.<ReplicatedLogEntry>emptyList(), 3, 1, 3, 1, -1, null, null);
         SnapshotOffer snapshotOffer = new SnapshotOffer(new SnapshotMetadata("test", 6, 12345), snapshot);
         mockRaftActor.handleRecover(snapshotOffer);
 
@@ -1053,7 +1056,7 @@ public class RaftActorTest extends AbstractActorTest {
         assertEquals("getLastAppliedTerm", term, replySnapshot.getLastAppliedTerm());
         assertEquals("getLastIndex", 2L, replySnapshot.getLastIndex());
         assertEquals("getLastTerm", term, replySnapshot.getLastTerm());
-        assertArrayEquals("getState", stateSnapshot, replySnapshot.getState());
+        assertArrayEquals("getState", stateSnapshot, replySnapshot.getState().read());
         assertEquals("getUnAppliedEntries size", 1, replySnapshot.getUnAppliedEntries().size());
         assertEquals("UnApplied entry index ", 2L, replySnapshot.getUnAppliedEntries().get(0).getIndex());
 
@@ -1086,7 +1089,7 @@ public class RaftActorTest extends AbstractActorTest {
         assertEquals("getLastAppliedTerm", -1L, replySnapshot.getLastAppliedTerm());
         assertEquals("getLastIndex", -1L, replySnapshot.getLastIndex());
         assertEquals("getLastTerm", -1L, replySnapshot.getLastTerm());
-        assertEquals("getState length", 0, replySnapshot.getState().length);
+        assertEquals("getState length", 0, replySnapshot.getState().read().length);
         assertEquals("getUnAppliedEntries size", 0, replySnapshot.getUnAppliedEntries().size());
 
         TEST_LOG.info("testGetSnapshot ending");
@@ -1113,8 +1116,8 @@ public class RaftActorTest extends AbstractActorTest {
                 new MockRaftActorContext.MockPayload("D"));
         ByteString stateBytes = fromObject(state);
 
-        Snapshot snapshot = Snapshot.create(stateBytes.toByteArray(), snapshotUnappliedEntries,
-                snapshotLastIndex, 1, snapshotLastApplied, 1, 1, "member-1");
+        Snapshot snapshot = Snapshot.create(ByteSource.wrap(stateBytes.toByteArray()), snapshotUnappliedEntries,
+                snapshotLastIndex, 1, snapshotLastApplied, 1, 1, "member-1", null);
 
         InMemorySnapshotStore.addSnapshotSavedLatch(persistenceId);
 
@@ -1132,10 +1135,10 @@ public class RaftActorTest extends AbstractActorTest {
         assertEquals("getLastAppliedTerm", snapshot.getLastAppliedTerm(), savedSnapshot.getLastAppliedTerm());
         assertEquals("getLastIndex", snapshot.getLastIndex(), savedSnapshot.getLastIndex());
         assertEquals("getLastTerm", snapshot.getLastTerm(), savedSnapshot.getLastTerm());
-        assertArrayEquals("getState", snapshot.getState(), savedSnapshot.getState());
+        assertArrayEquals("getState", snapshot.getState().read(), savedSnapshot.getState().read());
         assertEquals("getUnAppliedEntries", snapshot.getUnAppliedEntries(), savedSnapshot.getUnAppliedEntries());
 
-        verify(mockRaftActor.snapshotCohortDelegate, timeout(5000)).applySnapshot(any(byte[].class));
+        verify(mockRaftActor.snapshotCohortDelegate, timeout(5000)).applySnapshot(any(ByteSource.class));
 
         RaftActorContext context = mockRaftActor.getRaftActorContext();
         assertEquals("Journal log size", 1, context.getReplicatedLog().size());
@@ -1148,8 +1151,8 @@ public class RaftActorTest extends AbstractActorTest {
 
         // Test with data persistence disabled
 
-        snapshot = Snapshot.create(new byte[0], Collections.<ReplicatedLogEntry>emptyList(),
-                -1, -1, -1, -1, 5, "member-1");
+        snapshot = Snapshot.create(ByteSource.empty(), Collections.<ReplicatedLogEntry>emptyList(),
+                -1, -1, -1, -1, 5, "member-1", null);
 
         persistenceId = factory.generateActorId("test-actor-");
 
@@ -1179,8 +1182,8 @@ public class RaftActorTest extends AbstractActorTest {
         config.setCustomRaftPolicyImplementationClass(DisableElectionsRaftPolicy.class.getName());
 
         List<MockPayload> state = Arrays.asList(new MockRaftActorContext.MockPayload("A"));
-        Snapshot snapshot = Snapshot.create(fromObject(state).toByteArray(), Arrays.<ReplicatedLogEntry>asList(),
-                5, 2, 5, 2, 2, "member-1");
+        Snapshot snapshot = Snapshot.create(ByteSource.wrap(fromObject(state).toByteArray()),
+                Arrays.<ReplicatedLogEntry>asList(), 5, 2, 5, 2, 2, "member-1", null);
 
         InMemoryJournal.addEntry(persistenceId, 1, new SimpleReplicatedLogEntry(0, 1,
                 new MockRaftActorContext.MockPayload("B")));
@@ -1193,7 +1196,7 @@ public class RaftActorTest extends AbstractActorTest {
         mockRaftActor.waitForRecoveryComplete();
 
         Uninterruptibles.sleepUninterruptibly(500, TimeUnit.MILLISECONDS);
-        verify(mockRaftActor.snapshotCohortDelegate, never()).applySnapshot(any(byte[].class));
+        verify(mockRaftActor.snapshotCohortDelegate, never()).applySnapshot(any(ByteSource.class));
 
         RaftActorContext context = mockRaftActor.getRaftActorContext();
         assertEquals("Journal log size", 1, context.getReplicatedLog().size());

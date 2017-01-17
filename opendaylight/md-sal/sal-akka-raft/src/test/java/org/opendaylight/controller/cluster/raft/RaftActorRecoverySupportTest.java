@@ -10,7 +10,6 @@ package org.opendaylight.controller.cluster.raft;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.AdditionalMatchers.aryEq;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.doNothing;
@@ -23,6 +22,7 @@ import akka.persistence.RecoveryCompleted;
 import akka.persistence.SnapshotMetadata;
 import akka.persistence.SnapshotOffer;
 import com.google.common.collect.Sets;
+import com.google.common.io.ByteSource;
 import java.util.Arrays;
 import java.util.Collections;
 import org.hamcrest.Description;
@@ -41,6 +41,7 @@ import org.opendaylight.controller.cluster.raft.persisted.DeleteEntries;
 import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload;
 import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
+import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.slf4j.Logger;
@@ -176,8 +177,10 @@ public class RaftActorRecoverySupportTest {
         long electionTerm = 2;
         String electionVotedFor = "member-2";
 
-        Snapshot snapshot = Snapshot.create(snapshotBytes, Arrays.asList(unAppliedEntry1, unAppliedEntry2),
-                lastIndexDuringSnapshotCapture, 1, lastAppliedDuringSnapshotCapture, 1, electionTerm, electionVotedFor);
+        ByteSource snapshotBytesSource = ByteSource.wrap(snapshotBytes);
+        Snapshot snapshot = Snapshot.create(snapshotBytesSource,
+                Arrays.asList(unAppliedEntry1, unAppliedEntry2), lastIndexDuringSnapshotCapture, 1,
+                lastAppliedDuringSnapshotCapture, 1, electionTerm, electionVotedFor, null);
 
         SnapshotMetadata metadata = new SnapshotMetadata("test", 6, 12345);
         SnapshotOffer snapshotOffer = new SnapshotOffer(metadata , snapshot);
@@ -195,7 +198,7 @@ public class RaftActorRecoverySupportTest {
         assertEquals("Election votedFor", electionVotedFor, context.getTermInformation().getVotedFor());
         assertFalse("Dynamic server configuration", context.isDynamicServerConfigurationInUse());
 
-        verify(mockCohort).applyRecoverySnapshot(snapshotBytes);
+        verify(mockCohort).applyRecoverySnapshot(snapshotBytesSource);
     }
 
     @Test
@@ -255,11 +258,12 @@ public class RaftActorRecoverySupportTest {
 
     @Test
     public void testDataRecoveredWithPersistenceDisabled() {
-        doNothing().when(mockCohort).applyRecoverySnapshot(aryEq(new byte[0]));
+        doNothing().when(mockCohort).applyRecoverySnapshot(ByteSource.empty());
         doReturn(false).when(mockPersistence).isRecoveryApplicable();
         doReturn(10L).when(mockPersistentProvider).getLastSequenceNumber();
 
-        Snapshot snapshot = Snapshot.create(new byte[]{1}, Collections.<ReplicatedLogEntry>emptyList(), 3, 1, 3, 1);
+        Snapshot snapshot = Snapshot.create(ByteSource.wrap(new byte[]{1}),
+                Collections.<ReplicatedLogEntry>emptyList(), 3, 1, 3, 1, -1, null, null);
         SnapshotOffer snapshotOffer = new SnapshotOffer(new SnapshotMetadata("test", 6, 12345), snapshot);
 
         sendMessageToSupport(snapshotOffer);
@@ -285,7 +289,7 @@ public class RaftActorRecoverySupportTest {
 
         sendMessageToSupport(RecoveryCompleted.getInstance(), true);
 
-        verify(mockCohort).applyRecoverySnapshot(aryEq(new byte[0]));
+        verify(mockCohort).applyRecoverySnapshot(ByteSource.empty());
         verify(mockCohort, never()).getRestoreFromSnapshot();
         verifyNoMoreInteractions(mockCohort);
 
@@ -389,7 +393,7 @@ public class RaftActorRecoverySupportTest {
                                                         new ServerInfo("follower1", true),
                                                         new ServerInfo("follower2", true)));
 
-        Snapshot snapshot = Snapshot.create(new byte[]{1}, Collections.<ReplicatedLogEntry>emptyList(),
+        Snapshot snapshot = Snapshot.create(ByteSource.wrap(new byte[]{1}), Collections.<ReplicatedLogEntry>emptyList(),
                 -1, -1, -1, -1, electionTerm, electionVotedFor, serverPayload);
 
         SnapshotMetadata metadata = new SnapshotMetadata("test", 6, 12345);

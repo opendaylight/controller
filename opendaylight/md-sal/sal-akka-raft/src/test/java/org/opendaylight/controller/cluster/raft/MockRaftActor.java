@@ -16,6 +16,7 @@ import akka.actor.Props;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
+import com.google.common.io.ByteSource;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -169,12 +170,19 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
     }
 
     @Override
-    public void applyRecoverySnapshot(byte[] bytes) {
+    public void applyRecoverySnapshot(ByteSource bytes) {
         recoveryCohortDelegate.applyRecoverySnapshot(bytes);
         applySnapshotBytes(bytes);
     }
 
-    private void applySnapshotBytes(byte[] bytes) {
+    private void applySnapshotBytes(ByteSource source) {
+        byte[] bytes;
+        try {
+            bytes = source.read();
+        } catch (IOException e) {
+            throw new RuntimeException("Error reading bytes", e);
+        }
+
         if (bytes.length == 0) {
             return;
         }
@@ -197,7 +205,7 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
     }
 
     @Override
-    public void applySnapshot(byte [] snapshot) {
+    public void applySnapshot(ByteSource snapshot) {
         LOG.info("{}: applySnapshot called", persistenceId());
         applySnapshotBytes(snapshot);
         snapshotCohortDelegate.applySnapshot(snapshot);

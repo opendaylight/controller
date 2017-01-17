@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
+import com.google.common.io.ByteSource;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.Serializable;
 import java.util.List;
@@ -17,7 +18,10 @@ import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPay
  *
  * @author Moiz Raja
  * @author Thomas Pantelis
+ *
+ * @deprecated Use {@link org.opendaylight.controller.cluster.raft.persisted.Snapshot} instead.
  */
+@Deprecated
 public class Snapshot implements Serializable {
     private static final long serialVersionUID = -8298574936724056236L;
 
@@ -101,6 +105,12 @@ public class Snapshot implements Serializable {
 
     public ServerConfigurationPayload getServerConfiguration() {
         return serverConfig;
+    }
+
+    private Object readResolve() {
+        return org.opendaylight.controller.cluster.raft.persisted.Snapshot.create(ByteSource.wrap(state),
+                unAppliedEntries, lastIndex, lastTerm, lastAppliedIndex, lastAppliedTerm, electionTerm,
+                electionVotedFor, serverConfig, true);
     }
 
     @Override
