@@ -38,7 +38,7 @@ class RemoteDOMRpcFuture extends AbstractFuture<DOMRpcResult> implements Checked
     private final QName rpcName;
 
     private RemoteDOMRpcFuture(final QName rpcName) {
-        this.rpcName = Preconditions.checkNotNull(rpcName,"rpcName");
+        this.rpcName = Preconditions.checkNotNull(rpcName, "rpcName");
     }
 
     public static RemoteDOMRpcFuture create(final QName rpcName) {
@@ -76,8 +76,8 @@ class RemoteDOMRpcFuture extends AbstractFuture<DOMRpcResult> implements Checked
         }
     }
 
-    private DOMRpcException mapException(final ExecutionException e) {
-        final Throwable cause = e.getCause();
+    private static DOMRpcException mapException(final ExecutionException ex) {
+        final Throwable cause = ex.getCause();
         if (cause instanceof DOMRpcException) {
             return (DOMRpcException) cause;
         }
