@@ -17,6 +17,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.opendaylight.controller.remote.rpc.registry.gossip.Messages.GossiperMessages.GossipEnvelope;
 import static org.opendaylight.controller.remote.rpc.registry.gossip.Messages.GossiperMessages.GossipStatus;
+
+import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
 import akka.actor.Address;
 import akka.actor.Props;
@@ -67,17 +69,17 @@ public class GossiperTest {
     @Test
     public void testReceiveGossipTick_WhenNoRemoteMemberShouldIgnore() {
         mockGossiper.setClusterMembers();
-        doNothing().when(mockGossiper).getLocalStatusAndSendTo(any(Address.class));
+        doNothing().when(mockGossiper).getLocalStatusAndSendTo(any(ActorSelection.class));
         mockGossiper.receiveGossipTick();
-        verify(mockGossiper, times(0)).getLocalStatusAndSendTo(any(Address.class));
+        verify(mockGossiper, times(0)).getLocalStatusAndSendTo(any(ActorSelection.class));
     }
 
     @Test
     public void testReceiveGossipTick_WhenRemoteMemberExistsShouldSendStatus() {
         mockGossiper.setClusterMembers(new Address("tcp", "member"));
-        doNothing().when(mockGossiper).getLocalStatusAndSendTo(any(Address.class));
+        doNothing().when(mockGossiper).getLocalStatusAndSendTo(any(ActorSelection.class));
         mockGossiper.receiveGossipTick();
-        verify(mockGossiper, times(1)).getLocalStatusAndSendTo(any(Address.class));
+        verify(mockGossiper, times(1)).getLocalStatusAndSendTo(any(ActorSelection.class));
     }
 
     @Test
