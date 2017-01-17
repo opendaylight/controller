@@ -12,6 +12,7 @@ import akka.persistence.SaveSnapshotFailure;
 import akka.persistence.SaveSnapshotSuccess;
 import com.google.common.annotations.VisibleForTesting;
 import java.util.Collections;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.SerializationUtils;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
@@ -19,6 +20,8 @@ import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
 import org.opendaylight.controller.cluster.raft.client.messages.GetSnapshot;
 import org.opendaylight.controller.cluster.raft.client.messages.GetSnapshotReply;
+import org.opendaylight.controller.cluster.raft.persisted.EmptyState;
+import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.slf4j.Logger;
 import scala.concurrent.duration.Duration;
 
@@ -46,8 +49,14 @@ class RaftActorSnapshotMessageSupport {
         this.cohort = cohort;
         this.log = context.getLogger();
 
-        context.getSnapshotManager().setCreateSnapshotRunnable(() -> cohort.createSnapshot(context.getActor()));
+        context.getSnapshotManager().setCreateSnapshotConsumer(
+            outputStream -> cohort.createSnapshot(context.getActor(), outputStream));
         context.getSnapshotManager().setApplySnapshotConsumer(cohort::applySnapshot);
+        context.getSnapshotManager().setConvertSnapshotFunction(cohort::deserializeSnapshot);
+    }
+
+    RaftActorSnapshotCohort getSnapshotCohort() {
+        return cohort;
     }
 
     boolean handleSnapshotMessage(Object message, ActorRef sender) {
@@ -58,7 +67,7 @@ class RaftActorSnapshotMessageSupport {
         } else if (message instanceof SaveSnapshotFailure) {
             onSaveSnapshotFailure((SaveSnapshotFailure) message);
         } else if (message instanceof CaptureSnapshotReply) {
-            onCaptureSnapshotReply(((CaptureSnapshotReply) message).getSnapshot());
+            onCaptureSnapshotReply((CaptureSnapshotReply) message);
         } else if (COMMIT_SNAPSHOT.equals(message)) {
             context.getSnapshotManager().commit(-1, -1);
         } else if (message instanceof GetSnapshot) {
@@ -70,11 +79,11 @@ class RaftActorSnapshotMessageSupport {
         return true;
     }
 
-    private void onCaptureSnapshotReply(byte[] snapshotBytes) {
-        log.debug("{}: CaptureSnapshotReply received by actor: snapshot size {}", context.getId(),
-                snapshotBytes.length);
+    private void onCaptureSnapshotReply(CaptureSnapshotReply reply) {
+        log.debug("{}: CaptureSnapshotReply received by actor", context.getId());
 
-        context.getSnapshotManager().persist(snapshotBytes, context.getTotalMemory());
+        context.getSnapshotManager().persist(reply.getSnapshotState(), reply.getInstallSnapshotStream(),
+                context.getTotalMemory());
     }
 
     private void onSaveSnapshotFailure(SaveSnapshotFailure saveSnapshotFailure) {
@@ -103,15 +112,16 @@ class RaftActorSnapshotMessageSupport {
 
         if (context.getPersistenceProvider().isRecoveryApplicable()) {
             CaptureSnapshot captureSnapshot = context.getSnapshotManager().newCaptureSnapshot(
-                    context.getReplicatedLog().last(), -1, false);
+                    context.getReplicatedLog().last(), -1);
 
             ActorRef snapshotReplyActor = context.actorOf(GetSnapshotReplyActor.props(captureSnapshot,
                     ImmutableElectionTerm.copyOf(context.getTermInformation()), sender,
                     snapshotReplyActorTimeout, context.getId(), context.getPeerServerInfo(true)));
 
-            cohort.createSnapshot(snapshotReplyActor);
+            cohort.createSnapshot(snapshotReplyActor, Optional.empty());
         } else {
-            Snapshot snapshot = Snapshot.create(new byte[0], Collections.<ReplicatedLogEntry>emptyList(),
+            Snapshot snapshot = Snapshot.create(
+                    EmptyState.INSTANCE, Collections.<ReplicatedLogEntry>emptyList(),
                     -1, -1, -1, -1,
                     context.getTermInformation().getCurrentTerm(), context.getTermInformation().getVotedFor(),
                     context.getPeerServerInfo(true));

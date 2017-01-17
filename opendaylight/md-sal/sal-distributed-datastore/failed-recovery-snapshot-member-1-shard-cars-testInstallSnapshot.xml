@@ -1,0 +1,3 @@
+<test xmlns="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test">
+  <desc>foo</desc>
+</test>

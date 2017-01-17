@@ -7,7 +7,9 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 
 /**
@@ -36,9 +38,9 @@ public interface RaftActorRecoveryCohort {
     /**
      * This method is called during recovery to reconstruct the state of the actor.
      *
-     * @param snapshotBytes A snapshot of the state of the actor
+     * @param snapshotState A snapshot of the state of the actor
      */
-    void applyRecoverySnapshot(byte[] snapshotBytes);
+    void applyRecoverySnapshot(Snapshot.State snapshotState);
 
     /**
      * This method is called during recovery at the end of a batch to apply the current batched
@@ -53,4 +55,14 @@ public interface RaftActorRecoveryCohort {
      */
     @Nullable
     byte[] getRestoreFromSnapshot();
+
+    /**
+     * This method is called during recovery to de-serialize a snapshot that was persisted in the pre-Carbon format.
+     *
+     * @param from the snaphot bytes
+     * @return a Snapshot.State instance
+     */
+    @Deprecated
+    @Nonnull
+    Snapshot.State deserializePreCarbonSnapshot(byte [] from);
 }
