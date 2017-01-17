@@ -1,0 +1,9 @@
+Verified+1: jenkins-releng <jenkins-releng@opendaylight.org>
+Code-Review+1: Robert Varga <nite@hq.sk>
+Code-Review+1: Vladimir Lavor <vlavor@cisco.com>
+Code-Review+2: Tom Pantelis <tpanteli@brocade.com>
+Submitted-by: Tom Pantelis <tpanteli@brocade.com>
+Submitted-at: Tue, 17 Jan 2017 13:57:46 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/50535
+Project: controller
+Branch: refs/heads/master
