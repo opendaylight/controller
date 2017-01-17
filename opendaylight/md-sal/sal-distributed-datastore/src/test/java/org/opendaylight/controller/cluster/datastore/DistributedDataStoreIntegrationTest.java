@@ -30,6 +30,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.Uninterruptibles;
 import com.typesafe.config.ConfigFactory;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -52,10 +53,12 @@ import org.opendaylight.controller.cluster.datastore.messages.DatastoreSnapshot;
 import org.opendaylight.controller.cluster.datastore.messages.FindLocalShard;
 import org.opendaylight.controller.cluster.datastore.messages.LocalShardFound;
 import org.opendaylight.controller.cluster.datastore.persisted.MetadataShardDataTreeSnapshot;
+import org.opendaylight.controller.cluster.datastore.persisted.ShardSnapshotState;
 import org.opendaylight.controller.cluster.datastore.utils.MockDataChangeListener;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
-import org.opendaylight.controller.cluster.raft.Snapshot;
+import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
+import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
 import org.opendaylight.controller.md.cluster.datastore.model.CarsModel;
 import org.opendaylight.controller.md.cluster.datastore.model.PeopleModel;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
@@ -180,7 +183,6 @@ public class DistributedDataStoreIntegrationTest {
 
     @Test
     public void testReadWriteTransactionWithSingleShard() throws Exception {
-        System.setProperty("shard.persistent", "true");
         new IntegrationTestKit(getSystem(), datastoreContextBuilder) {
             {
                 try (AbstractDataStore dataStore = setupDistributedDataStore(
@@ -1255,8 +1257,9 @@ public class DistributedDataStoreIntegrationTest {
                 AbstractShardTest.writeToStore(dataTree, CarsModel.BASE_PATH, carsNode);
                 NormalizedNode<?, ?> root = AbstractShardTest.readStore(dataTree, YangInstanceIdentifier.EMPTY);
 
-                final Snapshot carsSnapshot = Snapshot.create(new MetadataShardDataTreeSnapshot(root).serialize(),
-                        Collections.<ReplicatedLogEntry>emptyList(), 2, 1, 2, 1, 1, "member-1");
+                final Snapshot carsSnapshot = Snapshot.create(
+                        new ShardSnapshotState(new MetadataShardDataTreeSnapshot(root)),
+                        Collections.<ReplicatedLogEntry>emptyList(), 2, 1, 2, 1, 1, "member-1", null);
 
                 NormalizedNode<?, ?> peopleNode = PeopleModel.create();
                 dataTree = InMemoryDataTreeFactory.getInstance().create(TreeType.OPERATIONAL);
@@ -1264,8 +1267,9 @@ public class DistributedDataStoreIntegrationTest {
                 AbstractShardTest.writeToStore(dataTree, PeopleModel.BASE_PATH, peopleNode);
                 root = AbstractShardTest.readStore(dataTree, YangInstanceIdentifier.EMPTY);
 
-                Snapshot peopleSnapshot = Snapshot.create(new MetadataShardDataTreeSnapshot(root).serialize(),
-                        Collections.<ReplicatedLogEntry>emptyList(), 2, 1, 2, 1, 1, "member-1");
+                Snapshot peopleSnapshot = Snapshot.create(
+                        new ShardSnapshotState(new MetadataShardDataTreeSnapshot(root)),
+                        Collections.<ReplicatedLogEntry>emptyList(), 2, 1, 2, 1, 1, "member-1", null);
 
                 restoreFromSnapshot = new DatastoreSnapshot(name, null,
                         Arrays.asList(
@@ -1286,6 +1290,43 @@ public class DistributedDataStoreIntegrationTest {
                     optional = readTx.read(PeopleModel.BASE_PATH).get(5, TimeUnit.SECONDS);
                     assertEquals("isPresent", true, optional.isPresent());
                     assertEquals("Data node", peopleNode, optional.get());
+                }
+            }
+        };
+    }
+
+    @Test
+    @Deprecated
+    public void testRecoveryFromPreCarbonSnapshot() throws Exception {
+        new IntegrationTestKit(getSystem(), datastoreContextBuilder) {
+            {
+                final String name = "testRecoveryFromPreCarbonSnapshot";
+
+                ContainerNode carsNode = CarsModel.newCarsNode(
+                        CarsModel.newCarsMapNode(CarsModel.newCarEntry("optima", BigInteger.valueOf(20000L)),
+                                CarsModel.newCarEntry("sportage", BigInteger.valueOf(30000L))));
+
+                DataTree dataTree = InMemoryDataTreeFactory.getInstance().create(TreeType.OPERATIONAL);
+                dataTree.setSchemaContext(SchemaContextHelper.full());
+                AbstractShardTest.writeToStore(dataTree, CarsModel.BASE_PATH, carsNode);
+                NormalizedNode<?, ?> root = AbstractShardTest.readStore(dataTree, YangInstanceIdentifier.EMPTY);
+
+                final ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                new MetadataShardDataTreeSnapshot(root).serialize(bos);
+                final org.opendaylight.controller.cluster.raft.Snapshot snapshot =
+                    org.opendaylight.controller.cluster.raft.Snapshot.create(bos.toByteArray(),
+                            Collections.<ReplicatedLogEntry>emptyList(), 2, 1, 2, 1, 1, "member-1", null);
+
+                InMemorySnapshotStore.addSnapshot("member-1-shard-cars-" + name, snapshot);
+
+                try (AbstractDataStore dataStore = setupDistributedDataStore(name, "module-shards-member1.conf",
+                        true, "cars")) {
+
+                    DOMStoreReadTransaction readTx = dataStore.newReadOnlyTransaction();
+
+                    Optional<NormalizedNode<?, ?>> optional = readTx.read(CarsModel.BASE_PATH).get(5, TimeUnit.SECONDS);
+                    assertEquals("isPresent", true, optional.isPresent());
+                    assertEquals("Data node", carsNode, optional.get());
                 }
             }
         };
