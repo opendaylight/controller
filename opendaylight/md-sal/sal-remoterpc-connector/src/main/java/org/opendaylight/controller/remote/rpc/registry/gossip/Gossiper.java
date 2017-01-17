@@ -273,7 +273,7 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
      * @param envelope contains buckets from a remote gossiper
      */
     @VisibleForTesting
-    <T extends Copier<T>> void receiveGossip(final GossipEnvelope<T> envelope) {
+    <T extends BucketData<T>> void receiveGossip(final GossipEnvelope<T> envelope) {
         //TODO: Add more validations
         if (!selfAddress.equals(envelope.to())) {
             LOG.trace("Ignoring message intended for someone else. From [{}] to [{}]", envelope.from(), envelope.to());
@@ -289,7 +289,7 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
      * @param buckets map of Buckets to update
      */
     @VisibleForTesting
-    <T extends Copier<T>> void updateRemoteBuckets(final Map<Address, Bucket<T>> buckets) {
+    <T extends BucketData<T>> void updateRemoteBuckets(final Map<Address, Bucket<T>> buckets) {
         getContext().parent().tell(new UpdateRemoteBuckets<>(buckets), getSelf());
     }
 
