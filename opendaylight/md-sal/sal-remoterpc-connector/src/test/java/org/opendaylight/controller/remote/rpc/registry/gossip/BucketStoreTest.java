@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.remote.rpc.registry.gossip;
 
+import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Address;
 import akka.actor.Props;
@@ -14,6 +15,7 @@ import akka.testkit.TestActorRef;
 import com.typesafe.config.ConfigFactory;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -29,10 +31,15 @@ public class BucketStoreTest {
      * @author gwu
      *
      */
-    private static class T implements Copier<T> {
+    private static class T implements BucketData<T> {
         @Override
         public T copy() {
             return new T();
+        }
+
+        @Override
+        public Optional<ActorRef> getWatchActor() {
+            return Optional.empty();
         }
     }
 

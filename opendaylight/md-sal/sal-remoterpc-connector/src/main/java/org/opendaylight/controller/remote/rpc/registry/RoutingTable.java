@@ -12,13 +12,13 @@ import com.google.common.base.Preconditions;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
-
-import org.opendaylight.controller.remote.rpc.registry.gossip.Copier;
+import org.opendaylight.controller.remote.rpc.registry.gossip.BucketData;
 import org.opendaylight.controller.sal.connector.api.RpcRouter;
 import org.opendaylight.controller.sal.connector.api.RpcRouter.RouteIdentifier;
 
-public class RoutingTable implements Copier<RoutingTable>, Serializable {
+public class RoutingTable implements BucketData<RoutingTable>, Serializable {
     private static final long serialVersionUID = 5592610415175278760L;
 
     private final Map<RouteIdentifier<?, ?, ?>, Long> table;
@@ -36,6 +36,11 @@ public class RoutingTable implements Copier<RoutingTable>, Serializable {
     @Override
     public RoutingTable copy() {
         return new RoutingTable(router, new HashMap<>(table));
+    }
+
+    @Override
+    public Optional<ActorRef> getWatchActor() {
+        return Optional.of(router);
     }
 
     public Set<RpcRouter.RouteIdentifier<?, ?, ?>> getRoutes() {
