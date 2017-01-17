@@ -58,7 +58,7 @@ public abstract class AbstractConfigTestBase {
      */
     private static final String KARAF_DISTRO_TYPE = "zip";
     private static final String KARAF_DISTRO_ARTIFACTID = "opendaylight-karaf-empty";
-    private static final String KARAF_DISTRO_GROUPID = "org.opendaylight.controller";
+    private static final String KARAF_DISTRO_GROUPID = "org.opendaylight.odlparent";
 
     /*
      * Property names to override defaults for karaf distro artifactId, groupId, version, and type

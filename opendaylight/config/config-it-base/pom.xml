@@ -39,7 +39,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <artifactId>config-util</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.opendaylight.controller</groupId>
+      <groupId>org.opendaylight.odlparent</groupId>
       <artifactId>opendaylight-karaf-empty</artifactId>
       <version>${opendaylight.karaf.version}</version>
       <type>zip</type>
