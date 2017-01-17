@@ -28,8 +28,8 @@ abstract class ModifiedDataTreeCandidateNode extends AbstractDataTreeCandidateNo
         this.children = Preconditions.checkNotNull(children);
     }
 
-    static DataTreeCandidateNode create(final Collection<DataTreeCandidateNode> children) {
-        return new ModifiedDataTreeCandidateNode(ModificationType.SUBTREE_MODIFIED, children) {
+    static DataTreeCandidateNode create(final ModificationType type, final Collection<DataTreeCandidateNode> children) {
+        return new ModifiedDataTreeCandidateNode(type, children) {
             @Override
             public PathArgument getIdentifier() {
                 throw new UnsupportedOperationException("Root node does not have an identifier");

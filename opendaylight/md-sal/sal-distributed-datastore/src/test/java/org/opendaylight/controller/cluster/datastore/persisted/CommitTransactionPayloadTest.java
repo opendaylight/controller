@@ -18,6 +18,7 @@ import org.apache.commons.lang3.SerializationUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.AbstractTest;
+import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -28,9 +29,13 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidateNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidates;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.TipProducingDataTree;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.TreeType;
 import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
+import org.opendaylight.yangtools.yang.data.impl.schema.tree.InMemoryDataTreeFactory;
 
 public class CommitTransactionPayloadTest extends AbstractTest {
     static final QName LEAF_SET = QName.create(TestModel.TEST_QNAME, "leaf-set");
@@ -64,39 +69,24 @@ public class CommitTransactionPayloadTest extends AbstractTest {
 
     private static void assertCandidateEquals(final DataTreeCandidate expected, final DataTreeCandidate actual) {
         assertEquals("root path", expected.getRootPath(), actual.getRootPath());
-
-        final DataTreeCandidateNode expRoot = expected.getRootNode();
-        final DataTreeCandidateNode actRoot = expected.getRootNode();
-        assertEquals("root type", expRoot.getModificationType(), actRoot.getModificationType());
-
-        switch (actRoot.getModificationType()) {
-            case DELETE:
-            case WRITE:
-                assertEquals("root data", expRoot.getDataAfter(), actRoot.getDataAfter());
-                break;
-            case SUBTREE_MODIFIED:
-                assertChildrenEquals(expRoot.getChildNodes(), actRoot.getChildNodes());
-                break;
-            default:
-                fail("Unexpect root type " + actRoot.getModificationType());
-                break;
-        }
-
         assertCandidateNodeEquals(expected.getRootNode(), actual.getRootNode());
     }
 
     private static void assertCandidateNodeEquals(final DataTreeCandidateNode expected,
             final DataTreeCandidateNode actual) {
         assertEquals("child type", expected.getModificationType(), actual.getModificationType());
-        assertEquals("child identifier", expected.getIdentifier(), actual.getIdentifier());
 
         switch (actual.getModificationType()) {
             case DELETE:
             case WRITE:
+                assertEquals("child identifier", expected.getIdentifier(), actual.getIdentifier());
                 assertEquals("child data", expected.getDataAfter(), actual.getDataAfter());
                 break;
             case SUBTREE_MODIFIED:
+                assertEquals("child identifier", expected.getIdentifier(), actual.getIdentifier());
                 assertChildrenEquals(expected.getChildNodes(), actual.getChildNodes());
+                break;
+            case UNMODIFIED:
                 break;
             default:
                 fail("Unexpect root type " + actual.getModificationType());
@@ -187,6 +177,19 @@ public class CommitTransactionPayloadTest extends AbstractTest {
                 new YangInstanceIdentifier.NodeIdentifier(TestModel.DESC_QNAME)).withValue("test").build();
 
         candidate = DataTreeCandidates.fromNormalizedNode(leafPath, leafNode);
+        CommitTransactionPayload payload = CommitTransactionPayload.create(nextTransactionId(), candidate);
+        assertCandidateEquals(candidate, payload.getCandidate().getValue());
+    }
+
+    @Test
+    public void testUnmodifiedRootCandidate() throws Exception {
+        final TipProducingDataTree dataTree = InMemoryDataTreeFactory.getInstance().create(TreeType.CONFIGURATION);
+        dataTree.setSchemaContext(SchemaContextHelper.select(SchemaContextHelper.CARS_YANG));
+
+        DataTreeModification modification = dataTree.takeSnapshot().newModification();
+        modification.ready();
+        candidate = dataTree.prepare(modification);
+
         CommitTransactionPayload payload = CommitTransactionPayload.create(nextTransactionId(), candidate);
         assertCandidateEquals(candidate, payload.getCandidate().getValue());
     }

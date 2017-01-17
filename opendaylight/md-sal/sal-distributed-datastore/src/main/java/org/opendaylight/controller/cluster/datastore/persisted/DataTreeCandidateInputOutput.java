@@ -104,14 +104,24 @@ public final class DataTreeCandidateInputOutput {
 
         final DataTreeCandidateNode rootNode;
         switch (type) {
+            case APPEARED:
+                rootNode = ModifiedDataTreeCandidateNode.create(ModificationType.APPEARED, readChildren(reader));
+                break;
             case DELETE:
                 rootNode = DeletedDataTreeCandidateNode.create();
                 break;
+            case DISAPPEARED:
+                rootNode = ModifiedDataTreeCandidateNode.create(ModificationType.DISAPPEARED, readChildren(reader));
+                break;
             case SUBTREE_MODIFIED:
-                rootNode = ModifiedDataTreeCandidateNode.create(readChildren(reader));
+                rootNode = ModifiedDataTreeCandidateNode.create(ModificationType.SUBTREE_MODIFIED,
+                        readChildren(reader));
                 break;
             case WRITE:
                 rootNode = DataTreeCandidateNodes.fromNormalizedNode(reader.readNormalizedNode());
+                break;
+            case UNMODIFIED:
+                rootNode = AbstractDataTreeCandidateNode.createUnmodified();
                 break;
             default:
                 throw new IllegalArgumentException("Unhandled node type " + type);
