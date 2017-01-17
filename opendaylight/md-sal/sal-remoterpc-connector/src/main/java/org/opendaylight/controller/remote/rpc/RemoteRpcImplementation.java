@@ -50,7 +50,7 @@ public class RemoteRpcImplementation implements DOMRpcImplementation {
             LOG.warn("Rpc {} was removed during execution or there is loop present. Failing received rpc.", rpc);
             return Futures.<DOMRpcResult, DOMRpcException>immediateFailedCheckedFuture(
                     new DOMRpcImplementationNotAvailableException(
-                            "Rpc implementation for {} was removed during processing.", rpc));
+                            "Rpc implementation for %s was removed during processing.", rpc));
         }
         final RemoteDOMRpcFuture frontEndFuture = RemoteDOMRpcFuture.create(rpc.getType().getLastComponent());
         findRouteAsync(rpc).onComplete(new OnComplete<FindRoutersReply>() {
