@@ -9,6 +9,8 @@
 package org.opendaylight.controller.remote.rpc.registry;
 
 import static org.junit.Assert.fail;
+import static org.opendaylight.controller.remote.rpc.registry.gossip.BucketStoreAccess.Singletons.GET_ALL_BUCKETS;
+import static org.opendaylight.controller.remote.rpc.registry.gossip.BucketStoreAccess.Singletons.GET_BUCKET_VERSIONS;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
@@ -48,10 +50,6 @@ import org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.Remo
 import org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.UpdateRemoteEndpoints;
 import org.opendaylight.controller.remote.rpc.registry.RpcRegistry.RemoteRpcEndpoint;
 import org.opendaylight.controller.remote.rpc.registry.gossip.Bucket;
-import org.opendaylight.controller.remote.rpc.registry.gossip.Messages.BucketStoreMessages.GetAllBuckets;
-import org.opendaylight.controller.remote.rpc.registry.gossip.Messages.BucketStoreMessages.GetAllBucketsReply;
-import org.opendaylight.controller.remote.rpc.registry.gossip.Messages.BucketStoreMessages.GetBucketVersions;
-import org.opendaylight.controller.remote.rpc.registry.gossip.Messages.BucketStoreMessages.GetBucketVersionsReply;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 import org.slf4j.Logger;
@@ -320,10 +318,10 @@ public class RpcRegistryTest {
     }
 
     private static Map<Address, Long> retrieveVersions(final ActorRef bucketStore, final JavaTestKit testKit) {
-        bucketStore.tell(new GetBucketVersions(), testKit.getRef());
-        GetBucketVersionsReply reply = testKit.expectMsgClass(Duration.create(3, TimeUnit.SECONDS),
-                GetBucketVersionsReply.class);
-        return reply.getVersions();
+        bucketStore.tell(GET_BUCKET_VERSIONS, testKit.getRef());
+        @SuppressWarnings("unchecked")
+        final Map<Address, Long> reply = testKit.expectMsgClass(Duration.create(3, TimeUnit.SECONDS), Map.class);
+        return reply;
     }
 
     private static void verifyBucket(final Bucket<RoutingTable> bucket, final List<DOMRpcIdentifier> expRouteIds) {
@@ -342,12 +340,11 @@ public class RpcRegistryTest {
             final JavaTestKit testKit, final Address... addresses) {
         int numTries = 0;
         while (true) {
-            bucketStore.tell(new GetAllBuckets(), testKit.getRef());
+            bucketStore.tell(GET_ALL_BUCKETS, testKit.getRef());
             @SuppressWarnings("unchecked")
-            GetAllBucketsReply<RoutingTable> reply = testKit.expectMsgClass(Duration.create(3, TimeUnit.SECONDS),
-                    GetAllBucketsReply.class);
+            Map<Address, Bucket<RoutingTable>> buckets = testKit.expectMsgClass(Duration.create(3, TimeUnit.SECONDS),
+                    Map.class);
 
-            Map<Address, Bucket<RoutingTable>> buckets = reply.getBuckets();
             boolean foundAll = true;
             for (Address addr : addresses) {
                 Bucket<RoutingTable> bucket = buckets.get(addr);
@@ -386,15 +383,14 @@ public class RpcRegistryTest {
                     ActorRef.noSender());
         }
 
-        GetAllBuckets getAllBuckets = new GetAllBuckets();
         FiniteDuration duration = Duration.create(3, TimeUnit.SECONDS);
         int numTries = 0;
         while (true) {
-            registry1.tell(getAllBuckets, testKit.getRef());
+            registry1.tell(GET_ALL_BUCKETS, testKit.getRef());
             @SuppressWarnings("unchecked")
-            GetAllBucketsReply<RoutingTable> reply = testKit.expectMsgClass(duration, GetAllBucketsReply.class);
+            Map<Address, Bucket<RoutingTable>> buckets = testKit.expectMsgClass(duration, Map.class);
 
-            Bucket<RoutingTable> localBucket = reply.getBuckets().values().iterator().next();
+            Bucket<RoutingTable> localBucket = buckets.values().iterator().next();
             RoutingTable table = localBucket.getData();
             if (table != null && table.size() == nRoutes) {
                 for (DOMRpcIdentifier r : added) {
