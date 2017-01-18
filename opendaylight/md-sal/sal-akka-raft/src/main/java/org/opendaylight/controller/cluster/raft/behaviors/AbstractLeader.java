@@ -606,8 +606,6 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
     /**
      * This method checks if any update needs to be sent to the given follower. This includes append log entries,
      * sending next snapshot chunk, and initiating a snapshot.
-     *
-     * @return true if any update is sent, false otherwise
      */
     private void sendUpdatesToFollower(String followerId, FollowerLogInformation followerLogInformation,
                                        boolean sendHeartbeat, boolean isHeartbeat) {
@@ -740,16 +738,16 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
             // Note: sendSnapshotChunk will set the LeaderInstallSnapshotState.
             sendSnapshotChunk(followerActor, followerLogInfo);
             return true;
-        } else {
-            boolean captureInitiated = context.getSnapshotManager().captureToInstall(context.getReplicatedLog().last(),
-                    this.getReplicatedToAllIndex(), followerId);
-            if (captureInitiated) {
-                followerLogInfo.setLeaderInstallSnapshotState(new LeaderInstallSnapshotState(
-                        context.getConfigParams().getSnapshotChunkSize(), logName()));
-            }
-
-            return captureInitiated;
         }
+
+        boolean captureInitiated = context.getSnapshotManager().captureToInstall(context.getReplicatedLog().last(),
+            this.getReplicatedToAllIndex(), followerId);
+        if (captureInitiated) {
+            followerLogInfo.setLeaderInstallSnapshotState(new LeaderInstallSnapshotState(
+                context.getConfigParams().getSnapshotChunkSize(), logName()));
+        }
+
+        return captureInitiated;
     }
 
     private boolean canInstallSnapshot(long nextIndex) {
