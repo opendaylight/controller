@@ -16,16 +16,16 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import org.opendaylight.controller.md.sal.dom.api.DOMRpcIdentifier;
 import org.opendaylight.controller.remote.rpc.registry.gossip.BucketData;
-import org.opendaylight.controller.sal.connector.api.RpcRouter.RouteIdentifier;
 
 public class RoutingTable implements BucketData<RoutingTable>, Serializable {
     private static final long serialVersionUID = 1L;
 
-    private final Set<RouteIdentifier<?, ?, ?>> rpcs;
+    private final Set<DOMRpcIdentifier> rpcs;
     private final ActorRef rpcInvoker;
 
-    private RoutingTable(final ActorRef rpcInvoker, final Set<RouteIdentifier<?, ?, ?>> table) {
+    private RoutingTable(final ActorRef rpcInvoker, final Set<DOMRpcIdentifier> table) {
         this.rpcInvoker = Preconditions.checkNotNull(rpcInvoker);
         this.rpcs = ImmutableSet.copyOf(table);
     }
@@ -39,7 +39,7 @@ public class RoutingTable implements BucketData<RoutingTable>, Serializable {
         return Optional.of(rpcInvoker);
     }
 
-    public Set<RouteIdentifier<?, ?, ?>> getRoutes() {
+    public Set<DOMRpcIdentifier> getRoutes() {
         return rpcs;
     }
 
@@ -47,20 +47,20 @@ public class RoutingTable implements BucketData<RoutingTable>, Serializable {
         return rpcInvoker;
     }
 
-    RoutingTable addRpcs(final Collection<RouteIdentifier<?, ?, ?>> toAdd) {
-        final Set<RouteIdentifier<?, ?, ?>> newRpcs = new HashSet<>(rpcs);
+    RoutingTable addRpcs(final Collection<DOMRpcIdentifier> toAdd) {
+        final Set<DOMRpcIdentifier> newRpcs = new HashSet<>(rpcs);
         newRpcs.addAll(toAdd);
         return new RoutingTable(rpcInvoker, newRpcs);
     }
 
-    RoutingTable removeRpcs(final Collection<RouteIdentifier<?, ?, ?>> toRemove) {
-        final Set<RouteIdentifier<?, ?, ?>> newRpcs = new HashSet<>(rpcs);
+    RoutingTable removeRpcs(final Collection<DOMRpcIdentifier> toRemove) {
+        final Set<DOMRpcIdentifier> newRpcs = new HashSet<>(rpcs);
         newRpcs.removeAll(toRemove);
         return new RoutingTable(rpcInvoker, newRpcs);
     }
 
     @VisibleForTesting
-    boolean contains(final RouteIdentifier<?, ?, ?> routeId) {
+    boolean contains(final DOMRpcIdentifier routeId) {
         return rpcs.contains(routeId);
     }
 

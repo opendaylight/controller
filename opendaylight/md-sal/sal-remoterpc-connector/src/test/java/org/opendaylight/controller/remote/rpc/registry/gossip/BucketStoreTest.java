@@ -13,6 +13,7 @@ import akka.actor.Address;
 import akka.actor.Props;
 import akka.testkit.JavaTestKit;
 import akka.testkit.TestActorRef;
+import com.google.common.collect.ImmutableMap;
 import com.typesafe.config.ConfigFactory;
 import java.util.HashMap;
 import java.util.Map;
@@ -58,7 +59,7 @@ public class BucketStoreTest {
     @Test
     public void testReceiveUpdateRemoteBuckets() {
 
-        final BucketStore<T> store = createStore();
+        final BucketStoreActor<T> store = createStore();
 
         Address localAddress = system.provider().getDefaultAddress();
         Bucket<T> localBucket = new BucketImpl<>(0L, new T());
@@ -71,14 +72,8 @@ public class BucketStoreTest {
         Bucket<T> b2 = new BucketImpl<>(0L, new T());
         Bucket<T> b3 = new BucketImpl<>(0L, new T());
 
-        Map<Address, Bucket<T>> remoteBuckets = new HashMap<>(3);
-        remoteBuckets.put(a1, b1);
-        remoteBuckets.put(a2, b2);
-        remoteBuckets.put(a3, b3);
-        remoteBuckets.put(localAddress, localBucket);
-
         //Given remote buckets
-        store.receiveUpdateRemoteBuckets(remoteBuckets);
+        store.receiveUpdateRemoteBuckets(ImmutableMap.of(a1, b1, a2, b2, localAddress, localBucket));
 
         //Should NOT contain local bucket
         //Should contain ONLY 3 entries i.e a1, a2, a3
@@ -89,9 +84,7 @@ public class BucketStoreTest {
         //Add a new remote bucket
         Address a4 = new Address("tcp", "system4");
         Bucket<T> b4 = new BucketImpl<>(0L, new T());
-        remoteBuckets.clear();
-        remoteBuckets.put(a4, b4);
-        store.receiveUpdateRemoteBuckets(remoteBuckets);
+        store.receiveUpdateRemoteBuckets(ImmutableMap.of(a4, b4));
 
         //Should contain a4
         //Should contain 4 entries now i.e a1, a2, a3, a4
@@ -101,7 +94,7 @@ public class BucketStoreTest {
 
         //Update a bucket
         Bucket<T> b3New = new BucketImpl<>(0L, new T());
-        remoteBuckets.clear();
+        Map<Address, Bucket<?>> remoteBuckets = new HashMap<>(3);
         remoteBuckets.put(a3, b3New);
         remoteBuckets.put(a1, null);
         remoteBuckets.put(a2, null);
@@ -145,10 +138,10 @@ public class BucketStoreTest {
      *
      * @return instance of BucketStore class
      */
-    private static BucketStore<T> createStore() {
-        final Props props = Props.create(BucketStore.class, new RemoteRpcProviderConfig(system.settings().config()),
+    private static BucketStoreActor<T> createStore() {
+        final Props props = Props.create(BucketStoreActor.class, new RemoteRpcProviderConfig(system.settings().config()),
             new T());
-        final TestActorRef<BucketStore<T>> testRef = TestActorRef.create(system, props, "testStore");
+        final TestActorRef<BucketStoreActor<T>> testRef = TestActorRef.create(system, props, "testStore");
         return testRef.underlyingActor();
     }
 }
