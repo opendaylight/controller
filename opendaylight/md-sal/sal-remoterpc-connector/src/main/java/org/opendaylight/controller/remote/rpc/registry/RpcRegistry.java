@@ -29,7 +29,6 @@ import org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.Remo
 import org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.UpdateRemoteEndpoints;
 import org.opendaylight.controller.remote.rpc.registry.gossip.Bucket;
 import org.opendaylight.controller.remote.rpc.registry.gossip.BucketStore;
-import org.opendaylight.controller.sal.connector.api.RpcRouter;
 import org.opendaylight.controller.sal.connector.api.RpcRouter.RouteIdentifier;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 
@@ -74,13 +73,7 @@ public class RpcRegistry extends BucketStore<RoutingTable> {
 
     private void receiveAddRoutes(final AddOrUpdateRoutes msg) {
         LOG.debug("AddOrUpdateRoutes: {}", msg.getRouteIdentifiers());
-
-        RoutingTable table = getLocalBucket().getData().copy();
-        for (RpcRouter.RouteIdentifier<?, ?, ?> routeId : msg.getRouteIdentifiers()) {
-            table.addRoute(routeId);
-        }
-
-        updateLocalBucket(table);
+        updateLocalBucket(getLocalBucket().getData().addRpcs(msg.getRouteIdentifiers()));
     }
 
     /**
@@ -89,12 +82,8 @@ public class RpcRegistry extends BucketStore<RoutingTable> {
      * @param msg contains list of route ids to remove
      */
     private void receiveRemoveRoutes(final RemoveRoutes msg) {
-        RoutingTable table = getLocalBucket().getData().copy();
-        for (RpcRouter.RouteIdentifier<?, ?, ?> routeId : msg.getRouteIdentifiers()) {
-            table.removeRoute(routeId);
-        }
-
-        updateLocalBucket(table);
+        LOG.debug("RemoveRoutes: {}", msg.getRouteIdentifiers());
+        updateLocalBucket(getLocalBucket().getData().removeRpcs(msg.getRouteIdentifiers()));
     }
 
     @Override
@@ -120,7 +109,7 @@ public class RpcRegistry extends BucketStore<RoutingTable> {
             }
 
             endpoints.put(e.getKey(), rpcs.isEmpty() ? Optional.empty()
-                    : Optional.of(new RemoteRpcEndpoint(table.getRouter(), rpcs)));
+                    : Optional.of(new RemoteRpcEndpoint(table.getRpcInvoker(), rpcs)));
         }
 
         if (!endpoints.isEmpty()) {
@@ -151,15 +140,15 @@ public class RpcRegistry extends BucketStore<RoutingTable> {
      */
     public static class Messages {
         abstract static class AbstractRouteMessage {
-            final List<RpcRouter.RouteIdentifier<?, ?, ?>> routeIdentifiers;
+            final List<RouteIdentifier<?, ?, ?>> routeIdentifiers;
 
-            AbstractRouteMessage(final List<RpcRouter.RouteIdentifier<?, ?, ?>> routeIdentifiers) {
+            AbstractRouteMessage(final List<RouteIdentifier<?, ?, ?>> routeIdentifiers) {
                 Preconditions.checkArgument(routeIdentifiers != null && !routeIdentifiers.isEmpty(),
                         "Route Identifiers must be supplied");
                 this.routeIdentifiers = routeIdentifiers;
             }
 
-            List<RpcRouter.RouteIdentifier<?, ?, ?>> getRouteIdentifiers() {
+            List<RouteIdentifier<?, ?, ?>> getRouteIdentifiers() {
                 return this.routeIdentifiers;
             }
 
@@ -170,13 +159,13 @@ public class RpcRegistry extends BucketStore<RoutingTable> {
         }
 
         public static final class AddOrUpdateRoutes extends AbstractRouteMessage {
-            public AddOrUpdateRoutes(final List<RpcRouter.RouteIdentifier<?, ?, ?>> routeIdentifiers) {
+            public AddOrUpdateRoutes(final List<RouteIdentifier<?, ?, ?>> routeIdentifiers) {
                 super(routeIdentifiers);
             }
         }
 
         public static final class RemoveRoutes extends AbstractRouteMessage {
-            public RemoveRoutes(final List<RpcRouter.RouteIdentifier<?, ?, ?>> routeIdentifiers) {
+            public RemoveRoutes(final List<RouteIdentifier<?, ?, ?>> routeIdentifiers) {
                 super(routeIdentifiers);
             }
         }
