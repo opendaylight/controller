@@ -80,7 +80,7 @@ public class RpcRegistryTest {
 
     @BeforeClass
     public static void staticSetup() throws InterruptedException {
-        AkkaConfigurationReader reader = () -> ConfigFactory.load();
+        AkkaConfigurationReader reader = ConfigFactory::load;
 
         RemoteRpcProviderConfig config1 = new RemoteRpcProviderConfig.Builder("memberA").gossipTickInterval("200ms")
                 .withConfigReader(reader).build();

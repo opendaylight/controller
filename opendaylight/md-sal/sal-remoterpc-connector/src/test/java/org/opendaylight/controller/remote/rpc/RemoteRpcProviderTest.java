@@ -15,6 +15,7 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.testkit.JavaTestKit;
 import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
 import java.util.concurrent.TimeUnit;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -32,7 +33,8 @@ public class RemoteRpcProviderTest {
 
     @BeforeClass
     public static void setup() throws InterruptedException {
-        moduleConfig = new RemoteRpcProviderConfig.Builder("odl-cluster-rpc").build();
+        moduleConfig = new RemoteRpcProviderConfig.Builder("odl-cluster-rpc")
+                .withConfigReader(ConfigFactory::load).build();
         final Config config = moduleConfig.get();
         system = ActorSystem.create("odl-cluster-rpc", config);
 
