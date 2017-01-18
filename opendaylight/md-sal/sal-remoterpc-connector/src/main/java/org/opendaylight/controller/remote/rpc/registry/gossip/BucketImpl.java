@@ -12,23 +12,21 @@ import com.google.common.base.Verify;
 import java.io.Serializable;
 
 final class BucketImpl<T extends BucketData<T>> implements Bucket<T>, Serializable {
-    private static final long serialVersionUID = 294779770032719196L;
+    private static final long serialVersionUID = 1L;
 
-    // Guaranteed to be non-null.
-    // This is kept a Long for binary compatibility of serialization format.
-    private final Long version;
+    private final long version;
 
     // Guaranteed to be non-null
     private final T data;
 
-    BucketImpl(final Long version, final T data) {
-        this.version = Preconditions.checkNotNull(version);
+    BucketImpl(final long version, final T data) {
+        this.version = version;
         this.data = Preconditions.checkNotNull(data);
     }
 
     @Override
     public long getVersion() {
-        return version.longValue();
+        return version;
     }
 
     @Override
@@ -42,7 +40,6 @@ final class BucketImpl<T extends BucketData<T>> implements Bucket<T>, Serializab
     }
 
     private Object readResolve() {
-        Verify.verifyNotNull(version);
         Verify.verifyNotNull(data);
         return this;
     }
