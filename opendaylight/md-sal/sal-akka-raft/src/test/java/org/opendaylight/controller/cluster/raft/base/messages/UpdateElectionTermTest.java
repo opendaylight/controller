@@ -28,6 +28,6 @@ public class UpdateElectionTermTest {
 
         Assert.assertEquals("getCurrentTerm", 5, clone.getCurrentTerm());
         Assert.assertEquals("getVotedFor", "member1", clone.getVotedFor());
-        Assert.assertEquals("isMigrated", true, clone.isMigrated());
+        Assert.assertTrue("isMigrated", clone.isMigrated());
     }
 }

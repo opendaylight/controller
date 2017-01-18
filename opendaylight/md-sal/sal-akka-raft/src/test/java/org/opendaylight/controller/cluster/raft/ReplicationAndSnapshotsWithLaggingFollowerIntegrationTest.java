@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.raft;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import akka.actor.ActorRef;
 import akka.persistence.SaveSnapshotSuccess;
@@ -84,7 +85,7 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         follower2 = follower2Actor.underlyingActor().getCurrentBehavior();
 
         currentTerm = leaderContext.getTermInformation().getCurrentTerm();
-        assertEquals("Current term > " + initialTerm, true, currentTerm > initialTerm);
+        assertTrue("Current term > " + initialTerm, currentTerm > initialTerm);
 
         leaderCollectorActor = leaderActor.underlyingActor().collectorActor();
         follower1CollectorActor = follower1Actor.underlyingActor().collectorActor();
@@ -574,7 +575,7 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
             assertEquals("InstallSnapshotReply getTerm", currentTerm, installSnapshotReply.getTerm());
             assertEquals("InstallSnapshotReply getChunkIndex", index++, installSnapshotReply.getChunkIndex());
             assertEquals("InstallSnapshotReply getFollowerId", follower2Id, installSnapshotReply.getFollowerId());
-            assertEquals("InstallSnapshotReply isSuccess", true, installSnapshotReply.isSuccess());
+            assertTrue("InstallSnapshotReply isSuccess", installSnapshotReply.isSuccess());
         }
 
         // Verify follower 2 applies the snapshot.

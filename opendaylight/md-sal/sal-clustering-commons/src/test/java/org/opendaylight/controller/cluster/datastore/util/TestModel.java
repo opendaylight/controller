@@ -117,7 +117,7 @@ public class TestModel {
     private static final String TWO_ONE_NAME = "one";
     private static final String TWO_TWO_NAME = "two";
     private static final String DESC = "Hello there";
-    private static final Boolean ENABLED = true;
+    private static final Boolean ENABLED = Boolean.TRUE;
     private static final Short SHORT_ID = 1;
     private static final Byte BYTE_ID = 1;
     // Family specific constants

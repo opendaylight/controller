@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.raft;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableSet;
 import java.util.Arrays;
@@ -35,6 +36,6 @@ public class ServerConfigurationPayloadTest {
                 new org.opendaylight.controller.cluster.raft.persisted.ServerInfo("1", true),
                 new org.opendaylight.controller.cluster.raft.persisted.ServerInfo("2", false)),
                 ImmutableSet.copyOf(cloned.getServerConfig()));
-        assertEquals("isMigrated", true, cloned.isMigrated());
+        assertTrue("isMigrated", cloned.isMigrated());
     }
 }

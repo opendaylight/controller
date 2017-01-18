@@ -8,6 +8,7 @@
 
 package org.opendaylight.controller.cluster.raft;
 
+import static java.lang.Boolean.TRUE;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -334,31 +335,31 @@ public class RaftActorTest extends AbstractActorTest {
         mockRaftActor.waitForRecoveryComplete();
 
         ApplySnapshot applySnapshot = new ApplySnapshot(mock(Snapshot.class));
-        doReturn(true).when(mockSupport).handleSnapshotMessage(same(applySnapshot), any(ActorRef.class));
+        doReturn(TRUE).when(mockSupport).handleSnapshotMessage(same(applySnapshot), any(ActorRef.class));
         mockRaftActor.handleCommand(applySnapshot);
 
         CaptureSnapshot captureSnapshot = new CaptureSnapshot(1, 1, 1, 1, 0, 1, null);
-        doReturn(true).when(mockSupport).handleSnapshotMessage(same(captureSnapshot), any(ActorRef.class));
+        doReturn(TRUE).when(mockSupport).handleSnapshotMessage(same(captureSnapshot), any(ActorRef.class));
         mockRaftActor.handleCommand(captureSnapshot);
 
         CaptureSnapshotReply captureSnapshotReply = new CaptureSnapshotReply(new byte[0]);
-        doReturn(true).when(mockSupport).handleSnapshotMessage(same(captureSnapshotReply), any(ActorRef.class));
+        doReturn(TRUE).when(mockSupport).handleSnapshotMessage(same(captureSnapshotReply), any(ActorRef.class));
         mockRaftActor.handleCommand(captureSnapshotReply);
 
         SaveSnapshotSuccess saveSnapshotSuccess = new SaveSnapshotSuccess(new SnapshotMetadata("", 0L, 0L));
-        doReturn(true).when(mockSupport).handleSnapshotMessage(same(saveSnapshotSuccess), any(ActorRef.class));
+        doReturn(TRUE).when(mockSupport).handleSnapshotMessage(same(saveSnapshotSuccess), any(ActorRef.class));
         mockRaftActor.handleCommand(saveSnapshotSuccess);
 
         SaveSnapshotFailure saveSnapshotFailure = new SaveSnapshotFailure(new SnapshotMetadata("", 0L, 0L),
                 new Throwable());
-        doReturn(true).when(mockSupport).handleSnapshotMessage(same(saveSnapshotFailure), any(ActorRef.class));
+        doReturn(TRUE).when(mockSupport).handleSnapshotMessage(same(saveSnapshotFailure), any(ActorRef.class));
         mockRaftActor.handleCommand(saveSnapshotFailure);
 
-        doReturn(true).when(mockSupport).handleSnapshotMessage(same(RaftActorSnapshotMessageSupport.COMMIT_SNAPSHOT),
+        doReturn(TRUE).when(mockSupport).handleSnapshotMessage(same(RaftActorSnapshotMessageSupport.COMMIT_SNAPSHOT),
                 any(ActorRef.class));
         mockRaftActor.handleCommand(RaftActorSnapshotMessageSupport.COMMIT_SNAPSHOT);
 
-        doReturn(true).when(mockSupport).handleSnapshotMessage(same(GetSnapshot.INSTANCE), any(ActorRef.class));
+        doReturn(TRUE).when(mockSupport).handleSnapshotMessage(same(GetSnapshot.INSTANCE), any(ActorRef.class));
         mockRaftActor.handleCommand(GetSnapshot.INSTANCE);
 
         verify(mockSupport).handleSnapshotMessage(same(applySnapshot), any(ActorRef.class));
@@ -473,7 +474,7 @@ public class RaftActorTest extends AbstractActorTest {
         final short newLeaderVersion = 6;
         Follower follower = new Follower(raftActor.getRaftActorContext()) {
             @Override
-            public RaftActorBehavior handleMessage(ActorRef sender, Object message) {
+            public RaftActorBehavior handleMessage(final ActorRef sender, final Object message) {
                 setLeaderId(newLeaderId);
                 setLeaderPayloadVersion(newLeaderVersion);
                 return this;
@@ -937,7 +938,7 @@ public class RaftActorTest extends AbstractActorTest {
         assertEquals(RaftState.Leader, leaderActor.getCurrentBehavior().state());
     }
 
-    public static ByteString fromObject(Object snapshot) throws Exception {
+    public static ByteString fromObject(final Object snapshot) throws Exception {
         ByteArrayOutputStream bos = null;
         ObjectOutputStream os = null;
         try {
@@ -1160,7 +1161,7 @@ public class RaftActorTest extends AbstractActorTest {
         mockRaftActor = raftActorRef.underlyingActor();
 
         mockRaftActor.waitForRecoveryComplete();
-        assertEquals("snapshot committed", true,
+        assertTrue("snapshot committed",
                 Uninterruptibles.awaitUninterruptibly(mockRaftActor.snapshotCommitted, 5, TimeUnit.SECONDS));
 
         context = mockRaftActor.getRaftActorContext();
@@ -1201,7 +1202,7 @@ public class RaftActorTest extends AbstractActorTest {
         assertEquals("Last applied", -1, context.getLastApplied());
         assertEquals("Commit index", -1, context.getCommitIndex());
         assertEquals("Current term", 0, context.getTermInformation().getCurrentTerm());
-        assertEquals("Voted for", null, context.getTermInformation().getVotedFor());
+        assertNull("Voted for", context.getTermInformation().getVotedFor());
 
         TEST_LOG.info("testRestoreFromSnapshotWithRecoveredData ending");
     }
@@ -1281,7 +1282,7 @@ public class RaftActorTest extends AbstractActorTest {
         config.setIsolatedLeaderCheckInterval(new FiniteDuration(1, TimeUnit.DAYS));
 
         DataPersistenceProvider mockPersistenceProvider = mock(DataPersistenceProvider.class);
-        doReturn(true).when(mockPersistenceProvider).isRecoveryApplicable();
+        doReturn(TRUE).when(mockPersistenceProvider).isRecoveryApplicable();
 
         TestActorRef<MockRaftActor> leaderActorRef = factory.createTestActor(
                 MockRaftActor.props(leaderId, ImmutableMap.of(followerId, followerActor.path().toString()), config,
@@ -1299,7 +1300,7 @@ public class RaftActorTest extends AbstractActorTest {
 
         ReplicatedLogEntry logEntry = leaderActor.getReplicatedLog().get(0);
         assertNotNull("ReplicatedLogEntry not found", logEntry);
-        assertEquals("isPersistencePending", true, logEntry.isPersistencePending());
+        assertTrue("isPersistencePending", logEntry.isPersistencePending());
         assertEquals("getCommitIndex", -1, leaderActor.getRaftActorContext().getCommitIndex());
 
         leaderActor.onReceiveCommand(new AppendEntriesReply(followerId, 1, true, 0, 1, (short)0));
