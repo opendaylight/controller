@@ -9,6 +9,7 @@
 package org.opendaylight.controller.cluster.raft.behaviors;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import akka.actor.ActorRef;
@@ -207,7 +208,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
 
         AppendEntriesReply reply = MessageCollectorActor.expectFirstMatching(
                 peerActors[0], AppendEntriesReply.class);
-        assertEquals("isSuccess", false, reply.isSuccess());
+        assertFalse("isSuccess", reply.isSuccess());
         assertEquals("getTerm", 2, reply.getTerm());
         assertTrue("New Behavior : " + newBehavior, newBehavior instanceof Candidate);
     }
@@ -247,7 +248,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
 
         RequestVoteReply reply = MessageCollectorActor.expectFirstMatching(
                 peerActors[0], RequestVoteReply.class);
-        assertEquals("isVoteGranted", false, reply.isVoteGranted());
+        assertFalse("isVoteGranted", reply.isVoteGranted());
         assertEquals("getTerm", 2, reply.getTerm());
     }
 
@@ -265,7 +266,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
 
         RequestVoteReply reply = MessageCollectorActor.expectFirstMatching(
                 peerActors[0], RequestVoteReply.class);
-        assertEquals("isVoteGranted", true, reply.isVoteGranted());
+        assertTrue("isVoteGranted", reply.isVoteGranted());
         assertEquals("getTerm", 1001, reply.getTerm());
     }
 
@@ -286,7 +287,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
 
         RequestVoteReply reply = MessageCollectorActor.expectFirstMatching(
                 peerActors[0], RequestVoteReply.class);
-        assertEquals("isVoteGranted", false, reply.isVoteGranted());
+        assertFalse("isVoteGranted", reply.isVoteGranted());
         assertEquals("getTerm", 1001, reply.getTerm());
     }
 

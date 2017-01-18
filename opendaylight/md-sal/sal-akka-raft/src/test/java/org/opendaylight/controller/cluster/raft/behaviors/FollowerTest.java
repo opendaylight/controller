@@ -96,7 +96,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
     }
 
     @Override
-    protected Follower createBehavior(RaftActorContext actorContext) {
+    protected Follower createBehavior(final RaftActorContext actorContext) {
         return spy(new Follower(actorContext));
     }
 
@@ -106,7 +106,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
     }
 
     @Override
-    protected  MockRaftActorContext createActorContext(ActorRef actorRef) {
+    protected  MockRaftActorContext createActorContext(final ActorRef actorRef) {
         MockRaftActorContext context = new MockRaftActorContext("follower", getSystem(), actorRef);
         context.setPayloadVersion(payloadVersion );
         return context;
@@ -180,7 +180,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
 
         RequestVoteReply reply = MessageCollectorActor.expectFirstMatching(leaderActor, RequestVoteReply.class);
 
-        assertEquals("isVoteGranted", true, reply.isVoteGranted());
+        assertTrue("isVoteGranted", reply.isVoteGranted());
         assertEquals("getTerm", term, reply.getTerm());
         verify(follower).scheduleElection(any(FiniteDuration.class));
     }
@@ -199,7 +199,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
 
         RequestVoteReply reply = MessageCollectorActor.expectFirstMatching(leaderActor, RequestVoteReply.class);
 
-        assertEquals("isVoteGranted", false, reply.isVoteGranted());
+        assertFalse("isVoteGranted", reply.isVoteGranted());
         verify(follower, never()).scheduleElection(any(FiniteDuration.class));
     }
 
@@ -545,7 +545,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         AppendEntriesReply reply = MessageCollectorActor.expectFirstMatching(leaderActor,
                 AppendEntriesReply.class);
 
-        assertEquals("isSuccess", false, reply.isSuccess());
+        assertFalse("isSuccess", reply.isSuccess());
     }
 
     /**
@@ -851,7 +851,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         for (InstallSnapshotReply reply: replies) {
             assertEquals("getChunkIndex", chunkIndex++, reply.getChunkIndex());
             assertEquals("getTerm", 1, reply.getTerm());
-            assertEquals("isSuccess", true, reply.isSuccess());
+            assertTrue("isSuccess", reply.isSuccess());
             assertEquals("getFollowerId", context.getId(), reply.getFollowerId());
         }
 
@@ -898,7 +898,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         follower.handleMessage(leaderActor, appendEntries);
 
         AppendEntriesReply reply = MessageCollectorActor.expectFirstMatching(leaderActor, AppendEntriesReply.class);
-        assertEquals("isSuccess", true, reply.isSuccess());
+        assertTrue("isSuccess", reply.isSuccess());
         assertEquals("getLogLastIndex", context.getReplicatedLog().lastIndex(), reply.getLogLastIndex());
         assertEquals("getLogLastTerm", context.getReplicatedLog().lastTerm(), reply.getLogLastTerm());
         assertEquals("getTerm", context.getTermInformation().getCurrentTerm(), reply.getTerm());
@@ -941,7 +941,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         follower.handleMessage(leaderActor, appendEntries);
 
         AppendEntriesReply reply = MessageCollectorActor.expectFirstMatching(leaderActor, AppendEntriesReply.class);
-        assertEquals("isSuccess", true, reply.isSuccess());
+        assertTrue("isSuccess", reply.isSuccess());
         assertEquals("getLogLastIndex", 2, reply.getLogLastIndex());
         assertEquals("getLogLastTerm", 2, reply.getLogLastTerm());
         assertEquals("getTerm", 2, reply.getTerm());
@@ -1019,7 +1019,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         InstallSnapshotReply reply = MessageCollectorActor.expectFirstMatching(leaderActor,
                 InstallSnapshotReply.class);
 
-        assertEquals("isSuccess", false, reply.isSuccess());
+        assertFalse("isSuccess", reply.isSuccess());
         assertEquals("getChunkIndex", -1, reply.getChunkIndex());
         assertEquals("getTerm", 1, reply.getTerm());
         assertEquals("getFollowerId", context.getId(), reply.getFollowerId());
@@ -1135,7 +1135,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         followerActorRef.tell(appendEntries, leaderActor);
 
         AppendEntriesReply reply = MessageCollectorActor.expectFirstMatching(leaderActor, AppendEntriesReply.class);
-        assertEquals("isSuccess", true, reply.isSuccess());
+        assertTrue("isSuccess", reply.isSuccess());
 
         final Snapshot snapshot = InMemorySnapshotStore.waitForSavedSnapshot(id, Snapshot.class);
 
@@ -1189,7 +1189,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         followerActorRef.tell(appendEntries, leaderActor);
 
         AppendEntriesReply reply = MessageCollectorActor.expectFirstMatching(leaderActor, AppendEntriesReply.class);
-        assertEquals("isSuccess", true, reply.isSuccess());
+        assertTrue("isSuccess", reply.isSuccess());
 
         final Snapshot snapshot = InMemorySnapshotStore.waitForSavedSnapshot(id, Snapshot.class);
 
@@ -1262,7 +1262,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         followerActorRef.tell(appendEntries, leaderActor);
 
         AppendEntriesReply reply = MessageCollectorActor.expectFirstMatching(leaderActor, AppendEntriesReply.class);
-        assertEquals("isSuccess", true, reply.isSuccess());
+        assertTrue("isSuccess", reply.isSuccess());
 
         final Snapshot snapshot = InMemorySnapshotStore.waitForSavedSnapshot(id, Snapshot.class);
 
@@ -1287,10 +1287,11 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    private RaftActorSnapshotCohort newRaftActorSnapshotCohort(final AtomicReference<MockRaftActor> followerRaftActor) {
+    private static RaftActorSnapshotCohort newRaftActorSnapshotCohort(
+            final AtomicReference<MockRaftActor> followerRaftActor) {
         RaftActorSnapshotCohort snapshotCohort = new RaftActorSnapshotCohort() {
             @Override
-            public void createSnapshot(ActorRef actorRef) {
+            public void createSnapshot(final ActorRef actorRef) {
                 try {
                     actorRef.tell(new CaptureSnapshotReply(RaftActorTest.fromObject(
                             followerRaftActor.get().getState()).toByteArray()), actorRef);
@@ -1300,13 +1301,13 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
             }
 
             @Override
-            public void applySnapshot(byte[] snapshotBytes) {
+            public void applySnapshot(final byte[] snapshotBytes) {
             }
         };
         return snapshotCohort;
     }
 
-    public byte[] getNextChunk(ByteString bs, int offset, int chunkSize) {
+    public byte[] getNextChunk(final ByteString bs, final int offset, final int chunkSize) {
         int snapshotLength = bs.size();
         int start = offset;
         int size = chunkSize;
@@ -1323,14 +1324,14 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         return nextChunk;
     }
 
-    private void expectAndVerifyAppendEntriesReply(int expTerm, boolean expSuccess,
-            String expFollowerId, long expLogLastTerm, long expLogLastIndex) {
+    private void expectAndVerifyAppendEntriesReply(final int expTerm, final boolean expSuccess,
+            final String expFollowerId, final long expLogLastTerm, final long expLogLastIndex) {
         expectAndVerifyAppendEntriesReply(expTerm, expSuccess, expFollowerId, expLogLastTerm, expLogLastIndex, false);
     }
 
-    private void expectAndVerifyAppendEntriesReply(int expTerm, boolean expSuccess,
-                                                   String expFollowerId, long expLogLastTerm, long expLogLastIndex,
-                                                   boolean expForceInstallSnapshot) {
+    private void expectAndVerifyAppendEntriesReply(final int expTerm, final boolean expSuccess,
+                                                   final String expFollowerId, final long expLogLastTerm, final long expLogLastIndex,
+                                                   final boolean expForceInstallSnapshot) {
 
         AppendEntriesReply reply = MessageCollectorActor.expectFirstMatching(leaderActor,
                 AppendEntriesReply.class);
@@ -1345,7 +1346,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
     }
 
 
-    private static ReplicatedLogEntry newReplicatedLogEntry(long term, long index, String data) {
+    private static ReplicatedLogEntry newReplicatedLogEntry(final long term, final long index, final String data) {
         return new SimpleReplicatedLogEntry(index, term,
                 new MockRaftActorContext.MockPayload(data));
     }
@@ -1360,8 +1361,8 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
     }
 
     @Override
-    protected void assertStateChangesToFollowerWhenRaftRPCHasNewerTerm(MockRaftActorContext actorContext,
-            ActorRef actorRef, RaftRPC rpc) throws Exception {
+    protected void assertStateChangesToFollowerWhenRaftRPCHasNewerTerm(final MockRaftActorContext actorContext,
+            final ActorRef actorRef, final RaftRPC rpc) throws Exception {
         super.assertStateChangesToFollowerWhenRaftRPCHasNewerTerm(actorContext, actorRef, rpc);
 
         String expVotedFor = rpc instanceof RequestVote ? ((RequestVote)rpc).getCandidateId() : null;
@@ -1372,6 +1373,6 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
     protected void handleAppendEntriesAddSameEntryToLogReply(final TestActorRef<MessageCollectorActor> replyActor)
             throws Exception {
         AppendEntriesReply reply = MessageCollectorActor.expectFirstMatching(replyActor, AppendEntriesReply.class);
-        assertEquals("isSuccess", true, reply.isSuccess());
+        assertTrue("isSuccess", reply.isSuccess());
     }
 }

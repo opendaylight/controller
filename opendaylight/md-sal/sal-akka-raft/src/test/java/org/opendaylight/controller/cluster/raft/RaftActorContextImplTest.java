@@ -8,8 +8,10 @@
 package org.opendaylight.controller.cluster.raft;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -90,7 +92,7 @@ public class RaftActorContextImplTest extends AbstractActorTest {
         assertEquals("getPeerAddress", "peerAddress1_1", context.getPeerAddress("peer1"));
 
         context.setPeerAddress("peer2", "peerAddress2");
-        assertEquals("getPeerAddress", null, context.getPeerAddress("peer2"));
+        assertNull("getPeerAddress", context.getPeerAddress("peer2"));
     }
 
     @Test
@@ -105,22 +107,22 @@ public class RaftActorContextImplTest extends AbstractActorTest {
         verifyPeerInfo(context, "peer1", null);
         verifyPeerInfo(context, "peer2", true);
         verifyPeerInfo(context, "peer3", false);
-        assertEquals("isVotingMember", false, context.isVotingMember());
+        assertFalse("isVotingMember", context.isVotingMember());
 
         context.updatePeerIds(new ServerConfigurationPayload(Arrays.asList(new ServerInfo("self", true),
                 new ServerInfo("peer2", true), new ServerInfo("peer3", true))));
         verifyPeerInfo(context, "peer2", true);
         verifyPeerInfo(context, "peer3", true);
-        assertEquals("isVotingMember", true, context.isVotingMember());
+        assertTrue("isVotingMember", context.isVotingMember());
 
         context.updatePeerIds(new ServerConfigurationPayload(Arrays.asList(new ServerInfo("peer2", true),
                 new ServerInfo("peer3", true))));
         verifyPeerInfo(context, "peer2", true);
         verifyPeerInfo(context, "peer3", true);
-        assertEquals("isVotingMember", false, context.isVotingMember());
+        assertFalse("isVotingMember", context.isVotingMember());
     }
 
-    private static void verifyPeerInfo(RaftActorContextImpl context, String peerId, Boolean voting) {
+    private static void verifyPeerInfo(final RaftActorContextImpl context, final String peerId, final Boolean voting) {
         PeerInfo peerInfo = context.getPeerInfo(peerId);
         if (voting != null) {
             assertNotNull("Expected peer " + peerId, peerInfo);

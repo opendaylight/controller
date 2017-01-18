@@ -48,7 +48,7 @@ public class RaftActorTestKit extends JavaTestKit {
             ) {
                 @Override
                 protected Boolean run() {
-                    return true;
+                    return Boolean.TRUE;
                 }
             }.from(raftActor.path().toString())
                 .message(message)

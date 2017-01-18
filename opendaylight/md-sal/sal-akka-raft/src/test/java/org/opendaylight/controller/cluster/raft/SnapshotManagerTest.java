@@ -105,7 +105,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
     @Test
     public void testConstruction() {
-        assertEquals(false, snapshotManager.isCapturing());
+        assertFalse(snapshotManager.isCapturing());
     }
 
     @Test
@@ -115,7 +115,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
         snapshotManager.captureToInstall(new SimpleReplicatedLogEntry(0, 1,
                 new MockRaftActorContext.MockPayload()), 0, "follower-1");
 
-        assertEquals(true, snapshotManager.isCapturing());
+        assertTrue(snapshotManager.isCapturing());
 
         verify(mockProcedure).run();
 
@@ -142,7 +142,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
         assertTrue(capture);
 
-        assertEquals(true, snapshotManager.isCapturing());
+        assertTrue(snapshotManager.isCapturing());
 
         verify(mockProcedure).run();
 
@@ -170,7 +170,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
         assertTrue(capture);
 
-        assertEquals(true, snapshotManager.isCapturing());
+        assertTrue(snapshotManager.isCapturing());
 
         verify(mockProcedure).run();
 
@@ -200,7 +200,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
         assertFalse(capture);
 
-        assertEquals(false, snapshotManager.isCapturing());
+        assertFalse(snapshotManager.isCapturing());
 
         verify(mockProcedure).run();
     }
@@ -353,7 +353,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
         snapshotManager.persist(bytes, Runtime.getRuntime().totalMemory());
 
-        assertEquals(true, snapshotManager.isCapturing());
+        assertTrue(snapshotManager.isCapturing());
 
         verify(mockDataPersistenceProvider).saveSnapshot(any(Snapshot.class));
 
@@ -409,11 +409,11 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
         snapshotManager.persist(new byte[]{}, Runtime.getRuntime().totalMemory());
 
-        assertEquals(true, snapshotManager.isCapturing());
+        assertTrue(snapshotManager.isCapturing());
 
         snapshotManager.commit(100L, 1234L);
 
-        assertEquals(false, snapshotManager.isCapturing());
+        assertFalse(snapshotManager.isCapturing());
 
         verify(mockReplicatedLog).snapshotCommit();
 
@@ -605,7 +605,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
         assertTrue(capture);
 
-        assertEquals(true, snapshotManager.isCapturing());
+        assertTrue(snapshotManager.isCapturing());
 
         ReplicatedLogEntry replicatedLogEntry = mock(ReplicatedLogEntry.class);
         doReturn(20L).when(mockRaftActorContext).getLastApplied();
@@ -627,7 +627,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
         assertTrue(capture);
 
-        assertEquals(true, snapshotManager.isCapturing());
+        assertTrue(snapshotManager.isCapturing());
 
         ReplicatedLogEntry replicatedLogEntry = mock(ReplicatedLogEntry.class);
         doReturn(20L).when(mockRaftActorContext).getLastApplied();

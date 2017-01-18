@@ -87,11 +87,11 @@ public class RaftActorRecoverySupportTest {
         context.setReplicatedLog(ReplicatedLogImpl.newInstance(context));
     }
 
-    private void sendMessageToSupport(Object message) {
+    private void sendMessageToSupport(final Object message) {
         sendMessageToSupport(message, false);
     }
 
-    private void sendMessageToSupport(Object message, boolean expComplete) {
+    private void sendMessageToSupport(final Object message, final boolean expComplete) {
         boolean complete = support.handleRecoveryMessage(message, mockPersistentProvider);
         assertEquals("complete", expComplete, complete);
     }
@@ -295,13 +295,13 @@ public class RaftActorRecoverySupportTest {
     static UpdateElectionTerm updateElectionTerm(final long term, final String votedFor) {
         return Matchers.argThat(new ArgumentMatcher<UpdateElectionTerm>() {
             @Override
-            public boolean matches(Object argument) {
+            public boolean matches(final Object argument) {
                 UpdateElectionTerm other = (UpdateElectionTerm) argument;
                 return term == other.getCurrentTerm() && votedFor.equals(other.getVotedFor());
             }
 
             @Override
-            public void describeTo(Description description) {
+            public void describeTo(final Description description) {
                 description.appendValue(new UpdateElectionTerm(term, votedFor));
             }
         });
@@ -344,9 +344,9 @@ public class RaftActorRecoverySupportTest {
         assertTrue("Dynamic server configuration", context.isDynamicServerConfigurationInUse());
         assertEquals("New peer Ids", Sets.newHashSet(follower1, follower2, follower3),
                 Sets.newHashSet(context.getPeerIds()));
-        assertEquals("follower1 isVoting", true, context.getPeerInfo(follower1).isVoting());
-        assertEquals("follower2 isVoting", false, context.getPeerInfo(follower2).isVoting());
-        assertEquals("follower3 isVoting", true, context.getPeerInfo(follower3).isVoting());
+        assertTrue("follower1 isVoting", context.getPeerInfo(follower1).isVoting());
+        assertFalse("follower2 isVoting", context.getPeerInfo(follower2).isVoting());
+        assertTrue("follower3 isVoting", context.getPeerInfo(follower3).isVoting());
 
         sendMessageToSupport(new ApplyJournalEntries(0));
 

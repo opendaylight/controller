@@ -473,7 +473,7 @@ public class RaftActorTest extends AbstractActorTest {
         final short newLeaderVersion = 6;
         Follower follower = new Follower(raftActor.getRaftActorContext()) {
             @Override
-            public RaftActorBehavior handleMessage(ActorRef sender, Object message) {
+            public RaftActorBehavior handleMessage(final ActorRef sender, final Object message) {
                 setLeaderId(newLeaderId);
                 setLeaderPayloadVersion(newLeaderVersion);
                 return this;
@@ -937,7 +937,7 @@ public class RaftActorTest extends AbstractActorTest {
         assertEquals(RaftState.Leader, leaderActor.getCurrentBehavior().state());
     }
 
-    public static ByteString fromObject(Object snapshot) throws Exception {
+    public static ByteString fromObject(final Object snapshot) throws Exception {
         ByteArrayOutputStream bos = null;
         ObjectOutputStream os = null;
         try {
@@ -1160,7 +1160,7 @@ public class RaftActorTest extends AbstractActorTest {
         mockRaftActor = raftActorRef.underlyingActor();
 
         mockRaftActor.waitForRecoveryComplete();
-        assertEquals("snapshot committed", true,
+        assertTrue("snapshot committed",
                 Uninterruptibles.awaitUninterruptibly(mockRaftActor.snapshotCommitted, 5, TimeUnit.SECONDS));
 
         context = mockRaftActor.getRaftActorContext();
@@ -1201,7 +1201,7 @@ public class RaftActorTest extends AbstractActorTest {
         assertEquals("Last applied", -1, context.getLastApplied());
         assertEquals("Commit index", -1, context.getCommitIndex());
         assertEquals("Current term", 0, context.getTermInformation().getCurrentTerm());
-        assertEquals("Voted for", null, context.getTermInformation().getVotedFor());
+        assertNull("Voted for", context.getTermInformation().getVotedFor());
 
         TEST_LOG.info("testRestoreFromSnapshotWithRecoveredData ending");
     }
@@ -1299,7 +1299,7 @@ public class RaftActorTest extends AbstractActorTest {
 
         ReplicatedLogEntry logEntry = leaderActor.getReplicatedLog().get(0);
         assertNotNull("ReplicatedLogEntry not found", logEntry);
-        assertEquals("isPersistencePending", true, logEntry.isPersistencePending());
+        assertTrue("isPersistencePending", logEntry.isPersistencePending());
         assertEquals("getCommitIndex", -1, leaderActor.getRaftActorContext().getCommitIndex());
 
         leaderActor.onReceiveCommand(new AppendEntriesReply(followerId, 1, true, 0, 1, (short)0));
