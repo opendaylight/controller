@@ -8,70 +8,69 @@
 package org.opendaylight.controller.remote.rpc.registry;
 
 import akka.actor.ActorRef;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableSet;
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import org.opendaylight.controller.remote.rpc.registry.gossip.BucketData;
-import org.opendaylight.controller.sal.connector.api.RpcRouter;
 import org.opendaylight.controller.sal.connector.api.RpcRouter.RouteIdentifier;
 
 public class RoutingTable implements BucketData<RoutingTable>, Serializable {
-    private static final long serialVersionUID = 5592610415175278760L;
+    private static final long serialVersionUID = 1L;
 
-    private final Map<RouteIdentifier<?, ?, ?>, Long> table;
-    private final ActorRef router;
+    private final Set<RouteIdentifier<?, ?, ?>> rpcs;
+    private final ActorRef rpcInvoker;
 
-    private RoutingTable(final ActorRef router, final Map<RouteIdentifier<?, ?, ?>, Long> table) {
-        this.router = Preconditions.checkNotNull(router);
-        this.table = Preconditions.checkNotNull(table);
+    private RoutingTable(final ActorRef rpcInvoker, final Set<RouteIdentifier<?, ?, ?>> table) {
+        this.rpcInvoker = Preconditions.checkNotNull(rpcInvoker);
+        this.rpcs = ImmutableSet.copyOf(table);
     }
 
-    RoutingTable(final ActorRef router) {
-        this(router, new HashMap<>());
-    }
-
-    RoutingTable copy() {
-        return new RoutingTable(router, new HashMap<>(table));
+    RoutingTable(final ActorRef rpcInvoker) {
+        this(rpcInvoker, ImmutableSet.of());
     }
 
     @Override
     public Optional<ActorRef> getWatchActor() {
-        return Optional.of(router);
+        return Optional.of(rpcInvoker);
     }
 
-    public Set<RpcRouter.RouteIdentifier<?, ?, ?>> getRoutes() {
-        return table.keySet();
+    public Set<RouteIdentifier<?, ?, ?>> getRoutes() {
+        return rpcs;
     }
 
-    public void addRoute(final RpcRouter.RouteIdentifier<?, ?, ?> routeId) {
-        table.put(routeId, System.currentTimeMillis());
+    ActorRef getRpcInvoker() {
+        return rpcInvoker;
     }
 
-    public void removeRoute(final RpcRouter.RouteIdentifier<?, ?, ?> routeId) {
-        table.remove(routeId);
+    RoutingTable addRpcs(final Collection<RouteIdentifier<?, ?, ?>> toAdd) {
+        final Set<RouteIdentifier<?, ?, ?>> newRpcs = new HashSet<>(rpcs);
+        newRpcs.addAll(toAdd);
+        return new RoutingTable(rpcInvoker, newRpcs);
     }
 
-    public boolean contains(final RpcRouter.RouteIdentifier<?, ?, ?> routeId) {
-        return table.containsKey(routeId);
+    RoutingTable removeRpcs(final Collection<RouteIdentifier<?, ?, ?>> toRemove) {
+        final Set<RouteIdentifier<?, ?, ?>> newRpcs = new HashSet<>(rpcs);
+        newRpcs.removeAll(toRemove);
+        return new RoutingTable(rpcInvoker, newRpcs);
     }
 
-    public boolean isEmpty() {
-        return table.isEmpty();
+    @VisibleForTesting
+    boolean contains(final RouteIdentifier<?, ?, ?> routeId) {
+        return rpcs.contains(routeId);
     }
 
-    public int size() {
-        return table.size();
-    }
-
-    public ActorRef getRouter() {
-        return router;
+    @VisibleForTesting
+    int size() {
+        return rpcs.size();
     }
 
     @Override
     public String toString() {
-        return "RoutingTable{" + "table=" + table + ", router=" + router + '}';
+        return "RoutingTable{" + "rpcs=" + rpcs + ", rpcInvoker=" + rpcInvoker + '}';
     }
 }
