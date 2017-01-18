@@ -34,11 +34,6 @@ public class BucketStoreTest {
      */
     private static class T implements BucketData<T> {
         @Override
-        public T copy() {
-            return new T();
-        }
-
-        @Override
         public Optional<ActorRef> getWatchActor() {
             return Optional.empty();
         }
