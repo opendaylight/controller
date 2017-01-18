@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
+import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -82,16 +84,16 @@ public class RaftActorRecoverySupportTest {
 
         support = new RaftActorRecoverySupport(context, mockCohort);
 
-        doReturn(true).when(mockPersistence).isRecoveryApplicable();
+        doReturn(TRUE).when(mockPersistence).isRecoveryApplicable();
 
         context.setReplicatedLog(ReplicatedLogImpl.newInstance(context));
     }
 
-    private void sendMessageToSupport(Object message) {
+    private void sendMessageToSupport(final Object message) {
         sendMessageToSupport(message, false);
     }
 
-    private void sendMessageToSupport(Object message, boolean expComplete) {
+    private void sendMessageToSupport(final Object message, final boolean expComplete) {
         boolean complete = support.handleRecoveryMessage(message, mockPersistentProvider);
         assertEquals("complete", expComplete, complete);
     }
@@ -256,7 +258,7 @@ public class RaftActorRecoverySupportTest {
     @Test
     public void testDataRecoveredWithPersistenceDisabled() {
         doNothing().when(mockCohort).applyRecoverySnapshot(aryEq(new byte[0]));
-        doReturn(false).when(mockPersistence).isRecoveryApplicable();
+        doReturn(FALSE).when(mockPersistence).isRecoveryApplicable();
         doReturn(10L).when(mockPersistentProvider).getLastSequenceNumber();
 
         Snapshot snapshot = Snapshot.create(new byte[]{1}, Collections.<ReplicatedLogEntry>emptyList(), 3, 1, 3, 1);
@@ -295,13 +297,13 @@ public class RaftActorRecoverySupportTest {
     static UpdateElectionTerm updateElectionTerm(final long term, final String votedFor) {
         return Matchers.argThat(new ArgumentMatcher<UpdateElectionTerm>() {
             @Override
-            public boolean matches(Object argument) {
+            public boolean matches(final Object argument) {
                 UpdateElectionTerm other = (UpdateElectionTerm) argument;
                 return term == other.getCurrentTerm() && votedFor.equals(other.getVotedFor());
             }
 
             @Override
-            public void describeTo(Description description) {
+            public void describeTo(final Description description) {
                 description.appendValue(new UpdateElectionTerm(term, votedFor));
             }
         });
@@ -309,7 +311,7 @@ public class RaftActorRecoverySupportTest {
 
     @Test
     public void testNoDataRecoveredWithPersistenceDisabled() {
-        doReturn(false).when(mockPersistence).isRecoveryApplicable();
+        doReturn(FALSE).when(mockPersistence).isRecoveryApplicable();
 
         sendMessageToSupport(new UpdateElectionTerm(5, "member2"));
 
@@ -344,9 +346,9 @@ public class RaftActorRecoverySupportTest {
         assertTrue("Dynamic server configuration", context.isDynamicServerConfigurationInUse());
         assertEquals("New peer Ids", Sets.newHashSet(follower1, follower2, follower3),
                 Sets.newHashSet(context.getPeerIds()));
-        assertEquals("follower1 isVoting", true, context.getPeerInfo(follower1).isVoting());
-        assertEquals("follower2 isVoting", false, context.getPeerInfo(follower2).isVoting());
-        assertEquals("follower3 isVoting", true, context.getPeerInfo(follower3).isVoting());
+        assertTrue("follower1 isVoting", context.getPeerInfo(follower1).isVoting());
+        assertFalse("follower2 isVoting", context.getPeerInfo(follower2).isVoting());
+        assertTrue("follower3 isVoting", context.getPeerInfo(follower3).isVoting());
 
         sendMessageToSupport(new ApplyJournalEntries(0));
 
@@ -368,7 +370,7 @@ public class RaftActorRecoverySupportTest {
 
     @Test
     public void testServerConfigurationPayloadAppliedWithPersistenceDisabled() {
-        doReturn(false).when(mockPersistence).isRecoveryApplicable();
+        doReturn(FALSE).when(mockPersistence).isRecoveryApplicable();
 
         String follower = "follower";
         ServerConfigurationPayload obj = new ServerConfigurationPayload(Arrays.asList(

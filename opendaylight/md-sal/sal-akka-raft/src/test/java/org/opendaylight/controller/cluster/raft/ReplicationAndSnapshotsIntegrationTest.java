@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.raft;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import akka.persistence.SaveSnapshotSuccess;
 import com.google.common.collect.ImmutableMap;
@@ -108,7 +109,7 @@ public class ReplicationAndSnapshotsIntegrationTest extends AbstractRaftActorInt
         waitUntilLeader(leaderActor);
 
         currentTerm = leaderContext.getTermInformation().getCurrentTerm();
-        assertEquals("Current term > " + initialTerm, true, currentTerm > initialTerm);
+        assertTrue("Current term > " + initialTerm, currentTerm > initialTerm);
 
         leader = leaderActor.underlyingActor().getCurrentBehavior();
 

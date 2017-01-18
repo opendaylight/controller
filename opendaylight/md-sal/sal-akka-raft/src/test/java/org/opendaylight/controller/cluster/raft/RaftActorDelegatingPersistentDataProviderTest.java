@@ -64,7 +64,7 @@ public class RaftActorDelegatingPersistentDataProviderTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testPersistWithPersistenceEnabled() {
-        doReturn(true).when(mockDelegateProvider).isRecoveryApplicable();
+        doReturn(Boolean.TRUE).when(mockDelegateProvider).isRecoveryApplicable();
 
         provider.persist(mockPersistentLogEntry, mockProcedure);
         verify(mockDelegateProvider).persist(mockPersistentLogEntry, mockProcedure);
@@ -79,7 +79,7 @@ public class RaftActorDelegatingPersistentDataProviderTest {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Test
     public void testPersistWithPersistenceDisabled() throws Exception {
-        doReturn(false).when(mockDelegateProvider).isRecoveryApplicable();
+        doReturn(Boolean.FALSE).when(mockDelegateProvider).isRecoveryApplicable();
 
         provider.persist(mockPersistentLogEntry, mockProcedure);
 

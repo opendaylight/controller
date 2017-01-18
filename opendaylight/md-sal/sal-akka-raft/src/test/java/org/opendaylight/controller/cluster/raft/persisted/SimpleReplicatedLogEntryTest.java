@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.raft.persisted;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 import org.apache.commons.lang.SerializationUtils;
 import org.junit.Test;
@@ -29,6 +30,6 @@ public class SimpleReplicatedLogEntryTest {
         assertEquals("getTerm", expected.getTerm(), cloned.getTerm());
         assertEquals("getIndex", expected.getIndex(), cloned.getIndex());
         assertEquals("getData", expected.getData(), cloned.getData());
-        assertEquals("isMigrated", false, cloned.isMigrated());
+        assertFalse("isMigrated", cloned.isMigrated());
     }
 }

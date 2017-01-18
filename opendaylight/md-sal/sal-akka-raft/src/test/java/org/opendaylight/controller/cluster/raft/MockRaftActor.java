@@ -8,7 +8,7 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
 import akka.actor.ActorRef;
@@ -48,7 +48,7 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
     final CountDownLatch snapshotCommitted = new CountDownLatch(1);
     private final Function<Runnable, Void> pauseLeaderFunction;
 
-    protected MockRaftActor(AbstractBuilder<?, ?> builder) {
+    protected MockRaftActor(final AbstractBuilder<?, ?> builder) {
         super(builder.id, builder.peerAddresses != null ? builder.peerAddresses :
             Collections.<String, String>emptyMap(), Optional.fromNullable(builder.config), PAYLOAD_VERSION);
         state = new ArrayList<>();
@@ -70,7 +70,7 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
         pauseLeaderFunction = builder.pauseLeaderFunction;
     }
 
-    public void setRaftActorRecoverySupport(RaftActorRecoverySupport support) {
+    public void setRaftActorRecoverySupport(final RaftActorRecoverySupport support) {
         raftActorRecoverySupport = support;
     }
 
@@ -96,7 +96,7 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
 
     public void waitForRecoveryComplete() {
         try {
-            assertEquals("Recovery complete", true, recoveryComplete.await(5,  TimeUnit.SECONDS));
+            assertTrue("Recovery complete", recoveryComplete.await(5,  TimeUnit.SECONDS));
         } catch (InterruptedException e) {
             Throwables.propagate(e);
         }
@@ -104,7 +104,7 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
 
     public void waitForInitializeBehaviorComplete() {
         try {
-            assertEquals("Behavior initialized", true, initializeBehaviorComplete.await(5,  TimeUnit.SECONDS));
+            assertTrue("Behavior initialized", initializeBehaviorComplete.await(5,  TimeUnit.SECONDS));
         } catch (InterruptedException e) {
             Throwables.propagate(e);
         }
@@ -125,7 +125,7 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
     }
 
     @Override
-    protected void applyState(ActorRef clientActor, Identifier identifier, Object data) {
+    protected void applyState(final ActorRef clientActor, final Identifier identifier, final Object data) {
         actorDelegate.applyState(clientActor, identifier, data);
         LOG.info("{}: applyState called: {}", persistenceId(), data);
 
@@ -144,11 +144,11 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
     }
 
     @Override
-    public void startLogRecoveryBatch(int maxBatchSize) {
+    public void startLogRecoveryBatch(final int maxBatchSize) {
     }
 
     @Override
-    public void appendRecoveredLogEntry(Payload data) {
+    public void appendRecoveredLogEntry(final Payload data) {
         state.add(data);
     }
 
@@ -169,12 +169,12 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
     }
 
     @Override
-    public void applyRecoverySnapshot(byte[] bytes) {
+    public void applyRecoverySnapshot(final byte[] bytes) {
         recoveryCohortDelegate.applyRecoverySnapshot(bytes);
         applySnapshotBytes(bytes);
     }
 
-    private void applySnapshotBytes(byte[] bytes) {
+    private void applySnapshotBytes(final byte[] bytes) {
         if (bytes.length == 0) {
             return;
         }
@@ -191,13 +191,13 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
     }
 
     @Override
-    public void createSnapshot(ActorRef actorRef) {
+    public void createSnapshot(final ActorRef actorRef) {
         LOG.info("{}: createSnapshot called", persistenceId());
         snapshotCohortDelegate.createSnapshot(actorRef);
     }
 
     @Override
-    public void applySnapshot(byte [] snapshot) {
+    public void applySnapshot(final byte [] snapshot) {
         LOG.info("{}: applySnapshot called", persistenceId());
         applySnapshotBytes(snapshot);
         snapshotCohortDelegate.applySnapshot(snapshot);
@@ -217,7 +217,7 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
         return this.getId();
     }
 
-    protected void newBehavior(RaftActorBehavior newBehavior) {
+    protected void newBehavior(final RaftActorBehavior newBehavior) {
         self().tell(newBehavior, ActorRef.noSender());
     }
 
@@ -235,7 +235,7 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
     }
 
     @Override
-    protected void pauseLeader(Runnable operation) {
+    protected void pauseLeader(final Runnable operation) {
         if (pauseLeaderFunction != null) {
             pauseLeaderFunction.apply(operation);
         } else {
@@ -243,7 +243,7 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
         }
     }
 
-    public static Object toObject(byte[] bs) throws ClassNotFoundException, IOException {
+    public static Object toObject(final byte[] bs) throws ClassNotFoundException, IOException {
         Object obj = null;
         ByteArrayInputStream bis = null;
         ObjectInputStream ois = null;
@@ -271,12 +271,12 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
         return restoreFromSnapshot;
     }
 
-    public static Props props(final String id, final Map<String, String> peerAddresses, ConfigParams config) {
+    public static Props props(final String id, final Map<String, String> peerAddresses, final ConfigParams config) {
         return builder().id(id).peerAddresses(peerAddresses).config(config).props();
     }
 
     public static Props props(final String id, final Map<String, String> peerAddresses,
-                              ConfigParams config, DataPersistenceProvider dataPersistenceProvider) {
+                              final ConfigParams config, final DataPersistenceProvider dataPersistenceProvider) {
         return builder().id(id).peerAddresses(peerAddresses).config(config)
                 .dataPersistenceProvider(dataPersistenceProvider).props();
     }
@@ -298,7 +298,7 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
         private Function<Runnable, Void> pauseLeaderFunction;
         private RaftActorSnapshotCohort snapshotCohort;
 
-        protected AbstractBuilder(Class<A> actorClass) {
+        protected AbstractBuilder(final Class<A> actorClass) {
             this.actorClass = actorClass;
         }
 
@@ -307,52 +307,52 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
             return (T) this;
         }
 
-        public T id(String newId) {
+        public T id(final String newId) {
             this.id = newId;
             return self();
         }
 
-        public T peerAddresses(Map<String, String> newPeerAddresses) {
+        public T peerAddresses(final Map<String, String> newPeerAddresses) {
             this.peerAddresses = newPeerAddresses;
             return self();
         }
 
-        public T config(ConfigParams newConfig) {
+        public T config(final ConfigParams newConfig) {
             this.config = newConfig;
             return self();
         }
 
-        public T dataPersistenceProvider(DataPersistenceProvider newDataPersistenceProvider) {
+        public T dataPersistenceProvider(final DataPersistenceProvider newDataPersistenceProvider) {
             this.dataPersistenceProvider = newDataPersistenceProvider;
             return self();
         }
 
-        public T roleChangeNotifier(ActorRef newRoleChangeNotifier) {
+        public T roleChangeNotifier(final ActorRef newRoleChangeNotifier) {
             this.roleChangeNotifier = newRoleChangeNotifier;
             return self();
         }
 
-        public T snapshotMessageSupport(RaftActorSnapshotMessageSupport newSnapshotMessageSupport) {
+        public T snapshotMessageSupport(final RaftActorSnapshotMessageSupport newSnapshotMessageSupport) {
             this.snapshotMessageSupport = newSnapshotMessageSupport;
             return self();
         }
 
-        public T restoreFromSnapshot(byte[] newRestoreFromSnapshot) {
+        public T restoreFromSnapshot(final byte[] newRestoreFromSnapshot) {
             this.restoreFromSnapshot = newRestoreFromSnapshot;
             return self();
         }
 
-        public T persistent(Optional<Boolean> newPersistent) {
+        public T persistent(final Optional<Boolean> newPersistent) {
             this.persistent = newPersistent;
             return self();
         }
 
-        public T pauseLeaderFunction(Function<Runnable, Void> newPauseLeaderFunction) {
+        public T pauseLeaderFunction(final Function<Runnable, Void> newPauseLeaderFunction) {
             this.pauseLeaderFunction = newPauseLeaderFunction;
             return self();
         }
 
-        public T snapshotCohort(RaftActorSnapshotCohort newSnapshotCohort) {
+        public T snapshotCohort(final RaftActorSnapshotCohort newSnapshotCohort) {
             this.snapshotCohort = newSnapshotCohort;
             return self();
         }

@@ -11,6 +11,7 @@ package org.opendaylight.controller.cluster.raft.behaviors;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import akka.actor.ActorRef;
 import akka.actor.Props;
@@ -111,7 +112,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
         AppendEntriesReply reply = MessageCollectorActor.expectFirstMatching(
                 behaviorActor, AppendEntriesReply.class);
 
-        assertEquals("isSuccess", false, reply.isSuccess());
+        assertFalse("isSuccess", reply.isSuccess());
         assertEquals("getPayloadVersion", payloadVersion, reply.getPayloadVersion());
     }
 
@@ -149,7 +150,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
         handleAppendEntriesAddSameEntryToLogReply(behaviorActor);
     }
 
-    protected void handleAppendEntriesAddSameEntryToLogReply(TestActorRef<MessageCollectorActor> replyActor)
+    protected void handleAppendEntriesAddSameEntryToLogReply(final TestActorRef<MessageCollectorActor> replyActor)
             throws Exception {
         AppendEntriesReply reply = MessageCollectorActor.getFirstMatching(replyActor, AppendEntriesReply.class);
         Assert.assertNull("Expected no AppendEntriesReply", reply);
@@ -173,7 +174,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
 
         RequestVoteReply reply = MessageCollectorActor.expectFirstMatching(behaviorActor,
                 RequestVoteReply.class);
-        assertEquals("isVoteGranted", true, reply.isVoteGranted());
+        assertTrue("isVoteGranted", reply.isVoteGranted());
     }
 
     /**
@@ -199,7 +200,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
 
         RequestVoteReply reply = MessageCollectorActor.expectFirstMatching(behaviorActor,
                 RequestVoteReply.class);
-        assertEquals("isVoteGranted", false, reply.isVoteGranted());
+        assertFalse("isVoteGranted", reply.isVoteGranted());
     }
 
 
@@ -221,7 +222,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
 
         RequestVoteReply reply = MessageCollectorActor.expectFirstMatching(behaviorActor,
                 RequestVoteReply.class);
-        assertEquals("isVoteGranted", false, reply.isVoteGranted());
+        assertFalse("isVoteGranted", reply.isVoteGranted());
     }
 
     @Test
@@ -272,8 +273,8 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
     }
 
 
-    protected void assertStateChangesToFollowerWhenRaftRPCHasNewerTerm(MockRaftActorContext actorContext,
-            ActorRef actorRef, RaftRPC rpc) throws Exception {
+    protected void assertStateChangesToFollowerWhenRaftRPCHasNewerTerm(final MockRaftActorContext actorContext,
+            final ActorRef actorRef, final RaftRPC rpc) throws Exception {
 
         Payload payload = new MockRaftActorContext.MockPayload("");
         setLastLogEntry(actorContext, 1, 0, payload);
@@ -290,12 +291,12 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
     }
 
     protected MockRaftActorContext.SimpleReplicatedLog setLastLogEntry(
-        MockRaftActorContext actorContext, long term, long index, Payload data) {
+        final MockRaftActorContext actorContext, final long term, final long index, final Payload data) {
         return setLastLogEntry(actorContext, new SimpleReplicatedLogEntry(index, term, data));
     }
 
-    protected MockRaftActorContext.SimpleReplicatedLog setLastLogEntry(MockRaftActorContext actorContext,
-            ReplicatedLogEntry logEntry) {
+    protected MockRaftActorContext.SimpleReplicatedLog setLastLogEntry(final MockRaftActorContext actorContext,
+            final ReplicatedLogEntry logEntry) {
         MockRaftActorContext.SimpleReplicatedLog log = new MockRaftActorContext.SimpleReplicatedLog();
         log.append(logEntry);
         actorContext.setReplicatedLog(log);
@@ -305,7 +306,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
 
     protected abstract T createBehavior(RaftActorContext actorContext);
 
-    protected final T createBehavior(MockRaftActorContext actorContext) {
+    protected final T createBehavior(final MockRaftActorContext actorContext) {
         T ret = createBehavior((RaftActorContext)actorContext);
         actorContext.setCurrentBehavior(ret);
         return ret;
@@ -319,7 +320,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
         return new MockRaftActorContext();
     }
 
-    protected MockRaftActorContext createActorContext(ActorRef actor) {
+    protected MockRaftActorContext createActorContext(final ActorRef actor) {
         return new MockRaftActorContext("test", getSystem(), actor);
     }
 
@@ -339,7 +340,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
         return new RequestVoteReply(100, false);
     }
 
-    protected ByteString toByteString(Map<String, String> state) {
+    protected ByteString toByteString(final Map<String, String> state) {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         try (ObjectOutputStream oos = new ObjectOutputStream(bos)) {
             oos.writeObject(state);
@@ -349,7 +350,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
         }
     }
 
-    protected void logStart(String name) {
+    protected void logStart(final String name) {
         LoggerFactory.getLogger(LeaderTest.class).info("Starting " + name);
     }
 

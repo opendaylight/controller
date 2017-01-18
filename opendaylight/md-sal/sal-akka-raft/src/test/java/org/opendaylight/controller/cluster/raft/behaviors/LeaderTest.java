@@ -127,7 +127,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         // The follower would normally reply - simulate that explicitly here.
         leader.handleMessage(followerActor, new AppendEntriesReply(
                 FOLLOWER_ID, term, true, lastIndex - 1, term, (short)0));
-        assertEquals("isFollowerActive", true, leader.getFollower(FOLLOWER_ID).isFollowerActive());
+        assertTrue("isFollowerActive", leader.getFollower(FOLLOWER_ID).isFollowerActive());
 
         followerActor.underlyingActor().clear();
 
@@ -147,11 +147,12 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
     }
 
 
-    private RaftActorBehavior sendReplicate(MockRaftActorContext actorContext, long index) {
+    private RaftActorBehavior sendReplicate(final MockRaftActorContext actorContext, final long index) {
         return sendReplicate(actorContext, 1, index);
     }
 
-    private RaftActorBehavior sendReplicate(MockRaftActorContext actorContext, long term, long index) {
+    private RaftActorBehavior sendReplicate(final MockRaftActorContext actorContext, final long term,
+            final long index) {
         MockRaftActorContext.MockPayload payload = new MockRaftActorContext.MockPayload("foo");
         SimpleReplicatedLogEntry newEntry = new SimpleReplicatedLogEntry(index, term, payload);
         actorContext.getReplicatedLog().append(newEntry);
@@ -176,7 +177,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         long lastIndex = actorContext.getReplicatedLog().lastIndex();
         leader.handleMessage(followerActor, new AppendEntriesReply(
                 FOLLOWER_ID, term, true, lastIndex, term, (short)0));
-        assertEquals("isFollowerActive", true, leader.getFollower(FOLLOWER_ID).isFollowerActive());
+        assertTrue("isFollowerActive", leader.getFollower(FOLLOWER_ID).isFollowerActive());
 
         followerActor.underlyingActor().clear();
 
@@ -269,7 +270,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         long lastIndex = actorContext.getReplicatedLog().lastIndex();
         leader.handleMessage(followerActor, new AppendEntriesReply(
                 FOLLOWER_ID, term, true, lastIndex, term, (short) 0));
-        assertEquals("isFollowerActive", true, leader.getFollower(FOLLOWER_ID).isFollowerActive());
+        assertTrue("isFollowerActive", leader.getFollower(FOLLOWER_ID).isFollowerActive());
 
         followerActor.underlyingActor().clear();
 
@@ -312,7 +313,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         long lastIndex = actorContext.getReplicatedLog().lastIndex();
         leader.handleMessage(followerActor, new AppendEntriesReply(
                 FOLLOWER_ID, term, true, lastIndex, term, (short)0));
-        assertEquals("isFollowerActive", true, leader.getFollower(FOLLOWER_ID).isFollowerActive());
+        assertTrue("isFollowerActive", leader.getFollower(FOLLOWER_ID).isFollowerActive());
 
         followerActor.underlyingActor().clear();
 
@@ -352,7 +353,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         long lastIndex = actorContext.getReplicatedLog().lastIndex();
         leader.handleMessage(followerActor, new AppendEntriesReply(
                 FOLLOWER_ID, term, true, lastIndex, term, (short)0));
-        assertEquals("isFollowerActive", true, leader.getFollower(FOLLOWER_ID).isFollowerActive());
+        assertTrue("isFollowerActive", leader.getFollower(FOLLOWER_ID).isFollowerActive());
 
         followerActor.underlyingActor().clear();
 
@@ -402,7 +403,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         long lastIndex = actorContext.getReplicatedLog().lastIndex();
         leader.handleMessage(followerActor, new AppendEntriesReply(
                 FOLLOWER_ID, term, true, lastIndex, term, (short)0));
-        assertEquals("isFollowerActive", true, leader.getFollower(FOLLOWER_ID).isFollowerActive());
+        assertTrue("isFollowerActive", leader.getFollower(FOLLOWER_ID).isFollowerActive());
 
         followerActor.underlyingActor().clear();
 
@@ -447,7 +448,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         long lastIndex = actorContext.getReplicatedLog().lastIndex();
         leader.handleMessage(followerActor, new AppendEntriesReply(
                 FOLLOWER_ID, term, true, lastIndex, term, (short)0));
-        assertEquals("isFollowerActive", true, leader.getFollower(FOLLOWER_ID).isFollowerActive());
+        assertTrue("isFollowerActive", leader.getFollower(FOLLOWER_ID).isFollowerActive());
 
         followerActor.underlyingActor().clear();
 
@@ -484,7 +485,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         long lastIndex = actorContext.getReplicatedLog().lastIndex();
         leader.handleMessage(followerActor, new AppendEntriesReply(
                 FOLLOWER_ID, term, true, lastIndex, term, (short)0));
-        assertEquals("isFollowerActive", true, leader.getFollower(FOLLOWER_ID).isFollowerActive());
+        assertTrue("isFollowerActive", leader.getFollower(FOLLOWER_ID).isFollowerActive());
 
         followerActor.underlyingActor().clear();
 
@@ -653,7 +654,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         assertTrue(raftBehavior instanceof Leader);
 
-        assertEquals("isCapturing", true, actorContext.getSnapshotManager().isCapturing());
+        assertTrue("isCapturing", actorContext.getSnapshotManager().isCapturing());
     }
 
     @Test
@@ -696,7 +697,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         leader.handleMessage(leaderActor, new Replicate(null, new MockIdentifier("state-id"), entry, true));
 
-        assertEquals("isCapturing", true, actorContext.getSnapshotManager().isCapturing());
+        assertTrue("isCapturing", actorContext.getSnapshotManager().isCapturing());
 
         CaptureSnapshot cs = actorContext.getSnapshotManager().getCaptureSnapshot();
 
@@ -759,7 +760,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         // installed with a SendInstallSnapshot
         leader.handleMessage(leaderActor, new AppendEntriesReply(FOLLOWER_ID, 1, false, 1, 1, (short) 1, true));
 
-        assertEquals("isCapturing", true, actorContext.getSnapshotManager().isCapturing());
+        assertTrue("isCapturing", actorContext.getSnapshotManager().isCapturing());
 
         CaptureSnapshot cs = actorContext.getSnapshotManager().getCaptureSnapshot();
 
@@ -1200,11 +1201,11 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
     }
 
     @Override
-    protected MockRaftActorContext createActorContext(ActorRef actorRef) {
+    protected MockRaftActorContext createActorContext(final ActorRef actorRef) {
         return createActorContext(LEADER_ID, actorRef);
     }
 
-    private MockRaftActorContext createActorContext(String id, ActorRef actorRef) {
+    private MockRaftActorContext createActorContext(final String id, final ActorRef actorRef) {
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
         configParams.setHeartBeatInterval(new FiniteDuration(50, TimeUnit.MILLISECONDS));
         configParams.setElectionTimeoutFactor(100000);
@@ -1624,7 +1625,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         AppendEntriesReply appendEntriesReply = MessageCollectorActor.expectFirstMatching(leaderActor,
                 AppendEntriesReply.class);
 
-        assertEquals(false, appendEntriesReply.isSuccess());
+        assertFalse(appendEntriesReply.isSuccess());
         assertEquals(RaftState.Follower, leaderActor.underlyingActor().getFirstBehaviorChange().state());
 
         MessageCollectorActor.clearMessages(leaderActor);
@@ -1649,7 +1650,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         AppendEntriesReply appendEntriesReply = MessageCollectorActor.expectFirstMatching(leaderActor,
                 AppendEntriesReply.class);
 
-        assertEquals(false, appendEntriesReply.isSuccess());
+        assertFalse(appendEntriesReply.isSuccess());
         assertEquals(RaftState.Leader, leaderActor.underlyingActor().getFirstBehaviorChange().state());
 
         MessageCollectorActor.clearMessages(leaderActor);
@@ -1855,7 +1856,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         assertTrue("Expected Leader", newBehavior instanceof Leader);
     }
 
-    private RaftActorBehavior setupIsolatedLeaderCheckTestWithTwoFollowers(RaftPolicy raftPolicy) {
+    private RaftActorBehavior setupIsolatedLeaderCheckTestWithTwoFollowers(final RaftPolicy raftPolicy) {
         ActorRef followerActor1 = getSystem().actorOf(MessageCollectorActor.props(), "follower-1");
         ActorRef followerActor2 = getSystem().actorOf(MessageCollectorActor.props(), "follower-2");
 
@@ -2195,8 +2196,8 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
     }
 
     @Override
-    protected void assertStateChangesToFollowerWhenRaftRPCHasNewerTerm(MockRaftActorContext actorContext,
-            ActorRef actorRef, RaftRPC rpc) throws Exception {
+    protected void assertStateChangesToFollowerWhenRaftRPCHasNewerTerm(final MockRaftActorContext actorContext,
+            final ActorRef actorRef, final RaftRPC rpc) throws Exception {
         super.assertStateChangesToFollowerWhenRaftRPCHasNewerTerm(actorContext, actorRef, rpc);
         assertEquals("New votedFor", null, actorContext.getTermInformation().getVotedFor());
     }
@@ -2206,7 +2207,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         private final long electionTimeOutIntervalMillis;
         private final int snapshotChunkSize;
 
-        MockConfigParamsImpl(long electionTimeOutIntervalMillis, int snapshotChunkSize) {
+        MockConfigParamsImpl(final long electionTimeOutIntervalMillis, final int snapshotChunkSize) {
             super();
             this.electionTimeOutIntervalMillis = electionTimeOutIntervalMillis;
             this.snapshotChunkSize = snapshotChunkSize;

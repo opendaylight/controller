@@ -164,12 +164,12 @@ public class MigratedMessagesTest extends AbstractActorTest {
 
         RaftActorSnapshotCohort snapshotCohort = new RaftActorSnapshotCohort() {
             @Override
-            public void createSnapshot(ActorRef actorRef) {
+            public void createSnapshot(final ActorRef actorRef) {
                 actorRef.tell(new CaptureSnapshotReply(new byte[0]), actorRef);
             }
 
             @Override
-            public void applySnapshot(byte[] snapshotBytes) {
+            public void applySnapshot(final byte[] snapshotBytes) {
             }
         };
 
@@ -209,7 +209,8 @@ public class MigratedMessagesTest extends AbstractActorTest {
         TEST_LOG.info("testSnapshotAfterStartupWithMigratedReplicatedLogEntry ending");
     }
 
-    private TestActorRef<MockRaftActor> doTestSnapshotAfterStartupWithMigratedServerConfigPayload(boolean persistent) {
+    private TestActorRef<MockRaftActor> doTestSnapshotAfterStartupWithMigratedServerConfigPayload(
+            final boolean persistent) {
         String persistenceId = factory.generateActorId("test-actor-");
 
         org.opendaylight.controller.cluster.raft.ServerConfigurationPayload persistedServerConfig =
@@ -237,8 +238,8 @@ public class MigratedMessagesTest extends AbstractActorTest {
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    private TestActorRef<MockRaftActor> doTestSnapshotAfterStartupWithMigratedMessage(String id, boolean persistent,
-            Consumer<Snapshot> snapshotVerifier) {
+    private TestActorRef<MockRaftActor> doTestSnapshotAfterStartupWithMigratedMessage(final String id,
+            final boolean persistent, final Consumer<Snapshot> snapshotVerifier) {
         InMemorySnapshotStore.addSnapshotSavedLatch(id);
         InMemoryJournal.addDeleteMessagesCompleteLatch(id);
         DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
@@ -246,12 +247,12 @@ public class MigratedMessagesTest extends AbstractActorTest {
 
         RaftActorSnapshotCohort snapshotCohort = new RaftActorSnapshotCohort() {
             @Override
-            public void createSnapshot(ActorRef actorRef) {
+            public void createSnapshot(final ActorRef actorRef) {
                 actorRef.tell(new CaptureSnapshotReply(new byte[0]), actorRef);
             }
 
             @Override
-            public void applySnapshot(byte[] snapshotBytes) {
+            public void applySnapshot(final byte[] snapshotBytes) {
             }
         };
 

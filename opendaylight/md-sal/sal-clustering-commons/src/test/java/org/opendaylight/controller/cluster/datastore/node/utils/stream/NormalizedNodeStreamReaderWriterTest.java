@@ -9,6 +9,7 @@
 package org.opendaylight.controller.cluster.datastore.node.utils.stream;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import com.google.common.base.Optional;
 import com.google.common.io.ByteStreams;
@@ -212,7 +213,7 @@ public class NormalizedNodeStreamReaderWriterTest {
 
         Optional<DataContainerChild<? extends PathArgument, ?>> child =
                 deserialized.getChild(new NodeIdentifier(TestModel.ANY_XML_QNAME));
-        assertEquals("AnyXml child present", true, child.isPresent());
+        assertTrue("AnyXml child present", child.isPresent());
 
         StreamResult xmlOutput = new StreamResult(new StringWriter());
         Transformer transformer = TransformerFactory.newInstance().newTransformer();

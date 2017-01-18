@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.raft.persisted;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 import org.apache.commons.lang.SerializationUtils;
 import org.junit.Test;
@@ -25,6 +26,6 @@ public class DeleteEntriesTest {
         DeleteEntries cloned = (DeleteEntries) SerializationUtils.clone(expected);
 
         assertEquals("getFromIndex", expected.getFromIndex(), cloned.getFromIndex());
-        assertEquals("isMigrated", false, cloned.isMigrated());
+        assertFalse("isMigrated", cloned.isMigrated());
     }
 }
