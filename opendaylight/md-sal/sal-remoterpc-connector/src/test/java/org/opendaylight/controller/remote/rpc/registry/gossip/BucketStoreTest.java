@@ -61,15 +61,15 @@ public class BucketStoreTest {
         final BucketStore<T> store = createStore();
 
         Address localAddress = system.provider().getDefaultAddress();
-        Bucket<T> localBucket = new BucketImpl<>(new T());
+        Bucket<T> localBucket = new BucketImpl<>(0L, new T());
 
         Address a1 = new Address("tcp", "system1");
         Address a2 = new Address("tcp", "system2");
         Address a3 = new Address("tcp", "system3");
 
-        Bucket<T> b1 = new BucketImpl<>(new T());
-        Bucket<T> b2 = new BucketImpl<>(new T());
-        Bucket<T> b3 = new BucketImpl<>(new T());
+        Bucket<T> b1 = new BucketImpl<>(0L, new T());
+        Bucket<T> b2 = new BucketImpl<>(0L, new T());
+        Bucket<T> b3 = new BucketImpl<>(0L, new T());
 
         Map<Address, Bucket<T>> remoteBuckets = new HashMap<>(3);
         remoteBuckets.put(a1, b1);
@@ -88,7 +88,7 @@ public class BucketStoreTest {
 
         //Add a new remote bucket
         Address a4 = new Address("tcp", "system4");
-        Bucket<T> b4 = new BucketImpl<>(new T());
+        Bucket<T> b4 = new BucketImpl<>(0L, new T());
         remoteBuckets.clear();
         remoteBuckets.put(a4, b4);
         store.receiveUpdateRemoteBuckets(remoteBuckets);
@@ -100,7 +100,7 @@ public class BucketStoreTest {
         Assert.assertTrue(remoteBucketsInStore.size() == 4);
 
         //Update a bucket
-        Bucket<T> b3New = new BucketImpl<>(new T());
+        Bucket<T> b3New = new BucketImpl<>(0L, new T());
         remoteBuckets.clear();
         remoteBuckets.put(a3, b3New);
         remoteBuckets.put(a1, null);
