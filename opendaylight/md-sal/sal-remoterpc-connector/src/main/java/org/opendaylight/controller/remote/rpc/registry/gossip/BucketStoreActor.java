@@ -8,6 +8,9 @@
 
 package org.opendaylight.controller.remote.rpc.registry.gossip;
 
+import static org.opendaylight.controller.remote.rpc.registry.gossip.BucketStoreAccess.Singletons.GET_ALL_BUCKETS;
+import static org.opendaylight.controller.remote.rpc.registry.gossip.BucketStoreAccess.Singletons.GET_BUCKET_VERSIONS;
+
 import akka.actor.ActorRef;
 import akka.actor.ActorRefProvider;
 import akka.actor.Address;
@@ -21,25 +24,20 @@ import akka.persistence.SaveSnapshotFailure;
 import akka.persistence.SaveSnapshotSuccess;
 import akka.persistence.SnapshotOffer;
 import akka.persistence.SnapshotSelectionCriteria;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Verify;
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.SetMultimap;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
-import java.util.Set;
+import java.util.function.Consumer;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedPersistentActorWithMetering;
 import org.opendaylight.controller.remote.rpc.RemoteRpcProviderConfig;
-import org.opendaylight.controller.remote.rpc.registry.gossip.Messages.BucketStoreMessages.GetAllBuckets;
-import org.opendaylight.controller.remote.rpc.registry.gossip.Messages.BucketStoreMessages.GetAllBucketsReply;
-import org.opendaylight.controller.remote.rpc.registry.gossip.Messages.BucketStoreMessages.GetBucketVersions;
-import org.opendaylight.controller.remote.rpc.registry.gossip.Messages.BucketStoreMessages.GetBucketVersionsReply;
-import org.opendaylight.controller.remote.rpc.registry.gossip.Messages.BucketStoreMessages.GetBucketsByMembers;
-import org.opendaylight.controller.remote.rpc.registry.gossip.Messages.BucketStoreMessages.GetBucketsByMembersReply;
-import org.opendaylight.controller.remote.rpc.registry.gossip.Messages.BucketStoreMessages.RemoveRemoteBucket;
-import org.opendaylight.controller.remote.rpc.registry.gossip.Messages.BucketStoreMessages.UpdateRemoteBuckets;
 import org.opendaylight.controller.utils.ConditionalProbe;
 
 /**
@@ -50,9 +48,14 @@ import org.opendaylight.controller.utils.ConditionalProbe;
  * <p>
  * Buckets are sync'ed across nodes using Gossip protocol (http://en.wikipedia.org/wiki/Gossip_protocol).
  * This store uses a {@link org.opendaylight.controller.remote.rpc.registry.gossip.Gossiper}.
- *
  */
-public class BucketStore<T extends BucketData<T>> extends AbstractUntypedPersistentActorWithMetering {
+public abstract class BucketStoreActor<T extends BucketData<T>> extends
+        AbstractUntypedPersistentActorWithMetering {
+    @FunctionalInterface
+    static interface ExecuteInActor extends Consumer<BucketStoreActor<?>> {
+
+    }
+
     /**
      * Buckets owned by other known nodes in the cluster.
      */
@@ -88,14 +91,26 @@ public class BucketStore<T extends BucketData<T>> extends AbstractUntypedPersist
     private Integer incarnation;
     private boolean persisting;
 
-    public BucketStore(final RemoteRpcProviderConfig config, final String persistenceId, final T initialData) {
+    protected BucketStoreActor(final RemoteRpcProviderConfig config, final String persistenceId, final T initialData) {
         this.config = Preconditions.checkNotNull(config);
         this.initialData = Preconditions.checkNotNull(initialData);
         this.persistenceId = Preconditions.checkNotNull(persistenceId);
     }
 
+    public final T getLocalData() {
+        return getLocalBucket().getData();
+    }
+
+    public final Map<Address, Bucket<T>> getRemoteBuckets() {
+        return remoteBuckets;
+    }
+
+    public final Map<Address, Long> getVersions() {
+        return versions;
+    }
+
     @Override
-    public String persistenceId() {
+    public final String persistenceId() {
         return persistenceId;
     }
 
@@ -109,7 +124,6 @@ public class BucketStore<T extends BucketData<T>> extends AbstractUntypedPersist
         }
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     protected void handleCommand(final Object message) throws Exception {
         if (probe != null) {
@@ -121,19 +135,16 @@ public class BucketStore<T extends BucketData<T>> extends AbstractUntypedPersist
             return;
         }
 
-        if (message instanceof GetBucketsByMembers) {
-            receiveGetBucketsByMembers(((GetBucketsByMembers) message).getMembers());
-        } else if (message instanceof GetBucketVersions) {
-            receiveGetBucketVersions();
-        } else if (message instanceof UpdateRemoteBuckets) {
-            receiveUpdateRemoteBuckets(((UpdateRemoteBuckets<T>) message).getBuckets());
-        } else if (message instanceof RemoveRemoteBucket) {
-            removeBucket(((RemoveRemoteBucket) message).getAddress());
+        if (message instanceof ExecuteInActor) {
+            ((ExecuteInActor) message).accept(this);
+        } else if (GET_BUCKET_VERSIONS == message) {
+            // FIXME: do we need to send ourselves?
+            getSender().tell(ImmutableMap.copyOf(versions), getSelf());
+        } else if (GET_ALL_BUCKETS == message) {
+            // GetAllBuckets is used only for unit tests.
+            getSender().tell(getAllBuckets(), self());
         } else if (message instanceof Terminated) {
             actorTerminated((Terminated) message);
-        } else if (message instanceof GetAllBuckets) {
-            // GetAllBuckets is used only for unit tests.
-            receiveGetAllBuckets();
         } else if (message instanceof ConditionalProbe) {
             // The ConditionalProbe is only used for unit tests.
             LOG.info("Received probe {} {}", getSelf(), message);
@@ -170,7 +181,7 @@ public class BucketStore<T extends BucketData<T>> extends AbstractUntypedPersist
     }
 
     @Override
-    protected void handleRecover(final Object message) throws Exception {
+    protected final void handleRecover(final Object message) throws Exception {
         if (message instanceof RecoveryCompleted) {
             if (incarnation != null) {
                 incarnation = incarnation + 1;
@@ -191,24 +202,47 @@ public class BucketStore<T extends BucketData<T>> extends AbstractUntypedPersist
         }
     }
 
-    protected RemoteRpcProviderConfig getConfig() {
+    protected final RemoteRpcProviderConfig getConfig() {
         return config;
     }
 
-    /**
-     * Returns all the buckets the this node knows about, self owned + remote.
-     */
-    void receiveGetAllBuckets() {
-        final ActorRef sender = getSender();
-        sender.tell(new GetAllBucketsReply<>(getAllBuckets()), getSelf());
+    protected final void updateLocalBucket(final T data) {
+        final LocalBucket<T> local = getLocalBucket();
+        final boolean bumpIncarnation = local.setData(data);
+        versions.put(selfAddress, local.getVersion());
+
+        if (bumpIncarnation) {
+            LOG.debug("Version wrapped. incrementing incarnation");
+
+            Verify.verify(incarnation <= Integer.MAX_VALUE, "Ran out of incarnations, cannot continue");
+            incarnation = incarnation + 1;
+
+            persisting = true;
+            saveSnapshot(incarnation);
+        }
     }
+
+    /**
+     * Callback to subclasses invoked when a bucket is removed.
+     *
+     * @param address Remote address
+     * @param bucket Bucket removed
+     */
+    protected abstract void onBucketRemoved(final Address address, final Bucket<T> bucket);
+
+    /**
+     * Callback to subclasses invoked when the set of remote buckets is updated.
+     *
+     * @param newBuckets Map of address to new bucket. Never null, but can be empty.
+     */
+    protected abstract void onBucketsUpdated(final Map<Address, Bucket<T>> newBuckets);
 
     /**
      * Helper to collect all known buckets.
      *
      * @return self owned + remote buckets
      */
-    Map<Address, Bucket<T>> getAllBuckets() {
+    private Map<Address, Bucket<T>> getAllBuckets() {
         Map<Address, Bucket<T>> all = new HashMap<>(remoteBuckets.size() + 1);
 
         //first add the local bucket
@@ -221,23 +255,11 @@ public class BucketStore<T extends BucketData<T>> extends AbstractUntypedPersist
     }
 
     /**
-     * Returns buckets for requested members that this node knows about.
-     *
-     * @param members requested members
-     */
-    void receiveGetBucketsByMembers(final Set<Address> members) {
-        final ActorRef sender = getSender();
-        Map<Address, Bucket<T>> buckets = getBucketsByMembers(members);
-        sender.tell(new GetBucketsByMembersReply<>(buckets), getSelf());
-    }
-
-    /**
      * Helper to collect buckets for requested members.
      *
      * @param members requested members
-     * @return buckets for requested members
      */
-    Map<Address, Bucket<T>> getBucketsByMembers(final Set<Address> members) {
+    void getBucketsByMembers(final Collection<Address> members) {
         Map<Address, Bucket<T>> buckets = new HashMap<>();
 
         //first add the local bucket if asked
@@ -252,16 +274,15 @@ public class BucketStore<T extends BucketData<T>> extends AbstractUntypedPersist
             }
         }
 
-        return buckets;
+        getSender().tell(buckets, getSelf());
     }
 
-    /**
-     * Returns versions for all buckets known.
-     */
-    void receiveGetBucketVersions() {
-        final ActorRef sender = getSender();
-        GetBucketVersionsReply reply = new GetBucketVersionsReply(versions);
-        sender.tell(reply, getSelf());
+    final void removeBucket(final Address addr) {
+        final Bucket<T> bucket = remoteBuckets.remove(addr);
+        if (bucket != null) {
+            bucket.getWatchActor().ifPresent(ref -> removeWatch(addr, ref));
+            onBucketRemoved(addr, bucket);
+        }
     }
 
     /**
@@ -270,7 +291,8 @@ public class BucketStore<T extends BucketData<T>> extends AbstractUntypedPersist
      * @param receivedBuckets buckets sent by remote
      *                        {@link org.opendaylight.controller.remote.rpc.registry.gossip.Gossiper}
      */
-    void receiveUpdateRemoteBuckets(final Map<Address, Bucket<T>> receivedBuckets) {
+    @VisibleForTesting
+    void updateRemoteBuckets(final Map<Address, Bucket<?>> receivedBuckets) {
         LOG.debug("{}: receiveUpdateRemoteBuckets: {}", selfAddress, receivedBuckets);
         if (receivedBuckets == null || receivedBuckets.isEmpty()) {
             //nothing to do
@@ -278,7 +300,7 @@ public class BucketStore<T extends BucketData<T>> extends AbstractUntypedPersist
         }
 
         final Map<Address, Bucket<T>> newBuckets = new HashMap<>(receivedBuckets.size());
-        for (Entry<Address, Bucket<T>> entry : receivedBuckets.entrySet()) {
+        for (Entry<Address, Bucket<?>> entry : receivedBuckets.entrySet()) {
             final Address addr = entry.getKey();
 
             if (selfAddress.equals(addr)) {
@@ -286,7 +308,8 @@ public class BucketStore<T extends BucketData<T>> extends AbstractUntypedPersist
                 continue;
             }
 
-            final Bucket<T> receivedBucket = entry.getValue();
+            @SuppressWarnings("unchecked")
+            final Bucket<T> receivedBucket = (Bucket<T>) entry.getValue();
             if (receivedBucket == null) {
                 LOG.debug("Ignoring null bucket from {}", addr);
                 continue;
@@ -336,14 +359,6 @@ public class BucketStore<T extends BucketData<T>> extends AbstractUntypedPersist
         }
     }
 
-    private void removeBucket(final Address addr) {
-        final Bucket<T> bucket = remoteBuckets.remove(addr);
-        if (bucket != null) {
-            bucket.getWatchActor().ifPresent(ref -> removeWatch(addr, ref));
-            onBucketRemoved(addr, bucket);
-        }
-    }
-
     private void actorTerminated(final Terminated message) {
         LOG.info("Actor termination {} received", message);
 
@@ -357,55 +372,8 @@ public class BucketStore<T extends BucketData<T>> extends AbstractUntypedPersist
         }
     }
 
-    /**
-     * Callback to subclasses invoked when a bucket is removed.
-     *
-     * @param address Remote address
-     * @param bucket Bucket removed
-     */
-    protected void onBucketRemoved(final Address address, final Bucket<T> bucket) {
-        // Default noop
-    }
-
-    /**
-     * Callback to subclasses invoked when the set of remote buckets is updated.
-     *
-     * @param newBuckets Map of address to new bucket. Never null, but can be empty.
-     */
-    protected void onBucketsUpdated(final Map<Address, Bucket<T>> newBuckets) {
-        // Default noop
-    }
-
-    public T getLocalData() {
-        return getLocalBucket().getData();
-    }
-
     private LocalBucket<T> getLocalBucket() {
         Preconditions.checkState(localBucket != null, "Attempted to access local bucket before recovery completed");
         return localBucket;
-    }
-
-    protected void updateLocalBucket(final T data) {
-        final LocalBucket<T> local = getLocalBucket();
-        final boolean bumpIncarnation = local.setData(data);
-        versions.put(selfAddress, local.getVersion());
-
-        if (bumpIncarnation) {
-            LOG.debug("Version wrapped. incrementing incarnation");
-
-            Verify.verify(incarnation <= Integer.MAX_VALUE, "Ran out of incarnations, cannot continue");
-            incarnation = incarnation + 1;
-
-            persisting = true;
-            saveSnapshot(incarnation);
-        }
-    }
-
-    public Map<Address, Bucket<T>> getRemoteBuckets() {
-        return remoteBuckets;
-    }
-
-    public Map<Address, Long> getVersions() {
-        return versions;
     }
 }
