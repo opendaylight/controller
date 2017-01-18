@@ -9,9 +9,7 @@ package org.opendaylight.controller.remote.rpc;
 
 import akka.actor.ActorRef;
 import com.google.common.base.Preconditions;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import javax.annotation.Nonnull;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcAvailabilityListener;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcIdentifier;
@@ -19,7 +17,6 @@ import org.opendaylight.controller.md.sal.dom.api.DOMRpcImplementation;
 import org.opendaylight.controller.remote.rpc.registry.RpcRegistry;
 import org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.AddOrUpdateRoutes;
 import org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.RemoveRoutes;
-import org.opendaylight.controller.sal.connector.api.RpcRouter.RouteIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,15 +39,7 @@ final class RpcListener implements DOMRpcAvailabilityListener {
         Preconditions.checkArgument(rpcs != null, "Input Collection of DOMRpcIdentifier can not be null.");
         LOG.debug("Adding registration for [{}]", rpcs);
 
-        final List<RouteIdentifier<?,?,?>> routeIds = new ArrayList<>(rpcs.size());
-
-        for (final DOMRpcIdentifier rpc : rpcs) {
-            // FIXME: Refactor routeId and message to use DOMRpcIdentifier directly.
-            final RouteIdentifier<?,?,?> routeId =
-                    new RouteIdentifierImpl(null, rpc.getType().getLastComponent(), rpc.getContextReference());
-            routeIds.add(routeId);
-        }
-        rpcRegistry.tell(new AddOrUpdateRoutes(routeIds), ActorRef.noSender());
+        rpcRegistry.tell(new AddOrUpdateRoutes(rpcs), ActorRef.noSender());
     }
 
     @Override
@@ -58,12 +47,7 @@ final class RpcListener implements DOMRpcAvailabilityListener {
         Preconditions.checkArgument(rpcs != null, "Input Collection of DOMRpcIdentifier can not be null.");
 
         LOG.debug("Removing registration for [{}]", rpcs);
-
-        final List<RouteIdentifier<?,?,?>> routeIds = new ArrayList<>(rpcs.size());
-        for (final DOMRpcIdentifier rpc : rpcs) {
-            routeIds.add(new RouteIdentifierImpl(null, rpc.getType().getLastComponent(), rpc.getContextReference()));
-        }
-        rpcRegistry.tell(new RemoveRoutes(routeIds), ActorRef.noSender());
+        rpcRegistry.tell(new RemoveRoutes(rpcs), ActorRef.noSender());
     }
 
     @Override
