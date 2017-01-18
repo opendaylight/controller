@@ -33,8 +33,7 @@ public class RoutingTable implements BucketData<RoutingTable>, Serializable {
         this(router, new HashMap<>());
     }
 
-    @Override
-    public RoutingTable copy() {
+    RoutingTable copy() {
         return new RoutingTable(router, new HashMap<>(table));
     }
 
