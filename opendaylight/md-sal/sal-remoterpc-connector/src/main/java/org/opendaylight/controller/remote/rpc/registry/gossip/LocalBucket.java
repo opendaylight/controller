@@ -23,7 +23,7 @@ final class LocalBucket<T extends BucketData<T>> {
      *
      * We are keeping a boxed version here, as we stick it into a map anyway.
      */
-    private Long version;
+    private long version;
     private T data;
 
     // We bump versions only if we took a snapshot since last data update
@@ -35,15 +35,15 @@ final class LocalBucket<T extends BucketData<T>> {
         this.data = Preconditions.checkNotNull(data);
     }
 
-    private static Long calculateLongVersion(final int incarnation, final int vers) {
-        return Long.valueOf((((long)incarnation) << Integer.SIZE) | Integer.toUnsignedLong(vers));
+    private static long calculateLongVersion(final int incarnation, final int vers) {
+        return (((long)incarnation) << Integer.SIZE) | Integer.toUnsignedLong(vers);
     }
 
     T getData() {
         return data;
     }
 
-    Long getVersion() {
+    long getVersion() {
         return version;
     }
 
@@ -54,15 +54,11 @@ final class LocalBucket<T extends BucketData<T>> {
 
     boolean setData(final T data) {
         this.data = Preconditions.checkNotNull(data);
-        if (bumpVersion) {
-            final long next = version.longValue() + 1;
-            if ((next & 0xffff_ffffL) == 0) {
-                return true;
-            }
-
-            version = next;
-            bumpVersion = false;
+        if (!bumpVersion) {
+            return false;
         }
-        return false;
+
+        bumpVersion = false;
+        return (++version & 0xffff_ffffL) == 0;
     }
 }
