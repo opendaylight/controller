@@ -11,9 +11,18 @@ package org.opendaylight.controller.remote.rpc.registry.gossip;
 import akka.actor.ActorRef;
 import akka.actor.ActorRefProvider;
 import akka.actor.Address;
+import akka.actor.PoisonPill;
 import akka.actor.Terminated;
 import akka.cluster.ClusterActorRefProvider;
+import akka.persistence.DeleteSnapshotsFailure;
+import akka.persistence.DeleteSnapshotsSuccess;
+import akka.persistence.RecoveryCompleted;
+import akka.persistence.SaveSnapshotFailure;
+import akka.persistence.SaveSnapshotSuccess;
+import akka.persistence.SnapshotOffer;
+import akka.persistence.SnapshotSelectionCriteria;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Verify;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
 import java.util.HashMap;
@@ -21,7 +30,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
-import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActorWithMetering;
+import org.opendaylight.controller.cluster.common.actor.AbstractUntypedPersistentActorWithMetering;
 import org.opendaylight.controller.remote.rpc.RemoteRpcProviderConfig;
 import org.opendaylight.controller.remote.rpc.registry.gossip.Messages.BucketStoreMessages.GetAllBuckets;
 import org.opendaylight.controller.remote.rpc.registry.gossip.Messages.BucketStoreMessages.GetAllBucketsReply;
@@ -43,12 +52,7 @@ import org.opendaylight.controller.utils.ConditionalProbe;
  * This store uses a {@link org.opendaylight.controller.remote.rpc.registry.gossip.Gossiper}.
  *
  */
-public class BucketStore<T extends BucketData<T>> extends AbstractUntypedActorWithMetering {
-    /**
-     * Bucket owned by the node.
-     */
-    private final BucketImpl<T> localBucket;
-
+public class BucketStore<T extends BucketData<T>> extends AbstractUntypedPersistentActorWithMetering {
     /**
      * Buckets owned by other known nodes in the cluster.
      */
@@ -65,6 +69,9 @@ public class BucketStore<T extends BucketData<T>> extends AbstractUntypedActorWi
      */
     private final SetMultimap<ActorRef, Address> watchedActors = HashMultimap.create(1, 1);
 
+    private final RemoteRpcProviderConfig config;
+    private final String persistenceId;
+
     /**
      * Cluster address for this node.
      */
@@ -73,11 +80,23 @@ public class BucketStore<T extends BucketData<T>> extends AbstractUntypedActorWi
     // FIXME: should be part of test-specific subclass
     private ConditionalProbe probe;
 
-    private final RemoteRpcProviderConfig config;
+    /**
+     * Bucket owned by the node. Initialized during recovery (due to incarnation number).
+     */
+    private LocalBucket<T> localBucket;
+    private T initialData;
+    private Integer incarnation;
+    private boolean persisting;
 
-    public BucketStore(final RemoteRpcProviderConfig config, final T initialData) {
+    public BucketStore(final RemoteRpcProviderConfig config, final String persistenceId, final T initialData) {
         this.config = Preconditions.checkNotNull(config);
-        this.localBucket = new BucketImpl<>(initialData);
+        this.initialData = Preconditions.checkNotNull(initialData);
+        this.persistenceId = Preconditions.checkNotNull(persistenceId);
+    }
+
+    @Override
+    public String persistenceId() {
+        return persistenceId;
     }
 
     @Override
@@ -92,9 +111,14 @@ public class BucketStore<T extends BucketData<T>> extends AbstractUntypedActorWi
 
     @SuppressWarnings("unchecked")
     @Override
-    protected void handleReceive(final Object message) throws Exception {
+    protected void handleCommand(final Object message) throws Exception {
         if (probe != null) {
             probe.tell(message, getSelf());
+        }
+
+        if (persisting) {
+            handleSnapshotMessage(message);
+            return;
         }
 
         if (message instanceof GetBucketsByMembers) {
@@ -116,9 +140,54 @@ public class BucketStore<T extends BucketData<T>> extends AbstractUntypedActorWi
             probe = (ConditionalProbe) message;
             // Send back any message to tell the caller we got the probe.
             getSender().tell("Got it", getSelf());
+        } else if (message instanceof DeleteSnapshotsSuccess) {
+            LOG.debug("{}: got command: {}", persistenceId(), message);
+        } else if (message instanceof DeleteSnapshotsFailure) {
+            LOG.warn("{}: failed to delete prior snapshots", persistenceId(),
+                ((DeleteSnapshotsFailure) message).cause());
         } else {
             LOG.debug("Unhandled message [{}]", message);
             unhandled(message);
+        }
+    }
+
+    private void handleSnapshotMessage(final Object message) {
+        if (message instanceof SaveSnapshotFailure) {
+            LOG.error("{}: failed to persist state", persistenceId(), ((SaveSnapshotFailure) message).cause());
+            persisting = false;
+            self().tell(PoisonPill.getInstance(), ActorRef.noSender());
+        } else if (message instanceof SaveSnapshotSuccess) {
+            LOG.debug("{}: got command: {}", persistenceId(), message);
+            SaveSnapshotSuccess saved = (SaveSnapshotSuccess)message;
+            deleteSnapshots(new SnapshotSelectionCriteria(saved.metadata().sequenceNr(),
+                    saved.metadata().timestamp() - 1, 0L, 0L));
+            persisting = false;
+            unstash();
+        } else {
+            LOG.debug("{}: stashing command {}", persistenceId(), message);
+            stash();
+        }
+    }
+
+    @Override
+    protected void handleRecover(final Object message) throws Exception {
+        if (message instanceof RecoveryCompleted) {
+            if (incarnation != null) {
+                incarnation = incarnation + 1;
+            } else {
+                incarnation = 0;
+            }
+
+            this.localBucket = new LocalBucket<>(incarnation.intValue(), initialData);
+            initialData = null;
+            LOG.debug("{}: persisting new incarnation {}", persistenceId(), incarnation);
+            persisting = true;
+            saveSnapshot(incarnation);
+        } else if (message instanceof SnapshotOffer) {
+            incarnation = (Integer) ((SnapshotOffer)message).snapshot();
+            LOG.debug("{}: recovered incarnation {}", persistenceId(), incarnation);
+        } else {
+            LOG.warn("{}: ignoring recovery message {}", persistenceId(), message);
         }
     }
 
@@ -143,7 +212,7 @@ public class BucketStore<T extends BucketData<T>> extends AbstractUntypedActorWi
         Map<Address, Bucket<T>> all = new HashMap<>(remoteBuckets.size() + 1);
 
         //first add the local bucket
-        all.put(selfAddress, new BucketImpl<>(localBucket));
+        all.put(selfAddress, getLocalBucket().snapshot());
 
         //then get all remote buckets
         all.putAll(remoteBuckets);
@@ -173,7 +242,7 @@ public class BucketStore<T extends BucketData<T>> extends AbstractUntypedActorWi
 
         //first add the local bucket if asked
         if (members.contains(selfAddress)) {
-            buckets.put(selfAddress, new BucketImpl<>(localBucket));
+            buckets.put(selfAddress, getLocalBucket().snapshot());
         }
 
         //then get buckets for requested remote nodes
@@ -307,13 +376,29 @@ public class BucketStore<T extends BucketData<T>> extends AbstractUntypedActorWi
         // Default noop
     }
 
-    public BucketImpl<T> getLocalBucket() {
+    public T getLocalData() {
+        return getLocalBucket().getData();
+    }
+
+    private LocalBucket<T> getLocalBucket() {
+        Preconditions.checkState(localBucket != null, "Attempted to access local bucket before recovery completed");
         return localBucket;
     }
 
     protected void updateLocalBucket(final T data) {
-        localBucket.setData(data);
-        versions.put(selfAddress, localBucket.getVersion());
+        final LocalBucket<T> local = getLocalBucket();
+        final boolean bumpIncarnation = local.setData(data);
+        versions.put(selfAddress, local.getVersion());
+
+        if (bumpIncarnation) {
+            LOG.debug("Version wrapped. incrementing incarnation");
+
+            Verify.verify(incarnation <= Integer.MAX_VALUE, "Ran out of incarnations, cannot continue");
+            incarnation = incarnation + 1;
+
+            persisting = true;
+            saveSnapshot(incarnation);
+        }
     }
 
     public Map<Address, Bucket<T>> getRemoteBuckets() {
