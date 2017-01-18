@@ -53,17 +53,19 @@ public class MeteredBoundedMailboxTest {
 
         actorSystem.mailboxes().settings();
         lock.lock();
-        //queue capacity = 10
-        //need to send 12 messages; 1 message is dequeued and actor waits on lock,
-        //2nd to 11th messages are put on the queue
-        //12th message is sent to dead letter.
-        for (int i = 0; i < 12; i++) {
-            pingPongActor.tell("ping", mockReceiver.getRef());
+        try {
+            //queue capacity = 10
+            //need to send 12 messages; 1 message is dequeued and actor waits on lock,
+            //2nd to 11th messages are put on the queue
+            //12th message is sent to dead letter.
+            for (int i = 0; i < 12; i++) {
+                pingPongActor.tell("ping", mockReceiver.getRef());
+            }
+
+            mockReceiver.expectMsgClass(twentySeconds, DeadLetter.class);
+        } finally {
+            lock.unlock();
         }
-
-        mockReceiver.expectMsgClass(twentySeconds, DeadLetter.class);
-
-        lock.unlock();
 
         mockReceiver.receiveN(11, twentySeconds);
     }
