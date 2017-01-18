@@ -17,7 +17,7 @@ import java.util.Optional;
  *
  * @param <T> Concrete BucketData type
  */
-public interface BucketData<T extends BucketData<T>> extends Copier<T> {
+public interface BucketData<T extends BucketData<T>> {
     /**
      * Return the {@link ActorRef} which should be tracked as the authoritative source of this bucket's data.
      * The bucket will be invalidated should the actor be reported as Terminated.
