@@ -32,15 +32,12 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActorWithMetering;
 import org.opendaylight.controller.remote.rpc.RemoteRpcProviderConfig;
-import org.opendaylight.controller.remote.rpc.registry.gossip.Messages.BucketStoreMessages.GetBucketVersions;
-import org.opendaylight.controller.remote.rpc.registry.gossip.Messages.BucketStoreMessages.GetBucketVersionsReply;
-import org.opendaylight.controller.remote.rpc.registry.gossip.Messages.BucketStoreMessages.GetBucketsByMembers;
-import org.opendaylight.controller.remote.rpc.registry.gossip.Messages.BucketStoreMessages.GetBucketsByMembersReply;
-import org.opendaylight.controller.remote.rpc.registry.gossip.Messages.BucketStoreMessages.RemoveRemoteBucket;
-import org.opendaylight.controller.remote.rpc.registry.gossip.Messages.BucketStoreMessages.UpdateRemoteBuckets;
-import org.opendaylight.controller.remote.rpc.registry.gossip.Messages.GossiperMessages.GossipEnvelope;
-import org.opendaylight.controller.remote.rpc.registry.gossip.Messages.GossiperMessages.GossipStatus;
-import org.opendaylight.controller.remote.rpc.registry.gossip.Messages.GossiperMessages.GossipTick;
+import org.opendaylight.controller.remote.rpc.registry.gossip.BucketStoreMessages.GetBucketVersions;
+import org.opendaylight.controller.remote.rpc.registry.gossip.BucketStoreMessages.GetBucketVersionsReply;
+import org.opendaylight.controller.remote.rpc.registry.gossip.BucketStoreMessages.GetBucketsByMembers;
+import org.opendaylight.controller.remote.rpc.registry.gossip.BucketStoreMessages.GetBucketsByMembersReply;
+import org.opendaylight.controller.remote.rpc.registry.gossip.BucketStoreMessages.RemoveRemoteBucket;
+import org.opendaylight.controller.remote.rpc.registry.gossip.BucketStoreMessages.UpdateRemoteBuckets;
 import scala.concurrent.Future;
 import scala.concurrent.duration.FiniteDuration;
 
@@ -63,6 +60,13 @@ import scala.concurrent.duration.FiniteDuration;
  * for update.
  */
 public class Gossiper extends AbstractUntypedActorWithMetering {
+    private static final Object GOSSIP_TICK = new Object() {
+        @Override
+        public String toString() {
+            return "gossip tick";
+        }
+    };
+
     private final boolean autoStartGossipTicks;
     private final RemoteRpcProviderConfig config;
 
@@ -120,7 +124,7 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
                     new FiniteDuration(1, TimeUnit.SECONDS),        //initial delay
                     config.getGossipTickInterval(),                 //interval
                     getSelf(),                                      //target
-                    new Messages.GossiperMessages.GossipTick(),     //message
+                    GOSSIP_TICK,                                    //message
                     getContext().dispatcher(),                      //execution context
                     getSelf()                                       //sender
             );
@@ -142,7 +146,7 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
     protected void handleReceive(final Object message) throws Exception {
         //Usually sent by self via gossip task defined above. But its not enforced.
         //These ticks can be sent by another actor as well which is esp. useful while testing
-        if (message instanceof GossipTick) {
+        if (GOSSIP_TICK.equals(message)) {
             receiveGossipTick();
         } else if (message instanceof GossipStatus) {
             // Message from remote gossiper with its bucket versions
@@ -348,10 +352,10 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
      * Then this method compares remote bucket versions with local bucket versions.
      * <ul>
      *     <li>The buckets that are newer locally, send
-     *     {@link org.opendaylight.controller.remote.rpc.registry.gossip.Messages.GossiperMessages.GossipEnvelope}
+     *     {@link org.opendaylight.controller.remote.rpc.registry.gossip.GossipEnvelope}
      *     to remote
      *     <li>The buckets that are older locally, send
-     *     {@link org.opendaylight.controller.remote.rpc.registry.gossip.Messages.GossiperMessages.GossipStatus}
+     *     {@link org.opendaylight.controller.remote.rpc.registry.gossip.GossipStatus}
      *     to remote so that remote sends GossipEnvelop.
      * </ul>
      *
@@ -416,10 +420,10 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
      * Processes the message from {@link org.opendaylight.controller.remote.rpc.registry.gossip.BucketStore}
      * that contains {@link org.opendaylight.controller.remote.rpc.registry.gossip.Bucket}.
      * These buckets are sent to a remote member encapsulated in
-     * {@link org.opendaylight.controller.remote.rpc.registry.gossip.Messages.GossiperMessages.GossipEnvelope}
+     * {@link org.opendaylight.controller.remote.rpc.registry.gossip.GossipEnvelope}
      *
      * @param sender the remote member that sent
-     *           {@link org.opendaylight.controller.remote.rpc.registry.gossip.Messages.GossiperMessages.GossipStatus}
+     *           {@link org.opendaylight.controller.remote.rpc.registry.gossip.GossipStatus}
      *           in reply to which bucket is being sent back
      * @return a {@link akka.dispatch.Mapper} that gets evaluated in future
      *

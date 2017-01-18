@@ -48,10 +48,10 @@ import org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.Remo
 import org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.UpdateRemoteEndpoints;
 import org.opendaylight.controller.remote.rpc.registry.RpcRegistry.RemoteRpcEndpoint;
 import org.opendaylight.controller.remote.rpc.registry.gossip.Bucket;
-import org.opendaylight.controller.remote.rpc.registry.gossip.Messages.BucketStoreMessages.GetAllBuckets;
-import org.opendaylight.controller.remote.rpc.registry.gossip.Messages.BucketStoreMessages.GetAllBucketsReply;
-import org.opendaylight.controller.remote.rpc.registry.gossip.Messages.BucketStoreMessages.GetBucketVersions;
-import org.opendaylight.controller.remote.rpc.registry.gossip.Messages.BucketStoreMessages.GetBucketVersionsReply;
+import org.opendaylight.controller.remote.rpc.registry.gossip.BucketStoreMessages.GetAllBucketsReply;
+import org.opendaylight.controller.remote.rpc.registry.gossip.BucketStoreMessages.GetBucketVersions;
+import org.opendaylight.controller.remote.rpc.registry.gossip.BucketStoreMessages.GetBucketVersionsReply;
+import org.opendaylight.controller.remote.rpc.registry.gossip.GetAllBuckets;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 import org.slf4j.Logger;
@@ -342,7 +342,7 @@ public class RpcRegistryTest {
             final JavaTestKit testKit, final Address... addresses) {
         int numTries = 0;
         while (true) {
-            bucketStore.tell(new GetAllBuckets(), testKit.getRef());
+            bucketStore.tell(GetAllBuckets.getInstance(), testKit.getRef());
             @SuppressWarnings("unchecked")
             GetAllBucketsReply<RoutingTable> reply = testKit.expectMsgClass(Duration.create(3, TimeUnit.SECONDS),
                     GetAllBucketsReply.class);
@@ -386,11 +386,10 @@ public class RpcRegistryTest {
                     ActorRef.noSender());
         }
 
-        GetAllBuckets getAllBuckets = new GetAllBuckets();
         FiniteDuration duration = Duration.create(3, TimeUnit.SECONDS);
         int numTries = 0;
         while (true) {
-            registry1.tell(getAllBuckets, testKit.getRef());
+            registry1.tell(GetAllBuckets.getInstance(), testKit.getRef());
             @SuppressWarnings("unchecked")
             GetAllBucketsReply<RoutingTable> reply = testKit.expectMsgClass(duration, GetAllBucketsReply.class);
 
