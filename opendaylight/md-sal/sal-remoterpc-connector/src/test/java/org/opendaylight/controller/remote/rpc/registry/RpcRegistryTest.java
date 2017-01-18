@@ -9,6 +9,8 @@
 package org.opendaylight.controller.remote.rpc.registry;
 
 import static org.junit.Assert.fail;
+import static org.opendaylight.controller.remote.rpc.registry.gossip.BucketStoreAccess.Singletons.GET_ALL_BUCKETS;
+import static org.opendaylight.controller.remote.rpc.registry.gossip.BucketStoreAccess.Singletons.GET_BUCKET_VERSIONS;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
@@ -27,6 +29,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -40,20 +43,15 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.common.actor.AkkaConfigurationReader;
+import org.opendaylight.controller.md.sal.dom.api.DOMRpcIdentifier;
 import org.opendaylight.controller.remote.rpc.RemoteRpcProviderConfig;
-import org.opendaylight.controller.remote.rpc.RouteIdentifierImpl;
 import org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.AddOrUpdateRoutes;
 import org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.RemoveRoutes;
 import org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.UpdateRemoteEndpoints;
 import org.opendaylight.controller.remote.rpc.registry.RpcRegistry.RemoteRpcEndpoint;
 import org.opendaylight.controller.remote.rpc.registry.gossip.Bucket;
-import org.opendaylight.controller.remote.rpc.registry.gossip.Messages.BucketStoreMessages.GetAllBuckets;
-import org.opendaylight.controller.remote.rpc.registry.gossip.Messages.BucketStoreMessages.GetAllBucketsReply;
-import org.opendaylight.controller.remote.rpc.registry.gossip.Messages.BucketStoreMessages.GetBucketVersions;
-import org.opendaylight.controller.remote.rpc.registry.gossip.Messages.BucketStoreMessages.GetBucketVersionsReply;
-import org.opendaylight.controller.sal.connector.api.RpcRouter;
-import org.opendaylight.controller.sal.connector.api.RpcRouter.RouteIdentifier;
 import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.duration.Duration;
@@ -183,7 +181,7 @@ public class RpcRegistryTest {
 
         // Add rpc on node 1
 
-        List<RpcRouter.RouteIdentifier<?, ?, ?>> addedRouteIds = createRouteIds();
+        List<DOMRpcIdentifier> addedRouteIds = createRouteIds();
 
         registry1.tell(new AddOrUpdateRoutes(addedRouteIds), ActorRef.noSender());
 
@@ -217,7 +215,7 @@ public class RpcRegistryTest {
 
         LOG.info("testRpcAddRemoveInCluster starting");
 
-        List<RpcRouter.RouteIdentifier<?, ?, ?>> addedRouteIds = createRouteIds();
+        List<DOMRpcIdentifier> addedRouteIds = createRouteIds();
 
         Address node1Address = node1.provider().getDefaultAddress();
 
@@ -249,7 +247,7 @@ public class RpcRegistryTest {
             buckets = retrieveBuckets(registry1, testKit, address);
 
             try {
-                verifyBucket(buckets.get(address), Collections.<RouteIdentifier<?, ?, ?>>emptyList());
+                verifyBucket(buckets.get(address), Collections.emptyList());
                 break;
             } catch (AssertionError e) {
                 if (++numTries >= 50) {
@@ -269,14 +267,14 @@ public class RpcRegistryTest {
         final JavaTestKit testKit = new JavaTestKit(node3);
 
         // Add rpc on node 1
-        List<RpcRouter.RouteIdentifier<?, ?, ?>> addedRouteIds1 = createRouteIds();
+        List<DOMRpcIdentifier> addedRouteIds1 = createRouteIds();
         registry1.tell(new AddOrUpdateRoutes(addedRouteIds1), ActorRef.noSender());
 
         final UpdateRemoteEndpoints req1 = registrar3.expectMsgClass(Duration.create(3, TimeUnit.SECONDS),
             UpdateRemoteEndpoints.class);
 
         // Add rpc on node 2
-        List<RpcRouter.RouteIdentifier<?, ?, ?>> addedRouteIds2 = createRouteIds();
+        List<DOMRpcIdentifier> addedRouteIds2 = createRouteIds();
         registry2.tell(new AddOrUpdateRoutes(addedRouteIds2), ActorRef.noSender());
 
         final UpdateRemoteEndpoints req2 = registrar3.expectMsgClass(Duration.create(3, TimeUnit.SECONDS),
@@ -320,17 +318,16 @@ public class RpcRegistryTest {
     }
 
     private static Map<Address, Long> retrieveVersions(final ActorRef bucketStore, final JavaTestKit testKit) {
-        bucketStore.tell(new GetBucketVersions(), testKit.getRef());
-        GetBucketVersionsReply reply = testKit.expectMsgClass(Duration.create(3, TimeUnit.SECONDS),
-                GetBucketVersionsReply.class);
-        return reply.getVersions();
+        bucketStore.tell(GET_BUCKET_VERSIONS, testKit.getRef());
+        @SuppressWarnings("unchecked")
+        final Map<Address, Long> reply = testKit.expectMsgClass(Duration.create(3, TimeUnit.SECONDS), Map.class);
+        return reply;
     }
 
-    private static void verifyBucket(final Bucket<RoutingTable> bucket,
-            final List<RouteIdentifier<?, ?, ?>> expRouteIds) {
+    private static void verifyBucket(final Bucket<RoutingTable> bucket, final List<DOMRpcIdentifier> expRouteIds) {
         RoutingTable table = bucket.getData();
         Assert.assertNotNull("Bucket RoutingTable is null", table);
-        for (RouteIdentifier<?, ?, ?> r : expRouteIds) {
+        for (DOMRpcIdentifier r : expRouteIds) {
             if (!table.contains(r)) {
                 Assert.fail("RoutingTable does not contain " + r + ". Actual: " + table);
             }
@@ -343,12 +340,11 @@ public class RpcRegistryTest {
             final JavaTestKit testKit, final Address... addresses) {
         int numTries = 0;
         while (true) {
-            bucketStore.tell(new GetAllBuckets(), testKit.getRef());
+            bucketStore.tell(GET_ALL_BUCKETS, testKit.getRef());
             @SuppressWarnings("unchecked")
-            GetAllBucketsReply<RoutingTable> reply = testKit.expectMsgClass(Duration.create(3, TimeUnit.SECONDS),
-                    GetAllBucketsReply.class);
+            Map<Address, Bucket<RoutingTable>> buckets = testKit.expectMsgClass(Duration.create(3, TimeUnit.SECONDS),
+                    Map.class);
 
-            Map<Address, Bucket<RoutingTable>> buckets = reply.getBuckets();
             boolean foundAll = true;
             for (Address addr : addresses) {
                 Bucket<RoutingTable> bucket = buckets.get(addr);
@@ -376,30 +372,29 @@ public class RpcRegistryTest {
         final JavaTestKit testKit = new JavaTestKit(node1);
 
         final int nRoutes = 500;
-        final RouteIdentifier<?, ?, ?>[] added = new RouteIdentifier<?, ?, ?>[nRoutes];
+        final Collection<DOMRpcIdentifier> added = new ArrayList<>(nRoutes);
         for (int i = 0; i < nRoutes; i++) {
-            final RouteIdentifierImpl routeId = new RouteIdentifierImpl(null,
-                    new QName(new URI("/mockrpc"), "type" + i), null);
-            added[i] = routeId;
+            final DOMRpcIdentifier routeId = DOMRpcIdentifier.create(SchemaPath.create(true,
+                    new QName(new URI("/mockrpc"), "type" + i)));
+            added.add(routeId);
 
             //Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
-            registry1.tell(new AddOrUpdateRoutes(Arrays.<RouteIdentifier<?, ?, ?>>asList(routeId)),
+            registry1.tell(new AddOrUpdateRoutes(Arrays.asList(routeId)),
                     ActorRef.noSender());
         }
 
-        GetAllBuckets getAllBuckets = new GetAllBuckets();
         FiniteDuration duration = Duration.create(3, TimeUnit.SECONDS);
         int numTries = 0;
         while (true) {
-            registry1.tell(getAllBuckets, testKit.getRef());
+            registry1.tell(GET_ALL_BUCKETS, testKit.getRef());
             @SuppressWarnings("unchecked")
-            GetAllBucketsReply<RoutingTable> reply = testKit.expectMsgClass(duration, GetAllBucketsReply.class);
+            Map<Address, Bucket<RoutingTable>> buckets = testKit.expectMsgClass(duration, Map.class);
 
-            Bucket<RoutingTable> localBucket = reply.getBuckets().values().iterator().next();
+            Bucket<RoutingTable> localBucket = buckets.values().iterator().next();
             RoutingTable table = localBucket.getData();
             if (table != null && table.size() == nRoutes) {
-                for (RouteIdentifier<?, ?, ?> r : added) {
-                    Assert.assertEquals("RoutingTable contains " + r, true, table.contains(r));
+                for (DOMRpcIdentifier r : added) {
+                    Assert.assertTrue("RoutingTable contains " + r, table.contains(r));
                 }
 
                 break;
@@ -413,10 +408,10 @@ public class RpcRegistryTest {
         }
     }
 
-    private List<RpcRouter.RouteIdentifier<?, ?, ?>> createRouteIds() throws URISyntaxException {
+    private List<DOMRpcIdentifier> createRouteIds() throws URISyntaxException {
         QName type = new QName(new URI("/mockrpc"), "mockrpc" + routeIdCounter++);
-        List<RpcRouter.RouteIdentifier<?, ?, ?>> routeIds = new ArrayList<>(1);
-        routeIds.add(new RouteIdentifierImpl(null, type, null));
+        List<DOMRpcIdentifier> routeIds = new ArrayList<>(1);
+        routeIds.add(DOMRpcIdentifier.create(SchemaPath.create(true, type)));
         return routeIds;
     }
 }
