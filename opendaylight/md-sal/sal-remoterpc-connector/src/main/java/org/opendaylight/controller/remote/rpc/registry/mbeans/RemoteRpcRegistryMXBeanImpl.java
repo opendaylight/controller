@@ -45,7 +45,7 @@ public class RemoteRpcRegistryMXBeanImpl extends AbstractMXBean implements Remot
 
     @Override
     public Set<String> getGlobalRpc() {
-        RoutingTable table = rpcRegistry.getLocalBucket().getData();
+        RoutingTable table = rpcRegistry.getLocalData();
         Set<String> globalRpc = new HashSet<>(table.getRoutes().size());
         for (RpcRouter.RouteIdentifier<?, ?, ?> route : table.getRoutes()) {
             if (route.getRoute() == null) {
@@ -59,7 +59,7 @@ public class RemoteRpcRegistryMXBeanImpl extends AbstractMXBean implements Remot
 
     @Override
     public Set<String> getLocalRegisteredRoutedRpc() {
-        RoutingTable table = rpcRegistry.getLocalBucket().getData();
+        RoutingTable table = rpcRegistry.getLocalData();
         Set<String> routedRpc = new HashSet<>(table.getRoutes().size());
         for (RpcRouter.RouteIdentifier<?, ?, ?> route : table.getRoutes()) {
             if (route.getRoute() != null) {
@@ -76,7 +76,7 @@ public class RemoteRpcRegistryMXBeanImpl extends AbstractMXBean implements Remot
 
     @Override
     public Map<String, String> findRpcByName(final String name) {
-        RoutingTable localTable = rpcRegistry.getLocalBucket().getData();
+        RoutingTable localTable = rpcRegistry.getLocalData();
         // Get all RPCs from local bucket
         Map<String, String> rpcMap = new HashMap<>(getRpcMemberMapByName(localTable, name, LOCAL_CONSTANT));
 
@@ -92,8 +92,8 @@ public class RemoteRpcRegistryMXBeanImpl extends AbstractMXBean implements Remot
     }
 
     @Override
-    public Map<String, String> findRpcByRoute(String routeId) {
-        RoutingTable localTable = rpcRegistry.getLocalBucket().getData();
+    public Map<String, String> findRpcByRoute(final String routeId) {
+        RoutingTable localTable = rpcRegistry.getLocalData();
         Map<String, String> rpcMap = new HashMap<>(getRpcMemberMapByRoute(localTable, routeId, LOCAL_CONSTANT));
 
         Map<Address, Bucket<RoutingTable>> buckets = rpcRegistry.getRemoteBuckets();
@@ -109,7 +109,7 @@ public class RemoteRpcRegistryMXBeanImpl extends AbstractMXBean implements Remot
     /**
      * Search if the routing table route String contains routeName.
      */
-    private Map<String,String> getRpcMemberMapByRoute(final RoutingTable table, final String routeName,
+    private static Map<String,String> getRpcMemberMapByRoute(final RoutingTable table, final String routeName,
                                                       final String address) {
         Set<RpcRouter.RouteIdentifier<?, ?, ?>> routes = table.getRoutes();
         Map<String, String> rpcMap = new HashMap<>(routes.size());
@@ -130,7 +130,7 @@ public class RemoteRpcRegistryMXBeanImpl extends AbstractMXBean implements Remot
     /**
      * Search if the routing table route type contains name.
      */
-    private Map<String, String>  getRpcMemberMapByName(final RoutingTable table, final String name,
+    private static Map<String, String>  getRpcMemberMapByName(final RoutingTable table, final String name,
                                                        final String address) {
         Set<RpcRouter.RouteIdentifier<?, ?, ?>> routes = table.getRoutes();
         Map<String, String> rpcMap = new HashMap<>(routes.size());
