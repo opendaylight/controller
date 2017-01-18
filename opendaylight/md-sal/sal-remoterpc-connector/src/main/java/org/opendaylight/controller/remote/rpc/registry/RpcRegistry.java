@@ -43,7 +43,7 @@ public class RpcRegistry extends BucketStore<RoutingTable> {
     private final ActorRef rpcRegistrator;
 
     public RpcRegistry(final RemoteRpcProviderConfig config, final ActorRef rpcInvoker, final ActorRef rpcRegistrator) {
-        super(config, new RoutingTable(rpcInvoker));
+        super(config, config.getRpcRegistryPersistenceId(), new RoutingTable(rpcInvoker));
         this.rpcRegistrator = Preconditions.checkNotNull(rpcRegistrator);
     }
 
@@ -61,19 +61,19 @@ public class RpcRegistry extends BucketStore<RoutingTable> {
     }
 
     @Override
-    protected void handleReceive(final Object message) throws Exception {
+    protected void handleCommand(final Object message) throws Exception {
         if (message instanceof AddOrUpdateRoutes) {
             receiveAddRoutes((AddOrUpdateRoutes) message);
         } else if (message instanceof RemoveRoutes) {
             receiveRemoveRoutes((RemoveRoutes) message);
         } else {
-            super.handleReceive(message);
+            super.handleCommand(message);
         }
     }
 
     private void receiveAddRoutes(final AddOrUpdateRoutes msg) {
         LOG.debug("AddOrUpdateRoutes: {}", msg.getRouteIdentifiers());
-        updateLocalBucket(getLocalBucket().getData().addRpcs(msg.getRouteIdentifiers()));
+        updateLocalBucket(getLocalData().addRpcs(msg.getRouteIdentifiers()));
     }
 
     /**
@@ -83,7 +83,7 @@ public class RpcRegistry extends BucketStore<RoutingTable> {
      */
     private void receiveRemoveRoutes(final RemoveRoutes msg) {
         LOG.debug("RemoveRoutes: {}", msg.getRouteIdentifiers());
-        updateLocalBucket(getLocalBucket().getData().removeRpcs(msg.getRouteIdentifiers()));
+        updateLocalBucket(getLocalData().removeRpcs(msg.getRouteIdentifiers()));
     }
 
     @Override
