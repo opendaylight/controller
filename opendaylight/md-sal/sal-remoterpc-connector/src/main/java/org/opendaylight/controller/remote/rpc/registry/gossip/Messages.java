@@ -12,6 +12,8 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import java.io.Serializable;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import org.opendaylight.controller.remote.rpc.registry.gossip.Messages.BucketStoreMessages.ContainsBucketVersions;
@@ -50,7 +52,7 @@ public class Messages {
 
             protected ContainsBuckets(final Map<Address, Bucket<T>> buckets) {
                 Preconditions.checkArgument(buckets != null, "buckets can not be null");
-                this.buckets = ImmutableMap.copyOf(buckets);
+                this.buckets = Collections.unmodifiableMap(new HashMap<>(buckets));
             }
 
             public final Map<Address, Bucket<T>> getBuckets() {
