@@ -31,8 +31,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendaylight.controller.remote.rpc.RemoteRpcProviderConfig;
 import org.opendaylight.controller.remote.rpc.TerminationMonitor;
-import org.opendaylight.controller.remote.rpc.registry.gossip.Messages.GossiperMessages.GossipEnvelope;
-import org.opendaylight.controller.remote.rpc.registry.gossip.Messages.GossiperMessages.GossipStatus;
 
 
 public class GossiperTest {
@@ -63,7 +61,6 @@ public class GossiperTest {
     @After
     public void resetMocks() {
         reset(mockGossiper);
-
     }
 
     @Test
@@ -85,7 +82,6 @@ public class GossiperTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testReceiveGossipStatus_WhenSenderIsNonMemberShouldIgnore() {
-
         Address nonMember = new Address("tcp", "non-member");
         GossipStatus remoteStatus = new GossipStatus(nonMember, mock(Map.class));
 
@@ -95,14 +91,12 @@ public class GossiperTest {
         verify(mockGossiper, times(0)).getSender();
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings("unchecked")
     @Test
     public void testReceiveGossipWhenNotAddressedToSelfShouldIgnore() {
-        Address notSelf = new Address("tcp", "not-self");
-
-        GossipEnvelope envelope = new GossipEnvelope(notSelf, notSelf, mock(Map.class));
         doNothing().when(mockGossiper).updateRemoteBuckets(anyMap());
-        mockGossiper.receiveGossip(envelope);
+        Address notSelf = new Address("tcp", "not-self");
+        mockGossiper.receiveGossip(new GossipEnvelope(notSelf, notSelf, mock(Map.class)));
         verify(mockGossiper, times(0)).updateRemoteBuckets(anyMap());
     }
 
