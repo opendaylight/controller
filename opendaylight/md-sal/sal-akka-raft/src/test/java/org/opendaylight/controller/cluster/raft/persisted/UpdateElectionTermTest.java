@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.raft.persisted;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 import org.apache.commons.lang.SerializationUtils;
 import org.junit.Test;
@@ -26,6 +27,6 @@ public class UpdateElectionTermTest {
 
         assertEquals("getCurrentTerm", expected.getCurrentTerm(), cloned.getCurrentTerm());
         assertEquals("getVotedFor", expected.getVotedFor(), cloned.getVotedFor());
-        assertEquals("isMigrated", false, cloned.isMigrated());
+        assertFalse("isMigrated", cloned.isMigrated());
     }
 }

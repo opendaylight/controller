@@ -9,6 +9,7 @@
 package org.opendaylight.controller.cluster.common.actor;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -26,7 +27,7 @@ public class CommonConfigTest {
         assertNotNull(config.getMailBoxCapacity());
         assertNotNull(config.getMailBoxName());
         assertNotNull(config.getMailBoxPushTimeout());
-        assertNotNull(config.isMetricCaptureEnabled());
+        assertFalse(config.isMetricCaptureEnabled());
     }
 
     @Test

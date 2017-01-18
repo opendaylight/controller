@@ -74,16 +74,16 @@ public class RaftActorSnapshotMessageSupportTest {
 
         support = new RaftActorSnapshotMessageSupport(context, mockCohort);
 
-        doReturn(true).when(mockPersistence).isRecoveryApplicable();
+        doReturn(Boolean.TRUE).when(mockPersistence).isRecoveryApplicable();
 
         context.setReplicatedLog(ReplicatedLogImpl.newInstance(context));
     }
 
-    private void sendMessageToSupport(Object message) {
+    private void sendMessageToSupport(final Object message) {
         sendMessageToSupport(message, true);
     }
 
-    private void sendMessageToSupport(Object message, boolean expHandled) {
+    private void sendMessageToSupport(final Object message, final boolean expHandled) {
         boolean handled = support.handleSnapshotMessage(message, mockRaftActorRef);
         assertEquals("complete", expHandled, handled);
     }

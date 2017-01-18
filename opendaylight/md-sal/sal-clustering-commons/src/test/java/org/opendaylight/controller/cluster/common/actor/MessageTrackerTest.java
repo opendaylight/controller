@@ -55,7 +55,7 @@ public class MessageTrackerTest {
         ticker.increment(MILLISECONDS.toNanos(20));
 
         MessageTracker.Context context2 = messageTracker.received(new Foo());
-        Assert.assertEquals(true, context2.error().isPresent());
+        Assert.assertTrue(context2.error().isPresent());
         Assert.assertEquals(0, context2.error().get().getMessageProcessingTimesSinceLastExpectedMessage().size());
 
     }
@@ -77,7 +77,7 @@ public class MessageTrackerTest {
 
         MessageTracker.Context context2 = messageTracker.received(new Foo());
 
-        Assert.assertEquals(true, context2.error().isPresent());
+        Assert.assertTrue(context2.error().isPresent());
 
         MessageTracker.Error error = context2.error().get();
 
@@ -107,7 +107,7 @@ public class MessageTrackerTest {
         ticker.increment(MILLISECONDS.toNanos(1));
 
         MessageTracker.Context context2 = messageTracker.received(new Foo());
-        Assert.assertEquals(false, context2.error().isPresent());
+        Assert.assertFalse(context2.error().isPresent());
 
     }
 
@@ -139,11 +139,11 @@ public class MessageTrackerTest {
 
         MessageTracker.Context context = messageTracker.received(new Foo());
 
-        Assert.assertEquals(true, context.error().isPresent());
+        Assert.assertTrue(context.error().isPresent());
 
         MessageTracker.Error error = context.error().get();
 
-        Assert.assertEquals(null, error.getLastExpectedMessage());
+        Assert.assertNull(error.getLastExpectedMessage());
         Assert.assertEquals(Foo.class, error.getCurrentExpectedMessage().getClass());
 
         String errorString = error.toString();
@@ -162,7 +162,7 @@ public class MessageTrackerTest {
 
         MessageTracker.Context context = messageTracker.received(new Foo());
 
-        Assert.assertEquals(true, context.error().isPresent());
+        Assert.assertTrue(context.error().isPresent());
 
     }
 
@@ -172,10 +172,10 @@ public class MessageTrackerTest {
         messageTracker.begin();
 
         try (MessageTracker.Context ctx = messageTracker.received(45)) {
-            Assert.assertEquals(false, ctx.error().isPresent());
+            Assert.assertFalse(ctx.error().isPresent());
         }
         try (MessageTracker.Context ctx = messageTracker.received(45L)) {
-            Assert.assertEquals(false, ctx.error().isPresent());
+            Assert.assertFalse(ctx.error().isPresent());
         }
 
         List<MessageTracker.MessageProcessingTime> processingTimeList =
