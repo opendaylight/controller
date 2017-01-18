@@ -27,16 +27,16 @@ import org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.AddO
 import org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.RemoveRoutes;
 import org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.UpdateRemoteEndpoints;
 import org.opendaylight.controller.remote.rpc.registry.gossip.Bucket;
-import org.opendaylight.controller.remote.rpc.registry.gossip.BucketStore;
+import org.opendaylight.controller.remote.rpc.registry.gossip.BucketStoreActor;
 
 /**
  * Registry to look up cluster nodes that have registered for a given RPC.
  *
  * <p>
- * It uses {@link org.opendaylight.controller.remote.rpc.registry.gossip.BucketStore} to maintain this
+ * It uses {@link org.opendaylight.controller.remote.rpc.registry.gossip.BucketStoreActor} to maintain this
  * cluster wide information.
  */
-public class RpcRegistry extends BucketStore<RoutingTable> {
+public class RpcRegistry extends BucketStoreActor<RoutingTable> {
     private final ActorRef rpcRegistrator;
 
     public RpcRegistry(final RemoteRpcProviderConfig config, final ActorRef rpcInvoker, final ActorRef rpcRegistrator) {
