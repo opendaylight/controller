@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.opendaylight.odlparent</groupId>
+    <artifactId>features-parent</artifactId>
+    <version>1.8.0-SNAPSHOT</version>
+    <relativePath/>
+  </parent>
+
+  <groupId>org.opendaylight.controller</groupId>
+  <artifactId>features-config-netty</artifactId>
+  <version>0.6.0-SNAPSHOT</version>
+  <packaging>jar</packaging>
+
+  <properties>
+    <config.version>0.6.0-SNAPSHOT</config.version>
+    <config.configfile.directory>etc/opendaylight/karaf</config.configfile.directory>
+    <config.netty.configfile>00-netty.xml</config.netty.configfile>
+  </properties>
+
+  <dependencyManagement>
+    <dependencies>
+       <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>config-artifacts</artifactId>
+        <version>${config.version}</version>
+        <scope>import</scope>
+        <type>pom</type>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>features-config-persister</artifactId>
+      <classifier>features</classifier>
+      <type>xml</type>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>netty-event-executor-config</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>netty-threadgroup-config</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>netty-timer-config</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>threadpool-config-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>threadpool-config-impl</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>config-netty-config</artifactId>
+      <version>${config.version}</version>
+      <type>xml</type>
+      <classifier>config</classifier>
+    </dependency>
+  </dependencies>
+
+
+  <scm>
+    <connection>scm:git:http://git.opendaylight.org/gerrit/controller.git</connection>
+    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
+    <tag>HEAD</tag>
+    <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:MD-SAL</url>
+  </scm>
+</project>
