@@ -93,6 +93,7 @@
     <!-- XSQL -->
     <module>sal-dom-xsql</module>
     <module>sal-karaf-xsql</module>
+    <module>sal-karaf4-xsql</module>
     <module>sal-dom-xsql-config</module>
 
     <!-- Yang Test Models for MD-SAL -->
