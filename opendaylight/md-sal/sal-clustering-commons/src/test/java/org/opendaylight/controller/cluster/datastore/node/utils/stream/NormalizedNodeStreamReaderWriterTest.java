@@ -42,21 +42,20 @@ import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableCo
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableLeafSetEntryNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableLeafSetNodeBuilder;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
 
 public class NormalizedNodeStreamReaderWriterTest {
 
-    @SuppressWarnings("deprecation")
     @Test
     public void testNormalizedNodeStreaming() throws IOException {
 
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        NormalizedNodeOutputStreamWriter writer = new NormalizedNodeOutputStreamWriter(
-            ByteStreams.newDataOutput(byteArrayOutputStream));
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        NormalizedNodeDataOutput nnout = NormalizedNodeInputOutput.newDataOutput(ByteStreams.newDataOutput(bos));
 
         NormalizedNode<?, ?> testContainer = createTestContainer();
-        writer.writeNormalizedNode(testContainer);
+        nnout.writeNormalizedNode(testContainer);
 
         QName toaster = QName.create("http://netconfcentral.org/ns/toaster","2009-11-20","toaster");
         QName darknessFactor = QName.create("http://netconfcentral.org/ns/toaster","2009-11-20","darknessFactor");
@@ -67,18 +66,16 @@ public class NormalizedNodeStreamReaderWriterTest {
 
         ContainerNode toasterContainer = Builders.containerBuilder()
                 .withNodeIdentifier(new NodeIdentifier(SchemaContext.NAME)).withChild(toasterNode).build();
-        writer.writeNormalizedNode(toasterContainer);
+        nnout.writeNormalizedNode(toasterContainer);
 
-        NormalizedNodeInputStreamReader reader = new NormalizedNodeInputStreamReader(
-            ByteStreams.newDataInput(byteArrayOutputStream.toByteArray()));
+        NormalizedNodeDataInput nnin = NormalizedNodeInputOutput.newDataInput(ByteStreams.newDataInput(
+            bos.toByteArray()));
 
-        NormalizedNode<?,?> node = reader.readNormalizedNode();
+        NormalizedNode<?,?> node = nnin.readNormalizedNode();
         Assert.assertEquals(testContainer, node);
 
-        node = reader.readNormalizedNode();
+        node = nnin.readNormalizedNode();
         Assert.assertEquals(toasterContainer, node);
-
-        writer.close();
     }
 
     private static NormalizedNode<?, ?> createTestContainer() {
@@ -104,25 +101,22 @@ public class NormalizedNodeStreamReaderWriterTest {
                               TestModel.ID_QNAME, 11)).build()).build();
     }
 
-    @SuppressWarnings("deprecation")
     @Test
     public void testYangInstanceIdentifierStreaming() throws IOException  {
         YangInstanceIdentifier path = YangInstanceIdentifier.builder(TestModel.TEST_PATH)
                 .node(TestModel.OUTER_LIST_QNAME).nodeWithKey(
                         TestModel.INNER_LIST_QNAME, TestModel.ID_QNAME, 10).build();
 
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        NormalizedNodeOutputStreamWriter writer =
-                new NormalizedNodeOutputStreamWriter(ByteStreams.newDataOutput(byteArrayOutputStream));
-        writer.writeYangInstanceIdentifier(path);
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        NormalizedNodeDataOutput nnout = NormalizedNodeInputOutput.newDataOutput(ByteStreams.newDataOutput(bos));
 
-        NormalizedNodeInputStreamReader reader = new NormalizedNodeInputStreamReader(
-            ByteStreams.newDataInput(byteArrayOutputStream.toByteArray()));
+        nnout.writeYangInstanceIdentifier(path);
 
-        YangInstanceIdentifier newPath = reader.readYangInstanceIdentifier();
+        NormalizedNodeDataInput nnin = NormalizedNodeInputOutput.newDataInput(ByteStreams.newDataInput(
+            bos.toByteArray()));
+
+        YangInstanceIdentifier newPath = nnin.readYangInstanceIdentifier();
         Assert.assertEquals(path, newPath);
-
-        writer.close();
     }
 
     @Test
@@ -179,10 +173,8 @@ public class NormalizedNodeStreamReaderWriterTest {
                 (SampleNormalizedNodeSerializable)SerializationUtils.clone(serializable);
 
         Assert.assertEquals(input, clone.getInput());
-
     }
 
-    @SuppressWarnings("deprecation")
     @Test
     public void testAnyXmlStreaming() throws Exception {
         String xml = "<foo xmlns=\"http://www.w3.org/TR/html4/\" x=\"123\"><bar>one</bar><bar>two</bar></foo>";
@@ -199,16 +191,15 @@ public class NormalizedNodeStreamReaderWriterTest {
                         Builders.anyXmlBuilder().withNodeIdentifier(new NodeIdentifier(TestModel.ANY_XML_QNAME))
                             .withValue(new DOMSource(xmlNode)).build()).build();
 
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        NormalizedNodeOutputStreamWriter writer = new NormalizedNodeOutputStreamWriter(
-            ByteStreams.newDataOutput(byteArrayOutputStream));
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        NormalizedNodeDataOutput nnout = NormalizedNodeInputOutput.newDataOutput(ByteStreams.newDataOutput(bos));
 
-        writer.writeNormalizedNode(anyXmlContainer);
+        nnout.writeNormalizedNode(anyXmlContainer);
 
-        NormalizedNodeInputStreamReader reader = new NormalizedNodeInputStreamReader(
-                ByteStreams.newDataInput(byteArrayOutputStream.toByteArray()));
+        NormalizedNodeDataInput nnin = NormalizedNodeInputOutput.newDataInput(ByteStreams.newDataInput(
+            bos.toByteArray()));
 
-        ContainerNode deserialized = (ContainerNode)reader.readNormalizedNode();
+        ContainerNode deserialized = (ContainerNode)nnin.readNormalizedNode();
 
         Optional<DataContainerChild<? extends PathArgument, ?>> child =
                 deserialized.getChild(new NodeIdentifier(TestModel.ANY_XML_QNAME));
@@ -221,8 +212,20 @@ public class NormalizedNodeStreamReaderWriterTest {
 
         assertEquals("XML", xml, xmlOutput.getWriter().toString());
         assertEquals("http://www.w3.org/TR/html4/", ((AnyXmlNode)child.get()).getValue().getNode().getNamespaceURI());
+    }
 
-        writer.close();
+    @Test
+    public void testSchemaPathSerialization() throws Exception {
+        final SchemaPath expected = SchemaPath.create(true, TestModel.ANY_XML_QNAME);
+
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        NormalizedNodeDataOutput nnout = NormalizedNodeInputOutput.newDataOutput(ByteStreams.newDataOutput(bos));
+        nnout.writeSchemaPath(expected);
+
+        NormalizedNodeDataInput nnin = NormalizedNodeInputOutput.newDataInput(ByteStreams.newDataInput(
+            bos.toByteArray()));
+        SchemaPath actual = nnin.readSchemaPath();
+        assertEquals(expected, actual);
     }
 
     private static String largeString(final int pow) {
