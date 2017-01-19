@@ -103,6 +103,7 @@ class RpcServiceMetadata extends AbstractDependentComponentFactoryMetadata {
     private void retrievedDOMRpcService(DOMRpcService domRpcService) {
         LOG.debug("{}: retrievedDOMRpcService", logName());
 
+        setDependendencyDesc("Available DOM RPC for binding RPC: " + rpcInterface);
         rpcListenerReg = domRpcService.registerRpcListener(new DOMRpcAvailabilityListener() {
             @Override
             public void onRpcAvailable(Collection<DOMRpcIdentifier> rpcs) {
