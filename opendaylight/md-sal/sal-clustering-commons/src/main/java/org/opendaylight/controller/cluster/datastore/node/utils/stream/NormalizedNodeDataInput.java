@@ -13,9 +13,11 @@ import java.io.IOException;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 
 /**
- * Interface for reading {@link NormalizedNode}s, {@link YangInstanceIdentifier}s and {@link PathArgument}s.
+ * Interface for reading {@link NormalizedNode}s, {@link YangInstanceIdentifier}s, {@link PathArgument}s
+ * and {@link SchemaPath}s.
  */
 @Beta
 public interface NormalizedNodeDataInput extends DataInput {
@@ -31,4 +33,6 @@ public interface NormalizedNodeDataInput extends DataInput {
     YangInstanceIdentifier readYangInstanceIdentifier() throws IOException;
 
     PathArgument readPathArgument() throws IOException;
+
+    SchemaPath readSchemaPath() throws IOException;
 }

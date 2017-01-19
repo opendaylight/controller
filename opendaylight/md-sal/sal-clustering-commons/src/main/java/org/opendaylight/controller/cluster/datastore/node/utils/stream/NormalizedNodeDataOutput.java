@@ -13,9 +13,11 @@ import java.io.IOException;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 
 /**
- * Interface for emitting {@link NormalizedNode}s, {@link YangInstanceIdentifier}s and {@link PathArgument}s.
+ * Interface for emitting {@link NormalizedNode}s, {@link YangInstanceIdentifier}s, {@link PathArgument}s
+ * and {@link SchemaPath}s.
  */
 @Beta
 public interface NormalizedNodeDataOutput extends AutoCloseable, DataOutput {
@@ -24,6 +26,8 @@ public interface NormalizedNodeDataOutput extends AutoCloseable, DataOutput {
     void writePathArgument(PathArgument pathArgument) throws IOException;
 
     void writeYangInstanceIdentifier(YangInstanceIdentifier identifier) throws IOException;
+
+    void writeSchemaPath(SchemaPath path) throws IOException;
 
     @Override
     void close() throws IOException;

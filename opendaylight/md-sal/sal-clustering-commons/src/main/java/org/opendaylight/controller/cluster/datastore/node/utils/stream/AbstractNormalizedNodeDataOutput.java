@@ -32,6 +32,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgum
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeStreamWriter;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeWriter;
+import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -344,6 +345,18 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
                 o.getClass(), o);
 
             writeString((String) o);
+        }
+    }
+
+    @Override
+    public void writeSchemaPath(final SchemaPath path) throws IOException {
+        ensureHeaderWritten();
+        output.writeBoolean(path.isAbsolute());
+
+        final Collection<QName> qnames = path.getPath();
+        output.writeInt(qnames.size());
+        for (QName qname : qnames) {
+            writeQName(qname);
         }
     }
 
