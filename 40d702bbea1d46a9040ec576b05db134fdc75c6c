@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "1a622d24_9f435bae",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RemoteRpcProviderConfig.java",
+        "patchSetId": 17
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2017-01-19T12:46:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1a622d24_f41b967e",
+      "range": {
+        "startLine": 20,
+        "startChar": 66,
+        "endLine": 20,
+        "endChar": 77
+      },
+      "revId": "40d702bbea1d46a9040ec576b05db134fdc75c6c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a622d24_ff77ef9d",
         "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RpcRegistrator.java",
         "patchSetId": 17
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "1a622d24_ff152f9c",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RpcRegistrator.java",
+        "patchSetId": 17
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2017-01-19T12:46:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1a622d24_ff77ef9d",
+      "range": {
+        "startLine": 30,
+        "startChar": 15,
+        "endLine": 30,
+        "endChar": 26
+      },
+      "revId": "40d702bbea1d46a9040ec576b05db134fdc75c6c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a622d24_ff9ecfb7",
         "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/registry/RpcRegistry.java",
         "patchSetId": 17
@@ -59,6 +107,30 @@
       "writtenOn": "2017-01-19T11:14:29Z",
       "side": 1,
       "message": "Registrar",
+      "range": {
+        "startLine": 44,
+        "startChar": 30,
+        "endLine": 44,
+        "endChar": 41
+      },
+      "revId": "40d702bbea1d46a9040ec576b05db134fdc75c6c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_df1833d5",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/registry/RpcRegistry.java",
+        "patchSetId": 17
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2017-01-19T12:46:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1a622d24_ff9ecfb7",
       "range": {
         "startLine": 44,
         "startChar": 30,
