@@ -17,6 +17,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -39,6 +40,7 @@ import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.ListNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.NormalizedNodeAttrBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.NormalizedNodeContainerBuilder;
+import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
@@ -349,6 +351,20 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput 
         byte[] bytes = new byte[input.readInt()];
         input.readFully(bytes);
         return new String(bytes, StandardCharsets.UTF_8);
+    }
+
+    @Override
+    public SchemaPath readSchemaPath() throws IOException {
+        readSignatureMarkerAndVersionIfNeeded();
+
+        final boolean absolute = input.readBoolean();
+        final int size = input.readInt();
+        final Collection<QName> qnames = new ArrayList<>(size);
+        for (int i = 0; i < size; ++i) {
+            qnames.add(readQName());
+        }
+
+        return SchemaPath.create(qnames, absolute);
     }
 
     @Override
