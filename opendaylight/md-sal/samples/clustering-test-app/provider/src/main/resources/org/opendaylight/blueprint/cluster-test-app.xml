@@ -7,6 +7,8 @@
   <reference id="dataBroker" interface="org.opendaylight.controller.md.sal.binding.api.DataBroker"/>
   <reference id="notificationService" interface="org.opendaylight.controller.sal.binding.api.NotificationProviderService"/>
   <reference id="entityOwnershipService" interface="org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipService"/>
+  <reference id="bindingRpcRegistry" interface="org.opendaylight.controller.sal.binding.api.RpcProviderRegistry"/>
+  <reference id="clusterSingletonService" interface="org.opendaylight.mdsal.singleton.common.api.ClusterSingletonServiceProvider"/>
 
   <bean id="purchaseCarProvider" class="org.opendaylight.controller.clustering.it.provider.PurchaseCarProvider" >
     <property name="notificationProvider" ref="notificationService"/>
@@ -32,5 +34,10 @@
   </bean>
 
   <odl:notification-listener ref="peopleCarListener"/>
+
+  <bean id="basicTestProvider" class="org.opendaylight.controller.clustering.it.provider.BasicRpcTestProvider">
+    <argument ref="bindingRpcRegistry"/>
+    <argument ref="clusterSingletonService"/>
+  </bean>
 
 </blueprint>
