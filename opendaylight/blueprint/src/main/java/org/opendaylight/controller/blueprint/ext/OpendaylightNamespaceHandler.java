@@ -13,8 +13,6 @@ import java.io.StringReader;
 import java.net.URL;
 import java.util.Collections;
 import java.util.Set;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import org.apache.aries.blueprint.ComponentDefinitionRegistry;
 import org.apache.aries.blueprint.NamespaceHandler;
 import org.apache.aries.blueprint.ParserContext;
@@ -28,6 +26,7 @@ import org.apache.aries.blueprint.mutable.MutableValueMetadata;
 import org.opendaylight.controller.blueprint.BlueprintContainerRestartService;
 import org.opendaylight.controller.md.sal.binding.api.NotificationService;
 import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
+import org.opendaylight.yangtools.util.xml.UntrustedXML;
 import org.osgi.service.blueprint.container.ComponentDefinitionException;
 import org.osgi.service.blueprint.reflect.BeanMetadata;
 import org.osgi.service.blueprint.reflect.ComponentMetadata;
@@ -392,16 +391,9 @@ public final class OpendaylightNamespaceHandler implements NamespaceHandler {
     }
 
     private static Element parseXML(final String name, final String xml) {
-        DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
-        builderFactory.setNamespaceAware(true);
-        builderFactory.setCoalescing(true);
-        builderFactory.setIgnoringElementContentWhitespace(true);
-        builderFactory.setIgnoringComments(true);
-
         try {
-            return builderFactory.newDocumentBuilder().parse(new InputSource(
-                    new StringReader(xml))).getDocumentElement();
-        } catch (SAXException | IOException | ParserConfigurationException e) {
+            return UntrustedXML.newDocumentBuilder().parse(new InputSource(new StringReader(xml))).getDocumentElement();
+        } catch (SAXException | IOException e) {
             throw new ComponentDefinitionException(String.format("Error %s parsing XML: %s", name, xml), e);
         }
     }

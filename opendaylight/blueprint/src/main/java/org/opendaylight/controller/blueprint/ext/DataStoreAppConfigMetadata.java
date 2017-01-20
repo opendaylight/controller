@@ -24,8 +24,6 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import org.apache.aries.blueprint.services.ExtendedBlueprintContainer;
 import org.opendaylight.controller.md.sal.binding.api.ClusteredDataTreeChangeListener;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
@@ -39,6 +37,7 @@ import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
+import org.opendaylight.yangtools.util.xml.UntrustedXML;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.Identifiable;
 import org.opendaylight.yangtools.yang.binding.Identifier;
@@ -81,17 +80,6 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
     private static final String DEFAULT_APP_CONFIG_FILE_PATH = "etc" + File.separator + "opendaylight" + File.separator
             + "datastore" + File.separator + "initial" + File.separator + "config";
 
-    private static final DocumentBuilderFactory DOC_BUILDER_FACTORY;
-
-    static {
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        factory.setNamespaceAware(true);
-        factory.setCoalescing(true);
-        factory.setIgnoringElementContentWhitespace(true);
-        factory.setIgnoringComments(true);
-        DOC_BUILDER_FACTORY = factory;
-    }
-
     private final Element defaultAppConfigElement;
     private final String defaultAppConfigFileName;
     private final String appConfigBindingClassName;
@@ -108,9 +96,9 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
     // project are still used - conversion to the mdsal binding classes hasn't occurred yet.
     private volatile BindingNormalizedNodeSerializer bindingSerializer;
 
-    public DataStoreAppConfigMetadata(@Nonnull String id, @Nonnull String appConfigBindingClassName,
-            @Nullable String appConfigListKeyValue, @Nullable String defaultAppConfigFileName,
-            @Nonnull UpdateStrategy updateStrategyValue, @Nullable Element defaultAppConfigElement) {
+    public DataStoreAppConfigMetadata(@Nonnull final String id, @Nonnull final String appConfigBindingClassName,
+            @Nullable final String appConfigListKeyValue, @Nullable final String defaultAppConfigFileName,
+            @Nonnull final UpdateStrategy updateStrategyValue, @Nullable final Element defaultAppConfigElement) {
         super(id);
         this.defaultAppConfigElement = defaultAppConfigElement;
         this.defaultAppConfigFileName = defaultAppConfigFileName;
@@ -121,7 +109,7 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
 
     @Override
     @SuppressWarnings("unchecked")
-    public void init(ExtendedBlueprintContainer container) {
+    public void init(final ExtendedBlueprintContainer container) {
         super.init(container);
 
         Class<DataObject> appConfigBindingClass;
@@ -189,7 +177,7 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
         retrieveService("data-broker", DataBroker.class, service -> retrieveInitialAppConfig((DataBroker)service));
     }
 
-    private void retrieveInitialAppConfig(DataBroker dataBroker) {
+    private void retrieveInitialAppConfig(final DataBroker dataBroker) {
         LOG.debug("{}: Got DataBroker instance - reading app config {}", logName(), bindingContext.appConfigPath);
 
         setDependendencyDesc("Initial app config " + bindingContext.appConfigBindingClass.getSimpleName());
@@ -214,7 +202,7 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
                 LogicalDatastoreType.CONFIGURATION, bindingContext.appConfigPath);
         Futures.addCallback(future, new FutureCallback<Optional<DataObject>>() {
             @Override
-            public void onSuccess(Optional<DataObject> possibleAppConfig) {
+            public void onSuccess(final Optional<DataObject> possibleAppConfig) {
                 LOG.debug("{}: Read of app config {} succeeded: {}", logName(), bindingContext
                         .appConfigBindingClass.getName(), possibleAppConfig);
 
@@ -223,7 +211,7 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
             }
 
             @Override
-            public void onFailure(Throwable failure) {
+            public void onFailure(final Throwable failure) {
                 readOnlyTx.close();
 
                 // We may have gotten the app config via the data tree change listener so only retry if not.
@@ -237,7 +225,7 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
         });
     }
 
-    private void onAppConfigChanged(Collection<DataTreeModification<DataObject>> changes) {
+    private void onAppConfigChanged(final Collection<DataTreeModification<DataObject>> changes) {
         for (DataTreeModification<DataObject> change: changes) {
             DataObjectModification<DataObject> changeRoot = change.getRootNode();
             ModificationType type = changeRoot.getModificationType();
@@ -267,7 +255,7 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
         }
     }
 
-    private boolean setInitialAppConfig(Optional<DataObject> possibleAppConfig) {
+    private boolean setInitialAppConfig(final Optional<DataObject> possibleAppConfig) {
         boolean result = readingInitialAppConfig.compareAndSet(true, false);
         if (result) {
             DataObject localAppConfig;
@@ -345,8 +333,8 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
         return appConfig;
     }
 
-    private NormalizedNode<?, ?> parsePossibleDefaultAppConfigXMLFile(SchemaContext schemaContext,
-            DataSchemaNode dataSchema) {
+    private NormalizedNode<?, ?> parsePossibleDefaultAppConfigXMLFile(final SchemaContext schemaContext,
+            final DataSchemaNode dataSchema) {
 
         String appConfigFileName = defaultAppConfigFileName;
         if (Strings.isNullOrEmpty(appConfigFileName)) {
@@ -373,14 +361,14 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
                 XmlUtils.DEFAULT_XML_CODEC_PROVIDER, schemaContext);
 
         try (FileInputStream fis = new FileInputStream(appConfigFile)) {
-            Document root = DOC_BUILDER_FACTORY.newDocumentBuilder().parse(fis);
+            Document root = UntrustedXML.newDocumentBuilder().parse(fis);
             NormalizedNode<?, ?> dataNode = bindingContext.parseDataElement(root.getDocumentElement(), dataSchema,
                     parserFactory);
 
             LOG.debug("{}: Parsed data node: {}", logName(), dataNode);
 
             return dataNode;
-        } catch (SAXException | IOException | ParserConfigurationException e) {
+        } catch (SAXException | IOException e) {
             String msg = String.format("%s: Could not read/parse app config file %s", logName(), appConfigFile);
             LOG.error(msg, e);
             setFailureMessage(msg);
@@ -389,7 +377,7 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
         return null;
     }
 
-    private String findYangModuleName(QName qname, SchemaContext schemaContext) {
+    private String findYangModuleName(final QName qname, final SchemaContext schemaContext) {
         for (Module m : schemaContext.getModules()) {
             if (qname.getModule().equals(m.getQNameModule())) {
                 return m.getName();
@@ -401,8 +389,8 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
     }
 
     @Nullable
-    private NormalizedNode<?, ?> parsePossibleDefaultAppConfigElement(SchemaContext schemaContext,
-            DataSchemaNode dataSchema) {
+    private NormalizedNode<?, ?> parsePossibleDefaultAppConfigElement(final SchemaContext schemaContext,
+            final DataSchemaNode dataSchema) {
         if (defaultAppConfigElement == null) {
             return null;
         }
@@ -425,7 +413,7 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
 
 
     @Override
-    public void destroy(Object instance) {
+    public void destroy(final Object instance) {
         super.destroy(instance);
 
         if (appConfigChangeListenerReg != null) {
@@ -443,8 +431,8 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
         final Class<? extends DataSchemaNode> schemaType;
         final QName bindingQName;
 
-        protected BindingContext(Class<DataObject> appConfigBindingClass, InstanceIdentifier<DataObject> appConfigPath,
-                Class<? extends DataSchemaNode> schemaType) {
+        protected BindingContext(final Class<DataObject> appConfigBindingClass,
+                final InstanceIdentifier<DataObject> appConfigPath, final Class<? extends DataSchemaNode> schemaType) {
             this.appConfigBindingClass = appConfigBindingClass;
             this.appConfigPath = appConfigPath;
             this.schemaType = schemaType;
@@ -462,18 +450,18 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
      * BindingContext implementation for a container binding.
      */
     private static class ContainerBindingContext extends BindingContext {
-        ContainerBindingContext(Class<DataObject> appConfigBindingClass) {
+        ContainerBindingContext(final Class<DataObject> appConfigBindingClass) {
             super(appConfigBindingClass, InstanceIdentifier.create(appConfigBindingClass), ContainerSchemaNode.class);
         }
 
         @Override
-        NormalizedNode<?, ?> newDefaultNode(DataSchemaNode dataSchema) {
+        NormalizedNode<?, ?> newDefaultNode(final DataSchemaNode dataSchema) {
             return ImmutableNodes.containerNode(bindingQName);
         }
 
         @Override
-        NormalizedNode<?, ?> parseDataElement(Element element, DataSchemaNode dataSchema,
-                DomToNormalizedNodeParserFactory parserFactory) {
+        NormalizedNode<?, ?> parseDataElement(final Element element, final DataSchemaNode dataSchema,
+                final DomToNormalizedNodeParserFactory parserFactory) {
             return parserFactory.getContainerNodeParser().parse(Collections.singletonList(element),
                     (ContainerSchemaNode)dataSchema);
         }
@@ -485,14 +473,14 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
     private static class ListBindingContext extends BindingContext {
         final String appConfigListKeyValue;
 
-        ListBindingContext(Class<DataObject> appConfigBindingClass, InstanceIdentifier<DataObject> appConfigPath,
-                String appConfigListKeyValue) {
+        ListBindingContext(final Class<DataObject> appConfigBindingClass,
+                final InstanceIdentifier<DataObject> appConfigPath, final String appConfigListKeyValue) {
             super(appConfigBindingClass, appConfigPath, ListSchemaNode.class);
             this.appConfigListKeyValue = appConfigListKeyValue;
         }
 
         @SuppressWarnings({ "rawtypes", "unchecked" })
-        private static ListBindingContext newInstance(Class<DataObject> bindingClass, String listKeyValue)
+        private static ListBindingContext newInstance(final Class<DataObject> bindingClass, final String listKeyValue)
                 throws InstantiationException, IllegalAccessException, IllegalArgumentException,
                        InvocationTargetException, NoSuchMethodException, SecurityException {
             // We assume the yang list key type is string.
@@ -503,7 +491,7 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
         }
 
         @Override
-        NormalizedNode<?, ?> newDefaultNode(DataSchemaNode dataSchema) {
+        NormalizedNode<?, ?> newDefaultNode(final DataSchemaNode dataSchema) {
             // We assume there's only one key for the list.
             List<QName> keys = ((ListSchemaNode)dataSchema).getKeyDefinition();
             Preconditions.checkArgument(keys.size() == 1, "Expected only 1 key for list %s", appConfigBindingClass);
@@ -512,8 +500,8 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
         }
 
         @Override
-        NormalizedNode<?, ?> parseDataElement(Element element, DataSchemaNode dataSchema,
-                DomToNormalizedNodeParserFactory parserFactory) {
+        NormalizedNode<?, ?> parseDataElement(final Element element, final DataSchemaNode dataSchema,
+                final DomToNormalizedNodeParserFactory parserFactory) {
             return parserFactory.getMapEntryNodeParser().parse(Collections.singletonList(element),
                     (ListSchemaNode)dataSchema);
         }
