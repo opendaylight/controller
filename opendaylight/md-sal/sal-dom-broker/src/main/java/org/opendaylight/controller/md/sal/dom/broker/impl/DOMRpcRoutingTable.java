@@ -28,20 +28,16 @@ import org.opendaylight.controller.md.sal.dom.api.DOMRpcIdentifier;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcImplementation;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcImplementationNotAvailableException;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcResult;
+import org.opendaylight.controller.md.sal.dom.broker.spi.rpc.RpcRoutingStrategy;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
-import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.RpcDefinition;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
-import org.opendaylight.yangtools.yang.model.api.UnknownSchemaNode;
 
 final class DOMRpcRoutingTable {
-    private static final QName CONTEXT_REFERENCE = QName.create("urn:opendaylight:yang:extension:yang-ext",
-        "2013-07-09", "context-reference").intern();
 
     static final DOMRpcRoutingTable EMPTY = new DOMRpcRoutingTable(ImmutableMap.of(), null);
 
@@ -161,16 +157,11 @@ final class DOMRpcRoutingTable {
             return new UnknownDOMRpcRoutingTableEntry(key, implementations);
         }
 
-        final ContainerSchemaNode input = rpcDef.getInput();
-        if (input != null) {
-            for (DataSchemaNode c : input.getChildNodes()) {
-                for (UnknownSchemaNode extension : c.getUnknownSchemaNodes()) {
-                    if (CONTEXT_REFERENCE.equals(extension.getNodeType())) {
-                        final YangInstanceIdentifier keyId = YangInstanceIdentifier.of(c.getQName());
-                        return new RoutedDOMRpcRoutingTableEntry(rpcDef, keyId, implementations);
-                    }
-                }
-            }
+        final RpcRoutingStrategy strategy = RpcRoutingStrategy.from(rpcDef);
+        if (strategy.isContextBasedRouted()) {
+            return new RoutedDOMRpcRoutingTableEntry(rpcDef, YangInstanceIdentifier.of(strategy.getLeaf()),
+                implementations);
+
         }
 
         return new GlobalDOMRpcRoutingTableEntry(rpcDef, implementations);
