@@ -103,7 +103,7 @@ class SpecificReferenceListMetadata extends AbstractDependentComponentFactoryMet
             }
         };
 
-        setDependendencyDesc(interfaceName + " services with types " + expectedServiceTypes);
+        setDependencyDesc(interfaceName + " services with types " + expectedServiceTypes);
 
         serviceTracker = new ServiceTracker<>(container().getBundleContext(), interfaceName, serviceListener);
         serviceTracker.open();
@@ -175,7 +175,7 @@ class SpecificReferenceListMetadata extends AbstractDependentComponentFactoryMet
             } else {
                 Set<String> remaining = new HashSet<>(expectedServiceTypes);
                 remaining.removeAll(retrievedServiceTypes);
-                setDependendencyDesc(interfaceName + " services with types " + remaining);
+                setDependencyDesc(interfaceName + " services with types " + remaining);
             }
         }
 
