@@ -43,30 +43,30 @@ class RpcServiceMetadata extends AbstractDependentComponentFactoryMetadata {
     private volatile ListenerRegistration<DOMRpcAvailabilityListener> rpcListenerReg;
     private volatile Class<RpcService> rpcInterface;
 
-    RpcServiceMetadata(String id, String interfaceName) {
+    RpcServiceMetadata(final String id, final String interfaceName) {
         super(id);
         this.interfaceName = interfaceName;
     }
 
     @SuppressWarnings({ "checkstyle:IllegalCatch", "unchecked" })
     @Override
-    public void init(ExtendedBlueprintContainer container) {
+    public void init(final ExtendedBlueprintContainer container) {
         super.init(container);
 
+        final Class<?> interfaceClass;
         try {
-            Class<?> interfaceClass = container().getBundleContext().getBundle().loadClass(interfaceName);
-            if (!RpcService.class.isAssignableFrom(interfaceClass)) {
-                throw new ComponentDefinitionException(String.format(
-                        "%s: The specified interface %s is not an RpcService", logName(), interfaceName));
-            }
-
-            rpcInterface = (Class<RpcService>)interfaceClass;
-        } catch (ComponentDefinitionException e) {
-            throw e;
+            interfaceClass = container().getBundleContext().getBundle().loadClass(interfaceName);
         } catch (Exception e) {
             throw new ComponentDefinitionException(String.format("%s: Error obtaining interface class %s",
                     logName(), interfaceName), e);
         }
+
+        if (!RpcService.class.isAssignableFrom(interfaceClass)) {
+            throw new ComponentDefinitionException(String.format(
+                "%s: The specified interface %s is not an RpcService", logName(), interfaceName));
+        }
+
+        rpcInterface = (Class<RpcService>)interfaceClass;
     }
 
     @Override
@@ -77,7 +77,7 @@ class RpcServiceMetadata extends AbstractDependentComponentFactoryMetadata {
             service -> retrievedSchemaContext(((SchemaService)service).getGlobalContext()));
     }
 
-    private void retrievedSchemaContext(SchemaContext schemaContext) {
+    private void retrievedSchemaContext(final SchemaContext schemaContext) {
         LOG.debug("{}: retrievedSchemaContext", logName());
 
         QNameModule moduleName = BindingReflections.getQNameModule(rpcInterface);
@@ -100,23 +100,23 @@ class RpcServiceMetadata extends AbstractDependentComponentFactoryMetadata {
             service -> retrievedDOMRpcService((DOMRpcService)service));
     }
 
-    private void retrievedDOMRpcService(DOMRpcService domRpcService) {
+    private void retrievedDOMRpcService(final DOMRpcService domRpcService) {
         LOG.debug("{}: retrievedDOMRpcService", logName());
 
         setDependendencyDesc("Available DOM RPC for binding RPC: " + rpcInterface);
         rpcListenerReg = domRpcService.registerRpcListener(new DOMRpcAvailabilityListener() {
             @Override
-            public void onRpcAvailable(Collection<DOMRpcIdentifier> rpcs) {
+            public void onRpcAvailable(final Collection<DOMRpcIdentifier> rpcs) {
                 onRpcsAvailable(rpcs);
             }
 
             @Override
-            public void onRpcUnavailable(Collection<DOMRpcIdentifier> rpcs) {
+            public void onRpcUnavailable(final Collection<DOMRpcIdentifier> rpcs) {
             }
         });
     }
 
-    protected void onRpcsAvailable(Collection<DOMRpcIdentifier> rpcs) {
+    protected void onRpcsAvailable(final Collection<DOMRpcIdentifier> rpcs) {
         for (DOMRpcIdentifier identifier : rpcs) {
             if (rpcSchemaPaths.contains(identifier.getType())) {
                 LOG.debug("{}: onRpcsAvailable - found SchemaPath {}", logName(), identifier.getType());
@@ -163,7 +163,7 @@ class RpcServiceMetadata extends AbstractDependentComponentFactoryMetadata {
     }
 
     @Override
-    public void destroy(Object instance) {
+    public void destroy(final Object instance) {
         super.destroy(instance);
         closeRpcListenerReg();
     }
