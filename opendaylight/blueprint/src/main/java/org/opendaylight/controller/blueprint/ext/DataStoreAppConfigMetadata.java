@@ -180,7 +180,7 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
     private void retrieveInitialAppConfig(final DataBroker dataBroker) {
         LOG.debug("{}: Got DataBroker instance - reading app config {}", logName(), bindingContext.appConfigPath);
 
-        setDependendencyDesc("Initial app config " + bindingContext.appConfigBindingClass.getSimpleName());
+        setDependencyDesc("Initial app config " + bindingContext.appConfigBindingClass.getSimpleName());
 
         // We register a DTCL to get updates and also read the app config data from the data store. If
         // the app config data is present then both the read and initial DTCN update will return it. If the
