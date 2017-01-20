@@ -10,18 +10,22 @@ package org.opendaylight.controller.cluster.raft.behaviors;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.protobuf.ByteString;
+import com.google.common.io.ByteSource;
+import com.google.common.io.CountingOutputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.Arrays;
 import org.slf4j.Logger;
 
 /**
  * Helper class that maintains state for a snapshot that is being installed in chunks on a Follower.
  */
-public class SnapshotTracker {
+class SnapshotTracker implements AutoCloseable {
     private final Logger log;
     private final int totalChunks;
     private final String leaderId;
-    private ByteString collectedChunks = ByteString.EMPTY;
+    private final CountingOutputStream countingStream;
+    private final ByteArrayOutputStream backingStream;
     private int lastChunkIndex = LeaderInstallSnapshotState.FIRST_CHUNK_INDEX - 1;
     private boolean sealed = false;
     private int lastChunkHashCode = LeaderInstallSnapshotState.INITIAL_LAST_CHUNK_HASH_CODE;
@@ -30,6 +34,9 @@ public class SnapshotTracker {
         this.log = log;
         this.totalChunks = totalChunks;
         this.leaderId = Preconditions.checkNotNull(leaderId);
+
+        backingStream = new ByteArrayOutputStream();
+        countingStream = new CountingOutputStream(backingStream);
     }
 
     /**
@@ -42,9 +49,9 @@ public class SnapshotTracker {
      * @throws InvalidChunkException if the chunk index is invalid or out of order
      */
     boolean addChunk(int chunkIndex, byte[] chunk, Optional<Integer> maybeLastChunkHashCode)
-            throws InvalidChunkException {
+            throws InvalidChunkException, IOException {
         log.debug("addChunk: chunkIndex={}, lastChunkIndex={}, collectedChunks.size={}, lastChunkHashCode={}",
-                chunkIndex, lastChunkIndex, collectedChunks.size(), this.lastChunkHashCode);
+                chunkIndex, lastChunkIndex, countingStream.getCount(), this.lastChunkHashCode);
 
         if (sealed) {
             throw new InvalidChunkException("Invalid chunk received with chunkIndex " + chunkIndex
@@ -61,30 +68,36 @@ public class SnapshotTracker {
                     + maybeLastChunkHashCode.get());
         }
 
+        countingStream.write(chunk);
+
         sealed = chunkIndex == totalChunks;
         lastChunkIndex = chunkIndex;
-        collectedChunks = collectedChunks.concat(ByteString.copyFrom(chunk));
         this.lastChunkHashCode = Arrays.hashCode(chunk);
         return sealed;
     }
 
-    byte[] getSnapshot() {
+    ByteSource getSnapshotBytes() {
         if (!sealed) {
             throw new IllegalStateException("lastChunk not received yet");
         }
 
-        return collectedChunks.toByteArray();
-    }
-
-    ByteString getCollectedChunks() {
-        return collectedChunks;
+        return ByteSource.wrap(backingStream.toByteArray());
     }
 
     String getLeaderId() {
         return leaderId;
     }
 
-    public static class InvalidChunkException extends Exception {
+    @Override
+    public void close() {
+        try {
+            countingStream.close();
+        } catch (IOException e) {
+            log.warn("Error closing snapshot stream");
+        }
+    }
+
+    public static class InvalidChunkException extends IOException {
         private static final long serialVersionUID = 1L;
 
         InvalidChunkException(String message) {
