@@ -11,14 +11,14 @@ package org.opendaylight.controller.cluster.raft.behaviors;
 import static org.junit.Assert.assertEquals;
 
 import com.google.common.base.Optional;
+import com.google.common.io.ByteSource;
 import com.google.protobuf.ByteString;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import org.junit.Assert;
+import org.apache.commons.lang3.SerializationUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -41,117 +41,67 @@ public class SnapshotTrackerTest {
         data.put("key2", "value2");
         data.put("key3", "value3");
 
-        byteString = toByteString(data);
+        byteString = ByteString.copyFrom(SerializationUtils.serialize((Serializable) data));
         chunk1 = getNextChunk(byteString, 0, 10);
         chunk2 = getNextChunk(byteString, 10, 10);
         chunk3 = getNextChunk(byteString, 20, byteString.size());
     }
 
     @Test
-    public void testAddChunk() throws SnapshotTracker.InvalidChunkException {
-        SnapshotTracker tracker1 = new SnapshotTracker(logger, 5, "leader");
+    public void testAddChunks() throws IOException {
+        SnapshotTracker tracker = new SnapshotTracker(logger, 3, "leader");
 
-        tracker1.addChunk(1, chunk1, Optional.<Integer>absent());
-        tracker1.addChunk(2, chunk2, Optional.<Integer>absent());
-        tracker1.addChunk(3, chunk3, Optional.<Integer>absent());
+        tracker.addChunk(1, chunk1, Optional.of(LeaderInstallSnapshotState.INITIAL_LAST_CHUNK_HASH_CODE));
+        tracker.addChunk(2, chunk2, Optional.of(Arrays.hashCode(chunk1)));
+        tracker.addChunk(3, chunk3, Optional.of(Arrays.hashCode(chunk2)));
 
-        // Verify that an InvalidChunkException is thrown when we try to add a chunk to a sealed tracker
-        SnapshotTracker tracker2 = new SnapshotTracker(logger, 2, "leader");
+        ByteSource snapshotBytes = tracker.getSnapshotBytes();
+        assertEquals("Deserialized", data, SerializationUtils.deserialize(snapshotBytes.read()));
 
-        tracker2.addChunk(1, chunk1, Optional.<Integer>absent());
-        tracker2.addChunk(2, chunk2, Optional.<Integer>absent());
-
-        try {
-            tracker2.addChunk(3, chunk3, Optional.<Integer>absent());
-            Assert.fail();
-        } catch (SnapshotTracker.InvalidChunkException e) {
-            // expected
-        }
-
-        // The first chunk's index must at least be FIRST_CHUNK_INDEX
-        SnapshotTracker tracker3 = new SnapshotTracker(logger, 2, "leader");
-
-        try {
-            tracker3.addChunk(LeaderInstallSnapshotState.FIRST_CHUNK_INDEX - 1, chunk1, Optional.<Integer>absent());
-            Assert.fail();
-        } catch (SnapshotTracker.InvalidChunkException e) {
-            // expected
-        }
-
-        // Out of sequence chunk indexes won't work
-        SnapshotTracker tracker4 = new SnapshotTracker(logger, 2, "leader");
-
-        tracker4.addChunk(LeaderInstallSnapshotState.FIRST_CHUNK_INDEX, chunk1, Optional.<Integer>absent());
-
-        try {
-            tracker4.addChunk(LeaderInstallSnapshotState.FIRST_CHUNK_INDEX + 2, chunk2, Optional.<Integer>absent());
-            Assert.fail();
-        } catch (SnapshotTracker.InvalidChunkException e) {
-            // expected
-        }
-
-        // No exceptions will be thrown when invalid chunk is added with the right sequence
-        // If the lastChunkHashCode is missing
-        SnapshotTracker tracker5 = new SnapshotTracker(logger, 2, "leader");
-
-        tracker5.addChunk(LeaderInstallSnapshotState.FIRST_CHUNK_INDEX, chunk1, Optional.<Integer>absent());
-        // Look I can add the same chunk again
-        tracker5.addChunk(LeaderInstallSnapshotState.FIRST_CHUNK_INDEX + 1, chunk1, Optional.<Integer>absent());
-
-        // An exception will be thrown when an invalid chunk is addedd with the right sequence
-        // when the lastChunkHashCode is present
-        SnapshotTracker tracker6 = new SnapshotTracker(logger, 2, "leader");
-
-        tracker6.addChunk(LeaderInstallSnapshotState.FIRST_CHUNK_INDEX, chunk1, Optional.of(-1));
-
-        try {
-            // Here we add a second chunk and tell addChunk that the previous chunk had a hash code 777
-            tracker6.addChunk(LeaderInstallSnapshotState.FIRST_CHUNK_INDEX + 1, chunk2, Optional.of(777));
-            Assert.fail();
-        } catch (SnapshotTracker.InvalidChunkException e) {
-            // expected
-        }
-
+        tracker.close();
     }
 
-    @Test
-    public void testGetSnapShot() throws SnapshotTracker.InvalidChunkException {
-
-        // Trying to get a snapshot before all chunks have been received will throw an exception
-        SnapshotTracker tracker1 = new SnapshotTracker(logger, 5, "leader");
-
-        tracker1.addChunk(1, chunk1, Optional.<Integer>absent());
-        try {
-            tracker1.getSnapshot();
-            Assert.fail();
-        } catch (IllegalStateException e) {
-            // expected
+    @Test(expected = SnapshotTracker.InvalidChunkException.class)
+    public void testAddChunkWhenAlreadySealed() throws IOException {
+        try (SnapshotTracker tracker = new SnapshotTracker(logger, 2, "leader")) {
+            tracker.addChunk(1, chunk1, Optional.<Integer>absent());
+            tracker.addChunk(2, chunk2, Optional.<Integer>absent());
+            tracker.addChunk(3, chunk3, Optional.<Integer>absent());
         }
-
-        SnapshotTracker tracker2 = new SnapshotTracker(logger, 3, "leader");
-
-        tracker2.addChunk(1, chunk1, Optional.of(LeaderInstallSnapshotState.INITIAL_LAST_CHUNK_HASH_CODE));
-        tracker2.addChunk(2, chunk2, Optional.of(Arrays.hashCode(chunk1)));
-        tracker2.addChunk(3, chunk3, Optional.of(Arrays.hashCode(chunk2)));
-
-        byte[] snapshot = tracker2.getSnapshot();
-
-        assertEquals(byteString, ByteString.copyFrom(snapshot));
     }
 
-    @Test
-    public void testGetCollectedChunks() throws SnapshotTracker.InvalidChunkException {
-        SnapshotTracker tracker1 = new SnapshotTracker(logger, 5, "leader");
-
-        ByteString chunks = ByteString.copyFrom(chunk1).concat(ByteString.copyFrom(chunk2));
-
-        tracker1.addChunk(1, chunk1, Optional.of(LeaderInstallSnapshotState.INITIAL_LAST_CHUNK_HASH_CODE));
-        tracker1.addChunk(2, chunk2, Optional.of(Arrays.hashCode(chunk1)));
-
-        assertEquals(chunks, tracker1.getCollectedChunks());
+    @Test(expected = SnapshotTracker.InvalidChunkException.class)
+    public void testInvalidFirstChunkIndex() throws IOException {
+        try (SnapshotTracker tracker = new SnapshotTracker(logger, 2, "leader")) {
+            tracker.addChunk(LeaderInstallSnapshotState.FIRST_CHUNK_INDEX - 1, chunk1, Optional.<Integer>absent());
+        }
     }
 
-    public byte[] getNextChunk(ByteString bs, int offset, int size) {
+    @Test(expected = SnapshotTracker.InvalidChunkException.class)
+    public void testOutOfSequenceChunk() throws IOException {
+        try (SnapshotTracker tracker = new SnapshotTracker(logger, 2, "leader")) {
+            tracker.addChunk(1, chunk1, Optional.<Integer>absent());
+            tracker.addChunk(3, chunk3, Optional.<Integer>absent());
+        }
+    }
+
+    @Test(expected = SnapshotTracker.InvalidChunkException.class)
+    public void testInvalidLastChunkHashCode() throws IOException {
+        try (SnapshotTracker tracker = new SnapshotTracker(logger, 2, "leader")) {
+            tracker.addChunk(1, chunk1, Optional.of(LeaderInstallSnapshotState.INITIAL_LAST_CHUNK_HASH_CODE));
+            tracker.addChunk(2, chunk2, Optional.of(1));
+        }
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void testGetSnapshotBytesWhenNotSealed() throws IOException {
+        try (SnapshotTracker tracker = new SnapshotTracker(logger, 2, "leader")) {
+            tracker.addChunk(1, chunk1, Optional.<Integer>absent());
+            tracker.getSnapshotBytes();
+        }
+    }
+
+    private byte[] getNextChunk(ByteString bs, int offset, int size) {
         int snapshotLength = bs.size();
         int start = offset;
         if (size > snapshotLength) {
@@ -166,31 +116,4 @@ public class SnapshotTrackerTest {
         bs.copyTo(nextChunk, start, 0, size);
         return nextChunk;
     }
-
-    private static ByteString toByteString(Map<String, String> state) {
-        ByteArrayOutputStream bos = null;
-        ObjectOutputStream os = null;
-        try {
-            try {
-                bos = new ByteArrayOutputStream();
-                os = new ObjectOutputStream(bos);
-                os.writeObject(state);
-                byte[] snapshotBytes = bos.toByteArray();
-                return ByteString.copyFrom(snapshotBytes);
-            } finally {
-                if (os != null) {
-                    os.flush();
-                    os.close();
-                }
-                if (bos != null) {
-                    bos.close();
-                }
-            }
-        } catch (IOException e) {
-            org.junit.Assert.fail("IOException in converting Hashmap to Bytestring:" + e);
-        }
-        return null;
-    }
-
-
 }
