@@ -9,12 +9,70 @@
   <xsd:attribute name="use-default-for-reference-types" type="xsd:boolean"/>
   <xsd:attribute name="type" type="xsd:string"/>
 
+  <!--
+       String representation of an instance identifier. Precise string format
+       is undefined just now.
+   -->
+  <xsd:simpleType name="Tpath">
+    <xsd:restriction base="xsd:string"/>
+  </xsd:simpleType>
+
+  <!--
+       A promise to instantiate actions of specified binding interface.
+       Specified interface must define at least one action. In case a bean
+       is specified, it will be used as the implementation of last resort
+       for actions not otherwise bound. If a bean is not specified, a blank
+       implementation will be substituted.
+   -->
+  <xsd:complexType name="TactionProvider">
+    <xsd:attribute name="interface" type="bp:Tclass" use="required"/>
+    <xsd:attribute name="ref" type="bp:Tidref" use="optional"/>
+  </xsd:complexType>
+  <xsd:element name="action-provider" type="TactionProvider"/>
+
+  <!--
+       A reference to an action-provider providing specified interface.
+       Specified interface must define at least one action.
+   -->
+  <xsd:complexType name="TactionService">
+    <xsd:attribute name="interface" type="bp:Tclass" use="required"/>
+    <xsd:attribute name="id" type="xsd:ID"/>
+  </xsd:complexType>
+  <xsd:element name="action-service" type="TactionService"/>
+
+  <!--
+       Implementation of an action at specific instance. This is used
+       to provide binding to actions on specific context, rather than
+       to a more general contract of action-provider.
+   -->
+  <xsd:complexType name="TactionImplementation">
+    <xsd:attribute name="interface" type="bp:Tclass" use="optional"/>
+    <xsd:attribute name="ref" type="bp:Tidref" use="required"/>
+    <xsd:attribute name="path" type="Tpath" use="required"/>
+    <xsd:attribute name="id" type="xsd:ID"/>
+  </xsd:complexType>
+  <xsd:element name="action-implementation" type="TactionImplementation"/>
+
+  <!--
+       A reference to a specific action-implementation.
+   -->
+  <xsd:complexType name="TactionInstance">
+    <xsd:attribute name="interface" type="bp:Tclass" use="required"/>
+    <xsd:attribute name="path" type="Tpath" use="required"/>
+    <xsd:attribute name="id" type="xsd:ID"/>
+  </xsd:complexType>
+  <xsd:element name="action-instance" type="TactionInstance"/>
+
   <xsd:complexType name="TrpcImplementation">
     <xsd:attribute name="interface" type="bp:Tclass" use="optional"/>
     <xsd:attribute name="ref" type="bp:Tidref" use="required"/>
   </xsd:complexType>
   <xsd:element name="rpc-implementation" type="TrpcImplementation"/>
 
+  <!--
+       Deprecated. This interface contract is fulfilled by
+       action-implementation instead
+   -->
   <xsd:complexType name="TroutedRpcImplementation">
     <xsd:attribute name="interface" type="bp:Tclass" use="optional"/>
     <xsd:attribute name="ref" type="bp:Tidref" use="required"/>
