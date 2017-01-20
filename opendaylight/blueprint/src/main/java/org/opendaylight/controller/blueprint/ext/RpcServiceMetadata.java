@@ -7,8 +7,9 @@
  */
 package org.opendaylight.controller.blueprint.ext;
 
+import com.google.common.collect.Collections2;
+import com.google.common.collect.ImmutableSet;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Set;
 import org.apache.aries.blueprint.services.ExtendedBlueprintContainer;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcAvailabilityListener;
@@ -86,10 +87,7 @@ class RpcServiceMetadata extends AbstractDependentComponentFactoryMetadata {
 
         LOG.debug("{}: Got Module: {}", logName(), module);
 
-        rpcSchemaPaths = new HashSet<>();
-        for (RpcDefinition rpcDef : module.getRpcs()) {
-            rpcSchemaPaths.add(rpcDef.getPath());
-        }
+        rpcSchemaPaths = ImmutableSet.copyOf(Collections2.transform(module.getRpcs(), RpcDefinition::getPath));
 
         LOG.debug("{}: Got SchemaPaths: {}", logName(), rpcSchemaPaths);
 
