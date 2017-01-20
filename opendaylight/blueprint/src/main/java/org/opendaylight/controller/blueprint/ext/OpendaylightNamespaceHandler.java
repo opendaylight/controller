@@ -54,6 +54,7 @@ public final class OpendaylightNamespaceHandler implements NamespaceHandler {
     public static final String NAMESPACE_1_0_0 = "http://opendaylight.org/xmlns/blueprint/v1.0.0";
     static final String ROUTED_RPC_REG_CONVERTER_NAME = "org.opendaylight.blueprint.RoutedRpcRegConverter";
     static final String RPC_REGISTRY_NAME = "org.opendaylight.blueprint.RpcRegistry";
+    static final String RPC_PROVIDER_SERVICE_NAME = "org.opendaylight.blueprint.DOMRpcProviderService";
     static final String NOTIFICATION_SERVICE_NAME = "org.opendaylight.blueprint.NotificationService";
     static final String TYPE_ATTR = "type";
     static final String UPDATE_STRATEGY_ATTR = "update-strategy";
@@ -67,6 +68,7 @@ public final class OpendaylightNamespaceHandler implements NamespaceHandler {
     private static final String REF_ATTR = "ref";
     private static final String ID_ATTR = "id";
     private static final String RPC_SERVICE = "rpc-service";
+    private static final String ACTION_SERVICE = "action-service";
     private static final String SPECIFIC_SERVICE_REF_LIST = "specific-reference-list";
     private static final String STATIC_REFERENCE = "static-reference";
 
@@ -105,6 +107,10 @@ public final class OpendaylightNamespaceHandler implements NamespaceHandler {
             return parseSpecificReferenceList(element, context);
         } else if (nodeNameEquals(element, STATIC_REFERENCE)) {
             return parseStaticReference(element, context);
+        } else if (nodeNameEquals(element, ACTION_SERVICE)) {
+            return parseActionService(element, context);
+        } else if (nodeNameEquals(element, ActionProviderBean.ACTION_PROVIDER)) {
+            return parseActionProvider(element, context);
         }
 
         throw new ComponentDefinitionException("Unsupported standalone element: " + element.getNodeName());
@@ -232,6 +238,31 @@ public final class OpendaylightNamespaceHandler implements NamespaceHandler {
         return metadata;
     }
 
+
+    private static Metadata parseActionProvider(final Element element, final ParserContext context) {
+        // FIXME: also inject DOMRpcProviderService
+        registerRpcRegistryServiceRefBean(context);
+
+        MutableBeanMetadata metadata = context.createMetadata(MutableBeanMetadata.class);
+        metadata.setId(context.generateId());
+        metadata.setScope(BeanMetadata.SCOPE_SINGLETON);
+        metadata.setActivation(ReferenceMetadata.ACTIVATION_EAGER);
+        metadata.setRuntimeClass(RpcImplementationBean.class);
+        metadata.setInitMethod("init");
+        metadata.setDestroyMethod("destroy");
+        metadata.addProperty("bundle", createRef(context, "blueprintBundle"));
+        metadata.addProperty("rpcProviderService", createRef(context, RPC_PROVIDER_SERVICE_NAME));
+        metadata.addProperty("rpcRegistry", createRef(context, RPC_REGISTRY_NAME));
+        metadata.addProperty("interfaceName", createValue(context, element.getAttribute(INTERFACE)));
+
+        if (element.hasAttribute(REF_ATTR)) {
+            metadata.addProperty("implementation", createRef(context, element.getAttribute(REF_ATTR)));
+        }
+
+        LOG.debug("parseActionProvider returning {}", metadata);
+        return metadata;
+    }
+
     private static Metadata parseRpcImplementation(final Element element, final ParserContext context) {
         registerRpcRegistryServiceRefBean(context);
 
@@ -250,8 +281,7 @@ public final class OpendaylightNamespaceHandler implements NamespaceHandler {
             metadata.addProperty("interfaceName", createValue(context, element.getAttribute(INTERFACE)));
         }
 
-        LOG.debug("parseAddRpcImplementation returning {}", metadata);
-
+        LOG.debug("parseRpcImplementation returning {}", metadata);
         return metadata;
     }
 
@@ -263,6 +293,15 @@ public final class OpendaylightNamespaceHandler implements NamespaceHandler {
                 element.getAttribute(INTERFACE), element.getAttribute(REF_ATTR));
 
         LOG.debug("parseRoutedRpcImplementation returning {}", metadata);
+
+        return metadata;
+    }
+
+    private static Metadata parseActionService(final Element element, final ParserContext context) {
+        ComponentFactoryMetadata metadata = new ActionServiceMetadata(getId(context, element),
+                element.getAttribute(INTERFACE));
+
+        LOG.debug("parseActionService returning {}", metadata);
 
         return metadata;
     }
