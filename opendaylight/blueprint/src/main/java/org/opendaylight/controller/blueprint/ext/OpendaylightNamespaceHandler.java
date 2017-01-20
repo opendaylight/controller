@@ -67,6 +67,7 @@ public final class OpendaylightNamespaceHandler implements NamespaceHandler {
     private static final String REF_ATTR = "ref";
     private static final String ID_ATTR = "id";
     private static final String RPC_SERVICE = "rpc-service";
+    private static final String ACTION_SERVICE = "action-service";
     private static final String SPECIFIC_SERVICE_REF_LIST = "specific-reference-list";
     private static final String STATIC_REFERENCE = "static-reference";
 
@@ -105,6 +106,8 @@ public final class OpendaylightNamespaceHandler implements NamespaceHandler {
             return parseSpecificReferenceList(element, context);
         } else if (nodeNameEquals(element, STATIC_REFERENCE)) {
             return parseStaticReference(element, context);
+        } else if (nodeNameEquals(element, ACTION_SERVICE)) {
+            return parseActionService(element, context);
         }
 
         throw new ComponentDefinitionException("Unsupported standalone element: " + element.getNodeName());
@@ -263,6 +266,15 @@ public final class OpendaylightNamespaceHandler implements NamespaceHandler {
                 element.getAttribute(INTERFACE), element.getAttribute(REF_ATTR));
 
         LOG.debug("parseRoutedRpcImplementation returning {}", metadata);
+
+        return metadata;
+    }
+
+    private static Metadata parseActionService(final Element element, final ParserContext context) {
+        ComponentFactoryMetadata metadata = new ActionServiceMetadata(getId(context, element),
+                element.getAttribute(INTERFACE));
+
+        LOG.debug("parseActionService returning {}", metadata);
 
         return metadata;
     }
