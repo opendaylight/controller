@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
  * @author Thomas Pantelis
  */
 abstract class AbstractDependentComponentFactoryMetadata implements DependentComponentFactoryMetadata {
-    private final Logger log = LoggerFactory.getLogger(getClass());
+    final Logger log = LoggerFactory.getLogger(getClass());
     private final String id;
     private final AtomicBoolean started = new AtomicBoolean();
     private final AtomicBoolean satisfied = new AtomicBoolean();
@@ -47,7 +47,7 @@ abstract class AbstractDependentComponentFactoryMetadata implements DependentCom
     @GuardedBy("serviceRecipes")
     private boolean stoppedServiceRecipes;
 
-    protected AbstractDependentComponentFactoryMetadata(String id) {
+    protected AbstractDependentComponentFactoryMetadata(final String id) {
         this.id = Preconditions.checkNotNull(id);
     }
 
@@ -76,16 +76,16 @@ abstract class AbstractDependentComponentFactoryMetadata implements DependentCom
         return satisfied.get();
     }
 
-    protected void setFailureMessage(String failureMessage) {
+    protected void setFailureMessage(final String failureMessage) {
         setFailure(failureMessage, null);
     }
 
-    protected void setFailure(String failureMessage, Throwable failureCause) {
+    protected void setFailure(final String failureMessage, final Throwable failureCause) {
         this.failureMessage = failureMessage;
         this.failureCause = failureCause;
     }
 
-    protected void setDependendencyDesc(String dependendencyDesc) {
+    protected void setDependencyDesc(final String dependendencyDesc) {
         this.dependendencyDesc = dependendencyDesc;
     }
 
@@ -99,11 +99,13 @@ abstract class AbstractDependentComponentFactoryMetadata implements DependentCom
         }
     }
 
-    protected void retrieveService(String name, Class<?> interfaceClass, Consumer<Object> onServiceRetrieved) {
+    protected void retrieveService(final String name, final Class<?> interfaceClass,
+            final Consumer<Object> onServiceRetrieved) {
         retrieveService(name, interfaceClass.getName(), onServiceRetrieved);
     }
 
-    protected void retrieveService(String name, String interfaceName, Consumer<Object> onServiceRetrieved) {
+    protected void retrieveService(final String name, final String interfaceName,
+            final Consumer<Object> onServiceRetrieved) {
         synchronized (serviceRecipes) {
             if (stoppedServiceRecipes) {
                 return;
@@ -111,7 +113,7 @@ abstract class AbstractDependentComponentFactoryMetadata implements DependentCom
 
             StaticServiceReferenceRecipe recipe = new StaticServiceReferenceRecipe(getId() + "-" + name,
                     container, interfaceName);
-            setDependendencyDesc(recipe.getOsgiFilter());
+            setDependencyDesc(recipe.getOsgiFilter());
             serviceRecipes.add(recipe);
 
             recipe.startTracking(onServiceRetrieved);
@@ -123,7 +125,7 @@ abstract class AbstractDependentComponentFactoryMetadata implements DependentCom
     }
 
     @Override
-    public void init(ExtendedBlueprintContainer newContainer) {
+    public void init(final ExtendedBlueprintContainer newContainer) {
         this.container = newContainer;
 
         log.debug("{}: In init", logName());
@@ -192,7 +194,7 @@ abstract class AbstractDependentComponentFactoryMetadata implements DependentCom
     }
 
     @Override
-    public void destroy(Object instance) {
+    public void destroy(final Object instance) {
         log.debug("{}: In destroy", logName());
 
         stopServiceRecipes();
@@ -221,7 +223,7 @@ abstract class AbstractDependentComponentFactoryMetadata implements DependentCom
 
     @SuppressWarnings("unchecked")
     @Nullable
-    protected <T> T getOSGiService(Class<T> serviceInterface) {
+    protected <T> T getOSGiService(final Class<T> serviceInterface) {
         try {
             ServiceReference<T> serviceReference =
                     container().getBundleContext().getServiceReference(serviceInterface);
