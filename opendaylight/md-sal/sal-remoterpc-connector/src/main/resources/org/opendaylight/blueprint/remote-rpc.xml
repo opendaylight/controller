@@ -15,6 +15,8 @@
   <reference id="schemaService" interface="org.opendaylight.controller.sal.core.api.model.SchemaService" />
   <reference id="domRpcService" interface="org.opendaylight.controller.md.sal.dom.api.DOMRpcService"/>
   <reference id="domRpcRegistry" interface="org.opendaylight.controller.md.sal.dom.api.DOMRpcProviderService"/>
+  <reference id="bindingRpcRegistry" interface="org.opendaylight.controller.sal.binding.api.RpcProviderRegistry"/>
+  <reference id="clusterSingletonService" interface="org.opendaylight.mdsal.singleton.common.api.ClusterSingletonServiceProvider"/>
 
   <bean id="actorSystem" factory-ref="actorSystemProvider" factory-method="getActorSystem"/>
 
@@ -34,6 +36,11 @@
     <argument ref="remoteRpcProviderConfig"/>
     <property name="schemaService" ref="schemaService"/>
     <property name="rpcService" ref="domRpcService"/>
+  </bean>
+
+  <bean id="basicTestProvider" class="org.opendaylight.controller.test.BasicRpcTestProvider">
+    <argument ref="bindingRpcRegistry"/>
+    <argument ref="clusterSingletonService"/>
   </bean>
 
 </blueprint>
