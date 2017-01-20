@@ -18,7 +18,7 @@ import akka.cluster.MemberStatus;
 import akka.japi.Procedure;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Stopwatch;
-import com.google.common.io.ByteSource;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Optional;
 import java.util.Set;
@@ -529,9 +529,8 @@ public class Follower extends AbstractRaftActorBehavior {
 
             if (snapshotTracker.addChunk(installSnapshot.getChunkIndex(), installSnapshot.getData(),
                     installSnapshot.getLastChunkHashCode())) {
-                ByteSource snapshotBytes = ByteSource.wrap(snapshotTracker.getSnapshot());
                 Snapshot snapshot = Snapshot.create(
-                        context.getSnapshotManager().convertSnapshot(snapshotBytes),
+                        context.getSnapshotManager().convertSnapshot(snapshotTracker.getSnapshotBytes()),
                         new ArrayList<>(),
                         installSnapshot.getLastIncludedIndex(),
                         installSnapshot.getLastIncludedTerm(),
@@ -557,24 +556,32 @@ public class Follower extends AbstractRaftActorBehavior {
 
                 actor().tell(new ApplySnapshot(snapshot, applySnapshotCallback), actor());
 
-                snapshotTracker = null;
+                closeSnapshotTracker();
             } else {
                 log.debug("{}: handleInstallSnapshot returning: {}", logName(), reply);
 
                 sender.tell(reply, actor());
             }
-        } catch (SnapshotTracker.InvalidChunkException e) {
+        } catch (IOException e) {
             log.debug("{}: Exception in InstallSnapshot of follower", logName(), e);
 
             sender.tell(new InstallSnapshotReply(currentTerm(), context.getId(),
                     -1, false), actor());
-            snapshotTracker = null;
 
+            closeSnapshotTracker();
+        }
+    }
+
+    private void closeSnapshotTracker() {
+        if (snapshotTracker != null) {
+            snapshotTracker.close();
+            snapshotTracker = null;
         }
     }
 
     @Override
     public void close() {
+        closeSnapshotTracker();
         stopElection();
     }
 

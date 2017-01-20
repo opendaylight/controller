@@ -28,6 +28,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.io.ByteSource;
 import com.google.common.util.concurrent.Uninterruptibles;
 import com.google.protobuf.ByteString;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -585,7 +586,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
                 -1, null, null), ByteSource.wrap(bs.toByteArray())));
         LeaderInstallSnapshotState fts = new LeaderInstallSnapshotState(
                 actorContext.getConfigParams().getSnapshotChunkSize(), leader.logName());
-        fts.setSnapshotBytes(bs);
+        fts.setSnapshotBytes(ByteSource.wrap(bs.toByteArray()));
         leader.getFollower(FOLLOWER_ID).setLeaderInstallSnapshotState(fts);
 
         //send first chunk and no InstallSnapshotReply received yet
@@ -924,7 +925,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
                 -1, null, null), ByteSource.wrap(bs.toByteArray())));
         LeaderInstallSnapshotState fts = new LeaderInstallSnapshotState(
                 actorContext.getConfigParams().getSnapshotChunkSize(), leader.logName());
-        fts.setSnapshotBytes(bs);
+        fts.setSnapshotBytes(ByteSource.wrap(bs.toByteArray()));
         leader.getFollower(FOLLOWER_ID).setLeaderInstallSnapshotState(fts);
         while (!fts.isLastChunk(fts.getChunkIndex())) {
             fts.getNextChunk();
@@ -1156,7 +1157,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
     }
 
     @Test
-    public void testLeaderInstallSnapshotState() {
+    public void testLeaderInstallSnapshotState() throws IOException {
         logStart("testLeaderInstallSnapshotState");
 
         Map<String, String> leadersSnapshot = new HashMap<>();
@@ -1168,7 +1169,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         byte[] barray = bs.toByteArray();
 
         LeaderInstallSnapshotState fts = new LeaderInstallSnapshotState(50, "test");
-        fts.setSnapshotBytes(bs);
+        fts.setSnapshotBytes(ByteSource.wrap(barray));
 
         assertEquals(bs.size(), barray.length);
 
@@ -1192,6 +1193,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         }
 
         assertEquals("totalChunks not matching", chunkIndex, fts.getTotalChunks());
+        fts.close();
     }
 
     @Override
