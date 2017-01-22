@@ -125,6 +125,8 @@ public class DatastoreContext {
         setCustomRaftPolicyImplementation(other.raftConfig.getCustomRaftPolicyImplementationClass());
         setShardSnapshotChunkSize(other.raftConfig.getSnapshotChunkSize());
         setPeerAddressResolver(other.raftConfig.getPeerAddressResolver());
+        setTempFileDirectory(other.getTempFileDirectory());
+        setFileBackedStreamingThreshold(other.getFileBackedStreamingThreshold());
     }
 
     public static Builder newBuilder() {
@@ -201,6 +203,22 @@ public class DatastoreContext {
 
     public String getShardManagerPersistenceId() {
         return shardManagerPersistenceId;
+    }
+
+    public String getTempFileDirectory() {
+        return raftConfig.getTempFileDirectory();
+    }
+
+    private void setTempFileDirectory(String tempFileDirectory) {
+        raftConfig.setTempFileDirectory(tempFileDirectory);
+    }
+
+    public int getFileBackedStreamingThreshold() {
+        return raftConfig.getFileBackedStreamingThreshold();
+    }
+
+    private void setFileBackedStreamingThreshold(int fileBackedStreamingThreshold) {
+        raftConfig.setFileBackedStreamingThreshold(fileBackedStreamingThreshold);
     }
 
     private void setPeerAddressResolver(PeerAddressResolver resolver) {
@@ -515,6 +533,16 @@ public class DatastoreContext {
 
         public Builder shardPeerAddressResolver(PeerAddressResolver resolver) {
             datastoreContext.setPeerAddressResolver(resolver);
+            return this;
+        }
+
+        public Builder tempFileDirectory(String tempFileDirectory) {
+            datastoreContext.setTempFileDirectory(tempFileDirectory);
+            return this;
+        }
+
+        public Builder fileBackedStreamingThreshold(int  fileBackedStreamingThreshold) {
+            datastoreContext.setFileBackedStreamingThreshold(fileBackedStreamingThreshold);
             return this;
         }
     }

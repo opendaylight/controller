@@ -10,6 +10,7 @@ package org.opendaylight.controller.config.yang.config.distributed_datastore_pro
 
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.DistributedDataStoreInterface;
+import org.opendaylight.controller.cluster.raft.ConfigParams;
 import org.opendaylight.controller.config.api.DependencyResolver;
 import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.config.api.osgi.WaitingServiceTracker;
@@ -63,6 +64,9 @@ public class DistributedOperationalDataStoreProviderModule
 
         return DatastoreContext.newBuilder()
                 .logicalStoreType(LogicalDatastoreType.OPERATIONAL)
+                .tempFileDirectory("./data")
+                .fileBackedStreamingThreshold(props.getFileBackedStreamingThresholdInMegabytes().getValue().intValue()
+                        * ConfigParams.MEGABYTE)
                 .maxShardDataChangeExecutorPoolSize(props.getMaxShardDataChangeExecutorPoolSize().getValue().intValue())
                 .maxShardDataChangeExecutorQueueSize(props.getMaxShardDataChangeExecutorQueueSize()
                         .getValue().intValue())

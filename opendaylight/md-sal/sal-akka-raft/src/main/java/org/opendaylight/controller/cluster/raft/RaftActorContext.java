@@ -21,6 +21,7 @@ import java.util.function.LongSupplier;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
+import org.opendaylight.controller.cluster.io.FileBackedOutputStream;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload;
@@ -326,4 +327,12 @@ public interface RaftActorContext {
      * @return the Consumer
      */
     Consumer<ApplyState> getApplyStateConsumer();
+
+    /**
+     * Creates a FileBackedOutputStream with a common configuration.
+     *
+     * @return a FileBackedOutputStream instance
+     */
+    @Nonnull
+    FileBackedOutputStream newFileBackedOutputStream();
 }
