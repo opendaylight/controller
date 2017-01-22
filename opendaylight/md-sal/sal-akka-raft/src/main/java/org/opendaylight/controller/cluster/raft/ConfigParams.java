@@ -114,4 +114,19 @@ public interface ConfigParams {
      */
     String getCustomRaftPolicyImplementationClass();
 
+    /**
+     * Returns the directory in which to create temp files.
+     *
+     * @return the directory in which to create temp files.
+     */
+    @Nonnull
+    String getTempFileDirectory();
+
+    /**
+     * Returns the threshold in terms of number of bytes when streaming data before it should switch from storing in
+     * memory to buffering to a file.
+     *
+     * @return the threshold in terms of number of bytes.
+     */
+    int getFileBackedStreamingThreshold();
 }

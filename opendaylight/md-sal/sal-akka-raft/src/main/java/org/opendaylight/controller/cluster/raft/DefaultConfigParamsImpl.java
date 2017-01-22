@@ -26,6 +26,8 @@ public class DefaultConfigParamsImpl implements ConfigParams {
 
     private static final Logger LOG = LoggerFactory.getLogger(DefaultConfigParamsImpl.class);
 
+    private static final int MEGABYTE = 1000000;
+
     private static final int SNAPSHOT_BATCH_COUNT = 20000;
 
     private static final int JOURNAL_RECOVERY_LOG_BATCH_SIZE = 1000;
@@ -68,6 +70,10 @@ public class DefaultConfigParamsImpl implements ConfigParams {
 
     private PeerAddressResolver peerAddressResolver = NoopPeerAddressResolver.INSTANCE;
 
+    private String tempFileDirectory = "";
+
+    private int fileBackedStreamingThreshold = 500 * MEGABYTE;
+
     public void setHeartBeatInterval(FiniteDuration heartBeatInterval) {
         this.heartBeatInterval = heartBeatInterval;
         electionTimeOutInterval = null;
@@ -96,6 +102,14 @@ public class DefaultConfigParamsImpl implements ConfigParams {
     public void setElectionTimeoutFactor(long electionTimeoutFactor) {
         this.electionTimeoutFactor = electionTimeoutFactor;
         electionTimeOutInterval = null;
+    }
+
+    public void setTempFileDirectory(String tempFileDirectory) {
+        this.tempFileDirectory = tempFileDirectory;
+    }
+
+    public void setFileBackedStreamingThreshold(int fileBackedStreamingThreshold) {
+        this.fileBackedStreamingThreshold = fileBackedStreamingThreshold;
     }
 
     public void setCustomRaftPolicyImplementationClass(String customRaftPolicyImplementationClass) {
@@ -160,6 +174,16 @@ public class DefaultConfigParamsImpl implements ConfigParams {
     @Override
     public RaftPolicy getRaftPolicy() {
         return policySupplier.get();
+    }
+
+    @Override
+    public String getTempFileDirectory() {
+        return tempFileDirectory;
+    }
+
+    @Override
+    public int getFileBackedStreamingThreshold() {
+        return fileBackedStreamingThreshold;
     }
 
     private class PolicySupplier implements Supplier<RaftPolicy> {
