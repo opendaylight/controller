@@ -28,6 +28,7 @@ import java.util.function.Consumer;
 import java.util.function.LongSupplier;
 import javax.annotation.Nonnull;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
+import org.opendaylight.controller.cluster.io.FileBackedOutputStream;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload;
@@ -397,6 +398,12 @@ public class RaftActorContextImpl implements RaftActorContext {
     @Override
     public Consumer<ApplyState> getApplyStateConsumer() {
         return applyStateConsumer;
+    }
+
+    @Override
+    public FileBackedOutputStream newFileBackedOutputStream() {
+        return new FileBackedOutputStream(configParams.getFileBackedStreamingThreshold(),
+                configParams.getTempFileDirectory());
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")

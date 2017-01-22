@@ -63,6 +63,9 @@ public class DistributedOperationalDataStoreProviderModule
 
         return DatastoreContext.newBuilder()
                 .logicalStoreType(LogicalDatastoreType.OPERATIONAL)
+                .tempFileDirectory("./data")
+                .fileBackedStreamingThresholdInMegabytes(props.getFileBackedStreamingThresholdInMegabytes()
+                        .getValue().intValue())
                 .maxShardDataChangeExecutorPoolSize(props.getMaxShardDataChangeExecutorPoolSize().getValue().intValue())
                 .maxShardDataChangeExecutorQueueSize(props.getMaxShardDataChangeExecutorQueueSize()
                         .getValue().intValue())
