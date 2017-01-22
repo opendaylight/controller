@@ -139,7 +139,7 @@ public class Follower extends AbstractRaftActorBehavior {
         if (snapshotTracker != null && !snapshotTracker.getLeaderId().equals(appendEntries.getLeaderId())) {
             log.debug("{}: snapshot install is in progress but the prior snapshot leaderId {} does not match the "
                 + "AppendEntries leaderId {}", logName(), snapshotTracker.getLeaderId(), appendEntries.getLeaderId());
-            snapshotTracker = null;
+            closeSnapshotTracker();
         }
 
         if (snapshotTracker != null || context.getSnapshotManager().isApplying()) {
@@ -518,7 +518,8 @@ public class Follower extends AbstractRaftActorBehavior {
         leaderId = installSnapshot.getLeaderId();
 
         if (snapshotTracker == null) {
-            snapshotTracker = new SnapshotTracker(log, installSnapshot.getTotalChunks(), installSnapshot.getLeaderId());
+            snapshotTracker = new SnapshotTracker(log, installSnapshot.getTotalChunks(), installSnapshot.getLeaderId(),
+                    context);
         }
 
         updateInitialSyncStatus(installSnapshot.getLastIncludedIndex(), installSnapshot.getLeaderId());
