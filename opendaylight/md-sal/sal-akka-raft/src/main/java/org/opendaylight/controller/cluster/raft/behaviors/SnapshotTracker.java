@@ -11,10 +11,10 @@ package org.opendaylight.controller.cluster.raft.behaviors;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.io.ByteSource;
-import com.google.common.io.CountingOutputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
+import org.opendaylight.controller.cluster.io.FileBackedOutputStream;
+import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.slf4j.Logger;
 
 /**
@@ -24,19 +24,16 @@ class SnapshotTracker implements AutoCloseable {
     private final Logger log;
     private final int totalChunks;
     private final String leaderId;
-    private final CountingOutputStream countingStream;
-    private final ByteArrayOutputStream backingStream;
+    private final FileBackedOutputStream outputStream;
     private int lastChunkIndex = LeaderInstallSnapshotState.FIRST_CHUNK_INDEX - 1;
     private boolean sealed = false;
     private int lastChunkHashCode = LeaderInstallSnapshotState.INITIAL_LAST_CHUNK_HASH_CODE;
 
-    SnapshotTracker(Logger log, int totalChunks, String leaderId) {
+    SnapshotTracker(Logger log, int totalChunks, String leaderId, RaftActorContext context) {
         this.log = log;
         this.totalChunks = totalChunks;
         this.leaderId = Preconditions.checkNotNull(leaderId);
-
-        backingStream = new ByteArrayOutputStream();
-        countingStream = new CountingOutputStream(backingStream);
+        outputStream = context.newFileBackedOutputStream();
     }
 
     /**
@@ -51,7 +48,7 @@ class SnapshotTracker implements AutoCloseable {
     boolean addChunk(int chunkIndex, byte[] chunk, Optional<Integer> maybeLastChunkHashCode)
             throws InvalidChunkException, IOException {
         log.debug("addChunk: chunkIndex={}, lastChunkIndex={}, collectedChunks.size={}, lastChunkHashCode={}",
-                chunkIndex, lastChunkIndex, countingStream.getCount(), this.lastChunkHashCode);
+                chunkIndex, lastChunkIndex, outputStream.getCount(), this.lastChunkHashCode);
 
         if (sealed) {
             throw new InvalidChunkException("Invalid chunk received with chunkIndex " + chunkIndex
@@ -68,7 +65,7 @@ class SnapshotTracker implements AutoCloseable {
                     + maybeLastChunkHashCode.get());
         }
 
-        countingStream.write(chunk);
+        outputStream.write(chunk);
 
         sealed = chunkIndex == totalChunks;
         lastChunkIndex = chunkIndex;
@@ -76,12 +73,12 @@ class SnapshotTracker implements AutoCloseable {
         return sealed;
     }
 
-    ByteSource getSnapshotBytes() {
+    ByteSource getSnapshotBytes() throws IOException {
         if (!sealed) {
             throw new IllegalStateException("lastChunk not received yet");
         }
 
-        return ByteSource.wrap(backingStream.toByteArray());
+        return outputStream.asByteSource();
     }
 
     String getLeaderId() {
@@ -90,11 +87,7 @@ class SnapshotTracker implements AutoCloseable {
 
     @Override
     public void close() {
-        try {
-            countingStream.close();
-        } catch (IOException e) {
-            log.warn("Error closing snapshot stream");
-        }
+        outputStream.cleanup();
     }
 
     public static class InvalidChunkException extends IOException {
