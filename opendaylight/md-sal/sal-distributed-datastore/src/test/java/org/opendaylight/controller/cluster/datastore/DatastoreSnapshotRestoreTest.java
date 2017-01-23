@@ -22,9 +22,9 @@ import java.util.Objects;
 import org.apache.commons.lang3.SerializationUtils;
 import org.junit.After;
 import org.junit.Test;
-import org.opendaylight.controller.cluster.datastore.messages.DatastoreSnapshot;
-import org.opendaylight.controller.cluster.datastore.messages.DatastoreSnapshot.ShardSnapshot;
-import org.opendaylight.controller.cluster.datastore.messages.DatastoreSnapshotList;
+import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot;
+import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot.ShardSnapshot;
+import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshotList;
 
 /**
  * Unit tests for DatastoreSnapshotRestore.

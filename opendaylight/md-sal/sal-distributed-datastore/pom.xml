@@ -223,6 +223,7 @@
                 org.opendaylight.controller.cluster.datastore;
                 org.opendaylight.controller.cluster.datastore.config;
                 org.opendaylight.controller.cluster.datastore.messages;
+                org.opendaylight.controller.cluster.datastore.persisted;
                 org.opendaylight.controller.cluster.datastore.utils;
             </Export-Package>
             <Import-Package>

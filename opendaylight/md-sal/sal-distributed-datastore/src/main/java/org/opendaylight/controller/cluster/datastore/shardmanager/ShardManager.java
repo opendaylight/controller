@@ -72,7 +72,6 @@ import org.opendaylight.controller.cluster.datastore.messages.AddShardReplica;
 import org.opendaylight.controller.cluster.datastore.messages.ChangeShardMembersVotingStatus;
 import org.opendaylight.controller.cluster.datastore.messages.CreatePrefixedShard;
 import org.opendaylight.controller.cluster.datastore.messages.CreateShard;
-import org.opendaylight.controller.cluster.datastore.messages.DatastoreSnapshot;
 import org.opendaylight.controller.cluster.datastore.messages.FindLocalShard;
 import org.opendaylight.controller.cluster.datastore.messages.FindPrimary;
 import org.opendaylight.controller.cluster.datastore.messages.FlipShardMembersVotingStatus;
@@ -84,6 +83,7 @@ import org.opendaylight.controller.cluster.datastore.messages.RemotePrimaryShard
 import org.opendaylight.controller.cluster.datastore.messages.RemoveShardReplica;
 import org.opendaylight.controller.cluster.datastore.messages.ShardLeaderStateChanged;
 import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContext;
+import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot;
 import org.opendaylight.controller.cluster.datastore.utils.ClusterUtils;
 import org.opendaylight.controller.cluster.datastore.utils.Dispatchers;
 import org.opendaylight.controller.cluster.datastore.utils.PrimaryShardInfoFutureCache;
@@ -1173,12 +1173,8 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
                 new AutoFindPrimaryFailureResponseHandler(getSender(), shardName, persistenceId(), getSelf()) {
                     @Override
                     public void onRemotePrimaryShardFound(final RemotePrimaryShardFound response) {
-                        getSelf().tell(new RunnableMessage() {
-                            @Override
-                            public void run() {
-                                addShard(getShardName(), response, getSender());
-                            }
-                        }, getTargetActor());
+                        getSelf().tell((RunnableMessage) () -> addShard(getShardName(), response, getSender()),
+                                getTargetActor());
                     }
 
                     @Override
