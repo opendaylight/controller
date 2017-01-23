@@ -25,7 +25,7 @@ public final class ShardManagerSnapshot implements Serializable {
         this.shardList = ImmutableList.copyOf(shardList);
     }
 
-    List<String> getShardList() {
+    public List<String> getShardList() {
         return this.shardList;
     }
 
