@@ -5,9 +5,10 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.cluster.datastore.messages;
+package org.opendaylight.controller.cluster.datastore.persisted;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.Serializable;
 import java.util.List;
@@ -18,10 +19,7 @@ import javax.annotation.Nullable;
  * Stores a snapshot of the internal state of a data store.
  *
  * @author Thomas Pantelis
- *
- * @deprecated Use {@link org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot} instead.
  */
-@Deprecated
 public class DatastoreSnapshot implements Serializable {
     private static final long serialVersionUID = 1L;
 
@@ -36,7 +34,7 @@ public class DatastoreSnapshot implements Serializable {
             @Nonnull List<ShardSnapshot> shardSnapshots) {
         this.type = Preconditions.checkNotNull(type);
         this.shardManagerSnapshot = shardManagerSnapshot;
-        this.shardSnapshots = Preconditions.checkNotNull(shardSnapshots);
+        this.shardSnapshots = ImmutableList.copyOf(Preconditions.checkNotNull(shardSnapshots));
     }
 
     @Nonnull
