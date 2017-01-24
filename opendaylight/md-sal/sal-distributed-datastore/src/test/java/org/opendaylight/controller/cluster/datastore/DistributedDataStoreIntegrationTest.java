@@ -31,7 +31,9 @@ import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.Uninterruptibles;
 import com.typesafe.config.ConfigFactory;
 import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -53,6 +55,7 @@ import org.opendaylight.controller.cluster.datastore.messages.FindLocalShard;
 import org.opendaylight.controller.cluster.datastore.messages.LocalShardFound;
 import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.MetadataShardDataTreeSnapshot;
+import org.opendaylight.controller.cluster.datastore.persisted.PayloadVersion;
 import org.opendaylight.controller.cluster.datastore.persisted.ShardSnapshotState;
 import org.opendaylight.controller.cluster.datastore.utils.MockDataChangeListener;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
@@ -1271,12 +1274,9 @@ public class DistributedDataStoreIntegrationTest {
                         new ShardSnapshotState(new MetadataShardDataTreeSnapshot(root)),
                         Collections.<ReplicatedLogEntry>emptyList(), 2, 1, 2, 1, 1, "member-1", null);
 
-                restoreFromSnapshot = new DatastoreSnapshot(name, null,
-                        Arrays.asList(
-                                new DatastoreSnapshot.ShardSnapshot("cars",
-                                        org.apache.commons.lang3.SerializationUtils.serialize(carsSnapshot)),
-                                new DatastoreSnapshot.ShardSnapshot("people",
-                                        org.apache.commons.lang3.SerializationUtils.serialize(peopleSnapshot))));
+                restoreFromSnapshot = new DatastoreSnapshot(name, null, Arrays.asList(
+                        new DatastoreSnapshot.ShardSnapshot("cars", carsSnapshot),
+                        new DatastoreSnapshot.ShardSnapshot("people", peopleSnapshot)));
 
                 try (AbstractDataStore dataStore = setupDistributedDataStore(name, "module-shards-member1.conf",
                         true, "cars", "people")) {
@@ -1311,8 +1311,15 @@ public class DistributedDataStoreIntegrationTest {
                 AbstractShardTest.writeToStore(dataTree, CarsModel.BASE_PATH, carsNode);
                 NormalizedNode<?, ?> root = AbstractShardTest.readStore(dataTree, YangInstanceIdentifier.EMPTY);
 
+                MetadataShardDataTreeSnapshot shardSnapshot = new MetadataShardDataTreeSnapshot(root);
                 final ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                new MetadataShardDataTreeSnapshot(root).serialize(bos);
+                try (final DataOutputStream dos = new DataOutputStream(bos)) {
+                    PayloadVersion.BORON.writeTo(dos);
+                    try (ObjectOutputStream oos = new ObjectOutputStream(dos)) {
+                        oos.writeObject(shardSnapshot);
+                    }
+                }
+
                 final org.opendaylight.controller.cluster.raft.Snapshot snapshot =
                     org.opendaylight.controller.cluster.raft.Snapshot.create(bos.toByteArray(),
                             Collections.<ReplicatedLogEntry>emptyList(), 2, 1, 2, 1, 1, "member-1", null);
