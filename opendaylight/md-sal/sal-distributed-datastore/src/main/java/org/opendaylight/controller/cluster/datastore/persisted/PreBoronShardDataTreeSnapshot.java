@@ -8,9 +8,8 @@
 package org.opendaylight.controller.cluster.datastore.persisted;
 
 import com.google.common.annotations.Beta;
-import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
+import java.io.ObjectOutput;
 import java.util.Optional;
 import javax.annotation.Nullable;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.SerializationUtils;
@@ -36,9 +35,7 @@ public final class PreBoronShardDataTreeSnapshot extends ShardDataTreeSnapshot {
     }
 
     @Override
-    public void serialize(OutputStream os) throws IOException {
-        try (final DataOutputStream dos = new DataOutputStream(os)) {
-            SerializationUtils.serializeNormalizedNode(rootNode, dos);
-        }
+    public void serialize(ObjectOutput out) throws IOException {
+        SerializationUtils.serializeNormalizedNode(rootNode, out);
     }
 }
