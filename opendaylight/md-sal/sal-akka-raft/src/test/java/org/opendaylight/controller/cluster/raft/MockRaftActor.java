@@ -46,7 +46,7 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
     protected final CountDownLatch initializeBehaviorComplete = new CountDownLatch(1);
     private RaftActorRecoverySupport raftActorRecoverySupport;
     private RaftActorSnapshotMessageSupport snapshotMessageSupport;
-    private final byte[] restoreFromSnapshot;
+    private final Snapshot restoreFromSnapshot;
     final CountDownLatch snapshotCommitted = new CountDownLatch(1);
     private final Function<Runnable, Void> pauseLeaderFunction;
 
@@ -263,7 +263,7 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
     }
 
     @Override
-    public byte[] getRestoreFromSnapshot() {
+    public Snapshot getRestoreFromSnapshot() {
         return restoreFromSnapshot;
     }
 
@@ -288,7 +288,7 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
         private DataPersistenceProvider dataPersistenceProvider;
         private ActorRef roleChangeNotifier;
         private RaftActorSnapshotMessageSupport snapshotMessageSupport;
-        private byte[] restoreFromSnapshot;
+        private Snapshot restoreFromSnapshot;
         private Optional<Boolean> persistent = Optional.absent();
         private final Class<A> actorClass;
         private Function<Runnable, Void> pauseLeaderFunction;
@@ -333,7 +333,7 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
             return self();
         }
 
-        public T restoreFromSnapshot(byte[] newRestoreFromSnapshot) {
+        public T restoreFromSnapshot(Snapshot newRestoreFromSnapshot) {
             this.restoreFromSnapshot = newRestoreFromSnapshot;
             return self();
         }
