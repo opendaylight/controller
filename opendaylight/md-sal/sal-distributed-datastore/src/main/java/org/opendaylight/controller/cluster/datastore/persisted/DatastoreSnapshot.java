@@ -9,10 +9,16 @@ package org.opendaylight.controller.cluster.datastore.persisted;
 
 import com.google.common.base.Preconditions;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 
 /**
  * Stores a snapshot of the internal state of a data store.
@@ -21,6 +27,52 @@ import javax.annotation.Nullable;
  */
 public class DatastoreSnapshot implements Serializable {
     private static final long serialVersionUID = 1L;
+
+    private static final class Proxy implements Externalizable {
+        private static final long serialVersionUID = 1L;
+
+        private DatastoreSnapshot datastoreSnapshot;
+
+        // checkstyle flags the public modifier as redundant which really doesn't make sense since it clearly isn't
+        // redundant. It is explicitly needed for Java serialization to be able to create instances via reflection.
+        @SuppressWarnings("checkstyle:RedundantModifier")
+        public Proxy() {
+            // For Externalizable
+        }
+
+        Proxy(final DatastoreSnapshot datastoreSnapshot) {
+            this.datastoreSnapshot = datastoreSnapshot;
+        }
+
+        @Override
+        public void writeExternal(ObjectOutput out) throws IOException {
+            out.writeObject(datastoreSnapshot.type);
+            out.writeObject(datastoreSnapshot.shardManagerSnapshot);
+
+            out.writeInt(datastoreSnapshot.shardSnapshots.size());
+            for (ShardSnapshot shardSnapshot: datastoreSnapshot.shardSnapshots) {
+                out.writeObject(shardSnapshot);
+            }
+        }
+
+        @Override
+        public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+            String type = (String)in.readObject();
+            byte[] shardManagerSnapshot = (byte[]) in.readObject();
+
+            int size = in.readInt();
+            List<ShardSnapshot> shardSnapshots = new ArrayList<>(size);
+            for (int i = 0; i < size; i++) {
+                shardSnapshots.add((ShardSnapshot) in.readObject());
+            }
+
+            datastoreSnapshot = new DatastoreSnapshot(type, shardManagerSnapshot, shardSnapshots);
+        }
+
+        private Object readResolve() {
+            return datastoreSnapshot;
+        }
+    }
 
     private final String type;
     private final byte[] shardManagerSnapshot;
@@ -54,13 +106,50 @@ public class DatastoreSnapshot implements Serializable {
         return shardSnapshots;
     }
 
+    @SuppressWarnings("static-method")
+    private Object writeReplace() {
+        return new Proxy(this);
+    }
+
     public static class ShardSnapshot implements Serializable {
         private static final long serialVersionUID = 1L;
 
-        private final String name;
-        private final byte[] snapshot;
+        private static final class Proxy implements Externalizable {
+            private static final long serialVersionUID = 1L;
 
-        public ShardSnapshot(@Nonnull String name, @Nonnull byte[] snapshot) {
+            private ShardSnapshot shardSnapshot;
+
+            // checkstyle flags the public modifier as redundant which really doesn't make sense since it clearly isn't
+            // redundant. It is explicitly needed for Java serialization to be able to create instances via reflection.
+            @SuppressWarnings("checkstyle:RedundantModifier")
+            public Proxy() {
+                // For Externalizable
+            }
+
+            Proxy(final ShardSnapshot shardSnapshot) {
+                this.shardSnapshot = shardSnapshot;
+            }
+
+            @Override
+            public void writeExternal(ObjectOutput out) throws IOException {
+                out.writeObject(shardSnapshot.name);
+                out.writeObject(shardSnapshot.snapshot);
+            }
+
+            @Override
+            public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+                shardSnapshot = new ShardSnapshot((String)in.readObject(), (Snapshot) in.readObject());
+            }
+
+            private Object readResolve() {
+                return shardSnapshot;
+            }
+        }
+
+        private final String name;
+        private final Snapshot snapshot;
+
+        public ShardSnapshot(@Nonnull String name, @Nonnull Snapshot snapshot) {
             this.name = Preconditions.checkNotNull(name);
             this.snapshot = Preconditions.checkNotNull(snapshot);
         }
@@ -70,12 +159,14 @@ public class DatastoreSnapshot implements Serializable {
             return name;
         }
 
-        @SuppressFBWarnings(value = "EI_EXPOSE_REP", justification = "Exposes a mutable object stored in a field but "
-                + "this is OK since this class is merely a DTO and does not process byte[] internally. "
-                + "Also it would be inefficient to create a return copy as the byte[] could be large.")
         @Nonnull
-        public byte[] getSnapshot() {
+        public Snapshot getSnapshot() {
             return snapshot;
+        }
+
+        @SuppressWarnings("static-method")
+        private Object writeReplace() {
+            return new Proxy(this);
         }
     }
 }
