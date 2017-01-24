@@ -14,6 +14,7 @@ import akka.actor.ActorRef;
 import akka.testkit.JavaTestKit;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.ObjectInputStream;
 import java.util.Optional;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.AbstractActorTest;
@@ -47,8 +48,12 @@ public class ShardSnapshotActorTest extends AbstractActorTest {
                 assertEquals("Snapshot", snapshot, ((ShardSnapshotState)reply.getSnapshotState()).getSnapshot());
 
                 if (installSnapshotStream != null) {
-                    final ShardDataTreeSnapshot deserialized = ShardDataTreeSnapshot.deserialize(
-                            new ByteArrayInputStream(installSnapshotStream.toByteArray()));
+                    final ShardDataTreeSnapshot deserialized;
+                    try (final ObjectInputStream in = new ObjectInputStream(new ByteArrayInputStream(
+                            installSnapshotStream.toByteArray()))) {
+                        deserialized = ShardDataTreeSnapshot.deserialize(in);
+                    }
+
                     assertEquals("Deserialized snapshot type", snapshot.getClass(), deserialized.getClass());
 
                     final Optional<NormalizedNode<?, ?>> maybeNode = deserialized.getRootNode();

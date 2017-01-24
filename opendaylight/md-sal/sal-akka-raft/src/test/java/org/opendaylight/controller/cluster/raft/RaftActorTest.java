@@ -52,7 +52,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import org.apache.commons.lang3.SerializationUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -1050,7 +1049,7 @@ public class RaftActorTest extends AbstractActorTest {
         GetSnapshotReply reply = kit.expectMsgClass(GetSnapshotReply.class);
 
         assertEquals("getId", persistenceId, reply.getId());
-        Snapshot replySnapshot = SerializationUtils.deserialize(reply.getSnapshot());
+        Snapshot replySnapshot = reply.getSnapshot();
         assertEquals("getElectionTerm", term, replySnapshot.getElectionTerm());
         assertEquals("getElectionVotedFor", "member-1", replySnapshot.getElectionVotedFor());
         assertEquals("getLastAppliedIndex", 1L, replySnapshot.getLastAppliedIndex());
@@ -1083,7 +1082,7 @@ public class RaftActorTest extends AbstractActorTest {
         verify(mockRaftActor.snapshotCohortDelegate, never()).createSnapshot(anyObject(), anyObject());
 
         assertEquals("getId", persistenceId, reply.getId());
-        replySnapshot = SerializationUtils.deserialize(reply.getSnapshot());
+        replySnapshot = reply.getSnapshot();
         assertEquals("getElectionTerm", term, replySnapshot.getElectionTerm());
         assertEquals("getElectionVotedFor", "member-1", replySnapshot.getElectionVotedFor());
         assertEquals("getLastAppliedIndex", -1L, replySnapshot.getLastAppliedIndex());
@@ -1122,7 +1121,7 @@ public class RaftActorTest extends AbstractActorTest {
         InMemorySnapshotStore.addSnapshotSavedLatch(persistenceId);
 
         TestActorRef<MockRaftActor> raftActorRef = factory.createTestActor(MockRaftActor.builder().id(persistenceId)
-                .config(config).restoreFromSnapshot(SerializationUtils.serialize(snapshot)).props()
+                .config(config).restoreFromSnapshot(snapshot).props()
                     .withDispatcher(Dispatchers.DefaultDispatcherId()), persistenceId);
         MockRaftActor mockRaftActor = raftActorRef.underlyingActor();
 
@@ -1157,7 +1156,7 @@ public class RaftActorTest extends AbstractActorTest {
         persistenceId = factory.generateActorId("test-actor-");
 
         raftActorRef = factory.createTestActor(MockRaftActor.builder().id(persistenceId)
-                .config(config).restoreFromSnapshot(SerializationUtils.serialize(snapshot))
+                .config(config).restoreFromSnapshot(snapshot)
                 .persistent(Optional.of(Boolean.FALSE)).props()
                     .withDispatcher(Dispatchers.DefaultDispatcherId()), persistenceId);
         mockRaftActor = raftActorRef.underlyingActor();
@@ -1189,7 +1188,7 @@ public class RaftActorTest extends AbstractActorTest {
                 new MockRaftActorContext.MockPayload("B")));
 
         TestActorRef<MockRaftActor> raftActorRef = factory.createTestActor(MockRaftActor.builder().id(persistenceId)
-                .config(config).restoreFromSnapshot(SerializationUtils.serialize(snapshot)).props()
+                .config(config).restoreFromSnapshot(snapshot).props()
                     .withDispatcher(Dispatchers.DefaultDispatcherId()), persistenceId);
         MockRaftActor mockRaftActor = raftActorRef.underlyingActor();
 

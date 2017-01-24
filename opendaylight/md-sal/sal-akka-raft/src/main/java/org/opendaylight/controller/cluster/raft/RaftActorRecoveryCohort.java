@@ -49,12 +49,12 @@ public interface RaftActorRecoveryCohort {
     void applyCurrentLogRecoveryBatch();
 
     /**
-     * Returns the state snapshot to restore from on recovery.
+     * Returns the snapshot to restore from on recovery.
      *
-     * @return the snapshot bytes or null if there's no snapshot to restore
+     * @return the snapshot or null if there's no snapshot to restore
      */
     @Nullable
-    byte[] getRestoreFromSnapshot();
+    Snapshot getRestoreFromSnapshot();
 
     /**
      * This method is called during recovery to de-serialize a snapshot that was persisted in the pre-Carbon format.
