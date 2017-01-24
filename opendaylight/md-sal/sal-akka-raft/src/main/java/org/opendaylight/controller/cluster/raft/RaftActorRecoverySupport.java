@@ -10,9 +10,6 @@ package org.opendaylight.controller.cluster.raft;
 import akka.persistence.RecoveryCompleted;
 import akka.persistence.SnapshotOffer;
 import com.google.common.base.Stopwatch;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.util.Collections;
 import org.opendaylight.controller.cluster.PersistentDataProvider;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
@@ -82,7 +79,7 @@ class RaftActorRecoverySupport {
 
     @SuppressWarnings("checkstyle:IllegalCatch")
     private void possiblyRestoreFromSnapshot() {
-        byte[] restoreFromSnapshot = cohort.getRestoreFromSnapshot();
+        Snapshot restoreFromSnapshot = cohort.getRestoreFromSnapshot();
         if (restoreFromSnapshot == null) {
             return;
         }
@@ -93,15 +90,9 @@ class RaftActorRecoverySupport {
             return;
         }
 
-        try (ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(restoreFromSnapshot))) {
-            Snapshot snapshot = (Snapshot) ois.readObject();
+        log.debug("{}: Restore snapshot: {}", context.getId(), restoreFromSnapshot);
 
-            log.debug("{}: Deserialized restore snapshot: {}", context.getId(), snapshot);
-
-            context.getSnapshotManager().apply(new ApplySnapshot(snapshot));
-        } catch (RuntimeException | ClassNotFoundException | IOException e) {
-            log.error("{}: Error deserializing snapshot restore", context.getId(), e);
-        }
+        context.getSnapshotManager().apply(new ApplySnapshot(restoreFromSnapshot));
     }
 
     private ReplicatedLog replicatedLog() {

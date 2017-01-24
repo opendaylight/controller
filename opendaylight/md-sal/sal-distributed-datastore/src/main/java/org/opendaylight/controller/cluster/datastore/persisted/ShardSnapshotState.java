@@ -11,10 +11,8 @@ import com.google.common.base.Preconditions;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.Externalizable;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
-import java.io.OutputStream;
 import javax.annotation.Nonnull;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 
@@ -44,38 +42,12 @@ public class ShardSnapshotState implements Snapshot.State {
 
         @Override
         public void writeExternal(final ObjectOutput out) throws IOException {
-            snapshotState.snapshot.serialize(toOutputStream(out));
-        }
-
-        private OutputStream toOutputStream(final ObjectOutput out) {
-            if (out instanceof OutputStream) {
-                return (OutputStream) out;
-            }
-
-            return new OutputStream() {
-                @Override
-                public void write(int value) throws IOException {
-                    out.write(value);
-                }
-            };
+            snapshotState.snapshot.serialize(out);
         }
 
         @Override
         public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
-            snapshotState = new ShardSnapshotState(ShardDataTreeSnapshot.deserialize(toInputStream(in)));
-        }
-
-        private InputStream toInputStream(final ObjectInput in) {
-            if (in instanceof InputStream) {
-                return (InputStream) in;
-            }
-
-            return new InputStream() {
-                @Override
-                public int read() throws IOException {
-                    return in.read();
-                }
-            };
+            snapshotState = new ShardSnapshotState(ShardDataTreeSnapshot.deserialize(in));
         }
 
         private Object readResolve() {
