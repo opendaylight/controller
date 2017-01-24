@@ -14,7 +14,6 @@ import com.google.common.annotations.VisibleForTesting;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-import org.apache.commons.lang3.SerializationUtils;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
@@ -125,8 +124,7 @@ class RaftActorSnapshotMessageSupport {
                     context.getTermInformation().getCurrentTerm(), context.getTermInformation().getVotedFor(),
                     context.getPeerServerInfo(true));
 
-            sender.tell(new GetSnapshotReply(context.getId(), SerializationUtils.serialize(snapshot)),
-                    context.getActor());
+            sender.tell(new GetSnapshotReply(context.getId(), snapshot), context.getActor());
         }
     }
 
