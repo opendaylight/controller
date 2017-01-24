@@ -14,7 +14,6 @@ import akka.actor.ReceiveTimeout;
 import akka.actor.UntypedActor;
 import com.google.common.base.Preconditions;
 import java.util.concurrent.TimeoutException;
-import org.apache.commons.lang3.SerializationUtils;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
 import org.opendaylight.controller.cluster.raft.client.messages.GetSnapshotReply;
@@ -53,8 +52,7 @@ class GetSnapshotReplyActor extends UntypedActor {
 
             LOG.debug("{}: Received CaptureSnapshotReply, sending {}", params.id, snapshot);
 
-            params.replyToActor.tell(new GetSnapshotReply(params.id, SerializationUtils.serialize(snapshot)),
-                    getSelf());
+            params.replyToActor.tell(new GetSnapshotReply(params.id, snapshot), getSelf());
             getSelf().tell(PoisonPill.getInstance(), getSelf());
         } else if (message instanceof ReceiveTimeout) {
             LOG.warn("{}: Got ReceiveTimeout for inactivity - did not receive CaptureSnapshotReply within {} ms",

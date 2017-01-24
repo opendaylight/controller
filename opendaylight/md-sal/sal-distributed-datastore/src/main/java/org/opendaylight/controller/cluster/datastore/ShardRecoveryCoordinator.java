@@ -34,11 +34,11 @@ class ShardRecoveryCoordinator implements RaftActorRecoveryCohort {
     private final ShardDataTree store;
     private final String shardName;
     private final Logger log;
-    private final byte[] restoreFromSnapshot;
+    private final Snapshot restoreFromSnapshot;
 
     private boolean open;
 
-    ShardRecoveryCoordinator(final ShardDataTree store,  final byte[] restoreFromSnapshot, final String shardName,
+    ShardRecoveryCoordinator(final ShardDataTree store,  final Snapshot restoreFromSnapshot, final String shardName,
             final Logger log) {
         this.store = Preconditions.checkNotNull(store);
         this.shardName = Preconditions.checkNotNull(shardName);
@@ -109,7 +109,7 @@ class ShardRecoveryCoordinator implements RaftActorRecoveryCohort {
     }
 
     @Override
-    public byte[] getRestoreFromSnapshot() {
+    public Snapshot getRestoreFromSnapshot() {
         return restoreFromSnapshot;
     }
 
@@ -117,7 +117,7 @@ class ShardRecoveryCoordinator implements RaftActorRecoveryCohort {
     @Deprecated
     public State deserializePreCarbonSnapshot(byte[] from) {
         try {
-            return new ShardSnapshotState(ShardDataTreeSnapshot.deserialize(from));
+            return new ShardSnapshotState(ShardDataTreeSnapshot.deserializePreCarbon(from));
         } catch (IOException e) {
             log.error("{}: failed to deserialize snapshot", shardName, e);
             throw Throwables.propagate(e);

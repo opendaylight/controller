@@ -13,7 +13,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import com.google.common.io.ByteSource;
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.ObjectInputStream;
 import java.io.OutputStream;
 import java.util.Optional;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
@@ -96,8 +96,8 @@ class ShardSnapshotCohort implements RaftActorSnapshotCohort {
 
     @Override
     public State deserializeSnapshot(ByteSource snapshotBytes) {
-        try (final InputStream is = snapshotBytes.openStream()) {
-            return new ShardSnapshotState(ShardDataTreeSnapshot.deserialize(is));
+        try (final ObjectInputStream in = new ObjectInputStream(snapshotBytes.openStream())) {
+            return new ShardSnapshotState(ShardDataTreeSnapshot.deserialize(in));
         } catch (IOException e) {
             throw Throwables.propagate(e);
         }
