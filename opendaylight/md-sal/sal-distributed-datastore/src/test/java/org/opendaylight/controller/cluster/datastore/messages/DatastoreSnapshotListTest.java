@@ -57,8 +57,9 @@ public class DatastoreSnapshotListTest {
 
         NormalizedNode<?, ?> legacyConfigRoot2 = toRootNode(PeopleModel.BASE_PATH, PeopleModel.emptyContainer());
 
+        ShardManagerSnapshot legacyShardManagerSnapshot = newLegacyShardManagerSnapshot("config-one", "config-two");
         DatastoreSnapshot legacyConfigSnapshot = new DatastoreSnapshot("config",
-                SerializationUtils.serialize(newLegacyShardManagerSnapshot("config-one", "config-two")),
+                SerializationUtils.serialize(legacyShardManagerSnapshot),
                 Arrays.asList(newLegacyShardSnapshot("config-one", newLegacySnapshot(legacyConfigRoot1)),
                     newLegacyShardSnapshot("config-two", newLegacySnapshot(legacyConfigRoot2))));
 
@@ -73,24 +74,29 @@ public class DatastoreSnapshotListTest {
                 SerializationUtils.clone(legacy);
 
         assertEquals("DatastoreSnapshotList size", 2, cloned.size());
-        assertDatastoreSnapshotEquals(legacyConfigSnapshot, cloned.get(0), Optional.of(legacyConfigRoot1),
-                Optional.of(legacyConfigRoot2));
-        assertDatastoreSnapshotEquals(legacyOperSnapshot, cloned.get(1), Optional.empty());
+        assertDatastoreSnapshotEquals(legacyConfigSnapshot, cloned.get(0),
+                new org.opendaylight.controller.cluster.datastore.persisted.ShardManagerSnapshot(
+                        legacyShardManagerSnapshot.getShardList()),
+                Optional.of(legacyConfigRoot1), Optional.of(legacyConfigRoot2));
+        assertDatastoreSnapshotEquals(legacyOperSnapshot, cloned.get(1),
+                (org.opendaylight.controller.cluster.datastore.persisted.ShardManagerSnapshot)null,
+                Optional.empty());
     }
 
+    @SuppressWarnings("unchecked")
     private void assertDatastoreSnapshotEquals(DatastoreSnapshot legacy,
             org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot actual,
+            org.opendaylight.controller.cluster.datastore.persisted.ShardManagerSnapshot expShardMgrSnapshot,
             Optional<NormalizedNode<?, ?>>... shardRoots) throws IOException {
         assertEquals("Type", legacy.getType(), actual.getType());
 
         if (legacy.getShardManagerSnapshot() == null) {
             assertNull("Expected null ShardManagerSnapshot", actual.getShardManagerSnapshot());
         } else {
-            ShardManagerSnapshot legacyShardManagerSnapshot =
-                    (ShardManagerSnapshot) SerializationUtils.deserialize(legacy.getShardManagerSnapshot());
-            ShardManagerSnapshot actualShardManagerSnapshot =
-                    (ShardManagerSnapshot) SerializationUtils.deserialize(actual.getShardManagerSnapshot());
-            assertEquals("ShardManagerSnapshot", legacyShardManagerSnapshot.getShardList(),
+            org.opendaylight.controller.cluster.datastore.persisted.ShardManagerSnapshot actualShardManagerSnapshot =
+                (org.opendaylight.controller.cluster.datastore.persisted.ShardManagerSnapshot)
+                    SerializationUtils.deserialize(legacy.getShardManagerSnapshot());
+            assertEquals("ShardManagerSnapshot", expShardMgrSnapshot.getShardList(),
                     actualShardManagerSnapshot.getShardList());
         }
 

@@ -18,15 +18,14 @@ import java.io.FileOutputStream;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Objects;
 import org.apache.commons.lang3.SerializationUtils;
 import org.junit.After;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshotList;
 import org.opendaylight.controller.cluster.datastore.persisted.MetadataShardDataTreeSnapshot;
+import org.opendaylight.controller.cluster.datastore.persisted.ShardManagerSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.ShardSnapshotState;
-import org.opendaylight.controller.cluster.datastore.shardmanager.ShardManagerSnapshot;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.md.cluster.datastore.model.CarsModel;
@@ -61,7 +60,7 @@ public class DatastoreSnapshotRestoreTest {
         assertTrue("Failed to mkdir " + restoreDirectoryPath, restoreDirectoryFile.mkdirs());
 
         final DatastoreSnapshot configSnapshot = new DatastoreSnapshot("config",
-                SerializationUtils.serialize(newShardManagerSnapshot("config-one", "config-two")),
+                newShardManagerSnapshot("config-one", "config-two"),
                 Arrays.asList(new DatastoreSnapshot.ShardSnapshot("config-one", newSnapshot(CarsModel.BASE_PATH,
                         CarsModel.newCarsNode(CarsModel.newCarsMapNode(CarsModel.newCarEntry("optima",
                             BigInteger.valueOf(20000L)),CarsModel.newCarEntry("sportage",
@@ -96,8 +95,14 @@ public class DatastoreSnapshotRestoreTest {
     private static void assertDatastoreSnapshotEquals(DatastoreSnapshot expected, DatastoreSnapshot actual) {
         assertNotNull("DatastoreSnapshot is null", actual);
         assertEquals("getType", expected.getType(), actual.getType());
-        assertTrue("ShardManager snapshots don't match", Objects.deepEquals(expected.getShardManagerSnapshot(),
-                actual.getShardManagerSnapshot()));
+
+        if (expected.getShardManagerSnapshot() == null) {
+            assertNull("Expected null ShardManagerSnapshot", actual.getShardManagerSnapshot());
+        } else {
+            assertEquals("ShardManagerSnapshot", expected.getShardManagerSnapshot().getShardList(),
+                    actual.getShardManagerSnapshot().getShardList());
+        }
+
         assertEquals("ShardSnapshots size", expected.getShardSnapshots().size(), actual.getShardSnapshots().size());
         for (int i = 0; i < expected.getShardSnapshots().size(); i++) {
             assertEquals("ShardSnapshot " + (i + 1) + " name", expected.getShardSnapshots().get(i).getName(),
@@ -120,7 +125,7 @@ public class DatastoreSnapshotRestoreTest {
     }
 
     private static ShardManagerSnapshot newShardManagerSnapshot(String... shards) {
-        return ShardManagerSnapshot.forShardList(Arrays.asList(shards));
+        return new ShardManagerSnapshot(Arrays.asList(shards));
     }
 
     private static Snapshot newSnapshot(YangInstanceIdentifier path, NormalizedNode<?, ?> node)
