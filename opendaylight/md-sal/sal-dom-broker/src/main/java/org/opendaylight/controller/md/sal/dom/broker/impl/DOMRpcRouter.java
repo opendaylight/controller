@@ -12,7 +12,6 @@ import com.google.common.base.Verify;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.MapDifference;
 import com.google.common.collect.MapDifference.ValueDifference;
 import com.google.common.collect.Maps;
@@ -62,12 +61,6 @@ public final class DOMRpcRouter implements AutoCloseable, DOMRpcService, DOMRpcP
         final DOMRpcRouter rpcRouter = new DOMRpcRouter();
         schemaService.registerSchemaContextListener(rpcRouter);
         return rpcRouter;
-    }
-
-    @Override
-    public <T extends DOMRpcImplementation> DOMRpcImplementationRegistration<T> registerRpcImplementation(
-            final T implementation, final DOMRpcIdentifier... rpcs) {
-        return registerRpcImplementation(implementation, ImmutableSet.copyOf(rpcs));
     }
 
     private synchronized void removeRpcImplementation(final DOMRpcImplementation implementation,
