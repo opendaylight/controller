@@ -13,6 +13,7 @@ import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.List;
 import org.opendaylight.controller.cluster.datastore.persisted.ShardDataTreeSnapshot;
+import org.opendaylight.controller.cluster.datastore.persisted.ShardManagerSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.ShardSnapshotState;
 import org.opendaylight.controller.cluster.raft.Snapshot;
 import org.opendaylight.controller.cluster.raft.persisted.EmptyState;
@@ -38,10 +39,22 @@ public class DatastoreSnapshotList extends ArrayList<DatastoreSnapshot> {
                 new ArrayList<>(size());
         for (DatastoreSnapshot legacy: this) {
             snapshots.add(new org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot(
-                    legacy.getType(), legacy.getShardManagerSnapshot(), fromLegacy(legacy.getShardSnapshots())));
+                    legacy.getType(), deserializeShardManagerSnapshot(legacy.getShardManagerSnapshot()),
+                    fromLegacy(legacy.getShardSnapshots())));
         }
 
         return new org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshotList(snapshots);
+    }
+
+    private static org.opendaylight.controller.cluster.datastore.persisted.ShardManagerSnapshot
+            deserializeShardManagerSnapshot(byte [] bytes) throws IOException, ClassNotFoundException {
+        if (bytes == null) {
+            return null;
+        }
+
+        try (ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(bytes))) {
+            return (ShardManagerSnapshot) ois.readObject();
+        }
     }
 
     private static List<org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot.ShardSnapshot>
@@ -50,13 +63,13 @@ public class DatastoreSnapshotList extends ArrayList<DatastoreSnapshot> {
                 new ArrayList<>(from.size());
         for (DatastoreSnapshot.ShardSnapshot legacy: from) {
             snapshots.add(new org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot.ShardSnapshot(
-                    legacy.getName(), deserialize(legacy.getSnapshot())));
+                    legacy.getName(), deserializeShardSnapshot(legacy.getSnapshot())));
         }
 
         return snapshots;
     }
 
-    private static org.opendaylight.controller.cluster.raft.persisted.Snapshot deserialize(byte[] bytes)
+    private static org.opendaylight.controller.cluster.raft.persisted.Snapshot deserializeShardSnapshot(byte[] bytes)
             throws IOException, ClassNotFoundException {
         try (ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(bytes))) {
             Snapshot legacy = (Snapshot) ois.readObject();
