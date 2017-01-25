@@ -59,7 +59,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
-import org.apache.commons.lang3.SerializationUtils;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
@@ -97,6 +96,7 @@ import org.opendaylight.controller.cluster.datastore.messages.ShardLeaderStateCh
 import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContext;
 import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot.ShardSnapshot;
+import org.opendaylight.controller.cluster.datastore.persisted.ShardManagerSnapshot;
 import org.opendaylight.controller.cluster.datastore.utils.ForwardingActor;
 import org.opendaylight.controller.cluster.datastore.utils.MockClusterWrapper;
 import org.opendaylight.controller.cluster.datastore.utils.MockConfiguration;
@@ -1372,9 +1372,8 @@ public class ShardManagerTest extends AbstractShardManagerTest {
         assertEquals("Shard names", Sets.newHashSet("shard1", "shard2", "astronauts"), Sets.newHashSet(
                 Lists.transform(datastoreSnapshot.getShardSnapshots(), shardNameTransformer)));
 
-        byte[] snapshotBytes = datastoreSnapshot.getShardManagerSnapshot();
-        assertNotNull("Expected ShardManagerSnapshot", snapshotBytes);
-        ShardManagerSnapshot snapshot = SerializationUtils.deserialize(snapshotBytes);
+        ShardManagerSnapshot snapshot = datastoreSnapshot.getShardManagerSnapshot();
+        assertNotNull("Expected ShardManagerSnapshot", snapshot);
         assertEquals("Shard names", Sets.newHashSet("shard1", "shard2", "astronauts"),
                 Sets.newHashSet(snapshot.getShardList()));
 
@@ -1394,8 +1393,8 @@ public class ShardManagerTest extends AbstractShardManagerTest {
                 .put("astronauts", Collections.<String>emptyList()).build());
 
         ShardManagerSnapshot snapshot = new ShardManagerSnapshot(Arrays.asList("shard1", "shard2", "astronauts"));
-        DatastoreSnapshot restoreFromSnapshot = new DatastoreSnapshot(shardMrgIDSuffix,
-                SerializationUtils.serialize(snapshot), Collections.<ShardSnapshot>emptyList());
+        DatastoreSnapshot restoreFromSnapshot = new DatastoreSnapshot(shardMrgIDSuffix, snapshot,
+                Collections.<ShardSnapshot>emptyList());
         TestActorRef<TestShardManager> shardManager = actorFactory.createTestActor(newTestShardMgrBuilder(mockConfig)
                 .restoreFromSnapshot(restoreFromSnapshot).props().withDispatcher(Dispatchers.DefaultDispatcherId()));
 
@@ -1413,11 +1412,9 @@ public class ShardManagerTest extends AbstractShardManagerTest {
 
         assertEquals("getType", shardMrgIDSuffix, datastoreSnapshot.getType());
 
-        byte[] snapshotBytes = datastoreSnapshot.getShardManagerSnapshot();
-        assertNotNull("Expected ShardManagerSnapshot", snapshotBytes);
-        snapshot = SerializationUtils.deserialize(snapshotBytes);
+        assertNotNull("Expected ShardManagerSnapshot", datastoreSnapshot.getShardManagerSnapshot());
         assertEquals("Shard names", Sets.newHashSet("shard1", "shard2", "astronauts"),
-                Sets.newHashSet(snapshot.getShardList()));
+                Sets.newHashSet(datastoreSnapshot.getShardManagerSnapshot().getShardList()));
 
         LOG.info("testRestoreFromSnapshot ending");
     }
