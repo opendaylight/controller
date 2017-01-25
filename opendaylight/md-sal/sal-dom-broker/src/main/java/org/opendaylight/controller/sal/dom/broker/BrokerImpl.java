@@ -161,13 +161,6 @@ public class BrokerImpl implements Broker, DOMRpcProviderService, DOMRpcService,
         return session;
     }
 
-
-    @Nonnull
-    @Override
-    public <T extends DOMRpcImplementation> DOMRpcImplementationRegistration<T> registerRpcImplementation(@Nonnull final T implementation, @Nonnull final DOMRpcIdentifier... rpcs) {
-        return rpcProvider.registerRpcImplementation(implementation, rpcs);
-    }
-
     @Nonnull
     @Override
     public <T extends DOMRpcImplementation> DOMRpcImplementationRegistration<T> registerRpcImplementation(@Nonnull final T implementation, @Nonnull final Set<DOMRpcIdentifier> rpcs) {

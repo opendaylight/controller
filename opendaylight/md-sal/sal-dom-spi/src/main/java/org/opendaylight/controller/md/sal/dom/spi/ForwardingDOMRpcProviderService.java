@@ -24,12 +24,8 @@ public abstract class ForwardingDOMRpcProviderService extends ForwardingObject i
     protected abstract @Nonnull DOMRpcProviderService delegate();
 
     @Override
-    public <T extends DOMRpcImplementation> DOMRpcImplementationRegistration<T> registerRpcImplementation(final T implementation, final DOMRpcIdentifier... types) {
-        return delegate().registerRpcImplementation(implementation, types);
-    }
-
-    @Override
-    public <T extends DOMRpcImplementation> DOMRpcImplementationRegistration<T> registerRpcImplementation(final T implementation, final Set<DOMRpcIdentifier> types) {
+    public <T extends DOMRpcImplementation> DOMRpcImplementationRegistration<T> registerRpcImplementation(
+            final T implementation, final Set<DOMRpcIdentifier> types) {
         return delegate().registerRpcImplementation(implementation, types);
     }
 }
