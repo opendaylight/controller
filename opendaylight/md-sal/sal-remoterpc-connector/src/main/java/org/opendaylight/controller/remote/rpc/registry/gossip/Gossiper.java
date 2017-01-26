@@ -108,6 +108,7 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
             cluster.subscribe(getSelf(),
                     ClusterEvent.initialStateAsEvents(),
                     ClusterEvent.MemberEvent.class,
+                    ClusterEvent.ReachableMember.class,
                     ClusterEvent.UnreachableMember.class);
         }
 
@@ -149,7 +150,10 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
             // comparing the GossipStatus message with its local versions.
             receiveGossip((GossipEnvelope) message);
         } else if (message instanceof ClusterEvent.MemberUp) {
-            receiveMemberUp(((ClusterEvent.MemberUp) message).member());
+            receiveMemberUpOrReachable(((ClusterEvent.MemberUp) message).member());
+
+        } else if (message instanceof ClusterEvent.ReachableMember) {
+            receiveMemberUpOrReachable(((ClusterEvent.ReachableMember) message).member());
 
         } else if (message instanceof ClusterEvent.MemberRemoved) {
             receiveMemberRemoveOrUnreachable(((ClusterEvent.MemberRemoved) message).member());
@@ -183,10 +187,11 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
      *
      * @param member the member to add
      */
-    void receiveMemberUp(Member member) {
+    void receiveMemberUpOrReachable(final Member member) {
 
         if (selfAddress.equals(member.address())) {
-            return; //ignore up notification for self
+            //ignore up notification for self
+            return;
         }
 
         if (!clusterMembers.contains(member.address())) {
