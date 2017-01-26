@@ -43,6 +43,12 @@
       <groupId>commons-lang</groupId>
       <artifactId>commons-lang</artifactId>
     </dependency>
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+      <scope>test</scope>
+    </dependency>
+
 
     <!-- Akka -->
     <dependency>
@@ -72,6 +78,12 @@
     <dependency>
       <groupId>com.typesafe.akka</groupId>
       <artifactId>akka-testkit_${scala.version}</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.typesafe.akka</groupId>
+      <artifactId>akka-persistence-tck_${scala.version}</artifactId>
+      <version>${akka.version}</version>
       <scope>test</scope>
     </dependency>
 
@@ -201,6 +213,7 @@
               <instructions>
                   <Bundle-Name>${project.groupId}.${project.artifactId}</Bundle-Name>
                   <Export-Package>org.opendaylight.controller.cluster.schema.provider.impl, {local-packages}</Export-Package>
+                  <DynamicImport-Package>*</DynamicImport-Package>
               </instructions>
               </configuration>
           </plugin>
