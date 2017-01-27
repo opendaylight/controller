@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fafc7978_4c2f1aa2",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/sharding/DistributedShardedDOMDataTreeRemotingTest.java",
+        "patchSetId": 71
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2017-01-27T15:13:18Z",
+      "side": 1,
+      "message": "This is removed in https://git.opendaylight.org/gerrit/#/c/50609/\nto avoid a huge rebase with the 10 patches.",
+      "range": {
+        "startLine": 59,
+        "startChar": 0,
+        "endLine": 59,
+        "endChar": 81
+      },
+      "revId": "ccbe628225ef482ed24d8e6df2ffa419f78f5fbc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
