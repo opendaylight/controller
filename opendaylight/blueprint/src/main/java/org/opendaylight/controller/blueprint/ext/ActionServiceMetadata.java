@@ -35,8 +35,6 @@ final class ActionServiceMetadata extends AbstractInvokableServiceMetadata {
 
     @Override
     Predicate<RpcRoutingStrategy> rpcFilter() {
-        // FIXME: BUG-7608: action-service is a no-op for now
-        // return RpcRoutingStrategy::isContextBasedRouted;
-        return (strategy) -> false;
+        return RpcRoutingStrategy::isContextBasedRouted;
     }
 }
