@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fafc7978_8c8f4223",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/AbstractInvokableServiceMetadata.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-01-27T14:23:56Z",
+      "side": 1,
+      "message": "You want this in retrievedDOMRpcService. We\u0027re actually waiting on the DOMRpcService here and retrieveService will overwrite the dependency desc.\n\nAlso I just realized that \"setDependendencyDesc\" is misspelled :) can you fix that too?",
+      "revId": "ef43ac28f0c22f7a64f1a2ceb374f115344c8f88",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_eccd2e5f",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/OpendaylightNamespaceHandler.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-01-27T14:23:56Z",
+      "side": 1,
+      "message": "This should be SchemaService.",
+      "revId": "ef43ac28f0c22f7a64f1a2ceb374f115344c8f88",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_ecf40e89",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/OpendaylightNamespaceHandler.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 253,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-01-27T14:23:56Z",
+      "side": 1,
+      "message": "I believe you mean ActionProviderBean here.",
+      "revId": "ef43ac28f0c22f7a64f1a2ceb374f115344c8f88",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
