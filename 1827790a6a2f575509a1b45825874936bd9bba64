@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fafc7978_8c12a2b2",
+        "filename": "opendaylight/blueprint/src/main/java/org/opendaylight/controller/blueprint/ext/AbstractInvokableServiceMetadata.java",
+        "patchSetId": 15
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-01-27T14:25:28Z",
+      "side": 1,
+      "message": "You want this in retrievedDOMRpcService. We\u0027re actually waiting on the DOMRpcService here and retrieveService will overwrite the dependency desc.\n\nAlso I just realized that \"setDependendencyDesc\" is misspelled :) can you fix that too?",
+      "revId": "1827790a6a2f575509a1b45825874936bd9bba64",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
