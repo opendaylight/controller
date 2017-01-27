@@ -9,7 +9,6 @@
     <relativePath/>
   </parent>
 
-  <groupId>org.opendaylight.controller</groupId>
   <artifactId>blueprint</artifactId>
   <packaging>bundle</packaging>
   <name>${project.artifactId}</name>
