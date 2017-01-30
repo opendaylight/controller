@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_f5b04bdf",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/SnapshotManager.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-01-30T18:22:48Z",
+      "side": 1,
+      "message": "They\u0027re accessed outside the package by unit tests. They\u0027re passed in as function pointers from multiple classes or inlined.",
+      "parentUuid": "fafc7978_b574039d",
+      "range": {
+        "startLine": 122,
+        "startChar": 0,
+        "endLine": 137,
+        "endChar": 5
+      },
+      "revId": "95781ae87517f184b69132d21e2260288aff456f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fafc7978_c3cc7038",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/persisted/Snapshot.java",
         "patchSetId": 5
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_15a06f8f",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/persisted/Snapshot.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-01-30T18:22:48Z",
+      "side": 1,
+      "message": "Why does it need to be a top-level interface? It\u0027s intended for use with Snapshot.",
+      "parentUuid": "fafc7978_c3cc7038",
+      "range": {
+        "startLine": 32,
+        "startChar": 0,
+        "endLine": 33,
+        "endChar": 5
+      },
+      "revId": "95781ae87517f184b69132d21e2260288aff456f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fafc7978_8873a74c",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/persisted/Snapshot.java",
         "patchSetId": 5
@@ -59,6 +107,30 @@
       "writtenOn": "2017-01-30T17:19:37Z",
       "side": 1,
       "message": "WritableObjects.writeLongs() ?",
+      "range": {
+        "startLine": 53,
+        "startChar": 0,
+        "endLine": 56,
+        "endChar": 52
+      },
+      "revId": "95781ae87517f184b69132d21e2260288aff456f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_35a3f39f",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/persisted/Snapshot.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-01-30T18:22:48Z",
+      "side": 1,
+      "message": "I suppose - but it doesn\u0027t really buy us much and reduces clarity. The state will far dominate the serialized size.",
+      "parentUuid": "fafc7978_8873a74c",
       "range": {
         "startLine": 53,
         "startChar": 0,
