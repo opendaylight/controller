@@ -2,6 +2,52 @@
   "comments": [
     {
       "key": {
+        "uuid": "fafc7978_18cb8673",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorSnapshotCohort.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2017-01-30T22:22:08Z",
+      "side": 1,
+      "message": "throws IOException, see below",
+      "range": {
+        "startLine": 37,
+        "startChar": 105,
+        "endLine": 37,
+        "endChar": 107
+      },
+      "revId": "95781ae87517f184b69132d21e2260288aff456f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_d8b9feea",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorSnapshotCohort.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2017-01-30T22:22:08Z",
+      "side": 1,
+      "message": "I think this should throw IOException, too. It is based on ByteSource, which can throw IOExceptions, hence any caller should be well-equipped to deal with IOExceptions.",
+      "range": {
+        "startLine": 54,
+        "startChar": 4,
+        "endLine": 54,
+        "endChar": 74
+      },
+      "revId": "95781ae87517f184b69132d21e2260288aff456f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fafc7978_b574039d",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/SnapshotManager.java",
         "patchSetId": 5
@@ -97,6 +143,53 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_18e4260c",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/SnapshotManager.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2017-01-30T22:22:08Z",
+      "side": 1,
+      "message": "Fair enough :)",
+      "parentUuid": "fafc7978_58522ede",
+      "range": {
+        "startLine": 122,
+        "startChar": 0,
+        "endLine": 137,
+        "endChar": 5
+      },
+      "revId": "95781ae87517f184b69132d21e2260288aff456f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_b8ba3adf",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/base/messages/CaptureSnapshotReply.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2017-01-30T22:22:08Z",
+      "side": 1,
+      "message": "Preconditions.checkNotNull()",
+      "range": {
+        "startLine": 20,
+        "startChar": 8,
+        "endLine": 20,
+        "endChar": 43
+      },
+      "revId": "95781ae87517f184b69132d21e2260288aff456f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fafc7978_c3cc7038",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/persisted/Snapshot.java",
         "patchSetId": 5
@@ -184,6 +277,29 @@
         "startChar": 0,
         "endLine": 56,
         "endChar": 52
+      },
+      "revId": "95781ae87517f184b69132d21e2260288aff456f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_78c8d274",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/ShardSnapshotActor.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2017-01-30T22:22:08Z",
+      "side": 1,
+      "message": "This one deserves a javadoc",
+      "range": {
+        "startLine": 89,
+        "startChar": 4,
+        "endLine": 89,
+        "endChar": 17
       },
       "revId": "95781ae87517f184b69132d21e2260288aff456f",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
