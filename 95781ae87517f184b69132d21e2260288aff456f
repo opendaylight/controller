@@ -73,6 +73,30 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_58522ede",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/SnapshotManager.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-01-30T21:01:04Z",
+      "side": 1,
+      "message": "Not just tests actually.I patterned these new methods after what was already there - it\u0027s one way to do it - there are other ways but not really important at this point.",
+      "parentUuid": "fafc7978_d5a42759",
+      "range": {
+        "startLine": 122,
+        "startChar": 0,
+        "endLine": 137,
+        "endChar": 5
+      },
+      "revId": "95781ae87517f184b69132d21e2260288aff456f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fafc7978_c3cc7038",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/persisted/Snapshot.java",
         "patchSetId": 5
