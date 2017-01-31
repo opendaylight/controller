@@ -48,7 +48,6 @@
             <Export-Package>
               org.opendaylight.controller.liblldp</Export-Package>
           </instructions>
-          <manifestLocation>${project.basedir}/META-INF</manifestLocation>
         </configuration>
       </plugin>
     </plugins>

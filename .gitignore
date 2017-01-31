@@ -12,7 +12,6 @@ target-ide
 .classpath
 .project
 .settings
-MANIFEST.MF
 opendaylight/northbound/integrationtest/logs/*
 *.ipr
 *.iml
