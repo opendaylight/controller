@@ -173,14 +173,14 @@ public class LogbackModuleWithInitialConfigurationTest extends AbstractConfigTes
         rollingApp.setMinIndex(rollingPolicy.getMinIndex());
         SizeBasedTriggeringPolicy<ILoggingEvent> triggeringPolicy = (SizeBasedTriggeringPolicy<ILoggingEvent>) fileAppender
                 .getTriggeringPolicy();
-        rollingApp.setMaxFileSize(triggeringPolicy.getMaxFileSize());
+        rollingApp.setMaxFileSize(LogbackModuleFactory.getMaxFileSize(triggeringPolicy).toString());
         rollingApp.setName(fileAppender.getName());
         rollingApp.setFileNamePattern(rollingPolicy.getFileNamePattern());
         rollingAppenders.add(rollingApp);
 
-        assertEquals(rollingApp.getFileName(), "target/osgi.log");
-        assertEquals(rollingApp.getMaxFileSize(), "50MB");
-        assertEquals(rollingApp.getName(), "VARLOGFILE");
+        assertEquals("target/osgi.log", rollingApp.getFileName());
+        assertEquals("50 MB", rollingApp.getMaxFileSize());
+        assertEquals("VARLOGFILE", rollingApp.getName());
 
         List<ConsoleAppenderTO> consoleAppenders = new ArrayList<>();
         ConsoleAppenderTO consoleApp = new ConsoleAppenderTO();

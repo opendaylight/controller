@@ -16,6 +16,7 @@ import ch.qos.logback.core.Appender;
 import ch.qos.logback.core.rolling.FixedWindowRollingPolicy;
 import ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy;
 import ch.qos.logback.core.rolling.TimeBasedRollingPolicy;
+import ch.qos.logback.core.util.FileSize;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
@@ -215,7 +216,7 @@ public class ContextSetterImpl implements ContextSetter, Closeable {
             }
             SizeBasedTriggeringPolicy<ILoggingEvent> triggeringPolicy = new SizeBasedTriggeringPolicy<>();
             triggeringPolicy.setContext(context);
-            triggeringPolicy.setMaxFileSize(appender.getMaxFileSize());
+            triggeringPolicy.setMaxFileSize(FileSize.valueOf(appender.getMaxFileSize()));
             triggeringPolicy.start();
             app.setTriggeringPolicy(triggeringPolicy);
             app.setName(appender.getName());
