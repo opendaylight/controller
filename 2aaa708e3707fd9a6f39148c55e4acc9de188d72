@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fafc7978_89dba61a",
+        "filename": "opendaylight/md-sal/sal-clustering-config/src/main/resources/initial/module-shards.conf",
+        "patchSetId": 14
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 2630
+      },
+      "writtenOn": "2017-01-31T13:54:39Z",
+      "side": 1,
+      "message": "is it possible to remove the default shard like this without any consequences in other parts of odl, such as odl-restconf?",
+      "revId": "2aaa708e3707fd9a6f39148c55e4acc9de188d72",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
