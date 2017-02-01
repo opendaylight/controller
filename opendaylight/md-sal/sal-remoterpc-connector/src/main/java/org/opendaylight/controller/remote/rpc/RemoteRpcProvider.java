@@ -18,7 +18,6 @@ import org.opendaylight.controller.md.sal.dom.api.DOMRpcProviderService;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
 import org.opendaylight.controller.sal.core.api.Broker;
 import org.opendaylight.controller.sal.core.api.Provider;
-import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +34,6 @@ public class RemoteRpcProvider implements AutoCloseable, Provider {
     private final ActorSystem actorSystem;
 
     private DOMRpcService rpcService;
-    private SchemaService schemaService;
     private ActorRef rpcManager;
 
     public RemoteRpcProvider(final ActorSystem actorSystem, final DOMRpcProviderService rpcProvisionRegistry,
@@ -47,10 +45,6 @@ public class RemoteRpcProvider implements AutoCloseable, Provider {
 
     public void setRpcService(final DOMRpcService rpcService) {
         this.rpcService = rpcService;
-    }
-
-    public void setSchemaService(final SchemaService schemaService) {
-        this.schemaService = schemaService;
     }
 
     @Override
