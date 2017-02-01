@@ -9,7 +9,6 @@
 package org.opendaylight.controller.remote.rpc;
 
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
@@ -23,7 +22,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcProviderService;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
-import org.opendaylight.controller.sal.core.api.Broker;
 import scala.concurrent.Await;
 import scala.concurrent.duration.Duration;
 
@@ -49,11 +47,9 @@ public class RemoteRpcProviderTest {
     @Test
     public void testRemoteRpcProvider() throws Exception {
         try (final RemoteRpcProvider rpcProvider = new RemoteRpcProvider(system, mock(DOMRpcProviderService.class),
-                new RemoteRpcProviderConfig(system.settings().config()))) {
-            final Broker.ProviderSession session = mock(Broker.ProviderSession.class);
-            when(session.getService(DOMRpcService.class)).thenReturn(mock(DOMRpcService.class));
+            mock(DOMRpcService.class), new RemoteRpcProviderConfig(system.settings().config()))) {
 
-            rpcProvider.onSessionInitiated(session);
+            rpcProvider.start();
 
             final ActorRef actorRef = Await.result(
                     system.actorSelection(moduleConfig.getRpcManagerPath()).resolveOne(
