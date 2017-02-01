@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_b7d88e54",
+        "filename": "opendaylight/md-sal/mdsal-trace/.gitignore",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 5357
+      },
+      "writtenOn": "2017-02-01T12:45:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1a622d24_2b04167a",
+      "revId": "5cb49a90a57134f828c5f324ab41e0b1312592ad",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a622d24_cbf2c299",
         "filename": "opendaylight/md-sal/mdsal-trace/api/pom.xml",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2016-12-13T13:36:19Z",
       "side": 1,
       "message": "Could I encourage you do enable CS enforcement on all brand new artifacts such as this one, by inserting https://wiki.opendaylight.org/view/BestPractices/Coding_Guidelines#Checkstyle here?",
+      "revId": "5cb49a90a57134f828c5f324ab41e0b1312592ad",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_e99eb255",
+        "filename": "opendaylight/md-sal/mdsal-trace/api/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 5357
+      },
+      "writtenOn": "2017-02-01T12:45:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1a622d24_cbf2c299",
       "revId": "5cb49a90a57134f828c5f324ab41e0b1312592ad",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_29a0ba8f",
+        "filename": "opendaylight/md-sal/mdsal-trace/api/src/main/yang/mdsaltrace.yang",
+        "patchSetId": 2
+      },
+      "lineNbr": 6,
+      "author": {
+        "id": 5357
+      },
+      "writtenOn": "2017-02-01T12:45:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1a622d24_8b3f2a25",
+      "revId": "5cb49a90a57134f828c5f324ab41e0b1312592ad",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a622d24_6b3c4e30",
         "filename": "opendaylight/md-sal/mdsal-trace/api/src/main/yang/mdsaltrace.yang",
         "patchSetId": 2
@@ -64,6 +118,24 @@
       "writtenOn": "2016-12-13T13:36:19Z",
       "side": 1,
       "message": "nit pick: remove trailing space",
+      "revId": "5cb49a90a57134f828c5f324ab41e0b1312592ad",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_89ad668b",
+        "filename": "opendaylight/md-sal/mdsal-trace/api/src/main/yang/mdsaltrace.yang",
+        "patchSetId": 2
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 5357
+      },
+      "writtenOn": "2017-02-01T12:45:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1a622d24_6b3c4e30",
       "revId": "5cb49a90a57134f828c5f324ab41e0b1312592ad",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_bf04dc7e",
+        "filename": "opendaylight/md-sal/mdsal-trace/binding-impl/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 5357
+      },
+      "writtenOn": "2017-02-01T12:45:02Z",
+      "side": 1,
+      "message": "Yeah. I checked and it does not work without this.",
+      "parentUuid": "1a622d24_cb4922d2",
+      "revId": "5cb49a90a57134f828c5f324ab41e0b1312592ad",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a622d24_abef86af",
         "filename": "opendaylight/md-sal/mdsal-trace/binding-impl/pom.xml",
         "patchSetId": 2
@@ -98,6 +188,24 @@
       "writtenOn": "2016-12-13T13:36:19Z",
       "side": 1,
       "message": "Could I encourage you do enable CS enforcement on all brand new artifacts such as this one, by inserting https://wiki.opendaylight.org/view/BestPractices/Coding_Guidelines#Checkstyle here?",
+      "revId": "5cb49a90a57134f828c5f324ab41e0b1312592ad",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_69aac271",
+        "filename": "opendaylight/md-sal/mdsal-trace/binding-impl/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 5357
+      },
+      "writtenOn": "2017-02-01T12:45:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1a622d24_abef86af",
       "revId": "5cb49a90a57134f828c5f324ab41e0b1312592ad",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_ff35c446",
+        "filename": "opendaylight/md-sal/mdsal-trace/dom-impl/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 5357
+      },
+      "writtenOn": "2017-02-01T12:45:02Z",
+      "side": 1,
+      "message": "and I checked this one too. It doesn\u0027t work without it.",
+      "parentUuid": "1a622d24_0b131ab9",
+      "revId": "5cb49a90a57134f828c5f324ab41e0b1312592ad",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a622d24_6b23ae05",
         "filename": "opendaylight/md-sal/mdsal-trace/dom-impl/pom.xml",
         "patchSetId": 2
@@ -138,6 +264,24 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_3f546c53",
+        "filename": "opendaylight/md-sal/mdsal-trace/dom-impl/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 5357
+      },
+      "writtenOn": "2017-02-01T12:45:02Z",
+      "side": 1,
+      "message": "Once again, does not work without this.",
+      "parentUuid": "1a622d24_6b23ae05",
+      "revId": "5cb49a90a57134f828c5f324ab41e0b1312592ad",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a622d24_0b2cba01",
         "filename": "opendaylight/md-sal/mdsal-trace/dom-impl/pom.xml",
         "patchSetId": 2
@@ -149,6 +293,24 @@
       "writtenOn": "2016-12-13T13:36:19Z",
       "side": 1,
       "message": "Could I encourage you do enable CS enforcement on all brand new artifacts such as this one, by inserting https://wiki.opendaylight.org/view/BestPractices/Coding_Guidelines#Checkstyle here?",
+      "revId": "5cb49a90a57134f828c5f324ab41e0b1312592ad",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_a9bb0ac3",
+        "filename": "opendaylight/md-sal/mdsal-trace/dom-impl/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 5357
+      },
+      "writtenOn": "2017-02-01T12:45:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1a622d24_0b2cba01",
       "revId": "5cb49a90a57134f828c5f324ab41e0b1312592ad",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
