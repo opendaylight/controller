@@ -10,6 +10,7 @@ package org.opendaylight.controller.md.sal.binding.test;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
+import java.util.concurrent.Executors;
 import javassist.ClassPool;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.NotificationPublishService;
@@ -83,9 +84,8 @@ public class DataBrokerTestCustomizer {
         return new BindingDOMNotificationPublishServiceAdapter(bindingToNormalized, domNotificationRouter);
     }
 
-
     public ListeningExecutorService getCommitCoordinatorExecutor() {
-        return MoreExecutors.newDirectExecutorService();
+        return MoreExecutors.listeningDecorator(Executors.newSingleThreadExecutor());
     }
 
     public DataBroker createDataBroker() {
@@ -101,7 +101,7 @@ public class DataBrokerTestCustomizer {
     }
 
     private DOMDataBroker getDOMDataBroker() {
-        if(domDataBroker == null) {
+        if (domDataBroker == null) {
             domDataBroker = createDOMDataBroker();
         }
         return domDataBroker;
