@@ -7,9 +7,14 @@
  */
 package org.opendaylight.controller.md.sal.binding.test;
 
+import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.CONFIGURATION;
+import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.OPERATIONAL;
+
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import javassist.ClassPool;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.NotificationPublishService;
@@ -60,15 +65,19 @@ public class DataBrokerTestCustomizer {
     }
 
     public DOMStore createConfigurationDatastore() {
-        final InMemoryDOMDataStore store = new InMemoryDOMDataStore("CFG", MoreExecutors.newDirectExecutorService());
+        final InMemoryDOMDataStore store = new InMemoryDOMDataStore("CFG", getDatastoreExecutor(CONFIGURATION));
         schemaService.registerSchemaContextListener(store);
         return store;
     }
 
     public DOMStore createOperationalDatastore() {
-        final InMemoryDOMDataStore store = new InMemoryDOMDataStore("OPER", MoreExecutors.newDirectExecutorService());
+        final InMemoryDOMDataStore store = new InMemoryDOMDataStore("OPER", getDatastoreExecutor(OPERATIONAL));
         schemaService.registerSchemaContextListener(store);
         return store;
+    }
+
+    protected ExecutorService getDatastoreExecutor(LogicalDatastoreType type) {
+        return Executors.newCachedThreadPool();
     }
 
     public DOMDataBroker createDOMDataBroker() {
@@ -83,9 +92,8 @@ public class DataBrokerTestCustomizer {
         return new BindingDOMNotificationPublishServiceAdapter(bindingToNormalized, domNotificationRouter);
     }
 
-
     public ListeningExecutorService getCommitCoordinatorExecutor() {
-        return MoreExecutors.newDirectExecutorService();
+        return MoreExecutors.listeningDecorator(Executors.newSingleThreadExecutor());
     }
 
     public DataBroker createDataBroker() {
@@ -101,7 +109,7 @@ public class DataBrokerTestCustomizer {
     }
 
     private DOMDataBroker getDOMDataBroker() {
-        if(domDataBroker == null) {
+        if (domDataBroker == null) {
             domDataBroker = createDOMDataBroker();
         }
         return domDataBroker;
