@@ -7,6 +7,9 @@
  */
 package org.opendaylight.controller.md.sal.binding.test;
 
+import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.CONFIGURATION;
+import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.OPERATIONAL;
+
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
@@ -22,7 +25,7 @@ import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.md.sal.dom.broker.impl.DOMNotificationRouter;
 import org.opendaylight.controller.md.sal.dom.broker.impl.SerializedDOMDataBroker;
-import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
+import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStoreFactory;
 import org.opendaylight.controller.sal.binding.test.util.MockSchemaService;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.opendaylight.controller.sal.core.spi.data.DOMStore;
@@ -60,15 +63,11 @@ public class DataBrokerTestCustomizer {
     }
 
     public DOMStore createConfigurationDatastore() {
-        final InMemoryDOMDataStore store = new InMemoryDOMDataStore("CFG", MoreExecutors.newDirectExecutorService());
-        schemaService.registerSchemaContextListener(store);
-        return store;
+        return InMemoryDOMDataStoreFactory.create("CFG", CONFIGURATION, schemaService, false, null);
     }
 
     public DOMStore createOperationalDatastore() {
-        final InMemoryDOMDataStore store = new InMemoryDOMDataStore("OPER", MoreExecutors.newDirectExecutorService());
-        schemaService.registerSchemaContextListener(store);
-        return store;
+        return InMemoryDOMDataStoreFactory.create("OPER", OPERATIONAL,  schemaService, false, null);
     }
 
     public DOMDataBroker createDOMDataBroker() {
