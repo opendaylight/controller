@@ -12,10 +12,10 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.opendaylight.odlparent</groupId>
-        <artifactId>single-feature-parent</artifactId>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>controller-single-feature-parent</artifactId>
         <version>1.8.0-SNAPSHOT</version>
-        <relativePath/>
+        <relativePath>../../parents/controller-single-feature-parent</relativePath>
     </parent>
 
     <groupId>org.opendaylight.controller</groupId>

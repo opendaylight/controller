@@ -12,10 +12,10 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.opendaylight.odlparent</groupId>
-        <artifactId>feature-repo-parent</artifactId>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>controller-feature-repo-parent</artifactId>
         <version>1.8.0-SNAPSHOT</version>
-        <relativePath/>
+        <relativePath>../../parents/controller-feature-repo-parent</relativePath>
     </parent>
 
     <groupId>org.opendaylight.controller</groupId>
