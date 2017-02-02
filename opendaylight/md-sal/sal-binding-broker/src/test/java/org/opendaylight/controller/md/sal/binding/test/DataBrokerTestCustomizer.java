@@ -7,6 +7,10 @@
  */
 package org.opendaylight.controller.md.sal.binding.test;
 
+import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.CONFIGURATION;
+import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.OPERATIONAL;
+import static org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStoreConfigProperties.DEFAULT_MAX_DATA_CHANGE_LISTENER_QUEUE_SIZE;
+
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
@@ -60,13 +64,17 @@ public class DataBrokerTestCustomizer {
     }
 
     public DOMStore createConfigurationDatastore() {
-        final InMemoryDOMDataStore store = new InMemoryDOMDataStore("CFG", MoreExecutors.newDirectExecutorService());
+        final InMemoryDOMDataStore store = new InMemoryDOMDataStore("CFG", CONFIGURATION,
+                MoreExecutors.newDirectExecutorService(),
+                DEFAULT_MAX_DATA_CHANGE_LISTENER_QUEUE_SIZE, false);
         schemaService.registerSchemaContextListener(store);
         return store;
     }
 
     public DOMStore createOperationalDatastore() {
-        final InMemoryDOMDataStore store = new InMemoryDOMDataStore("OPER", MoreExecutors.newDirectExecutorService());
+        final InMemoryDOMDataStore store = new InMemoryDOMDataStore("OPER", OPERATIONAL,
+                MoreExecutors.newDirectExecutorService(),
+                DEFAULT_MAX_DATA_CHANGE_LISTENER_QUEUE_SIZE, false);
         schemaService.registerSchemaContextListener(store);
         return store;
     }
