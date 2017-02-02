@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fafc7978_32de5340",
+        "filename": "opendaylight/md-sal/mdsal-trace/binding-impl/pom.xml",
+        "patchSetId": 8
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2017-02-02T21:08:27Z",
+      "side": 1,
+      "message": "sorry I didn\u0027t see this before, this needs to be mockito-core; see https://git.opendaylight.org/gerrit/#/q/topic:bug/7662 .. I\u0027ve taken the liberty of going ahead and just changing it for you.",
+      "revId": "a210a48449b5adcf3fe6f1885e2cc9545101851a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_52e4b70c",
+        "filename": "opendaylight/md-sal/mdsal-trace/dom-impl/pom.xml",
+        "patchSetId": 8
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2017-02-02T21:08:27Z",
+      "side": 1,
+      "message": "sorry I didn\u0027t see this before, this needs to be mockito-core; see https://git.opendaylight.org/gerrit/#/q/topic:bug/7662 .. I\u0027ve taken the liberty of going ahead and just changing it for you.",
+      "revId": "a210a48449b5adcf3fe6f1885e2cc9545101851a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
