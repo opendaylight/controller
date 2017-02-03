@@ -106,7 +106,7 @@ public class DistributedDataStoreTest extends AbstractActorTest {
 
     @Test
     public void testWaitTillReadyCountDown() {
-        try (final DistributedDataStore distributedDataStore = new DistributedDataStore(actorContext, UNKNOWN_ID)) {
+        try (DistributedDataStore distributedDataStore = new DistributedDataStore(actorContext, UNKNOWN_ID)) {
             doReturn(datastoreContext).when(actorContext).getDatastoreContext();
             doReturn(shardElectionTimeout).when(datastoreContext).getShardLeaderElectionTimeout();
             doReturn(FiniteDuration.apply(5000, TimeUnit.MILLISECONDS)).when(shardElectionTimeout).duration();
