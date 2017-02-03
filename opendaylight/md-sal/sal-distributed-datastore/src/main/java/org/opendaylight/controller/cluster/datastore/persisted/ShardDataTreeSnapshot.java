@@ -49,8 +49,8 @@ public abstract class ShardDataTreeSnapshot {
         }
 
         try {
-            try (final InputStream is = new ByteArrayInputStream(bytes)) {
-                try (final DataInputStream dis = new DataInputStream(is)) {
+            try (InputStream is = new ByteArrayInputStream(bytes)) {
+                try (DataInputStream dis = new DataInputStream(is)) {
                     final ShardDataTreeSnapshot ret = AbstractVersionedShardDataTreeSnapshot.deserialize(dis);
 
                     // Make sure we consume all bytes, otherwise something went very wrong

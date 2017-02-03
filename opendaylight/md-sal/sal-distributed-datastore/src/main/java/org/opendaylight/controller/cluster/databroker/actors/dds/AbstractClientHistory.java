@@ -134,8 +134,8 @@ abstract class AbstractClientHistory extends LocalAbortable implements Identifia
         return ret;
     }
 
-    abstract ProxyHistory createHistoryProxy(final LocalHistoryIdentifier historyId,
-            final AbstractClientConnection<ShardBackendInfo> connection);
+    abstract ProxyHistory createHistoryProxy(LocalHistoryIdentifier historyId,
+            AbstractClientConnection<ShardBackendInfo> connection);
 
     private void createHistoryCallback(final Response<?, ?> response) {
         LOG.debug("Create history response {}", response);

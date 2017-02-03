@@ -530,16 +530,15 @@ abstract class AbstractProxyTransaction implements Identifiable<TransactionIdent
 
     abstract boolean isSnapshotOnly();
 
-    abstract void doDelete(final YangInstanceIdentifier path);
+    abstract void doDelete(YangInstanceIdentifier path);
 
-    abstract void doMerge(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data);
+    abstract void doMerge(YangInstanceIdentifier path, NormalizedNode<?, ?> data);
 
-    abstract void doWrite(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data);
+    abstract void doWrite(YangInstanceIdentifier path, NormalizedNode<?, ?> data);
 
-    abstract CheckedFuture<Boolean, ReadFailedException> doExists(final YangInstanceIdentifier path);
+    abstract CheckedFuture<Boolean, ReadFailedException> doExists(YangInstanceIdentifier path);
 
-    abstract CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> doRead(
-            final YangInstanceIdentifier path);
+    abstract CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> doRead(YangInstanceIdentifier path);
 
     abstract void doSeal();
 

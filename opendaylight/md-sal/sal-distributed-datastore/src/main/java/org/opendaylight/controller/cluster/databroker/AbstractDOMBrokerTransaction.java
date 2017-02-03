@@ -61,7 +61,7 @@ public abstract class AbstractDOMBrokerTransaction<T extends DOMStoreTransaction
         return ret;
     }
 
-    protected abstract T createTransaction(final LogicalDatastoreType key);
+    protected abstract T createTransaction(LogicalDatastoreType key);
 
     /**
      * Returns immutable Iterable of all subtransactions.

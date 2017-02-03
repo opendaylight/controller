@@ -683,7 +683,7 @@ public class DistributedDataStoreIntegrationTest {
 
                     // Create the write Tx.
 
-                    try (final DOMStoreWriteTransaction writeTx = writeOnly ? dataStore.newWriteOnlyTransaction()
+                    try (DOMStoreWriteTransaction writeTx = writeOnly ? dataStore.newWriteOnlyTransaction()
                             : dataStore.newReadWriteTransaction()) {
                         assertNotNull("newReadWriteTransaction returned null", writeTx);
 
