@@ -536,7 +536,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
                 leaderActor, ApplyState.class);
         assertEquals("ApplyState count", newLogIndex, applyStateList.size());
 
-        for (int i = 0; i <= newLogIndex - 1; i++ ) {
+        for (int i = 0; i <= newLogIndex - 1; i++) {
             ApplyState applyState = applyStateList.get(i);
             assertEquals("getIndex", i + 1, applyState.getReplicatedLogEntry().getIndex());
             assertEquals("getTerm", term, applyState.getReplicatedLogEntry().getTerm());

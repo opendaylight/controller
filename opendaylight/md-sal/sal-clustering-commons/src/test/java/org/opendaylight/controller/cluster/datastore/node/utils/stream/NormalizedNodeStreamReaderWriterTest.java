@@ -168,7 +168,7 @@ public class NormalizedNodeStreamReaderWriterTest {
     @Test
     public void testWithSerializable() {
         NormalizedNode<?, ?> input = TestModel.createTestContainer();
-        SampleNormalizedNodeSerializable serializable = new SampleNormalizedNodeSerializable(input );
+        SampleNormalizedNodeSerializable serializable = new SampleNormalizedNodeSerializable(input);
         SampleNormalizedNodeSerializable clone =
                 (SampleNormalizedNodeSerializable)SerializationUtils.clone(serializable);
 

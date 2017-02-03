@@ -368,7 +368,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     private void switchBehavior(SwitchBehavior message) {
         if (!getRaftActorContext().getRaftPolicy().automaticElectionsEnabled()) {
             RaftState newState = message.getNewState();
-            if ( newState == RaftState.Leader || newState == RaftState.Follower) {
+            if (newState == RaftState.Leader || newState == RaftState.Follower) {
                 switchBehavior(behaviorStateTracker.capture(getCurrentBehavior()),
                     AbstractRaftActorBehavior.createBehavior(context, message.getNewState()));
                 getRaftActorContext().getTermInformation().updateAndPersist(message.getNewTerm(), "");

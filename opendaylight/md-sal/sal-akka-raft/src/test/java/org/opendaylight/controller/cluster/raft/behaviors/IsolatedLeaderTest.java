@@ -89,7 +89,7 @@ public class IsolatedLeaderTest extends AbstractLeaderTest<IsolatedLeader> {
 
         newBehavior = isolatedLeader.handleMessage(senderActor,
                 new AppendEntriesReply("follower-2", isolatedLeader.lastTerm() - 1, true,
-                        isolatedLeader.lastIndex() - 1, isolatedLeader.lastTerm() - 1, (short)0 ));
+                        isolatedLeader.lastIndex() - 1, isolatedLeader.lastTerm() - 1, (short) 0));
 
         assertEquals("Raft state", RaftState.Leader, newBehavior.state());
     }
@@ -116,13 +116,13 @@ public class IsolatedLeaderTest extends AbstractLeaderTest<IsolatedLeader> {
         // in a 5 member cluster, atleast 2 followers need to be active and return a reply
         RaftActorBehavior newBehavior = isolatedLeader.handleMessage(senderActor,
                 new AppendEntriesReply("follower-1", isolatedLeader.lastTerm() - 1, true,
-                        isolatedLeader.lastIndex() - 1, isolatedLeader.lastTerm() - 1, (short)0 ));
+                        isolatedLeader.lastIndex() - 1, isolatedLeader.lastTerm() - 1, (short) 0));
 
         assertEquals("Raft state", RaftState.IsolatedLeader, newBehavior.state());
 
         newBehavior = isolatedLeader.handleMessage(senderActor,
                 new AppendEntriesReply("follower-2", isolatedLeader.lastTerm() - 1, true,
-                        isolatedLeader.lastIndex() - 1, isolatedLeader.lastTerm() - 1, (short)0 ));
+                        isolatedLeader.lastIndex() - 1, isolatedLeader.lastTerm() - 1, (short) 0));
 
         assertEquals("Raft state", RaftState.Leader, newBehavior.state());
 
@@ -131,7 +131,7 @@ public class IsolatedLeaderTest extends AbstractLeaderTest<IsolatedLeader> {
 
         newBehavior = isolatedLeader.handleMessage(senderActor,
                 new AppendEntriesReply("follower-3", isolatedLeader.lastTerm() - 1, true,
-                        isolatedLeader.lastIndex() - 1, isolatedLeader.lastTerm() - 1, (short)0 ));
+                        isolatedLeader.lastIndex() - 1, isolatedLeader.lastTerm() - 1, (short) 0));
 
         assertEquals("Raft state", RaftState.Leader, newBehavior.state());
     }

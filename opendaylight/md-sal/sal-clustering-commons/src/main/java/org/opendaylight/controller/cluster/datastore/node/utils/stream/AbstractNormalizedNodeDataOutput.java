@@ -418,7 +418,7 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
                 break;
             default :
                 throw new IllegalStateException("Unknown node identifier type is found : "
-                        + pathArgument.getClass().toString() );
+                        + pathArgument.getClass().toString());
         }
     }
 

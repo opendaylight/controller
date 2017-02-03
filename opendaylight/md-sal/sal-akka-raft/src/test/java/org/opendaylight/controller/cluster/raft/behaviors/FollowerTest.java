@@ -112,7 +112,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
     @Override
     protected  MockRaftActorContext createActorContext(ActorRef actorRef) {
         MockRaftActorContext context = new MockRaftActorContext("follower", getSystem(), actorRef);
-        context.setPayloadVersion(payloadVersion );
+        context.setPayloadVersion(payloadVersion);
         return context;
     }
 

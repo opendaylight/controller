@@ -107,7 +107,7 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
 
         bucketStore = new BucketStoreAccess(getContext(), config.getAskDuration());
 
-        if (provider instanceof ClusterActorRefProvider ) {
+        if (provider instanceof ClusterActorRefProvider) {
             cluster = Cluster.get(getContext().system());
             cluster.subscribe(getSelf(),
                     ClusterEvent.initialStateAsEvents(),

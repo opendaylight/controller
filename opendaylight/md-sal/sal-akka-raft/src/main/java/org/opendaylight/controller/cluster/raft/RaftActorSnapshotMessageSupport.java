@@ -59,7 +59,7 @@ class RaftActorSnapshotMessageSupport {
     }
 
     boolean handleSnapshotMessage(Object message, ActorRef sender) {
-        if (message instanceof ApplySnapshot ) {
+        if (message instanceof ApplySnapshot) {
             onApplySnapshot((ApplySnapshot) message);
         } else if (message instanceof SaveSnapshotSuccess) {
             onSaveSnapshotSuccess((SaveSnapshotSuccess) message);

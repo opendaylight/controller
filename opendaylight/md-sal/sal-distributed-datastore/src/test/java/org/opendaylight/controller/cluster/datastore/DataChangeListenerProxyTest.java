@@ -53,7 +53,7 @@ public class DataChangeListenerProxyTest extends AbstractActorTest {
         @Override
         public Set<YangInstanceIdentifier> getRemovedPaths() {
             Set<YangInstanceIdentifier> ids = new HashSet<>();
-            ids.add( CompositeModel.TEST_PATH);
+            ids.add(CompositeModel.TEST_PATH);
             return ids;
         }
 
