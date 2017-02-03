@@ -106,5 +106,5 @@ abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdent
     abstract FrontendTransaction createReadyTransaction(TransactionIdentifier id, DataTreeModification mod)
         throws RequestException;
 
-    abstract ShardDataTreeCohort createReadyCohort(final TransactionIdentifier id, final DataTreeModification mod);
+    abstract ShardDataTreeCohort createReadyCohort(TransactionIdentifier id, DataTreeModification mod);
 }

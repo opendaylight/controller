@@ -108,8 +108,8 @@ abstract class FrontendTransaction implements Identifiable<TransactionIdentifier
     }
 
     // Sequence has already been checked
-    abstract @Nullable TransactionSuccess<?> handleRequest(final TransactionRequest<?> request,
-            final RequestEnvelope envelope, final long now) throws RequestException;
+    abstract @Nullable TransactionSuccess<?> handleRequest(TransactionRequest<?> request,
+            RequestEnvelope envelope, long now) throws RequestException;
 
     private void recordResponse(final long sequence, final Object response) {
         if (replayQueue.isEmpty()) {
