@@ -259,7 +259,7 @@ public class Shard extends RaftActor {
     @SuppressWarnings("checkstyle:IllegalCatch")
     @Override
     protected void handleNonRaftCommand(final Object message) {
-        try (final MessageTracker.Context context = appendEntriesReplyTracker.received(message)) {
+        try (MessageTracker.Context context = appendEntriesReplyTracker.received(message)) {
             final Optional<Error> maybeError = context.error();
             if (maybeError.isPresent()) {
                 LOG.trace("{} : AppendEntriesReply failed to arrive at the expected interval {}", persistenceId(),
