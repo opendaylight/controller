@@ -290,7 +290,7 @@ public class RaftActorTest extends AbstractActorTest {
         mockRaftActor.waitForRecoveryComplete();
 
         RaftActorRecoverySupport mockSupport = mock(RaftActorRecoverySupport.class);
-        mockRaftActor.setRaftActorRecoverySupport(mockSupport );
+        mockRaftActor.setRaftActorRecoverySupport(mockSupport);
 
         Snapshot snapshot = Snapshot.create(new byte[]{1}, Collections.<ReplicatedLogEntry>emptyList(), 3, 1, 3, 1);
         SnapshotOffer snapshotOffer = new SnapshotOffer(new SnapshotMetadata("test", 6, 12345), snapshot);

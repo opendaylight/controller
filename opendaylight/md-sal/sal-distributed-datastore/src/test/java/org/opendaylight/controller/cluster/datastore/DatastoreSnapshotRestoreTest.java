@@ -49,13 +49,13 @@ public class DatastoreSnapshotRestoreTest {
         List<ShardSnapshot> shardSnapshots = new ArrayList<>();
         shardSnapshots.add(new ShardSnapshot("cars", new byte[]{1,2}));
         shardSnapshots.add(new ShardSnapshot("people", new byte[]{3,4}));
-        final DatastoreSnapshot configSnapshot = new DatastoreSnapshot("config", null, shardSnapshots );
+        final DatastoreSnapshot configSnapshot = new DatastoreSnapshot("config", null, shardSnapshots);
 
         shardSnapshots = new ArrayList<>();
         shardSnapshots.add(new ShardSnapshot("cars", new byte[]{5,6}));
         shardSnapshots.add(new ShardSnapshot("people", new byte[]{7,8}));
         shardSnapshots.add(new ShardSnapshot("bikes", new byte[]{9,0}));
-        DatastoreSnapshot operSnapshot = new DatastoreSnapshot("oper", null, shardSnapshots );
+        DatastoreSnapshot operSnapshot = new DatastoreSnapshot("oper", null, shardSnapshots);
 
         DatastoreSnapshotList snapshotList = new DatastoreSnapshotList();
         snapshotList.add(configSnapshot);

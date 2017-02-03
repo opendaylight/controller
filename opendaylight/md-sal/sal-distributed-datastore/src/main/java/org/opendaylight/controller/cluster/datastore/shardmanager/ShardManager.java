@@ -1464,7 +1464,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
                     OnDemandRaftState raftState = (OnDemandRaftState) response;
                     Map<String, Boolean> serverVotingStatusMap = new HashMap<>();
-                    for ( Entry<String, Boolean> e: raftState.getPeerVotingStates().entrySet()) {
+                    for (Entry<String, Boolean> e: raftState.getPeerVotingStates().entrySet()) {
                         serverVotingStatusMap.put(e.getKey(), !e.getValue());
                     }
 

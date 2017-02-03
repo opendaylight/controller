@@ -431,7 +431,7 @@ public class SnapshotManager implements SnapshotState {
                         context.updatePeerIds(snapshot.getServerConfiguration());
                     }
 
-                    if (snapshot.getState().length > 0 ) {
+                    if (snapshot.getState().length > 0) {
                         applySnapshotProcedure.accept(snapshot.getState());
                     }
 

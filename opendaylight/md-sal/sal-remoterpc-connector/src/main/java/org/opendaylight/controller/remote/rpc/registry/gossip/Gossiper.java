@@ -107,7 +107,7 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
         ActorRefProvider provider = getContext().provider();
         selfAddress = provider.getDefaultAddress();
 
-        if (provider instanceof ClusterActorRefProvider ) {
+        if (provider instanceof ClusterActorRefProvider) {
             cluster = Cluster.get(getContext().system());
             cluster.subscribe(getSelf(),
                     ClusterEvent.initialStateAsEvents(),

@@ -23,7 +23,7 @@ public class QNameFactoryTest {
         QName expected = TestModel.AUG_NAME_QNAME;
         QName created = QNameFactory.create(expected.toString());
 
-        assertFalse( expected == created);
+        assertFalse(expected == created);
 
         assertEquals(expected, created);
 
@@ -31,6 +31,6 @@ public class QNameFactoryTest {
 
         assertEquals(expected, cached);
 
-        assertTrue( cached == created );
+        assertTrue(cached == created);
     }
 }

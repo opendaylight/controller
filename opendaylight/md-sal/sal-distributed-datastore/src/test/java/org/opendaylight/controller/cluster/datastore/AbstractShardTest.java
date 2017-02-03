@@ -489,7 +489,7 @@ public abstract class AbstractShardTest extends AbstractActorTest {
         }
 
         @SuppressWarnings("unchecked")
-        private <T> FutureCallback<T> mockFutureCallback(final FutureCallback<T> actual ) {
+        private <T> FutureCallback<T> mockFutureCallback(final FutureCallback<T> actual) {
             FutureCallback<T> mock = mock(FutureCallback.class);
             doAnswer(invocation -> {
                 actual.onFailure(invocation.getArgumentAt(0, Throwable.class));

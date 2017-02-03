@@ -70,7 +70,7 @@ public class DataChangeListener extends AbstractUntypedActor {
         try {
             this.listener.onDataChanged(change);
         } catch (RuntimeException e) {
-            LOG.error( String.format( "Error notifying listener %s", this.listener ), e );
+            LOG.error(String.format("Error notifying listener %s", this.listener), e);
         }
 
         if (isValidSender(getSender())) {

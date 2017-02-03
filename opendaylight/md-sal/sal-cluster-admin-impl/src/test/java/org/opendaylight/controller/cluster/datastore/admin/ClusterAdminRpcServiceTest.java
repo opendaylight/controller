@@ -170,7 +170,7 @@ public class ClusterAdminRpcServiceTest {
     public void testAddShardReplica() throws Exception {
         String name = "testAddShardReplica";
         String moduleShardsConfig = "module-shards-cars-member-1.conf";
-        MemberNode leaderNode1 = MemberNode.builder(memberNodes).akkaConfig("Member1").testName(name )
+        MemberNode leaderNode1 = MemberNode.builder(memberNodes).akkaConfig("Member1").testName(name)
                 .moduleShardsConfig(moduleShardsConfig).waitForShardLeader("cars").build();
 
         MemberNode newReplicaNode2 = MemberNode.builder(memberNodes).akkaConfig("Member2").testName(name)
@@ -421,7 +421,7 @@ public class ClusterAdminRpcServiceTest {
     public void testAddReplicasForAllShards() throws Exception {
         String name = "testAddReplicasForAllShards";
         String moduleShardsConfig = "module-shards-member1.conf";
-        MemberNode leaderNode1 = MemberNode.builder(memberNodes).akkaConfig("Member1").testName(name )
+        MemberNode leaderNode1 = MemberNode.builder(memberNodes).akkaConfig("Member1").testName(name)
                 .moduleShardsConfig(moduleShardsConfig).waitForShardLeader("cars", "people").build();
 
         ModuleShardConfiguration petsModuleConfig = new ModuleShardConfiguration(URI.create("pets-ns"), "pets-module",
