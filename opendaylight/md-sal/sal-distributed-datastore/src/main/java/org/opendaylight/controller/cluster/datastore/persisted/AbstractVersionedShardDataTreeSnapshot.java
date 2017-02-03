@@ -35,7 +35,7 @@ abstract class AbstractVersionedShardDataTreeSnapshot extends ShardDataTreeSnaps
         switch (version) {
             case BORON:
                 // Boron snapshots use Java Serialization
-                try (final ObjectInputStream ois = new ObjectInputStream(is)) {
+                try (ObjectInputStream ois = new ObjectInputStream(is)) {
                     return (ShardDataTreeSnapshot) ois.readObject();
                 } catch (ClassNotFoundException e) {
                     LOG.error("Failed to serialize data tree snapshot", e);
@@ -94,7 +94,7 @@ abstract class AbstractVersionedShardDataTreeSnapshot extends ShardDataTreeSnaps
 
     @Override
     public void serialize(final OutputStream os) throws IOException {
-        try (final DataOutputStream dos = new DataOutputStream(os)) {
+        try (DataOutputStream dos = new DataOutputStream(os)) {
             final PayloadVersion version = version();
             version.writeTo(dos);
             versionedSerialize(dos, version);

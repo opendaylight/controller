@@ -50,7 +50,7 @@ public abstract class ShardDataTreeSnapshot {
         }
 
         try {
-            try (final InputStream is = new ByteArrayInputStream(bytes)) {
+            try (InputStream is = new ByteArrayInputStream(bytes)) {
                 return deserialize(is);
             }
         } catch (IOException e) {
@@ -60,7 +60,7 @@ public abstract class ShardDataTreeSnapshot {
     }
 
     public static ShardDataTreeSnapshot deserialize(final InputStream is) throws IOException {
-        try (final DataInputStream dis = new DataInputStream(is)) {
+        try (DataInputStream dis = new DataInputStream(is)) {
             final ShardDataTreeSnapshot ret = AbstractVersionedShardDataTreeSnapshot.deserialize(dis);
 
             // Make sure we consume all bytes, otherwise something went very wrong
@@ -81,7 +81,7 @@ public abstract class ShardDataTreeSnapshot {
      */
     public abstract Optional<NormalizedNode<?, ?>> getRootNode();
 
-    public abstract void serialize(final OutputStream os) throws IOException;
+    public abstract void serialize(OutputStream os) throws IOException;
 
     @Deprecated
     private static boolean isLegacyStream(final byte[] bytes) {
