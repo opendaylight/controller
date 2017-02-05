@@ -197,12 +197,6 @@
             <artifactId>sal-dom-broker-config</artifactId>
         </dependency>
         <dependency>
-            <!-- TODO start-level="40" -->
-            <groupId>${project.groupId}</groupId>
-            <artifactId>blueprint</artifactId>
-            <version>0.6.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
             <!-- finalname="${config.configfile.directory}/${config.mdsal.configfile}" -->
             <groupId>${project.groupId}</groupId>
             <artifactId>md-sal-config</artifactId>
@@ -211,6 +205,35 @@
             <classifier>config</classifier>
             <scope>provided</scope>
         </dependency>
+
+
+        <dependency>
+            <!-- TODO start-level="40" -->
+            <groupId>${project.groupId}</groupId>
+            <artifactId>blueprint</artifactId>
+            <version>0.6.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <!-- TODO start-level="40" -->
+            <groupId>org.apache.aries.quiesce</groupId>
+            <artifactId>org.apache.aries.quiesce.api</artifactId>
+            <version>[1.0.0,2.0.0)</version>
+        </dependency>
+
+
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.karaf.tooling</groupId>
+                <artifactId>karaf-maven-plugin</artifactId>
+                <extensions>true</extensions>
+                <configuration>
+                    <includeTransitiveDependency>false</includeTransitiveDependency>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>
