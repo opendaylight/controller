@@ -45,6 +45,7 @@
         <dependency>
             <groupId>org.eclipse.tycho</groupId>
             <artifactId>org.eclipse.osgi</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>
