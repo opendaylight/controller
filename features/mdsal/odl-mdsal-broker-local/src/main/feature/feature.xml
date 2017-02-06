@@ -6,8 +6,10 @@
  terms of the Eclipse Public License v1.0 which accompanies this distribution,
  and is available at http://www.eclipse.org/legal/epl-v10.html
  -->
-<features name="odl-mdsal-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.2.0">
+<features name="odl-mdsal-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.4.0">
     <feature name="odl-mdsal-broker-local" version="${project.version}">
+        <feature dependency="true">aries-blueprint</feature>
+        <bundle>mvn:org.apache.aries.quiesce/org.apache.aries.quiesce.api/[1.0.0,2)</bundle>
         <bundle start-level="70">mvn:org.opendaylight.controller/sal-schema-service/${project.version}</bundle>
         <bundle start-level="40">mvn:org.opendaylight.controller/blueprint/${blueprint.version}</bundle>
         <configfile finalname="${config.configfile.directory}/${config.mdsal.configfile}">

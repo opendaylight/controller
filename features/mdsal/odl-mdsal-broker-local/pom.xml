@@ -201,6 +201,13 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>blueprint</artifactId>
             <version>0.6.0-SNAPSHOT</version>
+            <exclusions>
+                <!-- We use Karaf's Blueprint feature to pull this in -->
+                <exclusion>
+                    <groupId>org.apache.aries.blueprint</groupId>
+                    <artifactId>org.apache.aries.blueprint.core</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <!-- finalname="${config.configfile.directory}/${config.mdsal.configfile}" -->
