@@ -16,7 +16,7 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
  *
  * @author Michael Vorburger
  */
-public class ConstantSchemaAbstractDataBrokerTest extends AbstractDataBrokerTest {
+public class ConstantSchemaAbstractDataBrokerTest extends AbstractConcurrentDataBrokerTest {
 
     @Override
     protected SchemaContext getSchemaContext() throws Exception {

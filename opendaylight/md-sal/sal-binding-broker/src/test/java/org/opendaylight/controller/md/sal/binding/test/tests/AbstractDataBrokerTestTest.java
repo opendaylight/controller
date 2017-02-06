@@ -17,7 +17,7 @@ import org.junit.Test;
 import org.junit.runners.MethodSorters;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
-import org.opendaylight.controller.md.sal.binding.test.AbstractDataBrokerTest;
+import org.opendaylight.controller.md.sal.binding.test.AbstractConcurrentDataBrokerTest;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
@@ -34,7 +34,7 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
  * @author Michael Vorburger
  */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class AbstractDataBrokerTestTest extends AbstractDataBrokerTest {
+public class AbstractDataBrokerTestTest extends AbstractConcurrentDataBrokerTest {
 
     private static final InstanceIdentifier<Top> TOP_PATH = InstanceIdentifier.create(Top.class);
 

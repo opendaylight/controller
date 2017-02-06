@@ -7,55 +7,25 @@
  */
 package org.opendaylight.controller.md.sal.binding.test;
 
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
-import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-
-import com.google.common.util.concurrent.ListenableFuture;
-
-public class AbstractDataBrokerTest extends AbstractSchemaAwareTest {
-
-    private DataBrokerTestCustomizer testCustomizer;
-    private DataBroker dataBroker;
-    private DOMDataBroker domBroker;
-
+/**
+ * AbstractDataBrokerTest.
+ *
+ * @deprecated Please now use the AbstractConcurrentDataBrokerTest instead of this.
+ *             Normally in a well written test this should be a drop-in
+ *             replacement. However some tests which relied on the Test
+ *             DataBroker being synchronous, contrary to its specification as
+ *             well as the production implementation, may require changes to
+ *             e.g. use get() on submit()'ed transaction to make the test wait
+ *             before asserts. See also
+ *             <a href="https://bugs.opendaylight.org/show_bug.cgi?id=7538">bug
+ *             7538</a> for more details.
+ */
+@Deprecated
+public class AbstractDataBrokerTest extends AbstractBaseDataBrokerTest {
 
     @Override
-    protected void setupWithSchema(final SchemaContext context) {
-        testCustomizer = createDataBrokerTestCustomizer();
-        dataBroker = testCustomizer.createDataBroker();
-        domBroker = testCustomizer.createDOMDataBroker();
-        testCustomizer.updateSchema(context);
-        setupWithDataBroker(dataBroker);
-    }
-
-    protected void setupWithDataBroker(final DataBroker dataBroker) {
-        // Intentionally left No-op, subclasses may customize it
-    }
-
-    protected DataBrokerTestCustomizer createDataBrokerTestCustomizer() {
+    protected AbstractDataBrokerTestCustomizer createDataBrokerTestCustomizer() {
         return new DataBrokerTestCustomizer();
     }
-
-    public DataBroker getDataBroker() {
-        return dataBroker;
-    }
-
-    public DOMDataBroker getDomBroker() {
-        return domBroker;
-    }
-
-    protected static final void assertCommit(final ListenableFuture<Void> commit) {
-        try {
-            commit.get(500, TimeUnit.MILLISECONDS);
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
 
 }

@@ -15,7 +15,7 @@ import java.util.concurrent.ExecutionException;
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.compat.HydrogenDataBrokerAdapter;
-import org.opendaylight.controller.md.sal.binding.test.AbstractDataBrokerTest;
+import org.opendaylight.controller.md.sal.binding.test.AbstractConcurrentDataBrokerTest;
 import org.opendaylight.controller.md.sal.binding.test.DataBrokerTestCustomizer;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.Top;
@@ -28,8 +28,7 @@ import org.opendaylight.yangtools.yang.binding.YangModuleInfo;
 import org.opendaylight.yangtools.yang.binding.util.BindingReflections;
 
 @Deprecated
-public class ForwardedBackwardsCompatibleDataBrokerTest extends
-    AbstractDataBrokerTest {
+public class ForwardedBackwardsCompatibleDataBrokerTest extends AbstractConcurrentDataBrokerTest {
 
     private HydrogenDataBrokerAdapter dataBroker;
     private static final InstanceIdentifier<Top> TOP_PATH = InstanceIdentifier.create(Top.class);
