@@ -1,0 +1,124 @@
+module odl-mdsal-lowlevel {
+
+    yang-version 1;
+    namespace "tag:opendaylight.org,2017:controller:yang:lowlevel";
+    prefix ll;
+    organization "OpenDaylight";
+    contact "Vratko Polak <vrpolak@cisco.com>";
+    revision "2017-02-06" {
+        description "Work in progress, change before releasing.";
+    }
+    description "Operations for cluster system testing not reachable via Restconf.
+        In gneral, elements under test are not backed by any implementation
+        upon feature installation.
+        Control RPCs are used to dynamically register, unregister, start or stop
+        the operations under test.
+        Control RPCs are backed by an implementation upon feature instalaltion.
+        Their registration should only affect local member,
+        but their invocation can interact with Entity Ownership or Singleton.";
+
+    // Elements under tests
+
+    rpc get-constant {
+        description "Return the constant string provided by the previously registered implementation.
+            Propagate appropriate error if no, unreachable, or failing implementation is found.";
+        // No input.
+        output {
+            leaf constant {
+                type string;
+                description "The implemented constant string."
+            }
+        }
+    }
+
+    rpc get-keyed-value {
+        description "Return the value corresponding to registered implementation (either bound or default).
+            Propagate appropriate error if no, unreachable, or failing implementation is found.";
+        input {
+            leaf key {
+                type string;
+                description "The key for bound implementation to match."
+            }
+        }
+        output {
+            leaf value {
+                type string;
+                description "The found value."
+            }
+        }
+    }
+
+    // Control RPCs.
+
+    rpc register-constant {
+        description "Upon receiving this, the member has to create get-constant implementation (global RPC).
+            If the registration fails for any reason, propagate the corresponding error.";
+        input {
+            leaf constant {
+                type string;
+                description "String to be returned by get-constant RPC.";
+            }
+        }
+        // No output.
+    }
+
+    rpc unregister-constant {
+        description "Upon receiving this, the member has to unregister
+            any get-constant implementations it has registered.
+            If no implementation has been registered, do nothing.";
+        // No input.
+        // No output.
+    }
+
+    rpc register-default-value {
+        description "Upon receiving this, the member has to create and register
+            a default get-keyed-value implementation (routed RPC).
+            If the registration fails for any reason, propagate the corresponding error.";
+        input {
+            leaf value {
+                type string;
+                description "The value to return when no bound implementation matches."
+            }
+        }
+        // No output.
+    }
+
+    rpc unregister-default-value {
+        description "Upon receiving this, the member has to unregister
+            any get-keyed-value default implementations it has registered.
+            If no default implementation has been registered, do nothing.";
+        // No input.
+        // No output.
+    }
+
+    rpc register-bound-value {
+        description "Upon receiving this, the member has to create and register
+            a bound get-keyed-value implementation (routed RPC).
+            If the registration fails for any reason, propagate the corresponding error.";
+        input {
+            leaf key {
+                type strng;
+                description "The key to bound this implementation to.";
+            }
+            leaf value {
+                type string;
+                description "The value to return when the key matches."
+            }
+        }
+        // No output.
+    }
+
+    rpc unregister-bound-value {
+        description "Upon receiving this, the member has to unregister
+            any get-keyed-value implementations bound to the key.
+            If no bound implementation for the key has been registered, do nothing.";
+        input {
+            leaf key {
+                type strng;
+                description "The key matching the implementations to unregister.";
+            }
+        }
+        // No output.
+    }
+
+}
