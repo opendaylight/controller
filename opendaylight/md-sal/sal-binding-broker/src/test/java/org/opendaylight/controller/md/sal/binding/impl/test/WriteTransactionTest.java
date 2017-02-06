@@ -14,7 +14,7 @@ import java.util.concurrent.ExecutionException;
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
-import org.opendaylight.controller.md.sal.binding.test.AbstractDataBrokerTest;
+import org.opendaylight.controller.md.sal.binding.test.AbstractConcurrentDataBrokerTest;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.Top;
@@ -27,12 +27,13 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import com.google.common.base.Optional;
 
 
-public class WriteTransactionTest extends AbstractDataBrokerTest {
+public class WriteTransactionTest extends AbstractConcurrentDataBrokerTest {
 
     private static final InstanceIdentifier<Top> TOP_PATH = InstanceIdentifier.create(Top.class);
     private static final TopLevelListKey TOP_LIST_KEY = new TopLevelListKey("foo");
     private static final InstanceIdentifier<TopLevelList> NODE_PATH = TOP_PATH.child(TopLevelList.class, TOP_LIST_KEY);
     private static final TopLevelList NODE = new TopLevelListBuilder().setKey(TOP_LIST_KEY).build();
+
     @Test
     public void test() throws InterruptedException, ExecutionException {
         WriteTransaction writeTx = getDataBroker().newWriteOnlyTransaction();
@@ -43,7 +44,6 @@ public class WriteTransactionTest extends AbstractDataBrokerTest {
 
     @Test
     public void testPutCreateParentsSuccess() throws TransactionCommitFailedException, InterruptedException, ExecutionException {
-
         WriteTransaction writeTx = getDataBroker().newWriteOnlyTransaction();
         writeTx.put(LogicalDatastoreType.OPERATIONAL, NODE_PATH, NODE,true);
         writeTx.submit().checkedGet();
@@ -57,7 +57,6 @@ public class WriteTransactionTest extends AbstractDataBrokerTest {
 
     @Test
     public void testMergeCreateParentsSuccess() throws TransactionCommitFailedException, InterruptedException, ExecutionException {
-
         WriteTransaction writeTx = getDataBroker().newWriteOnlyTransaction();
         writeTx.merge(LogicalDatastoreType.OPERATIONAL, NODE_PATH, NODE,true);
         writeTx.submit().checkedGet();

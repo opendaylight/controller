@@ -16,8 +16,8 @@ import static org.opendaylight.controller.md.sal.test.model.util.ListsBindingUti
 import static org.opendaylight.controller.md.sal.test.model.util.ListsBindingUtils.top;
 import static org.opendaylight.controller.md.sal.test.model.util.ListsBindingUtils.topLevelList;
 
+import org.junit.Before;
 import org.junit.Test;
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.binding.test.AbstractDataChangeListenerTest;
@@ -29,12 +29,9 @@ import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 /**
- *
  * This testsuite tests explanation for data change scope and data modifications
  * which were described in
  * https://lists.opendaylight.org/pipermail/controller-dev/2014-July/005541.html
- *
- *
  */
 public class ListInsertionDataChangeListenerTest extends AbstractDataChangeListenerTest{
 
@@ -43,10 +40,9 @@ public class ListInsertionDataChangeListenerTest extends AbstractDataChangeListe
     private static final InstanceIdentifier<TopLevelList> TOP_FOO = TOP.child(TopLevelList.class, TOP_FOO_KEY);
     private static final InstanceIdentifier<TopLevelList> TOP_BAR = TOP.child(TopLevelList.class, TOP_BAR_KEY);
 
-
-    @Override
-    protected void setupWithDataBroker(final DataBroker dataBroker) {
-        WriteTransaction initialTx = dataBroker.newWriteOnlyTransaction();
+    @Before
+    public void setupWithDataBroker() {
+        WriteTransaction initialTx = getDataBroker().newWriteOnlyTransaction();
         initialTx.put(CONFIGURATION, TOP, top(topLevelList(TOP_FOO_KEY)));
         assertCommit(initialTx.submit());
     }
