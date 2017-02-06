@@ -20,7 +20,7 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 import com.google.common.util.concurrent.SettableFuture;
 
-public abstract class AbstractDataChangeListenerTest extends AbstractDataBrokerTest {
+public abstract class AbstractDataChangeListenerTest extends AbstractConcurrentDataBrokerTest {
 
     protected static final class TestListener implements DataChangeListener {
 
