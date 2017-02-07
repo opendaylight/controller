@@ -8,6 +8,8 @@
 
 package org.opendaylight.controller.cluster.datastore;
 
+import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.TEST_PATH;
+
 import akka.actor.ActorRef;
 import akka.actor.DeadLetter;
 import akka.actor.Props;
@@ -30,7 +32,7 @@ public class DataChangeListenerTest extends AbstractActorTest {
             {
                 final AsyncDataChangeEvent mockChangeEvent = Mockito.mock(AsyncDataChangeEvent.class);
                 final AsyncDataChangeListener mockListener = Mockito.mock(AsyncDataChangeListener.class);
-                final Props props = DataChangeListener.props(mockListener);
+                final Props props = DataChangeListener.props(mockListener, TEST_PATH);
                 final ActorRef subject = getSystem().actorOf(props, "testDataChangedNotificationsEnabled");
 
                 // Let the DataChangeListener know that notifications should be
@@ -53,7 +55,7 @@ public class DataChangeListenerTest extends AbstractActorTest {
             {
                 final AsyncDataChangeEvent mockChangeEvent = Mockito.mock(AsyncDataChangeEvent.class);
                 final AsyncDataChangeListener mockListener = Mockito.mock(AsyncDataChangeListener.class);
-                final Props props = DataChangeListener.props(mockListener);
+                final Props props = DataChangeListener.props(mockListener, TEST_PATH);
                 final ActorRef subject = getSystem().actorOf(props, "testDataChangedNotificationsDisabled");
 
                 subject.tell(new DataChanged(mockChangeEvent), getRef());
@@ -78,7 +80,7 @@ public class DataChangeListenerTest extends AbstractActorTest {
             {
                 final AsyncDataChangeEvent mockChangeEvent = Mockito.mock(AsyncDataChangeEvent.class);
                 final AsyncDataChangeListener mockListener = Mockito.mock(AsyncDataChangeListener.class);
-                final Props props = DataChangeListener.props(mockListener);
+                final Props props = DataChangeListener.props(mockListener, TEST_PATH);
                 final ActorRef subject = getSystem().actorOf(props, "testDataChangedWithNoSender");
 
                 getSystem().eventStream().subscribe(getRef(), DeadLetter.class);
@@ -115,7 +117,7 @@ public class DataChangeListenerTest extends AbstractActorTest {
                 AsyncDataChangeListener mockListener = Mockito.mock(AsyncDataChangeListener.class);
                 Mockito.doThrow(new RuntimeException("mock")).when(mockListener).onDataChanged(mockChangeEvent2);
 
-                Props props = DataChangeListener.props(mockListener);
+                Props props = DataChangeListener.props(mockListener, TEST_PATH);
                 ActorRef subject = getSystem().actorOf(props, "testDataChangedWithListenerRuntimeEx");
 
                 // Let the DataChangeListener know that notifications should be

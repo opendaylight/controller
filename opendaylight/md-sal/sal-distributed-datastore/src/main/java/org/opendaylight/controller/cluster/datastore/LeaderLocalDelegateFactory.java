@@ -19,9 +19,8 @@ import com.google.common.base.Preconditions;
  *
  * @param <D> delegate type
  * @param <M> message type
- * @param <I> initial state type
  */
-abstract class LeaderLocalDelegateFactory<M, D, I> extends DelegateFactory<M, D, I> {
+abstract class LeaderLocalDelegateFactory<M, D> extends DelegateFactory<M, D> {
     private final Shard shard;
 
     protected LeaderLocalDelegateFactory(final Shard shard) {
