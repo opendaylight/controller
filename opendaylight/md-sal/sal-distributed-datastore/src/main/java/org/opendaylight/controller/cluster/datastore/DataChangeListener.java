@@ -9,9 +9,7 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.Props;
-import akka.japi.Creator;
 import com.google.common.base.Preconditions;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActor;
 import org.opendaylight.controller.cluster.datastore.messages.DataChanged;
 import org.opendaylight.controller.cluster.datastore.messages.DataChangedReply;
@@ -30,10 +28,13 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 @Deprecated
 public class DataChangeListener extends AbstractUntypedActor {
     private final AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>> listener;
+    private final YangInstanceIdentifier registeredPath;
     private boolean notificationsEnabled = false;
 
-    public DataChangeListener(AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>> listener) {
+    public DataChangeListener(AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>> listener,
+            final YangInstanceIdentifier registeredPath) {
         this.listener = Preconditions.checkNotNull(listener, "listener should not be null");
+        this.registeredPath = Preconditions.checkNotNull(registeredPath);
     }
 
     @Override
@@ -78,26 +79,8 @@ public class DataChangeListener extends AbstractUntypedActor {
         }
     }
 
-    public static Props props(final AsyncDataChangeListener<YangInstanceIdentifier,
-                                                            NormalizedNode<?, ?>> listener) {
-        return Props.create(new DataChangeListenerCreator(listener));
-    }
-
-    private static class DataChangeListenerCreator implements Creator<DataChangeListener> {
-        private static final long serialVersionUID = 1L;
-
-        @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "This field is not Serializable but we don't "
-                + "create remote instances of this actor and thus don't need it to be Serializable.")
-        final AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>> listener;
-
-        DataChangeListenerCreator(
-                AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>> listener) {
-            this.listener = listener;
-        }
-
-        @Override
-        public DataChangeListener create() throws Exception {
-            return new DataChangeListener(listener);
-        }
+    public static Props props(final AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>> listener,
+            final YangInstanceIdentifier registeredPath) {
+        return Props.create(DataChangeListener.class, listener, registeredPath);
     }
 }
