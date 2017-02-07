@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fafc7978_b6afc593",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/test/java/org/opendaylight/controller/md/sal/binding/test/AbstractBaseDataBrokerTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-02-07T15:34:16Z",
+      "side": 1,
+      "message": "I think you should bump this up a bit to be safe in case the jenkins system is overloaded. At least a second but I usually do 5 sec. You don\u0027t expect it to timeout normally and, if it does, it doesn\u0027t matter if it takes seconds.",
+      "revId": "1731537d9e8f52bbee594065425486a20f56f649",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_f6902d50",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/test/java/org/opendaylight/controller/md/sal/binding/test/AbstractBaseDataBrokerTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-02-07T15:34:16Z",
+      "side": 1,
+      "message": "I don\u0027t think IllegalStateException is technically appropriate here. I would suggest wrapping with an AssertionError.",
+      "revId": "1731537d9e8f52bbee594065425486a20f56f649",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_369bd573",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/test/java/org/opendaylight/controller/md/sal/binding/test/ConcurrentDataBrokerTestCustomizer.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-02-07T15:34:16Z",
+      "side": 1,
+      "message": "Can you add explanation of this class here instead of directing folks to a bug where one has to dig thru comments to understand its purpose?",
+      "revId": "1731537d9e8f52bbee594065425486a20f56f649",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
