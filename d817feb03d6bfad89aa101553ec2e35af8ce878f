@@ -16,6 +16,24 @@
       "revId": "d817feb03d6bfad89aa101553ec2e35af8ce878f",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_db455471",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/AbstractDOMBrokerWriteTransaction.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2017-02-07T14:41:24Z",
+      "side": 1,
+      "message": "I agree it doesn\u0027t look pretty, but unfortunately it\u0027s how our CS rules currently seem to be configured (but I doubt intentionally, this may be a CS default which we never tweaked; haven\u0027t looked).. for me it\u0027s red in Eclipse as it currently is, violation message: \"Right Curly Brace Placement: \u0027}\u0027 at column 9 should be alone on a line.\", and with this change its fine - and still passes the build.  Now, perhaps we should investigate this more, to make sure it doesn\u0027t bite us at the next CS upgrade?  Please -1 this change if you believe it\u0027s worth to dig into this..",
+      "parentUuid": "fafc7978_4a4ebb97",
+      "revId": "d817feb03d6bfad89aa101553ec2e35af8ce878f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

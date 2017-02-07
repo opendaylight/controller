@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_7b4ee897",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/AbstractDOMBrokerTransaction.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2017-02-07T14:41:24Z",
+      "side": 0,
+      "message": "It comes up as \"Redundant Modifier: Redundant \u0027final\u0027 modifier.\" I think we already had this on interfaces, and I guess someone came up at CS with this not being consistent (which seems right), so they must have tighten this in latest CS..",
+      "parentUuid": "fafc7978_ea5e8f44",
+      "range": {
+        "startLine": 64,
+        "startChar": 43,
+        "endLine": 64,
+        "endChar": 48
+      },
+      "revId": "3354f45e32faaab5452f95f9931274a3580de912",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fafc7978_aa3c87e3",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
         "patchSetId": 2
@@ -36,6 +60,24 @@
       "writtenOn": "2017-02-03T12:44:08Z",
       "side": 0,
       "message": "Is this s violation b/c final is redundant here?",
+      "revId": "3354f45e32faaab5452f95f9931274a3580de912",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_9b190c8b",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 260,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2017-02-07T14:41:24Z",
+      "side": 0,
+      "message": "yes, apparently so; violoation message is: \"Redundant Modifier: Redundant \u0027final\u0027 modifier.\".  Looks like in Java an AutoCloseable try final the closeable is always final anyway.  I just tried, and indeed compiler wouldn\u0027t let you assign, it (Eclipse ECJ) says: \"The resource context of a try-with-resources statement cannot be assigned\"",
+      "parentUuid": "fafc7978_aa3c87e3",
       "revId": "3354f45e32faaab5452f95f9931274a3580de912",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
