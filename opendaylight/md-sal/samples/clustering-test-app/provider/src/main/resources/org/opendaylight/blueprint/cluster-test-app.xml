@@ -9,6 +9,7 @@
   <reference id="entityOwnershipService" interface="org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipService"/>
   <reference id="bindingRpcRegistry" interface="org.opendaylight.controller.sal.binding.api.RpcProviderRegistry"/>
   <reference id="clusterSingletonService" interface="org.opendaylight.mdsal.singleton.common.api.ClusterSingletonServiceProvider"/>
+  <reference id="domDataBroker" interface="org.opendaylight.controller.md.sal.dom.api.DOMDataBroker"/>
 
   <bean id="purchaseCarProvider" class="org.opendaylight.controller.clustering.it.provider.PurchaseCarProvider" >
     <property name="notificationProvider" ref="notificationService"/>
@@ -21,9 +22,11 @@
     <property name="rpcRegistration" ref="carPurchaseRpcReg"/>
   </bean>
 
-  <bean id="carProvider" class="org.opendaylight.controller.clustering.it.provider.CarProvider" >
+  <bean id="carProvider" class="org.opendaylight.controller.clustering.it.provider.CarProvider"
+       destroy-method="close">
     <argument ref="dataBroker"/>
     <argument ref="entityOwnershipService"/>
+    <argument ref="domDataBroker"/>
   </bean>
 
   <odl:rpc-implementation ref="carProvider"/>

@@ -30,6 +30,9 @@ import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipS
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
+import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
+import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeCommitCohortRegistry;
+import org.opendaylight.mdsal.dom.api.DOMDataTreeCommitCohortRegistration;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.CarId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.CarService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.Cars;
@@ -46,6 +49,7 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcError.ErrorType;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,8 +65,8 @@ public class CarProvider implements CarService {
 
     private static final String ENTITY_TYPE = "cars";
 
-    private AtomicLong succcessCounter = new AtomicLong();
-    private AtomicLong failureCounter = new AtomicLong();
+    private final AtomicLong succcessCounter = new AtomicLong();
+    private final AtomicLong failureCounter = new AtomicLong();
 
     private final CarEntityOwnershipListener ownershipListener = new CarEntityOwnershipListener();
     private final AtomicBoolean registeredListener = new AtomicBoolean();
@@ -74,14 +78,37 @@ public class CarProvider implements CarService {
     private static final DataTreeIdentifier<Cars> CARS_DTID = new DataTreeIdentifier<>(
             LogicalDatastoreType.CONFIGURATION, CARS_IID);
 
-    private Collection<ListenerRegistration<DataChangeListener>> carsDclRegistrations =
+    private final Collection<ListenerRegistration<DataChangeListener>> carsDclRegistrations =
             Sets.newConcurrentHashSet();
-    private Collection<ListenerRegistration<CarDataTreeChangeListener>> carsDtclRegistrations =
+    private final Collection<ListenerRegistration<CarDataTreeChangeListener>> carsDtclRegistrations =
             Sets.newConcurrentHashSet();
 
-    public CarProvider(DataBroker dataProvider, EntityOwnershipService ownershipService) {
+    private final DOMDataTreeCommitCohortRegistration<CarEntryDataTreeCommitCohort> commitCohortReg;
+
+    public CarProvider(DataBroker dataProvider, EntityOwnershipService ownershipService,
+            DOMDataBroker domDataBroker) {
         this.dataProvider = dataProvider;
         this.ownershipService = ownershipService;
+
+        final DOMDataTreeCommitCohortRegistry commitCohortRegistry = (DOMDataTreeCommitCohortRegistry)
+                domDataBroker.getSupportedExtensions().get(DOMDataTreeCommitCohortRegistry.class);
+
+        final YangInstanceIdentifier carEntryPath = YangInstanceIdentifier.builder(
+                YangInstanceIdentifier.of(Cars.QNAME)).node(CarEntry.QNAME).node(CarEntry.QNAME).build();
+        commitCohortReg = commitCohortRegistry.registerCommitCohort(
+                new org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier(
+                    org.opendaylight.mdsal.common.api.LogicalDatastoreType.CONFIGURATION,
+                        carEntryPath), new CarEntryDataTreeCommitCohort());
+    }
+
+    public void close() {
+        stopThread();
+
+        try {
+            commitCohortReg.close();
+        } catch (Exception e) {
+            LOG.warn("Error closing commit cohort registration", e);
+        }
     }
 
     private void stopThread() {
@@ -101,7 +128,7 @@ public class CarProvider implements CarService {
         final long inputCount;
 
         // If rate is not provided, or given as zero, then just return.
-        if ((input.getRate() == null) || (input.getRate() == 0)) {
+        if (input.getRate() == null || input.getRate() == 0) {
             log.info("Exiting stress test as no rate is given.");
             return Futures.immediateFuture(RpcResultBuilder.<Void>failed()
                     .withError(ErrorType.PROTOCOL, "invalid rate")
@@ -170,12 +197,12 @@ public class CarProvider implements CarService {
                         break;
                     }
 
-                    if((count.get() % 1000) == 0) {
+                    if(count.get() % 1000 == 0) {
                         log.info("Cars created {}, time: {}",count.get(),sw.elapsed(TimeUnit.SECONDS));
                     }
 
                     // Check if a count is specified in input and we have created that many cars.
-                    if ((inputCount != 0) && (count.get() >= inputCount)) {
+                    if (inputCount != 0 && count.get() >= inputCount) {
                         stopThread = true;
                     }
                 }
