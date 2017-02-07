@@ -75,9 +75,12 @@ public class FeatureConfigPusher {
 
     private Set<FeatureConfigSnapshotHolder> pushConfig(final Feature feature) throws Exception {
         Set<FeatureConfigSnapshotHolder> configs = new LinkedHashSet<>();
-        if(isInstalled(feature)) {
+        // Ignore feature conditions — these encode conditions on other features and shouldn't be processed here
+        if (feature.getName().contains("-condition-")) {
+            LOG.warn("Ignoring conditional feature {}", feature);
+        } else if (isInstalled(feature)) {
             // FIXME Workaround for BUG-2836, features service returns null for feature: standard-condition-webconsole_0_0_0, 3.0.1
-            if(featuresService.getFeature(feature.getName(), feature.getVersion()) == null) {
+            if (featuresService.getFeature(feature.getName(), feature.getVersion()) == null) {
                 LOG.debug("Feature: {}, {} is missing from features service. Skipping", feature.getName(), feature.getVersion());
             } else {
                 ChildAwareFeatureWrapper wrappedFeature = new ChildAwareFeatureWrapper(feature, featuresService);
