@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "fafc7978_38ef4389",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/test/java/org/opendaylight/controller/md/sal/binding/test/AbstractBaseDataBrokerTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2017-02-07T20:06:27Z",
+      "side": 1,
+      "message": "javadoc this, please.",
+      "range": {
+        "startLine": 35,
+        "startChar": 4,
+        "endLine": 36,
+        "endChar": 64
+      },
+      "revId": "1731537d9e8f52bbee594065425486a20f56f649",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fafc7978_b6afc593",
         "filename": "opendaylight/md-sal/sal-binding-broker/src/test/java/org/opendaylight/controller/md/sal/binding/test/AbstractBaseDataBrokerTest.java",
         "patchSetId": 1
@@ -19,6 +42,29 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_d8e0b798",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/test/java/org/opendaylight/controller/md/sal/binding/test/AbstractBaseDataBrokerTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2017-02-07T20:06:27Z",
+      "side": 1,
+      "message": "This should be in arguments, with a utility method providing defaults (which in turn should be a proper constant). I agree with 5 seconds being better.\n\nWould it also make sense to LOG.trace() blocking duration?",
+      "range": {
+        "startLine": 49,
+        "startChar": 23,
+        "endLine": 49,
+        "endChar": 49
+      },
+      "revId": "1731537d9e8f52bbee594065425486a20f56f649",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fafc7978_f6902d50",
         "filename": "opendaylight/md-sal/sal-binding-broker/src/test/java/org/opendaylight/controller/md/sal/binding/test/AbstractBaseDataBrokerTest.java",
         "patchSetId": 1
@@ -30,6 +76,24 @@
       "writtenOn": "2017-02-07T15:34:16Z",
       "side": 1,
       "message": "I don\u0027t think IllegalStateException is technically appropriate here. I would suggest wrapping with an AssertionError.",
+      "revId": "1731537d9e8f52bbee594065425486a20f56f649",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_58d5e7b7",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/test/java/org/opendaylight/controller/md/sal/binding/test/AbstractBaseDataBrokerTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2017-02-07T20:06:27Z",
+      "side": 1,
+      "message": "agree, it is an assert()-type of thing",
+      "parentUuid": "fafc7978_f6902d50",
       "revId": "1731537d9e8f52bbee594065425486a20f56f649",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
