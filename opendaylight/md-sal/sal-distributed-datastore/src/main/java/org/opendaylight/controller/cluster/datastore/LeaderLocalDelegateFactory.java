@@ -17,11 +17,10 @@ import com.google.common.base.Preconditions;
  * Base class for factories instantiating delegates which are local to the
  * shard leader.
  *
- * <D> delegate type
- * <M> message type
- * <I> initial state type
+ * @param <D> delegate type
+ * @param <M> message type
  */
-abstract class LeaderLocalDelegateFactory<M, D, I> extends DelegateFactory<M, D, I> {
+abstract class LeaderLocalDelegateFactory<M, D> extends DelegateFactory<M, D> {
     private final Shard shard;
 
     protected LeaderLocalDelegateFactory(final Shard shard) {

@@ -8,13 +8,13 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.Props;
-import akka.japi.Creator;
 import com.google.common.base.Preconditions;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActor;
 import org.opendaylight.controller.cluster.datastore.messages.DataTreeChanged;
 import org.opendaylight.controller.cluster.datastore.messages.DataTreeChangedReply;
 import org.opendaylight.controller.cluster.datastore.messages.EnableNotification;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeListener;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,10 +25,13 @@ import org.slf4j.LoggerFactory;
 final class DataTreeChangeListenerActor extends AbstractUntypedActor {
     private static final Logger LOG = LoggerFactory.getLogger(DataTreeChangeListenerActor.class);
     private final DOMDataTreeChangeListener listener;
+    private final YangInstanceIdentifier registeredPath;
     private boolean notificationsEnabled = false;
 
-    private DataTreeChangeListenerActor(final DOMDataTreeChangeListener listener) {
+    private DataTreeChangeListenerActor(final DOMDataTreeChangeListener listener,
+            final YangInstanceIdentifier registeredPath) {
         this.listener = Preconditions.checkNotNull(listener);
+        this.registeredPath = Preconditions.checkNotNull(registeredPath);
     }
 
     @Override
@@ -71,21 +74,7 @@ final class DataTreeChangeListenerActor extends AbstractUntypedActor {
                 listener);
     }
 
-    public static Props props(final DOMDataTreeChangeListener listener) {
-        return Props.create(new DataTreeChangeListenerCreator(listener));
-    }
-
-    private static final class DataTreeChangeListenerCreator implements Creator<DataTreeChangeListenerActor> {
-        private static final long serialVersionUID = 1L;
-        private final DOMDataTreeChangeListener listener;
-
-        DataTreeChangeListenerCreator(final DOMDataTreeChangeListener listener) {
-            this.listener = Preconditions.checkNotNull(listener);
-        }
-
-        @Override
-        public DataTreeChangeListenerActor create() {
-            return new DataTreeChangeListenerActor(listener);
-        }
+    public static Props props(final DOMDataTreeChangeListener listener, final YangInstanceIdentifier registeredPath) {
+        return Props.create(DataTreeChangeListenerActor.class, listener, registeredPath);
     }
 }

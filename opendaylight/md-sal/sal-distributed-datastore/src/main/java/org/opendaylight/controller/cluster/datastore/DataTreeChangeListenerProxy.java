@@ -37,15 +37,19 @@ final class DataTreeChangeListenerProxy<T extends DOMDataTreeChangeListener> ext
     private static final Logger LOG = LoggerFactory.getLogger(DataTreeChangeListenerProxy.class);
     private final ActorRef dataChangeListenerActor;
     private final ActorContext actorContext;
+    private final YangInstanceIdentifier registeredPath;
 
     @GuardedBy("this")
     private ActorSelection listenerRegistrationActor;
 
-    public DataTreeChangeListenerProxy(final ActorContext actorContext, final T listener) {
+    DataTreeChangeListenerProxy(final ActorContext actorContext, final T listener,
+            final YangInstanceIdentifier registeredPath) {
         super(listener);
         this.actorContext = Preconditions.checkNotNull(actorContext);
+        this.registeredPath = Preconditions.checkNotNull(registeredPath);
         this.dataChangeListenerActor = actorContext.getActorSystem().actorOf(
-            DataTreeChangeListenerActor.props(getInstance()).withDispatcher(actorContext.getNotificationDispatcherPath()));
+                DataTreeChangeListenerActor.props(getInstance(), registeredPath)
+                    .withDispatcher(actorContext.getNotificationDispatcherPath()));
     }
 
     @Override
@@ -58,19 +62,19 @@ final class DataTreeChangeListenerProxy<T extends DOMDataTreeChangeListener> ext
         dataChangeListenerActor.tell(PoisonPill.getInstance(), ActorRef.noSender());
     }
 
-    void init(final String shardName, final YangInstanceIdentifier treeId) {
+    void init(final String shardName) {
         Future<ActorRef> findFuture = actorContext.findLocalShardAsync(shardName);
         findFuture.onComplete(new OnComplete<ActorRef>() {
             @Override
             public void onComplete(final Throwable failure, final ActorRef shard) {
                 if (failure instanceof LocalShardNotFoundException) {
-                    LOG.debug("No local shard found for {} - DataTreeChangeListener {} at path {} " +
-                            "cannot be registered", shardName, getInstance(), treeId);
+                    LOG.debug("No local shard found for {} - DataTreeChangeListener {} at path {} "
+                            + "cannot be registered", shardName, getInstance(), registeredPath);
                 } else if (failure != null) {
-                    LOG.error("Failed to find local shard {} - DataTreeChangeListener {} at path {} " +
-                            "cannot be registered: {}", shardName, getInstance(), treeId, failure);
+                    LOG.error("Failed to find local shard {} - DataTreeChangeListener {} at path {} "
+                            + "cannot be registered: {}", shardName, getInstance(), registeredPath, failure);
                 } else {
-                    doRegistration(shard, treeId);
+                    doRegistration(shard);
                 }
             }
         }, actorContext.getClientDispatcher());
@@ -93,10 +97,10 @@ final class DataTreeChangeListenerProxy<T extends DOMDataTreeChangeListener> ext
         actor.tell(CloseDataTreeChangeListenerRegistration.getInstance(), null);
     }
 
-    private void doRegistration(final ActorRef shard, final YangInstanceIdentifier path) {
+    private void doRegistration(final ActorRef shard) {
 
         Future<Object> future = actorContext.executeOperationAsync(shard,
-                new RegisterDataTreeChangeListener(path, dataChangeListenerActor,
+                new RegisterDataTreeChangeListener(registeredPath, dataChangeListenerActor,
                         getInstance() instanceof ClusteredDOMDataTreeChangeListener),
                 actorContext.getDatastoreContext().getShardInitializationTimeout());
 
@@ -105,7 +109,7 @@ final class DataTreeChangeListenerProxy<T extends DOMDataTreeChangeListener> ext
             public void onComplete(final Throwable failure, final Object result) {
                 if (failure != null) {
                     LOG.error("Failed to register DataTreeChangeListener {} at path {}",
-                            getInstance(), path.toString(), failure);
+                            getInstance(), registeredPath, failure);
                 } else {
                     RegisterDataTreeChangeListenerReply reply = (RegisterDataTreeChangeListenerReply) result;
                     setListenerRegistrationActor(actorContext.actorSelection(

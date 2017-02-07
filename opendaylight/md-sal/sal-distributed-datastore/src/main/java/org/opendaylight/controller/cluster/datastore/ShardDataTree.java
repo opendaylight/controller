@@ -652,6 +652,10 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         LOG.debug("{}: Transaction {} submitted to persistence", logContext, txId);
     }
 
+    Collection<ActorRef> getCohortActors() {
+        return cohortRegistry.getCohortActors();
+    }
+
     void processCohortRegistryCommand(final ActorRef sender, final CohortRegistryCommand message) {
         cohortRegistry.process(sender, message);
     }

@@ -42,8 +42,8 @@ public class DataTreeCohortRegistrationProxy<C extends DOMDataTreeCommitCohort> 
         super(cohort);
         this.subtree = Preconditions.checkNotNull(subtree);
         this.actorContext = Preconditions.checkNotNull(actorContext);
-        this.actor = actorContext.getActorSystem().actorOf(
-                DataTreeCohortActor.props(getInstance()).withDispatcher(actorContext.getNotificationDispatcherPath()));
+        this.actor = actorContext.getActorSystem().actorOf(DataTreeCohortActor.props(getInstance(),
+                subtree.getRootIdentifier()).withDispatcher(actorContext.getNotificationDispatcherPath()));
     }
 
 

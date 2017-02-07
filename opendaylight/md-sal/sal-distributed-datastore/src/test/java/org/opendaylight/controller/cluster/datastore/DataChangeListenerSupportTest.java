@@ -22,6 +22,7 @@ import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.o
 import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.outerNode;
 import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.outerNodeEntry;
 import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.testNodeWithOuter;
+
 import akka.actor.ActorRef;
 import akka.testkit.TestActorRef;
 import org.junit.After;
@@ -154,7 +155,7 @@ public class DataChangeListenerSupportTest extends AbstractShardTest {
     private MockDataChangeListener registerChangeListener(final YangInstanceIdentifier path, final DataChangeScope scope,
             final int expectedEvents, final boolean isLeader) {
         MockDataChangeListener listener = new MockDataChangeListener(expectedEvents);
-        ActorRef dclActor = actorFactory.createActor(DataChangeListener.props(listener));
+        ActorRef dclActor = actorFactory.createActor(DataChangeListener.props(listener, path));
 
         support.onMessage(new RegisterChangeListener(path, dclActor, scope, false), isLeader, true);
         return listener;

@@ -15,6 +15,7 @@ import akka.util.Timeout;
 import com.google.common.base.Preconditions;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,6 +49,9 @@ class DataTreeCohortActorRegistry extends AbstractRegistrationTree<ActorRef> {
 
     private final Map<ActorRef, RegistrationTreeNode<ActorRef>> cohortToNode = new HashMap<>();
 
+    Collection<ActorRef> getCohortActors() {
+        return Collections.unmodifiableCollection(cohortToNode.keySet());
+    }
 
     void registerCohort(final ActorRef sender, final RegisterCohort cohort) {
         takeLock();

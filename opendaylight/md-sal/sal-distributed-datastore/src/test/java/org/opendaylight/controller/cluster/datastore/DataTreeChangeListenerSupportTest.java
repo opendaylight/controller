@@ -116,7 +116,7 @@ public class DataTreeChangeListenerSupportTest extends AbstractShardTest {
     private MockDataTreeChangeListener registerChangeListener(final YangInstanceIdentifier path,
             final int expectedEvents, final boolean isLeader) {
         MockDataTreeChangeListener listener = new MockDataTreeChangeListener(expectedEvents);
-        ActorRef dclActor = actorFactory.createActor(DataTreeChangeListenerActor.props(listener));
+        ActorRef dclActor = actorFactory.createActor(DataTreeChangeListenerActor.props(listener, TEST_PATH));
         support.onMessage(new RegisterDataTreeChangeListener(path, dclActor, false), isLeader, true);
         return listener;
     }

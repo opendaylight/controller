@@ -174,8 +174,8 @@ public class DistributedDataStore implements DistributedDataStoreInterface, Sche
         LOG.debug("Registering tree listener: {} for tree: {} shard: {}", listener, treeId, shardName);
 
         final DataTreeChangeListenerProxy<L> listenerRegistrationProxy =
-                new DataTreeChangeListenerProxy<L>(actorContext, listener);
-        listenerRegistrationProxy.init(shardName, treeId);
+                new DataTreeChangeListenerProxy<>(actorContext, listener, treeId);
+        listenerRegistrationProxy.init(shardName);
 
         return listenerRegistrationProxy;
     }
@@ -192,7 +192,7 @@ public class DistributedDataStore implements DistributedDataStoreInterface, Sche
         final String shardName = actorContext.getShardStrategyFactory().getStrategy(treeId).findShard(treeId);
         LOG.debug("Registering cohort: {} for tree: {} shard: {}", cohort, treeId, shardName);
 
-        DataTreeCohortRegistrationProxy<C> cohortProxy = new DataTreeCohortRegistrationProxy<C>(actorContext, subtree, cohort);
+        DataTreeCohortRegistrationProxy<C> cohortProxy = new DataTreeCohortRegistrationProxy<>(actorContext, subtree, cohort);
         cohortProxy.init(shardName);
         return cohortProxy;
     }

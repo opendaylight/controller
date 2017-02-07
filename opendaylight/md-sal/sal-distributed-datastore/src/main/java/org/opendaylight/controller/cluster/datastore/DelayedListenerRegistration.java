@@ -7,12 +7,9 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
-import com.google.common.base.Optional;
 import java.util.EventListener;
-import java.util.Map.Entry;
 import javax.annotation.concurrent.GuardedBy;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 
 abstract class DelayedListenerRegistration<L extends EventListener, R> implements ListenerRegistration<L> {
     private final R registrationMessage;
@@ -34,10 +31,9 @@ abstract class DelayedListenerRegistration<L extends EventListener, R> implement
     }
 
     synchronized <LR extends ListenerRegistration<L>> void createDelegate(
-            final LeaderLocalDelegateFactory<R, LR, Optional<DataTreeCandidate>> factory) {
+            final LeaderLocalDelegateFactory<R, LR> factory) {
         if (!closed) {
-            final Entry<LR, Optional<DataTreeCandidate>> res = factory.createDelegate(registrationMessage);
-            this.delegate = res.getKey();
+            this.delegate = factory.createDelegate(registrationMessage);
         }
     }
 
