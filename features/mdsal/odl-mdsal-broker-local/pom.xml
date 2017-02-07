@@ -202,15 +202,6 @@
             <artifactId>blueprint</artifactId>
             <version>0.6.0-SNAPSHOT</version>
         </dependency>
-        <dependency>
-            <!-- finalname="${config.configfile.directory}/${config.mdsal.configfile}" -->
-            <groupId>${project.groupId}</groupId>
-            <artifactId>md-sal-config</artifactId>
-            <version>${project.version}</version>
-            <type>xml</type>
-            <classifier>config</classifier>
-            <scope>provided</scope>
-        </dependency>
     </dependencies>
 
     <build>

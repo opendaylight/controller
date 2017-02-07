@@ -137,15 +137,6 @@
       <classifier>features</classifier>
       <type>xml</type>
     </dependency>
-
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>md-sal-config</artifactId>
-      <version>${controller.mdsal.version}</version>
-      <type>xml</type>
-      <classifier>config</classifier>
-    </dependency>
-
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal-akka-raft</artifactId>
