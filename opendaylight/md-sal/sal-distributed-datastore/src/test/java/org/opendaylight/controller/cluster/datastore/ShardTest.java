@@ -139,8 +139,8 @@ public class ShardTest extends AbstractShardTest {
                 shard.tell(new UpdateSchemaContext(SchemaContextHelper.full()), ActorRef.noSender());
 
                 final MockDataChangeListener listener = new MockDataChangeListener(1);
-                final ActorRef dclActor = actorFactory.createActor(DataChangeListener.props(listener),
-                        "testRegisterChangeListener-DataChangeListener");
+                final ActorRef dclActor = actorFactory.createActor(DataChangeListener.props(listener,
+                        TestModel.TEST_PATH), "testRegisterChangeListener-DataChangeListener");
 
                 shard.tell(new RegisterChangeListener(TestModel.TEST_PATH, dclActor,
                         AsyncDataBroker.DataChangeScope.BASE, true), getRef());
@@ -216,8 +216,9 @@ public class ShardTest extends AbstractShardTest {
 
         setupInMemorySnapshotStore();
 
+        final YangInstanceIdentifier path = TestModel.TEST_PATH;
         final MockDataChangeListener listener = new MockDataChangeListener(1);
-        final ActorRef dclActor = actorFactory.createActor(DataChangeListener.props(listener),
+        final ActorRef dclActor = actorFactory.createActor(DataChangeListener.props(listener, path),
                 "testRegisterChangeListenerWhenNotLeaderInitially-DataChangeListener");
 
         final TestActorRef<Shard> shard = actorFactory.createTestActor(
@@ -226,8 +227,6 @@ public class ShardTest extends AbstractShardTest {
 
         new ShardTestKit(getSystem()) {
             {
-                final YangInstanceIdentifier path = TestModel.TEST_PATH;
-
                 // Wait until the shard receives the first ElectionTimeout
                 // message.
                 assertEquals("Got first ElectionTimeout", true, onFirstElectionTimeout.await(5, TimeUnit.SECONDS));
@@ -271,8 +270,8 @@ public class ShardTest extends AbstractShardTest {
                 shard.tell(new UpdateSchemaContext(SchemaContextHelper.full()), ActorRef.noSender());
 
                 final MockDataTreeChangeListener listener = new MockDataTreeChangeListener(1);
-                final ActorRef dclActor = actorFactory.createActor(DataTreeChangeListenerActor.props(listener),
-                        "testRegisterDataTreeChangeListener-DataTreeChangeListener");
+                final ActorRef dclActor = actorFactory.createActor(DataTreeChangeListenerActor.props(listener,
+                        TestModel.TEST_PATH), "testRegisterDataTreeChangeListener-DataTreeChangeListener");
 
                 shard.tell(new RegisterDataTreeChangeListener(TestModel.TEST_PATH, dclActor, false), getRef());
 
@@ -326,15 +325,14 @@ public class ShardTest extends AbstractShardTest {
 
         setupInMemorySnapshotStore();
 
+        final YangInstanceIdentifier path = TestModel.TEST_PATH;
         final MockDataTreeChangeListener listener = new MockDataTreeChangeListener(1);
-        final ActorRef dclActor = actorFactory.createActor(DataTreeChangeListenerActor.props(listener),
+        final ActorRef dclActor = actorFactory.createActor(DataTreeChangeListenerActor.props(listener, path),
                 "testDataTreeChangeListenerNotifiedWhenNotTheLeaderOnRegistration-DataChangeListener");
 
         final TestActorRef<Shard> shard = actorFactory.createTestActor(
                 Props.create(new DelegatingShardCreator(creator)).withDispatcher(Dispatchers.DefaultDispatcherId()),
                 "testDataTreeChangeListenerNotifiedWhenNotTheLeaderOnRegistration");
-
-        final YangInstanceIdentifier path = TestModel.TEST_PATH;
 
         new ShardTestKit(getSystem()) {
             {
@@ -2129,8 +2127,9 @@ public class ShardTest extends AbstractShardTest {
                 dataStoreContextBuilder.shardElectionTimeoutFactor(1000)
                         .customRaftPolicyImplementation(DisableElectionsRaftPolicy.class.getName());
 
+                final YangInstanceIdentifier path = TestModel.TEST_PATH;
                 final MockDataChangeListener listener = new MockDataChangeListener(1);
-                final ActorRef dclActor = actorFactory.createActor(DataChangeListener.props(listener),
+                final ActorRef dclActor = actorFactory.createActor(DataChangeListener.props(listener, path),
                         actorFactory.generateActorId(testName + "-DataChangeListener"));
 
                 setupInMemorySnapshotStore();
@@ -2140,8 +2139,6 @@ public class ShardTest extends AbstractShardTest {
                         actorFactory.generateActorId(testName + "-shard"));
 
                 waitUntilNoLeader(shard);
-
-                final YangInstanceIdentifier path = TestModel.TEST_PATH;
 
                 shard.tell(new RegisterChangeListener(path, dclActor, AsyncDataBroker.DataChangeScope.BASE, true),
                         getRef());
@@ -2189,7 +2186,7 @@ public class ShardTest extends AbstractShardTest {
 
                 final YangInstanceIdentifier path = TestModel.TEST_PATH;
                 final MockDataChangeListener listener = new MockDataChangeListener(1);
-                final ActorRef dclActor = actorFactory.createActor(DataChangeListener.props(listener),
+                final ActorRef dclActor = actorFactory.createActor(DataChangeListener.props(listener, path),
                         actorFactory.generateActorId(testName + "-DataChangeListener"));
 
                 followerShard.tell(
@@ -2215,8 +2212,8 @@ public class ShardTest extends AbstractShardTest {
                         .customRaftPolicyImplementation(DisableElectionsRaftPolicy.class.getName());
 
                 final MockDataTreeChangeListener listener = new MockDataTreeChangeListener(1);
-                final ActorRef dclActor = actorFactory.createActor(DataTreeChangeListenerActor.props(listener),
-                        actorFactory.generateActorId(testName + "-DataTreeChangeListener"));
+                final ActorRef dclActor = actorFactory.createActor(DataTreeChangeListenerActor.props(listener,
+                        TestModel.TEST_PATH), actorFactory.generateActorId(testName + "-DataTreeChangeListener"));
 
                 setupInMemorySnapshotStore();
 
@@ -2271,7 +2268,7 @@ public class ShardTest extends AbstractShardTest {
 
                 final YangInstanceIdentifier path = TestModel.TEST_PATH;
                 final MockDataTreeChangeListener listener = new MockDataTreeChangeListener(1);
-                final ActorRef dclActor = actorFactory.createActor(DataTreeChangeListenerActor.props(listener),
+                final ActorRef dclActor = actorFactory.createActor(DataTreeChangeListenerActor.props(listener, path),
                         actorFactory.generateActorId(testName + "-DataTreeChangeListener"));
 
                 followerShard.tell(new RegisterDataTreeChangeListener(TestModel.TEST_PATH, dclActor, true), getRef());

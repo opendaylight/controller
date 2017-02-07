@@ -19,6 +19,7 @@ import org.opendaylight.mdsal.common.api.PostPreCommitStep;
 import org.opendaylight.mdsal.common.api.ThreePhaseCommitStep;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeCandidate;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeCommitCohort;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 /**
@@ -28,10 +29,12 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 final class DataTreeCohortActor extends AbstractUntypedActor {
     private final CohortBehaviour<?> idleState = new Idle();
     private final DOMDataTreeCommitCohort cohort;
+    private final YangInstanceIdentifier registeredPath;
     private CohortBehaviour<?> currentState = idleState;
 
-    private DataTreeCohortActor(final DOMDataTreeCommitCohort cohort) {
+    private DataTreeCohortActor(final DOMDataTreeCommitCohort cohort, final YangInstanceIdentifier registeredPath) {
         this.cohort = Preconditions.checkNotNull(cohort);
+        this.registeredPath = registeredPath;
     }
 
     @Override
@@ -143,7 +146,8 @@ final class DataTreeCohortActor extends AbstractUntypedActor {
             } else if (message instanceof Abort) {
                 return abort();
             }
-            throw new UnsupportedOperationException();
+            throw new UnsupportedOperationException(String.format("Unexpected message %s in cohort behavior %s",
+                    message.getClass(), getClass().getSimpleName()));
         }
 
         abstract CohortBehaviour<?> abort();
@@ -269,7 +273,7 @@ final class DataTreeCohortActor extends AbstractUntypedActor {
 
     }
 
-    static Props props(final DOMDataTreeCommitCohort cohort) {
-        return Props.create(DataTreeCohortActor.class, cohort);
+    static Props props(final DOMDataTreeCommitCohort cohort, final YangInstanceIdentifier registeredPath) {
+        return Props.create(DataTreeCohortActor.class, cohort, registeredPath);
     }
 }
