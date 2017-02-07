@@ -7,15 +7,12 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
-import java.util.Map.Entry;
-
 /**
  * Base class for factories instantiating delegates.
  *
  * @param <M> message type
  * @param <D> delegate type
- * @param <I> initial state type
  */
-abstract class DelegateFactory<M, D, I> {
-    abstract Entry<D, I> createDelegate(M message);
+abstract class DelegateFactory<M, D> {
+    abstract D createDelegate(M message);
 }

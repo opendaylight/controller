@@ -179,8 +179,8 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
         LOG.debug("Registering tree listener: {} for tree: {} shard: {}", listener, treeId, shardName);
 
         final DataTreeChangeListenerProxy<L> listenerRegistrationProxy =
-                new DataTreeChangeListenerProxy<>(actorContext, listener);
-        listenerRegistrationProxy.init(shardName, treeId);
+                new DataTreeChangeListenerProxy<>(actorContext, listener, treeId);
+        listenerRegistrationProxy.init(shardName);
 
         return listenerRegistrationProxy;
     }
