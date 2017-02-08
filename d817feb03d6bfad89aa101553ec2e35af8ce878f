@@ -34,6 +34,24 @@
       "revId": "d817feb03d6bfad89aa101553ec2e35af8ce878f",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_ad3acbca",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/AbstractDOMBrokerWriteTransaction.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-02-08T23:03:55Z",
+      "side": 1,
+      "message": "It\u0027s just cosmetic and it doesn\u0027t really matter much to me either way. It just seems inconsistent with the Sun coding style and seems like something wrong with CS or the rule. Not sure if the rule can be customized... if not I\u0027m OK with it to keep CS from complaining.",
+      "parentUuid": "fafc7978_db455471",
+      "revId": "d817feb03d6bfad89aa101553ec2e35af8ce878f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
