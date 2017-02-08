@@ -8,9 +8,6 @@
  -->
 <features name="odl-mdsal-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.2.0">
     <feature name="odl-mdsal-broker" version="${project.version}">
-        <configfile finalname="${config.configfile.directory}/${config.clustering.configfile}" override="true">
-            mvn:org.opendaylight.controller/sal-clustering-config/${project.version}/xml/config
-        </configfile>
         <configfile finalname="${config.configfile.directory}/${config.clustered-entity-ownership.configfile}">
             mvn:org.opendaylight.controller/sal-clustering-config/${project.version}/xml/entityownershipconfig
         </configfile>

@@ -57,7 +57,6 @@
         <bundle>mvn:org.opendaylight.controller/sal-inmemory-datastore/{{VERSION}}</bundle>
         <bundle>mvn:org.opendaylight.controller/sal-dom-broker-config/{{VERSION}}</bundle>
         <bundle start-level="40">mvn:org.opendaylight.controller/blueprint/{{VERSION}}</bundle>
-        <configfile finalname="${config.configfile.directory}/${config.mdsal.configfile}">mvn:org.opendaylight.controller/md-sal-config/{{VERSION}}/xml/config</configfile>
     </feature>
     <feature name='odl-toaster' version='${project.version}' description="OpenDaylight :: Toaster">
         <feature version='${yangtools.version}'>odl-yangtools-common</feature>
@@ -100,7 +99,6 @@
     <feature name ='odl-mdsal-broker' version='${project.version}'>
         <feature version='${project.version}'>odl-mdsal-remoterpc-connector</feature>
         <feature version='${project.version}'>odl-mdsal-distributed-datastore</feature>
-        <configfile finalname="${config.configfile.directory}/${config.clustering.configfile}" override="true" >mvn:org.opendaylight.controller/sal-clustering-config/{{VERSION}}/xml/config</configfile>
         <configfile finalname="${config.configfile.directory}/${config.clustered-entity-ownership.configfile}">mvn:org.opendaylight.controller/sal-clustering-config/{{VERSION}}/xml/entityownershipconfig</configfile>
         <configfile finalname="configuration/initial/akka.conf">mvn:org.opendaylight.controller/sal-clustering-config/{{VERSION}}/xml/akkaconf</configfile>
         <configfile finalname="configuration/factory/akka.conf" override="true">mvn:org.opendaylight.controller/sal-clustering-config/{{VERSION}}/xml/factoryakkaconf</configfile>
