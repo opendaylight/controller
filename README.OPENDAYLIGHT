@@ -23,7 +23,7 @@ In order to build it's required to have JDK 1.7+ and Maven 3+, to get
 a build going it's needed to:
 1) From the root directory run
    "mvn clean install"
-2) On succesfull completion go in the directory:
+2) On successful completion go in the directory:
 "opendaylight/distribution/opendaylight/target"
 
 to pick the zip file of the distribution or controller can be executed
