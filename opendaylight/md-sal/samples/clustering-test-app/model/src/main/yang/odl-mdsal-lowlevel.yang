@@ -1,0 +1,410 @@
+module odl-mdsal-lowlevel {
+
+    yang-version 1;
+    namespace "tag:opendaylight.org,2017:controller:yang:lowlevel";
+    prefix ll;
+    organization "OpenDaylight";
+    contact "Vratko Polak <vrpolak@cisco.com>";
+    revision "2017-02-06" {
+        description "Work in progress, change before releasing.";
+    }
+    description "Operations for cluster system testing not reachable via Restconf.
+        In gneral, elements under test are not backed by any implementation
+        upon feature installation.
+        Control RPCs are used to dynamically register, unregister, start or stop
+        the operations under test.
+        Control RPCs are backed by an implementation upon feature instalaltion.
+        Their registration shall only affect local member,
+        but their invocation can interact with Entity Ownership or Singleton.";
+
+    // Common goupings.
+
+    grouping id-grouping {
+        leaf id {
+            type string;
+            description "Any string uniquely identifying the publisher,
+                typically containing the member name.";
+        }
+    }
+
+    grouping constant-grouping {
+        leaf constant {
+            type string;
+            description "The string to be returned by get-constant RPC implementation.
+                    The string typically includes the name of the member
+                    the user called to cause the RPC implementation registration
+                    (that member may be different from both the member running the implementation,
+                    and member where get-constant is called).";
+        }
+    }
+
+    // Elements under tests.
+
+    leaf count-leaf {
+        description "A simple config datastore leaf,
+            expected writes should keep incrementing by one or reset to zero.
+            Type is 64 bit to allow longevity tests, and signed to allow exceptional writes.
+            Typical use of this leaf is to generate data change notifications.
+            Config is true, in order to allow Restconf to set the value at will.";
+        config true;
+        type int64;
+    }
+
+    list int-list {
+        description "A simple list of integers.
+            Typical use of this list is to generate data change notifications.
+            Config is true, in order to allow Restconf to reset content at will.
+            Expected writes should create and delete items at random, values 0 .. 2^20";
+        ordered-by system;
+        config true;
+        key "value";
+        leaf value {
+            type int32;
+            description "The integer value of this item. ot restricted to allow more scenarios.";
+        }
+    }
+
+    notification id-sequence {
+        description "Notification where published is identified by the id
+            and each publish increases the sequence number.";
+        uses id-grouping;
+        leaf sequence-number {
+            type int64;
+            description "Subscriber shall verify whether this value has increased
+                since the previous notification. The first sequence number published shall be 1.
+                Type is 64 bit to allow longevity tests, and signed to allow exceptional numbers.";
+        }
+    }
+
+    rpc get-constant {
+        description "Return the constant string provided by the previously registered implementation.
+            Propagate appropriate error if no, unreachable, or failing implementation is found.";
+        // No input.
+        output {
+            uses constant-grouping;
+        }
+    }
+
+    rpc get-keyed-value {
+        description "Return the value corresponding to registered implementation (either bound or default).
+            Propagate appropriate error if no, unreachable, or failing implementation is found.";
+        input {
+            leaf key {
+                type string;
+                description "The key for bound implementation to match.";
+            }
+        }
+        output {
+            leaf value {
+                type string;
+                description "The found value. Typically contains registering member name.";
+            }
+        }
+    }
+
+    // Control RPCs.
+
+    rpc count-directly {
+        description "Upon receiving this, the member shall start submitting transactions
+            which write numbers 0, 1, 2, ... to count-leaf until time is up.
+            .get with timeout on currently earliest non-complete Future (from .submit)
+            shall be used as primary wait method to throttle the submission rate.
+            The RPC shall not return until all transactions are confirmed successful,
+            or an exception is raised (the exception should propagate to restconf response).";
+        input {
+            leaf seconds {
+                type uint32;
+                description "This RPC has to work (roughly) this long.";
+            }
+            leaf counts-per-second {
+                type uint32;
+                description "An upper limit of writes per second this RPC shall try to achieve.";
+            }
+            leaf chained-transactions {
+                type boolean;
+                description "If true, write transactions shall be created on a transaction chain,
+                    (created at start of the RPC call, and deleted at at its end).
+                    If false, write transactions shall be created separately.
+                    OptimistiLockException is tolerated if false, but considered an error if true.";
+            }
+        }
+        // No output.
+    }
+
+    rpc produce-transactions {
+        description "Upon receiving this, the member shall start submitting transactions
+            to randomly add or delete items on int-list.
+
+            FIXME: How to avoid conflicts between separate transactions or multiple producers?
+
+            .get with a timeout on currently earliest non-complete Future (from .submit)
+            shall be used as the primary wait method to throttle the submission rate.
+            The RPC shall not return until all transactions are confirmed successful,
+            or an exception is raised (the exception should propagate to restconf response).";
+        input {
+            leaf seconds {
+                type uint32;
+                description "This RPC has to work (roughly) this long.";
+            }
+            leaf transactions-per-second {
+                type uint32;
+                description "An upper limit of transactions per second this RPC shall try to achieve.";
+            }
+            leaf chained-transactions {
+                type boolean;
+                description "If true, write transactions shall be created on a transaction chain,
+                    (created at start of the RPC call, and deleted at at its end).
+                    If false, write transactions shall be created separately.
+                    Either way, OptimistiLockException is considered an error.";
+            }
+        }
+        // No output.
+    }
+
+    rpc subscribe-transaction-listener {
+        description "Upon receiving this, the member checks whether it has already subscribed
+            and fails if yes. If no, the member subscribes a Data Tree Change Listener
+            to listen for changes on int-list, and stores the value from the initial notification
+            to a local variable (called the local copy).
+            Each Data Tree Change from further Notifications shall be applied
+            to the local copy if it is compatible
+            (the old state from notification is equal to the local copy state).
+            If a notification is not compatible, it shall be ignored.";
+        // No input.
+        // No output.
+    }
+
+    rpc unsubscribe-transaction-listener {
+        description "Upon receiving this, the member checks whether it has currently subscribed
+            a listener for int-list changes, and fails if no. If yes, the member
+            shall unsubscribe the listener, read state of int-list, compare that
+            to the local copy, and return whether the local copy is the same.";
+        // No input.
+        output {
+            leaf copy-matches {
+                type boolean;
+                description "True if and only if the read int-list is equal to the local copy.";
+            }
+        }
+    }
+
+    rpc subscribe-notification-listener {
+        description "Upon receiving this, the member checks whether it has already subscribed
+            a listener for the given id, and fails if yes.
+            If no, the member subscribes a Yang notification listener to listen for
+            id-sequence notifications, ignoring those with non-matching id.
+            The member also creates a local variable (called the local number)
+            for the sequence number and initialize that to 0.
+            Each matching id-sequence notification shall increase the local number
+            if it is compatible (the local number was one less than the received sequence number).";
+        input {
+            uses id-grouping;
+        }
+        // No output.
+    }
+
+    rpc unsubscribe-notification-listener {
+        description "Upon receiving this, the member checks whether it has currently subscribed
+            a listener for the given id, and fails if no. If yes, the member
+            shall unsubscribe the listener and return the value of the local number.";
+        input {
+            uses id-grouping;
+        }
+        output {
+            leaf local-number {
+                type int64;
+                description "alue of the local number, should be equal to
+                    the sequence number of the last compatible id-sequence notification received.";
+            }
+        }
+    }
+
+    rpc produce-notifications {
+        description "Upon receiving this, the member shall start publishing id-sequence
+            notifications with the give id and sequence numbers increasing from 1.
+            .get with a timeout on currently earliest non-complete Future (from .publish)
+            shall be used as the primary wait method to throttle the publish rate.
+            The RPC shall not return until all publishes are confirmed successful,
+            or an exception is raised (the exception should propagate to restconf response).";
+        input {
+            uses id-grouping;
+            leaf seconds {
+                type uint32;
+                description "This RPC has to work (roughly) this long.";
+            }
+            leaf notifications-per-second {
+                type uint32;
+                description "An upper limit of publishes per second this RPC shall try to achieve.";
+            }
+        }
+        // No output.
+    }
+
+    rpc register-singleton-constant {
+        description "Upon receiving this, the member checks whether it has already registered
+            a singleton service, and fails if yes. If no, the member creates
+            a service implementation based on the given constant and registers the implementation
+            as a singleton service.
+            If the service is instantiated, it creates and registers a get-constant implementation
+            which refurns the given costant. When the service instance is closed, it unregisters
+            that get-constant implementation.
+            If the registration fails for any reason, propagate the corresponding error.";
+        input {
+            uses contant-grouping;
+        }
+        // No output.
+    }
+
+    rpc unregister-singleton-constant {
+        description "Upon receiving this, the member checks whether it has currently registered
+            a singleton service, and fails if no. If yes, the member shall unregister
+            the service implementation, presumably causing service instantiation on other member,
+            and closing of the local service instance.";
+            If the unregistration fails for any reason, propagate the corresponding error.";
+        // No input.
+        // No output.
+    }
+
+    rpc subscribe-count-replay {
+        description "Upon receiving this, the member checks whether it has already subscribed
+            and fails if yes. If no, the member subscribes a Data Tree Change Listener
+            to listen for changes on count-leaf, and stores the value from the initial notification
+            to a local variable (called the local copy).
+            Each Data Tree Change from further Notifications shall be written
+            to the local copy if it is compatible
+            (the old count-leaf value from notification is equal to copy value).
+            If a notification is not compatible, it shall be ignored.";
+        // No input.
+        // No output.
+    }
+
+    rpc unsubscribe-count-replay {
+        description "Upon receiving this, the member shall unsubscribe the listener created in
+            subscribe-replay call, and return the local copy value.";
+        // No input.
+        output {
+            leaf local-copy {
+                type int64;
+                description "The value of the local copy at the time of unregistration.";
+            }
+        }
+    }
+
+    rpc subscribe-count-updater {
+        description "Upon receiving this, the member checks whether it has already subscribed
+            and fails if yes. If no, the member subscribes Yang notification listener and return.
+            The listener shall listen to change-count notifications and apply them to count-leaf.";
+        input {
+            leaf chained-transactions {
+                type boolean;
+                description "If true, write transactions shall be created on a transaction chain,
+                    (created at start of the RPC call, not deleted here).
+                    If false, write transactions shall be created separately.
+                    OptimisticLockException is tolerated either way.";
+            }
+        }
+        // No output.
+    }
+
+    rpc unsubscribe-count-updater {
+        description "Upon receiving this, the member shall unsubscribe the listener created in
+            subscribe-count-updater call (possibly deleting the transaction chain).";
+        // No input.
+        // No output.
+    }
+
+    rpc subscribe-count {
+        description "Upon receiving this, the member checks whether it has already subscribed
+            and fails if yes. If no, the member subscribes Yang notification listener and returns.
+            The listener shall listen to change-count notifications,
+            and initializes local variable to zero. Each time change-count notification is received,
+            the variable is increased by one (regardless of notification content).";
+        // No input.
+        // No output.
+    }
+
+    rpc unsubscribe-count {
+        description "Upon receiving this, the member checks whether it has already subscribed
+            and fails if no. If yes, the member unsubscribes the Yang notification listener
+            value of the local variable mentioned in unsubscribe-count."
+        // No input.
+        output {
+            leaf counted {
+                type int64;
+                description "The member has received this much update-count notifications.";
+            }
+        }
+    }
+
+    rpc register-constant {
+        description "Upon receiving this, the member has to create get-constant implementation (global RPC).
+            If the registration fails for any reason, propagate the corresponding error.";
+        input {
+            leaf constant {
+                type string;
+                description "String to be returned by get-constant RPC.";
+            }
+        }
+        // No output.
+    }
+
+    rpc unregister-constant {
+        description "Upon receiving this, the member has to unregister
+            any get-constant implementations it has registered.
+            If no implementation has been registered, do nothing.";
+        // No input.
+        // No output.
+    }
+
+    rpc register-default-value {
+        description "Upon receiving this, the member has to create and register
+            a default get-keyed-value implementation (routed RPC).
+            If the registration fails for any reason, propagate the corresponding error.";
+        input {
+            leaf value {
+                type string;
+                description "The value to return when no bound implementation matches.";
+            }
+        }
+        // No output.
+    }
+
+    rpc unregister-default-value {
+        description "Upon receiving this, the member has to unregister
+            any get-keyed-value default implementations it has registered.
+            If no default implementation has been registered, do nothing.";
+        // No input.
+        // No output.
+    }
+
+    rpc register-bound-value {
+        description "Upon receiving this, the member has to create and register
+            a bound get-keyed-value implementation (routed RPC).
+            If the registration fails for any reason, propagate the corresponding error.";
+        input {
+            leaf key {
+                type string;
+                description "The key to bound this implementation to.";
+            }
+            leaf value {
+                type string;
+                description "The value to return when the key matches.";
+            }
+        }
+        // No output.
+    }
+
+    rpc unregister-bound-value {
+        description "Upon receiving this, the member has to unregister
+            any get-keyed-value implementations bound to the key.
+            If no bound implementation for the key has been registered, do nothing.";
+        input {
+            leaf key {
+                type string;
+                description "The key matching the implementations to unregister.";
+            }
+        }
+        // No output.
+    }
+
+}
