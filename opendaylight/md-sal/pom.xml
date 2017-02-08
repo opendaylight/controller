@@ -62,9 +62,6 @@
     <module>sal-dom-broker-config</module>
     <module>sal-binding-config</module>
 
-    <!-- Configuration File -->
-    <module>md-sal-config</module>
-
     <!-- Samples -->
     <module>samples</module>
 

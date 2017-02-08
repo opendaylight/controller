@@ -32,11 +32,6 @@
             <configuration>
               <artifacts>
                 <artifact>
-                  <file>${project.build.directory}/classes/initial/05-clustering.xml.conf</file>
-                  <type>xml</type>
-                  <classifier>config</classifier>
-                </artifact>
-                <artifact>
                   <file>${project.build.directory}/classes/initial/06-clustered-entity-ownership.xml.conf</file>
                   <type>xml</type>
                   <classifier>entityownershipconfig</classifier>
