@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_1267b626",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/test/java/org/opendaylight/controller/md/sal/binding/test/AbstractBaseDataBrokerTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2017-02-08T22:03:29Z",
+      "side": 1,
+      "message": "NOK; FYI this was already like this in AbstractDataBrokerTest today, since the dawn of time; I\u0027ve just re-factored it here... Tell you what, as this is not how I would design this for today\u0027s JUnit anyway, I\u0027ve moved this helper method as-is away from here in the new AbstractBaseDataBrokerTest into the now @Deprecated AbstractDataBrokerTest, just so not to break existing tests, and new tests extending AbstractConcurrentDataBrokerTest can instead of this just use their own @Before annotated method, as illustrated in the AbstractDataBrokerTestTest (it works).",
+      "parentUuid": "fafc7978_38ef4389",
+      "range": {
+        "startLine": 35,
+        "startChar": 4,
+        "endLine": 36,
+        "endChar": 64
+      },
+      "revId": "1731537d9e8f52bbee594065425486a20f56f649",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fafc7978_b6afc593",
         "filename": "opendaylight/md-sal/sal-binding-broker/src/test/java/org/opendaylight/controller/md/sal/binding/test/AbstractBaseDataBrokerTest.java",
         "patchSetId": 1
@@ -53,6 +77,30 @@
       "writtenOn": "2017-02-07T20:06:27Z",
       "side": 1,
       "message": "This should be in arguments, with a utility method providing defaults (which in turn should be a proper constant). I agree with 5 seconds being better.\n\nWould it also make sense to LOG.trace() blocking duration?",
+      "range": {
+        "startLine": 49,
+        "startChar": 23,
+        "endLine": 49,
+        "endChar": 49
+      },
+      "revId": "1731537d9e8f52bbee594065425486a20f56f649",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_12c056df",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/test/java/org/opendaylight/controller/md/sal/binding/test/AbstractBaseDataBrokerTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2017-02-08T22:03:29Z",
+      "side": 1,
+      "message": "FYI this was already like this in AbstractDataBrokerTest today, since the dawn of time; I\u0027ve just re-factored it here...  But fine, I have increased the timeout as suggested.  I disagree with arguments and needing a utility method providing defaults, because I can\u0027t see a case where test would want to wait longer or shorter time, so this is just one more method, increasing API surface; I wouldn\u0027t do it, but to move forward on this issue and get this merged, I\u0027ve do it anyway... ;-)",
+      "parentUuid": "fafc7978_d8e0b798",
       "range": {
         "startLine": 49,
         "startChar": 23,
@@ -100,6 +148,24 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_72b72287",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/test/java/org/opendaylight/controller/md/sal/binding/test/AbstractBaseDataBrokerTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2017-02-08T22:03:29Z",
+      "side": 1,
+      "message": "FYI this was already like this in AbstractDataBrokerTest today, since the dawn of time; I\u0027ve just re-factored it here... I agree an AssertionError would be better than an IllegalStateException for this, the name is even called assertCommit, but am concerned that hypothetically theoretically this could break compatibility with downstream tests, on the off chance that they may rely on this (granted, unlikely; but you never know), and thus I refuse to adjust this as part of this change.  Can you live with that?",
+      "parentUuid": "fafc7978_58d5e7b7",
+      "revId": "1731537d9e8f52bbee594065425486a20f56f649",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fafc7978_b802133c",
         "filename": "opendaylight/md-sal/sal-binding-broker/src/test/java/org/opendaylight/controller/md/sal/binding/test/AbstractDataBrokerTestCustomizer.java",
         "patchSetId": 1
@@ -134,6 +200,24 @@
       "writtenOn": "2017-02-07T15:34:16Z",
       "side": 1,
       "message": "Can you add explanation of this class here instead of directing folks to a bug where one has to dig thru comments to understand its purpose?",
+      "revId": "1731537d9e8f52bbee594065425486a20f56f649",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_324bda88",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/test/java/org/opendaylight/controller/md/sal/binding/test/ConcurrentDataBrokerTestCustomizer.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2017-02-08T22:03:29Z",
+      "side": 1,
+      "message": "good idea, but I\u0027ve done it over in the AbstractConcurrentDataBrokerTest class instead of here, as that is the first class a developer will look at, not here in this class which is more internal (e.g. I only discovered this one once I started digging into the internals of what\u0027s what around here).",
+      "parentUuid": "fafc7978_369bd573",
       "revId": "1731537d9e8f52bbee594065425486a20f56f649",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
