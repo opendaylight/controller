@@ -25,8 +25,6 @@
 
     <properties>
         <config.configfile.directory>etc/opendaylight/karaf</config.configfile.directory>
-        <config.clustering.configfile>05-clustering.xml</config.clustering.configfile>
-        <config.clustered-entity-ownership.configfile>06-clustered-entity-ownership.xml</config.clustered-entity-ownership.configfile>
     </properties>
 
     <dependencies>
@@ -43,24 +41,6 @@
             <version>${project.version}</version>
             <type>xml</type>
             <classifier>features</classifier>
-        </dependency>
-        <dependency>
-            <!-- finalname="${config.configfile.directory}/${config.clustering.configfile}" override="true" -->
-            <groupId>${project.groupId}</groupId>
-            <artifactId>sal-clustering-config</artifactId>
-            <version>${project.version}</version>
-            <type>xml</type>
-            <classifier>config</classifier>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <!-- finalname="${config.configfile.directory}/${config.clustered-entity-ownership.configfile}" -->
-            <groupId>${project.groupId}</groupId>
-            <artifactId>sal-clustering-config</artifactId>
-            <version>${project.version}</version>
-            <type>xml</type>
-            <classifier>entityownershipconfig</classifier>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <!-- finalname="configuration/initial/akka.conf" -->

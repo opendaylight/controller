@@ -26,10 +26,7 @@
     <akka.features.version>1.8.0-SNAPSHOT</akka.features.version>
     <features.file>features.xml</features.file>
     <config.configfile.directory>etc/opendaylight/karaf</config.configfile.directory>
-    <config.clustering.configfile>05-clustering.xml</config.clustering.configfile>
-    <config.clustered-entity-ownership.configfile>06-clustered-entity-ownership.xml</config.clustered-entity-ownership.configfile>
     <config.netty.configfile>00-netty.xml</config.netty.configfile>
-    <config.mdsal.configfile>01-md-sal.xml</config.mdsal.configfile>
     <config.xsql.configfile>04-xsql.xml</config.xsql.configfile>
   </properties>
 
@@ -137,15 +134,6 @@
       <classifier>features</classifier>
       <type>xml</type>
     </dependency>
-
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>md-sal-config</artifactId>
-      <version>${controller.mdsal.version}</version>
-      <type>xml</type>
-      <classifier>config</classifier>
-    </dependency>
-
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal-akka-raft</artifactId>
@@ -240,20 +228,6 @@
       <version>${controller.mdsal.version}</version>
       <type>xml</type>
       <classifier>factoryakkaconf</classifier>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>sal-clustering-config</artifactId>
-      <version>${controller.mdsal.version}</version>
-      <type>xml</type>
-      <classifier>config</classifier>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>sal-clustering-config</artifactId>
-      <version>${controller.mdsal.version}</version>
-      <type>xml</type>
-      <classifier>entityownershipconfig</classifier>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
