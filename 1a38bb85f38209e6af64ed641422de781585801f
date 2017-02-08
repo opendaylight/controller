@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fafc7978_d22a4e8f",
+        "filename": "features/config-persister/odl-config-persister/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2017-02-08T22:19:00Z",
+      "side": 1,
+      "message": "we need this for felix.util. Felix util is actually used in karaf\u0027s feature service (i.e. standard-feature.xml:feature), so if we can make a reference to that somehow, we would not be wrapping it.",
+      "range": {
+        "startLine": 80,
+        "startChar": 8,
+        "endLine": 80,
+        "endChar": 77
+      },
+      "revId": "1a38bb85f38209e6af64ed641422de781585801f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
