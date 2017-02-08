@@ -25,6 +25,7 @@ import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import org.mockito.Mockito;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext.Builder;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
@@ -32,7 +33,9 @@ import org.opendaylight.controller.cluster.datastore.config.ConfigurationImpl;
 import org.opendaylight.controller.cluster.datastore.config.EmptyModuleShardConfigProvider;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStats;
 import org.opendaylight.controller.cluster.datastore.messages.DatastoreSnapshot;
+import org.opendaylight.controller.cluster.datastore.messages.OnDemandShardState;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
+import org.opendaylight.controller.cluster.raft.client.messages.GetOnDemandRaftState;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
@@ -186,6 +189,31 @@ public class IntegrationTestKit extends ShardTestKit {
 
             try {
                 verifier.verify(shardStats);
+                return;
+            } catch (AssertionError e) {
+                lastError = e;
+                Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
+            }
+        }
+
+        throw lastError;
+    }
+
+    public static void verifyShardState(final AbstractDataStore datastore, final String shardName,
+            final Consumer<OnDemandShardState> verifier) throws Exception {
+        ActorContext actorContext = datastore.getActorContext();
+
+        Future<ActorRef> future = actorContext.findLocalShardAsync(shardName);
+        ActorRef shardActor = Await.result(future, Duration.create(10, TimeUnit.SECONDS));
+
+        AssertionError lastError = null;
+        Stopwatch sw = Stopwatch.createStarted();
+        while (sw.elapsed(TimeUnit.SECONDS) <= 5) {
+            OnDemandShardState shardState = (OnDemandShardState)actorContext
+                    .executeOperation(shardActor, GetOnDemandRaftState.INSTANCE);
+
+            try {
+                verifier.accept(shardState);
                 return;
             } catch (AssertionError e) {
                 lastError = e;
