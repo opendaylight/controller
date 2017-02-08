@@ -12,6 +12,7 @@ import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.actor.Status;
 import com.google.common.base.Preconditions;
+import java.util.Collection;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActor;
 import org.opendaylight.mdsal.common.api.PostCanCommitStep;
@@ -39,6 +40,9 @@ final class DataTreeCohortActor extends AbstractUntypedActor {
 
     @Override
     protected void handleReceive(final Object message) {
+        LOG.debug("handleReceive for cohort {} - currentState: {}, message: {}", cohort.getClass().getName(),
+                currentState, message);
+
         currentState = currentState.handle(message);
     }
 
@@ -59,23 +63,29 @@ final class DataTreeCohortActor extends AbstractUntypedActor {
         protected CommitProtocolCommand(TransactionIdentifier txId) {
             this.txId = Preconditions.checkNotNull(txId);
         }
+
+        @Override
+        public String toString() {
+            return getClass().getSimpleName() + " [txId=" + txId + "]";
+        }
     }
 
     static final class CanCommit extends CommitProtocolCommand<Success> {
 
-        private final DOMDataTreeCandidate candidate;
+        private final Collection<DOMDataTreeCandidate> candidates;
         private final ActorRef cohort;
         private final SchemaContext schema;
 
-        CanCommit(TransactionIdentifier txId, DOMDataTreeCandidate candidate, SchemaContext schema, ActorRef cohort) {
+        CanCommit(TransactionIdentifier txId, Collection<DOMDataTreeCandidate> candidates, SchemaContext schema,
+                ActorRef cohort) {
             super(txId);
             this.cohort = Preconditions.checkNotNull(cohort);
-            this.candidate = Preconditions.checkNotNull(candidate);
+            this.candidates = Preconditions.checkNotNull(candidates);
             this.schema = Preconditions.checkNotNull(schema);
         }
 
-        DOMDataTreeCandidate getCandidate() {
-            return candidate;
+        Collection<DOMDataTreeCandidate> getCandidates() {
+            return candidates;
         }
 
         SchemaContext getSchema() {
@@ -86,6 +96,10 @@ final class DataTreeCohortActor extends AbstractUntypedActor {
             return cohort;
         }
 
+        @Override
+        public String toString() {
+            return "CanCommit [txId=" + getTxId() + ", candidates=" + candidates + ", cohort=" + cohort  + "]";
+        }
     }
 
     abstract static class CommitReply {
@@ -105,6 +119,11 @@ final class DataTreeCohortActor extends AbstractUntypedActor {
         final TransactionIdentifier getTxId() {
             return txId;
         }
+
+        @Override
+        public String toString() {
+            return getClass().getSimpleName() + " [txId=" + txId + ", cohortRef=" + cohortRef + "]";
+        }
     }
 
     static final class Success extends CommitReply {
@@ -112,7 +131,6 @@ final class DataTreeCohortActor extends AbstractUntypedActor {
         Success(ActorRef cohortRef, TransactionIdentifier txId) {
             super(cohortRef, txId);
         }
-
     }
 
     static final class PreCommit extends CommitProtocolCommand<Success> {
@@ -154,6 +172,10 @@ final class DataTreeCohortActor extends AbstractUntypedActor {
 
         abstract CohortBehaviour<?> process(E message);
 
+        @Override
+        public String toString() {
+            return getClass().getSimpleName();
+        }
     }
 
     private class Idle extends CohortBehaviour<CanCommit> {
@@ -166,9 +188,11 @@ final class DataTreeCohortActor extends AbstractUntypedActor {
         @Override
         @SuppressWarnings("checkstyle:IllegalCatch")
         CohortBehaviour<?> process(CanCommit message) {
-            final PostCanCommitStep nextStep;
+            PostCanCommitStep nextStep = null;
             try {
-                nextStep = cohort.canCommit(message.getTxId(), message.getCandidate(), message.getSchema()).get();
+                for (DOMDataTreeCandidate candidate: message.getCandidates()) {
+                    nextStep = cohort.canCommit(message.getTxId(), candidate, message.getSchema()).get();
+                }
             } catch (final Exception e) {
                 getSender().tell(new Status.Failure(e), getSelf());
                 return this;
@@ -181,7 +205,6 @@ final class DataTreeCohortActor extends AbstractUntypedActor {
         CohortBehaviour<?> abort() {
             return this;
         }
-
     }
 
 
@@ -218,6 +241,10 @@ final class DataTreeCohortActor extends AbstractUntypedActor {
             return idleState;
         }
 
+        @Override
+        public String toString() {
+            return getClass().getSimpleName() + " [txId=" + txId + ", step=" + step + "]";
+        }
     }
 
     private class PostCanCommit extends CohortStateWithStep<PreCommit, PostCanCommitStep> {
