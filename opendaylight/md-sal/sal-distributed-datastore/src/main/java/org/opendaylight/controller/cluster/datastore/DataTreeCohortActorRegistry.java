@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 import javax.annotation.concurrent.NotThreadSafe;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
-import org.opendaylight.controller.cluster.datastore.DataTreeCohortActor.CanCommit;
 import org.opendaylight.controller.md.sal.dom.spi.AbstractRegistrationTree;
 import org.opendaylight.controller.md.sal.dom.spi.RegistrationTreeNode;
 import org.opendaylight.controller.md.sal.dom.spi.RegistrationTreeSnapshot;
@@ -138,8 +137,7 @@ class DataTreeCohortActorRegistry extends AbstractRegistrationTree<ActorRef> {
         private final TransactionIdentifier txId;
         private final DataTreeCandidate candidate;
         private final SchemaContext schema;
-        private final Collection<DataTreeCohortActor.CanCommit> messages =
-                new ArrayList<>();
+        private final Map<ActorRef, Collection<DOMDataTreeCandidate>> actorToCandidates = new HashMap<>();
 
         CanCommitMessageBuilder(final TransactionIdentifier txId, final DataTreeCandidate candidate,
                 final SchemaContext schema) {
@@ -196,8 +194,13 @@ class DataTreeCohortActorRegistry extends AbstractRegistrationTree<ActorRef> {
                 final DataTreeCandidateNode node) {
             final DOMDataTreeCandidate domCandidate = DOMDataTreeCandidateTO.create(treeIdentifier(path), node);
             for (final ActorRef reg : regs) {
-                final CanCommit message = new DataTreeCohortActor.CanCommit(txId, domCandidate, schema, reg);
-                messages.add(message);
+                Collection<DOMDataTreeCandidate> candidates = actorToCandidates.get(reg);
+                if (candidates == null) {
+                    candidates = new ArrayList<>();
+                    actorToCandidates.put(reg, candidates);
+                }
+
+                candidates.add(domCandidate);
             }
         }
 
@@ -208,6 +211,12 @@ class DataTreeCohortActorRegistry extends AbstractRegistrationTree<ActorRef> {
         private Collection<DataTreeCohortActor.CanCommit> perform(final RegistrationTreeNode<ActorRef> rootNode) {
             final List<PathArgument> toLookup = candidate.getRootPath().getPathArguments();
             lookupAndCreateCanCommits(toLookup, 0, rootNode);
+
+            Collection<DataTreeCohortActor.CanCommit> messages = new ArrayList<>();
+            for (Map.Entry<ActorRef, Collection<DOMDataTreeCandidate>> entry: actorToCandidates.entrySet()) {
+                messages.add(new DataTreeCohortActor.CanCommit(txId, entry.getValue(), schema, entry.getKey()));
+            }
+
             return messages;
         }
     }
