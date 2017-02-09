@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fafc7978_1fe69eb4",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/registry/gossip/BucketStore.java",
+        "patchSetId": 20
+      },
+      "lineNbr": 191,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2017-02-09T06:46:31Z",
+      "side": 1,
+      "message": "add @VisibleForTesting",
+      "range": {
+        "startLine": 191,
+        "startChar": 4,
+        "endLine": 191,
+        "endChar": 43
+      },
+      "revId": "968ec840a989d2531734a09b78a5d99b2b9b02ae",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_ffe0fa97",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/registry/gossip/BucketStore.java",
+        "patchSetId": 20
+      },
+      "lineNbr": 369,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2017-02-09T06:46:31Z",
+      "side": 1,
+      "message": "add @VisibleForTesting",
+      "range": {
+        "startLine": 369,
+        "startChar": 4,
+        "endLine": 369,
+        "endChar": 38
+      },
+      "revId": "968ec840a989d2531734a09b78a5d99b2b9b02ae",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
