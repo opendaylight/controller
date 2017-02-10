@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_ee6d1806",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorSnapshotCohort.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-02-10T12:16:07Z",
+      "side": 1,
+      "message": "This is really meant to be off-loaded so IOException shouldn\u0027t be thrown here",
+      "parentUuid": "fafc7978_18cb8673",
+      "range": {
+        "startLine": 37,
+        "startChar": 105,
+        "endLine": 37,
+        "endChar": 107
+      },
+      "revId": "95781ae87517f184b69132d21e2260288aff456f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fafc7978_d8b9feea",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorSnapshotCohort.java",
         "patchSetId": 5
@@ -36,6 +60,30 @@
       "writtenOn": "2017-01-30T22:22:08Z",
       "side": 1,
       "message": "I think this should throw IOException, too. It is based on ByteSource, which can throw IOExceptions, hence any caller should be well-equipped to deal with IOExceptions.",
+      "range": {
+        "startLine": 54,
+        "startChar": 4,
+        "endLine": 54,
+        "endChar": 74
+      },
+      "revId": "95781ae87517f184b69132d21e2260288aff456f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_ce72d4e4",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorSnapshotCohort.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-02-10T12:16:07Z",
+      "side": 1,
+      "message": "Good point - done",
+      "parentUuid": "fafc7978_d8b9feea",
       "range": {
         "startLine": 54,
         "startChar": 4,
@@ -167,6 +215,30 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_e90eb233",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/SnapshotManager.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-02-10T12:16:07Z",
+      "side": 1,
+      "message": "I changed it to pass in the RaftActorSnapshotCohort since it can now throw IOException",
+      "parentUuid": "fafc7978_18e4260c",
+      "range": {
+        "startLine": 122,
+        "startChar": 0,
+        "endLine": 137,
+        "endChar": 5
+      },
+      "revId": "95781ae87517f184b69132d21e2260288aff456f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fafc7978_b8ba3adf",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/base/messages/CaptureSnapshotReply.java",
         "patchSetId": 5
@@ -178,6 +250,30 @@
       "writtenOn": "2017-01-30T22:22:08Z",
       "side": 1,
       "message": "Preconditions.checkNotNull()",
+      "range": {
+        "startLine": 20,
+        "startChar": 8,
+        "endLine": 20,
+        "endChar": 43
+      },
+      "revId": "95781ae87517f184b69132d21e2260288aff456f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_2910ba4d",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/base/messages/CaptureSnapshotReply.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-02-10T12:16:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fafc7978_b8ba3adf",
       "range": {
         "startLine": 20,
         "startChar": 8,
@@ -295,6 +391,30 @@
       "writtenOn": "2017-01-30T22:22:08Z",
       "side": 1,
       "message": "This one deserves a javadoc",
+      "range": {
+        "startLine": 89,
+        "startChar": 4,
+        "endLine": 89,
+        "endChar": 17
+      },
+      "revId": "95781ae87517f184b69132d21e2260288aff456f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_29371ae5",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/ShardSnapshotActor.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-02-10T12:16:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fafc7978_78c8d274",
       "range": {
         "startLine": 89,
         "startChar": 4,
