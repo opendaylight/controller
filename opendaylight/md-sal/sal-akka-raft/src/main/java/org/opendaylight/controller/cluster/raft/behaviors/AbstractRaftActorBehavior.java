@@ -132,10 +132,8 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
 
         // 1. Reply false if term < currentTerm (§5.1)
         if (appendEntries.getTerm() < currentTerm()) {
-            if(LOG.isDebugEnabled()) {
-                LOG.debug("{}: Cannot append entries because sender term {} is less than {}",
-                        logName(), appendEntries.getTerm(), currentTerm());
-            }
+            LOG.info("{}: Cannot append entries because sender's term {} is less than {}", logName(),
+                    appendEntries.getTerm(), currentTerm());
 
             sender.tell(
                 new AppendEntriesReply(context.getId(), currentTerm(), false,
@@ -213,7 +211,7 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
             // more up-to-date.
             if (requestVote.getLastLogTerm() > lastTerm()) {
                 candidateLatest = true;
-            } else if ((requestVote.getLastLogTerm() == lastTerm())
+            } else if (requestVote.getLastLogTerm() == lastTerm()
                     && requestVote.getLastLogIndex() >= lastIndex()) {
                 candidateLatest = true;
             }
@@ -427,7 +425,8 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
             return this;
         }
 
-        LOG.info("{} :- Switching from behavior {} to {}", logName(), this.state(), newBehavior.state());
+        LOG.info("{} :- Switching from behavior {} to {}, election term: {}", logName(), this.state(),
+                newBehavior.state(), context.getTermInformation().getCurrentTerm());
         try {
             close();
         } catch (Exception e) {
