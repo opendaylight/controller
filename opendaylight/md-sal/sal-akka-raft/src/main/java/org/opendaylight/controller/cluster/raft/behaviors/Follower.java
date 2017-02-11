@@ -165,11 +165,12 @@ public class Follower extends AbstractRaftActorBehavior {
             // We found that the log was out of sync so just send a negative
             // reply and return
 
-            log.debug("{}: Follower is out-of-sync, so sending negative reply, lastIndex: {}, lastTerm: {}",
-                        logName(), lastIndex, lastTerm());
+            final AppendEntriesReply reply = new AppendEntriesReply(context.getId(), currentTerm(), false, lastIndex,
+                    lastTerm(), context.getPayloadVersion());
 
-            sender.tell(new AppendEntriesReply(context.getId(), currentTerm(), false, lastIndex,
-                    lastTerm(), context.getPayloadVersion()), actor());
+            log.info("{}: Follower is out-of-sync so sending negative reply: {}", logName(), reply);
+
+            sender.tell(reply, actor());
             return this;
         }
 
@@ -206,8 +207,7 @@ public class Follower extends AbstractRaftActorBehavior {
 
                     if (!context.getRaftPolicy().applyModificationToStateBeforeConsensus()) {
 
-                        log.debug("{}: Removing entries from log starting at {}", logName(),
-                                matchEntry.getIndex());
+                        log.info("{}: Removing entries from log starting at {}", logName(), matchEntry.getIndex());
 
                         // Entries do not match so remove all subsequent entries
                         if (!context.getReplicatedLog().removeFromAndPersist(matchEntry.getIndex())) {
@@ -216,7 +216,7 @@ public class Follower extends AbstractRaftActorBehavior {
                             // so we must send back a reply to force a snapshot to completely re-sync the
                             // follower's log and state.
 
-                            log.debug("{}: Could not remove entries - sending reply to force snapshot", logName());
+                            log.info("{}: Could not remove entries - sending reply to force snapshot", logName());
                             sender.tell(new AppendEntriesReply(context.getId(), currentTerm(), false, lastIndex,
                                     lastTerm(), context.getPayloadVersion(), true), actor());
                             return this;
@@ -330,14 +330,14 @@ public class Follower extends AbstractRaftActorBehavior {
             // an entry at prevLogIndex and this follower has no entries in
             // it's log.
 
-            log.debug("{}: The followers log is empty and the senders prevLogIndex is {}",
+            log.info("{}: The followers log is empty and the senders prevLogIndex is {}",
                         logName(), appendEntries.getPrevLogIndex());
         } else if (lastIndex > -1 && appendEntries.getPrevLogIndex() != -1 && !prevEntryPresent) {
 
             // The follower's log is out of sync because the Leader's
             // prevLogIndex entry was not found in it's log
 
-            log.debug("{}: The log is not empty but the prevLogIndex {} was not found in it - "
+            log.info("{}: The log is not empty but the prevLogIndex {} was not found in it - "
                     + "lastIndex: {}, snapshotIndex: {}", logName(), appendEntries.getPrevLogIndex(), lastIndex,
                     context.getReplicatedLog().getSnapshotIndex());
         } else if (lastIndex > -1 && prevEntryPresent && prevLogTerm != appendEntries.getPrevLogTerm()) {
@@ -346,7 +346,7 @@ public class Follower extends AbstractRaftActorBehavior {
             // prevLogIndex entry does exist in the follower's log but it has
             // a different term in it
 
-            log.debug("{}: The prevLogIndex {} was found in the log but the term {} is not equal to the append entries"
+            log.info("{}: The prevLogIndex {} was found in the log but the term {} is not equal to the append entries"
                       + "prevLogTerm {} - lastIndex: {}, snapshotIndex: {}", logName(), appendEntries.getPrevLogIndex(),
                       prevLogTerm, appendEntries.getPrevLogTerm(), lastIndex,
                       context.getReplicatedLog().getSnapshotIndex());
@@ -356,12 +356,12 @@ public class Follower extends AbstractRaftActorBehavior {
             // This append entry comes from a leader who has it's log aggressively trimmed and so does not have
             // the previous entry in it's in-memory journal
 
-            log.debug("{}: Cannot append entries because the replicatedToAllIndex {} does not appear to be in the"
+            log.info("{}: Cannot append entries because the replicatedToAllIndex {} does not appear to be in the"
                     + " in-memory journal", logName(), appendEntries.getReplicatedToAllIndex());
         } else if (appendEntries.getPrevLogIndex() == -1 && appendEntries.getPrevLogTerm() == -1
                 && appendEntries.getReplicatedToAllIndex() != -1 && numLogEntries > 0
                 && !isLogEntryPresent(appendEntries.getEntries().get(0).getIndex() - 1)) {
-            log.debug("{}: Cannot append entries because the calculated previousIndex {} was not found in the "
+            log.info("{}: Cannot append entries because the calculated previousIndex {} was not found in the "
                     + " in-memory journal", logName(), appendEntries.getEntries().get(0).getIndex() - 1);
         } else {
             outOfSync = false;
@@ -397,7 +397,7 @@ public class Follower extends AbstractRaftActorBehavior {
         // set currentTerm = T, convert to follower (§5.1)
         // This applies to all RPC messages and responses
         if (rpc.getTerm() > context.getTermInformation().getCurrentTerm()) {
-            log.debug("{}: Term {} in \"{}\" message is greater than follower's term {} - updating term",
+            log.info("{}: Term {} in \"{}\" message is greater than follower's term {} - updating term",
                 logName(), rpc.getTerm(), rpc, context.getTermInformation().getCurrentTerm());
 
             context.getTermInformation().updateAndPersist(rpc.getTerm(), null);
@@ -529,6 +529,9 @@ public class Follower extends AbstractRaftActorBehavior {
 
             if (snapshotTracker.addChunk(installSnapshot.getChunkIndex(), installSnapshot.getData(),
                     installSnapshot.getLastChunkHashCode())) {
+
+                log.info("{}: Snapshot installed from leader: {}", logName(), installSnapshot.getLeaderId());
+
                 Snapshot snapshot = Snapshot.create(
                         context.getSnapshotManager().convertSnapshot(snapshotTracker.getSnapshotBytes()),
                         new ArrayList<>(),
