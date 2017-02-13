@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fafc7978_cdc0dee2",
+        "filename": "opendaylight/config/config-persister-feature4-adapter/src/main/java/org/opendaylight/controller/configpusherfeature/internal/FeatureConfigPusher.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2017-02-13T17:08:55Z",
+      "side": 1,
+      "message": "I think a debug would suffice",
+      "range": {
+        "startLine": 80,
+        "startChar": 16,
+        "endLine": 80,
+        "endChar": 20
+      },
+      "revId": "778a5d94b6c78fe144f61ef91b04566744139911",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
