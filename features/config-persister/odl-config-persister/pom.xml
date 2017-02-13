@@ -70,18 +70,18 @@
             <classifier>features</classifier>
         </dependency>
         <dependency>
+            <groupId>org.opendaylight.odlparent</groupId>
+            <artifactId>odl-karaf-feat-feature</artifactId>
+            <type>xml</type>
+            <classifier>features</classifier>
+        </dependency>
+        <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>config-manager-facade-xml</artifactId>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>config-persister-feature4-adapter</artifactId>
-        </dependency>
-        <!-- For some reason config-persister-feature4-adapter needs this -->
-        <dependency>
-            <groupId>org.apache.karaf</groupId>
-            <artifactId>org.apache.karaf.util</artifactId>
-            <version>${karaf4.version}</version>
         </dependency>
     </dependencies>
 
