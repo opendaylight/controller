@@ -75,9 +75,9 @@ public class FeatureConfigPusher {
 
     private Set<FeatureConfigSnapshotHolder> pushConfig(final Feature feature) throws Exception {
         Set<FeatureConfigSnapshotHolder> configs = new LinkedHashSet<>();
-        if(isInstalled(feature)) {
+        if (isInstalled(feature)) {
             // FIXME Workaround for BUG-2836, features service returns null for feature: standard-condition-webconsole_0_0_0, 3.0.1
-            if(featuresService.getFeature(feature.getName(), feature.getVersion()) == null) {
+            if (featuresService.getFeature(feature.getName(), feature.getVersion()) == null) {
                 LOG.debug("Feature: {}, {} is missing from features service. Skipping", feature.getName(), feature.getVersion());
             } else {
                 ChildAwareFeatureWrapper wrappedFeature = new ChildAwareFeatureWrapper(feature, featuresService);
@@ -95,18 +95,19 @@ public class FeatureConfigPusher {
         for (int retries = 0; retries < MAX_RETRIES; retries++) {
             try {
                 List<Feature> installedFeatures = Arrays.asList(featuresService.listInstalledFeatures());
-                if(installedFeatures.contains(feature)) {
+                if (installedFeatures.contains(feature)) {
                     return true;
                 } else {
-                    LOG.warn("Karaf featuresService.listInstalledFeatures() has not yet finished installing feature (retry {}) {} {}",retries,feature.getName(),feature.getVersion());
+                    LOG.info("Karaf Feature Service has not yet finished installing feature {}/{} (retry {})",
+                        feature.getName(), feature.getVersion(), retries);
                 }
             } catch (Exception e) {
                 LOG.warn("Karaf featuresService.listInstalledFeatures() has thrown an exception, retry {}", retries, e);
             }
             try {
                 Thread.sleep(RETRY_PAUSE_MILLIS);
-            } catch (InterruptedException e1) {
-                throw new IllegalStateException(e1);
+            } catch (InterruptedException e) {
+                throw new IllegalStateException(e);
             }
         }
         LOG.error("Giving up (after {} retries) on Karaf featuresService.listInstalledFeatures() which has not yet finished installing feature {} {}",MAX_RETRIES,feature.getName(),feature.getVersion());
