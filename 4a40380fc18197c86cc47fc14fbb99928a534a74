@@ -22,6 +22,54 @@
       "revId": "4a40380fc18197c86cc47fc14fbb99928a534a74",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_431cbd13",
+        "filename": "opendaylight/md-sal/samples/clustering-test-app/provider/src/main/java/org/opendaylight/controller/clustering/it/provider/CarEntryDataTreeCommitCohort.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-02-14T01:59:44Z",
+      "side": 1,
+      "message": "I can\u0027t pull out dataAfter.get() before line 57 b/c I need to ensure isPresent. I can actually use a PreCondition to assert instanceof MapEntryNode or, better yet, DataContainerNode.",
+      "parentUuid": "fafc7978_a30489c0",
+      "range": {
+        "startLine": 57,
+        "startChar": 37,
+        "endLine": 57,
+        "endChar": 52
+      },
+      "revId": "4a40380fc18197c86cc47fc14fbb99928a534a74",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_23289933",
+        "filename": "opendaylight/md-sal/samples/clustering-test-app/provider/src/main/java/org/opendaylight/controller/clustering/it/provider/CarEntryDataTreeCommitCohort.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-02-14T01:59:44Z",
+      "side": 1,
+      "message": "I\u0027m checking the failure case but I can do !(year.longValue() \u003e\u003d 1990)",
+      "parentUuid": "fafc7978_83ffc5a9",
+      "range": {
+        "startLine": 66,
+        "startChar": 16,
+        "endLine": 66,
+        "endChar": 46
+      },
+      "revId": "4a40380fc18197c86cc47fc14fbb99928a534a74",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
