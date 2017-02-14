@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fafc7978_c1770539",
+        "filename": "opendaylight/config/config-persister-feature4-adapter/src/main/java/org/opendaylight/controller/configpusherfeature/internal/FeatureConfigPusher.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 2046
+      },
+      "writtenOn": "2017-02-14T10:56:56Z",
+      "side": 1,
+      "message": "We should document projects should avoid feature names with this pattern, at least it the feature contains a config subsystem configfile.",
+      "range": {
+        "startLine": 79,
+        "startChar": 40,
+        "endLine": 79,
+        "endChar": 51
+      },
+      "revId": "65defe208374fd0e3688f0653c46aac086241904",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_81a4dda6",
+        "filename": "opendaylight/config/config-persister-feature4-adapter/src/main/java/org/opendaylight/controller/configpusherfeature/internal/FeatureConfigPusher.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 2046
+      },
+      "writtenOn": "2017-02-14T10:56:56Z",
+      "side": 1,
+      "message": "We should document projects should not include config subsystem configfiles in conditional parts of their features.",
+      "range": {
+        "startLine": 80,
+        "startChar": 23,
+        "endLine": 80,
+        "endChar": 31
+      },
+      "revId": "65defe208374fd0e3688f0653c46aac086241904",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_2187f110",
+        "filename": "opendaylight/config/config-persister-feature4-adapter/src/main/java/org/opendaylight/controller/configpusherfeature/internal/FeatureConfigPusher.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 2046
+      },
+      "writtenOn": "2017-02-14T10:56:56Z",
+      "side": 1,
+      "message": "This workaround is not needed since line 79 filters out installation of conditional parts of features.",
+      "range": {
+        "startLine": 83,
+        "startChar": 84,
+        "endLine": 83,
+        "endChar": 91
+      },
+      "revId": "65defe208374fd0e3688f0653c46aac086241904",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
