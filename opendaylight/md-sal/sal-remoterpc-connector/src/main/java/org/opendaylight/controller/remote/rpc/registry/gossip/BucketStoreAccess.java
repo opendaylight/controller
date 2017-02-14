@@ -75,7 +75,6 @@ public final class BucketStoreAccess {
         context.parent().tell(removeBucketMessage(addr), ActorRef.noSender());
     }
 
-    @VisibleForTesting
     public enum Singletons {
         // Sent from Gossiper to BucketStore, response is an immutable Map<Address, Bucket<?>>
         GET_ALL_BUCKETS,
