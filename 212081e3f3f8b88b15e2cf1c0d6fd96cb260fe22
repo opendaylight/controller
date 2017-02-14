@@ -22,6 +22,30 @@
       "revId": "212081e3f3f8b88b15e2cf1c0d6fd96cb260fe22",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_d29fd5b2",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 660,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-02-14T16:58:42Z",
+      "side": 0,
+      "message": "You mean if canInstallSnapshot returns false. It shouldn\u0027t in this case since 2 of the  checks have already passed if we got here. If the 3rd check, isInSnapshot, fails then I think something is wrong. I\u0027m not sure why we even check canInstallSnapshot here - been there a long time - but I should log in an else clause. I\u0027ll check coverage in the unit tests to see if we ever fail canInstallSnapshot.",
+      "parentUuid": "fafc7978_175f8f73",
+      "range": {
+        "startLine": 656,
+        "startChar": 1,
+        "endLine": 660,
+        "endChar": 94
+      },
+      "revId": "212081e3f3f8b88b15e2cf1c0d6fd96cb260fe22",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
