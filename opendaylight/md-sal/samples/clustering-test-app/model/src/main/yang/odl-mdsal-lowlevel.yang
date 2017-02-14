@@ -1,0 +1,499 @@
+module odl-mdsal-lowlevel {
+
+    yang-version 1;
+    namespace "tag:opendaylight.org,2017:controller:yang:lowlevel";
+    prefix ll;
+    organization "OpenDaylight";
+    contact "Vratko Polak <vrpolak@cisco.com>";
+    revision "2017-02-06" {
+        description "Work in progress, change before releasing.";
+    }
+    description "Operations for cluster system testing not reachable via Restconf.
+        In gneral, elements under test are not backed by any implementation
+        upon feature installation.
+        Control RPCs are used to dynamically register, unregister, start or stop
+        the operations under test.
+        Control RPCs are backed by an implementation upon feature instalaltion.
+        Their registration shall only affect the local member,
+        but their invocation can interact with Entity Ownership or Singleton.
+
+        TODO: Unify grammar: present or future tense, or imperative mood.";
+
+    // Common goupings.
+
+    grouping id-grouping {
+        leaf id {
+            description "Any string uniquely identifying the publisher, producer or writer,
+                typically containing the member name.";
+            type string;
+        }
+    }
+
+    grouping constant-grouping {
+        leaf constant {
+            description "The string to be returned by get-constant
+                    (or get-contexted-constant) RPC implementation.
+                    The string typically includes (the context and) the name of the member
+                    the user called to cause the RPC implementation registration
+                    (that member may be different from both the member running the implementation,
+                    and member where get-constant is called).";
+            type string;
+        }
+    }
+
+    grouping context-grouping {
+        leaf context {
+            description "The context for bound implementation of
+                get-contexted-constant RPC to match.";
+            type string;
+        }
+    }
+
+    // Elements under tests.
+
+    list id-ints {
+        description "A list of integers nested in list of ids.
+            Ids are there to avoid OptimisticLockFailures from different writers.
+            Typical use of the int list is to generate data change notifications.
+            Config is true, in order to allow Restconf to reset content at will.
+            Expected writes should create and delete items at random, values 0 .. 2^20";
+        ordered-by system;
+        config true;
+        key "id";
+        uses id-grouping;
+        list item {
+            description "Unsorted keyed list item. One write should create or delete up to one item.";
+            ordered-by system;
+            config true;
+            key "number";
+            leaf number {
+                description "The integer value of this item.
+                    Not range restricted, to allow more scenarios.";
+                type int32;
+            }
+        }
+    }
+
+    notification id-sequence {
+        description "Notification where the publisher is identified by the id
+            and each publish increases the sequence number.";
+        uses id-grouping;
+        leaf sequence-number {
+            description "Subscriber shall verify whether this value has increased
+                since the previous notification. The first sequence number published shall be 1.
+                Type is 64 bit to allow longevity tests, and signed to allow exceptional numbers.";
+            type int64;
+        }
+    }
+
+    rpc get-constant {
+        description "Return the constant string provided by the previously registered implementation.
+            Propagate appropriate error if no, unreachable, or failing implementation is found.";
+        // No input.
+        output {
+            uses constant-grouping;
+        }
+    }
+
+    rpc get-singleton-constant {
+        description "Return the constant string provided by the previously registered implementation.
+            Propagate appropriate error if no, unreachable, or failing implementation is found.
+            This is basically the same as get-constant, but it can have a different
+            implementation registered, thus allowing to track both implementations in longevity jobs.";
+        // No input.
+        output {
+            uses constant-grouping;
+        }
+    }
+
+    rpc get-contexted-constant {
+        description "Return the constant corresponding to a registered implementation (either bound or default).
+            Propagate appropriate error if no, unreachable, or failing implementation is found.";
+        input {
+            uses context-grouping;
+        }
+        output {
+            uses constant-grouping;
+        }
+    }
+
+    // Control RPCs.
+
+    rpc register-constant {
+        description "Upon receiving this, the member has to create get-constant
+            implementation (global RPC). If the registration fails for any reason,
+            propagate the corresponding error.";
+        input {
+            uses constant-grouping;
+        }
+        // No output.
+    }
+
+    rpc unregister-constant {
+        description "Upon receiving this, the member has to unregister
+            any get-constant implementations it has registered.
+            If no implementation has been registered, do nothing.";
+        // No input.
+        // No output.
+    }
+
+    rpc register-singleton-constant {
+        description "Upon receiving this, the member checks whether it has already registered
+            a singleton application, and fails if yes. If no, the member creates
+            an application implementation based on the given constant
+            and registers the implementation as a singleton application.
+            If the registration fails for any reason, propagate the corresponding error.
+            If the application is instantiated, it creates and registers
+            a get-singleton-constant implementation, which returns the given costant.
+            When the application instance is closed, it unregisters that
+            get-singleton-constant implementation.";
+        input {
+            uses constant-grouping;
+        }
+        // No output.
+    }
+
+    rpc unregister-singleton-constant {
+        description "Upon receiving this, the member checks whether it has currently registered
+            a singleton application, and fails if no. If yes, the member shall unregister
+            the application, presumably causing application instantiation on other member,
+            and closing of the local application instance (unregistering get-singleton-constant).
+            If the unregistration fails for any reason, propagate the corresponding error.";
+        // No input.
+        // No output.
+    }
+
+    rpc register-flapping-singleton {
+        description "Upon receiving this, the member checks whether it has already created
+            a 'flapping' application implementation and 'active' flag is set, and fails if yes.
+            If no, the member (creates a flapping application implementation,)
+            sets the active flag, initializes local variable flap-count to 0,
+            and registers the implementation as a singleton application.
+            If the registration fails for any reason, propagate the corresponding error.
+            If the application is instantiated, it immediatelly un-registers itself.
+            When the application instance is closed, it increments flap-count
+            and if active flag is set, re-registers the application implementation as a singleton.
+            If either un-registration or re-registration fails, flap-count is set
+            to negative of its previous value (minus one in case of un-registration)
+            to signal a failure has happened.";
+        // No input.
+        // No output.
+    }
+
+    rpc unregister-flapping-singleton {
+        description "Upon receiving this, the member checks whether it has created
+            a flapping application, and fails if no. If yes, the member shall
+            set the active flag to false and return the current flap-count value.";
+        // No input.
+        output {
+            leaf flap-count {
+                description "Number of successful re-registrations. If negative,
+                    (minus) cycle number when a failure occured.";
+                type int64;
+            }
+        }
+    }
+
+    rpc write-transactions {
+        description "Upon receiving this, the member shall make sure the outer list item exists
+            for the given id, and then start creating (one by one) and submitting transactions
+            to randomly add or delete items on the inner list for that id.
+            The randomness should avoid creating conflicting writes (at least for non-chained
+            transactions). The recommended way is to require the random number
+            has different low significant bits than past ~100k numbers.
+            To ensure balanced number of deletes, the first write can create
+            a random set of random numbers. Other writes shall be one per number.
+            The writes shall use the old API, transaction (chains) created directly on datastore
+            (as opposed to DOMDataTreeProducer).
+            .get with a timeout on currently earliest non-complete Future (from .submit)
+            shall be used as the primary wait method to throttle the submission rate.
+            The RPC shall not return until all transactions are confirmed successful,
+            or an exception is raised (the exception should propagate to restconf response).
+            OptimisticLockException is always considered an error.";
+        input {
+            uses id-grouping;
+            leaf seconds {
+                description "This RPC has to work (roughly) this long.";
+                type uint32;
+            }
+            leaf transactions-per-second {
+                description "An upper limit of transactions per second this RPC shall try to achieve.";
+                type uint32;
+            }
+            leaf chained-transactions {
+                description "If true, write transactions shall be created on a transaction chain,
+                    (created at start of the RPC call, and deleted at at its end).
+                    If false, write transactions shall be created separately.";
+                type boolean;
+            }
+        }
+        // No output.
+    }
+
+    rpc produce-transactions {
+        description "Upon receiving this, the member shall make sure the outer list item exists
+            for the given id, make sure a shard for the whole (config) id-ints is created
+            (by creating and closing producer for the whole id-ints),
+            and create a DOMDataTreeProducer for that item (using that shard).
+
+            FIXME: Is the above the normal way of creating prefix-based chards?
+
+            Then start creating (one by one) and submitting transactions
+            to randomly add or delete items on the inner list for that id.
+            To ensure balanced number of deletes, the first write can create
+            a random set of random numbers. Other writes shall be one per number.
+            The writes shall use DOMDataTreeProducer API, as opposed to transaction (chains)
+            created directly on datastore.
+            .get with a timeout on currently earliest non-complete Future (from .submit)
+            shall be used as the primary wait method to throttle the submission rate.
+            The RPC shall not return until all transactions are confirmed successful,
+            or an exception is raised (the exception should propagate to restconf response).
+            OptimisticLockException is always considered an error.
+            In either case, the producer should be closed before returning,
+            the shard and the id item shall be kept as they are.";
+        input {
+            uses id-grouping;
+            leaf seconds {
+                description "This RPC has to work (roughly) this long.";
+                type uint32;
+            }
+            leaf transactions-per-second {
+                description "An upper limit of transactions per second this RPC shall try to achieve.";
+                type uint32;
+            }
+            leaf isolated-transactions {
+                description "The value for DOMDataTreeProducer#createTransaction argument.";
+                type boolean;
+            }
+        }
+        // No output.
+    }
+
+    rpc become-prefix-leader {
+        description "Upon receiving this, the member shall ask the appropriate API
+            to become Leader of the given shard (presumably the list-ints one,
+            created by produce-transactions) and return immediatelly.";
+        input {
+            leaf shard-name {
+                type string;
+                description "TBD.
+
+                FIXME: Ask Java implementation developer about the format needed.";
+            }
+        }
+        // No output.
+    }
+
+    rpc become-module-leader {
+        description "Upon receiving this, the member shall ask appropriate API
+            to become Leader of given config shard and return immediatelly.";
+        input {
+            leaf shard-name {
+                type string;
+                description "TBD.
+
+                FIXME: Ask Java implementation developer about the format needed.
+                TODO: Perhaps the names are compatible and one "become-leader" would suffice?";
+            }
+        }
+        // No output.
+    }
+
+    rpc remove-shard-replica {
+        description "A specialised copy of cluster-admin:remove-shard-replica.
+
+            FIXME: Is this needed for prefix shards, or even module shards?";
+        input {
+            leaf shard-name {
+                mandatory true;
+                type string;
+                description "The name of the shard for which to remove the replica.";
+            }
+    }
+
+    rpc deconfigure-id-ints-shard {
+        description "Upon receiving this, the member shall ask the appropriate API
+            to remove the id-ints shard (presumably created by produce-transactions)
+            and return immediatelly.
+            It is expected the data would move to the root prefix shard seamlessly.
+
+            TODO: Make shard name configurable by input?";
+        // No input.
+        // No output.
+    }
+
+    rpc is-client-aborted {
+        description "Return state of cds-access-client.
+
+            FIXME: Is an input needed?";
+        output {
+            leaf aborted {
+                description "True if client is aborted (or unreachable), false otherwise.";
+                type boolean;
+            }
+        }
+    }
+
+    rpc subscribe-dtcl {
+        description "Upon receiving this, the member checks whether it has already subscribed
+            and fails if yes. If no, the member subscribes a Data Tree Change Listener
+            to listen for changes on whole id-ints, and stores the state from the initial notification
+            to a local variable (called the local copy).
+            Each Data Tree Change from further Notifications shall be applied
+            to the local copy if it is compatible
+            (the old state from notification is equal to the local copy state).
+            If a notification is not compatible, it shall be ignored.";
+        // No input.
+        // No output.
+    }
+
+    rpc unsubscribe-dtcl {
+        description "Upon receiving this, the member checks whether it has currently subscribed
+            a Data Tree Change Listener for id-ints changes, and fails if no. If yes, the member
+            shall unsubscribe the listener, read state of id-ints, compare that
+            to the local copy, and return whether the local copy is the same.";
+        // No input.
+        output {
+            leaf copy-matches {
+                type boolean;
+                description "True if and only if the read id-ints is equal to the local copy.";
+            }
+        }
+    }
+
+    rpc subscribe-ddtl {
+        description "Upon receiving this, the member checks whether it has already subscribed
+            and fails if yes. If no, the member subscribes a DOMDataTreeListener
+            to listen for changes on whole id-ints, and stores the state from the initial notification
+            to a local variable (called the local copy).
+            Each Data Tree Change from further notifications shall be applied
+            to the local copy if it is compatible
+            (the old state from notification is equal to the local copy state).
+            If a notification is not compatible, it shall be ignored.";
+        // No input.
+        // No output.
+    }
+
+    rpc unsubscribe-ddtl {
+        description "Upon receiving this, the member checks whether it has currently subscribed
+            a DOMDataTreeListener for id-ints changes, and fails if no. If yes, the member
+            shall unsubscribe the listener, read state of id-ints (by briefly subscribing
+            and ubsubscribing again), compare that to the local copy,
+            and return whether the local copy is the same.";
+        // No input.
+        output {
+            leaf copy-matches {
+                type boolean;
+                description "True if and only if the read id-ints is equal to the local copy.";
+            }
+        }
+    }
+
+    rpc publish-notifications {
+        description "Upon receiving this, the member shall start publishing id-sequence
+            notifications with the given id and sequence numbers, increasing, from 1.
+            .get with a timeout on currently earliest non-complete Future (from .publish)
+            shall be used as the primary wait method to throttle the publish rate.
+            The RPC shall not return until all publishes are confirmed successful,
+            or an exception is raised (the exception should propagate to restconf response).";
+        input {
+            uses id-grouping;
+            leaf seconds {
+                type uint32;
+                description "This RPC has to work (roughly) this long.";
+            }
+            leaf notifications-per-second {
+                type uint32;
+                description "An upper limit of publishes per second this RPC shall try to achieve.";
+            }
+        }
+        // No output.
+    }
+
+    rpc subscribe-ynl {
+        description "Upon receiving this, the member checks whether it has already subscribed
+            a listener for the given id, and fails if yes.
+            If no, the member subscribes a Yang notification listener to listen for
+            id-sequence notifications. The member also creates a local variable
+            (called local-number) for the sequence number and initialize that to 0.
+            Also three local counters are initialized to 0: all-not, id-not, err-not.
+            Upon receifing any id-sequence notification, all-not is incremented.
+            Each id-sequence notification of matching id shall increment id-not.
+            If local-number was one less than the sequence number (from a notification matching id),
+            increment local-number, else increment err-not.";
+        input {
+            uses id-grouping;
+        }
+        // No output.
+    }
+
+    rpc unsubscribe-ynl {
+        description "Upon receiving this, the member checks whether it has currently subscribed
+            a listener for the given id, and fails if no. If yes, the member
+            shall unsubscribe the listener and return values of the local variables.";
+        input {
+            uses id-grouping;
+        }
+        output {
+            leaf all-not {
+                description "Number of received id-sequence notifications of any id.";
+                type int64;
+            }
+            leaf id-not {
+                description "Number of received id-sequence notifications of matching id
+                    and any sequence number.";
+                type int64;
+            }
+            leaf err-not {
+                description "Number of received id-sequence notifications of matching id,
+                    but out-of-order sequence number.";
+                type int64;
+            }
+            leaf local-number {
+                description "Value of the local number, should be equal to
+                    the sequence number of the last compatible id-sequence notification received.";
+                type int64;
+            }
+        }
+    }
+
+    rpc register-bound-constant {
+        description "Upon receiving this, the member has to create and register
+            a bound get-contexted-constant implementation (routed RPC).
+            If the registration fails for any reason, propagate the corresponding error.";
+        input {
+            uses context-grouping;
+            uses constant-grouping;
+        }
+        // No output.
+    }
+
+    rpc unregister-bound-constant {
+        description "Upon receiving this, the member has to unregister
+            any get-contexted-constant implementations bound to the context.
+            If no bound implementation for the context has been registered, do nothing.";
+        input {
+            uses context-grouping;
+        }
+        // No output.
+    }
+
+    rpc register-default-constant {
+        description "Upon receiving this, the member has to create and register
+            a default get-contexted-constant implementation (routed RPC).
+            If the registration fails for any reason, propagate the corresponding error.";
+        input {
+            uses constant-grouping;
+        }
+        // No output.
+    }
+
+    rpc unregister-default-constant {
+        description "Upon receiving this, the member has to unregister
+            any get-contexted-constant default implementations it has registered.
+            If no default implementation has been registered, do nothing.";
+        // No input.
+        // No output.
+    }
+
+}
