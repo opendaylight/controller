@@ -850,48 +850,68 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
     }
 
     @Test
-    public void testRemoveServer() {
+    public void testRemoveServer() throws Exception {
         LOG.info("testRemoveServer starting");
 
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
         configParams.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
         configParams.setCustomRaftPolicyImplementationClass(DisableElectionsRaftPolicy.class.getName());
 
-        final String followerActorId = actorFactory.generateActorId(FOLLOWER_ID);
-        final String followerActorPath = actorFactory.createTestActorPath(followerActorId);
+        final String follower1ActorId = actorFactory.generateActorId(FOLLOWER_ID);
+        final String follower1ActorPath = actorFactory.createTestActorPath(follower1ActorId);
+        final String follower2ActorId = actorFactory.generateActorId(FOLLOWER_ID2);
+        final String follower2ActorPath = actorFactory.createTestActorPath(follower2ActorId);
         RaftActorContext initialActorContext = new MockRaftActorContext();
 
-        TestActorRef<MockLeaderRaftActor> leaderActor = actorFactory.createTestActor(
-                MockLeaderRaftActor.props(ImmutableMap.of(FOLLOWER_ID, followerActorPath),
+        final String downNodeId = "downNode";
+        TestActorRef<MockLeaderRaftActor> leaderActor = actorFactory.createTestActor(MockLeaderRaftActor.props(
+                ImmutableMap.of(FOLLOWER_ID, follower1ActorPath, FOLLOWER_ID2, follower2ActorPath, downNodeId, ""),
                         initialActorContext).withDispatcher(Dispatchers.DefaultDispatcherId()),
                 actorFactory.generateActorId(LEADER_ID));
 
         final TestActorRef<MessageCollectorActor> leaderCollector =
                 newLeaderCollectorActor(leaderActor.underlyingActor());
 
-        TestActorRef<MessageCollectorActor> collector = actorFactory.createTestActor(MessageCollectorActor.props()
-                .withDispatcher(Dispatchers.DefaultDispatcherId()),
+        TestActorRef<MessageCollectorActor> follower1Collector = actorFactory.createTestActor(
+                MessageCollectorActor.props().withDispatcher(Dispatchers.DefaultDispatcherId()),
                         actorFactory.generateActorId("collector"));
-        actorFactory.createTestActor(
-                CollectingMockRaftActor.props(FOLLOWER_ID, ImmutableMap.of(LEADER_ID, leaderActor.path().toString()),
-                        configParams, NO_PERSISTENCE, collector).withDispatcher(Dispatchers.DefaultDispatcherId()),
-                followerActorId);
+        final TestActorRef<CollectingMockRaftActor> follower1Actor = actorFactory.createTestActor(
+                CollectingMockRaftActor.props(FOLLOWER_ID, ImmutableMap.of(LEADER_ID, leaderActor.path().toString(),
+                        FOLLOWER_ID2, follower2ActorPath, downNodeId, ""), configParams, NO_PERSISTENCE,
+                        follower1Collector).withDispatcher(Dispatchers.DefaultDispatcherId()), follower1ActorId);
+
+        TestActorRef<MessageCollectorActor> follower2Collector = actorFactory.createTestActor(
+                MessageCollectorActor.props().withDispatcher(Dispatchers.DefaultDispatcherId()),
+                        actorFactory.generateActorId("collector"));
+        final TestActorRef<CollectingMockRaftActor> follower2Actor = actorFactory.createTestActor(
+                CollectingMockRaftActor.props(FOLLOWER_ID2, ImmutableMap.of(LEADER_ID, leaderActor.path().toString(),
+                        FOLLOWER_ID, follower1ActorPath, downNodeId, ""), configParams, NO_PERSISTENCE,
+                        follower2Collector).withDispatcher(Dispatchers.DefaultDispatcherId()), follower2ActorId);
+
+        leaderActor.underlyingActor().waitForInitializeBehaviorComplete();
+        follower1Actor.underlyingActor().waitForInitializeBehaviorComplete();
+        follower2Actor.underlyingActor().waitForInitializeBehaviorComplete();
 
         leaderActor.tell(new RemoveServer(FOLLOWER_ID), testKit.getRef());
         RemoveServerReply removeServerReply = testKit.expectMsgClass(JavaTestKit.duration("5 seconds"),
                 RemoveServerReply.class);
         assertEquals("getStatus", ServerChangeStatus.OK, removeServerReply.getStatus());
 
-        final ApplyState applyState = MessageCollectorActor.expectFirstMatching(leaderCollector, ApplyState.class);
+        ApplyState applyState = MessageCollectorActor.expectFirstMatching(leaderCollector, ApplyState.class);
         assertEquals(0L, applyState.getReplicatedLogEntry().getIndex());
         verifyServerConfigurationPayloadEntry(leaderActor.underlyingActor().getRaftActorContext().getReplicatedLog(),
-                votingServer(LEADER_ID));
+                votingServer(LEADER_ID), votingServer(FOLLOWER_ID2), votingServer(downNodeId));
+
+        applyState = MessageCollectorActor.expectFirstMatching(follower2Collector, ApplyState.class);
+        assertEquals(0L, applyState.getReplicatedLogEntry().getIndex());
+        verifyServerConfigurationPayloadEntry(leaderActor.underlyingActor().getRaftActorContext().getReplicatedLog(),
+                votingServer(LEADER_ID), votingServer(FOLLOWER_ID2), votingServer(downNodeId));
 
         RaftActorBehavior currentBehavior = leaderActor.underlyingActor().getCurrentBehavior();
         assertTrue("Expected Leader", currentBehavior instanceof Leader);
-        assertEquals("Follower ids size", 0, ((Leader)currentBehavior).getFollowerIds().size());
+        assertEquals("Follower ids size", 2, ((Leader)currentBehavior).getFollowerIds().size());
 
-        MessageCollectorActor.expectFirstMatching(collector, ServerRemoved.class);
+        MessageCollectorActor.expectFirstMatching(follower1Collector, ServerRemoved.class);
 
         LOG.info("testRemoveServer ending");
     }
