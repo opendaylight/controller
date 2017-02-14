@@ -82,6 +82,11 @@ public class FeatureConfigPusher {
             LOG.debug("Ignoring conditional feature {}", feature);
             return Collections.emptySet();
         }
+        // pax-exam's Karaf container generates a wrapper feature holding the test dependencies. Ignore it.
+        if (feature.getName().equals("test-dependencies")) {
+            LOG.debug("Ignoring pax-exam wrapper feature {}", feature);
+            return Collections.emptySet();
+        }
 
         if (!isInstalled(feature)) {
             return Collections.emptySet();
