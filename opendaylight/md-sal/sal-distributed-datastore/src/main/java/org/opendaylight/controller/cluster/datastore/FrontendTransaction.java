@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Verify;
 import java.util.ArrayDeque;
@@ -138,5 +139,13 @@ abstract class FrontendTransaction implements Identifiable<TransactionIdentifier
             final RuntimeRequestException failure) {
         recordResponse(envelope.getMessage().getSequence(), failure);
         envelope.sendFailure(failure, executionTime(startTime));
+    }
+
+    @Override
+    public final String toString() {
+        return MoreObjects.toStringHelper(this).omitNullValues().add("identifier", getIdentifier())
+                .add("expectedSequence", expectedSequence).add("firstReplaySequence", firstReplaySequence)
+                .add("lastPurgedSequence", lastPurgedSequence)
+                .toString();
     }
 }
