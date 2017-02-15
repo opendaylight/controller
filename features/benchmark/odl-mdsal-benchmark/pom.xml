@@ -67,7 +67,6 @@
             <version>${project.version}</version>
             <type>xml</type>
             <classifier>config</classifier>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <!-- finalname="ntfbenchmark-impl-default-config.xml" -->
@@ -76,7 +75,6 @@
             <version>${project.version}</version>
             <type>xml</type>
             <classifier>config</classifier>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <!-- finalname="rpcbenchmark-impl-default-config.xml" -->
@@ -85,7 +83,6 @@
             <version>${project.version}</version>
             <type>xml</type>
             <classifier>config</classifier>
-            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>
