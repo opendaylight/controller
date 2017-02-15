@@ -11,14 +11,16 @@ package org.opendaylight.controller.cluster.datastore.utils;
 import akka.actor.ActorRef;
 import akka.actor.Address;
 import akka.actor.AddressFromURIString;
-import akka.cluster.ClusterEvent;
+import akka.cluster.ClusterEvent.MemberRemoved;
+import akka.cluster.ClusterEvent.MemberUp;
+import akka.cluster.ClusterEvent.ReachableMember;
+import akka.cluster.ClusterEvent.UnreachableMember;
+import akka.cluster.Member;
 import akka.cluster.MemberStatus;
 import akka.cluster.UniqueAddress;
-import java.util.HashSet;
-import java.util.Set;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.ClusterWrapper;
-import scala.collection.JavaConversions;
+import scala.collection.immutable.Set;
 
 public class MockClusterWrapper implements ClusterWrapper {
 
@@ -29,12 +31,12 @@ public class MockClusterWrapper implements ClusterWrapper {
         this("member-1");
     }
 
-    public MockClusterWrapper(String currentMemberName) {
+    public MockClusterWrapper(final String currentMemberName) {
         this.currentMemberName = MemberName.forName(currentMemberName);
     }
 
     @Override
-    public void subscribeToMemberEvents(ActorRef actorRef) {
+    public void subscribeToMemberEvents(final ActorRef actorRef) {
     }
 
     @Override
@@ -47,74 +49,48 @@ public class MockClusterWrapper implements ClusterWrapper {
         return selfAddress;
     }
 
-    public void setSelfAddress(Address selfAddress) {
+    public void setSelfAddress(final Address selfAddress) {
         this.selfAddress = selfAddress;
     }
 
-    public static void sendMemberUp(ActorRef to, String memberName, String address) {
+    public static void sendMemberUp(final ActorRef to, final String memberName, final String address) {
         to.tell(createMemberUp(memberName, address), null);
     }
 
-    public static void sendMemberRemoved(ActorRef to, String memberName, String address) {
+    public static void sendMemberRemoved(final ActorRef to, final String memberName, final String address) {
         to.tell(createMemberRemoved(memberName, address), null);
     }
 
-    public static ClusterEvent.MemberRemoved createMemberRemoved(String memberName, String address) {
-        akka.cluster.UniqueAddress uniqueAddress = new UniqueAddress(
-            AddressFromURIString.parse(address), 55);
+    public static MemberRemoved createMemberRemoved(final String memberName, final String address) {
+        UniqueAddress uniqueAddress = new UniqueAddress(AddressFromURIString.parse(address), 55L);
+        Member member = new Member(uniqueAddress, 1, MemberStatus.removed(), setOf(memberName));
 
-        Set<String> roles = new HashSet<>();
-
-        roles.add(memberName);
-
-        akka.cluster.Member member = new akka.cluster.Member(uniqueAddress, 1, MemberStatus
-            .removed(),
-            JavaConversions.asScalaSet(roles).<String>toSet());
-
-        return new ClusterEvent.MemberRemoved(member, MemberStatus.up());
-
+        return new MemberRemoved(member, MemberStatus.up());
     }
 
+    public static MemberUp createMemberUp(final String memberName, final String address) {
+        UniqueAddress uniqueAddress = new UniqueAddress(AddressFromURIString.parse(address), 55L);
+        Member member = new Member(uniqueAddress, 1, MemberStatus.up(), setOf(memberName));
 
-    public static ClusterEvent.MemberUp createMemberUp(String memberName, String address) {
-        akka.cluster.UniqueAddress uniqueAddress = new UniqueAddress(
-            AddressFromURIString.parse(address), 55);
-
-        Set<String> roles = new HashSet<>();
-
-        roles.add(memberName);
-
-        akka.cluster.Member member = new akka.cluster.Member(uniqueAddress, 1, MemberStatus.up(),
-            JavaConversions.asScalaSet(roles).<String>toSet());
-
-        return new ClusterEvent.MemberUp(member);
+        return new MemberUp(member);
     }
 
-    public static ClusterEvent.UnreachableMember createUnreachableMember(String memberName, String address) {
-        akka.cluster.UniqueAddress uniqueAddress = new UniqueAddress(
-            AddressFromURIString.parse(address), 55);
+    public static UnreachableMember createUnreachableMember(final String memberName, final String address) {
+        UniqueAddress uniqueAddress = new UniqueAddress(AddressFromURIString.parse(address), 55L);
+        Member member = new Member(uniqueAddress, 1, MemberStatus.up(), setOf(memberName));
 
-        Set<String> roles = new HashSet<>();
-
-        roles.add(memberName);
-
-        akka.cluster.Member member = new akka.cluster.Member(uniqueAddress, 1, MemberStatus.up(),
-            JavaConversions.asScalaSet(roles).<String>toSet());
-
-        return new ClusterEvent.UnreachableMember(member);
+        return new UnreachableMember(member);
     }
 
-    public static ClusterEvent.ReachableMember createReachableMember(String memberName, String address) {
-        akka.cluster.UniqueAddress uniqueAddress = new UniqueAddress(
-            AddressFromURIString.parse(address), 55);
+    public static ReachableMember createReachableMember(final String memberName, final String address) {
+        UniqueAddress uniqueAddress = new UniqueAddress(AddressFromURIString.parse(address), 55L);
+        Member member = new Member(uniqueAddress, 1, MemberStatus.up(), setOf(memberName));
 
-        Set<String> roles = new HashSet<>();
+        return new ReachableMember(member);
+    }
 
-        roles.add(memberName);
-
-        akka.cluster.Member member = new akka.cluster.Member(uniqueAddress, 1, MemberStatus.up(),
-            JavaConversions.asScalaSet(roles).<String>toSet());
-
-        return new ClusterEvent.ReachableMember(member);
+    @SuppressWarnings("unchecked")
+    private static Set<String> setOf(final String str) {
+        return scala.collection.immutable.Set$.MODULE$.<String>newBuilder().$plus$eq(str).result();
     }
 }
