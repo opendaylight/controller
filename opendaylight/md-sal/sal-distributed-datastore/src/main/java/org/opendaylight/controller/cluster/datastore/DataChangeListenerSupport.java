@@ -11,8 +11,8 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Map.Entry;
 import java.util.Set;
 import org.opendaylight.controller.cluster.datastore.messages.EnableNotification;
@@ -38,7 +38,7 @@ final class DataChangeListenerSupport extends AbstractDataListenerSupport<
     }
 
     Collection<ActorSelection> getListenerActors() {
-        return Collections.unmodifiableCollection(listenerActors);
+        return new ArrayList<>(listenerActors);
     }
 
     @Override
