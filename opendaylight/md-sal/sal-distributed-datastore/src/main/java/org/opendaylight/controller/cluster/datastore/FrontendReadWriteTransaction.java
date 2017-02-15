@@ -32,6 +32,8 @@ import org.opendaylight.controller.cluster.access.commands.TransactionMerge;
 import org.opendaylight.controller.cluster.access.commands.TransactionModification;
 import org.opendaylight.controller.cluster.access.commands.TransactionPreCommitRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionPreCommitSuccess;
+import org.opendaylight.controller.cluster.access.commands.TransactionPurgeRequest;
+import org.opendaylight.controller.cluster.access.commands.TransactionPurgeResponse;
 import org.opendaylight.controller.cluster.access.commands.TransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionSuccess;
 import org.opendaylight.controller.cluster.access.commands.TransactionWrite;
@@ -102,6 +104,9 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
             return null;
         } else if (request instanceof TransactionAbortRequest) {
             return handleTransactionAbort((TransactionAbortRequest) request, envelope, now);
+        } else if (request instanceof TransactionPurgeRequest) {
+            // No-op for now
+            return new TransactionPurgeResponse(request.getTarget(), request.getSequence());
         } else {
             throw new UnsupportedRequestException(request);
         }
