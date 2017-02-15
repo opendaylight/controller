@@ -1,0 +1,42 @@
+module odl-mdsal-lowlevel-common {
+
+    yang-version 1;
+    namespace "tag:opendaylight.org,2017:controller:yang:lowlevel:common";
+    prefix llc;
+    organization "OpenDaylight";
+    contact "Vratko Polak <vrpolak@cisco.com>";
+    revision "2017-02-15" {
+        description "Work in progress, change before releasing.";
+    }
+    description "Groupings to be used both in odl-mdsal-lowlevel-target (llt)
+            and odl-mdsal-lowlevel-control (ll).";
+
+    grouping id-grouping {
+        leaf id {
+            description "Any string uniquely identifying the publisher, producer or writer,
+                typically containing the member name.";
+            type string;
+        }
+    }
+
+    grouping constant-grouping {
+        leaf constant {
+            description "The string to be returned by llt:get-constant
+                    (or llt:get-contexted-constant) RPC implementation.
+                    The string typically includes (the context and) the name of the member
+                    the user called to cause the RPC implementation registration
+                    (that member may be different from both the member running the implementation,
+                    and member where llt:get-constant is called).";
+            type string;
+        }
+    }
+
+    grouping context-grouping {
+        leaf context {
+            description "The context for bound implementation of
+                llt:get-contexted-constant RPC to match.";
+            type string;
+        }
+    }
+
+}
