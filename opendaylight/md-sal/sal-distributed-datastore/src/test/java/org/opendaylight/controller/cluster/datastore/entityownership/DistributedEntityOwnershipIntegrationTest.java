@@ -44,6 +44,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.mockito.exceptions.base.MockitoException;
 import org.opendaylight.controller.cluster.datastore.AbstractDataStore;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.IntegrationTestKit;
@@ -486,10 +487,13 @@ public class DistributedEntityOwnershipIntegrationTest {
 
         final DOMEntityOwnershipCandidateRegistration candidate2 =
                 follower1EntityOwnershipService.registerCandidate(ENTITY1);
+        verify(follower1MockListener, timeout(5000)).ownershipChanged(ownershipChange(ENTITY1, false, false, true));
+
         final DOMEntityOwnershipCandidateRegistration candidate3 =
                 follower2EntityOwnershipService.registerCandidate(ENTITY1);
+        verify(follower2MockListener, timeout(5000)).ownershipChanged(ownershipChange(ENTITY1, false, false, true));
 
-        Mockito.reset(leaderMockListener);
+        Mockito.reset(leaderMockListener, follower1MockListener, follower2MockListener);
 
         ArgumentCaptor<DOMEntityOwnershipChange> leaderChangeCaptor =
                 ArgumentCaptor.forClass(DOMEntityOwnershipChange.class);
@@ -508,26 +512,35 @@ public class DistributedEntityOwnershipIntegrationTest {
         boolean passed = false;
         for (int i = 0; i < 100; i++) {
             Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
-            if (!leaderEntityOwnershipService.getOwnershipState(ENTITY1).isPresent()
-                    || leaderEntityOwnershipService.getOwnershipState(ENTITY1).get() == EntityOwnershipState.NO_OWNER
-                            && follower1EntityOwnershipService.getOwnershipState(ENTITY1).isPresent()
-                            && follower1EntityOwnershipService.getOwnershipState(ENTITY1)
-                                    .get() == EntityOwnershipState.NO_OWNER
-                            && follower2EntityOwnershipService.getOwnershipState(ENTITY1).isPresent()
-                            && follower2EntityOwnershipService.getOwnershipState(ENTITY1)
-                                    .get() == EntityOwnershipState.NO_OWNER
-                            && leaderChangeCaptor.getAllValues().size() > 0
-                            && !leaderChangeCaptor.getValue().getState().hasOwner()
-                            && leaderChangeCaptor.getAllValues().size() > 0
-                            && !follower1ChangeCaptor.getValue().getState().hasOwner()
-                            && leaderChangeCaptor.getAllValues().size() > 0
-                            && !follower2ChangeCaptor.getValue().getState().hasOwner()) {
+            final Optional<EntityOwnershipState> leaderState = leaderEntityOwnershipService.getOwnershipState(ENTITY1);
+            final Optional<EntityOwnershipState> follower1State =
+                    follower1EntityOwnershipService.getOwnershipState(ENTITY1);
+            final Optional<EntityOwnershipState> follower2State =
+                    follower2EntityOwnershipService.getOwnershipState(ENTITY1);
+            final Optional<DOMEntityOwnershipChange> leaderChange = getValueSafely(leaderChangeCaptor);
+            final Optional<DOMEntityOwnershipChange> follower1Change = getValueSafely(follower1ChangeCaptor);
+            final Optional<DOMEntityOwnershipChange> follower2Change = getValueSafely(follower2ChangeCaptor);
+            if (!leaderState.isPresent() || leaderState.get() == EntityOwnershipState.NO_OWNER
+                    && follower1State.isPresent() && follower1State.get() == EntityOwnershipState.NO_OWNER
+                    && follower2State.isPresent() && follower2State.get() == EntityOwnershipState.NO_OWNER
+                    && leaderChange.isPresent() && !leaderChange.get().getState().hasOwner()
+                    && follower1Change.isPresent() && !follower1Change.get().getState().hasOwner()
+                    && follower2Change.isPresent() && !follower2Change.get().getState().hasOwner()) {
                 passed = true;
                 break;
             }
         }
 
         assertTrue("No ownership change message was sent with hasOwner=false", passed);
+    }
+
+    private static Optional<DOMEntityOwnershipChange> getValueSafely(ArgumentCaptor<DOMEntityOwnershipChange> captor) {
+        try {
+            return Optional.fromNullable(captor.getValue());
+        } catch (MockitoException e) {
+            // No value was captured
+            return Optional.absent();
+        }
     }
 
     /**
