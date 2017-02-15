@@ -71,7 +71,7 @@ public final class ShardSnapshotActor extends AbstractUntypedActorWithMetering {
         }
     }
 
-    private void onSerializeSnapshot(SerializeSnapshot request) {
+    private static void onSerializeSnapshot(final SerializeSnapshot request) {
         Optional<OutputStream> installSnapshotStream = request.getInstallSnapshotStream();
         if (installSnapshotStream.isPresent()) {
             try {
