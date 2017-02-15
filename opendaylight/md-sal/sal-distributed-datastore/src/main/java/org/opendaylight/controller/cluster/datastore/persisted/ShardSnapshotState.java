@@ -47,14 +47,14 @@ public class ShardSnapshotState implements Snapshot.State {
             snapshotState.snapshot.serialize(toOutputStream(out));
         }
 
-        private OutputStream toOutputStream(final ObjectOutput out) {
+        private static OutputStream toOutputStream(final ObjectOutput out) {
             if (out instanceof OutputStream) {
                 return (OutputStream) out;
             }
 
             return new OutputStream() {
                 @Override
-                public void write(int value) throws IOException {
+                public void write(final int value) throws IOException {
                     out.write(value);
                 }
             };
@@ -65,7 +65,7 @@ public class ShardSnapshotState implements Snapshot.State {
             snapshotState = new ShardSnapshotState(ShardDataTreeSnapshot.deserialize(toInputStream(in)));
         }
 
-        private InputStream toInputStream(final ObjectInput in) {
+        private static InputStream toInputStream(final ObjectInput in) {
             if (in instanceof InputStream) {
                 return (InputStream) in;
             }
@@ -88,7 +88,7 @@ public class ShardSnapshotState implements Snapshot.State {
             + "aren't serialized. FindBugs does not recognize this.")
     private final ShardDataTreeSnapshot snapshot;
 
-    public ShardSnapshotState(@Nonnull ShardDataTreeSnapshot snapshot) {
+    public ShardSnapshotState(@Nonnull final ShardDataTreeSnapshot snapshot) {
         this.snapshot = Preconditions.checkNotNull(snapshot);
     }
 
@@ -97,7 +97,6 @@ public class ShardSnapshotState implements Snapshot.State {
         return snapshot;
     }
 
-    @SuppressWarnings("static-method")
     private Object writeReplace() {
         return new Proxy(this);
     }
