@@ -46,6 +46,30 @@
       "revId": "d98bea5d456be31205b64dc8f0c5f3ae2b1a4cd0",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_23c08e7b",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataChangeListenerSupport.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 2046
+      },
+      "writtenOn": "2017-02-15T17:06:52Z",
+      "side": 1,
+      "message": "Guava 18.0 javadoc [0] states copyOf() is safe. The implementation uses toArray [1] which should be safe as well.\nUnmodifiableCollection javadoc [2] provides just a readonly view, but it sill reflects changes to underlying Collection.\n\n[0] https://github.com/google/guava/blob/v18.0/guava/src/com/google/common/collect/ImmutableList.java#L244-L246\n[1] http://grepcode.com/file/repository.grepcode.com/java/root/jdk/openjdk/8u40-b25/java/util/Collection.java#Collection.toArray%28%29\n[2] http://grepcode.com/file/repository.grepcode.com/java/root/jdk/openjdk/8u40-b25/java/util/Collections.java#Collections.UnmodifiableCollection",
+      "parentUuid": "fafc7978_2864ede3",
+      "range": {
+        "startLine": 41,
+        "startChar": 15,
+        "endLine": 41,
+        "endChar": 47
+      },
+      "revId": "d98bea5d456be31205b64dc8f0c5f3ae2b1a4cd0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
