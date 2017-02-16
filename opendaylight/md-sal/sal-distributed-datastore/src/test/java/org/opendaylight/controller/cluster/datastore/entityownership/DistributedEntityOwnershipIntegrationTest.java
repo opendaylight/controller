@@ -11,6 +11,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.AdditionalMatchers.or;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
@@ -183,6 +184,7 @@ public class DistributedEntityOwnershipIntegrationTest {
         follower1EntityOwnershipService.registerCandidate(ENTITY1);
         verifyCandidates(leaderDistributedDataStore, ENTITY1, "member-1", "member-2");
         verifyOwner(leaderDistributedDataStore, ENTITY1, "member-1");
+        verifyOwner(follower2Node.configDataStore(), ENTITY1, "member-1");
         Uninterruptibles.sleepUninterruptibly(300, TimeUnit.MILLISECONDS);
         verify(leaderMockListener, never()).ownershipChanged(ownershipChange(ENTITY1));
         verify(follower1MockListener, never()).ownershipChanged(ownershipChange(ENTITY1));
@@ -193,13 +195,14 @@ public class DistributedEntityOwnershipIntegrationTest {
                 follower1EntityOwnershipService.registerCandidate(ENTITY2);
         verify(follower1MockListener, timeout(5000)).ownershipChanged(ownershipChange(ENTITY2, false, true, true));
         verify(leaderMockListener, timeout(5000)).ownershipChanged(ownershipChange(ENTITY2, false, false, true));
+        verifyOwner(follower2Node.configDataStore(), ENTITY2, "member-2");
         reset(leaderMockListener, follower1MockListener);
 
         // Register follower2 candidate for entity2 and verify it gets added but doesn't become owner
 
         follower2EntityOwnershipService.registerListener(ENTITY_TYPE1, follower2MockListener);
-        verify(follower2MockListener, timeout(5000)).ownershipChanged(ownershipChange(ENTITY2, false, false, true));
-        verify(follower2MockListener, timeout(5000)).ownershipChanged(ownershipChange(ENTITY1, false, false, true));
+        verify(follower2MockListener, timeout(5000).times(2)).ownershipChanged(or(
+                ownershipChange(ENTITY1, false, false, true), ownershipChange(ENTITY2, false, false, true)));
 
         follower2EntityOwnershipService.registerCandidate(ENTITY2);
         verifyCandidates(leaderDistributedDataStore, ENTITY2, "member-2", "member-3");
