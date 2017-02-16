@@ -44,6 +44,6 @@ final class SingleClientHistory extends AbstractClientHistory {
     @Override
     ProxyHistory createHistoryProxy(final LocalHistoryIdentifier historyId,
             final AbstractClientConnection<ShardBackendInfo> connection) {
-        return ProxyHistory.createSingle(connection, historyId);
+        return ProxyHistory.createSingle(this, connection, historyId);
     }
 }
