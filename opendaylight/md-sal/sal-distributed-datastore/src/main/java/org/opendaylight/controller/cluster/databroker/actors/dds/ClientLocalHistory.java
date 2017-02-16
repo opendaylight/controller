@@ -32,11 +32,7 @@ public final class ClientLocalHistory extends AbstractClientHistory implements A
 
     @Override
     public void close() {
-        final State local = state();
-        if (local != State.CLOSED) {
-            Preconditions.checkState(local == State.IDLE, "Local history %s has an open transaction", this);
-            updateState(local, State.CLOSED);
-        }
+        doClose();
     }
 
     private State ensureIdleState() {
@@ -92,6 +88,6 @@ public final class ClientLocalHistory extends AbstractClientHistory implements A
     @Override
     ProxyHistory createHistoryProxy(final LocalHistoryIdentifier historyId,
             final AbstractClientConnection<ShardBackendInfo> connection) {
-        return ProxyHistory.createClient(connection, historyId);
+        return ProxyHistory.createClient(this, connection, historyId);
     }
 }
