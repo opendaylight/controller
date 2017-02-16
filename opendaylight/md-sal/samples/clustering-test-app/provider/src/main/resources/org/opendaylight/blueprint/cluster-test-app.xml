@@ -8,6 +8,7 @@
   <reference id="notificationService" interface="org.opendaylight.controller.sal.binding.api.NotificationProviderService"/>
   <reference id="entityOwnershipService" interface="org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipService"/>
   <reference id="bindingRpcRegistry" interface="org.opendaylight.controller.sal.binding.api.RpcProviderRegistry"/>
+  <reference id="domRpcProviderService" interface="org.opendaylight.controller.md.sal.dom.api.DOMRpcProviderService"/>
   <reference id="clusterSingletonService" interface="org.opendaylight.mdsal.singleton.common.api.ClusterSingletonServiceProvider"/>
   <reference id="domDataBroker" interface="org.opendaylight.controller.md.sal.dom.api.DOMDataBroker"/>
 
@@ -40,6 +41,12 @@
 
   <bean id="basicTestProvider" class="org.opendaylight.controller.clustering.it.provider.BasicRpcTestProvider">
     <argument ref="bindingRpcRegistry"/>
+    <argument ref="clusterSingletonService"/>
+  </bean>
+
+  <bean id="lowLevelTestProvider" class="org.opendaylight.controller.clustering.it.provider.MdsalLowLevelTestProvider">
+    <argument ref="bindingRpcRegistry"/>
+    <argument ref="domRpcProviderService"/>
     <argument ref="clusterSingletonService"/>
   </bean>
 
