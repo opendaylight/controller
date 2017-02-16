@@ -126,6 +126,7 @@ public class ShardTest extends AbstractShardTest {
     private static final String DUMMY_DATA = "Dummy data as snapshot sequence number is set to 0 in "
             + "InMemorySnapshotStore and journal recovery seq number will start from 1";
 
+    @Deprecated
     @Test
     public void testRegisterChangeListener() throws Exception {
         new ShardTestKit(getSystem()) {
@@ -156,7 +157,7 @@ public class ShardTest extends AbstractShardTest {
 
                 listener.waitForChangeEvents(path);
             }
-        };
+        }.shutdown(getSystem());
     }
 
     @SuppressWarnings("serial")
@@ -254,7 +255,7 @@ public class ShardTest extends AbstractShardTest {
                 // data in the store.
                 listener.waitForChangeEvents(path);
             }
-        };
+        }.shutdown(getSystem());
     }
 
     @Test
@@ -286,7 +287,7 @@ public class ShardTest extends AbstractShardTest {
 
                 listener.waitForChangeEvents();
             }
-        };
+        }.shutdown(getSystem());
     }
 
     @SuppressWarnings("serial")
@@ -352,7 +353,7 @@ public class ShardTest extends AbstractShardTest {
                 // TODO: investigate why we do not receive data chage events
                 listener.waitForChangeEvents();
             }
-        };
+        }.shutdown(getSystem());
     }
 
     @Test
@@ -375,7 +376,7 @@ public class ShardTest extends AbstractShardTest {
                 assertTrue("Unexpected transaction path " + path, path
                         .startsWith("akka://test/user/testCreateTransaction/shard-member-1:ShardTransactionTest@0:"));
             }
-        };
+        }.shutdown(getSystem());
     }
 
     @Test
@@ -396,7 +397,7 @@ public class ShardTest extends AbstractShardTest {
                 assertTrue("Unexpected transaction path " + path, path.startsWith(
                         "akka://test/user/testCreateTransactionOnChain/shard-member-1:ShardTransactionTest@0:"));
             }
-        };
+        }.shutdown(getSystem());
     }
 
     @Test
@@ -416,7 +417,7 @@ public class ShardTest extends AbstractShardTest {
                 final OnDemandRaftState state = expectMsgClass(OnDemandRaftState.class);
                 assertEquals("getPeerAddress", address, state.getPeerAddresses().get(peerID.toString()));
             }
-        };
+        }.shutdown(getSystem());
     }
 
     @Test
@@ -695,7 +696,7 @@ public class ShardTest extends AbstractShardTest {
 
                 verifyLastApplied(shard, 2);
             }
-        };
+        }.shutdown(getSystem());
     }
 
     @Test
@@ -748,7 +749,7 @@ public class ShardTest extends AbstractShardTest {
 
                 verifyOuterListEntry(shard, 1);
             }
-        };
+        }.shutdown(getSystem());
     }
 
     @Test
@@ -789,7 +790,7 @@ public class ShardTest extends AbstractShardTest {
 
                 verifyOuterListEntry(shard, 1);
             }
-        };
+        }.shutdown(getSystem());
     }
 
     @Test(expected = IllegalStateException.class)
@@ -817,7 +818,7 @@ public class ShardTest extends AbstractShardTest {
                     Throwables.propagate(failure.cause());
                 }
             }
-        };
+        }.shutdown(getSystem());
     }
 
     @Test
@@ -856,7 +857,7 @@ public class ShardTest extends AbstractShardTest {
                 failure = expectMsgClass(duration("5 seconds"), akka.actor.Status.Failure.class);
                 assertEquals("Failure cause", cause, failure.cause());
             }
-        };
+        }.shutdown(getSystem());
     }
 
     @Test
@@ -911,7 +912,7 @@ public class ShardTest extends AbstractShardTest {
                 final NormalizedNode<?, ?> actualNode = readStore(shard, path);
                 assertEquals("Stored node", containerNode, actualNode);
             }
-        };
+        }.shutdown(getSystem());
     }
 
     @Test
@@ -954,7 +955,7 @@ public class ShardTest extends AbstractShardTest {
 
                 expectMsgEquals(batched);
             }
-        };
+        }.shutdown(getSystem());
     }
 
     @Test
@@ -983,7 +984,7 @@ public class ShardTest extends AbstractShardTest {
                 failure = expectMsgClass(Failure.class);
                 assertEquals("Failure cause type", NoShardLeaderException.class, failure.cause().getClass());
             }
-        };
+        }.shutdown(getSystem());
     }
 
     @Test
@@ -1020,7 +1021,7 @@ public class ShardTest extends AbstractShardTest {
                 final NormalizedNode<?, ?> actualNode = readStore(shard, TestModel.TEST_PATH);
                 assertEquals(TestModel.TEST_QNAME.getLocalName(), containerNode, actualNode);
             }
-        };
+        }.shutdown(getSystem());
     }
 
     @Test
@@ -1053,7 +1054,7 @@ public class ShardTest extends AbstractShardTest {
                 final NormalizedNode<?, ?> actualNode = readStore(shard, TestModel.OUTER_LIST_PATH);
                 assertEquals(TestModel.OUTER_LIST_QNAME.getLocalName(), mergeData, actualNode);
             }
-        };
+        }.shutdown(getSystem());
     }
 
     @Test
@@ -1098,7 +1099,7 @@ public class ShardTest extends AbstractShardTest {
                 final NormalizedNode<?, ?> actualNode = readStore(shard, TestModel.OUTER_LIST_PATH);
                 assertEquals(TestModel.OUTER_LIST_QNAME.getLocalName(), mergeData, actualNode);
             }
-        };
+        }.shutdown(getSystem());
     }
 
     @Test
@@ -1137,7 +1138,7 @@ public class ShardTest extends AbstractShardTest {
                 final NormalizedNode<?, ?> actualNode = readStore(shard, TestModel.TEST_PATH);
                 assertEquals(TestModel.TEST_QNAME.getLocalName(), containerNode, actualNode);
             }
-        };
+        }.shutdown(getSystem());
     }
 
     @Test
@@ -1199,7 +1200,7 @@ public class ShardTest extends AbstractShardTest {
                 // modification
                 assertEquals(0, shardStats.getCommitIndex());
             }
-        };
+        }.shutdown(getSystem());
     }
 
     @Test
@@ -1276,7 +1277,7 @@ public class ShardTest extends AbstractShardTest {
 
                 inOrder.verify(dataTree).commit(any(DataTreeCandidate.class));
             }
-        };
+        }.shutdown(getSystem());
     }
 
     @Test
@@ -1344,7 +1345,7 @@ public class ShardTest extends AbstractShardTest {
                 inOrder.verify(dataTree).prepare(any(DataTreeModification.class));
                 inOrder.verify(dataTree).validate(any(DataTreeModification.class));
             }
-        };
+        }.shutdown(getSystem());
     }
 
     @Test
@@ -1386,7 +1387,7 @@ public class ShardTest extends AbstractShardTest {
                         .fromSerializable(expectMsgClass(CanCommitTransactionReply.class));
                 assertEquals("getCanCommit", true, reply.getCanCommit());
             }
-        };
+        }.shutdown(getSystem());
     }
 
     @Test
@@ -1436,7 +1437,7 @@ public class ShardTest extends AbstractShardTest {
 
                 expectMsgClass(duration, CommitTransactionReply.class);
             }
-        };
+        }.shutdown(getSystem());
     }
 
     @Test
@@ -1446,7 +1447,7 @@ public class ShardTest extends AbstractShardTest {
                 final Creator<Shard> creator = () -> new Shard(newShardBuilder()) {
                     @Override
                     void persistPayload(final TransactionIdentifier transactionId, final Payload payload,
-                            boolean batchHint) {
+                            final boolean batchHint) {
                         // Simulate an AbortTransaction message occurring during
                         // replication, after
                         // persisting and before finishing the commit to the
@@ -1486,7 +1487,7 @@ public class ShardTest extends AbstractShardTest {
                 // canCommit and preCommit and persisted the data.
                 assertNotNull(TestModel.TEST_QNAME.getLocalName() + " not found", node);
             }
-        };
+        }.shutdown(getSystem());
     }
 
     @Test
@@ -1552,7 +1553,7 @@ public class ShardTest extends AbstractShardTest {
                 final NormalizedNode<?, ?> node = readStore(shard, listNodePath);
                 assertNotNull(listNodePath + " not found", node);
             }
-        };
+        }.shutdown(getSystem());
     }
 
 //    @Test
@@ -1658,7 +1659,7 @@ public class ShardTest extends AbstractShardTest {
                 shard.tell(new CanCommitTransaction(transactionID3, CURRENT_VERSION).toSerializable(), getRef());
                 expectMsgClass(duration, CanCommitTransactionReply.class);
             }
-        };
+        }.shutdown(getSystem());
     }
 
     @Test
@@ -1718,7 +1719,7 @@ public class ShardTest extends AbstractShardTest {
                 final NormalizedNode<?, ?> node = readStore(shard, TestModel.TEST2_PATH);
                 assertNotNull(TestModel.TEST2_PATH + " not found", node);
             }
-        };
+        }.shutdown(getSystem());
     }
 
     @Test
@@ -1732,7 +1733,7 @@ public class ShardTest extends AbstractShardTest {
                 shard.tell(new CanCommitTransaction(nextTransactionId(), CURRENT_VERSION).toSerializable(), getRef());
                 expectMsgClass(duration("5 seconds"), akka.actor.Status.Failure.class);
             }
-        };
+        }.shutdown(getSystem());
     }
 
     @Test
@@ -1785,7 +1786,7 @@ public class ShardTest extends AbstractShardTest {
                 canCommitReply = (CanCommitTransactionReply) Await.result(canCommitFuture, duration);
                 assertEquals("Can commit", true, canCommitReply.getCanCommit());
             }
-        };
+        }.shutdown(getSystem());
     }
 
     @Test
@@ -1830,7 +1831,7 @@ public class ShardTest extends AbstractShardTest {
                 shard.tell(new CanCommitTransaction(transactionID2, CURRENT_VERSION).toSerializable(), getRef());
                 expectMsgClass(duration, CanCommitTransactionReply.class);
             }
-        };
+        }.shutdown(getSystem());
     }
 
     @Test
@@ -1884,7 +1885,7 @@ public class ShardTest extends AbstractShardTest {
 
                 assertEquals("getPendingTxCommitQueueSize", 0, shard.underlyingActor().getPendingTxCommitQueueSize());
             }
-        };
+        }.shutdown(getSystem());
     }
 
     @Test
@@ -1978,7 +1979,7 @@ public class ShardTest extends AbstractShardTest {
                         .getRootNode().get();
                 assertEquals("Root node", expectedRoot, actual);
             }
-        };
+        }.shutdown(getSystem());
     }
 
     /**
@@ -2034,7 +2035,7 @@ public class ShardTest extends AbstractShardTest {
 
                 assertFalse("Recovery Not Applicable", shard2.underlyingActor().persistence().isRecoveryApplicable());
             }
-        };
+        }.shutdown(getSystem());
     }
 
     @Test
@@ -2061,7 +2062,7 @@ public class ShardTest extends AbstractShardTest {
                 assertEquals("isRecoveryApplicable", true,
                         shard.underlyingActor().persistence().isRecoveryApplicable());
             }
-        };
+        }.shutdown(getSystem());
     }
 
     @Test
@@ -2099,7 +2100,7 @@ public class ShardTest extends AbstractShardTest {
                 assertEquals("getLocalShardDataTree present", false,
                         leaderStateChanged.getLocalShardDataTree().isPresent());
             }
-        };
+        }.shutdown(getSystem());
     }
 
     @Test
@@ -2151,7 +2152,7 @@ public class ShardTest extends AbstractShardTest {
 
                 listener.waitForChangeEvents();
             }
-        };
+        }.shutdown(getSystem());
     }
 
     @Test
@@ -2200,7 +2201,7 @@ public class ShardTest extends AbstractShardTest {
 
                 listener.waitForChangeEvents();
             }
-        };
+        }.shutdown(getSystem());
     }
 
     @Test
@@ -2233,7 +2234,7 @@ public class ShardTest extends AbstractShardTest {
 
                 listener.waitForChangeEvents();
             }
-        };
+        }.shutdown(getSystem());
     }
 
     @Test
@@ -2280,7 +2281,7 @@ public class ShardTest extends AbstractShardTest {
 
                 listener.waitForChangeEvents();
             }
-        };
+        }.shutdown(getSystem());
     }
 
     @Test
