@@ -169,8 +169,6 @@ class EntityOwnershipShard extends Shard {
     private void onRegisterCandidateLocal(final RegisterCandidateLocal registerCandidate) {
         LOG.debug("{}: onRegisterCandidateLocal: {}", persistenceId(), registerCandidate);
 
-        listenerSupport.setHasCandidateForEntity(registerCandidate.getEntity());
-
         NormalizedNode<?, ?> entityOwners = entityOwnersWithCandidate(registerCandidate.getEntity().getType(),
                 registerCandidate.getEntity().getIdentifier(), localMemberName.getName());
         commitCoordinator.commitModification(new MergeModification(ENTITY_OWNERS_PATH, entityOwners), this);
@@ -182,8 +180,6 @@ class EntityOwnershipShard extends Shard {
         LOG.debug("{}: onUnregisterCandidateLocal: {}", persistenceId(), unregisterCandidate);
 
         DOMEntity entity = unregisterCandidate.getEntity();
-        listenerSupport.unsetHasCandidateForEntity(entity);
-
         YangInstanceIdentifier candidatePath = candidatePath(entity.getType(), entity.getIdentifier(),
                 localMemberName.getName());
         commitCoordinator.commitModification(new DeleteModification(candidatePath), this);
