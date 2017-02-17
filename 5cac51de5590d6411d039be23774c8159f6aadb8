@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_e0367151",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/ConfigParams.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-02-17T13:54:40Z",
+      "side": 1,
+      "message": "done",
+      "parentUuid": "fafc7978_0ac63649",
+      "range": {
+        "startLine": 27,
+        "startChar": 19,
+        "endLine": 27,
+        "endChar": 26
+      },
+      "revId": "5cac51de5590d6411d039be23774c8159f6aadb8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fafc7978_4ac03e2a",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/DefaultConfigParamsImpl.java",
         "patchSetId": 11
@@ -36,6 +60,30 @@
       "writtenOn": "2017-02-17T02:20:59Z",
       "side": 1,
       "message": "This may be excessing for smaller deployments. How about 128?",
+      "range": {
+        "startLine": 73,
+        "startChar": 47,
+        "endLine": 73,
+        "endChar": 50
+      },
+      "revId": "5cac51de5590d6411d039be23774c8159f6aadb8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_60f3a19e",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/DefaultConfigParamsImpl.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-02-17T13:54:40Z",
+      "side": 1,
+      "message": "Sure",
+      "parentUuid": "fafc7978_4ac03e2a",
       "range": {
         "startLine": 73,
         "startChar": 47,
