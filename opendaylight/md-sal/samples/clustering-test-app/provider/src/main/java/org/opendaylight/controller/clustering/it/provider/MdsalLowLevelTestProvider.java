@@ -9,12 +9,18 @@
 package org.opendaylight.controller.clustering.it.provider;
 
 import com.google.common.util.concurrent.Futures;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.Future;
 import org.opendaylight.controller.clustering.it.provider.impl.GetConstantService;
+import org.opendaylight.controller.clustering.it.provider.impl.RoutedGetConstantService;
+import org.opendaylight.controller.md.sal.binding.impl.BindingToNormalizedNodeCodec;
+import org.opendaylight.controller.md.sal.binding.impl.BindingToNormalizedNodeCodecFactory;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcImplementationRegistration;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcProviderService;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
 import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
+import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.opendaylight.mdsal.singleton.common.api.ClusterSingletonServiceProvider;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.AddShardReplicaInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.BecomeModuleLeaderInput;
@@ -36,9 +42,14 @@ import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.l
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.UnsubscribeYnlInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.UnsubscribeYnlOutput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.WriteTransactionsInput;
+import org.opendaylight.yangtools.concepts.ListenerRegistration;
+import org.opendaylight.yangtools.sal.binding.generator.impl.GeneratedClassLoadingStrategy;
+import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcError;
+import org.opendaylight.yangtools.yang.common.RpcError.ErrorType;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
+import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,19 +59,33 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
 
     private final RpcProviderRegistry rpcRegistry;
     private final BindingAwareBroker.RpcRegistration<OdlMdsalLowlevelControlService> registration;
+    private final SchemaService schemaService;
     private final ClusterSingletonServiceProvider singletonService;
     private final DOMRpcProviderService domRpcService;
+
+    private final BindingToNormalizedNodeCodec codec;
+    private final ListenerRegistration<SchemaContextListener> schemaServiceReg;
+
+    private Map<InstanceIdentifier<?>, DOMRpcImplementationRegistration<RoutedGetConstantService>> routedRegistrations =
+            new HashMap<>();
 
     private DOMRpcImplementationRegistration<GetConstantService> globalGetConstantRegistration = null;
 
     public MdsalLowLevelTestProvider(final RpcProviderRegistry rpcRegistry,
                                      final DOMRpcProviderService domRpcService,
-                                     final ClusterSingletonServiceProvider singletonService) {
+                                     final ClusterSingletonServiceProvider singletonService,
+                                     final SchemaService schemaService) {
         this.rpcRegistry = rpcRegistry;
         this.domRpcService = domRpcService;
         this.singletonService = singletonService;
+        this.schemaService = schemaService;
 
         registration = rpcRegistry.addRpcImplementation(OdlMdsalLowlevelControlService.class, this);
+
+        codec = BindingToNormalizedNodeCodecFactory.newInstance(
+                GeneratedClassLoadingStrategy.getTCCLClassLoadingStrategy());
+
+        schemaServiceReg = BindingToNormalizedNodeCodecFactory.registerInstance(codec, schemaService);
     }
 
     @Override
@@ -109,8 +134,22 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
     }
 
     @Override
-    public Future<RpcResult<Void>> unregisterBoundConstant(UnregisterBoundConstantInput input) {
-        return null;
+    public Future<RpcResult<Void>> unregisterBoundConstant(final UnregisterBoundConstantInput input) {
+        LOG.debug("unregister-bound-constant, {}", input);
+
+        final DOMRpcImplementationRegistration<RoutedGetConstantService> registration =
+                routedRegistrations.remove(input.getContext());
+
+        if (registration == null) {
+            LOG.debug("No get-contexted-constant registration for context: {}", input.getContext());
+            final RpcError rpcError = RpcResultBuilder
+                    .newError(ErrorType.APPLICATION, "missing-registration", "No get-constant rpc registration present.");
+            final RpcResult<Void> result = RpcResultBuilder.<Void>failed().withRpcError(rpcError).build();
+            return Futures.immediateFuture(result);
+        }
+
+        registration.close();
+        return Futures.immediateFuture(RpcResultBuilder.<Void>success().build());
     }
 
     @Override
@@ -128,7 +167,7 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
 
         if (globalGetConstantRegistration == null) {
             final RpcError rpcError = RpcResultBuilder
-                    .newError(RpcError.ErrorType.APPLICATION, "missing-registration", "No get-constant rpc registration present.");
+                    .newError(ErrorType.APPLICATION, "missing-registration", "No get-constant rpc registration present.");
             final RpcResult<Void> result = RpcResultBuilder.<Void>failed().withRpcError(rpcError).build();
             return Futures.immediateFuture(result);
         }
@@ -155,8 +194,26 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
     }
 
     @Override
-    public Future<RpcResult<Void>> registerBoundConstant(RegisterBoundConstantInput input) {
-        return null;
+    public Future<RpcResult<Void>> registerBoundConstant(final RegisterBoundConstantInput input) {
+        LOG.debug("register-bound-constant: {}", input);
+
+        if (input.getContext() == null || input.getConstant() == null) {
+            final RpcError error = RpcResultBuilder.newError(
+                    ErrorType.RPC, "Invalid input.", "Constant value is null");
+            return Futures.immediateFuture(RpcResultBuilder.<Void>failed().withRpcError(error).build());
+        }
+
+        if (routedRegistrations.containsKey(input.getContext())) {
+            final RpcError error = RpcResultBuilder.newError(ErrorType.RPC, "Registration present.",
+                    "There is already a rpc registered for context: " + input.getContext());
+            return Futures.immediateFuture(RpcResultBuilder.<Void>failed().withRpcError(error).build());
+        }
+
+        final DOMRpcImplementationRegistration<RoutedGetConstantService> registration =
+                RoutedGetConstantService.registerNew(codec, domRpcService, input.getConstant(), input.getContext());
+
+        routedRegistrations.put(input.getContext(), registration);
+        return Futures.immediateFuture(RpcResultBuilder.<Void>success().build());
     }
 
     @Override
@@ -191,7 +248,7 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
 
         if (input.getConstant() == null) {
             final RpcError error = RpcResultBuilder.newError(
-                    RpcError.ErrorType.RPC, "Invalid input.", "Constant value is null");
+                    ErrorType.RPC, "Invalid input.", "Constant value is null");
             return Futures.immediateFuture(RpcResultBuilder.<Void>failed().withRpcError(error).build());
         }
 
