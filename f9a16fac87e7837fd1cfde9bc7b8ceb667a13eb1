@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fafc7978_17f2d605",
+        "filename": "opendaylight/md-sal/samples/clustering-test-app/model/src/main/yang/odl-mdsal-lowlevel-common.yang",
+        "patchSetId": 23
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 2046
+      },
+      "writtenOn": "2017-02-20T14:44:57Z",
+      "side": 1,
+      "message": "Do you need this?\nThe \"context\" argument is not used in the implementation [0] of routed RPC registration, and \"people\" model does not use this ext in the definition [1] of add-person RPC, even though its implementation does register [2] buy-car as a routed RPC.\n\n[0] https://git.opendaylight.org/gerrit/gitweb?p\u003dcontroller.git;a\u003dblob;f\u003dopendaylight/md-sal/sal-binding-broker/src/main/java/org/opendaylight/controller/md/sal/binding/compat/CompositeRoutedRpcRegistration.java;h\u003dbb6c2e7770b35021083d55e561ef65849de36be2;hb\u003drefs/heads/master#l53\n[1] https://git.opendaylight.org/gerrit/gitweb?p\u003dcontroller.git;a\u003dblob;f\u003dopendaylight/md-sal/samples/clustering-test-app/model/src/main/yang/people.yang;h\u003d4efc218dff2df73a4c605d7f4f336eb9fd8f2a87;hb\u003drefs/heads/master#l77\n[2] https://git.opendaylight.org/gerrit/gitweb?p\u003dcontroller.git;a\u003dblob;f\u003dopendaylight/md-sal/samples/clustering-test-app/provider/src/main/java/org/opendaylight/controller/clustering/it/provider/PeopleProvider.java;h\u003d6301188cc70b954645cb36c0d86de796c08421f6;hb\u003drefs/heads/master#l71",
+      "range": {
+        "startLine": 53,
+        "startChar": 16,
+        "endLine": 53,
+        "endChar": 33
+      },
+      "revId": "f9a16fac87e7837fd1cfde9bc7b8ceb667a13eb1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_57229e52",
+        "filename": "opendaylight/md-sal/samples/clustering-test-app/model/src/main/yang/odl-mdsal-lowlevel-common.yang",
+        "patchSetId": 23
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 2046
+      },
+      "writtenOn": "2017-02-20T14:44:57Z",
+      "side": 1,
+      "message": "How is the user supposed to create a context needed by ll:register-bound-constant?",
+      "range": {
+        "startLine": 60,
+        "startChar": 15,
+        "endLine": 60,
+        "endChar": 20
+      },
+      "revId": "f9a16fac87e7837fd1cfde9bc7b8ceb667a13eb1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
