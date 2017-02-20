@@ -11,6 +11,7 @@
   <reference id="domRpcProviderService" interface="org.opendaylight.controller.md.sal.dom.api.DOMRpcProviderService"/>
   <reference id="clusterSingletonService" interface="org.opendaylight.mdsal.singleton.common.api.ClusterSingletonServiceProvider"/>
   <reference id="domDataBroker" interface="org.opendaylight.controller.md.sal.dom.api.DOMDataBroker"/>
+  <reference id="schemaService" interface="org.opendaylight.controller.sal.core.api.model.SchemaService" />
 
   <bean id="purchaseCarProvider" class="org.opendaylight.controller.clustering.it.provider.PurchaseCarProvider" >
     <property name="notificationProvider" ref="notificationService"/>
@@ -48,6 +49,7 @@
     <argument ref="bindingRpcRegistry"/>
     <argument ref="domRpcProviderService"/>
     <argument ref="clusterSingletonService"/>
+    <argument ref="schemaService"/>
   </bean>
 
 </blueprint>
