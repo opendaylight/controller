@@ -86,7 +86,7 @@ class ShardRecoveryCoordinator implements RaftActorRecoveryCohort {
     /**
      * Applies a recovered snapshot to the data store.
      *
-     * @param snapshotBytes the serialized snapshot
+     * @param snapshotState the serialized snapshot
      */
     @Override
     @SuppressWarnings("checkstyle:IllegalCatch")
@@ -115,7 +115,7 @@ class ShardRecoveryCoordinator implements RaftActorRecoveryCohort {
 
     @Override
     @Deprecated
-    public State deserializePreCarbonSnapshot(byte[] from) {
+    public State deserializePreCarbonSnapshot(final byte[] from) {
         try {
             return new ShardSnapshotState(ShardDataTreeSnapshot.deserialize(from));
         } catch (IOException e) {
