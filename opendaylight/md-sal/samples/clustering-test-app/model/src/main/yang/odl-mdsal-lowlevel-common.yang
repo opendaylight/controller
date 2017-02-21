@@ -1,0 +1,71 @@
+module odl-mdsal-lowlevel-common {
+
+    yang-version 1;
+    namespace "tag:opendaylight.org,2017:controller:yang:lowlevel:common";
+    prefix llc;
+
+    import yang-ext { prefix ext; revision-date 2013-07-09; }
+
+    organization "OpenDaylight";
+    contact "Vratko Polak <vrpolak@cisco.com>";
+
+    revision "2017-02-15" {
+        description "Initial revision for Carbon clustering testing.";
+    }
+    description "Declarations to be used both in odl-mdsal-lowlevel-target (llt)
+            and odl-mdsal-lowlevel-control (ll).";
+
+    grouping id-grouping {
+        leaf id {
+            description "Any string uniquely identifying the publisher, producer or writer,
+                typically containing the member name.";
+            mandatory true;
+            type string;
+        }
+    }
+
+    grouping constant-grouping {
+        leaf constant {
+            description "The string to be returned by llt:get-constant
+                    (or llt:get-contexted-constant) RPC implementation.
+                    The string typically includes (the context and) the name of the member
+                    the user called to cause the RPC implementation registration
+                    (that member may be different from both the member running the implementation,
+                    and member where llt:get-constant is called).";
+            mandatory true;
+            type string;
+        }
+    }
+
+    identity constant-context {
+        description "Routed RPCs context needs to be based on an identity.";
+    }
+
+    list rpc-context {
+        description "Routed RPCs need to be registered with a path.
+            It has to be an instance-identifier within an accessible model,
+            but the instance does not have to be present in data tree.
+            This is config false to signal users they do not need to create any instance.";
+        config false;
+        ordered-by system;
+        key "identifier";
+        leaf identifier {
+            description "Users are free to refer to arbitrary strings
+                if they are testing RPC regstrations to different paths.";
+            type string;
+        }
+    }
+
+    grouping context-grouping {
+        leaf context {
+            description "The context for bound implementation of
+                llt:get-contexted-constant RPC to match.
+                The extension has no data, users are free to use instance identifiers
+                referring to (non-existent) items of rpc-context list.";
+            ext:context-reference constant-context;
+            mandatory true;
+            type instance-identifier;
+        }
+    }
+
+}
