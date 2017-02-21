@@ -22,6 +22,30 @@
       "revId": "fd26230eb65e14192bc3949bcec0dd47ed420280",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_9818b276",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/pom.xml",
+        "patchSetId": 15
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2017-02-21T13:47:43Z",
+      "side": 1,
+      "message": "yeah I can push a patch for that.",
+      "parentUuid": "fafc7978_7d0ea03c",
+      "range": {
+        "startLine": 83,
+        "startChar": 0,
+        "endLine": 86,
+        "endChar": 40
+      },
+      "revId": "fd26230eb65e14192bc3949bcec0dd47ed420280",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
