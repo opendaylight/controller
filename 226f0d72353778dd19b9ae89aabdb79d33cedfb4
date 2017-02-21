@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fafc7978_f8657e1e",
+        "filename": "opendaylight/md-sal/samples/clustering-test-app/provider/src/main/java/org/opendaylight/controller/clustering/it/provider/MdsalLowLevelTestProvider.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 202,
+      "author": {
+        "id": 2046
+      },
+      "writtenOn": "2017-02-21T15:54:41Z",
+      "side": 1,
+      "message": "or context\n\nSeparate to two checks maybe?",
+      "range": {
+        "startLine": 202,
+        "startChar": 62,
+        "endLine": 202,
+        "endChar": 63
+      },
+      "revId": "226f0d72353778dd19b9ae89aabdb79d33cedfb4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_3843866d",
+        "filename": "opendaylight/md-sal/samples/clustering-test-app/provider/src/main/java/org/opendaylight/controller/clustering/it/provider/MdsalLowLevelTestProvider.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 206,
+      "author": {
+        "id": 2046
+      },
+      "writtenOn": "2017-02-21T15:54:41Z",
+      "side": 1,
+      "message": "The yang model seems to allow for multiple registrations on the same context, but on the other hand it does not really require such registrations to succeed.\n\nThe test scenarios do not attempt multiple registrations on the same context, so this is implementation is okay.",
+      "range": {
+        "startLine": 206,
+        "startChar": 32,
+        "endLine": 206,
+        "endChar": 43
+      },
+      "revId": "226f0d72353778dd19b9ae89aabdb79d33cedfb4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
