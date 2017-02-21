@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_1d13140e",
+        "filename": "opendaylight/md-sal/samples/clustering-test-app/model/src/main/yang/odl-mdsal-lowlevel-common.yang",
+        "patchSetId": 23
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2017-02-21T11:56:58Z",
+      "side": 1,
+      "message": "Add person doesn\u0027t use this since it\u0027s not a routed rpc itself, it seems to have some mapping internally that actually registers buy-car which uses the context-reference extensio.\nWe have 2 ways we could approach this, either pass the instance-identifier into register-bounded-constant which would be also used when calling get, or have some internal mapping from string into some instance identifier. In the second option we would still need to pass an instance identifier when calling get-bounded-constant.",
+      "parentUuid": "fafc7978_17f2d605",
+      "range": {
+        "startLine": 53,
+        "startChar": 16,
+        "endLine": 53,
+        "endChar": 33
+      },
+      "revId": "f9a16fac87e7837fd1cfde9bc7b8ceb667a13eb1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fafc7978_57229e52",
         "filename": "opendaylight/md-sal/samples/clustering-test-app/model/src/main/yang/odl-mdsal-lowlevel-common.yang",
         "patchSetId": 23
@@ -36,6 +60,30 @@
       "writtenOn": "2017-02-20T14:44:57Z",
       "side": 1,
       "message": "How is the user supposed to create a context needed by ll:register-bound-constant?",
+      "range": {
+        "startLine": 60,
+        "startChar": 15,
+        "endLine": 60,
+        "endChar": 20
+      },
+      "revId": "f9a16fac87e7837fd1cfde9bc7b8ceb667a13eb1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_dd334ca9",
+        "filename": "opendaylight/md-sal/samples/clustering-test-app/model/src/main/yang/odl-mdsal-lowlevel-common.yang",
+        "patchSetId": 23
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2017-02-21T11:56:58Z",
+      "side": 1,
+      "message": "User is not supposed to create the context, the context reference needs to bind to some identifier, so this is only used so the instance identifier that will be used for the routedrpc has something to bind to.",
+      "parentUuid": "fafc7978_57229e52",
       "range": {
         "startLine": 60,
         "startChar": 15,
