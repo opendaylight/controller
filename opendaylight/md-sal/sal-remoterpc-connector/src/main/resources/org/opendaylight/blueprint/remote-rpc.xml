@@ -12,6 +12,7 @@
   </cm:property-placeholder>
 
   <reference id="actorSystemProvider" interface="org.opendaylight.controller.cluster.ActorSystemProvider" />
+  <reference id="schemaService" interface="org.opendaylight.controller.sal.core.api.model.SchemaService" />
   <reference id="domRpcService" interface="org.opendaylight.controller.md.sal.dom.api.DOMRpcService"/>
   <reference id="domRpcRegistry" interface="org.opendaylight.controller.md.sal.dom.api.DOMRpcProviderService"/>
 
@@ -29,9 +30,10 @@
   <bean id="remoteRpcProvider" class="org.opendaylight.controller.remote.rpc.RemoteRpcProviderFactory"
           factory-method="createInstance" init-method="start" destroy-method="close">
     <argument ref="domRpcRegistry"/>
-    <argument ref="domRpcService"/>
     <argument ref="actorSystem"/>
     <argument ref="remoteRpcProviderConfig"/>
+    <property name="schemaService" ref="schemaService"/>
+    <property name="rpcService" ref="domRpcService"/>
   </bean>
 
 </blueprint>
