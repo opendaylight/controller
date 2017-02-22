@@ -21,8 +21,8 @@ import javax.management.openmbean.CompositeType;
 import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.OpenType;
 import org.opendaylight.controller.config.yangjmxgenerator.TypeProviderWrapper;
-import org.opendaylight.yangtools.binding.generator.util.ReferencedTypeImpl;
-import org.opendaylight.yangtools.sal.binding.model.api.Type;
+import org.opendaylight.mdsal.binding.generator.util.ReferencedTypeImpl;
+import org.opendaylight.mdsal.binding.model.api.Type;
 import org.opendaylight.yangtools.yang.model.api.AugmentationTarget;
 import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.DataNodeContainer;
@@ -48,18 +48,18 @@ public class TOAttribute extends AbstractAttribute implements TypedAttribute {
     }
 
     public static <T extends DataNodeContainer & AugmentationTarget & DataSchemaNode> TOAttribute create(
-            T containerSchemaNode, TypeProviderWrapper typeProviderWrapper, String packageName) {
+            final T containerSchemaNode, final TypeProviderWrapper typeProviderWrapper, final String packageName) {
         // Transfer Object: get the leaves
-        Map<String, AttributeIfc> map = new HashMap<>();
-        Map<String, String> attributeNameMap = new HashMap<>();
-        for (DataSchemaNode dataSchemaNode : containerSchemaNode
+        final Map<String, AttributeIfc> map = new HashMap<>();
+        final Map<String, String> attributeNameMap = new HashMap<>();
+        for (final DataSchemaNode dataSchemaNode : containerSchemaNode
                 .getChildNodes()) {
             try {
-                String yangName = dataSchemaNode.getQName().getLocalName();
+                final String yangName = dataSchemaNode.getQName().getLocalName();
                 map.put(yangName,
                         createInnerAttribute(dataSchemaNode,
                                 typeProviderWrapper, packageName));
-            } catch (IllegalArgumentException e) {
+            } catch (final IllegalArgumentException e) {
                 throw new IllegalStateException("Unable to create TO", e);
             }
         }
@@ -68,9 +68,9 @@ public class TOAttribute extends AbstractAttribute implements TypedAttribute {
     }
 
     private static AttributeIfc createInnerAttribute(
-            DataSchemaNode dataSchemaNode,
-            TypeProviderWrapper typeProviderWrapper, String packageName) {
-        Class<? extends DataSchemaNode> type = isAllowedType(dataSchemaNode);
+            final DataSchemaNode dataSchemaNode,
+            final TypeProviderWrapper typeProviderWrapper, final String packageName) {
+        final Class<? extends DataSchemaNode> type = isAllowedType(dataSchemaNode);
 
         if (type.equals(LeafSchemaNode.class)) {
             return new JavaAttribute((LeafSchemaNode) dataSchemaNode,
@@ -90,8 +90,8 @@ public class TOAttribute extends AbstractAttribute implements TypedAttribute {
     }
 
     private static Class<? extends DataSchemaNode> isAllowedType(
-            DataSchemaNode dataSchemaNode) {
-        for (Class<? extends DataSchemaNode> allowedType : ALLOWED_CHILDREN) {
+            final DataSchemaNode dataSchemaNode) {
+        for (final Class<? extends DataSchemaNode> allowedType : ALLOWED_CHILDREN) {
             if (allowedType.isAssignableFrom(dataSchemaNode.getClass()) == true) {
                 return allowedType;
             }
@@ -101,25 +101,25 @@ public class TOAttribute extends AbstractAttribute implements TypedAttribute {
                 + ALLOWED_CHILDREN);
     }
 
-    private TOAttribute(DataSchemaNode attrNode,
-            Map<String, AttributeIfc> transferObject,
-            Map<String, String> attributeNameMap, String nullableDescription, String packageName) {
+    private TOAttribute(final DataSchemaNode attrNode,
+            final Map<String, AttributeIfc> transferObject,
+            final Map<String, String> attributeNameMap, final String nullableDescription, final String packageName) {
         super(attrNode);
-        yangNameToAttributeMap = transferObject;
+        this.yangNameToAttributeMap = transferObject;
         this.attributeNameMap = attributeNameMap;
         this.nullableDescription = nullableDescription;
-        nullableDefault = null;
+        this.nullableDefault = null;
         this.packageName = packageName;
     }
 
     public Map<String, String> getAttributeNameMap() {
-        return attributeNameMap;
+        return this.attributeNameMap;
     }
 
     public Map<String, AttributeIfc> getCapitalizedPropertiesToTypesMap() {
-        Map<String, AttributeIfc> capitalizedPropertiesToTypesMap = Maps
+        final Map<String, AttributeIfc> capitalizedPropertiesToTypesMap = Maps
                 .newHashMap();
-        for (Entry<String, AttributeIfc> entry : yangNameToAttributeMap
+        for (final Entry<String, AttributeIfc> entry : this.yangNameToAttributeMap
                 .entrySet()) {
 
             capitalizedPropertiesToTypesMap.put(
@@ -130,8 +130,8 @@ public class TOAttribute extends AbstractAttribute implements TypedAttribute {
     }
 
     public Map<String, AttributeIfc> getJmxPropertiesToTypesMap() {
-        Map<String, AttributeIfc> jmxPropertiesToTypesMap = Maps.newHashMap();
-        for (Entry<String, AttributeIfc> entry : yangNameToAttributeMap
+        final Map<String, AttributeIfc> jmxPropertiesToTypesMap = Maps.newHashMap();
+        for (final Entry<String, AttributeIfc> entry : this.yangNameToAttributeMap
                 .entrySet()) {
 
             jmxPropertiesToTypesMap.put(
@@ -142,43 +142,43 @@ public class TOAttribute extends AbstractAttribute implements TypedAttribute {
     }
 
     public Map<String, AttributeIfc> getYangPropertiesToTypesMap() {
-        return yangNameToAttributeMap;
+        return this.yangNameToAttributeMap;
     }
 
     @Override
     public String getNullableDescription() {
-        return nullableDescription;
+        return this.nullableDescription;
     }
 
     @Override
     public String getNullableDefault() {
-        return nullableDefault;
+        return this.nullableDefault;
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if ((o == null) || (getClass() != o.getClass())) {
             return false;
         }
         if (!super.equals(o)) {
             return false;
         }
 
-        TOAttribute that = (TOAttribute) o;
+        final TOAttribute that = (TOAttribute) o;
 
-        if (nullableDefault != null ? !nullableDefault
+        if (this.nullableDefault != null ? !this.nullableDefault
                 .equals(that.nullableDefault) : that.nullableDefault != null) {
             return false;
         }
-        if (nullableDescription != null ? !nullableDescription
+        if (this.nullableDescription != null ? !this.nullableDescription
                 .equals(that.nullableDescription)
                 : that.nullableDescription != null) {
             return false;
         }
-        if (yangNameToAttributeMap != null ? !yangNameToAttributeMap
+        if (this.yangNameToAttributeMap != null ? !this.yangNameToAttributeMap
                 .equals(that.yangNameToAttributeMap)
                 : that.yangNameToAttributeMap != null) {
             return false;
@@ -190,15 +190,15 @@ public class TOAttribute extends AbstractAttribute implements TypedAttribute {
     @Override
     public int hashCode() {
         int result = super.hashCode();
-        result = 31
-                * result
-                + (nullableDescription != null ? nullableDescription.hashCode()
+        result = (31
+                * result)
+                + (this.nullableDescription != null ? this.nullableDescription.hashCode()
                         : 0);
-        result = 31 * result
-                + (nullableDefault != null ? nullableDefault.hashCode() : 0);
-        result = 31
-                * result
-                + (yangNameToAttributeMap != null ? yangNameToAttributeMap
+        result = (31 * result)
+                + (this.nullableDefault != null ? this.nullableDefault.hashCode() : 0);
+        result = (31
+                * result)
+                + (this.yangNameToAttributeMap != null ? this.yangNameToAttributeMap
                         .hashCode() : 0);
         return result;
     }
@@ -206,40 +206,40 @@ public class TOAttribute extends AbstractAttribute implements TypedAttribute {
     @Override
     public String toString() {
         return "TOAttribute{" + getAttributeYangName() + "," + "to="
-                + yangNameToAttributeMap + '}';
+                + this.yangNameToAttributeMap + '}';
     }
 
     @Override
     public Type getType() {
         // TODO: ReferencedTypeImpl from Types
-        return new ReferencedTypeImpl(packageName, getUpperCaseCammelCase());
+        return new ReferencedTypeImpl(this.packageName, getUpperCaseCammelCase());
     }
 
     @Override
     public CompositeType getOpenType() {
-        String description = getNullableDescription() == null ? getAttributeYangName() : getNullableDescription();
+        final String description = getNullableDescription() == null ? getAttributeYangName() : getNullableDescription();
 
-        FunctionImpl functionImpl = new FunctionImpl();
-        Map<String, AttributeIfc> jmxPropertiesToTypesMap = getJmxPropertiesToTypesMap();
-        OpenType<?>[] itemTypes = Collections2.transform(
+        final FunctionImpl functionImpl = new FunctionImpl();
+        final Map<String, AttributeIfc> jmxPropertiesToTypesMap = getJmxPropertiesToTypesMap();
+        final OpenType<?>[] itemTypes = Collections2.transform(
                 jmxPropertiesToTypesMap.entrySet(), functionImpl).toArray(
                 new OpenType<?>[] {});
-        String[] itemNames = functionImpl.getItemNames();
+        final String[] itemNames = functionImpl.getItemNames();
         try {
             // TODO add package name to create fully qualified name for this
             // type
-            CompositeType compositeType = new CompositeType(
+            final CompositeType compositeType = new CompositeType(
                     getUpperCaseCammelCase(), description, itemNames,
                     itemNames, itemTypes);
             return compositeType;
-        } catch (OpenDataException e) {
+        } catch (final OpenDataException e) {
             throw new RuntimeException("Unable to create CompositeType for "
                     + this, e);
         }
     }
 
     public String getPackageName() {
-        return packageName;
+        return this.packageName;
     }
 
 }
@@ -249,13 +249,13 @@ class FunctionImpl implements
     private final List<String> itemNames = new ArrayList<>();
 
     @Override
-    public OpenType<?> apply(Entry<String, AttributeIfc> input) {
-        AttributeIfc innerType = input.getValue();
-        itemNames.add(input.getKey());
+    public OpenType<?> apply(final Entry<String, AttributeIfc> input) {
+        final AttributeIfc innerType = input.getValue();
+        this.itemNames.add(input.getKey());
         return innerType.getOpenType();
     }
 
     public String[] getItemNames(){
-        return itemNames.toArray(new String[itemNames.size()]);
+        return this.itemNames.toArray(new String[this.itemNames.size()]);
     }
 }
