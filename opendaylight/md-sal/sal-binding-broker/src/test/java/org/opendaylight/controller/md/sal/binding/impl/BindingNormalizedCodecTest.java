@@ -25,6 +25,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.binding.test.AbstractSchemaAwareTest;
+import org.opendaylight.mdsal.binding.generator.impl.GeneratedClassLoadingStrategy;
+import org.opendaylight.mdsal.binding.generator.util.JavassistUtils;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.augment.rev140709.TreeComplexUsesAugment;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.augment.rev140709.TreeLeafOnlyAugment;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.bi.ba.rpcservice.rev140701.OpendaylightTestRpcServiceService;
@@ -34,8 +36,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yangtools.binding.data.codec.gen.impl.DataObjectSerializerGenerator;
 import org.opendaylight.yangtools.binding.data.codec.gen.impl.StreamWriterGenerator;
 import org.opendaylight.yangtools.binding.data.codec.impl.BindingNormalizedNodeCodecRegistry;
-import org.opendaylight.yangtools.sal.binding.generator.impl.GeneratedClassLoadingStrategy;
-import org.opendaylight.yangtools.sal.binding.generator.util.JavassistUtils;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -70,28 +70,28 @@ public class BindingNormalizedCodecTest extends AbstractSchemaAwareTest {
         this.context = context;
         final DataObjectSerializerGenerator streamWriter = StreamWriterGenerator.create(JavassistUtils.forClassPool(ClassPool.getDefault()));
         final BindingNormalizedNodeCodecRegistry registry = new BindingNormalizedNodeCodecRegistry(streamWriter);
-        codec = new BindingToNormalizedNodeCodec(GeneratedClassLoadingStrategy.getTCCLClassLoadingStrategy(), registry, true);
+        this.codec = new BindingToNormalizedNodeCodec(GeneratedClassLoadingStrategy.getTCCLClassLoadingStrategy(), registry, true);
     }
 
     @Test
     public void testComplexAugmentationSerialization() {
-        codec.onGlobalContextUpdated(context);
-        final PathArgument lastArg = codec.toYangInstanceIdentifier(BA_TREE_COMPLEX_USES).getLastPathArgument();
+        this.codec.onGlobalContextUpdated(this.context);
+        final PathArgument lastArg = this.codec.toYangInstanceIdentifier(BA_TREE_COMPLEX_USES).getLastPathArgument();
         assertTrue(lastArg instanceof AugmentationIdentifier);
     }
 
 
     @Test
     public void testLeafOnlyAugmentationSerialization() {
-        codec.onGlobalContextUpdated(context);
-        final PathArgument leafOnlyLastArg = codec.toYangInstanceIdentifier(BA_TREE_LEAF_ONLY).getLastPathArgument();
+        this.codec.onGlobalContextUpdated(this.context);
+        final PathArgument leafOnlyLastArg = this.codec.toYangInstanceIdentifier(BA_TREE_LEAF_ONLY).getLastPathArgument();
         assertTrue(leafOnlyLastArg instanceof AugmentationIdentifier);
         assertTrue(((AugmentationIdentifier) leafOnlyLastArg).getPossibleChildNames().contains(SIMPLE_VALUE_QNAME));
     }
 
     @Test
     public void testToYangInstanceIdentifierBlocking() {
-        codec.onGlobalContextUpdated(new EmptySchemaContext());
+        this.codec.onGlobalContextUpdated(new EmptySchemaContext());
 
         final CountDownLatch done = new CountDownLatch(1);
         final AtomicReference<YangInstanceIdentifier> yangId = new AtomicReference<>();
@@ -100,8 +100,8 @@ public class BindingNormalizedCodecTest extends AbstractSchemaAwareTest {
             @Override
             public void run() {
                 try {
-                    yangId.set(codec.toYangInstanceIdentifierBlocking(BA_TOP_LEVEL_LIST));
-                } catch(RuntimeException e) {
+                    yangId.set(BindingNormalizedCodecTest.this.codec.toYangInstanceIdentifierBlocking(BA_TOP_LEVEL_LIST));
+                } catch(final RuntimeException e) {
                     error.set(e);
                 } finally {
                     done.countDown();
@@ -110,7 +110,7 @@ public class BindingNormalizedCodecTest extends AbstractSchemaAwareTest {
         }.start();
 
         Uninterruptibles.sleepUninterruptibly(500, TimeUnit.MILLISECONDS);
-        codec.onGlobalContextUpdated(context);
+        this.codec.onGlobalContextUpdated(this.context);
 
         assertEquals("toYangInstanceIdentifierBlocking completed", true,
                 Uninterruptibles.awaitUninterruptibly(done, 3, TimeUnit.SECONDS));
@@ -128,7 +128,7 @@ public class BindingNormalizedCodecTest extends AbstractSchemaAwareTest {
 
     @Test
     public void testGetRpcMethodToSchemaPathBlocking() {
-        codec.onGlobalContextUpdated(new EmptySchemaContext());
+        this.codec.onGlobalContextUpdated(new EmptySchemaContext());
         testGetRpcMethodToSchemaPath();
     }
 
@@ -140,8 +140,8 @@ public class BindingNormalizedCodecTest extends AbstractSchemaAwareTest {
             @Override
             public void run() {
                 try {
-                    retMap.set(codec.getRpcMethodToSchemaPath(OpendaylightTestRpcServiceService.class));
-                } catch(RuntimeException e) {
+                    retMap.set(BindingNormalizedCodecTest.this.codec.getRpcMethodToSchemaPath(OpendaylightTestRpcServiceService.class));
+                } catch(final RuntimeException e) {
                     error.set(e);
                 } finally {
                     done.countDown();
@@ -150,7 +150,7 @@ public class BindingNormalizedCodecTest extends AbstractSchemaAwareTest {
         }.start();
 
         Uninterruptibles.sleepUninterruptibly(500, TimeUnit.MILLISECONDS);
-        codec.onGlobalContextUpdated(context);
+        this.codec.onGlobalContextUpdated(this.context);
 
         assertEquals("getRpcMethodToSchemaPath completed", true,
                 Uninterruptibles.awaitUninterruptibly(done, 3, TimeUnit.SECONDS));
@@ -158,7 +158,7 @@ public class BindingNormalizedCodecTest extends AbstractSchemaAwareTest {
             throw error.get();
         }
 
-        for(Method method: retMap.get().keySet()) {
+        for(final Method method: retMap.get().keySet()) {
             if(method.getName().equals("rockTheHouse")) {
                 return;
             }

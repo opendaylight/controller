@@ -24,7 +24,7 @@ import org.opendaylight.controller.config.util.capability.Capability;
 import org.opendaylight.controller.config.util.capability.ModuleListener;
 import org.opendaylight.controller.config.util.capability.YangModuleCapability;
 import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
-import org.opendaylight.yangtools.sal.binding.generator.util.BindingRuntimeContext;
+import org.opendaylight.mdsal.binding.generator.util.BindingRuntimeContext;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.ModuleIdentifier;
@@ -58,7 +58,7 @@ public class YangStoreService implements YangStoreContext {
     }
 
     public YangStoreContext getCurrentSnapshot() {
-        return snap;
+        return this.snap;
     }
 
     @Deprecated
@@ -68,9 +68,9 @@ public class YangStoreService implements YangStoreContext {
         YangStoreSnapshot snapshot;
 
         do {
-            snapshot = snap;
+            snapshot = this.snap;
             ret = snapshot.getModuleMXBeanEntryMap();
-        } while (!snapshot.equals(snap));
+        } while (!snapshot.equals(this.snap));
 
         return ret;
     }
@@ -81,33 +81,33 @@ public class YangStoreService implements YangStoreContext {
         YangStoreSnapshot snapshot;
 
         do {
-            snapshot = snap;
+            snapshot = this.snap;
             ret = snapshot.getQNamesToIdentitiesToModuleMXBeanEntries();
-        } while (!snapshot.equals(snap));
+        } while (!snapshot.equals(this.snap));
 
         return ret;
     }
 
     @Override
     public Set<Module> getModules() {
-        return snap.getModules();
+        return this.snap.getModules();
     }
 
     @Override
     public String getModuleSource(final ModuleIdentifier moduleIdentifier) {
-        return snap.getModuleSource(moduleIdentifier);
+        return this.snap.getModuleSource(moduleIdentifier);
     }
 
     @Override
     public EnumResolver getEnumResolver() {
-        return snap.getEnumResolver();
+        return this.snap.getEnumResolver();
     }
 
     public void refresh(final BindingRuntimeContext runtimeContext) {
-        final YangStoreSnapshot next = new YangStoreSnapshot(runtimeContext, sourceProvider);
-        final YangStoreSnapshot previous = snap;
-        snap = next;
-        notificationExecutor.submit(new Runnable() {
+        final YangStoreSnapshot next = new YangStoreSnapshot(runtimeContext, this.sourceProvider);
+        final YangStoreSnapshot previous = this.snap;
+        this.snap = next;
+        this.notificationExecutor.submit(new Runnable() {
             @Override
             public void run() {
                 notifyListeners(previous, next);
@@ -116,9 +116,9 @@ public class YangStoreService implements YangStoreContext {
     }
 
     public AutoCloseable registerModuleListener(final ModuleListener listener) {
-        final YangStoreContext context = snap;
+        final YangStoreContext context = this.snap;
 
-        synchronized (listeners) {
+        synchronized (this.listeners) {
             if (context != null) {
                 listener.onCapabilitiesChanged(toCapabilities(context.getModules(), context), Collections.<Capability>emptySet());
             }
@@ -128,8 +128,8 @@ public class YangStoreService implements YangStoreContext {
         return new AutoCloseable() {
             @Override
             public void close() {
-                synchronized (listeners) {
-                    listeners.remove(listener);
+                synchronized (YangStoreService.this.listeners) {
+                    YangStoreService.this.listeners.remove(listener);
                 }
             }
         };
@@ -144,8 +144,8 @@ public class YangStoreService implements YangStoreContext {
         final Set<Capability> addedCaps = toCapabilities(added, current);
         final Set<Capability> removedCaps = toCapabilities(removed, current);
 
-        synchronized (listeners) {
-            for (final ModuleListener listener : listeners) {
+        synchronized (this.listeners) {
+            for (final ModuleListener listener : this.listeners) {
                 listener.onCapabilitiesChanged(addedCaps, removedCaps);
             }
         }
