@@ -14,9 +14,9 @@ import java.util.concurrent.ExecutionException;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
+import org.opendaylight.mdsal.binding.generator.impl.ModuleInfoBackedContext;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.bi.ba.rpcservice.rev140701.RockTheHouseInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.Top;
-import org.opendaylight.yangtools.sal.binding.generator.impl.ModuleInfoBackedContext;
 import org.opendaylight.yangtools.yang.binding.YangModuleInfo;
 import org.opendaylight.yangtools.yang.binding.util.BindingReflections;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -31,22 +31,22 @@ public class SchemaUpdateForTransactionTest {
 
     @Before
     public void setupStore() {
-        domStore = new InMemoryDOMDataStore("TEST", MoreExecutors.newDirectExecutorService());
+        this.domStore = new InMemoryDOMDataStore("TEST", MoreExecutors.newDirectExecutorService());
         loadSchemas(RockTheHouseInput.class);
     }
 
     public void loadSchemas(final Class<?>... classes) {
         YangModuleInfo moduleInfo;
         try {
-            ModuleInfoBackedContext context = ModuleInfoBackedContext.create();
-            for (Class<?> clz : classes) {
+            final ModuleInfoBackedContext context = ModuleInfoBackedContext.create();
+            for (final Class<?> clz : classes) {
                 moduleInfo = BindingReflections.getModuleInfo(clz);
 
                 context.registerModuleInfo(moduleInfo);
             }
-            schemaContext = context.tryToCreateSchemaContext().get();
-            domStore.onGlobalContextUpdated(schemaContext);
-        } catch (Exception e) {
+            this.schemaContext = context.tryToCreateSchemaContext().get();
+            this.domStore.onGlobalContextUpdated(this.schemaContext);
+        } catch (final Exception e) {
             Throwables.propagateIfPossible(e);
         }
     }
@@ -68,11 +68,11 @@ public class SchemaUpdateForTransactionTest {
     @Test
     public void testTransactionSchemaUpdate() throws InterruptedException, ExecutionException {
 
-        assertNotNull(domStore);
+        assertNotNull(this.domStore);
 
         // We allocate transaction, initial schema context does not
         // contain Lists model
-        DOMStoreReadWriteTransaction writeTx = domStore.newReadWriteTransaction();
+        final DOMStoreReadWriteTransaction writeTx = this.domStore.newReadWriteTransaction();
         assertNotNull(writeTx);
 
         // we trigger schema context update to contain Lists model

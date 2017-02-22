@@ -50,7 +50,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
                         <configuration>
                             <codeGenerators>
                                 <generator>
-                                    <codeGeneratorClass>org.opendaylight.yangtools.maven.sal.api.gen.plugin.CodeGeneratorImpl</codeGeneratorClass>
+                                    <codeGeneratorClass>org.opendaylight.mdsal.binding.maven.api.gen.plugin.CodeGeneratorImpl</codeGeneratorClass>
                                     <outputBaseDir>${salGeneratorPath}</outputBaseDir>
                                 </generator>
                                 <generator>
@@ -61,7 +61,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
                                     </additionalConfiguration>
                                 </generator>
                                 <generator>
-                                    <codeGeneratorClass>org.opendaylight.yangtools.yang.unified.doc.generator.maven.DocumentationGeneratorImpl</codeGeneratorClass>
+                                    <codeGeneratorClass>org.opendaylight.mdsal.binding.yang.unified.doc.generator.maven.DocumentationGeneratorImpl</codeGeneratorClass>
                                     <outputBaseDir>target/site/models</outputBaseDir>
                                 </generator>
                             </codeGenerators>
