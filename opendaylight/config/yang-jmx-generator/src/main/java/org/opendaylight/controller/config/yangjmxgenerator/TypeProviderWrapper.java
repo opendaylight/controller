@@ -7,9 +7,9 @@
  */
 package org.opendaylight.controller.config.yangjmxgenerator;
 
-import org.opendaylight.yangtools.binding.generator.util.BindingGeneratorUtil;
-import org.opendaylight.yangtools.sal.binding.generator.spi.TypeProvider;
-import org.opendaylight.yangtools.sal.binding.model.api.Type;
+import org.opendaylight.mdsal.binding.generator.spi.TypeProvider;
+import org.opendaylight.mdsal.binding.generator.util.BindingGeneratorUtil;
+import org.opendaylight.mdsal.binding.model.api.Type;
 import org.opendaylight.yangtools.yang.model.api.LeafListSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.LeafSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaNode;
@@ -38,10 +38,10 @@ public class TypeProviderWrapper {
 
     public static String convertToJavaName(final SchemaNode schemaNode,
                                            final boolean capitalizeFirstLetter) {
-        for (UnknownSchemaNode unknownNode : schemaNode.getUnknownSchemaNodes()) {
+        for (final UnknownSchemaNode unknownNode : schemaNode.getUnknownSchemaNodes()) {
             if (ConfigConstants.JAVA_NAME_PREFIX_EXTENSION_QNAME
                     .equals(unknownNode.getNodeType())) {
-                String value = unknownNode.getNodeParameter();
+                final String value = unknownNode.getNodeParameter();
                 return convertToJavaName(value, capitalizeFirstLetter);
             }
         }
@@ -59,24 +59,24 @@ public class TypeProviderWrapper {
     }
 
     public Type getType(final LeafSchemaNode leaf) {
-        TypeDefinition<?> type = CompatUtils.compatLeafType(leaf);
+        final TypeDefinition<?> type = CompatUtils.compatLeafType(leaf);
         return getType(leaf, type);
     }
 
     public String getDefault(final LeafSchemaNode node) {
-        return typeProvider.getTypeDefaultConstruction(node);
+        return this.typeProvider.getTypeDefaultConstruction(node);
     }
 
     public Type getType(final SchemaNode leaf, final TypeDefinition<?> type) {
         Type javaType;
         try {
-            javaType = typeProvider.javaTypeForSchemaDefinitionType(
+            javaType = this.typeProvider.javaTypeForSchemaDefinitionType(
                     type, leaf);
             if (javaType == null) {
                 throw new IllegalArgumentException("Unknown type received for "
                         + leaf.toString());
             }
-        } catch (IllegalArgumentException e) {
+        } catch (final IllegalArgumentException e) {
             throw new IllegalArgumentException("Error while resolving type of "
                     + leaf, e);
         }
@@ -87,13 +87,13 @@ public class TypeProviderWrapper {
     public Type getType(final LeafListSchemaNode leaf) {
         Type javaType;
         try {
-            javaType = typeProvider.javaTypeForSchemaDefinitionType(
+            javaType = this.typeProvider.javaTypeForSchemaDefinitionType(
                     leaf.getType(), leaf);
             if (javaType == null) {
                 throw new IllegalArgumentException(
                         "Unknown type received for  " + leaf.toString());
             }
-        } catch (IllegalArgumentException e) {
+        } catch (final IllegalArgumentException e) {
             throw new IllegalArgumentException("Error while resolving type of "
                     + leaf, e);
         }
@@ -101,10 +101,10 @@ public class TypeProviderWrapper {
     }
 
     public String getJMXParamForBaseType(final TypeDefinition<?> baseType) {
-        return typeProvider.getConstructorPropertyName(baseType);
+        return this.typeProvider.getConstructorPropertyName(baseType);
     }
 
     public String getJMXParamForUnionInnerType(final TypeDefinition<?> unionInnerType) {
-        return typeProvider.getParamNameFromType(unionInnerType);
+        return this.typeProvider.getParamNameFromType(unionInnerType);
     }
 }

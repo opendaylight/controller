@@ -84,7 +84,7 @@
             <configuration>
               <codeGenerators>
                 <generator>
-                  <codeGeneratorClass>org.opendaylight.yangtools.maven.sal.api.gen.plugin.CodeGeneratorImpl</codeGeneratorClass>
+                  <codeGeneratorClass>org.opendaylight.mdsal.binding.maven.api.gen.plugin.CodeGeneratorImpl</codeGeneratorClass>
                   <outputBaseDir>${salGeneratorPath}</outputBaseDir>
                 </generator>
               </codeGenerators>

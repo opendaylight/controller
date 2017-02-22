@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.config.yangjmxgenerator.attribute;
 
-import org.opendaylight.yangtools.sal.binding.model.api.Type;
+import org.opendaylight.mdsal.binding.model.api.Type;
 
 public interface TypedAttribute extends AttributeIfc {
 

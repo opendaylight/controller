@@ -46,8 +46,8 @@ import org.opendaylight.controller.config.manager.testingservices.threadpool.Tes
 import org.opendaylight.controller.config.spi.Module;
 import org.opendaylight.controller.config.util.ConfigRegistryJMXClient;
 import org.opendaylight.controller.config.util.ConfigTransactionJMXClient;
-import org.opendaylight.yangtools.sal.binding.generator.api.ClassLoadingStrategy;
-import org.opendaylight.yangtools.sal.binding.generator.util.BindingRuntimeContext;
+import org.opendaylight.mdsal.binding.generator.api.ClassLoadingStrategy;
+import org.opendaylight.mdsal.binding.generator.util.BindingRuntimeContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextProvider;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
@@ -83,11 +83,11 @@ public abstract class AbstractConfigTest extends AbstractLockedPlatformMBeanServ
         private final List<RegistrationHolder> registrations = new LinkedList<>();
         @Override
         public void handleServiceRegistration(final Class<?> clazz, final Object serviceInstance, final Dictionary<String, ?> props) {
-            registrations.add(new RegistrationHolder(clazz, serviceInstance, props));
+            this.registrations.add(new RegistrationHolder(clazz, serviceInstance, props));
         }
 
         public List<RegistrationHolder> getRegistrations() {
-            return registrations;
+            return this.registrations;
         }
 
         protected static class RegistrationHolder {
@@ -104,7 +104,7 @@ public abstract class AbstractConfigTest extends AbstractLockedPlatformMBeanServ
     }
 
     protected BundleContextServiceRegistrationHandler getBundleContextServiceRegistrationHandler(final Class<?> serviceType) {
-        return currentBundleContextServiceRegistrationHandler;
+        return this.currentBundleContextServiceRegistrationHandler;
     }
 
     // this method should be called in @Before
@@ -112,12 +112,12 @@ public abstract class AbstractConfigTest extends AbstractLockedPlatformMBeanServ
 
         final MBeanServer platformMBeanServer = ManagementFactory.getPlatformMBeanServer();
 
-        configRegistryJMXRegistrator = new ConfigRegistryJMXRegistrator(platformMBeanServer);
+        this.configRegistryJMXRegistrator = new ConfigRegistryJMXRegistrator(platformMBeanServer);
         initBundleContext();
 
-        baseJmxRegistrator = new BaseJMXRegistrator(platformMBeanServer);
+        this.baseJmxRegistrator = new BaseJMXRegistrator(platformMBeanServer);
 
-        configRegistry = new ConfigRegistryImpl(resolver, platformMBeanServer, baseJmxRegistrator, new BindingContextProvider() {
+        this.configRegistry = new ConfigRegistryImpl(resolver, platformMBeanServer, this.baseJmxRegistrator, new BindingContextProvider() {
             @Override
             public synchronized void update(final ClassLoadingStrategy classLoadingStrategy, final SchemaContextProvider ctxProvider) {
                 // NOOP
@@ -128,30 +128,30 @@ public abstract class AbstractConfigTest extends AbstractLockedPlatformMBeanServ
                 return getBindingRuntimeContext();
             }
         });
-        notifyingConfigRegistry = new JMXNotifierConfigRegistry(this.configRegistry, platformMBeanServer);
+        this.notifyingConfigRegistry = new JMXNotifierConfigRegistry(this.configRegistry, platformMBeanServer);
 
         try {
-            configRegistryJMXRegistrator.registerToJMXNoNotifications(configRegistry);
-            configRegistryJMXRegistrator.registerToJMX(notifyingConfigRegistry);
-        } catch (InstanceAlreadyExistsException e) {
+            this.configRegistryJMXRegistrator.registerToJMXNoNotifications(this.configRegistry);
+            this.configRegistryJMXRegistrator.registerToJMX(this.notifyingConfigRegistry);
+        } catch (final InstanceAlreadyExistsException e) {
             throw new RuntimeException(e);
         }
-        configRegistryClient = new ConfigRegistryJMXClient(platformMBeanServer);
-        currentBundleContextServiceRegistrationHandler = new RecordingBundleContextServiceRegistrationHandler();
+        this.configRegistryClient = new ConfigRegistryJMXClient(platformMBeanServer);
+        this.currentBundleContextServiceRegistrationHandler = new RecordingBundleContextServiceRegistrationHandler();
     }
 
     private void initBundleContext() {
-        doNothing().when(mockedServiceRegistration).unregister();
-        RegisterServiceAnswer answer = new RegisterServiceAnswer();
-        doAnswer(answer).when(mockedContext).registerService(Matchers.<String>any(), any(), Matchers.<Dictionary<String, ?>>any());
-        doAnswer(answer).when(mockedContext).registerService(Matchers.<Class>any(), any(), Matchers.<Dictionary<String, ?>>any());
+        doNothing().when(this.mockedServiceRegistration).unregister();
+        final RegisterServiceAnswer answer = new RegisterServiceAnswer();
+        doAnswer(answer).when(this.mockedContext).registerService(Matchers.<String>any(), any(), Matchers.<Dictionary<String, ?>>any());
+        doAnswer(answer).when(this.mockedContext).registerService(Matchers.<Class>any(), any(), Matchers.<Dictionary<String, ?>>any());
     }
 
     @After
     public final void cleanUpConfigTransactionManagerImpl() {
-        configRegistryJMXRegistrator.close();
-        notifyingConfigRegistry.close();
-        configRegistry.close();
+        this.configRegistryJMXRegistrator.close();
+        this.notifyingConfigRegistry.close();
+        this.configRegistry.close();
         TestingFixedThreadPool.cleanUp();
         TestingScheduledThreadPoolImpl.cleanUp();
     }
@@ -161,7 +161,7 @@ public abstract class AbstractConfigTest extends AbstractLockedPlatformMBeanServ
      * would be discarded by closing config beans in this method
      */
     protected void destroyAllConfigBeans() throws Exception {
-        ConfigTransactionJMXClient transaction = configRegistryClient
+        final ConfigTransactionJMXClient transaction = this.configRegistryClient
                 .createTransaction();
         Set<ObjectName> all = transaction.lookupConfigBeans();
         // workaround for getting same Module more times
@@ -183,7 +183,7 @@ public abstract class AbstractConfigTest extends AbstractLockedPlatformMBeanServ
 
 
     protected void assertBeanCount(final int i, final String configMXBeanName) {
-        assertEquals(i, configRegistry.lookupConfigBeans(configMXBeanName).size());
+        assertEquals(i, this.configRegistry.lookupConfigBeans(configMXBeanName).size());
     }
 
     /**
@@ -210,20 +210,21 @@ public abstract class AbstractConfigTest extends AbstractLockedPlatformMBeanServ
     private class RegisterServiceAnswer implements Answer<ServiceRegistration<?>> {
         @Override
         public ServiceRegistration<?> answer(final InvocationOnMock invocation) throws Throwable {
-            Object[] args = invocation.getArguments();
+            final Object[] args = invocation.getArguments();
 
             Preconditions.checkArgument(args.length == 3, "Unexpected arguments size (expected 3 was %s)", args.length);
 
-            Object serviceTypeRaw = args[0];
-            Object serviceInstance = args[1];
+            final Object serviceTypeRaw = args[0];
+            final Object serviceInstance = args[1];
             @SuppressWarnings("unchecked")
+            final
             Dictionary<String, ?> props = (Dictionary<String, ?>) args[2];
 
             if (serviceTypeRaw instanceof Class) {
-                Class<?> serviceType = (Class<?>) serviceTypeRaw;
+                final Class<?> serviceType = (Class<?>) serviceTypeRaw;
                 invokeServiceHandler(serviceInstance, serviceType, props);
             } else if (serviceTypeRaw instanceof String[]) {
-                for (String className : (String[]) serviceTypeRaw) {
+                for (final String className : (String[]) serviceTypeRaw) {
                     invokeServiceHandler(serviceInstance, className, props);
                 }
             } else if (serviceTypeRaw instanceof String) {
@@ -232,20 +233,20 @@ public abstract class AbstractConfigTest extends AbstractLockedPlatformMBeanServ
                 throw new IllegalStateException("Not handling service registration of type, Unknown type" +  serviceTypeRaw);
             }
 
-            return mockedServiceRegistration;
+            return AbstractConfigTest.this.mockedServiceRegistration;
         }
 
         public void invokeServiceHandler(final Object serviceInstance, final String className, final Dictionary<String, ?> props) {
             try {
-                Class<?> serviceType = Class.forName(className);
+                final Class<?> serviceType = Class.forName(className);
                 invokeServiceHandler(serviceInstance, serviceType, props);
-            } catch (ClassNotFoundException e) {
+            } catch (final ClassNotFoundException e) {
                 throw new IllegalStateException("Not handling service registration of type " +  className, e);
             }
         }
 
         private void invokeServiceHandler(final Object serviceInstance, final Class<?> serviceType, final Dictionary<String, ?> props) {
-            BundleContextServiceRegistrationHandler serviceRegistrationHandler = getBundleContextServiceRegistrationHandler(serviceType);
+            final BundleContextServiceRegistrationHandler serviceRegistrationHandler = getBundleContextServiceRegistrationHandler(serviceType);
 
             if (serviceRegistrationHandler != null) {
                 serviceRegistrationHandler.handleServiceRegistration(serviceType, serviceInstance, props);
@@ -266,10 +267,10 @@ public abstract class AbstractConfigTest extends AbstractLockedPlatformMBeanServ
                         public Object invoke(final Object proxy, final Method method, final Object[] args) throws Throwable {
                             try {
                                 return method.invoke(innerObject, args);
-                            } catch (InvocationTargetException e) {
+                            } catch (final InvocationTargetException e) {
                                 try {
                                     throw e.getTargetException();
-                                } catch (RuntimeMBeanException e2) {
+                                } catch (final RuntimeMBeanException e2) {
                                     throw e2.getTargetException();
                                 }
                             }
@@ -294,7 +295,7 @@ public abstract class AbstractConfigTest extends AbstractLockedPlatformMBeanServ
             throw new IOException("Failed to list contents of " + dir);
         }
 
-        for (File file : files) {
+        for (final File file : files) {
             if (file.isDirectory()) {
                 cleanDirectory(dir);
             }

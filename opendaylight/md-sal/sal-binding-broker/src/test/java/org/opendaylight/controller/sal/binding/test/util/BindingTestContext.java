@@ -8,7 +8,6 @@
 package org.opendaylight.controller.sal.binding.test.util;
 
 import static com.google.common.base.Preconditions.checkState;
-
 import com.google.common.annotations.Beta;
 import com.google.common.collect.ClassToInstanceMap;
 import com.google.common.collect.ImmutableMap;
@@ -16,7 +15,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.MutableClassToInstanceMap;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
-import javassist.ClassPool;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.MountPointService;
 import org.opendaylight.controller.md.sal.binding.api.NotificationPublishService;
@@ -52,15 +50,16 @@ import org.opendaylight.controller.sal.binding.impl.RootBindingAwareBroker;
 import org.opendaylight.controller.sal.core.api.BrokerService;
 import org.opendaylight.controller.sal.core.spi.data.DOMStore;
 import org.opendaylight.controller.sal.dom.broker.BrokerImpl;
+import org.opendaylight.mdsal.binding.generator.impl.GeneratedClassLoadingStrategy;
+import org.opendaylight.mdsal.binding.generator.impl.ModuleInfoBackedContext;
+import org.opendaylight.mdsal.binding.generator.util.JavassistUtils;
 import org.opendaylight.yangtools.binding.data.codec.gen.impl.DataObjectSerializerGenerator;
 import org.opendaylight.yangtools.binding.data.codec.gen.impl.StreamWriterGenerator;
 import org.opendaylight.yangtools.binding.data.codec.impl.BindingNormalizedNodeCodecRegistry;
-import org.opendaylight.yangtools.sal.binding.generator.impl.GeneratedClassLoadingStrategy;
-import org.opendaylight.yangtools.sal.binding.generator.impl.ModuleInfoBackedContext;
-import org.opendaylight.yangtools.sal.binding.generator.util.JavassistUtils;
 import org.opendaylight.yangtools.yang.binding.YangModuleInfo;
 import org.opendaylight.yangtools.yang.binding.util.BindingReflections;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import javassist.ClassPool;
 
 @Beta
 public class BindingTestContext implements AutoCloseable {
@@ -109,11 +108,11 @@ public class BindingTestContext implements AutoCloseable {
 
 
     public DOMDataBroker getDomAsyncDataBroker() {
-        return newDOMDataBroker;
+        return this.newDOMDataBroker;
     }
 
     public BindingToNormalizedNodeCodec getCodec() {
-        return codec;
+        return this.codec;
     }
 
     protected BindingTestContext(final ListeningExecutorService executor, final ClassPool classPool, final boolean startWithSchema) {
@@ -126,26 +125,26 @@ public class BindingTestContext implements AutoCloseable {
     }
 
     public void startNewDataBroker() {
-        checkState(executor != null, "Executor needs to be set");
-        checkState(newDOMDataBroker != null, "DOM Data Broker must be set");
-        dataBroker = new BindingDOMDataBrokerAdapter(newDOMDataBroker, codec);
+        checkState(this.executor != null, "Executor needs to be set");
+        checkState(this.newDOMDataBroker != null, "DOM Data Broker must be set");
+        this.dataBroker = new BindingDOMDataBrokerAdapter(this.newDOMDataBroker, this.codec);
     }
 
     public void startNewDomDataBroker() {
-        checkState(executor != null, "Executor needs to be set");
+        checkState(this.executor != null, "Executor needs to be set");
         final InMemoryDOMDataStore operStore = new InMemoryDOMDataStore("OPER",
             MoreExecutors.newDirectExecutorService());
         final InMemoryDOMDataStore configStore = new InMemoryDOMDataStore("CFG",
             MoreExecutors.newDirectExecutorService());
-        newDatastores = ImmutableMap.<LogicalDatastoreType, DOMStore>builder()
+        this.newDatastores = ImmutableMap.<LogicalDatastoreType, DOMStore>builder()
                 .put(LogicalDatastoreType.OPERATIONAL, operStore)
                 .put(LogicalDatastoreType.CONFIGURATION, configStore)
                 .build();
 
-        newDOMDataBroker = new SerializedDOMDataBroker(newDatastores, executor);
+        this.newDOMDataBroker = new SerializedDOMDataBroker(this.newDatastores, this.executor);
 
-        mockSchemaService.registerSchemaContextListener(configStore);
-        mockSchemaService.registerSchemaContextListener(operStore);
+        this.mockSchemaService.registerSchemaContextListener(configStore);
+        this.mockSchemaService.registerSchemaContextListener(operStore);
     }
 
     public void startBindingDataBroker() {
@@ -153,22 +152,22 @@ public class BindingTestContext implements AutoCloseable {
     }
 
     public void startBindingBroker() {
-        checkState(executor != null, "Executor needs to be set");
-        checkState(baData != null, "Binding Data Broker must be started");
-        checkState(baNotifyImpl != null, "Notification Service must be started");
+        checkState(this.executor != null, "Executor needs to be set");
+        checkState(this.baData != null, "Binding Data Broker must be started");
+        checkState(this.baNotifyImpl != null, "Notification Service must be started");
 
-        baConsumerRpc = new BindingDOMRpcServiceAdapter(getDomRpcInvoker(), codec);
-        baProviderRpc = new BindingDOMRpcProviderServiceAdapter(getDomRpcRegistry(), codec);
+        this.baConsumerRpc = new BindingDOMRpcServiceAdapter(getDomRpcInvoker(), this.codec);
+        this.baProviderRpc = new BindingDOMRpcProviderServiceAdapter(getDomRpcRegistry(), this.codec);
 
-        baBrokerImpl = new RootBindingAwareBroker("test");
+        this.baBrokerImpl = new RootBindingAwareBroker("test");
 
-        final MountPointService mountService = new BindingDOMMountPointServiceAdapter(biMountImpl, codec);
-        baBrokerImpl.setMountService(mountService);
-        baBrokerImpl.setLegacyMountManager(new HydrogenMountProvisionServiceAdapter(mountService));
-        baBrokerImpl.setRpcBroker(new HeliumRpcProviderRegistry(baConsumerRpc, baProviderRpc));
-        baBrokerImpl.setLegacyDataBroker(baData);
-        baBrokerImpl.setNotificationBroker(baNotifyImpl);
-        baBrokerImpl.start();
+        final MountPointService mountService = new BindingDOMMountPointServiceAdapter(this.biMountImpl, this.codec);
+        this.baBrokerImpl.setMountService(mountService);
+        this.baBrokerImpl.setLegacyMountManager(new HydrogenMountProvisionServiceAdapter(mountService));
+        this.baBrokerImpl.setRpcBroker(new HeliumRpcProviderRegistry(this.baConsumerRpc, this.baProviderRpc));
+        this.baBrokerImpl.setLegacyDataBroker(this.baData);
+        this.baBrokerImpl.setNotificationBroker(this.baNotifyImpl);
+        this.baBrokerImpl.start();
     }
 
     public void startForwarding() {
@@ -176,17 +175,17 @@ public class BindingTestContext implements AutoCloseable {
     }
 
     public void startBindingToDomMappingService() {
-        checkState(classPool != null, "ClassPool needs to be present");
+        checkState(this.classPool != null, "ClassPool needs to be present");
 
-        final DataObjectSerializerGenerator generator = StreamWriterGenerator.create(JavassistUtils.forClassPool(classPool));
+        final DataObjectSerializerGenerator generator = StreamWriterGenerator.create(JavassistUtils.forClassPool(this.classPool));
         final BindingNormalizedNodeCodecRegistry codecRegistry = new BindingNormalizedNodeCodecRegistry(generator);
         final GeneratedClassLoadingStrategy loading = GeneratedClassLoadingStrategy.getTCCLClassLoadingStrategy();
-        codec = new BindingToNormalizedNodeCodec(loading,  codecRegistry);
-        mockSchemaService.registerSchemaContextListener(codec);
+        this.codec = new BindingToNormalizedNodeCodec(loading,  codecRegistry);
+        this.mockSchemaService.registerSchemaContextListener(this.codec);
     }
 
     private void updateYangSchema(final ImmutableSet<YangModuleInfo> moduleInfos) {
-        mockSchemaService.changeSchema(getContext(moduleInfos));
+        this.mockSchemaService.changeSchema(getContext(moduleInfos));
     }
 
     private SchemaContext getContext(final ImmutableSet<YangModuleInfo> moduleInfos) {
@@ -207,41 +206,41 @@ public class BindingTestContext implements AutoCloseable {
         startBindingBroker();
 
         startForwarding();
-        if (startWithSchema) {
+        if (this.startWithSchema) {
             loadYangSchemaFromClasspath();
         }
     }
 
     public void startNewBindingDataBroker() {
-        final HydrogenDataBrokerAdapter forwarded = new HydrogenDataBrokerAdapter(dataBroker);
-        baData = forwarded;
+        final HydrogenDataBrokerAdapter forwarded = new HydrogenDataBrokerAdapter(this.dataBroker);
+        this.baData = forwarded;
     }
 
     private void startDomMountPoint() {
-        biMountImpl = new DOMMountPointServiceImpl();
+        this.biMountImpl = new DOMMountPointServiceImpl();
     }
 
     private void startDomBroker() {
-        checkState(executor != null);
+        checkState(this.executor != null);
 
-        domRouter = new DOMRpcRouter();
-        mockSchemaService.registerSchemaContextListener(domRouter);
+        this.domRouter = new DOMRpcRouter();
+        this.mockSchemaService.registerSchemaContextListener(this.domRouter);
 
         final ClassToInstanceMap<BrokerService> services = MutableClassToInstanceMap.create();
-        services.put(DOMRpcService.class, domRouter);
+        services.put(DOMRpcService.class, this.domRouter);
 
-        biBrokerImpl = new BrokerImpl(domRouter,services);
+        this.biBrokerImpl = new BrokerImpl(this.domRouter,services);
 
     }
 
     public void startBindingNotificationBroker() {
-        checkState(executor != null);
+        checkState(this.executor != null);
         final DOMNotificationRouter router = DOMNotificationRouter.create(16);
-        domPublishService = router;
-        domListenService = router;
-        publishService = new BindingDOMNotificationPublishServiceAdapter(codec, domPublishService);
-        listenService = new BindingDOMNotificationServiceAdapter(codec, domListenService);
-        baNotifyImpl = new HeliumNotificationProviderServiceAdapter(publishService,listenService);
+        this.domPublishService = router;
+        this.domListenService = router;
+        this.publishService = new BindingDOMNotificationPublishServiceAdapter(this.codec, this.domPublishService);
+        this.listenService = new BindingDOMNotificationServiceAdapter(this.codec, this.domListenService);
+        this.baNotifyImpl = new HeliumNotificationProviderServiceAdapter(this.publishService,this.listenService);
 
     }
 
@@ -252,19 +251,19 @@ public class BindingTestContext implements AutoCloseable {
 
     @Deprecated
     public DataProviderService getBindingDataBroker() {
-        return baData;
+        return this.baData;
     }
 
     public RpcProviderRegistry getBindingRpcRegistry() {
-        return baBrokerImpl.getRoot();
+        return this.baBrokerImpl.getRoot();
     }
 
     public DOMRpcProviderService getDomRpcRegistry() {
-        return domRouter;
+        return this.domRouter;
     }
 
     public DOMRpcService getDomRpcInvoker() {
-        return domRouter;
+        return this.domRouter;
     }
 
     @Override
@@ -273,15 +272,15 @@ public class BindingTestContext implements AutoCloseable {
     }
 
     public MountProviderService getBindingMountProviderService() {
-        return baBrokerImpl.getLegacyMount();
+        return this.baBrokerImpl.getLegacyMount();
     }
 
     public DOMMountPointService getDomMountProviderService() {
-        return biMountImpl;
+        return this.biMountImpl;
     }
 
     public DataBroker getDataBroker() {
-        return dataBroker;
+        return this.dataBroker;
     }
 
 
