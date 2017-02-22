@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.concurrent.Future;
 import org.opendaylight.controller.clustering.it.provider.impl.GetConstantService;
 import org.opendaylight.controller.clustering.it.provider.impl.RoutedGetConstantService;
+import org.opendaylight.controller.clustering.it.provider.impl.SingletonGetConstantService;
 import org.opendaylight.controller.md.sal.binding.impl.BindingToNormalizedNodeCodec;
 import org.opendaylight.controller.md.sal.binding.impl.BindingToNormalizedNodeCodecFactory;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcImplementationRegistration;
@@ -22,6 +23,7 @@ import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
 import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.opendaylight.mdsal.singleton.common.api.ClusterSingletonServiceProvider;
+import org.opendaylight.mdsal.singleton.common.api.ClusterSingletonServiceRegistration;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.AddShardReplicaInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.BecomeModuleLeaderInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.BecomePrefixLeaderInput;
@@ -70,6 +72,7 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
             new HashMap<>();
 
     private DOMRpcImplementationRegistration<GetConstantService> globalGetConstantRegistration = null;
+    private ClusterSingletonServiceRegistration getSingletonConstantRegistration;
 
     public MdsalLowLevelTestProvider(final RpcProviderRegistry rpcRegistry,
                                      final DOMRpcProviderService domRpcService,
@@ -90,7 +93,28 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
 
     @Override
     public Future<RpcResult<Void>> unregisterSingletonConstant() {
-        return null;
+        LOG.debug("unregister-singleton-constant");
+
+        if (getSingletonConstantRegistration == null) {
+            LOG.debug("No get-singleton-constant registration present.");
+            final RpcError rpcError = RpcResultBuilder
+                    .newError(ErrorType.APPLICATION, "missing-registration", "No get-singleton-constant rpc registration present.");
+            final RpcResult<Void> result = RpcResultBuilder.<Void>failed().withRpcError(rpcError).build();
+            return Futures.immediateFuture(result);
+        }
+
+        try {
+            getSingletonConstantRegistration.close();
+            getSingletonConstantRegistration = null;
+
+            return Futures.immediateFuture(RpcResultBuilder.<Void>success().build());
+        } catch (final Exception e) {
+            LOG.debug("There was a problem closing the singleton constant service", e);
+            final RpcError rpcError = RpcResultBuilder
+                    .newError(ErrorType.APPLICATION, "error-closing", "There was a problem closing get-singleton-constant");
+            final RpcResult<Void> result = RpcResultBuilder.<Void>failed().withRpcError(rpcError).build();
+            return Futures.immediateFuture(result);
+        }
     }
 
     @Override
@@ -153,8 +177,20 @@ public class MdsalLowLevelTestProvider implements OdlMdsalLowlevelControlService
     }
 
     @Override
-    public Future<RpcResult<Void>> registerSingletonConstant(RegisterSingletonConstantInput input) {
-        return null;
+    public Future<RpcResult<Void>> registerSingletonConstant(final RegisterSingletonConstantInput input) {
+
+        LOG.debug("Received register-singleton-constant rpc, input: {}", input);
+
+        if (input.getConstant() == null) {
+            final RpcError error = RpcResultBuilder.newError(
+                    ErrorType.RPC, "Invalid input.", "Constant value is null");
+            return Futures.immediateFuture(RpcResultBuilder.<Void>failed().withRpcError(error).build());
+        }
+
+        getSingletonConstantRegistration =
+                SingletonGetConstantService.registerNew(singletonService, domRpcService, input.getConstant());
+
+        return Futures.immediateFuture(RpcResultBuilder.<Void>success().build());
     }
 
     @Override
