@@ -21,10 +21,10 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.opendaylight.controller.config.manager.impl.osgi.mapping.BindingContextProvider;
 import org.opendaylight.controller.config.manager.impl.osgi.mapping.RefreshingSCPModuleInfoRegistry;
+import org.opendaylight.mdsal.binding.generator.api.ClassLoadingStrategy;
+import org.opendaylight.mdsal.binding.generator.api.ModuleInfoRegistry;
+import org.opendaylight.mdsal.binding.generator.util.BindingRuntimeContext;
 import org.opendaylight.yangtools.concepts.ObjectRegistration;
-import org.opendaylight.yangtools.sal.binding.generator.api.ClassLoadingStrategy;
-import org.opendaylight.yangtools.sal.binding.generator.api.ModuleInfoRegistry;
-import org.opendaylight.yangtools.sal.binding.generator.util.BindingRuntimeContext;
 import org.opendaylight.yangtools.yang.binding.YangModuleInfo;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextProvider;
 import org.opendaylight.yangtools.yang.model.repo.api.YangTextSchemaSource;
@@ -43,11 +43,11 @@ public class RefreshingSCPModuleInfoRegistryTest {
 
     @Test
     public void testConstructor() throws Exception {
-        ModuleInfoRegistry reg = mock(ModuleInfoRegistry.class);
-        SchemaContextProvider prov = mock(SchemaContextProvider.class);
+        final ModuleInfoRegistry reg = mock(ModuleInfoRegistry.class);
+        final SchemaContextProvider prov = mock(SchemaContextProvider.class);
         doReturn("string").when(prov).toString();
-        BundleContext ctxt = mock(BundleContext.class);
-        ServiceRegistration<?> servReg = mock(ServiceRegistration.class);
+        final BundleContext ctxt = mock(BundleContext.class);
+        final ServiceRegistration<?> servReg = mock(ServiceRegistration.class);
         doReturn(servReg).when(ctxt).registerService(any(Class.class), any(SchemaContextProvider.class), any(Dictionary.class));
         doReturn(servReg).when(ctxt).registerService(Mockito.anyString(), any(Object.class), any(Dictionary.class));
         doNothing().when(servReg).setProperties(any(Dictionary.class));
@@ -59,13 +59,13 @@ public class RefreshingSCPModuleInfoRegistryTest {
         doReturn("B-runtime-context").when(bindingRuntimeContext).toString();
         doReturn(bindingRuntimeContext).when(codecRegistryProvider).getBindingContext();
 
-        RefreshingSCPModuleInfoRegistry scpreg = new RefreshingSCPModuleInfoRegistry(reg, prov, classLoadingStrat, sourceProvider, codecRegistryProvider, ctxt);
+        final RefreshingSCPModuleInfoRegistry scpreg = new RefreshingSCPModuleInfoRegistry(reg, prov, classLoadingStrat, this.sourceProvider, codecRegistryProvider, ctxt);
 
         doNothing().when(servReg).unregister();
 
-        YangModuleInfo modInfo = mock(YangModuleInfo.class);
+        final YangModuleInfo modInfo = mock(YangModuleInfo.class);
         doReturn("").when(modInfo).toString();
-        ObjectRegistration<YangModuleInfo> ymi = mock(ObjectRegistration.class);
+        final ObjectRegistration<YangModuleInfo> ymi = mock(ObjectRegistration.class);
         doReturn(ymi).when(reg).registerModuleInfo(modInfo);
 
         scpreg.registerModuleInfo(modInfo);

@@ -33,10 +33,10 @@ import org.opendaylight.mdsal.binding.dom.codec.api.BindingCodecTree;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingCodecTreeFactory;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingCodecTreeNode;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
+import org.opendaylight.mdsal.binding.generator.api.ClassLoadingStrategy;
+import org.opendaylight.mdsal.binding.generator.util.BindingRuntimeContext;
 import org.opendaylight.yangtools.binding.data.codec.impl.BindingNormalizedNodeCodecRegistry;
 import org.opendaylight.yangtools.binding.data.codec.impl.MissingSchemaException;
-import org.opendaylight.yangtools.sal.binding.generator.api.ClassLoadingStrategy;
-import org.opendaylight.yangtools.sal.binding.generator.util.BindingRuntimeContext;
 import org.opendaylight.yangtools.yang.binding.BindingMapping;
 import org.opendaylight.yangtools.yang.binding.DataContainer;
 import org.opendaylight.yangtools.yang.binding.DataObject;
@@ -95,10 +95,10 @@ public final class BindingToNormalizedNodeCodec implements BindingCodecTreeFacto
 
     YangInstanceIdentifier toYangInstanceIdentifierBlocking(final InstanceIdentifier<? extends DataObject> binding) {
         try {
-            return codecRegistry.toYangInstanceIdentifier(binding);
+            return this.codecRegistry.toYangInstanceIdentifier(binding);
         } catch (final MissingSchemaException e) {
             waitForSchema(decompose(binding),e);
-            return codecRegistry.toYangInstanceIdentifier(binding);
+            return this.codecRegistry.toYangInstanceIdentifier(binding);
         }
     }
 
@@ -113,23 +113,23 @@ public final class BindingToNormalizedNodeCodec implements BindingCodecTreeFacto
      *             If supplied Instance Identifier is not valid.
      */
     public YangInstanceIdentifier toNormalized(final InstanceIdentifier<? extends DataObject> binding) {
-        return codecRegistry.toYangInstanceIdentifier(binding);
+        return this.codecRegistry.toYangInstanceIdentifier(binding);
     }
 
     @Override
     public YangInstanceIdentifier toYangInstanceIdentifier(final InstanceIdentifier<?> binding) {
-        return codecRegistry.toYangInstanceIdentifier(binding);
+        return this.codecRegistry.toYangInstanceIdentifier(binding);
     }
 
 
     YangInstanceIdentifier toYangInstanceIdentifierCached(final InstanceIdentifier<?> binding) {
-        return iiCache .getUnchecked(binding);
+        return this.iiCache .getUnchecked(binding);
     }
 
     @Override
     public <T extends DataObject> Entry<YangInstanceIdentifier, NormalizedNode<?, ?>> toNormalizedNode(
             final InstanceIdentifier<T> path, final T data) {
-        return codecRegistry.toNormalizedNode(path, data);
+        return this.codecRegistry.toNormalizedNode(path, data);
     }
 
     /**
@@ -150,32 +150,32 @@ public final class BindingToNormalizedNodeCodec implements BindingCodecTreeFacto
     @Override
     public Entry<InstanceIdentifier<?>, DataObject> fromNormalizedNode(final YangInstanceIdentifier path,
             final NormalizedNode<?, ?> data) {
-        return codecRegistry.fromNormalizedNode(path, data);
+        return this.codecRegistry.fromNormalizedNode(path, data);
     }
 
     @Override
     public Notification fromNormalizedNodeNotification(final SchemaPath path, final ContainerNode data) {
-        return codecRegistry.fromNormalizedNodeNotification(path, data);
+        return this.codecRegistry.fromNormalizedNodeNotification(path, data);
     }
 
     @Override
     public DataObject fromNormalizedNodeRpcData(final SchemaPath path, final ContainerNode data) {
-        return codecRegistry.fromNormalizedNodeRpcData(path, data);
+        return this.codecRegistry.fromNormalizedNodeRpcData(path, data);
     }
 
     @Override
     public InstanceIdentifier<?> fromYangInstanceIdentifier(final YangInstanceIdentifier dom) {
-        return codecRegistry.fromYangInstanceIdentifier(dom);
+        return this.codecRegistry.fromYangInstanceIdentifier(dom);
     }
 
     @Override
     public ContainerNode toNormalizedNodeNotification(final Notification data) {
-        return codecRegistry.toNormalizedNodeNotification(data);
+        return this.codecRegistry.toNormalizedNodeNotification(data);
     }
 
     @Override
     public ContainerNode toNormalizedNodeRpcData(final DataContainer data) {
-        return codecRegistry.toNormalizedNodeRpcData(data);
+        return this.codecRegistry.toNormalizedNodeRpcData(data);
     }
 
     /**
@@ -190,14 +190,14 @@ public final class BindingToNormalizedNodeCodec implements BindingCodecTreeFacto
     public Optional<InstanceIdentifier<? extends DataObject>> toBinding(final YangInstanceIdentifier normalized)
                     throws DeserializationException {
         try {
-            return Optional.<InstanceIdentifier<? extends DataObject>>fromNullable(codecRegistry.fromYangInstanceIdentifier(normalized));
+            return Optional.<InstanceIdentifier<? extends DataObject>>fromNullable(this.codecRegistry.fromYangInstanceIdentifier(normalized));
         } catch (final IllegalArgumentException e) {
             return Optional.absent();
         }
     }
 
     public DataNormalizer getDataNormalizer() {
-        return legacyToNormalized;
+        return this.legacyToNormalized;
     }
 
     public Optional<Entry<InstanceIdentifier<? extends DataObject>, DataObject>> toBinding(
@@ -218,7 +218,7 @@ public final class BindingToNormalizedNodeCodec implements BindingCodecTreeFacto
              *
              */
             @SuppressWarnings("unchecked")
-            final Entry<InstanceIdentifier<? extends DataObject>, DataObject> binding = Entry.class.cast(codecRegistry.fromNormalizedNode(normalized.getKey(), normalized.getValue()));
+            final Entry<InstanceIdentifier<? extends DataObject>, DataObject> binding = Entry.class.cast(this.codecRegistry.fromNormalizedNode(normalized.getKey(), normalized.getValue()));
             return Optional.fromNullable(binding);
         } catch (final IllegalArgumentException e) {
             return Optional.absent();
@@ -227,14 +227,14 @@ public final class BindingToNormalizedNodeCodec implements BindingCodecTreeFacto
 
     @Override
     public void onGlobalContextUpdated(final SchemaContext schemaContext) {
-        legacyToNormalized = new DataNormalizer(schemaContext);
-        BindingRuntimeContext runtimeContext = BindingRuntimeContext.create(classLoadingStrategy, schemaContext);
-        codecRegistry.onBindingRuntimeContextUpdated(runtimeContext);
-        futureSchema.onRuntimeContextUpdated(runtimeContext);
+        this.legacyToNormalized = new DataNormalizer(schemaContext);
+        final BindingRuntimeContext runtimeContext = BindingRuntimeContext.create(this.classLoadingStrategy, schemaContext);
+        this.codecRegistry.onBindingRuntimeContextUpdated(runtimeContext);
+        this.futureSchema.onRuntimeContextUpdated(runtimeContext);
     }
 
     public <T extends DataObject> Function<Optional<NormalizedNode<?, ?>>, Optional<T>>  deserializeFunction(final InstanceIdentifier<T> path) {
-        return codecRegistry.deserializeFunction(path);
+        return this.codecRegistry.deserializeFunction(path);
     }
 
     /**
@@ -245,7 +245,7 @@ public final class BindingToNormalizedNodeCodec implements BindingCodecTreeFacto
      */
     public NormalizedNode<?, ?> getDefaultNodeFor(final YangInstanceIdentifier path) {
         final Iterator<PathArgument> iterator = path.getPathArguments().iterator();
-        DataNormalizationOperation<?> currentOp = legacyToNormalized.getRootOperation();
+        DataNormalizationOperation<?> currentOp = this.legacyToNormalized.getRootOperation();
         while (iterator.hasNext()) {
             final PathArgument currentArg = iterator.next();
             try {
@@ -258,7 +258,7 @@ public final class BindingToNormalizedNodeCodec implements BindingCodecTreeFacto
     }
 
     public BindingNormalizedNodeCodecRegistry getCodecRegistry() {
-        return codecRegistry;
+        return this.codecRegistry;
     }
 
     @Override
@@ -267,7 +267,7 @@ public final class BindingToNormalizedNodeCodec implements BindingCodecTreeFacto
     }
 
     public BindingNormalizedNodeCodecRegistry getCodecFactory() {
-        return codecRegistry;
+        return this.codecRegistry;
     }
 
     // FIXME: This should be probably part of Binding Runtime context
@@ -304,7 +304,7 @@ public final class BindingToNormalizedNodeCodec implements BindingCodecTreeFacto
         final URI namespace = moduleName.getNamespace();
         final Date revision = moduleName.getRevision();
         Module module = runtimeContext().getSchemaContext().findModuleByNamespaceAndRevision(namespace, revision);
-        if(module == null && futureSchema.waitForSchema(namespace,revision)) {
+        if((module == null) && this.futureSchema.waitForSchema(namespace,revision)) {
             module = runtimeContext().getSchemaContext().findModuleByNamespaceAndRevision(namespace, revision);
         }
         Preconditions.checkState(module != null, "Schema for %s is not available.", modeledClass);
@@ -312,9 +312,9 @@ public final class BindingToNormalizedNodeCodec implements BindingCodecTreeFacto
     }
 
     private void waitForSchema(final Collection<Class<?>> binding, final MissingSchemaException e) {
-        LOG.warn("Blocking thread to wait for schema convergence updates for {} {}", futureSchema.getDuration(),
-                futureSchema.getUnit());
-        if(futureSchema.waitForSchema(binding)) {
+        LOG.warn("Blocking thread to wait for schema convergence updates for {} {}", this.futureSchema.getDuration(),
+                this.futureSchema.getUnit());
+        if(this.futureSchema.waitForSchema(binding)) {
             return;
         }
 
@@ -331,25 +331,25 @@ public final class BindingToNormalizedNodeCodec implements BindingCodecTreeFacto
     }
 
     private BindingRuntimeContext runtimeContext() {
-        return futureSchema.runtimeContext();
+        return this.futureSchema.runtimeContext();
     }
 
     @Override
     public BindingCodecTree create(final BindingRuntimeContext context) {
-        return codecRegistry.create(context);
+        return this.codecRegistry.create(context);
     }
 
     @Override
     public BindingCodecTree create(final SchemaContext context, final Class<?>... bindingClasses) {
-        return codecRegistry.create(context, bindingClasses);
+        return this.codecRegistry.create(context, bindingClasses);
     }
 
     @Nonnull
     protected Map.Entry<InstanceIdentifier<?>, BindingCodecTreeNode<?>> getSubtreeCodec(
             final YangInstanceIdentifier domIdentifier) {
 
-        final BindingCodecTree currentCodecTree = codecRegistry.getCodecContext();
-        final InstanceIdentifier<?> bindingPath = codecRegistry.fromYangInstanceIdentifier(domIdentifier);
+        final BindingCodecTree currentCodecTree = this.codecRegistry.getCodecContext();
+        final InstanceIdentifier<?> bindingPath = this.codecRegistry.fromYangInstanceIdentifier(domIdentifier);
         Preconditions.checkArgument(bindingPath != null);
         /**
          * If we are able to deserialize YANG instance identifier, getSubtreeCodec must

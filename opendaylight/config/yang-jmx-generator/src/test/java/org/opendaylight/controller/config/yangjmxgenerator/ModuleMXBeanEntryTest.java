@@ -42,9 +42,9 @@ import org.opendaylight.controller.config.yangjmxgenerator.attribute.ListAttribu
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.ListDependenciesAttribute;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.TOAttribute;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.TypedAttribute;
-import org.opendaylight.yangtools.binding.generator.util.Types;
-import org.opendaylight.yangtools.sal.binding.model.api.Type;
-import org.opendaylight.yangtools.sal.binding.yang.types.TypeProviderImpl;
+import org.opendaylight.mdsal.binding.generator.util.Types;
+import org.opendaylight.mdsal.binding.model.api.Type;
+import org.opendaylight.mdsal.binding.yang.types.TypeProviderImpl;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.IdentitySchemaNode;
@@ -61,13 +61,13 @@ public class ModuleMXBeanEntryTest extends AbstractYangTest {
         try {
             THREADS_NAMESPACE = new URI(ConfigConstants.CONFIG_NAMESPACE
                     + ":threads");
-        } catch (URISyntaxException e) {
+        } catch (final URISyntaxException e) {
             throw new Error(e);
         }
-        SimpleDateFormat revisionFormat = new SimpleDateFormat("yyyy-MM-dd");
+        final SimpleDateFormat revisionFormat = new SimpleDateFormat("yyyy-MM-dd");
         try {
             THREADS_REVISION_DATE = revisionFormat.parse("2013-04-09");
-        } catch (ParseException e) {
+        } catch (final ParseException e) {
             throw new Error(e);
         }
     }
@@ -77,31 +77,31 @@ public class ModuleMXBeanEntryTest extends AbstractYangTest {
 
     @Before
     public void setUp() {
-        modulesToSIEs = loadThreadsServiceInterfaceEntries("packages.sis");
+        this.modulesToSIEs = loadThreadsServiceInterfaceEntries("packages.sis");
     }
 
 
     protected Map<String /* identity local name */, ModuleMXBeanEntry> loadThreadsJava() {
-        return loadThreadsJava(modulesToSIEs, PACKAGE_NAME);
+        return loadThreadsJava(this.modulesToSIEs, PACKAGE_NAME);
     }
 
     @Test
     public void test_jmxImplModule() {
-        Map<IdentitySchemaNode, ServiceInterfaceEntry> identitiesToSIs = new HashMap<>();
-        Map<QName, ServiceInterfaceEntry> modulesToSIEs = ServiceInterfaceEntry
-                .create(threadsModule, PACKAGE_NAME,identitiesToSIs);
-        modulesToSIEs.putAll(ServiceInterfaceEntry.create(jmxModule,
+        final Map<IdentitySchemaNode, ServiceInterfaceEntry> identitiesToSIs = new HashMap<>();
+        final Map<QName, ServiceInterfaceEntry> modulesToSIEs = ServiceInterfaceEntry
+                .create(this.threadsModule, PACKAGE_NAME,identitiesToSIs);
+        modulesToSIEs.putAll(ServiceInterfaceEntry.create(this.jmxModule,
                 PACKAGE_NAME,identitiesToSIs));
-        Map<String /* identity local name */, ModuleMXBeanEntry> namesToMBEs = ModuleMXBeanEntry
-                .create(jmxImplModule, modulesToSIEs, context, new TypeProviderWrapper(new TypeProviderImpl(context))
+        final Map<String /* identity local name */, ModuleMXBeanEntry> namesToMBEs = ModuleMXBeanEntry
+                .create(this.jmxImplModule, modulesToSIEs, this.context, new TypeProviderWrapper(new TypeProviderImpl(this.context))
                 , PACKAGE_NAME);
-        Map<String, AttributeIfc> attributes = namesToMBEs.get("impl-netconf")
+        final Map<String, AttributeIfc> attributes = namesToMBEs.get("impl-netconf")
                 .getAttributes();
 
         assertCorrectAttributesSize(namesToMBEs, attributes);
 
         //
-        DependencyAttribute threadFactoryAttribute = (DependencyAttribute) attributes
+        final DependencyAttribute threadFactoryAttribute = (DependencyAttribute) attributes
                 .get("thread-factory");
         assertNotNull(threadFactoryAttribute);
         assertFalse(threadFactoryAttribute.getDependency().isMandatory());
@@ -131,7 +131,7 @@ public class ModuleMXBeanEntryTest extends AbstractYangTest {
 
     protected RuntimeBeanEntry findFirstByYangName(
             final Collection<RuntimeBeanEntry> runtimeBeans, final String yangName) {
-        for (RuntimeBeanEntry rb : runtimeBeans) {
+        for (final RuntimeBeanEntry rb : runtimeBeans) {
             if (yangName.equals(rb.getYangName())) {
                 return rb;
             }
@@ -141,7 +141,7 @@ public class ModuleMXBeanEntryTest extends AbstractYangTest {
     }
 
     protected RuntimeBeanEntry findFirstByNamePrefix(final Collection<RuntimeBeanEntry> runtimeBeans, final String namePrefix) {
-        for (RuntimeBeanEntry rb : runtimeBeans) {
+        for (final RuntimeBeanEntry rb : runtimeBeans) {
             if (namePrefix.equals(rb.getJavaNamePrefix())) {
                 return rb;
             }
@@ -162,9 +162,9 @@ public class ModuleMXBeanEntryTest extends AbstractYangTest {
     }
 
     private void assertMatches(final String prefix, final String input) {
-        RevisionAwareXPath whenConstraint = mock(RevisionAwareXPath.class);
+        final RevisionAwareXPath whenConstraint = mock(RevisionAwareXPath.class);
         doReturn(input).when(whenConstraint).toString();
-        Matcher output = ModuleMXBeanEntryBuilder.getWhenConditionMatcher(prefix,
+        final Matcher output = ModuleMXBeanEntryBuilder.getWhenConditionMatcher(prefix,
                 whenConstraint);
         assertTrue(output.matches());
         assertEquals("threadpool-dynamic", output.group(1));
@@ -172,40 +172,40 @@ public class ModuleMXBeanEntryTest extends AbstractYangTest {
 
     @Test
     public void testThreadsJava() {
-        Map<String /* identity local name */, ModuleMXBeanEntry> namesToMBEs = loadThreadsJava();
+        final Map<String /* identity local name */, ModuleMXBeanEntry> namesToMBEs = loadThreadsJava();
 
         { // check threadpool-dynamic
-            ModuleMXBeanEntry dynamicThreadPool = namesToMBEs
+            final ModuleMXBeanEntry dynamicThreadPool = namesToMBEs
                     .get(THREADPOOL_DYNAMIC_MXB_NAME);
-            Map<String, AttributeIfc> attributes = dynamicThreadPool
+            final Map<String, AttributeIfc> attributes = dynamicThreadPool
                     .getAttributes();
             // core-size, keepalive, maximum-size
             // threadfactory
-            Set<String> longAttribs = Sets.newHashSet("core-size",
+            final Set<String> longAttribs = Sets.newHashSet("core-size",
                     "maximum-size");
-            for (String longAttrib : longAttribs) {
+            for (final String longAttrib : longAttribs) {
 
-                TypedAttribute attribute = (TypedAttribute) attributes
+                final TypedAttribute attribute = (TypedAttribute) attributes
                         .get(longAttrib);
                 assertThat("Failed to check " + longAttrib,
                         attribute.getType(),
                         is((Type) Types.typeForClass(Long.class)));
             }
             // check dependency on thread factory
-            QName threadfactoryQName = QName.create(THREADS_NAMESPACE,
+            final QName threadfactoryQName = QName.create(THREADS_NAMESPACE,
                     THREADS_REVISION_DATE, "threadfactory");
-            ServiceInterfaceEntry threadFactorySIEntry = modulesToSIEs
+            final ServiceInterfaceEntry threadFactorySIEntry = this.modulesToSIEs
                     .get(threadfactoryQName);
             assertNotNull(threadFactorySIEntry);
-            boolean expectedMandatory = true;
-            TypedAttribute actualThreadFactory = (TypedAttribute) attributes
+            final boolean expectedMandatory = true;
+            final TypedAttribute actualThreadFactory = (TypedAttribute) attributes
                     .get("threadfactory");
 
-            DataSchemaNode mockedDataSchemaNode = mock(DataSchemaNode.class);
+            final DataSchemaNode mockedDataSchemaNode = mock(DataSchemaNode.class);
             doReturn(Collections.emptyList()).when(mockedDataSchemaNode)
             .getUnknownSchemaNodes();
             doReturn(threadfactoryQName).when(mockedDataSchemaNode).getQName();
-            AttributeIfc expectedDependencyAttribute = new DependencyAttribute(
+            final AttributeIfc expectedDependencyAttribute = new DependencyAttribute(
                     mockedDataSchemaNode, threadFactorySIEntry,
                     expectedMandatory, "threadfactory description");
             assertThat(actualThreadFactory, is(expectedDependencyAttribute));
@@ -221,14 +221,14 @@ public class ModuleMXBeanEntryTest extends AbstractYangTest {
                     is(THREADPOOL_DYNAMIC_MXB_NAME));
 
             // check root runtime bean
-            Collection<RuntimeBeanEntry> runtimeBeans = dynamicThreadPool
+            final Collection<RuntimeBeanEntry> runtimeBeans = dynamicThreadPool
                     .getRuntimeBeans();
             assertThat(runtimeBeans.size(), is(1));
-            RuntimeBeanEntry rootRB = findFirstByYangName(runtimeBeans,
+            final RuntimeBeanEntry rootRB = findFirstByYangName(runtimeBeans,
                     THREADPOOL_DYNAMIC_MXB_NAME);
             assertThat(rootRB.isRoot(), is(true));
             assertThat(rootRB.getAttributes().size(), is(1));
-            JavaAttribute attribute = (JavaAttribute) rootRB.getAttributes()
+            final JavaAttribute attribute = (JavaAttribute) rootRB.getAttributes()
                     .iterator().next();
             assertThat(attribute.getAttributeYangName(), is("created-sessions"));
             assertThat(rootRB.getYangName(), is(THREADPOOL_DYNAMIC_MXB_NAME));
@@ -236,20 +236,20 @@ public class ModuleMXBeanEntryTest extends AbstractYangTest {
                     is(Long.class.getName()));
         }
         {// check threadfactory-naming
-            ModuleMXBeanEntry threadFactoryNaming = namesToMBEs
+            final ModuleMXBeanEntry threadFactoryNaming = namesToMBEs
                     .get(THREADFACTORY_NAMING_MXB_NAME);
-            Collection<RuntimeBeanEntry> runtimeBeans = threadFactoryNaming
+            final Collection<RuntimeBeanEntry> runtimeBeans = threadFactoryNaming
                     .getRuntimeBeans();
             assertThat(runtimeBeans.size(), is(4));
             {
-                RuntimeBeanEntry threadRB = findFirstByYangName(runtimeBeans,
+                final RuntimeBeanEntry threadRB = findFirstByYangName(runtimeBeans,
                         "thread");
                 assertNotNull(threadRB);
                 assertFalse(threadRB.isRoot());
                 assertEquals("name", threadRB.getKeyYangName().get());
                 assertEquals("Name", threadRB.getKeyJavaName().get());
                 assertThat(threadRB.getAttributes().size(), is(1));
-                AttributeIfc threadNameAttr = threadRB.getAttributes()
+                final AttributeIfc threadNameAttr = threadRB.getAttributes()
                         .iterator().next();
                 assertThat(threadNameAttr.getAttributeYangName(), is("name"));
                 assertTrue(threadNameAttr instanceof JavaAttribute);
@@ -258,16 +258,16 @@ public class ModuleMXBeanEntryTest extends AbstractYangTest {
                 assertThat(threadRB.getRpcs().size(), is(2));
             }
             {
-                RuntimeBeanEntry streamRB = findFirstByNamePrefix(runtimeBeans,
+                final RuntimeBeanEntry streamRB = findFirstByNamePrefix(runtimeBeans,
                         "ThreadStream");
                 assertNotNull(streamRB);
                 assertFalse(streamRB.getKeyYangName().isPresent());
                 assertFalse(streamRB.getKeyJavaName().isPresent());
-                Map<String, AttributeIfc> attributeMap = streamRB
+                final Map<String, AttributeIfc> attributeMap = streamRB
                         .getYangPropertiesToTypesMap();
                 assertEquals(4, attributeMap.size());
 
-                TOAttribute toAttr = (TOAttribute) attributeMap.get("peer");
+                final TOAttribute toAttr = (TOAttribute) attributeMap.get("peer");
                 assertNotNull(toAttr);
                 assertThat(toAttr.getAttributeYangName(), is("peer"));
                 assertThat(toAttr.getLowerCaseCammelCase(), is("peer"));
@@ -290,15 +290,15 @@ public class ModuleMXBeanEntryTest extends AbstractYangTest {
                 assertThat(toAttr.getJmxPropertiesToTypesMap().keySet(),
                         is(propsExpected));
 
-                JavaAttribute timestampAttr = (JavaAttribute) attributeMap
+                final JavaAttribute timestampAttr = (JavaAttribute) attributeMap
                         .get("timestamp");
                 assertNotNull(timestampAttr);
 
-                JavaAttribute stateAttr = (JavaAttribute) attributeMap
+                final JavaAttribute stateAttr = (JavaAttribute) attributeMap
                         .get("state");
                 assertNotNull(stateAttr);
 
-                ListAttribute innerStream = (ListAttribute) attributeMap
+                final ListAttribute innerStream = (ListAttribute) attributeMap
                         .get("inner-stream-list");
                 assertNotNull(innerStream);
                 assertThat(innerStream.getAttributeYangName(),
@@ -313,13 +313,13 @@ public class ModuleMXBeanEntryTest extends AbstractYangTest {
 
         }
         { // test multiple dependencies
-            ModuleMXBeanEntry threadPoolRegistry = namesToMBEs.get(THREADPOOL_REGISTRY_IMPL_NAME);
-            Map<String, AttributeIfc> attributes = threadPoolRegistry.getAttributes();
+            final ModuleMXBeanEntry threadPoolRegistry = namesToMBEs.get(THREADPOOL_REGISTRY_IMPL_NAME);
+            final Map<String, AttributeIfc> attributes = threadPoolRegistry.getAttributes();
             assertEquals(1, attributes.size());
-            AttributeIfc threadpoolsAttr = attributes.get("threadpools");
+            final AttributeIfc threadpoolsAttr = attributes.get("threadpools");
             assertNotNull(threadpoolsAttr);
             assertTrue(threadpoolsAttr instanceof ListDependenciesAttribute);
-            ListDependenciesAttribute threadpools = (ListDependenciesAttribute) threadpoolsAttr;
+            final ListDependenciesAttribute threadpools = (ListDependenciesAttribute) threadpoolsAttr;
         }
     }
 

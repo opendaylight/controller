@@ -21,7 +21,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import javax.annotation.concurrent.GuardedBy;
-import org.opendaylight.yangtools.sal.binding.generator.util.BindingRuntimeContext;
+import org.opendaylight.mdsal.binding.generator.util.BindingRuntimeContext;
 import org.opendaylight.yangtools.yang.binding.Augmentation;
 
 class FutureSchema implements AutoCloseable {
@@ -40,39 +40,39 @@ class FutureSchema implements AutoCloseable {
     }
 
     BindingRuntimeContext runtimeContext() {
-        BindingRuntimeContext localRuntimeContext = runtimeContext;
+        final BindingRuntimeContext localRuntimeContext = this.runtimeContext;
         if(localRuntimeContext != null) {
             return localRuntimeContext;
         }
 
         if(waitForSchema(Collections.emptyList())) {
-            return runtimeContext;
+            return this.runtimeContext;
         }
 
         throw new IllegalStateException("No SchemaContext is available");
     }
 
     void onRuntimeContextUpdated(final BindingRuntimeContext context) {
-        synchronized(postponedOperations) {
-            runtimeContext = context;
-            for (final FutureSchemaPredicate op : postponedOperations) {
+        synchronized(this.postponedOperations) {
+            this.runtimeContext = context;
+            for (final FutureSchemaPredicate op : this.postponedOperations) {
                 op.unlockIfPossible(context);
             }
         }
     }
 
     long getDuration() {
-        return duration;
+        return this.duration;
     }
 
     TimeUnit getUnit() {
-        return unit;
+        return this.unit;
     }
 
     @Override
     public void close() {
-        synchronized(postponedOperations) {
-            for (final FutureSchemaPredicate op : postponedOperations) {
+        synchronized(this.postponedOperations) {
+            for (final FutureSchemaPredicate op : this.postponedOperations) {
                 op.cancel();
             }
         }
@@ -111,18 +111,18 @@ class FutureSchema implements AutoCloseable {
         });
     }
 
-    private boolean addPostponedOpAndWait(FutureSchemaPredicate postponedOp) {
-        if(!waitEnabled) {
+    private boolean addPostponedOpAndWait(final FutureSchemaPredicate postponedOp) {
+        if(!this.waitEnabled) {
             return false;
         }
 
-        BindingRuntimeContext localRuntimeContext = runtimeContext;
-        synchronized(postponedOperations) {
-            postponedOperations.add(postponedOp);
+        final BindingRuntimeContext localRuntimeContext = this.runtimeContext;
+        synchronized(this.postponedOperations) {
+            this.postponedOperations.add(postponedOp);
 
             // If the runtimeContext changed, this op may now be satisfied so check it.
-            if(localRuntimeContext != runtimeContext) {
-                postponedOp.unlockIfPossible(runtimeContext);
+            if(localRuntimeContext != this.runtimeContext) {
+                postponedOp.unlockIfPossible(this.runtimeContext);
             }
         }
 
@@ -133,27 +133,27 @@ class FutureSchema implements AutoCloseable {
 
         final boolean waitForSchema() {
             try {
-                schemaPromise.get(duration, unit);
+                this.schemaPromise.get(FutureSchema.this.duration, FutureSchema.this.unit);
                 return true;
             } catch (final InterruptedException | ExecutionException e) {
                 throw Throwables.propagate(e);
             } catch (final TimeoutException e) {
                 return false;
             } finally {
-                synchronized(postponedOperations) {
-                    postponedOperations.remove(this);
+                synchronized(FutureSchema.this.postponedOperations) {
+                    FutureSchema.this.postponedOperations.remove(this);
                 }
             }
         }
 
         final void unlockIfPossible(final BindingRuntimeContext context) {
-            if (!schemaPromise.isDone() && apply(context)) {
-                schemaPromise.set(null);
+            if (!this.schemaPromise.isDone() && apply(context)) {
+                this.schemaPromise.set(null);
             }
         }
 
         final void cancel() {
-            schemaPromise.cancel(true);
+            this.schemaPromise.cancel(true);
         }
 
         private final SettableFuture<?> schemaPromise = SettableFuture.create();
