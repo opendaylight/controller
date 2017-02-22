@@ -10,10 +10,10 @@ package org.opendaylight.controller.config.manager.impl.osgi.mapping;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
+import org.opendaylight.mdsal.binding.generator.api.ClassLoadingStrategy;
+import org.opendaylight.mdsal.binding.generator.api.ModuleInfoRegistry;
+import org.opendaylight.mdsal.binding.generator.util.BindingRuntimeContext;
 import org.opendaylight.yangtools.concepts.ObjectRegistration;
-import org.opendaylight.yangtools.sal.binding.generator.api.ClassLoadingStrategy;
-import org.opendaylight.yangtools.sal.binding.generator.api.ModuleInfoRegistry;
-import org.opendaylight.yangtools.sal.binding.generator.util.BindingRuntimeContext;
 import org.opendaylight.yangtools.yang.binding.YangModuleInfo;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextProvider;
 import org.opendaylight.yangtools.yang.model.repo.api.YangTextSchemaSource;
@@ -47,21 +47,21 @@ public class RefreshingSCPModuleInfoRegistry implements ModuleInfoRegistry, Auto
         this.classLoadingStrat = classLoadingStrat;
         this.sourceProvider = sourceProvider;
         this.bindingContextProvider = bindingContextProvider;
-        osgiReg = bundleContext
+        this.osgiReg = bundleContext
             .registerService(SchemaContextProvider.class, schemaContextProvider, new Hashtable<String, String>());
     }
 
     public void updateService() {
-        if(osgiReg != null) {
+        if(this.osgiReg != null) {
             try {
-                bindingContextProvider.update(classLoadingStrat, schemaContextProvider);
+                this.bindingContextProvider.update(this.classLoadingStrat, this.schemaContextProvider);
 
                 final Dictionary<String, Object> props = new Hashtable<>();
-                props.put(BindingRuntimeContext.class.getName(), bindingContextProvider.getBindingContext());
-                props.put(SchemaSourceProvider.class.getName(), sourceProvider);
+                props.put(BindingRuntimeContext.class.getName(), this.bindingContextProvider.getBindingContext());
+                props.put(SchemaSourceProvider.class.getName(), this.sourceProvider);
                 // send modifiedService event
-                osgiReg.setProperties(props);
-            } catch (RuntimeException e) {
+                this.osgiReg.setProperties(props);
+            } catch (final RuntimeException e) {
                 // The ModuleInfoBackedContext throws a RuntimeException if it can't create the schema context.
                 LOG.warn("Error updating the BindingContextProvider", e);
             }
@@ -70,17 +70,17 @@ public class RefreshingSCPModuleInfoRegistry implements ModuleInfoRegistry, Auto
 
     @Override
     public ObjectRegistration<YangModuleInfo> registerModuleInfo(final YangModuleInfo yangModuleInfo) {
-        ObjectRegistration<YangModuleInfo> yangModuleInfoObjectRegistration = moduleInfoRegistry.registerModuleInfo(yangModuleInfo);
+        final ObjectRegistration<YangModuleInfo> yangModuleInfoObjectRegistration = this.moduleInfoRegistry.registerModuleInfo(yangModuleInfo);
         return new ObjectRegistrationWrapper(yangModuleInfoObjectRegistration);
     }
 
     @Override
     public void close() throws Exception {
-        if(osgiReg != null) {
-            osgiReg.unregister();
+        if(this.osgiReg != null) {
+            this.osgiReg.unregister();
         }
 
-        osgiReg = null;
+        this.osgiReg = null;
     }
 
     private class ObjectRegistrationWrapper implements ObjectRegistration<YangModuleInfo> {
@@ -92,19 +92,19 @@ public class RefreshingSCPModuleInfoRegistry implements ModuleInfoRegistry, Auto
 
         @Override
         public YangModuleInfo getInstance() {
-            return inner.getInstance();
+            return this.inner.getInstance();
         }
 
         @Override
         public void close() throws Exception {
-            inner.close();
+            this.inner.close();
             // send modify event when a bundle disappears
             updateService();
         }
 
         @Override
         public String toString() {
-            return inner.toString();
+            return this.inner.toString();
         }
     }
 }

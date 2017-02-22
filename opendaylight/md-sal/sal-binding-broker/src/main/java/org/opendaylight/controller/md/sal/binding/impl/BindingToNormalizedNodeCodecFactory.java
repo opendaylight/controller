@@ -11,10 +11,10 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import org.opendaylight.controller.sal.binding.codegen.impl.SingletonHolder;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
+import org.opendaylight.mdsal.binding.generator.api.ClassLoadingStrategy;
 import org.opendaylight.yangtools.binding.data.codec.gen.impl.StreamWriterGenerator;
 import org.opendaylight.yangtools.binding.data.codec.impl.BindingNormalizedNodeCodecRegistry;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
-import org.opendaylight.yangtools.sal.binding.generator.api.ClassLoadingStrategy;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
@@ -33,11 +33,11 @@ public class BindingToNormalizedNodeCodecFactory {
      * @return BindingToNormalizedNodeCodec instance
      */
     @Deprecated
-    public static BindingToNormalizedNodeCodec getOrCreateInstance(ClassLoadingStrategy classLoadingStrategy,
-                            SchemaService schemaService) {
-        BindingNormalizedNodeCodecRegistry codecRegistry = new BindingNormalizedNodeCodecRegistry(
+    public static BindingToNormalizedNodeCodec getOrCreateInstance(final ClassLoadingStrategy classLoadingStrategy,
+                            final SchemaService schemaService) {
+        final BindingNormalizedNodeCodecRegistry codecRegistry = new BindingNormalizedNodeCodecRegistry(
                 StreamWriterGenerator.create(SingletonHolder.JAVASSIST));
-        BindingToNormalizedNodeCodec instance = new BindingToNormalizedNodeCodec(
+        final BindingToNormalizedNodeCodec instance = new BindingToNormalizedNodeCodec(
                                classLoadingStrategy, codecRegistry, true);
         schemaService.registerSchemaContextListener(instance);
         return instance;
@@ -49,8 +49,8 @@ public class BindingToNormalizedNodeCodecFactory {
      * @param classLoadingStrategy
      * @return the BindingToNormalizedNodeCodec instance
      */
-    public static BindingToNormalizedNodeCodec newInstance(ClassLoadingStrategy classLoadingStrategy) {
-        BindingNormalizedNodeCodecRegistry codecRegistry = new BindingNormalizedNodeCodecRegistry(
+    public static BindingToNormalizedNodeCodec newInstance(final ClassLoadingStrategy classLoadingStrategy) {
+        final BindingNormalizedNodeCodecRegistry codecRegistry = new BindingNormalizedNodeCodecRegistry(
                 StreamWriterGenerator.create(SingletonHolder.JAVASSIST));
         return new BindingToNormalizedNodeCodec(classLoadingStrategy, codecRegistry, true);
     }
@@ -62,8 +62,8 @@ public class BindingToNormalizedNodeCodecFactory {
      * @param schemaService the SchemaService.
      * @return the ListenerRegistration
      */
-    public static ListenerRegistration<SchemaContextListener> registerInstance(BindingToNormalizedNodeCodec instance,
-            SchemaService schemaService) {
+    public static ListenerRegistration<SchemaContextListener> registerInstance(final BindingToNormalizedNodeCodec instance,
+            final SchemaService schemaService) {
         return schemaService.registerSchemaContextListener(instance);
     }
 
@@ -78,9 +78,9 @@ public class BindingToNormalizedNodeCodecFactory {
      * @param bundleContext the BundleContext
      * @return ServiceRegistration instance
      */
-    public static ServiceRegistration<BindingToNormalizedNodeCodec> registerOSGiService(BindingToNormalizedNodeCodec instance,
-            BundleContext bundleContext) {
-        Dictionary<String, String> props = new Hashtable<>();
+    public static ServiceRegistration<BindingToNormalizedNodeCodec> registerOSGiService(final BindingToNormalizedNodeCodec instance,
+            final BundleContext bundleContext) {
+        final Dictionary<String, String> props = new Hashtable<>();
 
         // Set the appropriate service properties so the corresponding CSS module is restarted if this
         // blueprint container is restarted
