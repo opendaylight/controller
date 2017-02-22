@@ -13,11 +13,11 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.opendaylight.controller.md.sal.dom.store.impl.DatastoreTestTask.WriteTransactionCustomizer;
+import org.opendaylight.mdsal.binding.generator.impl.ModuleInfoBackedContext;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.Top;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.TwoLevelList;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.two.level.list.TopLevelList;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.two.level.list.top.level.list.NestedList;
-import org.opendaylight.yangtools.sal.binding.generator.impl.ModuleInfoBackedContext;
 import org.opendaylight.yangtools.util.concurrent.SpecialExecutors;
 import org.opendaylight.yangtools.yang.binding.YangModuleInfo;
 import org.opendaylight.yangtools.yang.binding.util.BindingReflections;
@@ -51,23 +51,23 @@ public abstract class AbstractDataChangeListenerTest {
 
     @Before
     public final void setup() throws Exception {
-        YangModuleInfo moduleInfo = BindingReflections
+        final YangModuleInfo moduleInfo = BindingReflections
                 .getModuleInfo(TwoLevelList.class);
-        ModuleInfoBackedContext context = ModuleInfoBackedContext.create();
+        final ModuleInfoBackedContext context = ModuleInfoBackedContext.create();
         context.registerModuleInfo(moduleInfo);
-        schemaContext = context.tryToCreateSchemaContext().get();
+        this.schemaContext = context.tryToCreateSchemaContext().get();
 
-        dclExecutorService = new TestDCLExecutorService(
+        this.dclExecutorService = new TestDCLExecutorService(
                 SpecialExecutors.newBlockingBoundedFastThreadPool(1, 10, "DCL" ));
 
-        datastore = new InMemoryDOMDataStore("TEST", dclExecutorService);
-        datastore.onGlobalContextUpdated(schemaContext);
+        this.datastore = new InMemoryDOMDataStore("TEST", this.dclExecutorService);
+        this.datastore.onGlobalContextUpdated(this.schemaContext);
     }
 
     @After
     public void tearDown() {
-        if( dclExecutorService != null ) {
-            dclExecutorService.shutdownNow();
+        if( this.dclExecutorService != null ) {
+            this.dclExecutorService.shutdownNow();
         }
     }
 
@@ -79,7 +79,7 @@ public abstract class AbstractDataChangeListenerTest {
      *         children.
      */
     public final DatastoreTestTask newTestTask() {
-        return new DatastoreTestTask(datastore, dclExecutorService).cleanup(DatastoreTestTask
+        return new DatastoreTestTask(this.datastore, this.dclExecutorService).cleanup(DatastoreTestTask
                 .simpleDelete(TOP_LEVEL));
     }
 
@@ -113,26 +113,26 @@ public abstract class AbstractDataChangeListenerTest {
     }
 
     protected static <K> void assertContains(final Collection<K> set, final K... values) {
-        for (K key : values) {
+        for (final K key : values) {
             Assert.assertTrue(set.contains(key));
         }
 
     }
 
     protected static <K> void assertNotContains(final Collection<K> set, final K... values) {
-        for (K key : values) {
+        for (final K key : values) {
             Assert.assertFalse(set.contains(key));
         }
     }
 
     protected static <K> void assertContains(final Map<K,?> map, final K... values) {
-        for (K key : values) {
+        for (final K key : values) {
             Assert.assertTrue(map.containsKey(key));
         }
     }
 
     protected static <K> void assertNotContains(final Map<K,?> map, final K... values) {
-        for (K key : values) {
+        for (final K key : values) {
             Assert.assertFalse(map.containsKey(key));
         }
     }
@@ -159,8 +159,8 @@ public abstract class AbstractDataChangeListenerTest {
 
     public static final WriteTransactionCustomizer writeOneTopMultipleNested(
             final String topName, final String... nestedName) {
-        CollectionNodeBuilder<MapEntryNode, OrderedMapNode> nestedMapBuilder = nestedMap();
-        for (String nestedItem : nestedName) {
+        final CollectionNodeBuilder<MapEntryNode, OrderedMapNode> nestedMapBuilder = nestedMap();
+        for (final String nestedItem : nestedName) {
             nestedMapBuilder.addChild(nestedList(nestedItem).build());
         }
 
