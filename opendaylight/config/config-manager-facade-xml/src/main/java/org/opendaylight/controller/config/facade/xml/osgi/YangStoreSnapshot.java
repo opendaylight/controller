@@ -29,8 +29,8 @@ import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
 import org.opendaylight.controller.config.yangjmxgenerator.PackageTranslator;
 import org.opendaylight.controller.config.yangjmxgenerator.ServiceInterfaceEntry;
 import org.opendaylight.controller.config.yangjmxgenerator.TypeProviderWrapper;
-import org.opendaylight.yangtools.sal.binding.generator.util.BindingRuntimeContext;
-import org.opendaylight.yangtools.sal.binding.yang.types.TypeProviderImpl;
+import org.opendaylight.mdsal.binding.generator.util.BindingRuntimeContext;
+import org.opendaylight.mdsal.binding.yang.types.TypeProviderImpl;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.model.api.IdentitySchemaNode;
 import org.opendaylight.yangtools.yang.model.api.Module;
@@ -52,16 +52,16 @@ final class YangStoreSnapshot implements YangStoreContext, EnumResolver {
             LOG.trace("Resolved modules:{}", schemaContext.getModules());
 
             // JMX generator
-            Map<String, String> namespaceToPackageMapping = Maps.newHashMap();
-            PackageTranslator packageTranslator = new PackageTranslator(namespaceToPackageMapping);
-            Map<QName, ServiceInterfaceEntry> qNamesToSIEs = new HashMap<>();
-            Map<IdentitySchemaNode, ServiceInterfaceEntry> knownSEITracker = new HashMap<>();
+            final Map<String, String> namespaceToPackageMapping = Maps.newHashMap();
+            final PackageTranslator packageTranslator = new PackageTranslator(namespaceToPackageMapping);
+            final Map<QName, ServiceInterfaceEntry> qNamesToSIEs = new HashMap<>();
+            final Map<IdentitySchemaNode, ServiceInterfaceEntry> knownSEITracker = new HashMap<>();
             // create SIE structure qNamesToSIEs
-            for (Module module : schemaContext.getModules()) {
-                String packageName = packageTranslator.getPackageName(module);
-                Map<QName, ServiceInterfaceEntry> namesToSIEntries = ServiceInterfaceEntry
+            for (final Module module : schemaContext.getModules()) {
+                final String packageName = packageTranslator.getPackageName(module);
+                final Map<QName, ServiceInterfaceEntry> namesToSIEntries = ServiceInterfaceEntry
                         .create(module, packageName, knownSEITracker);
-                for (Entry<QName, ServiceInterfaceEntry> sieEntry : namesToSIEntries.entrySet()) {
+                for (final Entry<QName, ServiceInterfaceEntry> sieEntry : namesToSIEntries.entrySet()) {
                     // merge value into qNamesToSIEs
                     if (qNamesToSIEs.containsKey(sieEntry.getKey()) == false) {
                         qNamesToSIEs.put(sieEntry.getKey(), sieEntry.getValue());
@@ -72,19 +72,19 @@ final class YangStoreSnapshot implements YangStoreContext, EnumResolver {
                 }
             }
 
-            Map<String, Map<String, ModuleMXBeanEntry>> moduleMXBeanEntryMap = Maps.newHashMap();
+            final Map<String, Map<String, ModuleMXBeanEntry>> moduleMXBeanEntryMap = Maps.newHashMap();
 
-            Map<QName, Map<String /* identity local name */, ModuleMXBeanEntry>> qNamesToIdentitiesToModuleMXBeanEntries = new HashMap<>();
+            final Map<QName, Map<String /* identity local name */, ModuleMXBeanEntry>> qNamesToIdentitiesToModuleMXBeanEntries = new HashMap<>();
 
 
-            for (Module module : schemaContext.getModules()) {
-                String packageName = packageTranslator.getPackageName(module);
-                TypeProviderWrapper typeProviderWrapper = new TypeProviderWrapper(
+            for (final Module module : schemaContext.getModules()) {
+                final String packageName = packageTranslator.getPackageName(module);
+                final TypeProviderWrapper typeProviderWrapper = new TypeProviderWrapper(
                         new TypeProviderImpl(schemaContext));
 
-                QName qName = QName.create(module.getNamespace(), module.getRevision(), module.getName());
+                final QName qName = QName.create(module.getNamespace(), module.getRevision(), module.getName());
 
-                Map<String /* MB identity local name */, ModuleMXBeanEntry> namesToMBEs =
+                final Map<String /* MB identity local name */, ModuleMXBeanEntry> namesToMBEs =
                         Collections.unmodifiableMap(ModuleMXBeanEntry.create(module, qNamesToSIEs, schemaContext,
                                 typeProviderWrapper, packageName));
                 moduleMXBeanEntryMap.put(module.getNamespace().toString(), namesToMBEs);
@@ -114,14 +114,14 @@ final class YangStoreSnapshot implements YangStoreContext, EnumResolver {
     }
 
     private MXBeans getMXBeans() {
-        MXBeans mxBean = ref.get();
+        MXBeans mxBean = this.ref.get();
 
         if (mxBean == null) {
             synchronized (this) {
-                mxBean = ref.get();
+                mxBean = this.ref.get();
                 if (mxBean == null) {
-                    mxBean = new MXBeans(bindingContextProvider.getSchemaContext());
-                    ref = new SoftReference<>(mxBean);
+                    mxBean = new MXBeans(this.bindingContextProvider.getSchemaContext());
+                    this.ref = new SoftReference<>(mxBean);
                 }
             }
         }
@@ -141,8 +141,8 @@ final class YangStoreSnapshot implements YangStoreContext, EnumResolver {
 
     @Override
     public Set<Module> getModules() {
-        final Set<Module> modules = Sets.newHashSet(bindingContextProvider.getSchemaContext().getModules());
-        for (final Module module : bindingContextProvider.getSchemaContext().getModules()) {
+        final Set<Module> modules = Sets.newHashSet(this.bindingContextProvider.getSchemaContext().getModules());
+        for (final Module module : this.bindingContextProvider.getSchemaContext().getModules()) {
             modules.addAll(module.getSubmodules());
         }
         return modules;
@@ -150,7 +150,7 @@ final class YangStoreSnapshot implements YangStoreContext, EnumResolver {
 
     @Override
     public String getModuleSource(final org.opendaylight.yangtools.yang.model.api.ModuleIdentifier moduleIdentifier) {
-        final CheckedFuture<? extends YangTextSchemaSource, SchemaSourceException> source = sourceProvider.getSource(
+        final CheckedFuture<? extends YangTextSchemaSource, SchemaSourceException> source = this.sourceProvider.getSource(
             SourceIdentifier.create(moduleIdentifier.getName(), Optional.fromNullable(
                 QName.formattedRevision(moduleIdentifier.getRevision()))));
 
@@ -180,26 +180,26 @@ final class YangStoreSnapshot implements YangStoreContext, EnumResolver {
         }
 
         final YangStoreSnapshot other = (YangStoreSnapshot) obj;
-        return Objects.equals(bindingContextProvider, other.bindingContextProvider);
+        return Objects.equals(this.bindingContextProvider, other.bindingContextProvider);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(bindingContextProvider);
+        return Objects.hashCode(this.bindingContextProvider);
     }
 
     @Override
     public String fromYang(final String enumClass, final String enumYangValue) {
-        Preconditions.checkState(bindingContextProvider != null, "Binding context provider was not set yet");
-        final BiMap<String, String> enumMapping = bindingContextProvider.getEnumMapping(enumClass);
+        Preconditions.checkState(this.bindingContextProvider != null, "Binding context provider was not set yet");
+        final BiMap<String, String> enumMapping = this.bindingContextProvider.getEnumMapping(enumClass);
         final String javaName = enumMapping.get(enumYangValue);
         return Preconditions.checkNotNull(javaName, "Unable to resolve enum value %s for enum class %s with assumed enum mapping: %s", enumYangValue, enumClass, enumMapping);
     }
 
     @Override
     public String toYang(final String enumClass, final String enumJavaValue) {
-        Preconditions.checkState(bindingContextProvider != null, "Binding context provider was not set yet");
-        final BiMap<String, String> enumMapping = bindingContextProvider.getEnumMapping(enumClass);
+        Preconditions.checkState(this.bindingContextProvider != null, "Binding context provider was not set yet");
+        final BiMap<String, String> enumMapping = this.bindingContextProvider.getEnumMapping(enumClass);
         final String javaName = enumMapping.inverse().get(enumJavaValue);
         return Preconditions.checkNotNull(javaName,
             "Unable to map enum value %s for enum class %s with assumed enum mapping: %s", enumJavaValue, enumClass,

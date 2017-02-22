@@ -8,7 +8,7 @@
 package org.opendaylight.controller.md.sal.binding.test;
 
 import org.junit.Before;
-import org.opendaylight.yangtools.sal.binding.generator.impl.ModuleInfoBackedContext;
+import org.opendaylight.mdsal.binding.generator.impl.ModuleInfoBackedContext;
 import org.opendaylight.yangtools.yang.binding.YangModuleInfo;
 import org.opendaylight.yangtools.yang.binding.util.BindingReflections;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -20,8 +20,8 @@ public abstract class AbstractSchemaAwareTest  {
     }
 
     protected SchemaContext getSchemaContext() throws Exception {
-        Iterable<YangModuleInfo> moduleInfos = getModuleInfos();
-        ModuleInfoBackedContext moduleContext = ModuleInfoBackedContext.create();
+        final Iterable<YangModuleInfo> moduleInfos = getModuleInfos();
+        final ModuleInfoBackedContext moduleContext = ModuleInfoBackedContext.create();
         moduleContext.addModuleInfos(moduleInfos);
         return moduleContext.tryToCreateSchemaContext().get();
     }
