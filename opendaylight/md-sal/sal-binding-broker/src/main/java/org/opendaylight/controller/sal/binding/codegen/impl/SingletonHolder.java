@@ -20,11 +20,11 @@ import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import javassist.ClassPool;
 import org.apache.commons.lang3.StringUtils;
-import org.opendaylight.yangtools.sal.binding.generator.util.JavassistUtils;
+import org.opendaylight.mdsal.binding.generator.util.JavassistUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import javassist.ClassPool;
 
 public class SingletonHolder {
     private static final Logger logger = LoggerFactory.getLogger(SingletonHolder.class);

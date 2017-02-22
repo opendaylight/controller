@@ -14,27 +14,27 @@ import java.math.BigInteger;
 import java.util.Date;
 import java.util.Map;
 import javax.management.openmbean.SimpleType;
-import org.opendaylight.yangtools.sal.binding.model.api.Type;
+import org.opendaylight.mdsal.binding.model.api.Type;
 
 public class SimpleTypeResolver {
 
     private SimpleTypeResolver() {
     }
 
-    public static SimpleType<?> getSimpleType(Type type) {
-        SimpleType<?> expectedSimpleType = JAVA_TYPE_TO_SIMPLE_TYPE.get(type
+    public static SimpleType<?> getSimpleType(final Type type) {
+        final SimpleType<?> expectedSimpleType = JAVA_TYPE_TO_SIMPLE_TYPE.get(type
                 .getFullyQualifiedName());
         Preconditions.checkState(expectedSimpleType != null,
                 "Cannot find simple type for " + type.getFullyQualifiedName());
         return expectedSimpleType;
     }
 
-    public static boolean canResolve(Type type) {
+    public static boolean canResolve(final Type type) {
         return JAVA_TYPE_TO_SIMPLE_TYPE.containsKey(type.getFullyQualifiedName());
     }
 
-    public static SimpleType<?> getSimpleType(String fullyQualifiedName) {
-        SimpleType<?> expectedSimpleType = JAVA_TYPE_TO_SIMPLE_TYPE
+    public static SimpleType<?> getSimpleType(final String fullyQualifiedName) {
+        final SimpleType<?> expectedSimpleType = JAVA_TYPE_TO_SIMPLE_TYPE
                 .get(fullyQualifiedName);
         Preconditions.checkState(expectedSimpleType != null,
                 "Cannot find simple type for " + fullyQualifiedName);

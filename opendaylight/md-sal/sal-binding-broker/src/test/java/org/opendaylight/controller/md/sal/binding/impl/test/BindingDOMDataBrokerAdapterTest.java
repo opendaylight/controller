@@ -20,11 +20,11 @@ import org.opendaylight.controller.md.sal.binding.impl.BindingToNormalizedNodeCo
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.md.sal.dom.api.ClusteredDOMDataChangeListener;
+import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
+import org.opendaylight.mdsal.binding.generator.impl.GeneratedClassLoadingStrategy;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.Top;
 import org.opendaylight.yangtools.binding.data.codec.impl.BindingNormalizedNodeCodecRegistry;
-import org.opendaylight.yangtools.sal.binding.generator.impl.GeneratedClassLoadingStrategy;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -55,26 +55,26 @@ public class BindingDOMDataBrokerAdapterTest {
     @Test
     public void testClusteredDataChangeListernerRegisteration() {
 
-        BindingToNormalizedNodeCodec codec = new BindingToNormalizedNodeCodec(classLoadingStrategy, codecRegistry);
+        final BindingToNormalizedNodeCodec codec = new BindingToNormalizedNodeCodec(this.classLoadingStrategy, this.codecRegistry);
 
-        try (BindingDOMDataBrokerAdapter bindingDOMDataBrokerAdapter = new BindingDOMDataBrokerAdapter(dataBroker,
+        try (BindingDOMDataBrokerAdapter bindingDOMDataBrokerAdapter = new BindingDOMDataBrokerAdapter(this.dataBroker,
                 codec)) {
-            Mockito.when(codecRegistry.toYangInstanceIdentifier(TOP_PATH)).thenReturn(yangInstanceIdentifier);
+            Mockito.when(this.codecRegistry.toYangInstanceIdentifier(TOP_PATH)).thenReturn(this.yangInstanceIdentifier);
 
-            ArgumentCaptor<ClusteredDOMDataChangeListener> clusteredDOMListener = ArgumentCaptor
+            final ArgumentCaptor<ClusteredDOMDataChangeListener> clusteredDOMListener = ArgumentCaptor
                     .forClass(ClusteredDOMDataChangeListener.class);
-            ArgumentCaptor<LogicalDatastoreType> logicalDatastoreType = ArgumentCaptor
+            final ArgumentCaptor<LogicalDatastoreType> logicalDatastoreType = ArgumentCaptor
                     .forClass(LogicalDatastoreType.class);
-            ArgumentCaptor<AsyncDataBroker.DataChangeScope> dataChangeScope = ArgumentCaptor
+            final ArgumentCaptor<AsyncDataBroker.DataChangeScope> dataChangeScope = ArgumentCaptor
                     .forClass(AsyncDataBroker.DataChangeScope.class);
-            ArgumentCaptor<YangInstanceIdentifier> yangInstanceIdentifier = ArgumentCaptor
+            final ArgumentCaptor<YangInstanceIdentifier> yangInstanceIdentifier = ArgumentCaptor
                     .forClass(YangInstanceIdentifier.class);
 
-            TestListener listener = new TestListener();
+            final TestListener listener = new TestListener();
 
             bindingDOMDataBrokerAdapter.registerDataChangeListener(LogicalDatastoreType.OPERATIONAL, TOP_PATH,
                     listener, AsyncDataBroker.DataChangeScope.BASE);
-            Mockito.verify(dataBroker).registerDataChangeListener(logicalDatastoreType.capture(),
+            Mockito.verify(this.dataBroker).registerDataChangeListener(logicalDatastoreType.capture(),
                     yangInstanceIdentifier.capture(), clusteredDOMListener.capture(), dataChangeScope.capture());
         }
 
@@ -83,7 +83,7 @@ public class BindingDOMDataBrokerAdapterTest {
     private class TestListener implements ClusteredDataChangeListener {
 
         @Override
-        public void onDataChanged(AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> change) {
+        public void onDataChanged(final AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> change) {
 
         }
     }
