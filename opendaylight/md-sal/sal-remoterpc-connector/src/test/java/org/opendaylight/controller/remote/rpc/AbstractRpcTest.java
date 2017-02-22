@@ -26,6 +26,7 @@ import org.mockito.MockitoAnnotations;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcIdentifier;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcResult;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
+import org.opendaylight.controller.sal.core.api.Broker;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcError.ErrorSeverity;
@@ -71,6 +72,7 @@ public class AbstractRpcTest {
     protected JavaTestKit rpcRegistry1Probe;
     protected ActorRef rpcInvoker2;
     protected JavaTestKit rpcRegistry2Probe;
+    protected Broker.ProviderSession brokerSession;
     protected SchemaContext schemaContext;
     protected RemoteRpcImplementation remoteRpcImpl1;
     protected RemoteRpcImplementation remoteRpcImpl2;

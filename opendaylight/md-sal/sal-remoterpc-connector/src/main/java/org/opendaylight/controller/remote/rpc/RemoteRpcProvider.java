@@ -12,8 +12,13 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.PoisonPill;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableSet;
+import java.util.Collection;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcProviderService;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
+import org.opendaylight.controller.sal.core.api.Broker;
+import org.opendaylight.controller.sal.core.api.Provider;
+import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,23 +26,31 @@ import org.slf4j.LoggerFactory;
  * This is the base class which initialize all the actors, listeners and
  * default RPc implementation so remote invocation of rpcs.
  */
-public class RemoteRpcProvider implements AutoCloseable {
+public class RemoteRpcProvider implements AutoCloseable, Provider {
 
     private static final Logger LOG = LoggerFactory.getLogger(RemoteRpcProvider.class);
 
     private final DOMRpcProviderService rpcProvisionRegistry;
     private final RemoteRpcProviderConfig config;
     private final ActorSystem actorSystem;
-    private final DOMRpcService rpcService;
 
+    private DOMRpcService rpcService;
+    private SchemaService schemaService;
     private ActorRef rpcManager;
 
     public RemoteRpcProvider(final ActorSystem actorSystem, final DOMRpcProviderService rpcProvisionRegistry,
-            final DOMRpcService rpcService, final RemoteRpcProviderConfig config) {
-        this.actorSystem = Preconditions.checkNotNull(actorSystem);
-        this.rpcProvisionRegistry = Preconditions.checkNotNull(rpcProvisionRegistry);
-        this.rpcService = Preconditions.checkNotNull(rpcService);
+            final RemoteRpcProviderConfig config) {
+        this.actorSystem = actorSystem;
+        this.rpcProvisionRegistry = rpcProvisionRegistry;
         this.config = Preconditions.checkNotNull(config);
+    }
+
+    public void setRpcService(final DOMRpcService rpcService) {
+        this.rpcService = rpcService;
+    }
+
+    public void setSchemaService(final SchemaService schemaService) {
+        this.schemaService = schemaService;
     }
 
     @Override
@@ -47,6 +60,17 @@ public class RemoteRpcProvider implements AutoCloseable {
             rpcManager.tell(PoisonPill.getInstance(), ActorRef.noSender());
             rpcManager = null;
         }
+    }
+
+    @Override
+    public void onSessionInitiated(final Broker.ProviderSession session) {
+        rpcService = session.getService(DOMRpcService.class);
+        start();
+    }
+
+    @Override
+    public Collection<ProviderFunctionality> getProviderFunctionality() {
+        return ImmutableSet.of();
     }
 
     public void start() {
