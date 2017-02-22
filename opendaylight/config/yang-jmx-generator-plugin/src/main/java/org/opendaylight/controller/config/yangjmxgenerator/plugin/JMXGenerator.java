@@ -30,7 +30,7 @@ import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
 import org.opendaylight.controller.config.yangjmxgenerator.PackageTranslator;
 import org.opendaylight.controller.config.yangjmxgenerator.ServiceInterfaceEntry;
 import org.opendaylight.controller.config.yangjmxgenerator.TypeProviderWrapper;
-import org.opendaylight.yangtools.sal.binding.yang.types.TypeProviderImpl;
+import org.opendaylight.mdsal.binding.yang.types.TypeProviderImpl;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.model.api.IdentitySchemaNode;
 import org.opendaylight.yangtools.yang.model.api.Module;
@@ -88,27 +88,27 @@ public class JMXGenerator implements BasicCodeGenerator, MavenProjectAware {
                 "Null outputBaseDir received");
 
         Preconditions
-                .checkArgument(namespaceToPackageMapping != null && !namespaceToPackageMapping.isEmpty(),
+                .checkArgument((this.namespaceToPackageMapping != null) && !this.namespaceToPackageMapping.isEmpty(),
                         "No namespace to package mapping provided in additionalConfiguration");
 
-        PackageTranslator packageTranslator = new PackageTranslator(namespaceToPackageMapping);
+        final PackageTranslator packageTranslator = new PackageTranslator(this.namespaceToPackageMapping);
 
         if (!outputBaseDir.exists()) {
             outputBaseDir.mkdirs();
         }
 
-        GeneratedFilesTracker generatedFiles = new GeneratedFilesTracker();
+        final GeneratedFilesTracker generatedFiles = new GeneratedFilesTracker();
         // create SIE structure qNamesToSIEs
-        Map<QName, ServiceInterfaceEntry> qNamesToSIEs = new HashMap<>();
+        final Map<QName, ServiceInterfaceEntry> qNamesToSIEs = new HashMap<>();
 
 
-        Map<IdentitySchemaNode, ServiceInterfaceEntry> knownSEITracker = new HashMap<>();
-        for (Module module : context.getModules()) {
-            String packageName = packageTranslator.getPackageName(module);
-            Map<QName, ServiceInterfaceEntry> namesToSIEntries = ServiceInterfaceEntry
+        final Map<IdentitySchemaNode, ServiceInterfaceEntry> knownSEITracker = new HashMap<>();
+        for (final Module module : context.getModules()) {
+            final String packageName = packageTranslator.getPackageName(module);
+            final Map<QName, ServiceInterfaceEntry> namesToSIEntries = ServiceInterfaceEntry
                     .create(module, packageName, knownSEITracker);
 
-            for (Entry<QName, ServiceInterfaceEntry> sieEntry : namesToSIEntries
+            for (final Entry<QName, ServiceInterfaceEntry> sieEntry : namesToSIEntries
                     .entrySet()) {
                 // merge value into qNamesToSIEs
                 if (qNamesToSIEs.put(sieEntry.getKey(), sieEntry.getValue()) != null) {
@@ -119,11 +119,11 @@ public class JMXGenerator implements BasicCodeGenerator, MavenProjectAware {
             }
             if (yangModulesInCurrentMavenModule.contains(module)) {
                 // write this sie to disk
-                for (ServiceInterfaceEntry sie : namesToSIEntries.values()) {
+                for (final ServiceInterfaceEntry sie : namesToSIEntries.values()) {
                     try {
-                        generatedFiles.addFile(codeWriter.writeSie(sie,
+                        generatedFiles.addFile(this.codeWriter.writeSie(sie,
                                 outputBaseDir));
-                    } catch (Exception e) {
+                    } catch (final Exception e) {
                         throw new RuntimeException(
                                 "Error occurred during SIE source generate phase",
                                 e);
@@ -132,26 +132,26 @@ public class JMXGenerator implements BasicCodeGenerator, MavenProjectAware {
             }
         }
 
-        File mainBaseDir = concatFolders(projectBaseDir, "src", "main", "java");
-        Preconditions.checkNotNull(resourceBaseDir,
+        final File mainBaseDir = concatFolders(this.projectBaseDir, "src", "main", "java");
+        Preconditions.checkNotNull(this.resourceBaseDir,
                 "resource base dir attribute was null");
 
-        StringBuilder fullyQualifiedNamesOfFactories = new StringBuilder();
+        final StringBuilder fullyQualifiedNamesOfFactories = new StringBuilder();
         // create MBEs
-        for (Module module : yangModulesInCurrentMavenModule) {
-            String packageName = packageTranslator.getPackageName(module);
-            Map<String /* MB identity local name */, ModuleMXBeanEntry> namesToMBEs = ModuleMXBeanEntry
+        for (final Module module : yangModulesInCurrentMavenModule) {
+            final String packageName = packageTranslator.getPackageName(module);
+            final Map<String /* MB identity local name */, ModuleMXBeanEntry> namesToMBEs = ModuleMXBeanEntry
                     .create(module, qNamesToSIEs, context, new TypeProviderWrapper(new TypeProviderImpl(context)),
                             packageName);
 
-            for (Entry<String, ModuleMXBeanEntry> mbeEntry : namesToMBEs
+            for (final Entry<String, ModuleMXBeanEntry> mbeEntry : namesToMBEs
                     .entrySet()) {
-                ModuleMXBeanEntry mbe = mbeEntry.getValue();
+                final ModuleMXBeanEntry mbe = mbeEntry.getValue();
                 try {
-                    List<File> files1 = codeWriter.writeMbe(mbe, outputBaseDir,
+                    final List<File> files1 = this.codeWriter.writeMbe(mbe, outputBaseDir,
                             mainBaseDir);
                     generatedFiles.addFile(files1);
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     throw new RuntimeException(
                             "Error occurred during MBE source generate phase",
                             e);
@@ -162,18 +162,18 @@ public class JMXGenerator implements BasicCodeGenerator, MavenProjectAware {
             }
         }
         // create ModuleFactory file if needed
-        if (fullyQualifiedNamesOfFactories.length() > 0
-                && generateModuleFactoryFile) {
-            File serviceLoaderFile = JMXGenerator.concatFolders(
-                    resourceBaseDir, "META-INF", "services",
+        if ((fullyQualifiedNamesOfFactories.length() > 0)
+                && this.generateModuleFactoryFile) {
+            final File serviceLoaderFile = JMXGenerator.concatFolders(
+                    this.resourceBaseDir, "META-INF", "services",
                     ModuleFactory.class.getName());
             // if this file does not exist, create empty file
             serviceLoaderFile.getParentFile().mkdirs();
             try {
                 serviceLoaderFile.createNewFile();
                 Files.write(fullyQualifiedNamesOfFactories.toString(), serviceLoaderFile, StandardCharsets.UTF_8);
-            } catch (IOException e) {
-                String message = "Cannot write to " + serviceLoaderFile;
+            } catch (final IOException e) {
+                final String message = "Cannot write to " + serviceLoaderFile;
                 LOG.error(message, e);
                 throw new RuntimeException(message, e);
             }
@@ -184,7 +184,7 @@ public class JMXGenerator implements BasicCodeGenerator, MavenProjectAware {
     @VisibleForTesting
     static File concatFolders(final File projectBaseDir, final String... folderNames) {
         File result = projectBaseDir;
-        for (String folder: folderNames) {
+        for (final String folder: folderNames) {
             result = new File(result, folder);
         }
         return result;
@@ -198,17 +198,17 @@ public class JMXGenerator implements BasicCodeGenerator, MavenProjectAware {
     }
 
     private static boolean extractModuleFactoryBoolean(final Map<String, String> additionalCfg) {
-        String bool = additionalCfg.get(MODULE_FACTORY_FILE_BOOLEAN);
+        final String bool = additionalCfg.get(MODULE_FACTORY_FILE_BOOLEAN);
         return !"false".equals(bool);
     }
 
     private static Map<String, String> extractNamespaceMapping(
             final Map<String, String> additionalCfg) {
-        Map<String, String> namespaceToPackage = Maps.newHashMap();
-        for (String key : additionalCfg.keySet()) {
+        final Map<String, String> namespaceToPackage = Maps.newHashMap();
+        for (final String key : additionalCfg.keySet()) {
             if (key.startsWith(NAMESPACE_TO_PACKAGE_PREFIX)) {
-                String mapping = additionalCfg.get(key);
-                NamespaceMapping mappingResolved = extractNamespaceMapping(mapping);
+                final String mapping = additionalCfg.get(key);
+                final NamespaceMapping mappingResolved = extractNamespaceMapping(mapping);
                 namespaceToPackage.put(mappingResolved.namespace,
                         mappingResolved.packageName);
             }
@@ -217,7 +217,7 @@ public class JMXGenerator implements BasicCodeGenerator, MavenProjectAware {
     }
 
     private static NamespaceMapping extractNamespaceMapping(final String mapping) {
-        Matcher matcher = NAMESPACE_MAPPING_PATTERN.matcher(mapping);
+        final Matcher matcher = NAMESPACE_MAPPING_PATTERN.matcher(mapping);
         Preconditions.checkArgument(matcher.matches(),
             "Namespace to package mapping:%s is in invalid format, requested format is: %s",
             mapping, NAMESPACE_MAPPING_PATTERN);
@@ -232,7 +232,7 @@ public class JMXGenerator implements BasicCodeGenerator, MavenProjectAware {
     @Override
     public void setMavenProject(final MavenProject project) {
         this.projectBaseDir = project.getBasedir();
-        LOG.debug("{}: project base dir: {}", getClass().getCanonicalName(), projectBaseDir);
+        LOG.debug("{}: project base dir: {}", getClass().getCanonicalName(), this.projectBaseDir);
     }
 
     @VisibleForTesting
@@ -240,9 +240,9 @@ public class JMXGenerator implements BasicCodeGenerator, MavenProjectAware {
         private final Set<File> files = Sets.newHashSet();
 
         void addFile(final File file) {
-            if (files.contains(file)) {
-                List<File> undeletedFiles = Lists.newArrayList();
-                for (File presentFile : files) {
+            if (this.files.contains(file)) {
+                final List<File> undeletedFiles = Lists.newArrayList();
+                for (final File presentFile : this.files) {
                     if (!presentFile.delete()) {
                         undeletedFiles.add(presentFile);
                     }
@@ -256,17 +256,17 @@ public class JMXGenerator implements BasicCodeGenerator, MavenProjectAware {
                         "Name conflict in generated files, file" + file
                                 + " present twice");
             }
-            files.add(file);
+            this.files.add(file);
         }
 
         void addFile(final Collection<File> files) {
-            for (File file : files) {
+            for (final File file : files) {
                 addFile(file);
             }
         }
 
         public Set<File> getFiles() {
-            return files;
+            return this.files;
         }
     }
 }

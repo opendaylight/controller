@@ -9,7 +9,6 @@ package org.opendaylight.controller.config.yangjmxgenerator;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
-
 import com.google.common.base.Preconditions;
 import java.io.File;
 import java.io.FileInputStream;
@@ -22,7 +21,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.util.NameConflictException;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.util.YangModelSearchUtils;
-import org.opendaylight.yangtools.sal.binding.yang.types.TypeProviderImpl;
+import org.opendaylight.mdsal.binding.yang.types.TypeProviderImpl;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.test.util.YangParserTestUtils;
 import org.slf4j.Logger;
@@ -43,23 +42,23 @@ public class ModuleMXBeanEntryNameConflictTest extends AbstractYangTest {
         prepareSamples();
         prepareExceptionAssertions();
 
-        for (Map.Entry<File, String> currentTestEntry : testedFilesToYangModules
+        for (final Map.Entry<File, String> currentTestEntry : this.testedFilesToYangModules
                 .entrySet()) {
             final String moduleName = currentTestEntry.getValue();
             final File yangFile = currentTestEntry.getKey();
-            Module testedModule = loadYangs(yangFile, moduleName);
+            final Module testedModule = loadYangs(yangFile, moduleName);
 
             try {
                 LOG.debug("Testing {}", yangFile);
                 ModuleMXBeanEntry.create(testedModule,
-                        new HashMap<>(), context,
-                        new TypeProviderWrapper(new TypeProviderImpl(context)),
+                        new HashMap<>(), this.context,
+                        new TypeProviderWrapper(new TypeProviderImpl(this.context)),
                         PACKAGE_NAME);
                 fail(yangFile.toString()
                         + " did not cause a name conflict and should");
-            } catch (NameConflictException e) {
+            } catch (final NameConflictException e) {
                 assertEquals(
-                        testedYangModulesToExpectedConflictingName
+                        this.testedYangModulesToExpectedConflictingName
                                 .get(moduleName),
                         e.getConflictingName());
             }
@@ -67,68 +66,68 @@ public class ModuleMXBeanEntryNameConflictTest extends AbstractYangTest {
     }
 
     private void prepareSamples() {
-        File first = new File(getClass().getResource(
+        final File first = new File(getClass().getResource(
                 "/duplicates/config-test-duplicate-attribute-in-list.yang")
                 .getFile());
-        File dir = first.getParentFile();
+        final File dir = first.getParentFile();
 
-        for (File testYang : dir.listFiles()) {
-            String moduleName = getYangModuleName(testYang.getName());
-            testedFilesToYangModules.put(testYang, moduleName);
+        for (final File testYang : dir.listFiles()) {
+            final String moduleName = getYangModuleName(testYang.getName());
+            this.testedFilesToYangModules.put(testYang, moduleName);
         }
     }
 
     private void prepareExceptionAssertions() {
-        testedYangModulesToExpectedConflictingName.put(
+        this.testedYangModulesToExpectedConflictingName.put(
                 "config-test-duplicate-attribute", "DtoA");
-        testedYangModulesToExpectedConflictingName.put(
+        this.testedYangModulesToExpectedConflictingName.put(
                 "config-test-duplicate-attribute-in-list", "DtoA");
-        testedYangModulesToExpectedConflictingName.put(
+        this.testedYangModulesToExpectedConflictingName.put(
                 "config-test-duplicate-attribute-runtime-bean", "DtoA");
-        testedYangModulesToExpectedConflictingName.put(
+        this.testedYangModulesToExpectedConflictingName.put(
                 "config-test-generated-attributes-name-conflict", "StateB");
-        testedYangModulesToExpectedConflictingName.put(
+        this.testedYangModulesToExpectedConflictingName.put(
                 "config-test-runtime-bean-list-name-conflict",
                 "StateARuntimeMXBean");
-        testedYangModulesToExpectedConflictingName.put(
+        this.testedYangModulesToExpectedConflictingName.put(
                 "config-test-runtime-bean-list-name-conflict2",
                 "StateARuntimeMXBean");
-        testedYangModulesToExpectedConflictingName
+        this.testedYangModulesToExpectedConflictingName
                 .put("config-test-runtime-bean-name-conflict", "StateARuntimeMXBean");
-        testedYangModulesToExpectedConflictingName.put(
+        this.testedYangModulesToExpectedConflictingName.put(
                 "config-test-runtime-bean-name-conflict2",
                 "StateARuntimeMXBean");
-        testedYangModulesToExpectedConflictingName.put(
+        this.testedYangModulesToExpectedConflictingName.put(
                 "config-test-duplicate-attribute-in-runtime-and-mxbean",
                 "port");
     }
 
     private static String getYangModuleName(final String name) {
-        int startIndex = 0;
-        int endIndex = name.indexOf(".yang");
+        final int startIndex = 0;
+        final int endIndex = name.indexOf(".yang");
         return name.substring(startIndex, endIndex);
     }
 
     private Module loadYangs(final File testedModule, final String moduleName)
             throws Exception {
-        List<InputStream> yangISs = new ArrayList<>();
+        final List<InputStream> yangISs = new ArrayList<>();
         yangISs.addAll(getStreams("/ietf-inet-types.yang"));
 
         yangISs.add(new FileInputStream(testedModule));
 
         yangISs.addAll(getConfigApiYangInputStreams());
 
-        context =  YangParserTestUtils.parseYangStreams(yangISs);
+        this.context =  YangParserTestUtils.parseYangStreams(yangISs);
         // close ISs
-        for (InputStream is : yangISs) {
+        for (final InputStream is : yangISs) {
             is.close();
         }
-        namesToModules = YangModelSearchUtils.mapModulesByNames(context
+        this.namesToModules = YangModelSearchUtils.mapModulesByNames(this.context
                 .getModules());
-        configModule = namesToModules.get(ConfigConstants.CONFIG_MODULE);
-        final Module module = namesToModules.get(moduleName);
+        this.configModule = this.namesToModules.get(ConfigConstants.CONFIG_MODULE);
+        final Module module = this.namesToModules.get(moduleName);
         Preconditions.checkNotNull(module, "Cannot get module %s from %s",
-                moduleName, namesToModules.keySet());
+                moduleName, this.namesToModules.keySet());
         return module;
     }
 

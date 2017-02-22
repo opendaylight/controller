@@ -15,7 +15,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.management.MBeanServer;
 import org.opendaylight.controller.config.facade.xml.ConfigSubsystemFacadeFactory;
 import org.opendaylight.controller.config.util.ConfigRegistryJMXClient;
-import org.opendaylight.yangtools.sal.binding.generator.util.BindingRuntimeContext;
+import org.opendaylight.mdsal.binding.generator.util.BindingRuntimeContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextProvider;
 import org.opendaylight.yangtools.yang.model.repo.api.YangTextSchemaSource;
 import org.opendaylight.yangtools.yang.model.repo.spi.SchemaSourceProvider;
@@ -47,25 +47,25 @@ public class YangStoreActivator implements BundleActivator {
         LOG.debug("ConfigPersister starting");
         this.context = context;
 
-        ServiceTrackerCustomizer<SchemaContextProvider, YangStoreService> schemaServiceTrackerCustomizer = new ServiceTrackerCustomizer<SchemaContextProvider, YangStoreService>() {
+        final ServiceTrackerCustomizer<SchemaContextProvider, YangStoreService> schemaServiceTrackerCustomizer = new ServiceTrackerCustomizer<SchemaContextProvider, YangStoreService>() {
 
             private final AtomicBoolean alreadyStarted = new AtomicBoolean(false);
 
             @Override
-            public YangStoreService addingService(ServiceReference<SchemaContextProvider> reference) {
+            public YangStoreService addingService(final ServiceReference<SchemaContextProvider> reference) {
                 LOG.debug("Got addingService(SchemaContextProvider) event");
-                if(reference.getProperty(SchemaSourceProvider.class.getName()) == null &&
-                    reference.getProperty(BindingRuntimeContext.class.getName()) == null) {
+                if((reference.getProperty(SchemaSourceProvider.class.getName()) == null) &&
+                    (reference.getProperty(BindingRuntimeContext.class.getName()) == null)) {
                     LOG.debug("SchemaContextProvider not from config-manager. Ignoring");
                     return null;
                 }
 
                 // Yang store service should not be registered multiple times
-                if(!alreadyStarted.compareAndSet(false, true)) {
+                if(!this.alreadyStarted.compareAndSet(false, true)) {
                     LOG.warn("Starting yang store service multiple times. Received new service {}", reference);
                     throw new RuntimeException("Starting yang store service multiple times");
                 }
-                SchemaContextProvider schemaContextProvider = reference.getBundle().getBundleContext().getService(reference);
+                final SchemaContextProvider schemaContextProvider = reference.getBundle().getBundleContext().getService(reference);
                 final Object sourceProvider = Preconditions.checkNotNull(
                     reference.getProperty(SchemaSourceProvider.class.getName()), "Source provider not found");
                 Preconditions.checkArgument(sourceProvider instanceof SchemaSourceProvider);
@@ -81,15 +81,15 @@ public class YangStoreActivator implements BundleActivator {
                     yangStoreService.refresh(runtimeContext);
                 }
 
-                yangStoreServiceServiceRegistration = context.registerService(YangStoreService.class, yangStoreService,
+                YangStoreActivator.this.yangStoreServiceServiceRegistration = context.registerService(YangStoreService.class, yangStoreService,
                         new Hashtable<>());
-                configRegistryLookup = new ConfigRegistryLookupThread(yangStoreService);
-                configRegistryLookup.start();
+                YangStoreActivator.this.configRegistryLookup = new ConfigRegistryLookupThread(yangStoreService);
+                YangStoreActivator.this.configRegistryLookup.start();
                 return yangStoreService;
             }
 
             @Override
-            public void modifiedService(ServiceReference<SchemaContextProvider> reference, YangStoreService service) {
+            public void modifiedService(final ServiceReference<SchemaContextProvider> reference, final YangStoreService service) {
                 if (service == null) {
                     return;
                 }
@@ -102,35 +102,35 @@ public class YangStoreActivator implements BundleActivator {
             }
 
             @Override
-            public void removedService(ServiceReference<SchemaContextProvider> reference, YangStoreService service) {
+            public void removedService(final ServiceReference<SchemaContextProvider> reference, final YangStoreService service) {
                 if(service == null) {
                     return;
                 }
 
                 LOG.debug("Got removedService(SchemaContextProvider) event");
-                alreadyStarted.set(false);
-                configRegistryLookup.interrupt();
-                yangStoreServiceServiceRegistration.unregister();
-                yangStoreServiceServiceRegistration = null;
+                this.alreadyStarted.set(false);
+                YangStoreActivator.this.configRegistryLookup.interrupt();
+                YangStoreActivator.this.yangStoreServiceServiceRegistration.unregister();
+                YangStoreActivator.this.yangStoreServiceServiceRegistration = null;
             }
         };
 
-        ServiceTracker<SchemaContextProvider, YangStoreService> schemaContextProviderServiceTracker =
+        final ServiceTracker<SchemaContextProvider, YangStoreService> schemaContextProviderServiceTracker =
                 new ServiceTracker<>(context, SchemaContextProvider.class, schemaServiceTrackerCustomizer);
         schemaContextProviderServiceTracker.open();
     }
 
     @Override
-    public void stop(BundleContext context) throws Exception {
-        if(configRegistryLookup != null) {
-            configRegistryLookup.interrupt();
+    public void stop(final BundleContext context) throws Exception {
+        if(this.configRegistryLookup != null) {
+            this.configRegistryLookup.interrupt();
         }
-        if(osgiRegistrayion != null) {
-            osgiRegistrayion.unregister();
+        if(this.osgiRegistrayion != null) {
+            this.osgiRegistrayion.unregister();
         }
-        if (yangStoreServiceServiceRegistration != null) {
-            yangStoreServiceServiceRegistration.unregister();
-            yangStoreServiceServiceRegistration = null;
+        if (this.yangStoreServiceServiceRegistration != null) {
+            this.yangStoreServiceServiceRegistration.unregister();
+            this.yangStoreServiceServiceRegistration = null;
         }
     }
 
@@ -143,7 +143,7 @@ public class YangStoreActivator implements BundleActivator {
 
         private final YangStoreService yangStoreService;
 
-        private ConfigRegistryLookupThread(YangStoreService yangStoreService) {
+        private ConfigRegistryLookupThread(final YangStoreService yangStoreService) {
             super("config-registry-lookup");
             this.yangStoreService = yangStoreService;
         }
@@ -158,10 +158,10 @@ public class YangStoreActivator implements BundleActivator {
             while(true) {
 
                 try {
-                    configRegistryJMXClient = new ConfigRegistryJMXClient(configMBeanServer);
-                    configRegistryJMXClientNoNotifications = ConfigRegistryJMXClient.createWithoutNotifications(configMBeanServer);
+                    configRegistryJMXClient = new ConfigRegistryJMXClient(YangStoreActivator.this.configMBeanServer);
+                    configRegistryJMXClientNoNotifications = ConfigRegistryJMXClient.createWithoutNotifications(YangStoreActivator.this.configMBeanServer);
                     break;
-                } catch (IllegalStateException e) {
+                } catch (final IllegalStateException e) {
                     ++i;
                     if (i > SILENT_ATTEMPTS) {
                         LOG.info("JMX client not created after {} attempts, still trying", i, e);
@@ -170,7 +170,7 @@ public class YangStoreActivator implements BundleActivator {
                     }
                     try {
                         Thread.sleep(ATTEMPT_TIMEOUT_MS);
-                    } catch (InterruptedException e1) {
+                    } catch (final InterruptedException e1) {
                         Thread.currentThread().interrupt();
                         throw new IllegalStateException("Interrupted while reattempting connection", e1);
                     }
@@ -186,8 +186,8 @@ public class YangStoreActivator implements BundleActivator {
             }
 
             final ConfigSubsystemFacadeFactory configSubsystemFacade =
-                    new ConfigSubsystemFacadeFactory(jmxClient, jmxClientNoNotifications, yangStoreService);
-            osgiRegistrayion = context.registerService(ConfigSubsystemFacadeFactory.class, configSubsystemFacade,
+                    new ConfigSubsystemFacadeFactory(jmxClient, jmxClientNoNotifications, this.yangStoreService);
+            YangStoreActivator.this.osgiRegistrayion = YangStoreActivator.this.context.registerService(ConfigSubsystemFacadeFactory.class, configSubsystemFacade,
                     new Hashtable<>());
         }
     }
