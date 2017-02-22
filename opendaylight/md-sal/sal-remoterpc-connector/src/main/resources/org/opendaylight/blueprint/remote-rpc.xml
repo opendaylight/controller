@@ -29,9 +29,9 @@
   <bean id="remoteRpcProvider" class="org.opendaylight.controller.remote.rpc.RemoteRpcProviderFactory"
           factory-method="createInstance" init-method="start" destroy-method="close">
     <argument ref="domRpcRegistry"/>
-    <argument ref="domRpcService"/>
     <argument ref="actorSystem"/>
     <argument ref="remoteRpcProviderConfig"/>
+    <property name="rpcService" ref="domRpcService"/>
   </bean>
 
 </blueprint>
