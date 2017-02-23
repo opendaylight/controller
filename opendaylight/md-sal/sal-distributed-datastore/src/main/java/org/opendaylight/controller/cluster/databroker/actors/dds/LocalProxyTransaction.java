@@ -21,6 +21,7 @@ import org.opendaylight.controller.cluster.access.commands.ExistsTransactionSucc
 import org.opendaylight.controller.cluster.access.commands.ModifyTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.ReadTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.ReadTransactionSuccess;
+import org.opendaylight.controller.cluster.access.commands.TransactionPurgeRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionRequest;
 import org.opendaylight.controller.cluster.access.concepts.Response;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
@@ -100,6 +101,8 @@ abstract class LocalProxyTransaction extends AbstractProxyTransaction {
             final YangInstanceIdentifier path = ((ExistsTransactionRequest) request).getPath();
             final boolean result = readOnlyView().readNode(path).isPresent();
             callback.accept(new ExistsTransactionSuccess(request.getTarget(), request.getSequence(), result));
+        } else if (request instanceof TransactionPurgeRequest) {
+            purge();
         } else {
             throw new IllegalArgumentException("Unhandled request " + request);
         }
@@ -147,6 +150,8 @@ abstract class LocalProxyTransaction extends AbstractProxyTransaction {
             final Consumer<Response<?, ?>> callback) {
         if (request instanceof AbortLocalTransactionRequest) {
             successor.sendAbort(request, callback);
+        } else if (request instanceof TransactionPurgeRequest) {
+            successor.purge();
         } else {
             throw new IllegalArgumentException("Unhandled request" + request);
         }
