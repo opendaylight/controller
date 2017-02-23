@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fafc7978_dabfc4a8",
+        "filename": "opendaylight/md-sal/samples/clustering-test-app/provider/src/main/java/org/opendaylight/controller/clustering/it/provider/MdsalLowLevelTestProvider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 282,
+      "author": {
+        "id": 2046
+      },
+      "writtenOn": "2017-02-23T15:45:07Z",
+      "side": 1,
+      "message": "singleton",
+      "range": {
+        "startLine": 282,
+        "startChar": 46,
+        "endLine": 282,
+        "endChar": 56
+      },
+      "revId": "4488623d3235570322a2f9eeb95355826e834c30",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_7a34d849",
+        "filename": "opendaylight/md-sal/samples/clustering-test-app/provider/src/main/java/org/opendaylight/controller/clustering/it/provider/impl/FlappingSingletonService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 2046
+      },
+      "writtenOn": "2017-02-23T15:45:07Z",
+      "side": 1,
+      "message": "The model says \"type int64\" (implying long). If you believe int will not overflow even in longevity tests, you can edit the model to int32.",
+      "range": {
+        "startLine": 33,
+        "startChar": 21,
+        "endLine": 33,
+        "endChar": 24
+      },
+      "revId": "4488623d3235570322a2f9eeb95355826e834c30",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_3ab9b0cc",
+        "filename": "opendaylight/md-sal/samples/clustering-test-app/provider/src/main/java/org/opendaylight/controller/clustering/it/provider/impl/FlappingSingletonService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 2046
+      },
+      "writtenOn": "2017-02-23T15:45:07Z",
+      "side": 1,
+      "message": "Interesting. Is that documented in singleton javadocs?",
+      "range": {
+        "startLine": 52,
+        "startChar": 36,
+        "endLine": 52,
+        "endChar": 44
+      },
+      "revId": "4488623d3235570322a2f9eeb95355826e834c30",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
