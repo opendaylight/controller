@@ -22,6 +22,30 @@
       "revId": "d04b71990a802071a786fe8f0df57bc4adbdec3f",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_2da4d8b8",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/registry/gossip/BucketStore.java",
+        "patchSetId": 22
+      },
+      "lineNbr": 169,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2017-02-23T18:07:30Z",
+      "side": 1,
+      "message": "Time-based operation is problematic due to clock drifts. If a member loses its state, all others have to see it leaving the cluster (at which point they wipe the buckets). Once that is complete, the member can be brought up.\n\nWiping entire persistence is a very bad idea, and the member when it comes back is not really the same.",
+      "parentUuid": "fafc7978_ad22884f",
+      "range": {
+        "startLine": 169,
+        "startChar": 30,
+        "endLine": 169,
+        "endChar": 31
+      },
+      "revId": "d04b71990a802071a786fe8f0df57bc4adbdec3f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
