@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fafc7978_ad22884f",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/registry/gossip/BucketStore.java",
+        "patchSetId": 22
+      },
+      "lineNbr": 169,
+      "author": {
+        "id": 2046
+      },
+      "writtenOn": "2017-02-23T17:39:39Z",
+      "side": 1,
+      "message": "If the persisted data is lost, this causes\nhttps://bugs.opendaylight.org/show_bug.cgi?id\u003d7840\n\nBasically, other nodes do not react to bucket updates, because they consider them outdated.\n\nEither base the initial incarnation on current time, or implement a mechanism for peers to drop their learned versions when needed.",
+      "range": {
+        "startLine": 169,
+        "startChar": 30,
+        "endLine": 169,
+        "endChar": 31
+      },
+      "revId": "d04b71990a802071a786fe8f0df57bc4adbdec3f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
